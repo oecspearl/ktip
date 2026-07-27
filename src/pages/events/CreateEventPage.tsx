@@ -1,0 +1,343 @@
+import { createSignal, Show } from 'solid-js'
+import { A, useNavigate } from '@solidjs/router'
+import { MainLayout } from '../../components/layout/MainLayout'
+import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
+import { Textarea } from '../../components/ui/Textarea'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
+import { useCreateEvent } from '../../hooks/useEvents'
+import { eventSchema } from '../../lib/validation'
+import { Save, ChevronRight, Calendar, MapPin, Video, Users } from 'lucide-solid'
+import { analytics } from '../../hooks/useAnalytics'
+import { format } from 'date-fns'
+
+export default function CreateEventPage() {
+  const auth = useAuth()
+  const navigate = useNavigate()
+  const toast = useToast()
+  const { createEvent, loading } = useCreateEvent()
+
+  const [title, setTitle] = createSignal('')
+  const [description, setDescription] = createSignal('')
+  const [eventType, setEventType] = createSignal('meetup')
+  const [location, setLocation] = createSignal('')
+  const [isVirtual, setIsVirtual] = createSignal(false)
+  const [startDate, setStartDate] = createSignal('')
+  const [startTime, setStartTime] = createSignal('')
+  const [endDate, setEndDate] = createSignal('')
+  const [endTime, setEndTime] = createSignal('')
+  const [capacity, setCapacity] = createSignal<number | undefined>(undefined)
+  const [eventStatus, setEventStatus] = createSignal('published')
+  const [isClimateAction, setIsClimateAction] = createSignal(false)
+  const [errors, setErrors] = createSignal<Record<string, string>>({})
+  const [errorMessage, setErrorMessage] = createSignal('')
+
+  const isAdmin = () => auth.profile()?.roles?.includes('oecs')
+
+  const combineDatetime = (date: string, time: string): string => {
+    if (!date) return ''
+    const datetime = time ? `${date}T${time}:00` : `${date}T00:00:00`
+    return new Date(datetime).toISOString()
+  }
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault()
+    setErrors({})
+    setErrorMessage('')
+
+    const startDatetime = combineDatetime(startDate(), startTime())
+    const endDatetime = endDate()
+      ? combineDatetime(endDate(), endTime())
+      : undefined
+
+    // Validate form
+    const result = eventSchema.safeParse({
+      title: title(),
+      description: description(),
+      event_type: eventType(),
+      location: isVirtual() ? 'Virtual' : location(),
+      is_virtual: isVirtual(),
+      start_date: startDatetime,
+      end_date: endDatetime,
+      capacity: capacity(),
+    })
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {}
+      result.error.issues.forEach((error: any) => {
+        if (error.path[0]) {
+          fieldErrors[error.path[0] as string] = error.message
+        }
+      })
+      setErrors(fieldErrors)
+      return
+    }
+
+    try {
+      const event = await createEvent({
+        title: title(),
+        description: description(),
+        event_type: eventType() as any,
+        location: isVirtual() ? 'Virtual' : location(),
+        is_virtual: isVirtual(),
+        start_date: startDatetime,
+        end_date: endDatetime,
+        capacity: capacity(),
+        organizer_id: auth.user()!.id,
+        is_climate_action: isClimateAction(),
+        ...(isAdmin() ? { status: eventStatus() } : {}),
+      } as any)
+
+      analytics.feature('event', 'created')
+      toast.success('Event created successfully!')
+      navigate(`/events/${event.id}`)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create event')
+      setErrorMessage(error.message || 'Failed to create event')
+    }
+  }
+
+  // Set default date to today
+  const today = format(new Date(), 'yyyy-MM-dd')
+
+  return (
+    <MainLayout>
+      {/* Dark Hero */}
+      <div class="bg-gray-800 min-h-[180px] flex items-center">
+        <div class="container mx-auto px-4 flex items-center justify-between w-full">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Create New Event</p>
+            <h1 class="text-3xl font-display font-bold text-white">New Event</h1>
+          </div>
+          <nav class="hidden sm:flex items-center gap-1 text-sm text-gray-400">
+            <A href="/" class="hover:text-white transition-colors">Home</A>
+            <ChevronRight size={14} />
+            <A href="/events" class="hover:text-white transition-colors">Events</A>
+            <ChevronRight size={14} />
+            <span class="text-gray-200">Create</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* White Form Area */}
+      <div class="bg-white py-12">
+        <div class="max-w-3xl mx-auto px-4">
+          <form onSubmit={handleSubmit} class="space-y-6">
+            {errorMessage() && (
+              <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                {errorMessage()}
+              </div>
+            )}
+
+            {/* Title */}
+            <Input
+              label="Event Title"
+              placeholder="e.g., Caribbean Tech Summit 2025"
+              value={title()}
+              onInput={(e) => setTitle(e.currentTarget.value)}
+              error={errors().title}
+              fullWidth
+              required
+            />
+
+            {/* Description */}
+            <Textarea
+              label="Description"
+              placeholder="Describe your event, agenda, and what participants can expect..."
+              value={description()}
+              onInput={(e) => setDescription(e.currentTarget.value)}
+              error={errors().description}
+              rows={6}
+              fullWidth
+            />
+
+            {/* Event Type */}
+            <div>
+              <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
+                Event Type <span class="text-red-500">*</span>
+              </label>
+              <select
+                value={eventType()}
+                onChange={(e) => setEventType(e.currentTarget.value)}
+                class="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              >
+                <option value="hackathon">Hackathon</option>
+                <option value="workshop">Workshop</option>
+                <option value="meetup">Meetup</option>
+                <option value="conference">Conference</option>
+                <option value="demo_day">Demo Day</option>
+              </select>
+            </div>
+
+            {/* Event Status (Admin only) */}
+            <Show when={isAdmin()}>
+              <div>
+                <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
+                  Event Status
+                </label>
+                <select
+                  value={eventStatus()}
+                  onChange={(e) => setEventStatus(e.currentTarget.value)}
+                  class="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                >
+                  <option value="draft">Draft - Not visible to public</option>
+                  <option value="published">Published - Visible to everyone</option>
+                </select>
+                <p class="mt-1 text-xs text-ktip-sand-500">
+                  Draft events are only visible to administrators
+                </p>
+              </div>
+            </Show>
+
+            {/* Virtual Toggle */}
+            <div class="flex items-center gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isVirtual()}
+                  onChange={(e) => setIsVirtual(e.currentTarget.checked)}
+                  class="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
+                />
+                <div class="flex items-center gap-2">
+                  <Video size={18} class="text-ktip-sand-600" />
+                  <span class="text-sm text-ktip-sand-700">
+                    This is a virtual event
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {/* Location (if not virtual) */}
+            <Show when={!isVirtual()}>
+              <Input
+                label="Location"
+                placeholder="e.g., Innovation Hub, Kingston, Jamaica"
+                value={location()}
+                onInput={(e) => setLocation(e.currentTarget.value)}
+                error={errors().location}
+                icon={<MapPin size={20} />}
+                fullWidth
+                required
+              />
+            </Show>
+
+            {/* Date and Time */}
+            <div class="grid md:grid-cols-2 gap-4">
+              {/* Start Date */}
+              <div>
+                <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
+                  Start Date <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <Calendar
+                    size={20}
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                  />
+                  <input
+                    type="date"
+                    value={startDate()}
+                    onInput={(e) => setStartDate(e.currentTarget.value)}
+                    min={today}
+                    class="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    required
+                  />
+                </div>
+                {errors().start_date && (
+                  <p class="mt-1 text-sm text-red-600">{errors().start_date}</p>
+                )}
+              </div>
+
+              {/* Start Time */}
+              <Input
+                label="Start Time"
+                type="time"
+                value={startTime()}
+                onInput={(e) => setStartTime(e.currentTarget.value)}
+                fullWidth
+                required
+              />
+            </div>
+
+            {/* End Date and Time (Optional) */}
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
+                  End Date (Optional)
+                </label>
+                <div class="relative">
+                  <Calendar
+                    size={20}
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                  />
+                  <input
+                    type="date"
+                    value={endDate()}
+                    onInput={(e) => setEndDate(e.currentTarget.value)}
+                    min={startDate() || today}
+                    class="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <Input
+                label="End Time (Optional)"
+                type="time"
+                value={endTime()}
+                onInput={(e) => setEndTime(e.currentTarget.value)}
+                fullWidth
+              />
+            </div>
+
+            {/* Capacity */}
+            <Input
+              label="Capacity (Optional)"
+              type="number"
+              placeholder="Maximum number of attendees"
+              value={capacity()?.toString() || ''}
+              onInput={(e) =>
+                setCapacity(
+                  e.currentTarget.value ? parseInt(e.currentTarget.value) : undefined
+                )
+              }
+              error={errors().capacity}
+              icon={<Users size={20} />}
+              helperText="Leave empty for unlimited capacity"
+              fullWidth
+            />
+
+            {/* Climate Action */}
+            <div>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isClimateAction()}
+                  onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
+                  class="w-5 h-5 text-emerald-600 border-ktip-sand-300 rounded focus:ring-emerald-500"
+                />
+                <span class="text-sm text-ktip-sand-700">
+                  This event focuses on climate change solutions
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <div class="flex items-center gap-4">
+              <Button type="submit" loading={loading()} icon={<Save size={20} />} fullWidth>
+                Create Event
+              </Button>
+              <button
+                type="button"
+                onClick={() => navigate('/events')}
+                disabled={loading()}
+                class="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </MainLayout>
+  )
+}

@@ -1,0 +1,637 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Colors - Ocean */
+  --color-ktip-ocean-50: #e6f2ff;
+  --color-ktip-ocean-100: #cce5ff;
+  --color-ktip-ocean-200: #99ccff;
+  --color-ktip-ocean-300: #66b2ff;
+  --color-ktip-ocean-400: #3399ff;
+  --color-ktip-ocean-500: #0066cc;
+  --color-ktip-ocean-600: #0052a3;
+  --color-ktip-ocean-700: #003d7a;
+  --color-ktip-ocean-800: #002952;
+  --color-ktip-ocean-900: #001429;
+
+  /* Colors - Tropical */
+  --color-ktip-tropical-50: #f0fdf4;
+  --color-ktip-tropical-100: #dcfce7;
+  --color-ktip-tropical-200: #bbf7d0;
+  --color-ktip-tropical-300: #86efac;
+  --color-ktip-tropical-400: #4ade80;
+  --color-ktip-tropical-500: #22c55e;
+  --color-ktip-tropical-600: #16a34a;
+  --color-ktip-tropical-700: #15803d;
+  --color-ktip-tropical-800: #166534;
+  --color-ktip-tropical-900: #14532d;
+
+  /* Colors - Sand */
+  --color-ktip-sand-50: #fafaf9;
+  --color-ktip-sand-100: #f5f5f4;
+  --color-ktip-sand-200: #e7e5e4;
+  --color-ktip-sand-300: #d6d3d1;
+  --color-ktip-sand-400: #a8a29e;
+  --color-ktip-sand-500: #78716c;
+  --color-ktip-sand-600: #57534e;
+  --color-ktip-sand-700: #44403c;
+  --color-ktip-sand-800: #292524;
+  --color-ktip-sand-900: #1c1917;
+
+  /* Colors - Other */
+  --color-ktip-cream: #fffef9;
+  --color-ktip-canvas: #fafaf7;
+
+  /* Font Families */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Sora', 'Inter', system-ui, sans-serif;
+
+  /* Box Shadows */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-hard: 0 8px 32px rgba(0, 0, 0, 0.16);
+  --shadow-glow-ocean: 0 0 24px rgba(0, 102, 204, 0.3);
+  --shadow-glow-tropical: 0 0 24px rgba(74, 222, 128, 0.3);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 10px 25px -5px rgba(0, 102, 204, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  --shadow-nav: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-scale-in: scaleIn 0.3s ease-out;
+  --animate-pulse-soft: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+}
+
+@layer base {
+  :root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    font-weight: 400;
+    color-scheme: light;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background-color: #fafaf7;
+    color: #1c1917;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: Sora, Inter, system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  /* Caribbean Modern Component Styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white px-6 py-3 rounded-xl font-medium shadow-soft hover:shadow-medium hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply border border-ktip-sand-200 bg-white text-ktip-sand-700 px-6 py-3 rounded-xl font-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-6 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300;
+  }
+
+  .input-field {
+    @apply border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Scrollbar hide utility for horizontal tab scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tab content enter animation */
+@keyframes tabEnter {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-tab-enter {
+  animation: tabEnter 0.15s ease-out;
+}
+
+/* ProseMirror / TipTap Mini Editor (RichTextField) */
+.prose-editor-mini .ProseMirror {
+  min-height: 100px;
+  outline: none;
+  padding: 0.75rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #1c1917;
+}
+
+.prose-editor-mini .ProseMirror p {
+  margin-bottom: 0.5rem;
+}
+
+.prose-editor-mini .ProseMirror h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.prose-editor-mini .ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-editor-mini .ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-editor-mini .ProseMirror li {
+  margin-bottom: 0.15rem;
+}
+
+.prose-editor-mini .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #a8a29e;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ProseMirror / TipTap Full Editor for Proposals (RichTextField) */
+.prose-editor-proposal .ProseMirror {
+  min-height: 200px;
+  outline: none;
+  padding: 1rem 1.25rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #1c1917;
+}
+
+.prose-editor-proposal .ProseMirror p {
+  margin-bottom: 0.5rem;
+}
+
+.prose-editor-proposal .ProseMirror h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.prose-editor-proposal .ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.prose-editor-proposal .ProseMirror h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.prose-editor-proposal .ProseMirror h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.prose-editor-proposal .ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-editor-proposal .ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-editor-proposal .ProseMirror li {
+  margin-bottom: 0.15rem;
+}
+
+.prose-editor-proposal .ProseMirror blockquote {
+  border-left: 3px solid #d6d3d1;
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: #57534e;
+}
+
+.prose-editor-proposal .ProseMirror hr {
+  border: none;
+  border-top: 1px solid #e7e5e4;
+  margin: 1rem 0;
+}
+
+.prose-editor-proposal .ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.prose-editor-proposal .ProseMirror th,
+.prose-editor-proposal .ProseMirror td {
+  border: 1px solid #d6d3d1;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.prose-editor-proposal .ProseMirror th {
+  background: #f5f5f4;
+  font-weight: 600;
+}
+
+.prose-editor-proposal .ProseMirror .selectedCell {
+  background: #cce5ff;
+}
+
+.prose-editor-proposal .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0;
+}
+
+.prose-editor-proposal .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.prose-editor-proposal .ProseMirror mark {
+  background: #fef08a;
+  padding: 0.125rem 0.25rem;
+}
+
+.prose-editor-proposal .ProseMirror a,
+.prose-editor-proposal .ProseMirror a.editor-link {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.prose-editor-proposal .ProseMirror sub {
+  vertical-align: sub;
+  font-size: 0.75em;
+}
+
+.prose-editor-proposal .ProseMirror sup {
+  vertical-align: super;
+  font-size: 0.75em;
+}
+
+.prose-editor-proposal .ProseMirror code {
+  background: #f5f5f4;
+  padding: 0.125rem 0.375rem;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+.prose-editor-proposal .ProseMirror [style*="text-align: center"] { text-align: center; }
+.prose-editor-proposal .ProseMirror [style*="text-align: right"] { text-align: right; }
+.prose-editor-proposal .ProseMirror [style*="text-align: justify"] { text-align: justify; }
+
+.prose-editor-proposal .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #a8a29e;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Prose Preview (rendered HTML in ProposalPreview) */
+.prose-preview p {
+  margin-bottom: 0.5rem;
+}
+
+.prose-preview h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.prose-preview ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-preview ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-preview li {
+  margin-bottom: 0.15rem;
+}
+
+.prose-preview strong {
+  font-weight: 600;
+}
+
+.prose-preview em {
+  font-style: italic;
+}
+
+/* ProseMirror / TipTap Full Editor Styles */
+.ProseMirror {
+  min-height: 400px;
+  outline: none;
+  padding: 1rem;
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.7;
+  color: #1c1917;
+}
+
+.ProseMirror h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.25rem;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #d6d3d1;
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-bottom: 0.75rem;
+  color: #57534e;
+  font-style: italic;
+}
+
+.ProseMirror code {
+  background: #f5f5f4;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.875em;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+
+.ProseMirror pre {
+  background: #1c1917;
+  color: #f5f5f4;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid #e7e5e4;
+  margin: 1.5rem 0;
+}
+
+.ProseMirror strong {
+  font-weight: 600;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #a8a29e;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ProseForge Document Editor Styles */
+.prose-editor .ProseMirror {
+  min-height: 700px;
+  outline: none;
+  padding: 2.5rem 3rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.8;
+  color: #1c1917;
+  font-size: 1rem;
+}
+
+.prose-editor .ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+  table-layout: fixed;
+}
+
+.prose-editor .ProseMirror th,
+.prose-editor .ProseMirror td {
+  border: 1px solid #d6d3d1;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  position: relative;
+}
+
+.prose-editor .ProseMirror th {
+  background: #f5f5f4;
+  font-weight: 600;
+}
+
+.prose-editor .ProseMirror .selectedCell {
+  background: #cce5ff;
+}
+
+.prose-editor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+  margin: 0.5rem 0;
+}
+
+.prose-editor .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.prose-editor .ProseMirror mark {
+  background: #fef08a;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.125rem;
+}
+
+.prose-editor .ProseMirror a,
+.prose-editor .ProseMirror a.editor-link {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.prose-editor .ProseMirror sub {
+  vertical-align: sub;
+  font-size: 0.75em;
+}
+
+.prose-editor .ProseMirror sup {
+  vertical-align: super;
+  font-size: 0.75em;
+}
+
+.prose-editor .ProseMirror h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+/* Text alignment */
+.prose-editor .ProseMirror [style*="text-align: center"] { text-align: center; }
+.prose-editor .ProseMirror [style*="text-align: right"] { text-align: right; }
+.prose-editor .ProseMirror [style*="text-align: justify"] { text-align: justify; }
+
+/* Document editor print styles */
+@media print {
+  .doc-editor-print-content {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* tldraw container sizing */
+.tl-container {
+  border-radius: 0.75rem;
+}
+
+/* Print styles for proposal export */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  nav, [class*="print\:hidden"], button, .shadow-soft, .shadow-card {
+    display: none !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .proposal-preview {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .proposal-preview h1 {
+    font-size: 20pt;
+    margin-bottom: 8pt;
+  }
+
+  .proposal-preview h2 {
+    font-size: 16pt;
+    margin-top: 16pt;
+    margin-bottom: 6pt;
+    page-break-after: avoid;
+  }
+
+  .proposal-preview h3 {
+    font-size: 13pt;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+    page-break-after: avoid;
+  }
+
+  .rounded-2xl, .rounded-xl {
+    border-radius: 0 !important;
+  }
+
+  .border {
+    border: none !important;
+  }
+}

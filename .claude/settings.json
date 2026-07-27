@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vitest run)",
+      "Bash(npx vite build)",
+      "WebFetch(domain:unsplash.com)",
+      "Bash(while read f)",
+      "Bash(do basename \"$f\")",
+      "Bash(done)",
+      "Bash(head -5 grep -rn \"UPDATE\\\\|is_featured\" /Users/roystonemmanuel/Desktop/Applications/ktip/supabase/migrations/*.sql)",
+      "Bash(npx --no tsc --noEmit)",
+      "Bash(./node_modules/.bin/tsc --noEmit)"
+    ],
+    "additionalDirectories": [
+      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",
+      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/admin/shared-courses",
+      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/components/ai",
+      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/ai/tutor/context",
+      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/shared-courses/[id]/lesson/[lessonId]"
+    ]
+  }
+}
