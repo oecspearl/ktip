@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { User, Shield, Bell, ChevronRight } from 'lucide-react'
+import { User, Shield, Bell, BadgeCheck, ChevronRight } from 'lucide-react'
 import { ProfileSettingsTab } from './ProfileSettingsTab'
 import { SecuritySettingsTab } from './SecuritySettingsTab'
 import { PreferencesTab } from './PreferencesTab'
+import { VerificationTab } from './VerificationTab'
 import { cn } from '../../lib/utils'
 
-type SettingsTab = 'profile' | 'security' | 'preferences'
+type SettingsTab = 'profile' | 'security' | 'preferences' | 'verification'
 
 const tabs = [
   { id: 'profile' as const, label: 'Profile', icon: User, description: 'Manage your profile info' },
   { id: 'security' as const, label: 'Security', icon: Shield, description: 'Password & account' },
   { id: 'preferences' as const, label: 'Preferences', icon: Bell, description: 'Notifications & display' },
+  { id: 'verification' as const, label: 'Verification', icon: BadgeCheck, description: 'Verify your identity' },
 ]
 
 export default function SettingsPage() {
@@ -70,6 +72,7 @@ export default function SettingsPage() {
             {activeTab === 'profile' && <ProfileSettingsTab />}
             {activeTab === 'security' && <SecuritySettingsTab />}
             {activeTab === 'preferences' && <PreferencesTab />}
+            {activeTab === 'verification' && <VerificationTab />}
           </div>
         </div>
       </div>

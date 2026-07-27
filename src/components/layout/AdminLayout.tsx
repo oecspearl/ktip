@@ -11,6 +11,9 @@ import {
   ClipboardList,
   BarChart3,
   ClipboardCheck,
+  BadgeCheck,
+  MessageCircle,
+  Puzzle,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -23,6 +26,9 @@ const adminNavItems = [
   { href: '/admin/forums', label: 'Forums', icon: MessageSquare },
   { href: '/admin/resources', label: 'Resources', icon: BookOpen },
   { href: '/admin/grievances', label: 'Grievances', icon: Flag },
+  { href: '/admin/feedback', label: 'Feedback', icon: MessageCircle },
+  { href: '/admin/verification', label: 'Verification', icon: BadgeCheck },
+  { href: '/admin/integrations', label: 'Integrations', icon: Puzzle },
   { href: '/admin/preregistrations', label: 'Pre-Registrations', icon: ClipboardList },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck },

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
 import { Search, UserX, User, ChevronRight } from 'lucide-react'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
+import { ConnectButton } from '../../components/directory/ConnectButton'
 import { CARIBBEAN_COUNTRIES, ROLE_LABELS, SKILL_SUGGESTIONS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { debounce } from '../../lib/utils'
@@ -186,19 +187,22 @@ export default function DirectoryPage() {
                           </div>
                         )}
                       </div>
+                      <div className="mt-3">
+                        <ConnectButton otherUserId={member.id} size="sm" />
+                      </div>
                     </div>
 
-                    {/* Vertical "CONNECT NOW" tab */}
+                    {/* Vertical "VIEW PROFILE" tab */}
                     <Link
                       to={`/profile/${member.id}`}
                       className="w-12 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center shrink-0"
-                      aria-label={`Connect with ${member.display_name || 'member'}`}
+                      aria-label={`View ${member.display_name || 'member'}'s profile`}
                     >
                       <span
                         className="text-[11px] font-bold text-white uppercase tracking-widest whitespace-nowrap"
                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                       >
-                        Connect Now
+                        View Profile
                       </span>
                     </Link>
                   </div>

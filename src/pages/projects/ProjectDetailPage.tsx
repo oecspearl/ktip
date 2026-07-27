@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { LikeButton } from '../../components/projects/LikeButton'
+import { FollowButton } from '../../components/projects/FollowButton'
 import { CommentSection } from '../../components/projects/CommentSection'
+import { TeamWidget } from '../../components/projects/TeamWidget'
 import { ProposalCard } from '../../components/proposals/ProposalCard'
-import { useProject, useProjects } from '../../hooks/useProjects'
+import { useProject, useProjects, trackProjectView } from '../../hooks/useProjects'
+import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { supabase } from '../../lib/supabase'
 import { useProjectProposals } from '../../hooks/useProposals'
 import { useAuth } from '../../contexts/AuthContext'
@@ -18,6 +21,7 @@ import {
   Search,
   ChevronRight,
   Star,
+  Eye,
 } from 'lucide-react'
 import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
@@ -34,8 +38,19 @@ export default function ProjectDetailPage() {
   const { projects: recentProjects } = useProjects()
   usePageTitle(project?.title)
 
+  const { members } = useProjectMembers(params.id)
+
   const isOwner = project?.owner_id === auth.user?.id
   const isAdmin = auth.profile?.roles?.includes('oecs')
+  const myMembership = (members || []).find(
+    (m) => m.user_id === auth.user?.id && m.status === 'accepted'
+  )
+  const canEdit = isOwner || myMembership?.role === 'editor'
+
+  // Count a view once per browser session per project
+  useEffect(() => {
+    if (params.id) trackProjectView(params.id)
+  }, [params.id])
 
   const [togglingFeatured, setTogglingFeatured] = useState(false)
 
@@ -136,7 +151,7 @@ export default function ProjectDetailPage() {
                   {project.is_featured ? 'Featured' : 'Feature'}
                 </button>
               )}
-              {isOwner && (
+              {canEdit && (
                 <Link to={`/projects/${params.id}/edit`}>
                   <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
                     <Edit size={14} />
@@ -207,8 +222,13 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Engagement row */}
-            <div className="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4">
+            <div className="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4 flex-wrap">
               <LikeButton projectId={params.id!} />
+              <FollowButton projectId={params.id!} />
+              <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                <Eye size={16} />
+                {project.view_count ?? 0} views
+              </span>
               <button
                 className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
                 onClick={async () => {
@@ -368,6 +388,9 @@ export default function ProjectDetailPage() {
               </Link>
             </div>
 
+            {/* Widget: Team */}
+            <TeamWidget projectId={project.id} projectTitle={project.title} isOwner={isOwner} />
+
             {/* Widget 4: Project Details */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Project Details</h3>
@@ -389,6 +412,12 @@ export default function ProjectDetailPage() {
                   <span className="text-gray-500">Visibility</span>
                   <span className="font-medium text-ktip-sand-900">
                     {project.is_public ? 'Public' : 'Private'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-gray-500">Views</span>
+                  <span className="font-medium text-ktip-sand-900">
+                    {project.view_count ?? 0}
                   </span>
                 </div>
               </div>

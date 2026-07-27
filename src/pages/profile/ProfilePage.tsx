@@ -9,6 +9,10 @@ import { ProjectCard } from '../../components/projects/ProjectCard'
 import { EventCard } from '../../components/events/EventCard'
 import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useAuth } from '../../contexts/AuthContext'
+import { useUserBadges } from '../../hooks/useBadges'
+import { useMyConnections, useConnectionMutations } from '../../hooks/useConnections'
+import { ConnectButton } from '../../components/directory/ConnectButton'
+import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { profileUpdateSchema } from '../../lib/validation'
 import {
   ChevronRight,
@@ -20,6 +24,8 @@ import {
   FolderKanban,
   User,
   Flag,
+  Users,
+  UserX,
 } from 'lucide-react'
 import {
   ROLE_LABELS,
@@ -51,7 +57,11 @@ export default function ProfilePage() {
 
   const isOwnProfile = resolvedId === auth.user?.id
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'events'>('projects')
+  const { badges } = useUserBadges(resolvedId)
+  const { connections } = useMyConnections(isOwnProfile ? resolvedId : undefined)
+  const { removeConnection } = useConnectionMutations()
+
+  const [activeTab, setActiveTab] = useState<'projects' | 'events' | 'connections'>('projects')
   const [showEditModal, setShowEditModal] = useState(false)
 
   // Edit form state
@@ -194,6 +204,7 @@ export default function ProfilePage() {
               )}
               {!isOwnProfile && (
                 <>
+                  <ConnectButton otherUserId={profile.id} />
                   <Link to={`/messages?user=${profile.id}`}>
                     <Button variant="outline" icon={<MessageSquare size={18} />} className="border-gray-500 text-white hover:bg-gray-700">
                       Send Message
@@ -222,6 +233,15 @@ export default function ProfilePage() {
                 <Badge key={role} className={ROLE_COLORS[role]}>
                   {ROLE_LABELS[role] || role}
                 </Badge>
+              ))}
+            </div>
+          ) : null}
+
+          {/* Achievement Badges */}
+          {badges?.length ? (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {badges.map((userBadge) => (
+                <AchievementBadge key={userBadge.id} userBadge={userBadge} />
               ))}
             </div>
           ) : null}
@@ -284,6 +304,23 @@ export default function ProfilePage() {
               <Calendar size={18} />
               Events ({events?.length || 0})
             </button>
+            {isOwnProfile && (
+              <button
+                role="tab"
+                aria-selected={activeTab === 'connections'}
+                aria-controls="tabpanel-connections"
+                id="tab-connections"
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === 'connections'
+                    ? 'border-b-2 border-ktip-ocean-500 text-ktip-ocean-600'
+                    : 'text-ktip-sand-600 hover:text-ktip-sand-900'
+                }`}
+                onClick={() => setActiveTab('connections')}
+              >
+                <Users size={18} />
+                Connections ({connections?.length || 0})
+              </button>
+            )}
           </div>
         </div>
 
@@ -321,6 +358,74 @@ export default function ProfilePage() {
                   <Calendar size={32} className="text-ktip-sand-400" />
                 </div>
                 <p className="text-ktip-sand-600">No events organized yet.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'connections' && isOwnProfile && (
+          <div role="tabpanel" id="tabpanel-connections" aria-labelledby="tab-connections">
+            {connections?.length ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {connections.map((connection) => {
+                  const other =
+                    connection.requester_id === auth.user?.id
+                      ? connection.addressee
+                      : connection.requester
+                  const otherId =
+                    connection.requester_id === auth.user?.id
+                      ? connection.addressee_id
+                      : connection.requester_id
+                  const otherName = other?.display_name || 'Unknown User'
+                  return (
+                    <div
+                      key={connection.id}
+                      className="flex items-center justify-between gap-3 bg-white border border-gray-200 rounded-lg p-4"
+                    >
+                      <Link to={`/profile/${otherId}`} className="flex items-center gap-3 min-w-0 group">
+                        {other?.avatar_url ? (
+                          <img
+                            src={other.avatar_url}
+                            alt={otherName}
+                            className="w-11 h-11 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div
+                            className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 ${generateAvatarColor(otherName)}`}
+                          >
+                            {getInitials(otherName)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-ktip-sand-900 truncate group-hover:text-ktip-ocean-600 transition-colors">
+                            {otherName}
+                          </p>
+                          {other?.country && (
+                            <p className="text-xs text-gray-500 truncate">{other.country}</p>
+                          )}
+                        </div>
+                      </Link>
+                      <button
+                        onClick={() => removeConnection(connection.id)}
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        aria-label={`Remove connection with ${otherName}`}
+                        title="Remove connection"
+                      >
+                        <UserX size={16} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users size={32} className="text-ktip-sand-400" />
+                </div>
+                <p className="text-ktip-sand-600 mb-2">No connections yet.</p>
+                <Link to="/directory" className="text-sm text-ktip-ocean-600 hover:underline">
+                  Browse the member directory
+                </Link>
               </div>
             )}
           </div>

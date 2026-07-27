@@ -62,6 +62,7 @@ export interface Project {
   is_public: boolean
   is_climate_action: boolean
   is_featured: boolean
+  view_count: number
   owner_id: string
   created_at: string
   updated_at: string
@@ -214,16 +215,22 @@ export interface Notification {
   created_at: string
 }
 
+export type ConversationParticipantRole = 'admin' | 'member'
+
 export interface ConversationParticipant {
   id: string
   conversation_id: string
   user_id: string
+  role: ConversationParticipantRole
   joined_at: string
   user?: Profile
 }
 
 export interface Conversation {
   id: string
+  name: string | null
+  is_group: boolean
+  created_by: string | null
   created_at: string
   updated_at: string
   participants?: ConversationParticipant[]
@@ -345,6 +352,119 @@ export type GrievanceCategory =
   | 'privacy_violations'
 
 export type GrievanceStatus = 'pending' | 'under_review' | 'resolved' | 'dismissed'
+
+// Project team types
+export type ProjectMemberRole = 'editor' | 'viewer'
+export type ProjectMemberStatus = 'pending' | 'accepted' | 'declined'
+
+export interface ProjectMember {
+  id: string
+  project_id: string
+  user_id: string
+  role: ProjectMemberRole
+  status: ProjectMemberStatus
+  invited_by: string | null
+  created_at: string
+  updated_at: string
+  user?: Profile
+  project?: Project
+}
+
+// Connection types
+export type ConnectionStatus = 'pending' | 'accepted' | 'declined'
+
+export interface Connection {
+  id: string
+  requester_id: string
+  addressee_id: string
+  status: ConnectionStatus
+  created_at: string
+  updated_at: string
+  requester?: Profile
+  addressee?: Profile
+}
+
+// Verification types
+export type VerificationStatus = 'pending' | 'approved' | 'rejected'
+
+export interface VerificationRequest {
+  id: string
+  user_id: string
+  status: VerificationStatus
+  document_paths: string[]
+  user_note: string | null
+  admin_note: string | null
+  reviewer_id: string | null
+  reviewed_at: string | null
+  created_at: string
+  updated_at: string
+  user?: Profile
+}
+
+// Notification preferences
+export interface NotificationPreferences {
+  user_id: string
+  email: boolean
+  messages: boolean
+  events: boolean
+  projects: boolean
+  forums: boolean
+  collaboration: boolean
+  connections: boolean
+  updated_at: string
+}
+
+// Feedback types
+export type FeedbackCategory = 'bug' | 'feature_request' | 'general' | 'content'
+export type FeedbackStatus = 'new' | 'in_review' | 'resolved' | 'dismissed'
+
+export interface Feedback {
+  id: string
+  user_id: string | null
+  category: FeedbackCategory
+  subject: string
+  message: string
+  status: FeedbackStatus
+  admin_note: string | null
+  created_at: string
+  updated_at: string
+  user?: Profile
+}
+
+// Integration directory types
+export type IntegrationCategory = 'funding' | 'productivity' | 'government' | 'education' | 'developer' | 'other'
+
+export interface Integration {
+  id: string
+  name: string
+  description: string
+  category: IntegrationCategory
+  logo_url: string | null
+  website_url: string
+  is_published: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+// Badge types
+export interface BadgeDefinition {
+  id: string
+  slug: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  created_at: string
+}
+
+export interface UserBadge {
+  id: string
+  user_id: string
+  badge_id: string
+  awarded_at: string
+  badge?: BadgeDefinition
+}
 
 export interface Grievance {
   id: string

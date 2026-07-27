@@ -54,11 +54,20 @@ export default function MessagesPage() {
     setShowChat(false)
   }
 
+  const activeConversation = conversations?.find((c) => c.id === activeConversationId)
+
   const getOtherUserName = () => {
-    const conv = conversations?.find((c) => c.id === activeConversationId)
+    const conv = activeConversation
     if (!conv?.participants) return undefined
+    if (conv.is_group) return conv.name || 'Group'
     const other = conv.participants.find((p) => p.user_id !== auth.user?.id)
     return other?.user?.display_name || 'Unknown User'
+  }
+
+  const handleLeftGroup = () => {
+    setActiveConversationId(null)
+    setShowChat(false)
+    refetch()
   }
 
   return (
@@ -114,6 +123,8 @@ export default function MessagesPage() {
               <ChatWindow
                 conversationId={activeConversationId}
                 otherUserName={getOtherUserName()}
+                conversation={activeConversation}
+                onLeftGroup={handleLeftGroup}
               />
             </>
           ) : (

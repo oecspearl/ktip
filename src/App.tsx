@@ -75,6 +75,8 @@ const router = createBrowserRouter([
           { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
           { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
+          { path: '/help/faq', lazy: lazyPage(() => import('./pages/help/FAQPage')) },
+          { path: '/integrations', lazy: lazyPage(() => import('./pages/integrations/IntegrationsPage')) },
           { path: '/proposals/shared/:token', lazy: lazyPage(() => import('./pages/proposals/SharedProposalPage')) },
 
           // Authenticated routes
@@ -124,6 +126,9 @@ const router = createBrowserRouter([
                   { path: '/admin/forums', lazy: lazyPage(() => import('./pages/admin/forums/AdminForumsPage')) },
                   { path: '/admin/resources', lazy: lazyPage(() => import('./pages/admin/resources/AdminResourcesPage')) },
                   { path: '/admin/grievances', lazy: lazyPage(() => import('./pages/admin/grievances/AdminGrievancesPage')) },
+                  { path: '/admin/feedback', lazy: lazyPage(() => import('./pages/admin/feedback/AdminFeedbackPage')) },
+                  { path: '/admin/verification', lazy: lazyPage(() => import('./pages/admin/verification/AdminVerificationPage')) },
+                  { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
                   { path: '/admin/preregistrations', lazy: lazyPage(() => import('./pages/admin/preregistrations/AdminPreregistrationsPage')) },
                   { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
                   { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },

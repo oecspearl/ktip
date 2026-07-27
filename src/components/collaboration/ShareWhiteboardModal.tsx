@@ -3,6 +3,7 @@ import { Modal } from '../ui/Modal'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearchUsers, useCreateConversation, useSendMessage } from '../../hooks/useMessages'
 import { supabase } from '../../lib/supabase'
+import { sendNotification } from '../../lib/notify'
 import { debounce, getInitials, generateAvatarColor } from '../../lib/utils'
 import { Search, X, Send, Check, Eye, Pencil } from 'lucide-react'
 import type { Profile } from '../../types'
@@ -138,16 +139,14 @@ export function ShareWhiteboardModal({ open, onClose, whiteboardId, whiteboardTi
           content: message,
         })
 
-        // Send in-app notification
-        await (supabase.from('notifications') as any)
-          .insert({
-            user_id: user.id,
-            type: 'whiteboard_share',
-            title: 'Whiteboard Shared',
-            body: `${displayName()} shared "${titleText}" with you`,
-            link: wbId ? `/collaborate/whiteboard/${wbId}` : '/collaborate/whiteboards',
-          })
-          .then(() => {}, () => {})
+        // Send in-app notification (RPC enforces recipient preferences)
+        sendNotification({
+          userId: user.id,
+          type: 'whiteboard_share',
+          title: 'Whiteboard Shared',
+          body: `${displayName()} shared "${titleText}" with you`,
+          link: wbId ? `/collaborate/whiteboard/${wbId}` : '/collaborate/whiteboards',
+        })
       }
 
       setSuccess(true)

@@ -338,6 +338,123 @@ export function useProjectLike(projectId: string | undefined, userId: string | u
   }
 }
 
+// Follow / Unfollow hooks (mirrors the like pattern)
+export function useProjectFollow(projectId: string | undefined, userId: string | undefined) {
+  const queryClient = useQueryClient()
+
+  const checkFollow = async (pid: string, uid: string): Promise<boolean> => {
+    const { data, error } = await (supabase as any)
+      .from('project_follows')
+      .select('id')
+      .eq('project_id', pid)
+      .eq('user_id', uid)
+      .maybeSingle()
+    if (error) throw error
+    return !!data
+  }
+
+  const getFollowCount = async (pid: string): Promise<number> => {
+    const { count, error } = await (supabase as any)
+      .from('project_follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('project_id', pid)
+    if (error) throw error
+    return count || 0
+  }
+
+  const followedKey = keys.sub('projects', 'followed', projectId ? `${projectId}:${userId}` : undefined)
+  const countKey = keys.sub('projects', 'follow-count', projectId)
+
+  const followedQuery = useQuery({
+    queryKey: followedKey,
+    queryFn: () => checkFollow(projectId as string, userId as string),
+    enabled: !!projectId && !!userId,
+  })
+
+  const countQuery = useQuery({
+    queryKey: countKey,
+    queryFn: () => getFollowCount(projectId as string),
+    enabled: !!projectId,
+  })
+
+  const toggleMutation = useMutation({
+    mutationFn: async (nextFollowed: boolean) => {
+      if (!projectId || !userId) throw new Error('projectId and userId are required')
+      if (nextFollowed) {
+        const { error } = await (supabase as any)
+          .from('project_follows')
+          .insert({ project_id: projectId, user_id: userId })
+        if (error) throw error
+      } else {
+        const { error } = await (supabase as any)
+          .from('project_follows')
+          .delete()
+          .eq('project_id', projectId)
+          .eq('user_id', userId)
+        if (error) throw error
+      }
+      return nextFollowed
+    },
+    onMutate: async (nextFollowed: boolean) => {
+      await queryClient.cancelQueries({ queryKey: followedKey })
+      await queryClient.cancelQueries({ queryKey: countKey })
+
+      const previousFollowed = queryClient.getQueryData<boolean>(followedKey)
+      const previousCount = queryClient.getQueryData<number>(countKey)
+
+      queryClient.setQueryData<boolean>(followedKey, nextFollowed)
+      queryClient.setQueryData<number>(countKey, (old) => {
+        const base = old ?? 0
+        return nextFollowed ? base + 1 : Math.max(0, base - 1)
+      })
+
+      return { previousFollowed, previousCount }
+    },
+    onError: (_err, _nextFollowed, context) => {
+      if (context?.previousFollowed !== undefined) {
+        queryClient.setQueryData(followedKey, context.previousFollowed)
+      }
+      if (context?.previousCount !== undefined) {
+        queryClient.setQueryData(countKey, context.previousCount)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: followedKey })
+      queryClient.invalidateQueries({ queryKey: countKey })
+    },
+  })
+
+  return {
+    followed: followedQuery.data,
+    followCount: countQuery.data,
+    followProject: () => toggleMutation.mutateAsync(true),
+    unfollowProject: () => toggleMutation.mutateAsync(false),
+    loading: toggleMutation.isPending,
+    error: toggleMutation.error,
+  }
+}
+
+/**
+ * Bump the project view counter once per browser session per project.
+ * Uses the increment_project_view RPC (SECURITY DEFINER) so viewers
+ * don't need UPDATE rights on projects.
+ */
+export function trackProjectView(projectId: string): void {
+  const sessionKey = `ktip_viewed_${projectId}`
+  try {
+    if (sessionStorage.getItem(sessionKey)) return
+    sessionStorage.setItem(sessionKey, '1')
+  } catch {
+    // sessionStorage unavailable — still count the view
+  }
+  void (supabase as any)
+    .rpc('increment_project_view', { p_project_id: projectId })
+    .then(
+      () => {},
+      () => {}
+    )
+}
+
 // Comments hooks
 export function useProjectComments(projectId: string | undefined) {
   const fetchComments = async (pid: string): Promise<ProjectComment[]> => {

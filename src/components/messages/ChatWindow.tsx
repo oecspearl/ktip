@@ -1,18 +1,23 @@
 import { useState, useEffect, useRef, type FormEvent, type KeyboardEvent } from 'react'
-import { Send } from 'lucide-react'
+import { Send, Settings, Users } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { MessageBubble } from './MessageBubble'
+import { GroupSettingsModal } from './GroupSettingsModal'
 import { useMessages, useRealtimeMessages, useSendMessage } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
-import type { Message } from '../../types'
+import type { Conversation, Message } from '../../types'
 
 interface ChatWindowProps {
   conversationId: string
   otherUserName?: string
+  conversation?: Conversation
+  onLeftGroup?: () => void
 }
 
-export function ChatWindow({ conversationId, otherUserName }: ChatWindowProps) {
+export function ChatWindow({ conversationId, otherUserName, conversation, onLeftGroup }: ChatWindowProps) {
   const auth = useAuth()
+  const [showGroupSettings, setShowGroupSettings] = useState(false)
+  const isGroup = conversation?.is_group ?? false
   const { messages: fetchedMessages } = useMessages(conversationId)
   const { sendMessage, loading } = useSendMessage()
 
@@ -79,10 +84,35 @@ export function ChatWindow({ conversationId, otherUserName }: ChatWindowProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-ktip-sand-200 bg-white">
-        <h3 className="font-display font-bold text-ktip-sand-900">
-          {otherUserName || 'Conversation'}
-        </h3>
+      <div className="p-4 border-b border-ktip-sand-200 bg-white flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display font-bold text-ktip-sand-900 truncate flex items-center gap-2">
+            {isGroup && <Users size={16} className="text-ktip-ocean-600 shrink-0" />}
+            {(isGroup ? conversation?.name || 'Group' : otherUserName) || 'Conversation'}
+          </h3>
+          {isGroup && (
+            <p className="text-xs text-ktip-sand-500">
+              {conversation?.participants?.length || 0} members
+            </p>
+          )}
+        </div>
+        {isGroup && conversation && (
+          <>
+            <button
+              onClick={() => setShowGroupSettings(true)}
+              className="p-2 text-ktip-sand-500 hover:text-ktip-sand-900 hover:bg-ktip-sand-50 rounded-lg transition-colors shrink-0"
+              aria-label="Group settings"
+            >
+              <Settings size={18} />
+            </button>
+            <GroupSettingsModal
+              open={showGroupSettings}
+              onClose={() => setShowGroupSettings(false)}
+              conversation={conversation}
+              onLeft={onLeftGroup}
+            />
+          </>
+        )}
       </div>
 
       {/* Messages area */}

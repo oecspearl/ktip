@@ -6,6 +6,7 @@ import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useProject, useUpdateProject } from '../../hooks/useProjects'
+import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { projectSchema } from '../../lib/validation'
 import { PROJECT_CATEGORIES } from '../../lib/constants'
 import { Save, ChevronRight } from 'lucide-react'
@@ -46,7 +47,12 @@ export default function EditProjectPage() {
     }
   }, [project, initialized])
 
+  const { members } = useProjectMembers(params.id)
   const isOwner = project?.owner_id === auth.user?.id
+  const isEditorMember = (members || []).some(
+    (m) => m.user_id === auth.user?.id && m.status === 'accepted' && m.role === 'editor'
+  )
+  const canEdit = isOwner || isEditorMember
 
   const addHashtag = () => {
     const tag = hashtagInput.trim().replace(/^#/, '')
@@ -113,13 +119,13 @@ export default function EditProjectPage() {
     )
   }
 
-  if (!isOwner) {
+  if (!canEdit) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
           Not authorized
         </h2>
-        <p className="text-ktip-sand-600 mb-6">You can only edit your own projects.</p>
+        <p className="text-ktip-sand-600 mb-6">Only the owner or team editors can edit this project.</p>
         <Button onClick={() => navigate(`/projects/${params.id}`)}>
           Back to Project
         </Button>

@@ -4,7 +4,7 @@ import { JitsiVideoCall } from '../../components/collaboration/JitsiVideoCall'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearchUsers, useCreateConversation, useSendMessage } from '../../hooks/useMessages'
-import { supabase } from '../../lib/supabase'
+import { sendNotification } from '../../lib/notify'
 import { debounce, getInitials, generateAvatarColor } from '../../lib/utils'
 import { ChevronRight, Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send, ArrowLeft, Pen, FileText, Code } from 'lucide-react'
 import type { Profile } from '../../types'
@@ -138,16 +138,14 @@ export default function VideoConferencePage() {
           sender_id: currentUserId,
           content: inviteMessage,
         })
-        // Send in-app notification
-        await (supabase.from('notifications') as any)
-          .insert({
-            user_id: user.id,
-            type: 'video_invite',
-            title: 'Video Conference Invitation',
-            body: `${displayName()} invited you to join room "${room}"`,
-            link: `/collaborate/video?room=${encodeURIComponent(room)}`,
-          })
-          .then(() => {}, () => {}) // Silently ignore if table doesn't exist yet
+        // Send in-app notification (RPC enforces recipient preferences)
+        sendNotification({
+          userId: user.id,
+          type: 'video_invite',
+          title: 'Video Conference Invitation',
+          body: `${displayName()} invited you to join room "${room}"`,
+          link: `/collaborate/video?room=${encodeURIComponent(room)}`,
+        })
       }
       setInviteSuccess(true)
       setSelectedUsers([])

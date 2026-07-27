@@ -4,6 +4,7 @@ import { Modal } from '../../ui/Modal'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSearchUsers, useCreateConversation, useSendMessage } from '../../../hooks/useMessages'
 import { supabase } from '../../../lib/supabase'
+import { sendNotification } from '../../../lib/notify'
 import { debounce, getInitials, generateAvatarColor } from '../../../lib/utils'
 import { Search, X, Send, Check } from 'lucide-react'
 import type { Profile } from '../../../types'
@@ -125,16 +126,14 @@ export function ShareDocumentModal({ open, onClose, editor, documentId, document
           content: message,
         })
 
-        // Send in-app notification
-        await (supabase.from('notifications') as any)
-          .insert({
-            user_id: user.id,
-            type: 'document_share',
-            title: 'Document Shared',
-            body: `${displayName()} shared "${titleText}" with you`,
-            link: docId ? `/collaborate/document/${docId}` : '/collaborate/documents',
-          })
-          .then(() => {}, () => {})
+        // Send in-app notification (RPC enforces recipient preferences)
+        sendNotification({
+          userId: user.id,
+          type: 'document_share',
+          title: 'Document Shared',
+          body: `${displayName()} shared "${titleText}" with you`,
+          link: docId ? `/collaborate/document/${docId}` : '/collaborate/documents',
+        })
       }
 
       setSuccess(true)

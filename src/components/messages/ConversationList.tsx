@@ -1,4 +1,4 @@
-import { Plus, MessageSquare } from 'lucide-react'
+import { Plus, MessageSquare, Users } from 'lucide-react'
 import { Button } from '../ui/Button'
 import type { Conversation } from '../../types'
 import { formatRelativeTime, getInitials, generateAvatarColor } from '../../lib/utils'
@@ -47,7 +47,9 @@ export function ConversationList({
         {conversations?.length ? (
           conversations.map((conversation) => {
             const other = getOtherParticipant(conversation)
-            const otherName = other?.display_name || 'Unknown User'
+            const displayName = conversation.is_group
+              ? conversation.name || 'Group'
+              : other?.display_name || 'Unknown User'
             const isActive = activeConversationId === conversation.id
 
             return (
@@ -59,20 +61,31 @@ export function ConversationList({
                 onClick={() => onSelect(conversation.id)}
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(otherName)}`}
-                  >
-                    {getInitials(otherName)}
-                  </div>
+                  {conversation.is_group ? (
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-ktip-ocean-600 text-white shrink-0">
+                      <Users size={18} />
+                    </div>
+                  ) : (
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(displayName)}`}
+                    >
+                      {getInitials(displayName)}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-ktip-sand-900 text-sm truncate">
-                        {otherName}
+                        {displayName}
                       </span>
                       <span className="text-xs text-ktip-sand-400 shrink-0 ml-2">
                         {formatRelativeTime(conversation.updated_at)}
                       </span>
                     </div>
+                    {conversation.is_group && (
+                      <p className="text-xs text-ktip-sand-400">
+                        {conversation.participants?.length || 0} members
+                      </p>
+                    )}
                   </div>
                 </div>
               </button>

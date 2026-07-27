@@ -68,6 +68,7 @@ const navDropdowns: NavDropdown[] = [
       { name: 'My Applications', href: '/grants/my-applications', icon: ClipboardList, description: 'Track your grant applications' },
       { name: 'Resources', href: '/resources', icon: BookOpen, description: 'Articles, guides & case studies' },
       { name: 'Proposals', href: '/proposals', icon: FileText, description: 'Create & manage proposals' },
+      { name: 'Integrations', href: '/integrations', icon: BookOpen, description: 'External tools & partner platforms' },
     ],
   },
   {

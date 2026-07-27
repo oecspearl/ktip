@@ -1,8 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, X, Users } from 'lucide-react'
 import { Modal } from '../ui/Modal'
 import { Input } from '../ui/Input'
-import { useSearchUsers, useCreateConversation } from '../../hooks/useMessages'
+import { Button } from '../ui/Button'
+import {
+  useSearchUsers,
+  useCreateConversation,
+  useCreateGroupConversation,
+} from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Profile } from '../../types'
 import { getInitials, generateAvatarColor } from '../../lib/utils'
@@ -18,12 +23,17 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
   const auth = useAuth()
   const { searchUsers, loading: searchLoading } = useSearchUsers()
   const { createConversation, loading: createLoading } = useCreateConversation()
+  const { createGroupConversation, loading: groupLoading } = useCreateGroupConversation()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [results, setResults] = useState<Profile[]>([])
+  const [selected, setSelected] = useState<Profile[]>([])
+  const [groupName, setGroupName] = useState('')
   const [error, setError] = useState('')
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const creating = createLoading || groupLoading
+  const isGroup = selected.length > 1
 
   // Clear any pending debounce timer on unmount
   useEffect(() => {
@@ -56,12 +66,38 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
     doSearch(value)
   }
 
-  const handleSelectUser = async (userId: string) => {
-    if (!auth.user) return
+  const toggleUser = (user: Profile) => {
+    setError('')
+    setSelected((prev) =>
+      prev.some((u) => u.id === user.id)
+        ? prev.filter((u) => u.id !== user.id)
+        : [...prev, user]
+    )
+  }
+
+  const handleCreate = async () => {
+    if (!auth.user || selected.length === 0) return
     setError('')
 
     try {
-      const conversationId = await createConversation(auth.user.id, userId)
+      let conversationId: string
+      if (isGroup) {
+        if (!groupName.trim()) {
+          setError('Give your group a name')
+          return
+        }
+        conversationId = await createGroupConversation(
+          auth.user.id,
+          selected.map((u) => u.id),
+          groupName
+        )
+      } else {
+        conversationId = await createConversation(auth.user.id, selected[0].id)
+      }
+      setSelected([])
+      setGroupName('')
+      setSearchQuery('')
+      setResults([])
       onCreated(conversationId)
     } catch (err: any) {
       setError(err.message || 'Failed to create conversation')
@@ -73,10 +109,42 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
       open={open}
       onClose={onClose}
       title="New Conversation"
-      description="Search for a user to start messaging"
+      description="Pick one person for a direct message, or several to start a group"
       size="lg"
     >
       <div className="space-y-4">
+        {/* Selected chips */}
+        {selected.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {selected.map((user) => (
+              <span
+                key={user.id}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200 rounded-full text-sm"
+              >
+                {user.display_name || 'Unknown User'}
+                <button
+                  onClick={() => toggleUser(user)}
+                  aria-label={`Remove ${user.display_name || 'user'}`}
+                  className="hover:text-ktip-ocean-900"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Group name (2+ selected) */}
+        {isGroup && (
+          <Input
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Group name..."
+            icon={<Users size={18} />}
+            fullWidth
+          />
+        )}
+
         <Input
           value={searchQuery}
           onChange={(e) => handleInput(e.target.value)}
@@ -99,12 +167,16 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
           <div className="max-h-64 overflow-y-auto space-y-1">
             {results.map((user) => {
               const name = user.display_name || 'Unknown User'
+              const isSelected = selected.some((u) => u.id === user.id)
               return (
                 <button
                   key={user.id}
-                  className="w-full text-left p-3 rounded-xl hover:bg-ktip-sand-50 transition-colors flex items-center gap-3 disabled:opacity-50"
-                  onClick={() => handleSelectUser(user.id)}
-                  disabled={createLoading}
+                  className={`w-full text-left p-3 rounded-xl transition-colors flex items-center gap-3 disabled:opacity-50 ${
+                    isSelected ? 'bg-ktip-ocean-50 border border-ktip-ocean-200' : 'hover:bg-ktip-sand-50'
+                  }`}
+                  onClick={() => toggleUser(user)}
+                  disabled={creating}
+                  aria-pressed={isSelected}
                 >
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(name)}`}
@@ -119,6 +191,7 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
                       </p>
                     ) : null}
                   </div>
+                  {isSelected && <span className="text-xs font-bold text-ktip-ocean-600">Selected</span>}
                 </button>
               )
             })}
@@ -128,6 +201,16 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
         {searchQuery.trim() && !searchLoading && !results.length && (
           <p className="text-sm text-ktip-sand-500 text-center py-4">No users found</p>
         )}
+
+        <div className="flex justify-end pt-2">
+          <Button
+            onClick={handleCreate}
+            disabled={selected.length === 0 || creating || (isGroup && !groupName.trim())}
+            loading={creating}
+          >
+            {isGroup ? `Create Group (${selected.length + 1})` : 'Start Conversation'}
+          </Button>
+        </div>
       </div>
     </Modal>
   )

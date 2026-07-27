@@ -3,6 +3,7 @@ import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
 import { UATFeedbackButton } from '../uat/UATFeedbackButton'
+import { FeedbackButton } from '../feedback/FeedbackButton'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function MainLayout() {
@@ -23,6 +24,7 @@ export function MainLayout() {
       </main>
       <Footer />
       <UATFeedbackButton />
+      <FeedbackButton />
     </div>
   )
 }

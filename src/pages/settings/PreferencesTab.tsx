@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
+import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
+import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
 import {
   Bell,
   Eye,
@@ -45,71 +47,68 @@ function Toggle({ checked, onChange, label, description }: ToggleProps) {
   )
 }
 
+type NotifPrefs = typeof DEFAULT_NOTIFICATION_PREFERENCES
+
 export function PreferencesTab() {
+  const auth = useAuth()
   const toast = useToast()
+  const { preferences, loading } = useMyPreferences(auth.user?.id)
+  const { savePreferences, loading: saving } = useSavePreferences()
 
-  // Notification preferences
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [messageNotifications, setMessageNotifications] = useState(true)
-  const [eventReminders, setEventReminders] = useState(true)
-  const [projectUpdates, setProjectUpdates] = useState(true)
-  const [forumReplies, setForumReplies] = useState(true)
+  // Notification preferences — persisted in notification_preferences
+  // table and enforced by a DB trigger on the notifications table.
+  const [notif, setNotif] = useState<NotifPrefs>({ ...DEFAULT_NOTIFICATION_PREFERENCES })
 
-  // Privacy preferences
+  // Privacy preferences — still local-only (no enforcement yet)
   const [profilePublic, setProfilePublic] = useState(true)
   const [showEmail, setShowEmail] = useState(false)
   const [showCountry, setShowCountry] = useState(true)
 
-  const [saving, setSaving] = useState(false)
-
-  // Load preferences from local storage on mount
+  // Sync DB row into local state; migrate any legacy localStorage
+  // notification prefs the first time the user has no DB row.
   useEffect(() => {
+    if (loading || !preferences) return
+
+    let legacy: any = null
     try {
       const saved = localStorage.getItem('ktip_preferences')
-      if (saved) {
-        const prefs = JSON.parse(saved)
-        if (prefs.notifications) {
-          setEmailNotifications(prefs.notifications.email ?? true)
-          setMessageNotifications(prefs.notifications.messages ?? true)
-          setEventReminders(prefs.notifications.events ?? true)
-          setProjectUpdates(prefs.notifications.projects ?? true)
-          setForumReplies(prefs.notifications.forums ?? true)
-        }
-        if (prefs.privacy) {
-          setProfilePublic(prefs.privacy.profilePublic ?? true)
-          setShowEmail(prefs.privacy.showEmail ?? false)
-          setShowCountry(prefs.privacy.showCountry ?? true)
-        }
-      }
+      if (saved) legacy = JSON.parse(saved)
     } catch {
       // Ignore parse errors
     }
-  }, [])
+
+    setNotif({
+      email: preferences.email ?? legacy?.notifications?.email ?? true,
+      messages: preferences.messages ?? legacy?.notifications?.messages ?? true,
+      events: preferences.events ?? legacy?.notifications?.events ?? true,
+      projects: preferences.projects ?? legacy?.notifications?.projects ?? true,
+      forums: preferences.forums ?? legacy?.notifications?.forums ?? true,
+      collaboration: preferences.collaboration ?? true,
+      connections: preferences.connections ?? true,
+    })
+
+    if (legacy?.privacy) {
+      setProfilePublic(legacy.privacy.profilePublic ?? true)
+      setShowEmail(legacy.privacy.showEmail ?? false)
+      setShowCountry(legacy.privacy.showCountry ?? true)
+    }
+  }, [loading, preferences])
+
+  const setNotifField = (field: keyof NotifPrefs) => (checked: boolean) =>
+    setNotif((prev) => ({ ...prev, [field]: checked }))
 
   const handleSave = async () => {
-    setSaving(true)
-    // For now, store preferences locally until a preferences table is added
+    if (!auth.user) return
     try {
-      const preferences = {
-        notifications: {
-          email: emailNotifications,
-          messages: messageNotifications,
-          events: eventReminders,
-          projects: projectUpdates,
-          forums: forumReplies,
-        },
-        privacy: {
-          profilePublic: profilePublic,
-          showEmail: showEmail,
-          showCountry: showCountry,
-        },
-      }
-      localStorage.setItem('ktip_preferences', JSON.stringify(preferences))
+      await savePreferences(auth.user.id, notif)
+      // Privacy stays local until enforced server-side
+      localStorage.setItem(
+        'ktip_preferences',
+        JSON.stringify({ privacy: { profilePublic, showEmail, showCountry } })
+      )
       toast.success('Preferences saved!')
     } catch {
       toast.error('Failed to save preferences')
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -129,34 +128,46 @@ export function PreferencesTab() {
 
         <div className="divide-y divide-ktip-sand-100">
           <Toggle
-            checked={emailNotifications}
-            onChange={setEmailNotifications}
+            checked={notif.email}
+            onChange={setNotifField('email')}
             label="Email Notifications"
-            description="Receive email updates about your account activity"
+            description="Receive email updates about your account activity (coming soon)"
           />
           <Toggle
-            checked={messageNotifications}
-            onChange={setMessageNotifications}
+            checked={notif.messages}
+            onChange={setNotifField('messages')}
             label="New Messages"
             description="Get notified when someone sends you a message"
           />
           <Toggle
-            checked={eventReminders}
-            onChange={setEventReminders}
+            checked={notif.events}
+            onChange={setNotifField('events')}
             label="Event Reminders"
             description="Receive reminders about upcoming events you've joined"
           />
           <Toggle
-            checked={projectUpdates}
-            onChange={setProjectUpdates}
+            checked={notif.projects}
+            onChange={setNotifField('projects')}
             label="Project Updates"
-            description="Get notified about comments and updates on your projects"
+            description="Team invitations, follows, and updates on your projects"
           />
           <Toggle
-            checked={forumReplies}
-            onChange={setForumReplies}
+            checked={notif.forums}
+            onChange={setNotifField('forums')}
             label="Forum Replies"
             description="Get notified when someone replies to your forum posts"
+          />
+          <Toggle
+            checked={notif.collaboration}
+            onChange={setNotifField('collaboration')}
+            label="Collaboration"
+            description="Shared documents, whiteboards, and video invites"
+          />
+          <Toggle
+            checked={notif.connections}
+            onChange={setNotifField('connections')}
+            label="Connections"
+            description="Connection requests and acceptances"
           />
         </div>
       </Card>

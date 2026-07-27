@@ -76,6 +76,12 @@ export default function HelpCenterPage() {
             <div>
               <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Help Center</p>
               <h1 className="text-3xl md:text-4xl font-display font-bold text-white">How Can We Help?</h1>
+              <Link
+                to="/help/faq"
+                className="inline-block mt-2 text-sm text-ktip-ocean-400 hover:text-ktip-ocean-300 transition-colors"
+              >
+                Browse the FAQ →
+              </Link>
             </div>
             <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>

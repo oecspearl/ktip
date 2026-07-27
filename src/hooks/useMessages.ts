@@ -166,12 +166,12 @@ export function useCreateConversation() {
       // Create new conversation with client-generated ID
       // (avoids .select() which fails RLS before participants are added)
       const convId = crypto.randomUUID()
-      const { error: convError } = await supabase
+      const { error: convError } = await (supabase as any)
         .from('conversations')
-        .insert({ id: convId })
+        .insert({ id: convId, created_by: currentUserId })
       if (convError) throw convError
 
-      // Add both participants
+      // Add both participants (RLS: self-insert + creator-adds-others)
       const { error: partError } = await supabase
         .from('conversation_participants')
         .insert([
@@ -191,6 +191,99 @@ export function useCreateConversation() {
     mutation.mutateAsync({ currentUserId, otherUserId })
 
   return { createConversation, loading: mutation.isPending, error: mutation.error }
+}
+
+export function useCreateGroupConversation() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      creatorId,
+      participantIds,
+      name,
+    }: {
+      creatorId: string
+      participantIds: string[]
+      name: string
+    }): Promise<string> => {
+      const convId = crypto.randomUUID()
+      const { error: convError } = await (supabase as any)
+        .from('conversations')
+        .insert({ id: convId, name: name.trim(), is_group: true, created_by: creatorId })
+      if (convError) throw convError
+
+      const rows = [
+        { conversation_id: convId, user_id: creatorId, role: 'admin' },
+        ...participantIds
+          .filter((id) => id !== creatorId)
+          .map((id) => ({ conversation_id: convId, user_id: id, role: 'member' })),
+      ]
+      const { error: partError } = await (supabase as any)
+        .from('conversation_participants')
+        .insert(rows)
+      if (partError) throw partError
+
+      return convId
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('messages') })
+    },
+  })
+
+  const createGroupConversation = (creatorId: string, participantIds: string[], name: string) =>
+    mutation.mutateAsync({ creatorId, participantIds, name })
+
+  return { createGroupConversation, loading: mutation.isPending, error: mutation.error }
+}
+
+export function useGroupConversationMutations() {
+  const queryClient = useQueryClient()
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: keys.all('messages') })
+  }
+
+  const renameMutation = useMutation({
+    mutationFn: async ({ conversationId, name }: { conversationId: string; name: string }) => {
+      const { error } = await (supabase as any)
+        .from('conversations')
+        .update({ name: name.trim() })
+        .eq('id', conversationId)
+      if (error) throw error
+    },
+    onSuccess: invalidate,
+  })
+
+  const addMemberMutation = useMutation({
+    mutationFn: async ({ conversationId, userId }: { conversationId: string; userId: string }) => {
+      const { error } = await (supabase as any)
+        .from('conversation_participants')
+        .insert({ conversation_id: conversationId, user_id: userId, role: 'member' })
+      if (error) throw error
+    },
+    onSuccess: invalidate,
+  })
+
+  const removeMemberMutation = useMutation({
+    mutationFn: async (participantId: string) => {
+      const { error } = await supabase
+        .from('conversation_participants')
+        .delete()
+        .eq('id', participantId)
+      if (error) throw error
+    },
+    onSuccess: invalidate,
+  })
+
+  return {
+    renameGroup: (conversationId: string, name: string) =>
+      renameMutation.mutateAsync({ conversationId, name }),
+    addMember: (conversationId: string, userId: string) =>
+      addMemberMutation.mutateAsync({ conversationId, userId }),
+    removeMember: removeMemberMutation.mutateAsync,
+    loading: renameMutation.isPending || addMemberMutation.isPending || removeMemberMutation.isPending,
+    error: renameMutation.error || addMemberMutation.error || removeMemberMutation.error,
+  }
 }
 
 export function useSearchUsers() {
