@@ -22,6 +22,7 @@ export default function EditEventPage() {
 
   const [initialized, setInitialized] = useState(false)
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [eventType, setEventType] = useState('meetup')
   const [location, setLocation] = useState('')
@@ -38,6 +39,7 @@ export default function EditEventPage() {
   useEffect(() => {
     if (event && !initialized) {
       setTitle(event.title || '')
+      setSummary(event.summary || '')
       setDescription(event.description || '')
       setEventType(event.event_type || 'meetup')
       setLocation(event.location || '')
@@ -104,6 +106,7 @@ export default function EditEventPage() {
     try {
       await updateEvent(params.id!, {
         title,
+        summary: summary.trim() || null,
         description,
         event_type: eventType as any,
         location: isVirtual ? 'Virtual' : location,
@@ -186,6 +189,15 @@ export default function EditEventPage() {
             />
 
             {/* Description */}
+            <Input
+              label="Summary"
+              placeholder="One short sentence shown on the homepage hero (optional)"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={180}
+              fullWidth
+            />
+
             <Textarea
               label="Description"
               placeholder="Describe your event, agenda, and what participants can expect..."

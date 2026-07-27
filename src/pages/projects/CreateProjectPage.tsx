@@ -18,6 +18,7 @@ export default function CreateProjectPage() {
   const { createProject, loading } = useCreateProject()
 
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [phase, setPhase] = useState('concept')
@@ -69,6 +70,7 @@ export default function CreateProjectPage() {
     try {
       const project = await createProject({
         title,
+        summary: summary.trim() || null,
         description,
         category,
         phase: phase as any,
@@ -125,6 +127,16 @@ export default function CreateProjectPage() {
               error={errors.title}
               fullWidth
               required
+            />
+
+            {/* Summary */}
+            <Input
+              label="Summary"
+              placeholder="One short sentence shown on the homepage hero (optional)"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={180}
+              fullWidth
             />
 
             {/* Description */}

@@ -18,6 +18,7 @@ export default function CreateEventPage() {
   const { createEvent, loading } = useCreateEvent()
 
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [eventType, setEventType] = useState('meetup')
   const [location, setLocation] = useState('')
@@ -76,6 +77,7 @@ export default function CreateEventPage() {
     try {
       const event = await createEvent({
         title,
+        summary: summary.trim() || null,
         description,
         event_type: eventType as any,
         location: isVirtual ? 'Virtual' : location,
@@ -138,6 +140,16 @@ export default function CreateEventPage() {
               error={errors.title}
               fullWidth
               required
+            />
+
+            {/* Summary */}
+            <Input
+              label="Summary"
+              placeholder="One short sentence shown on the homepage hero (optional)"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={180}
+              fullWidth
             />
 
             {/* Description */}

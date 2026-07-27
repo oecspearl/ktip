@@ -95,6 +95,20 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [notifOpen, setNotifOpen] = useState(false)
 
+  // Transparent navbar over the homepage hero; turns solid on scroll
+  const isHome = location.pathname === '/'
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!isHome) return
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [isHome])
+
+  const overHero = isHome && !scrolled && !mobileMenuOpen
+
   // Notifications
   const { notifications, unreadCount, refetch: refetchNotifications } = useNotifications(auth.user?.id)
   const { markRead } = useMarkNotificationRead()
@@ -169,7 +183,13 @@ export function Navbar() {
 
   return (
     <nav
-      className="bg-white/80 backdrop-blur-lg shadow-nav border-b border-ktip-sand-100/80 sticky top-0 z-40"
+      className={cn(
+        'top-0 z-40 transition-colors duration-300',
+        isHome ? 'fixed inset-x-0' : 'sticky',
+        overHero
+          ? 'bg-transparent border-b border-transparent'
+          : 'bg-white/80 backdrop-blur-lg shadow-nav border-b border-ktip-sand-100/80'
+      )}
       style={{ paddingTop: '1rem', paddingBottom: '1rem' }}
     >
       <div className="w-full px-4">
@@ -179,8 +199,8 @@ export function Navbar() {
             <Link to="/" className="flex items-center gap-3 group">
               <img src="/pwa-512x512.png" alt="KTIP Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-cover rounded-full shadow-soft group-hover:shadow-medium transition-shadow" />
               <div className="hidden sm:block">
-                <h1 className="text-2xl font-display font-bold text-ktip-ocean-600">KTIP</h1>
-                <p className="text-xs font-medium text-ktip-sand-500 tracking-wide">OECS INNOVATE & CONNECT</p>
+                <h1 className={cn('text-2xl font-display font-bold', overHero ? 'text-white' : 'text-ktip-ocean-600')}>KTIP</h1>
+                <p className={cn('text-xs font-medium tracking-wide', overHero ? 'text-white/60' : 'text-ktip-sand-500')}>OECS INNOVATE & CONNECT</p>
               </div>
             </Link>
           </div>
@@ -195,8 +215,12 @@ export function Navbar() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
                   isActive(item.href)
-                    ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                    : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    ? overHero
+                      ? 'bg-white/15 text-white'
+                      : 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                    : overHero
+                      ? 'text-white/80 hover:bg-white/10 hover:text-white'
+                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
                 )}
               >
                 <item.icon size={18} />
@@ -218,8 +242,12 @@ export function Navbar() {
                   className={cn(
                     'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
                     isDropdownActive(dropdown) || openDropdownId === dropdown.id
-                      ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                      ? overHero
+                        ? 'bg-white/15 text-white'
+                        : 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                      : overHero
+                        ? 'text-white/80 hover:bg-white/10 hover:text-white'
+                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
                   )}
                 >
                   <dropdown.icon size={18} />
@@ -270,7 +298,9 @@ export function Navbar() {
                   'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
                   isActive('/admin')
                     ? 'bg-pink-50 text-pink-700'
-                    : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    : overHero
+                      ? 'text-white/80 hover:bg-white/10 hover:text-white'
+                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
                 )}
               >
                 <ShieldCheck size={18} />
@@ -284,7 +314,10 @@ export function Navbar() {
             <div className="relative w-full">
               <Search
                 size={20}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
+                className={cn(
+                  'absolute left-3 top-1/2 -translate-y-1/2',
+                  overHero ? 'text-white/60' : 'text-ktip-sand-400'
+                )}
               />
               <input
                 type="text"
@@ -293,7 +326,12 @@ export function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.currentTarget.value)}
                 onKeyDown={handleSearch}
-                className="w-full pl-10 pr-4 py-2 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                className={cn(
+                  'w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none transition-colors',
+                  overHero
+                    ? 'border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-ktip-sand-900 focus:placeholder-ktip-sand-400 focus:border-white'
+                    : 'border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20'
+                )}
               />
             </div>
           </div>
@@ -306,7 +344,10 @@ export function Navbar() {
                 <button
                   onClick={() => setNotifOpen(!notifOpen)}
                   aria-label="Notifications"
-                  className="relative p-2 rounded-lg hover:bg-ktip-sand-50 transition-colors text-ktip-sand-600"
+                  className={cn(
+                    'relative p-2 rounded-lg transition-colors',
+                    overHero ? 'text-white/80 hover:bg-white/10' : 'text-ktip-sand-600 hover:bg-ktip-sand-50'
+                  )}
                 >
                   <Bell size={20} />
                   {unreadCount > 0 && (
@@ -407,7 +448,7 @@ export function Navbar() {
                   className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-ktip-sand-50 transition-colors"
                 >
                   <div className="hidden md:block text-right">
-                    <p className="text-sm font-medium text-ktip-sand-900">
+                    <p className={cn('text-sm font-medium', overHero ? 'text-white' : 'text-ktip-sand-900')}>
                       {auth.profile?.display_name || 'User'}
                     </p>
                     <div className="flex gap-1 justify-end mt-0.5">
@@ -486,7 +527,12 @@ export function Navbar() {
                 {/* Desktop: both buttons */}
                 <div className="hidden sm:flex items-center gap-2">
                   <Link to="/login">
-                    <Button variant="ghost" size="sm" icon={<LogIn size={16} />}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={<LogIn size={16} />}
+                      className={overHero ? 'text-white hover:bg-white/10' : undefined}
+                    >
                       Log In
                     </Button>
                   </Link>
@@ -508,7 +554,10 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
-              className="lg:hidden p-2 rounded-lg hover:bg-ktip-sand-50"
+              className={cn(
+                'lg:hidden p-2 rounded-lg',
+                overHero ? 'text-white hover:bg-white/10' : 'hover:bg-ktip-sand-50'
+              )}
             >
               {!mobileMenuOpen ? <Menu size={24} /> : <X size={24} />}
             </button>

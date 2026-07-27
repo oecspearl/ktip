@@ -22,6 +22,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const { updateGrant, loading: updateLoading } = useUpdateGrant()
 
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [grantType, setGrantType] = useState('')
   const [amountMin, setAmountMin] = useState('')
@@ -36,6 +37,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
 
   const resetForm = () => {
     setTitle('')
+    setSummary('')
     setDescription('')
     setGrantType('')
     setAmountMin('')
@@ -50,6 +52,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   useEffect(() => {
     if (grant) {
       setTitle(grant.title)
+      setSummary(grant.summary || '')
       setDescription(grant.description || '')
       setGrantType(grant.grant_type || '')
       setAmountMin(grant.amount_min != null ? String(grant.amount_min) : '')
@@ -78,6 +81,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       is_climate_action: isClimateAction,
     }
 
+    grantData.summary = summary.trim() || null
     if (description.trim()) grantData.description = description.trim()
     if (grantType) grantData.grant_type = grantType
     if (amountMin) grantData.amount_min = Number(amountMin)
@@ -124,6 +128,21 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
             onChange={(e) => setTitle(e.currentTarget.value)}
             placeholder="Enter grant title"
             required
+            className={inputClass}
+          />
+        </div>
+
+        {/* Summary */}
+        <div>
+          <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+            Summary
+          </label>
+          <input
+            type="text"
+            value={summary}
+            onChange={(e) => setSummary(e.currentTarget.value)}
+            placeholder="One short sentence shown on the homepage hero (optional)"
+            maxLength={180}
             className={inputClass}
           />
         </div>

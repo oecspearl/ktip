@@ -24,6 +24,7 @@ export default function EditProjectPage() {
 
   const [initialized, setInitialized] = useState(false)
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [phase, setPhase] = useState('concept')
@@ -37,6 +38,7 @@ export default function EditProjectPage() {
   useEffect(() => {
     if (project && !initialized) {
       setTitle(project.title || '')
+      setSummary(project.summary || '')
       setDescription(project.description || '')
       setCategory(project.category || '')
       setPhase(project.phase || 'concept')
@@ -94,6 +96,7 @@ export default function EditProjectPage() {
     try {
       await updateProject(params.id!, {
         title,
+        summary: summary.trim() || null,
         description,
         category,
         phase: phase as any,
@@ -170,6 +173,15 @@ export default function EditProjectPage() {
               error={errors.title}
               fullWidth
               required
+            />
+
+            <Input
+              label="Summary"
+              placeholder="One short sentence shown on the homepage hero (optional)"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={180}
+              fullWidth
             />
 
             <Textarea

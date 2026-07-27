@@ -59,6 +59,7 @@ export interface Project {
   id: string
   title: string
   description: string | null
+  summary: string | null
   category: ProjectCategory | null
   phase: ProjectPhase
   hashtags: string[]
@@ -77,6 +78,7 @@ export interface Event {
   id: string
   title: string
   description: string | null
+  summary: string | null
   event_type: EventType
   status: EventStatus
   location: string | null
@@ -172,6 +174,7 @@ export interface Grant {
   id: string
   title: string
   description: string | null
+  summary: string | null
   amount_min: number | null
   amount_max: number | null
   currency: string
