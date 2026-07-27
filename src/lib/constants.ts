@@ -11,15 +11,17 @@ export const USER_ROLES = {
   INVESTOR: 'investor',
   ENTREPRENEUR: 'entrepreneur',
   PRIVATE_SECTOR: 'private_sector',
+  FACULTY: 'faculty',
   OECS: 'oecs',
 } as const
 
 export const ROLE_LABELS: Record<string, string> = {
-  student: 'Student',
+  student: 'Student/Youth Innovator',
   mentor: 'Mentor',
-  investor: 'Investor',
+  investor: 'Investor/Funding Agency',
   entrepreneur: 'Entrepreneur',
-  private_sector: 'Private Sector',
+  private_sector: 'Private Sector/SME',
+  faculty: 'Faculty/Researcher',
   oecs: 'OECS Admin',
 }
 
@@ -29,8 +31,19 @@ export const ROLE_COLORS: Record<string, string> = {
   investor: 'bg-purple-100 text-purple-700 border-purple-200',
   entrepreneur: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   private_sector: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  faculty: 'bg-teal-100 text-teal-700 border-teal-200',
   oecs: 'bg-pink-100 text-pink-700 border-pink-200',
 }
+
+// Roles a user can pick for themselves (excludes OECS admin)
+export const SELECTABLE_ROLES = [
+  { value: USER_ROLES.ENTREPRENEUR, label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations' },
+  { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects' },
+  { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia' },
+  { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators' },
+  { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects' },
+  { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators' },
+] as const
 
 // Project Phases
 export const PROJECT_PHASES = {
@@ -298,6 +311,60 @@ export const SKILL_SUGGESTIONS = [
   'Disaster Preparedness',
 ] as const
 
+// Interest Suggestions
+export const INTEREST_SUGGESTIONS = [
+  'AgriTech',
+  'Climate Adaptation',
+  'Digital Transformation',
+  'Youth Entrepreneurship',
+  'Sustainable Tourism',
+  'Blue Economy',
+  'Renewable Energy',
+  'Social Innovation',
+  'Artificial Intelligence',
+  'Circular Economy',
+  'Food Security',
+  'Health Innovation',
+  'Creative Industries',
+  'Financial Inclusion',
+  'Smart Cities',
+  'Ocean Conservation',
+] as const
+
+// Industries (curated Caribbean-relevant list; "Other" handled in UI)
+export const INDUSTRIES = [
+  'Agriculture & Agri-processing',
+  'Tourism & Hospitality',
+  'Renewable Energy',
+  'ICT & Digital Services',
+  'Blue Economy & Fisheries',
+  'Creative Industries',
+  'Health & Wellness',
+  'Education & Training',
+  'Financial Services',
+  'Manufacturing',
+  'Climate Resilience & Environment',
+  'Transport & Logistics',
+] as const
+
+export const INDUSTRY_OTHER = 'Other'
+
+// Openness to Collaborate
+export const COLLABORATION_OPTIONS = [
+  { value: 'research_co_investigation', label: 'Research Co-Investigation' },
+  { value: 'knowledge_transfer', label: 'Knowledge Transfer' },
+  { value: 'curriculum_advisory', label: 'Curriculum Advisory' },
+  { value: 'consultancy', label: 'Consultancy' },
+  { value: 'not_seeking', label: 'Not Currently Seeking' },
+] as const
+
+export const COLLABORATION_LABELS: Record<string, string> = Object.fromEntries(
+  COLLABORATION_OPTIONS.map((o) => [o.value, o.label])
+)
+
+// Selecting this clears all other collaboration options
+export const COLLAB_EXCLUSIVE_VALUE = 'not_seeking'
+
 // Proposal Types
 export const PROPOSAL_TYPE_LABELS: Record<string, string> = {
   funding: 'Funding/Grant Proposal',
@@ -424,6 +491,9 @@ export const LIMITS = {
   MAX_MESSAGE_LENGTH: 2000,
   MAX_BIO_LENGTH: 500,
   MAX_HASHTAGS: 10,
+  MAX_SKILLS: 20,
+  MAX_INTERESTS: 20,
+  MAX_ORGANIZATION_LENGTH: 200,
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
 } as const
 

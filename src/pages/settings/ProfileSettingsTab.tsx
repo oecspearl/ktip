@@ -15,19 +15,16 @@ import {
 } from 'lucide-react'
 import {
   CARIBBEAN_COUNTRIES,
-  ROLE_LABELS,
+  SELECTABLE_ROLES,
   SKILL_SUGGESTIONS,
+  INTEREST_SUGGESTIONS,
+  LIMITS,
 } from '../../lib/constants'
 import { getInitials, generateAvatarColor } from '../../lib/utils'
+import { TagInput } from '../../components/ui/TagInput'
+import { CollabSelect } from '../../components/ui/CollabSelect'
+import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import type { UserRole } from '../../types'
-
-const ALL_ROLES: { value: UserRole; label: string }[] = [
-  { value: 'student', label: ROLE_LABELS.student },
-  { value: 'mentor', label: ROLE_LABELS.mentor },
-  { value: 'investor', label: ROLE_LABELS.investor },
-  { value: 'entrepreneur', label: ROLE_LABELS.entrepreneur },
-  { value: 'private_sector', label: ROLE_LABELS.private_sector },
-]
 
 export function ProfileSettingsTab() {
   const auth = useAuth()
@@ -36,9 +33,12 @@ export function ProfileSettingsTab() {
   const [displayName, setDisplayName] = useState(auth.profile?.display_name || '')
   const [bio, setBio] = useState(auth.profile?.bio || '')
   const [country, setCountry] = useState(auth.profile?.country || '')
+  const [organization, setOrganization] = useState(auth.profile?.organization || '')
+  const [industry, setIndustry] = useState(auth.profile?.industry || '')
   const [roles, setRoles] = useState<UserRole[]>(auth.profile?.roles || [])
   const [skills, setSkills] = useState<string[]>(auth.profile?.skills || [])
-  const [skillInput, setSkillInput] = useState('')
+  const [interests, setInterests] = useState<string[]>(auth.profile?.interests || [])
+  const [openTo, setOpenTo] = useState<string[]>(auth.profile?.open_to || [])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -51,8 +51,12 @@ export function ProfileSettingsTab() {
       setDisplayName(p.display_name || '')
       setBio(p.bio || '')
       setCountry(p.country || '')
+      setOrganization(p.organization || '')
+      setIndustry(p.industry || '')
       setRoles(p.roles || [])
       setSkills(p.skills || [])
+      setInterests(p.interests || [])
+      setOpenTo(p.open_to || [])
       setInitialized(true)
     }
   }, [auth.profile, initialized])
@@ -118,6 +122,11 @@ export function ProfileSettingsTab() {
       display_name: displayName,
       bio: bio || undefined,
       country: country || undefined,
+      organization: organization || undefined,
+      industry: industry || undefined,
+      skills,
+      interests,
+      open_to: openTo as any,
     }
 
     const result = profileUpdateSchema.safeParse(input)
@@ -137,8 +146,12 @@ export function ProfileSettingsTab() {
         display_name: displayName,
         bio: bio || null,
         country: country || null,
-        roles: roles as any,
-        skills: skills as any,
+        organization: organization || null,
+        industry: industry || null,
+        roles,
+        skills,
+        interests,
+        open_to: openTo,
       })
       toast.success('Profile updated!')
     } catch (err: any) {
@@ -211,6 +224,17 @@ export function ProfileSettingsTab() {
             fullWidth
           />
 
+          <Input
+            label="Organisation"
+            value={organization}
+            onChange={(e) => setOrganization(e.target.value)}
+            error={errors.organization}
+            placeholder="Company, university, or institution"
+            fullWidth
+          />
+
+          <IndustrySelect value={industry} onChange={setIndustry} />
+
           <div className="flex flex-col gap-1.5 w-full">
             <label className="text-sm font-medium text-ktip-sand-700">Country</label>
             <select
@@ -232,7 +256,7 @@ export function ProfileSettingsTab() {
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Roles</h2>
         <p className="text-sm text-ktip-sand-600 mb-4">Select the roles that describe you. You can choose multiple.</p>
         <div className="flex flex-wrap gap-2">
-          {ALL_ROLES.map((role) => {
+          {SELECTABLE_ROLES.map((role) => {
             const isSelected = roles.includes(role.value)
             return (
               <button
@@ -256,76 +280,34 @@ export function ProfileSettingsTab() {
       {/* Skills */}
       <Card>
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Skills</h2>
-        <p className="text-sm text-ktip-sand-600 mb-4">Add skills to help others find you in the directory.</p>
+        <TagInput
+          description="Add skills to help others find you in the directory."
+          values={skills}
+          onChange={setSkills}
+          suggestions={SKILL_SUGGESTIONS}
+          max={LIMITS.MAX_SKILLS}
+          placeholder="Type a skill and press Enter..."
+        />
+      </Card>
 
-        {/* Current skills */}
-        {skills.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {skills.map((skill) => (
-              <span key={skill} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200">
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => setSkills(skills.filter((s) => s !== skill))}
-                  className="ml-0.5 hover:text-red-600 transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+      {/* Interests */}
+      <Card>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Interests</h2>
+        <TagInput
+          description="Topics you care about — used to surface relevant people and opportunities."
+          values={interests}
+          onChange={setInterests}
+          suggestions={INTEREST_SUGGESTIONS}
+          max={LIMITS.MAX_INTERESTS}
+          placeholder="Type an interest and press Enter..."
+        />
+      </Card>
 
-        {/* Add skill input */}
-        <div className="flex gap-2 mb-3">
-          <input
-            type="text"
-            value={skillInput}
-            onChange={(e) => setSkillInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                const val = skillInput.trim()
-                if (val && !skills.includes(val)) {
-                  setSkills([...skills, val])
-                  setSkillInput('')
-                }
-              }
-            }}
-            placeholder="Type a skill and press Enter..."
-            className="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white text-sm"
-          />
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            icon={<Plus size={14} />}
-            onClick={() => {
-              const val = skillInput.trim()
-              if (val && !skills.includes(val)) {
-                setSkills([...skills, val])
-                setSkillInput('')
-              }
-            }}
-          >
-            Add
-          </Button>
-        </div>
-
-        {/* Suggestions */}
-        <div className="flex flex-wrap gap-1.5">
-          {SKILL_SUGGESTIONS.filter((s) => !skills.includes(s)).slice(0, 12).map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              onClick={() => setSkills([...skills, suggestion])}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50 transition-all"
-            >
-              <Plus size={12} />
-              {suggestion}
-            </button>
-          ))}
-        </div>
+      {/* Openness to Collaborate */}
+      <Card>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Openness to Collaborate</h2>
+        <p className="text-sm text-ktip-sand-600 mb-4">Let others know what kinds of collaboration you're open to.</p>
+        <CollabSelect values={openTo} onChange={setOpenTo} />
       </Card>
 
       {/* Save Button */}

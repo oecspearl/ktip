@@ -11,6 +11,18 @@ import { supabase } from '../lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
 import type { Profile } from '../types'
 
+export interface SignupMetadata {
+  display_name?: string
+  role?: string
+  organization?: string
+  industry?: string
+  country?: string
+  bio?: string
+  skills?: string[]
+  interests?: string[]
+  open_to?: string[]
+}
+
 interface AuthContextType {
   user: User | null
   session: Session | null
@@ -20,7 +32,7 @@ interface AuthContextType {
   signUp: (
     email: string,
     password: string,
-    metadata?: { display_name?: string; role?: string }
+    metadata?: SignupMetadata
   ) => Promise<void>
   signOut: () => Promise<void>
   signInWithGoogle: () => Promise<void>
@@ -53,12 +65,20 @@ async function fetchProfileQuery(userId: string, userData?: User | null): Promis
 
   if (error && error.code === 'PGRST116') {
     // Profile doesn't exist yet — create it (handles users created before trigger was installed)
+    const meta = userData?.user_metadata
     const { data: newProfile, error: insertError } = await supabase
       .from('profiles')
       .insert({
         id: userId,
-        display_name: userData?.user_metadata?.display_name || userData?.email || null,
-        roles: userData?.user_metadata?.role ? [userData.user_metadata.role] : [],
+        display_name: meta?.display_name || userData?.email || null,
+        roles: meta?.role ? [meta.role] : [],
+        bio: meta?.bio || null,
+        country: meta?.country || null,
+        organization: meta?.organization || null,
+        industry: meta?.industry || null,
+        skills: Array.isArray(meta?.skills) ? meta.skills : [],
+        interests: Array.isArray(meta?.interests) ? meta.interests : [],
+        open_to: Array.isArray(meta?.open_to) ? meta.open_to : [],
       })
       .select()
       .single()
@@ -161,7 +181,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     async (
       email: string,
       password: string,
-      metadata?: { display_name?: string; role?: string }
+      metadata?: SignupMetadata
     ) => {
       const { error } = await supabase.auth.signUp({
         email,

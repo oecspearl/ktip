@@ -26,11 +26,15 @@ import {
   Flag,
   Users,
   UserX,
+  Briefcase,
+  Handshake,
 } from 'lucide-react'
 import {
   ROLE_LABELS,
   ROLE_COLORS,
   CARIBBEAN_COUNTRIES,
+  COLLABORATION_LABELS,
+  COLLAB_EXCLUSIVE_VALUE,
 } from '../../lib/constants'
 import {
   formatDate,
@@ -193,6 +197,13 @@ export default function ProfilePage() {
                   {profile.country}
                 </p>
               )}
+
+              {(profile.organization || profile.industry) && (
+                <p className="flex items-center gap-1.5 text-gray-300 mt-1">
+                  <Briefcase size={16} />
+                  {[profile.organization, profile.industry].filter(Boolean).join(' · ')}
+                </p>
+              )}
             </div>
 
             {/* Actions */}
@@ -255,12 +266,51 @@ export default function ProfilePage() {
 
           {/* Skills */}
           {profile.skills?.length ? (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {profile.skills.map((skill) => (
-                <span key={skill} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200">
-                  {skill}
-                </span>
-              ))}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">Skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {profile.skills.map((skill) => (
+                  <span key={skill} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Interests */}
+          {profile.interests?.length ? (
+            <div className="mb-3">
+              <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">Interests</p>
+              <div className="flex flex-wrap gap-1.5">
+                {profile.interests.map((interest) => (
+                  <span key={interest} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-tropical-50 text-ktip-tropical-700 border border-ktip-tropical-200">
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Openness to Collaborate */}
+          {profile.open_to?.length ? (
+            <div className="mb-3">
+              <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">Open To</p>
+              <div className="flex flex-wrap gap-1.5">
+                {profile.open_to.map((value) => (
+                  <span
+                    key={value}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
+                      value === COLLAB_EXCLUSIVE_VALUE
+                        ? 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200'
+                        : 'bg-purple-50 text-purple-700 border-purple-200'
+                    }`}
+                  >
+                    <Handshake size={12} />
+                    {COLLABORATION_LABELS[value] || value}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : null}
 

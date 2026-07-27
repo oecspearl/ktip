@@ -11,7 +11,12 @@ export interface Database {
           bio: string | null
           avatar_url: string | null
           country: string | null
+          organization: string | null
+          industry: string | null
           roles: string[]
+          skills: string[]
+          interests: string[]
+          open_to: string[]
           is_verified: boolean
           created_at: string
           updated_at: string
@@ -22,7 +27,12 @@ export interface Database {
           bio?: string | null
           avatar_url?: string | null
           country?: string | null
+          organization?: string | null
+          industry?: string | null
           roles?: string[]
+          skills?: string[]
+          interests?: string[]
+          open_to?: string[]
           is_verified?: boolean
           created_at?: string
           updated_at?: string
@@ -33,7 +43,12 @@ export interface Database {
           bio?: string | null
           avatar_url?: string | null
           country?: string | null
+          organization?: string | null
+          industry?: string | null
           roles?: string[]
+          skills?: string[]
+          interests?: string[]
+          open_to?: string[]
           is_verified?: boolean
           created_at?: string
           updated_at?: string

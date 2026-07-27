@@ -6,11 +6,53 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 })
 
+// Password requirements drive both the signup schema and the live
+// checklist UI, so they can never drift apart.
+export const PASSWORD_REQUIREMENTS: { id: string; label: string; test: (pw: string) => boolean }[] = [
+  { id: 'length', label: 'At least 8 characters', test: (pw) => pw.length >= 8 },
+  { id: 'number', label: 'At least one number', test: (pw) => /\d/.test(pw) },
+  { id: 'symbol', label: 'At least one symbol (e.g. !@#$%)', test: (pw) => /[^a-zA-Z0-9\s]/.test(pw) },
+  { id: 'case', label: 'Upper and lowercase letters', test: (pw) => /[a-z]/.test(pw) && /[A-Z]/.test(pw) },
+]
+
+const passwordSchema = z.string().superRefine((pw, ctx) => {
+  for (const req of PASSWORD_REQUIREMENTS) {
+    if (!req.test(pw)) {
+      ctx.addIssue({ code: 'custom', message: `Password needs: ${req.label.toLowerCase()}` })
+      return
+    }
+  }
+})
+
+export const SIGNUP_ROLES = ['student', 'mentor', 'investor', 'entrepreneur', 'private_sector', 'faculty'] as const
+export const COLLABORATION_VALUES = [
+  'research_co_investigation',
+  'knowledge_transfer',
+  'curriculum_advisory',
+  'consultancy',
+  'not_seeking',
+] as const
+
 export const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: passwordSchema,
   display_name: z.string().min(2, 'Name must be at least 2 characters'),
-  role: z.enum(['student', 'mentor', 'investor', 'entrepreneur', 'private_sector']),
+  role: z.enum(SIGNUP_ROLES, { error: 'Please select a role' }),
+  organization: z.string().max(200, 'Organisation name too long').optional(),
+  industry: z.string().max(100, 'Industry too long').optional(),
+  country: z.string().max(100).optional(),
+  bio: z.string().max(500, 'Bio too long').optional(),
+  skills: z.array(z.string()).max(20, 'Maximum 20 skills').optional(),
+  interests: z.array(z.string()).max(20, 'Maximum 20 interests').optional(),
+  open_to: z.array(z.enum(COLLABORATION_VALUES)).optional(),
+})
+
+// Step 1 of the signup wizard (required account fields)
+export const signupStep1Schema = signupSchema.pick({
+  email: true,
+  password: true,
+  display_name: true,
+  role: true,
 })
 
 // Project Schemas
@@ -81,6 +123,11 @@ export const profileUpdateSchema = z.object({
   display_name: z.string().min(2, 'Name must be at least 2 characters').max(100).optional(),
   bio: z.string().max(500, 'Bio too long').optional(),
   country: z.string().max(100).optional(),
+  organization: z.string().max(200, 'Organisation name too long').optional(),
+  industry: z.string().max(100, 'Industry too long').optional(),
+  skills: z.array(z.string()).max(20, 'Maximum 20 skills').optional(),
+  interests: z.array(z.string()).max(20, 'Maximum 20 interests').optional(),
+  open_to: z.array(z.enum(COLLABORATION_VALUES)).optional(),
 })
 
 // Change Password Schema

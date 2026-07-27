@@ -3,7 +3,7 @@ import { Modal } from './ui/Modal'
 import { Button } from './ui/Button'
 import { useSubmitPreregistration } from '../hooks/usePreregistrations'
 import { analytics } from '../hooks/useAnalytics'
-import { CARIBBEAN_COUNTRIES, ROLE_LABELS } from '../lib/constants'
+import { CARIBBEAN_COUNTRIES, SELECTABLE_ROLES } from '../lib/constants'
 import {
   User,
   Mail,
@@ -16,13 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-const PREREG_ROLES = [
-  { value: 'student', label: ROLE_LABELS.student, description: 'Learn and collaborate on projects' },
-  { value: 'mentor', label: ROLE_LABELS.mentor, description: 'Guide and support innovators' },
-  { value: 'investor', label: ROLE_LABELS.investor, description: 'Discover and fund projects' },
-  { value: 'entrepreneur', label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations' },
-  { value: 'private_sector', label: ROLE_LABELS.private_sector, description: 'Partner with innovators' },
-]
+const PREREG_ROLES = SELECTABLE_ROLES
 
 interface PreRegistrationModalProps {
   open: boolean

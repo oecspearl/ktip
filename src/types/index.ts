@@ -1,6 +1,6 @@
 // Custom types for KTIP application
 
-export type UserRole = 'student' | 'mentor' | 'investor' | 'entrepreneur' | 'private_sector' | 'oecs'
+export type UserRole = 'student' | 'mentor' | 'investor' | 'entrepreneur' | 'private_sector' | 'faculty' | 'oecs'
 
 export type ProjectPhase = 'concept' | 'prototype' | 'funding' | 'launch'
 
@@ -44,8 +44,12 @@ export interface Profile {
   bio: string | null
   avatar_url: string | null
   country: string | null
+  organization: string | null
+  industry: string | null
   roles: UserRole[]
   skills: string[]
+  interests: string[]
+  open_to: string[]
   is_verified: boolean
   created_at: string
   updated_at: string

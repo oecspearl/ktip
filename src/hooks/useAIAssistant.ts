@@ -12,11 +12,12 @@ export interface ChatMessage {
 const MAX_HISTORY = 20
 
 const ROLE_LABELS: Record<UserRole, string> = {
-  student: 'Student',
+  student: 'Student/Youth Innovator',
   mentor: 'Mentor',
-  investor: 'Investor',
+  investor: 'Investor/Funding Agency',
   entrepreneur: 'Entrepreneur',
-  private_sector: 'Private Sector Partner',
+  private_sector: 'Private Sector/SME Partner',
+  faculty: 'Faculty/Researcher',
   oecs: 'OECS Administrator',
 }
 
