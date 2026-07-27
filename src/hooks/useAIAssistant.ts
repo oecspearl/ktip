@@ -1,4 +1,5 @@
-import { createSignal } from 'solid-js'
+import { useRef, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import type { UserRole } from '../types'
 
 export interface ChatMessage {
@@ -77,35 +78,43 @@ export function useAIAssistant(options?: {
   const role = options?.userRole
   const name = options?.userName
 
-  const welcomeMsg: ChatMessage = {
-    id: 'welcome',
-    role: 'assistant',
-    content: buildWelcomeMessage(role, name),
-    timestamp: new Date(),
-  }
-
-  const [messages, setMessages] = createSignal<ChatMessage[]>([welcomeMsg])
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
-
-  const sendMessage = async (content: string) => {
-    const trimmed = content.trim()
-    if (!trimmed || loading()) return
-
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: trimmed,
+  // Computed once, at mount — mirrors the Solid original where the welcome
+  // message is derived a single time when the component instance is created.
+  const welcomeMsgRef = useRef<ChatMessage | null>(null)
+  if (!welcomeMsgRef.current) {
+    welcomeMsgRef.current = {
+      id: 'welcome',
+      role: 'assistant',
+      content: buildWelcomeMessage(role, name),
       timestamp: new Date(),
     }
+  }
+  const welcomeMsg = welcomeMsgRef.current
 
-    setMessages((prev) => [...prev, userMsg])
-    setLoading(true)
-    setError(null)
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [welcomeMsg])
+  const [error, setError] = useState<string | null>(null)
 
-    try {
+  const mutation = useMutation({
+    mutationFn: async (trimmed: string): Promise<string> => {
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: trimmed,
+        timestamp: new Date(),
+      }
+
+      // Capture the post-append message list synchronously (Solid's
+      // createSignal getter reflects the update immediately after the
+      // setter runs; React state updates are async, so we mirror the
+      // value locally instead of reading `messages` back out).
+      let updatedMessages: ChatMessage[] = []
+      setMessages((prev) => {
+        updatedMessages = [...prev, userMsg]
+        return updatedMessages
+      })
+
       // Build conversation for API — system prompt + recent history
-      const history = messages()
+      const history = updatedMessages
         .filter((m) => m.id !== 'welcome')
         .slice(-MAX_HISTORY)
       const apiMessages = [
@@ -133,16 +142,18 @@ export function useAIAssistant(options?: {
 
       const data = await res.json()
       const reply = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.'
-
+      return reply
+    },
+    onSuccess: (reply) => {
       const assistantMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         content: reply,
         timestamp: new Date(),
       }
-
       setMessages((prev) => [...prev, assistantMsg])
-    } catch (err: any) {
+    },
+    onError: (err: any) => {
       const msg = err?.message || 'Something went wrong. Please try again.'
       setError(msg)
 
@@ -153,21 +164,31 @@ export function useAIAssistant(options?: {
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMsg])
-    } finally {
-      setLoading(false)
+    },
+  })
+
+  const sendMessage = async (content: string) => {
+    const trimmed = content.trim()
+    if (!trimmed || mutation.isPending) return
+
+    setError(null)
+    try {
+      await mutation.mutateAsync(trimmed)
+    } catch {
+      // error state already recorded via onError
     }
   }
 
   const clearHistory = () => {
-    setMessages([
-      {
-        ...welcomeMsg,
-        id: `welcome-${Date.now()}`,
-        timestamp: new Date(),
-      },
-    ])
+    const nextWelcome: ChatMessage = {
+      ...welcomeMsg,
+      id: `welcome-${Date.now()}`,
+      timestamp: new Date(),
+    }
+    welcomeMsgRef.current = nextWelcome
+    setMessages([nextWelcome])
     setError(null)
   }
 
-  return { messages, loading, error, sendMessage, clearHistory }
+  return { messages, loading: mutation.isPending, error, sendMessage, clearHistory }
 }

@@ -1,4 +1,4 @@
-import { A } from '@solidjs/router'
+import { Link } from 'react-router'
 import type { ForumBoard } from '../../types'
 import {
   MessageSquare,
@@ -7,10 +7,10 @@ import {
   Users,
   Calendar,
   HelpCircle,
-} from 'lucide-solid'
-import type { Component } from 'solid-js'
+} from 'lucide-react'
+import type { ComponentType } from 'react'
 
-const iconMap: Record<string, Component<{ size?: number; class?: string }>> = {
+const iconMap: Record<string, ComponentType<{ size?: number; className?: string }>> = {
   MessageSquare,
   FolderKanban,
   DollarSign,
@@ -23,27 +23,24 @@ interface BoardCardProps {
   board: ForumBoard
 }
 
-export function BoardCard(props: BoardCardProps) {
-  const Icon = () => {
-    const IconComponent = iconMap[props.board.icon || 'MessageSquare'] || MessageSquare
-    return <IconComponent size={24} class="text-ktip-ocean-500" />
-  }
+export function BoardCard({ board }: BoardCardProps) {
+  const Icon = iconMap[board.icon || 'MessageSquare'] || MessageSquare
 
   return (
-    <A href={`/forums/${props.board.slug}`} class="block border border-gray-200 p-6 hover:border-ktip-ocean-400 transition-colors">
-      <div class="flex items-start gap-4">
-        <div class="w-12 h-12 bg-ktip-ocean-50 rounded-lg flex items-center justify-center shrink-0">
-          <Icon />
+    <Link to={`/forums/${board.slug}`} className="block border border-gray-200 p-6 hover:border-ktip-ocean-400 transition-colors">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 bg-ktip-ocean-50 rounded-lg flex items-center justify-center shrink-0">
+          <Icon size={24} className="text-ktip-ocean-500" />
         </div>
-        <div class="flex-1 min-w-0">
-          <h3 class="text-lg font-display font-bold text-ktip-sand-900 mb-1">
-            {props.board.name}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-display font-bold text-ktip-sand-900 mb-1">
+            {board.name}
           </h3>
-          <p class="text-sm text-gray-600 line-clamp-2">
-            {props.board.description}
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {board.description}
           </p>
         </div>
       </div>
-    </A>
+    </Link>
   )
 }

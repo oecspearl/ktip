@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Whiteboard } from '../types'
 
 export function useWhiteboards(filters?: { search?: string }) {
@@ -27,10 +28,12 @@ export function useWhiteboards(filters?: { search?: string }) {
     return (data as any[]) || []
   }
 
-  const filterKey = () => JSON.stringify({ search: filters?.search })
-  const [whiteboards, { refetch }] = createResource(filterKey, fetchWhiteboards)
+  const query = useQuery({
+    queryKey: keys.list('whiteboards', { search: filters?.search }),
+    queryFn: fetchWhiteboards,
+  })
 
-  return { whiteboards, refetch }
+  return { whiteboards: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useSharedWhiteboards() {
@@ -61,12 +64,15 @@ export function useSharedWhiteboards() {
     }))
   }
 
-  const [whiteboards, { refetch }] = createResource(fetchShared)
+  const query = useQuery({
+    queryKey: keys.sub('whiteboards', 'shared'),
+    queryFn: fetchShared,
+  })
 
-  return { whiteboards, refetch }
+  return { whiteboards: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useWhiteboardPermission(id: () => string | undefined) {
+export function useWhiteboardPermission(id: string | undefined) {
   const fetchPermission = async (whiteboardId: string): Promise<string | null> => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
@@ -82,12 +88,16 @@ export function useWhiteboardPermission(id: () => string | undefined) {
     return data.permission
   }
 
-  const [permission] = createResource(id, fetchPermission)
+  const query = useQuery({
+    queryKey: keys.sub('whiteboards', 'permission', id),
+    queryFn: () => fetchPermission(id as string),
+    enabled: !!id,
+  })
 
-  return { permission }
+  return { permission: query.data }
 }
 
-export function useWhiteboard(id: () => string | undefined) {
+export function useWhiteboard(id: string | undefined) {
   const fetchWhiteboard = async (whiteboardId: string): Promise<Whiteboard | null> => {
     const { data, error } = await (supabase
       .from('whiteboards') as any)
@@ -99,23 +109,20 @@ export function useWhiteboard(id: () => string | undefined) {
     return data as any
   }
 
-  const [whiteboard, { refetch }] = createResource(id, fetchWhiteboard)
+  const query = useQuery({
+    queryKey: keys.detail('whiteboards', id),
+    queryFn: () => fetchWhiteboard(id as string),
+    enabled: !!id,
+  })
 
-  return { whiteboard, refetch }
+  return { whiteboard: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateWhiteboard() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createWhiteboard = async (wbData: {
-    title?: string
-    snapshot?: Record<string, any>
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (wbData: { title?: string; snapshot?: Record<string, any> }) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -131,29 +138,26 @@ export function useCreateWhiteboard() {
 
       if (error) throw error
       return data as any as Whiteboard
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('whiteboards') })
+    },
+  })
 
-  return { createWhiteboard, loading, error }
+  return { createWhiteboard: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateWhiteboard() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateWhiteboard = async (
-    whiteboardId: string,
-    updates: { title?: string; snapshot?: Record<string, any> }
-  ) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      whiteboardId,
+      updates,
+    }: {
+      whiteboardId: string
+      updates: { title?: string; snapshot?: Record<string, any> }
+    }) => {
       const { data, error } = await (supabase
         .from('whiteboards') as any)
         .update({
@@ -166,39 +170,36 @@ export function useUpdateWhiteboard() {
 
       if (error) throw error
       return data as any as Whiteboard
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('whiteboards') })
+    },
+  })
 
-  return { updateWhiteboard, loading, error }
+  const updateWhiteboard = (
+    whiteboardId: string,
+    updates: { title?: string; snapshot?: Record<string, any> }
+  ) => mutation.mutateAsync({ whiteboardId, updates })
+
+  return { updateWhiteboard, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteWhiteboard() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteWhiteboard = async (whiteboardId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (whiteboardId: string) => {
       const { error } = await (supabase
         .from('whiteboards') as any)
         .delete()
         .eq('id', whiteboardId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('whiteboards') })
+    },
+  })
 
-  return { deleteWhiteboard, loading, error }
+  return { deleteWhiteboard: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

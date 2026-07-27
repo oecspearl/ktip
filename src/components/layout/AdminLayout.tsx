@@ -1,8 +1,7 @@
-import { type ParentComponent, For } from 'solid-js'
-import { A, useLocation } from '@solidjs/router'
-import { MainLayout } from './MainLayout'
+import { Link, Outlet, useLocation } from 'react-router'
 import {
   LayoutDashboard,
+  FolderKanban,
   Calendar,
   Users,
   DollarSign,
@@ -12,11 +11,12 @@ import {
   ClipboardList,
   BarChart3,
   ClipboardCheck,
-} from 'lucide-solid'
+} from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
   { href: '/admin/events', label: 'Events', icon: Calendar },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/grants', label: 'Grants', icon: DollarSign },
@@ -28,7 +28,7 @@ const adminNavItems = [
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck },
 ]
 
-export const AdminLayout: ParentComponent = (props) => {
+export function AdminLayout() {
   const location = useLocation()
 
   const isActive = (href: string, exact?: boolean) => {
@@ -37,61 +37,57 @@ export const AdminLayout: ParentComponent = (props) => {
   }
 
   return (
-    <MainLayout>
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar — desktop */}
-          <div class="hidden lg:block lg:w-56 shrink-0">
-            <div class="bg-gray-900 rounded-2xl p-2 sticky top-24">
-              <nav class="space-y-1">
-                <For each={adminNavItems}>
-                  {(item) => (
-                    <A
-                      href={item.href}
-                      class={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all',
-                        isActive(item.href, item.exact)
-                          ? 'bg-gray-800 text-white border-l-2 border-ktip-ocean-500'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      )}
-                    >
-                      <item.icon size={20} />
-                      <span class="font-medium text-sm">{item.label}</span>
-                    </A>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar — desktop */}
+        <div className="hidden lg:block lg:w-56 shrink-0">
+          <div className="bg-gray-900 rounded-2xl p-2 sticky top-24">
+            <nav className="space-y-1">
+              {adminNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all',
+                    isActive(item.href, item.exact)
+                      ? 'bg-gray-800 text-white border-l-2 border-ktip-ocean-500'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   )}
-                </For>
-              </nav>
-            </div>
-          </div>
-
-          {/* Mobile nav */}
-          <div class="lg:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <nav class="flex gap-1 min-w-max bg-gray-900 rounded-2xl p-2">
-              <For each={adminNavItems}>
-                {(item) => (
-                  <A
-                    href={item.href}
-                    class={cn(
-                      'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors',
-                      isActive(item.href, item.exact)
-                        ? 'bg-gray-800 text-white border-l-2 border-ktip-ocean-500'
-                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                    )}
-                  >
-                    <item.icon size={16} />
-                    {item.label}
-                  </A>
-                )}
-              </For>
+                >
+                  <item.icon size={20} />
+                  <span className="font-medium text-sm">{item.label}</span>
+                </Link>
+              ))}
             </nav>
           </div>
+        </div>
 
-          {/* Content */}
-          <div class="flex-1 min-w-0">
-            {props.children}
-          </div>
+        {/* Mobile nav */}
+        <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <nav className="flex gap-1 min-w-max bg-gray-900 rounded-2xl p-2">
+            {adminNavItems.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors',
+                  isActive(item.href, item.exact)
+                    ? 'bg-gray-800 text-white border-l-2 border-ktip-ocean-500'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                )}
+              >
+                <item.icon size={16} />
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <Outlet />
         </div>
       </div>
-    </MainLayout>
+    </div>
   )
 }

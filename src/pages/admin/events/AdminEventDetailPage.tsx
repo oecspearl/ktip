@@ -1,12 +1,11 @@
-import { createSignal, Show, Suspense } from 'solid-js'
-import { useParams, A } from '@solidjs/router'
+import { useState } from 'react'
+import { useParams, Link } from 'react-router'
 import { useEvent } from '../../../hooks/useEvents'
 import { useEventStatusUpdate } from '../../../hooks/useAdminEvents'
 import { useToast } from '../../../contexts/ToastContext'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
-import { AdminLayout } from '../../../components/layout/AdminLayout'
 import {
   ArrowLeft,
   Calendar,
@@ -25,7 +24,7 @@ import {
   LayoutList,
   Clock,
   Mic,
-} from 'lucide-solid'
+} from 'lucide-react'
 import {
   EVENT_TYPE_LABELS,
   EVENT_TYPE_COLORS,
@@ -46,23 +45,24 @@ import AdminEventSpeakersTab from './AdminEventSpeakersTab'
 
 type TabId = 'overview' | 'registrations' | 'form' | 'pages' | 'schedule' | 'speakers' | 'updates' | 'articles'
 
-function AdminEventDetailContent() {
+export default function AdminEventDetailPage() {
   const params = useParams<{ id: string }>()
+  const id = params.id
   const toast = useToast()
-  const [activeTab, setActiveTab] = createSignal<TabId>('overview')
-  const [confirmAction, setConfirmAction] = createSignal<{
+  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const [confirmAction, setConfirmAction] = useState<{
     status: EventStatus
   } | null>(null)
 
-  const { event, refetch } = useEvent(() => params.id)
+  const { event, loading: eventLoading, refetch } = useEvent(id)
   const { updateStatus, loading: statusLoading } = useEventStatusUpdate()
 
   const handleStatusChange = async () => {
-    const action = confirmAction()
-    if (!action || !params.id) return
+    const action = confirmAction
+    if (!action || !id) return
 
     try {
-      await updateStatus(params.id, action.status)
+      await updateStatus(id, action.status)
       toast.success(`Event ${EVENT_STATUS_LABELS[action.status].toLowerCase()} successfully`)
       setConfirmAction(null)
       refetch()
@@ -82,260 +82,249 @@ function AdminEventDetailContent() {
     { id: 'articles', label: 'Articles', icon: FileText },
   ]
 
+  if (eventLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-ktip-ocean-500 border-t-transparent mx-auto" />
+          <p className="mt-4 text-gray-600">Loading event...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!event) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-xl font-semibold text-gray-700">Event not found</h2>
+        <Link to="/admin/events" className="text-ktip-ocean-600 hover:underline mt-2 inline-block">
+          Back to events
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <>
-      <Suspense
-        fallback={
-          <div class="flex items-center justify-center py-20">
-            <div class="text-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-2 border-ktip-ocean-500 border-t-transparent mx-auto" />
-              <p class="mt-4 text-gray-600">Loading event...</p>
+      {/* Back link */}
+      <Link
+        to="/admin/events"
+        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-ktip-ocean-600 mb-6 transition-colors"
+      >
+        <ArrowLeft size={16} />
+        Back to Events
+      </Link>
+
+      {/* Dark Header Band */}
+      <div className="bg-gray-800 rounded-lg p-6 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl font-bold font-display text-white">
+                {event.title}
+              </h1>
+              <Badge className={EVENT_STATUS_COLORS[event.status] || ''}>
+                {EVENT_STATUS_LABELS[event.status] || event.status}
+              </Badge>
+              <Badge className={EVENT_TYPE_COLORS[event.event_type] || ''}>
+                {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-400">
+              <span className="flex items-center gap-1">
+                <Calendar size={14} />
+                {format(new Date(event.start_date), 'MMM d, yyyy h:mm a')}
+              </span>
+              {event.location && (
+                <span className="flex items-center gap-1">
+                  <MapPin size={14} />
+                  {event.location}
+                </span>
+              )}
+              {event.is_virtual && (
+                <span className="flex items-center gap-1">
+                  <Globe size={14} />
+                  Virtual
+                </span>
+              )}
+              {event.capacity && (
+                <span className="flex items-center gap-1">
+                  <Users size={14} />
+                  Capacity: {event.capacity}
+                </span>
+              )}
             </div>
           </div>
-        }
-      >
-        <Show
-          when={event()}
-          fallback={
-            <div class="text-center py-20">
-              <h2 class="text-xl font-semibold text-gray-700">Event not found</h2>
-              <A href="/admin/events" class="text-ktip-ocean-600 hover:underline mt-2 inline-block">
-                Back to events
-              </A>
-            </div>
-          }
-        >
-          {(evt) => (
-            <>
-              {/* Back link */}
-              <A
-                href="/admin/events"
-                class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-ktip-ocean-600 mb-6 transition-colors"
+
+          <div className="flex items-center gap-2">
+            <Link to={`/events/${event.id}/edit`}>
+              <Button variant="outline" size="sm" icon={<Edit size={14} />}>
+                Edit
+              </Button>
+            </Link>
+            {event.status === 'draft' && (
+              <Button
+                size="sm"
+                icon={<Send size={14} />}
+                onClick={() => setConfirmAction({ status: 'published' })}
               >
-                <ArrowLeft size={16} />
-                Back to Events
-              </A>
+                Publish
+              </Button>
+            )}
+            {event.status === 'published' && (
+              <>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={<XCircle size={14} />}
+                  onClick={() => setConfirmAction({ status: 'cancelled' })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<CheckCircle size={14} />}
+                  onClick={() => setConfirmAction({ status: 'completed' })}
+                >
+                  Complete
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
-              {/* Dark Header Band */}
-              <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div>
-                    <div class="flex items-center gap-3 mb-2">
-                      <h1 class="text-2xl font-bold font-display text-white">
-                        {evt().title}
-                      </h1>
-                      <Badge class={EVENT_STATUS_COLORS[evt().status] || ''}>
-                        {EVENT_STATUS_LABELS[evt().status] || evt().status}
-                      </Badge>
-                      <Badge class={EVENT_TYPE_COLORS[evt().event_type] || ''}>
-                        {EVENT_TYPE_LABELS[evt().event_type] || evt().event_type}
-                      </Badge>
-                    </div>
-                    <div class="flex items-center gap-4 text-sm text-gray-400">
-                      <span class="flex items-center gap-1">
-                        <Calendar size={14} />
-                        {format(new Date(evt().start_date), 'MMM d, yyyy h:mm a')}
-                      </span>
-                      <Show when={evt().location}>
-                        <span class="flex items-center gap-1">
-                          <MapPin size={14} />
-                          {evt().location}
-                        </span>
-                      </Show>
-                      <Show when={evt().is_virtual}>
-                        <span class="flex items-center gap-1">
-                          <Globe size={14} />
-                          Virtual
-                        </span>
-                      </Show>
-                      <Show when={evt().capacity}>
-                        <span class="flex items-center gap-1">
-                          <Users size={14} />
-                          Capacity: {evt().capacity}
-                        </span>
-                      </Show>
-                    </div>
-                  </div>
+      {/* Flat Tab Navigation */}
+      <div className="relative border-b border-gray-200 mb-6" role="tablist" aria-label="Event management">
+        <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
+          {tabs.map((tab) => (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
+                activeTab === tab.id
+                  ? 'border-ktip-ocean-500 text-ktip-ocean-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              )}
+              key={tab.id}
+            >
+              <tab.icon size={16} />
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-                  <div class="flex items-center gap-2">
-                    <A href={`/events/${evt().id}/edit`}>
-                      <Button variant="outline" size="sm" icon={<Edit size={14} />}>
-                        Edit
-                      </Button>
-                    </A>
-                    <Show when={evt().status === 'draft'}>
-                      <Button
-                        size="sm"
-                        icon={<Send size={14} />}
-                        onClick={() => setConfirmAction({ status: 'published' })}
-                      >
-                        Publish
-                      </Button>
-                    </Show>
-                    <Show when={evt().status === 'published'}>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        icon={<XCircle size={14} />}
-                        onClick={() => setConfirmAction({ status: 'cancelled' })}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        icon={<CheckCircle size={14} />}
-                        onClick={() => setConfirmAction({ status: 'completed' })}
-                      >
-                        Complete
-                      </Button>
-                    </Show>
-                  </div>
-                </div>
-              </div>
-
-              {/* Flat Tab Navigation */}
-              <div class="relative border-b border-gray-200 mb-6" role="tablist" aria-label="Event management">
-                <nav class="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
-                  {tabs.map((tab) => (
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={activeTab() === tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      class={cn(
-                        'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
-                        activeTab() === tab.id
-                          ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      )}
-                    >
-                      <tab.icon size={16} />
-                      {tab.label}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-
-              {/* Tab Content */}
-              <Show when={activeTab() === 'overview'}>
-                <div class="animate-tab-enter border border-gray-200 rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
-                  <Show when={evt().description}>
-                    <div class="prose prose-sm max-w-none">
-                      <p class="text-gray-700 whitespace-pre-wrap">{evt().description}</p>
-                    </div>
-                  </Show>
-                  <Show when={!evt().description}>
-                    <p class="text-gray-400 italic">No description provided</p>
-                  </Show>
-
-                  <div class="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Organizer</p>
-                      <p class="text-sm font-medium text-gray-900">{evt().organizer?.display_name || 'Unknown'}</p>
-                    </div>
-                    <div>
-                      <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Created</p>
-                      <p class="text-sm text-gray-700">{format(new Date(evt().created_at), 'MMM d, yyyy')}</p>
-                    </div>
-                    <Show when={evt().end_date}>
-                      <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">End Date</p>
-                        <p class="text-sm text-gray-700">{format(new Date(evt().end_date!), 'MMM d, yyyy h:mm a')}</p>
-                      </div>
-                    </Show>
-                  </div>
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'registrations'}>
-                <div class="animate-tab-enter">
-                  <AdminEventRegistrationsTab
-                    eventId={params.id}
-                    eventTitle={evt().title}
-                    registrationFields={evt().registration_fields || []}
-                  />
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'form'}>
-                <div class="animate-tab-enter">
-                  <AdminEventFormBuilderTab eventId={params.id} />
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'pages'}>
-                <div class="animate-tab-enter">
-                  <AdminEventPageBuilderTab eventId={params.id} />
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'schedule'}>
-                <div class="animate-tab-enter">
-                  <AdminEventScheduleTab eventId={params.id} />
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'speakers'}>
-                <div class="animate-tab-enter">
-                  <AdminEventSpeakersTab eventId={params.id} />
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'updates'}>
-                <div class="animate-tab-enter">
-                  <AdminEventUpdatesTab eventId={params.id} />
-                </div>
-              </Show>
-
-              <Show when={activeTab() === 'articles'}>
-                <div class="animate-tab-enter">
-                  <AdminEventArticlesTab eventId={params.id} />
-                </div>
-              </Show>
-
-              {/* Confirm Modal */}
-              <ConfirmModal
-                open={!!confirmAction()}
-                title={
-                  confirmAction()?.status === 'cancelled'
-                    ? 'Cancel Event'
-                    : confirmAction()?.status === 'completed'
-                    ? 'Complete Event'
-                    : 'Publish Event'
-                }
-                message={
-                  confirmAction()?.status === 'cancelled'
-                    ? `Are you sure you want to cancel "${evt().title}"? This will be visible to all users.`
-                    : confirmAction()?.status === 'completed'
-                    ? `Mark "${evt().title}" as completed?`
-                    : `Publish "${evt().title}"? It will become visible to all users.`
-                }
-                confirmLabel={
-                  confirmAction()?.status === 'cancelled'
-                    ? 'Cancel Event'
-                    : confirmAction()?.status === 'completed'
-                    ? 'Mark Complete'
-                    : 'Publish'
-                }
-                confirmVariant={confirmAction()?.status === 'cancelled' ? 'danger' : 'primary'}
-                loading={statusLoading()}
-                onConfirm={handleStatusChange}
-                onCancel={() => setConfirmAction(null)}
-              />
-            </>
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="animate-tab-enter border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
+          {event.description ? (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-gray-700 whitespace-pre-wrap">{event.description}</p>
+            </div>
+          ) : (
+            <p className="text-gray-400 italic">No description provided</p>
           )}
-        </Show>
-      </Suspense>
-    </>
-  )
-}
 
-export default function AdminEventDetailPage() {
-  return (
-    <AdminLayout>
-      <AdminEventDetailContent />
-    </AdminLayout>
+          <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Organizer</p>
+              <p className="text-sm font-medium text-gray-900">{event.organizer?.display_name || 'Unknown'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Created</p>
+              <p className="text-sm text-gray-700">{format(new Date(event.created_at), 'MMM d, yyyy')}</p>
+            </div>
+            {event.end_date && (
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">End Date</p>
+                <p className="text-sm text-gray-700">{format(new Date(event.end_date), 'MMM d, yyyy h:mm a')}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'registrations' && (
+        <div className="animate-tab-enter">
+          <AdminEventRegistrationsTab
+            eventId={event.id}
+            eventTitle={event.title}
+            registrationFields={event.registration_fields || []}
+          />
+        </div>
+      )}
+
+      {activeTab === 'form' && (
+        <div className="animate-tab-enter">
+          <AdminEventFormBuilderTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'pages' && (
+        <div className="animate-tab-enter">
+          <AdminEventPageBuilderTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'schedule' && (
+        <div className="animate-tab-enter">
+          <AdminEventScheduleTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'speakers' && (
+        <div className="animate-tab-enter">
+          <AdminEventSpeakersTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'updates' && (
+        <div className="animate-tab-enter">
+          <AdminEventUpdatesTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'articles' && (
+        <div className="animate-tab-enter">
+          <AdminEventArticlesTab eventId={event.id} />
+        </div>
+      )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        open={!!confirmAction}
+        title={
+          confirmAction?.status === 'cancelled'
+            ? 'Cancel Event'
+            : confirmAction?.status === 'completed'
+            ? 'Complete Event'
+            : 'Publish Event'
+        }
+        message={
+          confirmAction?.status === 'cancelled'
+            ? `Are you sure you want to cancel "${event.title}"? This will be visible to all users.`
+            : confirmAction?.status === 'completed'
+            ? `Mark "${event.title}" as completed?`
+            : `Publish "${event.title}"? It will become visible to all users.`
+        }
+        confirmLabel={
+          confirmAction?.status === 'cancelled'
+            ? 'Cancel Event'
+            : confirmAction?.status === 'completed'
+            ? 'Mark Complete'
+            : 'Publish'
+        }
+        confirmVariant={confirmAction?.status === 'cancelled' ? 'danger' : 'primary'}
+        loading={statusLoading}
+        onConfirm={handleStatusChange}
+        onCancel={() => setConfirmAction(null)}
+      />
+    </>
   )
 }

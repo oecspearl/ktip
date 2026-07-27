@@ -1,8 +1,9 @@
-import { createResource } from 'solid-js'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { Profile, Project, Event } from '../types'
 
-export function useProfile(id: () => string | undefined) {
+export function useProfile(id: string | undefined) {
   const fetchProfile = async (profileId: string): Promise<Profile | null> => {
     const { data, error } = await supabase
       .from('profiles')
@@ -13,11 +14,16 @@ export function useProfile(id: () => string | undefined) {
     return data as Profile
   }
 
-  const [profile, { refetch }] = createResource(id, fetchProfile)
-  return { profile, refetch }
+  const query = useQuery({
+    queryKey: keys.detail('profiles', id),
+    queryFn: () => fetchProfile(id as string),
+    enabled: !!id,
+  })
+
+  return { profile: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useUserProjects(userId: () => string | undefined) {
+export function useUserProjects(userId: string | undefined) {
   const fetchProjects = async (uid: string): Promise<Project[]> => {
     const { data, error } = await supabase
       .from('projects')
@@ -29,11 +35,16 @@ export function useUserProjects(userId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [projects, { refetch }] = createResource(userId, fetchProjects)
-  return { projects, refetch }
+  const query = useQuery({
+    queryKey: keys.sub('profiles', 'projects', userId),
+    queryFn: () => fetchProjects(userId as string),
+    enabled: !!userId,
+  })
+
+  return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useUserEvents(userId: () => string | undefined) {
+export function useUserEvents(userId: string | undefined) {
   const fetchEvents = async (uid: string): Promise<Event[]> => {
     const { data, error } = await supabase
       .from('events')
@@ -44,6 +55,11 @@ export function useUserEvents(userId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [events, { refetch }] = createResource(userId, fetchEvents)
-  return { events, refetch }
+  const query = useQuery({
+    queryKey: keys.sub('profiles', 'events', userId),
+    queryFn: () => fetchEvents(userId as string),
+    enabled: !!userId,
+  })
+
+  return { events: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }

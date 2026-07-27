@@ -1,8 +1,9 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { EventPageSection } from '../types'
 
-export function useEventPageSections(eventId: () => string | undefined) {
+export function useEventPageSections(eventId: string | undefined) {
   const fetchSections = async (id: string): Promise<EventPageSection[]> => {
     const { data, error } = await supabase
       .from('event_page_sections')
@@ -14,12 +15,16 @@ export function useEventPageSections(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [sections, { refetch }] = createResource(eventId, fetchSections)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'sections', eventId),
+    queryFn: () => fetchSections(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { sections, refetch }
+  return { sections: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function usePublicEventSections(eventId: () => string | undefined) {
+export function usePublicEventSections(eventId: string | undefined) {
   const fetchSections = async (id: string): Promise<EventPageSection[]> => {
     const { data, error } = await supabase
       .from('event_page_sections')
@@ -32,23 +37,26 @@ export function usePublicEventSections(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [sections] = createResource(eventId, fetchSections)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'public-sections', eventId),
+    queryFn: () => fetchSections(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { sections }
+  return { sections: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateSection() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const createSection = async (data: {
-    event_id: string
-    section_type: string
-    title: string
-    content?: Record<string, any>
-    sort_order?: number
-  }) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      event_id: string
+      section_type: string
+      title: string
+      content?: Record<string, any>
+      sort_order?: number
+    }) => {
       const { data: result, error } = await supabase
         .from('event_page_sections')
         .insert({
@@ -63,23 +71,27 @@ export function useCreateSection() {
 
       if (error) throw error
       return result
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'sections', variables.event_id) })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'public-sections', variables.event_id) })
+    },
+  })
 
-  return { createSection, loading }
+  return { createSection: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateSection() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const updateSection = async (
-    sectionId: string,
-    updates: Partial<Pick<EventPageSection, 'title' | 'content' | 'sort_order' | 'is_visible'>>
-  ) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      sectionId,
+      updates,
+    }: {
+      sectionId: string
+      updates: Partial<Pick<EventPageSection, 'title' | 'content' | 'sort_order' | 'is_visible'>>
+    }) => {
       const { data, error } = await supabase
         .from('event_page_sections')
         .update({ ...updates, updated_at: new Date().toISOString() } as any)
@@ -89,40 +101,47 @@ export function useUpdateSection() {
 
       if (error) throw error
       return data
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'sections') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'public-sections') })
+    },
+  })
 
-  return { updateSection, loading }
+  const updateSection = (
+    sectionId: string,
+    updates: Partial<Pick<EventPageSection, 'title' | 'content' | 'sort_order' | 'is_visible'>>
+  ) => mutation.mutateAsync({ sectionId, updates })
+
+  return { updateSection, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteSection() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const deleteSection = async (sectionId: string) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (sectionId: string) => {
       const { error } = await supabase
         .from('event_page_sections')
         .delete()
         .eq('id', sectionId)
 
       if (error) throw error
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'sections') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'public-sections') })
+    },
+  })
 
-  return { deleteSection, loading }
+  return { deleteSection: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useReorderSections() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const reorderSections = async (sectionIds: string[]) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (sectionIds: string[]) => {
       const updates = sectionIds.map((id, index) =>
         supabase
           .from('event_page_sections')
@@ -130,10 +149,12 @@ export function useReorderSections() {
           .eq('id', id)
       )
       await Promise.all(updates)
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'sections') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'public-sections') })
+    },
+  })
 
-  return { reorderSections, loading }
+  return { reorderSections: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

@@ -10,31 +10,28 @@ const LANGUAGE_LABELS: Record<Language, string> = {
 }
 
 interface StatusBarProps {
-  metrics: () => EditorMetrics
-  language: () => Language
-  darkMode: () => boolean
+  metrics: EditorMetrics
+  language: Language
+  darkMode: boolean
 }
 
-export function StatusBar(props: StatusBarProps) {
-  const dark = () => props.darkMode()
-  const m = () => props.metrics()
-
+export function StatusBar({ metrics, language, darkMode }: StatusBarProps) {
   return (
     <div
-      class={`flex items-center justify-between px-4 py-1.5 text-xs font-mono border-t ${
-        dark()
+      className={`flex items-center justify-between px-4 py-1.5 text-xs font-mono border-t ${
+        darkMode
           ? 'bg-[#21252b] text-gray-500 border-gray-700'
           : 'bg-ktip-sand-50/50 text-ktip-sand-500 border-ktip-sand-200'
       }`}
     >
-      <div class="flex items-center gap-4">
-        <span>Ln {m().cursorLine}, Col {m().cursorCol}</span>
+      <div className="flex items-center gap-4">
+        <span>Ln {metrics.cursorLine}, Col {metrics.cursorCol}</span>
       </div>
-      <div class="flex items-center gap-4">
-        <span>{m().lineCount} lines</span>
-        <span>{m().charCount} chars</span>
-        <span class={dark() ? 'text-gray-400' : 'text-ktip-sand-600'}>
-          {LANGUAGE_LABELS[props.language()]}
+      <div className="flex items-center gap-4">
+        <span>{metrics.lineCount} lines</span>
+        <span>{metrics.charCount} chars</span>
+        <span className={darkMode ? 'text-gray-400' : 'text-ktip-sand-600'}>
+          {LANGUAGE_LABELS[language]}
         </span>
       </div>
     </div>

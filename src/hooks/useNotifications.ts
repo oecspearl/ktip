@@ -1,79 +1,73 @@
-import { createSignal, createEffect, onCleanup } from 'solid-js'
+import { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { Notification } from '../types'
 
-export function useNotifications(userId: () => string | undefined) {
-  const [notifications, setNotifications] = createSignal<Notification[]>([])
-  const [unreadCount, setUnreadCount] = createSignal(0)
-  const [loading, setLoading] = createSignal(false)
+async function fetchNotifications(uid: string): Promise<Notification[]> {
+  try {
+    const { data, error } = await (supabase.from('notifications') as any)
+      .select('*')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(20)
 
-  const fetchNotifications = async (uid: string) => {
-    setLoading(true)
-    try {
-      const { data, error } = await (supabase
-        .from('notifications') as any)
-        .select('*')
-        .eq('user_id', uid)
-        .order('created_at', { ascending: false })
-        .limit(20)
-
-      if (error) throw error
-      const items = (data as Notification[]) || []
-      setNotifications(items)
-      setUnreadCount(items.filter((n) => !n.is_read).length)
-    } catch {
-      // Table may not exist yet — fail silently
-      setNotifications([])
-      setUnreadCount(0)
-    } finally {
-      setLoading(false)
-    }
+    if (error) throw error
+    return (data as Notification[]) || []
+  } catch {
+    // Table may not exist yet — fail silently
+    return []
   }
+}
 
-  // Fetch on userId change + subscribe to realtime inserts
-  createEffect(() => {
-    const uid = userId()
-    if (!uid) {
-      setNotifications([])
-      setUnreadCount(0)
-      return
-    }
+export function useNotifications(userId: string | undefined) {
+  const queryClient = useQueryClient()
 
-    fetchNotifications(uid)
+  const queryKey = ['notifications', userId]
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey,
+    queryFn: () => fetchNotifications(userId as string),
+    enabled: !!userId,
+  })
+
+  const notifications = data || []
+  const unreadCount = notifications.filter((n) => !n.is_read).length
+
+  // Subscribe to realtime inserts
+  useEffect(() => {
+    if (!userId) return
 
     const channel = supabase
-      .channel(`notifications:${uid}`)
+      .channel(`notifications:${userId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${uid}`,
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           const newNotification = payload.new as Notification
-          setNotifications((prev) => [newNotification, ...prev].slice(0, 20))
-          setUnreadCount((prev) => prev + 1)
+          queryClient.setQueryData<Notification[]>(queryKey, (prev) =>
+            [newNotification, ...(prev || [])].slice(0, 20)
+          )
         }
       )
       .subscribe()
 
-    onCleanup(() => {
+    return () => {
       supabase.removeChannel(channel)
-    })
-  })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
 
-  return { notifications, unreadCount, loading, refetch: () => {
-    const uid = userId()
-    if (uid) fetchNotifications(uid)
-  }}
+  return { notifications, unreadCount, loading: isLoading, refetch }
 }
 
 export function useMarkNotificationRead() {
   const markRead = async (notificationId: string) => {
-    const { error } = await (supabase
-      .from('notifications') as any)
+    const { error } = await (supabase.from('notifications') as any)
       .update({ is_read: true })
       .eq('id', notificationId)
 
@@ -85,8 +79,7 @@ export function useMarkNotificationRead() {
 
 export function useMarkAllRead() {
   const markAllRead = async (userId: string) => {
-    const { error } = await (supabase
-      .from('notifications') as any)
+    const { error } = await (supabase.from('notifications') as any)
       .update({ is_read: true })
       .eq('user_id', userId)
       .eq('is_read', false)

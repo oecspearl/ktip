@@ -1,8 +1,9 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { EventScheduleItem } from '../types'
 
-export function useEventSchedule(eventId: () => string | undefined) {
+export function useEventSchedule(eventId: string | undefined) {
   const fetchSchedule = async (id: string): Promise<EventScheduleItem[]> => {
     const { data, error } = await supabase
       .from('event_schedule')
@@ -17,26 +18,29 @@ export function useEventSchedule(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [schedule, { refetch }] = createResource(eventId, fetchSchedule)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'schedule', eventId),
+    queryFn: () => fetchSchedule(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { schedule, refetch }
+  return { schedule: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateScheduleItem() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const createItem = async (data: {
-    event_id: string
-    title: string
-    description?: string
-    start_time: string
-    end_time?: string
-    location?: string
-    speaker_id?: string
-    schedule_type: string
-  }) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      event_id: string
+      title: string
+      description?: string
+      start_time: string
+      end_time?: string
+      location?: string
+      speaker_id?: string
+      schedule_type: string
+    }) => {
       const insertData: any = {
         event_id: data.event_id,
         title: data.title,
@@ -59,20 +63,26 @@ export function useCreateScheduleItem() {
 
       if (error) throw error
       return result
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'schedule', variables.event_id) })
+    },
+  })
 
-  return { createItem, loading }
+  return { createItem: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateScheduleItem() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const updateItem = async (itemId: string, updates: Record<string, any>) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      itemId,
+      updates,
+    }: {
+      itemId: string
+      updates: Record<string, any>
+    }) => {
       const { data, error } = await supabase
         .from('event_schedule')
         .update(updates as any)
@@ -85,30 +95,34 @@ export function useUpdateScheduleItem() {
 
       if (error) throw error
       return data
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'schedule') })
+    },
+  })
 
-  return { updateItem, loading }
+  const updateItem = (itemId: string, updates: Record<string, any>) =>
+    mutation.mutateAsync({ itemId, updates })
+
+  return { updateItem, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteScheduleItem() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const deleteItem = async (itemId: string) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (itemId: string) => {
       const { error } = await supabase
         .from('event_schedule')
         .delete()
         .eq('id', itemId)
 
       if (error) throw error
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'schedule') })
+    },
+  })
 
-  return { deleteItem, loading }
+  return { deleteItem: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Document } from '../types'
 
 export function useDocuments(filters?: { search?: string }) {
@@ -28,10 +29,12 @@ export function useDocuments(filters?: { search?: string }) {
     return (data as any[]) || []
   }
 
-  const filterKey = () => JSON.stringify({ search: filters?.search })
-  const [documents, { refetch }] = createResource(filterKey, fetchDocuments)
+  const query = useQuery({
+    queryKey: keys.list('documents', { search: filters?.search }),
+    queryFn: fetchDocuments,
+  })
 
-  return { documents, refetch }
+  return { documents: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useSharedDocuments() {
@@ -58,12 +61,15 @@ export function useSharedDocuments() {
     return (data as any[]) || []
   }
 
-  const [documents, { refetch }] = createResource(fetchShared)
+  const query = useQuery({
+    queryKey: keys.sub('documents', 'shared'),
+    queryFn: fetchShared,
+  })
 
-  return { documents, refetch }
+  return { documents: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useDocument(id: () => string | undefined) {
+export function useDocument(id: string | undefined) {
   const fetchDocument = async (documentId: string): Promise<Document | null> => {
     const { data, error } = await supabase
       .from('documents')
@@ -75,23 +81,20 @@ export function useDocument(id: () => string | undefined) {
     return data as any
   }
 
-  const [document, { refetch }] = createResource(id, fetchDocument)
+  const query = useQuery({
+    queryKey: keys.detail('documents', id),
+    queryFn: () => fetchDocument(id as string),
+    enabled: !!id,
+  })
 
-  return { document, refetch }
+  return { document: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateDocument() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createDocument = async (docData: {
-    title?: string
-    content?: string
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (docData: { title?: string; content?: string }) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -107,29 +110,26 @@ export function useCreateDocument() {
 
       if (error) throw error
       return data as any as Document
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('documents') })
+    },
+  })
 
-  return { createDocument, loading, error }
+  return { createDocument: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateDocument() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateDocument = async (
-    documentId: string,
-    updates: { title?: string; content?: string }
-  ) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      documentId,
+      updates,
+    }: {
+      documentId: string
+      updates: { title?: string; content?: string }
+    }) => {
       const { data, error } = await (supabase
         .from('documents') as any)
         .update({
@@ -142,39 +142,34 @@ export function useUpdateDocument() {
 
       if (error) throw error
       return data as any as Document
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('documents') })
+    },
+  })
 
-  return { updateDocument, loading, error }
+  const updateDocument = (documentId: string, updates: { title?: string; content?: string }) =>
+    mutation.mutateAsync({ documentId, updates })
+
+  return { updateDocument, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteDocument() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteDocument = async (documentId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (documentId: string) => {
       const { error } = await supabase
         .from('documents')
         .delete()
         .eq('id', documentId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('documents') })
+    },
+  })
 
-  return { deleteDocument, loading, error }
+  return { deleteDocument: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

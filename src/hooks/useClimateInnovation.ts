@@ -1,5 +1,6 @@
-import { createResource } from 'solid-js'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { Project, Event, Grant } from '../types'
 
 interface ClimateHighlights {
@@ -9,50 +10,53 @@ interface ClimateHighlights {
   totalCount: number
 }
 
-export function useClimateHighlights() {
-  const fetchHighlights = async (): Promise<ClimateHighlights> => {
-    // Gracefully handle missing is_climate_action columns (migration not yet applied)
-    const [projectsRes, eventsRes, grantsRes] = await Promise.all([
-      supabase
-        .from('projects')
-        .select('*, owner:profiles(*)')
-        .eq('is_climate_action', true)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(3)
-        .then((r) => r, () => ({ data: null, error: true })),
-      supabase
-        .from('events')
-        .select('*, organizer:profiles(*)')
-        .eq('is_climate_action', true)
-        .neq('status', 'draft' as any)
-        .order('start_date', { ascending: true })
-        .limit(3)
-        .then((r) => r, () => ({ data: null, error: true })),
-      supabase
-        .from('grants')
-        .select('*')
-        .eq('is_climate_action', true)
-        .eq('is_active', true)
-        .order('deadline', { ascending: true, nullsFirst: false })
-        .limit(3)
-        .then((r) => r, () => ({ data: null, error: true })),
-    ])
+async function fetchHighlights(): Promise<ClimateHighlights> {
+  // Gracefully handle missing is_climate_action columns (migration not yet applied)
+  const [projectsRes, eventsRes, grantsRes] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('*, owner:profiles(*)')
+      .eq('is_climate_action', true)
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then((r) => r, () => ({ data: null, error: true })),
+    supabase
+      .from('events')
+      .select('*, organizer:profiles(*)')
+      .eq('is_climate_action', true)
+      .neq('status', 'draft' as any)
+      .order('start_date', { ascending: true })
+      .limit(3)
+      .then((r) => r, () => ({ data: null, error: true })),
+    supabase
+      .from('grants')
+      .select('*')
+      .eq('is_climate_action', true)
+      .eq('is_active', true)
+      .order('deadline', { ascending: true, nullsFirst: false })
+      .limit(3)
+      .then((r) => r, () => ({ data: null, error: true })),
+  ])
 
-    // Return empty arrays if column doesn't exist yet (400 error)
-    const projects = projectsRes.error ? [] : (projectsRes.data as any[]) || []
-    const events = eventsRes.error ? [] : (eventsRes.data as any[]) || []
-    const grants = grantsRes.error ? [] : (grantsRes.data as any[]) || []
+  // Return empty arrays if column doesn't exist yet (400 error)
+  const projects = projectsRes.error ? [] : (projectsRes.data as any[]) || []
+  const events = eventsRes.error ? [] : (eventsRes.data as any[]) || []
+  const grants = grantsRes.error ? [] : (grantsRes.data as any[]) || []
 
-    return {
-      projects,
-      events,
-      grants,
-      totalCount: projects.length + events.length + grants.length,
-    }
+  return {
+    projects,
+    events,
+    grants,
+    totalCount: projects.length + events.length + grants.length,
   }
+}
 
-  const [highlights, { refetch }] = createResource(fetchHighlights)
+export function useClimateHighlights() {
+  const query = useQuery({
+    queryKey: keys.list('climate-highlights'),
+    queryFn: fetchHighlights,
+  })
 
-  return { highlights, refetch }
+  return { highlights: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }

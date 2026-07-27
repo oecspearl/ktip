@@ -1,14 +1,14 @@
 import { Button } from '../../ui/Button'
-import { Download } from 'lucide-solid'
+import { Download } from 'lucide-react'
 import type { AnalyticsData } from '../../../hooks/useAdminAnalytics'
 
 interface ExportButtonProps {
   analytics: AnalyticsData | undefined
 }
 
-export function ExportButton(props: ExportButtonProps) {
+export function ExportButton({ analytics }: ExportButtonProps) {
   const exportCSV = () => {
-    const data = props.analytics
+    const data = analytics
     if (!data) return
 
     const lines: string[] = []
@@ -38,7 +38,7 @@ export function ExportButton(props: ExportButtonProps) {
       size="sm"
       icon={<Download size={14} />}
       onClick={exportCSV}
-      disabled={!props.analytics}
+      disabled={!analytics}
     >
       Export CSV
     </Button>

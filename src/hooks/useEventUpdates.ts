@@ -1,8 +1,9 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { EventUpdate } from '../types'
 
-export function useEventUpdates(eventId: () => string | undefined) {
+export function useEventUpdates(eventId: string | undefined) {
   const fetchUpdates = async (id: string): Promise<EventUpdate[]> => {
     const { data, error } = await supabase
       .from('event_updates')
@@ -17,12 +18,16 @@ export function useEventUpdates(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [updates, { refetch }] = createResource(eventId, fetchUpdates)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'updates', eventId),
+    queryFn: () => fetchUpdates(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { updates, refetch }
+  return { updates: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function usePublishedEventUpdates(eventId: () => string | undefined) {
+export function usePublishedEventUpdates(eventId: string | undefined) {
   const fetchUpdates = async (id: string): Promise<EventUpdate[]> => {
     const { data, error } = await supabase
       .from('event_updates')
@@ -38,27 +43,27 @@ export function usePublishedEventUpdates(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [updates, { refetch }] = createResource(eventId, fetchUpdates)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'published-updates', eventId),
+    queryFn: () => fetchUpdates(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { updates, refetch }
+  return { updates: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateEventUpdate() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createUpdate = async (data: {
-    event_id: string
-    author_id: string
-    title: string
-    content: string
-    update_type: string
-    is_published: boolean
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      event_id: string
+      author_id: string
+      title: string
+      content: string
+      update_type: string
+      is_published: boolean
+    }) => {
       const { data: result, error } = await supabase
         .from('event_updates')
         .insert({
@@ -70,31 +75,32 @@ export function useCreateEventUpdate() {
 
       if (error) throw error
       return result
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'updates', variables.event_id) })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'published-updates', variables.event_id) })
+    },
+  })
 
-  return { createUpdate, loading, error }
+  return { createUpdate: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateEventUpdate() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateEventUpdate = async (id: string, updates: {
-    title?: string
-    content?: string
-    update_type?: string
-    is_published?: boolean
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string
+      updates: {
+        title?: string
+        content?: string
+        update_type?: string
+        is_published?: boolean
+      }
+    }) => {
       const { data, error } = await supabase
         .from('event_updates')
         .update(updates as any)
@@ -104,39 +110,43 @@ export function useUpdateEventUpdate() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'updates') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'published-updates') })
+    },
+  })
 
-  return { updateEventUpdate, loading, error }
+  const updateEventUpdate = (
+    id: string,
+    updates: {
+      title?: string
+      content?: string
+      update_type?: string
+      is_published?: boolean
+    }
+  ) => mutation.mutateAsync({ id, updates })
+
+  return { updateEventUpdate, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteEventUpdate() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteEventUpdate = async (id: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('event_updates')
         .delete()
         .eq('id', id)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'updates') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'published-updates') })
+    },
+  })
 
-  return { deleteEventUpdate, loading, error }
+  return { deleteEventUpdate: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

@@ -1,6 +1,7 @@
-import { createResource } from 'solid-js'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Profile } from '../types'
 
 export function useDirectoryMembers(filters?: {
@@ -9,14 +10,7 @@ export function useDirectoryMembers(filters?: {
   country?: string
   skill?: string
 }) {
-  const filterKey = () => JSON.stringify({
-    search: filters?.search,
-    role: filters?.role,
-    country: filters?.country,
-    skill: filters?.skill,
-  })
-
-  const fetchMembers = async (_key: string): Promise<Profile[]> => {
+  const fetchMembers = async (): Promise<Profile[]> => {
     let query = supabase
       .from('profiles')
       .select('*')
@@ -49,7 +43,10 @@ export function useDirectoryMembers(filters?: {
     return (data as any[]) || []
   }
 
-  const [members, { refetch }] = createResource(filterKey, fetchMembers)
+  const query = useQuery({
+    queryKey: keys.list('directory_members', filters),
+    queryFn: fetchMembers,
+  })
 
-  return { members, refetch }
+  return { members: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }

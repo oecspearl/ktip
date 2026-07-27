@@ -1,6 +1,5 @@
-import { Show, For, Suspense, createSignal, createEffect, on } from 'solid-js'
-import { useParams, useNavigate, A } from '@solidjs/router'
-import { MainLayout } from '../../components/layout/MainLayout'
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useEvent, useRSVP } from '../../hooks/useEvents'
@@ -29,7 +28,7 @@ import {
   Megaphone,
   FileText,
   ChevronRight,
-} from 'lucide-solid'
+} from 'lucide-react'
 import {
   EVENT_TYPE_LABELS,
   EVENT_TYPE_COLORS,
@@ -48,65 +47,61 @@ export default function EventDetailPage() {
   const navigate = useNavigate()
   const auth = useAuth()
 
-  const { event } = useEvent(() => params.id)
-  usePageTitle(() => event()?.title)
+  const { event, loading: eventLoading } = useEvent(params.id)
+  usePageTitle(event?.title)
   const toast = useToast()
   const { rsvp, cancelRSVP, checkRSVP, getRSVPCount, loading: rsvpLoading } = useRSVP()
   const { submitRegistration, loading: regLoading } = useSubmitRegistration()
-  const { updates: eventUpdates } = usePublishedEventUpdates(() => params.id)
-  const { articles: eventArticles } = usePublishedEventArticles(() => params.id)
-  const { sections: pageSections } = usePublicEventSections(() => params.id)
-  const { schedule: scheduleItems } = useEventSchedule(() => params.id)
-  const { speakers: eventSpeakers } = useEventSpeakers(() => params.id)
+  const { updates: eventUpdates } = usePublishedEventUpdates(params.id)
+  const { articles: eventArticles } = usePublishedEventArticles(params.id)
+  const { sections: pageSections } = usePublicEventSections(params.id)
+  const { schedule: scheduleItems } = useEventSchedule(params.id)
+  const { speakers: eventSpeakers } = useEventSpeakers(params.id)
 
-  const [hasRSVPd, setHasRSVPd] = createSignal(false)
-  const [rsvpCount, setRSVPCount] = createSignal(0)
-  const [checking, setChecking] = createSignal(true)
-  const [showRegForm, setShowRegForm] = createSignal(false)
+  const [hasRSVPd, setHasRSVPd] = useState(false)
+  const [rsvpCount, setRSVPCount] = useState(0)
+  const [checking, setChecking] = useState(true)
+  const [showRegForm, setShowRegForm] = useState(false)
 
-  const hasCustomFields = () => (event()?.registration_fields || []).length > 0
+  const hasCustomFields = (event?.registration_fields || []).length > 0
 
-  const isOrganizer = () => event()?.organizer_id === auth.user()?.id
-  const isPastEvent = () => event() && isPast(new Date(event()!.start_date))
+  const isOrganizer = event?.organizer_id === auth.user?.id
+  const isPastEvent = !!(event && isPast(new Date(event.start_date)))
 
   // Check RSVP status and count
-  createEffect(
-    on(
-      () => [event(), auth.user()] as const,
-      ([eventData, userData]) => {
-        if (!eventData || !userData) return
-        setChecking(true)
-        Promise.all([
-          checkRSVP(eventData.id, userData.id),
-          getRSVPCount(eventData.id),
-        ])
-          .then(([hasRSVP, count]) => {
-            setHasRSVPd(hasRSVP)
-            setRSVPCount(count)
-          })
-          .catch((error) => {
-            console.error('Error checking RSVP:', error)
-          })
-          .finally(() => {
-            setChecking(false)
-          })
-      }
-    )
-  )
+  useEffect(() => {
+    if (!event || !auth.user) return
+    setChecking(true)
+    Promise.all([
+      checkRSVP(event.id, auth.user.id),
+      getRSVPCount(event.id),
+    ])
+      .then(([hasRSVP, count]) => {
+        setHasRSVPd(hasRSVP)
+        setRSVPCount(count)
+      })
+      .catch((error) => {
+        console.error('Error checking RSVP:', error)
+      })
+      .finally(() => {
+        setChecking(false)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event?.id, auth.user?.id])
 
   const handleRSVP = async () => {
-    if (!auth.user() || !event()) return
+    if (!auth.user || !event) return
 
     try {
-      if (hasRSVPd()) {
-        await cancelRSVP(event()!.id, auth.user()!.id)
+      if (hasRSVPd) {
+        await cancelRSVP(event.id, auth.user.id)
         setHasRSVPd(false)
         setRSVPCount((c) => c - 1)
-      } else if (hasCustomFields()) {
+      } else if (hasCustomFields) {
         // Show registration form instead of direct RSVP
         setShowRegForm(true)
       } else {
-        await rsvp(event()!.id, auth.user()!.id)
+        await rsvp(event.id, auth.user.id)
         setHasRSVPd(true)
         setRSVPCount((c) => c + 1)
       }
@@ -116,9 +111,9 @@ export default function EventDetailPage() {
   }
 
   const handleRegistrationSubmit = async (data: Record<string, any>) => {
-    if (!auth.user() || !event()) return
+    if (!auth.user || !event) return
     try {
-      await submitRegistration(event()!.id, auth.user()!.id, data)
+      await submitRegistration(event.id, auth.user.id, data)
       setHasRSVPd(true)
       setRSVPCount((c) => c + 1)
       setShowRegForm(false)
@@ -128,490 +123,474 @@ export default function EventDetailPage() {
     }
   }
 
-  const startDate = () => event() ? new Date(event()!.start_date) : null
-  const endDate = () =>
-    event() && event()!.end_date ? new Date(event()!.end_date!) : null
-  const isSingleDay = () => {
-    const s = startDate()
-    const e = endDate()
-    if (!s || !e) return true
-    return isSameDay(s, e)
-  }
+  const startDate = event ? new Date(event.start_date) : null
+  const endDate = event && event.end_date ? new Date(event.end_date) : null
+  const isSingleDay = !startDate || !endDate ? true : isSameDay(startDate, endDate)
 
-  const canRSVP = () => {
-    if (!event()) return false
-    if (isPastEvent()) return false
-    if (isOrganizer()) return false
-    if (!event()!.capacity) return true
-    return rsvpCount() < event()!.capacity!
-  }
+  const canRSVP = (() => {
+    if (!event) return false
+    if (isPastEvent) return false
+    if (isOrganizer) return false
+    if (!event.capacity) return true
+    return rsvpCount < event.capacity
+  })()
 
-  const isFull = () => {
-    if (!event()?.capacity) return false
-    return rsvpCount() >= event()!.capacity!
+  const isFull = event?.capacity ? rsvpCount >= event.capacity : false
+
+  if (eventLoading || !event) {
+    if (eventLoading) {
+      return (
+        <div className="container mx-auto px-4 py-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
+          <p className="mt-4 text-ktip-sand-600">Loading event...</p>
+        </div>
+      )
+    }
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span className="text-3xl">📅</span>
+        </div>
+        <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
+          Event Not Found
+        </h2>
+        <p className="text-gray-500 mb-6">
+          This event doesn't exist or has been removed.
+        </p>
+        <button
+          onClick={() => navigate('/events')}
+          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+        >
+          Back to Events
+        </button>
+      </div>
+    )
   }
 
   return (
-    <MainLayout>
-      <Suspense
-        fallback={
-          <div class="container mx-auto px-4 py-12 text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-            <p class="mt-4 text-ktip-sand-600">Loading event...</p>
-          </div>
-        }
+    <>
+      {/* === Dark Hero Header Band === */}
+      <div
+        className="relative min-h-[180px] flex items-center bg-gray-800 bg-cover bg-center"
+        style={event.image_url ? { backgroundImage: `url(${event.image_url})` } : {}}
       >
-        <Show
-          when={!event.loading && event()}
-          fallback={
-            <div class="container mx-auto px-4 py-16 text-center">
-              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="text-3xl">📅</span>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-gray-900/80" />
+
+        <div className="relative container mx-auto px-4 py-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Event Detail</p>
+              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
+                {event.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className={EVENT_TYPE_COLORS[event.event_type]}>
+                  {EVENT_TYPE_LABELS[event.event_type]}
+                </Badge>
+                {event.status === 'cancelled' && (
+                  <Badge className={EVENT_STATUS_COLORS['cancelled']}>
+                    {EVENT_STATUS_LABELS['cancelled']}
+                  </Badge>
+                )}
+                {isPastEvent && event.status !== 'cancelled' && (
+                  <Badge variant="default">Past Event</Badge>
+                )}
               </div>
-              <h2 class="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-                Event Not Found
-              </h2>
-              <p class="text-gray-500 mb-6">
-                This event doesn't exist or has been removed.
+            </div>
+            <div className="flex items-center gap-4">
+              {isOrganizer && (
+                <Link to={`/events/${params.id}/edit`}>
+                  <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                    <Edit size={14} />
+                    Edit
+                  </button>
+                </Link>
+              )}
+              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
+                <Link to="/" className="hover:text-white transition-colors">Home</Link>
+                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
+                <Link to="/events" className="hover:text-white transition-colors">Events</Link>
+                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
+                <span className="text-gray-300">{truncate(event.title, 30)}</span>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* === Past Event Banner === */}
+      {isPastEvent && (
+        <div className="bg-gray-50 border-b border-gray-200 py-3">
+          <p className="text-gray-700 text-center text-sm">
+            This event has already passed
+          </p>
+        </div>
+      )}
+
+      {/* === Two-Column Content Area === */}
+      <div className="bg-white py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+
+          {/* === Main Column === */}
+          <div className="lg:col-span-2">
+            {/* Event title repeat */}
+            <h2 className="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
+              {event.title}
+            </h2>
+
+            {/* Date line */}
+            {startDate && (
+              <p className="text-sm text-gray-400 text-center mb-6">
+                Date: {format(startDate, 'MMMM dd, yyyy')}
               </p>
+            )}
+
+            {/* Event Image */}
+            {event.image_url && (
+              <img
+                src={event.image_url}
+                alt={event.title}
+                className="w-full max-h-96 object-cover rounded mb-6"
+                loading="lazy"
+                width={800}
+                height={384}
+              />
+            )}
+
+            {/* Event Details Grid */}
+            <div className="grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded border border-gray-200">
+              {/* Date */}
+              <div className="flex items-start gap-3">
+                <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="font-medium text-ktip-sand-900">
+                    {format(startDate!, 'EEEE, MMMM d, yyyy')}
+                    {!isSingleDay && (
+                      <>
+                        <br />
+                        to {format(endDate!, 'EEEE, MMMM d, yyyy')}
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Time */}
+              <div className="flex items-start gap-3">
+                <Clock size={20} className="text-ktip-ocean-600 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-500">Time</p>
+                  <p className="font-medium text-ktip-sand-900">
+                    {format(startDate!, 'h:mm a')}
+                    {endDate && (
+                      <> - {format(endDate, 'h:mm a')}</>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="flex items-start gap-3">
+                {event.is_virtual ? (
+                  <Video size={20} className="text-ktip-ocean-600 mt-1" />
+                ) : (
+                  <MapPin size={20} className="text-ktip-ocean-600 mt-1" />
+                )}
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium text-ktip-sand-900">
+                    {event.is_virtual ? 'Virtual Event' : event.location}
+                  </p>
+                </div>
+              </div>
+
+              {/* Capacity */}
+              {event.capacity && (
+                <div className="flex items-start gap-3">
+                  <Users size={20} className="text-ktip-ocean-600 mt-1" />
+                  <div>
+                    <p className="text-sm text-gray-500">Capacity</p>
+                    <p className="font-medium text-ktip-sand-900">
+                      {rsvpCount} / {event.capacity} attendees
+                      {isFull && (
+                        <span className="text-red-600 ml-2">(Full)</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            {event.description && (
+              <div className="mb-6">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                  About This Event
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-3">Event description</p>
+                <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
+                  {event.description}
+                </div>
+              </div>
+            )}
+
+            {/* Engagement row */}
+            <div className="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4 mb-6">
               <button
-                onClick={() => navigate('/events')}
-                class="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+                className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  toast.success('Link copied to clipboard!')
+                }}
               >
-                Back to Events
+                <Share2 size={16} />
+                Share
               </button>
             </div>
-          }
-        >
-          {/* === Dark Hero Header Band === */}
-          <div
-            class="relative min-h-[180px] flex items-center bg-gray-800 bg-cover bg-center"
-            style={event()!.image_url ? { "background-image": `url(${event()!.image_url})` } : {}}
-          >
-            {/* Dark overlay */}
-            <div class="absolute inset-0 bg-gray-900/80" />
 
-            <div class="relative container mx-auto px-4 py-10">
-              <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div>
-                  <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Event Detail</p>
-                  <h1 class="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                    {event()!.title}
-                  </h1>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <Badge class={EVENT_TYPE_COLORS[event()!.event_type]}>
-                      {EVENT_TYPE_LABELS[event()!.event_type]}
-                    </Badge>
-                    <Show when={event()!.status === 'cancelled'}>
-                      <Badge class={EVENT_STATUS_COLORS['cancelled']}>
-                        {EVENT_STATUS_LABELS['cancelled']}
-                      </Badge>
-                    </Show>
-                    <Show when={isPastEvent() && event()!.status !== 'cancelled'}>
-                      <Badge variant="default">Past Event</Badge>
-                    </Show>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <Show when={isOrganizer()}>
-                    <A href={`/events/${params.id}/edit`}>
-                      <button class="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
-                        <Edit size={14} />
-                        Edit
-                      </button>
-                    </A>
-                  </Show>
-                  <nav class="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                    <A href="/" class="hover:text-white transition-colors">Home</A>
-                    <span class="mx-1.5"><ChevronRight size={12} class="inline" /></span>
-                    <A href="/events" class="hover:text-white transition-colors">Events</A>
-                    <span class="mx-1.5"><ChevronRight size={12} class="inline" /></span>
-                    <span class="text-gray-300">{truncate(event()!.title, 30)}</span>
-                  </nav>
+            {/* Page Sections */}
+            {(pageSections || []).map((section) => (
+              <EventPageSectionRenderer key={section.id} section={section} />
+            ))}
+
+            {/* Schedule */}
+            {scheduleItems && scheduleItems.length > 0 && (
+              <EventScheduleTimeline items={scheduleItems} />
+            )}
+
+            {/* Speakers */}
+            {eventSpeakers && eventSpeakers.length > 0 && (
+              <EventSpeakerGrid speakers={eventSpeakers} />
+            )}
+
+            {/* Event Updates */}
+            {eventUpdates && eventUpdates.length > 0 && (
+              <div className="mt-10">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
+                  <Megaphone size={18} className="text-ktip-ocean-600" />
+                  Updates
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4">Latest announcements</p>
+                <div className="space-y-4">
+                  {eventUpdates.map((update) => (
+                    <div key={update.id} className="border-l-4 border-ktip-ocean-200 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-ktip-sand-900">{update.title}</span>
+                        <Badge size="sm" className={EVENT_UPDATE_TYPE_COLORS[update.update_type] || ''}>
+                          {EVENT_UPDATE_TYPE_LABELS[update.update_type] || update.update_type}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{update.content}</p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {format(new Date(update.created_at), 'MMM d, yyyy h:mm a')}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Event Articles */}
+            {eventArticles && eventArticles.length > 0 && (
+              <div className="mt-10">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
+                  <FileText size={18} className="text-ktip-ocean-600" />
+                  Articles
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4">Related reading</p>
+                <div className="space-y-6">
+                  {eventArticles.map((article) => (
+                    <div key={article.id} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="text-lg font-semibold text-ktip-sand-900">{article.title}</h4>
+                        <Badge size="sm" className="bg-gray-100 text-gray-600 border-gray-200">
+                          {EVENT_ARTICLE_TYPE_LABELS[article.article_type] || article.article_type}
+                        </Badge>
+                      </div>
+                      <p className="text-gray-700 whitespace-pre-wrap">{article.content}</p>
+                      <p className="text-xs text-gray-400 mt-3">
+                        {format(new Date(article.created_at), 'MMM d, yyyy')}
+                        {article.author?.display_name && ` by ${article.author.display_name}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* === Past Event Banner === */}
-          <Show when={isPastEvent()}>
-            <div class="bg-gray-50 border-b border-gray-200 py-3">
-              <p class="text-gray-700 text-center text-sm">
-                This event has already passed
-              </p>
-            </div>
-          </Show>
+          {/* === Sidebar === */}
+          <div className="lg:col-span-1">
+            {/* Widget 1: Event Registration */}
+            <div className="mb-10">
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                Event Registration
+              </h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4">RSVP & sign up</p>
 
-          {/* === Two-Column Content Area === */}
-          <div class="bg-white py-12">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+              {checking && (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ktip-ocean-500 mx-auto"></div>
+                </div>
+              )}
 
-              {/* === Main Column === */}
-              <div class="lg:col-span-2">
-                {/* Event title repeat */}
-                <h2 class="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
-                  {event()!.title}
-                </h2>
-
-                {/* Date line */}
-                <Show when={startDate()}>
-                  {(d) => (
-                    <p class="text-sm text-gray-400 text-center mb-6">
-                      Date: {format(d(), 'MMMM dd, yyyy')}
-                    </p>
+              {!checking && (
+                <>
+                  {isOrganizer && (
+                    <div className="text-center py-4 text-gray-500">
+                      <p>You are the organizer of this event</p>
+                    </div>
                   )}
-                </Show>
 
-                {/* Event Image */}
-                <Show when={event()!.image_url}>
-                  <img
-                    src={event()!.image_url!}
-                    alt={event()!.title}
-                    class="w-full max-h-96 object-cover rounded mb-6"
-                    loading="lazy"
-                    width={800}
-                    height={384}
-                  />
-                </Show>
-
-                {/* Event Details Grid */}
-                <div class="grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded border border-gray-200">
-                  {/* Date */}
-                  <div class="flex items-start gap-3">
-                    <Calendar size={20} class="text-ktip-ocean-600 mt-1" />
-                    <div>
-                      <p class="text-sm text-gray-500">Date</p>
-                      <p class="font-medium text-ktip-sand-900">
-                        {format(startDate()!, 'EEEE, MMMM d, yyyy')}
-                        <Show when={!isSingleDay()}>
-                          <br />
-                          to {format(endDate()!, 'EEEE, MMMM d, yyyy')}
-                        </Show>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Time */}
-                  <div class="flex items-start gap-3">
-                    <Clock size={20} class="text-ktip-ocean-600 mt-1" />
-                    <div>
-                      <p class="text-sm text-gray-500">Time</p>
-                      <p class="font-medium text-ktip-sand-900">
-                        {format(startDate()!, 'h:mm a')}
-                        <Show when={endDate()}>
-                          {' '}
-                          - {format(endDate()!, 'h:mm a')}
-                        </Show>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div class="flex items-start gap-3">
-                    <Show
-                      when={event()!.is_virtual}
-                      fallback={<MapPin size={20} class="text-ktip-ocean-600 mt-1" />}
-                    >
-                      <Video size={20} class="text-ktip-ocean-600 mt-1" />
-                    </Show>
-                    <div>
-                      <p class="text-sm text-gray-500">Location</p>
-                      <p class="font-medium text-ktip-sand-900">
-                        {event()!.is_virtual ? 'Virtual Event' : event()!.location}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Capacity */}
-                  <Show when={event()!.capacity}>
-                    <div class="flex items-start gap-3">
-                      <Users size={20} class="text-ktip-ocean-600 mt-1" />
-                      <div>
-                        <p class="text-sm text-gray-500">Capacity</p>
-                        <p class="font-medium text-ktip-sand-900">
-                          {rsvpCount()} / {event()!.capacity} attendees
-                          <Show when={isFull()}>
-                            <span class="text-red-600 ml-2">(Full)</span>
-                          </Show>
-                        </p>
-                      </div>
-                    </div>
-                  </Show>
-                </div>
-
-                {/* Description */}
-                <Show when={event()!.description}>
-                  <div class="mb-6">
-                    <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                      About This Event
-                    </h3>
-                    <p class="text-ktip-ocean-600 text-xs italic mb-3">Event description</p>
-                    <div class="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
-                      {event()!.description}
-                    </div>
-                  </div>
-                </Show>
-
-                {/* Engagement row */}
-                <div class="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4 mb-6">
-                  <button
-                    class="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href)
-                      toast.success('Link copied to clipboard!')
-                    }}
-                  >
-                    <Share2 size={16} />
-                    Share
-                  </button>
-                </div>
-
-                {/* Page Sections */}
-                <For each={pageSections() || []}>
-                  {(section) => <EventPageSectionRenderer section={section} />}
-                </For>
-
-                {/* Schedule */}
-                <Show when={scheduleItems()?.length}>
-                  <EventScheduleTimeline items={scheduleItems()!} />
-                </Show>
-
-                {/* Speakers */}
-                <Show when={eventSpeakers()?.length}>
-                  <EventSpeakerGrid speakers={eventSpeakers()!} />
-                </Show>
-
-                {/* Event Updates */}
-                <Show when={eventUpdates()?.length}>
-                  <div class="mt-10">
-                    <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
-                      <Megaphone size={18} class="text-ktip-ocean-600" />
-                      Updates
-                    </h3>
-                    <p class="text-ktip-ocean-600 text-xs italic mb-4">Latest announcements</p>
-                    <div class="space-y-4">
-                      <For each={eventUpdates()}>
-                        {(update) => (
-                          <div class="border-l-4 border-ktip-ocean-200 pl-4 py-2">
-                            <div class="flex items-center gap-2 mb-1">
-                              <span class="font-medium text-ktip-sand-900">{update.title}</span>
-                              <Badge size="sm" class={EVENT_UPDATE_TYPE_COLORS[update.update_type] || ''}>
-                                {EVENT_UPDATE_TYPE_LABELS[update.update_type] || update.update_type}
-                              </Badge>
-                            </div>
-                            <p class="text-sm text-gray-600 whitespace-pre-wrap">{update.content}</p>
-                            <p class="text-xs text-gray-400 mt-2">
-                              {format(new Date(update.created_at), 'MMM d, yyyy h:mm a')}
-                            </p>
-                          </div>
-                        )}
-                      </For>
-                    </div>
-                  </div>
-                </Show>
-
-                {/* Event Articles */}
-                <Show when={eventArticles()?.length}>
-                  <div class="mt-10">
-                    <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
-                      <FileText size={18} class="text-ktip-ocean-600" />
-                      Articles
-                    </h3>
-                    <p class="text-ktip-ocean-600 text-xs italic mb-4">Related reading</p>
-                    <div class="space-y-6">
-                      <For each={eventArticles()}>
-                        {(article) => (
-                          <div class="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
-                            <div class="flex items-center gap-2 mb-2">
-                              <h4 class="text-lg font-semibold text-ktip-sand-900">{article.title}</h4>
-                              <Badge size="sm" class="bg-gray-100 text-gray-600 border-gray-200">
-                                {EVENT_ARTICLE_TYPE_LABELS[article.article_type] || article.article_type}
-                              </Badge>
-                            </div>
-                            <p class="text-gray-700 whitespace-pre-wrap">{article.content}</p>
-                            <p class="text-xs text-gray-400 mt-3">
-                              {format(new Date(article.created_at), 'MMM d, yyyy')}
-                              {article.author?.display_name && ` by ${article.author.display_name}`}
-                            </p>
-                          </div>
-                        )}
-                      </For>
-                    </div>
-                  </div>
-                </Show>
-              </div>
-
-              {/* === Sidebar === */}
-              <div class="lg:col-span-1">
-                {/* Widget 1: Event Registration */}
-                <div class="mb-10">
-                  <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                    Event Registration
-                  </h3>
-                  <p class="text-ktip-ocean-600 text-xs italic mb-4">RSVP & sign up</p>
-
-                  <Show when={checking()}>
-                    <div class="text-center py-4">
-                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-                    </div>
-                  </Show>
-
-                  <Show when={!checking()}>
-                    <Show when={isOrganizer()}>
-                      <div class="text-center py-4 text-gray-500">
-                        <p>You are the organizer of this event</p>
-                      </div>
-                    </Show>
-
-                    <Show when={!isOrganizer() && !isPastEvent()}>
-                      <Show when={hasRSVPd()}>
-                        <div class="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-lg p-4 mb-4">
-                          <div class="flex items-center gap-2 text-ktip-tropical-700 mb-2">
+                  {!isOrganizer && !isPastEvent && (
+                    <>
+                      {hasRSVPd && (
+                        <div className="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2 text-ktip-tropical-700 mb-2">
                             <CheckCircle size={20} />
-                            <span class="font-medium">You're attending!</span>
+                            <span className="font-medium">You're attending!</span>
                           </div>
-                          <p class="text-sm text-ktip-tropical-600">
+                          <p className="text-sm text-ktip-tropical-600">
                             We look forward to seeing you at the event.
                           </p>
                         </div>
-                      </Show>
+                      )}
 
-                      <Show when={isFull() && !hasRSVPd()}>
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                          <div class="flex items-center gap-2 text-red-700 mb-2">
+                      {isFull && !hasRSVPd && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2 text-red-700 mb-2">
                             <XCircle size={20} />
-                            <span class="font-medium">Event is full</span>
+                            <span className="font-medium">Event is full</span>
                           </div>
-                          <p class="text-sm text-red-600">
+                          <p className="text-sm text-red-600">
                             This event has reached maximum capacity.
                           </p>
                         </div>
-                      </Show>
+                      )}
 
-                      <Show
-                        when={showRegForm()}
-                        fallback={
-                          <Button
-                            fullWidth
-                            variant={hasRSVPd() ? 'outline' : 'primary'}
-                            onClick={handleRSVP}
-                            loading={rsvpLoading()}
-                            disabled={!canRSVP() && !hasRSVPd()}
-                          >
-                            {hasRSVPd() ? 'Cancel RSVP' : hasCustomFields() ? 'Register for Event' : 'RSVP to Event'}
-                          </Button>
-                        }
-                      >
+                      {showRegForm ? (
                         <EventRegistrationForm
-                          fields={event()!.registration_fields || []}
+                          fields={event.registration_fields || []}
                           onSubmit={handleRegistrationSubmit}
                           onCancel={() => setShowRegForm(false)}
-                          loading={regLoading()}
+                          loading={regLoading}
                         />
-                      </Show>
-                    </Show>
+                      ) : (
+                        <Button
+                          fullWidth
+                          variant={hasRSVPd ? 'outline' : 'primary'}
+                          onClick={handleRSVP}
+                          loading={rsvpLoading}
+                          disabled={!canRSVP && !hasRSVPd}
+                        >
+                          {hasRSVPd ? 'Cancel RSVP' : hasCustomFields ? 'Register for Event' : 'RSVP to Event'}
+                        </Button>
+                      )}
+                    </>
+                  )}
 
-                    <Show when={isPastEvent()}>
-                      <div class="text-center py-4 text-gray-500">
-                        <p>This event has already passed</p>
-                      </div>
-                    </Show>
-                  </Show>
+                  {isPastEvent && (
+                    <div className="text-center py-4 text-gray-500">
+                      <p>This event has already passed</p>
+                    </div>
+                  )}
+                </>
+              )}
 
-                  {/* Attendee Count */}
-                  <div class="mt-4 pt-4 border-t border-gray-200">
-                    <p class="text-sm text-gray-500">
-                      {rsvpCount()} {rsvpCount() === 1 ? 'person' : 'people'} attending
-                    </p>
-                  </div>
-                </div>
-
-                {/* Widget 2: Organizer */}
-                <div class="mb-10">
-                  <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                    Organized By
-                  </h3>
-                  <p class="text-ktip-ocean-600 text-xs italic mb-4">Event host</p>
-                  <div class="flex items-center gap-3 mb-4">
-                    <div class="w-12 h-12 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-lg font-medium text-ktip-ocean-700">
-                      {event()!.organizer?.display_name?.charAt(0).toUpperCase() || 'O'}
-                    </div>
-                    <div>
-                      <A
-                        href={`/profile/${event()!.organizer_id}`}
-                        class="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
-                      >
-                        {event()!.organizer?.display_name || 'Unknown User'}
-                      </A>
-                      <Show when={event()!.organizer?.country}>
-                        <p class="text-sm text-gray-500">
-                          {event()!.organizer!.country}
-                        </p>
-                      </Show>
-                    </div>
-                  </div>
-                  <Button variant="outline" fullWidth>
-                    Contact Organizer
-                  </Button>
-                </div>
-
-                {/* Widget 3: Event Details */}
-                <div class="mb-10">
-                  <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                    Event Details
-                  </h3>
-                  <p class="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
-                  <div class="text-sm divide-y divide-gray-100">
-                    <div class="flex items-center justify-between py-2.5">
-                      <span class="text-gray-500">Type</span>
-                      <span class="font-medium text-ktip-sand-900">
-                        {EVENT_TYPE_LABELS[event()!.event_type]}
-                      </span>
-                    </div>
-                    <div class="flex items-center justify-between py-2.5">
-                      <span class="text-gray-500">Date</span>
-                      <span class="font-medium text-ktip-sand-900">
-                        {format(startDate()!, 'MMM dd, yyyy')}
-                      </span>
-                    </div>
-                    <div class="flex items-center justify-between py-2.5">
-                      <span class="text-gray-500">Time</span>
-                      <span class="font-medium text-ktip-sand-900">
-                        {format(startDate()!, 'h:mm a')}
-                      </span>
-                    </div>
-                    <div class="flex items-center justify-between py-2.5">
-                      <span class="text-gray-500">Format</span>
-                      <span class="font-medium text-ktip-sand-900">
-                        {event()!.is_virtual ? 'Virtual' : 'In-Person'}
-                      </span>
-                    </div>
-                    <Show when={event()!.capacity}>
-                      <div class="flex items-center justify-between py-2.5">
-                        <span class="text-gray-500">Capacity</span>
-                        <span class="font-medium text-ktip-sand-900">
-                          {event()!.capacity}
-                        </span>
-                      </div>
-                    </Show>
-                  </div>
-                </div>
-
-                {/* Widget 4: Share */}
-                <div class="mb-10">
-                  <h3 class="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                    Share This Event
-                  </h3>
-                  <p class="text-ktip-ocean-600 text-xs italic mb-4">Spread the word</p>
-                  <Button variant="outline" fullWidth icon={<Share2 size={18} />}>
-                    Copy Link
-                  </Button>
-                </div>
+              {/* Attendee Count */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-500">
+                  {rsvpCount} {rsvpCount === 1 ? 'person' : 'people'} attending
+                </p>
               </div>
             </div>
+
+            {/* Widget 2: Organizer */}
+            <div className="mb-10">
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                Organized By
+              </h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4">Event host</p>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-lg font-medium text-ktip-ocean-700">
+                  {event.organizer?.display_name?.charAt(0).toUpperCase() || 'O'}
+                </div>
+                <div>
+                  <Link
+                    to={`/profile/${event.organizer_id}`}
+                    className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
+                  >
+                    {event.organizer?.display_name || 'Unknown User'}
+                  </Link>
+                  {event.organizer?.country && (
+                    <p className="text-sm text-gray-500">
+                      {event.organizer.country}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Button variant="outline" fullWidth>
+                Contact Organizer
+              </Button>
+            </div>
+
+            {/* Widget 3: Event Details */}
+            <div className="mb-10">
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                Event Details
+              </h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
+              <div className="text-sm divide-y divide-gray-100">
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-gray-500">Type</span>
+                  <span className="font-medium text-ktip-sand-900">
+                    {EVENT_TYPE_LABELS[event.event_type]}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-gray-500">Date</span>
+                  <span className="font-medium text-ktip-sand-900">
+                    {format(startDate!, 'MMM dd, yyyy')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-gray-500">Time</span>
+                  <span className="font-medium text-ktip-sand-900">
+                    {format(startDate!, 'h:mm a')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-gray-500">Format</span>
+                  <span className="font-medium text-ktip-sand-900">
+                    {event.is_virtual ? 'Virtual' : 'In-Person'}
+                  </span>
+                </div>
+                {event.capacity && (
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-gray-500">Capacity</span>
+                    <span className="font-medium text-ktip-sand-900">
+                      {event.capacity}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Widget 4: Share */}
+            <div className="mb-10">
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                Share This Event
+              </h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4">Spread the word</p>
+              <Button variant="outline" fullWidth icon={<Share2 size={18} />}>
+                Copy Link
+              </Button>
+            </div>
           </div>
-        </Show>
-      </Suspense>
-    </MainLayout>
+        </div>
+      </div>
+    </>
   )
 }

@@ -1,52 +1,51 @@
-import { type JSX, splitProps, Show, createUniqueId } from 'solid-js'
+import { useId, type TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/utils'
 
-interface TextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
   error?: string
   helperText?: string
   fullWidth?: boolean
 }
 
-export function Textarea(props: TextareaProps) {
-  const [local, others] = splitProps(props, [
-    'class',
-    'label',
-    'error',
-    'helperText',
-    'fullWidth',
-  ])
-  const textareaId = others.id || createUniqueId()
+export function Textarea({
+  className,
+  label,
+  error,
+  helperText,
+  fullWidth,
+  id,
+  ...others
+}: TextareaProps) {
+  const generatedId = useId()
+  const textareaId = id || generatedId
 
   return (
-    <div class={cn('flex flex-col gap-1.5', local.fullWidth && 'w-full')}>
-      <Show when={local.label}>
-        <label for={textareaId} class="text-sm font-medium text-ktip-sand-700">{local.label}</label>
-      </Show>
+    <div className={cn('flex flex-col gap-1.5', fullWidth && 'w-full')}>
+      {label && (
+        <label htmlFor={textareaId} className="text-sm font-medium text-ktip-sand-700">
+          {label}
+        </label>
+      )}
 
       <textarea
         id={textareaId}
-        class={cn(
+        className={cn(
           'w-full border rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all resize-none',
           'focus:outline-none focus:ring-2 focus:bg-white',
-          local.error
+          error
             ? 'border-red-400/70 bg-red-50/30 focus:border-red-400 focus:ring-red-400/15'
             : 'border-ktip-sand-200 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20',
-          local.class
+          className
         )}
         {...others}
       />
 
-      <Show when={local.error || local.helperText}>
-        <p
-          class={cn(
-            'text-sm',
-            local.error ? 'text-red-500' : 'text-ktip-sand-500'
-          )}
-        >
-          {local.error || local.helperText}
+      {(error || helperText) && (
+        <p className={cn('text-sm', error ? 'text-red-500' : 'text-ktip-sand-500')}>
+          {error || helperText}
         </p>
-      </Show>
+      )}
     </div>
   )
 }

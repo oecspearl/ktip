@@ -1,8 +1,7 @@
-import { A } from '@solidjs/router'
-import { Show, For } from 'solid-js'
+import { Link } from 'react-router'
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
-import { User, MapPin, MessageSquare } from 'lucide-solid'
+import { User, MapPin, MessageSquare } from 'lucide-react'
 import type { Profile } from '../../types'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { truncate } from '../../lib/utils'
@@ -11,91 +10,84 @@ interface MemberCardProps {
   member: Profile
 }
 
-export function MemberCard(props: MemberCardProps) {
+export function MemberCard({ member }: MemberCardProps) {
   return (
-    <Card hover class="h-full flex flex-col">
+    <Card hover className="h-full flex flex-col">
       {/* Avatar & Name */}
-      <div class="flex items-center gap-4 mb-4">
-        <Show
-          when={props.member.avatar_url}
-          fallback={
-            <div class="w-14 h-14 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-xl font-bold text-ktip-ocean-700 shrink-0">
-              {props.member.display_name?.charAt(0).toUpperCase() || <User size={24} />}
-            </div>
-          }
-        >
+      <div className="flex items-center gap-4 mb-4">
+        {member.avatar_url ? (
           <img
-            src={props.member.avatar_url!}
-            alt={props.member.display_name || 'Member'}
-            class="w-14 h-14 rounded-full object-cover shrink-0"
+            src={member.avatar_url!}
+            alt={member.display_name || 'Member'}
+            className="w-14 h-14 rounded-full object-cover shrink-0"
           />
-        </Show>
-        <div class="min-w-0">
-          <h3 class="text-lg font-display font-bold text-ktip-sand-900 truncate">
-            {props.member.display_name || 'Anonymous'}
+        ) : (
+          <div className="w-14 h-14 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-xl font-bold text-ktip-ocean-700 shrink-0">
+            {member.display_name?.charAt(0).toUpperCase() || <User size={24} />}
+          </div>
+        )}
+        <div className="min-w-0">
+          <h3 className="text-lg font-display font-bold text-ktip-sand-900 truncate">
+            {member.display_name || 'Anonymous'}
           </h3>
-          <Show when={props.member.country}>
-            <div class="flex items-center gap-1 text-sm text-ktip-sand-500">
+          {member.country && (
+            <div className="flex items-center gap-1 text-sm text-ktip-sand-500">
               <MapPin size={14} />
-              <span>{props.member.country}</span>
+              <span>{member.country}</span>
             </div>
-          </Show>
+          )}
         </div>
       </div>
 
       {/* Roles */}
-      <Show when={props.member.roles?.length > 0}>
-        <div class="flex flex-wrap gap-1.5 mb-3">
-          <For each={props.member.roles.slice(0, 3)}>
-            {(role) => (
-              <Badge class={ROLE_COLORS[role]} size="sm">
-                {ROLE_LABELS[role] || role}
-              </Badge>
-            )}
-          </For>
+      {member.roles?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {member.roles.slice(0, 3).map((role) => (
+            <Badge key={role} className={ROLE_COLORS[role]} size="sm">
+              {ROLE_LABELS[role] || role}
+            </Badge>
+          ))}
         </div>
-      </Show>
+      )}
 
       {/* Bio */}
-      <Show when={props.member.bio}>
-        <p class="text-sm text-ktip-sand-600 mb-3 line-clamp-2 flex-1">
-          {truncate(props.member.bio!, 120)}
+      {member.bio && (
+        <p className="text-sm text-ktip-sand-600 mb-3 line-clamp-2 flex-1">
+          {truncate(member.bio!, 120)}
         </p>
-      </Show>
+      )}
 
       {/* Skills */}
-      <Show when={props.member.skills?.length > 0}>
-        <div class="flex flex-wrap gap-1.5 mb-4">
-          <For each={props.member.skills.slice(0, 3)}>
-            {(skill) => (
-              <span class="text-xs px-2 py-0.5 bg-ktip-sand-100 text-ktip-sand-600 rounded-full">
-                {skill}
-              </span>
-            )}
-          </For>
-          <Show when={props.member.skills.length > 3}>
-            <span class="text-xs text-ktip-sand-400">
-              +{props.member.skills.length - 3}
+      {member.skills?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {member.skills.slice(0, 3).map((skill) => (
+            <span key={skill} className="text-xs px-2 py-0.5 bg-ktip-sand-100 text-ktip-sand-600 rounded-full">
+              {skill}
             </span>
-          </Show>
+          ))}
+          {member.skills.length > 3 && (
+            <span className="text-xs text-ktip-sand-400">
+              +{member.skills.length - 3}
+            </span>
+          )}
         </div>
-      </Show>
+      )}
 
       {/* Actions */}
-      <div class="mt-auto pt-3 border-t border-ktip-sand-100 flex gap-2">
-        <A
-          href={`/profile/${props.member.id}`}
-          class="flex-1 text-center text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 py-1.5 rounded-lg hover:bg-ktip-ocean-50 transition-colors"
+      <div className="mt-auto pt-3 border-t border-ktip-sand-100 flex gap-2">
+        <Link
+          to={`/profile/${member.id}`}
+          className="flex-1 text-center text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 py-1.5 rounded-lg hover:bg-ktip-ocean-50 transition-colors"
         >
           View Profile
-        </A>
-        <A
-          href="/messages"
-          class="flex items-center justify-center gap-1.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-700 py-1.5 px-3 rounded-lg hover:bg-ktip-sand-50 transition-colors"
+        </Link>
+        <Link
+          to="/messages"
+          className="flex items-center justify-center gap-1.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-700 py-1.5 px-3 rounded-lg hover:bg-ktip-sand-50 transition-colors"
         >
           <MessageSquare size={14} />
           Connect
-        </A>
+        </Link>
       </div>
     </Card>
   )

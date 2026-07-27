@@ -1,7 +1,6 @@
-import { createSignal, createEffect, createMemo, onCleanup, Show } from 'solid-js'
-import { A, useParams, useNavigate } from '@solidjs/router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useParams, useNavigate } from 'react-router'
 import type { Editor } from '@tiptap/core'
-import { MainLayout } from '../../components/layout/MainLayout'
 import { TiptapEditor } from '../../components/collaboration/TiptapEditor'
 import { EditorMenuBar } from '../../components/collaboration/editor/EditorMenuBar'
 import { EditorToolbarV2 } from '../../components/collaboration/editor/EditorToolbarV2'
@@ -13,83 +12,85 @@ import { downloadHTML, downloadMarkdown, printForPDF } from '../../lib/document-
 import { useDocument, useCreateDocument, useUpdateDocument } from '../../hooks/useDocuments'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { ChevronRight } from 'lucide-solid'
+import { ChevronRight } from 'lucide-react'
 
 export default function DocumentEditorPage() {
-  const params = useParams<{ id?: string }>()
+  const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
-  const isNew = () => !params.id
+  const isNew = !params.id
 
-  const [editor, setEditor] = createSignal<Editor | undefined>()
-  const [docId, setDocId] = createSignal<string | undefined>(params.id)
-  const [docTitle, setDocTitle] = createSignal('Untitled Document')
-  const [saveStatus, setSaveStatus] = createSignal<'saved' | 'saving' | 'unsaved'>('saved')
-  const [contentLoaded, setContentLoaded] = createSignal(false)
+  const [editor, setEditor] = useState<Editor | null>(null)
+  const [docId, setDocId] = useState<string | undefined>(params.id)
+  const [docTitle, setDocTitle] = useState('Untitled Document')
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
+  const [contentLoaded, setContentLoaded] = useState(false)
 
   // Modal states
-  const [linkOpen, setLinkOpen] = createSignal(false)
-  const [imageOpen, setImageOpen] = createSignal(false)
-  const [shareOpen, setShareOpen] = createSignal(false)
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [imageOpen, setImageOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   // DB hooks
-  const { document: dbDocument } = useDocument(() => params.id)
+  const { document: dbDocument, error: dbDocumentError } = useDocument(params.id)
   const { createDocument } = useCreateDocument()
   const { updateDocument } = useUpdateDocument()
 
   // Check if current user is the document owner
-  const isOwner = createMemo(() => {
-    if (isNew()) return true
-    const doc = dbDocument()
-    const userId = auth.user()?.id
-    if (!doc || !userId) return true // default to owner until loaded
-    return doc.owner_id === userId
-  })
+  const isOwner = isNew
+    ? true
+    : !dbDocument || !auth.user?.id
+      ? true // default to owner until loaded
+      : dbDocument.owner_id === auth.user.id
 
-  usePageTitle(() => docTitle() || 'Document Editor')
-
-  const tiptap = TiptapEditor({
-    onEditorReady: (e) => setEditor(e),
-    placeholder: 'Start writing your document...',
-  })
+  usePageTitle(docTitle || 'Document Editor')
 
   // Load content from DB when document resolves
-  createEffect(() => {
-    const doc = dbDocument()
-    const ed = editor()
-    if (doc && ed && !contentLoaded()) {
-      setDocTitle(doc.title)
-      setDocId(doc.id)
-      ed.commands.setContent(doc.content || '')
+  useEffect(() => {
+    if (dbDocument && editor && !contentLoaded) {
+      setDocTitle(dbDocument.title)
+      setDocId(dbDocument.id)
+      editor.commands.setContent(dbDocument.content || '')
       setContentLoaded(true)
       setSaveStatus('saved')
     }
-  })
+  }, [dbDocument, editor, contentLoaded])
 
   // Set editor editable based on ownership
-  createEffect(() => {
-    const ed = editor()
-    if (ed) ed.setEditable(isOwner())
-  })
+  useEffect(() => {
+    if (editor) editor.setEditable(isOwner)
+  }, [editor, isOwner])
 
-  // Auto-save to DB
-  let autoSaveTimer: ReturnType<typeof setTimeout> | undefined
+  // --- Refs that mirror the latest render's values, used by long-lived
+  // listeners/timers (tiptap 'update' subscription, beforeunload, unmount
+  // cleanup) that would otherwise close over stale state. ---
+  const editorRef = useRef<Editor | null>(null)
+  const docIdRef = useRef(docId)
+  const docTitleRef = useRef(docTitle)
+  const updateDocumentRef = useRef(updateDocument)
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  editorRef.current = editor
+  docIdRef.current = docId
+  docTitleRef.current = docTitle
+  updateDocumentRef.current = updateDocument
 
   const saveToDb = async () => {
-    const ed = editor()
-    if (!ed || !isOwner()) return
+    const ed = editor
+    if (!ed || !isOwner) return
 
     setSaveStatus('saving')
     const html = ed.getHTML()
-    const currentId = docId()
+    const currentId = docIdRef.current
 
     try {
       if (currentId) {
-        await updateDocument(currentId, { content: html, title: docTitle() })
+        await updateDocument(currentId, { content: html, title: docTitleRef.current })
       } else {
         // First save — create document
-        const newDoc = await createDocument({ title: docTitle(), content: html })
+        const newDoc = await createDocument({ title: docTitleRef.current, content: html })
         setDocId(newDoc.id)
+        docIdRef.current = newDoc.id
         navigate(`/collaborate/document/${newDoc.id}`, { replace: true })
       }
       setSaveStatus('saved')
@@ -97,54 +98,64 @@ export default function DocumentEditorPage() {
       setSaveStatus('unsaved')
     }
   }
+  const saveToDbRef = useRef(saveToDb)
+  saveToDbRef.current = saveToDb
 
-  createEffect(() => {
-    const ed = editor()
-    if (!ed) return
+  // Auto-save on editor content updates
+  useEffect(() => {
+    if (!editor) return
 
     const handleUpdate = () => {
       setSaveStatus('unsaved')
-      if (autoSaveTimer) clearTimeout(autoSaveTimer)
-      autoSaveTimer = setTimeout(() => saveToDb(), 1500)
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+      autoSaveTimerRef.current = setTimeout(() => saveToDbRef.current(), 1500)
     }
 
-    ed.on('update', handleUpdate)
-    onCleanup(() => {
-      ed.off('update', handleUpdate)
-      if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer)
+    editor.on('update', handleUpdate)
+    return () => {
+      editor.off('update', handleUpdate)
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
         // Save immediately on cleanup
-        const currentId = docId()
+        const currentId = docIdRef.current
         if (currentId) {
-          const html = ed.getHTML()
-          supabaseSync(currentId, html, docTitle())
+          const html = editor.getHTML()
+          updateDocumentRef.current(currentId, { content: html, title: docTitleRef.current }).catch(() => {})
         }
       }
-    })
-  })
-
-  // Sync helper for cleanup/beforeunload (fire-and-forget)
-  const supabaseSync = (id: string, content: string, title: string) => {
-    // Use sendBeacon-style approach: just fire the request
-    updateDocument(id, { content, title }).catch(() => {})
-  }
+    }
+  }, [editor])
 
   // Save before page unload
-  const handleBeforeUnload = () => {
-    if (autoSaveTimer) clearTimeout(autoSaveTimer)
-    const ed = editor()
-    const currentId = docId()
-    if (ed && currentId) {
-      supabaseSync(currentId, ed.getHTML(), docTitle())
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+      const ed = editorRef.current
+      const currentId = docIdRef.current
+      if (ed && currentId) {
+        updateDocumentRef.current(currentId, { content: ed.getHTML(), title: docTitleRef.current }).catch(() => {})
+      }
     }
-  }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
 
-  window.addEventListener('beforeunload', handleBeforeUnload)
-  onCleanup(() => window.removeEventListener('beforeunload', handleBeforeUnload))
+  // Ctrl+S
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+        saveToDbRef.current()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Manual save
   const handleSave = () => {
-    if (autoSaveTimer) clearTimeout(autoSaveTimer)
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
     saveToDb()
   }
 
@@ -155,91 +166,76 @@ export default function DocumentEditorPage() {
 
   // Title save on blur
   const handleTitleBlur = () => {
-    const currentId = docId()
-    if (currentId) {
-      updateDocument(currentId, { title: docTitle() }).catch(() => {})
+    if (docId) {
+      updateDocument(docId, { title: docTitle }).catch(() => {})
     }
   }
-
-  // Ctrl+S
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault()
-      handleSave()
-    }
-  }
-
-  window.addEventListener('keydown', handleKeyDown)
-  onCleanup(() => window.removeEventListener('keydown', handleKeyDown))
 
   const handleDownloadPDF = () => {
-    const ed = editor()
-    if (ed) printForPDF(ed)
+    if (editor) printForPDF(editor)
   }
 
   const handleDownloadHTML = () => {
-    const ed = editor()
-    if (ed) downloadHTML(ed, docTitle())
+    if (editor) downloadHTML(editor, docTitle)
   }
 
   const handleDownloadMarkdown = () => {
-    const ed = editor()
-    if (ed) downloadMarkdown(ed, docTitle())
+    if (editor) downloadMarkdown(editor, docTitle)
   }
 
   return (
-    <MainLayout>
+    <>
       {/* Dark Hero Band */}
-      <div class="bg-gray-800 min-h-[140px] flex items-center">
-        <div class="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
+      <div className="bg-gray-800 min-h-[140px] flex items-center">
+        <div className="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
             <input
               type="text"
-              value={docTitle()}
-              onInput={(e) => setDocTitle(e.currentTarget.value)}
+              value={docTitle}
+              onChange={(e) => setDocTitle(e.target.value)}
               onBlur={handleTitleBlur}
-              readOnly={!isOwner()}
-              class="text-3xl md:text-4xl font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-gray-500"
+              readOnly={!isOwner}
+              className="text-3xl md:text-4xl font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-gray-500"
               placeholder="Untitled Document"
             />
-            <Show when={!isOwner()}>
-              <span class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            {!isOwner && (
+              <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 View Only — Shared with you
               </span>
-            </Show>
+            )}
           </div>
-          <nav class="hidden md:flex items-center gap-1 text-sm text-gray-400 shrink-0 ml-4">
-            <A href="/" class="hover:text-white transition-colors">Home</A>
+          <nav className="hidden md:flex items-center gap-1 text-sm text-gray-400 shrink-0 ml-4">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={14} />
-            <A href="/collaborate" class="hover:text-white transition-colors">Collaborate</A>
+            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
             <ChevronRight size={14} />
-            <A href="/collaborate/documents" class="hover:text-white transition-colors">Documents</A>
+            <Link to="/collaborate/documents" className="hover:text-white transition-colors">Documents</Link>
             <ChevronRight size={14} />
-            <span class="text-gray-200 truncate max-w-[150px]">{docTitle()}</span>
+            <span className="text-gray-200 truncate max-w-[150px]">{docTitle}</span>
           </nav>
         </div>
       </div>
 
       {/* Document not found */}
-      <Show when={!isNew() && dbDocument.error}>
-        <div class="bg-white py-16 text-center">
-          <h2 class="text-xl font-semibold text-ktip-sand-800 mb-2">Document not found</h2>
-          <p class="text-ktip-sand-500 mb-4">This document may have been deleted or you don't have access.</p>
-          <A href="/collaborate/documents" class="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium">
+      {!isNew && dbDocumentError && (
+        <div className="bg-white py-16 text-center">
+          <h2 className="text-xl font-semibold text-ktip-sand-800 mb-2">Document not found</h2>
+          <p className="text-ktip-sand-500 mb-4">This document may have been deleted or you don't have access.</p>
+          <Link to="/collaborate/documents" className="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium">
             Back to My Documents
-          </A>
+          </Link>
         </div>
-      </Show>
+      )}
 
       {/* Editor Section */}
-      <Show when={isNew() || !dbDocument.error}>
-        <div class="bg-[#e8e8e8] py-8 min-h-[calc(100vh-200px)]">
-          <div class="max-w-5xl mx-auto px-4">
-            <div class="border border-gray-600 overflow-hidden shadow-hard">
+      {(isNew || !dbDocumentError) && (
+        <div className="bg-[#e8e8e8] py-8 min-h-[calc(100vh-200px)]">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="border border-gray-600 overflow-hidden shadow-hard">
               {/* Menu Bar */}
               <EditorMenuBar
-                editor={() => editor()}
+                editor={editor}
                 onSave={handleSave}
                 onNewDocument={handleNewDocument}
                 onOpenDocuments={() => navigate('/collaborate/documents')}
@@ -253,50 +249,50 @@ export default function DocumentEditorPage() {
 
               {/* Toolbar */}
               <EditorToolbarV2
-                editor={() => editor()}
+                editor={editor}
                 onInsertLink={() => setLinkOpen(true)}
                 onInsertImage={() => setImageOpen(true)}
               />
 
               {/* Canvas Area */}
-              <div class="bg-[#e8e8e8] flex justify-center py-6 px-4">
+              <div className="bg-[#e8e8e8] flex justify-center py-6 px-4">
                 <div
-                  class="bg-white w-full max-w-[850px] shadow-medium prose-editor"
-                  style={{ "min-height": "700px" }}
+                  className="bg-white w-full max-w-[850px] shadow-medium prose-editor"
+                  style={{ minHeight: '700px' }}
                 >
-                  <div ref={tiptap.ref} />
+                  <TiptapEditor onEditorReady={(e) => setEditor(e)} placeholder="Start writing your document..." />
                 </div>
               </div>
 
               {/* Status Bar */}
               <EditorStatusBar
-                editor={() => editor()}
+                editor={editor}
                 saveStatus={saveStatus}
-                title={() => docTitle()}
+                title={docTitle}
               />
             </div>
           </div>
         </div>
-      </Show>
+      )}
 
       {/* Modals */}
       <LinkModal
-        open={linkOpen()}
+        open={linkOpen}
         onClose={() => setLinkOpen(false)}
-        editor={() => editor()}
+        editor={editor}
       />
       <ImageModal
-        open={imageOpen()}
+        open={imageOpen}
         onClose={() => setImageOpen(false)}
-        editor={() => editor()}
+        editor={editor}
       />
       <ShareDocumentModal
-        open={shareOpen()}
+        open={shareOpen}
         onClose={() => setShareOpen(false)}
-        editor={() => editor()}
-        documentId={() => docId()}
-        documentTitle={() => docTitle()}
+        editor={editor}
+        documentId={docId}
+        documentTitle={docTitle}
       />
-    </MainLayout>
+    </>
   )
 }

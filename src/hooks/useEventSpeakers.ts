@@ -1,8 +1,9 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { EventSpeaker } from '../types'
 
-export function useEventSpeakers(eventId: () => string | undefined) {
+export function useEventSpeakers(eventId: string | undefined) {
   const fetchSpeakers = async (id: string): Promise<EventSpeaker[]> => {
     const { data, error } = await supabase
       .from('event_speakers')
@@ -14,24 +15,27 @@ export function useEventSpeakers(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [speakers, { refetch }] = createResource(eventId, fetchSpeakers)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'speakers', eventId),
+    queryFn: () => fetchSpeakers(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { speakers, refetch }
+  return { speakers: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateSpeaker() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const createSpeaker = async (data: {
-    event_id: string
-    name: string
-    title?: string
-    bio?: string
-    photo_url?: string
-    website?: string
-  }) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      event_id: string
+      name: string
+      title?: string
+      bio?: string
+      photo_url?: string
+      website?: string
+    }) => {
       const insertData: any = {
         event_id: data.event_id,
         name: data.name,
@@ -49,20 +53,26 @@ export function useCreateSpeaker() {
 
       if (error) throw error
       return result
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'speakers', variables.event_id) })
+    },
+  })
 
-  return { createSpeaker, loading }
+  return { createSpeaker: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateSpeaker() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const updateSpeaker = async (speakerId: string, updates: Record<string, any>) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      speakerId,
+      updates,
+    }: {
+      speakerId: string
+      updates: Record<string, any>
+    }) => {
       const { data, error } = await supabase
         .from('event_speakers')
         .update(updates as any)
@@ -72,30 +82,34 @@ export function useUpdateSpeaker() {
 
       if (error) throw error
       return data
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'speakers') })
+    },
+  })
 
-  return { updateSpeaker, loading }
+  const updateSpeaker = (speakerId: string, updates: Record<string, any>) =>
+    mutation.mutateAsync({ speakerId, updates })
+
+  return { updateSpeaker, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteSpeaker() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const deleteSpeaker = async (speakerId: string) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (speakerId: string) => {
       const { error } = await supabase
         .from('event_speakers')
         .delete()
         .eq('id', speakerId)
 
       if (error) throw error
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'speakers') })
+    },
+  })
 
-  return { deleteSpeaker, loading }
+  return { deleteSpeaker: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

@@ -1,5 +1,6 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 
 export interface Preregistration {
   id: string
@@ -25,23 +26,19 @@ export interface Preregistration {
 // ============================================================
 
 export function useSubmitPreregistration() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const submit = async (data: {
-    email: string
-    display_name: string
-    country?: string
-    bio?: string
-    organization?: string
-    role: string
-    skills?: string[]
-    linkedin_url?: string
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      email: string
+      display_name: string
+      country?: string
+      bio?: string
+      organization?: string
+      role: string
+      skills?: string[]
+      linkedin_url?: string
+    }) => {
       const { error: insertError } = await (supabase.from('preregistrations') as any).insert({
         email: data.email,
         display_name: data.display_name,
@@ -59,16 +56,13 @@ export function useSubmitPreregistration() {
         }
         throw insertError
       }
-    } catch (err: any) {
-      const msg = err.message || 'Failed to submit application'
-      setError(msg)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-preregistrations') })
+    },
+  })
 
-  return { submit, loading, error }
+  return { submit: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 // ============================================================
@@ -79,12 +73,7 @@ export function useAdminPreregistrations(filters?: {
   status?: string
   role?: string
 }) {
-  const filterKey = () => JSON.stringify({
-    status: filters?.status,
-    role: filters?.role,
-  })
-
-  const fetchPreregistrations = async (_key: string): Promise<Preregistration[]> => {
+  const fetchPreregistrations = async (): Promise<Preregistration[]> => {
     let query = (supabase.from('preregistrations') as any)
       .select('*')
       .order('created_at', { ascending: false })
@@ -102,9 +91,12 @@ export function useAdminPreregistrations(filters?: {
     return (data as any[]) || []
   }
 
-  const [preregistrations, { refetch }] = createResource(filterKey, fetchPreregistrations)
+  const query = useQuery({
+    queryKey: keys.list('admin-preregistrations', filters),
+    queryFn: fetchPreregistrations,
+  })
 
-  return { preregistrations, refetch }
+  return { preregistrations: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 // ============================================================
@@ -112,8 +104,7 @@ export function useAdminPreregistrations(filters?: {
 // ============================================================
 
 export function useAdminPreregistrationActions() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
   const getAuthHeader = async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -121,18 +112,18 @@ export function useAdminPreregistrationActions() {
     return `Bearer ${session.access_token}`
   }
 
-  const updateStatus = async (
-    id: string,
-    updates: {
-      status?: string
-      admin_notes?: string
-      info_request_message?: string
-    }
-  ) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string
+      updates: {
+        status?: string
+        admin_notes?: string
+        info_request_message?: string
+      }
+    }) => {
       const { data: { user } } = await supabase.auth.getUser()
 
       const { error: updateError } = await (supabase.from('preregistrations') as any)
@@ -144,19 +135,20 @@ export function useAdminPreregistrationActions() {
         .eq('id', id)
 
       if (updateError) throw updateError
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-preregistrations') })
+    },
+  })
 
-  const approve = async (preregistrationId: string, password: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const approveMutation = useMutation({
+    mutationFn: async ({
+      preregistrationId,
+      password,
+    }: {
+      preregistrationId: string
+      password: string
+    }) => {
       const auth = await getAuthHeader()
       const res = await fetch('/api/admin/approve-preregistration', {
         method: 'POST',
@@ -166,13 +158,28 @@ export function useAdminPreregistrationActions() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to approve application')
       return json.user
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-preregistrations') })
+    },
+  })
 
-  return { updateStatus, approve, loading, error }
+  const updateStatus = (
+    id: string,
+    updates: {
+      status?: string
+      admin_notes?: string
+      info_request_message?: string
+    }
+  ) => updateStatusMutation.mutateAsync({ id, updates })
+
+  const approve = (preregistrationId: string, password: string) =>
+    approveMutation.mutateAsync({ preregistrationId, password })
+
+  return {
+    updateStatus,
+    approve,
+    loading: updateStatusMutation.isPending || approveMutation.isPending,
+    error: updateStatusMutation.error || approveMutation.error,
+  }
 }

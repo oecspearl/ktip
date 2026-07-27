@@ -1,5 +1,5 @@
-import { createSignal, Show } from 'solid-js'
-import { Copy, Download, Printer, Check } from 'lucide-solid'
+import { useState } from 'react'
+import { Copy, Download, Printer, Check } from 'lucide-react'
 import {
   generateProposalMarkdown,
   downloadProposalAsMarkdown,
@@ -14,10 +14,10 @@ interface ProposalExportActionsProps {
   data: Record<string, any>
 }
 
-export function ProposalExportActions(props: ProposalExportActionsProps) {
-  const [copied, setCopied] = createSignal(false)
+export function ProposalExportActions({ type, title, data }: ProposalExportActionsProps) {
+  const [copied, setCopied] = useState(false)
 
-  const getMarkdown = () => generateProposalMarkdown(props.type, props.title, props.data)
+  const getMarkdown = () => generateProposalMarkdown(type, title, data)
 
   const handleCopy = async () => {
     const success = await copyProposalToClipboard(getMarkdown())
@@ -28,26 +28,24 @@ export function ProposalExportActions(props: ProposalExportActionsProps) {
   }
 
   const handleDownload = () => {
-    downloadProposalAsMarkdown(props.title, getMarkdown())
+    downloadProposalAsMarkdown(title, getMarkdown())
   }
 
   return (
-    <div class="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap">
       <button
         type="button"
         onClick={handleCopy}
-        class="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
       >
-        <Show when={copied()} fallback={<Copy size={16} />}>
-          <Check size={16} class="text-green-500" />
-        </Show>
-        {copied() ? 'Copied!' : 'Copy Markdown'}
+        {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+        {copied ? 'Copied!' : 'Copy Markdown'}
       </button>
 
       <button
         type="button"
         onClick={handleDownload}
-        class="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
       >
         <Download size={16} />
         Download .md
@@ -56,7 +54,7 @@ export function ProposalExportActions(props: ProposalExportActionsProps) {
       <button
         type="button"
         onClick={printProposal}
-        class="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
       >
         <Printer size={16} />
         Print / PDF

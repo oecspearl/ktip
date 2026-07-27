@@ -1,4 +1,5 @@
-import { createSignal, onCleanup } from 'solid-js'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -9,33 +10,45 @@ interface UseAutoSaveOptions {
 
 export function useAutoSave(options: UseAutoSaveOptions) {
   const delay = options.delay ?? 5000
-  const [status, setStatus] = createSignal<SaveStatus>('idle')
-  let timeout: ReturnType<typeof setTimeout> | null = null
-  let savedTimeout: ReturnType<typeof setTimeout> | null = null
+  const [status, setStatus] = useState<SaveStatus>('idle')
 
-  const trigger = () => {
-    if (timeout) clearTimeout(timeout)
-    if (savedTimeout) clearTimeout(savedTimeout)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Keep the latest onSave in a ref so trigger() always calls the current
+  // version without needing to be recreated on every render.
+  const onSaveRef = useRef(options.onSave)
+  onSaveRef.current = options.onSave
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      await onSaveRef.current()
+    },
+  })
+
+  const cancel = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current)
+  }, [])
+
+  const trigger = useCallback(() => {
+    cancel()
     setStatus('idle')
 
-    timeout = setTimeout(async () => {
+    timeoutRef.current = setTimeout(async () => {
       setStatus('saving')
       try {
-        await options.onSave()
+        await mutation.mutateAsync()
         setStatus('saved')
-        savedTimeout = setTimeout(() => setStatus('idle'), 3000)
+        savedTimeoutRef.current = setTimeout(() => setStatus('idle'), 3000)
       } catch {
         setStatus('error')
       }
     }, delay)
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cancel, delay])
 
-  const cancel = () => {
-    if (timeout) clearTimeout(timeout)
-    if (savedTimeout) clearTimeout(savedTimeout)
-  }
-
-  onCleanup(cancel)
+  useEffect(() => cancel, [cancel])
 
   return { status, trigger, cancel }
 }

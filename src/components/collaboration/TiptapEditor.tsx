@@ -1,4 +1,5 @@
-import { createSignal } from 'solid-js'
+import { useEffect } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
 import type { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -15,7 +16,6 @@ import Color from '@tiptap/extension-color'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Placeholder from '@tiptap/extension-placeholder'
-import { createTiptapEditor } from 'solid-tiptap'
 
 interface TiptapEditorProps {
   onEditorReady?: (editor: Editor) => void
@@ -23,57 +23,50 @@ interface TiptapEditorProps {
   initialContent?: string
 }
 
-export function TiptapEditor(props: TiptapEditorProps) {
-  const [ref, setRef] = createSignal<HTMLDivElement>()
-
-  const editor = createTiptapEditor(() => {
-    const el = ref()
-    if (!el) return undefined as unknown as { element: HTMLDivElement; extensions: [] }
-    return {
-      element: el,
-      extensions: [
-        StarterKit.configure({
-          heading: { levels: [1, 2, 3, 4] },
-        }),
-        Underline,
-        Highlight.configure({ multicolor: true }),
-        Link.configure({
-          openOnClick: false,
-          HTMLAttributes: { class: 'editor-link' },
-        }),
-        Image.configure({
-          inline: false,
-          allowBase64: true,
-        }),
-        Table.configure({ resizable: true }),
-        TableRow,
-        TableCell,
-        TableHeader,
-        TextAlign.configure({
-          types: ['heading', 'paragraph'],
-        }),
-        TextStyle,
-        Color,
-        Subscript,
-        Superscript,
-        Placeholder.configure({
-          placeholder: props.placeholder || 'Start writing your document...',
-        }),
-      ],
-      content: props.initialContent || '',
-      editorProps: {
-        attributes: {
-          class: 'prose-editor',
-        },
+export function TiptapEditor({ onEditorReady, placeholder, initialContent }: TiptapEditorProps) {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3, 4] },
+      }),
+      Underline,
+      Highlight.configure({ multicolor: true }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: { class: 'editor-link' },
+      }),
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+      }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      TextStyle,
+      Color,
+      Subscript,
+      Superscript,
+      Placeholder.configure({
+        placeholder: placeholder || 'Start writing your document...',
+      }),
+    ],
+    content: initialContent || '',
+    editorProps: {
+      attributes: {
+        class: 'prose-editor',
       },
-      onCreate: ({ editor: e }) => {
-        props.onEditorReady?.(e)
-      },
-    }
+    },
   })
 
-  return {
-    editor,
-    ref: setRef,
-  }
+  // Hand the editor instance up to the parent once it's created.
+  useEffect(() => {
+    if (editor) onEditorReady?.(editor)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor])
+
+  return <EditorContent editor={editor} />
 }

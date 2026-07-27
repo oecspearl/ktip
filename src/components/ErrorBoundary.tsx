@@ -1,25 +1,44 @@
-import { ErrorBoundary as SolidErrorBoundary } from 'solid-js'
-import type { ParentComponent } from 'solid-js'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-solid'
+import { Component, type ErrorInfo, type PropsWithChildren } from 'react'
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { Button } from './ui/Button'
 
-export const AppErrorBoundary: ParentComponent = (props) => {
-  return (
-    <SolidErrorBoundary
-      fallback={(err, reset) => (
-        <div class="min-h-screen bg-ktip-canvas flex items-center justify-center p-4">
-          <div class="max-w-md w-full text-center">
-            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertTriangle size={40} class="text-red-500" />
+interface State {
+  hasError: boolean
+  error: Error | null
+}
+
+export class AppErrorBoundary extends Component<PropsWithChildren, State> {
+  state: State = { hasError: false, error: null }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('AppErrorBoundary caught an error:', error, errorInfo)
+  }
+
+  reset = () => {
+    this.setState({ hasError: false, error: null })
+  }
+
+  render() {
+    if (this.state.hasError) {
+      const err = this.state.error
+      return (
+        <div className="min-h-screen bg-ktip-canvas flex items-center justify-center p-4">
+          <div className="max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle size={40} className="text-red-500" />
             </div>
-            <h1 class="text-3xl font-display font-bold text-ktip-sand-900 mb-3">
+            <h1 className="text-3xl font-display font-bold text-ktip-sand-900 mb-3">
               Something went wrong
             </h1>
-            <p class="text-ktip-sand-600 mb-8">
+            <p className="text-ktip-sand-600 mb-8">
               An unexpected error occurred. Please try refreshing the page or go back to the home page.
             </p>
-            <div class="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={reset} icon={<RefreshCw size={18} />}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={this.reset} icon={<RefreshCw size={18} />}>
                 Try Again
               </Button>
               <a href="/">
@@ -28,19 +47,19 @@ export const AppErrorBoundary: ParentComponent = (props) => {
                 </Button>
               </a>
             </div>
-            <details class="mt-8 text-left">
-              <summary class="text-sm text-ktip-sand-500 cursor-pointer hover:text-ktip-sand-700">
+            <details className="mt-8 text-left">
+              <summary className="text-sm text-ktip-sand-500 cursor-pointer hover:text-ktip-sand-700">
                 Error details
               </summary>
-              <pre class="mt-2 p-4 bg-ktip-sand-100 rounded-xl text-xs text-ktip-sand-700 overflow-auto max-h-40">
+              <pre className="mt-2 p-4 bg-ktip-sand-100 rounded-xl text-xs text-ktip-sand-700 overflow-auto max-h-40">
                 {err?.message || String(err)}
               </pre>
             </details>
           </div>
         </div>
-      )}
-    >
-      {props.children}
-    </SolidErrorBoundary>
-  )
+      )
+    }
+
+    return this.props.children
+  }
 }

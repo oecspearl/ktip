@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Project, ProjectComment } from '../types'
 
 export function useProjects(filters?: {
@@ -48,9 +49,40 @@ export function useProjects(filters?: {
     return (data as any[]) || []
   }
 
-  const [projects, { refetch }] = createResource(fetchProjects)
+  const query = useQuery({
+    queryKey: keys.list('projects', filters),
+    queryFn: fetchProjects,
+  })
 
-  return { projects, refetch }
+  return {
+    projects: query.data,
+    loading: query.isPending,
+    error: query.error,
+    refetch: query.refetch,
+  }
+}
+
+/** Admin moderation view: all projects (public + private), no cap. */
+export function useAdminProjects() {
+  const fetchAllProjects = async (): Promise<Project[]> => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        owner:profiles(*)
+      `)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data as any[]) || []
+  }
+
+  const query = useQuery({
+    queryKey: keys.list('admin-projects'),
+    queryFn: fetchAllProjects,
+  })
+
+  return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useFeaturedProjects() {
@@ -74,12 +106,15 @@ export function useFeaturedProjects() {
     return (data as any[]) || []
   }
 
-  const [projects, { refetch }] = createResource(fetchFeatured)
+  const query = useQuery({
+    queryKey: keys.list('projects', 'featured'),
+    queryFn: fetchFeatured,
+  })
 
-  return { projects, refetch }
+  return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useProject(id: () => string | undefined) {
+export function useProject(id: string | undefined) {
   const fetchProject = async (projectId: string): Promise<Project | null> => {
     const { data, error } = await supabase
       .from('projects')
@@ -94,28 +129,28 @@ export function useProject(id: () => string | undefined) {
     return data as any
   }
 
-  const [project, { refetch }] = createResource(id, fetchProject)
+  const query = useQuery({
+    queryKey: keys.detail('projects', id),
+    queryFn: () => fetchProject(id as string),
+    enabled: !!id,
+  })
 
-  return { project, refetch }
+  return { project: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateProject() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createProject = async (projectData: {
-    title: string
-    description?: string
-    category?: string
-    phase?: string
-    hashtags?: string[]
-    is_public?: boolean
-    owner_id: string
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (projectData: {
+      title: string
+      description?: string
+      category?: string
+      phase?: string
+      hashtags?: string[]
+      is_public?: boolean
+      owner_id: string
+    }) => {
       const { data, error } = await supabase
         .from('projects')
         .insert({
@@ -129,29 +164,26 @@ export function useCreateProject() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+    },
+  })
 
-  return { createProject, loading, error }
+  return { createProject: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateProject() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateProject = async (
-    projectId: string,
-    updates: Partial<Project>
-  ) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      projectId,
+      updates,
+    }: {
+      projectId: string
+      updates: Partial<Project>
+    }) => {
       const { data, error } = await supabase
         .from('projects')
         .update({
@@ -164,107 +196,150 @@ export function useUpdateProject() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+    },
+  })
 
-  return { updateProject, loading, error }
+  const updateProject = (projectId: string, updates: Partial<Project>) =>
+    mutation.mutateAsync({ projectId, updates })
+
+  return { updateProject, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteProject() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteProject = async (projectId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (projectId: string) => {
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', projectId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+    },
+  })
 
-  return { deleteProject, loading, error }
+  return { deleteProject: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 // Like / Unlike hooks
-export function useProjectLike() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+export function useProjectLike(projectId: string | undefined, userId: string | undefined) {
+  const queryClient = useQueryClient()
 
-  const likeProject = async (projectId: string, userId: string) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { error } = await supabase
-        .from('project_likes')
-        .insert({ project_id: projectId, user_id: userId })
-      if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const unlikeProject = async (projectId: string, userId: string) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { error } = await supabase
-        .from('project_likes')
-        .delete()
-        .eq('project_id', projectId)
-        .eq('user_id', userId)
-      if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const checkLike = async (projectId: string, userId: string): Promise<boolean> => {
+  const checkLike = async (pid: string, uid: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from('project_likes')
       .select('id')
-      .eq('project_id', projectId)
-      .eq('user_id', userId)
+      .eq('project_id', pid)
+      .eq('user_id', uid)
       .maybeSingle()
     if (error) throw error
     return !!data
   }
 
-  const getLikeCount = async (projectId: string): Promise<number> => {
+  const getLikeCount = async (pid: string): Promise<number> => {
     const { count, error } = await supabase
       .from('project_likes')
       .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId)
+      .eq('project_id', pid)
     if (error) throw error
     return count || 0
   }
 
-  return { likeProject, unlikeProject, checkLike, getLikeCount, loading, error }
+  const likedQuery = useQuery({
+    queryKey: keys.sub('projects', 'liked', projectId ? `${projectId}:${userId}` : undefined),
+    queryFn: () => checkLike(projectId as string, userId as string),
+    enabled: !!projectId && !!userId,
+  })
+
+  const countQuery = useQuery({
+    queryKey: keys.sub('projects', 'like-count', projectId),
+    queryFn: () => getLikeCount(projectId as string),
+    enabled: !!projectId,
+  })
+
+  const likedKey = keys.sub('projects', 'liked', projectId ? `${projectId}:${userId}` : undefined)
+  const countKey = keys.sub('projects', 'like-count', projectId)
+
+  const toggleMutation = useMutation({
+    mutationFn: async (nextLiked: boolean) => {
+      if (!projectId || !userId) throw new Error('projectId and userId are required')
+      if (nextLiked) {
+        const { error } = await supabase
+          .from('project_likes')
+          .insert({ project_id: projectId, user_id: userId })
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('project_likes')
+          .delete()
+          .eq('project_id', projectId)
+          .eq('user_id', userId)
+        if (error) throw error
+      }
+      return nextLiked
+    },
+    onMutate: async (nextLiked: boolean) => {
+      await queryClient.cancelQueries({ queryKey: likedKey })
+      await queryClient.cancelQueries({ queryKey: countKey })
+
+      const previousLiked = queryClient.getQueryData<boolean>(likedKey)
+      const previousCount = queryClient.getQueryData<number>(countKey)
+
+      queryClient.setQueryData<boolean>(likedKey, nextLiked)
+      queryClient.setQueryData<number>(countKey, (old) => {
+        const base = old ?? 0
+        return nextLiked ? base + 1 : Math.max(0, base - 1)
+      })
+
+      return { previousLiked, previousCount }
+    },
+    onError: (_err, _nextLiked, context) => {
+      if (context?.previousLiked !== undefined) {
+        queryClient.setQueryData(likedKey, context.previousLiked)
+      }
+      if (context?.previousCount !== undefined) {
+        queryClient.setQueryData(countKey, context.previousCount)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: likedKey })
+      queryClient.invalidateQueries({ queryKey: countKey })
+    },
+  })
+
+  const likeProject = async (pid: string, uid: string) => {
+    void pid
+    void uid
+    await toggleMutation.mutateAsync(true)
+  }
+
+  const unlikeProject = async (pid: string, uid: string) => {
+    void pid
+    void uid
+    await toggleMutation.mutateAsync(false)
+  }
+
+  return {
+    liked: likedQuery.data,
+    likeCount: countQuery.data,
+    likeProject,
+    unlikeProject,
+    checkLike,
+    getLikeCount,
+    loading: toggleMutation.isPending,
+    error: toggleMutation.error,
+  }
 }
 
 // Comments hooks
-export function useProjectComments(projectId: () => string | undefined) {
+export function useProjectComments(projectId: string | undefined) {
   const fetchComments = async (pid: string): Promise<ProjectComment[]> => {
     const { data, error } = await supabase
       .from('project_comments')
@@ -275,22 +350,24 @@ export function useProjectComments(projectId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [comments, { refetch }] = createResource(projectId, fetchComments)
-  return { comments, refetch }
+  const query = useQuery({
+    queryKey: keys.sub('projects', 'comments', projectId),
+    queryFn: () => fetchComments(projectId as string),
+    enabled: !!projectId,
+  })
+
+  return { comments: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateProjectComment() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createComment = async (data: {
-    project_id: string
-    user_id: string
-    content: string
-  }) => {
-    setLoading(true)
-    setError(null)
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      project_id: string
+      user_id: string
+      content: string
+    }) => {
       const { data: comment, error } = await supabase
         .from('project_comments')
         .insert(data)
@@ -298,30 +375,29 @@ export function useCreateProjectComment() {
         .single()
       if (error) throw error
       return comment
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('projects', 'comments', variables.project_id) })
+    },
+  })
 
-  const deleteComment = async (commentId: string) => {
-    setLoading(true)
-    setError(null)
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async (commentId: string) => {
       const { error } = await supabase
         .from('project_comments')
         .delete()
         .eq('id', commentId)
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('projects', 'comments') })
+    },
+  })
 
-  return { createComment, deleteComment, loading, error }
+  return {
+    createComment: mutation.mutateAsync,
+    deleteComment: deleteMutation.mutateAsync,
+    loading: mutation.isPending || deleteMutation.isPending,
+    error: mutation.error || deleteMutation.error,
+  }
 }

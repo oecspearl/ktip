@@ -1,4 +1,3 @@
-import { Show, For } from 'solid-js'
 import {
   Rocket,
   FolderKanban,
@@ -10,7 +9,7 @@ import {
   Handshake,
   Settings,
   Wrench,
-} from 'lucide-solid'
+} from 'lucide-react'
 import { HelpArticle } from './HelpArticle'
 import type { HelpCategory as HelpCategoryType } from '../../lib/help-content'
 
@@ -29,43 +28,39 @@ const ICON_MAP: Record<string, any> = {
 
 interface HelpCategoryProps {
   category: HelpCategoryType
-  expandedArticleId: () => string | null
+  expandedArticleId: string | null
   onToggleArticle: (id: string) => void
 }
 
-export function HelpCategorySection(props: HelpCategoryProps) {
-  const Icon = () => ICON_MAP[props.category.icon] || Rocket
+export function HelpCategorySection({ category, expandedArticleId, onToggleArticle }: HelpCategoryProps) {
+  if (category.articles.length === 0) return null
+
+  const Icon = ICON_MAP[category.icon] || Rocket
 
   return (
-    <Show when={props.category.articles.length > 0}>
-      <section class="mb-8">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 rounded-xl bg-ktip-ocean-50 flex items-center justify-center text-ktip-ocean-600">
-            {(() => {
-              const I = Icon()
-              return <I size={20} />
-            })()}
-          </div>
-          <div>
-            <h2 class="text-lg font-display font-bold text-ktip-sand-900">
-              {props.category.title}
-            </h2>
-            <p class="text-sm text-ktip-sand-500">{props.category.description}</p>
-          </div>
+    <section className="mb-8">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-ktip-ocean-50 flex items-center justify-center text-ktip-ocean-600">
+          <Icon size={20} />
         </div>
+        <div>
+          <h2 className="text-lg font-display font-bold text-ktip-sand-900">
+            {category.title}
+          </h2>
+          <p className="text-sm text-ktip-sand-500">{category.description}</p>
+        </div>
+      </div>
 
-        <div class="space-y-2">
-          <For each={props.category.articles}>
-            {(article) => (
-              <HelpArticle
-                article={article}
-                expanded={props.expandedArticleId() === article.id}
-                onToggle={() => props.onToggleArticle(article.id)}
-              />
-            )}
-          </For>
-        </div>
-      </section>
-    </Show>
+      <div className="space-y-2">
+        {category.articles.map((article) => (
+          <HelpArticle
+            key={article.id}
+            article={article}
+            expanded={expandedArticleId === article.id}
+            onToggle={() => onToggleArticle(article.id)}
+          />
+        ))}
+      </div>
+    </section>
   )
 }

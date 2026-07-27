@@ -1,4 +1,4 @@
-import { createSignal, Show, For, Suspense } from 'solid-js'
+import { useState } from 'react'
 import type { EventPageSection, EventSectionType } from '../../../types'
 import {
   useEventPageSections,
@@ -27,7 +27,7 @@ import {
   MapPin,
   Heart,
   FileText,
-} from 'lucide-solid'
+} from 'lucide-react'
 
 interface AdminEventPageBuilderTabProps {
   eventId: string
@@ -93,31 +93,291 @@ function getDefaultTitle(type: EventSectionType): string {
   }
 }
 
+// --- Content editors (shared between new and edit) ---
+
+interface ContentEditorProps {
+  content: Record<string, any>
+  setContent: (c: Record<string, any>) => void
+}
+
+function AboutCustomEditor({ content, setContent }: ContentEditorProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Body Content</label>
+      <textarea
+        value={content.body || ''}
+        onChange={(e) =>
+          setContent({ ...content, body: e.currentTarget.value })
+        }
+        rows={6}
+        className={cn(INPUT_CLASS, 'resize-none')}
+        placeholder="Write the section content..."
+      />
+    </div>
+  )
+}
+
+function FaqEditor({ content, setContent }: ContentEditorProps) {
+  const items = (content.items as { question: string; answer: string }[]) || []
+
+  const updateItem = (index: number, field: 'question' | 'answer', value: string) => {
+    const updated = [...items]
+    updated[index] = { ...updated[index], [field]: value }
+    setContent({ ...content, items: updated })
+  }
+
+  const addItem = () => {
+    setContent({
+      ...content,
+      items: [...items, { question: '', answer: '' }],
+    })
+  }
+
+  const removeItem = (index: number) => {
+    const updated = items.filter((_, i) => i !== index)
+    setContent({ ...content, items: updated })
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="block text-sm font-medium text-ktip-sand-700">Q&A Pairs</label>
+        <button
+          type="button"
+          onClick={addItem}
+          className="inline-flex items-center gap-1 text-xs font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
+        >
+          <Plus size={14} />
+          Add Q&A
+        </button>
+      </div>
+      {items.map((item, index) => (
+        <div key={index} className="relative bg-ktip-sand-50 rounded-lg p-4 space-y-2">
+          <button
+            type="button"
+            onClick={() => removeItem(index)}
+            className="absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
+            title="Remove Q&A"
+          >
+            <X size={14} />
+          </button>
+          <div>
+            <label className="block text-xs font-medium text-ktip-sand-600 mb-1">
+              Question {index + 1}
+            </label>
+            <input
+              type="text"
+              value={item.question}
+              onChange={(e) => updateItem(index, 'question', e.currentTarget.value)}
+              className={INPUT_CLASS}
+              placeholder="Enter question..."
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-ktip-sand-600 mb-1">Answer</label>
+            <textarea
+              value={item.answer}
+              onChange={(e) => updateItem(index, 'answer', e.currentTarget.value)}
+              rows={2}
+              className={cn(INPUT_CLASS, 'resize-none')}
+              placeholder="Enter answer..."
+            />
+          </div>
+        </div>
+      ))}
+      {items.length === 0 && (
+        <p className="text-sm text-ktip-sand-400 text-center py-4">
+          No Q&A pairs yet. Click "Add Q&A" to get started.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function VenueEditor({ content, setContent }: ContentEditorProps) {
+  const updateField = (field: string, value: string) => {
+    setContent({ ...content, [field]: value })
+  }
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Venue Name</label>
+        <input
+          type="text"
+          value={content.name || ''}
+          onChange={(e) => updateField('name', e.currentTarget.value)}
+          className={INPUT_CLASS}
+          placeholder="e.g., National Cultural Centre"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Address</label>
+        <input
+          type="text"
+          value={content.address || ''}
+          onChange={(e) => updateField('address', e.currentTarget.value)}
+          className={INPUT_CLASS}
+          placeholder="Full street address..."
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Map URL</label>
+        <input
+          type="url"
+          value={content.map_url || ''}
+          onChange={(e) => updateField('map_url', e.currentTarget.value)}
+          className={INPUT_CLASS}
+          placeholder="https://maps.google.com/..."
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Directions</label>
+        <textarea
+          value={content.directions || ''}
+          onChange={(e) => updateField('directions', e.currentTarget.value)}
+          rows={3}
+          className={cn(INPUT_CLASS, 'resize-none')}
+          placeholder="How to get to the venue..."
+        />
+      </div>
+    </div>
+  )
+}
+
+function SponsorsEditor({ content, setContent }: ContentEditorProps) {
+  const items =
+    (content.items as { name: string; logo_url: string; website: string }[]) || []
+
+  const updateItem = (index: number, field: 'name' | 'logo_url' | 'website', value: string) => {
+    const updated = [...items]
+    updated[index] = { ...updated[index], [field]: value }
+    setContent({ ...content, items: updated })
+  }
+
+  const addItem = () => {
+    setContent({
+      ...content,
+      items: [...items, { name: '', logo_url: '', website: '' }],
+    })
+  }
+
+  const removeItem = (index: number) => {
+    const updated = items.filter((_, i) => i !== index)
+    setContent({ ...content, items: updated })
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="block text-sm font-medium text-ktip-sand-700">Sponsors</label>
+        <button
+          type="button"
+          onClick={addItem}
+          className="inline-flex items-center gap-1 text-xs font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
+        >
+          <Plus size={14} />
+          Add Sponsor
+        </button>
+      </div>
+      {items.map((item, index) => (
+        <div key={index} className="relative bg-ktip-sand-50 rounded-lg p-4 space-y-2">
+          <button
+            type="button"
+            onClick={() => removeItem(index)}
+            className="absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
+            title="Remove sponsor"
+          >
+            <X size={14} />
+          </button>
+          <div>
+            <label className="block text-xs font-medium text-ktip-sand-600 mb-1">
+              Sponsor Name
+            </label>
+            <input
+              type="text"
+              value={item.name}
+              onChange={(e) => updateItem(index, 'name', e.currentTarget.value)}
+              className={INPUT_CLASS}
+              placeholder="Sponsor name..."
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-ktip-sand-600 mb-1">Logo URL</label>
+            <input
+              type="url"
+              value={item.logo_url}
+              onChange={(e) => updateItem(index, 'logo_url', e.currentTarget.value)}
+              className={INPUT_CLASS}
+              placeholder="https://example.com/logo.png"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-ktip-sand-600 mb-1">Website</label>
+            <input
+              type="url"
+              value={item.website}
+              onChange={(e) => updateItem(index, 'website', e.currentTarget.value)}
+              className={INPUT_CLASS}
+              placeholder="https://sponsor-website.com"
+            />
+          </div>
+        </div>
+      ))}
+      {items.length === 0 && (
+        <p className="text-sm text-ktip-sand-400 text-center py-4">
+          No sponsors yet. Click "Add Sponsor" to get started.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function renderContentEditor(
+  type: EventSectionType,
+  content: Record<string, any>,
+  setContent: (c: Record<string, any>) => void
+) {
+  switch (type) {
+    case 'about':
+    case 'custom':
+      return <AboutCustomEditor content={content} setContent={setContent} />
+    case 'faq':
+      return <FaqEditor content={content} setContent={setContent} />
+    case 'venue':
+      return <VenueEditor content={content} setContent={setContent} />
+    case 'sponsors':
+      return <SponsorsEditor content={content} setContent={setContent} />
+    default:
+      return null
+  }
+}
+
 export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTabProps) {
   const toast = useToast()
 
-  const { sections, refetch } = useEventPageSections(() => props.eventId)
+  const { sections, loading: sectionsLoading, refetch } = useEventPageSections(props.eventId)
   const { createSection, loading: creating } = useCreateSection()
   const { updateSection, loading: updating } = useUpdateSection()
   const { deleteSection, loading: deleting } = useDeleteSection()
   const { reorderSections, loading: reordering } = useReorderSections()
 
   // Track which section is being edited (by id), or null
-  const [editingSection, setEditingSection] = createSignal<string | null>(null)
+  const [editingSection, setEditingSection] = useState<string | null>(null)
   // Track add mode: null = not adding, or the chosen section type
-  const [addMode, setAddMode] = createSignal<EventSectionType | null>(null)
+  const [addMode, setAddMode] = useState<EventSectionType | null>(null)
   // Show the type selection dropdown
-  const [showTypeSelector, setShowTypeSelector] = createSignal(false)
+  const [showTypeSelector, setShowTypeSelector] = useState(false)
   // Delete confirmation target
-  const [deleteTarget, setDeleteTarget] = createSignal<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   // Editing form state (for existing sections)
-  const [editTitle, setEditTitle] = createSignal('')
-  const [editContent, setEditContent] = createSignal<Record<string, any>>({})
+  const [editTitle, setEditTitle] = useState('')
+  const [editContent, setEditContent] = useState<Record<string, any>>({})
 
   // New section form state
-  const [newTitle, setNewTitle] = createSignal('')
-  const [newContent, setNewContent] = createSignal<Record<string, any>>({})
+  const [newTitle, setNewTitle] = useState('')
+  const [newContent, setNewContent] = useState<Record<string, any>>({})
 
   // --- Add Section Flow ---
 
@@ -136,22 +396,22 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
   }
 
   const handleCreateSection = async () => {
-    const type = addMode()
+    const type = addMode
     if (!type) return
 
-    const title = newTitle().trim()
+    const title = newTitle.trim()
     if (!title) {
       toast.error('Section title is required')
       return
     }
 
     try {
-      const currentSections = sections() || []
+      const currentSections = sections || []
       await createSection({
         event_id: props.eventId,
         section_type: type,
         title,
-        content: newContent(),
+        content: newContent,
         sort_order: currentSections.length,
       })
       toast.success('Section created successfully')
@@ -177,7 +437,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
   }
 
   const handleSaveSection = async (sectionId: string) => {
-    const title = editTitle().trim()
+    const title = editTitle.trim()
     if (!title) {
       toast.error('Section title is required')
       return
@@ -186,7 +446,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
     try {
       await updateSection(sectionId, {
         title,
-        content: editContent(),
+        content: editContent,
       })
       toast.success('Section saved successfully')
       cancelEdit()
@@ -211,7 +471,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
   // --- Reorder ---
 
   const handleMoveUp = async (index: number) => {
-    const currentSections = sections()
+    const currentSections = sections
     if (!currentSections || index <= 0) return
 
     const ids = currentSections.map((s) => s.id)
@@ -228,7 +488,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
   }
 
   const handleMoveDown = async (index: number) => {
-    const currentSections = sections()
+    const currentSections = sections
     if (!currentSections || index >= currentSections.length - 1) return
 
     const ids = currentSections.map((s) => s.id)
@@ -247,14 +507,14 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
   // --- Delete ---
 
   const handleDelete = async () => {
-    const id = deleteTarget()
+    const id = deleteTarget
     if (!id) return
 
     try {
       await deleteSection(id)
       toast.success('Section deleted')
       setDeleteTarget(null)
-      if (editingSection() === id) {
+      if (editingSection === id) {
         cancelEdit()
       }
       refetch()
@@ -263,284 +523,13 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
     }
   }
 
-  // --- Content editors (shared between new and edit) ---
-
-  function AboutCustomEditor(editorProps: {
-    content: () => Record<string, any>
-    setContent: (c: Record<string, any>) => void
-  }) {
-    return (
-      <div>
-        <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Body Content</label>
-        <textarea
-          value={editorProps.content().body || ''}
-          onInput={(e) =>
-            editorProps.setContent({ ...editorProps.content(), body: e.currentTarget.value })
-          }
-          rows={6}
-          class={cn(INPUT_CLASS, 'resize-none')}
-          placeholder="Write the section content..."
-        />
-      </div>
-    )
-  }
-
-  function FaqEditor(editorProps: {
-    content: () => Record<string, any>
-    setContent: (c: Record<string, any>) => void
-  }) {
-    const items = () => (editorProps.content().items as { question: string; answer: string }[]) || []
-
-    const updateItem = (index: number, field: 'question' | 'answer', value: string) => {
-      const updated = [...items()]
-      updated[index] = { ...updated[index], [field]: value }
-      editorProps.setContent({ ...editorProps.content(), items: updated })
-    }
-
-    const addItem = () => {
-      editorProps.setContent({
-        ...editorProps.content(),
-        items: [...items(), { question: '', answer: '' }],
-      })
-    }
-
-    const removeItem = (index: number) => {
-      const updated = items().filter((_, i) => i !== index)
-      editorProps.setContent({ ...editorProps.content(), items: updated })
-    }
-
-    return (
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <label class="block text-sm font-medium text-ktip-sand-700">Q&A Pairs</label>
-          <button
-            type="button"
-            onClick={addItem}
-            class="inline-flex items-center gap-1 text-xs font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-          >
-            <Plus size={14} />
-            Add Q&A
-          </button>
-        </div>
-        <For each={items()}>
-          {(item, index) => (
-            <div class="relative bg-ktip-sand-50 rounded-lg p-4 space-y-2">
-              <button
-                type="button"
-                onClick={() => removeItem(index())}
-                class="absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
-                title="Remove Q&A"
-              >
-                <X size={14} />
-              </button>
-              <div>
-                <label class="block text-xs font-medium text-ktip-sand-600 mb-1">
-                  Question {index() + 1}
-                </label>
-                <input
-                  type="text"
-                  value={item.question}
-                  onInput={(e) => updateItem(index(), 'question', e.currentTarget.value)}
-                  class={INPUT_CLASS}
-                  placeholder="Enter question..."
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-ktip-sand-600 mb-1">Answer</label>
-                <textarea
-                  value={item.answer}
-                  onInput={(e) => updateItem(index(), 'answer', e.currentTarget.value)}
-                  rows={2}
-                  class={cn(INPUT_CLASS, 'resize-none')}
-                  placeholder="Enter answer..."
-                />
-              </div>
-            </div>
-          )}
-        </For>
-        <Show when={items().length === 0}>
-          <p class="text-sm text-ktip-sand-400 text-center py-4">
-            No Q&A pairs yet. Click "Add Q&A" to get started.
-          </p>
-        </Show>
-      </div>
-    )
-  }
-
-  function VenueEditor(editorProps: {
-    content: () => Record<string, any>
-    setContent: (c: Record<string, any>) => void
-  }) {
-    const updateField = (field: string, value: string) => {
-      editorProps.setContent({ ...editorProps.content(), [field]: value })
-    }
-
-    return (
-      <div class="space-y-3">
-        <div>
-          <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Venue Name</label>
-          <input
-            type="text"
-            value={editorProps.content().name || ''}
-            onInput={(e) => updateField('name', e.currentTarget.value)}
-            class={INPUT_CLASS}
-            placeholder="e.g., National Cultural Centre"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Address</label>
-          <input
-            type="text"
-            value={editorProps.content().address || ''}
-            onInput={(e) => updateField('address', e.currentTarget.value)}
-            class={INPUT_CLASS}
-            placeholder="Full street address..."
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Map URL</label>
-          <input
-            type="url"
-            value={editorProps.content().map_url || ''}
-            onInput={(e) => updateField('map_url', e.currentTarget.value)}
-            class={INPUT_CLASS}
-            placeholder="https://maps.google.com/..."
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Directions</label>
-          <textarea
-            value={editorProps.content().directions || ''}
-            onInput={(e) => updateField('directions', e.currentTarget.value)}
-            rows={3}
-            class={cn(INPUT_CLASS, 'resize-none')}
-            placeholder="How to get to the venue..."
-          />
-        </div>
-      </div>
-    )
-  }
-
-  function SponsorsEditor(editorProps: {
-    content: () => Record<string, any>
-    setContent: (c: Record<string, any>) => void
-  }) {
-    const items = () =>
-      (editorProps.content().items as { name: string; logo_url: string; website: string }[]) || []
-
-    const updateItem = (index: number, field: 'name' | 'logo_url' | 'website', value: string) => {
-      const updated = [...items()]
-      updated[index] = { ...updated[index], [field]: value }
-      editorProps.setContent({ ...editorProps.content(), items: updated })
-    }
-
-    const addItem = () => {
-      editorProps.setContent({
-        ...editorProps.content(),
-        items: [...items(), { name: '', logo_url: '', website: '' }],
-      })
-    }
-
-    const removeItem = (index: number) => {
-      const updated = items().filter((_, i) => i !== index)
-      editorProps.setContent({ ...editorProps.content(), items: updated })
-    }
-
-    return (
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <label class="block text-sm font-medium text-ktip-sand-700">Sponsors</label>
-          <button
-            type="button"
-            onClick={addItem}
-            class="inline-flex items-center gap-1 text-xs font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-          >
-            <Plus size={14} />
-            Add Sponsor
-          </button>
-        </div>
-        <For each={items()}>
-          {(item, index) => (
-            <div class="relative bg-ktip-sand-50 rounded-lg p-4 space-y-2">
-              <button
-                type="button"
-                onClick={() => removeItem(index())}
-                class="absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
-                title="Remove sponsor"
-              >
-                <X size={14} />
-              </button>
-              <div>
-                <label class="block text-xs font-medium text-ktip-sand-600 mb-1">
-                  Sponsor Name
-                </label>
-                <input
-                  type="text"
-                  value={item.name}
-                  onInput={(e) => updateItem(index(), 'name', e.currentTarget.value)}
-                  class={INPUT_CLASS}
-                  placeholder="Sponsor name..."
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-ktip-sand-600 mb-1">Logo URL</label>
-                <input
-                  type="url"
-                  value={item.logo_url}
-                  onInput={(e) => updateItem(index(), 'logo_url', e.currentTarget.value)}
-                  class={INPUT_CLASS}
-                  placeholder="https://example.com/logo.png"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-ktip-sand-600 mb-1">Website</label>
-                <input
-                  type="url"
-                  value={item.website}
-                  onInput={(e) => updateItem(index(), 'website', e.currentTarget.value)}
-                  class={INPUT_CLASS}
-                  placeholder="https://sponsor-website.com"
-                />
-              </div>
-            </div>
-          )}
-        </For>
-        <Show when={items().length === 0}>
-          <p class="text-sm text-ktip-sand-400 text-center py-4">
-            No sponsors yet. Click "Add Sponsor" to get started.
-          </p>
-        </Show>
-      </div>
-    )
-  }
-
-  function renderContentEditor(
-    type: EventSectionType,
-    content: () => Record<string, any>,
-    setContent: (c: Record<string, any>) => void
-  ) {
-    switch (type) {
-      case 'about':
-      case 'custom':
-        return <AboutCustomEditor content={content} setContent={setContent} />
-      case 'faq':
-        return <FaqEditor content={content} setContent={setContent} />
-      case 'venue':
-        return <VenueEditor content={content} setContent={setContent} />
-      case 'sponsors':
-        return <SponsorsEditor content={content} setContent={setContent} />
-      default:
-        return null
-    }
-  }
-
   return (
-    <div class="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-ktip-sand-900 font-display">Page Sections</h3>
-        <Show when={!addMode() && !showTypeSelector()}>
-          <div class="relative">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-ktip-sand-900 font-display">Page Sections</h3>
+        {!addMode && !showTypeSelector && (
+          <div className="relative">
             <Button
               size="sm"
               icon={<Plus size={14} />}
@@ -549,301 +538,287 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
               Add Section
             </Button>
           </div>
-        </Show>
+        )}
       </div>
 
       {/* Type Selector Dropdown */}
-      <Show when={showTypeSelector()}>
-        <div class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h4 class="font-medium text-ktip-sand-900">Choose Section Type</h4>
+      {showTypeSelector && (
+        <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-medium text-ktip-sand-900">Choose Section Type</h4>
             <button
               type="button"
               onClick={() => setShowTypeSelector(false)}
-              class="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
+              className="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
             >
               <X size={18} />
             </button>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <For each={SECTION_TYPE_OPTIONS}>
-              {(option) => {
-                const Icon = SECTION_TYPE_ICONS[option.value]
-                return (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectType(option.value)}
-                    class="flex flex-col items-center gap-2 p-4 rounded-xl border border-ktip-sand-200 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50 transition-all text-center group"
-                  >
-                    <div class="w-10 h-10 rounded-lg bg-ktip-sand-100 group-hover:bg-ktip-ocean-100 flex items-center justify-center transition-colors">
-                      <Icon size={20} class="text-ktip-sand-500 group-hover:text-ktip-ocean-600 transition-colors" />
-                    </div>
-                    <span class="text-sm font-medium text-ktip-sand-700 group-hover:text-ktip-ocean-700 transition-colors">
-                      {option.label}
-                    </span>
-                  </button>
-                )
-              }}
-            </For>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {SECTION_TYPE_OPTIONS.map((option) => {
+              const Icon = SECTION_TYPE_ICONS[option.value]
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelectType(option.value)}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-ktip-sand-200 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50 transition-all text-center group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-ktip-sand-100 group-hover:bg-ktip-ocean-100 flex items-center justify-center transition-colors">
+                    <Icon size={20} className="text-ktip-sand-500 group-hover:text-ktip-ocean-600 transition-colors" />
+                  </div>
+                  <span className="text-sm font-medium text-ktip-sand-700 group-hover:text-ktip-ocean-700 transition-colors">
+                    {option.label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
-      </Show>
+      )}
 
       {/* New Section Editor */}
-      <Show when={addMode()}>
-        {(type) => (
-          <div class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <h4 class="font-medium text-ktip-sand-900">
-                  New {EVENT_SECTION_TYPE_LABELS[type()] || type()} Section
-                </h4>
-                <Badge size="sm" class={SECTION_TYPE_BADGE_VARIANTS[type()]}>
-                  {EVENT_SECTION_TYPE_LABELS[type()] || type()}
-                </Badge>
-              </div>
-              <button
-                type="button"
-                onClick={cancelAdd}
-                class="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
-              >
-                <X size={18} />
-              </button>
+      {addMode && (
+        <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium text-ktip-sand-900">
+                New {EVENT_SECTION_TYPE_LABELS[addMode] || addMode} Section
+              </h4>
+              <Badge size="sm" className={SECTION_TYPE_BADGE_VARIANTS[addMode]}>
+                {EVENT_SECTION_TYPE_LABELS[addMode] || addMode}
+              </Badge>
             </div>
-
-            <div>
-              <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Section Title</label>
-              <input
-                type="text"
-                value={newTitle()}
-                onInput={(e) => setNewTitle(e.currentTarget.value)}
-                class={INPUT_CLASS}
-                placeholder="Section title..."
-              />
-            </div>
-
-            {renderContentEditor(type(), newContent, setNewContent)}
-
-            <div class="flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="sm" onClick={cancelAdd} type="button">
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                icon={<Save size={14} />}
-                onClick={handleCreateSection}
-                loading={creating()}
-              >
-                Create Section
-              </Button>
-            </div>
+            <button
+              type="button"
+              onClick={cancelAdd}
+              className="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
+            >
+              <X size={18} />
+            </button>
           </div>
-        )}
-      </Show>
+
+          <div>
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Section Title</label>
+            <input
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.currentTarget.value)}
+              className={INPUT_CLASS}
+              placeholder="Section title..."
+            />
+          </div>
+
+          {renderContentEditor(addMode, newContent, setNewContent)}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={cancelAdd} type="button">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              icon={<Save size={14} />}
+              onClick={handleCreateSection}
+              loading={creating}
+            >
+              Create Section
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Sections List */}
-      <Suspense
-        fallback={
-          <div class="text-center text-ktip-sand-500 py-8">Loading sections...</div>
-        }
-      >
-        <Show
-          when={sections()?.length}
-          fallback={
-            <Show when={!addMode() && !showTypeSelector()}>
-              <div class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
-                <FileText size={48} class="mx-auto text-ktip-sand-300 mb-4" />
-                <h3 class="text-lg font-semibold text-ktip-sand-700 mb-1 font-display">
-                  No page sections yet
-                </h3>
-                <p class="text-ktip-sand-500 text-sm mb-4">
-                  Add sections like About, FAQ, Venue, or Sponsors to build your event page
-                </p>
-                <Button
-                  size="sm"
-                  icon={<Plus size={14} />}
-                  onClick={() => setShowTypeSelector(true)}
-                >
-                  Add First Section
-                </Button>
-              </div>
-            </Show>
-          }
-        >
-          <div class="space-y-3">
-            <For each={sections()}>
-              {(section, index) => {
-                const Icon = SECTION_TYPE_ICONS[section.section_type] || FileText
-                const isEditing = () => editingSection() === section.id
+      {sectionsLoading ? (
+        <div className="text-center text-ktip-sand-500 py-8">Loading sections...</div>
+      ) : sections?.length ? (
+        <div className="space-y-3">
+          {sections.map((section, index) => {
+            const Icon = SECTION_TYPE_ICONS[section.section_type] || FileText
+            const isEditing = editingSection === section.id
 
-                return (
+            return (
+              <div
+                key={section.id}
+                className={cn(
+                  'bg-white rounded-xl border shadow-card transition-all',
+                  isEditing
+                    ? 'border-ktip-ocean-300 ring-2 ring-ktip-ocean-500/10'
+                    : 'border-ktip-sand-200'
+                )}
+              >
+                {/* Section Header Row */}
+                <div className="flex items-center gap-3 p-4">
+                  {/* Icon */}
                   <div
-                    class={cn(
-                      'bg-white rounded-xl border shadow-card transition-all',
-                      isEditing()
-                        ? 'border-ktip-ocean-300 ring-2 ring-ktip-ocean-500/10'
-                        : 'border-ktip-sand-200'
+                    className={cn(
+                      'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                      section.is_visible ? 'bg-ktip-ocean-100' : 'bg-ktip-sand-100'
                     )}
                   >
-                    {/* Section Header Row */}
-                    <div class="flex items-center gap-3 p-4">
-                      {/* Icon */}
-                      <div
-                        class={cn(
-                          'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-                          section.is_visible ? 'bg-ktip-ocean-100' : 'bg-ktip-sand-100'
+                    <Icon
+                      size={16}
+                      className={section.is_visible ? 'text-ktip-ocean-600' : 'text-ktip-sand-400'}
+                    />
+                  </div>
+
+                  {/* Title + Badge */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4
+                        className={cn(
+                          'font-medium truncate',
+                          section.is_visible ? 'text-ktip-sand-900' : 'text-ktip-sand-400'
                         )}
                       >
-                        <Icon
-                          size={16}
-                          class={section.is_visible ? 'text-ktip-ocean-600' : 'text-ktip-sand-400'}
-                        />
-                      </div>
+                        {section.title}
+                      </h4>
+                      <Badge size="sm" className={SECTION_TYPE_BADGE_VARIANTS[section.section_type]}>
+                        {EVENT_SECTION_TYPE_LABELS[section.section_type] || section.section_type}
+                      </Badge>
+                      {!section.is_visible && (
+                        <Badge size="sm" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                          Hidden
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-ktip-sand-400 mt-0.5">
+                      Order: {section.sort_order}
+                    </p>
+                  </div>
 
-                      {/* Title + Badge */}
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                          <h4
-                            class={cn(
-                              'font-medium truncate',
-                              section.is_visible ? 'text-ktip-sand-900' : 'text-ktip-sand-400'
-                            )}
-                          >
-                            {section.title}
-                          </h4>
-                          <Badge size="sm" class={SECTION_TYPE_BADGE_VARIANTS[section.section_type]}>
-                            {EVENT_SECTION_TYPE_LABELS[section.section_type] || section.section_type}
-                          </Badge>
-                          <Show when={!section.is_visible}>
-                            <Badge size="sm" class="bg-yellow-100 text-yellow-700 border-yellow-200">
-                              Hidden
-                            </Badge>
-                          </Show>
-                        </div>
-                        <p class="text-xs text-ktip-sand-400 mt-0.5">
-                          Order: {section.sort_order}
-                        </p>
-                      </div>
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    {/* Visibility Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => toggleVisibility(section)}
+                      className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
+                      title={section.is_visible ? 'Hide section' : 'Show section'}
+                    >
+                      {section.is_visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
 
-                      {/* Action Buttons */}
-                      <div class="flex items-center gap-0.5 flex-shrink-0">
-                        {/* Visibility Toggle */}
-                        <button
-                          type="button"
-                          onClick={() => toggleVisibility(section)}
-                          class="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
-                          title={section.is_visible ? 'Hide section' : 'Show section'}
-                        >
-                          {section.is_visible ? <Eye size={16} /> : <EyeOff size={16} />}
-                        </button>
+                    {/* Move Up */}
+                    <button
+                      type="button"
+                      onClick={() => handleMoveUp(index)}
+                      disabled={index === 0 || reordering}
+                      className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Move up"
+                    >
+                      <ChevronUp size={16} />
+                    </button>
 
-                        {/* Move Up */}
-                        <button
-                          type="button"
-                          onClick={() => handleMoveUp(index())}
-                          disabled={index() === 0 || reordering()}
-                          class="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                          title="Move up"
-                        >
-                          <ChevronUp size={16} />
-                        </button>
+                    {/* Move Down */}
+                    <button
+                      type="button"
+                      onClick={() => handleMoveDown(index)}
+                      disabled={index === (sections?.length || 0) - 1 || reordering}
+                      className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Move down"
+                    >
+                      <ChevronDown size={16} />
+                    </button>
 
-                        {/* Move Down */}
-                        <button
-                          type="button"
-                          onClick={() => handleMoveDown(index())}
-                          disabled={index() === (sections()?.length || 0) - 1 || reordering()}
-                          class="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                          title="Move down"
-                        >
-                          <ChevronDown size={16} />
-                        </button>
+                    {/* Edit Toggle */}
+                    {!isEditing ? (
+                      <button
+                        type="button"
+                        onClick={() => startEdit(section)}
+                        className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
+                        title="Edit"
+                      >
+                        <FileText size={16} />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={cancelEdit}
+                        className="p-1.5 text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
+                        title="Close editor"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
 
-                        {/* Edit Toggle */}
-                        <Show
-                          when={!isEditing()}
-                          fallback={
-                            <button
-                              type="button"
-                              onClick={cancelEdit}
-                              class="p-1.5 text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-                              title="Close editor"
-                            >
-                              <X size={16} />
-                            </button>
-                          }
-                        >
-                          <button
-                            type="button"
-                            onClick={() => startEdit(section)}
-                            class="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
-                            title="Edit"
-                          >
-                            <FileText size={16} />
-                          </button>
-                        </Show>
+                    {/* Delete */}
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(section.id)}
+                      className="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
 
-                        {/* Delete */}
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(section.id)}
-                          class="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                {/* Collapsible Editor */}
+                {isEditing && (
+                  <div className="border-t border-ktip-sand-200 p-4 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+                        Section Title
+                      </label>
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.currentTarget.value)}
+                        className={INPUT_CLASS}
+                        placeholder="Section title..."
+                      />
                     </div>
 
-                    {/* Collapsible Editor */}
-                    <Show when={isEditing()}>
-                      <div class="border-t border-ktip-sand-200 p-4 space-y-4">
-                        <div>
-                          <label class="block text-sm font-medium text-ktip-sand-700 mb-1">
-                            Section Title
-                          </label>
-                          <input
-                            type="text"
-                            value={editTitle()}
-                            onInput={(e) => setEditTitle(e.currentTarget.value)}
-                            class={INPUT_CLASS}
-                            placeholder="Section title..."
-                          />
-                        </div>
+                    {renderContentEditor(section.section_type, editContent, setEditContent)}
 
-                        {renderContentEditor(section.section_type, editContent, setEditContent)}
-
-                        <div class="flex justify-end gap-2 pt-2">
-                          <Button variant="outline" size="sm" onClick={cancelEdit} type="button">
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            icon={<Save size={14} />}
-                            onClick={() => handleSaveSection(section.id)}
-                            loading={updating()}
-                          >
-                            Save Changes
-                          </Button>
-                        </div>
-                      </div>
-                    </Show>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="outline" size="sm" onClick={cancelEdit} type="button">
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        icon={<Save size={14} />}
+                        onClick={() => handleSaveSection(section.id)}
+                        loading={updating}
+                      >
+                        Save Changes
+                      </Button>
+                    </div>
                   </div>
-                )
-              }}
-            </For>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        !addMode && !showTypeSelector && (
+          <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
+            <FileText size={48} className="mx-auto text-ktip-sand-300 mb-4" />
+            <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1 font-display">
+              No page sections yet
+            </h3>
+            <p className="text-ktip-sand-500 text-sm mb-4">
+              Add sections like About, FAQ, Venue, or Sponsors to build your event page
+            </p>
+            <Button
+              size="sm"
+              icon={<Plus size={14} />}
+              onClick={() => setShowTypeSelector(true)}
+            >
+              Add First Section
+            </Button>
           </div>
-        </Show>
-      </Suspense>
+        )
+      )}
 
       {/* Delete Confirm Modal */}
       <ConfirmModal
-        open={!!deleteTarget()}
+        open={!!deleteTarget}
         title="Delete Section"
         message="Are you sure you want to delete this page section? This action cannot be undone."
         confirmLabel="Delete"
         confirmVariant="danger"
-        loading={deleting()}
+        loading={deleting}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

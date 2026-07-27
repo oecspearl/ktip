@@ -1,14 +1,11 @@
 import { defineConfig } from 'vitest/config'
-import solid from 'vite-plugin-solid'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [solid()],
+  plugins: [react()],
   test: {
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.test.{ts,tsx}'],
-  },
-  resolve: {
-    conditions: ['development', 'browser'],
   },
 })

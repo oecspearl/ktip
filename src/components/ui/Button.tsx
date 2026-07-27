@@ -1,29 +1,28 @@
-import { type JSX, splitProps, Show } from 'solid-js'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '../../lib/utils'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
-interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
   loading?: boolean
-  icon?: JSX.Element
+  icon?: ReactNode
   fullWidth?: boolean
 }
 
-export function Button(props: ButtonProps) {
-  const [local, others] = splitProps(props, [
-    'class',
-    'variant',
-    'size',
-    'loading',
-    'icon',
-    'fullWidth',
-    'children',
-    'disabled',
-  ])
-
+export function Button({
+  className,
+  variant,
+  size,
+  loading,
+  icon,
+  fullWidth,
+  children,
+  disabled,
+  ...others
+}: ButtonProps) {
   const variantStyles = {
     primary:
       'bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white shadow-soft hover:shadow-medium hover:-translate-y-0.5 disabled:from-ktip-ocean-300 disabled:to-ktip-ocean-400',
@@ -43,21 +42,21 @@ export function Button(props: ButtonProps) {
 
   return (
     <button
-      class={cn(
+      className={cn(
         'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
-        variantStyles[local.variant || 'primary'],
-        sizeStyles[local.size || 'md'],
-        local.fullWidth && 'w-full',
-        local.class
+        variantStyles[variant || 'primary'],
+        sizeStyles[size || 'md'],
+        fullWidth && 'w-full',
+        className
       )}
-      disabled={local.disabled || local.loading}
+      disabled={disabled || loading}
       {...others}
     >
-      <Show when={local.loading}>
-        <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-      </Show>
-      <Show when={!local.loading && local.icon}>{local.icon}</Show>
-      {local.children}
+      {loading && (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+      )}
+      {!loading && icon}
+      {children}
     </button>
   )
 }

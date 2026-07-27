@@ -1,4 +1,5 @@
-import { createContext, useContext, onCleanup, type ParentComponent } from 'solid-js'
+import { useContext, createContext, useEffect, useRef, type ReactNode } from 'react'
+import { useLocation } from 'react-router'
 import { supabase } from '../lib/supabase'
 
 // ── Session ID (persists per browser tab) ──
@@ -19,7 +20,9 @@ async function track(
   pagePath?: string
 ) {
   try {
-    const { data: { session } } = await supabase.auth.getSession()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
     await (supabase as any).from('analytics_events').insert({
       session_id: getSessionId(),
       user_id: session?.user?.id ?? null,
@@ -68,45 +71,29 @@ const AnalyticsContext = createContext(analytics)
 
 export const useAnalytics = () => useContext(AnalyticsContext)
 
-/** Provider that auto-tracks page views by intercepting history changes */
-export const AnalyticsProvider: ParentComponent = (props) => {
-  let prevPath = window.location.pathname
+/** Provider that auto-tracks page views on route change (via react-router's useLocation) */
+export const AnalyticsProvider = ({ children }: { children: ReactNode }) => {
+  const location = useLocation()
+  const didMount = useRef(false)
 
-  // Track initial page view + session start
-  analytics.pageView(prevPath)
-  analytics.feature('session', 'start', {
-    entry_page: prevPath,
-    referrer: document.referrer || null,
-  })
+  // Track initial page view + session start (once, on mount)
+  useEffect(() => {
+    analytics.pageView(location.pathname)
+    analytics.feature('session', 'start', {
+      entry_page: location.pathname,
+      referrer: document.referrer || null,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  // Intercept pushState/replaceState to detect SPA navigation
-  const origPush = history.pushState.bind(history)
-  const origReplace = history.replaceState.bind(history)
-
-  const onNav = () => {
-    const path = window.location.pathname
-    if (path !== prevPath) {
-      prevPath = path
-      analytics.pageView(path)
+  // Track subsequent page views on route change
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true
+      return
     }
-  }
+    analytics.pageView(location.pathname)
+  }, [location.pathname])
 
-  history.pushState = function (...args) {
-    origPush(...args)
-    onNav()
-  }
-  history.replaceState = function (...args) {
-    origReplace(...args)
-    onNav()
-  }
-
-  window.addEventListener('popstate', onNav)
-
-  onCleanup(() => {
-    history.pushState = origPush
-    history.replaceState = origReplace
-    window.removeEventListener('popstate', onNav)
-  })
-
-  return props.children as any
+  return children
 }

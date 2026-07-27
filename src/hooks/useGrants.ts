@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Grant } from '../types'
 
 export function useGrants(filters?: {
@@ -46,12 +47,15 @@ export function useGrants(filters?: {
     return (data as any[]) || []
   }
 
-  const [grants, { refetch }] = createResource(fetchGrants)
+  const query = useQuery({
+    queryKey: keys.list('grants', filters),
+    queryFn: fetchGrants,
+  })
 
-  return { grants, refetch }
+  return { grants: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useGrant(id: () => string | undefined) {
+export function useGrant(id: string | undefined) {
   const fetchGrant = async (grantId: string): Promise<Grant | null> => {
     const { data, error } = await supabase
       .from('grants')
@@ -63,30 +67,30 @@ export function useGrant(id: () => string | undefined) {
     return data as any
   }
 
-  const [grant, { refetch }] = createResource(id, fetchGrant)
+  const query = useQuery({
+    queryKey: keys.detail('grants', id),
+    queryFn: () => fetchGrant(id as string),
+    enabled: !!id,
+  })
 
-  return { grant, refetch }
+  return { grant: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateGrant() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createGrant = async (grantData: {
-    title: string
-    description?: string
-    amount_min?: number
-    amount_max?: number
-    currency?: string
-    deadline?: string
-    eligibility?: string
-    application_url?: string
-    grant_type?: string
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (grantData: {
+      title: string
+      description?: string
+      amount_min?: number
+      amount_max?: number
+      currency?: string
+      deadline?: string
+      eligibility?: string
+      application_url?: string
+      grant_type?: string
+    }) => {
       const { data, error } = await supabase
         .from('grants')
         .insert({
@@ -99,26 +103,26 @@ export function useCreateGrant() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('grants') })
+    },
+  })
 
-  return { createGrant, loading, error }
+  return { createGrant: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateGrant() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateGrant = async (grantId: string, updates: Partial<Grant>) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      grantId,
+      updates,
+    }: {
+      grantId: string
+      updates: Partial<Grant>
+    }) => {
       const { data, error } = await supabase
         .from('grants')
         .update(updates)
@@ -128,19 +132,20 @@ export function useUpdateGrant() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('grants') })
+    },
+  })
 
-  return { updateGrant, loading, error }
+  const updateGrant = (grantId: string, updates: Partial<Grant>) =>
+    mutation.mutateAsync({ grantId, updates })
+
+  return { updateGrant, loading: mutation.isPending, error: mutation.error }
 }
 
 // Grant Applications
-export function useGrantApplications(userId?: () => string | undefined) {
+export function useGrantApplications(userId?: string) {
   const fetchApplications = async (uid: string) => {
     const { data, error } = await supabase
       .from('grant_applications')
@@ -155,24 +160,24 @@ export function useGrantApplications(userId?: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [applications, { refetch }] = createResource(userId, fetchApplications)
+  const query = useQuery({
+    queryKey: keys.sub('grants', 'applications', userId),
+    queryFn: () => fetchApplications(userId as string),
+    enabled: !!userId,
+  })
 
-  return { applications, refetch }
+  return { applications: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useApplyForGrant() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const applyForGrant = async (applicationData: {
-    grant_id: string
-    user_id: string
-    application_data: Record<string, any>
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (applicationData: {
+      grant_id: string
+      user_id: string
+      application_data: Record<string, any>
+    }) => {
       // Encrypt sensitive application data (in production, use pgcrypto on server)
       const { data, error } = await supabase
         .from('grant_applications')
@@ -185,13 +190,13 @@ export function useApplyForGrant() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('grants', 'applications', variables.user_id) })
+    },
+  })
+
+  const applyForGrant = mutation.mutateAsync
 
   const checkApplication = async (
     grantId: string,
@@ -218,5 +223,5 @@ export function useApplyForGrant() {
     return count || 0
   }
 
-  return { applyForGrant, checkApplication, getApplicationCount, loading, error }
+  return { applyForGrant, checkApplication, getApplicationCount, loading: mutation.isPending, error: mutation.error }
 }

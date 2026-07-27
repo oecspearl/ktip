@@ -1,13 +1,12 @@
-import { createSignal, Show, For } from 'solid-js'
-import { A } from '@solidjs/router'
-import { MainLayout } from '../../components/layout/MainLayout'
+import { useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router'
 import { JitsiVideoCall } from '../../components/collaboration/JitsiVideoCall'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearchUsers, useCreateConversation, useSendMessage } from '../../hooks/useMessages'
 import { supabase } from '../../lib/supabase'
 import { debounce, getInitials, generateAvatarColor } from '../../lib/utils'
-import { ChevronRight, Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send } from 'lucide-solid'
+import { ChevronRight, Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send, ArrowLeft, Pen, FileText, Code } from 'lucide-react'
 import type { Profile } from '../../types'
 
 function generateRoomName(): string {
@@ -20,27 +19,32 @@ function generateRoomName(): string {
 }
 
 export default function VideoConferencePage() {
-  usePageTitle(() => 'Video Conference')
+  usePageTitle('Video Conference')
   const auth = useAuth()
-  const [roomName, setRoomName] = createSignal('')
-  const [copied, setCopied] = createSignal(false)
+
+  // Auto-fill room name from URL query param (runs once, at mount)
+  const [roomName, setRoomName] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    return urlParams.get('room') || ''
+  })
+  const [copied, setCopied] = useState(false)
 
   // Invite participants state
-  const [inviteQuery, setInviteQuery] = createSignal('')
-  const [searchResults, setSearchResults] = createSignal<Profile[]>([])
-  const [selectedUsers, setSelectedUsers] = createSignal<Profile[]>([])
-  const [inviting, setInviting] = createSignal(false)
-  const [inviteSuccess, setInviteSuccess] = createSignal(false)
-  const [inviteError, setInviteError] = createSignal<string | null>(null)
-  const [showDropdown, setShowDropdown] = createSignal(false)
+  const [inviteQuery, setInviteQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Profile[]>([])
+  const [selectedUsers, setSelectedUsers] = useState<Profile[]>([])
+  const [inviting, setInviting] = useState(false)
+  const [inviteSuccess, setInviteSuccess] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [showDropdown, setShowDropdown] = useState(false)
   const { searchUsers, loading: searchLoading } = useSearchUsers()
   const { createConversation } = useCreateConversation()
   const { sendMessage } = useSendMessage()
 
   const displayName = () => {
-    const profile = auth.profile()
+    const profile = auth.profile
     if (profile?.display_name) return profile.display_name
-    const email = auth.user()?.email
+    const email = auth.user?.email
     if (email) return email.split('@')[0]
     return 'Guest'
   }
@@ -50,7 +54,7 @@ export default function VideoConferencePage() {
   }
 
   const copyRoomLink = async () => {
-    const name = roomName().trim()
+    const name = roomName.trim()
     if (!name) return
     const link = `${window.location.origin}/collaborate/video?room=${encodeURIComponent(name)}`
     try {
@@ -69,24 +73,36 @@ export default function VideoConferencePage() {
     }
   }
 
+  // Refs keep the debounced search callback (created once) reading fresh values.
+  const authRef = useRef(auth)
+  authRef.current = auth
+  const selectedUsersRef = useRef(selectedUsers)
+  selectedUsersRef.current = selectedUsers
+  const searchUsersRef = useRef(searchUsers)
+  searchUsersRef.current = searchUsers
+
   // Debounced user search
-  const debouncedSearch = debounce(async (query: string) => {
-    const userId = auth.user()?.id
-    if (!query.trim() || !userId) {
-      setSearchResults([])
-      setShowDropdown(false)
-      return
-    }
-    try {
-      const results = await searchUsers(query, userId)
-      // Filter out already-selected users
-      const selectedIds = new Set(selectedUsers().map((u) => u.id))
-      setSearchResults(results.filter((r) => !selectedIds.has(r.id)))
-      setShowDropdown(true)
-    } catch {
-      setSearchResults([])
-    }
-  }, 300)
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(async (query: string) => {
+        const userId = authRef.current.user?.id
+        if (!query.trim() || !userId) {
+          setSearchResults([])
+          setShowDropdown(false)
+          return
+        }
+        try {
+          const results = await searchUsersRef.current(query, userId)
+          // Filter out already-selected users
+          const selectedIds = new Set(selectedUsersRef.current.map((u) => u.id))
+          setSearchResults(results.filter((r) => !selectedIds.has(r.id)))
+          setShowDropdown(true)
+        } catch {
+          setSearchResults([])
+        }
+      }, 300),
+    []
+  )
 
   const handleSearchInput = (value: string) => {
     setInviteQuery(value)
@@ -105,9 +121,9 @@ export default function VideoConferencePage() {
   }
 
   const handleInviteAndStart = async () => {
-    const currentUserId = auth.user()?.id
-    const room = roomName().trim()
-    if (!currentUserId || !room || selectedUsers().length === 0) return
+    const currentUserId = auth.user?.id
+    const room = roomName.trim()
+    if (!currentUserId || !room || selectedUsers.length === 0) return
 
     setInviting(true)
     setInviteError(null)
@@ -115,7 +131,7 @@ export default function VideoConferencePage() {
       const roomLink = `${window.location.origin}/collaborate/video?room=${encodeURIComponent(room)}`
       const inviteMessage = `📹 You've been invited to a video conference!\n\nRoom: ${room}\nJoin here: ${roomLink}\n\nClick the link above to join the call.`
 
-      for (const user of selectedUsers()) {
+      for (const user of selectedUsers) {
         const conversationId = await createConversation(currentUserId, user.id)
         await sendMessage({
           conversation_id: conversationId,
@@ -123,13 +139,15 @@ export default function VideoConferencePage() {
           content: inviteMessage,
         })
         // Send in-app notification
-        await (supabase.from('notifications') as any).insert({
-          user_id: user.id,
-          type: 'video_invite',
-          title: 'Video Conference Invitation',
-          body: `${displayName()} invited you to join room "${room}"`,
-          link: `/collaborate/video?room=${encodeURIComponent(room)}`,
-        }).then(() => {}, () => {}) // Silently ignore if table doesn't exist yet
+        await (supabase.from('notifications') as any)
+          .insert({
+            user_id: user.id,
+            type: 'video_invite',
+            title: 'Video Conference Invitation',
+            body: `${displayName()} invited you to join room "${room}"`,
+            link: `/collaborate/video?room=${encodeURIComponent(room)}`,
+          })
+          .then(() => {}, () => {}) // Silently ignore if table doesn't exist yet
       }
       setInviteSuccess(true)
       setSelectedUsers([])
@@ -141,231 +159,248 @@ export default function VideoConferencePage() {
     }
   }
 
-  // Auto-fill room name from URL query param
-  const urlParams = new URLSearchParams(window.location.search)
-  const roomParam = urlParams.get('room')
-  if (roomParam) {
-    setRoomName(roomParam)
-  }
-
   return (
-    <MainLayout>
+    <>
       {/* Dark Hero Band */}
-      <div class="bg-gray-800 min-h-[140px] flex items-center">
-        <div class="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
+      <div className="bg-gray-800 min-h-[140px] flex items-center">
+        <div className="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
-            <h1 class="text-3xl md:text-4xl font-display font-bold text-white">Video Conference</h1>
+            <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Video Conference</h1>
           </div>
-          <nav class="hidden md:flex items-center gap-1 text-sm text-gray-400">
-            <A href="/" class="hover:text-white transition-colors">Home</A>
+          <nav className="hidden md:flex items-center gap-1 text-sm text-gray-400">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={14} />
-            <A href="/collaborate" class="hover:text-white transition-colors">Collaborate</A>
+            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
             <ChevronRight size={14} />
-            <span class="text-gray-200">Video Conference</span>
+            <span className="text-gray-200">Video Conference</span>
           </nav>
         </div>
       </div>
 
       {/* Content Section */}
-      <div class="bg-white py-8">
-        <div class="max-w-5xl mx-auto px-4">
+      <div className="bg-white py-8">
+        <div className="max-w-5xl mx-auto px-4">
+          {/* Back to hub + cross-links */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 text-sm">
+            <Link
+              to="/collaborate"
+              className="inline-flex items-center gap-1.5 text-ktip-sand-600 hover:text-ktip-ocean-600 transition-colors font-medium"
+            >
+              <ArrowLeft size={14} />
+              Back to Collaborate Hub
+            </Link>
+            <span className="text-ktip-sand-300">|</span>
+            <Link to="/collaborate/whiteboards" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
+              <Pen size={14} />
+              Whiteboards
+            </Link>
+            <Link to="/collaborate/documents" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
+              <FileText size={14} />
+              Documents
+            </Link>
+            <Link to="/collaborate/code" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
+              <Code size={14} />
+              Code
+            </Link>
+          </div>
+
           {/* Room Name Input */}
-          <div class="border border-gray-200 p-6 mb-6">
-            <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
+          <div className="border border-gray-200 p-6 mb-6">
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
               Room Name
             </label>
-            <div class="flex gap-3">
-              <div class="relative flex-1">
+            <div className="flex gap-3">
+              <div className="relative flex-1">
                 <Hash
                   size={18}
-                  class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
                 />
                 <input
                   type="text"
                   placeholder="e.g. ktip-team-standup"
-                  value={roomName()}
-                  onInput={(e) => setRoomName(e.currentTarget.value)}
-                  class="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleGenerate}
-                class="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-lg hover:bg-ktip-sand-50 text-ktip-sand-600 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-lg hover:bg-ktip-sand-50 text-ktip-sand-600 transition-colors"
                 title="Generate a random room name"
               >
                 <Shuffle size={16} />
-                <span class="text-sm font-medium">Generate</span>
+                <span className="text-sm font-medium">Generate</span>
               </button>
               <button
                 type="button"
                 onClick={copyRoomLink}
-                disabled={!roomName().trim()}
-                class="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-lg hover:bg-ktip-sand-50 text-ktip-sand-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!roomName.trim()}
+                className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-lg hover:bg-ktip-sand-50 text-ktip-sand-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 title="Copy shareable link"
               >
-                {copied() ? <Check size={16} class="text-green-600" /> : <Copy size={16} />}
-                <span class="text-sm font-medium">{copied() ? 'Copied!' : 'Share'}</span>
+                {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                <span className="text-sm font-medium">{copied ? 'Copied!' : 'Share'}</span>
               </button>
             </div>
-            <p class="mt-2 text-xs text-ktip-sand-400">
+            <p className="mt-2 text-xs text-ktip-sand-400">
               Enter a room name or generate one. Anyone with the same room name joins the same call.
               Use the Share button to copy a direct link for your team.
             </p>
           </div>
 
           {/* Invite Participants */}
-          <div class="border border-gray-200 p-6 mb-6">
-            <div class="flex items-center gap-2 mb-4">
-              <UserPlus size={18} class="text-ktip-ocean-600" />
-              <h2 class="text-sm font-semibold text-ktip-sand-800">Invite Participants</h2>
+          <div className="border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <UserPlus size={18} className="text-ktip-ocean-600" />
+              <h2 className="text-sm font-semibold text-ktip-sand-800">Invite Participants</h2>
             </div>
 
             {/* Search Input */}
-            <div class="relative">
+            <div className="relative">
               <Search
                 size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
               />
               <input
                 type="text"
                 placeholder="Search users to invite..."
-                value={inviteQuery()}
-                onInput={(e) => handleSearchInput(e.currentTarget.value)}
+                value={inviteQuery}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 onFocus={() => {
-                  if (searchResults().length > 0) setShowDropdown(true)
+                  if (searchResults.length > 0) setShowDropdown(true)
                 }}
                 onBlur={() => {
                   // Delay to allow click on dropdown item
                   setTimeout(() => setShowDropdown(false), 200)
                 }}
-                class="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
-              <Show when={searchLoading()}>
-                <div class="absolute right-3 top-1/2 -translate-y-1/2">
-                  <div class="w-4 h-4 border-2 border-ktip-ocean-300 border-t-transparent rounded-full animate-spin" />
+              {searchLoading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-ktip-ocean-300 border-t-transparent rounded-full animate-spin" />
                 </div>
-              </Show>
+              )}
             </div>
 
             {/* Search Results Dropdown */}
-            <Show when={showDropdown() && searchResults().length > 0}>
-              <div class="mt-1 border border-ktip-sand-200 rounded-lg bg-white shadow-medium max-h-48 overflow-y-auto">
-                <For each={searchResults()}>
-                  {(user) => {
-                    const color = generateAvatarColor(user.display_name || user.id)
-                    const initials = getInitials(user.display_name || 'U')
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => selectUser(user)}
-                        class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-ktip-sand-50 transition-colors text-left"
+            {showDropdown && searchResults.length > 0 && (
+              <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-white shadow-medium max-h-48 overflow-y-auto">
+                {searchResults.map((user) => {
+                  const color = generateAvatarColor(user.display_name || user.id)
+                  const initials = getInitials(user.display_name || 'U')
+                  return (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => selectUser(user)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-ktip-sand-50 transition-colors text-left"
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                        style={{ backgroundColor: color }}
                       >
-                        <div
-                          class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                          style={{ "background-color": color }}
-                        >
-                          {initials}
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <p class="text-sm font-medium text-ktip-sand-800 truncate">
-                            {user.display_name || 'Unnamed User'}
-                          </p>
-                          <Show when={user.country}>
-                            <p class="text-xs text-ktip-sand-500">{user.country}</p>
-                          </Show>
-                        </div>
-                        <Show when={user.roles?.length}>
-                          <span class="text-[10px] px-1.5 py-0.5 bg-ktip-ocean-50 text-ktip-ocean-600 rounded font-medium">
-                            {user.roles![0]}
-                          </span>
-                        </Show>
-                      </button>
-                    )
-                  }}
-                </For>
+                        {initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-ktip-sand-800 truncate">
+                          {user.display_name || 'Unnamed User'}
+                        </p>
+                        {user.country && (
+                          <p className="text-xs text-ktip-sand-500">{user.country}</p>
+                        )}
+                      </div>
+                      {user.roles?.length ? (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-ktip-ocean-50 text-ktip-ocean-600 rounded font-medium">
+                          {user.roles[0]}
+                        </span>
+                      ) : null}
+                    </button>
+                  )
+                })}
               </div>
-            </Show>
+            )}
 
             {/* No results message */}
-            <Show when={showDropdown() && searchResults().length === 0 && inviteQuery().trim() && !searchLoading()}>
-              <div class="mt-1 border border-ktip-sand-200 rounded-lg bg-white shadow-medium px-3 py-3">
-                <p class="text-sm text-ktip-sand-500 text-center">No users found</p>
+            {showDropdown && searchResults.length === 0 && inviteQuery.trim() && !searchLoading && (
+              <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-white shadow-medium px-3 py-3">
+                <p className="text-sm text-ktip-sand-500 text-center">No users found</p>
               </div>
-            </Show>
+            )}
 
             {/* Selected Users Chips */}
-            <Show when={selectedUsers().length > 0}>
-              <div class="flex flex-wrap gap-2 mt-3">
-                <For each={selectedUsers()}>
-                  {(user) => {
-                    const color = generateAvatarColor(user.display_name || user.id)
-                    return (
-                      <span
-                        class="inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium text-white"
-                        style={{ "background-color": color }}
-                      >
-                        <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
-                          {getInitials(user.display_name || 'U')}
-                        </span>
-                        {user.display_name || 'User'}
-                        <button
-                          type="button"
-                          onClick={() => removeUser(user.id)}
-                          class="ml-0.5 hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                        >
-                          <X size={12} />
-                        </button>
+            {selectedUsers.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {selectedUsers.map((user) => {
+                  const color = generateAvatarColor(user.display_name || user.id)
+                  return (
+                    <span
+                      key={user.id}
+                      className="inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
+                        {getInitials(user.display_name || 'U')}
                       </span>
-                    )
-                  }}
-                </For>
+                      {user.display_name || 'User'}
+                      <button
+                        type="button"
+                        onClick={() => removeUser(user.id)}
+                        className="ml-0.5 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  )
+                })}
               </div>
-            </Show>
+            )}
 
             {/* Invite & Start Call Button */}
-            <Show when={selectedUsers().length > 0}>
+            {selectedUsers.length > 0 && (
               <button
                 type="button"
                 onClick={handleInviteAndStart}
-                disabled={!roomName().trim() || inviting()}
-                class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!roomName.trim() || inviting}
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Show when={inviting()} fallback={<Send size={16} />}>
-                  <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                </Show>
-                {inviting()
+                {inviting ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send size={16} />
+                )}
+                {inviting
                   ? 'Sending invites...'
-                  : `Invite ${selectedUsers().length} user${selectedUsers().length > 1 ? 's' : ''} & Start Call`}
+                  : `Invite ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''} & Start Call`}
               </button>
-            </Show>
+            )}
 
             {/* Success message */}
-            <Show when={inviteSuccess()}>
-              <div class="mt-3 flex items-center gap-2 text-sm text-green-600">
+            {inviteSuccess && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
                 <Check size={16} />
                 <span>Invitations sent! Users will receive a message with the room link.</span>
               </div>
-            </Show>
+            )}
 
             {/* Error message */}
-            <Show when={inviteError()}>
-              <div class="mt-3 flex items-center gap-2 text-sm text-red-600">
+            {inviteError && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-red-600">
                 <X size={16} />
-                <span>{inviteError()}</span>
+                <span>{inviteError}</span>
               </div>
-            </Show>
+            )}
 
-            <p class="mt-3 text-xs text-ktip-sand-400">
+            <p className="mt-3 text-xs text-ktip-sand-400">
               Search for users to invite. They'll receive a direct message with a link to join the call.
             </p>
           </div>
 
           {/* Video Call Container */}
-          <JitsiVideoCall roomName={roomName()} displayName={displayName()} />
+          <JitsiVideoCall roomName={roomName} displayName={displayName()} />
         </div>
       </div>
-    </MainLayout>
+    </>
   )
 }

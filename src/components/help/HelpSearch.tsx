@@ -1,101 +1,104 @@
-import { For, Show } from 'solid-js'
-import { Search, X } from 'lucide-solid'
+import { Search, X } from 'lucide-react'
 import type { HelpCategory } from '../../lib/help-content'
 
 interface HelpSearchProps {
-  searchQuery: () => string
+  searchQuery: string
   setSearchQuery: (val: string) => void
-  selectedCategory: () => string
+  selectedCategory: string
   setSelectedCategory: (val: string) => void
   categories: HelpCategory[]
   resultCount?: number
 }
 
-export function HelpSearch(props: HelpSearchProps) {
-  const hasFilters = () => props.searchQuery().trim() !== '' || props.selectedCategory() !== ''
+export function HelpSearch({
+  searchQuery,
+  setSearchQuery,
+  selectedCategory,
+  setSelectedCategory,
+  categories,
+  resultCount,
+}: HelpSearchProps) {
+  const hasFilters = searchQuery.trim() !== '' || selectedCategory !== ''
 
   const clearAll = () => {
-    props.setSearchQuery('')
-    props.setSelectedCategory('')
+    setSearchQuery('')
+    setSelectedCategory('')
   }
 
   return (
-    <div class="space-y-4">
+    <div className="space-y-4">
       {/* Search Input */}
-      <div class="relative">
+      <div className="relative">
         <Search
           size={20}
-          class="absolute left-4 top-1/2 -translate-y-1/2 text-ktip-sand-400"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-ktip-sand-400"
         />
         <input
           type="text"
           placeholder="Search help articles..."
-          value={props.searchQuery()}
-          onInput={(e) => props.setSearchQuery(e.currentTarget.value)}
-          class="w-full pl-12 pr-4 py-3 bg-white border border-ktip-sand-200 rounded-xl text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 bg-white border border-ktip-sand-200 rounded-xl text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
         />
-        <Show when={props.searchQuery()}>
+        {searchQuery && (
           <button
             type="button"
-            onClick={() => props.setSearchQuery('')}
-            class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
             aria-label="Clear search"
           >
             <X size={16} />
           </button>
-        </Show>
+        )}
       </div>
 
       {/* Category Filters */}
-      <div class="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => props.setSelectedCategory('')}
-          class={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            props.selectedCategory() === ''
+          onClick={() => setSelectedCategory('')}
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            selectedCategory === ''
               ? 'bg-ktip-ocean-500 text-white'
               : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
           }`}
         >
           All
         </button>
-        <For each={props.categories}>
-          {(cat) => (
-            <button
-              type="button"
-              onClick={() =>
-                props.setSelectedCategory(
-                  props.selectedCategory() === cat.id ? '' : cat.id
-                )
-              }
-              class={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                props.selectedCategory() === cat.id
-                  ? 'bg-ktip-ocean-500 text-white'
-                  : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
-              }`}
-            >
-              {cat.title}
-            </button>
-          )}
-        </For>
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            onClick={() =>
+              setSelectedCategory(selectedCategory === cat.id ? '' : cat.id)
+            }
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              selectedCategory === cat.id
+                ? 'bg-ktip-ocean-500 text-white'
+                : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
+            }`}
+          >
+            {cat.title}
+          </button>
+        ))}
 
-        <Show when={hasFilters()}>
+        {hasFilters && (
           <button
             type="button"
             onClick={clearAll}
-            class="ml-auto text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
+            className="ml-auto text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
           >
             Clear all
           </button>
-        </Show>
+        )}
       </div>
 
       {/* Results count */}
-      <Show when={hasFilters() && props.resultCount !== undefined}>
-        <p class="text-sm text-ktip-sand-500">
-          Found {props.resultCount} article{props.resultCount !== 1 ? 's' : ''}
+      {hasFilters && resultCount !== undefined && (
+        <p className="text-sm text-ktip-sand-500">
+          Found {resultCount} article{resultCount !== 1 ? 's' : ''}
         </p>
-      </Show>
+      )}
     </div>
   )
 }

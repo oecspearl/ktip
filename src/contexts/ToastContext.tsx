@@ -1,6 +1,6 @@
-import { createContext, useContext, createSignal, For, type ParentComponent } from 'solid-js'
-import { Portal } from 'solid-js/web'
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-solid'
+import { createContext, useContext, useState, useCallback, type PropsWithChildren } from 'react'
+import { createPortal } from 'react-dom'
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react'
 import { cn } from '../lib/utils'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
@@ -21,22 +21,46 @@ interface ToastContextValue {
   }
 }
 
-const ToastContext = createContext<ToastContextValue>()
+const ToastContext = createContext<ToastContextValue | undefined>(undefined)
 
 let nextId = 0
 
-export const ToastProvider: ParentComponent = (props) => {
-  const [toasts, setToasts] = createSignal<Toast[]>([])
+const iconMap = {
+  success: CheckCircle,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+}
 
-  const addToast = (type: ToastType, message: string, duration = 4000) => {
-    const id = nextId++
-    setToasts((prev) => [...prev, { id, type, message, duration }])
-    setTimeout(() => removeToast(id), duration)
-  }
+const styleMap = {
+  success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+  error: 'bg-red-50 border-red-200 text-red-800',
+  warning: 'bg-amber-50 border-amber-200 text-amber-800',
+  info: 'bg-blue-50 border-blue-200 text-blue-800',
+}
 
-  const removeToast = (id: number) => {
+const iconColorMap = {
+  success: 'text-emerald-500',
+  error: 'text-red-500',
+  warning: 'text-amber-500',
+  info: 'text-blue-500',
+}
+
+export const ToastProvider = ({ children }: PropsWithChildren) => {
+  const [toasts, setToasts] = useState<Toast[]>([])
+
+  const removeToast = useCallback((id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
-  }
+  }, [])
+
+  const addToast = useCallback(
+    (type: ToastType, message: string, duration = 4000) => {
+      const id = nextId++
+      setToasts((prev) => [...prev, { id, type, message, duration }])
+      setTimeout(() => removeToast(id), duration)
+    },
+    [removeToast]
+  )
 
   const value: ToastContextValue = {
     toast: {
@@ -47,56 +71,35 @@ export const ToastProvider: ParentComponent = (props) => {
     },
   }
 
-  const iconMap = {
-    success: CheckCircle,
-    error: XCircle,
-    warning: AlertTriangle,
-    info: Info,
-  }
-
-  const styleMap = {
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
-    error: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-amber-50 border-amber-200 text-amber-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
-  }
-
-  const iconColorMap = {
-    success: 'text-emerald-500',
-    error: 'text-red-500',
-    warning: 'text-amber-500',
-    info: 'text-blue-500',
-  }
-
   return (
     <ToastContext.Provider value={value}>
-      {props.children}
-      <Portal>
-        <div class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
-          <For each={toasts()}>
-            {(toast) => {
-              const Icon = iconMap[toast.type]
-              return (
-                <div
-                  class={cn(
-                    'pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border shadow-medium animate-slide-up',
-                    styleMap[toast.type]
-                  )}
+      {children}
+      {createPortal(
+        <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+          {toasts.map((toast) => {
+            const Icon = iconMap[toast.type]
+            return (
+              <div
+                key={toast.id}
+                className={cn(
+                  'pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border shadow-medium animate-slide-up',
+                  styleMap[toast.type]
+                )}
+              >
+                <Icon size={20} className={cn('shrink-0 mt-0.5', iconColorMap[toast.type])} />
+                <p className="text-sm font-medium flex-1">{toast.message}</p>
+                <button
+                  onClick={() => removeToast(toast.id)}
+                  className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
                 >
-                  <Icon size={20} class={cn('shrink-0 mt-0.5', iconColorMap[toast.type])} />
-                  <p class="text-sm font-medium flex-1">{toast.message}</p>
-                  <button
-                    onClick={() => removeToast(toast.id)}
-                    class="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              )
-            }}
-          </For>
-        </div>
-      </Portal>
+                  <X size={16} />
+                </button>
+              </div>
+            )
+          })}
+        </div>,
+        document.body
+      )}
     </ToastContext.Provider>
   )
 }

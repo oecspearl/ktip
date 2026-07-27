@@ -1,5 +1,6 @@
-import { createResource } from 'solid-js'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 
 export interface DistributionItem {
   label: string
@@ -79,7 +80,10 @@ export function useAdminAnalytics() {
     }
   }
 
-  const [analytics, { refetch }] = createResource(fetchAnalytics)
+  const query = useQuery({
+    queryKey: keys.list('admin-analytics'),
+    queryFn: fetchAnalytics,
+  })
 
-  return { analytics, refetch }
+  return { analytics: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }

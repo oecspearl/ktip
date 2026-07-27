@@ -1,9 +1,9 @@
-import { Show, For } from 'solid-js'
 import { type EventScheduleItem } from '../../types'
 import { Badge } from '../ui/Badge'
 import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS } from '../../lib/constants'
 import { format } from 'date-fns'
-import { Clock, MapPin } from 'lucide-solid'
+import { Clock, MapPin } from 'lucide-react'
+import { cn } from '../../lib/utils'
 
 interface EventScheduleTimelineProps {
   items: EventScheduleItem[]
@@ -43,120 +43,108 @@ function getSpeakerInitials(name: string): string {
     .slice(0, 2)
 }
 
-export function EventScheduleTimeline(props: EventScheduleTimelineProps) {
-  const grouped = () => groupItemsByDate(props.items)
-  const dateKeys = () => Object.keys(grouped()).sort()
+export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
+  const grouped = groupItemsByDate(items)
+  const dateKeys = Object.keys(grouped).sort()
 
   return (
-    <div class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
-      <div class="flex items-center gap-2 mb-4">
-        <Clock class="w-5 h-5 text-ktip-ocean-600" />
-        <h2 class="text-xl font-display font-bold text-ktip-sand-900">Schedule</h2>
+    <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Clock className="w-5 h-5 text-ktip-ocean-600" />
+        <h2 className="text-xl font-display font-bold text-ktip-sand-900">Schedule</h2>
       </div>
 
-      <Show
-        when={props.items.length > 0}
-        fallback={
-          <div class="text-center py-8">
-            <Clock class="w-10 h-10 text-ktip-sand-300 mx-auto mb-3" />
-            <p class="text-ktip-sand-500">Schedule will be announced soon.</p>
-          </div>
-        }
-      >
-        <For each={dateKeys()}>
-          {(dateKey, index) => (
-            <div>
-              <Show when={dateKeys().length > 1}>
-                <h3
-                  class="text-lg font-semibold text-ktip-sand-800 mb-3"
-                  classList={{ 'mt-6': index() > 0 }}
-                >
-                  {format(new Date(dateKey), 'EEEE, MMMM d')}
-                </h3>
-              </Show>
+      {items.length > 0 ? (
+        dateKeys.map((dateKey, index) => (
+          <div key={dateKey}>
+            {dateKeys.length > 1 && (
+              <h3
+                className={cn('text-lg font-semibold text-ktip-sand-800 mb-3', index > 0 && 'mt-6')}
+              >
+                {format(new Date(dateKey), 'EEEE, MMMM d')}
+              </h3>
+            )}
 
-              <For each={grouped()[dateKey]}>
-                {(item) => (
-                  <div
-                    class="flex gap-4 py-3 border-b border-ktip-sand-100 last:border-0"
-                    classList={{
-                      'bg-ktip-sand-50 rounded-lg px-4 -mx-2': item.schedule_type === 'break',
-                    }}
-                  >
-                    <div class="w-32 flex-shrink-0 text-sm font-medium text-ktip-ocean-600">
-                      {formatTimeRange(item.start_time, item.end_time)}
-                    </div>
-
-                    <div class="flex-1">
-                      <div class="flex items-center gap-2 flex-wrap">
-                        <span
-                          class="font-medium"
-                          classList={{
-                            'text-ktip-sand-500': item.schedule_type === 'break',
-                            'text-ktip-sand-900': item.schedule_type !== 'break',
-                          }}
-                        >
-                          {item.title}
-                        </span>
-                        <Badge
-                          size="sm"
-                          class={SCHEDULE_TYPE_COLORS[item.schedule_type] ?? ''}
-                        >
-                          {SCHEDULE_TYPE_LABELS[item.schedule_type] ?? item.schedule_type}
-                        </Badge>
-                      </div>
-
-                      <Show when={item.description}>
-                        <p
-                          class="text-sm mt-1"
-                          classList={{
-                            'text-ktip-sand-400': item.schedule_type === 'break',
-                            'text-ktip-sand-600': item.schedule_type !== 'break',
-                          }}
-                        >
-                          {item.description}
-                        </p>
-                      </Show>
-
-                      <Show when={item.speaker}>
-                        <div class="flex items-center gap-2 mt-1">
-                          <Show
-                            when={item.speaker!.photo_url}
-                            fallback={
-                              <div class="w-5 h-5 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 flex items-center justify-center text-[10px] font-medium">
-                                {getSpeakerInitials(item.speaker!.name)}
-                              </div>
-                            }
-                          >
-                            <img
-                              src={item.speaker!.photo_url!}
-                              alt={item.speaker!.name}
-                              class="w-5 h-5 rounded-full object-cover"
-                            />
-                          </Show>
-                          <span class="text-sm text-ktip-sand-600">
-                            {item.speaker!.name}
-                            <Show when={item.speaker!.title}>
-                              <span class="text-ktip-sand-400"> - {item.speaker!.title}</span>
-                            </Show>
-                          </span>
-                        </div>
-                      </Show>
-
-                      <Show when={item.location}>
-                        <div class="flex items-center gap-1 mt-1">
-                          <MapPin class="w-3.5 h-3.5 text-ktip-sand-400" />
-                          <span class="text-sm text-ktip-sand-500">{item.location}</span>
-                        </div>
-                      </Show>
-                    </div>
-                  </div>
+            {grouped[dateKey].map((item) => (
+              <div
+                key={item.id}
+                className={cn(
+                  'flex gap-4 py-3 border-b border-ktip-sand-100 last:border-0',
+                  item.schedule_type === 'break' && 'bg-ktip-sand-50 rounded-lg px-4 -mx-2'
                 )}
-              </For>
-            </div>
-          )}
-        </For>
-      </Show>
+              >
+                <div className="w-32 flex-shrink-0 text-sm font-medium text-ktip-ocean-600">
+                  {formatTimeRange(item.start_time, item.end_time)}
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span
+                      className={cn(
+                        'font-medium',
+                        item.schedule_type === 'break' ? 'text-ktip-sand-500' : 'text-ktip-sand-900'
+                      )}
+                    >
+                      {item.title}
+                    </span>
+                    <Badge
+                      size="sm"
+                      className={SCHEDULE_TYPE_COLORS[item.schedule_type] ?? ''}
+                    >
+                      {SCHEDULE_TYPE_LABELS[item.schedule_type] ?? item.schedule_type}
+                    </Badge>
+                  </div>
+
+                  {item.description && (
+                    <p
+                      className={cn(
+                        'text-sm mt-1',
+                        item.schedule_type === 'break' ? 'text-ktip-sand-400' : 'text-ktip-sand-600'
+                      )}
+                    >
+                      {item.description}
+                    </p>
+                  )}
+
+                  {item.speaker && (
+                    <div className="flex items-center gap-2 mt-1">
+                      {item.speaker.photo_url ? (
+                        <img
+                          src={item.speaker.photo_url}
+                          alt={item.speaker.name}
+                          className="w-5 h-5 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 flex items-center justify-center text-[10px] font-medium">
+                          {getSpeakerInitials(item.speaker.name)}
+                        </div>
+                      )}
+                      <span className="text-sm text-ktip-sand-600">
+                        {item.speaker.name}
+                        {item.speaker.title && (
+                          <span className="text-ktip-sand-400"> - {item.speaker.title}</span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                  {item.location && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="w-3.5 h-3.5 text-ktip-sand-400" />
+                      <span className="text-sm text-ktip-sand-500">{item.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))
+      ) : (
+        <div className="text-center py-8">
+          <Clock className="w-10 h-10 text-ktip-sand-300 mx-auto mb-3" />
+          <p className="text-ktip-sand-500">Schedule will be announced soon.</p>
+        </div>
+      )}
     </div>
   )
 }

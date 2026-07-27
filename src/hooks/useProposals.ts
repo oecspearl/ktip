@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Proposal, ProposalType, ProposalStatus } from '../types'
 
 // --- List proposals for current user ---
@@ -40,14 +41,17 @@ export function useProposals(filters?: {
     return (data as Proposal[]) || []
   }
 
-  const [proposals, { refetch }] = createResource(fetchProposals)
+  const query = useQuery({
+    queryKey: keys.list('proposals', filters),
+    queryFn: fetchProposals,
+  })
 
-  return { proposals, refetch }
+  return { proposals: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 // --- List proposals for a specific project ---
 
-export function useProjectProposals(projectId: () => string) {
+export function useProjectProposals(projectId: string | undefined) {
   const fetchProjectProposals = async (pid: string): Promise<Proposal[]> => {
     const { data, error } = await supabase
       .from('proposals')
@@ -59,14 +63,18 @@ export function useProjectProposals(projectId: () => string) {
     return (data as Proposal[]) || []
   }
 
-  const [proposals, { refetch }] = createResource(projectId, fetchProjectProposals)
+  const query = useQuery({
+    queryKey: keys.sub('proposals', 'project', projectId),
+    queryFn: () => fetchProjectProposals(projectId as string),
+    enabled: !!projectId,
+  })
 
-  return { proposals, refetch }
+  return { proposals: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 // --- Get single proposal ---
 
-export function useProposal(id: () => string | undefined) {
+export function useProposal(id: string | undefined) {
   const fetchProposal = async (proposalId: string): Promise<Proposal | null> => {
     const { data, error } = await supabase
       .from('proposals')
@@ -78,28 +86,28 @@ export function useProposal(id: () => string | undefined) {
     return data as Proposal
   }
 
-  const [proposal, { refetch }] = createResource(id, fetchProposal)
+  const query = useQuery({
+    queryKey: keys.detail('proposals', id),
+    queryFn: () => fetchProposal(id as string),
+    enabled: !!id,
+  })
 
-  return { proposal, refetch }
+  return { proposal: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 // --- Create proposal ---
 
 export function useCreateProposal() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createProposal = async (proposalData: {
-    type: ProposalType
-    title: string
-    proposal_data?: Record<string, any>
-    current_step?: number
-    project_id?: string
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (proposalData: {
+      type: ProposalType
+      title: string
+      proposal_data?: Record<string, any>
+      current_step?: number
+      project_id?: string
+    }) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -123,36 +131,33 @@ export function useCreateProposal() {
 
       if (error) throw error
       return data as Proposal
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('proposals') })
+    },
+  })
 
-  return { createProposal, loading, error }
+  return { createProposal: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 // --- Update proposal ---
 
 export function useUpdateProposal() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateProposal = async (
-    proposalId: string,
-    updates: {
-      title?: string
-      status?: ProposalStatus
-      proposal_data?: Record<string, any>
-      current_step?: number
-    }
-  ) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      proposalId,
+      updates,
+    }: {
+      proposalId: string
+      updates: {
+        title?: string
+        status?: ProposalStatus
+        proposal_data?: Record<string, any>
+        current_step?: number
+      }
+    }) => {
       const updateData: Record<string, any> = { ...updates, updated_at: new Date().toISOString() }
       if (updates.status) updateData.status = updates.status as any
 
@@ -165,41 +170,43 @@ export function useUpdateProposal() {
 
       if (error) throw error
       return data as Proposal
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('proposals') })
+    },
+  })
 
-  return { updateProposal, loading, error }
+  const updateProposal = (
+    proposalId: string,
+    updates: {
+      title?: string
+      status?: ProposalStatus
+      proposal_data?: Record<string, any>
+      current_step?: number
+    }
+  ) => mutation.mutateAsync({ proposalId, updates })
+
+  return { updateProposal, loading: mutation.isPending, error: mutation.error }
 }
 
 // --- Delete proposal ---
 
 export function useDeleteProposal() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteProposal = async (proposalId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (proposalId: string) => {
       const { error } = await supabase
         .from('proposals')
         .delete()
         .eq('id', proposalId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('proposals') })
+    },
+  })
 
-  return { deleteProposal, loading, error }
+  return { deleteProposal: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

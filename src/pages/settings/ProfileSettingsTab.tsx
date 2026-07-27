@@ -1,4 +1,4 @@
-import { createSignal, createEffect, Show, For } from 'solid-js'
+import { useState, useEffect, type ChangeEvent } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -12,7 +12,7 @@ import {
   Save,
   X,
   Plus,
-} from 'lucide-solid'
+} from 'lucide-react'
 import {
   CARIBBEAN_COUNTRIES,
   ROLE_LABELS,
@@ -33,21 +33,21 @@ export function ProfileSettingsTab() {
   const auth = useAuth()
   const toast = useToast()
 
-  const [displayName, setDisplayName] = createSignal(auth.profile()?.display_name || '')
-  const [bio, setBio] = createSignal(auth.profile()?.bio || '')
-  const [country, setCountry] = createSignal(auth.profile()?.country || '')
-  const [roles, setRoles] = createSignal<UserRole[]>(auth.profile()?.roles || [])
-  const [skills, setSkills] = createSignal<string[]>(auth.profile()?.skills || [])
-  const [skillInput, setSkillInput] = createSignal('')
-  const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [saving, setSaving] = createSignal(false)
-  const [avatarUploading, setAvatarUploading] = createSignal(false)
-  const [initialized, setInitialized] = createSignal(false)
+  const [displayName, setDisplayName] = useState(auth.profile?.display_name || '')
+  const [bio, setBio] = useState(auth.profile?.bio || '')
+  const [country, setCountry] = useState(auth.profile?.country || '')
+  const [roles, setRoles] = useState<UserRole[]>(auth.profile?.roles || [])
+  const [skills, setSkills] = useState<string[]>(auth.profile?.skills || [])
+  const [skillInput, setSkillInput] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [initialized, setInitialized] = useState(false)
 
   // Sync form fields when profile loads/changes (handles late profile fetch)
-  createEffect(() => {
-    const p = auth.profile()
-    if (p && !initialized()) {
+  useEffect(() => {
+    const p = auth.profile
+    if (p && !initialized) {
       setDisplayName(p.display_name || '')
       setBio(p.bio || '')
       setCountry(p.country || '')
@@ -55,21 +55,20 @@ export function ProfileSettingsTab() {
       setSkills(p.skills || [])
       setInitialized(true)
     }
-  })
+  }, [auth.profile, initialized])
 
-  const displayNameValue = () => displayName() || 'User'
+  const displayNameValue = displayName || 'User'
 
   const toggleRole = (role: UserRole) => {
-    const current = roles()
-    if (current.includes(role)) {
-      setRoles(current.filter((r) => r !== role))
+    if (roles.includes(role)) {
+      setRoles(roles.filter((r) => r !== role))
     } else {
-      setRoles([...current, role])
+      setRoles([...roles, role])
     }
   }
 
-  const handleAvatarUpload = async (e: Event) => {
-    const input = e.target as HTMLInputElement
+  const handleAvatarUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target
     const file = input.files?.[0]
     if (!file) return
 
@@ -85,7 +84,7 @@ export function ProfileSettingsTab() {
 
     setAvatarUploading(true)
     try {
-      const userId = auth.user()!.id
+      const userId = auth.user!.id
       const fileExt = file.name.split('.').pop()
       const filePath = `${userId}/avatar.${fileExt}`
 
@@ -116,9 +115,9 @@ export function ProfileSettingsTab() {
     setErrors({})
 
     const input = {
-      display_name: displayName(),
-      bio: bio() || undefined,
-      country: country() || undefined,
+      display_name: displayName,
+      bio: bio || undefined,
+      country: country || undefined,
     }
 
     const result = profileUpdateSchema.safeParse(input)
@@ -135,11 +134,11 @@ export function ProfileSettingsTab() {
     setSaving(true)
     try {
       await auth.updateProfile({
-        display_name: displayName(),
-        bio: bio() || null,
-        country: country() || null,
-        roles: roles() as any,
-        skills: skills() as any,
+        display_name: displayName,
+        bio: bio || null,
+        country: country || null,
+        roles: roles as any,
+        skills: skills as any,
       })
       toast.success('Profile updated!')
     } catch (err: any) {
@@ -150,82 +149,79 @@ export function ProfileSettingsTab() {
   }
 
   return (
-    <div class="space-y-6">
+    <div className="space-y-6">
       {/* Avatar Section */}
       <Card>
-        <h2 class="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Photo</h2>
-        <div class="flex items-center gap-6">
-          <div class="relative">
-            <Show
-              when={auth.profile()?.avatar_url}
-              fallback={
-                <div
-                  class={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white ${generateAvatarColor(displayNameValue())}`}
-                >
-                  {getInitials(displayNameValue())}
-                </div>
-              }
-            >
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Photo</h2>
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            {auth.profile?.avatar_url ? (
               <img
-                src={auth.profile()!.avatar_url!}
+                src={auth.profile.avatar_url}
                 alt="Avatar"
-                class="w-20 h-20 rounded-full object-cover"
+                className="w-20 h-20 rounded-full object-cover"
               />
-            </Show>
-            <label class="absolute -bottom-1 -right-1 w-8 h-8 bg-ktip-ocean-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-ktip-ocean-600 transition-colors shadow-soft">
-              <Camera size={14} class="text-white" />
+            ) : (
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white ${generateAvatarColor(displayNameValue)}`}
+              >
+                {getInitials(displayNameValue)}
+              </div>
+            )}
+            <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-ktip-ocean-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-ktip-ocean-600 transition-colors shadow-soft">
+              <Camera size={14} className="text-white" />
               <input
                 type="file"
                 accept="image/*"
-                class="hidden"
+                className="hidden"
                 onChange={handleAvatarUpload}
-                disabled={avatarUploading()}
+                disabled={avatarUploading}
               />
             </label>
           </div>
           <div>
-            <p class="text-sm text-ktip-sand-700 font-medium">Upload a photo</p>
-            <p class="text-xs text-ktip-sand-500 mt-1">JPG, PNG or GIF. Max 5MB.</p>
-            <Show when={avatarUploading()}>
-              <p class="text-xs text-ktip-ocean-600 mt-1">Uploading...</p>
-            </Show>
+            <p className="text-sm text-ktip-sand-700 font-medium">Upload a photo</p>
+            <p className="text-xs text-ktip-sand-500 mt-1">JPG, PNG or GIF. Max 5MB.</p>
+            {avatarUploading && (
+              <p className="text-xs text-ktip-ocean-600 mt-1">Uploading...</p>
+            )}
           </div>
         </div>
       </Card>
 
       {/* Profile Info */}
       <Card>
-        <h2 class="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Information</h2>
-        <div class="space-y-4">
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Information</h2>
+        <div className="space-y-4">
           <Input
             label="Display Name"
-            value={displayName()}
-            onInput={(e) => setDisplayName(e.currentTarget.value)}
-            error={errors().display_name}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            error={errors.display_name}
             fullWidth
           />
 
           <Textarea
             label="Bio"
-            value={bio()}
-            onInput={(e) => setBio(e.currentTarget.value)}
-            error={errors().bio}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            error={errors.bio}
             rows={4}
             placeholder="Tell us about yourself..."
             fullWidth
           />
 
-          <div class="flex flex-col gap-1.5 w-full">
-            <label class="text-sm font-medium text-ktip-sand-700">Country</label>
+          <div className="flex flex-col gap-1.5 w-full">
+            <label className="text-sm font-medium text-ktip-sand-700">Country</label>
             <select
-              value={country()}
-              onChange={(e) => setCountry(e.currentTarget.value)}
-              class="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white"
             >
               <option value="">Select a country</option>
-              <For each={[...CARIBBEAN_COUNTRIES]}>
-                {(c) => <option value={c}>{c}</option>}
-              </For>
+              {[...CARIBBEAN_COUNTRIES].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -233,76 +229,71 @@ export function ProfileSettingsTab() {
 
       {/* Roles */}
       <Card>
-        <h2 class="text-lg font-display font-bold text-ktip-sand-900 mb-2">Roles</h2>
-        <p class="text-sm text-ktip-sand-600 mb-4">Select the roles that describe you. You can choose multiple.</p>
-        <div class="flex flex-wrap gap-2">
-          <For each={ALL_ROLES}>
-            {(role) => {
-              const isSelected = () => roles().includes(role.value)
-              return (
-                <button
-                  type="button"
-                  onClick={() => toggleRole(role.value)}
-                  class={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
-                    isSelected()
-                      ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-700'
-                      : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300'
-                  }`}
-                >
-                  <Show when={isSelected()} fallback={<Plus size={14} />}>
-                    <X size={14} />
-                  </Show>
-                  {role.label}
-                </button>
-              )
-            }}
-          </For>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Roles</h2>
+        <p className="text-sm text-ktip-sand-600 mb-4">Select the roles that describe you. You can choose multiple.</p>
+        <div className="flex flex-wrap gap-2">
+          {ALL_ROLES.map((role) => {
+            const isSelected = roles.includes(role.value)
+            return (
+              <button
+                key={role.value}
+                type="button"
+                onClick={() => toggleRole(role.value)}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
+                  isSelected
+                    ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-700'
+                    : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300'
+                }`}
+              >
+                {isSelected ? <X size={14} /> : <Plus size={14} />}
+                {role.label}
+              </button>
+            )
+          })}
         </div>
       </Card>
 
       {/* Skills */}
       <Card>
-        <h2 class="text-lg font-display font-bold text-ktip-sand-900 mb-2">Skills</h2>
-        <p class="text-sm text-ktip-sand-600 mb-4">Add skills to help others find you in the directory.</p>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Skills</h2>
+        <p className="text-sm text-ktip-sand-600 mb-4">Add skills to help others find you in the directory.</p>
 
         {/* Current skills */}
-        <Show when={skills().length > 0}>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <For each={skills()}>
-              {(skill) => (
-                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200">
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() => setSkills(skills().filter((s) => s !== skill))}
-                    class="ml-0.5 hover:text-red-600 transition-colors"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
-            </For>
+        {skills.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {skills.map((skill) => (
+              <span key={skill} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200">
+                {skill}
+                <button
+                  type="button"
+                  onClick={() => setSkills(skills.filter((s) => s !== skill))}
+                  className="ml-0.5 hover:text-red-600 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            ))}
           </div>
-        </Show>
+        )}
 
         {/* Add skill input */}
-        <div class="flex gap-2 mb-3">
+        <div className="flex gap-2 mb-3">
           <input
             type="text"
-            value={skillInput()}
-            onInput={(e) => setSkillInput(e.currentTarget.value)}
+            value={skillInput}
+            onChange={(e) => setSkillInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
-                const val = skillInput().trim()
-                if (val && !skills().includes(val)) {
-                  setSkills([...skills(), val])
+                const val = skillInput.trim()
+                if (val && !skills.includes(val)) {
+                  setSkills([...skills, val])
                   setSkillInput('')
                 }
               }
             }}
             placeholder="Type a skill and press Enter..."
-            class="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white text-sm"
+            className="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white text-sm"
           />
           <Button
             type="button"
@@ -310,9 +301,9 @@ export function ProfileSettingsTab() {
             variant="secondary"
             icon={<Plus size={14} />}
             onClick={() => {
-              const val = skillInput().trim()
-              if (val && !skills().includes(val)) {
-                setSkills([...skills(), val])
+              const val = skillInput.trim()
+              if (val && !skills.includes(val)) {
+                setSkills([...skills, val])
                 setSkillInput('')
               }
             }}
@@ -322,25 +313,24 @@ export function ProfileSettingsTab() {
         </div>
 
         {/* Suggestions */}
-        <div class="flex flex-wrap gap-1.5">
-          <For each={SKILL_SUGGESTIONS.filter((s) => !skills().includes(s)).slice(0, 12)}>
-            {(suggestion) => (
-              <button
-                type="button"
-                onClick={() => setSkills([...skills(), suggestion])}
-                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50 transition-all"
-              >
-                <Plus size={12} />
-                {suggestion}
-              </button>
-            )}
-          </For>
+        <div className="flex flex-wrap gap-1.5">
+          {SKILL_SUGGESTIONS.filter((s) => !skills.includes(s)).slice(0, 12).map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => setSkills([...skills, suggestion])}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50 transition-all"
+            >
+              <Plus size={12} />
+              {suggestion}
+            </button>
+          ))}
         </div>
       </Card>
 
       {/* Save Button */}
-      <div class="flex justify-end">
-        <Button onClick={handleSave} loading={saving()} icon={<Save size={18} />}>
+      <div className="flex justify-end">
+        <Button onClick={handleSave} loading={saving} icon={<Save size={18} />}>
           Save Changes
         </Button>
       </div>

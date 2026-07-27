@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Profile, GrantApplication, GrantApplicationStatus, UserRole } from '../types'
 
 // ============================================================
@@ -49,9 +50,12 @@ export function useAdminStats() {
     }
   }
 
-  const [stats, { refetch }] = createResource(fetchStats)
+  const query = useQuery({
+    queryKey: keys.list('admin-stats'),
+    queryFn: fetchStats,
+  })
 
-  return { stats, refetch }
+  return { stats: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 // ============================================================
@@ -63,13 +67,7 @@ export function useAdminUsers(filters?: {
   role?: string
   verified?: string
 }) {
-  const filterKey = () => JSON.stringify({
-    search: filters?.search,
-    role: filters?.role,
-    verified: filters?.verified,
-  })
-
-  const fetchUsers = async (_key: string): Promise<Profile[]> => {
+  const fetchUsers = async (): Promise<Profile[]> => {
     let query = supabase
       .from('profiles')
       .select('*')
@@ -98,14 +96,16 @@ export function useAdminUsers(filters?: {
     return (data as Profile[]) || []
   }
 
-  const [users, { refetch }] = createResource(filterKey, fetchUsers)
+  const query = useQuery({
+    queryKey: keys.list('admin-users', filters),
+    queryFn: fetchUsers,
+  })
 
-  return { users, refetch }
+  return { users: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useAdminUserActions() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
   const getAuthHeader = async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -113,54 +113,41 @@ export function useAdminUserActions() {
     return `Bearer ${session.access_token}`
   }
 
-  const updateRoles = async (userId: string, roles: UserRole[]) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const updateRolesMutation = useMutation({
+    mutationFn: async ({ userId, roles }: { userId: string; roles: UserRole[] }) => {
       const { error } = await supabase
         .from('profiles')
         .update({ roles } as any)
         .eq('id', userId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+    },
+  })
 
-  const toggleVerified = async (userId: string, verified: boolean) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const toggleVerifiedMutation = useMutation({
+    mutationFn: async ({ userId, verified }: { userId: string; verified: boolean }) => {
       const { error } = await supabase
         .from('profiles')
         .update({ is_verified: verified })
         .eq('id', userId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+    },
+  })
 
-  const createUser = async (data: {
-    email: string
-    password: string
-    display_name?: string
-    roles?: string[]
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const createUserMutation = useMutation({
+    mutationFn: async (data: {
+      email: string
+      password: string
+      display_name?: string
+      roles?: string[]
+    }) => {
       const auth = await getAuthHeader()
       const res = await fetch('/api/admin/create-user', {
         method: 'POST',
@@ -170,19 +157,14 @@ export function useAdminUserActions() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to create user')
       return json.user
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+    },
+  })
 
-  const resetPassword = async (userId: string, newPassword: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
       const auth = await getAuthHeader()
       const res = await fetch('/api/admin/reset-password', {
         method: 'POST',
@@ -191,19 +173,11 @@ export function useAdminUserActions() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to reset password')
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+  })
 
-  const deleteUser = async (userId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
       const auth = await getAuthHeader()
       const res = await fetch('/api/admin/delete-user', {
         method: 'POST',
@@ -212,15 +186,49 @@ export function useAdminUserActions() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to delete user')
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+    },
+  })
 
-  return { updateRoles, toggleVerified, createUser, resetPassword, deleteUser, loading, error }
+  const updateRoles = (userId: string, roles: UserRole[]) =>
+    updateRolesMutation.mutateAsync({ userId, roles })
+
+  const toggleVerified = (userId: string, verified: boolean) =>
+    toggleVerifiedMutation.mutateAsync({ userId, verified })
+
+  const createUser = (data: {
+    email: string
+    password: string
+    display_name?: string
+    roles?: string[]
+  }) => createUserMutation.mutateAsync(data)
+
+  const resetPassword = (userId: string, newPassword: string) =>
+    resetPasswordMutation.mutateAsync({ userId, newPassword })
+
+  const deleteUser = (userId: string) => deleteUserMutation.mutateAsync(userId)
+
+  return {
+    updateRoles,
+    toggleVerified,
+    createUser,
+    resetPassword,
+    deleteUser,
+    loading:
+      updateRolesMutation.isPending ||
+      toggleVerifiedMutation.isPending ||
+      createUserMutation.isPending ||
+      resetPasswordMutation.isPending ||
+      deleteUserMutation.isPending,
+    error:
+      updateRolesMutation.error ||
+      toggleVerifiedMutation.error ||
+      createUserMutation.error ||
+      resetPasswordMutation.error ||
+      deleteUserMutation.error,
+  }
 }
 
 // ============================================================
@@ -231,12 +239,7 @@ export function useAdminGrantApplications(filters?: {
   grantId?: string
   status?: string
 }) {
-  const filterKey = () => JSON.stringify({
-    grantId: filters?.grantId,
-    status: filters?.status,
-  })
-
-  const fetchApplications = async (_key: string): Promise<GrantApplication[]> => {
+  const fetchApplications = async (): Promise<GrantApplication[]> => {
     let query = supabase
       .from('grant_applications')
       .select(`
@@ -260,35 +263,41 @@ export function useAdminGrantApplications(filters?: {
     return (data as any[]) || []
   }
 
-  const [applications, { refetch }] = createResource(filterKey, fetchApplications)
+  const query = useQuery({
+    queryKey: keys.list('admin-grant-applications', filters),
+    queryFn: fetchApplications,
+  })
 
-  return { applications, refetch }
+  return { applications: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useAdminApplicationActions() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateApplicationStatus = async (applicationId: string, status: GrantApplicationStatus) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      applicationId,
+      status,
+    }: {
+      applicationId: string
+      status: GrantApplicationStatus
+    }) => {
       const { error } = await supabase
         .from('grant_applications')
         .update({ status: status as any })
         .eq('id', applicationId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-grant-applications') })
+    },
+  })
 
-  return { updateApplicationStatus, loading, error }
+  const updateApplicationStatus = (applicationId: string, status: GrantApplicationStatus) =>
+    mutation.mutateAsync({ applicationId, status })
+
+  return { updateApplicationStatus, loading: mutation.isPending, error: mutation.error }
 }
 
 // ============================================================
@@ -296,29 +305,25 @@ export function useAdminApplicationActions() {
 // ============================================================
 
 export function useAdminForumActions() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const togglePin = async (postId: string, pinned: boolean) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({ postId, pinned }: { postId: string; pinned: boolean }) => {
       const { error } = await supabase
         .from('forum_posts')
         .update({ is_pinned: pinned })
         .eq('id', postId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-forum-posts') })
+    },
+  })
 
-  return { togglePin, loading, error }
+  const togglePin = (postId: string, pinned: boolean) => mutation.mutateAsync({ postId, pinned })
+
+  return { togglePin, loading: mutation.isPending, error: mutation.error }
 }
 
 // ============================================================
@@ -329,12 +334,7 @@ export function useAdminAllPosts(filters?: {
   search?: string
   boardId?: string
 }) {
-  const filterKey = () => JSON.stringify({
-    search: filters?.search,
-    boardId: filters?.boardId,
-  })
-
-  const fetchPosts = async (_key: string) => {
+  const fetchPosts = async () => {
     let query = supabase
       .from('forum_posts')
       .select('*, author:profiles(*), board:forum_boards(*)')
@@ -360,7 +360,10 @@ export function useAdminAllPosts(filters?: {
     return (data as any[]) || []
   }
 
-  const [posts, { refetch }] = createResource(filterKey, fetchPosts)
+  const query = useQuery({
+    queryKey: keys.list('admin-forum-posts', filters),
+    queryFn: fetchPosts,
+  })
 
-  return { posts, refetch }
+  return { posts: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }

@@ -1,6 +1,5 @@
-import { createSignal, createEffect, Show, Suspense } from 'solid-js'
-import { A, useParams, useNavigate } from '@solidjs/router'
-import { MainLayout } from '../../components/layout/MainLayout'
+import { useState, useEffect, type FormEvent } from 'react'
+import { Link, useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -8,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useEvent, useUpdateEvent } from '../../hooks/useEvents'
 import { eventSchema } from '../../lib/validation'
-import { Save, ChevronRight, Calendar, MapPin, Video, Users } from 'lucide-solid'
+import { Save, ChevronRight, Calendar, MapPin, Video, Users } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
 export default function EditEventPage() {
@@ -16,54 +15,53 @@ export default function EditEventPage() {
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
-  const { event } = useEvent(() => params.id)
+  const { event, loading: eventLoading } = useEvent(params.id)
   const { updateEvent, loading: updating } = useUpdateEvent()
 
-  usePageTitle(() => event()?.title ? `Edit: ${event()!.title}` : 'Edit Event')
+  usePageTitle(event?.title ? `Edit: ${event.title}` : 'Edit Event')
 
-  const [initialized, setInitialized] = createSignal(false)
-  const [title, setTitle] = createSignal('')
-  const [description, setDescription] = createSignal('')
-  const [eventType, setEventType] = createSignal('meetup')
-  const [location, setLocation] = createSignal('')
-  const [isVirtual, setIsVirtual] = createSignal(false)
-  const [startDate, setStartDate] = createSignal('')
-  const [startTime, setStartTime] = createSignal('')
-  const [endDate, setEndDate] = createSignal('')
-  const [endTime, setEndTime] = createSignal('')
-  const [capacity, setCapacity] = createSignal<number | undefined>(undefined)
-  const [isClimateAction, setIsClimateAction] = createSignal(false)
-  const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [errorMessage, setErrorMessage] = createSignal('')
+  const [initialized, setInitialized] = useState(false)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [eventType, setEventType] = useState('meetup')
+  const [location, setLocation] = useState('')
+  const [isVirtual, setIsVirtual] = useState(false)
+  const [startDate, setStartDate] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [endTime, setEndTime] = useState('')
+  const [capacity, setCapacity] = useState<number | undefined>(undefined)
+  const [isClimateAction, setIsClimateAction] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errorMessage, setErrorMessage] = useState('')
 
-  createEffect(() => {
-    const e = event()
-    if (e && !initialized()) {
-      setTitle(e.title || '')
-      setDescription(e.description || '')
-      setEventType(e.event_type || 'meetup')
-      setLocation(e.location || '')
-      setIsVirtual(e.is_virtual ?? false)
-      setCapacity(e.capacity ?? undefined)
-      setIsClimateAction(e.is_climate_action ?? false)
+  useEffect(() => {
+    if (event && !initialized) {
+      setTitle(event.title || '')
+      setDescription(event.description || '')
+      setEventType(event.event_type || 'meetup')
+      setLocation(event.location || '')
+      setIsVirtual(event.is_virtual ?? false)
+      setCapacity(event.capacity ?? undefined)
+      setIsClimateAction(event.is_climate_action ?? false)
 
-      if (e.start_date) {
-        const d = new Date(e.start_date)
+      if (event.start_date) {
+        const d = new Date(event.start_date)
         setStartDate(d.toISOString().split('T')[0])
         setStartTime(d.toTimeString().slice(0, 5))
       }
 
-      if (e.end_date) {
-        const d = new Date(e.end_date)
+      if (event.end_date) {
+        const d = new Date(event.end_date)
         setEndDate(d.toISOString().split('T')[0])
         setEndTime(d.toTimeString().slice(0, 5))
       }
 
       setInitialized(true)
     }
-  })
+  }, [event, initialized])
 
-  const isOwner = () => event()?.organizer_id === auth.user()?.id
+  const isOwner = event?.organizer_id === auth.user?.id
 
   const combineDatetime = (date: string, time: string): string => {
     if (!date) return ''
@@ -71,25 +69,25 @@ export default function EditEventPage() {
     return new Date(datetime).toISOString()
   }
 
-  const handleSubmit = async (e: Event) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setErrors({})
     setErrorMessage('')
 
-    const startDatetime = combineDatetime(startDate(), startTime())
-    const endDatetime = endDate()
-      ? combineDatetime(endDate(), endTime())
+    const startDatetime = combineDatetime(startDate, startTime)
+    const endDatetime = endDate
+      ? combineDatetime(endDate, endTime)
       : undefined
 
     const result = eventSchema.safeParse({
-      title: title(),
-      description: description(),
-      event_type: eventType(),
-      location: isVirtual() ? 'Virtual' : location(),
-      is_virtual: isVirtual(),
+      title,
+      description,
+      event_type: eventType,
+      location: isVirtual ? 'Virtual' : location,
+      is_virtual: isVirtual,
       start_date: startDatetime,
       end_date: endDatetime,
-      capacity: capacity(),
+      capacity,
     })
 
     if (!result.success) {
@@ -105,15 +103,15 @@ export default function EditEventPage() {
 
     try {
       await updateEvent(params.id!, {
-        title: title(),
-        description: description(),
-        event_type: eventType() as any,
-        location: isVirtual() ? 'Virtual' : location(),
-        is_virtual: isVirtual(),
+        title,
+        description,
+        event_type: eventType as any,
+        location: isVirtual ? 'Virtual' : location,
+        is_virtual: isVirtual,
         start_date: startDatetime,
         end_date: endDatetime,
-        capacity: capacity(),
-        is_climate_action: isClimateAction(),
+        capacity,
+        is_climate_action: isClimateAction,
       } as any)
 
       toast.success('Event updated successfully!')
@@ -124,261 +122,245 @@ export default function EditEventPage() {
     }
   }
 
+  if (eventLoading || !event) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
+        <p className="mt-4 text-ktip-sand-600">Loading event...</p>
+      </div>
+    )
+  }
+
+  if (!isOwner) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
+          Not authorized
+        </h2>
+        <p className="text-ktip-sand-600 mb-6">You can only edit your own events.</p>
+        <Button onClick={() => navigate(`/events/${params.id}`)}>
+          Back to Event
+        </Button>
+      </div>
+    )
+  }
+
   return (
-    <MainLayout>
-      <Suspense
-        fallback={
-          <div class="container mx-auto px-4 py-12 text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
-            <p class="mt-4 text-ktip-sand-600">Loading event...</p>
+    <>
+      {/* Dark Hero */}
+      <div className="bg-gray-800 min-h-[180px] flex items-center">
+        <div className="container mx-auto px-4 flex items-center justify-between w-full">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Edit Event</p>
+            <h1 className="text-3xl font-display font-bold text-white">Edit Event</h1>
           </div>
-        }
-      >
-        <Show
-          when={!event.loading && event()}
-          fallback={
-            <div class="container mx-auto px-4 py-12 text-center">
-              <div class="text-6xl mb-4">📭</div>
-              <h2 class="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                Event not found
-              </h2>
-              <Button onClick={() => navigate('/events')}>
-                Back to Events
-              </Button>
-            </div>
-          }
-        >
-          <Show
-            when={isOwner()}
-            fallback={
-              <div class="container mx-auto px-4 py-12 text-center">
-                <h2 class="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                  Not authorized
-                </h2>
-                <p class="text-ktip-sand-600 mb-6">You can only edit your own events.</p>
-                <Button onClick={() => navigate(`/events/${params.id}`)}>
-                  Back to Event
-                </Button>
+          <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-400">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={14} />
+            <Link to="/events" className="hover:text-white transition-colors">Events</Link>
+            <ChevronRight size={14} />
+            <span className="text-gray-200">Edit</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* White Form Area */}
+      <div className="bg-white py-12">
+        <div className="max-w-3xl mx-auto px-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                {errorMessage}
               </div>
-            }
-          >
-            {/* Dark Hero */}
-            <div class="bg-gray-800 min-h-[180px] flex items-center">
-              <div class="container mx-auto px-4 flex items-center justify-between w-full">
-                <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Edit Event</p>
-                  <h1 class="text-3xl font-display font-bold text-white">Edit Event</h1>
+            )}
+
+            {/* Title */}
+            <Input
+              label="Event Title"
+              placeholder="e.g., Caribbean Tech Summit 2025"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              error={errors.title}
+              fullWidth
+              required
+            />
+
+            {/* Description */}
+            <Textarea
+              label="Description"
+              placeholder="Describe your event, agenda, and what participants can expect..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              error={errors.description}
+              rows={6}
+              fullWidth
+            />
+
+            {/* Event Type */}
+            <div>
+              <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
+                Event Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={eventType}
+                onChange={(e) => setEventType(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              >
+                <option value="hackathon">Hackathon</option>
+                <option value="workshop">Workshop</option>
+                <option value="meetup">Meetup</option>
+                <option value="conference">Conference</option>
+                <option value="demo_day">Demo Day</option>
+              </select>
+            </div>
+
+            {/* Virtual Toggle */}
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isVirtual}
+                  onChange={(e) => setIsVirtual(e.target.checked)}
+                  className="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
+                />
+                <div className="flex items-center gap-2">
+                  <Video size={18} className="text-ktip-sand-600" />
+                  <span className="text-sm text-ktip-sand-700">
+                    This is a virtual event
+                  </span>
                 </div>
-                <nav class="hidden sm:flex items-center gap-1 text-sm text-gray-400">
-                  <A href="/" class="hover:text-white transition-colors">Home</A>
-                  <ChevronRight size={14} />
-                  <A href="/events" class="hover:text-white transition-colors">Events</A>
-                  <ChevronRight size={14} />
-                  <span class="text-gray-200">Edit</span>
-                </nav>
-              </div>
+              </label>
             </div>
 
-            {/* White Form Area */}
-            <div class="bg-white py-12">
-              <div class="max-w-3xl mx-auto px-4">
-                <form onSubmit={handleSubmit} class="space-y-6">
-                  {errorMessage() && (
-                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                      {errorMessage()}
-                    </div>
-                  )}
+            {/* Location (if not virtual) */}
+            {!isVirtual && (
+              <Input
+                label="Location"
+                placeholder="e.g., Innovation Hub, Kingston, Jamaica"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                error={errors.location}
+                icon={<MapPin size={20} />}
+                fullWidth
+                required
+              />
+            )}
 
-                  {/* Title */}
-                  <Input
-                    label="Event Title"
-                    placeholder="e.g., Caribbean Tech Summit 2025"
-                    value={title()}
-                    onInput={(e) => setTitle(e.currentTarget.value)}
-                    error={errors().title}
-                    fullWidth
+            {/* Date and Time */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Start Date */}
+              <div>
+                <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
+                  Start Date <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Calendar
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                  />
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                     required
                   />
-
-                  {/* Description */}
-                  <Textarea
-                    label="Description"
-                    placeholder="Describe your event, agenda, and what participants can expect..."
-                    value={description()}
-                    onInput={(e) => setDescription(e.currentTarget.value)}
-                    error={errors().description}
-                    rows={6}
-                    fullWidth
-                  />
-
-                  {/* Event Type */}
-                  <div>
-                    <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
-                      Event Type <span class="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={eventType()}
-                      onChange={(e) => setEventType(e.currentTarget.value)}
-                      class="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                    >
-                      <option value="hackathon">Hackathon</option>
-                      <option value="workshop">Workshop</option>
-                      <option value="meetup">Meetup</option>
-                      <option value="conference">Conference</option>
-                      <option value="demo_day">Demo Day</option>
-                    </select>
-                  </div>
-
-                  {/* Virtual Toggle */}
-                  <div class="flex items-center gap-3">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isVirtual()}
-                        onChange={(e) => setIsVirtual(e.currentTarget.checked)}
-                        class="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
-                      />
-                      <div class="flex items-center gap-2">
-                        <Video size={18} class="text-ktip-sand-600" />
-                        <span class="text-sm text-ktip-sand-700">
-                          This is a virtual event
-                        </span>
-                      </div>
-                    </label>
-                  </div>
-
-                  {/* Location (if not virtual) */}
-                  <Show when={!isVirtual()}>
-                    <Input
-                      label="Location"
-                      placeholder="e.g., Innovation Hub, Kingston, Jamaica"
-                      value={location()}
-                      onInput={(e) => setLocation(e.currentTarget.value)}
-                      error={errors().location}
-                      icon={<MapPin size={20} />}
-                      fullWidth
-                      required
-                    />
-                  </Show>
-
-                  {/* Date and Time */}
-                  <div class="grid md:grid-cols-2 gap-4">
-                    {/* Start Date */}
-                    <div>
-                      <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
-                        Start Date <span class="text-red-500">*</span>
-                      </label>
-                      <div class="relative">
-                        <Calendar
-                          size={20}
-                          class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
-                        />
-                        <input
-                          type="date"
-                          value={startDate()}
-                          onInput={(e) => setStartDate(e.currentTarget.value)}
-                          class="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                          required
-                        />
-                      </div>
-                      {errors().start_date && (
-                        <p class="mt-1 text-sm text-red-600">{errors().start_date}</p>
-                      )}
-                    </div>
-
-                    {/* Start Time */}
-                    <Input
-                      label="Start Time"
-                      type="time"
-                      value={startTime()}
-                      onInput={(e) => setStartTime(e.currentTarget.value)}
-                      fullWidth
-                      required
-                    />
-                  </div>
-
-                  {/* End Date and Time (Optional) */}
-                  <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-ktip-sand-700 mb-2">
-                        End Date (Optional)
-                      </label>
-                      <div class="relative">
-                        <Calendar
-                          size={20}
-                          class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
-                        />
-                        <input
-                          type="date"
-                          value={endDate()}
-                          onInput={(e) => setEndDate(e.currentTarget.value)}
-                          min={startDate()}
-                          class="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <Input
-                      label="End Time (Optional)"
-                      type="time"
-                      value={endTime()}
-                      onInput={(e) => setEndTime(e.currentTarget.value)}
-                      fullWidth
-                    />
-                  </div>
-
-                  {/* Capacity */}
-                  <Input
-                    label="Capacity (Optional)"
-                    type="number"
-                    placeholder="Maximum number of attendees"
-                    value={capacity()?.toString() || ''}
-                    onInput={(e) =>
-                      setCapacity(
-                        e.currentTarget.value ? parseInt(e.currentTarget.value) : undefined
-                      )
-                    }
-                    error={errors().capacity}
-                    icon={<Users size={20} />}
-                    helperText="Leave empty for unlimited capacity"
-                    fullWidth
-                  />
-
-                  {/* Climate Action */}
-                  <div>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isClimateAction()}
-                        onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
-                        class="w-5 h-5 text-emerald-600 border-ktip-sand-300 rounded focus:ring-emerald-500"
-                      />
-                      <span class="text-sm text-ktip-sand-700">
-                        This event focuses on climate change solutions
-                      </span>
-                    </label>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div class="flex items-center gap-4">
-                    <Button type="submit" loading={updating()} icon={<Save size={20} />} fullWidth>
-                      Save Changes
-                    </Button>
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/events/${params.id}`)}
-                      disabled={updating()}
-                      class="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                </div>
+                {errors.start_date && (
+                  <p className="mt-1 text-sm text-red-600">{errors.start_date}</p>
+                )}
               </div>
+
+              {/* Start Time */}
+              <Input
+                label="Start Time"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                fullWidth
+                required
+              />
             </div>
-          </Show>
-        </Show>
-      </Suspense>
-    </MainLayout>
+
+            {/* End Date and Time (Optional) */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
+                  End Date (Optional)
+                </label>
+                <div className="relative">
+                  <Calendar
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                  />
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <Input
+                label="End Time (Optional)"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                fullWidth
+              />
+            </div>
+
+            {/* Capacity */}
+            <Input
+              label="Capacity (Optional)"
+              type="number"
+              placeholder="Maximum number of attendees"
+              value={capacity?.toString() || ''}
+              onChange={(e) =>
+                setCapacity(
+                  e.target.value ? parseInt(e.target.value) : undefined
+                )
+              }
+              error={errors.capacity}
+              icon={<Users size={20} />}
+              helperText="Leave empty for unlimited capacity"
+              fullWidth
+            />
+
+            {/* Climate Action */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isClimateAction}
+                  onChange={(e) => setIsClimateAction(e.target.checked)}
+                  className="w-5 h-5 text-emerald-600 border-ktip-sand-300 rounded focus:ring-emerald-500"
+                />
+                <span className="text-sm text-ktip-sand-700">
+                  This event focuses on climate change solutions
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex items-center gap-4">
+              <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>
+                Save Changes
+              </Button>
+              <button
+                type="button"
+                onClick={() => navigate(`/events/${params.id}`)}
+                disabled={updating}
+                className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
   )
 }

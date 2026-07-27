@@ -1,4 +1,4 @@
-import { createSignal, Show, For, Suspense } from 'solid-js'
+import { useState, type FormEvent } from 'react'
 import { useEventUpdates, useCreateEventUpdate, useUpdateEventUpdate, useDeleteEventUpdate } from '../../../hooks/useEventUpdates'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
@@ -13,7 +13,7 @@ import {
   Eye,
   EyeOff,
   X,
-} from 'lucide-solid'
+} from 'lucide-react'
 import {
   EVENT_UPDATE_TYPE_LABELS,
   EVENT_UPDATE_TYPE_COLORS,
@@ -26,21 +26,21 @@ interface AdminEventUpdatesTabProps {
   eventId: string
 }
 
-export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
+export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabProps) {
   const auth = useAuth()
   const toast = useToast()
-  const [showForm, setShowForm] = createSignal(false)
-  const [editingUpdate, setEditingUpdate] = createSignal<EventUpdate | null>(null)
-  const [deleteTarget, setDeleteTarget] = createSignal<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [editingUpdate, setEditingUpdate] = useState<EventUpdate | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   // Form state
-  const [title, setTitle] = createSignal('')
-  const [content, setContent] = createSignal('')
-  const [updateType, setUpdateType] = createSignal('announcement')
-  const [isPublished, setIsPublished] = createSignal(true)
-  const [errors, setErrors] = createSignal<Record<string, string>>({})
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [updateType, setUpdateType] = useState('announcement')
+  const [isPublished, setIsPublished] = useState(true)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const { updates, refetch } = useEventUpdates(() => props.eventId)
+  const { updates, loading: updatesLoading, refetch } = useEventUpdates(eventId)
   const { createUpdate, loading: creating } = useCreateEventUpdate()
   const { updateEventUpdate, loading: updating } = useUpdateEventUpdate()
   const { deleteEventUpdate, loading: deleting } = useDeleteEventUpdate()
@@ -64,14 +64,14 @@ export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
     setShowForm(true)
   }
 
-  const handleSubmit = async (e: SubmitEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
     const input = {
-      title: title(),
-      content: content(),
-      update_type: updateType() as any,
-      is_published: isPublished(),
+      title,
+      content,
+      update_type: updateType as any,
+      is_published: isPublished,
     }
 
     const result = eventUpdateSchema.safeParse(input)
@@ -86,14 +86,14 @@ export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
     }
 
     try {
-      if (editingUpdate()) {
-        await updateEventUpdate(editingUpdate()!.id, input)
+      if (editingUpdate) {
+        await updateEventUpdate(editingUpdate.id, input)
         toast.success('Update edited successfully')
       } else {
         await createUpdate({
           ...input,
-          event_id: props.eventId,
-          author_id: auth.user()!.id,
+          event_id: eventId,
+          author_id: auth.user!.id,
         })
         toast.success('Update created successfully')
       }
@@ -105,7 +105,7 @@ export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
   }
 
   const handleDelete = async () => {
-    const id = deleteTarget()
+    const id = deleteTarget
     if (!id) return
 
     try {
@@ -129,11 +129,11 @@ export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
   }
 
   return (
-    <div class="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-ktip-sand-900">Event Updates</h3>
-        <Show when={!showForm()}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-ktip-sand-900">Event Updates</h3>
+        {!showForm && (
           <Button
             size="sm"
             icon={<Plus size={14} />}
@@ -141,63 +141,63 @@ export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
           >
             New Update
           </Button>
-        </Show>
+        )}
       </div>
 
       {/* Form */}
-      <Show when={showForm()}>
+      {showForm && (
         <form
           onSubmit={handleSubmit}
-          class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4"
+          className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4"
         >
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="font-medium text-ktip-sand-900">
-              {editingUpdate() ? 'Edit Update' : 'New Update'}
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-medium text-ktip-sand-900">
+              {editingUpdate ? 'Edit Update' : 'New Update'}
             </h4>
             <button
               type="button"
               onClick={resetForm}
-              class="p-1 text-ktip-sand-400 hover:text-ktip-sand-600"
+              className="p-1 text-ktip-sand-400 hover:text-ktip-sand-600"
             >
               <X size={18} />
             </button>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Title</label>
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Title</label>
             <input
               type="text"
-              value={title()}
-              onInput={(e) => setTitle(e.currentTarget.value)}
-              class="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              value={title}
+              onChange={(e) => setTitle(e.currentTarget.value)}
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
               placeholder="Update title..."
             />
-            <Show when={errors().title}>
-              <p class="text-xs text-red-500 mt-1">{errors().title}</p>
-            </Show>
+            {errors.title && (
+              <p className="text-xs text-red-500 mt-1">{errors.title}</p>
+            )}
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Content</label>
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Content</label>
             <textarea
-              value={content()}
-              onInput={(e) => setContent(e.currentTarget.value)}
+              value={content}
+              onChange={(e) => setContent(e.currentTarget.value)}
               rows={4}
-              class="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none resize-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none resize-none"
               placeholder="Write your update..."
             />
-            <Show when={errors().content}>
-              <p class="text-xs text-red-500 mt-1">{errors().content}</p>
-            </Show>
+            {errors.content && (
+              <p className="text-xs text-red-500 mt-1">{errors.content}</p>
+            )}
           </div>
 
-          <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-ktip-sand-700 mb-1">Type</label>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Type</label>
               <select
-                value={updateType()}
+                value={updateType}
                 onChange={(e) => setUpdateType(e.currentTarget.value)}
-                class="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:outline-none"
               >
                 <option value="announcement">Announcement</option>
                 <option value="schedule_change">Schedule Change</option>
@@ -205,117 +205,110 @@ export default function AdminEventUpdatesTab(props: AdminEventUpdatesTabProps) {
               </select>
             </div>
 
-            <div class="flex items-end">
-              <label class="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={isPublished()}
+                  checked={isPublished}
                   onChange={(e) => setIsPublished(e.currentTarget.checked)}
-                  class="w-4 h-4 rounded border-ktip-sand-300 text-ktip-ocean-500 focus:ring-ktip-ocean-500"
+                  className="w-4 h-4 rounded border-ktip-sand-300 text-ktip-ocean-500 focus:ring-ktip-ocean-500"
                 />
-                <span class="text-sm text-ktip-sand-700">Publish immediately</span>
+                <span className="text-sm text-ktip-sand-700">Publish immediately</span>
               </label>
             </div>
           </div>
 
-          <div class="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" size="sm" onClick={resetForm} type="button">
               Cancel
             </Button>
             <Button
               size="sm"
               type="submit"
-              loading={creating() || updating()}
+              loading={creating || updating}
             >
-              {editingUpdate() ? 'Save Changes' : 'Create Update'}
+              {editingUpdate ? 'Save Changes' : 'Create Update'}
             </Button>
           </div>
         </form>
-      </Show>
+      )}
 
       {/* Updates List */}
-      <Suspense
-        fallback={<div class="text-center text-ktip-sand-500 py-8">Loading updates...</div>}
-      >
-        <Show
-          when={updates()?.length}
-          fallback={
-            <Show when={!showForm()}>
-              <div class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
-                <Megaphone size={48} class="mx-auto text-ktip-sand-300 mb-4" />
-                <h3 class="text-lg font-semibold text-ktip-sand-700 mb-1">No updates yet</h3>
-                <p class="text-ktip-sand-500 text-sm">
-                  Post announcements, schedule changes, or reminders for attendees
-                </p>
-              </div>
-            </Show>
-          }
-        >
-          <div class="space-y-3">
-            <For each={updates()}>
-              {(update) => (
-                <div class="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-4">
-                  <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2 mb-1">
-                        <h4 class="font-medium text-ktip-sand-900">{update.title}</h4>
-                        <Badge size="sm" class={EVENT_UPDATE_TYPE_COLORS[update.update_type] || ''}>
-                          {EVENT_UPDATE_TYPE_LABELS[update.update_type] || update.update_type}
-                        </Badge>
-                        <Show when={!update.is_published}>
-                          <Badge size="sm" class="bg-yellow-100 text-yellow-700 border-yellow-200">
-                            Draft
-                          </Badge>
-                        </Show>
-                      </div>
-                      <p class="text-sm text-ktip-sand-600 whitespace-pre-wrap">{update.content}</p>
-                      <p class="text-xs text-ktip-sand-400 mt-2">
-                        {format(new Date(update.created_at), 'MMM d, yyyy h:mm a')}
-                        {update.author?.display_name && ` by ${update.author.display_name}`}
-                      </p>
-                    </div>
-                    <div class="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => togglePublished(update)}
-                        class="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
-                        title={update.is_published ? 'Unpublish' : 'Publish'}
-                      >
-                        {update.is_published ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => startEdit(update)}
-                        class="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
-                        title="Edit"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(update.id)}
-                        class="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+      {updatesLoading ? (
+        <div className="text-center text-ktip-sand-500 py-8">Loading updates...</div>
+      ) : updates?.length ? (
+        <div className="space-y-3">
+          {updates.map((update) => (
+            <div key={update.id} className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-ktip-sand-900">{update.title}</h4>
+                    <Badge size="sm" className={EVENT_UPDATE_TYPE_COLORS[update.update_type] || ''}>
+                      {EVENT_UPDATE_TYPE_LABELS[update.update_type] || update.update_type}
+                    </Badge>
+                    {!update.is_published && (
+                      <Badge size="sm" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                        Draft
+                      </Badge>
+                    )}
                   </div>
+                  <p className="text-sm text-ktip-sand-600 whitespace-pre-wrap">{update.content}</p>
+                  <p className="text-xs text-ktip-sand-400 mt-2">
+                    {format(new Date(update.created_at), 'MMM d, yyyy h:mm a')}
+                    {update.author?.display_name && ` by ${update.author.display_name}`}
+                  </p>
                 </div>
-              )}
-            </For>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => togglePublished(update)}
+                    className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
+                    title={update.is_published ? 'Unpublish' : 'Publish'}
+                  >
+                    {update.is_published ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => startEdit(update)}
+                    className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
+                    title="Edit"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(update.id)}
+                    className="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        !showForm && (
+          <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
+            <Megaphone size={48} className="mx-auto text-ktip-sand-300 mb-4" />
+            <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1">No updates yet</h3>
+            <p className="text-ktip-sand-500 text-sm">
+              Post announcements, schedule changes, or reminders for attendees
+            </p>
           </div>
-        </Show>
-      </Suspense>
+        )
+      )}
 
       {/* Delete Confirm */}
       <ConfirmModal
-        open={!!deleteTarget()}
+        open={!!deleteTarget}
         title="Delete Update"
         message="Are you sure you want to delete this update? This action cannot be undone."
         confirmLabel="Delete"
         confirmVariant="danger"
-        loading={deleting()}
+        loading={deleting}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

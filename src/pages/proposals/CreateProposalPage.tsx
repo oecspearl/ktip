@@ -1,18 +1,17 @@
-import { createSignal, Show, For, createEffect, on, createResource } from 'solid-js'
-import { A, useNavigate, useSearchParams } from '@solidjs/router'
-import { MainLayout } from '../../components/layout/MainLayout'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Stepper } from '../../components/proposals/Stepper'
 import { StepForm } from '../../components/proposals/StepForm'
 import { ProposalPreview } from '../../components/proposals/ProposalPreview'
 import { ProposalExportActions } from '../../components/proposals/ProposalExportActions'
 import { AIReviewPanel } from '../../components/proposals/AIReviewPanel'
 import { useCreateProposal, useUpdateProposal, useProposal } from '../../hooks/useProposals'
+import { useProject } from '../../hooks/useProjects'
 import { PROPOSAL_STEPS } from '../../lib/proposal-templates'
 import { PROPOSAL_TYPE_LABELS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { SaveStatusBadge } from '../../components/proposals/SaveStatusBadge'
-import { supabase } from '../../lib/supabase'
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,7 +23,7 @@ import {
   Building,
   Loader2,
   ChevronRight,
-} from 'lucide-solid'
+} from 'lucide-react'
 import type { ProposalType } from '../../types'
 
 const PROPOSAL_TYPE_CARDS: { type: ProposalType; label: string; description: string; icon: any; color: string }[] = [
@@ -58,97 +57,137 @@ const PROPOSAL_TYPE_CARDS: { type: ProposalType; label: string; description: str
   },
 ]
 
+interface TypeSelectionProps {
+  onSelect: (type: ProposalType) => void
+}
+
+function TypeSelection({ onSelect }: TypeSelectionProps) {
+  return (
+    <div className="bg-white py-12">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-bold text-ktip-sand-900 font-display">Choose Proposal Type</h2>
+          <p className="text-sm text-ktip-sand-500 mt-2">
+            Select the type of proposal you want to create. Each template follows global best practices.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          {PROPOSAL_TYPE_CARDS.map((card) => {
+            const Icon = card.icon
+            return (
+              <button
+                key={card.type}
+                type="button"
+                onClick={() => onSelect(card.type)}
+                className="flex items-start gap-4 border border-gray-200 p-6 rounded-2xl text-left hover:border-ktip-ocean-400 hover:shadow-card transition-all group"
+              >
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${card.color} bg-gray-50`}>
+                  <Icon size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-600 transition-colors">
+                    {card.label}
+                  </h3>
+                  <p className="text-sm text-ktip-sand-500 mt-1">{card.description}</p>
+                  <span className="text-xs text-ktip-ocean-600 font-medium mt-2 inline-block">
+                    {PROPOSAL_STEPS[card.type].length} guided steps &rarr;
+                  </span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CreateProposalPage() {
-  usePageTitle(() => 'Create Proposal')
+  usePageTitle('Create Proposal')
 
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
   // If resuming a draft, load it
-  const draftId = () => searchParams.draft as string | undefined
+  const draftId = searchParams.get('draft') || undefined
   const { proposal: existingProposal } = useProposal(draftId)
 
   // If coming from a project, link the proposal to it
-  const projectId = () => searchParams.project as string | undefined
-  const [projectTitle] = createResource(projectId, async (pid) => {
-    const { data } = await supabase.from('projects').select('title').eq('id', pid).single()
-    return data?.title || null
-  })
+  const projectId = searchParams.get('project') || undefined
+  const { project } = useProject(projectId)
+  const projectTitle = project?.title || null
 
   // Core state
-  const [selectedType, setSelectedType] = createSignal<ProposalType | null>(null)
-  const [currentStep, setCurrentStep] = createSignal(0)
-  const [proposalData, setProposalData] = createSignal<Record<string, any>>({})
-  const [proposalId, setProposalId] = createSignal<string | null>(null)
-  const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [saving, setSaving] = createSignal(false)
+  const [selectedType, setSelectedType] = useState<ProposalType | null>(null)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [proposalData, setProposalData] = useState<Record<string, any>>({})
+  const [proposalId, setProposalId] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
 
   const { createProposal } = useCreateProposal()
   const { updateProposal } = useUpdateProposal()
 
-  // Auto-save (wired after saveDraft is defined below)
+  // Auto-save
   const autoSave = useAutoSave({
     delay: 5000,
     onSave: async () => {
-      const type = selectedType()
+      const type = selectedType
       if (!type) return
-      const data = proposalData()
+      const data = proposalData
       const title = data.title || 'Untitled Proposal'
-      if (proposalId()) {
-        await updateProposal(proposalId()!, { title, proposal_data: data, current_step: currentStep() })
+      if (proposalId) {
+        await updateProposal(proposalId, { title, proposal_data: data, current_step: currentStep })
       } else {
-        const created = await createProposal({ type, title, proposal_data: data, current_step: currentStep(), project_id: projectId() })
+        const created = await createProposal({ type, title, proposal_data: data, current_step: currentStep, project_id: projectId })
         if (created) setProposalId(created.id)
       }
     },
   })
 
-  // Load existing draft data
-  createEffect(on(() => existingProposal(), (draft) => {
-    if (draft) {
-      setSelectedType(draft.type)
-      setCurrentStep(draft.current_step)
-      setProposalData(draft.proposal_data || {})
-      setProposalId(draft.id)
+  // Load existing draft data — only apply once, when it first becomes available,
+  // so subsequent background refetches (e.g. triggered by autosave's cache
+  // invalidation) don't clobber in-progress local edits.
+  const hasLoadedDraftRef = useRef(false)
+  useEffect(() => {
+    if (existingProposal && !hasLoadedDraftRef.current) {
+      hasLoadedDraftRef.current = true
+      setSelectedType(existingProposal.type)
+      setCurrentStep(existingProposal.current_step)
+      setProposalData(existingProposal.proposal_data || {})
+      setProposalId(existingProposal.id)
     }
-  }))
+  }, [existingProposal])
 
-  const steps = () => {
-    const type = selectedType()
-    if (!type) return []
-    return PROPOSAL_STEPS[type]
-  }
+  const steps = selectedType ? PROPOSAL_STEPS[selectedType] : []
+  const stepNames = [...steps.map((s) => s.title), 'Review & Submit']
+  const totalSteps = steps.length + 1 // +1 for review
+  const isReviewStep = currentStep === steps.length
+  const currentStepConfig = steps[currentStep]
 
-  const stepNames = () => [...steps().map(s => s.title), 'Review & Submit']
-  const totalSteps = () => steps().length + 1 // +1 for review
-  const isReviewStep = () => currentStep() === steps().length
-  const currentStepConfig = () => steps()[currentStep()]
-
-  const getTitle = () => {
-    const data = proposalData()
-    return data.title || 'Untitled Proposal'
-  }
+  const getTitle = () => proposalData.title || 'Untitled Proposal'
 
   // --- Field change handler ---
   const handleFieldChange = (field: string, value: string) => {
-    setProposalData(prev => ({ ...prev, [field]: value }))
-    setErrors(prev => {
+    setProposalData((prev) => ({ ...prev, [field]: value }))
+    setErrors((prev) => {
       const next = { ...prev }
       delete next[field]
       return next
     })
-    if (selectedType()) autoSave.trigger()
+    if (selectedType) autoSave.trigger()
   }
 
   // --- Validation ---
   const validateCurrentStep = (): boolean => {
-    const step = currentStepConfig()
+    const step = currentStepConfig
     if (!step) return true
 
     const newErrors: Record<string, string> = {}
     for (const field of step.fields) {
       if (field.required) {
-        const val = proposalData()[field.name]
+        const val = proposalData[field.name]
         if (!val || !String(val).trim()) {
           newErrors[field.name] = `${field.label} is required`
         }
@@ -161,27 +200,27 @@ export default function CreateProposalPage() {
 
   // --- Save / persist draft ---
   const saveDraft = async () => {
-    const type = selectedType()
+    const type = selectedType
     if (!type) return
 
     setSaving(true)
     try {
-      const data = proposalData()
+      const data = proposalData
       const title = data.title || 'Untitled Proposal'
 
-      if (proposalId()) {
-        await updateProposal(proposalId()!, {
+      if (proposalId) {
+        await updateProposal(proposalId, {
           title,
           proposal_data: data,
-          current_step: currentStep(),
+          current_step: currentStep,
         })
       } else {
         const created = await createProposal({
           type,
           title,
           proposal_data: data,
-          current_step: currentStep(),
-          project_id: projectId(),
+          current_step: currentStep,
+          project_id: projectId,
         })
         if (created) {
           setProposalId(created.id)
@@ -198,13 +237,13 @@ export default function CreateProposalPage() {
   const handleNext = async () => {
     if (!validateCurrentStep()) return
     await saveDraft()
-    setCurrentStep(prev => Math.min(prev + 1, totalSteps() - 1))
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleBack = () => {
     setErrors({})
-    setCurrentStep(prev => Math.max(prev - 1, 0))
+    setCurrentStep((prev) => Math.max(prev - 1, 0))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -217,24 +256,24 @@ export default function CreateProposalPage() {
   const handleComplete = async () => {
     setSaving(true)
     try {
-      const data = proposalData()
+      const data = proposalData
       const title = data.title || 'Untitled Proposal'
 
-      if (proposalId()) {
-        await updateProposal(proposalId()!, {
+      if (proposalId) {
+        await updateProposal(proposalId, {
           title,
           proposal_data: data,
-          current_step: currentStep(),
+          current_step: currentStep,
           status: 'completed',
         })
-        navigate(`/proposals/${proposalId()}`)
+        navigate(`/proposals/${proposalId}`)
       } else {
         const created = await createProposal({
-          type: selectedType()!,
+          type: selectedType!,
           title,
           proposal_data: data,
-          current_step: currentStep(),
-          project_id: projectId(),
+          current_step: currentStep,
+          project_id: projectId,
         })
         if (created) {
           await updateProposal(created.id, { status: 'completed' })
@@ -248,221 +287,174 @@ export default function CreateProposalPage() {
     }
   }
 
-  // --- Type Selection View ---
-  const TypeSelection = () => (
-    <div class="bg-white py-12">
-      <div class="max-w-3xl mx-auto px-4">
-        <div class="text-center mb-8">
-          <h2 class="text-xl font-bold text-ktip-sand-900 font-display">Choose Proposal Type</h2>
-          <p class="text-sm text-ktip-sand-500 mt-2">
-            Select the type of proposal you want to create. Each template follows global best practices.
-          </p>
-        </div>
+  const handleSelectType = (type: ProposalType) => {
+    setSelectedType(type)
+    setCurrentStep(0)
+    setProposalData({})
+    setProposalId(null)
+    setErrors({})
+  }
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <For each={PROPOSAL_TYPE_CARDS}>
-            {(card) => {
-              const Icon = card.icon
-              return (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedType(card.type)
-                    setCurrentStep(0)
-                    setProposalData({})
-                    setProposalId(null)
-                    setErrors({})
-                  }}
-                  class="flex items-start gap-4 border border-gray-200 p-6 rounded-2xl text-left hover:border-ktip-ocean-400 hover:shadow-card transition-all group"
-                >
-                  <div class={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${card.color} bg-gray-50`}>
-                    <Icon size={20} />
-                  </div>
-                  <div>
-                    <h3 class="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-600 transition-colors">
-                      {card.label}
-                    </h3>
-                    <p class="text-sm text-ktip-sand-500 mt-1">{card.description}</p>
-                    <span class="text-xs text-ktip-ocean-600 font-medium mt-2 inline-block">
-                      {PROPOSAL_STEPS[card.type].length} guided steps →
-                    </span>
-                  </div>
-                </button>
-              )
-            }}
-          </For>
-        </div>
-      </div>
-    </div>
-  )
+  const handleChangeType = () => {
+    setSelectedType(null)
+    setCurrentStep(0)
+    setProposalData({})
+    setErrors({})
+  }
 
   return (
-    <MainLayout>
+    <>
       {/* Dark Hero */}
-      <div class="bg-gray-800 min-h-[180px] flex items-center">
-        <div class="container mx-auto px-4 flex items-center justify-between w-full">
+      <div className="bg-gray-800 min-h-[180px] flex items-center">
+        <div className="container mx-auto px-4 flex items-center justify-between w-full">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Create Proposal</p>
-            <h1 class="text-3xl font-display font-bold text-white">
-              {selectedType() ? `${PROPOSAL_TYPE_LABELS[selectedType()!]} Wizard` : 'New Proposal'}
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Create Proposal</p>
+            <h1 className="text-3xl font-display font-bold text-white">
+              {selectedType ? `${PROPOSAL_TYPE_LABELS[selectedType]} Wizard` : 'New Proposal'}
             </h1>
-            <Show when={projectTitle()}>
-              <p class="text-xs text-ktip-ocean-400 font-medium mt-1">
-                For project: {projectTitle()}
+            {projectTitle && (
+              <p className="text-xs text-ktip-ocean-400 font-medium mt-1">
+                For project: {projectTitle}
               </p>
-            </Show>
-            <Show when={selectedType()}>
-              <p class="text-sm text-gray-400 mt-1 flex items-center">
-                Step {currentStep() + 1} of {totalSteps()}
-                <SaveStatusBadge status={autoSave.status()} />
+            )}
+            {selectedType && (
+              <p className="text-sm text-gray-400 mt-1 flex items-center">
+                Step {currentStep + 1} of {totalSteps}
+                <SaveStatusBadge status={autoSave.status} />
               </p>
-            </Show>
+            )}
           </div>
-          <nav class="hidden sm:flex items-center gap-1 text-sm text-gray-400">
-            <A href="/" class="hover:text-white transition-colors">Home</A>
+          <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-400">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={14} />
-            <A href="/proposals" class="hover:text-white transition-colors">Proposals</A>
+            <Link to="/proposals" className="hover:text-white transition-colors">Proposals</Link>
             <ChevronRight size={14} />
-            <span class="text-gray-200">Create</span>
+            <span className="text-gray-200">Create</span>
           </nav>
         </div>
       </div>
 
       {/* Type selection or wizard */}
-      <Show when={selectedType()} fallback={<TypeSelection />}>
-        <div class="bg-white py-12">
-          <div class="max-w-4xl mx-auto px-4">
+      {!selectedType ? (
+        <TypeSelection onSelect={handleSelectType} />
+      ) : (
+        <div className="bg-white py-12">
+          <div className="max-w-4xl mx-auto px-4">
             {/* Stepper */}
-            <div class="border border-gray-200 rounded-2xl p-4 mb-6">
+            <div className="border border-gray-200 rounded-2xl p-4 mb-6">
               <Stepper
-                steps={stepNames()}
-                currentStep={currentStep()}
+                steps={stepNames}
+                currentStep={currentStep}
                 onStepClick={handleStepClick}
               />
             </div>
 
             {/* Content */}
-            <div class="border border-gray-200 rounded-2xl p-6 md:p-8">
-              <Show
-                when={!isReviewStep()}
-                fallback={
-                  <div>
-                    <div class="flex items-center justify-between mb-6">
-                      <div>
-                        <h3 class="text-lg font-semibold text-ktip-sand-900">Review & Submit</h3>
-                        <p class="text-sm text-ktip-sand-500 mt-1">
-                          Review your proposal before completing it. You can go back to edit any section.
-                        </p>
-                      </div>
-                      <ProposalExportActions
-                        type={selectedType()!}
-                        title={getTitle()}
-                        data={proposalData()}
-                      />
-                    </div>
-                    <div class="border border-ktip-sand-200 rounded-xl p-6 bg-ktip-sand-50/30">
-                      <ProposalPreview
-                        type={selectedType()!}
-                        title={getTitle()}
-                        data={proposalData()}
-                      />
-                    </div>
-
-                    <AIReviewPanel
-                      proposalType={selectedType()!}
-                      proposalTitle={getTitle()}
-                      proposalData={proposalData()}
-                    />
-                  </div>
-                }
-              >
+            <div className="border border-gray-200 rounded-2xl p-6 md:p-8">
+              {!isReviewStep ? (
                 <StepForm
-                  step={currentStepConfig()!}
-                  data={proposalData()}
+                  step={currentStepConfig!}
+                  data={proposalData}
                   onChange={handleFieldChange}
-                  errors={errors()}
-                  proposalType={selectedType()!}
+                  errors={errors}
+                  proposalType={selectedType}
                   proposalTitle={getTitle()}
                 />
-              </Show>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-ktip-sand-900">Review & Submit</h3>
+                      <p className="text-sm text-ktip-sand-500 mt-1">
+                        Review your proposal before completing it. You can go back to edit any section.
+                      </p>
+                    </div>
+                    <ProposalExportActions
+                      type={selectedType}
+                      title={getTitle()}
+                      data={proposalData}
+                    />
+                  </div>
+                  <div className="border border-ktip-sand-200 rounded-xl p-6 bg-ktip-sand-50/30">
+                    <ProposalPreview
+                      type={selectedType}
+                      title={getTitle()}
+                      data={proposalData}
+                    />
+                  </div>
+
+                  <AIReviewPanel
+                    proposalType={selectedType}
+                    proposalTitle={getTitle()}
+                    proposalData={proposalData}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Navigation Buttons */}
-            <div class="flex items-center justify-between mt-6">
-              <Show
-                when={currentStep() > 0}
-                fallback={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedType(null)
-                      setCurrentStep(0)
-                      setProposalData({})
-                      setErrors({})
-                    }}
-                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
-                  >
-                    <ArrowLeft size={16} />
-                    Change Type
-                  </button>
-                }
-              >
+            <div className="flex items-center justify-between mt-6">
+              {currentStep > 0 ? (
                 <button
                   type="button"
                   onClick={handleBack}
-                  class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
-              </Show>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleChangeType}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                  Change Type
+                </button>
+              )}
 
-              <div class="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 {/* Save Draft */}
-                <Show when={!isReviewStep()}>
+                {!isReviewStep && (
                   <button
                     type="button"
                     onClick={saveDraft}
-                    disabled={saving()}
-                    class="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors disabled:opacity-50"
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors disabled:opacity-50"
                   >
-                    {saving() ? <Loader2 size={16} class="animate-spin" /> : <Save size={16} />}
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                     Save Draft
                   </button>
-                </Show>
+                )}
 
                 {/* Next / Complete */}
-                <Show
-                  when={!isReviewStep()}
-                  fallback={
-                    <button
-                      type="button"
-                      onClick={handleComplete}
-                      disabled={saving()}
-                      class="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-white rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
-                    >
-                      {saving() ? <Loader2 size={16} class="animate-spin" /> : <CheckCircle size={16} />}
-                      Complete Proposal
-                    </button>
-                  }
-                >
+                {!isReviewStep ? (
                   <button
                     type="button"
                     onClick={handleNext}
-                    disabled={saving()}
-                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-ocean-500 text-white rounded-xl text-sm font-medium hover:bg-ktip-ocean-600 transition-colors disabled:opacity-50"
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-ocean-500 text-white rounded-xl text-sm font-medium hover:bg-ktip-ocean-600 transition-colors disabled:opacity-50"
                   >
-                    {saving() ? <Loader2 size={16} class="animate-spin" /> : 'Next'}
-                    <Show when={!saving()}>
-                      <ArrowRight size={16} />
-                    </Show>
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : 'Next'}
+                    {!saving && <ArrowRight size={16} />}
                   </button>
-                </Show>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleComplete}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-white rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                    Complete Proposal
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </Show>
-    </MainLayout>
+      )}
+    </>
   )
 }

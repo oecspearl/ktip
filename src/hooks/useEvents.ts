@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Event } from '../types'
 
 export function useEvents(filters?: {
@@ -10,16 +11,7 @@ export function useEvents(filters?: {
   status?: string
   climateAction?: boolean
 }) {
-  // Reactive source: serializes filter values so createResource refetches when they change
-  const filterKey = () => JSON.stringify({
-    type: filters?.type,
-    upcoming: filters?.upcoming,
-    search: filters?.search,
-    status: filters?.status,
-    climateAction: filters?.climateAction,
-  })
-
-  const fetchEvents = async (_key: string): Promise<Event[]> => {
+  const fetchEvents = async (): Promise<Event[]> => {
     let query = supabase
       .from('events')
       .select(`
@@ -69,12 +61,15 @@ export function useEvents(filters?: {
     return (data as any[]) || []
   }
 
-  const [events, { refetch }] = createResource(filterKey, fetchEvents)
+  const query = useQuery({
+    queryKey: keys.list('events', filters),
+    queryFn: fetchEvents,
+  })
 
-  return { events, refetch }
+  return { events: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useEvent(id: () => string | undefined) {
+export function useEvent(id: string | undefined) {
   const fetchEvent = async (eventId: string): Promise<Event | null> => {
     const { data, error } = await supabase
       .from('events')
@@ -89,30 +84,30 @@ export function useEvent(id: () => string | undefined) {
     return data as any
   }
 
-  const [event, { refetch }] = createResource(id, fetchEvent)
+  const query = useQuery({
+    queryKey: keys.detail('events', id),
+    queryFn: () => fetchEvent(id as string),
+    enabled: !!id,
+  })
 
-  return { event, refetch }
+  return { event: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateEvent() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createEvent = async (eventData: {
-    title: string
-    description?: string
-    event_type: string
-    location?: string
-    is_virtual?: boolean
-    start_date: string
-    end_date?: string
-    capacity?: number
-    organizer_id: string
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (eventData: {
+      title: string
+      description?: string
+      event_type: string
+      location?: string
+      is_virtual?: boolean
+      start_date: string
+      end_date?: string
+      capacity?: number
+      organizer_id: string
+    }) => {
       const { data, error } = await supabase
         .from('events')
         .insert({
@@ -126,26 +121,26 @@ export function useCreateEvent() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('events') })
+    },
+  })
 
-  return { createEvent, loading, error }
+  return { createEvent: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateEvent() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateEvent = async (eventId: string, updates: Partial<Event>) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      eventId,
+      updates,
+    }: {
+      eventId: string
+      updates: Partial<Event>
+    }) => {
       const { data, error } = await supabase
         .from('events')
         .update(updates)
@@ -155,49 +150,40 @@ export function useUpdateEvent() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('events') })
+    },
+  })
 
-  return { updateEvent, loading, error }
+  const updateEvent = (eventId: string, updates: Partial<Event>) =>
+    mutation.mutateAsync({ eventId, updates })
+
+  return { updateEvent, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteEvent() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteEvent = async (eventId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (eventId: string) => {
       const { error } = await supabase.from('events').delete().eq('id', eventId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('events') })
+    },
+  })
 
-  return { deleteEvent, loading, error }
+  return { deleteEvent: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useRSVP() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const rsvp = async (eventId: string, userId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const rsvpMutation = useMutation({
+    mutationFn: async ({ eventId, userId }: { eventId: string; userId: string }) => {
       const { data, error } = await supabase
         .from('event_rsvps')
         .insert({
@@ -209,19 +195,14 @@ export function useRSVP() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'rsvp', variables.eventId) })
+    },
+  })
 
-  const cancelRSVP = async (eventId: string, userId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const cancelMutation = useMutation({
+    mutationFn: async ({ eventId, userId }: { eventId: string; userId: string }) => {
       const { error } = await supabase
         .from('event_rsvps')
         .delete()
@@ -229,18 +210,16 @@ export function useRSVP() {
         .eq('user_id', userId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'rsvp', variables.eventId) })
+    },
+  })
 
-  const checkRSVP = async (
-    eventId: string,
-    userId: string
-  ): Promise<boolean> => {
+  const rsvp = (eventId: string, userId: string) => rsvpMutation.mutateAsync({ eventId, userId })
+  const cancelRSVP = (eventId: string, userId: string) => cancelMutation.mutateAsync({ eventId, userId })
+
+  const checkRSVP = async (eventId: string, userId: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from('event_rsvps')
       .select('id')
@@ -262,5 +241,12 @@ export function useRSVP() {
     return count || 0
   }
 
-  return { rsvp, cancelRSVP, checkRSVP, getRSVPCount, loading, error }
+  return {
+    rsvp,
+    cancelRSVP,
+    checkRSVP,
+    getRSVPCount,
+    loading: rsvpMutation.isPending || cancelMutation.isPending,
+    error: rsvpMutation.error || cancelMutation.error,
+  }
 }

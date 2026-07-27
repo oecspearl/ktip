@@ -1,4 +1,5 @@
-import { createSignal } from 'solid-js'
+import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 
 export type AIAction = 'improve_field' | 'suggest_section' | 'review_proposal' | 'adjust_tone'
 
@@ -103,29 +104,31 @@ ${context.fieldValue}`
 }
 
 export function useAISuggestions() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const invoke = async (action: AIAction, context: Record<string, any>): Promise<any> => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      action,
+      context,
+    }: {
+      action: AIAction
+      context: Record<string, any>
+    }): Promise<any> => {
       let systemPrompt: string
       let userPrompt: string
 
       switch (action) {
         case 'improve_field':
-          [systemPrompt, userPrompt] = buildImproveFieldPrompt(context)
+          ;[systemPrompt, userPrompt] = buildImproveFieldPrompt(context)
           break
         case 'suggest_section':
-          [systemPrompt, userPrompt] = buildSuggestSectionPrompt(context)
+          ;[systemPrompt, userPrompt] = buildSuggestSectionPrompt(context)
           break
         case 'review_proposal':
-          [systemPrompt, userPrompt] = buildReviewPrompt(context)
+          ;[systemPrompt, userPrompt] = buildReviewPrompt(context)
           break
         case 'adjust_tone':
-          [systemPrompt, userPrompt] = buildAdjustTonePrompt(context)
+          ;[systemPrompt, userPrompt] = buildAdjustTonePrompt(context)
           break
         default:
           throw new Error(`Unknown action: ${action}`)
@@ -142,11 +145,16 @@ export function useAISuggestions() {
       }
 
       return { html: result }
+    },
+  })
+
+  const invoke = async (action: AIAction, context: Record<string, any>): Promise<any> => {
+    setError(null)
+    try {
+      return await mutation.mutateAsync({ action, context })
     } catch (err: any) {
       setError(err.message || 'AI suggestion failed')
       return null
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -189,5 +197,5 @@ export function useAISuggestions() {
     return result?.html || null
   }
 
-  return { improveField, suggestSection, reviewProposal, adjustTone, loading, error }
+  return { improveField, suggestSection, reviewProposal, adjustTone, loading: mutation.isPending, error }
 }

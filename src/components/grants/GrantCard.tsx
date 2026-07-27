@@ -1,5 +1,4 @@
-import { A } from '@solidjs/router'
-import { Show } from 'solid-js'
+import { Link } from 'react-router'
 import { Badge } from '../ui/Badge'
 import type { Grant } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
@@ -10,18 +9,17 @@ interface GrantCardProps {
   grant: Grant
 }
 
-export function GrantCard(props: GrantCardProps) {
-  const hasDeadline = () => !!props.grant.deadline
-  const isExpired = () =>
-    hasDeadline() && isPast(new Date(props.grant.deadline!))
+export function GrantCard({ grant }: GrantCardProps) {
+  const hasDeadline = !!grant.deadline
+  const isExpired = hasDeadline && isPast(new Date(grant.deadline!))
 
   const getAmountDisplay = () => {
-    if (props.grant.amount_min && props.grant.amount_max) {
-      return `${formatCurrency(props.grant.amount_min, props.grant.currency)} - ${formatCurrency(props.grant.amount_max, props.grant.currency)}`
-    } else if (props.grant.amount_min) {
-      return `${formatCurrency(props.grant.amount_min, props.grant.currency)}+`
-    } else if (props.grant.amount_max) {
-      return `Up to ${formatCurrency(props.grant.amount_max, props.grant.currency)}`
+    if (grant.amount_min && grant.amount_max) {
+      return `${formatCurrency(grant.amount_min, grant.currency)} - ${formatCurrency(grant.amount_max, grant.currency)}`
+    } else if (grant.amount_min) {
+      return `${formatCurrency(grant.amount_min, grant.currency)}+`
+    } else if (grant.amount_max) {
+      return `Up to ${formatCurrency(grant.amount_max, grant.currency)}`
     }
     return 'Amount varies'
   }
@@ -49,81 +47,79 @@ export function GrantCard(props: GrantCardProps) {
   }
 
   return (
-    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-8 mb-8">
+    <div className="flex flex-col md:flex-row border-b border-gray-200 pb-8 mb-8">
       {/* Left: Icon area */}
-      <A href={`/grants/${props.grant.id}`} class="w-full md:w-40 h-36 shrink-0 relative">
-        <div class="w-full h-full bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 flex items-center justify-center text-5xl">
-          {getTypeIcon(props.grant.grant_type)}
+      <Link to={`/grants/${grant.id}`} className="w-full md:w-40 h-36 shrink-0 relative">
+        <div className="w-full h-full bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 flex items-center justify-center text-5xl">
+          {getTypeIcon(grant.grant_type)}
         </div>
         {/* Status overlays */}
-        <Show when={isExpired()}>
-          <div class="absolute top-3 left-3 z-10">
-            <Badge variant="danger" class="bg-red-100 text-red-700">Expired</Badge>
+        {isExpired && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge variant="danger" className="bg-red-100 text-red-700">Expired</Badge>
           </div>
-        </Show>
-        <Show when={!props.grant.is_active}>
-          <div class="absolute top-3 left-3 z-10">
+        )}
+        {!grant.is_active && (
+          <div className="absolute top-3 left-3 z-10">
             <Badge variant="default">Inactive</Badge>
           </div>
-        </Show>
-      </A>
+        )}
+      </Link>
 
       {/* Right: Content */}
-      <div class="flex-1 md:pl-6 pt-4 md:pt-0 flex flex-col justify-center">
+      <div className="flex-1 md:pl-6 pt-4 md:pt-0 flex flex-col justify-center">
         {/* Type + Climate badges */}
-        <div class="flex flex-wrap gap-2 mb-2">
-          <Show when={props.grant.grant_type}>
-            <Badge class={getTypeColor(props.grant.grant_type)} size="sm">
-              {props.grant.grant_type?.replace('_', ' ').toUpperCase()}
+        <div className="flex flex-wrap gap-2 mb-2">
+          {grant.grant_type && (
+            <Badge className={getTypeColor(grant.grant_type)} size="sm">
+              {grant.grant_type?.replace('_', ' ').toUpperCase()}
             </Badge>
-          </Show>
-          <Show when={props.grant.is_climate_action}>
-            <ClimateBadge />
-          </Show>
+          )}
+          {grant.is_climate_action && <ClimateBadge />}
         </div>
 
         {/* Title */}
-        <A href={`/grants/${props.grant.id}`}>
-          <h3 class="text-lg font-display font-bold text-ktip-sand-900 uppercase line-clamp-2 mb-2 hover:text-ktip-ocean-600 transition-colors">
-            {props.grant.title}
+        <Link to={`/grants/${grant.id}`}>
+          <h3 className="text-lg font-display font-bold text-ktip-sand-900 uppercase line-clamp-2 mb-2 hover:text-ktip-ocean-600 transition-colors">
+            {grant.title}
           </h3>
-        </A>
+        </Link>
 
         {/* Description */}
-        <Show when={props.grant.description}>
-          <p class="text-sm text-gray-600 mb-3 line-clamp-2">
-            {truncate(props.grant.description!, 150)}
+        {grant.description && (
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {truncate(grant.description!, 150)}
           </p>
-        </Show>
+        )}
 
         {/* Amount + Deadline pills */}
-        <div class="flex flex-wrap gap-3 mb-3">
-          <span class="border border-ktip-ocean-500 rounded px-3 py-1 text-sm">
-            <span class="font-bold text-ktip-ocean-600">Amount:</span>{' '}
-            <span class="text-gray-700">{getAmountDisplay()}</span>
+        <div className="flex flex-wrap gap-3 mb-3">
+          <span className="border border-ktip-ocean-500 rounded px-3 py-1 text-sm">
+            <span className="font-bold text-ktip-ocean-600">Amount:</span>{' '}
+            <span className="text-gray-700">{getAmountDisplay()}</span>
           </span>
-          <Show when={hasDeadline()}>
-            <span class={`border rounded px-3 py-1 text-sm ${isExpired() ? 'border-red-400' : 'border-ktip-ocean-500'}`}>
-              <span class={`font-bold ${isExpired() ? 'text-red-600' : 'text-ktip-ocean-600'}`}>Deadline:</span>{' '}
-              <span class={isExpired() ? 'text-red-600' : 'text-gray-700'}>
-                {formatDate(props.grant.deadline!)}
+          {hasDeadline && (
+            <span className={`border rounded px-3 py-1 text-sm ${isExpired ? 'border-red-400' : 'border-ktip-ocean-500'}`}>
+              <span className={`font-bold ${isExpired ? 'text-red-600' : 'text-ktip-ocean-600'}`}>Deadline:</span>{' '}
+              <span className={isExpired ? 'text-red-600' : 'text-gray-700'}>
+                {formatDate(grant.deadline!)}
               </span>
             </span>
-          </Show>
+          )}
         </div>
 
         {/* Bottom metadata */}
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <Show when={props.grant.eligibility}>
-            <p class="text-xs text-gray-400 line-clamp-1">
-              Eligibility: {props.grant.eligibility}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {grant.eligibility && (
+            <p className="text-xs text-gray-400 line-clamp-1">
+              Eligibility: {grant.eligibility}
             </p>
-          </Show>
-          <Show when={hasDeadline() && !isExpired()}>
-            <span class="text-xs text-gray-400">
-              {formatRelativeTime(props.grant.deadline!)}
+          )}
+          {hasDeadline && !isExpired && (
+            <span className="text-xs text-gray-400">
+              {formatRelativeTime(grant.deadline!)}
             </span>
-          </Show>
+          )}
         </div>
       </div>
     </div>

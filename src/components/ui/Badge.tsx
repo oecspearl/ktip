@@ -1,17 +1,15 @@
-import { type JSX, splitProps } from 'solid-js'
+import type { HTMLAttributes } from 'react'
 import { cn } from '../../lib/utils'
 
 type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
 type BadgeSize = 'sm' | 'md' | 'lg'
 
-interface BadgeProps extends JSX.HTMLAttributes<HTMLSpanElement> {
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant
   size?: BadgeSize
 }
 
-export function Badge(props: BadgeProps) {
-  const [local, others] = splitProps(props, ['class', 'variant', 'size', 'children'])
-
+export function Badge({ className, variant, size, children, ...others }: BadgeProps) {
   const variantStyles = {
     default: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
     primary: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
@@ -29,15 +27,15 @@ export function Badge(props: BadgeProps) {
 
   return (
     <span
-      class={cn(
+      className={cn(
         'inline-flex items-center gap-1 rounded-full font-medium border',
-        variantStyles[local.variant || 'default'],
-        sizeStyles[local.size || 'md'],
-        local.class
+        variantStyles[variant || 'default'],
+        sizeStyles[size || 'md'],
+        className
       )}
       {...others}
     >
-      {local.children}
+      {children}
     </span>
   )
 }

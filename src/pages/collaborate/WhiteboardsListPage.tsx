@@ -1,25 +1,22 @@
-import { createSignal, Show, For, Suspense } from 'solid-js'
-import { A, useNavigate } from '@solidjs/router'
-import { MainLayout } from '../../components/layout/MainLayout'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useWhiteboards, useSharedWhiteboards, useDeleteWhiteboard } from '../../hooks/useWhiteboards'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { formatRelativeTime, debounce } from '../../lib/utils'
-import { Plus, Search, Pen, Trash2, ChevronRight, Users } from 'lucide-solid'
+import { Plus, Search, Pen, Trash2, ChevronRight, Users } from 'lucide-react'
 
 export default function WhiteboardsListPage() {
-  usePageTitle(() => 'My Whiteboards')
+  usePageTitle('My Whiteboards')
   const navigate = useNavigate()
 
-  const [searchQuery, setSearchQuery] = createSignal('')
-  const whiteboards = useWhiteboards({ get search() { return searchQuery() } })
+  const [searchQuery, setSearchQuery] = useState('')
+  const whiteboards = useWhiteboards({ search: searchQuery })
   const shared = useSharedWhiteboards()
   const { deleteWhiteboard } = useDeleteWhiteboard()
 
-  const debouncedSearch = debounce((value: string) => {
-    setSearchQuery(value)
-  }, 300)
+  const debouncedSearch = useMemo(() => debounce((value: string) => setSearchQuery(value), 300), [])
 
-  const handleDelete = async (e: Event, wbId: string) => {
+  const handleDelete = async (e: React.MouseEvent, wbId: string) => {
     e.preventDefault()
     e.stopPropagation()
     if (!confirm('Delete this whiteboard? This cannot be undone.')) return
@@ -32,42 +29,42 @@ export default function WhiteboardsListPage() {
   }
 
   return (
-    <MainLayout>
+    <>
       {/* Dark Hero Band */}
-      <div class="bg-gray-800 min-h-[140px] flex items-center">
-        <div class="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
+      <div className="bg-gray-800 min-h-[140px] flex items-center">
+        <div className="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
           <div>
-            <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
-            <h1 class="text-3xl md:text-4xl font-display font-bold text-white">My Whiteboards</h1>
+            <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-white">My Whiteboards</h1>
           </div>
-          <nav class="hidden md:flex items-center gap-1 text-sm text-gray-400">
-            <A href="/" class="hover:text-white transition-colors">Home</A>
+          <nav className="hidden md:flex items-center gap-1 text-sm text-gray-400">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={14} />
-            <A href="/collaborate" class="hover:text-white transition-colors">Collaborate</A>
+            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
             <ChevronRight size={14} />
-            <span class="text-gray-200">Whiteboards</span>
+            <span className="text-gray-200">Whiteboards</span>
           </nav>
         </div>
       </div>
 
       {/* Content */}
-      <div class="bg-white py-8">
-        <div class="max-w-5xl mx-auto px-4">
+      <div className="bg-white py-8">
+        <div className="max-w-5xl mx-auto px-4">
           {/* Actions Bar */}
-          <div class="flex items-center gap-3 mb-6">
-            <div class="relative flex-1">
-              <Search size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400" />
               <input
                 type="text"
                 placeholder="Search whiteboards..."
-                onInput={(e) => debouncedSearch(e.currentTarget.value)}
-                class="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                onChange={(e) => debouncedSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
               />
             </div>
             <button
               type="button"
               onClick={() => navigate('/collaborate/whiteboard/new')}
-              class="inline-flex items-center gap-2 px-4 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors"
             >
               <Plus size={16} />
               New Whiteboard
@@ -75,111 +72,98 @@ export default function WhiteboardsListPage() {
           </div>
 
           {/* Whiteboard List */}
-          <Suspense
-            fallback={
-              <div class="space-y-3">
-                <For each={[1, 2, 3]}>
-                  {() => (
-                    <div class="border border-gray-200 p-4 animate-pulse">
-                      <div class="h-5 w-48 bg-gray-200 rounded mb-2" />
-                      <div class="h-4 w-32 bg-gray-100 rounded" />
-                    </div>
-                  )}
-                </For>
-              </div>
-            }
-          >
-            <Show
-              when={whiteboards.whiteboards() && whiteboards.whiteboards()!.length > 0}
-              fallback={
-                <div class="text-center py-16">
-                  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Pen size={32} class="text-gray-400" />
+          {whiteboards.loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="border border-gray-200 p-4 animate-pulse">
+                  <div className="h-5 w-48 bg-gray-200 rounded mb-2" />
+                  <div className="h-4 w-32 bg-gray-100 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : whiteboards.whiteboards && whiteboards.whiteboards.length > 0 ? (
+            <div className="space-y-2">
+              {whiteboards.whiteboards.map((wb) => (
+                <Link
+                  key={wb.id}
+                  to={`/collaborate/whiteboard/${wb.id}`}
+                  className="flex items-center justify-between border border-gray-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
+                >
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-700 transition-colors truncate">
+                      {wb.title}
+                    </h3>
+                    <p className="text-sm text-ktip-sand-500 mt-0.5">
+                      Edited {formatRelativeTime(wb.updated_at)}
+                    </p>
                   </div>
-                  <h3 class="text-lg font-semibold text-ktip-sand-800 mb-1">No whiteboards yet</h3>
-                  <p class="text-sm text-ktip-sand-500 mb-4">
-                    Create your first whiteboard to start brainstorming.
-                  </p>
                   <button
                     type="button"
-                    onClick={() => navigate('/collaborate/whiteboard/new')}
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    onClick={(e) => handleDelete(e, wb.id)}
+                    className="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    title="Delete whiteboard"
                   >
-                    <Plus size={16} />
-                    Create Whiteboard
+                    <Trash2 size={16} />
                   </button>
-                </div>
-              }
-            >
-              <div class="space-y-2">
-                <For each={whiteboards.whiteboards()}>
-                  {(wb) => (
-                    <A
-                      href={`/collaborate/whiteboard/${wb.id}`}
-                      class="flex items-center justify-between border border-gray-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
-                    >
-                      <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-700 transition-colors truncate">
-                          {wb.title}
-                        </h3>
-                        <p class="text-sm text-ktip-sand-500 mt-0.5">
-                          Edited {formatRelativeTime(wb.updated_at)}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => handleDelete(e, wb.id)}
-                        class="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Delete whiteboard"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </A>
-                  )}
-                </For>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Pen size={32} className="text-gray-400" />
               </div>
-            </Show>
-          </Suspense>
+              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1">No whiteboards yet</h3>
+              <p className="text-sm text-ktip-sand-500 mb-4">
+                Create your first whiteboard to start brainstorming.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/collaborate/whiteboard/new')}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                <Plus size={16} />
+                Create Whiteboard
+              </button>
+            </div>
+          )}
 
           {/* Shared with me */}
-          <Suspense>
-            <Show when={shared.whiteboards() && shared.whiteboards()!.length > 0}>
-              <div class="mt-10">
-                <h2 class="flex items-center gap-2 text-lg font-semibold text-ktip-sand-800 mb-4">
-                  <Users size={20} class="text-ktip-sand-400" />
-                  Shared with me
-                </h2>
-                <div class="space-y-2">
-                  <For each={shared.whiteboards()}>
-                    {(wb) => (
-                      <A
-                        href={`/collaborate/whiteboard/${wb.id}`}
-                        class="flex items-center justify-between border border-gray-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
-                      >
-                        <div class="min-w-0 flex-1">
-                          <h3 class="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-700 transition-colors truncate">
-                            {wb.title}
-                          </h3>
-                          <p class="text-sm text-ktip-sand-500 mt-0.5">
-                            Edited {formatRelativeTime(wb.updated_at)}
-                          </p>
-                        </div>
-                        <span class={`text-xs px-2 py-1 rounded ${
-                          (wb as any).permission === 'edit'
-                            ? 'text-ktip-ocean-600 bg-ktip-ocean-50'
-                            : 'text-ktip-sand-400 bg-ktip-sand-50'
-                        }`}>
-                          {(wb as any).permission === 'edit' ? 'Can edit' : 'View only'}
-                        </span>
-                      </A>
-                    )}
-                  </For>
-                </div>
+          {shared.whiteboards && shared.whiteboards.length > 0 && (
+            <div className="mt-10">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-ktip-sand-800 mb-4">
+                <Users size={20} className="text-ktip-sand-400" />
+                Shared with me
+              </h2>
+              <div className="space-y-2">
+                {shared.whiteboards.map((wb) => (
+                  <Link
+                    key={wb.id}
+                    to={`/collaborate/whiteboard/${wb.id}`}
+                    className="flex items-center justify-between border border-gray-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-700 transition-colors truncate">
+                        {wb.title}
+                      </h3>
+                      <p className="text-sm text-ktip-sand-500 mt-0.5">
+                        Edited {formatRelativeTime(wb.updated_at)}
+                      </p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      (wb as any).permission === 'edit'
+                        ? 'text-ktip-ocean-600 bg-ktip-ocean-50'
+                        : 'text-ktip-sand-400 bg-ktip-sand-50'
+                    }`}>
+                      {(wb as any).permission === 'edit' ? 'Can edit' : 'View only'}
+                    </span>
+                  </Link>
+                ))}
               </div>
-            </Show>
-          </Suspense>
+            </div>
+          )}
         </div>
       </div>
-    </MainLayout>
+    </>
   )
 }

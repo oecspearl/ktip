@@ -1,8 +1,9 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { RegistrationFieldConfig } from '../types'
 
-export function useRegistrationFields(eventId: () => string | undefined) {
+export function useRegistrationFields(eventId: string | undefined) {
   const fetchFields = async (id: string): Promise<RegistrationFieldConfig[]> => {
     const { data, error } = await supabase
       .from('events')
@@ -14,41 +15,57 @@ export function useRegistrationFields(eventId: () => string | undefined) {
     return (data?.registration_fields as RegistrationFieldConfig[]) || []
   }
 
-  const [fields, { refetch }] = createResource(eventId, fetchFields)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'registration-fields', eventId),
+    queryFn: () => fetchFields(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { fields, refetch }
+  return { fields: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useUpdateRegistrationFields() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const updateFields = async (eventId: string, fields: RegistrationFieldConfig[]) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      eventId,
+      fields,
+    }: {
+      eventId: string
+      fields: RegistrationFieldConfig[]
+    }) => {
       const { error } = await supabase
         .from('events')
         .update({ registration_fields: fields as any })
         .eq('id', eventId)
 
       if (error) throw error
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'registration-fields', variables.eventId) })
+    },
+  })
 
-  return { updateFields, loading }
+  const updateFields = (eventId: string, fields: RegistrationFieldConfig[]) =>
+    mutation.mutateAsync({ eventId, fields })
+
+  return { updateFields, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useSubmitRegistration() {
-  const [loading, setLoading] = createSignal(false)
+  const queryClient = useQueryClient()
 
-  const submitRegistration = async (
-    eventId: string,
-    userId: string,
-    registrationData: Record<string, any>
-  ) => {
-    setLoading(true)
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      eventId,
+      userId,
+      registrationData,
+    }: {
+      eventId: string
+      userId: string
+      registrationData: Record<string, any>
+    }) => {
       const { data, error } = await supabase
         .from('event_rsvps')
         .insert({
@@ -61,10 +78,17 @@ export function useSubmitRegistration() {
 
       if (error) throw error
       return data
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'registrations', variables.eventId) })
+    },
+  })
 
-  return { submitRegistration, loading }
+  const submitRegistration = (
+    eventId: string,
+    userId: string,
+    registrationData: Record<string, any>
+  ) => mutation.mutateAsync({ eventId, userId, registrationData })
+
+  return { submitRegistration, loading: mutation.isPending, error: mutation.error }
 }

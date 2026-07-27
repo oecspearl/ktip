@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Event, EventRSVP, EventStatus, RSVPStatus } from '../types'
 
 export function useAdminEvents(filters?: {
@@ -8,14 +9,7 @@ export function useAdminEvents(filters?: {
   type?: string
   search?: string
 }) {
-  // Reactive source: serializes filter values so createResource refetches when they change
-  const filterKey = () => JSON.stringify({
-    status: filters?.status,
-    type: filters?.type,
-    search: filters?.search,
-  })
-
-  const fetchEvents = async (_key: string): Promise<Event[]> => {
+  const fetchEvents = async (): Promise<Event[]> => {
     let query = supabase
       .from('events')
       .select(`
@@ -47,20 +41,19 @@ export function useAdminEvents(filters?: {
     return (data as any[]) || []
   }
 
-  const [events, { refetch }] = createResource(filterKey, fetchEvents)
+  const query = useQuery({
+    queryKey: keys.list('admin-events', filters),
+    queryFn: fetchEvents,
+  })
 
-  return { events, refetch }
+  return { events: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useEventStatusUpdate() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateStatus = async (eventId: string, status: EventStatus) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({ eventId, status }: { eventId: string; status: EventStatus }) => {
       const { data, error } = await supabase
         .from('events')
         .update({ status: status as any })
@@ -70,18 +63,20 @@ export function useEventStatusUpdate() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-events') })
+      queryClient.invalidateQueries({ queryKey: keys.all('events') })
+    },
+  })
 
-  return { updateStatus, loading, error }
+  const updateStatus = (eventId: string, status: EventStatus) =>
+    mutation.mutateAsync({ eventId, status })
+
+  return { updateStatus, loading: mutation.isPending, error: mutation.error }
 }
 
-export function useEventRegistrations(eventId: () => string | undefined) {
+export function useEventRegistrations(eventId: string | undefined) {
   const fetchRegistrations = async (id: string): Promise<EventRSVP[]> => {
     const { data, error } = await supabase
       .from('event_rsvps')
@@ -96,52 +91,55 @@ export function useEventRegistrations(eventId: () => string | undefined) {
     return (data as any[]) || []
   }
 
-  const [registrations, { refetch }] = createResource(eventId, fetchRegistrations)
+  const query = useQuery({
+    queryKey: keys.sub('events', 'registrations', eventId),
+    queryFn: () => fetchRegistrations(eventId as string),
+    enabled: !!eventId,
+  })
 
-  return { registrations, refetch }
+  return { registrations: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useRegistrationActions() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateRSVPStatus = async (rsvpId: string, status: RSVPStatus) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ rsvpId, status }: { rsvpId: string; status: RSVPStatus }) => {
       const { error } = await supabase
         .from('event_rsvps')
         .update({ status: status as any })
         .eq('id', rsvpId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'registrations') })
+    },
+  })
 
-  const bulkCheckIn = async (rsvpIds: string[]) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const bulkCheckInMutation = useMutation({
+    mutationFn: async (rsvpIds: string[]) => {
       const { error } = await supabase
         .from('event_rsvps')
         .update({ status: 'checked_in' as any })
         .in('id', rsvpIds)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('events', 'registrations') })
+    },
+  })
 
-  return { updateRSVPStatus, bulkCheckIn, loading, error }
+  const updateRSVPStatus = (rsvpId: string, status: RSVPStatus) =>
+    updateStatusMutation.mutateAsync({ rsvpId, status })
+
+  const bulkCheckIn = (rsvpIds: string[]) => bulkCheckInMutation.mutateAsync(rsvpIds)
+
+  return {
+    updateRSVPStatus,
+    bulkCheckIn,
+    loading: updateStatusMutation.isPending || bulkCheckInMutation.isPending,
+    error: updateStatusMutation.error || bulkCheckInMutation.error,
+  }
 }

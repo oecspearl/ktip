@@ -1,30 +1,37 @@
-import { createSignal, Show } from 'solid-js'
-import { A, useNavigate } from '@solidjs/router'
+import { useActionState, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { Lock, CheckCircle } from 'lucide-solid'
+import { Lock, CheckCircle } from 'lucide-react'
 import { changePasswordSchema } from '../../lib/validation'
+
+interface ResetPasswordActionState {
+  errors: Record<string, string>
+  errorMessage: string
+  success: boolean
+}
+
+const initialState: ResetPasswordActionState = {
+  errors: {},
+  errorMessage: '',
+  success: false,
+}
 
 export default function ResetPasswordPage() {
   const auth = useAuth()
   const navigate = useNavigate()
 
-  const [newPassword, setNewPassword] = createSignal('')
-  const [confirmPassword, setConfirmPassword] = createSignal('')
-  const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [loading, setLoading] = createSignal(false)
-  const [errorMessage, setErrorMessage] = createSignal('')
-  const [success, setSuccess] = createSignal(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const handleSubmit = async (e: Event) => {
-    e.preventDefault()
-    setErrors({})
-    setErrorMessage('')
-
+  const submitAction = async (
+    _prevState: ResetPasswordActionState,
+    _formData: FormData
+  ): Promise<ResetPasswordActionState> => {
     const result = changePasswordSchema.safeParse({
-      new_password: newPassword(),
-      confirm_password: confirmPassword(),
+      new_password: newPassword,
+      confirm_password: confirmPassword,
     })
 
     if (!result.success) {
@@ -33,94 +40,101 @@ export default function ResetPasswordPage() {
         const field = issue.path[0]?.toString()
         if (field) fieldErrors[field] = issue.message
       }
-      setErrors(fieldErrors)
-      return
+      return { errors: fieldErrors, errorMessage: '', success: false }
     }
 
-    setLoading(true)
     try {
-      await auth.updatePassword(newPassword())
-      setSuccess(true)
-      setTimeout(() => navigate('/'), 3000)
+      await auth.updatePassword(newPassword)
+      return { errors: {}, errorMessage: '', success: true }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to reset password. Please try again.')
-    } finally {
-      setLoading(false)
+      return {
+        errors: {},
+        errorMessage: err.message || 'Failed to reset password. Please try again.',
+        success: false,
+      }
     }
   }
 
+  const [state, formAction, pending] = useActionState(submitAction, initialState)
+
+  useEffect(() => {
+    if (!state.success) return
+    const timer = setTimeout(() => navigate('/'), 3000)
+    return () => clearTimeout(timer)
+  }, [state.success, navigate])
+
   return (
-    <div class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
-      <div class="bg-white rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
-        <Show when={success()}>
-          <div class="text-center py-8">
-            <div class="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={32} class="text-ktip-tropical-600" />
+    <div className="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
+        {state.success ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle size={32} className="text-ktip-tropical-600" />
             </div>
-            <h2 class="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
+            <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
               Password Reset!
             </h2>
-            <p class="text-ktip-sand-600 mb-6">
+            <p className="text-ktip-sand-600 mb-6">
               Your password has been updated. You'll be redirected shortly.
             </p>
-            <A href="/">
+            <Link to="/">
               <Button variant="secondary">Go to Home</Button>
-            </A>
+            </Link>
           </div>
-        </Show>
+        ) : (
+          <>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-display font-bold text-ktip-ocean-600 mb-2">
+                Set New Password
+              </h1>
+              <p className="text-ktip-sand-600">
+                Enter your new password below
+              </p>
+            </div>
 
-        <Show when={!success()}>
-          <div class="text-center mb-8">
-            <h1 class="text-3xl font-display font-bold text-ktip-ocean-600 mb-2">
-              Set New Password
-            </h1>
-            <p class="text-ktip-sand-600">
-              Enter your new password below
+            <form action={formAction} className="space-y-5">
+              {state.errorMessage && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  {state.errorMessage}
+                </div>
+              )}
+
+              <Input
+                type="password"
+                label="New Password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                error={state.errors.new_password}
+                icon={<Lock size={20} />}
+                fullWidth
+                required
+              />
+
+              <Input
+                type="password"
+                label="Confirm Password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={state.errors.confirm_password}
+                icon={<Lock size={20} />}
+                fullWidth
+                required
+              />
+
+              <Button type="submit" fullWidth loading={pending} icon={<Lock size={20} />}>
+                Reset Password
+              </Button>
+            </form>
+
+            <p className="mt-8 text-center text-sm text-ktip-sand-600">
+              <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
+                Back to Sign In
+              </Link>
             </p>
-          </div>
-
-          <form onSubmit={handleSubmit} class="space-y-5">
-            {errorMessage() && (
-              <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                {errorMessage()}
-              </div>
-            )}
-
-            <Input
-              type="password"
-              label="New Password"
-              placeholder="Enter new password"
-              value={newPassword()}
-              onInput={(e) => setNewPassword(e.currentTarget.value)}
-              error={errors().new_password}
-              icon={<Lock size={20} />}
-              fullWidth
-              required
-            />
-
-            <Input
-              type="password"
-              label="Confirm Password"
-              placeholder="Confirm new password"
-              value={confirmPassword()}
-              onInput={(e) => setConfirmPassword(e.currentTarget.value)}
-              error={errors().confirm_password}
-              icon={<Lock size={20} />}
-              fullWidth
-              required
-            />
-
-            <Button type="submit" fullWidth loading={loading()} icon={<Lock size={20} />}>
-              Reset Password
-            </Button>
-          </form>
-
-          <p class="mt-8 text-center text-sm text-ktip-sand-600">
-            <A href="/login" class="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
-              Back to Sign In
-            </A>
-          </p>
-        </Show>
+          </>
+        )}
       </div>
     </div>
   )

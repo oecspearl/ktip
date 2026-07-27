@@ -1,11 +1,11 @@
-import { Show } from 'solid-js'
-import { Eye, X, RefreshCw } from 'lucide-solid'
+import { useRef } from 'react'
+import { Eye, X, RefreshCw } from 'lucide-react'
 import type { Language } from './CodeMirrorEditor'
 
 interface PreviewPanelProps {
-  code: () => string
-  language: () => Language
-  darkMode: () => boolean
+  code: string
+  language: Language
+  darkMode: boolean
   onClose: () => void
 }
 
@@ -18,57 +18,51 @@ function wrapCss(css: string): string {
 <a href="#">A Link</a></body></html>`
 }
 
-export function PreviewPanel(props: PreviewPanelProps) {
-  let iframeRef!: HTMLIFrameElement
-  const dark = () => props.darkMode()
+export function PreviewPanel({ code, language, darkMode, onClose }: PreviewPanelProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const dark = darkMode
 
-  const srcdoc = () => {
-    const lang = props.language()
-    const src = props.code()
-    if (lang === 'html') return src
-    if (lang === 'css') return wrapCss(src)
-    return ''
-  }
+  const srcdoc = language === 'html' ? code : language === 'css' ? wrapCss(code) : ''
 
   const reload = () => {
-    if (iframeRef) {
+    const iframe = iframeRef.current
+    if (iframe) {
       // Force re-render by toggling srcdoc
-      const content = srcdoc()
-      iframeRef.srcdoc = ''
+      iframe.srcdoc = ''
       requestAnimationFrame(() => {
-        iframeRef.srcdoc = content
+        iframe.srcdoc = srcdoc
       })
     }
   }
 
   return (
-    <div class={`flex flex-col border-t ${dark() ? 'border-gray-700 bg-[#1e1e1e]' : 'border-ktip-sand-200 bg-white'}`}>
+    <div className={`flex flex-col border-t ${dark ? 'border-gray-700 bg-[#1e1e1e]' : 'border-ktip-sand-200 bg-white'}`}>
       {/* Header */}
-      <div class={`flex items-center justify-between px-3 py-2 border-b ${dark() ? 'border-gray-700' : 'border-ktip-sand-200'}`}>
-        <div class="flex items-center gap-2">
-          <Eye size={14} class={dark() ? 'text-gray-400' : 'text-ktip-sand-500'} />
-          <span class={`text-xs font-medium ${dark() ? 'text-gray-400' : 'text-ktip-sand-600'}`}>
+      <div className={`flex items-center justify-between px-3 py-2 border-b ${dark ? 'border-gray-700' : 'border-ktip-sand-200'}`}>
+        <div className="flex items-center gap-2">
+          <Eye size={14} className={dark ? 'text-gray-400' : 'text-ktip-sand-500'} />
+          <span className={`text-xs font-medium ${dark ? 'text-gray-400' : 'text-ktip-sand-600'}`}>
             Preview
           </span>
-          <Show when={props.language() === 'css'}>
-            <span class={`text-xs ${dark() ? 'text-gray-600' : 'text-ktip-sand-400'}`}>
+          {language === 'css' && (
+            <span className={`text-xs ${dark ? 'text-gray-600' : 'text-ktip-sand-400'}`}>
               (sample HTML)
             </span>
-          </Show>
+          )}
         </div>
-        <div class="flex items-center gap-1">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={reload}
-            class={`p-1 rounded ${dark() ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-ktip-sand-100 text-ktip-sand-400'} transition-colors`}
+            className={`p-1 rounded ${dark ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-ktip-sand-100 text-ktip-sand-400'} transition-colors`}
             title="Refresh preview"
           >
             <RefreshCw size={12} />
           </button>
           <button
             type="button"
-            onClick={props.onClose}
-            class={`p-1 rounded ${dark() ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-ktip-sand-100 text-ktip-sand-400'} transition-colors`}
+            onClick={onClose}
+            className={`p-1 rounded ${dark ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-ktip-sand-100 text-ktip-sand-400'} transition-colors`}
             title="Close preview"
           >
             <X size={12} />
@@ -78,10 +72,10 @@ export function PreviewPanel(props: PreviewPanelProps) {
 
       {/* Iframe */}
       <iframe
-        ref={iframeRef!}
-        srcdoc={srcdoc()}
+        ref={iframeRef}
+        srcDoc={srcdoc}
         sandbox="allow-scripts"
-        class="w-full bg-white"
+        className="w-full bg-white"
         style={{ height: '280px', border: 'none' }}
         title="HTML Preview"
       />

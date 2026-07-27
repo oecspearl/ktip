@@ -1,6 +1,7 @@
-import { createSignal, createResource } from 'solid-js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
+import { keys } from '../queries/keys'
 import type { Resource } from '../types'
 
 export function useResources(filters?: {
@@ -9,14 +10,7 @@ export function useResources(filters?: {
   search?: string
   climateAction?: boolean
 }) {
-  const filterKey = () => JSON.stringify({
-    type: filters?.type,
-    category: filters?.category,
-    search: filters?.search,
-    climateAction: filters?.climateAction,
-  })
-
-  const fetchResources = async (_key: string): Promise<Resource[]> => {
+  const fetchResources = async (): Promise<Resource[]> => {
     let query = (supabase as any)
       .from('resources')
       .select('*, author:profiles(*)')
@@ -50,12 +44,15 @@ export function useResources(filters?: {
     return (data as any[]) || []
   }
 
-  const [resources, { refetch }] = createResource(filterKey, fetchResources)
+  const query = useQuery({
+    queryKey: keys.list('resources', filters),
+    queryFn: fetchResources,
+  })
 
-  return { resources, refetch }
+  return { resources: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useResource(id: () => string | undefined) {
+export function useResource(id: string | undefined) {
   const fetchResource = async (resourceId: string): Promise<Resource | null> => {
     const { data, error } = await (supabase as any)
       .from('resources')
@@ -67,9 +64,13 @@ export function useResource(id: () => string | undefined) {
     return data as any
   }
 
-  const [resource, { refetch }] = createResource(id, fetchResource)
+  const query = useQuery({
+    queryKey: keys.detail('resources', id),
+    queryFn: () => fetchResource(id as string),
+    enabled: !!id,
+  })
 
-  return { resource, refetch }
+  return { resource: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useAdminResources() {
@@ -83,31 +84,30 @@ export function useAdminResources() {
     return (data as any[]) || []
   }
 
-  const [resources, { refetch }] = createResource(fetchResources)
+  const query = useQuery({
+    queryKey: keys.list('resources', 'admin'),
+    queryFn: fetchResources,
+  })
 
-  return { resources, refetch }
+  return { resources: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 export function useCreateResource() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const createResource = async (resourceData: {
-    title: string
-    description?: string
-    content?: string
-    resource_type: string
-    category?: string
-    tags?: string[]
-    download_url?: string
-    thumbnail_url?: string
-    is_climate_action?: boolean
-    is_published?: boolean
-  }) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (resourceData: {
+      title: string
+      description?: string
+      content?: string
+      resource_type: string
+      category?: string
+      tags?: string[]
+      download_url?: string
+      thumbnail_url?: string
+      is_climate_action?: boolean
+      is_published?: boolean
+    }) => {
       const { data, error } = await (supabase as any)
         .from('resources')
         .insert(resourceData)
@@ -116,26 +116,26 @@ export function useCreateResource() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('resources') })
+    },
+  })
 
-  return { createResource, loading, error }
+  return { createResource: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useUpdateResource() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const updateResource = async (resourceId: string, updates: Record<string, any>) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async ({
+      resourceId,
+      updates,
+    }: {
+      resourceId: string
+      updates: Record<string, any>
+    }) => {
       const { data, error } = await (supabase as any)
         .from('resources')
         .update(updates)
@@ -145,39 +145,34 @@ export function useUpdateResource() {
 
       if (error) throw error
       return data
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('resources') })
+    },
+  })
 
-  return { updateResource, loading, error }
+  const updateResource = (resourceId: string, updates: Record<string, any>) =>
+    mutation.mutateAsync({ resourceId, updates })
+
+  return { updateResource, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useDeleteResource() {
-  const [loading, setLoading] = createSignal(false)
-  const [error, setError] = createSignal<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const deleteResource = async (resourceId: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (resourceId: string) => {
       const { error } = await (supabase as any)
         .from('resources')
         .delete()
         .eq('id', resourceId)
 
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('resources') })
+    },
+  })
 
-  return { deleteResource, loading, error }
+  return { deleteResource: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }

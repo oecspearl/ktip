@@ -1,5 +1,5 @@
 import { defineConfig, loadEnv } from 'vite'
-import solid from 'vite-plugin-solid'
+import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -116,7 +116,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      solid(),
+      react(),
       apiProxyPlugin(openaiKey),
       VitePWA({
         registerType: 'autoUpdate',
