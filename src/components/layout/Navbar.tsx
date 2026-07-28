@@ -31,6 +31,7 @@ import {
   ClipboardList,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { FlowingMenuItem } from '../ui/FlowingMenuItem'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
@@ -93,6 +94,7 @@ export function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
 
   // Transparent navbar over the homepage hero; turns solid on scroll
@@ -109,6 +111,29 @@ export function Navbar() {
 
   const overHero = isHome && !scrolled && !mobileMenuOpen
 
+  // Auto-hide on scroll down, reappear on scroll up or top-edge hover
+  const [navHidden, setNavHidden] = useState(false)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y < 80) {
+        setNavHidden(false)
+      } else if (y > lastScrollY.current + 4) {
+        setNavHidden(true)
+      } else if (y < lastScrollY.current - 4) {
+        setNavHidden(false)
+      }
+      lastScrollY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const anyMenuOpen = mobileMenuOpen || userMenuOpen || notifOpen || openDropdownId !== null
+  const hidden = navHidden && !anyMenuOpen
+
   // Notifications
   const { notifications, unreadCount, refetch: refetchNotifications } = useNotifications(auth.user?.id)
   const { markRead } = useMarkNotificationRead()
@@ -117,14 +142,37 @@ export function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const searchRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       navigate(`/projects?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('')
+      setSearchOpen(false)
       setMobileMenuOpen(false)
     }
   }
+
+  // Collapsible desktop search: focus on expand, collapse on outside click / Escape
+  useEffect(() => {
+    if (!searchOpen) return
+    searchInputRef.current?.focus()
+    const onMouseDown = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false)
+      }
+    }
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === 'Escape') setSearchOpen(false)
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [searchOpen])
 
   useEffect(() => {
     if (!(userMenuOpen || mobileMenuOpen || openDropdownId || notifOpen)) return
@@ -182,13 +230,23 @@ export function Navbar() {
   }
 
   return (
+    <>
+    {/* Hover zone to reveal the hidden navbar */}
+    {hidden && (
+      <div
+        className="fixed top-0 inset-x-0 h-4 z-50"
+        onMouseEnter={() => setNavHidden(false)}
+      />
+    )}
     <nav
+      onMouseEnter={() => setNavHidden(false)}
       className={cn(
-        'top-0 z-40 transition-colors duration-300',
+        'top-0 z-40 transition-all duration-300',
         isHome ? 'fixed inset-x-0' : 'sticky',
+        hidden ? '-translate-y-full' : 'translate-y-0',
         overHero
           ? 'bg-transparent border-b border-transparent'
-          : 'bg-white/80 backdrop-blur-lg shadow-nav border-b border-ktip-sand-100/80'
+          : 'bg-gray-900/80 backdrop-blur-lg border-b border-white/10'
       )}
       style={{ paddingTop: '1rem', paddingBottom: '1rem' }}
     >
@@ -197,33 +255,27 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src="/pwa-512x512.png" alt="KTIP Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-cover rounded-full shadow-soft group-hover:shadow-medium transition-shadow" />
+              <img src="/ktip%20logo%20no%20bg.png" alt="KTIP Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
               <div className="hidden sm:block">
-                <h1 className={cn('text-2xl font-display font-bold', overHero ? 'text-white' : 'text-ktip-ocean-600')}>KTIP</h1>
-                <p className={cn('text-xs font-medium tracking-wide', overHero ? 'text-white/60' : 'text-ktip-sand-500')}>OECS INNOVATE & CONNECT</p>
+                <h1 className="text-2xl font-display font-bold whitespace-nowrap text-white">OECS KTIP</h1>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1 ml-auto">
             {/* Standalone links */}
             {topLinks.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
+                  'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
                   isActive(item.href)
-                    ? overHero
-                      ? 'bg-white/15 text-white'
-                      : 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                    : overHero
-                      ? 'text-white/80 hover:bg-white/10 hover:text-white'
-                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    ? 'text-white underline decoration-ktip-nav-accent decoration-2 underline-offset-8'
+                    : 'text-white/80 hover:text-ktip-nav-accent'
                 )}
               >
-                <item.icon size={18} />
                 <span>{item.name}</span>
               </Link>
             ))}
@@ -240,17 +292,12 @@ export function Navbar() {
                   aria-haspopup="true"
                   aria-expanded={openDropdownId === dropdown.id}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
+                    'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
                     isDropdownActive(dropdown) || openDropdownId === dropdown.id
-                      ? overHero
-                        ? 'bg-white/15 text-white'
-                        : 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                      : overHero
-                        ? 'text-white/80 hover:bg-white/10 hover:text-white'
-                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                      ? 'text-white underline decoration-ktip-nav-accent decoration-2 underline-offset-8'
+                      : 'text-white/80 hover:text-ktip-nav-accent'
                   )}
                 >
-                  <dropdown.icon size={18} />
                   <span>{dropdown.name}</span>
                   <ChevronDown
                     size={14}
@@ -264,26 +311,26 @@ export function Navbar() {
                 {openDropdownId === dropdown.id && (
                   <div
                     role="menu"
-                    className="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-hard border border-ktip-sand-100 py-2 animate-scale-in z-50"
+                    className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-hard overflow-hidden animate-scale-in z-50"
                   >
                     {dropdown.items.map((item) => (
-                      <Link
+                      <FlowingMenuItem
                         key={item.name}
                         to={item.href}
+                        label={item.name}
                         onClick={() => setOpenDropdownId(null)}
                         className={cn(
-                          'flex items-start gap-3 px-4 py-3 transition-colors',
+                          'flex items-start justify-end gap-3 px-4 py-3 transition-colors',
                           isActive(item.href)
                             ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                            : 'text-ktip-sand-700 hover:bg-ktip-sand-50'
+                            : 'text-ktip-sand-700'
                         )}
                       >
-                        <item.icon size={18} className="mt-0.5 shrink-0" />
-                        <div>
+                        <div className="text-right">
                           <p className="font-medium">{item.name}</p>
                           <p className="text-xs text-ktip-sand-500 mt-0.5">{item.description}</p>
                         </div>
-                      </Link>
+                      </FlowingMenuItem>
                     ))}
                   </div>
                 )}
@@ -295,44 +342,54 @@ export function Navbar() {
               <Link
                 to="/admin"
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
+                  'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
                   isActive('/admin')
-                    ? 'bg-pink-50 text-pink-700'
-                    : overHero
-                      ? 'text-white/80 hover:bg-white/10 hover:text-white'
-                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    ? 'text-white underline decoration-pink-400 decoration-2 underline-offset-8'
+                    : 'text-white/80 hover:text-ktip-nav-accent'
                 )}
               >
-                <ShieldCheck size={18} />
                 <span>Admin</span>
               </Link>
             )}
           </div>
 
-          {/* Search Bar (Desktop) */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
-            <div className="relative w-full">
-              <Search
-                size={20}
-                className={cn(
-                  'absolute left-3 top-1/2 -translate-y-1/2',
-                  overHero ? 'text-white/60' : 'text-ktip-sand-400'
-                )}
-              />
-              <input
-                type="text"
-                placeholder="Search projects, events..."
-                aria-label="Search projects and events"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                onKeyDown={handleSearch}
-                className={cn(
-                  'w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none transition-colors',
-                  overHero
-                    ? 'border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-ktip-sand-900 focus:placeholder-ktip-sand-400 focus:border-white'
-                    : 'border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20'
-                )}
-              />
+          {/* Search (Desktop) — collapsed to an icon, expands on click */}
+          <div
+            ref={searchRef}
+            className="hidden md:flex items-center justify-end flex-1 max-w-md mx-4"
+          >
+            <div
+              className={cn(
+                'relative overflow-hidden transition-[width] duration-300 ease-out',
+                searchOpen ? 'w-full' : 'w-10'
+              )}
+            >
+              {searchOpen ? (
+                <>
+                  <Search
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60"
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search projects, events..."
+                    aria-label="Search projects and events"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                    onKeyDown={handleSearch}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-ktip-sand-900 focus:placeholder-ktip-sand-400 focus:border-white"
+                  />
+                </>
+              ) : (
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  aria-label="Open search"
+                  className="p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
+                >
+                  <Search size={20} />
+                </button>
+              )}
             </div>
           </div>
 
@@ -344,10 +401,7 @@ export function Navbar() {
                 <button
                   onClick={() => setNotifOpen(!notifOpen)}
                   aria-label="Notifications"
-                  className={cn(
-                    'relative p-2 rounded-lg transition-colors',
-                    overHero ? 'text-white/80 hover:bg-white/10' : 'text-ktip-sand-600 hover:bg-ktip-sand-50'
-                  )}
+                  className="relative p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
                   <Bell size={20} />
                   {unreadCount > 0 && (
@@ -445,10 +499,10 @@ export function Navbar() {
                   aria-label="User menu"
                   aria-expanded={userMenuOpen}
                   aria-haspopup="true"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-ktip-sand-50 transition-colors"
+                  className="group flex items-center gap-3 px-3 py-2 transition-all duration-200 hover:scale-110"
                 >
                   <div className="hidden md:block text-right">
-                    <p className={cn('text-sm font-medium', overHero ? 'text-white' : 'text-ktip-sand-900')}>
+                    <p className="text-sm font-medium text-white transition-colors group-hover:text-ktip-nav-accent">
                       {auth.profile?.display_name || 'User'}
                     </p>
                     <div className="flex gap-1 justify-end mt-0.5">
@@ -531,7 +585,7 @@ export function Navbar() {
                       variant="ghost"
                       size="sm"
                       icon={<LogIn size={16} />}
-                      className={overHero ? 'text-white hover:bg-white/10' : undefined}
+                      className="text-white hover:bg-white/10"
                     >
                       Log In
                     </Button>
@@ -554,10 +608,7 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
-              className={cn(
-                'lg:hidden p-2 rounded-lg',
-                overHero ? 'text-white hover:bg-white/10' : 'hover:bg-ktip-sand-50'
-              )}
+              className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10"
             >
               {!mobileMenuOpen ? <Menu size={24} /> : <X size={24} />}
             </button>
@@ -566,13 +617,13 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-ktip-sand-100 animate-slide-up">
+          <div className="lg:hidden py-4 border-t border-white/10 animate-slide-up">
             {/* Mobile Search */}
             <div className="mb-4 px-2">
               <div className="relative">
                 <Search
                   size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60"
                 />
                 <input
                   type="text"
@@ -581,7 +632,7 @@ export function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.currentTarget.value)}
                   onKeyDown={handleSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-white rounded-lg focus:border-ktip-ocean-500 focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 border border-white/20 bg-white/10 text-white placeholder-white/60 rounded-lg focus:bg-white focus:text-ktip-sand-900 focus:placeholder-ktip-sand-400 focus:border-white focus:outline-none"
                 />
               </div>
             </div>
@@ -623,7 +674,7 @@ export function Navbar() {
               </Link>
             </div>
 
-            <hr className="my-2 mx-2 border-ktip-sand-100" />
+            <hr className="my-2 mx-2 border-white/10" />
 
             {/* Mobile Nav Links */}
             <div className="space-y-1 px-2">
@@ -636,8 +687,8 @@ export function Navbar() {
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
                     isActive(item.href)
-                      ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50'
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/80 hover:bg-white/10'
                   )}
                 >
                   <item.icon size={20} />
@@ -649,7 +700,7 @@ export function Navbar() {
               {navDropdowns.map((dropdown) => (
                 <div key={dropdown.id}>
                   <div className="pt-3 pb-1 px-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-400">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-white/40">
                       {dropdown.name}
                     </p>
                   </div>
@@ -661,8 +712,8 @@ export function Navbar() {
                       className={cn(
                         'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
                         isActive(item.href)
-                          ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                          : 'text-ktip-sand-600 hover:bg-ktip-sand-50'
+                          ? 'bg-white/15 text-white'
+                          : 'text-white/80 hover:bg-white/10'
                       )}
                     >
                       <item.icon size={20} />
@@ -675,8 +726,8 @@ export function Navbar() {
               {/* Admin link (OECS only) */}
               {auth.profile?.roles?.includes('oecs') && (
                 <>
-                  <hr className="my-2 border-ktip-sand-100" />
-                  <p className="px-4 py-1 text-xs font-semibold uppercase tracking-wider text-ktip-sand-400">
+                  <hr className="my-2 border-white/10" />
+                  <p className="px-4 py-1 text-xs font-semibold uppercase tracking-wider text-white/40">
                     Admin
                   </p>
                   <Link
@@ -686,7 +737,7 @@ export function Navbar() {
                       'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
                       isActive('/admin')
                         ? 'bg-pink-50 text-pink-700'
-                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                        : 'text-white/80 hover:bg-white/10'
                     )}
                   >
                     <ShieldCheck size={18} />
@@ -696,13 +747,13 @@ export function Navbar() {
               )}
 
               {/* Mobile Auth Links */}
-              <hr className="my-2 border-ktip-sand-100" />
+              <hr className="my-2 border-white/10" />
               {auth.user ? (
                 <>
                   <Link
                     to="/settings"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-ktip-sand-600 hover:bg-ktip-sand-50"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <Settings size={20} />
                     <span>Settings</span>
@@ -710,14 +761,14 @@ export function Navbar() {
                   <Link
                     to="/grievances/my-reports"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-ktip-sand-600 hover:bg-ktip-sand-50"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <Flag size={20} />
                     <span>My Reports</span>
                   </Link>
                   <button
                     onClick={() => { setMobileMenuOpen(false); handleSignOut() }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400 hover:bg-red-500/10"
                   >
                     <LogOut size={20} />
                     <span>Sign Out</span>
@@ -728,7 +779,7 @@ export function Navbar() {
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-ktip-sand-600 hover:bg-ktip-sand-50"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <LogIn size={20} />
                     <span>Log In</span>
@@ -736,7 +787,7 @@ export function Navbar() {
                   <Link
                     to="/signup"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-ktip-ocean-600 hover:bg-ktip-ocean-50"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white hover:bg-white/10"
                   >
                     <User size={20} />
                     <span>Sign Up</span>
@@ -748,5 +799,6 @@ export function Navbar() {
         )}
       </div>
     </nav>
+    </>
   )
 }

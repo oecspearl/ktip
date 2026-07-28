@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { Github, Twitter, Linkedin, Mail } from 'lucide-react'
 import { APP_NAME, APP_FULL_NAME } from '../../lib/constants'
+import { FlipWatermark } from '../ui/FlipWatermark'
 
 interface FooterLink {
   label: string
@@ -53,19 +54,29 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-gray-900 text-white mt-auto">
-      <div className="container mx-auto px-4 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    <footer className="relative bg-ktip-sand-900 text-white mt-auto overflow-hidden">
+      {/* Same rotating watermark as the homepage */}
+      <FlipWatermark
+        className="-bottom-[0.18em] right-0 md:-right-4"
+        charClassName="text-white/[0.04]"
+      />
+
+      <div className="relative container mx-auto px-6 md:px-12 py-10 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo & Mission */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <img src="/ktiplogo.png" alt="KTIP Logo" className="w-12 h-12 rounded-xl" />
+              <img src="/ktip%20logo%20no%20bg.png" alt="KTIP Logo" className="w-12 h-12 object-contain" />
               <div>
-                <h3 className="text-xl font-display font-bold text-white">{APP_NAME}</h3>
-                <p className="text-xs text-gray-400">Innovation Platform</p>
+                <h3 className="text-xl font-display font-extrabold tracking-tight text-white">
+                  {APP_NAME}
+                </h3>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">
+                  Innovation Platform
+                </p>
               </div>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
+            <p className="text-white/60 text-sm leading-relaxed max-w-sm">
               {APP_FULL_NAME} - Empowering Caribbean innovators, mentors, and investors
               to collaborate and drive transformative change across the region.
             </p>
@@ -74,21 +85,23 @@ export function Footer() {
           {/* Nav columns */}
           {footerColumns.map((column) => (
             <div key={column.title}>
-              <h4 className="font-display font-bold text-white text-lg mb-6">{column.title}</h4>
-              <ul className="space-y-3">
+              <h4 className="text-[11px] font-semibold uppercase tracking-[0.35em] text-white/50 mb-4">
+                {column.title}
+              </h4>
+              <ul className="space-y-2.5">
                 {column.links.map((link) => (
                   <li key={link.label}>
                     {link.external ? (
                       <a
                         href={link.href}
-                        className="text-sm text-gray-400 hover:text-white transition-colors"
+                        className="text-sm text-white/70 hover:text-white transition-colors"
                       >
                         {link.label}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
-                        className="text-sm text-gray-400 hover:text-white transition-colors"
+                        className="text-sm text-white/70 hover:text-white transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -102,10 +115,10 @@ export function Footer() {
       </div>
 
       {/* Footer Bottom Bar */}
-      <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 py-5">
+      <div className="relative border-t border-white/10">
+        <div className="container mx-auto px-6 md:px-12 py-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-white/40">
               &copy; {currentYear} OECS. All rights reserved.
             </p>
             <div className="flex items-center gap-3">
@@ -115,7 +128,7 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-lg bg-white/10 text-white/70 hover:bg-white hover:text-gray-900 flex items-center justify-center transition-colors"
                   aria-label={link.name}
                 >
                   <link.icon size={16} />

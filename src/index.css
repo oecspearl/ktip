@@ -43,6 +43,18 @@
   --color-ktip-cream: #fffef9;
   --color-ktip-canvas: #fafaf7;
 
+  /* Navbar hover/active accent — single source of truth for top nav links,
+     icon buttons, active underline, and dropdown flowing-hover band */
+  --color-ktip-nav-accent: #86efac; /* = ktip-tropical-300 */
+  --color-ktip-nav-accent-contrast: #14532d; /* = ktip-tropical-900, text on accent */
+
+  /* Border Radius — brand tokens: buttons 6px, cards 8px */
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.5rem;
+
   /* Font Families */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Sora', 'Inter', system-ui, sans-serif;
@@ -62,6 +74,12 @@
   --animate-slide-up: slideUp 0.5s ease-out;
   --animate-scale-in: scaleIn 0.3s ease-out;
   --animate-pulse-soft: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-char-flip: charFlip 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes charFlip {
+    0% { transform: rotateX(90deg); opacity: 0; }
+    100% { transform: rotateX(0deg); opacity: 1; }
+  }
 
   @keyframes fadeIn {
     0% { opacity: 0; }
@@ -112,6 +130,35 @@
 
   * {
     box-sizing: border-box;
+  }
+
+  /* Overlay scrollbar: native scrollbars are hidden entirely (no gutter,
+     no white column) and a custom thumb (#overlay-scrollbar, built in
+     index.tsx) fades in while scrolling. */
+  * {
+    scrollbar-width: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  #overlay-scrollbar {
+    position: fixed;
+    top: 0;
+    right: 4px;
+    width: 6px;
+    border-radius: 9999px;
+    background: rgba(120, 113, 108, 0.55);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  html[data-scrolling] #overlay-scrollbar {
+    opacity: 1;
   }
 }
 
@@ -581,7 +628,7 @@
 
 /* tldraw container sizing */
 .tl-container {
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
 }
 
 /* Print styles for proposal export */

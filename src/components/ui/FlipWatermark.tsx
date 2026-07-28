@@ -1,0 +1,41 @@
+import { useState, useEffect } from 'react'
+
+const WATERMARK_WORDS = ['Innovate', 'Connect', 'Collaborate']
+
+/** Giant background word that flips character-by-character between words. */
+export function FlipWatermark({
+  className,
+  charClassName = '',
+}: {
+  className: string
+  charClassName?: string
+}) {
+  const [wordIndex, setWordIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(
+      () => setWordIndex((i) => (i + 1) % WATERMARK_WORDS.length),
+      4000,
+    )
+    return () => clearInterval(interval)
+  }, [])
+
+  const word = WATERMARK_WORDS[wordIndex]
+
+  return (
+    <p
+      aria-hidden
+      className={`absolute font-display font-extrabold uppercase text-[16vw] md:text-[9rem] leading-none tracking-tight select-none pointer-events-none flex [perspective:600px] ${className}`}
+    >
+      {word.split('').map((ch, i) => (
+        <span
+          key={`${wordIndex}-${i}`}
+          className={`inline-block animate-char-flip ${charClassName}`}
+          style={{ animationDelay: `${i * 70}ms` }}
+        >
+          {ch}
+        </span>
+      ))}
+    </p>
+  )
+}

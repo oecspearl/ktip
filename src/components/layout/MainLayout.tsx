@@ -1,13 +1,18 @@
-import { Outlet } from 'react-router'
+import { useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
-import { UATFeedbackButton } from '../uat/UATFeedbackButton'
-import { FeedbackButton } from '../feedback/FeedbackButton'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function MainLayout() {
   const auth = useAuth()
+  const { pathname } = useLocation()
+
+  // Always land at the top when navigating between pages
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   return (
     <div className="min-h-screen flex flex-col bg-ktip-canvas">
@@ -23,8 +28,6 @@ export function MainLayout() {
         <Outlet />
       </main>
       <Footer />
-      <UATFeedbackButton />
-      <FeedbackButton />
     </div>
   )
 }
