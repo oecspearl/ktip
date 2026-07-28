@@ -270,7 +270,9 @@ export default function DiscoverPage() {
     return base - ((cur - target + count) % count)
   })()
 
-  useEffect(() => {
+  // Layout effect so the slide's transform+transition commit in the same
+  // paint frame as the ghost mount and origin-card hide — zero-jitter start
+  useLayoutEffect(() => {
     if (!ring || trackAnimating) return
     // Re-center into the middle copy (no animation) so there's always room
     // to slide right without running off the tripled track
@@ -280,9 +282,9 @@ export default function DiscoverPage() {
       return
     }
     if (targetPos === pos) return
-    // Scale duration with distance so far jumps glide at the same perceived
-    // speed as a single-step rotate
-    setTrackDur(Math.min(1.0, 0.55 + 0.12 * (pos - targetPos)))
+    // Single-step = 1.0s — the exact expand duration, same curve, so the
+    // slide and the expansion run in lockstep; longer jumps scale gently
+    setTrackDur(Math.min(1.2, 0.85 + 0.15 * (pos - targetPos)))
     setTrackTransition(true)
     setTrackAnimating(true)
     setPos(targetPos)
@@ -345,11 +347,15 @@ export default function DiscoverPage() {
     src: string
     phase: 'start' | 'expand' | 'fade'
     fromT: number
+    title: string
+    meta: string
+    imgH: number
     from: { x: number; y: number; w: number; h: number }
     sec: { w: number; h: number }
   } | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
+  const ghostRef = useRef<HTMLDivElement>(null)
 
   // Layout effect so the origin card's rect is measured BEFORE the slide's
   // new transform renders, and the ghost mounts in the same paint frame the
@@ -373,23 +379,33 @@ export default function DiscoverPage() {
     const el = fromT >= 0 ? cardRefs.current.get(fromT) : undefined
     // Fallback origin when the card isn't mounted: small box near the strip
     let from = { x: s.width * 0.1, y: s.height * 0.7, w: 128, h: 200 }
+    let imgH = 0
     if (el) {
       const r = el.getBoundingClientRect()
       from = { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height }
+      imgH = el.firstElementChild?.getBoundingClientRect().height ?? 0
     }
-    setAnim({ src: heroSrc, phase: 'start', fromT, from, sec: { w: s.width, h: s.height } })
+    if (!imgH) imgH = from.h * 0.6
+    setAnim({
+      src: heroSrc,
+      phase: 'start',
+      fromT,
+      title: active?.title ?? '',
+      meta: active?.meta ?? '',
+      imgH,
+      from,
+      sec: { w: s.width, h: s.height },
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heroSrc, shownSrc, anim, index, count, ring, pos, slots])
 
-  // Two frames after mounting the ghost at the card's rect, start the expand
-  useEffect(() => {
+  // FLIP kick: force a style flush of the ghost's start rect, then flip to
+  // 'expand' in the same pre-paint pass — the transition registers with zero
+  // dead frames and starts the exact frame the strip slide starts
+  useLayoutEffect(() => {
     if (anim?.phase !== 'start') return
-    const raf = requestAnimationFrame(() =>
-      requestAnimationFrame(() =>
-        setAnim((a) => (a && a.phase === 'start' ? { ...a, phase: 'expand' } : a)),
-      ),
-    )
-    return () => cancelAnimationFrame(raf)
+    ghostRef.current?.getBoundingClientRect()
+    setAnim((a) => (a && a.phase === 'start' ? { ...a, phase: 'expand' } : a))
   }, [anim])
 
   const ghostStyle = (): CSSProperties => {
@@ -401,7 +417,7 @@ export default function DiscoverPage() {
         top: from.y,
         width: from.w,
         height: from.h,
-        borderRadius: 6,
+        borderRadius: 8,
         transition: 'none',
         willChange: 'left, top, width, height',
         contain: 'layout paint',
@@ -442,10 +458,13 @@ export default function DiscoverPage() {
         {/* Ghost card: expands from the new hero's card in the strip to fill the hero, then fades */}
         {anim && (
           <div
+            ref={ghostRef}
             className="absolute overflow-hidden shadow-2xl pointer-events-none"
             style={ghostStyle()}
             onTransitionEnd={(e) => {
-              if (!anim) return
+              // Child layers crossfade opacity too — only the container's own
+              // transitions may advance the phase
+              if (!anim || e.target !== e.currentTarget) return
               if (anim.phase === 'expand' && e.propertyName === 'width') {
                 setShownSrc(anim.src)
                 setAnim({ ...anim, phase: 'fade' })
@@ -454,7 +473,37 @@ export default function DiscoverPage() {
               }
             }}
           >
-            <img src={anim.src} alt="" className="w-full h-full object-cover" />
+            {/* Hero image — fades in as the card chrome fades out */}
+            <img
+              src={anim.src}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                opacity: anim.phase === 'start' ? 0 : 1,
+                transition: 'opacity 0.3s ease',
+              }}
+            />
+            {/* Mini-card chrome — pixel replica of the strip card at takeover,
+                so it's the card itself that appears to bloom into the hero */}
+            <div
+              className="absolute inset-0 flex flex-col bg-white/10 backdrop-blur-sm"
+              style={{
+                opacity: anim.phase === 'start' ? 1 : 0,
+                transition: 'opacity 0.3s ease',
+              }}
+            >
+              <div className="overflow-hidden shrink-0" style={{ height: anim.imgH }}>
+                <img src={anim.src} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="px-3 py-2.5">
+                <p className="text-sm font-display font-semibold line-clamp-2 text-white">
+                  {anim.title}
+                </p>
+                <p className="text-[10px] mt-0.5 uppercase tracking-wider truncate text-white/50">
+                  {anim.meta}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -578,16 +627,22 @@ export default function DiscoverPage() {
                   className="flex items-end gap-3"
                   style={{
                     transform: `translateX(${-pos * step}px)`,
-                    // easeInOutQuint: starts gently from rest, glides, lands
-                    // softly — no jerk at either end of the slide
+                    // Same curve as the ghost expand — the two motions share
+                    // one clock and read as a single gesture
                     transition: trackTransition
-                      ? `transform ${trackDur}s cubic-bezier(0.83, 0, 0.17, 1)`
+                      ? `transform ${trackDur}s cubic-bezier(0.65, 0, 0.35, 1)`
                       : 'none',
                     willChange: trackTransition ? 'transform' : undefined,
                   }}
                   onTransitionEnd={(e) => {
                     if (e.propertyName !== 'transform' || e.target !== e.currentTarget) return
                     setTrackAnimating(false)
+                    // Promote in the same event batch — rotate-finish and
+                    // expand-start commit in one render, no dead frames
+                    if (pendingIndex !== null && pendingIndex < count && pos === targetPos) {
+                      setIndex(pendingIndex)
+                      setPendingIndex(null)
+                    }
                   }}
                 >
                 {trackItems.map((item, t) => {
