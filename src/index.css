@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Barlow+Semi+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @import "tailwindcss";
 
@@ -56,8 +56,8 @@
   --radius-3xl: 0.5rem;
 
   /* Font Families */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Sora', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Mulish', system-ui, sans-serif;
+  --font-display: 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif;
 
   /* Box Shadows */
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -102,9 +102,18 @@
   }
 }
 
+/* Accessibility "readable" mode — Atkinson Hyperlegible everywhere.
+   Toggled via html.readable (see useReadableMode + index.html FOUC guard).
+   Atkinson ships only 400/700; with font-synthesis: none, 500→400 and 600→700. */
+html.readable {
+  --font-sans: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-display: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
 @layer base {
   :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.6;
     font-weight: 400;
     color-scheme: light;
@@ -124,7 +133,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: Sora, Inter, system-ui, sans-serif;
+    font-family: var(--font-display);
     font-weight: 700;
   }
 
@@ -212,7 +221,7 @@
   min-height: 100px;
   outline: none;
   padding: 0.75rem;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.875rem;
   line-height: 1.65;
   color: #1c1917;
@@ -226,7 +235,7 @@
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .prose-editor-mini .ProseMirror ul {
@@ -258,7 +267,7 @@
   min-height: 200px;
   outline: none;
   padding: 1rem 1.25rem;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   line-height: 1.7;
   color: #1c1917;
@@ -272,21 +281,21 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.6rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .prose-editor-proposal .ProseMirror h2 {
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .prose-editor-proposal .ProseMirror h3 {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .prose-editor-proposal .ProseMirror h4 {
@@ -439,7 +448,7 @@
   min-height: 400px;
   outline: none;
   padding: 1rem;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.7;
   color: #1c1917;
 }
@@ -448,21 +457,21 @@
   font-size: 1.875rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .ProseMirror h2 {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .ProseMirror h3 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .ProseMirror p {
@@ -540,7 +549,7 @@
   min-height: 700px;
   outline: none;
   padding: 2.5rem 3rem;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.8;
   color: #1c1917;
   font-size: 1rem;
@@ -610,7 +619,7 @@
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  font-family: Sora, Inter, system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 /* Text alignment */

@@ -4,10 +4,12 @@ import { Button } from '../../components/ui/Button'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
+import { useReadableMode } from '../../hooks/useReadableMode'
 import {
   Bell,
   Eye,
   Save,
+  Type,
 } from 'lucide-react'
 
 interface ToggleProps {
@@ -54,6 +56,7 @@ export function PreferencesTab() {
   const toast = useToast()
   const { preferences, loading } = useMyPreferences(auth.user?.id)
   const { savePreferences, loading: saving } = useSavePreferences()
+  const [readable, setReadable] = useReadableMode()
 
   // Notification preferences — persisted in notification_preferences
   // table and enforced by a DB trigger on the notifications table.
@@ -202,6 +205,28 @@ export function PreferencesTab() {
             onChange={setShowCountry}
             label="Show Country"
             description="Display your country on your profile"
+          />
+        </div>
+      </Card>
+
+      {/* Accessibility — applies instantly, stored locally, not part of Save */}
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
+            <Type size={20} className="text-ktip-ocean-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Accessibility</h2>
+            <p className="text-sm text-ktip-sand-600">Make the site easier to read</p>
+          </div>
+        </div>
+
+        <div className="divide-y divide-ktip-sand-100">
+          <Toggle
+            checked={readable}
+            onChange={setReadable}
+            label="Readable font mode"
+            description="Use Atkinson Hyperlegible across the site for easier reading. Applies immediately."
           />
         </div>
       </Card>
