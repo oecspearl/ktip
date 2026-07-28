@@ -220,11 +220,28 @@ export default function DiscoverPage() {
   const next = useCallback(() => select((index + 1) % count), [select, index, count])
   const prev = useCallback(() => select((index - 1 + count) % count), [select, index, count])
 
+  // Pause auto-rotate when the page isn't actually in view: tab hidden,
+  // window minimized, or another app focused in front of the browser.
+  const [pageActive, setPageActive] = useState(
+    () => typeof document === 'undefined' || (!document.hidden && document.hasFocus()),
+  )
   useEffect(() => {
-    if (paused || count < 2 || pendingIndex !== null) return
+    const update = () => setPageActive(!document.hidden && document.hasFocus())
+    document.addEventListener('visibilitychange', update)
+    window.addEventListener('focus', update)
+    window.addEventListener('blur', update)
+    return () => {
+      document.removeEventListener('visibilitychange', update)
+      window.removeEventListener('focus', update)
+      window.removeEventListener('blur', update)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (paused || !pageActive || count < 2 || pendingIndex !== null) return
     const interval = setInterval(next, 6000)
     return () => clearInterval(interval)
-  }, [paused, next, count, pendingIndex])
+  }, [paused, pageActive, next, count, pendingIndex])
 
   // Clamp selection when the list shrinks or mode changes
   useEffect(() => {
@@ -524,7 +541,7 @@ export default function DiscoverPage() {
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
-                className="max-w-2xl animate-slide-up text-left md:text-right"
+                className="max-w-2xl animate-reveal-up text-left md:text-right"
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] mb-3 text-white/60">
                   {activeMode.label} &middot; {active.meta}

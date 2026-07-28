@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ChevronRight } from 'lucide-react'
 import { heroImageFor } from '../../lib/hero-images'
+import { Reveal } from '../ui/Reveal'
 
 export interface BreadcrumbItem {
   label: string
@@ -62,18 +63,30 @@ export function PageHero({
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">
-              {eyebrow}
-            </p>
-            <h1
-              className={`font-display font-extrabold text-white leading-[1.08] tracking-tight ${
-                compact ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-3xl sm:text-4xl md:text-5xl'
-              }`}
-            >
-              {title}
-            </h1>
-            {subtitle && <p className="mt-3 text-white/80 max-w-xl leading-relaxed">{subtitle}</p>}
-            {children && <div className="mt-4">{children}</div>}
+            <Reveal order={0}>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">
+                {eyebrow}
+              </p>
+            </Reveal>
+            <Reveal order={1}>
+              <h1
+                className={`font-display font-extrabold text-white leading-[1.08] tracking-tight ${
+                  compact ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-3xl sm:text-4xl md:text-5xl'
+                }`}
+              >
+                {title}
+              </h1>
+            </Reveal>
+            {subtitle && (
+              <Reveal order={2}>
+                <p className="mt-3 text-white/80 max-w-xl leading-relaxed">{subtitle}</p>
+              </Reveal>
+            )}
+            {children && (
+              <Reveal order={3}>
+                <div className="mt-4">{children}</div>
+              </Reveal>
+            )}
           </div>
 
           <div className="flex flex-col items-start md:items-end gap-4 shrink-0">

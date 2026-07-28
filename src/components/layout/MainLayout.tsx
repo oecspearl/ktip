@@ -25,7 +25,9 @@ export function MainLayout() {
       <Navbar />
       {auth.user && !auth.profile && !auth.loading && <SessionRecoveryBanner />}
       <main id="main-content" className="flex-1">
-        <Outlet />
+        <div key={pathname} className="contents page-reveal">
+          <Outlet />
+        </div>
       </main>
       <Footer />
     </div>
