@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
-import type { Event } from '../types'
+import type { DetailEntry, Event } from '../types'
 
 export function useEvents(filters?: {
   type?: string
@@ -99,6 +99,7 @@ export function useCreateEvent() {
   const mutation = useMutation({
     mutationFn: async (eventData: {
       title: string
+      summary?: string | null
       description?: string
       event_type: string
       location?: string
@@ -107,6 +108,8 @@ export function useCreateEvent() {
       end_date?: string
       capacity?: number
       organizer_id: string
+      is_climate_action?: boolean
+      details?: DetailEntry[]
     }) => {
       const { data, error } = await supabase
         .from('events')

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { ConversationList } from '../../components/messages/ConversationList'
 import { ChatWindow } from '../../components/messages/ChatWindow'
 import { NewConversationModal } from '../../components/messages/NewConversationModal'
 import { useConversations, useCreateConversation } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
-import { MessageSquare, ChevronRight, ArrowLeft } from 'lucide-react'
+import { MessageSquare, ArrowLeft } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
 export default function MessagesPage() {
@@ -72,21 +73,16 @@ export default function MessagesPage() {
 
   return (
     <>
-      {/* Thin Dark Hero Band */}
-      <div className="bg-gray-800 py-6">
-        <div className="container mx-auto px-4">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-3">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">Messages</span>
-          </nav>
-          <h1 className="text-2xl font-display font-bold text-white">Messages</h1>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Communication"
+        title="Messages"
+        imageSeed="messages"
+        compact
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Messages' }]}
+      />
 
       {/* Chat Layout */}
-      <div className="h-[calc(100vh-64px-80px-88px)] flex bg-white overflow-hidden border border-gray-200 mx-0 lg:mx-4 lg:mt-4">
+      <div className="h-[calc(100vh-64px-80px-88px)] flex bg-ktip-cream overflow-hidden border border-gray-200 mx-0 lg:mx-4 lg:mt-4">
         {/* Sidebar - Conversation List */}
         <div
           className={`w-full lg:w-80 lg:border-r border-gray-200 lg:block ${

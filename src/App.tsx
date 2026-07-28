@@ -24,7 +24,7 @@ function Placeholder() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <p className="text-gray-500">This page is being migrated.</p>
-      <Link to="/" className="text-emerald-600 hover:underline">
+      <Link to="/" className="text-ktip-tropical-700 hover:underline">
         Back to Discover
       </Link>
     </div>

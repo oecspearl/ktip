@@ -12,7 +12,7 @@ export function UATReminderPopup({ open, onDismiss, onOpen }: UATReminderPopupPr
 
   return createPortal(
     <div className="fixed bottom-24 right-6 z-50 animate-slide-up">
-      <div className="bg-white rounded-2xl shadow-hard border border-ktip-ocean-100 p-5 max-w-xs">
+      <div className="bg-ktip-cream rounded-2xl shadow-hard border border-ktip-ocean-100 p-5 max-w-xs">
         {/* Close button */}
         <button
           onClick={onDismiss}

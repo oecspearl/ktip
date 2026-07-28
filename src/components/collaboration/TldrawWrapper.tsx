@@ -73,7 +73,7 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
             fallback={
               <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
                 <div className="text-center">
-                  <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3" />
+                  <div className="w-10 h-10 border-4 border-ktip-ocean-200 border-t-ktip-ocean-600 rounded-full animate-spin mx-auto mb-3" />
                   <p className="text-ktip-sand-500">Loading whiteboard...</p>
                 </div>
               </div>

@@ -33,6 +33,7 @@ import {
 } from '../../../lib/constants'
 import { format } from 'date-fns'
 import { cn } from '../../../lib/utils'
+import { PageHero } from '../../../components/layout/PageHero'
 import type { EventStatus } from '../../../types'
 
 import AdminEventRegistrationsTab from './AdminEventRegistrationsTab'
@@ -115,48 +116,15 @@ export default function AdminEventDetailPage() {
         Back to Events
       </Link>
 
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold font-display text-white">
-                {event.title}
-              </h1>
-              <Badge className={EVENT_STATUS_COLORS[event.status] || ''}>
-                {EVENT_STATUS_LABELS[event.status] || event.status}
-              </Badge>
-              <Badge className={EVENT_TYPE_COLORS[event.event_type] || ''}>
-                {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-gray-400">
-              <span className="flex items-center gap-1">
-                <Calendar size={14} />
-                {format(new Date(event.start_date), 'MMM d, yyyy h:mm a')}
-              </span>
-              {event.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin size={14} />
-                  {event.location}
-                </span>
-              )}
-              {event.is_virtual && (
-                <span className="flex items-center gap-1">
-                  <Globe size={14} />
-                  Virtual
-                </span>
-              )}
-              {event.capacity && (
-                <span className="flex items-center gap-1">
-                  <Users size={14} />
-                  Capacity: {event.capacity}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
+      <PageHero
+        inset
+        compact
+        eyebrow="Event Management"
+        title={event.title}
+        image={event.image_url}
+        imageSeed={event.id}
+        actions={
+          <>
             <Link to={`/events/${event.id}/edit`}>
               <Button variant="outline" size="sm" icon={<Edit size={14} />}>
                 Edit
@@ -191,9 +159,44 @@ export default function AdminEventDetailPage() {
                 </Button>
               </>
             )}
+          </>
+        }
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Badge className={EVENT_STATUS_COLORS[event.status] || ''}>
+              {EVENT_STATUS_LABELS[event.status] || event.status}
+            </Badge>
+            <Badge className={EVENT_TYPE_COLORS[event.event_type] || ''}>
+              {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-white/70">
+            <span className="flex items-center gap-1">
+              <Calendar size={14} />
+              {format(new Date(event.start_date), 'MMM d, yyyy h:mm a')}
+            </span>
+            {event.location && (
+              <span className="flex items-center gap-1">
+                <MapPin size={14} />
+                {event.location}
+              </span>
+            )}
+            {event.is_virtual && (
+              <span className="flex items-center gap-1">
+                <Globe size={14} />
+                Virtual
+              </span>
+            )}
+            {event.capacity && (
+              <span className="flex items-center gap-1">
+                <Users size={14} />
+                Capacity: {event.capacity}
+              </span>
+            )}
           </div>
         </div>
-      </div>
+      </PageHero>
 
       {/* Flat Tab Navigation */}
       <div className="relative border-b border-gray-200 mb-6" role="tablist" aria-label="Event management">

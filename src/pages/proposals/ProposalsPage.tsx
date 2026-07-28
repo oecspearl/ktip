@@ -5,7 +5,8 @@ import { ProposalCard } from '../../components/proposals/ProposalCard'
 import { useProposals } from '../../hooks/useProposals'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PROPOSAL_TYPE_LABELS } from '../../lib/constants'
-import { Plus, Search, Inbox, ChevronRight } from 'lucide-react'
+import { Plus, Search, Inbox } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import type { ProposalType, ProposalStatus } from '../../types'
 import { debounce } from '../../lib/utils'
 
@@ -37,34 +38,24 @@ export default function ProposalsPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Proposal Archives</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Proposals</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to="/proposals/new">
-                <button className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors">
-                  <Plus size={16} />
-                  Create Proposal
-                </button>
-              </Link>
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-2"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">Proposals</span>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Proposal Archives"
+        title="Proposals"
+        imageSeed="proposals"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Proposals' }]}
+        actions={
+          <Link to="/proposals/new">
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors">
+              <Plus size={16} />
+              Create Proposal
+            </button>
+          </Link>
+        }
+      />
 
       {/* === Filter Section === */}
-      <div className="bg-white py-8">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-8">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Row 1: Search */}
           <div className="flex gap-2 mb-3">
             <div className="relative flex-1">
@@ -75,7 +66,7 @@ export default function ProposalsPage() {
                 aria-label="Search proposals"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); debouncedSetSearch(e.target.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
             </div>
             <button className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0">
@@ -88,7 +79,7 @@ export default function ProposalsPage() {
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
             >
               <option value="">All Types</option>
               {proposalTypes.map((t) => (
@@ -99,7 +90,7 @@ export default function ProposalsPage() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
             >
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
@@ -119,8 +110,8 @@ export default function ProposalsPage() {
       </div>
 
       {/* === Proposals List === */}
-      <div className="bg-white pb-12">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 pb-12">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading || !proposals ? (
             <SkeletonGrid count={6} />
           ) : proposals.length > 0 ? (

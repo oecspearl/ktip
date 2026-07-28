@@ -17,7 +17,7 @@ export function Card({ className, hover, padding, children, ...others }: CardPro
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl shadow-card border border-ktip-sand-100',
+        'bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100',
         hover && 'hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300 cursor-pointer',
         paddingStyles[padding || 'md'],
         className

@@ -19,6 +19,7 @@ import {
   LIMITS,
 } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
+import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 
 const STEPS = [
   { number: 1, title: 'Account' },
@@ -152,8 +153,8 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-8 w-full max-w-2xl mx-auto shadow-lg">
+    <AuthBackdrop wide>
+      <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-2xl mx-auto shadow-lg">
         {emailSent ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -188,7 +189,7 @@ export default function SignupPage() {
                         step === s.number
                           ? 'bg-ktip-ocean-500 text-white'
                           : step > s.number
-                            ? 'bg-ktip-tropical-500 text-white'
+                            ? 'bg-ktip-tropical-500 text-brand-navy'
                             : 'bg-ktip-sand-100 text-ktip-sand-500'
                       }`}
                     >
@@ -319,7 +320,7 @@ export default function SignupPage() {
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white"
+                    className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
                   >
                     <option value="">Select a country</option>
                     {[...CARIBBEAN_COUNTRIES].map((c) => (
@@ -415,6 +416,6 @@ export default function SignupPage() {
           </>
         )}
       </div>
-    </div>
+    </AuthBackdrop>
   )
 }

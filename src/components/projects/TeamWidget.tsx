@@ -44,8 +44,8 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
       <p className="text-ktip-ocean-600 text-xs italic mb-4">Project collaborators</p>
 
       {myPendingInvite && (
-        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-sm text-amber-800 mb-2">
+        <div className="mb-4 p-3 bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg">
+          <p className="text-sm text-ktip-sun-800 mb-2">
             You've been invited to join this project as {myPendingInvite.role}.
           </p>
           <div className="flex gap-2">

@@ -5,11 +5,13 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
 import { useReadableMode } from '../../hooks/useReadableMode'
+import { useThemeMode } from '../../hooks/useThemeMode'
 import {
   Bell,
   Eye,
   Save,
   Type,
+  Moon,
 } from 'lucide-react'
 
 interface ToggleProps {
@@ -57,6 +59,7 @@ export function PreferencesTab() {
   const { preferences, loading } = useMyPreferences(auth.user?.id)
   const { savePreferences, loading: saving } = useSavePreferences()
   const [readable, setReadable] = useReadableMode()
+  const [darkMode, setDarkMode] = useThemeMode()
 
   // Notification preferences — persisted in notification_preferences
   // table and enforced by a DB trigger on the notifications table.
@@ -178,8 +181,8 @@ export function PreferencesTab() {
       {/* Privacy Preferences */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-            <Eye size={20} className="text-purple-600" />
+          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
+            <Eye size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
             <h2 className="text-lg font-display font-bold text-ktip-sand-900">Privacy</h2>
@@ -227,6 +230,28 @@ export function PreferencesTab() {
             onChange={setReadable}
             label="Readable font mode"
             description="Use Atkinson Hyperlegible across the site for easier reading. Applies immediately."
+          />
+        </div>
+      </Card>
+
+      {/* Appearance — applies instantly, stored locally, not part of Save */}
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-sun-100 rounded-xl flex items-center justify-center">
+            <Moon size={20} className="text-ktip-sun-700" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Appearance</h2>
+            <p className="text-sm text-ktip-sand-600">Switch between light and dark mode</p>
+          </div>
+        </div>
+
+        <div className="divide-y divide-ktip-sand-100">
+          <Toggle
+            checked={darkMode}
+            onChange={setDarkMode}
+            label="Dark mode"
+            description="Use a dark color theme across the site. Applies immediately."
           />
         </div>
       </Card>

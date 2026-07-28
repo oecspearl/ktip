@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
-import type { Grant } from '../types'
+import type { DetailEntry, Grant } from '../types'
 
 export function useGrants(filters?: {
   type?: string
@@ -82,6 +82,7 @@ export function useCreateGrant() {
   const mutation = useMutation({
     mutationFn: async (grantData: {
       title: string
+      summary?: string | null
       description?: string
       amount_min?: number
       amount_max?: number
@@ -90,6 +91,8 @@ export function useCreateGrant() {
       eligibility?: string
       application_url?: string
       grant_type?: string
+      is_climate_action?: boolean
+      details?: DetailEntry[]
     }) => {
       const { data, error } = await supabase
         .from('grants')

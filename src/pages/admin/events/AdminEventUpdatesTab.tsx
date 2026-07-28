@@ -148,7 +148,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4"
+          className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4"
         >
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-medium text-ktip-sand-900">
@@ -239,7 +239,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
       ) : updates?.length ? (
         <div className="space-y-3">
           {updates.map((update) => (
-            <div key={update.id} className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-4">
+            <div key={update.id} className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -248,7 +248,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
                       {EVENT_UPDATE_TYPE_LABELS[update.update_type] || update.update_type}
                     </Badge>
                     {!update.is_published && (
-                      <Badge size="sm" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                      <Badge size="sm" className="bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200">
                         Draft
                       </Badge>
                     )}
@@ -291,7 +291,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
         </div>
       ) : (
         !showForm && (
-          <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
+          <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
             <Megaphone size={48} className="mx-auto text-ktip-sand-300 mb-4" />
             <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1">No updates yet</h3>
             <p className="text-ktip-sand-500 text-sm">

@@ -147,7 +147,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
                       {member.user?.display_name || 'Unknown User'}
                     </p>
                     {member.status === 'pending' && (
-                      <p className="text-xs text-amber-600">Invitation pending</p>
+                      <p className="text-xs text-ktip-sun-600">Invitation pending</p>
                     )}
                   </div>
                 </div>

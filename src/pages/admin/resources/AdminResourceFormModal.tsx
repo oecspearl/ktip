@@ -163,7 +163,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
             <select
               value={resourceType}
               onChange={(e) => setResourceType(e.currentTarget.value)}
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white text-sm"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-sm"
             >
               {Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -177,7 +177,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
             <select
               value={category}
               onChange={(e) => setCategory(e.currentTarget.value)}
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white text-sm"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-sm"
             >
               <option value="">No category</option>
               {Object.entries(RESOURCE_CATEGORY_LABELS).map(([value, label]) => (
@@ -209,7 +209,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
               onChange={(e) => setTagInput(e.currentTarget.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
               placeholder="Add a tag..."
-              className="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white text-sm"
+              className="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-sm"
             />
             <Button type="button" size="sm" variant="secondary" icon={<Plus size={14} />} onClick={addTag}>
               Add
@@ -251,9 +251,9 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
               type="checkbox"
               checked={isClimateAction}
               onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
-              className="w-4 h-4 rounded border-ktip-sand-300 text-emerald-600 focus:ring-emerald-500"
+              className="w-4 h-4 rounded border-ktip-sand-300 text-ktip-tropical-700 focus:ring-ktip-tropical-500"
             />
-            <Leaf size={14} className="text-emerald-600" />
+            <Leaf size={14} className="text-ktip-tropical-700" />
             <span className="text-sm text-ktip-sand-700 font-medium">Climate Action</span>
           </label>
         </div>

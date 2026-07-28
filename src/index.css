@@ -3,31 +3,56 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors - Ocean */
-  --color-ktip-ocean-50: #e6f2ff;
-  --color-ktip-ocean-100: #cce5ff;
-  --color-ktip-ocean-200: #99ccff;
-  --color-ktip-ocean-300: #66b2ff;
-  --color-ktip-ocean-400: #3399ff;
-  --color-ktip-ocean-500: #0066cc;
-  --color-ktip-ocean-600: #0052a3;
-  --color-ktip-ocean-700: #003d7a;
-  --color-ktip-ocean-800: #002952;
-  --color-ktip-ocean-900: #001429;
+  /* ============================================================
+     OECS BRAND PRIMITIVES — the ONLY 5 colors in the system.
+     Every scale below is a tint/shade of one of these.
+     Source: OECS Commission Brand Guidelines.
+     ============================================================ */
+  --color-brand-navy: #041E42;   /* Pantone 282 */
+  --color-brand-green: #97D700;  /* Pantone 375 */
+  --color-brand-yellow: #FFC72C; /* Pantone 123 */
+  --color-brand-white: #FFFFFF;
+  --color-brand-black: #000000;  /* sparing: hairline "design line" accents */
 
-  /* Colors - Tropical */
-  --color-ktip-tropical-50: #f0fdf4;
-  --color-ktip-tropical-100: #dcfce7;
-  --color-ktip-tropical-200: #bbf7d0;
-  --color-ktip-tropical-300: #86efac;
-  --color-ktip-tropical-400: #4ade80;
-  --color-ktip-tropical-500: #22c55e;
-  --color-ktip-tropical-600: #16a34a;
-  --color-ktip-tropical-700: #15803d;
-  --color-ktip-tropical-800: #166534;
-  --color-ktip-tropical-900: #14532d;
+  /* Colors - Ocean (navy scale; Pantone 282 exact at 700) */
+  --color-ktip-ocean-50: #E8EEF6;
+  --color-ktip-ocean-100: #D3DEEC;
+  --color-ktip-ocean-200: #A9BFDB;
+  --color-ktip-ocean-300: #7E9EC7;
+  --color-ktip-ocean-400: #4F7AAE;
+  --color-ktip-ocean-500: #2A5788; /* interactive mid navy */
+  --color-ktip-ocean-600: #163A63;
+  --color-ktip-ocean-700: #041E42; /* Pantone 282 exact */
+  --color-ktip-ocean-800: #031732;
+  --color-ktip-ocean-900: #020F21;
 
-  /* Colors - Sand */
+  /* Colors - Tropical (Pantone 375 green scale; brand exact at 500).
+     #97D700 on white ≈ 1.8:1 — NEVER use 300–500 as text on light bg;
+     green fills take navy text; green text uses 700+. */
+  --color-ktip-tropical-50: #F7FCE8;
+  --color-ktip-tropical-100: #EDF9CC;
+  --color-ktip-tropical-200: #DDF39B;
+  --color-ktip-tropical-300: #C6EA5C;
+  --color-ktip-tropical-400: #AEE12B;
+  --color-ktip-tropical-500: #97D700; /* Pantone 375 exact */
+  --color-ktip-tropical-600: #7AB000;
+  --color-ktip-tropical-700: #5E8A00; /* min shade for green text on white */
+  --color-ktip-tropical-800: #446400;
+  --color-ktip-tropical-900: #2C4100;
+
+  /* Colors - Sun (Pantone 123 yellow scale; accents only; brand exact at 500) */
+  --color-ktip-sun-50: #FFF9E6;
+  --color-ktip-sun-100: #FFF1C4;
+  --color-ktip-sun-200: #FFE48A;
+  --color-ktip-sun-300: #FFD75C;
+  --color-ktip-sun-400: #FFCF44;
+  --color-ktip-sun-500: #FFC72C; /* Pantone 123 exact */
+  --color-ktip-sun-600: #E6AC09;
+  --color-ktip-sun-700: #B38500;
+  --color-ktip-sun-800: #806000;
+  --color-ktip-sun-900: #4D3900;
+
+  /* Colors - Sand (neutral scale) */
   --color-ktip-sand-50: #fafaf9;
   --color-ktip-sand-100: #f5f5f4;
   --color-ktip-sand-200: #e7e5e4;
@@ -43,10 +68,15 @@
   --color-ktip-cream: #fffef9;
   --color-ktip-canvas: #fafaf7;
 
+  /* Semantic: surface that stays dark in BOTH modes (navbar/footer) */
+  --color-ktip-ink: #041E42; /* navy in light, black-black in dark */
+  /* Semantic: thin "modern design line" hairline */
+  --color-ktip-line: #000000;
+
   /* Navbar hover/active accent — single source of truth for top nav links,
      icon buttons, active underline, and dropdown flowing-hover band */
-  --color-ktip-nav-accent: #86efac; /* = ktip-tropical-300 */
-  --color-ktip-nav-accent-contrast: #14532d; /* = ktip-tropical-900, text on accent */
+  --color-ktip-nav-accent: #97D700; /* brand green */
+  --color-ktip-nav-accent-contrast: #041E42; /* brand navy, text on accent */
 
   /* Border Radius — brand tokens: buttons 6px, cards 8px */
   --radius-md: 0.25rem;
@@ -63,10 +93,10 @@
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
   --shadow-hard: 0 8px 32px rgba(0, 0, 0, 0.16);
-  --shadow-glow-ocean: 0 0 24px rgba(0, 102, 204, 0.3);
-  --shadow-glow-tropical: 0 0 24px rgba(74, 222, 128, 0.3);
+  --shadow-glow-ocean: 0 0 24px rgba(4, 30, 66, 0.3);
+  --shadow-glow-tropical: 0 0 24px rgba(151, 215, 0, 0.3);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 10px 25px -5px rgba(0, 102, 204, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 10px 25px -5px rgba(4, 30, 66, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
   --shadow-nav: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
 
   /* Animations */
@@ -111,6 +141,174 @@ html.readable {
   letter-spacing: 0.01em;
 }
 
+/* Dark mode — toggled via html.dark (see useThemeMode + index.html FOUC guard).
+   Tailwind v4 utilities compile to var(--color-*) references, so overriding
+   the variables here re-themes every component with zero markup changes. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html.dark {
+  color-scheme: dark;
+
+  /* Surfaces go "black black" */
+  --color-ktip-canvas: #0A0A0A;
+  --color-ktip-cream: #0F0F0E;
+
+  /* Neutral inversion: sand-50 → near-black surface … sand-900 → near-white text */
+  --color-ktip-sand-50: #131312;
+  --color-ktip-sand-100: #1B1B1A;
+  --color-ktip-sand-200: #292928;
+  --color-ktip-sand-300: #3A3A38;
+  --color-ktip-sand-400: #8C8C86;
+  --color-ktip-sand-500: #A5A59F;
+  --color-ktip-sand-600: #C2C2BC;
+  --color-ktip-sand-700: #D8D8D3;
+  --color-ktip-sand-800: #E9E9E6;
+  --color-ktip-sand-900: #F5F5F2;
+
+  /* Navy inverted + lightened for contrast on black */
+  --color-ktip-ocean-50: #0D1B30;
+  --color-ktip-ocean-100: #12263F;
+  --color-ktip-ocean-200: #1B3A5F;
+  --color-ktip-ocean-300: #2A578C;
+  --color-ktip-ocean-400: #4F7AAE;
+  --color-ktip-ocean-500: #7BA1CB;
+  --color-ktip-ocean-600: #9DBBDC;
+  --color-ktip-ocean-700: #BFD4EA;
+  --color-ktip-ocean-800: #D9E5F3;
+  --color-ktip-ocean-900: #ECF2F9;
+
+  /* Green: 500 stays brand-vibrant; light-chip shades flip dark */
+  --color-ktip-tropical-50: #141A05;
+  --color-ktip-tropical-100: #1E2A08;
+  --color-ktip-tropical-200: #2C4100;
+  --color-ktip-tropical-300: #446400;
+  --color-ktip-tropical-400: #7AB000;
+  --color-ktip-tropical-500: #97D700;
+  --color-ktip-tropical-600: #AEE12B;
+  --color-ktip-tropical-700: #C6EA5C;
+  --color-ktip-tropical-800: #DDF39B;
+  --color-ktip-tropical-900: #EDF9CC;
+
+  /* Yellow flipped likewise */
+  --color-ktip-sun-50: #201803;
+  --color-ktip-sun-100: #33270A;
+  --color-ktip-sun-200: #4D3900;
+  --color-ktip-sun-300: #806000;
+  --color-ktip-sun-400: #E6AC09;
+  --color-ktip-sun-500: #FFC72C;
+  --color-ktip-sun-600: #FFD75C;
+  --color-ktip-sun-700: #FFE48A;
+  --color-ktip-sun-800: #FFF1C4;
+  --color-ktip-sun-900: #FFF9E6;
+
+  --color-ktip-ink: #050505;  /* navbar/footer go black-black */
+  --color-ktip-line: #97D700; /* design line reads green on black */
+
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-card-hover: 0 0 0 1px rgba(151, 215, 0, 0.25);
+
+  /* ------------------------------------------------------------
+     Tailwind default-palette overrides — raw gray/status classes
+     across the app flip without per-file edits. Pattern per hue:
+     50–300 become dark tints (chip/alert backgrounds), 400–500
+     stay vibrant, 600–900 lighten (text on dark).
+     ------------------------------------------------------------ */
+  --color-gray-50: #161616;
+  --color-gray-100: #1E1E1E;
+  --color-gray-200: #2C2C2C;
+  --color-gray-300: #3D3D3D;
+  --color-gray-400: #8A8A8A;
+  --color-gray-500: #A3A3A3;
+  --color-gray-600: #C0C0C0;
+  --color-gray-700: #D6D6D6;
+  --color-gray-800: #E8E8E8;
+  --color-gray-900: #F4F4F4;
+
+  --color-red-50: #2A0D0D;
+  --color-red-100: #3C1010;
+  --color-red-200: #571717;
+  --color-red-300: #7F1D1D;
+  --color-red-600: #F87171;
+  --color-red-700: #FCA5A5;
+  --color-red-800: #FECACA;
+  --color-red-900: #FEE2E2;
+
+  --color-orange-100: #3D1A08;
+  --color-orange-200: #5C270C;
+  --color-orange-600: #FB923C;
+  --color-orange-700: #FDBA74;
+
+  --color-amber-50: #2A1D05;
+  --color-amber-100: #3D2A08;
+  --color-amber-200: #5C3F0B;
+  --color-amber-300: #78350F;
+  --color-amber-600: #FBBF24;
+  --color-amber-700: #FCD34D;
+  --color-amber-800: #FDE68A;
+  --color-amber-900: #FEF3C7;
+
+  --color-yellow-50: #291F04;
+  --color-yellow-100: #3B2D06;
+  --color-yellow-200: #574108;
+  --color-yellow-300: #713F12;
+  --color-yellow-600: #FACC15;
+  --color-yellow-700: #FDE047;
+  --color-yellow-800: #FEF08A;
+  --color-yellow-900: #FEF9C3;
+
+  --color-green-50: #0A2313;
+  --color-green-100: #0F3019;
+  --color-green-200: #144524;
+  --color-green-600: #AEE12B;
+  --color-green-700: #C6EA5C;
+
+  --color-emerald-50: #06231B;
+  --color-emerald-100: #083026;
+  --color-emerald-200: #0A4534;
+  --color-emerald-600: #34D399;
+  --color-emerald-700: #6EE7B7;
+  --color-emerald-800: #A7F3D0;
+
+  --color-teal-100: #0A2E2B;
+  --color-teal-200: #0E423E;
+  --color-teal-600: #2DD4BF;
+  --color-teal-700: #5EEAD4;
+
+  --color-cyan-600: #22D3EE;
+
+  --color-blue-50: #0E1B33;
+  --color-blue-100: #142447;
+  --color-blue-200: #1C3266;
+  --color-blue-300: #1E3A8A;
+  --color-blue-600: #60A5FA;
+  --color-blue-700: #93C5FD;
+  --color-blue-800: #BFDBFE;
+  --color-blue-900: #DBEAFE;
+
+  --color-indigo-50: #171633;
+  --color-indigo-100: #201E47;
+  --color-indigo-200: #2D2A66;
+  --color-indigo-600: #818CF8;
+  --color-indigo-700: #A5B4FC;
+  --color-indigo-800: #C7D2FE;
+
+  --color-purple-50: #1F0E30;
+  --color-purple-100: #2B1442;
+  --color-purple-200: #3F1D61;
+  --color-purple-600: #C084FC;
+  --color-purple-700: #D8B4FE;
+  --color-purple-800: #E9D5FF;
+
+  --color-pink-50: #2B0D1C;
+  --color-pink-100: #3D1228;
+  --color-pink-200: #5A1A3B;
+  --color-pink-600: #F472B6;
+  --color-pink-700: #F9A8D4;
+
+  --color-rose-50: #2B0D12;
+  --color-rose-600: #FB7185;
+}
+
 @layer base {
   :root {
     font-family: var(--font-sans);
@@ -128,8 +326,8 @@ html.readable {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
-    background-color: #fafaf7;
-    color: #1c1917;
+    background-color: var(--color-ktip-canvas);
+    color: var(--color-ktip-sand-900);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -173,20 +371,22 @@ html.readable {
 
 @layer components {
   /* Caribbean Modern Component Styles */
+  /* Navy primary: brand navy in light; dark mode uses mid navy (ocean-700
+     inverts to a light tint, so pin interactive navy via dark:) */
   .btn-primary {
-    @apply bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white px-6 py-3 rounded-xl font-medium shadow-soft hover:shadow-medium hover:-translate-y-0.5 transition-all duration-200;
+    @apply bg-ktip-ocean-700 text-white px-6 py-3 rounded-xl font-medium shadow-soft hover:bg-ktip-ocean-600 hover:shadow-medium hover:-translate-y-0.5 transition-all duration-200 dark:bg-ktip-ocean-300 dark:hover:bg-ktip-ocean-400;
   }
 
   .btn-secondary {
-    @apply border border-ktip-sand-200 bg-white text-ktip-sand-700 px-6 py-3 rounded-xl font-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 transition-all duration-200;
+    @apply border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 px-6 py-3 rounded-xl font-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 transition-all duration-200;
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-6 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300;
+    @apply bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300;
   }
 
   .input-field {
-    @apply border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all;
+    @apply border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all;
   }
 
   .badge {
@@ -257,7 +457,7 @@ html.readable {
 .prose-editor-mini .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #a8a29e;
+  color: var(--color-ktip-sand-400);
   pointer-events: none;
   height: 0;
 }
@@ -270,7 +470,7 @@ html.readable {
   font-family: var(--font-sans);
   font-size: 0.9rem;
   line-height: 1.7;
-  color: #1c1917;
+  color: var(--color-ktip-sand-900);
 }
 
 .prose-editor-proposal .ProseMirror p {
@@ -321,15 +521,15 @@ html.readable {
 }
 
 .prose-editor-proposal .ProseMirror blockquote {
-  border-left: 3px solid #d6d3d1;
+  border-left: 3px solid var(--color-ktip-sand-300);
   padding-left: 1rem;
   margin: 0.5rem 0;
-  color: #57534e;
+  color: var(--color-ktip-sand-600);
 }
 
 .prose-editor-proposal .ProseMirror hr {
   border: none;
-  border-top: 1px solid #e7e5e4;
+  border-top: 1px solid var(--color-ktip-sand-200);
   margin: 1rem 0;
 }
 
@@ -341,19 +541,19 @@ html.readable {
 
 .prose-editor-proposal .ProseMirror th,
 .prose-editor-proposal .ProseMirror td {
-  border: 1px solid #d6d3d1;
+  border: 1px solid var(--color-ktip-sand-300);
   padding: 0.4rem 0.6rem;
   text-align: left;
   font-size: 0.85rem;
 }
 
 .prose-editor-proposal .ProseMirror th {
-  background: #f5f5f4;
+  background: var(--color-ktip-sand-100);
   font-weight: 600;
 }
 
 .prose-editor-proposal .ProseMirror .selectedCell {
-  background: #cce5ff;
+  background: var(--color-ktip-ocean-100);
 }
 
 .prose-editor-proposal .ProseMirror img {
@@ -363,18 +563,18 @@ html.readable {
 }
 
 .prose-editor-proposal .ProseMirror img.ProseMirror-selectednode {
-  outline: 2px solid #0066cc;
+  outline: 2px solid var(--color-ktip-ocean-500);
   outline-offset: 2px;
 }
 
 .prose-editor-proposal .ProseMirror mark {
-  background: #fef08a;
+  background: var(--color-ktip-sun-200);
   padding: 0.125rem 0.25rem;
 }
 
 .prose-editor-proposal .ProseMirror a,
 .prose-editor-proposal .ProseMirror a.editor-link {
-  color: #0066cc;
+  color: var(--color-ktip-ocean-500);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -390,7 +590,7 @@ html.readable {
 }
 
 .prose-editor-proposal .ProseMirror code {
-  background: #f5f5f4;
+  background: var(--color-ktip-sand-100);
   padding: 0.125rem 0.375rem;
   font-family: monospace;
   font-size: 0.85em;
@@ -403,7 +603,7 @@ html.readable {
 .prose-editor-proposal .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #a8a29e;
+  color: var(--color-ktip-sand-400);
   pointer-events: none;
   height: 0;
 }
@@ -450,7 +650,7 @@ html.readable {
   padding: 1rem;
   font-family: var(--font-sans);
   line-height: 1.7;
-  color: #1c1917;
+  color: var(--color-ktip-sand-900);
 }
 
 .ProseMirror h1 {
@@ -495,16 +695,16 @@ html.readable {
 }
 
 .ProseMirror blockquote {
-  border-left: 3px solid #d6d3d1;
+  border-left: 3px solid var(--color-ktip-sand-300);
   padding-left: 1rem;
   margin-left: 0;
   margin-bottom: 0.75rem;
-  color: #57534e;
+  color: var(--color-ktip-sand-600);
   font-style: italic;
 }
 
 .ProseMirror code {
-  background: #f5f5f4;
+  background: var(--color-ktip-sand-100);
   border-radius: 0.25rem;
   padding: 0.125rem 0.375rem;
   font-size: 0.875em;
@@ -528,7 +728,7 @@ html.readable {
 
 .ProseMirror hr {
   border: none;
-  border-top: 1px solid #e7e5e4;
+  border-top: 1px solid var(--color-ktip-sand-200);
   margin: 1.5rem 0;
 }
 
@@ -539,7 +739,7 @@ html.readable {
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #a8a29e;
+  color: var(--color-ktip-sand-400);
   pointer-events: none;
   height: 0;
 }
@@ -551,7 +751,7 @@ html.readable {
   padding: 2.5rem 3rem;
   font-family: var(--font-sans);
   line-height: 1.8;
-  color: #1c1917;
+  color: var(--color-ktip-sand-900);
   font-size: 1rem;
 }
 
@@ -564,7 +764,7 @@ html.readable {
 
 .prose-editor .ProseMirror th,
 .prose-editor .ProseMirror td {
-  border: 1px solid #d6d3d1;
+  border: 1px solid var(--color-ktip-sand-300);
   padding: 0.5rem 0.75rem;
   text-align: left;
   vertical-align: top;
@@ -572,12 +772,12 @@ html.readable {
 }
 
 .prose-editor .ProseMirror th {
-  background: #f5f5f4;
+  background: var(--color-ktip-sand-100);
   font-weight: 600;
 }
 
 .prose-editor .ProseMirror .selectedCell {
-  background: #cce5ff;
+  background: var(--color-ktip-ocean-100);
 }
 
 .prose-editor .ProseMirror img {
@@ -588,19 +788,19 @@ html.readable {
 }
 
 .prose-editor .ProseMirror img.ProseMirror-selectednode {
-  outline: 2px solid #0066cc;
+  outline: 2px solid var(--color-ktip-ocean-500);
   outline-offset: 2px;
 }
 
 .prose-editor .ProseMirror mark {
-  background: #fef08a;
+  background: var(--color-ktip-sun-200);
   padding: 0.125rem 0.25rem;
   border-radius: 0.125rem;
 }
 
 .prose-editor .ProseMirror a,
 .prose-editor .ProseMirror a.editor-link {
-  color: #0066cc;
+  color: var(--color-ktip-ocean-500);
   text-decoration: underline;
   cursor: pointer;
 }

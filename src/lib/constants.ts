@@ -27,12 +27,12 @@ export const ROLE_LABELS: Record<string, string> = {
 
 export const ROLE_COLORS: Record<string, string> = {
   student: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  mentor: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-  investor: 'bg-purple-100 text-purple-700 border-purple-200',
-  entrepreneur: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  private_sector: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  faculty: 'bg-teal-100 text-teal-700 border-teal-200',
-  oecs: 'bg-pink-100 text-pink-700 border-pink-200',
+  mentor: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  investor: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  entrepreneur: 'bg-ktip-ocean-50 text-ktip-ocean-600 border-ktip-ocean-100',
+  private_sector: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
+  faculty: 'bg-ktip-tropical-50 text-ktip-tropical-800 border-ktip-tropical-100',
+  oecs: 'bg-brand-navy text-white border-brand-navy',
 }
 
 // Roles a user can pick for themselves (excludes OECS admin)
@@ -62,19 +62,19 @@ export const PHASE_LABELS: Record<string, string> = {
 
 export const PHASE_COLORS: Record<string, string> = {
   concept: 'bg-gray-100 text-gray-700 border-gray-200',
-  prototype: 'bg-blue-100 text-blue-700 border-blue-200',
-  funding: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  launch: 'bg-green-100 text-green-700 border-green-200',
+  prototype: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  funding: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  launch: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
 }
 
 // Project Categories
 export const PROJECT_CATEGORIES = [
-  { value: 'technology', label: 'Technology', icon: '💻' },
-  { value: 'healthcare', label: 'Healthcare', icon: '🏥' },
-  { value: 'education', label: 'Education', icon: '📚' },
-  { value: 'agriculture', label: 'Agriculture', icon: '🌾' },
-  { value: 'environment', label: 'Environment', icon: '🌍' },
-  { value: 'other', label: 'Other', icon: '✨' },
+  { value: 'technology', label: 'Technology' },
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'education', label: 'Education' },
+  { value: 'agriculture', label: 'Agriculture' },
+  { value: 'environment', label: 'Environment' },
+  { value: 'other', label: 'Other' },
 ] as const
 
 // Event Types
@@ -95,11 +95,11 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
 }
 
 export const EVENT_TYPE_COLORS: Record<string, string> = {
-  hackathon: 'bg-purple-100 text-purple-700 border-purple-200',
-  workshop: 'bg-blue-100 text-blue-700 border-blue-200',
-  meetup: 'bg-green-100 text-green-700 border-green-200',
-  conference: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  demo_day: 'bg-pink-100 text-pink-700 border-pink-200',
+  hackathon: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  workshop: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  meetup: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  conference: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  demo_day: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
 }
 
 // Event Statuses
@@ -118,8 +118,8 @@ export const EVENT_STATUS_LABELS: Record<string, string> = {
 }
 
 export const EVENT_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  published: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
+  draft: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  published: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   cancelled: 'bg-red-100 text-red-700 border-red-200',
   completed: 'bg-gray-100 text-gray-700 border-gray-200',
 }
@@ -133,10 +133,10 @@ export const RSVP_STATUS_LABELS: Record<string, string> = {
 }
 
 export const RSVP_STATUS_COLORS: Record<string, string> = {
-  confirmed: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-  waitlisted: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  confirmed: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  waitlisted: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   cancelled: 'bg-red-100 text-red-700 border-red-200',
-  checked_in: 'bg-blue-100 text-blue-700 border-blue-200',
+  checked_in: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
 }
 
 // Event Update Types
@@ -148,8 +148,8 @@ export const EVENT_UPDATE_TYPE_LABELS: Record<string, string> = {
 
 export const EVENT_UPDATE_TYPE_COLORS: Record<string, string> = {
   announcement: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  schedule_change: 'bg-orange-100 text-orange-700 border-orange-200',
-  reminder: 'bg-purple-100 text-purple-700 border-purple-200',
+  schedule_change: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  reminder: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
 }
 
 // Event Article Types
@@ -179,11 +179,11 @@ export const GRANT_TYPE_LABELS: Record<string, string> = {
 }
 
 export const GRANT_TYPE_COLORS: Record<string, string> = {
-  startup: 'bg-purple-100 text-purple-700 border-purple-200',
-  research: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  startup: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  research: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   innovation: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  development: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-  education: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  development: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  education: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
 }
 
 // Grant Application Statuses
@@ -195,9 +195,9 @@ export const GRANT_APPLICATION_STATUS_LABELS: Record<string, string> = {
 }
 
 export const GRANT_APPLICATION_STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   under_review: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  approved: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
+  approved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   rejected: 'bg-red-100 text-red-700 border-red-200',
 }
 
@@ -214,9 +214,9 @@ export const SCHEDULE_TYPE_LABELS: Record<string, string> = {
 export const SCHEDULE_TYPE_COLORS: Record<string, string> = {
   session: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   break: 'bg-ktip-sand-100 text-ktip-sand-600 border-ktip-sand-200',
-  keynote: 'bg-purple-100 text-purple-700 border-purple-200',
-  workshop: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-  networking: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  keynote: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  workshop: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  networking: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   other: 'bg-gray-100 text-gray-600 border-gray-200',
 }
 
@@ -374,10 +374,10 @@ export const PROPOSAL_TYPE_LABELS: Record<string, string> = {
 }
 
 export const PROPOSAL_TYPE_COLORS: Record<string, string> = {
-  funding: 'bg-purple-100 text-purple-700 border-purple-200',
+  funding: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   project: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  research: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  business: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
+  research: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  business: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
 }
 
 export const PROPOSAL_STATUS_LABELS: Record<string, string> = {
@@ -386,8 +386,8 @@ export const PROPOSAL_STATUS_LABELS: Record<string, string> = {
 }
 
 export const PROPOSAL_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  completed: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
+  draft: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  completed: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
 }
 
 // Resource Types
@@ -402,11 +402,11 @@ export const RESOURCE_TYPE_LABELS: Record<string, string> = {
 
 export const RESOURCE_TYPE_COLORS: Record<string, string> = {
   article: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  guide: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-  case_study: 'bg-purple-100 text-purple-700 border-purple-200',
-  template: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  video: 'bg-pink-100 text-pink-700 border-pink-200',
-  success_story: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  guide: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  case_study: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  template: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  video: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  success_story: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
 }
 
 export const RESOURCE_CATEGORY_LABELS: Record<string, string> = {
@@ -421,7 +421,7 @@ export const RESOURCE_CATEGORY_LABELS: Record<string, string> = {
 }
 
 // Climate Action
-export const CLIMATE_ACTION_BADGE_CLASS = 'bg-emerald-100 text-emerald-700 border-emerald-200'
+export const CLIMATE_ACTION_BADGE_CLASS = 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200'
 
 // Grievance Categories
 export const GRIEVANCE_CATEGORIES = {
@@ -449,14 +449,14 @@ export const GRIEVANCE_CATEGORY_LABELS: Record<string, string> = {
 }
 
 export const GRIEVANCE_CATEGORY_COLORS: Record<string, string> = {
-  soliciting: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  misrepresentation: 'bg-orange-100 text-orange-700 border-orange-200',
-  ip_infringement: 'bg-purple-100 text-purple-700 border-purple-200',
+  soliciting: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  misrepresentation: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  ip_infringement: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   abusive_interactions: 'bg-red-100 text-red-700 border-red-200',
   harassment: 'bg-red-100 text-red-700 border-red-200',
   spam_scam: 'bg-gray-100 text-gray-700 border-gray-200',
-  impersonation: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  hate_speech: 'bg-pink-100 text-pink-700 border-pink-200',
+  impersonation: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  hate_speech: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   privacy_violations: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
 }
 
@@ -476,9 +476,9 @@ export const GRIEVANCE_STATUS_LABELS: Record<string, string> = {
 }
 
 export const GRIEVANCE_STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   under_review: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  resolved: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
+  resolved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   dismissed: 'bg-gray-100 text-gray-700 border-gray-200',
 }
 

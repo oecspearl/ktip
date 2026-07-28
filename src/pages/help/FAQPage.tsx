@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { ChevronRight, ChevronDown, Search, HelpCircle, MessageCircle } from 'lucide-react'
+import { ChevronDown, Search, HelpCircle, MessageCircle } from 'lucide-react'
 import { FAQS, FAQ_CATEGORIES, searchFAQs } from '../../lib/faq-content'
+import { PageHero } from '../../components/layout/PageHero'
 import { FeedbackModal } from '../../components/feedback/FeedbackModal'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
@@ -23,26 +24,20 @@ export default function FAQPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 py-10">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <Link to="/help" className="hover:text-white transition-colors">Help Center</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">FAQ</span>
-          </nav>
-          <h1 className="text-3xl font-display font-bold text-white mb-2">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-gray-400 max-w-2xl">
-            Quick answers about projects, teams, connections, messaging, grants, and your account.
-          </p>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Help Center"
+        title="Frequently Asked Questions"
+        subtitle="Quick answers about projects, teams, connections, messaging, grants, and your account."
+        imageSeed="help"
+        compact
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Help Center', href: '/help' },
+          { label: 'FAQ' },
+        ]}
+      />
 
-      <div className="container mx-auto px-4 py-10 max-w-3xl">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-10 max-w-3xl">
         {/* Search */}
         <div className="relative mb-8">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -51,7 +46,7 @@ export default function FAQPage() {
             placeholder="Search questions..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 border border-gray-300 bg-white rounded-xl text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            className="w-full pl-11 pr-4 py-3 border border-gray-300 bg-ktip-cream rounded-xl text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
           />
         </div>
 
@@ -62,7 +57,7 @@ export default function FAQPage() {
                 <h2 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-3">
                   {category}
                 </h2>
-                <div className="border border-gray-200 rounded-xl divide-y divide-gray-100 bg-white overflow-hidden">
+                <div className="border border-gray-200 rounded-xl divide-y divide-gray-100 bg-ktip-cream overflow-hidden">
                   {items.map((faq) => {
                     const isOpen = openId === faq.id
                     return (

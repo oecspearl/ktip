@@ -30,7 +30,7 @@ export function EditorStatusBar({ editor, saveStatus, title }: EditorStatusBarPr
     saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Unsaved'
 
   const statusColor =
-    saveStatus === 'saving' ? 'text-yellow-400' : saveStatus === 'saved' ? 'text-green-400' : 'text-gray-500'
+    saveStatus === 'saving' ? 'text-ktip-sun-400' : saveStatus === 'saved' ? 'text-ktip-tropical-400' : 'text-gray-500'
 
   return (
     <div className="flex items-center justify-between px-3 py-1.5 bg-[#1c1c1e] text-xs text-gray-500 select-none">
@@ -45,10 +45,10 @@ export function EditorStatusBar({ editor, saveStatus, title }: EditorStatusBarPr
       <div className="flex items-center gap-3">
         <span className={statusColor}>
           {saveStatus === 'saving' && (
-            <span className="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse mr-1.5 align-middle" />
+            <span className="inline-block w-2 h-2 rounded-full bg-ktip-sun-400 animate-pulse mr-1.5 align-middle" />
           )}
           {saveStatus === 'saved' && (
-            <span className="inline-block w-2 h-2 rounded-full bg-green-400 mr-1.5 align-middle" />
+            <span className="inline-block w-2 h-2 rounded-full bg-ktip-tropical-400 mr-1.5 align-middle" />
           )}
           {statusLabel}
         </span>

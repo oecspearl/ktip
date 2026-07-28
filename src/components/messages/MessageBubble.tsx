@@ -32,7 +32,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
             className={`px-4 py-2.5 ${
               isOwn
                 ? 'bg-ktip-ocean-500 text-white rounded-2xl rounded-br-md'
-                : 'bg-white border border-ktip-sand-200 text-ktip-sand-900 rounded-2xl rounded-bl-md'
+                : 'bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-900 rounded-2xl rounded-bl-md'
             }`}
           >
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>

@@ -165,7 +165,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4"
+          className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4"
         >
           <fieldset disabled={creating || updating}>
           <div className="flex items-center justify-between mb-2">
@@ -315,7 +315,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                   className={`relative flex flex-col sm:flex-row gap-3 sm:gap-6 ${
                     isBreak
                       ? 'bg-ktip-sand-50 rounded-xl border border-ktip-sand-200 p-4'
-                      : 'bg-white rounded-xl border border-ktip-sand-200 shadow-card p-4'
+                      : 'bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-4'
                   }`}
                 >
                   {/* Time column */}
@@ -414,7 +414,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
         </div>
       ) : (
         !showForm && (
-          <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
+          <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
             <Clock size={48} className="mx-auto text-ktip-sand-300 mb-4" />
             <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1">No schedule items yet</h3>
             <p className="text-ktip-sand-500 text-sm mb-4">

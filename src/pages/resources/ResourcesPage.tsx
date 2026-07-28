@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import { ResourceCard } from '../../components/resources/ResourceCard'
 import { useResources } from '../../hooks/useResources'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { Search, BookOpen, ChevronRight } from 'lucide-react'
+import { Search, BookOpen } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import {
   RESOURCE_TYPE_LABELS,
@@ -36,26 +36,16 @@ export default function ResourcesPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Knowledge Base</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Resources</h1>
-            </div>
-            <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="mx-2"><ChevronRight size={12} className="inline" /></span>
-              <span className="text-gray-300">Resources</span>
-            </nav>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Knowledge Base"
+        title="Resources"
+        imageSeed="resources"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Resources' }]}
+      />
 
       {/* === Filter Section === */}
-      <div className="bg-white py-8">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-8">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Row 1: Search */}
           <div className="flex gap-2 mb-3">
             <div className="relative flex-1">
@@ -66,7 +56,7 @@ export default function ResourcesPage() {
                 aria-label="Search resources"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
             </div>
             <button className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0">
@@ -79,7 +69,7 @@ export default function ResourcesPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.currentTarget.value)}
-              className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
             >
               <option value="">All Types</option>
               {Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => (
@@ -90,7 +80,7 @@ export default function ResourcesPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.currentTarget.value)}
-              className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
             >
               <option value="">All Categories</option>
               {Object.entries(RESOURCE_CATEGORY_LABELS).map(([value, label]) => (
@@ -103,7 +93,7 @@ export default function ResourcesPage() {
                 type="checkbox"
                 checked={climateFilter}
                 onChange={(e) => setClimateFilter(e.currentTarget.checked)}
-                className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
               />
               Climate Action
             </label>
@@ -121,12 +111,12 @@ export default function ResourcesPage() {
       </div>
 
       {/* === Resources List === */}
-      <div className="bg-white pb-12">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 pb-12">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading || !resources ? (
             <SkeletonGrid count={6} />
           ) : resources.length ? (
-            <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {resources.map((resource) => (
                 <ResourceCard key={resource.id} resource={resource} />
               ))}

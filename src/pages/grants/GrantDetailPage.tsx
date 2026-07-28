@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useParams, useNavigate, Link } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
+import { DetailsList } from '../../components/shared/DetailsList'
 import { useGrant, useApplyForGrant } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -15,8 +16,9 @@ import {
   ExternalLink,
   CheckCircle,
   AlertCircle,
-  ChevronRight,
+  Wallet,
 } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { formatCurrency, formatDate, truncate } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -128,16 +130,16 @@ export default function GrantDetailPage() {
   if (grantLoading || !grant) {
     if (grantLoading) {
       return (
-        <div className="container mx-auto px-4 py-12 text-center">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
           <p className="mt-4 text-ktip-sand-600">Loading grant...</p>
         </div>
       )
     }
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">💰</span>
+          <Wallet size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
           Grant Not Found
@@ -157,46 +159,34 @@ export default function GrantDetailPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="relative min-h-[180px] flex items-center bg-gray-800">
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gray-900/80" />
-
-        <div className="relative container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Grant Detail</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {grant.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2">
-                {grant.grant_type && (
-                  <Badge variant="primary">
-                    {grant.grant_type?.replace('_', ' ').toUpperCase()}
-                  </Badge>
-                )}
-                {!grant.is_active && (
-                  <Badge variant="default">Inactive</Badge>
-                )}
-                {isExpired && (
-                  <Badge variant="danger">Expired</Badge>
-                )}
-              </div>
-            </div>
-            <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-              <Link to="/grants" className="hover:text-white transition-colors">Grants</Link>
-              <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-              <span className="text-gray-300">{truncate(grant.title, 30)}</span>
-            </nav>
-          </div>
+      <PageHero
+        eyebrow="Grant Detail"
+        title={grant.title}
+        imageSeed={grant.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Grants', href: '/grants' },
+          { label: truncate(grant.title, 30) },
+        ]}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          {grant.grant_type && (
+            <Badge variant="primary">
+              {grant.grant_type?.replace('_', ' ').toUpperCase()}
+            </Badge>
+          )}
+          {!grant.is_active && (
+            <Badge variant="default">Inactive</Badge>
+          )}
+          {isExpired && (
+            <Badge variant="danger">Expired</Badge>
+          )}
         </div>
-      </div>
+      </PageHero>
 
       {/* === Two-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
@@ -255,6 +245,17 @@ export default function GrantDetailPage() {
                 <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                   {grant.description}
                 </div>
+              </div>
+            )}
+
+            {/* Additional Details */}
+            {grant.details && grant.details.length > 0 && (
+              <div className="mb-8">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                  Additional Details
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4">Key facts at a glance</p>
+                <DetailsList details={grant.details} />
               </div>
             )}
 

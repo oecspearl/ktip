@@ -19,7 +19,7 @@ export default function SharedProposalPage() {
     <div className="min-h-screen bg-ktip-canvas">
       {/* Dark header bar */}
       <header className="border-b border-gray-700 bg-gray-800">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-3 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-ktip-ocean-500 flex items-center justify-center">
             <FileText size={16} className="text-white" />
           </div>
@@ -27,7 +27,7 @@ export default function SharedProposalPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8 max-w-4xl">
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 size={24} className="animate-spin text-ktip-ocean-500" />
@@ -50,7 +50,7 @@ export default function SharedProposalPage() {
               />
             </div>
 
-            <div className="bg-white border border-gray-200 p-6 md:p-8">
+            <div className="bg-ktip-cream border border-gray-200 p-6 md:p-8">
               <ProposalPreview
                 type={proposal.type}
                 title={proposal.title}

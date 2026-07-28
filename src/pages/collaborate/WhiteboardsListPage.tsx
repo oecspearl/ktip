@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router'
 import { useWhiteboards, useSharedWhiteboards, useDeleteWhiteboard } from '../../hooks/useWhiteboards'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { formatRelativeTime, debounce } from '../../lib/utils'
-import { Plus, Search, Pen, Trash2, ChevronRight, Users } from 'lucide-react'
+import { Plus, Search, Pen, Trash2, Users } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 
 export default function WhiteboardsListPage() {
   usePageTitle('My Whiteboards')
@@ -30,26 +31,21 @@ export default function WhiteboardsListPage() {
 
   return (
     <>
-      {/* Dark Hero Band */}
-      <div className="bg-gray-800 min-h-[140px] flex items-center">
-        <div className="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
-          <div>
-            <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-white">My Whiteboards</h1>
-          </div>
-          <nav className="hidden md:flex items-center gap-1 text-sm text-gray-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200">Whiteboards</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Collaboration Tools"
+        title="My Whiteboards"
+        imageSeed="whiteboards"
+        compact
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Collaborate', href: '/collaborate' },
+          { label: 'Whiteboards' },
+        ]}
+      />
 
       {/* Content */}
-      <div className="bg-white py-8">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-8">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Actions Bar */}
           <div className="flex items-center gap-3 mb-6">
             <div className="relative flex-1">
@@ -58,7 +54,7 @@ export default function WhiteboardsListPage() {
                 type="text"
                 placeholder="Search whiteboards..."
                 onChange={(e) => debouncedSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
               />
             </div>
             <button

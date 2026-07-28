@@ -67,7 +67,7 @@ export function StepForm({ step, data, onChange, errors, proposalType, proposalT
                   value={value}
                   onChange={(e) => onChange(field.name, e.target.value)}
                   className={cn(
-                    'w-full px-3 py-2.5 border rounded-xl text-sm text-ktip-sand-900 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 bg-white',
+                    'w-full px-3 py-2.5 border rounded-xl text-sm text-ktip-sand-900 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 bg-ktip-cream',
                     error ? 'border-red-300' : 'border-ktip-sand-200'
                   )}
                 >

@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
+import { PageHero } from '../../components/layout/PageHero'
 import { useAdminStats } from '../../hooks/useAdminDashboard'
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics'
 import { BarChart } from '../../components/admin/analytics/BarChart'
@@ -32,21 +33,15 @@ export default function AdminDashboardPage() {
 
   return (
     <>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider">Admin Dashboard</p>
-            <h1 className="text-2xl font-bold font-display text-white mt-1">
-              Platform Overview
-            </h1>
-            <p className="mt-1 text-gray-400 text-sm">
-              Overview of your platform activity
-            </p>
-          </div>
-          {analytics && <ExportButton analytics={analytics} />}
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Admin Dashboard"
+        title="Platform Overview"
+        subtitle="Overview of your platform activity"
+        imageSeed="admin"
+        actions={analytics ? <ExportButton analytics={analytics} /> : undefined}
+      />
 
       {/* Stats Grid */}
       {statsLoading || !stats ? (
@@ -91,8 +86,8 @@ export default function AdminDashboardPage() {
 
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <DollarSign size={20} className="text-purple-600" />
+              <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
+                <DollarSign size={20} className="text-ktip-ocean-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.grantCount}</p>
@@ -103,8 +98,8 @@ export default function AdminDashboardPage() {
 
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                <MessageSquare size={20} className="text-yellow-600" />
+              <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+                <MessageSquare size={20} className="text-ktip-sun-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.postCount}</p>
@@ -116,8 +111,8 @@ export default function AdminDashboardPage() {
           {analytics && (
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <BookOpen size={20} className="text-orange-600" />
+                <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+                  <BookOpen size={20} className="text-ktip-sun-700" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{analytics.resourceCount}</p>
@@ -133,21 +128,21 @@ export default function AdminDashboardPage() {
       {stats && (
         <div className="border border-gray-200 rounded-lg p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <Leaf size={18} className="text-emerald-600" />
-            <h2 className="text-sm font-semibold text-emerald-800">Climate Action</h2>
+            <Leaf size={18} className="text-ktip-tropical-700" />
+            <h2 className="text-sm font-semibold text-ktip-tropical-900">Climate Action</h2>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-2xl font-bold text-emerald-700">{stats.climateProjectCount}</p>
-              <p className="text-xs text-emerald-600">Projects</p>
+              <p className="text-2xl font-bold text-ktip-tropical-800">{stats.climateProjectCount}</p>
+              <p className="text-xs text-ktip-tropical-700">Projects</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-emerald-700">{stats.climateEventCount}</p>
-              <p className="text-xs text-emerald-600">Events</p>
+              <p className="text-2xl font-bold text-ktip-tropical-800">{stats.climateEventCount}</p>
+              <p className="text-xs text-ktip-tropical-700">Events</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-emerald-700">{stats.climateGrantCount}</p>
-              <p className="text-xs text-emerald-600">Grants</p>
+              <p className="text-2xl font-bold text-ktip-tropical-800">{stats.climateGrantCount}</p>
+              <p className="text-xs text-ktip-tropical-700">Grants</p>
             </div>
           </div>
         </div>
@@ -203,19 +198,19 @@ export default function AdminDashboardPage() {
             {/* Projects by Category */}
             <div className="border border-gray-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
-                <FolderKanban size={18} className="text-indigo-600" />
+                <FolderKanban size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Projects by Category</h2>
               </div>
-              <BarChart data={analytics.projectsByCategory} colorClass="bg-indigo-500" />
+              <BarChart data={analytics.projectsByCategory} colorClass="bg-ktip-ocean-500" />
             </div>
 
             {/* Projects by Phase */}
             <div className="border border-gray-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 size={18} className="text-purple-600" />
+                <BarChart3 size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Projects by Phase</h2>
               </div>
-              <BarChart data={analytics.projectsByPhase} colorClass="bg-purple-500" labelMap={PHASE_LABELS} />
+              <BarChart data={analytics.projectsByPhase} colorClass="bg-ktip-ocean-500" labelMap={PHASE_LABELS} />
             </div>
 
             {/* Events by Type */}
@@ -230,10 +225,10 @@ export default function AdminDashboardPage() {
             {/* Grant Application Pipeline */}
             <div className="border border-gray-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
-                <DollarSign size={18} className="text-purple-600" />
+                <DollarSign size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Grant Application Pipeline</h2>
               </div>
-              <BarChart data={analytics.grantPipeline} colorClass="bg-purple-500" labelMap={GRANT_APPLICATION_STATUS_LABELS} />
+              <BarChart data={analytics.grantPipeline} colorClass="bg-ktip-ocean-500" labelMap={GRANT_APPLICATION_STATUS_LABELS} />
             </div>
           </div>
         </>
@@ -310,8 +305,8 @@ export default function AdminDashboardPage() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <DollarSign size={20} className="text-purple-600" />
+              <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
+                <DollarSign size={20} className="text-ktip-ocean-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Grants</h3>
@@ -328,8 +323,8 @@ export default function AdminDashboardPage() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                <MessageSquare size={20} className="text-yellow-600" />
+              <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+                <MessageSquare size={20} className="text-ktip-sun-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Forums</h3>
@@ -346,8 +341,8 @@ export default function AdminDashboardPage() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                <BookOpen size={20} className="text-orange-600" />
+              <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+                <BookOpen size={20} className="text-ktip-sun-700" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Resources</h3>

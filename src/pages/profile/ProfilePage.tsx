@@ -42,6 +42,7 @@ import {
   generateAvatarColor,
 } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { heroImageFor } from '../../lib/hero-images'
 
 export default function ProfilePage() {
   const params = useParams()
@@ -127,7 +128,7 @@ export default function ProfilePage() {
 
   if (!profileLoading && !profile) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <User size={32} className="text-ktip-sand-400" />
         </div>
@@ -150,9 +151,18 @@ export default function ProfilePage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px] relative">
-        <div className="container mx-auto px-4 pt-6 pb-16">
+      {/* Dark Hero — homepage-style photo backdrop */}
+      <div className="bg-gray-900 min-h-[220px] relative overflow-hidden">
+        <img
+          src={heroImageFor(profile.id)}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-2xl bg-black/10 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/40 to-black/30" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="relative w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-6 pb-16">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-6">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
@@ -234,9 +244,9 @@ export default function ProfilePage() {
       </div>
 
       {/* White Content Below */}
-      <div className="container mx-auto px-4 -mt-4">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 -mt-4">
         {/* Profile Info Section */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+        <div className="bg-ktip-cream border border-gray-200 rounded-lg p-6 mb-8">
           {/* Role Badges */}
           {profile.roles?.length ? (
             <div className="flex flex-wrap gap-2 mb-3">
@@ -303,7 +313,7 @@ export default function ProfilePage() {
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
                       value === COLLAB_EXCLUSIVE_VALUE
                         ? 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200'
-                        : 'bg-purple-50 text-purple-700 border-purple-200'
+                        : 'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-200'
                     }`}
                   >
                     <Handshake size={12} />
@@ -321,64 +331,14 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <div className="flex gap-6" role="tablist" aria-label="Profile content">
-            <button
-              role="tab"
-              aria-selected={activeTab === 'projects'}
-              aria-controls="tabpanel-projects"
-              id="tab-projects"
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 ${
-                activeTab === 'projects'
-                  ? 'border-b-2 border-ktip-ocean-500 text-ktip-ocean-600'
-                  : 'text-ktip-sand-600 hover:text-ktip-sand-900'
-              }`}
-              onClick={() => setActiveTab('projects')}
-            >
-              <FolderKanban size={18} />
-              Projects ({projects?.length || 0})
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === 'events'}
-              aria-controls="tabpanel-events"
-              id="tab-events"
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 ${
-                activeTab === 'events'
-                  ? 'border-b-2 border-ktip-ocean-500 text-ktip-ocean-600'
-                  : 'text-ktip-sand-600 hover:text-ktip-sand-900'
-              }`}
-              onClick={() => setActiveTab('events')}
-            >
-              <Calendar size={18} />
-              Events ({events?.length || 0})
-            </button>
-            {isOwnProfile && (
-              <button
-                role="tab"
-                aria-selected={activeTab === 'connections'}
-                aria-controls="tabpanel-connections"
-                id="tab-connections"
-                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 ${
-                  activeTab === 'connections'
-                    ? 'border-b-2 border-ktip-ocean-500 text-ktip-ocean-600'
-                    : 'text-ktip-sand-600 hover:text-ktip-sand-900'
-                }`}
-                onClick={() => setActiveTab('connections')}
-              >
-                <Users size={18} />
-                Connections ({connections?.length || 0})
-              </button>
-            )}
-          </div>
-        </div>
-
+        {/* Vertical tab rail on the left, content right */}
+        <div className="flex flex-col-reverse lg:flex-row-reverse gap-6 items-start">
+          <div className="flex-1 min-w-0 w-full">
         {/* Tab Content */}
         {activeTab === 'projects' && (
           <div role="tabpanel" id="tabpanel-projects" aria-labelledby="tab-projects">
             {projects?.length ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
                 {projects.map((project) => (
                   <ProjectCard key={project.id} project={project} />
                 ))}
@@ -397,7 +357,7 @@ export default function ProfilePage() {
         {activeTab === 'events' && (
           <div role="tabpanel" id="tabpanel-events" aria-labelledby="tab-events">
             {events?.length ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
                 {events.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
@@ -430,7 +390,7 @@ export default function ProfilePage() {
                   return (
                     <div
                       key={connection.id}
-                      className="flex items-center justify-between gap-3 bg-white border border-gray-200 rounded-lg p-4"
+                      className="flex items-center justify-between gap-3 bg-ktip-cream border border-gray-200 rounded-lg p-4"
                     >
                       <Link to={`/profile/${otherId}`} className="flex items-center gap-3 min-w-0 group">
                         {other?.avatar_url ? (
@@ -480,6 +440,63 @@ export default function ProfilePage() {
             )}
           </div>
         )}
+          </div>
+
+          {/* Vertical tab rail — left side */}
+          <div className="w-full lg:w-60 shrink-0">
+            <div className="bg-ktip-cream border border-gray-200 rounded-2xl p-2 lg:sticky lg:top-28">
+              <nav className="flex flex-row lg:flex-col gap-1" role="tablist" aria-label="Profile content">
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'projects'}
+                  aria-controls="tabpanel-projects"
+                  id="tab-projects"
+                  className={`flex-1 lg:flex-none flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-colors ${
+                    activeTab === 'projects'
+                      ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                  }`}
+                  onClick={() => setActiveTab('projects')}
+                >
+                  <FolderKanban size={18} />
+                  Projects ({projects?.length || 0})
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'events'}
+                  aria-controls="tabpanel-events"
+                  id="tab-events"
+                  className={`flex-1 lg:flex-none flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-colors ${
+                    activeTab === 'events'
+                      ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                  }`}
+                  onClick={() => setActiveTab('events')}
+                >
+                  <Calendar size={18} />
+                  Events ({events?.length || 0})
+                </button>
+                {isOwnProfile && (
+                  <button
+                    role="tab"
+                    aria-selected={activeTab === 'connections'}
+                    aria-controls="tabpanel-connections"
+                    id="tab-connections"
+                    className={`flex-1 lg:flex-none flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-colors ${
+                      activeTab === 'connections'
+                        ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    }`}
+                    onClick={() => setActiveTab('connections')}
+                  >
+                    <Users size={18} />
+                    Connections ({connections?.length || 0})
+                  </button>
+                )}
+              </nav>
+            </div>
+          </div>
+        </div>
 
         {/* Bottom spacing */}
         <div className="pb-8" />
@@ -515,7 +532,7 @@ export default function ProfilePage() {
             <select
               value={editCountry}
               onChange={(e) => setEditCountry(e.target.value)}
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
             >
               <option value="">Select a country</option>
               {[...CARIBBEAN_COUNTRIES].map((country) => (

@@ -178,7 +178,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.currentTarget.value)}
                     placeholder="Your full name"
-                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
+                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
                   />
                 </div>
               </div>
@@ -192,7 +192,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                     value={email}
                     onChange={(e) => setEmail(e.currentTarget.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
+                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
                   />
                 </div>
               </div>
@@ -204,7 +204,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.currentTarget.value)}
-                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm appearance-none"
+                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm appearance-none"
                   >
                     <option value="">Select your country</option>
                     {[...CARIBBEAN_COUNTRIES].map((c) => (
@@ -225,7 +225,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                       className={`text-left p-3 border-2 transition-colors ${
                         role === r.value
                           ? 'border-ktip-ocean-600 bg-ktip-ocean-600 text-white'
-                          : 'border-ktip-sand-300 hover:border-ktip-sand-400 bg-white'
+                          : 'border-ktip-sand-300 hover:border-ktip-sand-400 bg-ktip-cream'
                       }`}
                     >
                       <p className={`font-medium text-sm ${role === r.value ? 'text-white' : 'text-ktip-sand-900'}`}>{r.label}</p>
@@ -259,7 +259,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                     value={organization}
                     onChange={(e) => setOrganization(e.currentTarget.value)}
                     placeholder="Where do you work or study?"
-                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
+                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
                   />
                 </div>
               </div>
@@ -274,7 +274,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                     placeholder="Tell us about yourself, your background, and what you hope to achieve on KTIP..."
                     rows={4}
                     maxLength={1000}
-                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm resize-none"
+                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm resize-none"
                   />
                 </div>
                 <p className="text-xs text-ktip-sand-400 mt-1 text-right">{bio.length}/1000</p>
@@ -289,7 +289,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                     onChange={(e) => setSkillInput(e.currentTarget.value)}
                     onKeyDown={handleSkillKeyDown}
                     placeholder="Type a skill and press Enter"
-                    className="flex-1 px-3 py-2 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
+                    className="flex-1 px-3 py-2 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
                   />
                   <Button variant="outline" size="sm" onClick={addSkill} disabled={!skillInput.trim()} className="!rounded-none">
                     Add
@@ -322,7 +322,7 @@ export function PreRegistrationModal(props: PreRegistrationModalProps) {
                     value={linkedinUrl}
                     onChange={(e) => setLinkedinUrl(e.currentTarget.value)}
                     placeholder="https://linkedin.com/in/yourprofile"
-                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-white focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
+                    className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream focus:border-ktip-ocean-600 focus:ring-2 focus:ring-ktip-ocean-600 focus:outline-none text-sm"
                   />
                 </div>
               </div>

@@ -1,6 +1,6 @@
 export function SkeletonCard() {
   return (
-    <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft">
+    <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft">
       {/* Image placeholder */}
       <div className="h-40 bg-ktip-sand-100 rounded-xl mb-4" />
       {/* Badge placeholder */}

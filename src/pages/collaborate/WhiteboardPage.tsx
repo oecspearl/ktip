@@ -5,7 +5,9 @@ import { ShareWhiteboardModal } from '../../components/collaboration/ShareWhiteb
 import { useWhiteboard, useWhiteboardPermission, useCreateWhiteboard, useUpdateWhiteboard } from '../../hooks/useWhiteboards'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { ChevronRight, Download, Share2, Save } from 'lucide-react'
+import { Download, Share2, Save } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
+import { truncate } from '../../lib/utils'
 
 export default function WhiteboardPage() {
   const params = useParams()
@@ -203,49 +205,46 @@ export default function WhiteboardPage() {
 
   return (
     <>
-      {/* Dark Hero Band */}
-      <div className="bg-gray-800 min-h-[140px] flex items-center">
-        <div className="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
-            <input
-              type="text"
-              value={wbTitle}
-              onChange={(e) => setWbTitle(e.target.value)}
-              onBlur={handleTitleBlur}
-              readOnly={!canEdit}
-              className="text-3xl md:text-4xl font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-gray-500"
-              placeholder="Untitled Whiteboard"
-            />
-            {!isOwner && (
-              <span className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-medium border ${
-                canEdit
-                  ? 'bg-ktip-ocean-500/20 text-ktip-ocean-300 border-ktip-ocean-500/30'
-                  : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-              }`}>
-                {canEdit ? 'Editor — Shared with you' : 'View Only — Shared with you'}
-              </span>
-            )}
-          </div>
-          <nav className="hidden md:flex items-center gap-1 text-sm text-gray-400 shrink-0 ml-4">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
-            <ChevronRight size={14} />
-            <Link to="/collaborate/whiteboards" className="hover:text-white transition-colors">Whiteboards</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200 truncate max-w-[150px]">{wbTitle}</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Collaboration Tools"
+        title={
+          <input
+            type="text"
+            value={wbTitle}
+            onChange={(e) => setWbTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            readOnly={!canEdit}
+            className="font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-gray-500"
+            placeholder="Untitled Whiteboard"
+          />
+        }
+        imageSeed="whiteboards"
+        compact
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Collaborate', href: '/collaborate' },
+          { label: 'Whiteboards', href: '/collaborate/whiteboards' },
+          { label: truncate(wbTitle, 20) },
+        ]}
+      >
+        {!isOwner && (
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
+            canEdit
+              ? 'bg-ktip-ocean-500/20 text-ktip-ocean-300 border-ktip-ocean-500/30'
+              : 'bg-ktip-sun-500/20 text-ktip-sun-300 border-ktip-sun-500/30'
+          }`}>
+            {canEdit ? 'Editor — Shared with you' : 'View Only — Shared with you'}
+          </span>
+        )}
+      </PageHero>
 
       {/* Action Toolbar */}
       <div className="bg-white border-b border-ktip-sand-200">
-        <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={`text-xs px-2 py-1 rounded ${
-              saveStatus === 'saved' ? 'text-green-600 bg-green-50' :
-              saveStatus === 'saving' ? 'text-amber-600 bg-amber-50' :
+              saveStatus === 'saved' ? 'text-ktip-tropical-700 bg-ktip-tropical-50' :
+              saveStatus === 'saving' ? 'text-ktip-sun-600 bg-ktip-sun-50' :
               'text-red-600 bg-red-50'
             }`}>
               {saveStatus === 'saved' ? 'Saved' :
@@ -315,7 +314,7 @@ export default function WhiteboardPage() {
       {/* Whiteboard Canvas */}
       {readyToRender && (isNew || !dbWhiteboardError) && (
         <div className="bg-white py-4">
-          <div className="max-w-5xl mx-auto px-4">
+          <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
             <TldrawWrapper
               snapshot={initialSnapshot}
               onEditorReady={handleEditorReady}

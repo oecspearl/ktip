@@ -9,11 +9,12 @@ import { PROPOSAL_TYPE_LABELS, PROPOSAL_TYPE_COLORS, PROPOSAL_STATUS_LABELS, PRO
 import { PROPOSAL_STEPS } from '../../lib/proposal-templates'
 import { truncate } from '../../lib/utils'
 import type { Proposal } from '../../types'
+import { PageHero } from '../../components/layout/PageHero'
 import {
   Pencil,
   Trash2,
   Loader2,
-  ChevronRight,
+  FileText,
 } from 'lucide-react'
 
 export default function ProposalDetailPage() {
@@ -46,9 +47,9 @@ export default function ProposalDetailPage() {
 
   if (!proposal) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">📄</span>
+          <FileText size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
           Proposal Not Found
@@ -93,61 +94,54 @@ function ProposalDetailContent({ proposal: p, onDelete, deleting }: ProposalDeta
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Proposal Detail</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {p.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${typeColor}`}>
-                  {typeLabel}
-                </span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor}`}>
-                  {statusLabel}
-                </span>
-                {p.status === 'draft' && (
-                  <span className="text-sm text-gray-300">
-                    Step {p.current_step + 1} of {totalSteps}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {p.status === 'completed' && (
-                <ShareButton
-                  proposalId={p.id}
-                  shareToken={shareToken}
-                  onTokenChange={setShareToken}
-                />
-              )}
-              {p.status === 'draft' && (
-                <Link
-                  to={`/proposals/new?draft=${p.id}`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
-                >
-                  <Pencil size={14} />
-                  Continue Editing
-                </Link>
-              )}
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <Link to="/proposals" className="hover:text-white transition-colors">Proposals</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">{truncate(p.title, 30)}</span>
-              </nav>
-            </div>
-          </div>
+      <PageHero
+        eyebrow="Proposal Detail"
+        title={p.title}
+        imageSeed={p.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Proposals', href: '/proposals' },
+          { label: truncate(p.title, 30) },
+        ]}
+        actions={
+          <>
+            {p.status === 'completed' && (
+              <ShareButton
+                proposalId={p.id}
+                shareToken={shareToken}
+                onTokenChange={setShareToken}
+              />
+            )}
+            {p.status === 'draft' && (
+              <Link
+                to={`/proposals/new?draft=${p.id}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+              >
+                <Pencil size={14} />
+                Continue Editing
+              </Link>
+            )}
+          </>
+        }
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${typeColor}`}>
+            {typeLabel}
+          </span>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor}`}>
+            {statusLabel}
+          </span>
+          {p.status === 'draft' && (
+            <span className="text-sm text-white/80">
+              Step {p.current_step + 1} of {totalSteps}
+            </span>
+          )}
         </div>
-      </div>
+      </PageHero>
 
       {/* === Single-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="max-w-4xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
           {/* Export Actions */}
           <div className="mb-8 print:hidden">
             <ProposalExportActions

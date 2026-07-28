@@ -48,7 +48,7 @@ export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
   const dateKeys = Object.keys(grouped).sort()
 
   return (
-    <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
+    <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="w-5 h-5 text-ktip-ocean-600" />
         <h2 className="text-xl font-display font-bold text-ktip-sand-900">Schedule</h2>

@@ -51,10 +51,10 @@ export function generateAvatarColor(name: string): string {
   const colors = [
     'bg-ktip-ocean-400',
     'bg-ktip-tropical-400',
-    'bg-purple-400',
-    'bg-pink-400',
-    'bg-yellow-400',
-    'bg-indigo-400',
+    'bg-ktip-sun-400',
+    'bg-ktip-ocean-600',
+    'bg-ktip-sun-500',
+    'bg-ktip-tropical-600',
   ]
   const index = name.charCodeAt(0) % colors.length
   return colors[index]

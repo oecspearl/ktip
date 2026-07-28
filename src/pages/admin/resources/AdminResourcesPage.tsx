@@ -4,6 +4,7 @@ import { Badge } from '../../../components/ui/Badge'
 import { useAdminResources, useDeleteResource } from '../../../hooks/useResources'
 import { useToast } from '../../../contexts/ToastContext'
 import { AdminResourceFormModal } from './AdminResourceFormModal'
+import { PageHero } from '../../../components/layout/PageHero'
 import {
   Plus,
   Edit,
@@ -56,19 +57,19 @@ export default function AdminResourcesPage() {
 
   return (
     <>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider">Resource Management</p>
-            <h1 className="text-2xl font-display font-bold text-white mt-1">Resources</h1>
-            <p className="text-sm text-gray-400 mt-1">Manage knowledge base articles, guides, and case studies</p>
-          </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Resource Management"
+        title="Resources"
+        subtitle="Manage knowledge base articles, guides, and case studies"
+        imageSeed="admin-resources"
+        actions={
           <Button icon={<Plus size={16} />} onClick={openCreate}>
             Add Resource
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Table */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -130,7 +131,7 @@ export default function AdminResourcesPage() {
                           Published
                         </Badge>
                       ) : (
-                        <Badge size="sm" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                        <Badge size="sm" className="bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200">
                           <EyeOff size={12} />
                           Draft
                         </Badge>

@@ -20,7 +20,7 @@ describe('cn', () => {
   })
 
   it('deduplicates tailwind classes', () => {
-    expect(cn('text-red-500', 'text-blue-500')).toBe('text-blue-500')
+    expect(cn('text-red-500', 'text-ktip-ocean-500')).toBe('text-ktip-ocean-500')
   })
 })
 

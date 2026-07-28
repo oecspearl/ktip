@@ -12,7 +12,8 @@ import { downloadHTML, downloadMarkdown, printForPDF } from '../../lib/document-
 import { useDocument, useCreateDocument, useUpdateDocument } from '../../hooks/useDocuments'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { ChevronRight } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
+import { truncate } from '../../lib/utils'
 
 export default function DocumentEditorPage() {
   const params = useParams()
@@ -185,37 +186,34 @@ export default function DocumentEditorPage() {
 
   return (
     <>
-      {/* Dark Hero Band */}
-      <div className="bg-gray-800 min-h-[140px] flex items-center">
-        <div className="max-w-5xl mx-auto px-4 w-full flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Collaboration Tools</p>
-            <input
-              type="text"
-              value={docTitle}
-              onChange={(e) => setDocTitle(e.target.value)}
-              onBlur={handleTitleBlur}
-              readOnly={!isOwner}
-              className="text-3xl md:text-4xl font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-gray-500"
-              placeholder="Untitled Document"
-            />
-            {!isOwner && (
-              <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                View Only — Shared with you
-              </span>
-            )}
-          </div>
-          <nav className="hidden md:flex items-center gap-1 text-sm text-gray-400 shrink-0 ml-4">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
-            <ChevronRight size={14} />
-            <Link to="/collaborate/documents" className="hover:text-white transition-colors">Documents</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200 truncate max-w-[150px]">{docTitle}</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Collaboration Tools"
+        title={
+          <input
+            type="text"
+            value={docTitle}
+            onChange={(e) => setDocTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            readOnly={!isOwner}
+            className="font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-gray-500"
+            placeholder="Untitled Document"
+          />
+        }
+        imageSeed="documents"
+        compact
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Collaborate', href: '/collaborate' },
+          { label: 'Documents', href: '/collaborate/documents' },
+          { label: truncate(docTitle, 20) },
+        ]}
+      >
+        {!isOwner && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-ktip-sun-500/20 text-ktip-sun-300 border border-ktip-sun-500/30">
+            View Only — Shared with you
+          </span>
+        )}
+      </PageHero>
 
       {/* Document not found */}
       {!isNew && dbDocumentError && (
@@ -231,7 +229,7 @@ export default function DocumentEditorPage() {
       {/* Editor Section */}
       {(isNew || !dbDocumentError) && (
         <div className="bg-[#e8e8e8] py-8 min-h-[calc(100vh-200px)]">
-          <div className="max-w-5xl mx-auto px-4">
+          <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
             <div className="border border-gray-600 overflow-hidden shadow-hard">
               {/* Menu Bar */}
               <EditorMenuBar

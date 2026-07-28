@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { forgotPasswordSchema } from '../../lib/validation'
+import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 
 interface ForgotPasswordActionState {
   errors: Record<string, string>
@@ -53,8 +54,8 @@ export default function ForgotPasswordPage() {
   const [state, formAction, pending] = useActionState(submitAction, initialState)
 
   return (
-    <div className="bg-gray-900 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
+    <AuthBackdrop>
+      <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
         {state.emailSent ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -114,6 +115,6 @@ export default function ForgotPasswordPage() {
           </>
         )}
       </div>
-    </div>
+    </AuthBackdrop>
   )
 }

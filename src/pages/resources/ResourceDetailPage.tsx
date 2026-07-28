@@ -10,7 +10,6 @@ import {
   ExternalLink,
   Calendar,
   User,
-  ChevronRight,
 } from 'lucide-react'
 import {
   RESOURCE_TYPE_LABELS,
@@ -18,6 +17,7 @@ import {
   RESOURCE_CATEGORY_LABELS,
 } from '../../lib/constants'
 import { formatDate, truncate } from '../../lib/utils'
+import { PageHero } from '../../components/layout/PageHero'
 
 export default function ResourceDetailPage() {
   const params = useParams()
@@ -29,8 +29,8 @@ export default function ResourceDetailPage() {
   if (loading || !resource) {
     if (loading) {
       return (
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
+          <div className="max-w-[calc(50vw+36rem)] mx-auto">
             <div className="bg-gray-800 min-h-[180px] rounded-none animate-pulse" />
             <div className="p-8 animate-pulse">
               <div className="h-4 w-24 bg-ktip-sand-100 rounded mb-4" />
@@ -43,7 +43,7 @@ export default function ResourceDetailPage() {
       )
     }
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <BookOpen size={32} className="text-ktip-sand-400" />
         </div>
@@ -65,41 +65,33 @@ export default function ResourceDetailPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Resource Detail</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {resource.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className={RESOURCE_TYPE_COLORS[resource.resource_type] || ''}>
-                  {RESOURCE_TYPE_LABELS[resource.resource_type] || resource.resource_type}
-                </Badge>
-                {resource.category && (
-                  <Badge className="bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200">
-                    {RESOURCE_CATEGORY_LABELS[resource.category!] || resource.category}
-                  </Badge>
-                )}
-                {resource.is_climate_action && <ClimateBadge size="md" />}
-              </div>
-            </div>
-            <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-              <Link to="/resources" className="hover:text-white transition-colors">Resources</Link>
-              <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-              <span className="text-gray-300">{truncate(resource.title, 30)}</span>
-            </nav>
-          </div>
+      <PageHero
+        eyebrow="Resource Detail"
+        title={resource.title}
+        image={resource.thumbnail_url}
+        imageSeed={resource.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Resources', href: '/resources' },
+          { label: truncate(resource.title, 30) },
+        ]}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className={RESOURCE_TYPE_COLORS[resource.resource_type] || ''}>
+            {RESOURCE_TYPE_LABELS[resource.resource_type] || resource.resource_type}
+          </Badge>
+          {resource.category && (
+            <Badge className="bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200">
+              {RESOURCE_CATEGORY_LABELS[resource.category!] || resource.category}
+            </Badge>
+          )}
+          {resource.is_climate_action && <ClimateBadge size="md" />}
         </div>
-      </div>
+      </PageHero>
 
       {/* === Two-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">

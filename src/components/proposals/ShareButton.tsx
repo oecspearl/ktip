@@ -43,7 +43,7 @@ export function ShareButton({ proposalId, shareToken, onTokenChange }: ShareButt
       </button>
 
       {showPanel && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-ktip-sand-200 rounded-xl shadow-medium p-4 z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-ktip-cream border border-ktip-sand-200 rounded-xl shadow-medium p-4 z-50">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-semibold text-ktip-sand-900">Share Proposal</h4>
             <button

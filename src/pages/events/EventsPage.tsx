@@ -3,7 +3,8 @@ import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
 import { useEvents } from '../../hooks/useEvents'
-import { Plus, Search, CalendarX, ChevronRight } from 'lucide-react'
+import { Plus, Search, CalendarX } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { debounce } from '../../lib/utils'
@@ -36,33 +37,23 @@ export default function EventsPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Event Archives</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Events</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to="/events/new">
-                <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
-                  Create Event
-                </Button>
-              </Link>
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-2"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">Events List</span>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Event Archives"
+        title="Events"
+        imageSeed="events"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Events List' }]}
+        actions={
+          <Link to="/events/new">
+            <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
+              Create Event
+            </Button>
+          </Link>
+        }
+      />
 
       {/* === Filter Section === */}
-      <div className="bg-white py-8">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-8">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Row 1: Search */}
           <div className="flex gap-2 mb-3">
             <div className="relative flex-1">
@@ -76,7 +67,7 @@ export default function EventsPage() {
                 aria-label="Search events"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); debouncedSetSearch(e.target.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
             </div>
             <button
@@ -91,14 +82,14 @@ export default function EventsPage() {
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
             >
               <option value="">All Event Types</option>
-              <option value="hackathon">💻 Hackathon</option>
-              <option value="workshop">🛠️ Workshop</option>
-              <option value="meetup">🤝 Meetup</option>
-              <option value="conference">🎤 Conference</option>
-              <option value="demo_day">🚀 Demo Day</option>
+              <option value="hackathon">Hackathon</option>
+              <option value="workshop">Workshop</option>
+              <option value="meetup">Meetup</option>
+              <option value="conference">Conference</option>
+              <option value="demo_day">Demo Day</option>
             </select>
 
             <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
@@ -116,7 +107,7 @@ export default function EventsPage() {
                 type="checkbox"
                 checked={climateFilter}
                 onChange={(e) => setClimateFilter(e.target.checked)}
-                className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
               />
               Climate Action
             </label>
@@ -134,8 +125,8 @@ export default function EventsPage() {
       </div>
 
       {/* === Events List === */}
-      <div className="bg-white pb-12">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 pb-12">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {eventsLoading || !events ? (
             <SkeletonGrid count={6} />
           ) : events.length > 0 ? (
@@ -143,7 +134,7 @@ export default function EventsPage() {
               <p className="text-sm text-gray-500 mb-6">
                 Found {events.length} event{events.length !== 1 ? 's' : ''}
               </p>
-              <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
                 {events.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}

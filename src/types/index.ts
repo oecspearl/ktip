@@ -30,6 +30,19 @@ export interface RegistrationFieldConfig {
   helpText?: string
 }
 
+export interface DetailItem {
+  id: string
+  label: string
+  value: string
+}
+
+export interface DetailEntry {
+  id: string
+  label: string
+  value?: string
+  items?: DetailItem[]
+}
+
 export type ProjectCategory =
   | 'technology'
   | 'healthcare'
@@ -68,6 +81,7 @@ export interface Project {
   is_climate_action: boolean
   is_featured: boolean
   view_count: number
+  details: DetailEntry[]
   owner_id: string
   created_at: string
   updated_at: string
@@ -90,6 +104,7 @@ export interface Event {
   organizer_id: string
   registration_fields: RegistrationFieldConfig[]
   is_climate_action: boolean
+  details: DetailEntry[]
   created_at: string
   organizer?: Profile
 }
@@ -184,6 +199,7 @@ export interface Grant {
   grant_type: string | null
   is_active: boolean
   is_climate_action: boolean
+  details: DetailEntry[]
   created_at: string
 }
 

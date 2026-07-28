@@ -110,7 +110,7 @@ export function UATFeedbackButton() {
       {hasSubmitted && (
         <button
           onClick={() => setFormOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 bg-white border border-ktip-sand-200 text-ktip-sand-600 rounded-full shadow-soft hover:shadow-medium hover:border-ktip-ocean-300 transition-all duration-300"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-600 rounded-full shadow-soft hover:shadow-medium hover:border-ktip-ocean-300 transition-all duration-300"
           aria-label="Submit additional feedback"
         >
           <MessageSquarePlus size={18} />

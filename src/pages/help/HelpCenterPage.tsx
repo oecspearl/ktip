@@ -22,8 +22,8 @@ import {
   Building2,
   Globe,
   Briefcase,
-  ChevronRight,
 } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 
 const ROLE_ICONS: Record<string, any> = {
   student: GraduationCap,
@@ -35,12 +35,12 @@ const ROLE_ICONS: Record<string, any> = {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  student: 'from-blue-500 to-blue-600',
-  mentor: 'from-amber-500 to-amber-600',
-  entrepreneur: 'from-emerald-500 to-emerald-600',
-  investor: 'from-purple-500 to-purple-600',
-  private_sector: 'from-rose-500 to-rose-600',
-  oecs: 'from-cyan-500 to-cyan-600',
+  student: 'from-ktip-ocean-500 to-ktip-ocean-600',
+  mentor: 'from-ktip-sun-500 to-ktip-sun-600',
+  entrepreneur: 'from-ktip-tropical-500 to-ktip-tropical-700',
+  investor: 'from-ktip-ocean-500 to-ktip-ocean-600',
+  private_sector: 'from-red-500 to-red-600',
+  oecs: 'from-ktip-ocean-400 to-ktip-ocean-500',
 }
 
 export default function HelpCenterPage() {
@@ -69,43 +69,33 @@ export default function HelpCenterPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Help Center</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">How Can We Help?</h1>
-              <Link
-                to="/help/faq"
-                className="inline-block mt-2 text-sm text-ktip-ocean-400 hover:text-ktip-ocean-300 transition-colors"
-              >
-                Browse the FAQ →
-              </Link>
-            </div>
-            <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="mx-2"><ChevronRight size={12} className="inline" /></span>
-              <span className="text-gray-300">Help Center</span>
-            </nav>
-          </div>
-
-          {/* Search embedded in hero */}
-          <div className="max-w-2xl mt-6">
-            <HelpSearch
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              categories={HELP_CATEGORIES}
-              resultCount={isSearching ? totalArticles : undefined}
-            />
-          </div>
+      <PageHero
+        eyebrow="Help Center"
+        title="How Can We Help?"
+        imageSeed="help"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Help Center' }]}
+      >
+        <Link
+          to="/help/faq"
+          className="inline-block text-sm text-ktip-nav-accent hover:text-white transition-colors"
+        >
+          Browse the FAQ →
+        </Link>
+        {/* Search embedded in hero */}
+        <div className="max-w-2xl mt-4">
+          <HelpSearch
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            categories={HELP_CATEGORIES}
+            resultCount={isSearching ? totalArticles : undefined}
+          />
         </div>
-      </div>
+      </PageHero>
 
-      <div className="bg-white py-10">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-10">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Quick Start Guides — Hidden during search */}
           {!isSearching && (
             <section className="mb-12">
@@ -245,7 +235,7 @@ export default function HelpCenterPage() {
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Link
                     to="/messages"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-cream text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
                   >
                     <MessageSquare size={18} />
                     Send a Message

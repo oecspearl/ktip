@@ -1,7 +1,7 @@
-import { Link } from 'react-router'
 import { BoardCard } from '../../components/forums/BoardCard'
 import { useForumBoards } from '../../hooks/useForums'
-import { MessageSquare, ChevronRight } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
@@ -11,30 +11,20 @@ export default function ForumsPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Community Forums</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Forums</h1>
-            </div>
-            <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="mx-2"><ChevronRight size={12} className="inline" /></span>
-              <span className="text-gray-300">Forums</span>
-            </nav>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Community Forums"
+        title="Forums"
+        imageSeed="forums"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Forums' }]}
+      />
 
       {/* === Board Grid === */}
-      <div className="bg-white py-12">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading ? (
             <SkeletonGrid count={6} />
           ) : boards?.length ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
               {boards.map((board) => (
                 <BoardCard key={board.id} board={board} />
               ))}

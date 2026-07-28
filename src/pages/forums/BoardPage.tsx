@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { PostCard } from '../../components/forums/PostCard'
 import { useForumBoard, useForumPosts } from '../../hooks/useForums'
-import { Plus, Search, MessageCircle, ChevronRight } from 'lucide-react'
+import { Plus, Search, MessageCircle } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { debounce } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
@@ -24,7 +25,7 @@ export default function BoardPage() {
 
   if (boardLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
         <div className="bg-gray-800 min-h-[180px] rounded-none animate-pulse-soft mb-0" />
         <div className="py-8 space-y-4">
           <div className="h-12 w-64 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
@@ -38,7 +39,7 @@ export default function BoardPage() {
 
   if (!board) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <MessageCircle size={32} className="text-ktip-sand-400" />
         </div>
@@ -58,41 +59,29 @@ export default function BoardPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Forum Board</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {board.name}
-              </h1>
-              {board.description && (
-                <p className="text-gray-300 text-sm">{board.description}</p>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to={`/forums/${params.slug}/new`}>
-                <button className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors">
-                  <Plus size={16} />
-                  New Post
-                </button>
-              </Link>
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <Link to="/forums" className="hover:text-white transition-colors">Forums</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">{board.name}</span>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Forum Board"
+        title={board.name}
+        subtitle={board.description || undefined}
+        imageSeed={board.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Forums', href: '/forums' },
+          { label: board.name },
+        ]}
+        actions={
+          <Link to={`/forums/${params.slug}/new`}>
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors">
+              <Plus size={16} />
+              New Post
+            </button>
+          </Link>
+        }
+      />
 
       {/* === Content Area === */}
-      <div className="bg-white py-12">
-        <div className="max-w-4xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
           {/* Search */}
           <div className="mb-8">
             <div className="relative">
@@ -105,7 +94,7 @@ export default function BoardPage() {
                   debouncedSetSearch(e.target.value)
                 }}
                 placeholder="Search posts..."
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               />
             </div>
           </div>

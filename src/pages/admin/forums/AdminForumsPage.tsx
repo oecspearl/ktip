@@ -5,6 +5,7 @@ import { useForumBoards, useDeleteForumPost } from '../../../hooks/useForums'
 import { useAdminAllPosts, useAdminForumActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
 import { cn, debounce } from '../../../lib/utils'
+import { PageHero } from '../../../components/layout/PageHero'
 import { format } from 'date-fns'
 import type { ForumPost } from '../../../types'
 import {
@@ -83,18 +84,14 @@ export default function AdminForumsPage() {
 
   return (
     <div>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div>
-          <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Administration</p>
-          <h1 className="text-2xl font-bold text-white">
-            Forum Moderation
-          </h1>
-          <p className="mt-1 text-gray-400 text-sm">
-            Manage forum boards and moderate posts
-          </p>
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Forum Moderation"
+        subtitle="Manage forum boards and moderate posts"
+        imageSeed="admin-forums"
+      />
 
       {/* Flat Tabs */}
       <div className="border-b border-gray-200 mb-6">
@@ -189,13 +186,13 @@ export default function AdminForumsPage() {
                     setSearchQuery(e.currentTarget.value)
                     debouncedSetSearch(e.currentTarget.value)
                   }}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
                 />
               </div>
               <select
                 value={boardFilter}
                 onChange={(e) => setBoardFilter(e.currentTarget.value)}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+                className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
               >
                 <option value="">All Boards</option>
                 {(boards || []).map((board) => (

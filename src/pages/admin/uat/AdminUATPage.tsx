@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../../lib/supabase'
 import { formatDate, cn } from '../../../lib/utils'
+import { PageHero } from '../../../components/layout/PageHero'
 import { keys } from '../../../queries/keys'
 import {
   ClipboardCheck,
@@ -122,12 +123,12 @@ function DistributionBar(props: {
   colorMap?: Record<string, string>
 }) {
   const defaultColors: Record<string, string> = {
-    very_useful: 'bg-emerald-500', somewhat: 'bg-yellow-500', not_very: 'bg-orange-500', not_at_all: 'bg-red-500',
-    yes: 'bg-emerald-500', no: 'bg-red-500',
-    very_easy: 'bg-emerald-500', easy: 'bg-green-400', neutral: 'bg-yellow-400', difficult: 'bg-orange-500', very_difficult: 'bg-red-500',
-    excellent: 'bg-emerald-500', good: 'bg-green-400', average: 'bg-yellow-400', poor: 'bg-orange-500', very_poor: 'bg-red-500',
-    fast: 'bg-emerald-500', acceptable: 'bg-yellow-500', slow: 'bg-red-500',
-    true: 'bg-red-500', false: 'bg-emerald-500',
+    very_useful: 'bg-ktip-tropical-500', somewhat: 'bg-ktip-sun-500', not_very: 'bg-ktip-sun-600', not_at_all: 'bg-red-500',
+    yes: 'bg-ktip-tropical-500', no: 'bg-red-500',
+    very_easy: 'bg-ktip-tropical-500', easy: 'bg-ktip-tropical-400', neutral: 'bg-ktip-sun-400', difficult: 'bg-ktip-sun-600', very_difficult: 'bg-red-500',
+    excellent: 'bg-ktip-tropical-500', good: 'bg-ktip-tropical-400', average: 'bg-ktip-sun-400', poor: 'bg-ktip-sun-600', very_poor: 'bg-red-500',
+    fast: 'bg-ktip-tropical-500', acceptable: 'bg-ktip-sun-500', slow: 'bg-red-500',
+    true: 'bg-red-500', false: 'bg-ktip-tropical-500',
   }
 
   const colors = props.colorMap || defaultColors
@@ -231,18 +232,14 @@ export default function AdminUATPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider">Admin</p>
-            <h1 className="text-2xl font-bold font-display text-white mt-1">
-              Platform Feedback Results
-            </h1>
-            <p className="mt-1 text-gray-400 text-sm">
-              User feedback on usefulness and experience
-            </p>
-          </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Admin"
+        title="Platform Feedback Results"
+        subtitle="User feedback on usefulness and experience"
+        imageSeed="admin-uat"
+        actions={
           <button
             onClick={exportCSV}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors"
@@ -250,8 +247,8 @@ export default function AdminUATPage() {
             <Download size={16} />
             Export CSV
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {isPending ? (
         <div className="space-y-4">
@@ -283,8 +280,8 @@ export default function AdminUATPage() {
 
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                  <Star size={20} className="text-yellow-600" />
+                <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+                  <Star size={20} className="text-ktip-sun-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{avgRating()}<span className="text-sm font-normal text-gray-400">/5</span></p>
@@ -334,15 +331,15 @@ export default function AdminUATPage() {
                 Q2: Most Valuable Features
               </h3>
               <DistributionBar counts={countFeatures(data)} labels={FEATURE_LABELS} total={data.length} colorMap={{
-                projects: 'bg-ktip-ocean-500', events: 'bg-ktip-tropical-500', grants: 'bg-purple-500',
-                forums: 'bg-yellow-500', collaboration: 'bg-indigo-500', directory: 'bg-pink-500',
-                resources: 'bg-orange-500', proposals: 'bg-teal-500',
+                projects: 'bg-ktip-ocean-500', events: 'bg-ktip-tropical-500', grants: 'bg-ktip-ocean-300',
+                forums: 'bg-ktip-sun-500', collaboration: 'bg-ktip-ocean-700', directory: 'bg-ktip-sun-300',
+                resources: 'bg-ktip-sun-700', proposals: 'bg-ktip-tropical-700',
               }} />
             </div>
 
             <div className="border border-gray-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <BarChart3 size={16} className="text-purple-600" />
+                <BarChart3 size={16} className="text-ktip-ocean-600" />
                 Q3: Connecting Innovators
               </h3>
               <DistributionBar counts={countValues(data, 'q3_connect_innovators')} labels={CONNECT_LABELS} total={data.length} />
@@ -350,7 +347,7 @@ export default function AdminUATPage() {
 
             <div className="border border-gray-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <BarChart3 size={16} className="text-orange-600" />
+                <BarChart3 size={16} className="text-ktip-sun-700" />
                 Q4: Discovering Opportunities
               </h3>
               <DistributionBar counts={countValues(data, 'q4_discover_opportunities')} labels={CONNECT_LABELS} total={data.length} />
@@ -358,20 +355,20 @@ export default function AdminUATPage() {
 
             <div className="border border-gray-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Star size={16} className="text-yellow-600" />
+                <Star size={16} className="text-ktip-sun-600" />
                 Q5: Recommendation Rating (1-5)
               </h3>
               <DistributionBar
                 counts={countValues(data, 'q5_recommend_rating')}
                 labels={{ '1': '1 - Not likely', '2': '2', '3': '3', '4': '4', '5': '5 - Very likely' }}
                 total={data.length}
-                colorMap={{ '1': 'bg-red-500', '2': 'bg-orange-500', '3': 'bg-yellow-500', '4': 'bg-green-400', '5': 'bg-emerald-500' }}
+                colorMap={{ '1': 'bg-red-500', '2': 'bg-ktip-sun-600', '3': 'bg-ktip-sun-500', '4': 'bg-ktip-tropical-400', '5': 'bg-ktip-tropical-500' }}
               />
             </div>
 
             <div className="border border-gray-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <BarChart3 size={16} className="text-indigo-600" />
+                <BarChart3 size={16} className="text-ktip-ocean-600" />
                 Q6: Ease of Navigation
               </h3>
               <DistributionBar counts={countValues(data, 'q6_ease_of_navigation')} labels={NAVIGATION_LABELS} total={data.length} />
@@ -379,7 +376,7 @@ export default function AdminUATPage() {
 
             <div className="border border-gray-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <BarChart3 size={16} className="text-pink-600" />
+                <BarChart3 size={16} className="text-ktip-sun-600" />
                 Q8: Overall Experience
               </h3>
               <DistributionBar counts={countValues(data, 'q8_overall_experience')} labels={EXPERIENCE_LABELS} total={data.length} />
@@ -387,7 +384,7 @@ export default function AdminUATPage() {
 
             <div className="border border-gray-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Zap size={16} className="text-teal-600" />
+                <Zap size={16} className="text-ktip-tropical-700" />
                 Q10: Performance
               </h3>
               <DistributionBar counts={countValues(data, 'q10_performance')} labels={PERFORMANCE_LABELS} total={data.length} />
@@ -464,8 +461,8 @@ export default function AdminUATPage() {
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         'w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white',
-                        r.q5_recommend_rating >= 4 ? 'bg-emerald-500' :
-                        r.q5_recommend_rating >= 3 ? 'bg-yellow-500' : 'bg-red-500'
+                        r.q5_recommend_rating >= 4 ? 'bg-ktip-tropical-500' :
+                        r.q5_recommend_rating >= 3 ? 'bg-ktip-sun-500' : 'bg-red-500'
                       )}>
                         {r.q5_recommend_rating}
                       </div>
@@ -503,9 +500,9 @@ export default function AdminUATPage() {
                         </div>
                       )}
                       {r.q11_improvements && (
-                        <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                          <p className="text-xs font-semibold text-blue-700">Improvements</p>
-                          <p className="text-sm text-blue-800 mt-1">{r.q11_improvements}</p>
+                        <div className="mt-2 p-3 bg-ktip-ocean-50 rounded-lg">
+                          <p className="text-xs font-semibold text-ktip-ocean-700">Improvements</p>
+                          <p className="text-sm text-ktip-ocean-800 mt-1">{r.q11_improvements}</p>
                         </div>
                       )}
                       {r.q12_comments && (

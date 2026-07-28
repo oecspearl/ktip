@@ -8,8 +8,8 @@ import { StatusBar } from '../../components/collaboration/StatusBar'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { executeJavaScript, downloadCodeAsFile, clearCode } from '../../lib/code-sandbox-utils'
 import type { ConsoleMessage, ExecutionResult } from '../../lib/code-sandbox-utils'
+import { PageHero } from '../../components/layout/PageHero'
 import {
-  ChevronRight,
   Sun,
   Moon,
   Play,
@@ -128,26 +128,21 @@ export default function CodeEditorPage() {
 
   return (
     <>
-      {/* Dark Hero Band */}
-      <div className="bg-gray-800 min-h-[140px] flex items-center">
-        <div className="max-w-5xl mx-auto px-4 w-full">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
-            Collaboration Tools
-          </p>
-          <h1 className="text-2xl font-bold text-white mb-2">Code Sandbox</h1>
-          <nav className="flex items-center gap-1 text-sm text-gray-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/collaborate" className="hover:text-white transition-colors">Collaborate</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-300">Code Sandbox</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Collaboration Tools"
+        title="Code Sandbox"
+        imageSeed="code"
+        compact
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Collaborate', href: '/collaborate' },
+          { label: 'Code Sandbox' },
+        ]}
+      />
 
       {/* Content */}
-      <div className="bg-white py-8">
-        <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-8">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Back to hub + cross-links */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 text-sm">
             <Link
@@ -192,7 +187,7 @@ export default function CodeEditorPage() {
                 onChange={(e) => setLanguage(e.target.value as Language)}
                 className={`px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 ${
                   dark
-                    ? 'bg-[#2c313a] border-gray-600 text-gray-300 focus:border-amber-500 focus:ring-amber-500/20'
+                    ? 'bg-[#2c313a] border-gray-600 text-gray-300 focus:border-ktip-sun-500 focus:ring-ktip-sun-500/20'
                     : 'bg-white border-ktip-sand-200 text-ktip-sand-800 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20'
                 }`}
               >
@@ -212,8 +207,8 @@ export default function CodeEditorPage() {
                   disabled={running}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                     dark
-                      ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                      : 'bg-amber-500 hover:bg-amber-600 text-white'
+                      ? 'bg-ktip-sun-600 hover:bg-ktip-sun-500 text-white'
+                      : 'bg-ktip-sun-500 hover:bg-ktip-sun-600 text-white'
                   }`}
                   title="Run code (JavaScript only)"
                 >
@@ -254,7 +249,7 @@ export default function CodeEditorPage() {
                 }`}
                 title="Copy code"
               >
-                {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                {copied ? <Check size={16} className="text-ktip-tropical-500" /> : <Copy size={16} />}
               </button>
 
               {/* Download */}

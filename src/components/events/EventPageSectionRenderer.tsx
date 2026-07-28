@@ -14,7 +14,7 @@ export function EventPageSectionRenderer({ section }: EventPageSectionRendererPr
   }
 
   return (
-    <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
+    <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6">
       {(section.section_type === 'about' || section.section_type === 'custom') && (
         <>
           <h3 className="text-xl font-display font-bold text-ktip-sand-900 mb-4">

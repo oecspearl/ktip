@@ -8,6 +8,7 @@ import { formatDate, getInitials, generateAvatarColor } from '../../../lib/utils
 import type { Feedback, FeedbackStatus } from '../../../types'
 import { MessageCircle, Filter, X, Clock, FileText } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { PageHero } from '../../../components/layout/PageHero'
 
 export const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
   bug: 'Bug Report',
@@ -18,9 +19,9 @@ export const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
 
 const FEEDBACK_CATEGORY_COLORS: Record<string, string> = {
   bug: 'bg-red-100 text-red-700 border-red-200',
-  feature_request: 'bg-purple-100 text-purple-700 border-purple-200',
+  feature_request: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   general: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  content: 'bg-amber-100 text-amber-700 border-amber-200',
+  content: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
 }
 
 export const FEEDBACK_STATUS_LABELS: Record<string, string> = {
@@ -32,8 +33,8 @@ export const FEEDBACK_STATUS_LABELS: Record<string, string> = {
 
 const FEEDBACK_STATUS_COLORS: Record<string, string> = {
   new: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  in_review: 'bg-amber-100 text-amber-700 border-amber-200',
-  resolved: 'bg-green-100 text-green-700 border-green-200',
+  in_review: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
+  resolved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   dismissed: 'bg-gray-100 text-gray-700 border-gray-200',
 }
 
@@ -77,32 +78,23 @@ export default function AdminFeedbackPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-1.5 text-sm text-ktip-sand-500 mb-2">
-          <span>Administration</span>
-          <span>/</span>
-          <span className="text-ktip-sand-900 font-medium">Feedback</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-            <MessageCircle size={20} className="text-purple-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-display font-bold text-ktip-sand-900">User Feedback</h1>
-            <p className="text-ktip-sand-500 text-sm">Bug reports, feature requests, and general feedback</p>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="User Feedback"
+        subtitle="Bug reports, feature requests, and general feedback"
+        imageSeed="admin-feedback"
+      />
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <Filter size={16} className="text-ktip-sand-400" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Statuses</option>
             {Object.entries(FEEDBACK_STATUS_LABELS).map(([value, label]) => (
@@ -112,7 +104,7 @@ export default function AdminFeedbackPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Categories</option>
             {Object.entries(FEEDBACK_CATEGORY_LABELS).map(([value, label]) => (
@@ -135,7 +127,7 @@ export default function AdminFeedbackPage() {
       </div>
 
       {/* Feedback list */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
@@ -223,7 +215,7 @@ export default function AdminFeedbackPage() {
               <select
                 value={detailStatus}
                 onChange={(e) => setDetailStatus(e.currentTarget.value as FeedbackStatus)}
-                className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
                 {Object.entries(FEEDBACK_STATUS_LABELS).map(([value, label]) => (
                   <option value={value} key={value}>{label}</option>

@@ -23,8 +23,8 @@ export function AIReviewPanel({ proposalType, proposalTitle, proposalData }: AIR
   }
 
   const score = review?.score || 0
-  const scoreColor = score >= 80 ? 'text-ktip-tropical-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600'
-  const scoreBg = score >= 80 ? 'bg-ktip-tropical-50 border-ktip-tropical-200' : score >= 60 ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'
+  const scoreColor = score >= 80 ? 'text-ktip-tropical-600' : score >= 60 ? 'text-ktip-sun-600' : 'text-red-600'
+  const scoreBg = score >= 80 ? 'bg-ktip-tropical-50 border-ktip-tropical-200' : score >= 60 ? 'bg-ktip-sun-50 border-ktip-sun-200' : 'bg-red-50 border-red-200'
 
   return (
     <div className="mt-6">
@@ -86,15 +86,15 @@ export function AIReviewPanel({ proposalType, proposalTitle, proposalData }: AIR
 
           {/* Weaknesses */}
           {review.weaknesses.length > 0 && (
-            <div className="p-4 bg-yellow-50/50 border border-yellow-100 rounded-xl">
-              <h4 className="text-sm font-semibold text-yellow-800 mb-2 flex items-center gap-1.5">
+            <div className="p-4 bg-ktip-sun-50/50 border border-ktip-sun-100 rounded-xl">
+              <h4 className="text-sm font-semibold text-ktip-sun-800 mb-2 flex items-center gap-1.5">
                 <AlertTriangle size={14} />
                 Areas for Improvement
               </h4>
               <ul className="space-y-1.5">
                 {review.weaknesses.map((w, i) => (
-                  <li key={i} className="text-xs text-yellow-700 flex items-start gap-1.5">
-                    <span className="mt-1 w-1 h-1 rounded-full bg-yellow-500 shrink-0" />
+                  <li key={i} className="text-xs text-ktip-sun-700 flex items-start gap-1.5">
+                    <span className="mt-1 w-1 h-1 rounded-full bg-ktip-sun-500 shrink-0" />
                     {w}
                   </li>
                 ))}

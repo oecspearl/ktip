@@ -59,7 +59,7 @@ greet("Caribbean Innovator")
   css: `/* CSS */
 body {
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #0066cc, #00cc99);
+  background: linear-gradient(135deg, #041E42, #97D700);
   color: white;
   display: flex;
   justify-content: center;

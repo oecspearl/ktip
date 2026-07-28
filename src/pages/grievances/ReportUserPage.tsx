@@ -11,8 +11,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { GRIEVANCE_CATEGORY_LABELS } from '../../lib/constants'
 import { getInitials, generateAvatarColor } from '../../lib/utils'
-import { ChevronRight, Flag, AlertTriangle, User, ShieldAlert, CheckCircle2 } from 'lucide-react'
+import { Flag, AlertTriangle, User, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { PageHero } from '../../components/layout/PageHero'
 
 export default function ReportUserPage() {
   const params = useParams()
@@ -90,32 +91,21 @@ export default function ReportUserPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800">
-        <div className="container mx-auto px-4 py-6">
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">Report User</span>
-          </nav>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-              <Flag size={20} className="text-red-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold text-white">Report a User</h1>
-              <p className="text-gray-400 text-sm">Submit a report about inappropriate behavior or policy violations</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Community Safety"
+        title="Report a User"
+        subtitle="Submit a report about inappropriate behavior or policy violations"
+        imageSeed="grievances"
+        compact
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Report User' }]}
+      />
 
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8 max-w-2xl">
         {/* Submitted confirmation — visible fallback in case redirect is delayed/blocked */}
         {submitted && (
-          <div className="flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-6">
-            <CheckCircle2 size={20} className="text-emerald-600 shrink-0 mt-0.5" />
-            <div className="text-sm text-emerald-800">
+          <div className="flex items-start gap-3 p-4 bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl mb-6">
+            <CheckCircle2 size={20} className="text-ktip-tropical-700 shrink-0 mt-0.5" />
+            <div className="text-sm text-ktip-tropical-900">
               <p className="font-medium mb-1">Report submitted</p>
               <p>
                 Redirecting you to{' '}
@@ -129,9 +119,9 @@ export default function ReportUserPage() {
         )}
 
         {/* Warning Banner */}
-        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
-          <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-800">
+        <div className="flex items-start gap-3 p-4 bg-ktip-sun-50 border border-ktip-sun-200 rounded-xl mb-6">
+          <AlertTriangle size={20} className="text-ktip-sun-600 shrink-0 mt-0.5" />
+          <div className="text-sm text-ktip-sun-800">
             <p className="font-medium mb-1">Please use this feature responsibly</p>
             <p>False or malicious reports may result in action against your account. All reports are reviewed by our administration team.</p>
           </div>
@@ -175,7 +165,7 @@ export default function ReportUserPage() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-white focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all text-ktip-sand-900"
+                  className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all text-ktip-sand-900"
                 >
                   <option value="">Select a category...</option>
                   {Object.entries(GRIEVANCE_CATEGORY_LABELS).map(([value, label]) => (
@@ -268,10 +258,10 @@ export default function ReportUserPage() {
             </p>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="bg-ktip-sun-50 border border-ktip-sun-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-sm text-amber-800 space-y-2">
+              <AlertTriangle size={18} className="text-ktip-sun-600 shrink-0 mt-0.5" />
+              <div className="text-sm text-ktip-sun-800 space-y-2">
                 <p className="font-semibold">By submitting this report, you confirm that:</p>
                 <ul className="list-disc pl-4 space-y-1">
                   <li>The information provided is truthful and accurate to the best of your knowledge.</li>

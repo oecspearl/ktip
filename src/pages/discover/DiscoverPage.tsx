@@ -13,11 +13,13 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
 import { PreRegistrationModal } from '../../components/PreRegistrationModal'
 import { useAuth } from '../../contexts/AuthContext'
+import { FALLBACK_IMAGE, heroImageFor } from '../../lib/hero-images'
 import { analytics } from '../../hooks/useAnalytics'
 import { useProjects } from '../../hooks/useProjects'
 import { useEvents } from '../../hooks/useEvents'
 import { useGrants } from '../../hooks/useGrants'
-import type { Grant } from '../../types'
+import type { DetailEntry, Grant } from '../../types'
+import { DetailsList } from '../../components/shared/DetailsList'
 import {
   FolderKanban,
   Calendar,
@@ -41,29 +43,11 @@ interface HeroItem {
   title: string
   meta: string
   description: string
+  details?: DetailEntry[]
   href: string
   image: string | null
 }
 
-const FALLBACK_IMAGE = '/ktiphero.png'
-
-// Pool of stock hero images assigned to items that have no image of their own.
-// The pick is a stable hash of the item id so each card keeps its image across
-// renders instead of reshuffling.
-const HERO_IMAGES = [
-  '/hero/hero-1.jpg',
-  '/hero/hero-2.jpg',
-  '/hero/hero-3.jpg',
-  '/hero/hero-4.jpg',
-  '/hero/hero-5.jpg',
-  '/hero/hero-6.jpg',
-]
-
-const heroImageFor = (id: string) => {
-  let h = 0
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
-  return HERO_IMAGES[h % HERO_IMAGES.length]
-}
 const MAX_ITEMS = 6
 const VISIBLE_COUNT = 5
 
@@ -84,7 +68,7 @@ const FEATURES: Feature[] = [
     description: 'Launch and collaborate on innovative projects with creators across the Caribbean.',
     href: '/projects',
     image: '/hero/hero-1.jpg',
-    gradient: 'from-ktip-ocean-700 via-ktip-ocean-600/70 to-ktip-ocean-500/10',
+    gradient: 'from-[#041E42] via-[#163A63]/70 to-[#2A5788]/10',
     span: 'md:col-span-2 md:row-span-2',
   },
   {
@@ -93,7 +77,7 @@ const FEATURES: Feature[] = [
     description: 'Discover workshops, hackathons, and networking events happening near you.',
     href: '/events',
     image: '/hero/hero-2.jpg',
-    gradient: 'from-ktip-tropical-700 via-ktip-tropical-600/70 to-ktip-tropical-500/10',
+    gradient: 'from-[#2C4100] via-[#5E8A00]/70 to-[#97D700]/10',
     span: 'md:col-span-2',
   },
   {
@@ -102,7 +86,7 @@ const FEATURES: Feature[] = [
     description: 'Find funding opportunities and grants to turn your ideas into reality.',
     href: '/grants',
     image: '/hero/hero-3.jpg',
-    gradient: 'from-purple-800 via-purple-600/70 to-purple-500/10',
+    gradient: 'from-[#020F21] via-[#041E42]/70 to-[#4F7AAE]/10',
     span: '',
   },
   {
@@ -111,7 +95,7 @@ const FEATURES: Feature[] = [
     description: 'Join discussions, share knowledge, and engage with the community.',
     href: '/forums',
     image: '/hero/hero-4.jpg',
-    gradient: 'from-pink-700 via-pink-500/70 to-pink-400/10',
+    gradient: 'from-[#806000] via-[#B38500]/70 to-[#FFC72C]/10',
     span: '',
   },
   {
@@ -120,7 +104,7 @@ const FEATURES: Feature[] = [
     description: 'Connect directly with mentors, investors, and fellow innovators.',
     href: '/messages',
     image: '/hero/hero-5.jpg',
-    gradient: 'from-indigo-800 via-indigo-600/70 to-indigo-500/10',
+    gradient: 'from-[#163A63] via-[#2A5788]/70 to-[#7AB000]/10',
     span: '',
   },
   {
@@ -129,7 +113,7 @@ const FEATURES: Feature[] = [
     description: 'Access articles, guides, case studies, and tools for Caribbean innovation.',
     href: '/resources',
     image: '/hero/hero-6.jpg',
-    gradient: 'from-orange-700 via-orange-500/70 to-orange-400/10',
+    gradient: 'from-[#4D3900] via-[#E6AC09]/70 to-[#FFD75C]/10',
     span: 'md:col-span-2',
   },
   {
@@ -138,7 +122,7 @@ const FEATURES: Feature[] = [
     description: 'Browse the member directory and connect with innovators across the Caribbean.',
     href: '/directory',
     image: '/ktiphero.png',
-    gradient: 'from-teal-700 via-teal-600/70 to-teal-500/10',
+    gradient: 'from-[#446400] via-[#7AB000]/70 to-[#AEE12B]/10',
     span: '',
   },
 ]
@@ -185,6 +169,7 @@ export default function DiscoverPage() {
         title: g.title,
         meta: grantAmount(g),
         description: g.summary || g.description || 'Funding opportunity for Caribbean innovators.',
+        details: g.details,
         href: `/grants/${g.id}`,
         image: heroImageFor(g.id),
       }))
@@ -195,6 +180,7 @@ export default function DiscoverPage() {
         title: p.title,
         meta: (p.category as string) || 'Project',
         description: p.summary || p.description || 'An innovation project from the OECS community.',
+        details: p.details,
         href: `/projects/${p.id}`,
         image: p.image_url || heroImageFor(p.id),
       }))
@@ -204,6 +190,7 @@ export default function DiscoverPage() {
       title: e.title,
       meta: `${format(new Date(e.start_date), 'MMM d, yyyy')}${e.location ? ` · ${e.location}` : ''}`,
       description: e.summary || e.description || 'An upcoming event for the OECS community.',
+      details: e.details,
       href: `/events/${e.id}`,
       image: e.image_url || heroImageFor(e.id),
     }))
@@ -235,30 +222,38 @@ export default function DiscoverPage() {
     setIndex((i) => (count === 0 ? 0 : Math.min(i, count - 1)))
   }, [count])
 
-  // --- Ring carousel ---
-  // The strip is a circular track (items rendered three times when it wraps).
-  // On selection the track rotates RIGHT until the selected card slides off
-  // the right edge of the strip; only then does the hero swap animation start.
+  // --- Ring carousel: on-deck queue ---
+  // The strip always shows `slots` cards; the RIGHTMOST card is the on-deck
+  // item — the next hero (index+1). On rotation the new hero's card expands
+  // in place into the hero (via the ghost) while the strip simultaneously
+  // slides right: a new card enters from the LEFT and the next on-deck card
+  // settles at the right end. The track renders the items reversed (and
+  // tripled for circular wrapping) so ascending selection slides rightward.
   const ring = count > 1
   const slots = Math.min(VISIBLE_COUNT, Math.max(count, 1))
-  const trackItems = ring ? [...items, ...items, ...items] : items
+  const revItems = [...items].reverse()
+  const trackItems = ring ? [...revItems, ...revItems, ...revItems] : items
+  // Item index shown at track position t (reversed mapping when wrapping)
+  const itemIdxAt = (t: number) => (ring ? (count - 1 - (t % count) + count) % count : t)
   const [pos, setPos] = useState(0) // track position of the first visible card
   const [trackAnimating, setTrackAnimating] = useState(false)
   const [trackTransition, setTrackTransition] = useState(false)
+  const [trackDur, setTrackDur] = useState(0.7)
   const [cardW, setCardW] = useState(128)
   const GAP = 12 // matches gap-3
   const step = cardW + GAP
 
-  // Track position that puts the active card one step PAST the last visible
-  // slot — i.e. slid off the right edge of the clipped strip.
-  // pos DECREASES so the whole strip slides to the RIGHT — the selected card
-  // travels rightward until it exits, wrapping circularly (the track
-  // is tripled; we silently re-center into the middle copy between moves).
+  // Track position whose window puts the on-deck item (index+1) in the LAST
+  // slot. pos DECREASES so the strip always slides RIGHT and new cards enter
+  // from the left, wrapping circularly (the track is tripled; we silently
+  // re-center into the middle copy between moves). Rightward-only rotation
+  // guarantees the expanding card's strip copy always exits through the
+  // clipped right edge — no holes are left behind in the strip.
   const targetPos = (() => {
     if (!ring) return 0
     const base = pos < count ? pos + count : pos
     const cur = base % count
-    const target = (index - slots + count) % count
+    const target = (((count - slots - index - 1) % count) + count) % count
     return base - ((cur - target + count) % count)
   })()
 
@@ -272,6 +267,9 @@ export default function DiscoverPage() {
       return
     }
     if (targetPos === pos) return
+    // Scale duration with distance so far jumps glide at the same perceived
+    // speed as a single-step rotate
+    setTrackDur(Math.min(1.0, 0.55 + 0.12 * (pos - targetPos)))
     setTrackTransition(true)
     setTrackAnimating(true)
     setPos(targetPos)
@@ -307,45 +305,52 @@ export default function DiscoverPage() {
 
   const active: HeroItem | null = count > 0 ? items[index] : null
 
-  // Hero image swap: once the carousel finishes sliding the active card off
-  // the right edge of the strip, a ghost mounted exactly where that card
-  // stopped (just right of the strip, over the hero) expands in place until it
-  // fills the hero, then fades away to reveal the (already swapped) dimmed
-  // base image. No extra slide — the carousel rotation IS the slide, so the
-  // two can never drift out of sync.
+  // Hero image swap: the moment the selection changes, a ghost mounts exactly
+  // on top of the new hero's card in the strip (the rightmost/on-deck card
+  // for auto-rotate, the clicked card otherwise) and expands in place to fill
+  // the hero WHILE the strip slides — one simultaneous motion. The ghost then
+  // fades away to reveal the (already swapped) dimmed base image.
   const heroSrc = active?.image || FALLBACK_IMAGE
   const [shownSrc, setShownSrc] = useState(heroSrc)
   const [anim, setAnim] = useState<{
     src: string
     phase: 'start' | 'expand' | 'fade'
+    fromT: number
     from: { x: number; y: number; w: number; h: number }
     sec: { w: number; h: number }
   } | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
-  const rotatePending = ring && (targetPos !== pos || trackAnimating)
 
-  // Layout effect so the ghost mounts in the same paint frame the parked card
-  // hides — otherwise there's a one-frame gap in the card→ghost handoff
+  // Layout effect so the origin card's rect is measured BEFORE the slide's
+  // new transform renders, and the ghost mounts in the same paint frame the
+  // origin card hides — a seamless card→ghost handoff
   useLayoutEffect(() => {
-    if (heroSrc === shownSrc || anim?.src === heroSrc || rotatePending) return
+    if (heroSrc === shownSrc || anim?.src === heroSrc) return
     const sec = sectionRef.current
     if (!sec) {
       setShownSrc(heroSrc)
       return
     }
     const s = sec.getBoundingClientRect()
-    // The active card has slid one step past the right edge — expand from
-    // that off-strip rect
-    const el = cardRefs.current.get(pos + slots)
+    // Expand from the new hero's card copy currently in the visible window
+    let fromT = -1
+    for (let t = pos; t < pos + slots; t++) {
+      if (itemIdxAt(t) === index && cardRefs.current.has(t)) {
+        fromT = t
+        break
+      }
+    }
+    const el = fromT >= 0 ? cardRefs.current.get(fromT) : undefined
     // Fallback origin when the card isn't mounted: small box near the strip
     let from = { x: s.width * 0.1, y: s.height * 0.7, w: 128, h: 200 }
     if (el) {
       const r = el.getBoundingClientRect()
       from = { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height }
     }
-    setAnim({ src: heroSrc, phase: 'start', from, sec: { w: s.width, h: s.height } })
-  }, [heroSrc, shownSrc, anim, index, count, rotatePending, pos, slots])
+    setAnim({ src: heroSrc, phase: 'start', fromT, from, sec: { w: s.width, h: s.height } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [heroSrc, shownSrc, anim, index, count, ring, pos, slots])
 
   // Two frames after mounting the ghost at the card's rect, start the expand
   useEffect(() => {
@@ -369,7 +374,11 @@ export default function DiscoverPage() {
         height: from.h,
         borderRadius: 6,
         transition: 'none',
+        willChange: 'left, top, width, height',
+        contain: 'layout paint',
       }
+    // easeInOutCubic: starts and ends at zero velocity, in step with the
+    // concurrently-running strip slide — the two read as one motion
     return {
       left: 0,
       top: 0,
@@ -377,10 +386,12 @@ export default function DiscoverPage() {
       height: sec.h,
       borderRadius: 0,
       opacity: phase === 'fade' ? 0 : 1,
+      willChange: 'left, top, width, height',
+      contain: 'layout paint',
       transition:
         phase === 'fade'
-          ? 'opacity 0.5s ease'
-          : 'left 0.9s cubic-bezier(0.22, 1, 0.36, 1), top 0.9s cubic-bezier(0.22, 1, 0.36, 1), width 0.9s cubic-bezier(0.22, 1, 0.36, 1), height 0.9s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
+          ? 'opacity 0.6s ease'
+          : 'left 1s cubic-bezier(0.65, 0, 0.35, 1), top 1s cubic-bezier(0.65, 0, 0.35, 1), width 1s cubic-bezier(0.65, 0, 0.35, 1), height 1s cubic-bezier(0.65, 0, 0.35, 1), border-radius 1s cubic-bezier(0.65, 0, 0.35, 1)',
     }
   }
   return (
@@ -399,7 +410,7 @@ export default function DiscoverPage() {
         <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/40 to-black/30" />
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 to-transparent" />
 
-        {/* Ghost card: expands from where the card slid off the strip to fill the hero, then fades */}
+        {/* Ghost card: expands from the new hero's card in the strip to fill the hero, then fades */}
         {anim && (
           <div
             className="absolute overflow-hidden shadow-2xl pointer-events-none"
@@ -447,10 +458,16 @@ export default function DiscoverPage() {
                   {active.description}
                 </p>
 
+                {active.details && active.details.length > 0 && (
+                  <div className="mt-5 max-w-xl md:ml-auto inline-block text-left">
+                    <DetailsList details={active.details} tone="dark" compact max={3} />
+                  </div>
+                )}
+
                 <div className="mt-8 flex items-center gap-4 md:justify-end">
                   <Link
                     to={active.href}
-                    className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-white text-gray-900 text-sm font-medium tracking-wide hover:bg-white/90 transition-colors"
+                    className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-ktip-cream text-gray-900 text-sm font-medium tracking-wide hover:bg-white/90 transition-colors"
                   >
                     View Details
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -484,7 +501,7 @@ export default function DiscoverPage() {
                 <div className="mt-8 md:flex md:justify-end">
                   <Link
                     to={activeMode.href}
-                    className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-white text-gray-900 text-sm font-medium tracking-wide hover:bg-white/90 transition-colors"
+                    className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-ktip-cream text-gray-900 text-sm font-medium tracking-wide hover:bg-white/90 transition-colors"
                   >
                     Browse {activeMode.label}
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -500,7 +517,7 @@ export default function DiscoverPage() {
               {/* Slide toggle */}
               <div className="relative inline-flex bg-white/10 backdrop-blur-sm p-1 mb-4 rounded-lg">
                 <div
-                  className="absolute top-1 bottom-1 w-[calc((100%-0.5rem)/3)] bg-white rounded-md transition-transform duration-300 ease-out"
+                  className="absolute top-1 bottom-1 w-[calc((100%-0.5rem)/3)] bg-ktip-cream rounded-md transition-transform duration-300 ease-out"
                   style={{ transform: `translateX(${modeIndex * 100}%)` }}
                 />
                 {MODES.map((m) => (
@@ -525,23 +542,19 @@ export default function DiscoverPage() {
               >
                 <div
                   ref={viewportRef}
-                  className="pt-1.5 pb-1 max-w-full"
-                  // Clip the strip on the left/top/bottom but let it overflow
-                  // one card-slot to the right, so the exiting card stays
-                  // visible as it slides off before expanding into the hero
-                  style={
-                    count > 0
-                      ? { width: slots * step - GAP, clipPath: `inset(0px ${-step}px 0px 0px)` }
-                      : undefined
-                  }
+                  className="overflow-hidden pt-1.5 pb-1 max-w-full"
+                  style={count > 0 ? { width: slots * step - GAP } : undefined}
                 >
                 <div
                   className="flex items-end gap-3"
                   style={{
                     transform: `translateX(${-pos * step}px)`,
+                    // easeInOutQuint: starts gently from rest, glides, lands
+                    // softly — no jerk at either end of the slide
                     transition: trackTransition
-                      ? 'transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)'
+                      ? `transform ${trackDur}s cubic-bezier(0.83, 0, 0.17, 1)`
                       : 'none',
+                    willChange: trackTransition ? 'transform' : undefined,
                   }}
                   onTransitionEnd={(e) => {
                     if (e.propertyName !== 'transform' || e.target !== e.currentTarget) return
@@ -549,13 +562,14 @@ export default function DiscoverPage() {
                   }}
                 >
                 {trackItems.map((item, t) => {
-                  const itemIdx = t % Math.max(count, 1)
+                  const itemIdx = itemIdxAt(t)
                   const isActive = itemIdx === index
-                  // The card parked one step past the right edge hides the
-                  // moment its slide completes — the ghost mounts at the same
-                  // rect in the same frame, so the card reads as morphing into
-                  // the expanding hero image instead of lingering beside it
-                  const offStage = ring && t === pos + slots && !rotatePending
+                  // The ghost's origin copy snap-hides the instant the ghost
+                  // mounts on its exact rect — the card visually "becomes" the
+                  // expanding hero. Rightward-only rotation then carries this
+                  // hidden copy out through the clipped right edge, so it
+                  // never leaves a hole in the settled strip.
+                  const hidden = anim?.fromT === t
                   return (
                     <button
                       key={`${t}-${item.id}`}
@@ -564,18 +578,14 @@ export default function DiscoverPage() {
                         else cardRefs.current.delete(t)
                       }}
                       style={{
-                        opacity: offStage ? 0 : 1,
-                        // Snap instead of fade: the ghost mounts at this exact
-                        // rect in the same frame, so an instant swap reads as
-                        // the card itself expanding — a fade would show the
-                        // card and the ghost as two copies side by side
-                        transition: offStage ? 'none' : undefined,
-                        pointerEvents: offStage ? 'none' : undefined,
+                        opacity: hidden ? 0 : 1,
+                        transition: hidden ? 'none' : undefined,
+                        pointerEvents: hidden ? 'none' : undefined,
                       }}
                       onClick={() => setIndex(itemIdx)}
                       className={`group text-left shrink-0 w-28 sm:w-32 rounded-lg overflow-hidden transition-all duration-300 ${
                         isActive
-                          ? 'bg-white shadow-hard -translate-y-1'
+                          ? 'bg-ktip-cream shadow-hard -translate-y-1'
                           : 'bg-white/10 backdrop-blur-sm hover:bg-white/20'
                       }`}
                     >
@@ -641,14 +651,14 @@ export default function DiscoverPage() {
                     <button
                       onClick={prev}
                       aria-label="Previous"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white text-gray-900 shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 transition-opacity duration-200"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-ktip-cream text-gray-900 shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 transition-opacity duration-200"
                     >
                       <ChevronLeft size={16} />
                     </button>
                     <button
                       onClick={next}
                       aria-label="Next"
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-9 h-9 rounded-full bg-white text-gray-900 shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 transition-opacity duration-200"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-9 h-9 rounded-full bg-ktip-cream text-gray-900 shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 transition-opacity duration-200"
                     >
                       <ChevronRight size={16} />
                     </button>
@@ -710,7 +720,7 @@ export default function DiscoverPage() {
                   </p>
                 </div>
 
-                <span className="relative self-start inline-flex items-center gap-1.5 bg-white text-gray-900 rounded-lg px-4 py-2 text-xs font-semibold shadow-md group-hover:gap-2.5 transition-all">
+                <span className="relative self-start inline-flex items-center gap-1.5 bg-ktip-cream text-gray-900 rounded-lg px-4 py-2 text-xs font-semibold shadow-md group-hover:gap-2.5 transition-all">
                   Explore <ArrowRight size={13} />
                 </span>
               </Link>

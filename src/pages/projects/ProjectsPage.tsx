@@ -3,7 +3,9 @@ import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { ProjectCard } from '../../components/projects/ProjectCard'
 import { useProjects } from '../../hooks/useProjects'
-import { Plus, Search, Inbox, ChevronRight, Leaf } from 'lucide-react'
+import { Plus, Search, Inbox, Leaf } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
+import { projectCategoryIcon } from '../../lib/category-icons'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { PROJECT_CATEGORIES } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -51,33 +53,23 @@ export default function ProjectsPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Project Archives</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Projects</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to="/projects/new">
-                <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
-                  Create Project
-                </Button>
-              </Link>
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-2"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">Projects</span>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Project Archives"
+        title="Projects"
+        imageSeed="projects"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Projects' }]}
+        actions={
+          <Link to="/projects/new">
+            <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
+              Create Project
+            </Button>
+          </Link>
+        }
+      />
 
       {/* === Two-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
@@ -96,7 +88,7 @@ export default function ProjectsPage() {
                     aria-label="Search projects"
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); debouncedSetSearch(e.target.value) }}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
                   />
                 </div>
                 <button
@@ -111,12 +103,12 @@ export default function ProjectsPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                 >
                   <option value="">All Categories</option>
                   {PROJECT_CATEGORIES.map((category) => (
                     <option key={category.value} value={category.value}>
-                      {category.icon} {category.label}
+                      {category.label}
                     </option>
                   ))}
                 </select>
@@ -124,7 +116,7 @@ export default function ProjectsPage() {
                 <select
                   value={selectedPhase}
                   onChange={(e) => setSelectedPhase(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                 >
                   <option value="">All Phases</option>
                   <option value="concept">Concept</option>
@@ -138,7 +130,7 @@ export default function ProjectsPage() {
                     type="checkbox"
                     checked={climateFilter}
                     onChange={(e) => setClimateFilter(e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                    className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
                   />
                   Climate Action
                 </label>
@@ -162,7 +154,7 @@ export default function ProjectsPage() {
                 <p className="text-sm text-gray-500 mb-6">
                   Found {projects.length} project{projects.length !== 1 ? 's' : ''}
                 </p>
-                <div className="divide-y divide-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr">
                   {projects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
@@ -219,8 +211,11 @@ export default function ProjectsPage() {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="w-16 h-16 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center text-2xl shrink-0">
-                          {PROJECT_CATEGORIES.find((c) => c.value === project.category)?.icon || '✨'}
+                        <div className="w-16 h-16 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center shrink-0">
+                          {(() => {
+                            const Icon = projectCategoryIcon(project.category)
+                            return <Icon size={22} className="text-ktip-ocean-600" />
+                          })()}
                         </div>
                       )}
                       <div className="min-w-0">
@@ -256,7 +251,13 @@ export default function ProjectsPage() {
                           : 'text-ktip-sand-700 hover:text-ktip-ocean-600'
                       }`}
                     >
-                      <span>{category.icon} {category.label}</span>
+                      <span className="flex items-center gap-2">
+                        {(() => {
+                          const Icon = projectCategoryIcon(category.value)
+                          return <Icon size={14} className="text-ktip-sand-400" />
+                        })()}
+                        {category.label}
+                      </span>
                       <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
                         {count}
                       </span>
@@ -289,8 +290,8 @@ export default function ProjectsPage() {
                   onClick={() => setClimateFilter(!climateFilter)}
                   className={`px-3 py-1 text-sm rounded-full border transition-colors flex items-center gap-1 ${
                     climateFilter
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
-                      : 'border-gray-300 text-gray-600 hover:border-emerald-400 hover:text-emerald-600'
+                      ? 'border-ktip-tropical-500 bg-ktip-tropical-50 text-ktip-tropical-700'
+                      : 'border-gray-300 text-gray-600 hover:border-ktip-tropical-400 hover:text-ktip-tropical-700'
                   }`}
                 >
                   <Leaf size={12} />

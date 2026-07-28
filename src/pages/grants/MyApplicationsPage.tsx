@@ -4,7 +4,6 @@ import { Button } from '../../components/ui/Button'
 import { useGrantApplications } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-  ChevronRight,
   FileText,
   Calendar,
   DollarSign,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { PageHero } from '../../components/layout/PageHero'
 
 export default function MyApplicationsPage() {
   usePageTitle('My Grant Applications')
@@ -28,7 +28,7 @@ export default function MyApplicationsPage() {
       case 'rejected':
         return 'bg-red-100 text-red-700 border-red-200'
       case 'under_review':
-        return 'bg-blue-100 text-blue-700 border-blue-200'
+        return 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200'
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200'
     }
@@ -56,37 +56,27 @@ export default function MyApplicationsPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px]">
-        <div className="container mx-auto px-4 pt-6 pb-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-6">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <Link to="/grants" className="hover:text-white transition-colors">Grants</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">My Applications</span>
-          </nav>
-
-          <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-1">My Applications</p>
-          <h1 className="text-4xl font-display font-bold text-white mb-2">
-            Grant Applications
-          </h1>
-          <p className="text-lg text-gray-400">
-            Track the status of your funding applications
-          </p>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="My Applications"
+        title="Grant Applications"
+        subtitle="Track the status of your funding applications"
+        imageSeed="grants"
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Grants', href: '/grants' },
+          { label: 'My Applications' },
+        ]}
+      />
 
       {/* Content */}
-      <div className="container mx-auto px-4 -mt-4 pb-8">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-8">
         {loading || !applications ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
             <p className="mt-4 text-ktip-sand-600">Loading applications...</p>
           </div>
         ) : applications.length > 0 ? (
-          <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="bg-ktip-cream border border-gray-200 rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
               <p className="text-sm text-ktip-sand-600">
                 {applications.length} application
@@ -196,7 +186,7 @@ export default function MyApplicationsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="bg-ktip-cream border border-gray-200 rounded-lg p-6">
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText size={32} className="text-ktip-sand-400" />

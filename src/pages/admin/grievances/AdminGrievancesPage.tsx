@@ -25,6 +25,7 @@ import {
   FileText,
 } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { PageHero } from '../../../components/layout/PageHero'
 
 export default function AdminGrievancesPage() {
   const auth = useAuth()
@@ -108,32 +109,23 @@ export default function AdminGrievancesPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-1.5 text-sm text-ktip-sand-500 mb-2">
-          <span>Administration</span>
-          <span>/</span>
-          <span className="text-ktip-sand-900 font-medium">Grievance Management</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-            <Flag size={20} className="text-red-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-display font-bold text-ktip-sand-900">Grievance Management</h1>
-            <p className="text-ktip-sand-500 text-sm">Review and manage user reports</p>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Grievance Management"
+        subtitle="Review and manage user reports"
+        imageSeed="admin-grievances"
+      />
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <Filter size={16} className="text-ktip-sand-400" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Statuses</option>
             {Object.entries(GRIEVANCE_STATUS_LABELS).map(([value, label]) => (
@@ -144,7 +136,7 @@ export default function AdminGrievancesPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Categories</option>
             {Object.entries(GRIEVANCE_CATEGORY_LABELS).map(([value, label]) => (
@@ -165,7 +157,7 @@ export default function AdminGrievancesPage() {
       </div>
 
       {/* Grievances Table */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
@@ -249,7 +241,7 @@ export default function AdminGrievancesPage() {
                             {grievance.status !== 'resolved' && (
                               <button
                                 onClick={() => handleStatusChange(grievance.id, 'resolved')}
-                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                className="p-1.5 text-ktip-tropical-700 hover:bg-ktip-tropical-50 rounded-lg transition-colors"
                                 title="Resolve"
                               >
                                 <CheckCircle size={16} />
@@ -448,7 +440,7 @@ export default function AdminGrievancesPage() {
                   <select
                     value={detailStatus}
                     onChange={(e) => setDetailStatus(e.currentTarget.value as GrievanceStatus)}
-                    className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                    className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
                   >
                     {Object.entries(GRIEVANCE_STATUS_LABELS).map(([value, label]) => (
                       <option value={value} key={value}>{label}</option>

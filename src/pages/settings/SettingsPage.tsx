@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { User, Shield, Bell, BadgeCheck, ChevronRight } from 'lucide-react'
+import { User, Shield, Bell, BadgeCheck } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { ProfileSettingsTab } from './ProfileSettingsTab'
 import { SecuritySettingsTab } from './SecuritySettingsTab'
 import { PreferencesTab } from './PreferencesTab'
@@ -23,27 +23,20 @@ export default function SettingsPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px]">
-        <div className="container mx-auto px-4 pt-6 pb-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-6">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">Settings</span>
-          </nav>
-
-          <h1 className="text-3xl font-display font-bold text-white">Settings</h1>
-          <p className="text-gray-400 mt-1">Manage your account and preferences</p>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Account"
+        title="Settings"
+        subtitle="Manage your account and preferences"
+        imageSeed="settings"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Settings' }]}
+      />
 
       {/* Content */}
-      <div className="container mx-auto px-4 -mt-4 pb-8">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Tabs */}
           <div className="lg:w-64 shrink-0">
-            <div className="bg-white border border-gray-200 rounded-lg p-2">
+            <div className="bg-ktip-cream border border-gray-200 rounded-lg p-2">
               <nav className="space-y-1">
                 {tabs.map((tab) => (
                   <button

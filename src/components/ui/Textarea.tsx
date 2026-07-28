@@ -32,7 +32,7 @@ export function Textarea({
         id={textareaId}
         className={cn(
           'w-full border rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all resize-none',
-          'focus:outline-none focus:ring-2 focus:bg-white',
+          'focus:outline-none focus:ring-2 focus:bg-ktip-cream',
           error
             ? 'border-red-400/70 bg-red-50/30 focus:border-red-400 focus:ring-red-400/15'
             : 'border-ktip-sand-200 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20',

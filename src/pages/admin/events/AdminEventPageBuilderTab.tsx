@@ -51,9 +51,9 @@ const SECTION_TYPE_ICONS: Record<EventSectionType, typeof Info> = {
 
 const SECTION_TYPE_BADGE_VARIANTS: Record<EventSectionType, string> = {
   about: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  faq: 'bg-purple-100 text-purple-700 border-purple-200',
+  faq: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   venue: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-  sponsors: 'bg-pink-100 text-pink-700 border-pink-200',
+  sponsors: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   custom: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
 }
 
@@ -543,7 +543,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
 
       {/* Type Selector Dropdown */}
       {showTypeSelector && (
-        <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium text-ktip-sand-900">Choose Section Type</h4>
             <button
@@ -579,7 +579,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
 
       {/* New Section Editor */}
       {addMode && (
-        <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <h4 className="font-medium text-ktip-sand-900">
@@ -640,7 +640,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
               <div
                 key={section.id}
                 className={cn(
-                  'bg-white rounded-xl border shadow-card transition-all',
+                  'bg-ktip-cream rounded-xl border shadow-card transition-all',
                   isEditing
                     ? 'border-ktip-ocean-300 ring-2 ring-ktip-ocean-500/10'
                     : 'border-ktip-sand-200'
@@ -676,7 +676,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                         {EVENT_SECTION_TYPE_LABELS[section.section_type] || section.section_type}
                       </Badge>
                       {!section.is_visible && (
-                        <Badge size="sm" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                        <Badge size="sm" className="bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200">
                           Hidden
                         </Badge>
                       )}
@@ -792,7 +792,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
         </div>
       ) : (
         !addMode && !showTypeSelector && (
-          <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
+          <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
             <FileText size={48} className="mx-auto text-ktip-sand-300 mb-4" />
             <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1 font-display">
               No page sections yet

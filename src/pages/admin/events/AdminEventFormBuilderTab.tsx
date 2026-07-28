@@ -242,7 +242,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
 
       {/* Inline Add/Edit Form */}
       {showForm && (
-        <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-medium text-ktip-sand-900 font-display">
               {editingFieldId ? 'Edit Field' : 'Add New Field'}
@@ -278,7 +278,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
                   type: e.currentTarget.value as RegistrationFieldType,
                 })
               }
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 text-ktip-sand-900 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 text-ktip-sand-900 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
             >
               {FIELD_TYPES.map((ft) => (
                 <option key={ft} value={ft}>{FIELD_TYPE_LABELS[ft]}</option>
@@ -378,7 +378,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
       {fields.length > 0 ? (
         <div className="space-y-2">
           {fields.map((field, index) => (
-            <div key={field.id} className="bg-white rounded-xl border border-ktip-sand-200 shadow-soft p-4 flex items-center gap-4 group hover:shadow-card transition-shadow">
+            <div key={field.id} className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-soft p-4 flex items-center gap-4 group hover:shadow-card transition-shadow">
               {/* Drag handle indicator */}
               <div className="text-ktip-sand-300 flex-shrink-0">
                 <GripVertical size={18} />
@@ -442,7 +442,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
         </div>
       ) : (
         !showForm && (
-          <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-soft p-12 text-center">
+          <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-soft p-12 text-center">
             <FormInput size={48} className="mx-auto text-ktip-sand-300 mb-4" />
             <h3 className="text-lg font-semibold text-ktip-sand-700 font-display mb-1">
               No registration fields yet

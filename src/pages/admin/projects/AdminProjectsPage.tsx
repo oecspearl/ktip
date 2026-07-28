@@ -9,12 +9,13 @@ import {
   Search,
 } from 'lucide-react'
 import type { Project } from '../../../types'
+import { PageHero } from '../../../components/layout/PageHero'
 
 const PHASE_COLORS: Record<string, string> = {
-  concept: 'bg-purple-100 text-purple-700',
-  prototype: 'bg-blue-100 text-blue-700',
-  funding: 'bg-yellow-100 text-yellow-700',
-  launch: 'bg-emerald-100 text-emerald-700',
+  concept: 'bg-ktip-ocean-100 text-ktip-ocean-700',
+  prototype: 'bg-ktip-ocean-100 text-ktip-ocean-700',
+  funding: 'bg-ktip-sun-100 text-ktip-sun-700',
+  launch: 'bg-ktip-tropical-100 text-ktip-tropical-800',
 }
 
 export default function AdminProjectsPage() {
@@ -59,25 +60,21 @@ export default function AdminProjectsPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider">Admin</p>
-            <h1 className="text-2xl font-bold font-display text-white mt-1">
-              Manage Projects
-            </h1>
-            <p className="mt-1 text-gray-400 text-sm">
-              Toggle featured status to showcase projects on the homepage
-            </p>
+      <PageHero
+        inset
+        compact
+        eyebrow="Admin"
+        title="Manage Projects"
+        subtitle="Toggle featured status to showcase projects on the homepage"
+        imageSeed="admin-projects"
+        actions={
+          <div className="flex items-center gap-2 bg-ktip-sun-900/30 border border-ktip-sun-700/50 rounded-xl px-4 py-2">
+            <Star size={18} className="text-ktip-sun-400" />
+            <span className="text-ktip-sun-300 font-bold text-lg">{featuredCount}</span>
+            <span className="text-ktip-sun-400/70 text-sm">featured</span>
           </div>
-          <div className="flex items-center gap-2 bg-yellow-900/30 border border-yellow-700/50 rounded-xl px-4 py-2">
-            <Star size={18} className="text-yellow-400" />
-            <span className="text-yellow-300 font-bold text-lg">{featuredCount}</span>
-            <span className="text-yellow-400/70 text-sm">featured</span>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Search */}
       <div className="mb-6">
@@ -119,16 +116,16 @@ export default function AdminProjectsPage() {
                   key={project.id}
                   className={cn(
                     'border-b border-gray-100 hover:bg-gray-50/50 transition-colors',
-                    project.is_featured && 'bg-yellow-50/50'
+                    project.is_featured && 'bg-ktip-sun-50/50'
                   )}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
-                        project.is_featured ? 'bg-yellow-100' : 'bg-gray-100'
+                        project.is_featured ? 'bg-ktip-sun-100' : 'bg-gray-100'
                       )}>
-                        <FolderKanban size={18} className={project.is_featured ? 'text-yellow-600' : 'text-gray-500'} />
+                        <FolderKanban size={18} className={project.is_featured ? 'text-ktip-sun-600' : 'text-gray-500'} />
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium text-gray-900 truncate">{project.title}</p>
@@ -157,7 +154,7 @@ export default function AdminProjectsPage() {
                       className={cn(
                         'p-2 rounded-lg transition-all',
                         project.is_featured
-                          ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
+                          ? 'bg-ktip-sun-100 text-ktip-sun-600 hover:bg-ktip-sun-200'
                           : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600',
                         toggling === project.id && 'opacity-50 cursor-not-allowed'
                       )}

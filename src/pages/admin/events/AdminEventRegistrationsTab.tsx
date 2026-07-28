@@ -122,28 +122,28 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
     <div className="space-y-6">
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl border border-ktip-sand-200 p-3 shadow-card">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 p-3 shadow-card">
           <div className="flex items-center gap-2">
             <UserCheck size={16} className="text-ktip-tropical-600" />
             <span className="text-sm text-ktip-sand-600">Confirmed</span>
           </div>
           <p className="text-xl font-bold text-ktip-sand-900 mt-1">{stats.confirmed}</p>
         </div>
-        <div className="bg-white rounded-xl border border-ktip-sand-200 p-3 shadow-card">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 p-3 shadow-card">
           <div className="flex items-center gap-2">
-            <Clock size={16} className="text-yellow-600" />
+            <Clock size={16} className="text-ktip-sun-600" />
             <span className="text-sm text-ktip-sand-600">Waitlisted</span>
           </div>
           <p className="text-xl font-bold text-ktip-sand-900 mt-1">{stats.waitlisted}</p>
         </div>
-        <div className="bg-white rounded-xl border border-ktip-sand-200 p-3 shadow-card">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 p-3 shadow-card">
           <div className="flex items-center gap-2">
-            <CheckCircle size={16} className="text-blue-600" />
+            <CheckCircle size={16} className="text-ktip-ocean-600" />
             <span className="text-sm text-ktip-sand-600">Checked In</span>
           </div>
           <p className="text-xl font-bold text-ktip-sand-900 mt-1">{stats.checked_in}</p>
         </div>
-        <div className="bg-white rounded-xl border border-ktip-sand-200 p-3 shadow-card">
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 p-3 shadow-card">
           <div className="flex items-center gap-2">
             <XCircle size={16} className="text-red-600" />
             <span className="text-sm text-ktip-sand-600">Cancelled</span>
@@ -161,7 +161,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
             placeholder="Search attendees..."
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white border border-ktip-sand-200 rounded-lg text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+            className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -187,7 +187,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
       </div>
 
       {/* Registrations Table */}
-      <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card overflow-hidden">
+      <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card overflow-hidden">
         {registrationsLoading ? (
           <div className="p-12 text-center text-ktip-sand-500">Loading registrations...</div>
         ) : filteredRegistrations.length ? (

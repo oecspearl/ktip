@@ -12,9 +12,9 @@ interface OutputPanelProps {
 
 const typeStyles: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
   log: { bg: '', text: 'text-ktip-sand-800', darkBg: '', darkText: 'text-gray-300' },
-  warn: { bg: 'bg-amber-50/60', text: 'text-amber-800', darkBg: 'bg-amber-900/20', darkText: 'text-amber-300' },
+  warn: { bg: 'bg-ktip-sun-50/60', text: 'text-ktip-sun-800', darkBg: 'bg-ktip-sun-900/20', darkText: 'text-ktip-sun-300' },
   error: { bg: 'bg-red-50/60', text: 'text-red-800', darkBg: 'bg-red-900/20', darkText: 'text-red-300' },
-  info: { bg: 'bg-blue-50/60', text: 'text-blue-800', darkBg: 'bg-blue-900/20', darkText: 'text-blue-300' },
+  info: { bg: 'bg-ktip-ocean-50/60', text: 'text-ktip-ocean-800', darkBg: 'bg-ktip-ocean-900/20', darkText: 'text-ktip-ocean-300' },
 }
 
 const typeIcons: Record<string, ComponentType<{ size?: number; className?: string }>> = {
@@ -45,7 +45,7 @@ export function OutputPanel({ messages, result, running, darkMode, onClear }: Ou
           <span className={`text-xs font-medium ${dark ? 'text-gray-400' : 'text-ktip-sand-600'}`}>
             Console Output
           </span>
-          {running && <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
+          {running && <div className="w-2 h-2 rounded-full bg-ktip-sun-500 animate-pulse" />}
           {result && (
             <span className={`text-xs flex items-center gap-1 ${dark ? 'text-gray-500' : 'text-ktip-sand-400'}`}>
               <Clock size={10} />

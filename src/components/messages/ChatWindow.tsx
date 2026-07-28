@@ -84,7 +84,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-ktip-sand-200 bg-white flex items-center justify-between gap-3">
+      <div className="p-4 border-b border-ktip-sand-200 bg-ktip-cream flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-display font-bold text-ktip-sand-900 truncate flex items-center gap-2">
             {isGroup && <Users size={16} className="text-ktip-ocean-600 shrink-0" />}
@@ -134,7 +134,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
       </div>
 
       {/* Input area */}
-      <form onSubmit={handleSend} className="p-4 border-t border-ktip-sand-200 bg-white">
+      <form onSubmit={handleSend} className="p-4 border-t border-ktip-sand-200 bg-ktip-cream">
         <div className="flex items-end gap-3">
           <textarea
             value={input}

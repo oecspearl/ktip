@@ -24,6 +24,7 @@ import {
 } from '../../../lib/constants'
 import { format, isPast } from 'date-fns'
 import { debounce } from '../../../lib/utils'
+import { PageHero } from '../../../components/layout/PageHero'
 import type { EventStatus } from '../../../types'
 
 export default function AdminEventsPage() {
@@ -83,25 +84,21 @@ export default function AdminEventsPage() {
 
   return (
     <>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Administration</p>
-            <h1 className="text-2xl font-bold text-white">
-              Events Management
-            </h1>
-            <p className="mt-1 text-gray-400 text-sm">
-              Manage all events, registrations, and content
-            </p>
-          </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Events Management"
+        subtitle="Manage all events, registrations, and content"
+        imageSeed="admin-events"
+        actions={
           <Link to="/events/new">
             <Button size="sm" icon={<Plus size={16} />}>
               Create Event
             </Button>
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       {/* Flat Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -129,8 +126,8 @@ export default function AdminEventsPage() {
         </div>
         <div className="border border-gray-200 p-4 rounded-lg">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-              <FileText size={20} className="text-yellow-600" />
+            <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+              <FileText size={20} className="text-ktip-sun-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.drafts}</p>
@@ -140,8 +137,8 @@ export default function AdminEventsPage() {
         </div>
         <div className="border border-gray-200 p-4 rounded-lg">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-              <Users size={20} className="text-purple-600" />
+            <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
+              <Users size={20} className="text-ktip-ocean-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.upcoming}</p>
@@ -161,13 +158,13 @@ export default function AdminEventsPage() {
               placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Statuses</option>
             <option value="draft">Draft</option>
@@ -178,7 +175,7 @@ export default function AdminEventsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Types</option>
             <option value="hackathon">Hackathon</option>
@@ -304,7 +301,7 @@ export default function AdminEventsPage() {
                             <button
                               type="button"
                               onClick={() => setConfirmAction({ eventId: event.id, status: 'completed', title: event.title })}
-                              className="p-1.5 text-gray-400 hover:text-green-600 transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-ktip-tropical-700 transition-colors"
                               title="Mark complete"
                             >
                               <CheckCircle size={16} />

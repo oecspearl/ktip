@@ -9,8 +9,9 @@ import {
   GRIEVANCE_STATUS_COLORS,
 } from '../../lib/constants'
 import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
-import { ChevronRight, ShieldAlert, Clock, HelpCircle, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, Clock, HelpCircle, ArrowLeft } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { PageHero } from '../../components/layout/PageHero'
 
 export default function MyGrievancesPage() {
   const auth = useAuth()
@@ -20,27 +21,16 @@ export default function MyGrievancesPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800">
-        <div className="container mx-auto px-4 py-6">
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">My Reports</span>
-          </nav>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-ktip-ocean-500/20 flex items-center justify-center">
-              <ShieldAlert size={20} className="text-ktip-ocean-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold text-white">My Reports</h1>
-              <p className="text-gray-400 text-sm">Track the status of your submitted reports</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Community Safety"
+        title="My Reports"
+        subtitle="Track the status of your submitted reports"
+        imageSeed="grievances"
+        compact
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'My Reports' }]}
+      />
 
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8 max-w-3xl">
         {/* Navigation helpers — back to home / on to help center */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <Link
@@ -61,8 +51,8 @@ export default function MyGrievancesPage() {
 
         {loading ? (
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft h-32" />
-            <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft h-32" />
+            <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft h-32" />
+            <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft h-32" />
           </div>
         ) : grievances && grievances.length > 0 ? (
           <div className="space-y-4">

@@ -77,7 +77,7 @@ export function VerificationTab() {
             <p className="text-sm font-medium">Your account is verified.</p>
           </div>
         ) : request?.status === 'pending' ? (
-          <div className="flex items-start gap-2 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+          <div className="flex items-start gap-2 p-4 bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg text-ktip-sun-800">
             <Clock size={20} className="shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium">Your verification request is under review.</p>

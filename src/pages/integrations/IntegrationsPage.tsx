@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router'
-import { ChevronRight, Search, ExternalLink, Puzzle } from 'lucide-react'
+import { Search, ExternalLink, Puzzle } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { useIntegrations } from '../../hooks/useIntegrations'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -27,22 +27,16 @@ export default function IntegrationsPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 py-10">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-200">Integrations</span>
-          </nav>
-          <h1 className="text-3xl font-display font-bold text-white mb-2">Integration Directory</h1>
-          <p className="text-gray-400 max-w-2xl">
-            External tools, services, and partner platforms for OECS innovators — curated by the KTIP team.
-          </p>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Integrations"
+        title="Integration Directory"
+        subtitle="External tools, services, and partner platforms for OECS innovators — curated by the KTIP team."
+        imageSeed="integrations"
+        compact
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Integrations' }]}
+      />
 
-      <div className="container mx-auto px-4 py-10">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-10">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
@@ -55,13 +49,13 @@ export default function IntegrationsPage() {
                 setSearchQuery(e.target.value)
                 debouncedSetSearch(e.target.value)
               }}
-              className="w-full pl-9 pr-3 py-2.5 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+              className="w-full pl-9 pr-3 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
             />
           </div>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Categories</option>
             {Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => (
@@ -77,7 +71,7 @@ export default function IntegrationsPage() {
             {integrations.map((integration) => (
               <div
                 key={integration.id}
-                className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow"
+                className="bg-ktip-cream border border-gray-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center gap-3 mb-3">
                   {integration.logo_url ? (

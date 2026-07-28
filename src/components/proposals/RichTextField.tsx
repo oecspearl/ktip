@@ -56,7 +56,7 @@ interface RichTextFieldProps {
 
 const COLORS = [
   '#000000', '#374151', '#991b1b', '#b45309', '#166534',
-  '#1e40af', '#6b21a8', '#be185d', '#0066cc', '#dc2626',
+  '#1e40af', '#6b21a8', '#be185d', '#041E42', '#dc2626',
 ]
 
 export function RichTextField({ value, onChange, placeholder, minHeight, error }: RichTextFieldProps) {
@@ -205,7 +205,7 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error }
                 <Palette size={15} />
               </button>
               {showColorPicker && (
-                <div className="absolute top-full left-0 z-10 mt-1 bg-white border border-ktip-sand-200 shadow-md p-2 flex gap-1 flex-wrap w-32">
+                <div className="absolute top-full left-0 z-10 mt-1 bg-ktip-cream border border-ktip-sand-200 shadow-md p-2 flex gap-1 flex-wrap w-32">
                   {COLORS.map((c) => (
                     <button
                       key={c}
@@ -299,7 +299,7 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error }
                 </button>
               )}
               {showLinkInput && (
-                <div className="absolute top-full left-0 z-10 mt-1 bg-white border border-ktip-sand-200 shadow-md p-2 flex gap-1 w-64">
+                <div className="absolute top-full left-0 z-10 mt-1 bg-ktip-cream border border-ktip-sand-200 shadow-md p-2 flex gap-1 w-64">
                   <input
                     type="url"
                     value={linkUrl}
@@ -319,7 +319,7 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error }
                 <ImagePlus size={15} />
               </button>
               {showImageInput && (
-                <div className="absolute top-full left-0 z-10 mt-1 bg-white border border-ktip-sand-200 shadow-md p-2 flex gap-1 w-64">
+                <div className="absolute top-full left-0 z-10 mt-1 bg-ktip-cream border border-ktip-sand-200 shadow-md p-2 flex gap-1 w-64">
                   <input
                     type="url"
                     value={imageUrl}

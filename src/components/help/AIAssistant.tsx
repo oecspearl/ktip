@@ -69,7 +69,7 @@ export function AIAssistant() {
 
       {/* Chat Panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] max-h-[520px] sm:w-[380px] max-sm:left-4 max-sm:right-4 max-sm:w-auto bg-white rounded-2xl shadow-hard border border-ktip-sand-100 flex flex-col overflow-hidden animate-scale-in">
+        <div className="fixed bottom-24 right-6 z-50 w-[380px] max-h-[520px] sm:w-[380px] max-sm:left-4 max-sm:right-4 max-sm:w-auto bg-ktip-cream rounded-2xl shadow-hard border border-ktip-sand-100 flex flex-col overflow-hidden animate-scale-in">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-ktip-sand-100 bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600">
             <div className="flex items-center gap-3">

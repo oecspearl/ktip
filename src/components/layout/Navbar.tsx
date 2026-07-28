@@ -29,12 +29,15 @@ import {
   ChevronRight,
   HelpCircle,
   ClipboardList,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
+import { useThemeMode } from '../../hooks/useThemeMode'
 
 interface DropdownItem {
   name: string
@@ -96,20 +99,20 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [darkMode, setDarkMode] = useThemeMode()
 
-  // Transparent navbar over the homepage hero; turns solid on scroll
-  const isHome = location.pathname === '/'
+  // Transparent navbar over the page hero; turns solid on scroll.
+  // Every page now opens with a dark photo hero, so this applies everywhere.
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    if (!isHome) return
     const onScroll = () => setScrolled(window.scrollY > 24)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [isHome])
+  }, [])
 
-  const overHero = isHome && !scrolled && !mobileMenuOpen
+  const overHero = !scrolled && !mobileMenuOpen
 
   // Auto-hide on scroll down, reappear on scroll up or top-edge hover
   const [navHidden, setNavHidden] = useState(false)
@@ -241,12 +244,11 @@ export function Navbar() {
     <nav
       onMouseEnter={() => setNavHidden(false)}
       className={cn(
-        'top-0 z-40 transition-all duration-300',
-        isHome ? 'fixed inset-x-0' : 'sticky',
+        'top-0 z-40 transition-all duration-300 fixed inset-x-0',
         hidden ? '-translate-y-full' : 'translate-y-0',
         overHero
           ? 'bg-transparent border-b border-transparent'
-          : 'bg-gray-900/80 backdrop-blur-lg border-b border-white/10'
+          : 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
       )}
       style={{ paddingTop: '1rem', paddingBottom: '1rem' }}
     >
@@ -311,7 +313,7 @@ export function Navbar() {
                 {openDropdownId === dropdown.id && (
                   <div
                     role="menu"
-                    className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-hard overflow-hidden animate-scale-in z-50"
+                    className="absolute right-0 mt-2 w-64 bg-ktip-cream rounded-xl shadow-hard overflow-hidden animate-scale-in z-50"
                   >
                     {dropdown.items.map((item) => (
                       <FlowingMenuItem
@@ -344,7 +346,7 @@ export function Navbar() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
                   isActive('/admin')
-                    ? 'text-white underline decoration-pink-400 decoration-2 underline-offset-8'
+                    ? 'text-white underline decoration-ktip-sun-400 decoration-2 underline-offset-8'
                     : 'text-white/80 hover:text-ktip-nav-accent'
                 )}
               >
@@ -378,7 +380,7 @@ export function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.currentTarget.value)}
                     onKeyDown={handleSearch}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-ktip-sand-900 focus:placeholder-ktip-sand-400 focus:border-white"
+                    className="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white"
                   />
                 </>
               ) : (
@@ -395,6 +397,15 @@ export function Navbar() {
 
           {/* User Menu / Auth Buttons */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="hidden sm:block p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
             {/* Notification Bell */}
             {auth.user && (
               <div className="relative" ref={notifRef}>
@@ -412,7 +423,7 @@ export function Navbar() {
                 </button>
 
                 {notifOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-hard border border-ktip-sand-100 animate-scale-in z-50 max-h-96 flex flex-col">
+                  <div className="absolute right-0 mt-2 w-80 bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 animate-scale-in z-50 max-h-96 flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-ktip-sand-100">
                       <h3 className="text-sm font-semibold text-ktip-sand-800">Notifications</h3>
@@ -524,7 +535,7 @@ export function Navbar() {
                       className="w-10 h-10 rounded-full object-cover shadow-soft"
                     />
                   ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-ktip-ocean-400 to-ktip-tropical-400 rounded-full flex items-center justify-center text-white font-medium shadow-soft">
+                    <div className="w-10 h-10 bg-gradient-to-br from-ktip-ocean-600 to-ktip-tropical-700 rounded-full flex items-center justify-center text-white font-medium shadow-soft">
                       {auth.profile?.display_name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                   )}
@@ -532,7 +543,7 @@ export function Navbar() {
 
                 {/* User Dropdown Menu */}
                 {userMenuOpen && (
-                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-hard border border-ktip-sand-100 py-2 animate-scale-in">
+                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 py-2 animate-scale-in">
                     <Link
                       to="/profile/me"
                       onClick={() => setUserMenuOpen(false)}
@@ -632,7 +643,7 @@ export function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.currentTarget.value)}
                   onKeyDown={handleSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-white/20 bg-white/10 text-white placeholder-white/60 rounded-lg focus:bg-white focus:text-ktip-sand-900 focus:placeholder-ktip-sand-400 focus:border-white focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 border border-white/20 bg-white/10 text-white placeholder-white/60 rounded-lg focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white focus:outline-none"
                 />
               </div>
             </div>
@@ -664,7 +675,7 @@ export function Navbar() {
               <Link
                 to="/projects"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                className="flex items-center justify-between px-4 py-3 rounded-lg bg-ktip-sun-50 text-ktip-sun-800 hover:bg-ktip-sun-100 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <FolderKanban size={18} />
@@ -672,6 +683,17 @@ export function Navbar() {
                 </div>
                 <ChevronRight size={16} />
               </Link>
+            </div>
+
+            {/* Theme Toggle (mobile) */}
+            <div className="px-2 mb-1">
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10 transition-all"
+              >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
             </div>
 
             <hr className="my-2 mx-2 border-white/10" />
@@ -736,7 +758,7 @@ export function Navbar() {
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
                       isActive('/admin')
-                        ? 'bg-pink-50 text-pink-700'
+                        ? 'bg-ktip-sun-50 text-ktip-sun-800'
                         : 'text-white/80 hover:bg-white/10'
                     )}
                   >

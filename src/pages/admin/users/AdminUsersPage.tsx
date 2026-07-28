@@ -7,6 +7,7 @@ import { useAdminUsers, useAdminUserActions } from '../../../hooks/useAdminDashb
 import { useToast } from '../../../contexts/ToastContext'
 import { ROLE_LABELS, ROLE_COLORS } from '../../../lib/constants'
 import { debounce } from '../../../lib/utils'
+import { PageHero } from '../../../components/layout/PageHero'
 import type { Profile, UserRole } from '../../../types'
 import {
   Search,
@@ -192,34 +193,26 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Administration</p>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-white">
-                User Management
-              </h1>
-              {users && (
-                <Badge size="sm" variant="primary">
-                  {users.length} users
-                </Badge>
-              )}
-            </div>
-            <p className="mt-1 text-gray-400 text-sm">
-              Create accounts, manage roles, reset passwords, and verify users
-            </p>
-          </div>
-          <Button
-            onClick={() => setCreateModalOpen(true)}
-            className="shrink-0"
-          >
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="User Management"
+        subtitle="Create accounts, manage roles, reset passwords, and verify users"
+        imageSeed="admin-users"
+        actions={
+          <Button onClick={() => setCreateModalOpen(true)} className="shrink-0">
             <UserPlus size={16} />
             Create User
           </Button>
-        </div>
-      </div>
+        }
+      >
+        {users && (
+          <Badge size="sm" variant="primary">
+            {users.length} users
+          </Badge>
+        )}
+      </PageHero>
 
       {/* Inline Filter Bar */}
       <div className="mb-6">
@@ -234,13 +227,13 @@ export default function AdminUsersPage() {
                 setSearchQuery(e.currentTarget.value)
                 debouncedSetSearch(e.currentTarget.value)
               }}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Roles</option>
             {ALL_ROLES.map((role) => (
@@ -250,7 +243,7 @@ export default function AdminUsersPage() {
           <select
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Status</option>
             <option value="true">Verified</option>
@@ -380,7 +373,7 @@ export default function AdminUsersPage() {
                             id: user.id,
                             name: user.display_name || 'this user',
                           })}
-                          className="p-1.5 text-gray-400 hover:text-amber-600 transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
                           title="Reset password"
                         >
                           <KeyRound size={16} />
@@ -497,7 +490,7 @@ export default function AdminUsersPage() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     newRoles.includes(role)
                       ? 'bg-ktip-ocean-50 border-ktip-ocean-300 text-ktip-ocean-700'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                      : 'bg-ktip-cream border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                   key={role}
                 >

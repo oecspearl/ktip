@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
-import { Search, UserX, User, ChevronRight } from 'lucide-react'
+import { Search, UserX, User } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
+import { BentoCard } from '../../components/ui/BentoCard'
 import { CARIBBEAN_COUNTRIES, ROLE_LABELS, SKILL_SUGGESTIONS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { debounce } from '../../lib/utils'
@@ -36,27 +37,16 @@ export default function DirectoryPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-white">
-              Member Directory
-            </h1>
-            <nav className="text-sm text-gray-400" aria-label="Breadcrumb">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="mx-2">
-                <ChevronRight size={12} className="inline" />
-              </span>
-              <span className="text-gray-300">Member Directory</span>
-            </nav>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Network"
+        title="Member Directory"
+        imageSeed="directory"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Member Directory' }]}
+      />
 
       {/* === Search and Filter Section === */}
-      <div className="bg-white py-12">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
           <div className="mb-8">
             <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-1">
               Search for a member to connect with
@@ -79,7 +69,7 @@ export default function DirectoryPage() {
                 aria-label="Search members"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
             </div>
 
@@ -87,7 +77,7 @@ export default function DirectoryPage() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Roles</option>
               {Object.entries(ROLE_LABELS).map(([value, label]) => (
@@ -99,7 +89,7 @@ export default function DirectoryPage() {
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Countries</option>
               {CARIBBEAN_COUNTRIES.map((country) => (
@@ -111,7 +101,7 @@ export default function DirectoryPage() {
             <select
               value={selectedSkill}
               onChange={(e) => setSelectedSkill(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-white rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Skills</option>
               {SKILL_SUGGESTIONS.map((skill) => (
@@ -132,8 +122,8 @@ export default function DirectoryPage() {
       </div>
 
       {/* === Members Grid Section === */}
-      <div className="bg-white pb-16">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <div className="bg-ktip-sand-50 pb-16">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
           {loading || !members ? (
             <SkeletonGrid count={6} />
           ) : members.length > 0 ? (
@@ -142,70 +132,44 @@ export default function DirectoryPage() {
                 Found {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
                 {members.map((member) => (
-                  <div key={member.id} className="flex bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                    {/* Avatar */}
-                    <div className="flex items-center justify-center px-5 py-5 shrink-0">
-                      {member.avatar_url ? (
-                        <img
-                          src={member.avatar_url!}
-                          alt={member.display_name || 'Member'}
-                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 bg-ktip-ocean-100 rounded-full border-2 border-gray-200 flex items-center justify-center text-2xl font-bold text-ktip-ocean-700">
-                          {member.display_name?.charAt(0).toUpperCase() || <User size={28} />}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Metadata */}
-                    <div className="flex-1 py-4 pr-3 min-w-0">
-                      <h3 className="text-lg font-display font-bold text-ktip-ocean-600 truncate mb-2">
-                        {member.display_name || 'Anonymous'}
-                      </h3>
-                      <div className="space-y-1 text-sm">
-                        {member.roles?.length > 0 && (
-                          <div className="flex gap-1">
-                            <span className="text-gray-400 shrink-0">Role:</span>
-                            <span className="text-ktip-sand-700 truncate">
-                              {member.roles.slice(0, 2).map((r: string) => ROLE_LABELS[r] || r).join(', ')}
-                            </span>
-                          </div>
+                  <BentoCard
+                    key={member.id}
+                    to={`/profile/${member.id}`}
+                    imageSeed={member.id}
+                    eyebrow={
+                      member.roles?.length > 0
+                        ? member.roles.slice(0, 2).map((r: string) => ROLE_LABELS[r] || r).join(', ')
+                        : 'Member'
+                    }
+                    title={
+                      <span className="flex items-center gap-3">
+                        {member.avatar_url ? (
+                          <img
+                            src={member.avatar_url!}
+                            alt=""
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-white/60 shrink-0"
+                          />
+                        ) : (
+                          <span className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full ring-2 ring-white/60 flex items-center justify-center text-base font-bold text-white shrink-0">
+                            {member.display_name?.charAt(0).toUpperCase() || <User size={18} />}
+                          </span>
                         )}
-                        {member.country && (
-                          <div className="flex gap-1">
-                            <span className="text-gray-400 shrink-0">Country:</span>
-                            <span className="text-ktip-sand-700">{member.country}</span>
-                          </div>
-                        )}
-                        {member.skills?.length > 0 && (
-                          <div className="flex gap-1">
-                            <span className="text-gray-400 shrink-0">Skill:</span>
-                            <span className="text-ktip-sand-700 truncate">{member.skills[0]}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-3">
-                        <ConnectButton otherUserId={member.id} size="sm" />
-                      </div>
-                    </div>
-
-                    {/* Vertical "VIEW PROFILE" tab */}
-                    <Link
-                      to={`/profile/${member.id}`}
-                      className="w-12 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center shrink-0"
-                      aria-label={`View ${member.display_name || 'member'}'s profile`}
-                    >
-                      <span
-                        className="text-[11px] font-bold text-white uppercase tracking-widest whitespace-nowrap"
-                        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                      >
-                        View Profile
+                        <span className="truncate">{member.display_name || 'Anonymous'}</span>
                       </span>
-                    </Link>
-                  </div>
+                    }
+                    meta={
+                      <>
+                        {member.country && <>{member.country}</>}
+                        {member.country && member.skills?.length > 0 && <> · </>}
+                        {member.skills?.length > 0 && <>{member.skills[0]}</>}
+                      </>
+                    }
+                    cta="View Profile"
+                  >
+                    <ConnectButton otherUserId={member.id} size="sm" />
+                  </BentoCard>
                 ))}
               </div>
             </div>

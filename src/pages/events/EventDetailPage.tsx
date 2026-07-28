@@ -11,6 +11,7 @@ import { useEventSchedule } from '../../hooks/useEventSchedule'
 import { useEventSpeakers } from '../../hooks/useEventSpeakers'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
+import { DetailsList } from '../../components/shared/DetailsList'
 import { EventRegistrationForm } from '../../components/events/EventRegistrationForm'
 import { EventPageSectionRenderer } from '../../components/events/EventPageSectionRenderer'
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
@@ -27,8 +28,9 @@ import {
   XCircle,
   Megaphone,
   FileText,
-  ChevronRight,
+  CalendarX,
 } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import {
   EVENT_TYPE_LABELS,
   EVENT_TYPE_COLORS,
@@ -140,16 +142,16 @@ export default function EventDetailPage() {
   if (eventLoading || !event) {
     if (eventLoading) {
       return (
-        <div className="container mx-auto px-4 py-12 text-center">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
           <p className="mt-4 text-ktip-sand-600">Loading event...</p>
         </div>
       )
     }
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">📅</span>
+          <CalendarX size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
           Event Not Found
@@ -169,59 +171,45 @@ export default function EventDetailPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div
-        className="relative min-h-[180px] flex items-center bg-gray-800 bg-cover bg-center"
-        style={event.image_url ? { backgroundImage: `url(${event.image_url})` } : {}}
+      <PageHero
+        eyebrow="Event Detail"
+        title={event.title}
+        image={event.image_url}
+        imageSeed={event.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Events', href: '/events' },
+          { label: truncate(event.title, 30) },
+        ]}
+        actions={
+          isOrganizer ? (
+            <Link to={`/events/${params.id}/edit`}>
+              <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                <Edit size={14} />
+                Edit
+              </button>
+            </Link>
+          ) : undefined
+        }
       >
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gray-900/80" />
-
-        <div className="relative container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Event Detail</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {event.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className={EVENT_TYPE_COLORS[event.event_type]}>
-                  {EVENT_TYPE_LABELS[event.event_type]}
-                </Badge>
-                {event.status === 'cancelled' && (
-                  <Badge className={EVENT_STATUS_COLORS['cancelled']}>
-                    {EVENT_STATUS_LABELS['cancelled']}
-                  </Badge>
-                )}
-                {isPastEvent && event.status !== 'cancelled' && (
-                  <Badge variant="default">Past Event</Badge>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {isOrganizer && (
-                <Link to={`/events/${params.id}/edit`}>
-                  <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
-                    <Edit size={14} />
-                    Edit
-                  </button>
-                </Link>
-              )}
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <Link to="/events" className="hover:text-white transition-colors">Events</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">{truncate(event.title, 30)}</span>
-              </nav>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className={EVENT_TYPE_COLORS[event.event_type]}>
+            {EVENT_TYPE_LABELS[event.event_type]}
+          </Badge>
+          {event.status === 'cancelled' && (
+            <Badge className={EVENT_STATUS_COLORS['cancelled']}>
+              {EVENT_STATUS_LABELS['cancelled']}
+            </Badge>
+          )}
+          {isPastEvent && event.status !== 'cancelled' && (
+            <Badge variant="default">Past Event</Badge>
+          )}
         </div>
-      </div>
+      </PageHero>
 
       {/* === Past Event Banner === */}
       {isPastEvent && (
-        <div className="bg-gray-50 border-b border-gray-200 py-3">
+        <div className="bg-ktip-sand-50 border-b border-gray-200 py-3">
           <p className="text-gray-700 text-center text-sm">
             This event has already passed
           </p>
@@ -229,8 +217,8 @@ export default function EventDetailPage() {
       )}
 
       {/* === Two-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
@@ -333,6 +321,17 @@ export default function EventDetailPage() {
                 <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                   {event.description}
                 </div>
+              </div>
+            )}
+
+            {/* Additional Details */}
+            {event.details && event.details.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                  Additional Details
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-3">Key facts at a glance</p>
+                <DetailsList details={event.details} />
               </div>
             )}
 

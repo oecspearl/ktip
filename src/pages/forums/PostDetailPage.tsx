@@ -14,12 +14,13 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { forumReplySchema } from '../../lib/validation'
 import { truncate } from '../../lib/utils'
+import { PageHero } from '../../components/layout/PageHero'
 import {
   Trash2,
   Pin,
   Send,
   MessageCircle,
-  ChevronRight,
+  FileText,
 } from 'lucide-react'
 import {
   formatDate,
@@ -93,7 +94,7 @@ export default function PostDetailPage() {
 
   if (postLoading) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
         <p className="mt-4 text-ktip-sand-600">Loading post...</p>
       </div>
@@ -102,9 +103,9 @@ export default function PostDetailPage() {
 
   if (!post) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">📝</span>
+          <FileText size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
           Post Not Found
@@ -122,58 +123,42 @@ export default function PostDetailPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Forum Post</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {post.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2">
-                {post.is_pinned && (
-                  <Badge variant="warning" size="sm">
-                    <Pin size={12} className="mr-1" />
-                    Pinned
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {isAuthor && (
-                <button
-                  onClick={handleDeletePost}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-red-400 text-red-300 text-sm font-medium rounded-lg hover:bg-red-500/20 transition-colors"
-                  title="Delete post"
-                >
-                  <Trash2 size={14} />
-                  Delete
-                </button>
-              )}
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <Link to="/forums" className="hover:text-white transition-colors">Forums</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                {post.board && (
-                  <>
-                    <Link to={`/forums/${params.slug}`} className="hover:text-white transition-colors">
-                      {post.board.name}
-                    </Link>
-                    <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                  </>
-                )}
-                <span className="text-gray-300">{truncate(post.title, 30)}</span>
-              </nav>
-            </div>
+      <PageHero
+        eyebrow="Forum Post"
+        title={post.title}
+        imageSeed={post.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Forums', href: '/forums' },
+          ...(post.board ? [{ label: post.board.name, href: `/forums/${params.slug}` }] : []),
+          { label: truncate(post.title, 30) },
+        ]}
+        actions={
+          isAuthor ? (
+            <button
+              onClick={handleDeletePost}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-red-400 text-red-300 text-sm font-medium rounded-lg hover:bg-red-500/20 transition-colors"
+              title="Delete post"
+            >
+              <Trash2 size={14} />
+              Delete
+            </button>
+          ) : undefined
+        }
+      >
+        {post.is_pinned && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="warning" size="sm">
+              <Pin size={12} className="mr-1" />
+              Pinned
+            </Badge>
           </div>
-        </div>
-      </div>
+        )}
+      </PageHero>
 
       {/* === Two-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">

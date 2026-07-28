@@ -14,9 +14,9 @@ export function Badge({ className, variant, size, children, ...others }: BadgePr
     default: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
     primary: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
     success: 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200',
-    warning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    warning: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
     danger: 'bg-red-100 text-red-700 border-red-200',
-    info: 'bg-blue-100 text-blue-700 border-blue-200',
+    info: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   }
 
   const sizeStyles = {

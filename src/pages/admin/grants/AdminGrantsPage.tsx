@@ -13,6 +13,7 @@ import {
 } from '../../../lib/constants'
 import { format } from 'date-fns'
 import { cn } from '../../../lib/utils'
+import { PageHero } from '../../../components/layout/PageHero'
 import type { Grant, GrantApplicationStatus } from '../../../types'
 import {
   DollarSign,
@@ -117,20 +118,14 @@ export default function AdminGrantsPage() {
 
   return (
     <div>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Administration</p>
-            <h1 className="text-2xl font-bold text-white">
-              Grant Management
-            </h1>
-            <p className="mt-1 text-gray-400 text-sm">
-              Manage grants and review applications
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Grant Management"
+        subtitle="Manage grants and review applications"
+        imageSeed="admin-grants"
+      />
 
       {/* Flat Tabs */}
       <div className="border-b border-gray-200 mb-6">
@@ -285,7 +280,7 @@ export default function AdminGrantsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.currentTarget.value)}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+                className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>

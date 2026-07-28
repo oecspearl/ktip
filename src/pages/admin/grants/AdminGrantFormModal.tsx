@@ -3,7 +3,8 @@ import { Modal } from '../../../components/ui/Modal'
 import { Button } from '../../../components/ui/Button'
 import { useCreateGrant, useUpdateGrant } from '../../../hooks/useGrants'
 import { useToast } from '../../../contexts/ToastContext'
-import type { Grant } from '../../../types'
+import { DetailsEditor, cleanDetails } from '../../../components/shared/DetailsEditor'
+import type { DetailEntry, Grant } from '../../../types'
 import { Save } from 'lucide-react'
 
 interface AdminGrantFormModalProps {
@@ -32,6 +33,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const [eligibility, setEligibility] = useState('')
   const [applicationUrl, setApplicationUrl] = useState('')
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [details, setDetails] = useState<DetailEntry[]>([])
 
   const isEditing = grant !== null
 
@@ -47,6 +49,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     setEligibility('')
     setApplicationUrl('')
     setIsClimateAction(false)
+    setDetails([])
   }
 
   useEffect(() => {
@@ -62,6 +65,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       setEligibility(grant.eligibility || '')
       setApplicationUrl(grant.application_url || '')
       setIsClimateAction(grant.is_climate_action ?? false)
+      setDetails(grant.details || [])
     } else {
       resetForm()
     }
@@ -82,6 +86,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     }
 
     grantData.summary = summary.trim() || null
+    grantData.details = cleanDetails(details)
     if (description.trim()) grantData.description = description.trim()
     if (grantType) grantData.grant_type = grantType
     if (amountMin) grantData.amount_min = Number(amountMin)
@@ -159,6 +164,17 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
             rows={3}
             className={inputClass}
           />
+        </div>
+
+        {/* Additional Details */}
+        <div>
+          <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+            Additional Details
+          </label>
+          <p className="text-xs text-ktip-sand-500 mb-2">
+            Optional extra metadata shown under the description — add standalone fields or groups of items
+          </p>
+          <DetailsEditor value={details} onChange={setDetails} />
         </div>
 
         {/* Grant Type */}
@@ -274,7 +290,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
               type="checkbox"
               checked={isClimateAction}
               onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
-              className="w-5 h-5 text-emerald-600 border-ktip-sand-300 rounded focus:ring-emerald-500"
+              className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
             />
             <span className="text-sm text-ktip-sand-700">
               Climate Action grant

@@ -22,9 +22,9 @@ export function SessionRecoveryBanner() {
   }
 
   return (
-    <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
+    <div className="bg-ktip-sun-50 border-b border-ktip-sun-200 px-4 py-3">
       <div className="container mx-auto flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2 text-amber-800 text-sm">
+        <div className="flex items-center gap-2 text-ktip-sun-800 text-sm">
           <AlertTriangle size={16} className="shrink-0" />
           <span>Your session may have expired. Profile data couldn't be loaded.</span>
         </div>
@@ -32,7 +32,7 @@ export function SessionRecoveryBanner() {
           <button
             onClick={handleRetry}
             disabled={retrying}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-ktip-sun-700 bg-ktip-sun-100 hover:bg-ktip-sun-200 rounded-lg transition-colors disabled:opacity-50"
           >
             <RefreshCw size={14} className={cn(retrying && 'animate-spin')} />
             Reload

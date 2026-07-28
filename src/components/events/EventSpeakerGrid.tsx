@@ -7,7 +7,7 @@ interface EventSpeakerGridProps {
 
 export function EventSpeakerGrid({ speakers }: EventSpeakerGridProps) {
   return (
-    <div className="bg-white rounded-xl border border-ktip-sand-200 shadow-card p-6">
+    <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6">
       <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-4 flex items-center gap-2">
         <Mic className="text-ktip-ocean-600" size={20} />
         Speakers

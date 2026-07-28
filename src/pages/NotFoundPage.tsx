@@ -1,10 +1,19 @@
 import { Link } from 'react-router'
 import { Button } from '../components/ui/Button'
 import { Home, ArrowLeft, MapPinOff } from 'lucide-react'
+import { PageHero } from '../components/layout/PageHero'
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center p-4">
+    <>
+      <PageHero
+        eyebrow="Error 404"
+        title="Page Not Found"
+        imageSeed="404"
+        compact
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: '404' }]}
+      />
+      <div className="min-h-[40vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <div className="w-20 h-20 bg-ktip-ocean-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <MapPinOff size={40} className="text-ktip-ocean-500" />
@@ -25,6 +34,7 @@ export default function NotFoundPage() {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

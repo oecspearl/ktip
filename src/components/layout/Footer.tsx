@@ -54,7 +54,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="relative bg-ktip-sand-900 text-white mt-auto overflow-hidden">
+    <footer className="relative bg-ktip-ink text-white mt-auto overflow-hidden border-t border-ktip-line/40">
       {/* Same rotating watermark as the homepage */}
       <FlipWatermark
         className="-bottom-[0.18em] right-0 md:-right-4"
@@ -128,7 +128,7 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-lg bg-white/10 text-white/70 hover:bg-white hover:text-gray-900 flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-lg bg-white/10 text-white/70 hover:bg-white hover:text-brand-navy flex items-center justify-center transition-colors"
                   aria-label={link.name}
                 >
                   <link.icon size={16} />

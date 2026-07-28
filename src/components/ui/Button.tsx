@@ -24,14 +24,16 @@ export function Button({
   ...others
 }: ButtonProps) {
   const variantStyles = {
+    // Navy primary; ocean-700 inverts to a light tint in dark mode, so pin
+    // an interactive mid navy there via dark:
     primary:
-      'bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white shadow-soft hover:shadow-medium hover:-translate-y-0.5 disabled:from-ktip-ocean-300 disabled:to-ktip-ocean-400',
+      'bg-ktip-ocean-700 text-white shadow-soft hover:bg-ktip-ocean-600 hover:shadow-medium hover:-translate-y-0.5 disabled:bg-ktip-ocean-400 dark:bg-ktip-ocean-300 dark:hover:bg-ktip-ocean-400 dark:disabled:bg-ktip-ocean-200',
     secondary:
-      'border border-ktip-sand-200 bg-white text-ktip-sand-700 hover:bg-ktip-sand-50 hover:border-ktip-sand-300',
+      'border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 hover:bg-ktip-sand-50 hover:border-ktip-sand-300',
     outline: 'border border-ktip-ocean-500 text-ktip-ocean-600 hover:bg-ktip-ocean-50',
     ghost: 'text-ktip-sand-600 hover:bg-ktip-sand-100',
     danger:
-      'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-soft hover:shadow-medium hover:-translate-y-0.5',
+      'bg-red-600 text-white shadow-soft hover:bg-red-700 hover:shadow-medium hover:-translate-y-0.5 dark:bg-red-500 dark:hover:bg-red-400',
   }
 
   const sizeStyles = {

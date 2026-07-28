@@ -1,13 +1,13 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useForumBoard, useCreateForumPost } from '../../hooks/useForums'
 import { useAuth } from '../../contexts/AuthContext'
 import { forumPostSchema } from '../../lib/validation'
-import { ChevronRight } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { PageHero } from '../../components/layout/PageHero'
 
 export default function CreatePostPage() {
   usePageTitle('New Post')
@@ -60,7 +60,7 @@ export default function CreatePostPage() {
 
   if (boardLoading) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
       </div>
     )
@@ -68,7 +68,7 @@ export default function CreatePostPage() {
 
   if (!board) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
         <p className="text-ktip-sand-600">Board not found.</p>
       </div>
     )
@@ -76,31 +76,26 @@ export default function CreatePostPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 flex items-center justify-between w-full">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">New Forum Post</p>
-            <h1 className="text-3xl font-display font-bold text-white">New Post</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Posting in <span className="text-gray-200 font-medium">{board.name}</span>
-            </p>
-          </div>
-          <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/forums" className="hover:text-white transition-colors">Forums</Link>
-            <ChevronRight size={14} />
-            <Link to={`/forums/${params.slug}`} className="hover:text-white transition-colors">{board.name}</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200">New Post</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="New Forum Post"
+        title="New Post"
+        subtitle={
+          <>
+            Posting in <span className="text-white font-medium">{board.name}</span>
+          </>
+        }
+        imageSeed="forums"
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Forums', href: '/forums' },
+          { label: board.name, href: `/forums/${params.slug}` },
+          { label: 'New Post' },
+        ]}
+      />
 
-      {/* White Form Area */}
-      <div className="bg-white py-12">
-        <div className="max-w-3xl mx-auto px-4">
+      {/* Form Area */}
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Title"

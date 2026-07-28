@@ -1,13 +1,16 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateEvent } from '../../hooks/useEvents'
+import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import type { DetailEntry } from '../../types'
 import { eventSchema } from '../../lib/validation'
-import { Save, ChevronRight, Calendar, MapPin, Video, Users } from 'lucide-react'
+import { Save, Calendar, MapPin, Video, Users } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
 
@@ -30,6 +33,7 @@ export default function CreateEventPage() {
   const [capacity, setCapacity] = useState<number | undefined>(undefined)
   const [eventStatus, setEventStatus] = useState('published')
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [details, setDetails] = useState<DetailEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -87,6 +91,7 @@ export default function CreateEventPage() {
         capacity,
         organizer_id: auth.user!.id,
         is_climate_action: isClimateAction,
+        details: cleanDetails(details),
         ...(isAdmin ? { status: eventStatus } : {}),
       } as any)
 
@@ -104,26 +109,20 @@ export default function CreateEventPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 flex items-center justify-between w-full">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Create New Event</p>
-            <h1 className="text-3xl font-display font-bold text-white">New Event</h1>
-          </div>
-          <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/events" className="hover:text-white transition-colors">Events</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200">Create</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Create New Event"
+        title="New Event"
+        imageSeed="events"
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Events', href: '/events' },
+          { label: 'Create' },
+        ]}
+      />
 
-      {/* White Form Area */}
-      <div className="bg-white py-12">
-        <div className="max-w-3xl mx-auto px-4">
+      {/* Form Area */}
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
@@ -162,6 +161,17 @@ export default function CreateEventPage() {
               rows={6}
               fullWidth
             />
+
+            {/* Additional Details */}
+            <div>
+              <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+                Additional Details
+              </label>
+              <p className="text-xs text-ktip-sand-500 mb-2">
+                Optional extra metadata shown under the description — add standalone fields or groups of items
+              </p>
+              <DetailsEditor value={details} onChange={setDetails} />
+            </div>
 
             {/* Event Type */}
             <div>
@@ -324,7 +334,7 @@ export default function CreateEventPage() {
                   type="checkbox"
                   checked={isClimateAction}
                   onChange={(e) => setIsClimateAction(e.target.checked)}
-                  className="w-5 h-5 text-emerald-600 border-ktip-sand-300 rounded focus:ring-emerald-500"
+                  className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
                 />
                 <span className="text-sm text-ktip-sand-700">
                   This event focuses on climate change solutions

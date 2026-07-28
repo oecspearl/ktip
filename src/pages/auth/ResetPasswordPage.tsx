@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Lock, CheckCircle } from 'lucide-react'
 import { changePasswordSchema } from '../../lib/validation'
+import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 
 interface ResetPasswordActionState {
   errors: Record<string, string>
@@ -64,8 +65,8 @@ export default function ResetPasswordPage() {
   }, [state.success, navigate])
 
   return (
-    <div className="bg-gray-900 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
+    <AuthBackdrop>
+      <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
         {state.success ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -136,6 +137,6 @@ export default function ResetPasswordPage() {
           </>
         )}
       </div>
-    </div>
+    </AuthBackdrop>
   )
 }

@@ -7,6 +7,7 @@ import { useAdminPreregistrations, useAdminPreregistrationActions } from '../../
 import type { Preregistration } from '../../../hooks/usePreregistrations'
 import { useToast } from '../../../contexts/ToastContext'
 import { ROLE_LABELS, ROLE_COLORS } from '../../../lib/constants'
+import { PageHero } from '../../../components/layout/PageHero'
 import {
   Users,
   CheckCircle,
@@ -30,10 +31,10 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_VARIANTS: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  approved: 'bg-green-100 text-green-700',
+  pending: 'bg-ktip-sun-100 text-ktip-sun-700',
+  approved: 'bg-ktip-tropical-100 text-ktip-tropical-800',
   rejected: 'bg-red-100 text-red-700',
-  info_requested: 'bg-blue-100 text-blue-700',
+  info_requested: 'bg-ktip-ocean-100 text-ktip-ocean-700',
 }
 
 const ALL_PREREG_ROLES = ['student', 'mentor', 'investor', 'entrepreneur', 'private_sector']
@@ -159,32 +160,27 @@ export default function AdminPreregistrationsPage() {
 
   return (
     <div>
-      {/* Dark Header Band */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">Administration</p>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-white">Pre-Registrations</h1>
-              {preregistrations && (
-                <>
-                  <Badge size="sm" variant="primary">
-                    {preregistrations.length} total
-                  </Badge>
-                  {!statusFilter && pendingCount > 0 && (
-                    <Badge size="sm" className="bg-amber-100 text-amber-700">
-                      {pendingCount} pending
-                    </Badge>
-                  )}
-                </>
-              )}
-            </div>
-            <p className="mt-1 text-gray-400 text-sm">
-              Review and approve pre-registration applications
-            </p>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Pre-Registrations"
+        subtitle="Review and approve pre-registration applications"
+        imageSeed="admin-prereg"
+      >
+        {preregistrations && (
+          <div className="flex items-center gap-2">
+            <Badge size="sm" variant="primary">
+              {preregistrations.length} total
+            </Badge>
+            {!statusFilter && pendingCount > 0 && (
+              <Badge size="sm" className="bg-ktip-sun-100 text-ktip-sun-700">
+                {pendingCount} pending
+              </Badge>
+            )}
           </div>
-        </div>
-      </div>
+        )}
+      </PageHero>
 
       {/* Filters */}
       <div className="mb-6">
@@ -192,7 +188,7 @@ export default function AdminPreregistrationsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -203,7 +199,7 @@ export default function AdminPreregistrationsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Roles</option>
             {ALL_PREREG_ROLES.map((role) => (
@@ -287,7 +283,7 @@ export default function AdminPreregistrationsPage() {
                             <button
                               type="button"
                               onClick={() => { setInfoRequestPrereg(prereg); setInfoMessage('') }}
-                              className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
                               title="Request more info"
                             >
                               <MessageSquare size={16} />
@@ -417,9 +413,9 @@ export default function AdminPreregistrationsPage() {
 
             {/* Info request message (if any) */}
             {detailPrereg.info_request_message && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-xs text-blue-600 font-medium mb-1">Information Requested</p>
-                <p className="text-sm text-blue-800">{detailPrereg.info_request_message}</p>
+              <div className="bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-lg p-3">
+                <p className="text-xs text-ktip-ocean-600 font-medium mb-1">Information Requested</p>
+                <p className="text-sm text-ktip-ocean-800">{detailPrereg.info_request_message}</p>
               </div>
             )}
 

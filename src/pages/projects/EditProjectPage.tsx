@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent, type KeyboardEvent } from 'react'
-import { Link, useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -7,9 +7,12 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useProject, useUpdateProject } from '../../hooks/useProjects'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
+import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import type { DetailEntry } from '../../types'
 import { projectSchema } from '../../lib/validation'
 import { PROJECT_CATEGORIES } from '../../lib/constants'
-import { Save, ChevronRight } from 'lucide-react'
+import { Save } from 'lucide-react'
+import { PageHero } from '../../components/layout/PageHero'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
 export default function EditProjectPage() {
@@ -32,6 +35,7 @@ export default function EditProjectPage() {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [details, setDetails] = useState<DetailEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -45,6 +49,7 @@ export default function EditProjectPage() {
       setHashtags(project.hashtags || [])
       setIsPublic(project.is_public ?? true)
       setIsClimateAction(project.is_climate_action ?? false)
+      setDetails(project.details || [])
       setInitialized(true)
     }
   }, [project, initialized])
@@ -103,6 +108,7 @@ export default function EditProjectPage() {
         hashtags,
         is_public: isPublic,
         is_climate_action: isClimateAction,
+        details: cleanDetails(details),
       } as any)
 
       toast.success('Project updated successfully!')
@@ -115,7 +121,7 @@ export default function EditProjectPage() {
 
   if (projectLoading || !project) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
         <p className="mt-4 text-ktip-sand-600">Loading project...</p>
       </div>
@@ -124,7 +130,7 @@ export default function EditProjectPage() {
 
   if (!canEdit) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
           Not authorized
         </h2>
@@ -138,26 +144,20 @@ export default function EditProjectPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 flex items-center justify-between w-full">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Edit Project</p>
-            <h1 className="text-3xl font-display font-bold text-white">Edit Project</h1>
-          </div>
-          <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/projects" className="hover:text-white transition-colors">Projects</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200">Edit</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Project Workspace"
+        title="Edit Project"
+        imageSeed="projects"
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Projects', href: '/projects' },
+          { label: 'Edit' },
+        ]}
+      />
 
-      {/* White Form Area */}
-      <div className="bg-white py-12">
-        <div className="max-w-3xl mx-auto px-4">
+      {/* Form Area */}
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
@@ -194,6 +194,17 @@ export default function EditProjectPage() {
               fullWidth
             />
 
+            {/* Additional Details */}
+            <div>
+              <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+                Additional Details
+              </label>
+              <p className="text-xs text-ktip-sand-500 mb-2">
+                Optional extra metadata shown under the description — add standalone fields or groups of items
+              </p>
+              <DetailsEditor value={details} onChange={setDetails} />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
                 Category <span className="text-red-500">*</span>
@@ -207,7 +218,7 @@ export default function EditProjectPage() {
                 <option value="">Select a category</option>
                 {PROJECT_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
-                    {cat.icon} {cat.label}
+                    {cat.label}
                   </option>
                 ))}
               </select>
@@ -280,7 +291,7 @@ export default function EditProjectPage() {
                   type="checkbox"
                   checked={isClimateAction}
                   onChange={(e) => setIsClimateAction(e.target.checked)}
-                  className="w-5 h-5 text-emerald-600 border-ktip-sand-300 rounded focus:ring-emerald-500"
+                  className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
                 />
                 <span className="text-sm text-ktip-sand-700">
                   This project addresses climate change solutions

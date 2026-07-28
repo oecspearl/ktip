@@ -41,7 +41,7 @@ export function Input({
           id={inputId}
           className={cn(
             'w-full border rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all',
-            'focus:outline-none focus:ring-2 focus:bg-white',
+            'focus:outline-none focus:ring-2 focus:bg-ktip-cream',
             icon && 'pl-10',
             error
               ? 'border-red-400/70 bg-red-50/30 focus:border-red-400 focus:ring-red-400/15'

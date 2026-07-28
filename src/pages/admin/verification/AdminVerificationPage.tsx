@@ -13,6 +13,7 @@ import { formatDate, getInitials, generateAvatarColor } from '../../../lib/utils
 import type { VerificationRequest } from '../../../types'
 import { BadgeCheck, CheckCircle, XCircle, ExternalLink, Filter, X, FileText } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { PageHero } from '../../../components/layout/PageHero'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
@@ -21,8 +22,8 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-700 border-amber-200',
-  approved: 'bg-green-100 text-green-700 border-green-200',
+  pending: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
+  approved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   rejected: 'bg-red-100 text-red-700 border-red-200',
 }
 
@@ -71,32 +72,23 @@ export default function AdminVerificationPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-1.5 text-sm text-ktip-sand-500 mb-2">
-          <span>Administration</span>
-          <span>/</span>
-          <span className="text-ktip-sand-900 font-medium">Verification</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
-            <BadgeCheck size={20} className="text-ktip-ocean-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-display font-bold text-ktip-sand-900">Verification Requests</h1>
-            <p className="text-ktip-sand-500 text-sm">Review identity documents and verify members</p>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Verification Requests"
+        subtitle="Review identity documents and verify members"
+        imageSeed="admin-verification"
+      />
 
       {/* Filter */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <Filter size={16} className="text-ktip-sand-400" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Statuses</option>
             {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -116,7 +108,7 @@ export default function AdminVerificationPage() {
       </div>
 
       {/* Requests */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />

@@ -8,6 +8,7 @@ import { Mail, Lock, LogIn, Trash2 } from 'lucide-react'
 import { loginSchema } from '../../lib/validation'
 import { APP_FULL_NAME } from '../../lib/constants'
 import { clearSupabaseSession } from '../../lib/auth-utils'
+import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 import { analytics } from '../../hooks/useAnalytics'
 import { usePageTitle } from '../../hooks/usePageTitle'
 
@@ -123,8 +124,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
+    <AuthBackdrop>
+      <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-display font-bold text-ktip-ocean-600 mb-2">
             Welcome to KTIP
@@ -140,12 +141,12 @@ export default function LoginPage() {
           )}
 
           {showRecovery && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm">
+            <div className="bg-ktip-sun-50 border border-ktip-sun-200 text-ktip-sun-800 px-4 py-3 rounded-xl text-sm">
               <p className="mb-2">A stale session may be blocking sign-in. Clear it and try again.</p>
               <button
                 type="button"
                 onClick={handleClearSession}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-ktip-sun-100 hover:bg-ktip-sun-200 rounded-lg transition-colors"
               >
                 <Trash2 size={14} />
                 Clear Session
@@ -196,7 +197,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-ktip-sand-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-ktip-sand-500">Or continue with</span>
+              <span className="px-2 bg-ktip-cream text-ktip-sand-500">Or continue with</span>
             </div>
           </div>
 
@@ -253,6 +254,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </AuthBackdrop>
   )
 }

@@ -1,4 +1,5 @@
 import { useAnalyticsData, type DateRange } from '../../../hooks/useAnalyticsData'
+import { PageHero } from '../../../components/layout/PageHero'
 import {
   BarChart3,
   Eye,
@@ -48,28 +49,31 @@ export default function AdminAnalyticsPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-white">Usage Analytics</h1>
-          <p className="text-gray-400 text-sm mt-1">Track page views, feature usage, funnels, and conversions</p>
-        </div>
-        <div className="flex gap-1 bg-gray-800 p-1">
-          {RANGE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setRange(opt.value)}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                range === opt.value
-                  ? 'bg-ktip-ocean-600 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Usage Analytics"
+        subtitle="Track page views, feature usage, funnels, and conversions"
+        imageSeed="admin-analytics"
+        actions={
+          <div className="flex gap-1 bg-gray-800 p-1">
+            {RANGE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setRange(opt.value)}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  range === opt.value
+                    ? 'bg-ktip-ocean-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {loading ? (
         <div className="text-gray-400 py-12 text-center">Loading analytics...</div>
@@ -186,7 +190,7 @@ export default function AdminAnalyticsPage() {
             {/* Pre-Registration Funnel */}
             <div className="bg-gray-900 border border-gray-800 p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Target size={20} className="text-amber-500" />
+                <Target size={20} className="text-ktip-sun-500" />
                 Pre-Registration Funnel
               </h2>
               {preregFunnel?.some(s => s.count > 0) ? (
@@ -206,7 +210,7 @@ export default function AdminAnalyticsPage() {
                             <span className="text-sm text-white font-medium">{step.count} <span className="text-gray-500 text-xs">({pct}%)</span></span>
                           </div>
                           <div className="h-2 bg-gray-800">
-                            <div className="h-full bg-amber-600 transition-all" style={{ width: `${pct}%` }} />
+                            <div className="h-full bg-ktip-sun-600 transition-all" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
                       )

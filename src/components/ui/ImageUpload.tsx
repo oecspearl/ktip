@@ -103,7 +103,7 @@ export function ImageUpload({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="p-2 bg-white rounded-full shadow-soft text-ktip-sand-700 hover:text-ktip-ocean-600 transition-colors"
+              className="p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-ktip-ocean-600 transition-colors"
               title="Change image"
             >
               <Camera size={16} />
@@ -112,7 +112,7 @@ export function ImageUpload({
               <button
                 type="button"
                 onClick={handleRemove}
-                className="p-2 bg-white rounded-full shadow-soft text-ktip-sand-700 hover:text-red-500 transition-colors"
+                className="p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-red-500 transition-colors"
                 title="Remove image"
               >
                 <X size={16} />

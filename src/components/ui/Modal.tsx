@@ -98,7 +98,7 @@ export function Modal({ open, onClose, title, description, children, size, class
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative bg-white rounded-3xl shadow-hard w-full mx-4 animate-scale-in max-h-[90vh] overflow-y-auto',
+          'relative bg-ktip-cream rounded-3xl shadow-hard w-full mx-4 animate-scale-in max-h-[90vh] overflow-y-auto',
           sizeStyles[size || 'md'],
           className
         )}

@@ -33,17 +33,17 @@ const iconMap = {
 }
 
 const styleMap = {
-  success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+  success: 'bg-ktip-tropical-50 border-ktip-tropical-200 text-ktip-tropical-900',
   error: 'bg-red-50 border-red-200 text-red-800',
-  warning: 'bg-amber-50 border-amber-200 text-amber-800',
-  info: 'bg-blue-50 border-blue-200 text-blue-800',
+  warning: 'bg-ktip-sun-50 border-ktip-sun-200 text-ktip-sun-800',
+  info: 'bg-ktip-ocean-50 border-ktip-ocean-200 text-ktip-ocean-800',
 }
 
 const iconColorMap = {
-  success: 'text-emerald-500',
+  success: 'text-ktip-tropical-500',
   error: 'text-red-500',
-  warning: 'text-amber-500',
-  info: 'text-blue-500',
+  warning: 'text-ktip-sun-500',
+  info: 'text-ktip-ocean-500',
 }
 
 export const ToastProvider = ({ children }: PropsWithChildren) => {

@@ -8,6 +8,7 @@ import { useToast } from '../../../contexts/ToastContext'
 import type { Integration } from '../../../types'
 import { Puzzle, Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { PageHero } from '../../../components/layout/PageHero'
 import { INTEGRATION_CATEGORY_LABELS } from '../../integrations/IntegrationsPage'
 
 const EMPTY_FORM = {
@@ -103,31 +104,22 @@ export default function AdminIntegrationsPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <div className="flex items-center gap-1.5 text-sm text-ktip-sand-500 mb-2">
-            <span>Administration</span>
-            <span>/</span>
-            <span className="text-ktip-sand-900 font-medium">Integrations</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
-              <Puzzle size={20} className="text-ktip-ocean-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold text-ktip-sand-900">Integration Directory</h1>
-              <p className="text-ktip-sand-500 text-sm">Curate external tools shown at /integrations</p>
-            </div>
-          </div>
-        </div>
-        <Button onClick={openCreate} icon={<Plus size={16} />}>
-          Add Integration
-        </Button>
-      </div>
+      <PageHero
+        inset
+        compact
+        eyebrow="Administration"
+        title="Integration Directory"
+        subtitle="Curate external tools shown at /integrations"
+        imageSeed="admin-integrations"
+        actions={
+          <Button onClick={openCreate} icon={<Plus size={16} />}>
+            Add Integration
+          </Button>
+        }
+      />
 
       {/* List */}
-      <div className="bg-white rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
+      <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
@@ -175,7 +167,7 @@ export default function AdminIntegrationsPage() {
                     disabled={mutating}
                     className={`p-2 rounded-lg transition-colors ${
                       integration.is_published
-                        ? 'text-green-600 hover:bg-green-50'
+                        ? 'text-ktip-tropical-700 hover:bg-ktip-tropical-50'
                         : 'text-ktip-sand-400 hover:bg-ktip-sand-100'
                     }`}
                     title={integration.is_published ? 'Unpublish' : 'Publish'}
@@ -238,7 +230,7 @@ export default function AdminIntegrationsPage() {
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-white"
+                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
               >
                 {Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => (
                   <option value={value} key={value}>{label}</option>

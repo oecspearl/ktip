@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { Stepper } from '../../components/proposals/Stepper'
 import { StepForm } from '../../components/proposals/StepForm'
 import { ProposalPreview } from '../../components/proposals/ProposalPreview'
@@ -12,6 +12,7 @@ import { PROPOSAL_TYPE_LABELS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { SaveStatusBadge } from '../../components/proposals/SaveStatusBadge'
+import { PageHero } from '../../components/layout/PageHero'
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,7 +23,6 @@ import {
   GraduationCap,
   Building,
   Loader2,
-  ChevronRight,
 } from 'lucide-react'
 import type { ProposalType } from '../../types'
 
@@ -32,7 +32,7 @@ const PROPOSAL_TYPE_CARDS: { type: ProposalType; label: string; description: str
     label: 'Funding / Grant',
     description: 'Request funding for initiatives with clear goals, budgets, and impact metrics.',
     icon: FileText,
-    color: 'text-purple-600',
+    color: 'text-ktip-ocean-600',
   },
   {
     type: 'project',
@@ -46,7 +46,7 @@ const PROPOSAL_TYPE_CARDS: { type: ProposalType; label: string; description: str
     label: 'Research',
     description: 'Design a research study with methodology, expected outcomes, and dissemination.',
     icon: GraduationCap,
-    color: 'text-indigo-600',
+    color: 'text-ktip-ocean-600',
   },
   {
     type: 'business',
@@ -63,8 +63,8 @@ interface TypeSelectionProps {
 
 function TypeSelection({ onSelect }: TypeSelectionProps) {
   return (
-    <div className="bg-white py-12">
-      <div className="max-w-3xl mx-auto px-4">
+    <div className="bg-ktip-sand-50 py-12">
+      <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-xl font-bold text-ktip-sand-900 font-display">Choose Proposal Type</h2>
           <p className="text-sm text-ktip-sand-500 mt-2">
@@ -304,42 +304,35 @@ export default function CreateProposalPage() {
 
   return (
     <>
-      {/* Dark Hero */}
-      <div className="bg-gray-800 min-h-[180px] flex items-center">
-        <div className="container mx-auto px-4 flex items-center justify-between w-full">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Create Proposal</p>
-            <h1 className="text-3xl font-display font-bold text-white">
-              {selectedType ? `${PROPOSAL_TYPE_LABELS[selectedType]} Wizard` : 'New Proposal'}
-            </h1>
-            {projectTitle && (
-              <p className="text-xs text-ktip-ocean-400 font-medium mt-1">
-                For project: {projectTitle}
-              </p>
-            )}
-            {selectedType && (
-              <p className="text-sm text-gray-400 mt-1 flex items-center">
-                Step {currentStep + 1} of {totalSteps}
-                <SaveStatusBadge status={autoSave.status} />
-              </p>
-            )}
-          </div>
-          <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={14} />
-            <Link to="/proposals" className="hover:text-white transition-colors">Proposals</Link>
-            <ChevronRight size={14} />
-            <span className="text-gray-200">Create</span>
-          </nav>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Create Proposal"
+        title={selectedType ? `${PROPOSAL_TYPE_LABELS[selectedType]} Wizard` : 'New Proposal'}
+        imageSeed="proposals"
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Proposals', href: '/proposals' },
+          { label: 'Create' },
+        ]}
+      >
+        {projectTitle && (
+          <p className="text-xs text-ktip-nav-accent font-medium">
+            For project: {projectTitle}
+          </p>
+        )}
+        {selectedType && (
+          <p className="text-sm text-white/70 mt-1 flex items-center">
+            Step {currentStep + 1} of {totalSteps}
+            <SaveStatusBadge status={autoSave.status} />
+          </p>
+        )}
+      </PageHero>
 
       {/* Type selection or wizard */}
       {!selectedType ? (
         <TypeSelection onSelect={handleSelectType} />
       ) : (
-        <div className="bg-white py-12">
-          <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-ktip-sand-50 py-12">
+          <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
             {/* Stepper */}
             <div className="border border-gray-200 rounded-2xl p-4 mb-6">
               <Stepper
@@ -444,7 +437,7 @@ export default function CreateProposalPage() {
                     type="button"
                     onClick={handleComplete}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-white rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-brand-navy rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
                   >
                     {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                     Complete Proposal

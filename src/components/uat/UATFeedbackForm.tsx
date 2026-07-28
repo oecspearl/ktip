@@ -469,9 +469,9 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
         {/* Step 3: Open Feedback */}
         {step === 'open_feedback' && (
           <div className="space-y-6">
-            <div className="bg-purple-50 rounded-xl px-4 py-3">
-              <h3 className="font-display font-semibold text-purple-700">Open Feedback</h3>
-              <p className="text-xs text-purple-600 mt-0.5">
+            <div className="bg-ktip-ocean-50 rounded-xl px-4 py-3">
+              <h3 className="font-display font-semibold text-ktip-ocean-700">Open Feedback</h3>
+              <p className="text-xs text-ktip-ocean-600 mt-0.5">
                 Share any additional thoughts to help us improve.
               </p>
             </div>

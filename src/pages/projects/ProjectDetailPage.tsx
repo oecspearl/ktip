@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
+import { DetailsList } from '../../components/shared/DetailsList'
 import { LikeButton } from '../../components/projects/LikeButton'
 import { FollowButton } from '../../components/projects/FollowButton'
 import { CommentSection } from '../../components/projects/CommentSection'
@@ -19,13 +20,15 @@ import {
   FileText,
   Plus,
   Search,
-  ChevronRight,
+  Inbox,
   Star,
   Eye,
 } from 'lucide-react'
 import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { PageHero } from '../../components/layout/PageHero'
+import { projectCategoryIcon } from '../../lib/category-icons'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -75,22 +78,19 @@ export default function ProjectDetailPage() {
 
   const getCategoryLabel = (category: string | null) => {
     const cat = PROJECT_CATEGORIES.find((c) => c.value === category)
-    return cat ? `${cat.icon} ${cat.label}` : category
+    return cat ? cat.label : category
   }
 
-  const getCategoryIcon = (category: string | null) => {
-    const cat = PROJECT_CATEGORIES.find((c) => c.value === category)
-    return cat?.icon || '✨'
-  }
+  const CategoryIcon = projectCategoryIcon(project?.category)
 
   // Sidebar search
   const [sidebarSearch, setSidebarSearch] = useState('')
 
   if (projectLoading || !project) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">📭</span>
+          <Inbox size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
           Project Not Found
@@ -110,70 +110,58 @@ export default function ProjectDetailPage() {
 
   return (
     <>
-      {/* === Dark Hero Header Band === */}
-      <div
-        className="relative min-h-[180px] flex items-center bg-gray-800 bg-cover bg-center"
-        style={project.image_url ? { backgroundImage: `url(${project.image_url})` } : {}}
-      >
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gray-900/80" />
-
-        <div className="relative container mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Project Detail</p>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-                {project.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className={PHASE_COLORS[project.phase]}>
-                  {PHASE_LABELS[project.phase]}
-                </Badge>
-                {project.category && (
-                  <span className="text-sm text-gray-300">
-                    {getCategoryLabel(project.category)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {isAdmin && (
-                <button
-                  onClick={toggleFeatured}
-                  disabled={togglingFeatured}
-                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
-                    project.is_featured
-                      ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  } ${togglingFeatured ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <Star size={14} className={project.is_featured ? 'fill-current' : ''} />
-                  {project.is_featured ? 'Featured' : 'Feature'}
+      <PageHero
+        eyebrow="Project Detail"
+        title={project.title}
+        image={project.image_url}
+        imageSeed={project.id}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Projects', href: '/projects' },
+          { label: truncate(project.title, 30) },
+        ]}
+        actions={
+          <>
+            {isAdmin && (
+              <button
+                onClick={toggleFeatured}
+                disabled={togglingFeatured}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+                  project.is_featured
+                    ? 'bg-ktip-sun-500 text-white hover:bg-ktip-sun-600'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                } ${togglingFeatured ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <Star size={14} className={project.is_featured ? 'fill-current' : ''} />
+                {project.is_featured ? 'Featured' : 'Feature'}
+              </button>
+            )}
+            {canEdit && (
+              <Link to={`/projects/${params.id}/edit`}>
+                <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                  <Edit size={14} />
+                  Edit
                 </button>
-              )}
-              {canEdit && (
-                <Link to={`/projects/${params.id}/edit`}>
-                  <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
-                    <Edit size={14} />
-                    Edit
-                  </button>
-                </Link>
-              )}
-              <nav className="text-sm text-gray-400 hidden md:block" aria-label="Breadcrumb">
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <Link to="/projects" className="hover:text-white transition-colors">Projects</Link>
-                <span className="mx-1.5"><ChevronRight size={12} className="inline" /></span>
-                <span className="text-gray-300">{truncate(project.title, 30)}</span>
-              </nav>
-            </div>
-          </div>
+              </Link>
+            )}
+          </>
+        }
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className={PHASE_COLORS[project.phase]}>
+            {PHASE_LABELS[project.phase]}
+          </Badge>
+          {project.category && (
+            <span className="text-sm text-white/80">
+              {getCategoryLabel(project.category)}
+            </span>
+          )}
         </div>
-      </div>
+      </PageHero>
 
       {/* === Two-Column Content Area === */}
-      <div className="bg-white py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
@@ -198,8 +186,8 @@ export default function ProjectDetailPage() {
                 height={384}
               />
             ) : (
-              <div className="w-full max-h-96 h-64 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center text-7xl mb-6">
-                {getCategoryIcon(project.category)}
+              <div className="w-full max-h-96 h-64 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center mb-6">
+                <CategoryIcon size={64} className="text-ktip-ocean-500" />
               </div>
             )}
 
@@ -218,6 +206,17 @@ export default function ProjectDetailPage() {
             {project.description && (
               <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap mb-6">
                 {project.description}
+              </div>
+            )}
+
+            {/* Additional Details */}
+            {project.details && project.details.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                  Additional Details
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-3">Key facts at a glance</p>
+                <DetailsList details={project.details} />
               </div>
             )}
 
@@ -308,7 +307,7 @@ export default function ProjectDetailPage() {
                         navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
                       }
                     }}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                   />
                 </div>
                 <button
@@ -340,8 +339,11 @@ export default function ProjectDetailPage() {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="w-14 h-14 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center text-xl shrink-0">
-                          {getCategoryIcon(p.category)}
+                        <div className="w-14 h-14 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center shrink-0">
+                          {(() => {
+                            const Icon = projectCategoryIcon(p.category)
+                            return <Icon size={20} className="text-ktip-ocean-600" />
+                          })()}
                         </div>
                       )}
                       <div className="min-w-0">

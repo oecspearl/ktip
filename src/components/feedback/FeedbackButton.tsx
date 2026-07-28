@@ -17,7 +17,7 @@ export function FeedbackButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-4 py-3 bg-white border border-ktip-sand-200 text-ktip-sand-700 rounded-full shadow-lg hover:shadow-xl hover:text-ktip-ocean-600 transition-all text-sm font-semibold"
+        className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-4 py-3 bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-700 rounded-full shadow-lg hover:shadow-xl hover:text-ktip-ocean-600 transition-all text-sm font-semibold"
         aria-label="Send feedback"
       >
         <MessageCircle size={18} />

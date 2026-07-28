@@ -174,8 +174,8 @@ export function SecuritySettingsTab() {
       {/* Change Email */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-            <Mail size={20} className="text-indigo-600" />
+          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
+            <Mail size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
             <h2 className="text-lg font-display font-bold text-ktip-sand-900">Change Email</h2>
@@ -273,7 +273,7 @@ export function SecuritySettingsTab() {
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder="DELETE"
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-red-500 focus:ring-red-500/20 focus:bg-white"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-red-500 focus:ring-red-500/20 focus:bg-ktip-cream"
             />
           </div>
 

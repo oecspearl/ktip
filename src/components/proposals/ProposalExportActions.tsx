@@ -38,7 +38,7 @@ export function ProposalExportActions({ type, title, data }: ProposalExportActio
         onClick={handleCopy}
         className="inline-flex items-center gap-2 px-4 py-2 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
       >
-        {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+        {copied ? <Check size={16} className="text-ktip-tropical-500" /> : <Copy size={16} />}
         {copied ? 'Copied!' : 'Copy Markdown'}
       </button>
 

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
-import type { Project, ProjectComment } from '../types'
+import type { DetailEntry, Project, ProjectComment } from '../types'
 
 export function useProjects(filters?: {
   category?: string
@@ -144,11 +144,14 @@ export function useCreateProject() {
   const mutation = useMutation({
     mutationFn: async (projectData: {
       title: string
+      summary?: string | null
       description?: string
       category?: string
       phase?: string
       hashtags?: string[]
       is_public?: boolean
+      is_climate_action?: boolean
+      details?: DetailEntry[]
       owner_id: string
     }) => {
       const { data, error } = await supabase
