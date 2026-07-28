@@ -204,22 +204,32 @@ export default function DiscoverPage() {
   const [paused, setPaused] = useState(false)
 
   const count = items.length
-  const next = useCallback(() => {
-    if (count > 1) setIndex((i) => (i + 1) % count)
-  }, [count])
-  const prev = useCallback(() => {
-    if (count > 1) setIndex((i) => (i - 1 + count) % count)
-  }, [count])
+  // Staged selection: a card only ever expands from the RIGHTMOST slot.
+  // Picking the on-deck card (index+1 — what auto-rotate does) expands right
+  // away; picking any other card stores it as pending so the strip first
+  // rotates it into the rightmost slot, and only then does it become the hero.
+  const [pendingIndex, setPendingIndex] = useState<number | null>(null)
+  const select = useCallback(
+    (i: number) => {
+      if (count < 2 || i === index) return
+      if (pendingIndex === null && i === (index + 1) % count) setIndex(i)
+      else setPendingIndex(i)
+    },
+    [count, index, pendingIndex],
+  )
+  const next = useCallback(() => select((index + 1) % count), [select, index, count])
+  const prev = useCallback(() => select((index - 1 + count) % count), [select, index, count])
 
   useEffect(() => {
-    if (paused || count < 2) return
+    if (paused || count < 2 || pendingIndex !== null) return
     const interval = setInterval(next, 6000)
     return () => clearInterval(interval)
-  }, [paused, next, count])
+  }, [paused, next, count, pendingIndex])
 
   // Clamp selection when the list shrinks or mode changes
   useEffect(() => {
     setIndex((i) => (count === 0 ? 0 : Math.min(i, count - 1)))
+    setPendingIndex(null)
   }, [count])
 
   // --- Ring carousel: on-deck queue ---
@@ -253,7 +263,10 @@ export default function DiscoverPage() {
     if (!ring) return 0
     const base = pos < count ? pos + count : pos
     const cur = base % count
-    const target = (((count - slots - index - 1) % count) + count) % count
+    const target =
+      pendingIndex !== null
+        ? (((count - slots - pendingIndex) % count) + count) % count // pending card → rightmost slot
+        : (((count - slots - index - 1) % count) + count) % count // on-deck (index+1) → rightmost slot
     return base - ((cur - target + count) % count)
   })()
 
@@ -274,6 +287,21 @@ export default function DiscoverPage() {
     setTrackAnimating(true)
     setPos(targetPos)
   }, [targetPos, pos, ring, count, trackAnimating])
+
+  // Once the pending card has rotated into the rightmost slot, promote it:
+  // index changes, the ghost expands from the rightmost rect, and the strip
+  // takes its final settle step — rotate first, expand second.
+  useEffect(() => {
+    if (pendingIndex === null) return
+    if (pendingIndex >= count) {
+      setPendingIndex(null)
+      return
+    }
+    if (targetPos === pos && !trackAnimating) {
+      setIndex(pendingIndex)
+      setPendingIndex(null)
+    }
+  }, [pendingIndex, targetPos, pos, trackAnimating, count])
 
   // Keep the measured card width in sync (w-28 → sm:w-32 breakpoint)
   const cardRefs = useRef(new Map<number, HTMLElement>())
@@ -301,6 +329,7 @@ export default function DiscoverPage() {
   const switchMode = (m: Mode) => {
     setMode(m)
     setIndex(0)
+    setPendingIndex(null)
   }
 
   const active: HeroItem | null = count > 0 ? items[index] : null
@@ -582,7 +611,7 @@ export default function DiscoverPage() {
                         transition: hidden ? 'none' : undefined,
                         pointerEvents: hidden ? 'none' : undefined,
                       }}
-                      onClick={() => setIndex(itemIdx)}
+                      onClick={() => select(itemIdx)}
                       className={`group text-left shrink-0 w-28 sm:w-32 rounded-lg overflow-hidden transition-all duration-300 ${
                         isActive
                           ? 'bg-ktip-cream shadow-hard -translate-y-1'

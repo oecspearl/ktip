@@ -101,18 +101,8 @@ export function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [darkMode, setDarkMode] = useThemeMode()
 
-  // Transparent navbar over the page hero; turns solid on scroll.
-  // Every page now opens with a dark photo hero, so this applies everywhere.
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const overHero = !scrolled && !mobileMenuOpen
+  // Navbar is always transparent over page content; it only gets a dark
+  // backdrop while the mobile menu is open so menu links stay readable.
 
   // Auto-hide on scroll down, reappear on scroll up or top-edge hover
   const [navHidden, setNavHidden] = useState(false)
@@ -246,9 +236,9 @@ export function Navbar() {
       className={cn(
         'top-0 z-40 transition-all duration-300 fixed inset-x-0',
         hidden ? '-translate-y-full' : 'translate-y-0',
-        overHero
-          ? 'bg-transparent border-b border-transparent'
-          : 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
+        mobileMenuOpen
+          ? 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
+          : 'bg-transparent border-b border-transparent'
       )}
       style={{ paddingTop: '1rem', paddingBottom: '1rem' }}
     >
