@@ -441,7 +441,7 @@ export default function DiscoverPage() {
   }
   return (
     <>
-      <section ref={sectionRef} className="sticky top-0 min-h-screen bg-gray-900 overflow-hidden">
+      <section ref={sectionRef} className="sticky top-0 h-screen bg-gray-900 overflow-hidden">
         {/* Full-bleed hero image — follows the selected item */}
         <img
           src={shownSrc}
@@ -496,7 +496,7 @@ export default function DiscoverPage() {
                 <img src={anim.src} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="px-3 py-2.5">
-                <p className="text-sm font-display font-semibold line-clamp-2 text-white">
+                <p className="text-sm font-display font-semibold line-clamp-2 min-h-10 text-white">
                   {anim.title}
                 </p>
                 <p className="text-[10px] mt-0.5 uppercase tracking-wider truncate text-white/50">
@@ -509,7 +509,7 @@ export default function DiscoverPage() {
 
 
         {/* Content — pt clears the fixed transparent navbar */}
-        <div className="relative container mx-auto px-6 md:px-12 flex flex-col min-h-screen pt-28 md:pt-32 pb-8 md:pb-10">
+        <div className="relative container mx-auto px-6 md:px-12 flex flex-col h-full pt-28 md:pt-32 pb-8 md:pb-10">
           {/* Counter */}
           <div className="flex items-center justify-end">
             {count > 0 && (
@@ -520,7 +520,7 @@ export default function DiscoverPage() {
           </div>
 
           {/* Active item content — right side */}
-          <div className="flex-1 flex flex-col justify-center items-start md:items-end">
+          <div className="flex-1 min-h-0 flex flex-col justify-center items-start md:items-end">
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
@@ -694,7 +694,7 @@ export default function DiscoverPage() {
                       </div>
                       <div className="px-3 py-2.5">
                         <p
-                          className={`text-sm font-display font-semibold line-clamp-2 ${
+                          className={`text-sm font-display font-semibold line-clamp-2 min-h-10 ${
                             isActive ? 'text-ktip-sand-900' : 'text-white'
                           }`}
                         >
