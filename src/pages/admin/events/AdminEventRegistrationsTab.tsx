@@ -201,7 +201,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
                   <th className="text-right px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ktip-sand-100">
+              <tbody className="divide-y divide-ktip-sand-100 stagger-rows">
                 {filteredRegistrations.map((reg) => (
                   <Fragment key={reg.id}>
                     <tr className="hover:bg-ktip-sand-50 transition-colors">

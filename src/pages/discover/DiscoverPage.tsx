@@ -793,7 +793,7 @@ export default function DiscoverPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:auto-rows-[minmax(10.5rem,auto)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:auto-rows-[minmax(10.5rem,auto)] stagger-children">
             {FEATURES.map((f) => (
               <Link
                 key={f.title}

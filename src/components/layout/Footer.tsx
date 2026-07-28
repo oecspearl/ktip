@@ -30,7 +30,7 @@ const footerColumns: FooterColumn[] = [
       { label: 'Forums', href: '/forums' },
       { label: 'Directory', href: '/directory' },
       { label: 'Collaborate', href: '/collaborate' },
-      { label: 'Resources', href: '/resources' },
+      { label: 'Resources & Integrations', href: '/resources' },
     ],
   },
   {
@@ -66,7 +66,7 @@ export function Footer() {
           {/* Logo & Mission */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <img src="/ktip%20logo%20no%20bg.png" alt="KTIP Logo" className="w-12 h-12 object-contain" />
+              <img src="/KTIP%20LOGO.png" alt="KTIP Logo" className="w-12 h-12 object-contain" />
               <div>
                 <h3 className="text-xl font-display font-extrabold tracking-tight text-white">
                   {APP_NAME}

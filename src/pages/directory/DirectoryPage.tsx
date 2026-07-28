@@ -125,14 +125,14 @@ export default function DirectoryPage() {
       <div className="bg-ktip-sand-50 pb-16">
         <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
           {loading || !members ? (
-            <SkeletonGrid count={6} />
+            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : members.length > 0 ? (
             <div>
               <p className="text-sm text-gray-500 mb-6">
                 Found {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
                 {members.map((member) => (
                   <BentoCard
                     key={member.id}

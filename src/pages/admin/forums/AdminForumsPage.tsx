@@ -136,7 +136,7 @@ export default function AdminForumsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
             {boards.map((board) => {
               const IconComp = boardIconMap[board.icon || 'MessageSquare'] || MessageSquare
               return (
@@ -252,7 +252,7 @@ export default function AdminForumsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200 stagger-rows">
                     {posts.map((post) => (
                       <tr key={post.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-3">

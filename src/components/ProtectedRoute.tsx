@@ -10,7 +10,7 @@ export const ProtectedRoute = () => {
       <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
         <div className="text-center">
           <img
-            src="/ktip%20logo%20no%20bg.png"
+            src="/KTIP%20LOGO.png"
             alt="KTIP Logo"
             className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
           />
@@ -22,6 +22,12 @@ export const ProtectedRoute = () => {
 
   if (!auth.user) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  // OAuth users who never finished onboarding have no role yet — send them
+  // back to complete their profile (email signups always set a role).
+  if (auth.profile && auth.profile.roles.length === 0) {
+    return <Navigate to="/onboarding" replace />
   }
 
   return <Outlet />

@@ -294,7 +294,7 @@ export default function AdminUsersPage() {
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 stagger-rows">
                 {users.map((user) => (
                   <tr className="hover:bg-gray-50 transition-colors" key={user.id}>
                     {/* User */}

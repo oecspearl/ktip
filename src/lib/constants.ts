@@ -102,6 +102,15 @@ export const EVENT_TYPE_COLORS: Record<string, string> = {
   demo_day: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
 }
 
+// Solid accent colors for calendar day dots / compact-card accent bars
+export const EVENT_TYPE_DOT_COLORS: Record<string, string> = {
+  hackathon: 'bg-ktip-ocean-500',
+  workshop: 'bg-ktip-tropical-500',
+  meetup: 'bg-ktip-sun-500',
+  conference: 'bg-ktip-ocean-500',
+  demo_day: 'bg-ktip-tropical-500',
+}
+
 // Event Statuses
 export const EVENT_STATUSES = {
   DRAFT: 'draft',
@@ -188,6 +197,7 @@ export const GRANT_TYPE_COLORS: Record<string, string> = {
 
 // Grant Application Statuses
 export const GRANT_APPLICATION_STATUS_LABELS: Record<string, string> = {
+  draft: 'Draft',
   pending: 'Pending',
   under_review: 'Under Review',
   approved: 'Approved',
@@ -195,6 +205,7 @@ export const GRANT_APPLICATION_STATUS_LABELS: Record<string, string> = {
 }
 
 export const GRANT_APPLICATION_STATUS_COLORS: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-600 border-gray-200',
   pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   under_review: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   approved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
@@ -253,6 +264,8 @@ export const ROUTES = {
   CREATE_EVENT: '/events/new',
   GRANTS: '/grants',
   GRANT_DETAIL: (id: string) => `/grants/${id}`,
+  GRANT_APPLY: (id: string) => `/grants/${id}/apply`,
+  MY_APPLICATIONS: '/grants/my-applications',
   MESSAGES: '/messages',
   FORUMS: '/forums',
   FORUM_BOARD: (slug: string) => `/forums/${slug}`,
@@ -263,10 +276,6 @@ export const ROUTES = {
   SETTINGS: '/settings',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
-  PROPOSALS: '/proposals',
-  CREATE_PROPOSAL: '/proposals/new',
-  PROPOSAL_DETAIL: (id: string) => `/proposals/${id}`,
-  SHARED_PROPOSAL: (token: string) => `/proposals/shared/${token}`,
   COLLABORATE: '/collaborate',
   WHITEBOARD: '/collaborate/whiteboard',
   DOCUMENT_EDITOR: '/collaborate/document',
@@ -365,31 +374,6 @@ export const COLLABORATION_LABELS: Record<string, string> = Object.fromEntries(
 // Selecting this clears all other collaboration options
 export const COLLAB_EXCLUSIVE_VALUE = 'not_seeking'
 
-// Proposal Types
-export const PROPOSAL_TYPE_LABELS: Record<string, string> = {
-  funding: 'Funding/Grant Proposal',
-  project: 'Project Proposal',
-  research: 'Research Proposal',
-  business: 'Business Proposal',
-}
-
-export const PROPOSAL_TYPE_COLORS: Record<string, string> = {
-  funding: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  project: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  research: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  business: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-}
-
-export const PROPOSAL_STATUS_LABELS: Record<string, string> = {
-  draft: 'Draft',
-  completed: 'Completed',
-}
-
-export const PROPOSAL_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
-  completed: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-}
-
 // Resource Types
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   article: 'Article',
@@ -417,6 +401,15 @@ export const RESOURCE_CATEGORY_LABELS: Record<string, string> = {
   environment: 'Environment',
   climate_action: 'Climate Action',
   business: 'Business',
+  other: 'Other',
+}
+
+export const INTEGRATION_CATEGORY_LABELS: Record<string, string> = {
+  funding: 'Funding',
+  productivity: 'Productivity',
+  government: 'Government',
+  education: 'Education',
+  developer: 'Developer Tools',
   other: 'Other',
 }
 

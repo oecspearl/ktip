@@ -254,7 +254,7 @@ Legend: ✅ **Present** · 🟡 **Partial** · ❌ **Absent**
 
 ## Critical Issues Discovered
 
-1. **Proposals feature broken** — [src/hooks/useProposals.ts](src/hooks/useProposals.ts) and full UI ([CreateProposalPage.tsx](src/pages/proposals/CreateProposalPage.tsx), [ProposalsPage.tsx](src/pages/proposals/ProposalsPage.tsx), [ProposalDetailPage.tsx](src/pages/proposals/ProposalDetailPage.tsx)) reference a `proposals` table **not present in any migration**. Feature will fail at runtime.
+1. ~~Proposals feature broken~~ — **Resolved**: the standalone proposals feature was removed; its wizard was repurposed into the 5-step grant application flow ([GrantApplicationPage.tsx](src/pages/grants/GrantApplicationPage.tsx), migration `045_grant_application_wizard.sql`).
 2. **Documents feature broken** — [src/hooks/useDocuments.ts](src/hooks/useDocuments.ts) and [DocumentEditorPage.tsx](src/pages/collaborate/DocumentEditorPage.tsx) reference `documents` and `document_shares` tables **not present in migrations**.
 3. **No CI/CD** — no `.github/workflows/`; tests not run automatically.
 4. **No error/observability tooling** — no Sentry, Datadog, or similar.
@@ -277,7 +277,7 @@ Legend: ✅ **Present** · 🟡 **Partial** · ❌ **Absent**
 
 ## Recommended Next Steps (priority order)
 
-1. **Ship missing migrations** for `proposals`, `documents`, `document_shares` so existing UI code stops failing.
+1. **Ship missing migrations** for `documents`, `document_shares` so existing UI code stops failing.
 2. **Add legal pages** (`/privacy`, `/terms`) + cookie consent banner — fastest path to GDPR baseline.
 3. **Wire error tracking** (Sentry has a free tier and 1-line SolidJS setup).
 4. **Add CI** — single GitHub Actions workflow running `tsc`, `vitest`, `vite build`.

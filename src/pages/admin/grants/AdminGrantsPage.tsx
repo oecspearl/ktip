@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
+import { Modal } from '../../../components/ui/Modal'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
+import { ApplicationPreview } from '../../../components/grants/application/ApplicationPreview'
+import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
 import { useGrants, useUpdateGrant } from '../../../hooks/useGrants'
 import { useAdminGrantApplications, useAdminApplicationActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
@@ -14,7 +17,7 @@ import {
 import { format } from 'date-fns'
 import { cn } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
-import type { Grant, GrantApplicationStatus } from '../../../types'
+import type { Grant, GrantApplication, GrantApplicationStatus } from '../../../types'
 import {
   DollarSign,
   Plus,
@@ -52,6 +55,13 @@ export default function AdminGrantsPage() {
     status: GrantApplicationStatus
     applicantName: string
   } | null>(null)
+
+  // Application detail viewer
+  const [viewingApplication, setViewingApplication] = useState<GrantApplication | null>(null)
+
+  // New wizard applications match the step field names; legacy rows used ad-hoc keys
+  const isWizardApplication = (data: Record<string, any>) =>
+    GRANT_APPLICATION_STEPS.some((step) => step.fields.some((f) => data[f.name]))
 
   const handleOpenCreate = () => {
     setEditingGrant(null)
@@ -196,7 +206,7 @@ export default function AdminGrantsPage() {
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200 stagger-rows">
                     {grants.map((grant) => (
                       <tr className="hover:bg-gray-50 transition-colors" key={grant.id}>
                         <td className="px-4 py-3">
@@ -328,7 +338,7 @@ export default function AdminGrantsPage() {
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200 stagger-rows">
                     {applications.map((application) => (
                       <tr className="hover:bg-gray-50 transition-colors" key={application.id}>
                         <td className="px-4 py-3">
@@ -356,6 +366,14 @@ export default function AdminGrantsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setViewingApplication(application)}
+                              className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
+                              title="View application"
+                            >
+                              <Eye size={16} />
+                            </button>
                             {application.status !== 'approved' && (
                               <button
                                 type="button"
@@ -410,6 +428,45 @@ export default function AdminGrantsPage() {
           </div>
         </div>
       )}
+
+      {/* Application Detail Modal */}
+      <Modal
+        open={!!viewingApplication}
+        onClose={() => setViewingApplication(null)}
+        title="Application Details"
+        description={
+          viewingApplication
+            ? `${viewingApplication.applicant?.display_name || 'Unknown applicant'} — ${viewingApplication.grant?.title || 'Unknown grant'}`
+            : undefined
+        }
+        size="lg"
+      >
+        {viewingApplication && (
+          <div className="max-h-[70vh] overflow-y-auto">
+            {isWizardApplication(viewingApplication.application_data) ? (
+              <ApplicationPreview
+                title={viewingApplication.application_data.title || 'Untitled Application'}
+                grantTitle={viewingApplication.grant?.title}
+                data={viewingApplication.application_data}
+              />
+            ) : (
+              // Legacy applications submitted before the wizard
+              <div className="space-y-3">
+                {Object.entries(viewingApplication.application_data).map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-sm font-medium text-ktip-sand-600">
+                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())}
+                    </p>
+                    <p className="text-sm text-ktip-sand-900 whitespace-pre-wrap">
+                      {String(value || '-')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
 
       {/* Grant Form Modal */}
       <AdminGrantFormModal

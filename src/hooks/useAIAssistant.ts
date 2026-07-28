@@ -33,17 +33,15 @@ ${nameCtx}${roleCtx}
 
 KTIP has these features:
 
-PROJECTS: Users create, browse, and edit innovation projects. Projects have categories (Technology, Healthcare, Education, Agriculture, Environment), phases (Concept, Prototype, Funding, Launch), hashtags, and can be linked to proposals. Project owners can receive comments and likes.
+PROJECTS: Users create, browse, and edit innovation projects. Projects have categories (Technology, Healthcare, Education, Agriculture, Environment), phases (Concept, Prototype, Funding, Launch), and hashtags. Project owners can receive comments and likes.
 
 EVENTS: Create and browse hackathons, workshops, meetups, conferences, and demo days. Events can be virtual or in-person with location, dates, and capacity.
 
-GRANTS & FUNDING: Browse grant opportunities with amounts, deadlines, and eligibility. Logged-in users can apply and track applications from "My Applications".
+GRANTS & FUNDING: Browse grant opportunities with amounts, deadlines, and eligibility. Logged-in users apply through a guided 5-step application wizard (Basics, Summary & Problem, Solution & Plan, Budget & Team, Impact & Review) with AI-powered content suggestions, AI review scoring, auto-save drafts, and rich text editing. Applications are tracked from "My Applications", where drafts can be resumed.
 
 FORUMS: Community discussion boards with posts and replies. Browsing is public; posting requires login. Posts can be pinned.
 
 MESSAGES: Real-time direct messaging between users. Requires login.
-
-PROPOSALS: A guided wizard for four proposal types — Funding/Grant, Project, Research, Business. Includes AI-powered content suggestions, AI review scoring, auto-save, rich text editing, shareable links, and PDF/Word export. Proposals can be linked to projects.
 
 COLLABORATION TOOLS: Whiteboard (visual brainstorming), Document Editor (shared writing), Code Editor (coding), Video Conference (video calls). All require login.
 
@@ -69,7 +67,7 @@ function buildWelcomeMessage(userRole?: UserRole | null, userName?: string | nul
     ? ` As a ${ROLE_LABELS[userRole]}, I can help you get the most out of KTIP's features.`
     : ' Whether you are just exploring or already have an account, I am here to help.'
 
-  return `${greeting} I am the KTIP Assistant.${roleHint}\n\nAsk me anything about projects, events, grants, proposals, collaboration tools, or how to use the platform. What can I help you with?`
+  return `${greeting} I am the KTIP Assistant.${roleHint}\n\nAsk me anything about projects, events, grants, grant applications, collaboration tools, or how to use the platform. What can I help you with?`
 }
 
 export function useAIAssistant(options?: {

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'ktip_theme';
+const SYNC_EVENT = 'ktip-theme-change';
 
 /**
  * Light/dark theme mode: toggles the `dark` class on <html>, which flips the
@@ -13,6 +14,13 @@ export function useThemeMode(): [boolean, (dark: boolean) => void] {
     document.documentElement.classList.contains('dark')
   );
 
+  // Keep every mounted instance in sync (e.g. FAB toggle + Settings toggle)
+  useEffect(() => {
+    const onSync = (e: Event) => setDarkState((e as CustomEvent<boolean>).detail);
+    window.addEventListener(SYNC_EVENT, onSync);
+    return () => window.removeEventListener(SYNC_EVENT, onSync);
+  }, []);
+
   const setDark = (on: boolean) => {
     document.documentElement.classList.toggle('dark', on);
     try {
@@ -21,6 +29,7 @@ export function useThemeMode(): [boolean, (dark: boolean) => void] {
       // localStorage unavailable — mode still applies for this session
     }
     setDarkState(on);
+    window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: on }));
   };
 
   return [dark, setDark];

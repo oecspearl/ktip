@@ -12,20 +12,23 @@ import { Mail, Lock, User, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Buildin
 import { signupSchema, signupStep1Schema } from '../../lib/validation'
 import {
   APP_FULL_NAME,
-  SELECTABLE_ROLES,
   CARIBBEAN_COUNTRIES,
   SKILL_SUGGESTIONS,
   INTEREST_SUGGESTIONS,
   LIMITS,
 } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
-import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
+import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
+import { RolePicker } from '../../components/auth/RolePicker'
+import { OAuthButtons } from '../../components/auth/OAuthButtons'
 
 const STEPS = [
-  { number: 1, title: 'Account' },
-  { number: 2, title: 'About You' },
-  { number: 3, title: 'Skills & Collaboration' },
-] as const
+  { title: 'Account', caption: 'Join the Caribbean’s knowledge and innovation network.' },
+  { title: 'About You', caption: 'Tell your story — connect across the OECS.' },
+  { title: 'Skills & Collaboration', caption: 'Find collaborators. Build what’s next.' },
+]
+
+const HEADINGS = ['Create an account', 'About you', 'Skills & collaboration']
 
 export default function SignupPage() {
   const auth = useAuth()
@@ -153,16 +156,27 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthBackdrop wide>
-      <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-2xl mx-auto shadow-lg">
+    <AuthSplitShell
+        step={step}
+        steps={STEPS}
+        heading={emailSent ? 'Check your email' : HEADINGS[step - 1]}
+        subheading={!emailSent && step === 1 ? APP_FULL_NAME : undefined}
+        topLink={
+          emailSent ? undefined : (
+            <>
+              Already have an account?{' '}
+              <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
+                Log in
+              </Link>
+            </>
+          )
+        }
+      >
         {emailSent ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={32} className="text-ktip-tropical-600" />
             </div>
-            <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-              Check your email
-            </h2>
             <p className="text-ktip-sand-600 mb-6 max-w-md mx-auto">
               We've sent a confirmation link to <strong className="text-ktip-sand-800">{email}</strong>. Click the link to verify your account and get started.
             </p>
@@ -172,38 +186,6 @@ export default function SignupPage() {
           </div>
         ) : (
           <>
-            <div className="text-center mb-6">
-              <h1 className="text-4xl font-display font-bold text-ktip-ocean-600 mb-2">
-                Join KTIP
-              </h1>
-              <p className="text-ktip-sand-600">{APP_FULL_NAME}</p>
-            </div>
-
-            {/* Step indicator */}
-            <div className="flex items-center justify-center gap-2 mb-8">
-              {STEPS.map((s, i) => (
-                <div key={s.number} className="flex items-center gap-2">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                        step === s.number
-                          ? 'bg-ktip-ocean-500 text-white'
-                          : step > s.number
-                            ? 'bg-ktip-tropical-500 text-brand-navy'
-                            : 'bg-ktip-sand-100 text-ktip-sand-500'
-                      }`}
-                    >
-                      {step > s.number ? <CheckCircle size={16} /> : s.number}
-                    </div>
-                    <span className="text-xs text-ktip-sand-600 mt-1 whitespace-nowrap">{s.title}</span>
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className={`w-10 h-0.5 mb-5 ${step > s.number ? 'bg-ktip-tropical-400' : 'bg-ktip-sand-200'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-5">
                 {errorMessage}
@@ -211,7 +193,7 @@ export default function SignupPage() {
             )}
 
             {step === 1 && (
-              <div className="space-y-5">
+              <div className="space-y-3">
                 <Input
                   type="text"
                   label="Display Name"
@@ -256,48 +238,30 @@ export default function SignupPage() {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                    I am a... <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {SELECTABLE_ROLES.map((role) => (
-                      <button
-                        key={role.value}
-                        type="button"
-                        onClick={() => {
-                          setSelectedRole(role.value)
-                          markTouched('role')
-                          setErrors((prev) => {
-                            const next = { ...prev }
-                            delete next.role
-                            return next
-                          })
-                        }}
-                        className={`p-4 rounded-xl border-2 text-left transition-all ${
-                          selectedRole === role.value
-                            ? 'border-ktip-ocean-500 bg-ktip-ocean-50'
-                            : 'border-ktip-sand-200 hover:border-ktip-ocean-300'
-                        }`}
-                      >
-                        <div className="font-medium text-ktip-sand-900">{role.label}</div>
-                        <div className="text-sm text-ktip-sand-600 mt-1">{role.description}</div>
-                      </button>
-                    ))}
-                  </div>
-                  {visibleError('role') && (
-                    <p className="mt-2 text-sm text-red-600">{errors.role}</p>
-                  )}
-                </div>
+                <RolePicker
+                  value={selectedRole}
+                  onChange={(value) => {
+                    setSelectedRole(value)
+                    markTouched('role')
+                    setErrors((prev) => {
+                      const next = { ...prev }
+                      delete next.role
+                      return next
+                    })
+                  }}
+                  error={visibleError('role')}
+                />
 
                 <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>
                   Next
                 </Button>
+
+                <OAuthButtons label="Or sign up with" onError={setErrorMessage} />
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <p className="text-sm text-ktip-sand-600 -mt-1">
                   Tell us a bit about yourself. These details are optional — you can add or change them later in Settings.
                 </p>
@@ -360,7 +324,7 @@ export default function SignupPage() {
             )}
 
             {step === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <p className="text-sm text-ktip-sand-600 -mt-1">
                   Help others find and collaborate with you. Optional — editable later in Settings.
                 </p>
@@ -406,16 +370,8 @@ export default function SignupPage() {
                 </div>
               </div>
             )}
-
-            <p className="mt-8 text-center text-sm text-ktip-sand-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
-                Sign in
-              </Link>
-            </p>
           </>
         )}
-      </div>
-    </AuthBackdrop>
+    </AuthSplitShell>
   )
 }

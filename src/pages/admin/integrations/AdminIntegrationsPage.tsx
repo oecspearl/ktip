@@ -9,7 +9,7 @@ import type { Integration } from '../../../types'
 import { Puzzle, Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
-import { INTEGRATION_CATEGORY_LABELS } from '../../integrations/IntegrationsPage'
+import { INTEGRATION_CATEGORY_LABELS } from '../../../lib/constants'
 
 const EMPTY_FORM = {
   name: '',
@@ -126,7 +126,7 @@ export default function AdminIntegrationsPage() {
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
           </div>
         ) : integrations && integrations.length > 0 ? (
-          <div className="divide-y divide-ktip-sand-100">
+          <div className="divide-y divide-ktip-sand-100 stagger-children">
             {integrations.map((integration) => (
               <div key={integration.id} className="flex items-center justify-between gap-3 p-4 hover:bg-ktip-sand-50/50 transition-colors">
                 <div className="flex items-center gap-3 min-w-0">

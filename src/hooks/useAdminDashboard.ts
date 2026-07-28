@@ -255,6 +255,9 @@ export function useAdminGrantApplications(filters?: {
 
     if (filters?.status) {
       query = query.eq('status', filters.status as any)
+    } else {
+      // Drafts are private to the applicant until submitted
+      query = query.neq('status', 'draft')
     }
 
     const { data, error } = await query

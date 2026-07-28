@@ -129,13 +129,13 @@ export default function GrantsPage() {
       <div className="bg-ktip-sand-50 pb-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading || !grants ? (
-            <SkeletonGrid count={6} />
+            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : grants.length > 0 ? (
             <div>
               <p className="text-sm text-gray-500 mb-6">
                 Found {grants.length} grant{grants.length !== 1 ? 's' : ''}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
                 {grants.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
               </div>
             </div>

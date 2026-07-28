@@ -6,19 +6,15 @@ import { LikeButton } from '../../components/projects/LikeButton'
 import { FollowButton } from '../../components/projects/FollowButton'
 import { CommentSection } from '../../components/projects/CommentSection'
 import { TeamWidget } from '../../components/projects/TeamWidget'
-import { ProposalCard } from '../../components/proposals/ProposalCard'
 import { useProject, useProjects, trackProjectView } from '../../hooks/useProjects'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { supabase } from '../../lib/supabase'
-import { useProjectProposals } from '../../hooks/useProposals'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import {
   Share2,
   Edit,
   User,
-  FileText,
-  Plus,
   Search,
   Inbox,
   Star,
@@ -37,7 +33,6 @@ export default function ProjectDetailPage() {
   const toast = useToast()
 
   const { project, loading: projectLoading } = useProject(params.id)
-  const { proposals } = useProjectProposals(params.id)
   const { projects: recentProjects } = useProjects()
   usePageTitle(project?.title)
 
@@ -239,44 +234,6 @@ export default function ProjectDetailPage() {
                 Share
               </button>
             </div>
-
-            {/* Proposals Section — Owner Only */}
-            {isOwner && (
-              <div className="mt-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider">
-                      Linked Proposals
-                    </h3>
-                    <p className="text-ktip-ocean-600 text-xs italic">Proposals connected to this project</p>
-                  </div>
-                  <Link to={`/proposals/new?project=${params.id}`}>
-                    <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
-                      <Plus size={14} />
-                      Create Proposal
-                    </button>
-                  </Link>
-                </div>
-
-                {proposals && proposals.length > 0 ? (
-                  <div className="space-y-4">
-                    {proposals.map((proposal) => (
-                      <ProposalCard key={proposal.id} proposal={proposal} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                      <FileText size={22} className="text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-500 mb-1">No proposals yet</p>
-                    <p className="text-xs text-gray-400">
-                      Create a funding, project, research, or business proposal for this project.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Comments Section */}
             <div className="mt-10">

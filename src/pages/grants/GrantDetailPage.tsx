@@ -1,12 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { Modal } from '../../components/ui/Modal'
-import { Input } from '../../components/ui/Input'
-import { Textarea } from '../../components/ui/Textarea'
 import { DetailsList } from '../../components/shared/DetailsList'
-import { useGrant, useApplyForGrant } from '../../hooks/useGrants'
+import { useGrant, useApplyForGrant, useDraftApplication } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   DollarSign,
@@ -30,90 +27,30 @@ export default function GrantDetailPage() {
 
   const { grant, loading: grantLoading } = useGrant(params.id)
   usePageTitle(grant?.title)
-  const {
-    applyForGrant,
-    checkApplication,
-    getApplicationCount,
-    loading: applicationLoading,
-  } = useApplyForGrant()
+  const { getApplicationCount } = useApplyForGrant()
+  const { application, loading: applicationChecking } = useDraftApplication(
+    params.id,
+    auth.user?.id
+  )
 
-  const [hasApplied, setHasApplied] = useState(false)
   const [applicationCount, setApplicationCount] = useState(0)
-  const [checking, setChecking] = useState(true)
-  const [showApplicationModal, setShowApplicationModal] = useState(false)
 
-  // Application form state
-  const [projectTitle, setProjectTitle] = useState('')
-  const [projectDescription, setProjectDescription] = useState('')
-  const [fundingAmount, setFundingAmount] = useState('')
-  const [teamSize, setTeamSize] = useState('')
-  const [timeline, setTimeline] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const hasDraft = application?.status === 'draft'
+  const hasApplied = !!application && application.status !== 'draft'
+  const checking = !!auth.user && applicationChecking
 
   const isExpired = !!(grant && grant.deadline && isPast(new Date(grant.deadline)))
   const canApply = !!(grant && grant.is_active && !isExpired && !hasApplied)
 
-  // Check application status
+  // Load submitted-application count
   useEffect(() => {
-    if (grant && auth.user) {
-      setChecking(true)
-      Promise.all([
-        checkApplication(grant.id, auth.user.id),
-        getApplicationCount(grant.id),
-      ])
-        .then(([hasApp, count]) => {
-          setHasApplied(hasApp)
-          setApplicationCount(count)
-        })
-        .catch((error) => {
-          console.error('Error checking application:', error)
-        })
-        .finally(() => {
-          setChecking(false)
-        })
+    if (grant) {
+      getApplicationCount(grant.id)
+        .then(setApplicationCount)
+        .catch((error) => console.error('Error loading application count:', error))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grant?.id, auth.user?.id])
-
-  const handleApply = async (e: FormEvent) => {
-    e.preventDefault()
-    setErrors({})
-
-    if (!projectTitle || !projectDescription) {
-      setErrors({
-        projectTitle: !projectTitle ? 'Project title is required' : '',
-        projectDescription: !projectDescription ? 'Description is required' : '',
-      })
-      return
-    }
-
-    try {
-      await applyForGrant({
-        grant_id: grant!.id,
-        user_id: auth.user!.id,
-        application_data: {
-          projectTitle,
-          projectDescription,
-          fundingAmount,
-          teamSize,
-          timeline,
-        },
-      })
-
-      setHasApplied(true)
-      setApplicationCount((c) => c + 1)
-      setShowApplicationModal(false)
-
-      // Reset form
-      setProjectTitle('')
-      setProjectDescription('')
-      setFundingAmount('')
-      setTeamSize('')
-      setTimeline('')
-    } catch (error: any) {
-      console.error('Application error:', error)
-    }
-  }
+  }, [grant?.id])
 
   const getAmountDisplay = () => {
     if (!grant) return ''
@@ -332,10 +269,10 @@ export default function GrantDetailPage() {
                   {!grant.application_url && canApply && (
                     <Button
                       fullWidth
-                      onClick={() => setShowApplicationModal(true)}
+                      onClick={() => navigate(`/grants/${grant.id}/apply`)}
                       icon={<FileText size={20} />}
                     >
-                      Apply Now
+                      {hasDraft ? 'Continue Application' : 'Apply Now'}
                     </Button>
                   )}
                 </>
@@ -380,77 +317,6 @@ export default function GrantDetailPage() {
         </div>
       </div>
 
-      {/* Application Modal */}
-      <Modal
-        open={showApplicationModal}
-        onClose={() => setShowApplicationModal(false)}
-        title="Apply for Grant"
-        description="Submit your application for this funding opportunity"
-        size="lg"
-      >
-        <form onSubmit={handleApply} className="space-y-4">
-          <Input
-            label="Project Title"
-            placeholder="Your project name"
-            value={projectTitle}
-            onChange={(e) => setProjectTitle(e.currentTarget.value)}
-            error={errors.projectTitle}
-            fullWidth
-            required
-          />
-
-          <Textarea
-            label="Project Description"
-            placeholder="Describe your project and how you'll use the funding..."
-            value={projectDescription}
-            onChange={(e) => setProjectDescription(e.currentTarget.value)}
-            error={errors.projectDescription}
-            rows={5}
-            fullWidth
-            required
-          />
-
-          <Input
-            label="Funding Amount Requested"
-            type="number"
-            placeholder="Amount in USD"
-            value={fundingAmount}
-            onChange={(e) => setFundingAmount(e.currentTarget.value)}
-            fullWidth
-          />
-
-          <Input
-            label="Team Size"
-            type="number"
-            placeholder="Number of team members"
-            value={teamSize}
-            onChange={(e) => setTeamSize(e.currentTarget.value)}
-            fullWidth
-          />
-
-          <Input
-            label="Project Timeline"
-            placeholder="e.g., 6 months, 1 year"
-            value={timeline}
-            onChange={(e) => setTimeline(e.currentTarget.value)}
-            fullWidth
-          />
-
-          <div className="flex gap-3 mt-6">
-            <Button type="submit" loading={applicationLoading} fullWidth>
-              Submit Application
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowApplicationModal(false)}
-              disabled={applicationLoading}
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </>
   )
 }

@@ -148,13 +148,13 @@ export default function ProjectsPage() {
 
             {/* Project List */}
             {projectsLoading || !projects ? (
-              <SkeletonGrid count={6} />
+              <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr" />
             ) : projects.length > 0 ? (
               <div>
                 <p className="text-sm text-gray-500 mb-6">
                   Found {projects.length} project{projects.length !== 1 ? 's' : ''}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr stagger-children">
                   {projects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}

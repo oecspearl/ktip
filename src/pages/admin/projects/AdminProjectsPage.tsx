@@ -110,7 +110,7 @@ export default function AdminProjectsPage() {
                 <th className="text-center px-4 py-3 font-semibold text-gray-700">Featured</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger-rows">
               {filtered.map((project) => (
                 <tr
                   key={project.id}

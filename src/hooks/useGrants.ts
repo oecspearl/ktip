@@ -172,59 +172,102 @@ export function useGrantApplications(userId?: string) {
   return { applications: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+// Fetches the current user's application (any status) for a grant.
+// status === 'draft' → resume; anything else → already applied.
+export function useDraftApplication(grantId?: string, userId?: string) {
+  const query = useQuery({
+    queryKey: keys.sub('grants', 'application', `${grantId}:${userId}`),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('grant_applications')
+        .select('*')
+        .eq('grant_id', grantId as string)
+        .eq('user_id', userId as string)
+        .maybeSingle()
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!grantId && !!userId,
+  })
+
+  return { application: query.data, loading: query.isPending, refetch: query.refetch }
+}
+
 export function useApplyForGrant() {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation({
-    mutationFn: async (applicationData: {
+  const invalidate = (userId: string) => {
+    queryClient.invalidateQueries({ queryKey: keys.sub('grants', 'applications', userId) })
+    queryClient.invalidateQueries({ queryKey: keys.sub('grants', 'application') })
+    queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
+  }
+
+  const saveMutation = useMutation({
+    mutationFn: async (draft: {
       grant_id: string
       user_id: string
       application_data: Record<string, any>
+      current_step: number
     }) => {
-      // Encrypt sensitive application data (in production, use pgcrypto on server)
       const { data, error } = await supabase
         .from('grant_applications')
-        .insert({
-          ...applicationData,
-          status: 'pending',
-        })
+        .upsert(
+          { ...draft, status: 'draft' },
+          { onConflict: 'grant_id,user_id' }
+        )
         .select()
         .single()
 
       if (error) throw error
       return data
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: keys.sub('grants', 'applications', variables.user_id) })
-    },
+    onSuccess: (_data, variables) => invalidate(variables.user_id),
   })
 
-  const applyForGrant = mutation.mutateAsync
+  const submitMutation = useMutation({
+    mutationFn: async (submission: {
+      id: string
+      user_id: string
+      application_data: Record<string, any>
+      current_step: number
+    }) => {
+      const { data, error } = await supabase
+        .from('grant_applications')
+        .update({
+          application_data: submission.application_data,
+          current_step: submission.current_step,
+          status: 'pending',
+        })
+        .eq('id', submission.id)
+        .select()
+        .single()
 
-  const checkApplication = async (
-    grantId: string,
-    userId: string
-  ): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from('grant_applications')
-      .select('id')
-      .eq('grant_id', grantId)
-      .eq('user_id', userId)
-      .maybeSingle()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_data, variables) => invalidate(variables.user_id),
+  })
 
-    if (error) throw error
-    return !!data
-  }
+  const saveDraft = saveMutation.mutateAsync
+  const submitApplication = submitMutation.mutateAsync
 
   const getApplicationCount = async (grantId: string): Promise<number> => {
     const { count, error } = await supabase
       .from('grant_applications')
       .select('*', { count: 'exact', head: true })
       .eq('grant_id', grantId)
+      .neq('status', 'draft')
 
     if (error) throw error
     return count || 0
   }
 
-  return { applyForGrant, checkApplication, getApplicationCount, loading: mutation.isPending, error: mutation.error }
+  return {
+    saveDraft,
+    submitApplication,
+    getApplicationCount,
+    loading: saveMutation.isPending || submitMutation.isPending,
+    error: saveMutation.error || submitMutation.error,
+  }
 }

@@ -10,6 +10,7 @@ export function useEvents(filters?: {
   search?: string
   status?: string
   climateAction?: boolean
+  dateRange?: { start: string; end: string }
 }) {
   const fetchEvents = async (): Promise<Event[]> => {
     let query = supabase
@@ -27,8 +28,12 @@ export function useEvents(filters?: {
       query = query.neq('status', 'draft' as any)
     }
 
-    // Filter by upcoming events
-    if (filters?.upcoming) {
+    // Date window (calendar month view) — supersedes the upcoming filter
+    if (filters?.dateRange) {
+      query = query
+        .gte('start_date', filters.dateRange.start)
+        .lte('start_date', filters.dateRange.end)
+    } else if (filters?.upcoming) {
       const now = new Date().toISOString()
       query = query.gte('start_date', now)
     }
@@ -53,7 +58,7 @@ export function useEvents(filters?: {
       }
     }
 
-    query = query.limit(50)
+    query = query.limit(filters?.dateRange ? 100 : 50)
 
     const { data, error } = await query
 

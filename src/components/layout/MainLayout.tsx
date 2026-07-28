@@ -3,6 +3,9 @@ import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
+import { FloatingActionButton } from '../ui/FloatingActionButton'
+import { MessagingPanel } from '../messages/MessagingPanel'
+import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function MainLayout() {
@@ -15,6 +18,7 @@ export function MainLayout() {
   }, [pathname])
 
   return (
+    <MessagingPanelProvider>
     <div className="min-h-screen flex flex-col bg-ktip-canvas">
       <a
         href="#main-content"
@@ -29,7 +33,10 @@ export function MainLayout() {
           <Outlet />
         </div>
       </main>
+      <FloatingActionButton />
+      <MessagingPanel />
       <Footer />
     </div>
+    </MessagingPanelProvider>
   )
 }

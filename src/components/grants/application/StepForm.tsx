@@ -1,19 +1,19 @@
-import type { StepConfig } from '../../lib/proposal-templates'
+import type { StepConfig } from '../../../lib/grant-application-template'
 import { RichTextField } from './RichTextField'
 import { AIFieldActions } from './AIFieldActions'
 import { HelpCircle } from 'lucide-react'
-import { cn } from '../../lib/utils'
+import { cn } from '../../../lib/utils'
 
 interface StepFormProps {
   step: StepConfig
   data: Record<string, any>
   onChange: (field: string, value: string) => void
   errors?: Record<string, string>
-  proposalType?: string
-  proposalTitle?: string
+  grantTitle?: string
+  applicationTitle?: string
 }
 
-export function StepForm({ step, data, onChange, errors, proposalType, proposalTitle }: StepFormProps) {
+export function StepForm({ step, data, onChange, errors, grantTitle, applicationTitle }: StepFormProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -49,14 +49,14 @@ export function StepForm({ step, data, onChange, errors, proposalType, proposalT
                     minHeight={`${(field.rows || 4) * 28}px`}
                     error={!!error}
                   />
-                  {proposalType && (
+                  {grantTitle && (
                     <AIFieldActions
-                      proposalType={proposalType}
+                      grantTitle={grantTitle}
                       fieldLabel={field.label}
                       fieldValue={value}
                       helpText={field.helpText}
                       placeholder={field.placeholder}
-                      proposalTitle={proposalTitle}
+                      applicationTitle={applicationTitle}
                       existingData={data}
                       onReplace={(html) => onChange(field.name, html)}
                     />

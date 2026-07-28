@@ -115,7 +115,7 @@ export default function AdminVerificationPage() {
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
           </div>
         ) : requests && requests.length > 0 ? (
-          <div className="divide-y divide-ktip-sand-100">
+          <div className="divide-y divide-ktip-sand-100 stagger-children">
             {requests.map((request) => {
               const name = request.user?.display_name || 'Unknown'
               return (

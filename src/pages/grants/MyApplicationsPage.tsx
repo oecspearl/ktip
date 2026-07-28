@@ -11,6 +11,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  PencilLine,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -29,6 +30,8 @@ export default function MyApplicationsPage() {
         return 'bg-red-100 text-red-700 border-red-200'
       case 'under_review':
         return 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200'
+      case 'draft':
+        return 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200'
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200'
     }
@@ -42,9 +45,22 @@ export default function MyApplicationsPage() {
         return <XCircle size={20} />
       case 'under_review':
         return <Clock size={20} />
+      case 'draft':
+        return <PencilLine size={20} />
       default:
         return <AlertCircle size={20} />
     }
+  }
+
+  // New-style applications use wizard keys; legacy rows used camelCase keys
+  const getProjectTitle = (data: Record<string, any>) =>
+    data.title || data.projectTitle || null
+  const getFundingAmount = (data: Record<string, any>) =>
+    data.funding_amount || data.fundingAmount || null
+  const getSummary = (data: Record<string, any>) => {
+    const raw = data.executive_summary || data.projectDescription || ''
+    // Wizard fields are rich text; strip tags for the snippet
+    return String(raw).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || null
   }
 
   const getStatusLabel = (status: string) => {
@@ -80,7 +96,7 @@ export default function MyApplicationsPage() {
             <div className="px-6 py-4 border-b border-gray-200">
               <p className="text-sm text-ktip-sand-600">
                 {applications.length} application
-                {applications.length !== 1 ? 's' : ''} submitted
+                {applications.length !== 1 ? 's' : ''}
               </p>
             </div>
 
@@ -112,29 +128,31 @@ export default function MyApplicationsPage() {
 
                     {/* Application Data Summary */}
                     <div className="space-y-2 mb-4">
-                      {application.application_data.projectTitle && (
+                      {getProjectTitle(application.application_data) && (
                         <div>
                           <span className="text-sm text-ktip-sand-600">
                             Project:{' '}
                           </span>
                           <span className="font-medium text-ktip-sand-900">
-                            {application.application_data.projectTitle}
+                            {getProjectTitle(application.application_data)}
                           </span>
                         </div>
                       )}
-                      {application.application_data.fundingAmount && (
+                      {getFundingAmount(application.application_data) && (
                         <div className="flex items-center gap-2">
                           <DollarSign size={16} className="text-ktip-sand-400" />
                           <span className="text-sm text-ktip-sand-600">
                             Requested:{' '}
                           </span>
                           <span className="font-medium text-ktip-sand-900">
-                            {formatCurrency(
-                              parseFloat(
-                                application.application_data.fundingAmount
-                              ),
-                              application.grant.currency
-                            )}
+                            {Number.isFinite(
+                              parseFloat(getFundingAmount(application.application_data))
+                            ) && /^\d/.test(String(getFundingAmount(application.application_data)).trim())
+                              ? formatCurrency(
+                                  parseFloat(getFundingAmount(application.application_data)),
+                                  application.grant.currency
+                                )
+                              : getFundingAmount(application.application_data)}
                           </span>
                         </div>
                       )}
@@ -145,7 +163,8 @@ export default function MyApplicationsPage() {
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
                         <span>
-                          Applied {formatDate(application.created_at)}
+                          {application.status === 'draft' ? 'Started' : 'Applied'}{' '}
+                          {formatDate(application.created_at)}
                         </span>
                       </div>
                     </div>
@@ -163,22 +182,30 @@ export default function MyApplicationsPage() {
                         {getStatusLabel(application.status)}
                       </span>
                     </div>
-                    <Link to={`/grants/${application.grant.id}`}>
-                      <Button variant="outline" size="sm">
-                        View Grant
-                      </Button>
-                    </Link>
+                    {application.status === 'draft' ? (
+                      <Link to={`/grants/${application.grant.id}/apply`}>
+                        <Button size="sm" icon={<PencilLine size={16} />}>
+                          Continue
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link to={`/grants/${application.grant.id}`}>
+                        <Button variant="outline" size="sm">
+                          View Grant
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
 
-                {/* Project Description */}
-                {application.application_data.projectDescription && (
+                {/* Summary */}
+                {getSummary(application.application_data) && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <p className="text-sm text-ktip-sand-600 mb-1">
-                      Project Description
+                      Executive Summary
                     </p>
                     <p className="text-ktip-sand-700 line-clamp-3">
-                      {application.application_data.projectDescription}
+                      {getSummary(application.application_data)}
                     </p>
                   </div>
                 )}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -9,6 +9,7 @@ import { ProjectCard } from '../../components/projects/ProjectCard'
 import { EventCard } from '../../components/events/EventCard'
 import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useMyConnections, useConnectionMutations } from '../../hooks/useConnections'
 import { ConnectButton } from '../../components/directory/ConnectButton'
@@ -28,6 +29,7 @@ import {
   UserX,
   Briefcase,
   Handshake,
+  TrendingUp,
 } from 'lucide-react'
 import {
   ROLE_LABELS,
@@ -44,10 +46,13 @@ import {
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { heroImageFor } from '../../lib/hero-images'
 
+const TimelineSection = lazy(() => import('../../components/dashboard/TimelineSection'))
+
 export default function ProfilePage() {
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
+  const { openPanel } = useMessagingPanel()
 
   const resolvedId = useMemo(() => {
     if (!params.id || params.id === 'me') return auth.user?.id
@@ -58,15 +63,23 @@ export default function ProfilePage() {
   const { projects } = useUserProjects(resolvedId)
   const { events } = useUserEvents(resolvedId)
 
-  usePageTitle(profile?.display_name ? `${profile.display_name}'s Profile` : 'Profile')
-
   const isOwnProfile = resolvedId === auth.user?.id
+
+  usePageTitle(
+    isOwnProfile
+      ? 'My Dashboard'
+      : profile?.display_name
+        ? `${profile.display_name}'s Profile`
+        : 'Profile'
+  )
 
   const { badges } = useUserBadges(resolvedId)
   const { connections } = useMyConnections(isOwnProfile ? resolvedId : undefined)
   const { removeConnection } = useConnectionMutations()
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'events' | 'connections'>('projects')
+  const [activeTab, setActiveTab] = useState<'progress' | 'projects' | 'events' | 'connections'>(
+    isOwnProfile ? 'progress' : 'projects'
+  )
   const [showEditModal, setShowEditModal] = useState(false)
 
   // Edit form state
@@ -167,7 +180,7 @@ export default function ProfilePage() {
           <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-6">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={14} className="text-gray-500" />
-            <span className="text-gray-400">Profile</span>
+            <span className="text-gray-400">{isOwnProfile ? 'Dashboard' : 'Profile'}</span>
             <ChevronRight size={14} className="text-gray-500" />
             <span className="text-gray-200">{displayName}</span>
           </nav>
@@ -226,11 +239,14 @@ export default function ProfilePage() {
               {!isOwnProfile && (
                 <>
                   <ConnectButton otherUserId={profile.id} />
-                  <Link to={`/messages?user=${profile.id}`}>
-                    <Button variant="outline" icon={<MessageSquare size={18} />} className="border-gray-500 text-white hover:bg-gray-700">
-                      Send Message
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    icon={<MessageSquare size={18} />}
+                    onClick={() => openPanel({ userId: profile.id })}
+                    className="border-gray-500 text-white hover:bg-gray-700"
+                  >
+                    Send Message
+                  </Button>
                   <Link to={`/grievances/report/${profile.id}`}>
                     <Button variant="ghost" icon={<Flag size={18} />} className="text-gray-400 hover:bg-red-500/10 hover:text-red-400">
                       Report
@@ -335,10 +351,22 @@ export default function ProfilePage() {
         <div className="flex flex-col-reverse lg:flex-row-reverse gap-6 items-start">
           <div className="flex-1 min-w-0 w-full">
         {/* Tab Content */}
+        {activeTab === 'progress' && isOwnProfile && auth.user && (
+          <div role="tabpanel" id="tabpanel-progress" aria-labelledby="tab-progress">
+            <Suspense
+              fallback={
+                <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 h-48 animate-pulse-soft" />
+              }
+            >
+              <TimelineSection userId={auth.user.id} />
+            </Suspense>
+          </div>
+        )}
+
         {activeTab === 'projects' && (
           <div role="tabpanel" id="tabpanel-projects" aria-labelledby="tab-projects">
             {projects?.length ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
                 {projects.map((project) => (
                   <ProjectCard key={project.id} project={project} />
                 ))}
@@ -357,7 +385,7 @@ export default function ProfilePage() {
         {activeTab === 'events' && (
           <div role="tabpanel" id="tabpanel-events" aria-labelledby="tab-events">
             {events?.length ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
                 {events.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
@@ -376,7 +404,7 @@ export default function ProfilePage() {
         {activeTab === 'connections' && isOwnProfile && (
           <div role="tabpanel" id="tabpanel-connections" aria-labelledby="tab-connections">
             {connections?.length ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
                 {connections.map((connection) => {
                   const other =
                     connection.requester_id === auth.user?.id
@@ -445,7 +473,24 @@ export default function ProfilePage() {
           {/* Vertical tab rail — left side */}
           <div className="w-full lg:w-60 shrink-0">
             <div className="bg-ktip-cream border border-gray-200 rounded-2xl p-2 lg:sticky lg:top-28">
-              <nav className="flex flex-row lg:flex-col gap-1" role="tablist" aria-label="Profile content">
+              <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto" role="tablist" aria-label="Profile content">
+                {isOwnProfile && (
+                  <button
+                    role="tab"
+                    aria-selected={activeTab === 'progress'}
+                    aria-controls="tabpanel-progress"
+                    id="tab-progress"
+                    className={`flex-1 lg:flex-none flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-colors ${
+                      activeTab === 'progress'
+                        ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    }`}
+                    onClick={() => setActiveTab('progress')}
+                  >
+                    <TrendingUp size={18} />
+                    Progress
+                  </button>
+                )}
                 <button
                   role="tab"
                   aria-selected={activeTab === 'projects'}

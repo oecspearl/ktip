@@ -15,7 +15,7 @@ import Color from '@tiptap/extension-color'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Placeholder from '@tiptap/extension-placeholder'
-import { cn } from '../../lib/utils'
+import { cn } from '../../../lib/utils'
 import {
   Bold,
   Italic,

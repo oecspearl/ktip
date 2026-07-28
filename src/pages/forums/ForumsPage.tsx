@@ -22,9 +22,9 @@ export default function ForumsPage() {
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading ? (
-            <SkeletonGrid count={6} />
+            <SkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : boards?.length ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
               {boards.map((board) => (
                 <BoardCard key={board.id} board={board} />
               ))}

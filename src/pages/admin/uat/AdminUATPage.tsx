@@ -265,7 +265,7 @@ export default function AdminUATPage() {
       ) : (
         <>
           {/* Summary Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
@@ -451,7 +451,7 @@ export default function AdminUATPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Individual Responses ({data.length})
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-2 stagger-children">
               {data.map((r, idx) => (
                 <div className="border border-gray-100 rounded-xl overflow-hidden" key={r.id}>
                   <button

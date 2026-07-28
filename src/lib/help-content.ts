@@ -106,12 +106,6 @@ export const HELP_CATEGORIES: HelpCategory[] = [
         tags: ['phase', 'concept', 'prototype', 'funding', 'launch', 'stages'],
       },
       {
-        id: 'project-proposals',
-        title: 'How do I create a proposal for my project?',
-        content: `If you own a project, you will see a "Proposals" section on the project detail page.\n\nClick "Create Proposal" to start the proposal wizard. The proposal will be automatically linked to your project.\n\nYou can create different types of proposals: Funding, Project, Research, or Business. The wizard guides you through each step with helpful prompts.`,
-        tags: ['proposal', 'project', 'link', 'create', 'wizard'],
-      },
-      {
         id: 'project-comments',
         title: 'How do comments and likes work?',
         content: `On any project detail page, you can leave a comment to share your thoughts or ask questions. Scroll down to the Comments section and type your message.\n\nYou can also click the heart button to like a project. This helps the project owner know their idea is appreciated and helps popular projects get noticed.\n\nYou need to be logged in to comment or like a project.`,
@@ -262,48 +256,36 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     ],
   },
 
-  // 7. Proposals
+  // 7. Grant Applications
   {
-    id: 'proposals',
-    title: 'Proposals',
-    description: 'Create professional proposals with the guided wizard.',
+    id: 'grant-applications',
+    title: 'Grant Applications',
+    description: 'Apply for grants with the guided application wizard.',
     icon: 'FileText',
     articles: [
       {
-        id: 'what-are-proposals',
-        title: 'What is the Proposal Wizard?',
-        content: `The Proposal Wizard is a step-by-step tool that helps you create professional proposals for your projects.\n\nInstead of starting from a blank page, the wizard guides you through each section with helpful prompts and best practices.\n\nYou can create four types of proposals: Funding/Grant, Project, Research, and Business. Each type has its own tailored template.`,
-        tags: ['proposal', 'wizard', 'what', 'overview', 'introduction'],
-      },
-      {
-        id: 'proposal-types',
-        title: 'What types of proposals can I create?',
-        content: `KTIP offers four proposal types:\n\nFunding / Grant — Request funding with clear goals, budgets, and impact metrics. Great for applying to grants.\n\nProject — Plan project execution with scope, deliverables, timeline, and risk assessment.\n\nResearch — Design a research study with methodology, expected outcomes, and dissemination plans.\n\nBusiness — Build a business case with market analysis, revenue model, and financial projections.\n\nEach type has different guided steps tailored to that type of proposal.`,
-        tags: ['types', 'funding', 'project', 'research', 'business', 'proposal'],
-      },
-      {
-        id: 'create-proposal',
-        title: 'How do I create a proposal?',
-        content: `Go to the Proposals page and click "Create Proposal". You can also create a proposal from a project's detail page.\n\nFirst, choose the proposal type. Then the wizard will guide you through several steps, each with fields to fill in.\n\nYour work is auto-saved every few seconds, so you will not lose your progress. You can also click "Save Draft" at any time.\n\nWhen you have completed all steps, review your proposal on the final step and click "Complete Proposal".`,
-        tags: ['create', 'proposal', 'new', 'wizard', 'steps'],
+        id: 'apply-for-grant',
+        title: 'How do I apply for a grant?',
+        content: `Open a grant from the Grants page and click "Apply Now".\n\nThe application wizard guides you through 5 steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, and Impact & Review.\n\nYour work is auto-saved every few seconds, so you will not lose your progress. You can also click "Save Draft" at any time.\n\nOn the final step, review your application and click "Submit Application".`,
+        tags: ['apply', 'grant', 'application', 'wizard', 'steps'],
       },
       {
         id: 'ai-suggestions',
         title: 'How do the AI suggestions work?',
-        content: `Each field in the proposal wizard has AI-powered tools:\n\nImprove — Rewrites your existing content to be more professional and compelling.\n\nSuggest — Generates content for a section based on the proposal type and what you have written so far.\n\nTone — Adjusts the tone of your content (Professional, Persuasive, Academic, or Concise).\n\nLook for the small buttons below each text field. Click one and the AI will generate a suggestion. You can accept it, modify it, or discard it.\n\nThe AI Review on the final step scores your complete proposal and gives specific feedback.`,
+        content: `Each text field in the application wizard has AI-powered tools:\n\nImprove — Rewrites your existing content to be more professional and compelling.\n\nSuggest — Generates content for a section based on the grant and what you have written so far.\n\nTone — Adjusts the tone of your content (Professional, Persuasive, Academic, or Concise).\n\nLook for the small buttons below each text field. Click one and the AI will generate a suggestion. You can accept it, modify it, or discard it.\n\nThe AI Review on the final step scores your complete application and gives specific feedback.`,
         tags: ['ai', 'suggestions', 'improve', 'generate', 'review', 'tone'],
       },
       {
-        id: 'share-proposal',
-        title: 'How do I share a proposal?',
-        content: `After completing a proposal, go to its detail page.\n\nClick the "Share" button to generate a shareable link. Anyone with this link can view your proposal without needing a KTIP account.\n\nThis is useful for sharing proposals with potential funders, partners, or reviewers outside the platform.\n\nYou can also export your proposal as a document using the export options on the review step.`,
-        tags: ['share', 'link', 'export', 'proposal', 'send'],
+        id: 'resume-draft',
+        title: 'How do I continue working on a draft application?',
+        content: `Go to My Applications (under Grants) to see all your applications.\n\nDrafts are marked with a "Draft" badge. Click "Continue" to pick up where you left off.\n\nThe wizard will take you to the step where you stopped, and all your previous work will be there. You can also reopen the grant page — the button will read "Continue Application".`,
+        tags: ['draft', 'resume', 'continue', 'edit', 'save', 'application'],
       },
       {
-        id: 'resume-draft',
-        title: 'How do I continue working on a draft?',
-        content: `Go to the Proposals page to see all your proposals.\n\nDrafts are marked with a "Draft" badge. Click on a draft to open it, then click "Resume" or "Edit" to continue where you left off.\n\nThe wizard will take you to the step where you stopped, and all your previous work will be there.`,
-        tags: ['draft', 'resume', 'continue', 'edit', 'save'],
+        id: 'application-status',
+        title: 'How do I track my application status?',
+        content: `Go to My Applications to see the status of each application:\n\nDraft — You have not submitted yet. Click "Continue" to finish.\n\nPending — Submitted and waiting for review.\n\nUnder Review — An administrator is reviewing your application.\n\nApproved / Rejected — The final decision on your application.`,
+        tags: ['status', 'track', 'pending', 'approved', 'rejected'],
       },
     ],
   },
@@ -376,7 +358,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
       {
         id: 'delete-account',
         title: 'How do I delete my account?',
-        content: `Go to Settings and scroll to the Danger Zone at the bottom.\n\nClick "Delete Account". You will be asked to confirm this action.\n\nWarning: Deleting your account is permanent. All your projects, proposals, messages, and other data will be removed and cannot be recovered.\n\nIf you just want to take a break, consider logging out instead of deleting your account.`,
+        content: `Go to Settings and scroll to the Danger Zone at the bottom.\n\nClick "Delete Account". You will be asked to confirm this action.\n\nWarning: Deleting your account is permanent. All your projects, grant applications, messages, and other data will be removed and cannot be recovered.\n\nIf you just want to take a break, consider logging out instead of deleting your account.`,
         tags: ['delete', 'account', 'remove', 'permanent', 'close'],
       },
     ],
@@ -454,7 +436,7 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   {
     role: 'mentor',
     title: 'Mentors',
-    description: 'Guide innovators, review proposals, and share your expertise.',
+    description: 'Guide innovators, review ideas, and share your expertise.',
     steps: [
       'Create your account and set your role to Mentor',
       'Complete your profile with your expertise and experience',
@@ -471,18 +453,18 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   {
     role: 'entrepreneur',
     title: 'Entrepreneurs',
-    description: 'Launch projects, create proposals, and find investors.',
+    description: 'Launch projects, apply for grants, and find investors.',
     steps: [
       'Create your account and set your role to Entrepreneur',
       'Create a project to showcase your innovation',
-      'Use the Proposal Wizard to build professional funding proposals',
-      'Browse grants and apply for funding opportunities',
+      'Browse grants and apply with the guided application wizard',
+      'Track your applications under My Applications',
       'Connect with mentors and investors through messages',
     ],
     quickLinks: [
       { label: 'Create Project', href: '/projects/new' },
-      { label: 'Create Proposal', href: '/proposals/new' },
       { label: 'Find Grants', href: '/grants' },
+      { label: 'My Applications', href: '/grants/my-applications' },
     ],
   },
   {
@@ -492,7 +474,7 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     steps: [
       'Create your account and set your role to Investor',
       'Browse projects to find promising innovations',
-      'Review proposals linked to projects you are interested in',
+      'Follow projects you are interested in to track their progress',
       'Message entrepreneurs directly to discuss opportunities',
       'Attend demo days and conferences listed on Events',
     ],

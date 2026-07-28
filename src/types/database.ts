@@ -469,7 +469,8 @@ export interface Database {
           grant_id: string
           user_id: string
           application_data: Record<string, any>
-          status: 'pending' | 'under_review' | 'approved' | 'rejected'
+          status: 'draft' | 'pending' | 'under_review' | 'approved' | 'rejected'
+          current_step: number
           created_at: string
           updated_at: string
         }
@@ -478,7 +479,8 @@ export interface Database {
           grant_id: string
           user_id: string
           application_data?: Record<string, any>
-          status?: 'pending' | 'under_review' | 'approved' | 'rejected'
+          status?: 'draft' | 'pending' | 'under_review' | 'approved' | 'rejected'
+          current_step?: number
           created_at?: string
           updated_at?: string
         }
@@ -487,7 +489,8 @@ export interface Database {
           grant_id?: string
           user_id?: string
           application_data?: Record<string, any>
-          status?: 'pending' | 'under_review' | 'approved' | 'rejected'
+          status?: 'draft' | 'pending' | 'under_review' | 'approved' | 'rejected'
+          current_step?: number
           created_at?: string
           updated_at?: string
         }
@@ -614,48 +617,6 @@ export interface Database {
           title?: string
           content?: string
           is_pinned?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      proposals: {
-        Row: {
-          id: string
-          user_id: string
-          type: 'funding' | 'project' | 'research' | 'business'
-          title: string
-          status: 'draft' | 'completed'
-          proposal_data: Record<string, any>
-          current_step: number
-          share_token: string | null
-          project_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          type: 'funding' | 'project' | 'research' | 'business'
-          title: string
-          status?: 'draft' | 'completed'
-          proposal_data?: Record<string, any>
-          current_step?: number
-          share_token?: string | null
-          project_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          type?: 'funding' | 'project' | 'research' | 'business'
-          title?: string
-          status?: 'draft' | 'completed'
-          proposal_data?: Record<string, any>
-          current_step?: number
-          share_token?: string | null
-          project_id?: string | null
           created_at?: string
           updated_at?: string
         }

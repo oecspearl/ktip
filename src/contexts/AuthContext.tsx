@@ -65,12 +65,15 @@ async function fetchProfileQuery(userId: string, userData?: User | null): Promis
 
   if (error && error.code === 'PGRST116') {
     // Profile doesn't exist yet — create it (handles users created before trigger was installed)
+    // OAuth providers (Google/Microsoft) supply full_name/name/picture instead of our keys
     const meta = userData?.user_metadata
     const { data: newProfile, error: insertError } = await supabase
       .from('profiles')
       .insert({
         id: userId,
-        display_name: meta?.display_name || userData?.email || null,
+        display_name:
+          meta?.display_name || meta?.full_name || meta?.name || userData?.email || null,
+        avatar_url: meta?.avatar_url || meta?.picture || null,
         roles: meta?.role ? [meta.role] : [],
         bio: meta?.bio || null,
         country: meta?.country || null,
@@ -222,7 +225,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
     if (error) throw error
@@ -233,7 +236,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'azure',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
         scopes: 'email',
       },
     })

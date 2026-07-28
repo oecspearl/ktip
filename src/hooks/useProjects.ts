@@ -170,6 +170,7 @@ export function useCreateProject() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
     },
   })
 
@@ -202,6 +203,7 @@ export function useUpdateProject() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
     },
   })
 

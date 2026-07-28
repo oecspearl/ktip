@@ -1,7 +1,6 @@
 import DOMPurify from 'dompurify'
-import { PROPOSAL_STEPS } from '../../lib/proposal-templates'
-import { PROPOSAL_TYPE_LABELS } from '../../lib/constants'
-import type { ProposalType } from '../../types'
+import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
+import type { StepConfig } from '../../../lib/grant-application-template'
 
 // Force all links to open in new tab safely
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -15,25 +14,25 @@ function isHtml(str: string): boolean {
   return /<[a-z][\s\S]*>/i.test(str)
 }
 
-interface ProposalPreviewProps {
-  type: ProposalType
+interface ApplicationPreviewProps {
   title: string
+  grantTitle?: string
   data: Record<string, any>
+  steps?: StepConfig[]
 }
 
-export function ProposalPreview({ type, title, data }: ProposalPreviewProps) {
-  const steps = PROPOSAL_STEPS[type]
-  const typeLabel = PROPOSAL_TYPE_LABELS[type] || type
-
+export function ApplicationPreview({ title, grantTitle, data, steps = GRANT_APPLICATION_STEPS }: ApplicationPreviewProps) {
   return (
     <div className="proposal-preview prose prose-sm max-w-none">
       {/* Title Block */}
       <div className="border-b border-ktip-sand-200 pb-4 mb-6 print:mb-4">
         <h1 className="text-2xl font-bold text-ktip-sand-900 mb-2 font-display">{title}</h1>
         <div className="flex items-center gap-3 text-sm text-ktip-sand-500">
-          <span className="px-2 py-0.5 bg-ktip-ocean-50 text-ktip-ocean-700 rounded-full text-xs font-medium">
-            {typeLabel}
-          </span>
+          {grantTitle && (
+            <span className="px-2 py-0.5 bg-ktip-ocean-50 text-ktip-ocean-700 rounded-full text-xs font-medium">
+              {grantTitle}
+            </span>
+          )}
           <span>{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
       </div>
@@ -89,7 +88,7 @@ export function ProposalPreview({ type, title, data }: ProposalPreviewProps) {
 
       {/* Footer */}
       <div className="mt-8 pt-4 border-t border-ktip-sand-200 text-xs text-ktip-sand-400 print:mt-4">
-        Generated with KTIP Proposal Wizard
+        Generated with KTIP Grant Application
       </div>
     </div>
   )

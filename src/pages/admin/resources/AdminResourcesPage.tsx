@@ -103,7 +103,7 @@ export default function AdminResourcesPage() {
                   <th className="text-right text-xs font-semibold text-gray-600 uppercase tracking-wider px-6 py-3">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 stagger-rows">
                 {resources.map((resource) => (
                   <tr key={resource.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">

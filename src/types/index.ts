@@ -203,7 +203,7 @@ export interface Grant {
   created_at: string
 }
 
-export type GrantApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected'
+export type GrantApplicationStatus = 'draft' | 'pending' | 'under_review' | 'approved' | 'rejected'
 
 export interface GrantApplication {
   id: string
@@ -211,10 +211,27 @@ export interface GrantApplication {
   user_id: string
   application_data: Record<string, any>
   status: GrantApplicationStatus
+  current_step: number
   created_at: string
   updated_at: string
   grant?: Grant
   applicant?: Profile
+}
+
+export interface GrantApplicationEvent {
+  id: string
+  application_id: string
+  status: GrantApplicationStatus
+  changed_by: string | null
+  created_at: string
+}
+
+export interface ProjectPhaseEvent {
+  id: string
+  project_id: string
+  phase: ProjectPhase
+  changed_by: string | null
+  created_at: string
 }
 
 export interface ProjectComment {
@@ -325,23 +342,6 @@ export interface Resource {
   created_at: string
   updated_at: string
   author?: Profile
-}
-
-export type ProposalType = 'funding' | 'project' | 'research' | 'business'
-export type ProposalStatus = 'draft' | 'completed'
-
-export interface Proposal {
-  id: string
-  user_id: string
-  type: ProposalType
-  title: string
-  status: ProposalStatus
-  proposal_data: Record<string, any>
-  current_step: number
-  share_token: string | null
-  project_id: string | null
-  created_at: string
-  updated_at: string
 }
 
 export interface Document {

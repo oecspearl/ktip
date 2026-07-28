@@ -134,7 +134,7 @@ export default function AdminFeedbackPage() {
             <div className="h-12 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
           </div>
         ) : feedback && feedback.length > 0 ? (
-          <div className="divide-y divide-ktip-sand-100">
+          <div className="divide-y divide-ktip-sand-100 stagger-children">
             {feedback.map((item) => {
               const name = item.user?.display_name || 'Anonymous'
               return (

@@ -28,7 +28,6 @@ const FEATURE_OPTIONS = [
   { value: 'collaboration', label: 'Collaboration Tools' },
   { value: 'directory', label: 'Member Directory' },
   { value: 'resources', label: 'Resources' },
-  { value: 'proposals', label: 'Proposals' },
 ] as const
 
 const YES_SOMEWHAT_NO = [

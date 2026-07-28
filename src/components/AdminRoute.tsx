@@ -12,7 +12,7 @@ export const AdminRoute = () => {
       <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
         <div className="text-center">
           <img
-            src="/ktip%20logo%20no%20bg.png"
+            src="/KTIP%20LOGO.png"
             alt="KTIP Logo"
             className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
           />

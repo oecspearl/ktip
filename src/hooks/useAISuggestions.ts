@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 
-export type AIAction = 'improve_field' | 'suggest_section' | 'review_proposal' | 'adjust_tone'
+export type AIAction = 'improve_field' | 'suggest_section' | 'review_application' | 'adjust_tone'
 
 export interface AIReviewResult {
   score: number
@@ -35,7 +35,7 @@ async function callOpenAI(systemPrompt: string, userPrompt: string): Promise<str
 }
 
 function buildImproveFieldPrompt(context: Record<string, any>): [string, string] {
-  const system = `You are an expert proposal writer helping improve a specific field in a ${context.proposalType} proposal.
+  const system = `You are an expert grant writer helping improve a specific field in a grant application${context.grantTitle ? ` for the grant "${context.grantTitle}"` : ''}.
 Return ONLY the improved HTML content — no explanations, no markdown code fences.
 Use <p>, <strong>, <em>, <ul>/<li>, <ol>/<li>, and <h3> tags as appropriate.
 Maintain the original intent but make it more compelling, clear, and professional.`
@@ -51,7 +51,7 @@ Improve this content to be more professional, specific, and compelling.`
 }
 
 function buildSuggestSectionPrompt(context: Record<string, any>): [string, string] {
-  const system = `You are an expert proposal writer. Generate content for a specific section of a ${context.proposalType} proposal.
+  const system = `You are an expert grant writer. Generate content for a specific section of a grant application${context.grantTitle ? ` for the grant "${context.grantTitle}"` : ''}.
 Return ONLY HTML content — no explanations, no markdown code fences.
 Use <p>, <strong>, <em>, <ul>/<li>, <ol>/<li>, and <h3> tags as appropriate.
 Generate professional, specific, and compelling content.`
@@ -60,7 +60,7 @@ Generate professional, specific, and compelling content.`
 ${context.helpText ? `Guidance: ${context.helpText}` : ''}
 ${context.placeholder ? `Hints: ${context.placeholder}` : ''}
 
-Proposal title: ${context.proposalTitle || 'Untitled'}
+Application title: ${context.applicationTitle || 'Untitled'}
 ${context.existingData ? `Other sections already written:\n${JSON.stringify(context.existingData, null, 2)}` : ''}
 
 Generate appropriate content for this section.`
@@ -69,7 +69,7 @@ Generate appropriate content for this section.`
 }
 
 function buildReviewPrompt(context: Record<string, any>): [string, string] {
-  const system = `You are an expert proposal reviewer evaluating a ${context.proposalType} proposal.
+  const system = `You are an expert grant reviewer evaluating an application for the grant "${context.grantTitle}".
 Return a JSON object (no markdown fences) with this exact structure:
 {
   "score": <number 1-100>,
@@ -80,11 +80,11 @@ Return a JSON object (no markdown fences) with this exact structure:
 }
 Be specific, constructive, and actionable. Score fairly based on completeness, clarity, and persuasiveness.`
 
-  const user = `Proposal Title: ${context.proposalTitle}
-Type: ${context.proposalType}
+  const user = `Application Title: ${context.applicationTitle}
+Grant: ${context.grantTitle}
 
-Proposal Data:
-${JSON.stringify(context.proposalData, null, 2)}`
+Application Data:
+${JSON.stringify(context.applicationData, null, 2)}`
 
   return [system, user]
 }
@@ -124,7 +124,7 @@ export function useAISuggestions() {
         case 'suggest_section':
           ;[systemPrompt, userPrompt] = buildSuggestSectionPrompt(context)
           break
-        case 'review_proposal':
+        case 'review_application':
           ;[systemPrompt, userPrompt] = buildReviewPrompt(context)
           break
         case 'adjust_tone':
@@ -136,7 +136,7 @@ export function useAISuggestions() {
 
       const result = await callOpenAI(systemPrompt, userPrompt)
 
-      if (action === 'review_proposal') {
+      if (action === 'review_application') {
         try {
           return JSON.parse(result)
         } catch {
@@ -159,7 +159,7 @@ export function useAISuggestions() {
   }
 
   const improveField = async (context: {
-    proposalType: string
+    grantTitle: string
     fieldLabel: string
     fieldValue: string
     helpText?: string
@@ -169,23 +169,23 @@ export function useAISuggestions() {
   }
 
   const suggestSection = async (context: {
-    proposalType: string
+    grantTitle: string
     fieldLabel: string
     helpText?: string
     placeholder?: string
-    proposalTitle?: string
+    applicationTitle?: string
     existingData?: Record<string, any>
   }): Promise<string | null> => {
     const result = await invoke('suggest_section', context)
     return result?.html || null
   }
 
-  const reviewProposal = async (context: {
-    proposalType: string
-    proposalTitle: string
-    proposalData: Record<string, any>
+  const reviewApplication = async (context: {
+    grantTitle: string
+    applicationTitle: string
+    applicationData: Record<string, any>
   }): Promise<AIReviewResult | null> => {
-    const result = await invoke('review_proposal', context)
+    const result = await invoke('review_application', context)
     return result as AIReviewResult | null
   }
 
@@ -197,5 +197,5 @@ export function useAISuggestions() {
     return result?.html || null
   }
 
-  return { improveField, suggestSection, reviewProposal, adjustTone, loading: mutation.isPending, error }
+  return { improveField, suggestSection, reviewApplication, adjustTone, loading: mutation.isPending, error }
 }

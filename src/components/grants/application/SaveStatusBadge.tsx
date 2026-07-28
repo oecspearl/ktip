@@ -1,5 +1,5 @@
 import { Loader2, Check, CircleAlert } from 'lucide-react'
-import type { SaveStatus } from '../../hooks/useAutoSave'
+import type { SaveStatus } from '../../../hooks/useAutoSave'
 
 interface SaveStatusBadgeProps {
   status: SaveStatus

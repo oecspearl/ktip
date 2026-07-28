@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, RouterProvider, Outlet, Link } from 'react-router'
+import { createBrowserRouter, RouterProvider, Outlet, Link, Navigate } from 'react-router'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AnalyticsProvider } from './hooks/useAnalytics'
@@ -56,6 +56,8 @@ const router = createBrowserRouter([
       { path: '/signup', lazy: lazyPage(() => import('./pages/auth/SignupPage')) },
       { path: '/forgot-password', lazy: lazyPage(() => import('./pages/auth/ForgotPasswordPage')) },
       { path: '/reset-password', lazy: lazyPage(() => import('./pages/auth/ResetPasswordPage')) },
+      { path: '/auth/callback', lazy: lazyPage(() => import('./pages/auth/AuthCallbackPage')) },
+      { path: '/onboarding', lazy: lazyPage(() => import('./pages/onboarding/OnboardingPage')) },
 
       {
         Component: MainLayout,
@@ -76,8 +78,7 @@ const router = createBrowserRouter([
           { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
           { path: '/help/faq', lazy: lazyPage(() => import('./pages/help/FAQPage')) },
-          { path: '/integrations', lazy: lazyPage(() => import('./pages/integrations/IntegrationsPage')) },
-          { path: '/proposals/shared/:token', lazy: lazyPage(() => import('./pages/proposals/SharedProposalPage')) },
+          { path: '/integrations', element: <Navigate to="/resources?tab=integrations" replace /> },
 
           // Authenticated routes
           {
@@ -88,14 +89,12 @@ const router = createBrowserRouter([
               { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
               { path: '/events/:id/edit', lazy: lazyPage(() => import('./pages/events/EditEventPage')) },
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
+              { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
               { path: '/profile/me', lazy: lazyPage(() => import('./pages/profile/ProfilePage')) },
               { path: '/profile/:id', lazy: lazyPage(() => import('./pages/profile/ProfilePage')) },
-              { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesPage')) },
+              { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
               { path: '/settings', lazy: lazyPage(() => import('./pages/settings/SettingsPage')) },
-              { path: '/proposals', lazy: lazyPage(() => import('./pages/proposals/ProposalsPage')) },
-              { path: '/proposals/new', lazy: lazyPage(() => import('./pages/proposals/CreateProposalPage')) },
-              { path: '/proposals/:id', lazy: lazyPage(() => import('./pages/proposals/ProposalDetailPage')) },
               { path: '/grievances/report/:userId', lazy: lazyPage(() => import('./pages/grievances/ReportUserPage')) },
               { path: '/grievances/my-reports', lazy: lazyPage(() => import('./pages/grievances/MyGrievancesPage')) },
               { path: '/collaborate', lazy: lazyPage(() => import('./pages/collaborate/CollaborateHubPage')) },

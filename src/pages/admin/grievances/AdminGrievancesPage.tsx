@@ -179,7 +179,7 @@ export default function AdminGrievancesPage() {
                     <th className="px-4 py-3 text-xs font-medium text-ktip-sand-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-ktip-sand-100">
+                <tbody className="divide-y divide-ktip-sand-100 stagger-rows">
                   {grievances.map((grievance) => {
                     const reporterName = grievance.reporter?.display_name || 'Unknown'
                     const reportedName = grievance.reported_user?.display_name || 'Unknown'
@@ -273,7 +273,7 @@ export default function AdminGrievancesPage() {
             </div>
 
             {/* Mobile Cards */}
-            <div className="md:hidden divide-y divide-ktip-sand-100">
+            <div className="md:hidden divide-y divide-ktip-sand-100 stagger-children">
               {grievances.map((grievance) => {
                 const reporterName = grievance.reporter?.display_name || 'Unknown'
                 const reportedName = grievance.reported_user?.display_name || 'Unknown'

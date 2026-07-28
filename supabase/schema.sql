@@ -450,7 +450,8 @@ CREATE TABLE IF NOT EXISTS grant_applications (
   grant_id UUID NOT NULL REFERENCES grants(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   application_data JSONB NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'under_review', 'approved', 'rejected')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('draft', 'pending', 'under_review', 'approved', 'rejected')),
+  current_step INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(grant_id, user_id)
@@ -469,16 +470,10 @@ CREATE POLICY "Users can view their own applications"
   ON grant_applications FOR SELECT
   USING (auth.uid() = user_id);
 
+-- One application per user per grant is enforced by UNIQUE(grant_id, user_id)
 CREATE POLICY "Users can create applications"
   ON grant_applications FOR INSERT
-  WITH CHECK (
-    auth.uid() = user_id
-    AND NOT EXISTS (
-      SELECT 1 FROM grant_applications
-      WHERE grant_id = grant_applications.grant_id
-      AND user_id = auth.uid()
-    )
-  );
+  WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update their own applications"
   ON grant_applications FOR UPDATE
@@ -488,10 +483,11 @@ CREATE POLICY "Users can delete their own applications"
   ON grant_applications FOR DELETE
   USING (auth.uid() = user_id);
 
--- Function to get application count for a grant
+-- Function to get application count for a grant (drafts excluded)
 CREATE OR REPLACE FUNCTION get_grant_application_count(grant_uuid UUID)
 RETURNS INTEGER AS $$
-  SELECT COUNT(*)::INTEGER FROM grant_applications WHERE grant_id = grant_uuid;
+  SELECT COUNT(*)::INTEGER FROM grant_applications
+  WHERE grant_id = grant_uuid AND status <> 'draft';
 $$ LANGUAGE SQL STABLE;
 
 -- Function to check if user has applied to a grant
@@ -2130,98 +2126,6 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_featured boolean NOT NULL DEFAU
 
 -- Index for quick featured project lookups
 CREATE INDEX IF NOT EXISTS idx_projects_is_featured ON projects(is_featured) WHERE is_featured = true;
-
-
--- ============================================================
--- migrations/025_proposals.sql
--- ============================================================
--- ============================================================
--- Migration 025: Proposals
--- Creates the proposals table backing the Proposal Wizard
--- (src/hooks/useProposals.ts, src/hooks/useShareProposal.ts,
---  src/pages/proposals/SharedProposalPage.tsx)
--- Idempotent — safe to re-run.
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS proposals (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  type TEXT NOT NULL CHECK (type IN ('funding', 'project', 'research', 'business')),
-  title TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'completed')),
-  proposal_data JSONB NOT NULL DEFAULT '{}'::jsonb,
-  current_step INTEGER NOT NULL DEFAULT 0,
-  share_token UUID,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- share_token is generated client-side via crypto.randomUUID() (useShareProposal.ts)
--- and looked up with .eq('share_token', t).single() — must be unique.
--- Multiple NULLs are allowed under a UNIQUE constraint (unshared proposals).
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'proposals_share_token_key'
-  ) THEN
-    ALTER TABLE proposals ADD CONSTRAINT proposals_share_token_key UNIQUE (share_token);
-  END IF;
-END $$;
-
--- ============================================================
--- Indexes
--- ============================================================
-
-CREATE INDEX IF NOT EXISTS idx_proposals_user ON proposals(user_id, updated_at DESC);
-CREATE INDEX IF NOT EXISTS idx_proposals_project ON proposals(project_id);
-CREATE INDEX IF NOT EXISTS idx_proposals_share_token ON proposals(share_token) WHERE share_token IS NOT NULL;
-
--- ============================================================
--- Row Level Security
--- ============================================================
-
-ALTER TABLE proposals ENABLE ROW LEVEL SECURITY;
-
--- Owner: full CRUD
-DROP POLICY IF EXISTS "Users can view own proposals" ON proposals;
-CREATE POLICY "Users can view own proposals"
-  ON proposals FOR SELECT
-  USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can create own proposals" ON proposals;
-CREATE POLICY "Users can create own proposals"
-  ON proposals FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can update own proposals" ON proposals;
-CREATE POLICY "Users can update own proposals"
-  ON proposals FOR UPDATE
-  USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "Users can delete own proposals" ON proposals;
-CREATE POLICY "Users can delete own proposals"
-  ON proposals FOR DELETE
-  USING (auth.uid() = user_id);
-
--- Public: unauthenticated visitors can read a proposal once it has been
--- shared (share_token set). SharedProposalPage.tsx / useSharedProposal()
--- queries `select('*').eq('share_token', t).single()` with no auth
--- required, so the row must be readable by the anon role.
-DROP POLICY IF EXISTS "Anyone can view shared proposals" ON proposals;
-CREATE POLICY "Anyone can view shared proposals"
-  ON proposals FOR SELECT
-  USING (share_token IS NOT NULL);
-
--- ============================================================
--- updated_at trigger (reuses update_updated_at_column() from 001)
--- ============================================================
-
-DROP TRIGGER IF EXISTS set_proposals_updated_at ON proposals;
-CREATE TRIGGER set_proposals_updated_at
-  BEFORE UPDATE ON proposals
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
 
 
 -- ============================================================

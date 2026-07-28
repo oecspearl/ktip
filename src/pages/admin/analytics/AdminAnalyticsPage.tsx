@@ -273,7 +273,7 @@ export default function AdminAnalyticsPage() {
                       <th className="pb-2">Journey</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="stagger-rows">
                     {recentSessions.slice(0, 25).map((session) => (
                       <tr key={session.session_id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
                         <td className="py-2 pr-4 text-gray-400 font-mono text-xs">{session.session_id.slice(0, 8)}</td>

@@ -13,7 +13,6 @@ import {
   MessageSquare,
   Users,
   Handshake,
-  FileText,
   BookOpen,
   User,
   Settings,
@@ -29,15 +28,12 @@ import {
   ChevronRight,
   HelpCircle,
   ClipboardList,
-  Sun,
-  Moon,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
-import { useThemeMode } from '../../hooks/useThemeMode'
 
 interface DropdownItem {
   name: string
@@ -53,11 +49,15 @@ interface NavDropdown {
   items: DropdownItem[]
 }
 
-// Top-level standalone links
-const topLinks = [
+// Standalone links rendered before the dropdowns
+const leadingLinks = [
   { name: 'Discover', href: '/', icon: Home },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
   { name: 'Events', href: '/events', icon: Calendar },
+]
+
+// Standalone links rendered after the dropdowns
+const trailingLinks = [
   { name: 'Help', href: '/help', icon: HelpCircle },
 ]
 
@@ -70,9 +70,7 @@ const navDropdowns: NavDropdown[] = [
     items: [
       { name: 'Grants', href: '/grants', icon: DollarSign, description: 'Browse funding opportunities' },
       { name: 'My Applications', href: '/grants/my-applications', icon: ClipboardList, description: 'Track your grant applications' },
-      { name: 'Resources', href: '/resources', icon: BookOpen, description: 'Articles, guides & case studies' },
-      { name: 'Proposals', href: '/proposals', icon: FileText, description: 'Create & manage proposals' },
-      { name: 'Integrations', href: '/integrations', icon: BookOpen, description: 'External tools & partner platforms' },
+      { name: 'Resources & Integrations', href: '/resources', icon: BookOpen, description: 'Guides, articles & partner tools' },
     ],
   },
   {
@@ -82,7 +80,6 @@ const navDropdowns: NavDropdown[] = [
     items: [
       { name: 'Directory', href: '/directory', icon: Users, description: 'Browse the member directory' },
       { name: 'Forums', href: '/forums', icon: MessageSquare, description: 'Join community discussions' },
-      { name: 'Messages', href: '/messages', icon: MessageSquare, description: 'Direct conversations' },
       { name: 'Collaborate', href: '/collaborate', icon: Handshake, description: 'Work together in real-time' },
     ],
   },
@@ -99,7 +96,6 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
-  const [darkMode, setDarkMode] = useThemeMode()
 
   // Navbar is always transparent over page content; it only gets a dark
   // backdrop while the mobile menu is open so menu links stay readable.
@@ -247,7 +243,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src="/ktip%20logo%20no%20bg.png" alt="KTIP Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
+              <img src="/KTIP%20LOGO.png" alt="KTIP Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
               <div className="hidden sm:block">
                 <h1 className="text-2xl font-display font-bold whitespace-nowrap text-white">OECS KTIP</h1>
               </div>
@@ -257,7 +253,7 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 ml-auto">
             {/* Standalone links */}
-            {topLinks.map((item) => (
+            {leadingLinks.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
@@ -329,6 +325,22 @@ export function Navbar() {
               </div>
             ))}
 
+            {/* Trailing standalone links */}
+            {trailingLinks.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
+                  isActive(item.href)
+                    ? 'text-white underline decoration-ktip-nav-accent decoration-2 underline-offset-8'
+                    : 'text-white/80 hover:text-ktip-nav-accent'
+                )}
+              >
+                <span>{item.name}</span>
+              </Link>
+            ))}
+
             {/* Admin link (OECS only) */}
             {auth.profile?.roles?.includes('oecs') && (
               <Link
@@ -387,15 +399,6 @@ export function Navbar() {
 
           {/* User Menu / Auth Buttons */}
           <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="hidden sm:block p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
             {/* Notification Bell */}
             {auth.user && (
               <div className="relative" ref={notifRef}>
@@ -675,23 +678,12 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* Theme Toggle (mobile) */}
-            <div className="px-2 mb-1">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10 transition-all"
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-              </button>
-            </div>
-
             <hr className="my-2 mx-2 border-white/10" />
 
             {/* Mobile Nav Links */}
             <div className="space-y-1 px-2">
               {/* Standalone links */}
-              {topLinks.map((item) => (
+              {leadingLinks.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
@@ -733,6 +725,24 @@ export function Navbar() {
                     </Link>
                   ))}
                 </div>
+              ))}
+
+              {/* Trailing standalone links */}
+              {trailingLinks.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
+                    isActive(item.href)
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/80 hover:bg-white/10'
+                  )}
+                >
+                  <item.icon size={20} />
+                  <span>{item.name}</span>
+                </Link>
               ))}
 
               {/* Admin link (OECS only) */}

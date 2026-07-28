@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
 
       {/* Stats Grid */}
       {statsLoading || !stats ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
           {[1, 2, 3, 4].map((i) => (
             <div className="border border-gray-200 rounded-lg p-4 animate-pulse" key={i}>
               <div className="flex items-center gap-3">
@@ -59,7 +59,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 stagger-children">
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">

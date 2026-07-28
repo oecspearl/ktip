@@ -17,9 +17,11 @@ interface NewConversationModalProps {
   open: boolean
   onClose: () => void
   onCreated: (conversationId: string) => void
+  /** 'dm' = single-select direct message, 'group' = forced group, 'auto' = group when 2+ selected */
+  mode?: 'auto' | 'dm' | 'group'
 }
 
-export function NewConversationModal({ open, onClose, onCreated }: NewConversationModalProps) {
+export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }: NewConversationModalProps) {
   const auth = useAuth()
   const { searchUsers, loading: searchLoading } = useSearchUsers()
   const { createConversation, loading: createLoading } = useCreateConversation()
@@ -33,7 +35,7 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const creating = createLoading || groupLoading
-  const isGroup = selected.length > 1
+  const isGroup = mode === 'group' || (mode === 'auto' && selected.length > 1)
 
   // Clear any pending debounce timer on unmount
   useEffect(() => {
@@ -68,15 +70,20 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
 
   const toggleUser = (user: Profile) => {
     setError('')
-    setSelected((prev) =>
-      prev.some((u) => u.id === user.id)
-        ? prev.filter((u) => u.id !== user.id)
-        : [...prev, user]
-    )
+    setSelected((prev) => {
+      if (prev.some((u) => u.id === user.id)) return prev.filter((u) => u.id !== user.id)
+      // DM mode is single-select: picking someone replaces the selection
+      if (mode === 'dm') return [user]
+      return [...prev, user]
+    })
   }
 
   const handleCreate = async () => {
     if (!auth.user || selected.length === 0) return
+    if (mode === 'group' && selected.length < 2) {
+      setError('Pick at least two people for a group')
+      return
+    }
     setError('')
 
     try {
@@ -108,8 +115,14 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
     <Modal
       open={open}
       onClose={onClose}
-      title="New Conversation"
-      description="Pick one person for a direct message, or several to start a group"
+      title={mode === 'group' ? 'New Group' : mode === 'dm' ? 'New Message' : 'New Conversation'}
+      description={
+        mode === 'group'
+          ? 'Pick at least two people and name your group'
+          : mode === 'dm'
+            ? 'Pick a person to message'
+            : 'Pick one person for a direct message, or several to start a group'
+      }
       size="lg"
     >
       <div className="space-y-4">
@@ -205,7 +218,11 @@ export function NewConversationModal({ open, onClose, onCreated }: NewConversati
         <div className="flex justify-end pt-2">
           <Button
             onClick={handleCreate}
-            disabled={selected.length === 0 || creating || (isGroup && !groupName.trim())}
+            disabled={
+              (mode === 'group' ? selected.length < 2 : selected.length === 0) ||
+              creating ||
+              (isGroup && !groupName.trim())
+            }
             loading={creating}
           >
             {isGroup ? `Create Group (${selected.length + 1})` : 'Start Conversation'}

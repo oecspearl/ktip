@@ -24,9 +24,9 @@ export function SkeletonCard() {
   )
 }
 
-export function SkeletonGrid({ count }: { count?: number }) {
+export function SkeletonGrid({ count, className }: { count?: number; className?: string }) {
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className={className ?? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6'}>
       {Array.from({ length: count ?? 6 }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}

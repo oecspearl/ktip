@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useAISuggestions } from '../../hooks/useAISuggestions'
+import { useAISuggestions } from '../../../hooks/useAISuggestions'
 import { Sparkles, Wand2, MessageSquare, Loader2 } from 'lucide-react'
 
 interface AIFieldActionsProps {
-  proposalType: string
+  grantTitle: string
   fieldLabel: string
   fieldValue: string
   helpText?: string
   placeholder?: string
-  proposalTitle?: string
+  applicationTitle?: string
   existingData?: Record<string, any>
   onReplace: (html: string) => void
 }
@@ -21,14 +21,14 @@ const TONES = [
 ]
 
 export function AIFieldActions(props: AIFieldActionsProps) {
-  const { proposalType, fieldLabel, fieldValue, helpText, placeholder, proposalTitle, existingData, onReplace } = props
+  const { grantTitle, fieldLabel, fieldValue, helpText, placeholder, applicationTitle, existingData, onReplace } = props
   const ai = useAISuggestions()
   const [showTones, setShowTones] = useState(false)
 
   const handleImprove = async () => {
     if (!fieldValue?.trim()) return
     const html = await ai.improveField({
-      proposalType,
+      grantTitle,
       fieldLabel,
       fieldValue,
       helpText,
@@ -38,11 +38,11 @@ export function AIFieldActions(props: AIFieldActionsProps) {
 
   const handleSuggest = async () => {
     const html = await ai.suggestSection({
-      proposalType,
+      grantTitle,
       fieldLabel,
       helpText,
       placeholder,
-      proposalTitle,
+      applicationTitle,
       existingData,
     })
     if (html) onReplace(html)

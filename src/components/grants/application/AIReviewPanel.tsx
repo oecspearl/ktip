@@ -1,23 +1,23 @@
 import { useState } from 'react'
-import { useAISuggestions } from '../../hooks/useAISuggestions'
-import type { AIReviewResult } from '../../hooks/useAISuggestions'
+import { useAISuggestions } from '../../../hooks/useAISuggestions'
+import type { AIReviewResult } from '../../../hooks/useAISuggestions'
 import { Sparkles, Loader2, CheckCircle, AlertTriangle, Lightbulb } from 'lucide-react'
 
 interface AIReviewPanelProps {
-  proposalType: string
-  proposalTitle: string
-  proposalData: Record<string, any>
+  grantTitle: string
+  applicationTitle: string
+  applicationData: Record<string, any>
 }
 
-export function AIReviewPanel({ proposalType, proposalTitle, proposalData }: AIReviewPanelProps) {
+export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }: AIReviewPanelProps) {
   const ai = useAISuggestions()
   const [review, setReview] = useState<AIReviewResult | null>(null)
 
   const handleReview = async () => {
-    const result = await ai.reviewProposal({
-      proposalType,
-      proposalTitle,
-      proposalData,
+    const result = await ai.reviewApplication({
+      grantTitle,
+      applicationTitle,
+      applicationData,
     })
     if (result) setReview(result)
   }
@@ -31,9 +31,9 @@ export function AIReviewPanel({ proposalType, proposalTitle, proposalData }: AIR
       {!review ? (
         <div className="text-center py-6 border border-dashed border-ktip-sand-300 rounded-xl">
           <Sparkles size={24} className="mx-auto text-ktip-ocean-400 mb-2" />
-          <h4 className="text-sm font-semibold text-ktip-sand-800 mb-1">AI Proposal Review</h4>
+          <h4 className="text-sm font-semibold text-ktip-sand-800 mb-1">AI Application Review</h4>
           <p className="text-xs text-ktip-sand-500 mb-4 max-w-md mx-auto">
-            Get an AI-powered analysis of your proposal with scoring, strengths, weaknesses, and actionable suggestions.
+            Get an AI-powered analysis of your application with scoring, strengths, weaknesses, and actionable suggestions.
           </p>
           <button
             type="button"
@@ -49,7 +49,7 @@ export function AIReviewPanel({ proposalType, proposalTitle, proposalData }: AIR
             ) : (
               <>
                 <Sparkles size={16} />
-                Analyze Proposal
+                Analyze Application
               </>
             )}
           </button>

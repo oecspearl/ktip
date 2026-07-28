@@ -1,18 +1,75 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { ResourceCard } from '../../components/resources/ResourceCard'
+import { IntegrationCard } from '../../components/integrations/IntegrationCard'
 import { useResources } from '../../hooks/useResources'
+import { useIntegrations } from '../../hooks/useIntegrations'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { Search, BookOpen } from 'lucide-react'
+import { Search, BookOpen, Puzzle } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
+import { cn, debounce } from '../../lib/utils'
 import {
   RESOURCE_TYPE_LABELS,
   RESOURCE_CATEGORY_LABELS,
+  INTEGRATION_CATEGORY_LABELS,
 } from '../../lib/constants'
 
-export default function ResourcesPage() {
-  usePageTitle('Resources')
+type Tab = 'resources' | 'integrations'
 
+const TABS: { id: Tab; label: string; icon: typeof BookOpen }[] = [
+  { id: 'resources', label: 'Resources', icon: BookOpen },
+  { id: 'integrations', label: 'Integrations', icon: Puzzle },
+]
+
+export default function ResourcesPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab: Tab = searchParams.get('tab') === 'integrations' ? 'integrations' : 'resources'
+  usePageTitle(tab === 'integrations' ? 'Integrations' : 'Resources')
+
+  const setTab = (t: Tab) =>
+    setSearchParams(t === 'resources' ? {} : { tab: t }, { replace: true })
+
+  return (
+    <>
+      <PageHero
+        eyebrow="Knowledge Base"
+        title="Resources & Integrations"
+        imageSeed="resources"
+        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Resources' }]}
+      />
+
+      {/* === Tabs === */}
+      <div className="bg-ktip-sand-50 pt-6">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+          <div role="tablist" aria-label="Knowledge base sections" className="flex gap-1 border-b border-ktip-sand-200">
+            {TABS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={tab === id}
+                onClick={() => setTab(id)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 text-sm font-semibold -mb-px border-b-2 transition-colors',
+                  tab === id
+                    ? 'border-ktip-ocean-600 text-ktip-ocean-700'
+                    : 'border-transparent text-ktip-sand-500 hover:text-ktip-sand-700'
+                )}
+              >
+                <Icon size={16} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {tab === 'resources' ? <ResourcesTab /> : <IntegrationsTab />}
+    </>
+  )
+}
+
+function ResourcesTab() {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -36,13 +93,6 @@ export default function ResourcesPage() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Knowledge Base"
-        title="Resources"
-        imageSeed="resources"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Resources' }]}
-      />
-
       {/* === Filter Section === */}
       <div className="bg-ktip-sand-50 py-8">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
@@ -114,9 +164,9 @@ export default function ResourcesPage() {
       <div className="bg-ktip-sand-50 pb-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading || !resources ? (
-            <SkeletonGrid count={6} />
+            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : resources.length ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
               {resources.map((resource) => (
                 <ResourceCard key={resource.id} resource={resource} />
               ))}
@@ -147,5 +197,69 @@ export default function ResourcesPage() {
         </div>
       </div>
     </>
+  )
+}
+
+function IntegrationsTab() {
+  const [category, setCategory] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
+
+  const { integrations, loading } = useIntegrations({ category, search: debouncedSearch })
+
+  return (
+    <div className="bg-ktip-sand-50 pb-12">
+      <div className="max-w-[calc(50vw+32rem)] mx-auto px-4 py-8">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search integrations..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                debouncedSetSearch(e.target.value)
+              }}
+              className="w-full pl-9 pr-3 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            />
+          </div>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+          >
+            <option value="">All Categories</option>
+            {Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => (
+              <option value={value} key={value}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        {loading ? (
+          <SkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" />
+        ) : integrations && integrations.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
+            {integrations.map((integration) => (
+              <IntegrationCard key={integration.id} integration={integration} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Puzzle size={32} className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No integrations found</h3>
+            <p className="text-gray-500 text-sm">
+              {searchQuery || category
+                ? 'Try adjusting your search or category filter.'
+                : 'The directory is being curated — check back soon.'}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

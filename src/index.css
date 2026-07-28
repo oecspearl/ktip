@@ -422,6 +422,22 @@ html.dark {
   animation: tabEnter 0.15s ease-out;
 }
 
+/* Events calendar: month grid slide on prev/next navigation */
+@keyframes calLeft {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes calRight {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-cal-left {
+  animation: calLeft 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.animate-cal-right {
+  animation: calRight 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Section headings reveal on navigation (routed subtree remounts via
    key={pathname} in MainLayout/AdminLayout). :where() keeps specificity
    at 0 so animate-none can opt out. */
@@ -429,9 +445,53 @@ html.dark {
   animation: revealUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
 }
 
+/* Card-by-card staggered reveal for grids/lists. Applied to the container;
+   each child gets its own 80ms slot, capped at 12 (children 13+ share the
+   last slot — below the fold anyway). `backwards` fill (not `both`): cards
+   keep hover transforms (BentoCard hover:-translate-y) once the entrance
+   animation finishes. Fires on mount, i.e. when the loading branch swaps
+   skeleton → real grid, and again after every skeleton cycle. */
+.stagger-children > * {
+  animation: revealUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: 880ms;
+}
+/* Table-row variant: fade only — translateY on <tr> can glitch table
+   painting, so rows fade in without movement. */
+.stagger-rows > * {
+  animation: fadeIn 0.5s ease-out backwards;
+  animation-delay: 880ms;
+}
+.stagger-children > :nth-child(1),
+.stagger-rows > :nth-child(1) { animation-delay: 0ms; }
+.stagger-children > :nth-child(2),
+.stagger-rows > :nth-child(2) { animation-delay: 80ms; }
+.stagger-children > :nth-child(3),
+.stagger-rows > :nth-child(3) { animation-delay: 160ms; }
+.stagger-children > :nth-child(4),
+.stagger-rows > :nth-child(4) { animation-delay: 240ms; }
+.stagger-children > :nth-child(5),
+.stagger-rows > :nth-child(5) { animation-delay: 320ms; }
+.stagger-children > :nth-child(6),
+.stagger-rows > :nth-child(6) { animation-delay: 400ms; }
+.stagger-children > :nth-child(7),
+.stagger-rows > :nth-child(7) { animation-delay: 480ms; }
+.stagger-children > :nth-child(8),
+.stagger-rows > :nth-child(8) { animation-delay: 560ms; }
+.stagger-children > :nth-child(9),
+.stagger-rows > :nth-child(9) { animation-delay: 640ms; }
+.stagger-children > :nth-child(10),
+.stagger-rows > :nth-child(10) { animation-delay: 720ms; }
+.stagger-children > :nth-child(11),
+.stagger-rows > :nth-child(11) { animation-delay: 800ms; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-reveal-up,
-  .page-reveal :where(h2) {
+  .page-reveal :where(h2),
+  .animate-cal-left,
+  .animate-cal-right,
+  .animate-tab-enter,
+  .stagger-children > *,
+  .stagger-rows > * {
     animation: none;
   }
 }
