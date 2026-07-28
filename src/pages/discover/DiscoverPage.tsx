@@ -1,4 +1,12 @@
-import { useState, useEffect, useCallback, useMemo, useRef, type CSSProperties } from 'react'
+import {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  type CSSProperties,
+} from 'react'
 import { Link } from 'react-router'
 import { format } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -317,7 +325,9 @@ export default function DiscoverPage() {
   const viewportRef = useRef<HTMLDivElement>(null)
   const rotatePending = ring && (targetPos !== pos || trackAnimating)
 
-  useEffect(() => {
+  // Layout effect so the ghost mounts in the same paint frame the parked card
+  // hides — otherwise there's a one-frame gap in the card→ghost handoff
+  useLayoutEffect(() => {
     if (heroSrc === shownSrc || anim?.src === heroSrc || rotatePending) return
     const sec = sectionRef.current
     if (!sec) {
@@ -541,11 +551,11 @@ export default function DiscoverPage() {
                 {trackItems.map((item, t) => {
                   const itemIdx = t % Math.max(count, 1)
                   const isActive = itemIdx === index
-                  // The card parked one step past the right edge (the one the
-                  // ghost expanded from) stays hidden once its slide is done,
-                  // so it doesn't linger over the hero after the ghost fades
-                  const offStage =
-                    ring && t === pos + slots && !rotatePending && (!anim || anim.phase === 'fade')
+                  // The card parked one step past the right edge hides the
+                  // moment its slide completes — the ghost mounts at the same
+                  // rect in the same frame, so the card reads as morphing into
+                  // the expanding hero image instead of lingering beside it
+                  const offStage = ring && t === pos + slots && !rotatePending
                   return (
                     <button
                       key={`${t}-${item.id}`}
@@ -555,6 +565,11 @@ export default function DiscoverPage() {
                       }}
                       style={{
                         opacity: offStage ? 0 : 1,
+                        // Snap instead of fade: the ghost mounts at this exact
+                        // rect in the same frame, so an instant swap reads as
+                        // the card itself expanding — a fade would show the
+                        // card and the ghost as two copies side by side
+                        transition: offStage ? 'none' : undefined,
                         pointerEvents: offStage ? 'none' : undefined,
                       }}
                       onClick={() => setIndex(itemIdx)}
