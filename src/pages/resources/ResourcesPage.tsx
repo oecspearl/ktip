@@ -6,7 +6,10 @@ import { useResources } from '../../hooks/useResources'
 import { useIntegrations } from '../../hooks/useIntegrations'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { SortSelect } from '../../components/ui/SortSelect'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { Search, BookOpen, Puzzle } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
@@ -29,8 +32,13 @@ export default function ResourcesPage() {
   const tab: Tab = searchParams.get('tab') === 'integrations' ? 'integrations' : 'resources'
   usePageTitle(tab === 'integrations' ? 'Integrations' : 'Resources')
 
-  const setTab = (t: Tab) =>
-    setSearchParams(t === 'resources' ? {} : { tab: t }, { replace: true })
+  const setTab = (t: Tab) => {
+    // Keep ?sort= across tab switches; only the tab itself is rewritten.
+    const params = new URLSearchParams(searchParams)
+    if (t === 'resources') params.delete('tab')
+    else params.set('tab', t)
+    setSearchParams(params, { replace: true })
+  }
 
   return (
     <>
@@ -77,8 +85,19 @@ function ResourcesTab() {
   const [categoryFilter, setCategoryFilter] = useState('')
   const [climateFilter, setClimateFilter] = useState(false)
   const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const { tags: tagOptions } = useTagVocabulary('resources')
+
+  // Sort lives in the URL so it is shareable and survives back/forward.
+  const { active: personalizationActive } = usePersonalizationActive()
+  const sort = resolveSort(searchParams.get('sort'), personalizationActive, 'newest')
+
+  const setSort = (next: ContentSort) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('sort', next)
+    setSearchParams(params, { replace: true })
+  }
 
   const { resources, loading } = useResources({
     search: searchQuery,
@@ -86,6 +105,7 @@ function ResourcesTab() {
     category: categoryFilter,
     climateAction: climateFilter,
     tags: tagFilter,
+    sort,
   })
 
   const hasActiveFilters = !!(
@@ -160,6 +180,15 @@ function ResourcesTab() {
               />
               Climate Action
             </label>
+
+            <div className="ml-auto">
+              <SortSelect
+                value={sort}
+                onChange={setSort}
+                options={SORT_OPTIONS.resource.options}
+                personalizationActive={personalizationActive}
+              />
+            </div>
           </div>
 
           <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />

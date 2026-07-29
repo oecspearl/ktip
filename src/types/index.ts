@@ -72,7 +72,29 @@ export interface Profile {
   updated_at: string
 }
 
-export interface Project {
+/**
+ * One reason the personalization ranker scored a row up, as returned by
+ * the `rank_content` RPC (migration 061). Score and reasons are derived
+ * from the same contribution array server-side, so the chip on a card can
+ * never disagree with the ordering it produced.
+ */
+export interface MatchReason {
+  code: string
+  label: string
+  w: number
+}
+
+/**
+ * Mixed into every rankable content entity. Both fields are absent unless
+ * the list was fetched under the "For You" sort, which is why nothing
+ * downstream has to know whether personalization is on.
+ */
+export interface Ranked {
+  match_score?: number
+  match_reasons?: MatchReason[]
+}
+
+export interface Project extends Ranked {
   id: string
   title: string
   description: string | null
@@ -92,7 +114,7 @@ export interface Project {
   owner?: Profile
 }
 
-export interface Event {
+export interface Event extends Ranked {
   id: string
   title: string
   description: string | null
@@ -190,7 +212,7 @@ export interface EventScheduleItem {
   speaker?: EventSpeaker
 }
 
-export interface Grant {
+export interface Grant extends Ranked {
   id: string
   title: string
   description: string | null
@@ -202,6 +224,8 @@ export interface Grant {
   eligibility: string | null
   application_url: string | null
   grant_type: string | null
+  /** Migration 060 — grants joined the tag vocabulary last. */
+  tags: string[]
   is_active: boolean
   is_climate_action: boolean
   details: DetailEntry[]
@@ -351,7 +375,7 @@ export type ResourceType = 'article' | 'guide' | 'case_study' | 'template' | 'vi
 
 export type ResourceCategory = 'technology' | 'healthcare' | 'education' | 'agriculture' | 'environment' | 'climate_action' | 'business' | 'other'
 
-export interface Resource {
+export interface Resource extends Ranked {
   id: string
   title: string
   description: string | null
@@ -444,6 +468,20 @@ export interface EmailInvite {
   created_at: string
 }
 
+/**
+ * A secondary email that can sign in to the same account with the same
+ * password. `verification_token` exists on the row but is deliberately never
+ * selected by the client — see useEmailAlias.
+ */
+export interface UserEmailAlias {
+  id: string
+  user_id: string
+  email: string
+  verified_at: string | null
+  token_expires_at: string | null
+  created_at: string
+}
+
 // Grievance types
 export type GrievanceCategory =
   | 'soliciting'
@@ -506,6 +544,111 @@ export interface VerificationRequest {
   user?: Profile
 }
 
+// Employer types (migration 058)
+
+export interface Country {
+  code: string
+  name: string
+  is_oecs_member: boolean
+  sort_order: number
+}
+
+/**
+ * Employer-scoped verification. Distinct from VerificationStatus above, which
+ * is person-level identity KYC — 'verified' here asserts the *company* was
+ * checked, and 'revoked' exists because that assertion can be withdrawn after
+ * the fact (see api/partner/v1/employers.ts for how consumers learn about it).
+ */
+export type EmployerVerificationStatus =
+  | 'unverified'
+  | 'pending'
+  | 'verified'
+  | 'rejected'
+  | 'revoked'
+
+export type EmployerVerificationMethod =
+  | 'document_review'
+  | 'registry_lookup'
+  | 'manual_attestation'
+
+export interface Employer {
+  id: string
+  slug: string
+  legal_name: string
+  trading_name: string | null
+  industry: string | null
+  website_url: string | null
+  logo_url: string | null
+  description: string | null
+
+  // Address hierarchy, coarse -> fine. country_code is a FK to countries.
+  country_code: string
+  administrative_area: string | null
+  locality: string | null
+  address_line1: string | null
+  address_line2: string | null
+  postal_code: string | null
+
+  contact_email: string
+  contact_email_verified_at: string | null
+  contact_phone: string | null
+
+  verification_status: EmployerVerificationStatus
+  verification_method: EmployerVerificationMethod | null
+  registration_number: string | null
+  verified_at: string | null
+  verified_by: string | null
+  /** INTERNAL reviewer commentary. Never leaves the system. */
+  verification_note: string | null
+  /** INTERNAL paths into the private verification-documents bucket. */
+  document_paths: string[]
+  /** Generated column — lets the feed report evidence volume without reading the paths. */
+  document_count: number
+
+  share_externally: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+
+  country?: Country
+}
+
+export type EmployerMemberRole = 'owner' | 'admin' | 'recruiter'
+
+export interface EmployerMember {
+  id: string
+  employer_id: string
+  user_id: string
+  role: EmployerMemberRole
+  created_at: string
+  user?: Profile
+  employer?: Employer
+}
+
+export interface EmployerVerificationEvent {
+  id: string
+  employer_id: string
+  from_status: EmployerVerificationStatus | null
+  to_status: EmployerVerificationStatus
+  method: EmployerVerificationMethod | null
+  note: string | null
+  actor_id: string | null
+  created_at: string
+}
+
+// Partner API types (migration 059)
+
+export interface ApiClient {
+  id: string
+  name: string
+  key_prefix: string
+  scopes: string[]
+  last_used_at: string | null
+  revoked_at: string | null
+  created_by: string | null
+  created_at: string
+}
+
 // Notification preferences
 export interface NotificationPreferences {
   user_id: string
@@ -516,6 +659,28 @@ export interface NotificationPreferences {
   forums: boolean
   collaboration: boolean
   connections: boolean
+  updated_at: string
+}
+
+// Personalization types (migration 055)
+
+/**
+ * Settings › Personalization. The three arrays are stored in the
+ * *content* vocabulary — real tags, the shared project/resource
+ * category enum, and namespaced type keys ('resource:guide') — so the
+ * ranker can compare them to content rows directly.
+ */
+export interface UserPersonalization {
+  user_id: string
+  enabled: boolean
+  use_profile_signals: boolean
+  use_behavior_signals: boolean
+  use_badge_signals: boolean
+  climate_focus: boolean
+  topics: string[]
+  categories: string[]
+  content_types: string[]
+  created_at: string
   updated_at: string
 }
 

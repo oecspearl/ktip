@@ -6,6 +6,8 @@ import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
 import { FloatingActionButton } from '../ui/FloatingActionButton'
 import { MessagingPanel } from '../messages/MessagingPanel'
 import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
+import { MemberPanel } from '../directory/MemberPanel'
+import { MemberPanelProvider } from '../../contexts/MemberPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function MainLayout() {
@@ -19,6 +21,8 @@ export function MainLayout() {
 
   return (
     <MessagingPanelProvider>
+    {/* Nested inside: MemberPanel's "Message" action calls useMessagingPanel */}
+    <MemberPanelProvider>
     <div className="min-h-screen flex flex-col bg-ktip-canvas">
       <a
         href="#main-content"
@@ -35,8 +39,10 @@ export function MainLayout() {
       </main>
       <FloatingActionButton />
       <MessagingPanel />
+      <MemberPanel />
       <Footer />
     </div>
+    </MemberPanelProvider>
     </MessagingPanelProvider>
   )
 }

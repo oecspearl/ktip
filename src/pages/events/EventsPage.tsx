@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
   addDays,
   eachDayOfInterval,
@@ -18,10 +18,13 @@ import { useCalendarMonth } from '../../components/calendar/useCalendarMonth'
 import { useEvents } from '../../hooks/useEvents'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { SortSelect } from '../../components/ui/SortSelect'
 import { Plus, Search, CalendarX, CalendarDays, LayoutGrid } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { cn, debounce } from '../../lib/utils'
 import { groupByDay } from '../../lib/calendar'
 import { EVENT_TYPE_LABELS } from '../../lib/constants'
@@ -40,8 +43,20 @@ export default function EventsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
   const [tagFilter, setTagFilter] = useState<string[]>([])
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const { tags: tagOptions } = useTagVocabulary('events')
+
+  // Sort lives in the URL so it is shareable and survives back/forward. It
+  // only applies to the grid — the calendar has to stay in date order.
+  const { active: personalizationActive } = usePersonalizationActive()
+  const sort = resolveSort(searchParams.get('sort'), personalizationActive, 'upcoming')
+
+  const setSort = (next: ContentSort) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('sort', next)
+    setSearchParams(params, { replace: true })
+  }
 
   const [view, setView] = useState<EventsView>(() =>
     localStorage.getItem(VIEW_STORAGE_KEY) === 'grid' ? 'grid' : 'calendar'
@@ -107,6 +122,7 @@ export default function EventsPage() {
           search: debouncedSearch,
           climateAction: climateFilter,
           tags: tagFilter,
+          sort,
         }
   )
 
@@ -229,6 +245,15 @@ export default function EventsPage() {
               />
               Climate Action
             </label>
+
+            {view === 'grid' && (
+              <SortSelect
+                value={sort}
+                onChange={setSort}
+                options={SORT_OPTIONS.event.options}
+                personalizationActive={personalizationActive}
+              />
+            )}
 
             <div className="ml-auto flex items-center gap-2">
               {/* Collapsible search — icon expands to input, like the navbar */}

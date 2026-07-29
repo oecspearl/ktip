@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { rankRows, type ContentSort } from '../lib/personalization'
+import { usePersonalizationActive } from './usePersonalization'
 import type { DetailEntry, Event } from '../types'
 
 export function useEvents(filters?: {
@@ -12,12 +14,19 @@ export function useEvents(filters?: {
   climateAction?: boolean
   dateRange?: { start: string; end: string }
   tags?: string[]
+  sort?: ContentSort
 }) {
   // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
   const tags = filters?.tags?.length
     ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
     : undefined
-  const normalized = { ...filters, tags }
+
+  // "For You" only survives if the ranker can actually do something, and never
+  // in the calendar's date-window mode — a month grid has to stay in date order.
+  const { active, uid } = usePersonalizationActive()
+  const sort: ContentSort =
+    filters?.sort === 'for_you' && active && !filters?.dateRange ? 'for_you' : 'upcoming'
+  const normalized = { ...filters, tags, sort, uid: sort === 'for_you' ? uid : undefined }
 
   const fetchEvents = async (): Promise<Event[]> => {
     let query = supabase
@@ -70,17 +79,23 @@ export function useEvents(filters?: {
       }
     }
 
-    query = query.limit(filters?.dateRange ? 100 : 50)
+    // A wider net under "For You" so the ranking has more than one page to
+    // choose from.
+    query = query.limit(filters?.dateRange ? 100 : sort === 'for_you' ? 150 : 50)
 
     const { data, error } = await query
 
     if (error) throw error
-    return (data as any[]) || []
+    const rows = (data as any[]) || []
+
+    return sort === 'for_you' ? rankRows('event', rows) : rows
   }
 
   const query = useQuery({
     queryKey: keys.list('events', normalized),
     queryFn: fetchEvents,
+    // The second round trip is only worth paying for once a minute.
+    staleTime: sort === 'for_you' ? 60_000 : undefined,
   })
 
   return { events: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }

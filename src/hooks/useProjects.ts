@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { rankRows, type ContentSort } from '../lib/personalization'
+import { usePersonalizationActive } from './usePersonalization'
 import type { DetailEntry, Project, ProjectComment } from '../types'
 
 export function useProjects(filters?: {
@@ -11,12 +13,19 @@ export function useProjects(filters?: {
   climateAction?: boolean
   /** Matched against the `hashtags` column — projects' tag field. */
   tags?: string[]
+  sort?: ContentSort
 }) {
   // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
   const tags = filters?.tags?.length
     ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
     : undefined
-  const normalized = { ...filters, tags }
+
+  // "For You" only survives if the ranker can actually do something. The uid
+  // enters the cache key only in that case, so signed-out and non-personalized
+  // readers keep sharing the one cache entry they always did.
+  const { active, uid } = usePersonalizationActive()
+  const sort: ContentSort = filters?.sort === 'for_you' && active ? 'for_you' : 'newest'
+  const normalized = { ...filters, tags, sort, uid: sort === 'for_you' ? uid : undefined }
 
   const fetchProjects = async (): Promise<Project[]> => {
     let query = supabase
@@ -54,17 +63,24 @@ export function useProjects(filters?: {
       }
     }
 
-    query = query.limit(50)
+    // Two-stage retrieval: this query generates candidates, the ranker
+    // re-orders them. A wider net under "For You" so the ranking has more
+    // than one page to choose from.
+    query = query.limit(sort === 'for_you' ? 150 : 50)
 
     const { data, error } = await query
 
     if (error) throw error
-    return (data as any[]) || []
+    const rows = (data as any[]) || []
+
+    return sort === 'for_you' ? rankRows('project', rows) : rows
   }
 
   const query = useQuery({
     queryKey: keys.list('projects', normalized),
     queryFn: fetchProjects,
+    // The second round trip is only worth paying for once a minute.
+    staleTime: sort === 'for_you' ? 60_000 : undefined,
   })
 
   return {
@@ -98,34 +114,9 @@ export function useAdminProjects() {
   return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useFeaturedProjects() {
-  const fetchFeatured = async (): Promise<Project[]> => {
-    const { data, error } = await supabase
-      .from('projects')
-      .select(`
-        *,
-        owner:profiles(*)
-      `)
-      .eq('is_public', true)
-      .eq('is_featured', true as any)
-      .order('created_at', { ascending: false })
-      .limit(6)
-
-    // Gracefully degrade — if column doesn't exist yet, return empty array
-    if (error) {
-      console.warn('useFeaturedProjects error (column may not exist yet):', error.message)
-      return []
-    }
-    return (data as any[]) || []
-  }
-
-  const query = useQuery({
-    queryKey: keys.list('projects', 'featured'),
-    queryFn: fetchFeatured,
-  })
-
-  return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
-}
+// useFeaturedProjects() lived here and was imported by nothing. `is_featured`
+// now earns its keep as a +15 contribution in the personalization ranker
+// (migration 061) rather than as a separate unused query.
 
 export function useProject(id: string | undefined) {
   const fetchProject = async (projectId: string): Promise<Project | null> => {

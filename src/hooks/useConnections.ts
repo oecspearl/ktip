@@ -182,7 +182,7 @@ export function useConnectionMutations() {
         type: 'connection_request',
         title: 'New connection request',
         body: `${params.requesterName} wants to connect with you`,
-        link: `/profile/${params.requesterId}`,
+        link: `/directory?member=${params.requesterId}`,
       })
       return data
     },
@@ -212,7 +212,7 @@ export function useConnectionMutations() {
           type: 'connection_accepted',
           title: 'Connection accepted',
           body: `${params.myName} accepted your connection request`,
-          link: `/profile/${params.myId}`,
+          link: `/directory?member=${params.myId}`,
         })
       }
       return data

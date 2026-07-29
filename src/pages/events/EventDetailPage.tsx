@@ -10,6 +10,7 @@ import { usePublicEventSections } from '../../hooks/useEventPageSections'
 import { useEventSchedule } from '../../hooks/useEventSchedule'
 import { useEventSpeakers } from '../../hooks/useEventSpeakers'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { EventRegistrationForm } from '../../components/events/EventRegistrationForm'
@@ -48,6 +49,7 @@ export default function EventDetailPage() {
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
+  const { openMember } = useMemberPanel()
 
   const { event, loading: eventLoading } = useEvent(params.id)
   usePageTitle(event?.title)
@@ -538,12 +540,13 @@ export default function EventDetailPage() {
                   {event.organizer?.display_name?.charAt(0).toUpperCase() || 'O'}
                 </div>
                 <div>
-                  <Link
-                    to={`/profile/${event.organizer_id}`}
+                  <button
+                    type="button"
+                    onClick={() => openMember(event.organizer_id)}
                     className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                   >
                     {event.organizer?.display_name || 'Unknown User'}
-                  </Link>
+                  </button>
                   {event.organizer?.country && (
                     <p className="text-sm text-gray-500">
                       {event.organizer.country}

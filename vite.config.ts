@@ -101,8 +101,11 @@ export default defineConfig(({ mode }) => {
   // The api/ handlers read process.env, exactly as they do on Vercel
   if (openaiKey) process.env.OPENAI_API_KEY = openaiKey
   // Endpoints that verify the caller's JWT (e.g. /api/extract-fields) need the
-  // Supabase URL and anon key server-side too, or they 503 under `npm run dev`
-  for (const key of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']) {
+  // Supabase URL and anon key server-side too, or they 503 under `npm run dev`.
+  // The service-role key is needed by every privileged handler — api/admin/*,
+  // api/auth/*, api/partner/* — and lives in .env, but loadEnv() does not put
+  // it on process.env by itself.
+  for (const key of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY']) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }
 

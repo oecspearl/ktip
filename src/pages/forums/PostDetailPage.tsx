@@ -12,6 +12,7 @@ import {
   useDeleteForumReply,
 } from '../../hooks/useForums'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { forumReplySchema } from '../../lib/validation'
 import { truncate } from '../../lib/utils'
 import { PageHero } from '../../components/layout/PageHero'
@@ -33,6 +34,7 @@ export default function PostDetailPage() {
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
+  const { openMember } = useMemberPanel()
 
   const { post, loading: postLoading } = useForumPost(params.postId)
   const { replies, refetch: refetchReplies } = useForumReplies(params.postId)
@@ -170,12 +172,13 @@ export default function PostDetailPage() {
                 {getInitials(authorName)}
               </div>
               <div>
-                <Link
-                  to={`/profile/${post.author_id}`}
+                <button
+                  type="button"
+                  onClick={() => openMember(post.author_id)}
                   className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                 >
                   {authorName}
-                </Link>
+                </button>
                 <p className="text-xs text-gray-400">
                   {formatRelativeTime(post.created_at)}
                 </p>

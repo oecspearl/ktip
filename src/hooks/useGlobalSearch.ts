@@ -242,7 +242,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       title: m.display_name || 'Member',
       description: truncate(plainText(m.bio) || m.country || '', 100),
       category: 'Directory',
-      href: `/profile/${m.id}`,
+      href: `/directory?member=${m.id}`,
       icon: 'User',
     })
   }

@@ -11,6 +11,7 @@ import { useProject, useProjects, trackProjectView } from '../../hooks/useProjec
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 import {
   Share2,
@@ -32,6 +33,7 @@ export default function ProjectDetailPage() {
   const navigate = useNavigate()
   const auth = useAuth()
   const toast = useToast()
+  const { openMember } = useMemberPanel()
 
   const { project, loading: projectLoading } = useProject(params.id)
   const { projects: recentProjects } = useProjects()
@@ -344,12 +346,13 @@ export default function ProjectDetailPage() {
                   {project.owner?.display_name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <Link
-                    to={`/profile/${project.owner_id}`}
+                  <button
+                    type="button"
+                    onClick={() => openMember(project.owner_id)}
                     className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                   >
                     {project.owner?.display_name || 'Unknown User'}
-                  </Link>
+                  </button>
                   {project.owner?.country && (
                     <p className="text-sm text-gray-500">
                       {project.owner.country}
@@ -357,12 +360,13 @@ export default function ProjectDetailPage() {
                   )}
                 </div>
               </div>
-              <Link to={`/profile/${project.owner_id}`}>
-                <button className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center gap-1.5">
-                  <User size={16} />
-                  View Profile
-                </button>
-              </Link>
+              <button
+                onClick={() => openMember(project.owner_id)}
+                className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <User size={16} />
+                View Profile
+              </button>
             </div>
 
             {/* Widget: Team */}

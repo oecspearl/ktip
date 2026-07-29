@@ -1,16 +1,19 @@
-import { Link } from 'react-router'
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
 import { User, MapPin, MessageSquare } from 'lucide-react'
 import type { Profile } from '../../types'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { truncate } from '../../lib/utils'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
+import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 
 interface MemberCardProps {
   member: Profile
 }
 
 export function MemberCard({ member }: MemberCardProps) {
+  const { openMember } = useMemberPanel()
+  const { openPanel } = useMessagingPanel()
   return (
     <Card hover className="h-full flex flex-col">
       {/* Avatar & Name */}
@@ -75,19 +78,21 @@ export function MemberCard({ member }: MemberCardProps) {
 
       {/* Actions */}
       <div className="mt-auto pt-3 border-t border-ktip-sand-100 flex gap-2">
-        <Link
-          to={`/profile/${member.id}`}
+        <button
+          type="button"
+          onClick={() => openMember(member.id)}
           className="flex-1 text-center text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 py-1.5 rounded-lg hover:bg-ktip-ocean-50 transition-colors"
         >
           View Profile
-        </Link>
-        <Link
-          to="/messages"
+        </button>
+        <button
+          type="button"
+          onClick={() => openPanel({ userId: member.id })}
           className="flex items-center justify-center gap-1.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-700 py-1.5 px-3 rounded-lg hover:bg-ktip-sand-50 transition-colors"
         >
           <MessageSquare size={14} />
-          Connect
-        </Link>
+          Message
+        </button>
       </div>
     </Card>
   )

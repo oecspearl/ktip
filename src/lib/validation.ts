@@ -144,6 +144,11 @@ export const changeEmailSchema = z.object({
   email: z.string().email('Invalid email address'),
 })
 
+// Secondary (alias) Email Schema
+export const secondaryEmailSchema = z.object({
+  email: z.string().email('Invalid email address').max(254, 'Email too long'),
+})
+
 // Forgot Password Schema
 export const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),

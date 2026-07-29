@@ -57,6 +57,7 @@ const router = createBrowserRouter([
       { path: '/forgot-password', lazy: lazyPage(() => import('./pages/auth/ForgotPasswordPage')) },
       { path: '/reset-password', lazy: lazyPage(() => import('./pages/auth/ResetPasswordPage')) },
       { path: '/auth/callback', lazy: lazyPage(() => import('./pages/auth/AuthCallbackPage')) },
+      { path: '/verify-email/:token', lazy: lazyPage(() => import('./pages/auth/VerifyEmailAliasPage')) },
       { path: '/onboarding', lazy: lazyPage(() => import('./pages/onboarding/OnboardingPage')) },
 
       {
@@ -84,8 +85,28 @@ const router = createBrowserRouter([
           {
             Component: ProtectedRoute,
             children: [
-              { path: '/dashboard', lazy: lazyPage(() => import('./pages/dashboard/DashboardPage')) },
-              { path: '/dashboard/submissions', lazy: lazyPage(() => import('./pages/dashboard/MySubmissionsPage')) },
+              // The one personal page. Everything that used to live on
+              // /profile/me is a tab under here — see dashboard-tabs.ts.
+              {
+                path: '/dashboard',
+                lazy: lazyPage(() => import('./pages/dashboard/DashboardLayout')),
+                // Absolute child paths — legal because they extend the parent,
+                // and site-search.test.ts matches route paths literally.
+                children: [
+                  { index: true, lazy: lazyPage(() => import('./pages/dashboard/tabs/OverviewTab')) },
+                  { path: '/dashboard/profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProfileTab')) },
+                  { path: '/dashboard/progress', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProgressTab')) },
+                  { path: '/dashboard/projects', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProjectsTab')) },
+                  { path: '/dashboard/events', lazy: lazyPage(() => import('./pages/dashboard/tabs/EventsTab')) },
+                  { path: '/dashboard/connections', lazy: lazyPage(() => import('./pages/dashboard/tabs/ConnectionsTab')) },
+                  { path: '/dashboard/submissions', lazy: lazyPage(() => import('./pages/dashboard/tabs/SubmissionsTab')) },
+                  // Role-gated; each stub bounces to /dashboard without the role.
+                  { path: '/dashboard/funding', lazy: lazyPage(() => import('./pages/dashboard/tabs/FundingTab')) },
+                  { path: '/dashboard/mentees', lazy: lazyPage(() => import('./pages/dashboard/tabs/MenteesTab')) },
+                  { path: '/dashboard/research', lazy: lazyPage(() => import('./pages/dashboard/tabs/ResearchTab')) },
+                ],
+              },
+              // Full-page receipt, deliberately outside the tab shell
               { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
               { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
               { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
@@ -94,8 +115,10 @@ const router = createBrowserRouter([
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
-              { path: '/profile/me', lazy: lazyPage(() => import('./pages/profile/ProfilePage')) },
-              { path: '/profile/:id', lazy: lazyPage(() => import('./pages/profile/ProfilePage')) },
+              // /profile is gone — kept only so old links and the /profile/<id>
+              // URLs already stored in notification rows keep resolving.
+              { path: '/profile/me', element: <Navigate to="/dashboard" replace /> },
+              { path: '/profile/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
               { path: '/settings', lazy: lazyPage(() => import('./pages/settings/SettingsPage')) },
               { path: '/grievances/report/:userId', lazy: lazyPage(() => import('./pages/grievances/ReportUserPage')) },
@@ -140,6 +163,8 @@ const router = createBrowserRouter([
                   { path: '/admin/feedback', lazy: lazyPage(() => import('./pages/admin/feedback/AdminFeedbackPage')) },
                   { path: '/admin/verification', lazy: lazyPage(() => import('./pages/admin/verification/AdminVerificationPage')) },
                   { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
+                  { path: '/admin/employers', lazy: lazyPage(() => import('./pages/admin/employers/AdminEmployersPage')) },
+                  { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
                   { path: '/admin/preregistrations', lazy: lazyPage(() => import('./pages/admin/preregistrations/AdminPreregistrationsPage')) },
                   { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
                   { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },

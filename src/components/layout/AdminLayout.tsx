@@ -14,6 +14,8 @@ import {
   BadgeCheck,
   MessageCircle,
   Puzzle,
+  Building2,
+  KeyRound,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -29,6 +31,8 @@ const adminNavItems = [
   { href: '/admin/feedback', label: 'Feedback', icon: MessageCircle },
   { href: '/admin/verification', label: 'Verification', icon: BadgeCheck },
   { href: '/admin/integrations', label: 'Integrations', icon: Puzzle },
+  { href: '/admin/employers', label: 'Employers', icon: Building2 },
+  { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound },
   { href: '/admin/preregistrations', label: 'Pre-Registrations', icon: ClipboardList },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck },
@@ -47,17 +51,17 @@ export function AdminLayout() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar — desktop */}
         <div className="hidden lg:block lg:w-56 shrink-0">
-          <div className="bg-gray-900 rounded-2xl p-2 sticky top-28">
+          <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 sticky top-28">
             <nav className="space-y-1">
               {adminNavItems.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all',
+                    'flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors',
                     isActive(item.href, item.exact)
-                      ? 'bg-gray-800 text-white border-l-2 border-ktip-ocean-500'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                      ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
                   )}
                 >
                   <item.icon size={20} />
@@ -70,7 +74,7 @@ export function AdminLayout() {
 
         {/* Mobile nav */}
         <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
-          <nav className="flex gap-1 min-w-max bg-gray-900 rounded-2xl p-2">
+          <nav className="flex gap-1 min-w-max bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2">
             {adminNavItems.map((item) => (
               <Link
                 key={item.href}
@@ -78,8 +82,8 @@ export function AdminLayout() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors',
                   isActive(item.href, item.exact)
-                    ? 'bg-gray-800 text-white border-l-2 border-ktip-ocean-500'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                    : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
                 )}
               >
                 <item.icon size={16} />

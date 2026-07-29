@@ -1,12 +1,17 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { GrantCard } from '../../components/grants/GrantCard'
 import { useGrants } from '../../hooks/useGrants'
 import { Search, Wallet, FileText } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
+import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { SortSelect } from '../../components/ui/SortSelect'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTagVocabulary } from '../../hooks/useTagVocabulary'
+import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { debounce } from '../../lib/utils'
 
 export default function GrantsPage() {
@@ -16,13 +21,30 @@ export default function GrantsPage() {
   const [climateFilter, setClimateFilter] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
+
+  const { tags: tagOptions } = useTagVocabulary('grants')
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Sort lives in the URL so it is shareable and survives back/forward. The
+  // fallback here is deadline order, which is what the query already does.
+  const { active: personalizationActive } = usePersonalizationActive()
+  const sort = resolveSort(searchParams.get('sort'), personalizationActive, 'deadline')
+
+  const setSort = (next: ContentSort) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('sort', next)
+    setSearchParams(params, { replace: true })
+  }
 
   const { grants, loading } = useGrants({
     type: selectedType,
     active: showActive,
     search: debouncedSearch,
     climateAction: climateFilter,
+    tags: selectedTags,
+    sort,
   })
 
   const clearFilters = () => {
@@ -31,9 +53,16 @@ export default function GrantsPage() {
     setSearchQuery('')
     setDebouncedSearch('')
     setClimateFilter(false)
+    setSelectedTags([])
   }
 
-  const hasActiveFilters = !!(selectedType || !showActive || searchQuery || climateFilter)
+  const hasActiveFilters = !!(
+    selectedType ||
+    !showActive ||
+    searchQuery ||
+    climateFilter ||
+    selectedTags.length
+  )
 
   const grantTypes = [
     { value: 'startup', label: 'Startup Funding' },
@@ -112,7 +141,18 @@ export default function GrantsPage() {
               />
               Climate Action
             </label>
+
+            <div className="ml-auto">
+              <SortSelect
+                value={sort}
+                onChange={setSort}
+                options={SORT_OPTIONS.grant.options}
+                personalizationActive={personalizationActive}
+              />
+            </div>
           </div>
+
+          <TagFilterChips options={tagOptions} selected={selectedTags} onChange={setSelectedTags} />
 
           {hasActiveFilters && (
             <button

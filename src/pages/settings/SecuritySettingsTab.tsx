@@ -6,10 +6,12 @@ import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { changePasswordSchema, changeEmailSchema } from '../../lib/validation'
+import { changePasswordSchema, changeEmailSchema, secondaryEmailSchema } from '../../lib/validation'
+import { useMyEmailAlias, useEmailAliasMutations } from '../../hooks/useEmailAlias'
 import {
   Lock,
   Mail,
+  MailPlus,
   Trash2,
   AlertTriangle,
   CheckCircle,
@@ -32,6 +34,13 @@ export function SecuritySettingsTab() {
   const [emailErrors, setEmailErrors] = useState<Record<string, string>>({})
   const [emailLoading, setEmailLoading] = useState(false)
   const [emailSuccess, setEmailSuccess] = useState(false)
+
+  // Secondary email
+  const { alias, loading: aliasLoading } = useMyEmailAlias(auth.user?.id)
+  const { addAlias, removeAlias, loading: aliasSaving } = useEmailAliasMutations()
+  const [secondaryEmail, setSecondaryEmail] = useState('')
+  const [aliasErrors, setAliasErrors] = useState<Record<string, string>>({})
+  const [aliasSent, setAliasSent] = useState(false)
 
   // Delete account
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -96,6 +105,53 @@ export function SecuritySettingsTab() {
       setEmailErrors({ _form: err.message || 'Failed to update email' })
     } finally {
       setEmailLoading(false)
+    }
+  }
+
+  /** Add, change the pending address, or resend — one endpoint handles all three. */
+  const submitSecondaryEmail = async (value: string) => {
+    setAliasErrors({})
+    setAliasSent(false)
+
+    const result = secondaryEmailSchema.safeParse({ email: value })
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {}
+      for (const issue of result.error.issues) {
+        const field = issue.path[0]?.toString()
+        if (field) fieldErrors[field] = issue.message
+      }
+      setAliasErrors(fieldErrors)
+      return
+    }
+
+    try {
+      const res = await addAlias(value.trim().toLowerCase())
+      if (res.already_verified) {
+        toast.success('That address is already verified.')
+        return
+      }
+      setAliasSent(true)
+      setSecondaryEmail('')
+      // Without Resend configured, dev builds hand the link back instead.
+      if (res.dev_link) {
+        console.log('[dev] verification link:', res.dev_link)
+        toast.success('Verification link logged to the console (dev mode).')
+      } else {
+        toast.success('Verification email sent.')
+      }
+    } catch (err: any) {
+      setAliasErrors({ _form: err.message || 'Failed to save the address' })
+    }
+  }
+
+  const handleRemoveSecondaryEmail = async () => {
+    setAliasErrors({})
+    setAliasSent(false)
+    try {
+      await removeAlias(auth.user!.id)
+      toast.success('Secondary email removed')
+    } catch (err: any) {
+      setAliasErrors({ _form: err.message || 'Failed to remove the address' })
     }
   }
 
@@ -213,6 +269,114 @@ export function SecuritySettingsTab() {
           <Button onClick={handleChangeEmail} loading={emailLoading}>
             Update Email
           </Button>
+        </div>
+      </Card>
+
+      {/* Secondary Email */}
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
+            <MailPlus size={20} className="text-ktip-ocean-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Secondary Email</h2>
+            <p className="text-sm text-ktip-sand-600">
+              A backup address that signs in to this account with the same password
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4 max-w-md">
+          {aliasErrors._form && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {aliasErrors._form}
+            </div>
+          )}
+
+          {aliasLoading ? (
+            <div className="h-12 bg-ktip-sand-100 rounded-xl animate-pulse-soft" />
+          ) : !alias ? (
+            <>
+              {aliasSent && (
+                <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
+                  <CheckCircle size={18} />
+                  Check that inbox for a confirmation link.
+                </div>
+              )}
+              <Input
+                type="email"
+                label="Secondary Email"
+                placeholder="Enter a backup email address"
+                value={secondaryEmail}
+                onChange={(e) => setSecondaryEmail(e.target.value)}
+                error={aliasErrors.email}
+                icon={<Mail size={20} />}
+                fullWidth
+              />
+              <p className="text-xs text-ktip-sand-500">
+                You'll need to confirm the address before it can be used. It cannot already
+                belong to another KTIP account.
+              </p>
+              <Button
+                onClick={() => submitSecondaryEmail(secondaryEmail)}
+                loading={aliasSaving}
+              >
+                Add Secondary Email
+              </Button>
+            </>
+          ) : alias.verified_at ? (
+            <>
+              {alias.email === auth.user?.email?.toLowerCase() ? (
+                <div className="bg-ktip-ocean-50 border border-ktip-ocean-200 text-ktip-ocean-700 px-4 py-3 rounded-xl text-sm">
+                  <strong>{alias.email}</strong> is now your primary email address, so it no
+                  longer works as a secondary one. You can remove it and add a different
+                  backup address.
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
+                  <CheckCircle size={18} />
+                  <span>
+                    <strong>{alias.email}</strong> is verified — you can sign in with it.
+                  </span>
+                </div>
+              )}
+              <Button variant="secondary" onClick={handleRemoveSecondaryEmail} loading={aliasSaving}>
+                Remove
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="bg-ktip-sun-50 border border-ktip-sun-200 text-ktip-sun-800 px-4 py-3 rounded-xl text-sm">
+                {alias.token_expires_at && new Date(alias.token_expires_at) > new Date() ? (
+                  <>
+                    Waiting for confirmation of <strong>{alias.email}</strong>. Check that
+                    inbox — the link expires 24 hours after it was sent.
+                  </>
+                ) : (
+                  <>
+                    The confirmation link for <strong>{alias.email}</strong> expired. Send a
+                    fresh one, or remove the address.
+                  </>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => submitSecondaryEmail(alias.email)} loading={aliasSaving}>
+                  Resend Link
+                </Button>
+                <Button variant="secondary" onClick={handleRemoveSecondaryEmail} loading={aliasSaving}>
+                  Remove
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* OAuth-only accounts have no password, so there is nothing to sign in with yet. */}
+          {!auth.user?.identities?.some((i) => i.provider === 'email') && (
+            <p className="text-xs text-ktip-sand-500">
+              You sign in with Google or Microsoft, so this address can't sign in until you set
+              a password — use "Forgot password" with it once it's verified.
+            </p>
+          )}
         </div>
       </Card>
 

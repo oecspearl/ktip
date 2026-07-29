@@ -686,3 +686,178 @@ INSERT INTO messages (id, conversation_id, sender_id, content, created_at) VALUE
    'That would be amazing! I will try histogram equalisation this week. Could we also meet bi-weekly to review my progress? I am targeting a conference paper submission by March.',
    NOW() - INTERVAL '41 days')
 ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- 13. EMPLOYERS  (10 companies across the verification lifecycle)
+-- ============================================================
+-- Requires migrations 058 and 059.
+--
+-- Deliberately covers every state the partner feed distinguishes, so
+-- /api/partner/v1/employers can be exercised end to end:
+--   * verified + shared                            -> in the feed
+--   * verified + shared, contact email unconfirmed -> in the feed, contact_email null
+--   * verified but NOT shared                      -> withheld (verification is not consent)
+--   * pending / unverified / rejected              -> never in the feed, and no tombstone
+--   * revoked (was verified)                       -> tombstone under ?include_removed=true
+--
+-- No API key is seeded. A key committed to a file is a live credential the
+-- moment this runs anywhere real — issue one from Admin -> Partner API.
+
+INSERT INTO employers (
+  id, slug, legal_name, trading_name, industry, website_url, logo_url, description,
+  country_code, administrative_area, locality, address_line1, address_line2, postal_code,
+  contact_email, contact_email_verified_at, contact_phone,
+  verification_status, verification_method, registration_number,
+  verified_at, verified_by, verification_note, document_paths,
+  share_externally, created_by, created_at, updated_at
+) VALUES
+  -- 1. Verified and published — the happy path
+  ('e0000000-0000-0000-0000-000000000001', 'castries-tech-limited', 'Castries Tech Limited', 'CasTech',
+   'ICT & Digital Services', 'https://castriestech.example', NULL,
+   'Software development house building government service portals across the OECS.',
+   'LC', 'Castries', 'Castries', '12 Bridge Street', NULL, 'LC04 101',
+   'careers@castriestech.example', NOW() - INTERVAL '80 days', '+1-758-555-0142',
+   'verified', 'registry_lookup', 'LC-2019-004412',
+   NOW() - INTERVAL '78 days', 'a0000000-0000-0000-0000-000000000001',
+   'Confirmed against the Saint Lucia Registry of Companies. Director list matches.',
+   ARRAY['e0000000-0000-0000-0000-000000000001/certificate-of-incorporation.pdf'],
+   TRUE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '90 days', NOW() - INTERVAL '78 days'),
+
+  -- 2. Verified and published
+  ('e0000000-0000-0000-0000-000000000002', 'blue-horizon-fisheries', 'Blue Horizon Fisheries Ltd', 'Blue Horizon',
+   'Blue Economy & Fisheries', 'https://bluehorizon.example', NULL,
+   'Sustainable fishing cooperative running cold-chain logistics for 40 small vessels.',
+   'GD', 'Saint George', 'St. George''s', 'Melville Street Fish Market', 'Unit 4', NULL,
+   'hr@bluehorizon.example', NOW() - INTERVAL '55 days', '+1-473-555-0188',
+   'verified', 'document_review', 'GD-2016-001987',
+   NOW() - INTERVAL '52 days', 'a0000000-0000-0000-0000-000000000001',
+   'Incorporation certificate and 2025 tax compliance letter on file.',
+   ARRAY['e0000000-0000-0000-0000-000000000002/incorporation.pdf',
+         'e0000000-0000-0000-0000-000000000002/tax-compliance-2025.pdf'],
+   TRUE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '60 days', NOW() - INTERVAL '52 days'),
+
+  -- 3. Verified and published
+  ('e0000000-0000-0000-0000-000000000003', 'sunfield-renewables', 'Sunfield Renewables Inc.', NULL,
+   'Renewable Energy', 'https://sunfield.example', NULL,
+   'Solar PV installer and O&M provider; 6 MW deployed across Antigua and Barbuda.',
+   'AG', 'Saint John', 'St. John''s', 'Friars Hill Road', NULL, NULL,
+   'people@sunfield.example', NOW() - INTERVAL '30 days', '+1-268-555-0110',
+   'verified', 'document_review', 'AG-2021-003310',
+   NOW() - INTERVAL '28 days', 'a0000000-0000-0000-0000-000000000001',
+   'Registry printout supplied by applicant, cross-checked against the utility interconnection list.',
+   ARRAY['e0000000-0000-0000-0000-000000000003/registry-printout.pdf'],
+   TRUE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '40 days', NOW() - INTERVAL '28 days'),
+
+  -- 4. Verified and published, but the contact address was never confirmed.
+  --    The feed returns this employer with contact_email = null.
+  ('e0000000-0000-0000-0000-000000000004', 'nature-isle-agro', 'Nature Isle Agro-Processing Ltd', 'Nature Isle',
+   'Agriculture & Agri-processing', 'https://natureisle.example', NULL,
+   'Value-added processing of bay leaf, cocoa and root crops for regional export.',
+   'DM', 'Saint Andrew', 'Marigot', 'Industrial Estate Road', NULL, NULL,
+   'jobs@natureisle.example', NULL, '+1-767-555-0173',
+   'verified', 'manual_attestation', NULL,
+   NOW() - INTERVAL '20 days', 'a0000000-0000-0000-0000-000000000001',
+   'Attested in person by the Invest Dominica liaison. No registry extract yet — follow up.',
+   '{}',
+   TRUE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '25 days', NOW() - INTERVAL '20 days'),
+
+  -- 5. Verified but has NOT consented to external sharing. Withheld from the feed.
+  ('e0000000-0000-0000-0000-000000000005', 'bequia-marine-services', 'Bequia Marine Services Ltd', NULL,
+   'Transport & Logistics', 'https://bequiamarine.example', NULL,
+   'Inter-island freight and vessel maintenance operating out of Port Elizabeth.',
+   'VC', 'Grenadines', 'Port Elizabeth', 'Front Street', NULL, 'VC0400',
+   'admin@bequiamarine.example', NOW() - INTERVAL '15 days', '+1-784-555-0125',
+   'verified', 'registry_lookup', 'VC-2014-000771',
+   NOW() - INTERVAL '14 days', 'a0000000-0000-0000-0000-000000000001',
+   'Verified. Employer explicitly declined to be listed on partner platforms.',
+   ARRAY['e0000000-0000-0000-0000-000000000005/registry.pdf'],
+   FALSE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '18 days', NOW() - INTERVAL '14 days'),
+
+  -- 6. Awaiting review
+  ('e0000000-0000-0000-0000-000000000006', 'basseterre-health-labs', 'Basseterre Health Labs Ltd', NULL,
+   'Health & Wellness', 'https://bhlabs.example', NULL,
+   'Clinical diagnostics laboratory serving public and private clinics in Saint Kitts.',
+   'KN', 'Saint George Basseterre', 'Basseterre', 'Cayon Street', 'Suite 2', NULL,
+   'recruitment@bhlabs.example', NULL, '+1-869-555-0164',
+   'pending', NULL, NULL,
+   NULL, NULL, 'Awaiting the certificate of good standing requested on intake.',
+   ARRAY['e0000000-0000-0000-0000-000000000006/application-form.pdf'],
+   FALSE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '9 days', NOW() - INTERVAL '9 days'),
+
+  -- 7. Newly created, untouched. Andre Williams (demo private_sector user) owns it.
+  ('e0000000-0000-0000-0000-000000000007', 'caribbeancloud-limited', 'CaribbeanCloud Limited', 'CaribbeanCloud',
+   'ICT & Digital Services', 'https://caribbeancloud.example', NULL,
+   'Regional cloud hosting and open-data infrastructure for OECS public agencies.',
+   'MS', 'Saint Peter', 'Brades', 'Main Road', NULL, NULL,
+   'careers@caribbeancloud.example', NULL, NULL,
+   'unverified', NULL, NULL,
+   NULL, NULL, NULL, '{}',
+   FALSE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'),
+
+  -- 8. Rejected, and never verified — so it produces no tombstone. A failed
+  --    application must not be announced to partners.
+  ('e0000000-0000-0000-0000-000000000008', 'tortola-logistics-group', 'Tortola Logistics Group', NULL,
+   'Transport & Logistics', NULL, NULL,
+   'Freight forwarding. Application could not be substantiated.',
+   'VG', 'Tortola', 'Road Town', 'Waterfront Drive', NULL, NULL,
+   'contact@tortolalogistics.example', NULL, NULL,
+   'rejected', NULL, NULL,
+   NULL, NULL, 'Registration number did not resolve; applicant unreachable after two attempts.',
+   '{}',
+   FALSE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '35 days', NOW() - INTERVAL '31 days'),
+
+  -- 9. Was verified and shared, then revoked. This is the tombstone case:
+  --    it comes back as {"removed": true} under ?include_removed=true.
+  ('e0000000-0000-0000-0000-000000000009', 'helen-bay-hospitality', 'Helen Bay Hospitality Ltd', 'Helen Bay',
+   'Tourism & Hospitality', 'https://helenbay.example', NULL,
+   'Boutique resort group. Verification withdrawn pending a labour-standards review.',
+   'LC', 'Gros Islet', 'Rodney Bay', 'Reduit Beach Avenue', NULL, 'LC01 401',
+   'hr@helenbay.example', NOW() - INTERVAL '100 days', '+1-758-555-0199',
+   'revoked', 'document_review', 'LC-2011-002204',
+   NOW() - INTERVAL '95 days', 'a0000000-0000-0000-0000-000000000001',
+   'Verification revoked after a grievance was upheld. Do not restore without OECS sign-off.',
+   ARRAY['e0000000-0000-0000-0000-000000000009/incorporation.pdf'],
+   FALSE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '110 days', NOW() - INTERVAL '3 days'),
+
+  -- 10. Verified and published, outside the OECS — exercises the country
+  --     hierarchy with a non-member state.
+  ('e0000000-0000-0000-0000-000000000010', 'bridgetown-finserve', 'Bridgetown FinServe Inc.', 'FinServe',
+   'Financial Services', 'https://finserve.example', NULL,
+   'Regional payments processor with an OECS SME lending desk.',
+   'BB', 'Saint Michael', 'Bridgetown', 'Broad Street', 'Level 3', 'BB11000',
+   'talent@finserve.example', NOW() - INTERVAL '12 days', '+1-246-555-0157',
+   'verified', 'registry_lookup', 'BB-2009-011204',
+   NOW() - INTERVAL '10 days', 'a0000000-0000-0000-0000-000000000001',
+   'Verified against the Barbados Corporate Affairs registry.',
+   ARRAY['e0000000-0000-0000-0000-000000000010/registry.pdf'],
+   TRUE, 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '14 days', NOW() - INTERVAL '10 days')
+ON CONFLICT (id) DO NOTHING;
+
+-- People attached to demo employers
+INSERT INTO employer_members (id, employer_id, user_id, role, created_at) VALUES
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000012', 'owner', NOW() - INTERVAL '4 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000010', 'a0000000-0000-0000-0000-000000000011', 'admin', NOW() - INTERVAL '12 days')
+ON CONFLICT DO NOTHING;
+
+-- Audit trail. Written directly rather than through set_employer_verification(),
+-- which requires an authenticated OECS session.
+INSERT INTO employer_verification_events (id, employer_id, from_status, to_status, method, note, actor_id, created_at) VALUES
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000001', 'pending', 'verified', 'registry_lookup',
+   'Confirmed against the Saint Lucia Registry of Companies.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '78 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000002', 'pending', 'verified', 'document_review',
+   'Incorporation certificate and 2025 tax compliance letter on file.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '52 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000003', 'pending', 'verified', 'document_review',
+   'Registry printout cross-checked against the utility interconnection list.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '28 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000004', 'pending', 'verified', 'manual_attestation',
+   'Attested in person by the Invest Dominica liaison.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '20 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000005', 'pending', 'verified', 'registry_lookup',
+   'Verified. Employer declined partner listing.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '14 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000008', 'pending', 'rejected', NULL,
+   'Registration number did not resolve; applicant unreachable.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '31 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000009', 'pending', 'verified', 'document_review',
+   'Incorporation certificate on file.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '95 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000009', 'verified', 'revoked', NULL,
+   'Verification revoked after a grievance was upheld.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '3 days'),
+  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000010', 'pending', 'verified', 'registry_lookup',
+   'Verified against the Barbados Corporate Affairs registry.', 'a0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '10 days')
+ON CONFLICT DO NOTHING;

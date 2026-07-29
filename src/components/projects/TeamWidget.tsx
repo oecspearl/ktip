@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import { Settings, Check, X } from 'lucide-react'
 import { ManageTeamModal } from './ManageTeamModal'
 import { useProjectMembers, useProjectMemberMutations } from '../../hooks/useProjectMembers'
 import { useAuth } from '../../contexts/AuthContext'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 
 interface TeamWidgetProps {
@@ -17,6 +17,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
   const toast = useToast()
   const { members } = useProjectMembers(projectId)
   const { respondToInvite, loading } = useProjectMemberMutations()
+  const { openMember } = useMemberPanel()
   const [modalOpen, setModalOpen] = useState(false)
 
   const accepted = (members || []).filter((m) => m.status === 'accepted')
@@ -72,7 +73,12 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
       {accepted.length > 0 ? (
         <div className="space-y-3 mb-4">
           {accepted.map((member) => (
-            <Link key={member.id} to={`/profile/${member.user_id}`} className="flex items-center gap-3 group">
+            <button
+              key={member.id}
+              type="button"
+              onClick={() => openMember(member.user_id)}
+              className="flex items-center gap-3 group w-full text-left"
+            >
               <div className="w-10 h-10 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-sm font-medium text-ktip-ocean-700 shrink-0">
                 {member.user?.display_name?.charAt(0).toUpperCase() || 'U'}
               </div>
@@ -82,7 +88,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
                 </p>
                 <p className="text-xs text-gray-500 capitalize">{member.role}</p>
               </div>
-            </Link>
+            </button>
           ))}
         </div>
       ) : (

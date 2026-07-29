@@ -6,7 +6,7 @@
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(self), microphone=(self), geolocation=()" },
+        { "key": "Permissions-Policy", "value": "camera=(self \"https://meet.jit.si\" \"https://8x8.vc\"), microphone=(self \"https://meet.jit.si\" \"https://8x8.vc\"), display-capture=(self \"https://meet.jit.si\" \"https://8x8.vc\"), screen-wake-lock=(self \"https://meet.jit.si\" \"https://8x8.vc\"), geolocation=()" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
       ]
     },

@@ -4,6 +4,9 @@ import { Button } from '../../../components/ui/Button'
 import { useCreateGrant, useUpdateGrant } from '../../../hooks/useGrants'
 import { useToast } from '../../../contexts/ToastContext'
 import { DetailsEditor, cleanDetails } from '../../../components/shared/DetailsEditor'
+import { TagInput } from '../../../components/ui/TagInput'
+import { CONTENT_TAG_SUGGESTIONS } from '../../../lib/constants'
+import { sanitizeTag } from '../../../lib/utils'
 import type { DetailEntry, Grant } from '../../../types'
 import { Save } from 'lucide-react'
 
@@ -33,6 +36,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const [eligibility, setEligibility] = useState('')
   const [applicationUrl, setApplicationUrl] = useState('')
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
   const [details, setDetails] = useState<DetailEntry[]>([])
 
   const isEditing = grant !== null
@@ -49,6 +53,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     setEligibility('')
     setApplicationUrl('')
     setIsClimateAction(false)
+    setTags([])
     setDetails([])
   }
 
@@ -65,6 +70,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       setEligibility(grant.eligibility || '')
       setApplicationUrl(grant.application_url || '')
       setIsClimateAction(grant.is_climate_action ?? false)
+      setTags(grant.tags || [])
       setDetails(grant.details || [])
     } else {
       resetForm()
@@ -87,6 +93,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
 
     grantData.summary = summary.trim() || null
     grantData.details = cleanDetails(details)
+    grantData.tags = tags.map(sanitizeTag).filter(Boolean)
     if (description.trim()) grantData.description = description.trim()
     if (grantType) grantData.grant_type = grantType
     if (amountMin) grantData.amount_min = Number(amountMin)
@@ -282,6 +289,15 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
             className={inputClass}
           />
         </div>
+
+        <TagInput
+          label="Tags"
+          description="Topics applicants can filter and search by — also what the personalized ranking matches on."
+          values={tags}
+          onChange={setTags}
+          suggestions={CONTENT_TAG_SUGGESTIONS}
+          max={10}
+        />
 
         {/* Climate Action */}
         <div>

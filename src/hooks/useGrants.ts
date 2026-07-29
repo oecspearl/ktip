@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { escapeIlike } from '../lib/utils'
+import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { rankRows, type ContentSort } from '../lib/personalization'
+import { usePersonalizationActive } from './usePersonalization'
 import type { DetailEntry, Grant } from '../types'
 
 export function useGrants(filters?: {
@@ -9,7 +11,20 @@ export function useGrants(filters?: {
   active?: boolean
   search?: string
   climateAction?: boolean
+  tags?: string[]
+  sort?: ContentSort
 }) {
+  // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
+  const tags = filters?.tags?.length
+    ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
+    : undefined
+
+  // "For You" only survives if the ranker can actually do something. Grants
+  // fall back to deadline order, not recency — that is what the query does.
+  const { active, uid } = usePersonalizationActive()
+  const sort: ContentSort = filters?.sort === 'for_you' && active ? 'for_you' : 'deadline'
+  const normalized = { ...filters, tags, sort, uid: sort === 'for_you' ? uid : undefined }
+
   const fetchGrants = async (): Promise<Grant[]> => {
     let query = supabase
       .from('grants')
@@ -31,25 +46,38 @@ export function useGrants(filters?: {
       query = query.eq('is_climate_action', true)
     }
 
+    // "any of" — AND semantics would empty the list on the second chip click
+    if (tags?.length) {
+      query = (query as any).overlaps('tags', tags)
+    }
+
     // Search filter
     if (filters?.search) {
       const sanitized = escapeIlike(filters.search)
       if (sanitized) {
         query = query.or(
-          `title.ilike.%${sanitized}%,description.ilike.%${sanitized}%,eligibility.ilike.%${sanitized}%`
+          `title.ilike.%${sanitized}%,description.ilike.%${sanitized}%,eligibility.ilike.%${sanitized}%,tags_text.ilike.%${sanitized}%`
         )
       }
     }
 
+    // Unbounded until now. The ranker in 061 caps the ids it will score, and
+    // an unbounded list would blow past that on a large corpus.
+    query = query.limit(200)
+
     const { data, error } = await query
 
     if (error) throw error
-    return (data as any[]) || []
+    const rows = (data as any[]) || []
+
+    return sort === 'for_you' ? rankRows('grant', rows) : rows
   }
 
   const query = useQuery({
-    queryKey: keys.list('grants', filters),
+    queryKey: keys.list('grants', normalized),
     queryFn: fetchGrants,
+    // The second round trip is only worth paying for once a minute.
+    staleTime: sort === 'for_you' ? 60_000 : undefined,
   })
 
   return { grants: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }

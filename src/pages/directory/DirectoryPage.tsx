@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useAllBadges } from '../../hooks/useBadges'
 import { useConnectionCounts } from '../../hooks/useConnections'
 import { Search, UserX, User, Users } from 'lucide-react'
@@ -14,6 +16,32 @@ import { debounce } from '../../lib/utils'
 
 export default function DirectoryPage() {
   usePageTitle('Member Directory')
+  // `?member=<id>` is the shareable form of a member preview — it's what old
+  // /profile/<id> links and notification rows redirect to.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedMember = searchParams.get('member')
+  const { memberId, openMember, closeMember } = useMemberPanel()
+
+  useEffect(() => {
+    if (requestedMember) openMember(requestedMember)
+    else closeMember()
+  }, [requestedMember, openMember, closeMember])
+
+  // Closing the drawer (Escape, X, outside click) should drop the param too,
+  // otherwise the effect above can never reopen the same member.
+  useEffect(() => {
+    if (requestedMember && memberId === null) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.delete('member')
+          return next
+        },
+        { replace: true }
+      )
+    }
+  }, [requestedMember, memberId, setSearchParams])
+
   const [selectedRole, setSelectedRole] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedSkill, setSelectedSkill] = useState<string>('')
@@ -160,7 +188,7 @@ export default function DirectoryPage() {
                 {members.map((member) => (
                   <BentoCard
                     key={member.id}
-                    to={`/profile/${member.id}`}
+                    to={`/directory?member=${member.id}`}
                     imageSeed={member.id}
                     eyebrow={
                       member.roles?.length > 0

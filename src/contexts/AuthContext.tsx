@@ -170,13 +170,42 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   }, [])
 
-  // Sign in with email and password
+  // Sign in with email and password.
+  //
+  // The primary address takes the direct path, exactly as before. Only a
+  // credential mismatch triggers the secondary-email fallback, so ordinary
+  // logins keep their current latency and GoTrue's own rate limiting. Keep that
+  // regex narrow: widening it would add a round trip to every failed login,
+  // including 'Email not confirmed'.
   const signIn = useCallback(async (email: string, password: string) => {
+    const normalized = email.trim().toLowerCase()
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalized,
       password,
     })
-    if (error) throw error
+    if (!error) return
+    if (!/invalid login credentials/i.test(error.message)) throw error
+
+    const res = await fetch('/api/auth/login-alias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: normalized, password }),
+    })
+    const body = await res.json().catch(() => ({} as any))
+
+    if (!res.ok || !body?.access_token) {
+      if (body?.error === 'unverified_alias') {
+        throw new Error('Confirm your secondary email address before signing in with it.')
+      }
+      // Falls back to GoTrue's original message, which LoginPage already maps.
+      throw new Error(body?.error || error.message)
+    }
+
+    const { error: setErr } = await supabase.auth.setSession({
+      access_token: body.access_token,
+      refresh_token: body.refresh_token,
+    })
+    if (setErr) throw setErr
   }, [])
 
   // Sign up with email and password
@@ -255,11 +284,26 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (error) throw error
   }, [])
 
-  // Send password reset email
+  // Send password reset email.
+  //
+  // The alias route runs in PARALLEL rather than as a fallback:
+  // resetPasswordForEmail deliberately succeeds for unknown addresses, so there
+  // is no error to branch on. Firing both is safe because resolve_email_alias'
+  // primary_conflict check guarantees at most one of them ever sends mail.
   const resetPassword = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const normalized = email.trim().toLowerCase()
+    const { error } = await supabase.auth.resetPasswordForEmail(normalized, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
+
+    // Result intentionally ignored — the route is silent by design and must not
+    // reveal whether the address is a known alias.
+    void fetch('/api/auth/reset-alias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: normalized }),
+    }).catch(() => {})
+
     if (error) throw error
   }, [])
 

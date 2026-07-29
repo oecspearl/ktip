@@ -293,8 +293,10 @@ export const ROUTES = {
   FORUM_BOARD: (slug: string) => `/forums/${slug}`,
   FORUM_POST: (slug: string, postId: string) => `/forums/${slug}/${postId}`,
   CREATE_FORUM_POST: (slug: string) => `/forums/${slug}/new`,
-  PROFILE: (id: string) => `/profile/${id}`,
-  MY_PROFILE: '/profile/me',
+  // Members open in a drawer over the directory; your own profile is a
+  // dashboard tab. Neither has a page of its own any more.
+  PROFILE: (id: string) => `/directory?member=${id}`,
+  MY_PROFILE: '/dashboard/profile',
   SETTINGS: '/settings',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',

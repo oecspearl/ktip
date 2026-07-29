@@ -13,6 +13,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
 import { PreRegistrationModal } from '../../components/PreRegistrationModal'
 import { useAuth } from '../../contexts/AuthContext'
+import { ForYouRail } from '../../components/personalization/ForYouRail'
 import { FALLBACK_IMAGE, heroImageFor } from '../../lib/hero-images'
 import { analytics } from '../../hooks/useAnalytics'
 import { useProjects } from '../../hooks/useProjects'
@@ -770,6 +771,16 @@ export default function DiscoverPage() {
           </div>
         </div>
       </section>
+
+      {/* Personalized rail — renders nothing for signed-out visitors, so the
+          public landing page is byte-identical to what it was before. */}
+      {auth.user && (
+        <section className="relative z-10 bg-ktip-sand-50 pt-12">
+          <div className="container mx-auto px-6 md:px-12">
+            <ForYouRail limit={6} title="Picked for you" />
+          </div>
+        </section>
+      )}
 
       {/* Bento feature grid */}
       <section className="relative z-10 bg-ktip-sand-50 py-20 md:py-28 overflow-x-clip">

@@ -2,7 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 
-export type TaggableEntity = 'resources' | 'integrations' | 'events' | 'projects'
+export type TaggableEntity = 'resources' | 'integrations' | 'events' | 'projects' | 'grants'
+
+export interface TagCount {
+  tag: string
+  count: number
+}
 
 /**
  * Where each entity keeps its tags, and what counts as publicly visible.
@@ -18,6 +23,7 @@ const TAG_SOURCES: Record<
   integrations: { table: 'integrations', column: 'tags', visible: (q) => q.eq('is_published', true) },
   events: { table: 'events', column: 'tags', visible: (q) => q.neq('status', 'draft') },
   projects: { table: 'projects', column: 'hashtags', visible: (q) => q.eq('is_public', true) },
+  grants: { table: 'grants', column: 'tags', visible: (q) => q.eq('is_active', true) },
 }
 
 /** Chips beyond this are noise; the vocabulary is uncurated and long-tailed. */
@@ -59,6 +65,61 @@ export function useTagVocabulary(entity: TaggableEntity) {
   const query = useQuery({
     queryKey: keys.sub(entity, 'tag-vocabulary'),
     queryFn: fetchTags,
+    staleTime: 5 * 60_000,
+  })
+
+  return { tags: query.data ?? [], loading: query.isPending, error: query.error }
+}
+
+/** More chips than a list filter can show, because this one is a picker. */
+const MAX_MERGED_TAGS = 120
+
+/**
+ * Every tag in use anywhere, ranked by total usage across entities.
+ *
+ * Settings › Personalization needs the union rather than one entity's
+ * vocabulary: a topic like "agriculture" is cross-entity by nature, and a
+ * picker scoped to a single table would silently exclude the others. Counts
+ * come back with the tags so the picker can show how much content a topic
+ * would actually match.
+ *
+ * Each source is fetched independently and a failing one is skipped, so a
+ * table that has not been migrated yet degrades to a shorter list rather
+ * than an empty picker.
+ */
+export function useMergedTagVocabulary() {
+  const fetchAll = async (): Promise<TagCount[]> => {
+    const counts = new Map<string, number>()
+
+    const results = await Promise.all(
+      Object.values(TAG_SOURCES).map(async (source) => {
+        let query = (supabase as any).from(source.table).select(source.column)
+        query = source.visible(query)
+        const { data, error } = await query
+        if (error) return []
+        return (data as any[]) || []
+      })
+    )
+
+    for (const [index, rows] of results.entries()) {
+      const column = Object.values(TAG_SOURCES)[index].column
+      for (const row of rows) {
+        for (const tag of (row?.[column] as string[]) || []) {
+          if (!tag) continue
+          counts.set(tag, (counts.get(tag) || 0) + 1)
+        }
+      }
+    }
+
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, MAX_MERGED_TAGS)
+      .map(([tag, count]) => ({ tag, count }))
+  }
+
+  const query = useQuery({
+    queryKey: keys.all('tag-vocabulary-merged'),
+    queryFn: fetchAll,
     staleTime: 5 * 60_000,
   })
 

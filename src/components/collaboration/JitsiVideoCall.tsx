@@ -149,9 +149,14 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
             </div>
           </div>
 
+          {/* Bare feature names delegate to the frame's own src origin, so this
+              follows VITE_JITSI_DOMAIN automatically. It can only narrow what
+              the top-level page already holds — the Permissions-Policy header
+              in vercel.json must list the Jitsi origin too, or the browser
+              denies camera/mic without ever prompting the user. */}
           <iframe
             src={jitsiUrl}
-            allow="camera; microphone; display-capture; autoplay; clipboard-write"
+            allow="camera; microphone; display-capture; screen-wake-lock; autoplay; clipboard-write"
             className="w-full block"
             style={{ height: 'calc(100vh - 22rem)', border: 'none' }}
             title={`Video call: ${roomName}`}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
+import { Toggle } from '../../components/ui/Toggle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
@@ -16,43 +17,6 @@ import {
   Moon,
   Users,
 } from 'lucide-react'
-
-interface ToggleProps {
-  checked: boolean
-  onChange: (checked: boolean) => void
-  label: string
-  description?: string
-}
-
-function Toggle({ checked, onChange, label, description }: ToggleProps) {
-  return (
-    <label className="flex items-center justify-between py-3 cursor-pointer group">
-      <div className="flex-1 mr-4">
-        <div className="text-sm font-medium text-ktip-sand-800 group-hover:text-ktip-sand-900">
-          {label}
-        </div>
-        {description && (
-          <div className="text-xs text-ktip-sand-500 mt-0.5">{description}</div>
-        )}
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          checked ? 'bg-ktip-ocean-500' : 'bg-ktip-sand-300'
-        }`}
-      >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
-            checked ? 'translate-x-6' : 'translate-x-1'
-          }`}
-        />
-      </button>
-    </label>
-  )
-}
 
 type NotifPrefs = typeof DEFAULT_NOTIFICATION_PREFERENCES
 

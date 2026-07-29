@@ -3,6 +3,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { ClimateBadge } from '../../components/ui/ClimateBadge'
 import { useResource } from '../../hooks/useResources'
+import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import {
   BookOpen,
@@ -21,6 +22,7 @@ import { PageHero } from '../../components/layout/PageHero'
 
 export default function ResourceDetailPage() {
   const params = useParams()
+  const { openMember } = useMemberPanel()
 
   const { resource, loading } = useResource(params.id)
 
@@ -173,12 +175,13 @@ export default function ResourceDetailPage() {
                     <User size={16} className="text-gray-400 shrink-0" />
                     <span className="text-gray-500">
                       By{' '}
-                      <Link
-                        to={`/profile/${resource.author!.id}`}
+                      <button
+                        type="button"
+                        onClick={() => openMember(resource.author!.id)}
                         className="text-ktip-ocean-600 hover:underline"
                       >
                         {resource.author!.display_name}
-                      </Link>
+                      </button>
                     </span>
                   </div>
                 )}

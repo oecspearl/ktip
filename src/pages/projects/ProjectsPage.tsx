@@ -5,17 +5,20 @@ import { ProjectCard } from '../../components/projects/ProjectCard'
 import { useProjects } from '../../hooks/useProjects'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { SortSelect } from '../../components/ui/SortSelect'
 import { Plus, Search, Inbox, Leaf } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { PROJECT_CATEGORIES } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { debounce, formatDate } from '../../lib/utils'
 
 export default function ProjectsPage() {
   usePageTitle('Projects')
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedPhase, setSelectedPhase] = useState<string>('')
   const [climateFilter, setClimateFilter] = useState(false)
@@ -27,12 +30,25 @@ export default function ProjectsPage() {
 
   const { tags: tagOptions } = useTagVocabulary('projects')
 
+  // Sort lives in the URL so it is shareable and survives back/forward, the
+  // same convention as ?tab= elsewhere. With no param it resolves to "For
+  // You" for a personalized member and to "Newest" for everyone else.
+  const { active: personalizationActive } = usePersonalizationActive()
+  const sort = resolveSort(searchParams.get('sort'), personalizationActive, 'newest')
+
+  const setSort = (next: ContentSort) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('sort', next)
+    setSearchParams(params, { replace: true })
+  }
+
   const { projects, loading: projectsLoading } = useProjects({
     category: selectedCategory,
     phase: selectedPhase,
     search: debouncedSearch,
     climateAction: climateFilter,
     tags: tagFilter,
+    sort,
   })
 
   const clearFilters = () => {
@@ -143,6 +159,15 @@ export default function ProjectsPage() {
                   />
                   Climate Action
                 </label>
+
+                <div className="ml-auto">
+                  <SortSelect
+                    value={sort}
+                    onChange={setSort}
+                    options={SORT_OPTIONS.project.options}
+                    personalizationActive={personalizationActive}
+                  />
+                </div>
               </div>
 
               <TagFilterChips
@@ -214,8 +239,12 @@ export default function ProjectsPage() {
             {/* Widget 2: Recent Projects */}
             {projects && projects.length > 0 && (
               <div className="mb-10">
-                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Recent Projects</h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Explore the latest work</p>
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+                  {sort === 'for_you' ? 'Top Matches' : 'Recent Projects'}
+                </h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4">
+                  {sort === 'for_you' ? 'Closest to your interests' : 'Explore the latest work'}
+                </p>
                 <div className="space-y-4">
                   {projects.slice(0, 3).map((project) => (
                     <Link key={project.id} to={`/projects/${project.id}`} className="flex gap-3 group">

@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { rankRows, type ContentSort } from '../lib/personalization'
+import { usePersonalizationActive } from './usePersonalization'
 import type { Resource } from '../types'
 
 export function useResources(filters?: {
@@ -10,12 +12,19 @@ export function useResources(filters?: {
   search?: string
   climateAction?: boolean
   tags?: string[]
+  sort?: ContentSort
 }) {
   // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
   const tags = filters?.tags?.length
     ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
     : undefined
-  const normalized = { ...filters, tags }
+
+  // "For You" only survives if the ranker can actually do something. The uid
+  // enters the cache key only in that case, so signed-out and non-personalized
+  // readers keep sharing the one cache entry they always did.
+  const { active, uid } = usePersonalizationActive()
+  const sort: ContentSort = filters?.sort === 'for_you' && active ? 'for_you' : 'newest'
+  const normalized = { ...filters, tags, sort, uid: sort === 'for_you' ? uid : undefined }
 
   const fetchResources = async (): Promise<Resource[]> => {
     let query = (supabase as any)
@@ -50,15 +59,23 @@ export function useResources(filters?: {
       }
     }
 
+    // Unbounded until now. The ranker caps the ids it will score, and an
+    // unbounded list would blow past that on a large corpus.
+    query = query.limit(200)
+
     const { data, error } = await query
 
     if (error) throw error
-    return (data as any[]) || []
+    const rows = (data as any[]) || []
+
+    return sort === 'for_you' ? rankRows('resource', rows) : rows
   }
 
   const query = useQuery({
     queryKey: keys.list('resources', normalized),
     queryFn: fetchResources,
+    // The second round trip is only worth paying for once a minute.
+    staleTime: sort === 'for_you' ? 60_000 : undefined,
   })
 
   return { resources: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }

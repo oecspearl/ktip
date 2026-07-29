@@ -288,6 +288,12 @@ export function Navbar() {
     return location.pathname.startsWith(href)
   }
 
+  // Every nav link is white, which only works over the full-bleed dark hero the
+  // public pages put behind this bar. Admin pages use `<PageHero inset>`, whose
+  // hero starts BELOW the bar — leaving white text on the cream canvas. Those
+  // routes get the same dark backdrop the open mobile menu already uses.
+  const needsBackdrop = location.pathname.startsWith('/admin')
+
   const isDropdownActive = (dropdown: NavDropdown) =>
     dropdown.items.some((item) => isActive(item.href))
 
@@ -318,7 +324,7 @@ export function Navbar() {
       className={cn(
         'top-0 z-40 transition-all duration-300 fixed inset-x-0',
         hidden ? '-translate-y-full' : 'translate-y-0',
-        mobileMenuOpen
+        mobileMenuOpen || needsBackdrop
           ? 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
           : 'bg-transparent border-b border-transparent'
       )}
@@ -673,14 +679,6 @@ export function Navbar() {
                     >
                       <LayoutDashboard size={18} />
                       <span>My Dashboard</span>
-                    </Link>
-                    <Link
-                      to="/profile/me"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                    >
-                      <User size={18} />
-                      <span>My Profile</span>
                     </Link>
                     <Link
                       to="/settings"

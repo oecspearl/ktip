@@ -1,6 +1,7 @@
 import { Badge } from '../ui/Badge'
 import type { Grant } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
+import { MatchReasonChip } from '../ui/MatchReasonChip'
 import { BentoCard } from '../ui/BentoCard'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { isPast } from 'date-fns'
@@ -37,9 +38,10 @@ export function GrantCard({ grant }: GrantCardProps) {
           {hasDeadline && <> · Deadline {formatDate(grant.deadline!)}</>}
         </>
       }
+      tags={grant.tags}
       cta="View Grant"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {isExpired && (
           <Badge variant="danger" className="bg-red-100 text-red-700">
             Expired
@@ -47,6 +49,8 @@ export function GrantCard({ grant }: GrantCardProps) {
         )}
         {!grant.is_active && !isExpired && <Badge variant="default">Inactive</Badge>}
         {grant.is_climate_action && <ClimateBadge />}
+        {/* Only present when the list was fetched under the "For You" sort. */}
+        <MatchReasonChip reasons={grant.match_reasons} />
       </div>
     </BentoCard>
   )
