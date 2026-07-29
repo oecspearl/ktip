@@ -112,6 +112,36 @@ export function escapeIlike(input: string): string {
 }
 
 /**
+ * Normalise a tag before it is stored.
+ *
+ * PostgREST serialises array filters as a bare `ov.{a,b}` with no quoting, so a
+ * stored tag containing a comma, brace, quote or backslash would silently
+ * corrupt any `.overlaps()` filter built from it. Strip those, collapse
+ * whitespace, and cap the length. Returns '' for tags that reduce to nothing.
+ */
+export function sanitizeTag(input: string): string {
+  return input
+    .replace(/[,{}"\\]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 40)
+}
+
+/**
+ * Tags for a project. Stored bare — the leading `#` is a display convention
+ * applied on the card and detail page — so strip it on the way in, sanitize,
+ * and drop the duplicates stripping can create.
+ */
+export function normalizeHashtags(input: string[]): string[] {
+  const seen = new Set<string>()
+  for (const raw of input) {
+    const tag = sanitizeTag(raw.replace(/^#+/, ''))
+    if (tag) seen.add(tag)
+  }
+  return [...seen]
+}
+
+/**
  * Debounce function
  */
 export function debounce<T extends (...args: any[]) => any>(

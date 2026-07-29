@@ -47,6 +47,8 @@ export function useSharedDocuments() {
       .from('document_shares') as any)
       .select('document_id')
       .eq('shared_with', user.id)
+      // A pending invitation is not access yet — it lives in /invitations.
+      .eq('status', 'accepted')
 
     if (sharesError || !shares || shares.length === 0) return []
 
@@ -88,6 +90,36 @@ export function useDocument(id: string | undefined) {
   })
 
   return { document: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+/**
+ * The caller's permission on a document they don't own. Null means no accepted
+ * share exists. Documents only gained shared-edit in migration 053; before
+ * that every sharee was read-only.
+ */
+export function useDocumentPermission(id: string | undefined) {
+  const fetchPermission = async (documentId: string): Promise<'view' | 'edit' | null> => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data, error } = await (supabase.from('document_shares') as any)
+      .select('permission')
+      .eq('document_id', documentId)
+      .eq('shared_with', user.id)
+      .eq('status', 'accepted')
+      .maybeSingle()
+
+    if (error || !data) return null
+    return data.permission
+  }
+
+  const query = useQuery({
+    queryKey: keys.sub('documents', 'permission', id),
+    queryFn: () => fetchPermission(id as string),
+    enabled: !!id,
+  })
+
+  return { permission: query.data ?? null, loading: query.isPending, error: query.error }
 }
 
 export function useCreateDocument() {

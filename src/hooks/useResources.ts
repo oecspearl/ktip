@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { escapeIlike } from '../lib/utils'
+import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import type { Resource } from '../types'
 
@@ -9,7 +9,14 @@ export function useResources(filters?: {
   category?: string
   search?: string
   climateAction?: boolean
+  tags?: string[]
 }) {
+  // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
+  const tags = filters?.tags?.length
+    ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
+    : undefined
+  const normalized = { ...filters, tags }
+
   const fetchResources = async (): Promise<Resource[]> => {
     let query = (supabase as any)
       .from('resources')
@@ -29,11 +36,16 @@ export function useResources(filters?: {
       query = query.eq('is_climate_action', true)
     }
 
+    // "any of" — AND semantics would empty the list on the second chip click
+    if (tags?.length) {
+      query = query.overlaps('tags', tags)
+    }
+
     if (filters?.search) {
       const sanitized = escapeIlike(filters.search)
       if (sanitized) {
         query = query.or(
-          `title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`
+          `title.ilike.%${sanitized}%,summary.ilike.%${sanitized}%,description.ilike.%${sanitized}%,tags_text.ilike.%${sanitized}%`
         )
       }
     }
@@ -45,7 +57,7 @@ export function useResources(filters?: {
   }
 
   const query = useQuery({
-    queryKey: keys.list('resources', filters),
+    queryKey: keys.list('resources', normalized),
     queryFn: fetchResources,
   })
 
@@ -99,6 +111,7 @@ export function useCreateResource() {
     mutationFn: async (resourceData: {
       title: string
       description?: string
+      summary?: string | null
       content?: string
       resource_type: string
       category?: string

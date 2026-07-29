@@ -23,9 +23,9 @@ const tools = [
   },
   {
     title: 'Code Sandbox',
-    description: 'Write and share code with syntax highlighting, multiple languages, and theme support.',
+    description: 'Write, run and share code snippets with syntax highlighting across six languages.',
     icon: Code,
-    href: '/collaborate/code',
+    href: '/collaborate/snippets',
     bg: 'bg-ktip-sun-50',
     text: 'text-ktip-sun-600',
   },

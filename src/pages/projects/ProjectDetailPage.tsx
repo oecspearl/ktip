@@ -6,6 +6,7 @@ import { LikeButton } from '../../components/projects/LikeButton'
 import { FollowButton } from '../../components/projects/FollowButton'
 import { CommentSection } from '../../components/projects/CommentSection'
 import { TeamWidget } from '../../components/projects/TeamWidget'
+import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { useProject, useProjects, trackProjectView } from '../../hooks/useProjects'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { supabase } from '../../lib/supabase'
@@ -197,6 +198,13 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
+            {/* Summary lede */}
+            {project.summary && (
+              <p className="text-lg text-ktip-sand-800 font-medium leading-relaxed mb-6">
+                {project.summary}
+              </p>
+            )}
+
             {/* Description body */}
             {project.description && (
               <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap mb-6">
@@ -233,6 +241,16 @@ export default function ProjectDetailPage() {
                 <Share2 size={16} />
                 Share
               </button>
+            </div>
+
+            {/* Documents */}
+            <div className="mt-10">
+              <DocumentsPanel
+                entityType="project"
+                entityId={project.id}
+                canEditEntity={canEdit}
+                entity={project}
+              />
             </div>
 
             {/* Comments Section */}

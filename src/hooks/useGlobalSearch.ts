@@ -20,7 +20,7 @@ import {
  *
  *  1. Places & actions — instant local fuzzy match over the static site map
  *     (`src/lib/site-map.ts`), filtered to what the viewer can actually reach.
- *  2. Content — one debounced round trip that searches six Supabase tables,
+ *  2. Content — one debounced round trip that searches seven Supabase tables,
  *     five hits each, reusing the same `escapeIlike` + `.or(...ilike...)`
  *     pattern as the per-page hooks (useProjects, useEvents, …).
  *  3. AI navigation — when the brain toggle is on, `/api/ai-search` re-ranks
@@ -102,22 +102,22 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
 
   const projects = db
     .from('projects')
-    .select('id, title, description')
+    .select('id, title, summary, description')
     .eq('is_public', true)
-    .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+    .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const events = db
     .from('events')
-    .select('id, title, description')
+    .select('id, title, summary, description')
     .neq('status', 'draft')
-    .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+    .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const grants = db
     .from('grants')
-    .select('id, title, description')
-    .or(`title.ilike.%${q}%,description.ilike.%${q}%,eligibility.ilike.%${q}%`)
+    .select('id, title, summary, description')
+    .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,eligibility.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const posts = db
@@ -128,9 +128,16 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
 
   const resources = db
     .from('resources')
-    .select('id, title, description')
+    .select('id, title, summary, description')
     .eq('is_published', true)
-    .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+    .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
+    .limit(PER_TABLE_LIMIT)
+
+  const integrations = db
+    .from('integrations')
+    .select('id, name, summary, description')
+    .eq('is_published', true)
+    .or(`name.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const members = db
@@ -147,8 +154,9 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
     grantsRes,
     postsRes,
     resourcesRes,
+    integrationsRes,
     membersRes,
-  ] = await Promise.all([projects, events, grants, posts, resources, members])
+  ] = await Promise.all([projects, events, grants, posts, resources, integrations, members])
 
   const rows: SearchRow[] = []
 
@@ -157,7 +165,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       id: `project:${p.id}`,
       kind: 'project',
       title: p.title,
-      description: truncate(plainText(p.description), 100),
+      description: truncate(plainText(p.summary || p.description), 100),
       category: 'Projects',
       href: `/projects/${p.id}`,
       icon: 'FolderKanban',
@@ -169,7 +177,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       id: `event:${e.id}`,
       kind: 'event',
       title: e.title,
-      description: truncate(plainText(e.description), 100),
+      description: truncate(plainText(e.summary || e.description), 100),
       category: 'Events',
       href: `/events/${e.id}`,
       icon: 'Calendar',
@@ -181,7 +189,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       id: `grant:${g.id}`,
       kind: 'grant',
       title: g.title,
-      description: truncate(plainText(g.description), 100),
+      description: truncate(plainText(g.summary || g.description), 100),
       category: 'Funding',
       href: `/grants/${g.id}`,
       icon: 'DollarSign',
@@ -207,10 +215,23 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       id: `resource:${r.id}`,
       kind: 'resource',
       title: r.title,
-      description: truncate(plainText(r.description), 100),
+      description: truncate(plainText(r.summary || r.description), 100),
       category: 'Resources',
       href: `/resources/${r.id}`,
       icon: 'BookOpen',
+    })
+  }
+
+  for (const i of integrationsRes?.data ?? []) {
+    rows.push({
+      id: `integration:${i.id}`,
+      kind: 'integration',
+      title: i.name,
+      description: truncate(plainText(i.summary || i.description), 100),
+      category: 'Integrations',
+      // No integration detail route — land on the directory tab, pre-filtered.
+      href: `/resources?tab=integrations&search=${encodeURIComponent(i.name)}`,
+      icon: 'Plug',
     })
   }
 

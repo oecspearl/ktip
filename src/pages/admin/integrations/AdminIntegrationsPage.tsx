@@ -9,11 +9,15 @@ import type { Integration } from '../../../types'
 import { Puzzle, Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
-import { INTEGRATION_CATEGORY_LABELS } from '../../../lib/constants'
+import { INTEGRATION_CATEGORY_LABELS, CONTENT_TAG_SUGGESTIONS } from '../../../lib/constants'
+import { TagInput } from '../../../components/ui/TagInput'
+import { sanitizeTag } from '../../../lib/utils'
 
 const EMPTY_FORM = {
   name: '',
+  summary: '',
   description: '',
+  tags: [] as string[],
   category: 'productivity',
   website_url: '',
   logo_url: '',
@@ -44,7 +48,9 @@ export default function AdminIntegrationsPage() {
     setEditing(integration)
     setForm({
       name: integration.name,
+      summary: integration.summary || '',
       description: integration.description,
+      tags: integration.tags || [],
       category: integration.category,
       website_url: integration.website_url,
       logo_url: integration.logo_url || '',
@@ -60,7 +66,9 @@ export default function AdminIntegrationsPage() {
     try {
       const payload = {
         name: form.name.trim(),
+        summary: form.summary.trim() || null,
         description: form.description.trim(),
+        tags: form.tags.map(sanitizeTag).filter(Boolean),
         category: form.category,
         website_url: form.website_url.trim(),
         logo_url: form.logo_url.trim() || undefined,
@@ -217,12 +225,28 @@ export default function AdminIntegrationsPage() {
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             fullWidth
           />
+          <Input
+            label="Summary"
+            value={form.summary}
+            onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
+            maxLength={180}
+            placeholder="One short sentence shown on the directory card (optional)"
+            fullWidth
+          />
           <Textarea
             label="Description"
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             rows={3}
             fullWidth
+          />
+          <TagInput
+            label="Tags"
+            description="Topics visitors can filter and search by."
+            values={form.tags}
+            onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+            suggestions={CONTENT_TAG_SUGGESTIONS}
+            max={10}
           />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">

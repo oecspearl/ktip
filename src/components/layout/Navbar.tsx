@@ -29,6 +29,7 @@ import {
   HelpCircle,
   ClipboardList,
   LayoutDashboard,
+  Inbox,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
@@ -80,6 +81,7 @@ const navDropdowns: NavDropdown[] = [
     items: [
       { name: 'Grants', href: '/grants', icon: DollarSign, description: 'Browse funding opportunities' },
       { name: 'My Applications', href: '/grants/my-applications', icon: ClipboardList, description: 'Track your grant applications' },
+      { name: 'My Submissions', href: '/dashboard/submissions', icon: Inbox, description: 'Your copy of everything you submitted' },
       { name: 'Resources & Integrations', href: '/resources', icon: BookOpen, description: 'Guides, articles & partner tools' },
     ],
   },
@@ -607,6 +609,16 @@ export function Navbar() {
                         </div>
                       )}
                     </div>
+
+                    {/* The dropdown caps out at 20 items and has no accept /
+                        decline actions — invitations get a real page. */}
+                    <Link
+                      to="/invitations"
+                      onClick={() => setNotifOpen(false)}
+                      className="block px-4 py-2.5 text-center text-sm font-medium text-ktip-ocean-600 hover:bg-ktip-sand-50 border-t border-ktip-sand-100 rounded-b-xl"
+                    >
+                      View all invitations
+                    </Link>
                   </div>
                 )}
               </div>

@@ -51,6 +51,9 @@ export type ProjectCategory =
   | 'environment'
   | 'other'
 
+/** Who may see a member's connection count. */
+export type ConnectionCountVisibility = 'public' | 'connections' | 'private'
+
 export interface Profile {
   id: string
   display_name: string | null
@@ -64,6 +67,7 @@ export interface Profile {
   interests: string[]
   open_to: string[]
   is_verified: boolean
+  connection_count_visibility: ConnectionCountVisibility
   created_at: string
   updated_at: string
 }
@@ -93,6 +97,7 @@ export interface Event {
   title: string
   description: string | null
   summary: string | null
+  tags: string[]
   event_type: EventType
   status: EventStatus
   location: string | null
@@ -255,6 +260,26 @@ export interface Notification {
   created_at: string
 }
 
+// Submission receipts — the applicant's frozen copy of a submitted
+// grant application, event registration or grievance report.
+export type SubmissionKind = 'grant_application' | 'event_registration' | 'grievance'
+
+export interface SubmissionReceipt {
+  id: string
+  user_id: string
+  kind: SubmissionKind
+  source_table: string
+  source_id: string
+  title: string
+  subtitle: string | null
+  data: Record<string, any>
+  // Frozen at submit time so labels survive later edits to the source form
+  field_config: RegistrationFieldConfig[] | null
+  template_key: string | null
+  link: string
+  submitted_at: string
+}
+
 export type ConversationParticipantRole = 'admin' | 'member'
 
 export interface ConversationParticipant {
@@ -330,6 +355,7 @@ export interface Resource {
   id: string
   title: string
   description: string | null
+  summary: string | null
   content: string | null
   resource_type: ResourceType
   category: ResourceCategory | null
@@ -360,6 +386,62 @@ export interface Whiteboard {
   owner_id: string
   created_at: string
   updated_at: string
+}
+
+// Code snippets — the DB-backed successor to the sandbox's
+// `ktip_sandbox_${language}` localStorage drafts (migration 052).
+export type SnippetLanguage = 'javascript' | 'python' | 'html' | 'css' | 'json' | 'markdown'
+
+export interface Snippet {
+  id: string
+  title: string
+  language: SnippetLanguage
+  content: string | null
+  owner_id: string
+  created_at: string
+  updated_at: string
+}
+
+// Collaboration sharing & invitations
+export type CollabResourceType = 'whiteboard' | 'document' | 'snippet'
+export type SharePermission = 'view' | 'edit'
+export type ShareStatus = 'pending' | 'accepted' | 'declined'
+
+/** A row in whiteboard_shares / document_shares / snippet_shares. */
+export interface CollabShare {
+  id: string
+  shared_with: string
+  shared_by: string
+  permission: SharePermission
+  status: ShareStatus
+  created_at: string
+}
+
+/** A pending share flattened across the three tables for the invitations inbox. */
+export interface CollabInvite extends CollabShare {
+  resource_type: CollabResourceType
+  resource_id: string
+  resource_title: string
+  inviter?: Profile
+  recipient?: Profile
+}
+
+export type EmailInviteResourceType = CollabResourceType | 'platform'
+export type EmailInviteStatus = 'pending' | 'accepted' | 'expired' | 'revoked'
+
+export interface EmailInvite {
+  id: string
+  email: string
+  invited_by: string
+  resource_type: EmailInviteResourceType
+  resource_id: string | null
+  resource_title: string | null
+  permission: SharePermission
+  status: EmailInviteStatus
+  expires_at: string
+  accepted_by: string | null
+  accepted_at: string | null
+  created_at: string
 }
 
 // Grievance types
@@ -461,6 +543,8 @@ export interface Integration {
   id: string
   name: string
   description: string
+  summary: string | null
+  tags: string[]
   category: IntegrationCategory
   logo_url: string | null
   website_url: string
@@ -492,6 +576,119 @@ export interface UserBadge {
 /** Directory row: profile with its earned badges embedded by the directory query. */
 export interface DirectoryMember extends Profile {
   user_badges?: UserBadge[]
+}
+
+// ============================================================
+// Entity document library (migration 048)
+// ============================================================
+
+/** What a document can be attached to. */
+export type DocumentEntityType = 'grant' | 'project'
+
+/**
+ * private     — owner (and OECS admins) only; not even listed to others
+ * restricted  — listed to everyone, readable only after the owner approves
+ * members     — any signed-in member can read
+ * public      — anyone, signed in or not
+ */
+export type DocumentVisibility = 'private' | 'restricted' | 'members' | 'public'
+
+export type DocumentAccessRole = 'owner' | 'editor' | 'viewer'
+
+export type DocumentExtractionStatus =
+  | 'pending'
+  | 'processing'
+  | 'done'
+  | 'failed'
+  | 'unsupported'
+
+/** One AI-proposed value for a column on the parent grant/project. Never auto-applied. */
+export interface ExtractedField {
+  value: string | number | boolean | string[] | null
+  confidence: number
+  evidence?: string
+}
+
+export type ExtractedFields = Record<string, ExtractedField>
+
+/** Full row — only readable by someone with access (RLS on entity_documents). */
+export interface EntityDocument {
+  id: string
+  entity_type: DocumentEntityType
+  entity_id: string
+  owner_id: string
+  title: string
+  description: string | null
+  storage_path: string
+  file_name: string
+  mime_type: string
+  file_size: number
+  visibility: DocumentVisibility
+  /** Rich-text twin the WYSIWYG editor reads and writes. */
+  content_html: string | null
+  /** Plain markdown derived from content_html; what the AI and search read. */
+  markdown: string | null
+  extraction_status: DocumentExtractionStatus
+  extraction_error: string | null
+  extracted_fields: ExtractedFields
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Listing row from the get_entity_documents() RPC. Carries no markdown, and
+ * storage_path is null when the caller has no access — that is what makes a
+ * restricted document visible without being readable.
+ */
+export interface EntityDocumentSummary {
+  id: string
+  entity_type: DocumentEntityType
+  entity_id: string
+  owner_id: string
+  owner_name: string | null
+  owner_avatar_url: string | null
+  title: string
+  description: string | null
+  storage_path: string | null
+  file_name: string
+  mime_type: string
+  file_size: number
+  visibility: DocumentVisibility
+  has_content: boolean
+  extraction_status: DocumentExtractionStatus
+  extraction_error: string | null
+  extracted_field_count: number
+  my_role: DocumentAccessRole | null
+  pending_request: boolean
+  open_request_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface DocumentAccessGrant {
+  id: string
+  document_id: string
+  user_id: string
+  role: 'viewer' | 'editor'
+  granted_by: string | null
+  created_at: string
+  user?: Profile
+}
+
+export type DocumentAccessRequestStatus = 'pending' | 'approved' | 'denied'
+
+export interface DocumentAccessRequest {
+  id: string
+  document_id: string
+  requester_id: string
+  message: string | null
+  status: DocumentAccessRequestStatus
+  granted_role: 'viewer' | 'editor' | null
+  decided_by: string | null
+  decided_at: string | null
+  created_at: string
+  requester?: Profile
+  document?: EntityDocumentSummary
 }
 
 export interface Grievance {

@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useGrantApplications } from '../../hooks/useGrants'
+import { useSubmissionReceipts } from '../../hooks/useSubmissionReceipts'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   FileText,
@@ -12,6 +13,7 @@ import {
   XCircle,
   AlertCircle,
   PencilLine,
+  Receipt,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -21,6 +23,14 @@ export default function MyApplicationsPage() {
   usePageTitle('My Grant Applications')
   const auth = useAuth()
   const { applications, loading } = useGrantApplications(auth.user?.id)
+  const { receipts } = useSubmissionReceipts(auth.user?.id)
+
+  // application id -> receipt id, for the "submitted copy" link
+  const receiptByApplication = new Map(
+    (receipts || [])
+      .filter((r) => r.source_table === 'grant_applications')
+      .map((r) => [r.source_id, r.id])
+  )
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -189,11 +199,20 @@ export default function MyApplicationsPage() {
                         </Button>
                       </Link>
                     ) : (
-                      <Link to={`/grants/${application.grant.id}`}>
-                        <Button variant="outline" size="sm">
-                          View Grant
-                        </Button>
-                      </Link>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {receiptByApplication.has(application.id) && (
+                          <Link to={`/dashboard/submissions/${receiptByApplication.get(application.id)}`}>
+                            <Button variant="outline" size="sm" icon={<Receipt size={16} />}>
+                              View submitted copy
+                            </Button>
+                          </Link>
+                        )}
+                        <Link to={`/grants/${application.grant.id}`}>
+                          <Button variant="outline" size="sm">
+                            View Grant
+                          </Button>
+                        </Link>
+                      </div>
                     )}
                   </div>
                 </div>

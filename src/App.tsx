@@ -85,6 +85,8 @@ const router = createBrowserRouter([
             Component: ProtectedRoute,
             children: [
               { path: '/dashboard', lazy: lazyPage(() => import('./pages/dashboard/DashboardPage')) },
+              { path: '/dashboard/submissions', lazy: lazyPage(() => import('./pages/dashboard/MySubmissionsPage')) },
+              { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
               { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
               { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
               { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
@@ -105,10 +107,19 @@ const router = createBrowserRouter([
               { path: '/collaborate/documents', lazy: lazyPage(() => import('./pages/collaborate/DocumentsListPage')) },
               { path: '/collaborate/document/new', lazy: lazyPage(() => import('./pages/collaborate/DocumentEditorPage')) },
               { path: '/collaborate/document/:id', lazy: lazyPage(() => import('./pages/collaborate/DocumentEditorPage')) },
-              { path: '/collaborate/code', lazy: lazyPage(() => import('./pages/collaborate/CodeEditorPage')) },
+              { path: '/collaborate/snippets', lazy: lazyPage(() => import('./pages/collaborate/SnippetsListPage')) },
+              // Bare /collaborate/code kept for old links; snippets are DB-backed now.
+              { path: '/collaborate/code', element: <Navigate to="/collaborate/code/new" replace /> },
+              { path: '/collaborate/code/new', lazy: lazyPage(() => import('./pages/collaborate/CodeEditorPage')) },
+              { path: '/collaborate/code/:id', lazy: lazyPage(() => import('./pages/collaborate/CodeEditorPage')) },
               { path: '/collaborate/video', lazy: lazyPage(() => import('./pages/collaborate/VideoConferencePage')) },
+              { path: '/invitations', lazy: lazyPage(() => import('./pages/InvitationsPage')) },
             ],
           },
+
+          // Redeeming an emailed invite is public: an unauthenticated visitor
+          // gets pointed at signup, and the token is redeemed once they return.
+          { path: '/join/:token', lazy: lazyPage(() => import('./pages/JoinInvitePage')) },
 
           // Admin routes
           {

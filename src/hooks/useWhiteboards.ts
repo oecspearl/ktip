@@ -45,6 +45,8 @@ export function useSharedWhiteboards() {
       .from('whiteboard_shares') as any)
       .select('whiteboard_id, permission')
       .eq('shared_with', user.id)
+      // A pending invitation is not access yet — it lives in /invitations.
+      .eq('status', 'accepted')
 
     if (sharesError || !shares || shares.length === 0) return []
 
@@ -82,7 +84,9 @@ export function useWhiteboardPermission(id: string | undefined) {
       .select('permission')
       .eq('whiteboard_id', whiteboardId)
       .eq('shared_with', user.id)
-      .single()
+      // Edit rights only exist once the invitation has been accepted.
+      .eq('status', 'accepted')
+      .maybeSingle()
 
     if (error || !data) return null
     return data.permission

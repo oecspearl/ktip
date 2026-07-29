@@ -20,13 +20,14 @@ export function ResourceCard({ resource }: ResourceCardProps) {
       imageSeed={resource.id}
       eyebrow={RESOURCE_TYPE_LABELS[resource.resource_type] || resource.resource_type}
       title={resource.title}
-      description={resource.description}
+      description={resource.summary || resource.description}
       meta={
         <>
           {resource.author && <>By {resource.author!.display_name} · </>}
           {formatDate(resource.created_at)}
         </>
       }
+      tags={resource.tags}
       cta="View Resource"
     >
       <div className="flex items-center gap-2">

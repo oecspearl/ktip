@@ -1,4 +1,5 @@
-import { Component, Suspense, lazy, useState, type ReactNode } from 'react'
+import { Component, Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useThemeMode } from '../../hooks/useThemeMode'
 
 // Lazily load tldraw (and its stylesheet) — this is a large dependency and
 // mirrors the original's dynamic-import-on-mount strategy.
@@ -37,17 +38,28 @@ class TldrawLoadBoundary extends Component<
 
 export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapperProps) {
   const [error, setError] = useState<string | null>(null)
+  const [darkMode] = useThemeMode()
+  const editorRef = useRef<any>(null)
 
   const handleMount = (editor: any) => {
     if (readOnly) {
       editor.updateInstanceState({ isReadonly: true })
     }
+    editorRef.current = editor
+    editor.user.updateUserPreferences({ colorScheme: darkMode ? 'dark' : 'light' })
     onEditorReady?.(editor)
   }
 
+  // tldraw keeps its own colour scheme in user preferences, so mirror the app
+  // toggle into it on every change — onMount alone only covers the first paint.
+  useEffect(() => {
+    editorRef.current?.user.updateUserPreferences({ colorScheme: darkMode ? 'dark' : 'light' })
+  }, [darkMode])
+
   const tldrawProps: Record<string, any> = {
     licenseKey: import.meta.env.VITE_TLDRAW_LICENSE_KEY,
-    inferDarkMode: true,
+    // The canvas follows the app's own toggle rather than the OS preference.
+    inferDarkMode: false,
     onMount: handleMount,
   }
 
@@ -58,9 +70,9 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-12rem)] rounded-xl overflow-hidden border border-ktip-sand-200 bg-white">
+    <div className="relative w-full h-[calc(100vh-16rem)] min-h-[420px] overflow-hidden bg-ktip-cream">
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-ktip-cream z-10">
           <div className="text-center">
             <p className="text-red-500 mb-2">Failed to load whiteboard</p>
             <p className="text-ktip-sand-400 text-sm">{error}</p>
@@ -71,7 +83,7 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
         <TldrawLoadBoundary onError={setError}>
           <Suspense
             fallback={
-              <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-ktip-cream z-10">
                 <div className="text-center">
                   <div className="w-10 h-10 border-4 border-ktip-ocean-200 border-t-ktip-ocean-600 rounded-full animate-spin mx-auto mb-3" />
                   <p className="text-ktip-sand-500">Loading whiteboard...</p>

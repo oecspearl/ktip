@@ -119,7 +119,7 @@ export default function EventDetailPage() {
       setHasRSVPd(true)
       setRSVPCount((c) => c + 1)
       setShowRegForm(false)
-      toast.success('Registration submitted successfully!')
+      toast.success('Registration submitted — a copy is saved in your dashboard.')
     } catch (error: any) {
       toast.error(error.message || 'Failed to submit registration')
     }
@@ -310,6 +310,27 @@ export default function EventDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Summary lede */}
+            {event.summary && (
+              <p className="text-lg text-ktip-sand-800 font-medium leading-relaxed mb-6">
+                {event.summary}
+              </p>
+            )}
+
+            {/* Tags */}
+            {event.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {event.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 rounded-full text-sm font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Description */}
             {event.description && (

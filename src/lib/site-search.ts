@@ -16,6 +16,7 @@ export type SearchKind =
   | 'grant'
   | 'post'
   | 'resource'
+  | 'integration'
   | 'member'
 
 /** One row in the panel. Site entries and database records both normalise to this. */
@@ -47,6 +48,7 @@ export const GROUP_LABELS: Record<SearchKind, string> = {
   grant: 'Grants',
   post: 'Forum Posts',
   resource: 'Resources',
+  integration: 'Integrations',
   member: 'Members',
 }
 
@@ -59,6 +61,7 @@ export const GROUP_ORDER: SearchKind[] = [
   'grant',
   'post',
   'resource',
+  'integration',
   'member',
 ]
 

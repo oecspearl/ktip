@@ -3,6 +3,9 @@ import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { heroImageFor, gradientFor } from '../../lib/hero-images'
 
+/** The tile is a fixed min-height, so tags have to stay a single short row. */
+const MAX_CARD_TAGS = 3
+
 interface BentoCardProps {
   to: string
   /** Entity image; falls back to a seeded stock photo. */
@@ -13,6 +16,8 @@ interface BentoCardProps {
   description?: ReactNode
   /** Small line under the description (date, amount, location…). */
   meta?: ReactNode
+  /** Topic tags; only the first few render, the rest collapse into a +N pill. */
+  tags?: string[]
   cta?: string
   onClick?: () => void
   /** Extra overlay content (badges, action buttons). Rendered above the CTA row. */
@@ -29,6 +34,7 @@ export function BentoCard({
   title,
   description,
   meta,
+  tags,
   cta = 'View',
   onClick,
   children,
@@ -65,6 +71,23 @@ export function BentoCard({
           <p className="mt-2 text-xs text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.3)]">
             {meta}
           </p>
+        )}
+        {tags && tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {tags.slice(0, MAX_CARD_TAGS).map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/20 text-white border border-white/25 backdrop-blur-[2px]"
+              >
+                {tag}
+              </span>
+            ))}
+            {tags.length > MAX_CARD_TAGS && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium text-white/80">
+                +{tags.length - MAX_CARD_TAGS}
+              </span>
+            )}
+          </div>
         )}
       </div>
 

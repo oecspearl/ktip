@@ -1,11 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { escapeIlike } from '../lib/utils'
+import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import type { Integration } from '../types'
 
 // Public: published integrations with search/category filter
-export function useIntegrations(filters?: { category?: string; search?: string }) {
+export function useIntegrations(filters?: { category?: string; search?: string; tags?: string[] }) {
+  // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
+  const tags = filters?.tags?.length
+    ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
+    : undefined
+  const normalized = { ...filters, tags }
+
   const fetchIntegrations = async (): Promise<Integration[]> => {
     let query = (supabase as any)
       .from('integrations')
@@ -17,10 +23,16 @@ export function useIntegrations(filters?: { category?: string; search?: string }
     if (filters?.category) {
       query = query.eq('category', filters.category)
     }
+    // "any of" — AND semantics would empty the list on the second chip click
+    if (tags?.length) {
+      query = query.overlaps('tags', tags)
+    }
     if (filters?.search) {
       const sanitized = escapeIlike(filters.search)
       if (sanitized) {
-        query = query.or(`name.ilike.%${sanitized}%,description.ilike.%${sanitized}%`)
+        query = query.or(
+          `name.ilike.%${sanitized}%,summary.ilike.%${sanitized}%,description.ilike.%${sanitized}%,tags_text.ilike.%${sanitized}%`
+        )
       }
     }
 
@@ -30,7 +42,7 @@ export function useIntegrations(filters?: { category?: string; search?: string }
   }
 
   const query = useQuery({
-    queryKey: keys.list('integrations', filters),
+    queryKey: keys.list('integrations', normalized),
     queryFn: fetchIntegrations,
   })
 
@@ -70,6 +82,8 @@ export function useIntegrationMutations() {
     mutationFn: async (integrationData: {
       name: string
       description: string
+      summary?: string | null
+      tags?: string[]
       category: string
       website_url: string
       logo_url?: string

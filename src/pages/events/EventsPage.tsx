@@ -16,6 +16,8 @@ import { EventCalendar } from '../../components/events/EventCalendar'
 import { EventDayPanel } from '../../components/events/EventDayPanel'
 import { useCalendarMonth } from '../../components/calendar/useCalendarMonth'
 import { useEvents } from '../../hooks/useEvents'
+import { useTagVocabulary } from '../../hooks/useTagVocabulary'
+import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { Plus, Search, CalendarX, CalendarDays, LayoutGrid } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
@@ -37,6 +39,9 @@ export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
+  const [tagFilter, setTagFilter] = useState<string[]>([])
+
+  const { tags: tagOptions } = useTagVocabulary('events')
 
   const [view, setView] = useState<EventsView>(() =>
     localStorage.getItem(VIEW_STORAGE_KEY) === 'grid' ? 'grid' : 'calendar'
@@ -88,6 +93,7 @@ export default function EventsPage() {
           type: selectedType,
           search: debouncedSearch,
           climateAction: climateFilter,
+          tags: tagFilter,
           upcoming: false,
           // 31-day back-buffer catches multi-day events starting before the grid
           dateRange: {
@@ -100,6 +106,7 @@ export default function EventsPage() {
           upcoming: showUpcoming,
           search: debouncedSearch,
           climateAction: climateFilter,
+          tags: tagFilter,
         }
   )
 
@@ -156,10 +163,15 @@ export default function EventsPage() {
     setDebouncedSearch('')
     setClimateFilter(false)
     setSearchOpen(false)
+    setTagFilter([])
   }
 
   const hasActiveFilters = Boolean(
-    selectedType || (view === 'grid' && !showUpcoming) || searchQuery || climateFilter
+    selectedType ||
+      (view === 'grid' && !showUpcoming) ||
+      searchQuery ||
+      climateFilter ||
+      tagFilter.length
   )
 
   const selectedDayEvents = eventsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []
@@ -293,6 +305,8 @@ export default function EventsPage() {
               </div>
             </div>
           </div>
+
+          <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
 
           {hasActiveFilters && (
             <button

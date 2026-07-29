@@ -11,6 +11,7 @@ import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 import type { Extension } from '@codemirror/state'
 import { loadCode, saveCode } from '../../lib/code-sandbox-utils'
+import { useThemeMode } from '../../hooks/useThemeMode'
 
 export type Language = 'javascript' | 'python' | 'html' | 'css' | 'json' | 'markdown'
 
@@ -91,11 +92,15 @@ KTIP connects Caribbean innovators, educators, and students.
 
 interface CodeMirrorEditorProps {
   language: Language
-  darkMode: boolean
+  /** Controlled content. When omitted the editor falls back to its local draft. */
+  value?: string
   fontSize?: 'small' | 'medium' | 'large'
   onValueChange?: (value: string) => void
   onMetricsChange?: (metrics: EditorMetrics) => void
   height?: string
+  readOnly?: boolean
+  /** Seeds an uncontrolled editor from localStorage. Off for DB-backed snippets. */
+  useLocalDraft?: boolean
 }
 
 const fontSizeMap = { small: '12px', medium: '14px', large: '16px' }
@@ -106,30 +111,37 @@ function fontSizeTheme(size: 'small' | 'medium' | 'large'): Extension {
 
 export function CodeMirrorEditor({
   language,
-  darkMode,
+  value,
   fontSize = 'medium',
   onValueChange,
   onMetricsChange,
   height,
+  readOnly = false,
+  useLocalDraft = false,
 }: CodeMirrorEditorProps) {
-  const [code, setCode] = useState('')
+  const [darkMode] = useThemeMode()
+  const [localCode, setLocalCode] = useState('')
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const controlled = value !== undefined
+  const code = controlled ? value : localCode
 
-  // Load saved/default code on mount and whenever the language changes
-  // (mirrors the original onMount load + reactive language-switch reload).
+  // Uncontrolled mode only: seed from the localStorage draft (or the language
+  // template) on mount and on every language switch.
   useEffect(() => {
+    if (controlled || !useLocalDraft) return
     const saved = loadCode(language)
-    setCode(saved || defaultCode[language])
-  }, [language])
+    setLocalCode(saved || defaultCode[language])
+  }, [language, controlled, useLocalDraft])
 
-  const handleChange = (value: string) => {
-    setCode(value)
-    onValueChange?.(value)
+  const handleChange = (next: string) => {
+    if (!controlled) setLocalCode(next)
+    onValueChange?.(next)
 
+    if (!useLocalDraft) return
     // Debounced save to localStorage
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(() => {
-      saveCode(language, value)
+      saveCode(language, next)
     }, 1000)
   }
 
@@ -150,18 +162,24 @@ export function CodeMirrorEditor({
   // Memoized so identical language/fontSize renders don't force CodeMirror to
   // reconfigure its extensions compartment on every unrelated re-render.
   const extensions = useMemo(
-    () => [languageExtensions[language](), EditorView.lineWrapping, fontSizeTheme(fontSize)],
-    [language, fontSize]
+    () => [
+      languageExtensions[language](),
+      EditorView.lineWrapping,
+      fontSizeTheme(fontSize),
+      EditorView.editable.of(!readOnly),
+    ],
+    [language, fontSize, readOnly]
   )
 
   return (
-    <div className={`w-full overflow-auto ${darkMode ? 'bg-[#282c34]' : 'bg-white'}`}>
+    <div className="w-full overflow-auto bg-ktip-cream">
       <CodeMirror
         value={code}
         onChange={handleChange}
         onUpdate={handleUpdate}
         theme={darkMode ? oneDark : 'light'}
         extensions={extensions}
+        readOnly={readOnly}
         height={height || 'calc(100vh - 16rem)'}
       />
     </div>

@@ -115,6 +115,13 @@ export default function ResourceDetailPage() {
               Published {formatDate(resource.created_at)}
             </p>
 
+            {/* Summary lede */}
+            {resource.summary && (
+              <p className="text-lg text-ktip-sand-800 font-medium leading-relaxed mb-6">
+                {resource.summary}
+              </p>
+            )}
+
             {/* Description */}
             {resource.description && (
               <p className="text-lg text-gray-600 mb-6">

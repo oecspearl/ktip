@@ -18,6 +18,7 @@ export interface Database {
           interests: string[]
           open_to: string[]
           is_verified: boolean
+          connection_count_visibility: string
           created_at: string
           updated_at: string
         }
@@ -34,6 +35,7 @@ export interface Database {
           interests?: string[]
           open_to?: string[]
           is_verified?: boolean
+          connection_count_visibility?: string
           created_at?: string
           updated_at?: string
         }
@@ -50,6 +52,7 @@ export interface Database {
           interests?: string[]
           open_to?: string[]
           is_verified?: boolean
+          connection_count_visibility?: string
           created_at?: string
           updated_at?: string
         }

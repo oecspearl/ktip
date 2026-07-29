@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { Card } from '../../components/ui/Card'
 import { useMyGrievances } from '../../hooks/useGrievances'
+import { useSubmissionReceipts } from '../../hooks/useSubmissionReceipts'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   GRIEVANCE_CATEGORY_LABELS,
@@ -9,13 +10,21 @@ import {
   GRIEVANCE_STATUS_COLORS,
 } from '../../lib/constants'
 import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
-import { ShieldAlert, Clock, HelpCircle, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, Clock, HelpCircle, ArrowLeft, Receipt } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 
 export default function MyGrievancesPage() {
   const auth = useAuth()
   const { grievances, loading } = useMyGrievances(auth.user?.id)
+  const { receipts } = useSubmissionReceipts(auth.user?.id)
+
+  // grievance id -> receipt id, for the "submitted copy" link
+  const receiptByGrievance = new Map(
+    (receipts || [])
+      .filter((r) => r.source_table === 'grievances')
+      .map((r) => [r.source_id, r.id])
+  )
 
   usePageTitle('My Reports')
 
@@ -94,6 +103,15 @@ export default function MyGrievancesPage() {
                           <Clock size={12} />
                           {formatDate(grievance.created_at)}
                         </span>
+                        {receiptByGrievance.has(grievance.id) && (
+                          <Link
+                            to={`/dashboard/submissions/${receiptByGrievance.get(grievance.id)}`}
+                            className="inline-flex items-center gap-1 font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
+                          >
+                            <Receipt size={12} />
+                            View submitted copy
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

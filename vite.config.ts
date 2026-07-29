@@ -100,6 +100,11 @@ export default defineConfig(({ mode }) => {
   const openaiKey = getOpenAIKey(env)
   // The api/ handlers read process.env, exactly as they do on Vercel
   if (openaiKey) process.env.OPENAI_API_KEY = openaiKey
+  // Endpoints that verify the caller's JWT (e.g. /api/extract-fields) need the
+  // Supabase URL and anon key server-side too, or they 503 under `npm run dev`
+  for (const key of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']) {
+    if (!process.env[key] && env[key]) process.env[key] = env[key]
+  }
 
   return {
     plugins: [

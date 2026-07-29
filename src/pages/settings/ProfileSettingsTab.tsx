@@ -1,12 +1,13 @@
-import { useState, useEffect, type ChangeEvent } from 'react'
+import { useState, useEffect, useCallback, type ChangeEvent } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { supabase } from '../../lib/supabase'
 import { profileUpdateSchema } from '../../lib/validation'
+import { useFileDrop } from '../../hooks/useFileDrop'
+import { uploadOptimizedImage } from '../../lib/storage-upload'
 import {
   Camera,
   Save,
@@ -19,12 +20,15 @@ import {
   SKILL_SUGGESTIONS,
   INTEREST_SUGGESTIONS,
   LIMITS,
+  IMAGE_PRESETS,
 } from '../../lib/constants'
 import { getInitials, generateAvatarColor } from '../../lib/utils'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import type { UserRole } from '../../types'
+
+const IMAGE_ACCEPT = ['image/*'] as const
 
 export function ProfileSettingsTab() {
   const auth = useAuth()
@@ -71,49 +75,51 @@ export function ProfileSettingsTab() {
     }
   }
 
+  const handleAvatarFile = useCallback(
+    async (file: File) => {
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file')
+        return
+      }
+      // Checked before optimization so a huge file is never handed to the decoder.
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image must be less than 5MB')
+        return
+      }
+
+      setAvatarUploading(true)
+      try {
+        const publicUrl = await uploadOptimizedImage({
+          bucket: 'avatars',
+          basePath: `${auth.user!.id}/avatar`,
+          file,
+          preset: IMAGE_PRESETS.AVATAR,
+        })
+
+        await auth.updateProfile({ avatar_url: publicUrl } as any)
+        toast.success('Avatar updated!')
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to upload avatar')
+      } finally {
+        setAvatarUploading(false)
+      }
+    },
+    [auth, toast]
+  )
+
   const handleAvatarUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.target
     const file = input.files?.[0]
-    if (!file) return
-
-    // Validate file
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB')
-      return
-    }
-
-    setAvatarUploading(true)
-    try {
-      const userId = auth.user!.id
-      const fileExt = file.name.split('.').pop()
-      const filePath = `${userId}/avatar.${fileExt}`
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true })
-
-      if (uploadError) throw uploadError
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath)
-
-      // Update profile with avatar URL
-      await auth.updateProfile({ avatar_url: publicUrl } as any)
-      toast.success('Avatar updated!')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to upload avatar')
-    } finally {
-      setAvatarUploading(false)
-      input.value = ''
-    }
+    input.value = ''
+    if (file) await handleAvatarFile(file)
   }
+
+  const { isDragging: avatarDragging, dropProps: avatarDropProps } = useFileDrop({
+    onFiles: (files) => void handleAvatarFile(files[0]),
+    accept: IMAGE_ACCEPT,
+    disabled: avatarUploading,
+  })
 
   const handleSave = async () => {
     setErrors({})
@@ -166,8 +172,10 @@ export function ProfileSettingsTab() {
       {/* Avatar Section */}
       <Card>
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Photo</h2>
-        <div className="flex items-center gap-6">
-          <div className="relative">
+        <div className="flex items-center gap-6" {...avatarDropProps}>
+          <div
+            className={`relative rounded-full transition-shadow ${avatarDragging ? 'ring-2 ring-ktip-ocean-400 ring-offset-2' : ''}`}
+          >
             {auth.profile?.avatar_url ? (
               <img
                 src={auth.profile.avatar_url}
@@ -193,8 +201,13 @@ export function ProfileSettingsTab() {
             </label>
           </div>
           <div>
-            <p className="text-sm text-ktip-sand-700 font-medium">Upload a photo</p>
-            <p className="text-xs text-ktip-sand-500 mt-1">JPG, PNG or GIF. Max 5MB.</p>
+            <p className="text-sm text-ktip-sand-700 font-medium">
+              {avatarDragging ? 'Drop photo to upload' : 'Upload a photo'}
+            </p>
+            <p className="text-xs text-ktip-sand-500 mt-1">
+              JPG, PNG, GIF or WebP. Max 5MB. Click or drag &amp; drop — large images are resized
+              and optimized automatically.
+            </p>
             {avatarUploading && (
               <p className="text-xs text-ktip-ocean-600 mt-1">Uploading...</p>
             )}

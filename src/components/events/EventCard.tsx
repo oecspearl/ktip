@@ -29,6 +29,7 @@ export function EventCard({ event }: EventCardProps) {
       title={event.title}
       description={event.summary || event.description}
       meta={`${dateLabel} · ${locationLabel}`}
+      tags={event.tags}
       cta="View Event"
     >
       <div className="flex items-center gap-2">

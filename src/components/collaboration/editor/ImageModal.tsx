@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/core'
 import { Modal } from '../../ui/Modal'
-import { supabase } from '../../../lib/supabase'
+import { useFileDrop } from '../../../hooks/useFileDrop'
+import { uploadDocumentImage } from '../../../lib/storage-upload'
 import { Upload, Link, Loader2 } from 'lucide-react'
 
 interface ImageModalProps {
@@ -9,6 +10,8 @@ interface ImageModalProps {
   onClose: () => void
   editor: Editor | null
 }
+
+const IMAGE_ACCEPT = ['image/*'] as const
 
 export function ImageModal({ open, onClose, editor }: ImageModalProps) {
   const [mode, setMode] = useState<'upload' | 'url'>('upload')
@@ -32,20 +35,15 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
     onClose()
   }
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target
-    const file = input.files?.[0]
-    if (!file) return
-
+  const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file.')
-      input.value = ''
       return
     }
 
+    // Checked before optimization so a huge file is never handed to the decoder.
     if (file.size > 10 * 1024 * 1024) {
       setError('Image must be less than 10MB.')
-      input.value = ''
       return
     }
 
@@ -53,29 +51,28 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
     setUploading(true)
 
     try {
-      const fileExt = file.name.split('.').pop() || 'jpg'
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`
-      const filePath = `documents/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('document-images')
-        .upload(filePath, file, { upsert: true })
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('document-images')
-        .getPublicUrl(filePath)
-
+      const publicUrl = await uploadDocumentImage(file)
       setPreview(publicUrl)
       setUrl(publicUrl)
     } catch (err: any) {
       setError(err.message || 'Failed to upload image. The storage bucket may not exist yet.')
     } finally {
       setUploading(false)
-      input.value = ''
     }
+  }, [])
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target
+    const file = input.files?.[0]
+    input.value = ''
+    if (file) await handleFile(file)
   }
+
+  const { isDragging, dropProps } = useFileDrop({
+    onFiles: (files) => void handleFile(files[0]),
+    accept: IMAGE_ACCEPT,
+    disabled: uploading,
+  })
 
   const handleInsert = () => {
     const ed = editor
@@ -115,7 +112,7 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
 
         {/* Upload Tab */}
         {mode === 'upload' && (
-          <div className="space-y-4">
+          <div className="space-y-4" {...dropProps}>
             <input
               ref={fileInputRef}
               type="file"
@@ -142,7 +139,11 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="w-full flex flex-col items-center justify-center gap-3 px-4 py-10 border-2 border-dashed border-ktip-sand-300 rounded-xl bg-ktip-sand-50/50 hover:border-ktip-ocean-400 hover:bg-ktip-ocean-50/30 transition-colors cursor-pointer"
+                className={`w-full flex flex-col items-center justify-center gap-3 px-4 py-10 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${
+                  isDragging
+                    ? 'border-ktip-ocean-400 bg-ktip-ocean-50/50'
+                    : 'border-ktip-sand-300 bg-ktip-sand-50/50 hover:border-ktip-ocean-400 hover:bg-ktip-ocean-50/30'
+                }`}
               >
                 {uploading ? (
                   <Loader2 size={28} className="animate-spin text-ktip-ocean-500" />
@@ -151,9 +152,15 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
                 )}
                 <div className="text-center">
                   <p className="text-sm font-medium text-ktip-sand-700">
-                    {uploading ? 'Uploading...' : 'Click to select an image'}
+                    {uploading
+                      ? 'Uploading...'
+                      : isDragging
+                        ? 'Drop image to upload'
+                        : 'Click or drag an image here'}
                   </p>
-                  <p className="text-xs text-ktip-sand-400 mt-1">JPG, PNG, GIF, WebP up to 10MB</p>
+                  <p className="text-xs text-ktip-sand-400 mt-1">
+                    JPG, PNG, GIF, WebP up to 10MB — resized and optimized automatically
+                  </p>
                 </div>
               </button>
             )}

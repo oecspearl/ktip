@@ -1,10 +1,11 @@
-import { useState, type ChangeEvent } from 'react'
+import { useCallback, useState, type ChangeEvent } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyVerificationRequest, useSubmitVerification } from '../../hooks/useVerification'
+import { useFileDrop } from '../../hooks/useFileDrop'
 import { BadgeCheck, Clock, XCircle, Upload, FileText, X } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
 
@@ -23,22 +24,37 @@ export function VerificationTab() {
 
   const isVerified = auth.profile?.is_verified
 
+  const addFiles = useCallback(
+    (picked: File[]) => {
+      const valid = picked.filter((f) => {
+        if (!ACCEPTED.includes(f.type)) {
+          toast.error(`${f.name}: only PDF, JPG, PNG, or WebP files are allowed`)
+          return false
+        }
+        if (f.size > MAX_SIZE) {
+          toast.error(`${f.name}: file exceeds the 10MB limit`)
+          return false
+        }
+        return true
+      })
+      setFiles((prev) => [...prev, ...valid].slice(0, MAX_FILES))
+    },
+    [toast]
+  )
+
   const handleFiles = (e: ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files || [])
-    const valid = picked.filter((f) => {
-      if (!ACCEPTED.includes(f.type)) {
-        toast.error(`${f.name}: only PDF, JPG, PNG, or WebP files are allowed`)
-        return false
-      }
-      if (f.size > MAX_SIZE) {
-        toast.error(`${f.name}: file exceeds the 10MB limit`)
-        return false
-      }
-      return true
-    })
-    setFiles((prev) => [...prev, ...valid].slice(0, MAX_FILES))
     e.target.value = ''
+    addFiles(picked)
   }
+
+  // No `accept` filter here — addFiles reports rejected files by name instead of
+  // dropping them silently.
+  const { isDragging, dropProps } = useFileDrop({
+    onFiles: addFiles,
+    multiple: true,
+    disabled: submitting,
+  })
 
   const handleSubmit = async () => {
     if (!auth.user || files.length === 0) return
@@ -103,10 +119,19 @@ export function VerificationTab() {
             </p>
 
             {/* File picker */}
-            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-ktip-sand-300 rounded-xl p-6 cursor-pointer hover:border-ktip-ocean-400 hover:bg-ktip-ocean-50/30 transition-colors mb-3">
+            <label
+              {...dropProps}
+              className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-6 cursor-pointer transition-colors mb-3 ${
+                isDragging
+                  ? 'border-ktip-ocean-400 bg-ktip-ocean-50/50'
+                  : 'border-ktip-sand-300 hover:border-ktip-ocean-400 hover:bg-ktip-ocean-50/30'
+              }`}
+            >
               <Upload size={22} className="text-ktip-sand-400" />
               <span className="text-sm text-ktip-sand-600">
-                Click to upload (PDF, JPG, PNG, WebP — max {MAX_FILES} files, 10MB each)
+                {isDragging
+                  ? 'Drop files to add'
+                  : `Click or drag files here (PDF, JPG, PNG, WebP — max ${MAX_FILES} files, 10MB each)`}
               </span>
               <input
                 type="file"

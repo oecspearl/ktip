@@ -6,6 +6,7 @@ import { ApplicationPreview } from '../../components/grants/application/Applicat
 import { AIReviewPanel } from '../../components/grants/application/AIReviewPanel'
 import { SaveStatusBadge } from '../../components/grants/application/SaveStatusBadge'
 import { useGrant, useApplyForGrant, useDraftApplication } from '../../hooks/useGrants'
+import { fetchReceiptBySource } from '../../hooks/useSubmissionReceipts'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useAutoSave } from '../../hooks/useAutoSave'
@@ -186,8 +187,17 @@ export default function GrantApplicationPage() {
         application_data: applicationData,
         current_step: currentStep,
       })
-      toast.success('Application submitted!')
-      navigate('/grants/my-applications')
+      toast.success('Application submitted! A copy is saved in your dashboard.')
+
+      // The submit trigger writes the receipt, so it exists by now. Fall back to
+      // the applications list if it can't be read for any reason.
+      let receipt = null
+      try {
+        receipt = await fetchReceiptBySource('grant_applications', id!)
+      } catch {
+        // ignore — fall through to the list
+      }
+      navigate(receipt ? `/dashboard/submissions/${receipt.id}` : '/grants/my-applications')
     } catch (error: any) {
       console.error('Submit error:', error)
       toast.error('Failed to submit application')

@@ -21,6 +21,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       title={project.title}
       description={project.summary || project.description}
       meta={`${project.owner?.display_name || 'Unknown'} · ${formatDate(project.created_at, 'MMM dd, yyyy')}`}
+      tags={project.hashtags}
       cta="View Project"
     >
       <div className="flex items-center gap-2">

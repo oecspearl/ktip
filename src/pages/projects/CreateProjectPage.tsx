@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -7,9 +7,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateProject } from '../../hooks/useProjects'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import { TagInput } from '../../components/ui/TagInput'
+import { normalizeHashtags } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { projectSchema } from '../../lib/validation'
-import { PROJECT_CATEGORIES } from '../../lib/constants'
+import { PROJECT_CATEGORIES, CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
 import { Save } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -25,25 +27,12 @@ export default function CreateProjectPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [phase, setPhase] = useState('concept')
-  const [hashtagInput, setHashtagInput] = useState('')
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
-
-  const addHashtag = () => {
-    const tag = hashtagInput.trim().replace(/^#/, '')
-    if (tag && !hashtags.includes(tag) && hashtags.length < 10) {
-      setHashtags([...hashtags, tag])
-      setHashtagInput('')
-    }
-  }
-
-  const removeHashtag = (tag: string) => {
-    setHashtags(hashtags.filter((t) => t !== tag))
-  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -202,42 +191,15 @@ export default function CreateProjectPage() {
 
             {/* Hashtags */}
             <div>
-              <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Hashtags (Max 10)
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add a hashtag"
-                  value={hashtagInput}
-                  onChange={(e) => setHashtagInput(e.target.value)}
-                  onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && (e.preventDefault(), addHashtag())}
-                  className="flex-1 px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={addHashtag}
-                  disabled={hashtags.length >= 10}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {hashtags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-2 px-3 py-1 bg-ktip-ocean-50 text-ktip-ocean-700 rounded-full text-sm">
-                    #{tag}
-                    <button
-                      type="button"
-                      onClick={() => removeHashtag(tag)}
-                      aria-label={`Remove #${tag}`}
-                      className="hover:text-ktip-ocean-900"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
+              <TagInput
+                label="Hashtags (Max 10)"
+                description="Topics people can filter and search projects by."
+                placeholder="Add a hashtag"
+                values={hashtags}
+                onChange={(next) => setHashtags(normalizeHashtags(next))}
+                suggestions={CONTENT_TAG_SUGGESTIONS}
+                max={10}
+              />
               {errors.hashtags && (
                 <p className="mt-1 text-sm text-red-600">{errors.hashtags}</p>
               )}

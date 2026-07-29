@@ -119,7 +119,7 @@ export function EditorMenuBar(props: EditorMenuBarProps) {
 
   return (
     <div
-      className="relative flex items-center bg-[#2c2c2e] border-b border-gray-700 select-none"
+      className="relative flex items-center bg-ktip-sand-50 border-b border-ktip-sand-200 select-none"
       onMouseLeave={close}
     >
       {menus.map((menu) => (
@@ -128,8 +128,8 @@ export function EditorMenuBar(props: EditorMenuBarProps) {
             type="button"
             className={`flex items-center gap-1 px-3 py-1.5 text-sm transition-colors ${
               openMenu === menu.label
-                ? 'bg-white/15 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-white/10'
+                ? 'bg-ktip-ocean-100 text-ktip-ocean-700'
+                : 'text-ktip-sand-600 hover:text-ktip-sand-900 hover:bg-ktip-sand-100'
             }`}
             onClick={() => toggle(menu.label)}
             onMouseEnter={() => {
@@ -141,21 +141,21 @@ export function EditorMenuBar(props: EditorMenuBarProps) {
           </button>
 
           {openMenu === menu.label && (
-            <div className="absolute left-0 top-full z-50 min-w-[220px] bg-[#3a3a3c] border border-gray-600 rounded-lg shadow-hard py-1">
+            <div className="absolute left-0 top-full z-50 min-w-[220px] bg-ktip-cream border border-ktip-sand-200 rounded-lg shadow-medium py-1">
               {menu.items.map((item, idx) =>
                 item.separator ? (
-                  <div key={idx} className="h-px bg-gray-600 my-1 mx-2" />
+                  <div key={idx} className="h-px bg-ktip-sand-200 my-1 mx-2" />
                 ) : (
                   <button
                     key={item.label}
                     type="button"
-                    className="w-full flex items-center gap-2.5 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-1.5 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100 hover:text-ktip-sand-900 transition-colors text-left"
                     onClick={() => handleAction(item.action)}
                   >
                     {item.icon && <item.icon size={14} />}
                     <span className="flex-1">{item.label}</span>
                     {item.shortcut && (
-                      <span className="text-xs text-gray-500 ml-4">{item.shortcut}</span>
+                      <span className="text-xs text-ktip-sand-400 ml-4">{item.shortcut}</span>
                     )}
                   </button>
                 )

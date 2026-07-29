@@ -74,6 +74,69 @@ export function useMyConnections(userId: string | undefined) {
   return { connections: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/**
+ * Accepted-connection count for any user, via the
+ * get_connection_count RPC. Returns null when the viewer is not
+ * allowed to see it (target's connection_count_visibility), which
+ * is deliberately distinct from a count of 0.
+ */
+export function useConnectionCount(userId: string | undefined) {
+  const fetchCount = async (uid: string): Promise<number | null> => {
+    const { data, error } = await (supabase as any).rpc('get_connection_count', {
+      p_user_id: uid,
+    })
+    if (error) throw error
+    return data === null || data === undefined ? null : Number(data)
+  }
+
+  const query = useQuery({
+    queryKey: keys.sub('connections', 'count', userId),
+    queryFn: () => fetchCount(userId as string),
+    enabled: !!userId,
+  })
+
+  return {
+    count: query.data ?? null,
+    hidden: query.isSuccess && query.data === null,
+    loading: query.isPending,
+    error: query.error,
+    refetch: query.refetch,
+  }
+}
+
+/**
+ * Batch counts for a list of users (member directory). Users whose
+ * count is hidden from the viewer are absent from the map.
+ */
+export function useConnectionCounts(userIds: string[] | undefined) {
+  const ids = userIds || []
+  const idKey = ids.join(',')
+
+  const fetchCounts = async (): Promise<Record<string, number>> => {
+    const map: Record<string, number> = {}
+
+    // The RPC caps each call at 200 ids; the directory is unbounded.
+    for (let i = 0; i < ids.length; i += 200) {
+      const { data, error } = await (supabase as any).rpc('get_connection_counts', {
+        p_user_ids: ids.slice(i, i + 200),
+      })
+      if (error) throw error
+      for (const row of (data as any[]) || []) {
+        map[row.user_id] = Number(row.connection_count)
+      }
+    }
+    return map
+  }
+
+  const query = useQuery({
+    queryKey: keys.sub('connections', 'counts', idKey),
+    queryFn: fetchCounts,
+    enabled: ids.length > 0,
+  })
+
+  return { counts: query.data, loading: query.isPending, error: query.error }
+}
+
 /** Incoming pending requests for the current user. */
 export function usePendingRequests(userId: string | undefined) {
   const fetchPending = async (uid: string): Promise<Connection[]> => {

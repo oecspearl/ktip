@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
 import { useAllBadges } from '../../hooks/useBadges'
-import { Search, UserX, User } from 'lucide-react'
+import { useConnectionCounts } from '../../hooks/useConnections'
+import { Search, UserX, User, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
@@ -29,6 +30,10 @@ export default function DirectoryPage() {
     badge: selectedBadge,
   })
   const { badges: allBadges } = useAllBadges()
+
+  // Members who hide their count are simply absent from this map
+  const memberIds = useMemo(() => (members || []).map((m) => m.id), [members])
+  const { counts: connectionCounts } = useConnectionCounts(memberIds)
 
   const clearFilters = () => {
     setSelectedRole('')
@@ -183,6 +188,13 @@ export default function DirectoryPage() {
                         {member.country && <>{member.country}</>}
                         {member.country && member.skills?.length > 0 && <> · </>}
                         {member.skills?.length > 0 && <>{member.skills[0]}</>}
+                        {connectionCounts?.[member.id] !== undefined && (
+                          <span className="flex items-center gap-1.5 mt-1">
+                            <Users size={13} className="shrink-0" />
+                            {connectionCounts[member.id]}{' '}
+                            {connectionCounts[member.id] === 1 ? 'connection' : 'connections'}
+                          </span>
+                        )}
                         {(member.user_badges?.length ?? 0) > 0 && (
                           <span className="flex flex-wrap gap-1.5 mt-2">
                             {member.user_badges!.slice(0, 3).map((ub) => (

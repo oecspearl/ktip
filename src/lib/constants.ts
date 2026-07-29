@@ -302,7 +302,9 @@ export const ROUTES = {
   WHITEBOARD: '/collaborate/whiteboard',
   DOCUMENT_EDITOR: '/collaborate/document',
   CODE_EDITOR: '/collaborate/code',
+  SNIPPETS: '/collaborate/snippets',
   VIDEO_CONFERENCE: '/collaborate/video',
+  INVITATIONS: '/invitations',
   ADMIN: '/admin',
   ADMIN_EVENTS: '/admin/events',
   ADMIN_EVENT_DETAIL: (id: string) => `/admin/events/${id}`,
@@ -396,6 +398,21 @@ export const COLLABORATION_LABELS: Record<string, string> = Object.fromEntries(
 // Selecting this clears all other collaboration options
 export const COLLAB_EXCLUSIVE_VALUE = 'not_seeking'
 
+// Who may see a member's connection count (profiles.connection_count_visibility)
+export const CONNECTION_VISIBILITY_OPTIONS: {
+  value: 'public' | 'connections' | 'private'
+  label: string
+  description: string
+}[] = [
+  { value: 'public', label: 'Everyone', description: 'Anyone viewing your profile or the directory' },
+  { value: 'connections', label: 'My connections', description: 'Only members you are already connected to' },
+  { value: 'private', label: 'Only me', description: 'Hidden from everyone else' },
+]
+
+export const CONNECTION_VISIBILITY_LABELS: Record<string, string> = Object.fromEntries(
+  CONNECTION_VISIBILITY_OPTIONS.map((o) => [o.value, o.label])
+)
+
 // Resource Types
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   article: 'Article',
@@ -434,6 +451,29 @@ export const INTEGRATION_CATEGORY_LABELS: Record<string, string> = {
   developer: 'Developer Tools',
   other: 'Other',
 }
+
+// Tag suggestions offered while authoring content (resources, integrations,
+// events, projects). Authoring aid only — the tag filters on the public list
+// pages derive their options from what is actually stored, so this list can
+// drift without ever producing a chip that returns zero results.
+export const CONTENT_TAG_SUGGESTIONS = [
+  'climate',
+  'funding',
+  'startup',
+  'agriculture',
+  'blue economy',
+  'renewable energy',
+  'tourism',
+  'education',
+  'healthtech',
+  'fintech',
+  'policy',
+  'research',
+  'mentorship',
+  'open source',
+  'data',
+  'community',
+] as const
 
 // Climate Action
 export const CLIMATE_ACTION_BADGE_CLASS = 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200'
@@ -510,6 +550,13 @@ export const LIMITS = {
   MAX_INTERESTS: 20,
   MAX_ORGANIZATION_LENGTH: 200,
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+} as const
+
+// Image optimization presets — see src/lib/image-optimize.ts
+export const IMAGE_PRESETS = {
+  AVATAR: { maxDim: 512, quality: 0.85, maxBytes: 300 * 1024 },
+  SPEAKER: { maxDim: 800, quality: 0.85, maxBytes: 500 * 1024 },
+  DOCUMENT: { maxDim: 1600, quality: 0.82, maxBytes: 1024 * 1024 },
 } as const
 
 // Date Formats

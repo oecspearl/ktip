@@ -1,14 +1,33 @@
-import { useState } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
 import { CodeMirrorEditor, defaultCode } from '../../components/collaboration/CodeMirrorEditor'
 import type { Language, EditorMetrics } from '../../components/collaboration/CodeMirrorEditor'
 import { OutputPanel } from '../../components/collaboration/OutputPanel'
 import { PreviewPanel } from '../../components/collaboration/PreviewPanel'
-import { StatusBar } from '../../components/collaboration/StatusBar'
+import { ShareEntityModal } from '../../components/collaboration/ShareEntityModal'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { executeJavaScript, downloadCodeAsFile, clearCode } from '../../lib/code-sandbox-utils'
+import { useThemeMode } from '../../hooks/useThemeMode'
+import { useToolAutoSave } from '../../hooks/useToolAutoSave'
+import {
+  useSnippet,
+  useSnippetPermission,
+  useCreateSnippet,
+  useUpdateSnippet,
+} from '../../hooks/useSnippets'
+import { useAuth } from '../../contexts/AuthContext'
+import { executeJavaScript, downloadCodeAsFile } from '../../lib/code-sandbox-utils'
 import type { ConsoleMessage, ExecutionResult } from '../../lib/code-sandbox-utils'
-import { PageHero } from '../../components/layout/PageHero'
+import { ToolPanelShell, ToolNotFound } from '../../components/ui/ToolPanelShell'
+import { ToolTitleInput } from '../../components/ui/ToolTitleInput'
+import { ToolStatusBar, StatusMetric, SaveIndicator } from '../../components/ui/ToolStatusBar'
+import {
+  Toolbar,
+  ToolbarButton,
+  ToolbarSelect,
+  ToolbarSeparator,
+  ToolbarSpacer,
+} from '../../components/ui/Toolbar'
+import { truncate } from '../../lib/utils'
 import {
   Sun,
   Moon,
@@ -19,10 +38,8 @@ import {
   RotateCcw,
   Type,
   Check,
-  ArrowLeft,
-  Pen,
-  FileText,
-  Video,
+  Save,
+  Share2,
 } from 'lucide-react'
 
 const languages: { value: Language; label: string }[] = [
@@ -34,29 +51,43 @@ const languages: { value: Language; label: string }[] = [
   { value: 'markdown', label: 'Markdown' },
 ]
 
-const fontSizes = ['small', 'medium', 'large'] as const
-const fontSizeLabels: Record<string, string> = {
-  small: 'S',
-  medium: 'M',
-  large: 'L',
+const LANGUAGE_LABELS: Record<Language, string> = {
+  javascript: 'JavaScript',
+  python: 'Python',
+  html: 'HTML',
+  css: 'CSS',
+  json: 'JSON',
+  markdown: 'Markdown',
 }
 
+const fontSizes = ['small', 'medium', 'large'] as const
+const fontSizeLabels: Record<string, string> = { small: 'S', medium: 'M', large: 'L' }
+
 export default function CodeEditorPage() {
-  usePageTitle('Code Sandbox')
+  const params = useParams()
+  const navigate = useNavigate()
+  const auth = useAuth()
+  const isNew = !params.id
+
+  const [darkMode, setDarkMode] = useThemeMode()
 
   // Core state
+  const [snippetId, setSnippetId] = useState<string | undefined>(params.id)
+  const [title, setTitle] = useState('Untitled Snippet')
   const [language, setLanguage] = useState<Language>('javascript')
-  const [darkMode, setDarkMode] = useState(false)
+  const [code, setCode] = useState(defaultCode.javascript)
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium')
-  const [code, setCode] = useState('')
+  const [contentLoaded, setContentLoaded] = useState(false)
 
   // Execution state
   const [outputVisible, setOutputVisible] = useState(false)
   const [outputMessages, setOutputMessages] = useState<ConsoleMessage[]>([])
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null)
   const [running, setRunning] = useState(false)
+  const [previewVisible, setPreviewVisible] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
-  // Editor metrics
   const [metrics, setMetrics] = useState<EditorMetrics>({
     lineCount: 1,
     charCount: 0,
@@ -64,15 +95,80 @@ export default function CodeEditorPage() {
     cursorCol: 1,
   })
 
-  // Preview state (HTML/CSS)
-  const [previewVisible, setPreviewVisible] = useState(false)
+  // DB hooks
+  const { snippet: dbSnippet, error: dbSnippetError } = useSnippet(params.id)
+  const { permission: sharePermission } = useSnippetPermission(params.id)
+  const { createSnippet } = useCreateSnippet()
+  const { updateSnippet } = useUpdateSnippet()
 
-  // Toast state
-  const [copied, setCopied] = useState(false)
+  const isOwner = isNew
+    ? true
+    : !dbSnippet || !auth.user?.id
+      ? true
+      : dbSnippet.owner_id === auth.user.id
+  const canEdit = isOwner || sharePermission === 'edit'
 
-  const hasPanel = outputVisible || previewVisible
+  usePageTitle(title || 'Code Sandbox')
 
-  // --- Actions ---
+  useEffect(() => {
+    if (dbSnippet && !contentLoaded) {
+      setTitle(dbSnippet.title)
+      setLanguage(dbSnippet.language as Language)
+      setCode(dbSnippet.content || '')
+      setSnippetId(dbSnippet.id)
+      setContentLoaded(true)
+    }
+  }, [dbSnippet, contentLoaded])
+
+  // Refs so the autosave closure always persists the latest editor state.
+  const snippetIdRef = useRef(snippetId)
+  const titleRef = useRef(title)
+  const codeRef = useRef(code)
+  const languageRef = useRef(language)
+  snippetIdRef.current = snippetId
+  titleRef.current = title
+  codeRef.current = code
+  languageRef.current = language
+
+  const { status, lastSavedAt, schedule, saveNow } = useToolAutoSave({
+    enabled: canEdit,
+    save: async () => {
+      const currentId = snippetIdRef.current
+      if (currentId) {
+        await updateSnippet(currentId, {
+          title: titleRef.current,
+          language: languageRef.current,
+          content: codeRef.current,
+        })
+      } else {
+        const created = await createSnippet({
+          title: titleRef.current,
+          language: languageRef.current,
+          content: codeRef.current,
+        })
+        setSnippetId(created.id)
+        snippetIdRef.current = created.id
+        navigate(`/collaborate/code/${created.id}`, { replace: true })
+      }
+    },
+  })
+
+  const handleCodeChange = (next: string) => {
+    setCode(next)
+    schedule()
+  }
+
+  const handleLanguageChange = (next: Language) => {
+    setLanguage(next)
+    // Only seed a template into an untouched new snippet — never clobber
+    // code the user (or the database) already has.
+    if (isNew && !code.trim()) setCode(defaultCode[next])
+    schedule()
+  }
+
+  const handleTitleCommit = () => {
+    if (snippetId && canEdit) updateSnippet(snippetId, { title }).catch(() => {})
+  }
 
   const handleRun = async () => {
     if (language !== 'javascript' || running) return
@@ -90,28 +186,21 @@ export default function CodeEditorPage() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Fallback
       const textarea = document.createElement('textarea')
       textarea.value = code
       document.body.appendChild(textarea)
       textarea.select()
       document.execCommand('copy')
       document.body.removeChild(textarea)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
     }
-  }
-
-  const handleDownload = () => {
-    downloadCodeAsFile(code, language)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleReset = () => {
-    clearCode(language)
     setCode(defaultCode[language])
+    schedule()
   }
 
   const cycleFontSize = () => {
@@ -119,240 +208,205 @@ export default function CodeEditorPage() {
     setFontSize(fontSizes[(idx + 1) % fontSizes.length])
   }
 
-  const handleClearOutput = () => {
-    setOutputMessages([])
-    setExecutionResult(null)
-  }
-
-  const dark = darkMode
+  const hasPanel = outputVisible || previewVisible
+  const notFound = !isNew && !!dbSnippetError
 
   return (
     <>
-      <PageHero
-        eyebrow="Collaboration Tools"
-        title="Code Sandbox"
+      <ToolPanelShell
+        tool="code"
         imageSeed="code"
-        compact
+        title={
+          <ToolTitleInput
+            value={title}
+            onChange={setTitle}
+            onCommit={handleTitleCommit}
+            readOnly={!canEdit}
+            placeholder="Untitled Snippet"
+          />
+        }
         breadcrumb={[
           { label: 'Home', href: '/' },
           { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Code Sandbox' },
+          { label: 'Code', href: '/collaborate/snippets' },
+          { label: truncate(title, 20) },
         ]}
-      />
-
-      {/* Content */}
-      <div className="bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
-          {/* Back to hub + cross-links */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 text-sm">
-            <Link
-              to="/collaborate"
-              className="inline-flex items-center gap-1.5 text-ktip-sand-600 hover:text-ktip-ocean-600 transition-colors font-medium"
-            >
-              <ArrowLeft size={14} />
-              Back to Collaborate Hub
-            </Link>
-            <span className="text-ktip-sand-300">|</span>
-            <Link to="/collaborate/whiteboards" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
-              <Pen size={14} />
-              Whiteboards
-            </Link>
-            <Link to="/collaborate/documents" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
-              <FileText size={14} />
-              Documents
-            </Link>
-            <Link to="/collaborate/video" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
-              <Video size={14} />
-              Video
-            </Link>
-          </div>
-
-          {/* Editor Container */}
-          <div
-            className={`border overflow-hidden ${
-              dark ? 'border-gray-700 bg-[#282c34]' : 'border-gray-200 bg-white'
-            }`}
-          >
-            {/* Toolbar */}
-            <div
-              className={`flex items-center gap-2 px-3 py-2 border-b flex-wrap ${
-                dark
-                  ? 'border-gray-700 bg-[#21252b]'
-                  : 'border-ktip-sand-200 bg-ktip-sand-50/50'
+        heroBadge={
+          !isOwner && (
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
+                canEdit
+                  ? 'bg-ktip-ocean-500/20 text-ktip-ocean-300 border-ktip-ocean-500/30'
+                  : 'bg-ktip-sun-500/20 text-ktip-sun-300 border-ktip-sun-500/30'
               }`}
             >
-              {/* Language Selector */}
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className={`px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 ${
-                  dark
-                    ? 'bg-[#2c313a] border-gray-600 text-gray-300 focus:border-ktip-sun-500 focus:ring-ktip-sun-500/20'
-                    : 'bg-white border-ktip-sand-200 text-ktip-sand-800 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20'
-                }`}
-              >
-                {languages.map((lang) => (
-                  <option key={lang.value} value={lang.value}>{lang.label}</option>
-                ))}
-              </select>
-
-              {/* Separator */}
-              <div className={`w-px h-6 ${dark ? 'bg-gray-600' : 'bg-ktip-sand-200'}`} />
-
-              {/* Run (JavaScript only) */}
-              {language === 'javascript' && (
-                <button
-                  type="button"
-                  onClick={handleRun}
-                  disabled={running}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                    dark
-                      ? 'bg-ktip-sun-600 hover:bg-ktip-sun-500 text-white'
-                      : 'bg-ktip-sun-500 hover:bg-ktip-sun-600 text-white'
-                  }`}
-                  title="Run code (JavaScript only)"
-                >
-                  <Play size={14} className={running ? 'animate-pulse' : ''} />
-                  {running ? 'Running...' : 'Run'}
-                </button>
-              )}
-
-              {/* Preview (HTML/CSS) */}
-              {(language === 'html' || language === 'css') && (
-                <button
-                  type="button"
-                  onClick={() => setPreviewVisible(!previewVisible)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    previewVisible
-                      ? dark
-                        ? 'bg-ktip-ocean-600 text-white'
-                        : 'bg-ktip-ocean-500 text-white'
-                      : dark
-                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                        : 'bg-ktip-sand-100 hover:bg-ktip-sand-200 text-ktip-sand-700'
-                  }`}
-                  title="Toggle live preview"
-                >
-                  <Eye size={14} />
-                  Preview
-                </button>
-              )}
-
-              {/* Copy */}
-              <button
-                type="button"
-                onClick={handleCopy}
-                className={`inline-flex items-center gap-1.5 p-2 rounded-lg text-sm transition-colors ${
-                  dark
-                    ? 'hover:bg-gray-700 text-gray-400'
-                    : 'hover:bg-ktip-sand-100 text-ktip-sand-600'
-                }`}
-                title="Copy code"
-              >
-                {copied ? <Check size={16} className="text-ktip-tropical-500" /> : <Copy size={16} />}
-              </button>
-
-              {/* Download */}
-              <button
-                type="button"
-                onClick={handleDownload}
-                className={`p-2 rounded-lg text-sm transition-colors ${
-                  dark
-                    ? 'hover:bg-gray-700 text-gray-400'
-                    : 'hover:bg-ktip-sand-100 text-ktip-sand-600'
-                }`}
-                title="Download file"
-              >
-                <Download size={16} />
-              </button>
-
-              {/* Reset */}
-              <button
-                type="button"
-                onClick={handleReset}
-                className={`p-2 rounded-lg text-sm transition-colors ${
-                  dark
-                    ? 'hover:bg-red-900/30 text-gray-400 hover:text-red-400'
-                    : 'hover:bg-red-50 text-ktip-sand-600 hover:text-red-600'
-                }`}
-                title="Reset to default"
-              >
-                <RotateCcw size={16} />
-              </button>
-
-              {/* Separator */}
-              <div className={`w-px h-6 ${dark ? 'bg-gray-600' : 'bg-ktip-sand-200'}`} />
-
-              {/* Font Size */}
-              <button
-                type="button"
-                onClick={cycleFontSize}
-                className={`inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-sm transition-colors ${
-                  dark
-                    ? 'hover:bg-gray-700 text-gray-400'
-                    : 'hover:bg-ktip-sand-100 text-ktip-sand-600'
-                }`}
-                title={`Font size: ${fontSize}`}
-              >
-                <Type size={14} />
-                <span className="text-xs font-medium">{fontSizeLabels[fontSize]}</span>
-              </button>
-
-              {/* Dark Mode Toggle */}
-              <button
-                type="button"
-                onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 rounded-lg transition-colors ${
-                  dark
-                    ? 'hover:bg-gray-700 text-gray-400'
-                    : 'hover:bg-ktip-sand-100 text-ktip-sand-600'
-                }`}
-                title={dark ? 'Light mode' : 'Dark mode'}
-              >
-                {dark ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
-            </div>
-
-            {/* Code Editor */}
-            <CodeMirrorEditor
-              language={language}
-              darkMode={darkMode}
-              fontSize={fontSize}
-              onValueChange={setCode}
-              onMetricsChange={setMetrics}
-              height={hasPanel ? 'calc(100vh - 28rem)' : 'calc(100vh - 16rem)'}
+              {canEdit ? 'Editor — Shared with you' : 'View Only — Shared with you'}
+            </span>
+          )
+        }
+        fallback={
+          notFound ? (
+            <ToolNotFound
+              what="Snippet"
+              backHref="/collaborate/snippets"
+              backLabel="Back to My Snippets"
             />
+          ) : undefined
+        }
+        toolbar={
+          <Toolbar>
+            <ToolbarSelect
+              value={language}
+              onChange={(e) => handleLanguageChange(e.target.value as Language)}
+              disabled={!canEdit}
+              aria-label="Language"
+            >
+              {languages.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
+            </ToolbarSelect>
 
-            {/* Output Panel (JavaScript only) */}
-            {outputVisible && language === 'javascript' && (
-              <OutputPanel
-                messages={outputMessages}
-                result={executionResult}
-                running={running}
-                darkMode={darkMode}
-                onClear={handleClearOutput}
+            <ToolbarSeparator />
+
+            {language === 'javascript' && (
+              <ToolbarButton
+                icon={<Play size={14} className={running ? 'animate-pulse' : ''} />}
+                label={running ? 'Running…' : 'Run'}
+                variant="accent"
+                onClick={handleRun}
+                disabled={running}
+                title="Run code (JavaScript only)"
               />
             )}
 
-            {/* Preview Panel (HTML/CSS) */}
-            {previewVisible && (language === 'html' || language === 'css') && (
-              <PreviewPanel
-                code={code}
-                language={language}
-                darkMode={darkMode}
-                onClose={() => setPreviewVisible(false)}
+            {(language === 'html' || language === 'css') && (
+              <ToolbarButton
+                icon={<Eye size={14} />}
+                label="Preview"
+                active={previewVisible}
+                onClick={() => setPreviewVisible(!previewVisible)}
+                title="Toggle live preview"
               />
             )}
 
-            {/* Status Bar */}
-            <StatusBar
-              metrics={metrics}
-              language={language}
-              darkMode={darkMode}
+            <ToolbarButton
+              icon={copied ? <Check size={16} className="text-ktip-tropical-500" /> : <Copy size={16} />}
+              onClick={handleCopy}
+              title="Copy code"
+              aria-label="Copy code"
             />
-          </div>
-        </div>
-      </div>
+            <ToolbarButton
+              icon={<Download size={16} />}
+              onClick={() => downloadCodeAsFile(code, language)}
+              title="Download file"
+              aria-label="Download file"
+            />
+            <ToolbarButton
+              icon={<RotateCcw size={16} />}
+              variant="danger"
+              onClick={handleReset}
+              disabled={!canEdit}
+              title="Reset to the language template"
+              aria-label="Reset code"
+            />
+
+            <ToolbarSeparator />
+
+            <ToolbarButton
+              icon={<Type size={14} />}
+              label={<span className="text-xs">{fontSizeLabels[fontSize]}</span>}
+              onClick={cycleFontSize}
+              title={`Font size: ${fontSize}`}
+            />
+            <ToolbarButton
+              icon={darkMode ? <Sun size={16} /> : <Moon size={16} />}
+              onClick={() => setDarkMode(!darkMode)}
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label="Toggle theme"
+            />
+
+            <ToolbarSpacer />
+
+            <ToolbarButton
+              icon={<Save size={14} />}
+              label="Save"
+              onClick={() => void saveNow()}
+              disabled={!canEdit}
+              title="Save now (Ctrl+S)"
+            />
+            {isOwner && (
+              <ToolbarButton
+                icon={<Share2 size={14} />}
+                label="Invite"
+                variant="primary"
+                onClick={async () => {
+                  if (!snippetId) await saveNow()
+                  setShareOpen(true)
+                }}
+                title="Invite collaborators"
+              />
+            )}
+          </Toolbar>
+        }
+        statusBar={
+          <ToolStatusBar
+            left={
+              <>
+                <StatusMetric label="Ln" value={`${metrics.cursorLine}, Col ${metrics.cursorCol}`} />
+                <StatusMetric label="Lines" value={metrics.lineCount} />
+                <StatusMetric label="Chars" value={metrics.charCount} />
+              </>
+            }
+            right={
+              <>
+                <SaveIndicator status={status} lastSavedAt={lastSavedAt} />
+                <span className="text-ktip-sand-300" aria-hidden>|</span>
+                <span>{LANGUAGE_LABELS[language]}</span>
+              </>
+            }
+          />
+        }
+      >
+        <CodeMirrorEditor
+          language={language}
+          value={code}
+          fontSize={fontSize}
+          readOnly={!canEdit}
+          onValueChange={handleCodeChange}
+          onMetricsChange={setMetrics}
+          height={hasPanel ? 'calc(100vh - 32rem)' : 'calc(100vh - 22rem)'}
+        />
+
+        {outputVisible && language === 'javascript' && (
+          <OutputPanel
+            messages={outputMessages}
+            result={executionResult}
+            running={running}
+            onClear={() => {
+              setOutputMessages([])
+              setExecutionResult(null)
+            }}
+          />
+        )}
+
+        {previewVisible && (language === 'html' || language === 'css') && (
+          <PreviewPanel
+            code={code}
+            language={language}
+            onClose={() => setPreviewVisible(false)}
+          />
+        )}
+      </ToolPanelShell>
+
+      <ShareEntityModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        resourceType="snippet"
+        resourceId={snippetId}
+        resourceTitle={title}
+      />
     </>
   )
 }

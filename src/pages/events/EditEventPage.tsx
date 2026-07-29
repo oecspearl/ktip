@@ -7,6 +7,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useEvent, useUpdateEvent } from '../../hooks/useEvents'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import { TagInput } from '../../components/ui/TagInput'
+import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
+import { sanitizeTag } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { eventSchema } from '../../lib/validation'
 import { Save, Calendar, MapPin, Video, Users } from 'lucide-react'
@@ -27,6 +30,7 @@ export default function EditEventPage() {
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [eventType, setEventType] = useState('meetup')
   const [location, setLocation] = useState('')
   const [isVirtual, setIsVirtual] = useState(false)
@@ -45,6 +49,7 @@ export default function EditEventPage() {
       setTitle(event.title || '')
       setSummary(event.summary || '')
       setDescription(event.description || '')
+      setTags(event.tags || [])
       setEventType(event.event_type || 'meetup')
       setLocation(event.location || '')
       setIsVirtual(event.is_virtual ?? false)
@@ -112,6 +117,7 @@ export default function EditEventPage() {
       await updateEvent(params.id!, {
         title,
         summary: summary.trim() || null,
+        tags: tags.map(sanitizeTag).filter(Boolean),
         description,
         event_type: eventType as any,
         location: isVirtual ? 'Virtual' : location,
@@ -206,6 +212,16 @@ export default function EditEventPage() {
               error={errors.description}
               rows={6}
               fullWidth
+            />
+
+            {/* Tags */}
+            <TagInput
+              label="Tags"
+              description="Topics attendees can filter and search by."
+              values={tags}
+              onChange={setTags}
+              suggestions={CONTENT_TAG_SUGGESTIONS}
+              max={10}
             />
 
             {/* Additional Details */}

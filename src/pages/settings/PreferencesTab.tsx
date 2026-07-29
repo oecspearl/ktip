@@ -6,12 +6,15 @@ import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
 import { useReadableMode } from '../../hooks/useReadableMode'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import { CONNECTION_VISIBILITY_OPTIONS } from '../../lib/constants'
+import type { ConnectionCountVisibility } from '../../types'
 import {
   Bell,
   Eye,
   Save,
   Type,
   Moon,
+  Users,
 } from 'lucide-react'
 
 interface ToggleProps {
@@ -70,6 +73,16 @@ export function PreferencesTab() {
   const [showEmail, setShowEmail] = useState(false)
   const [showCountry, setShowCountry] = useState(true)
 
+  // Connection-count audience — persisted on the profile row and
+  // enforced by the get_connection_count* RPCs (migration 049).
+  const [connVisibility, setConnVisibility] = useState<ConnectionCountVisibility>('public')
+
+  useEffect(() => {
+    if (auth.profile?.connection_count_visibility) {
+      setConnVisibility(auth.profile.connection_count_visibility)
+    }
+  }, [auth.profile?.connection_count_visibility])
+
   // Sync DB row into local state; migrate any legacy localStorage
   // notification prefs the first time the user has no DB row.
   useEffect(() => {
@@ -107,7 +120,10 @@ export function PreferencesTab() {
     if (!auth.user) return
     try {
       await savePreferences(auth.user.id, notif)
-      // Privacy stays local until enforced server-side
+      if (connVisibility !== auth.profile?.connection_count_visibility) {
+        await auth.updateProfile({ connection_count_visibility: connVisibility })
+      }
+      // Remaining privacy toggles stay local until enforced server-side
       localStorage.setItem(
         'ktip_preferences',
         JSON.stringify({ privacy: { profilePublic, showEmail, showCountry } })
@@ -209,6 +225,46 @@ export function PreferencesTab() {
             label="Show Country"
             description="Display your country on your profile"
           />
+
+          {/* Connection count audience */}
+          <div className="py-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
+              <Users size={16} className="text-ktip-sand-500" />
+              Who can see my connection count
+            </div>
+            <p className="text-xs text-ktip-sand-500 mt-0.5 mb-3">
+              Controls the number shown on your profile and in the member directory. You can always
+              see your own count.
+            </p>
+            <div
+              className="flex flex-col sm:flex-row gap-2"
+              role="radiogroup"
+              aria-label="Who can see my connection count"
+            >
+              {CONNECTION_VISIBILITY_OPTIONS.map((option) => {
+                const selected = connVisibility === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setConnVisibility(option.value)}
+                    className={`flex-1 text-left px-3 py-2.5 rounded-xl border transition-colors ${
+                      selected
+                        ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-800'
+                        : 'border-ktip-sand-200 hover:border-ktip-sand-300 text-ktip-sand-700'
+                    }`}
+                  >
+                    <span className="block text-sm font-medium">{option.label}</span>
+                    <span className="block text-xs text-ktip-sand-500 mt-0.5">
+                      {option.description}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </Card>
 

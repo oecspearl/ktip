@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { DetailsList } from '../../components/shared/DetailsList'
+import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { useGrant, useApplyForGrant, useDraftApplication } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -41,6 +42,8 @@ export default function GrantDetailPage() {
 
   const isExpired = !!(grant && grant.deadline && isPast(new Date(grant.deadline)))
   const canApply = !!(grant && grant.is_active && !isExpired && !hasApplied)
+  // Only OECS admins can write to a grant, so only they see field proposals
+  const isOecs = !!auth.profile?.roles?.includes('oecs')
 
   // Load submitted-application count
   useEffect(() => {
@@ -209,6 +212,16 @@ export default function GrantDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* Documents */}
+            <div className="mb-8">
+              <DocumentsPanel
+                entityType="grant"
+                entityId={grant.id}
+                canEditEntity={isOecs}
+                entity={grant}
+              />
+            </div>
           </div>
 
           {/* === Sidebar === */}

@@ -4,6 +4,8 @@ import { ResourceCard } from '../../components/resources/ResourceCard'
 import { IntegrationCard } from '../../components/integrations/IntegrationCard'
 import { useResources } from '../../hooks/useResources'
 import { useIntegrations } from '../../hooks/useIntegrations'
+import { useTagVocabulary } from '../../hooks/useTagVocabulary'
+import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { Search, BookOpen, Puzzle } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -74,21 +76,32 @@ function ResourcesTab() {
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [climateFilter, setClimateFilter] = useState(false)
+  const [tagFilter, setTagFilter] = useState<string[]>([])
+
+  const { tags: tagOptions } = useTagVocabulary('resources')
 
   const { resources, loading } = useResources({
     search: searchQuery,
     type: typeFilter,
     category: categoryFilter,
     climateAction: climateFilter,
+    tags: tagFilter,
   })
 
-  const hasActiveFilters = !!(searchQuery || typeFilter || categoryFilter || climateFilter)
+  const hasActiveFilters = !!(
+    searchQuery ||
+    typeFilter ||
+    categoryFilter ||
+    climateFilter ||
+    tagFilter.length
+  )
 
   const clearFilters = () => {
     setSearchQuery('')
     setTypeFilter('')
     setCategoryFilter('')
     setClimateFilter(false)
+    setTagFilter([])
   }
 
   return (
@@ -149,6 +162,8 @@ function ResourcesTab() {
             </label>
           </div>
 
+          <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
+
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -201,12 +216,24 @@ function ResourcesTab() {
 }
 
 function IntegrationsTab() {
+  // Global search links here with ?search=<name> — there is no integration
+  // detail route, so the pre-filtered list stands in for one.
+  const [searchParams] = useSearchParams()
+  const initialSearch = searchParams.get('search') || ''
+
   const [category, setCategory] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [searchQuery, setSearchQuery] = useState(initialSearch)
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
+  const [tagFilter, setTagFilter] = useState<string[]>([])
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
 
-  const { integrations, loading } = useIntegrations({ category, search: debouncedSearch })
+  const { tags: tagOptions } = useTagVocabulary('integrations')
+
+  const { integrations, loading } = useIntegrations({
+    category,
+    search: debouncedSearch,
+    tags: tagFilter,
+  })
 
   return (
     <div className="bg-ktip-sand-50 pb-12">
@@ -238,6 +265,10 @@ function IntegrationsTab() {
           </select>
         </div>
 
+        <div className="mb-8 -mt-4">
+          <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
+        </div>
+
         {loading ? (
           <SkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" />
         ) : integrations && integrations.length > 0 ? (
@@ -253,8 +284,8 @@ function IntegrationsTab() {
             </div>
             <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No integrations found</h3>
             <p className="text-gray-500 text-sm">
-              {searchQuery || category
-                ? 'Try adjusting your search or category filter.'
+              {searchQuery || category || tagFilter.length
+                ? 'Try adjusting your search, category or tag filters.'
                 : 'The directory is being curated — check back soon.'}
             </p>
           </div>

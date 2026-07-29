@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { ProjectCard } from '../../components/projects/ProjectCard'
 import { useProjects } from '../../hooks/useProjects'
+import { useTagVocabulary } from '../../hooks/useTagVocabulary'
+import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { Plus, Search, Inbox, Leaf } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
@@ -21,12 +23,16 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
+  const [tagFilter, setTagFilter] = useState<string[]>([])
+
+  const { tags: tagOptions } = useTagVocabulary('projects')
 
   const { projects, loading: projectsLoading } = useProjects({
     category: selectedCategory,
     phase: selectedPhase,
     search: debouncedSearch,
     climateAction: climateFilter,
+    tags: tagFilter,
   })
 
   const clearFilters = () => {
@@ -35,9 +41,12 @@ export default function ProjectsPage() {
     setSearchQuery('')
     setDebouncedSearch('')
     setClimateFilter(false)
+    setTagFilter([])
   }
 
-  const hasActiveFilters = Boolean(selectedCategory || selectedPhase || searchQuery || climateFilter)
+  const hasActiveFilters = Boolean(
+    selectedCategory || selectedPhase || searchQuery || climateFilter || tagFilter.length
+  )
 
   // Derive category counts from current projects data
   const categoryCounts = useMemo(() => {
@@ -135,6 +144,13 @@ export default function ProjectsPage() {
                   Climate Action
                 </label>
               </div>
+
+              <TagFilterChips
+                label="Hashtags"
+                options={tagOptions}
+                selected={tagFilter}
+                onChange={setTagFilter}
+              />
 
               {hasActiveFilters && (
                 <button

@@ -6,15 +6,16 @@ import { Textarea } from '../../../components/ui/Textarea'
 import { useCreateResource, useUpdateResource } from '../../../hooks/useResources'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
+import { TagInput } from '../../../components/ui/TagInput'
+import { sanitizeTag } from '../../../lib/utils'
 import {
   Save,
-  Plus,
-  X,
   Leaf,
 } from 'lucide-react'
 import {
   RESOURCE_TYPE_LABELS,
   RESOURCE_CATEGORY_LABELS,
+  CONTENT_TAG_SUGGESTIONS,
 } from '../../../lib/constants'
 import type { Resource } from '../../../types'
 
@@ -32,12 +33,12 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
   const { updateResource, loading: updateLoading } = useUpdateResource()
 
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
   const [resourceType, setResourceType] = useState('article')
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
   const [downloadUrl, setDownloadUrl] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [isClimateAction, setIsClimateAction] = useState(false)
@@ -47,12 +48,12 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
 
   const resetForm = () => {
     setTitle('')
+    setSummary('')
     setDescription('')
     setContent('')
     setResourceType('article')
     setCategory('')
     setTags([])
-    setTagInput('')
     setDownloadUrl('')
     setThumbnailUrl('')
     setIsClimateAction(false)
@@ -62,6 +63,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
   useEffect(() => {
     if (open && resource) {
       setTitle(resource.title)
+      setSummary(resource.summary || '')
       setDescription(resource.description || '')
       setContent(resource.content || '')
       setResourceType(resource.resource_type)
@@ -83,11 +85,12 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
 
     const data: Record<string, any> = {
       title: title.trim(),
+      summary: summary.trim() || null,
       description: description.trim() || null,
       content: content.trim() || null,
       resource_type: resourceType,
       category: category || null,
-      tags,
+      tags: tags.map(sanitizeTag).filter(Boolean),
       download_url: downloadUrl.trim() || null,
       thumbnail_url: thumbnailUrl.trim() || null,
       is_climate_action: isClimateAction,
@@ -109,18 +112,6 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
     }
   }
 
-  const addTag = () => {
-    const val = tagInput.trim()
-    if (val && !tags.includes(val)) {
-      setTags([...tags, val])
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag))
-  }
-
   return (
     <Modal
       open={open}
@@ -138,12 +129,21 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
           fullWidth
         />
 
+        <Input
+          label="Summary"
+          value={summary}
+          onChange={(e) => setSummary(e.currentTarget.value)}
+          maxLength={180}
+          placeholder="One short sentence shown on cards and the homepage hero (optional)"
+          fullWidth
+        />
+
         <Textarea
           label="Description"
           value={description}
           onChange={(e) => setDescription(e.currentTarget.value)}
           rows={2}
-          placeholder="Brief summary of this resource..."
+          placeholder="A paragraph introducing this resource..."
           fullWidth
         />
 
@@ -187,35 +187,14 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
           </div>
         </div>
 
-        {/* Tags */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-ktip-sand-700">Tags</label>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-1">
-              {tags.map((tag) => (
-                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200">
-                  {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-600">
-                    <X size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.currentTarget.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
-              placeholder="Add a tag..."
-              className="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-sm"
-            />
-            <Button type="button" size="sm" variant="secondary" icon={<Plus size={14} />} onClick={addTag}>
-              Add
-            </Button>
-          </div>
-        </div>
+        <TagInput
+          label="Tags"
+          description="Topics readers can filter and search by."
+          values={tags}
+          onChange={setTags}
+          suggestions={CONTENT_TAG_SUGGESTIONS}
+          max={10}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <Input

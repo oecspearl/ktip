@@ -1,12 +1,13 @@
-import { useMemo, useRef, useState } from 'react'
+﻿import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { JitsiVideoCall } from '../../components/collaboration/JitsiVideoCall'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearchUsers, useCreateConversation, useSendMessage } from '../../hooks/useMessages'
+import { useMyConnections } from '../../hooks/useConnections'
 import { sendNotification } from '../../lib/notify'
 import { debounce, getInitials, generateAvatarColor } from '../../lib/utils'
-import { Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send, ArrowLeft, Pen, FileText, Code } from 'lucide-react'
+import { Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send, ArrowLeft, Pen, FileText, Code, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import type { Profile } from '../../types'
 
@@ -41,6 +42,17 @@ export default function VideoConferencePage() {
   const { searchUsers, loading: searchLoading } = useSearchUsers()
   const { createConversation } = useCreateConversation()
   const { sendMessage } = useSendMessage()
+  const { connections } = useMyConnections(auth.user?.id)
+
+  // Your accepted connections, offered up front so inviting the people you
+  // actually work with doesn't require typing their name.
+  const connectionProfiles = useMemo(() => {
+    const myId = auth.user?.id
+    const selectedIds = new Set(selectedUsers.map((u) => u.id))
+    return (connections || [])
+      .map((c) => (c.requester_id === myId ? c.addressee : c.requester))
+      .filter((p): p is Profile => !!p && !selectedIds.has(p.id))
+  }, [connections, auth.user?.id, selectedUsers])
 
   const displayName = () => {
     const profile = auth.profile
@@ -193,14 +205,14 @@ export default function VideoConferencePage() {
               <FileText size={14} />
               Documents
             </Link>
-            <Link to="/collaborate/code" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
+            <Link to="/collaborate/snippets" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
               <Code size={14} />
               Code
             </Link>
           </div>
 
           {/* Room Name Input */}
-          <div className="border border-gray-200 p-6 mb-6">
+          <div className="border border-ktip-sand-200 p-6 mb-6">
             <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
               Room Name
             </label>
@@ -245,11 +257,40 @@ export default function VideoConferencePage() {
           </div>
 
           {/* Invite Participants */}
-          <div className="border border-gray-200 p-6 mb-6">
+          <div className="border border-ktip-sand-200 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <UserPlus size={18} className="text-ktip-ocean-600" />
               <h2 className="text-sm font-semibold text-ktip-sand-800">Invite Participants</h2>
             </div>
+
+            {/* Connections quick-pick */}
+            {connectionProfiles.length > 0 && (
+              <div className="mb-3">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-ktip-sand-500 mb-2">
+                  <Users size={12} />
+                  My connections
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {connectionProfiles.slice(0, 12).map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => selectUser(user)}
+                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full border border-ktip-sand-200 bg-ktip-cream hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/40 text-xs font-medium text-ktip-sand-700 transition-colors"
+                    >
+                      <span
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${generateAvatarColor(
+                          user.display_name || user.id
+                        )}`}
+                      >
+                        {getInitials(user.display_name || 'U')}
+                      </span>
+                      {user.display_name || 'User'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Search Input */}
             <div className="relative">
@@ -259,7 +300,7 @@ export default function VideoConferencePage() {
               />
               <input
                 type="text"
-                placeholder="Search users to invite..."
+                placeholder="Search all members..."
                 value={inviteQuery}
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onFocus={() => {
@@ -292,8 +333,7 @@ export default function VideoConferencePage() {
                       className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-ktip-sand-50 transition-colors text-left"
                     >
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ backgroundColor: color }}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${color}`}
                       >
                         {initials}
                       </div>
@@ -331,8 +371,7 @@ export default function VideoConferencePage() {
                   return (
                     <span
                       key={user.id}
-                      className="inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium text-white"
-                      style={{ backgroundColor: color }}
+                      className={`inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium text-white ${color}`}
                     >
                       <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
                         {getInitials(user.display_name || 'U')}

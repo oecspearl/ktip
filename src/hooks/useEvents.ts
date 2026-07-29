@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
-import { escapeIlike } from '../lib/utils'
+import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import type { DetailEntry, Event } from '../types'
 
@@ -11,7 +11,14 @@ export function useEvents(filters?: {
   status?: string
   climateAction?: boolean
   dateRange?: { start: string; end: string }
+  tags?: string[]
 }) {
+  // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
+  const tags = filters?.tags?.length
+    ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
+    : undefined
+  const normalized = { ...filters, tags }
+
   const fetchEvents = async (): Promise<Event[]> => {
     let query = supabase
       .from('events')
@@ -48,12 +55,17 @@ export function useEvents(filters?: {
       query = query.eq('is_climate_action', true)
     }
 
+    // Tag filter — "any of"; AND semantics would empty the list on the second chip
+    if (tags?.length) {
+      query = query.overlaps('tags', tags)
+    }
+
     // Search filter
     if (filters?.search) {
       const sanitized = escapeIlike(filters.search)
       if (sanitized) {
         query = query.or(
-          `title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`
+          `title.ilike.%${sanitized}%,summary.ilike.%${sanitized}%,description.ilike.%${sanitized}%,tags_text.ilike.%${sanitized}%`
         )
       }
     }
@@ -67,7 +79,7 @@ export function useEvents(filters?: {
   }
 
   const query = useQuery({
-    queryKey: keys.list('events', filters),
+    queryKey: keys.list('events', normalized),
     queryFn: fetchEvents,
   })
 
@@ -105,6 +117,7 @@ export function useCreateEvent() {
     mutationFn: async (eventData: {
       title: string
       summary?: string | null
+      tags?: string[]
       description?: string
       event_type: string
       location?: string

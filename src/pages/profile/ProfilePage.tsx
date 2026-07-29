@@ -1,5 +1,5 @@
-import { useState, useMemo, lazy, Suspense } from 'react'
-import { useParams, useNavigate, Link } from 'react-router'
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -11,7 +11,7 @@ import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfi
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useUserBadges } from '../../hooks/useBadges'
-import { useMyConnections, useConnectionMutations } from '../../hooks/useConnections'
+import { useMyConnections, useConnectionMutations, useConnectionCount } from '../../hooks/useConnections'
 import { ConnectButton } from '../../components/directory/ConnectButton'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { profileUpdateSchema } from '../../lib/validation'
@@ -76,10 +76,35 @@ export default function ProfilePage() {
   const { badges } = useUserBadges(resolvedId)
   const { connections } = useMyConnections(isOwnProfile ? resolvedId : undefined)
   const { removeConnection } = useConnectionMutations()
+  // null when this viewer isn't allowed to see the count (owner's setting)
+  const { count: connectionCount } = useConnectionCount(resolvedId)
 
+  // `?tab=connections` lets the dashboard deep-link into a tab
+  const [searchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState<'progress' | 'projects' | 'events' | 'connections'>(
-    isOwnProfile ? 'progress' : 'projects'
+    () => {
+      const ownOnly = ['progress', 'connections']
+      if (
+        requestedTab === 'progress' ||
+        requestedTab === 'projects' ||
+        requestedTab === 'events' ||
+        requestedTab === 'connections'
+      ) {
+        if (!ownOnly.includes(requestedTab) || isOwnProfile) return requestedTab
+      }
+      return isOwnProfile ? 'progress' : 'projects'
+    }
   )
+  // On a hard reload the session resolves after first render, so an
+  // owner-only deep link (?tab=connections) has to be re-applied.
+  useEffect(() => {
+    if (!isOwnProfile) return
+    if (requestedTab === 'connections' || requestedTab === 'progress') {
+      setActiveTab(requestedTab)
+    }
+  }, [isOwnProfile, requestedTab])
+
   const [showEditModal, setShowEditModal] = useState(false)
 
   // Edit form state
@@ -225,6 +250,28 @@ export default function ProfilePage() {
                 <p className="flex items-center gap-1.5 text-gray-300 mt-1">
                   <Briefcase size={16} />
                   {[profile.organization, profile.industry].filter(Boolean).join(' · ')}
+                </p>
+              )}
+
+              {/* Connection count — hidden when the owner's privacy setting says so */}
+              {connectionCount !== null && (
+                <p className="flex items-center gap-1.5 text-gray-300 mt-1">
+                  <Users size={16} />
+                  <span>
+                    <span className="font-semibold text-white">{connectionCount}</span>{' '}
+                    {connectionCount === 1 ? 'connection' : 'connections'}
+                  </span>
+                  {isOwnProfile && profile.connection_count_visibility !== 'public' && (
+                    <Link
+                      to="/settings?tab=preferences"
+                      className="text-xs text-gray-400 hover:text-white underline underline-offset-2"
+                      title="Only you and the audience you chose can see this"
+                    >
+                      {profile.connection_count_visibility === 'private'
+                        ? 'Only you'
+                        : 'Connections only'}
+                    </Link>
+                  )}
                 </p>
               )}
             </div>

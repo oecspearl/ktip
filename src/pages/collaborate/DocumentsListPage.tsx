@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useDocuments, useSharedDocuments, useDeleteDocument } from '../../hooks/useDocuments'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -71,9 +71,9 @@ export default function DocumentsListPage() {
           {documents.loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="border border-gray-200 p-4 animate-pulse">
-                  <div className="h-5 w-48 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 w-32 bg-gray-100 rounded" />
+                <div key={i} className="border border-ktip-sand-200 p-4 animate-pulse">
+                  <div className="h-5 w-48 bg-ktip-sand-200 rounded mb-2" />
+                  <div className="h-4 w-32 bg-ktip-sand-100 rounded" />
                 </div>
               ))}
             </div>
@@ -83,7 +83,7 @@ export default function DocumentsListPage() {
                 <Link
                   key={doc.id}
                   to={`/collaborate/document/${doc.id}`}
-                  className="flex items-center justify-between border border-gray-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
+                  className="flex items-center justify-between border border-ktip-sand-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
                 >
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-700 transition-colors truncate">
@@ -106,8 +106,8 @@ export default function DocumentsListPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText size={32} className="text-gray-400" />
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileText size={32} className="text-ktip-sand-400" />
               </div>
               <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1">No documents yet</h3>
               <p className="text-sm text-ktip-sand-500 mb-4">
@@ -136,7 +136,7 @@ export default function DocumentsListPage() {
                   <Link
                     key={doc.id}
                     to={`/collaborate/document/${doc.id}`}
-                    className="flex items-center justify-between border border-gray-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
+                    className="flex items-center justify-between border border-ktip-sand-200 p-4 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/30 transition-colors group"
                   >
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-ktip-sand-900 group-hover:text-ktip-ocean-700 transition-colors truncate">
