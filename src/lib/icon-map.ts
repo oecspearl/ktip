@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Code2,
   DollarSign,
+  DoorOpen,
   FileEdit,
   FilePlus,
   FileText,
@@ -20,14 +21,18 @@ import {
   FolderKanban,
   Handshake,
   HelpCircle,
+  Gavel,
   Home,
   Inbox,
   KeyRound,
+  Landmark,
   LayoutDashboard,
   Leaf,
+  LifeBuoy,
   LogIn,
   LogOut,
   Mail,
+  Map,
   MessageCircle,
   MessageCircleQuestion,
   MessageSquare,
@@ -37,6 +42,7 @@ import {
   Plug,
   Plus,
   Presentation,
+  Rocket,
   Search,
   Send,
   Settings,
@@ -44,12 +50,15 @@ import {
   Shield,
   ShieldCheck,
   Sparkles,
+  Store,
   Trash2,
   TrendingUp,
+  Trophy,
   User,
   UserPlus,
   Users,
   Video,
+  Wrench,
 } from 'lucide-react'
 
 /**
@@ -57,7 +66,9 @@ import {
  * `site-map.ts` must stay free of React imports — the edge function imports it.
  * This is where names are resolved back to components.
  *
- * Shared by the navbar search panel and the KTIP Assistant's destination chips.
+ * Shared by the navbar search panel and the KTIP Assistant's destination chips,
+ * and by anything else that stores an icon as data — venue room kinds
+ * (VENUE_ROOM_KIND_ICONS in constants.ts) resolve through here too.
  */
 
 export type IconProps = { size?: number; className?: string }
@@ -76,6 +87,7 @@ export const ICONS: Record<string, ComponentType<IconProps>> = {
   ClipboardList,
   Code2,
   DollarSign,
+  DoorOpen,
   FileEdit,
   FilePlus,
   FileText,
@@ -83,14 +95,18 @@ export const ICONS: Record<string, ComponentType<IconProps>> = {
   FolderKanban,
   Handshake,
   HelpCircle,
+  Gavel,
   Home,
   Inbox,
   KeyRound,
+  Landmark,
   LayoutDashboard,
   Leaf,
+  LifeBuoy,
   LogIn,
   LogOut,
   Mail,
+  Map,
   MessageCircle,
   MessageCircleQuestion,
   MessageSquare,
@@ -100,6 +116,7 @@ export const ICONS: Record<string, ComponentType<IconProps>> = {
   Plug,
   Plus,
   Presentation,
+  Rocket,
   Search,
   Send,
   Settings,
@@ -107,12 +124,15 @@ export const ICONS: Record<string, ComponentType<IconProps>> = {
   Shield,
   ShieldCheck,
   Sparkles,
+  Store,
   Trash2,
   TrendingUp,
+  Trophy,
   User,
   UserPlus,
   Users,
   Video,
+  Wrench,
 }
 
 /** Resolve an icon name, falling back to a generic search glass. */

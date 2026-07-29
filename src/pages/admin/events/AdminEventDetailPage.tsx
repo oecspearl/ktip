@@ -25,6 +25,7 @@ import {
   Clock,
   Mic,
   Target,
+  Map,
 } from 'lucide-react'
 import {
   EVENT_TYPE_LABELS,
@@ -45,12 +46,14 @@ import AdminEventPageBuilderTab from './AdminEventPageBuilderTab'
 import AdminEventScheduleTab from './AdminEventScheduleTab'
 import AdminEventSpeakersTab from './AdminEventSpeakersTab'
 import AdminEventChallengeTab from './AdminEventChallengeTab'
+import AdminEventVenueTab from './AdminEventVenueTab'
 
 type TabId =
   | 'overview'
   | 'registrations'
   | 'form'
   | 'challenge'
+  | 'venue'
   | 'pages'
   | 'schedule'
   | 'speakers'
@@ -88,6 +91,7 @@ export default function AdminEventDetailPage() {
     { id: 'registrations', label: 'Registrations', icon: ClipboardList },
     { id: 'form', label: 'Reg. Form', icon: FormInput },
     { id: 'challenge', label: 'Challenge', icon: Target },
+    { id: 'venue', label: 'Venue', icon: Map },
     { id: 'pages', label: 'Pages', icon: LayoutList },
     { id: 'schedule', label: 'Schedule', icon: Clock },
     { id: 'speakers', label: 'Speakers', icon: Mic },
@@ -278,6 +282,17 @@ export default function AdminEventDetailPage() {
       {activeTab === 'form' && (
         <div className="animate-tab-enter">
           <AdminEventFormBuilderTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'venue' && (
+        <div className="animate-tab-enter">
+          <AdminEventVenueTab
+            eventId={event.id}
+            hasVenue={event.has_venue ?? false}
+            venueFloorplanUrl={event.venue_floorplan_url ?? null}
+            onEventChange={refetch}
+          />
         </div>
       )}
 

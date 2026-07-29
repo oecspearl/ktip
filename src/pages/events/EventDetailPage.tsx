@@ -32,6 +32,7 @@ import {
   Megaphone,
   FileText,
   CalendarX,
+  Map as MapIcon,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import {
@@ -374,6 +375,27 @@ export default function EventDetailPage() {
                 Share
               </button>
             </div>
+
+            {/*
+              Venue door. Above the brief on purpose: during a live event the
+              one thing an attendee is looking for is the way in.
+            */}
+            {event.has_venue && (
+              <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50 p-5 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-lg font-bold text-ktip-ocean-800">
+                    This event has a live virtual venue
+                  </h2>
+                  <p className="mt-1 text-sm text-ktip-ocean-700">
+                    Rooms, open audio and everyone who is online right now. Registered attendees can
+                    walk straight in.
+                  </p>
+                </div>
+                <Link to={`/events/${event.id}/venue`} className="shrink-0">
+                  <Button icon={<MapIcon size={16} />}>Enter the venue</Button>
+                </Link>
+              </div>
+            )}
 
             {/* Challenge brief — only once the organizer has switched it on */}
             {event.has_challenge && eventCriteria && eventCriteria.length > 0 && (
