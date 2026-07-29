@@ -24,5 +24,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  /* Server-side tests — typechecked by tsconfig.node.json instead. */
+  "exclude": ["src/lib/__tests__"]
 }

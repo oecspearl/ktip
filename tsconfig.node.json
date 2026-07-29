@@ -22,5 +22,19 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  /*
+   * Everything that runs on a server, not in the browser: the Vite/Vitest
+   * configs, the Vercel functions under api/, and the tests that import them.
+   * Those tests have to live here rather than with the app project — they pull
+   * in api/_lib, which uses process.env, and tsconfig.app.json deliberately has
+   * no node types.
+   */
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    "api/_lib",
+    "api/auth",
+    "api/vc",
+    "src/lib/__tests__"
+  ]
 }

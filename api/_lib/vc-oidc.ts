@@ -75,8 +75,13 @@ function keySet(url: string) {
 }
 
 export class VcTokenError extends Error {
-  constructor(public code: string, message?: string) {
+  // Assigned in the body rather than declared as a parameter property: those
+  // are not type-erasable, and this project builds with erasableSyntaxOnly.
+  code: string
+
+  constructor(code: string, message?: string) {
     super(message ?? code)
+    this.code = code
     this.name = 'VcTokenError'
   }
 }
@@ -163,7 +168,9 @@ const CLAIM_ALIASES = {
   institution: ['institution', 'school', 'organization', 'organisation', 'org', 'campus'],
   program: ['program', 'programme', 'course_of_study', 'courseOfStudy', 'major', 'faculty'],
   gradeLevel: ['grade_level', 'gradeLevel', 'grade', 'year_of_study', 'level'],
-  role: ['role', 'user_type', 'userType', 'account_type', 'accountType'],
+  // `roles` before `role`: a provider that sends both is describing the same
+  // thing, and the array is the richer one. pick() takes the first element.
+  role: ['roles', 'role', 'user_type', 'userType', 'account_type', 'accountType'],
   birthdate: ['birthdate', 'birth_date', 'birthDate', 'dob', 'date_of_birth'],
   website: ['website', 'profile', 'url', 'homepage'],
 } as const
@@ -198,6 +205,19 @@ function pick(payload: Record<string, unknown>, keys: readonly string[]): string
     }
   }
   return null
+}
+
+/**
+ * Last-resort name from an email local part: "ama.charles" -> "Ama Charles".
+ * Only ever used when the token carried no name at all, and the user can
+ * correct it in the CV editor.
+ */
+function titleCase(local: string): string {
+  return local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
 /** Registered JWT claims carry no profile information and only bloat the row. */
@@ -244,7 +264,9 @@ export function mapClaims(payload: JWTPayload): VcClaims {
     email,
     // Falling back to the local part gives a usable display name rather than an
     // empty header on the CV — profiles.display_name has the same fallback.
-    name: pick(p, CLAIM_ALIASES.name) || composed || email.split('@')[0] || 'Learner',
+    // Capitalised because the email was lowercased above, and "ama" set in 22pt
+    // at the top of a printed CV reads as a defect.
+    name: pick(p, CLAIM_ALIASES.name) || composed || titleCase(email.split('@')[0]) || 'Learner',
     picture: pick(p, CLAIM_ALIASES.picture),
     phone: pick(p, CLAIM_ALIASES.phone) ?? '',
     country,
