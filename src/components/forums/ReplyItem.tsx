@@ -1,4 +1,5 @@
 import { Trash2 } from 'lucide-react'
+import { ReportButton } from '../moderation/ReportButton'
 import type { ForumReply } from '../../types'
 import {
   formatRelativeTime,
@@ -36,15 +37,24 @@ export function ReplyItem({ reply, isAuthor, onDelete }: ReplyItemProps) {
             {reply.content}
           </p>
         </div>
-        {isAuthor && (
-          <button
-            onClick={onDelete}
-            className="p-1 text-ktip-sand-400 hover:text-red-500 transition-colors shrink-0"
-            title="Delete reply"
-          >
-            <Trash2 size={16} />
-          </button>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          <ReportButton
+            targetType="forum_reply"
+            targetId={reply.id}
+            targetAuthorId={reply.author_id}
+            contentSnapshot={reply.content}
+            targetLabel="this reply"
+          />
+          {isAuthor && (
+            <button
+              onClick={onDelete}
+              className="p-1 text-ktip-sand-400 hover:text-red-500 transition-colors shrink-0"
+              title="Delete reply"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

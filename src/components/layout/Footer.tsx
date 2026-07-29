@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { Github, Twitter, Linkedin, Mail } from 'lucide-react'
+import { Instagram, Linkedin, Facebook, Youtube } from 'lucide-react'
 import { APP_NAME, APP_FULL_NAME } from '../../lib/constants'
 import { FlipWatermark } from '../ui/FlipWatermark'
 
@@ -44,10 +44,10 @@ const footerColumns: FooterColumn[] = [
 ]
 
 const socialLinks = [
-  { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/ktip' },
-  { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/ktip' },
-  { name: 'GitHub', icon: Github, href: 'https://github.com/ktip' },
-  { name: 'Email', icon: Mail, href: 'mailto:support@ktip.org' },
+  { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/_oecscommission/' },
+  { name: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/company/organisation-of-eastern-caribbean-states/' },
+  { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/OECSCommission' },
+  { name: 'YouTube', icon: Youtube, href: 'https://www.youtube.com/oecstv' },
 ]
 
 export function Footer() {

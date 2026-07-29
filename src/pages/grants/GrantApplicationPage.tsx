@@ -12,6 +12,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { SponsorNominationCard } from '../../components/grants/SponsorNominationCard'
 import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
 import { truncate } from '../../lib/utils'
 import {
@@ -41,6 +42,9 @@ export default function GrantApplicationPage() {
   const [applicationData, setApplicationData] = useState<Record<string, any>>({})
   const [applicationId, setApplicationId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Students draft freely but cannot leave draft without an accepted sponsor.
+  const isStudent = !!auth.profile?.roles?.includes('student')
 
   const steps = GRANT_APPLICATION_STEPS
   const stepNames = steps.map((s) => s.title)
@@ -253,6 +257,17 @@ export default function GrantApplicationPage() {
               grantTitle={grant.title}
               applicationTitle={getTitle()}
             />
+
+            {isReviewStep && isStudent && (
+              <div className="mt-8">
+                <SponsorNominationCard
+                  applicationId={applicationId ?? undefined}
+                  applicantId={auth.user!.id}
+                  sponsorId={(existingApplication as any)?.sponsor_id ?? null}
+                  sponsorApprovedAt={(existingApplication as any)?.sponsor_approved_at ?? null}
+                />
+              </div>
+            )}
 
             {isReviewStep && (
               <div className="mt-8">

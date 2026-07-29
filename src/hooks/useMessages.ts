@@ -163,6 +163,21 @@ export function useCreateConversation() {
 
       if (existingId) return existingId as string
 
+      // Safeguarding: a 1-to-1 thread may never contain a school-verified
+      // student. RLS refuses it either way (064), but the raw policy violation
+      // reads as a generic permission error, so name the actual reason here.
+      const { data: parties } = await (supabase as any)
+        .from('profiles')
+        .select('id, roles')
+        .in('id', [currentUserId, otherUserId])
+
+      const studentInvolved = (parties || []).some((p: any) => (p.roles || []).includes('student'))
+      if (studentInvolved) {
+        throw new Error(
+          'Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.'
+        )
+      }
+
       // Create new conversation with client-generated ID
       // (avoids .select() which fails RLS before participants are added)
       const convId = crypto.randomUUID()

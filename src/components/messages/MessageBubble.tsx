@@ -1,5 +1,6 @@
 import type { Message } from '../../types'
 import { formatRelativeTime, getInitials, generateAvatarColor } from '../../lib/utils'
+import { ReportButton } from '../moderation/ReportButton'
 
 interface MessageBubbleProps {
   message: Message
@@ -21,10 +22,22 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           </div>
         )}
 
-        <div>
+        <div className="group">
           {/* Sender name for other users */}
           {!isOwn && (
-            <p className="text-xs text-ktip-sand-500 mb-1 ml-1">{senderName}</p>
+            <div className="flex items-center gap-1 mb-1 ml-1">
+              <p className="text-xs text-ktip-sand-500">{senderName}</p>
+              <span className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                <ReportButton
+                  targetType="message"
+                  targetId={message.id}
+                  targetAuthorId={message.sender_id}
+                  contentSnapshot={message.content}
+                  targetLabel="this message"
+                  className="!p-0.5"
+                />
+              </span>
+            </div>
           )}
 
           {/* Message bubble */}

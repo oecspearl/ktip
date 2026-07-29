@@ -41,9 +41,20 @@ export default function GrantDetailPage() {
   const checking = !!auth.user && applicationChecking
 
   const isExpired = !!(grant && grant.deadline && isPast(new Date(grant.deadline)))
-  const canApply = !!(grant && grant.is_active && !isExpired && !hasApplied)
+  // Students hold grant:view but never grant:apply — they draft an application
+  // and a faculty sponsor submits it. The DB enforces this; this just keeps the
+  // button honest about what will happen.
+  const isStudent = !!auth.profile?.roles?.includes('student')
+  const canSubmit = auth.can('grant:apply')
+  const canApply = !!(
+    grant &&
+    grant.is_active &&
+    !isExpired &&
+    !hasApplied &&
+    (canSubmit || isStudent)
+  )
   // Only OECS admins can write to a grant, so only they see field proposals
-  const isOecs = !!auth.profile?.roles?.includes('oecs')
+  const isOecs = auth.can('org:manage')
 
   // Load submitted-application count
   useEffect(() => {
@@ -280,13 +291,27 @@ export default function GrantDetailPage() {
                   )}
 
                   {!grant.application_url && canApply && (
-                    <Button
-                      fullWidth
-                      onClick={() => navigate(`/grants/${grant.id}/apply`)}
-                      icon={<FileText size={20} />}
-                    >
-                      {hasDraft ? 'Continue Application' : 'Apply Now'}
-                    </Button>
+                    <>
+                      <Button
+                        fullWidth
+                        onClick={() => navigate(`/grants/${grant.id}/apply`)}
+                        icon={<FileText size={20} />}
+                      >
+                        {hasDraft ? 'Continue Application' : isStudent ? 'Start Application' : 'Apply Now'}
+                      </Button>
+                      {isStudent && (
+                        <p className="mt-2 text-xs text-ktip-sand-600">
+                          Student applications must be sponsored. Nominate a faculty member in the
+                          application — they accept it, and then it can be submitted.
+                        </p>
+                      )}
+                    </>
+                  )}
+
+                  {!grant.application_url && !canApply && !hasApplied && !isExpired && auth.user && (
+                    <p className="text-sm text-ktip-sand-600">
+                      Your account does not have permission to apply for grants.
+                    </p>
                   )}
                 </>
               )}

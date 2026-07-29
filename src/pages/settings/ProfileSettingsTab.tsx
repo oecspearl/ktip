@@ -13,6 +13,7 @@ import {
   Save,
   X,
   Plus,
+  ShieldCheck,
 } from 'lucide-react'
 import {
   CARIBBEAN_COUNTRIES,
@@ -26,9 +27,15 @@ import { getInitials, generateAvatarColor } from '../../lib/utils'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
+import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 
 const IMAGE_ACCEPT = ['image/*'] as const
+
+/** Roles a user may grant themselves; everything else needs a reviewer. */
+const SELF_ASSIGNABLE_SLUGS = new Set<string>(
+  ROLE_DEFINITIONS.filter((r) => r.selfAssignable).map((r) => r.slug)
+)
 
 export function ProfileSettingsTab() {
   const auth = useAuth()
@@ -66,6 +73,8 @@ export function ProfileSettingsTab() {
   }, [auth.profile, initialized])
 
   const displayNameValue = displayName || 'User'
+
+  const verifiedRoles = (auth.profile?.roles || []).filter((r) => !SELF_ASSIGNABLE_SLUGS.has(r))
 
   const toggleRole = (role: UserRole) => {
     if (roles.includes(role)) {
@@ -154,7 +163,14 @@ export function ProfileSettingsTab() {
         country: country || null,
         organization: organization || null,
         industry: industry || null,
-        roles,
+        // Only self-assignable roles are submitted. Verification-gated roles
+        // (student, faculty, sme, …) are granted by an institution, a chamber
+        // or an admin, and the profiles guard trigger rejects a self-grant —
+        // sending the full array here would make every save fail.
+        roles: [
+          ...(auth.profile?.roles || []).filter((r) => !SELF_ASSIGNABLE_SLUGS.has(r)),
+          ...roles.filter((r) => SELF_ASSIGNABLE_SLUGS.has(r)),
+        ],
         skills,
         interests,
         open_to: openTo,
@@ -269,7 +285,7 @@ export function ProfileSettingsTab() {
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Roles</h2>
         <p className="text-sm text-ktip-sand-600 mb-4">Select the roles that describe you. You can choose multiple.</p>
         <div className="flex flex-wrap gap-2">
-          {SELECTABLE_ROLES.map((role) => {
+          {SELECTABLE_ROLES.filter((role) => SELF_ASSIGNABLE_SLUGS.has(role.value)).map((role) => {
             const isSelected = roles.includes(role.value)
             return (
               <button
@@ -288,6 +304,26 @@ export function ProfileSettingsTab() {
             )
           })}
         </div>
+
+        {verifiedRoles.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-ktip-sand-100">
+            <p className="text-sm text-ktip-sand-600 mb-2">
+              Granted by verification. These can only be changed by your institution, your Chamber
+              of Commerce, or an OECS administrator.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {verifiedRoles.map((slug) => (
+                <span
+                  key={slug}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-ktip-tropical-200 bg-ktip-tropical-50 text-sm font-medium text-ktip-tropical-800"
+                >
+                  <ShieldCheck size={14} />
+                  {ROLE_BY_SLUG[slug]?.label ?? slug}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Skills */}

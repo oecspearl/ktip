@@ -1,6 +1,59 @@
 // Custom types for KTIP application
 
-export type UserRole = 'student' | 'mentor' | 'investor' | 'entrepreneur' | 'private_sector' | 'faculty' | 'oecs'
+/**
+ * Every platform role. The first seven predate the tiered hierarchy and are
+ * still stored on live profiles — `oecs` in particular resolves to
+ * `super_admin` via ROLE_ALIASES rather than being renamed, so the existing
+ * `'oecs' = ANY(roles)` RLS clauses keep working. See src/lib/permissions.ts.
+ */
+export type RoleSlug =
+  // legacy — still assigned
+  | 'student'
+  | 'mentor'
+  | 'investor'
+  | 'entrepreneur'
+  | 'private_sector'
+  | 'faculty'
+  | 'oecs'
+  // tier 1 — admin
+  | 'super_admin'
+  | 'safety_admin'
+  // tier 2 — organization
+  | 'sme'
+  | 'educational_partner'
+  | 'chamber_admin'
+  // tier 3 — individual
+  | 'researcher'
+
+/** Historical name for RoleSlug. Kept so existing imports keep compiling. */
+export type UserRole = RoleSlug
+
+export type RoleTier = 'admin' | 'organization' | 'individual'
+
+export type PermissionKey =
+  | 'org:manage'
+  | 'members:manage'
+  | 'role:manage'
+  | 'audit:view'
+  | 'moderation:view'
+  | 'moderation:action'
+  | 'moderation:escalate'
+  | 'grant:view'
+  | 'grant:apply'
+  | 'grant:sponsor'
+  | 'grant:post'
+  | 'grant:manage_funds'
+  | 'project:create'
+  | 'project:manage'
+  | 'forum:post'
+  | 'forum:comment'
+  | 'mentorship:offer'
+  | 'dm:initiate'
+  | 'dm:receive'
+  | 'dm:supervise'
+  | 'sme:verify'
+  | 'institution:verify'
+  | 'institution:approve_students'
 
 export type ProjectPhase = 'concept' | 'prototype' | 'funding' | 'launch'
 
@@ -63,6 +116,11 @@ export interface Profile {
   organization: string | null
   industry: string | null
   roles: UserRole[]
+  /** Operating context for multi-role users. Null means "all roles at once". */
+  active_role: RoleSlug | null
+  is_suspended: boolean
+  suspended_until: string | null
+  suspension_reason: string | null
   skills: string[]
   interests: string[]
   open_to: string[]
@@ -898,4 +956,223 @@ export interface Grievance {
   reporter?: Profile
   reported_user?: Profile
   resolver?: Profile
+}
+
+// ============================================================
+// RBAC (migration 063)
+// ============================================================
+
+export interface RoleDefinitionRow {
+  slug: RoleSlug
+  label: string
+  tier: RoleTier
+  description: string | null
+  is_system: boolean
+  is_self_assignable: boolean
+  requires_verification: boolean
+  alias_of: RoleSlug | null
+  sort_order: number
+}
+
+export interface PermissionDefinitionRow {
+  key: PermissionKey
+  label: string
+  description: string | null
+  category: string
+  is_safeguard: boolean
+  sort_order: number
+}
+
+export interface RolePermissionRow {
+  role_slug: RoleSlug
+  permission_key: PermissionKey
+  allowed: boolean
+  updated_by: string | null
+  updated_at: string
+}
+
+export interface RolePermissionEvent {
+  id: string
+  role_slug: RoleSlug
+  permission_key: PermissionKey
+  from_allowed: boolean | null
+  to_allowed: boolean
+  actor_id: string | null
+  created_at: string
+  actor?: Profile
+}
+
+// ============================================================
+// Institutions & student safeguarding (migration 064)
+// ============================================================
+
+export type InstitutionKind = 'school' | 'university' | 'tvet' | 'chamber'
+export type InstitutionStatus = 'pending' | 'verified' | 'rejected'
+export type InstitutionMemberRole = 'admin' | 'educator' | 'student'
+export type InstitutionMemberStatus = 'pending' | 'approved' | 'rejected'
+
+export interface Institution {
+  id: string
+  slug: string
+  name: string
+  kind: InstitutionKind
+  country_code: string
+  /** Email domains this institution owns, e.g. ['dsc.edu.dm']. */
+  email_domains: string[]
+  status: InstitutionStatus
+  contact_email: string | null
+  website_url: string | null
+  verified_by: string | null
+  verified_at: string | null
+  review_note: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+  country?: Country
+}
+
+export interface InstitutionMember {
+  id: string
+  institution_id: string
+  user_id: string
+  role: InstitutionMemberRole
+  status: InstitutionMemberStatus
+  approved_by: string | null
+  approved_at: string | null
+  created_at: string
+  user?: Profile
+  institution?: Institution
+}
+
+/**
+ * Minor-safety record. Only the birth *year* is stored — enough to decide
+ * minor status for COPPA/GDPR handling without holding a full date of birth.
+ */
+export interface StudentSafeguarding {
+  user_id: string
+  institution_id: string | null
+  verified_domain: string | null
+  sponsor_user_id: string | null
+  birth_year: number | null
+  is_minor: boolean
+  guardian_consent_at: string | null
+  guardian_consent_ref: string | null
+  created_at: string
+  updated_at: string
+  institution?: Institution
+  sponsor?: Profile
+}
+
+// ============================================================
+// Moderation (migration 065)
+// ============================================================
+
+export type ContentStatus = 'active' | 'quarantined' | 'removed'
+
+export type ModerationTargetType =
+  | 'forum_post'
+  | 'forum_reply'
+  | 'project'
+  | 'project_comment'
+  | 'message'
+  | 'profile'
+  | 'grant'
+
+export type ReportCategory =
+  | 'hate_harassment'
+  | 'bullying'
+  | 'nsfw'
+  | 'spam_scam'
+  | 'grooming_risk'
+  | 'pii_leak'
+
+export type ReportStatus = 'open' | 'reviewing' | 'actioned' | 'dismissed'
+
+export type ModerationSeverity = 'low' | 'medium' | 'high'
+
+export type ModerationAction =
+  | 'flagged'
+  | 'warned'
+  | 'quarantined'
+  | 'restored'
+  | 'removed'
+  | 'suspended'
+  | 'escalated'
+
+export interface ContentReport {
+  id: string
+  reporter_id: string
+  target_type: ModerationTargetType
+  target_id: string
+  target_author_id: string | null
+  category: ReportCategory
+  detail: string | null
+  /** Frozen at report time so triage survives an edit or delete. */
+  content_snapshot: string | null
+  status: ReportStatus
+  severity: ModerationSeverity | null
+  admin_notes: string | null
+  resolved_by: string | null
+  resolved_at: string | null
+  created_at: string
+  updated_at: string
+  reporter?: Profile
+  target_author?: Profile
+}
+
+export interface ModerationTerm {
+  id: string
+  pattern: string
+  kind: 'term' | 'regex'
+  severity: ModerationSeverity
+  category: ReportCategory | null
+  /** Scopes a regional slur to one country; null applies everywhere. */
+  country_code: string | null
+  is_active: boolean
+  note: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ModerationLogEntry {
+  id: string
+  actor_kind: 'system' | 'admin' | 'reporter'
+  actor_id: string | null
+  user_id: string | null
+  target_type: ModerationTargetType | null
+  target_id: string | null
+  severity: ModerationSeverity | null
+  action: ModerationAction
+  detail: Record<string, unknown> | null
+  created_at: string
+  actor?: Profile
+  user?: Profile
+}
+
+export interface ModerationSettings {
+  id: number
+  report_threshold: number
+  report_window_minutes: number
+  auto_quarantine_enabled: boolean
+  low_action: ModerationAction
+  medium_action: ModerationAction
+  high_action: ModerationAction
+  updated_by: string | null
+  updated_at: string
+}
+
+/** One row of the moderation queue — a report or an automated flag. */
+export interface ModerationQueueItem {
+  source: 'report' | 'automated'
+  id: string
+  target_type: ModerationTargetType
+  target_id: string
+  target_author_id: string | null
+  category: ReportCategory | null
+  severity: ModerationSeverity | null
+  status: string
+  report_count: number
+  content_snapshot: string | null
+  created_at: string
 }

@@ -16,6 +16,7 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { forumReplySchema } from '../../lib/validation'
 import { truncate } from '../../lib/utils'
 import { PageHero } from '../../components/layout/PageHero'
+import { ReportButton } from '../../components/moderation/ReportButton'
 import {
   Trash2,
   Pin,
@@ -145,7 +146,16 @@ export default function PostDetailPage() {
               <Trash2 size={14} />
               Delete
             </button>
-          ) : undefined
+          ) : (
+            <ReportButton
+              targetType="forum_post"
+              targetId={post.id}
+              targetAuthorId={post.author_id}
+              contentSnapshot={post.content}
+              targetLabel="this post"
+              className="text-white/70 hover:text-red-300"
+            />
+          )
         }
       >
         {post.is_pinned && (

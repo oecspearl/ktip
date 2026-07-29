@@ -222,6 +222,65 @@ export function useDraftApplication(grantId?: string, userId?: string) {
   return { application: query.data, loading: query.isPending, refetch: query.refetch }
 }
 
+/** Applications naming the signed-in user as sponsor. RLS scopes this. */
+export function useSponsorshipRequests(userId: string | undefined) {
+  const query = useQuery({
+    queryKey: keys.sub('grants', 'sponsorships', userId),
+    queryFn: async (): Promise<any[]> => {
+      const { data, error } = await (supabase as any)
+        .from('grant_applications')
+        .select('*, grant:grants!grant_id(*), applicant:profiles!user_id(*)')
+        .eq('sponsor_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return (data as any[]) || []
+    },
+    enabled: !!userId,
+  })
+
+  return {
+    requests: query.data,
+    loading: query.isPending,
+    error: query.error,
+    refetch: query.refetch,
+  }
+}
+
+/** The sponsor's half of the handshake. Only the named sponsor may call it. */
+export function useReviewSponsorship() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (params: { applicationId: string; accept: boolean; note?: string }) => {
+      const { data, error } = await (supabase as any).rpc('review_grant_sponsorship', {
+        p_application: params.applicationId,
+        p_accept: params.accept,
+        p_note: params.note ?? null,
+      })
+
+      if (error) throw error
+      if (data && data.ok === false) {
+        throw new Error(
+          data.reason === 'forbidden'
+            ? 'You are not permitted to sponsor this application.'
+            : 'Application not found.'
+        )
+      }
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('grants') })
+    },
+  })
+
+  return {
+    reviewSponsorship: mutation.mutateAsync,
+    loading: mutation.isPending,
+    error: mutation.error,
+  }
+}
+
 export function useApplyForGrant() {
   const queryClient = useQueryClient()
 
@@ -277,8 +336,27 @@ export function useApplyForGrant() {
     onSuccess: (_data, variables) => invalidate(variables.user_id),
   })
 
+  /**
+   * Nominate a faculty sponsor. Students cannot submit unaided — the 064
+   * trigger rejects a non-draft status without an accepted sponsor — so this
+   * is the first half of that handshake; review_grant_sponsorship() is the
+   * second, and only the sponsor can call it.
+   */
+  const nominateMutation = useMutation({
+    mutationFn: async (params: { id: string; user_id: string; sponsor_id: string | null }) => {
+      const { error } = await (supabase as any)
+        .from('grant_applications')
+        .update({ sponsor_id: params.sponsor_id, sponsor_approved_at: null })
+        .eq('id', params.id)
+
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => invalidate(variables.user_id),
+  })
+
   const saveDraft = saveMutation.mutateAsync
   const submitApplication = submitMutation.mutateAsync
+  const nominateSponsor = nominateMutation.mutateAsync
 
   const getApplicationCount = async (grantId: string): Promise<number> => {
     const { count, error } = await supabase
@@ -294,8 +372,9 @@ export function useApplyForGrant() {
   return {
     saveDraft,
     submitApplication,
+    nominateSponsor,
     getApplicationCount,
-    loading: saveMutation.isPending || submitMutation.isPending,
-    error: saveMutation.error || submitMutation.error,
+    loading: saveMutation.isPending || submitMutation.isPending || nominateMutation.isPending,
+    error: saveMutation.error || submitMutation.error || nominateMutation.error,
   }
 }

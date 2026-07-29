@@ -1,6 +1,6 @@
 -- ============================================================
 -- OECS KTIP - COMBINED MIGRATIONS
--- Generated from supabase/migrations/ (62 files)
+-- Generated from supabase/migrations/ (65 files)
 -- Paste this whole file into the Supabase SQL Editor and Run.
 --
 -- Safe to re-run: CREATE TABLE/INDEX/EXTENSION use IF NOT EXISTS,
@@ -7390,5 +7390,2321 @@ CREATE TRIGGER touch_event_criteria_trigger
   BEFORE UPDATE ON event_criteria
   FOR EACH ROW
   EXECUTE FUNCTION touch_event_criteria();
+
+NOTIFY pgrst, 'reload schema';
+
+
+-- ============================================================
+-- 063_rbac_permissions.sql
+-- ============================================================
+
+-- Migration 063: Role-based access control
+--
+-- Until now the entire authorization model was one boolean: 'oecs' = ANY(roles).
+-- That expression appears inline in ~60 policies, so it could not be changed
+-- without touching every one of them, and it could not express anything other
+-- than "admin / not admin" — there was no way to say "students may read grants
+-- but not apply for them".
+--
+-- This migration introduces a permission layer *above* profiles.roles without
+-- replacing it. profiles.roles stays the identity source of truth; the new
+-- role_permissions table maps roles to permission keys, and has_permission()
+-- is the single predicate new policies call. The legacy 'oecs' slug is aliased
+-- onto 'super_admin' rather than renamed, so every existing policy keeps
+-- working untouched.
+--
+-- Two things are deliberately NOT toggleable:
+--   1. Child-safety permissions. has_permission() denies them to students
+--      before it reads the matrix, so neither the admin UI nor a direct UPDATE
+--      on role_permissions can grant a student unmonitored messaging or the
+--      ability to apply for funding independently.
+--   2. profiles.roles itself. Until now "Users can update their own profile"
+--      had a USING clause and no WITH CHECK, and the settings form already
+--      submitted the roles column — every user could make themselves an admin.
+--      That is closed here.
+--
+-- Idempotent — safe to re-run. Re-running does NOT clobber admin edits to the
+-- matrix; only reset_role_permissions() restores defaults.
+
+-- ============================================================
+-- 1. Role catalog
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS role_definitions (
+  slug TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
+  tier TEXT NOT NULL CHECK (tier IN ('admin', 'organization', 'individual')),
+  description TEXT,
+  -- System roles cannot be deleted from the admin UI.
+  is_system BOOLEAN NOT NULL DEFAULT TRUE,
+  -- May a user add this to themselves during onboarding?
+  is_self_assignable BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Granted only after institution / chamber / admin review.
+  requires_verification BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Legacy slug that resolves to another role. Self-reference, so no FK.
+  alias_of TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 100,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO role_definitions (slug, label, tier, description, is_self_assignable, requires_verification, alias_of, sort_order) VALUES
+  ('super_admin', 'Super Admin', 'admin', 'OECS Secretariat. System-wide management, global policy, audit logs, suspensions.', FALSE, TRUE, NULL, 10),
+  ('safety_admin', 'Safety Admin', 'admin', 'Content moderator. Owns flagged-content queues, automated moderation logs and escalations.', FALSE, TRUE, NULL, 20),
+  ('oecs', 'OECS Admin (legacy)', 'admin', 'Legacy admin slug. Resolves to Super Admin.', FALSE, TRUE, 'super_admin', 25),
+  ('investor', 'Investor / Funding Agency', 'organization', 'Posts grant opportunities, views vetted projects, connects with regional innovators.', TRUE, FALSE, NULL, 30),
+  ('sme', 'Verified SME', 'organization', 'Business account vetted by its National Chamber of Commerce.', FALSE, TRUE, NULL, 40),
+  ('private_sector', 'Private Sector', 'organization', 'Unverified business account. Gains SME capabilities once a Chamber verifies it.', TRUE, FALSE, NULL, 50),
+  ('educational_partner', 'Educational Partner', 'organization', 'School or university. Manages domain verification, approves student accounts, oversees submissions.', FALSE, TRUE, NULL, 60),
+  ('chamber_admin', 'Chamber of Commerce', 'organization', 'Country-level vetting authority that verifies and onboards local SMEs.', FALSE, TRUE, NULL, 70),
+  ('entrepreneur', 'Entrepreneur', 'individual', 'Builds and launches innovations, applies for grants.', TRUE, FALSE, NULL, 80),
+  ('faculty', 'Faculty', 'individual', 'Academic staff. May sponsor student grant applications and supervise student channels.', FALSE, TRUE, NULL, 90),
+  ('researcher', 'Researcher', 'individual', 'Conducts and publishes research, collaborates on projects.', TRUE, FALSE, NULL, 100),
+  ('mentor', 'Mentor', 'individual', 'Guides and supports innovators.', TRUE, FALSE, NULL, 110),
+  ('student', 'Student (school-verified)', 'individual', 'Verified via an approved institutional email domain. Read-only on grants, no unmonitored direct messaging.', FALSE, TRUE, NULL, 120)
+ON CONFLICT (slug) DO UPDATE SET
+  label = EXCLUDED.label,
+  tier = EXCLUDED.tier,
+  description = EXCLUDED.description,
+  is_self_assignable = EXCLUDED.is_self_assignable,
+  requires_verification = EXCLUDED.requires_verification,
+  alias_of = EXCLUDED.alias_of,
+  sort_order = EXCLUDED.sort_order;
+
+-- ============================================================
+-- 2. Permission catalog
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS permission_definitions (
+  key TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL,
+  -- Child-safety permission: denied to students in has_permission() itself,
+  -- before the matrix is consulted. The admin UI renders these cells locked.
+  is_safeguard BOOLEAN NOT NULL DEFAULT FALSE,
+  sort_order INTEGER NOT NULL DEFAULT 100,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO permission_definitions (key, label, description, category, is_safeguard, sort_order) VALUES
+  ('org:manage', 'Manage platform', 'Global settings, policy and system configuration.', 'platform', FALSE, 10),
+  ('members:manage', 'Manage members', 'Create, edit, suspend and delete user accounts.', 'platform', FALSE, 20),
+  ('role:manage', 'Manage roles & permissions', 'Assign roles and edit the permission matrix.', 'platform', FALSE, 30),
+  ('audit:view', 'View audit logs', 'Read permission-change and moderation audit trails.', 'platform', FALSE, 40),
+  ('moderation:view', 'View moderation queue', 'See reported and auto-flagged content, including quarantined items.', 'moderation', TRUE, 50),
+  ('moderation:action', 'Action moderation items', 'Quarantine, restore or remove content and issue warnings.', 'moderation', TRUE, 60),
+  ('moderation:escalate', 'Escalate & suspend', 'Suspend accounts and escalate to safety admins and school administrators.', 'moderation', TRUE, 70),
+  ('grant:view', 'View grants', 'Browse public grant opportunities.', 'grants', FALSE, 80),
+  ('grant:apply', 'Apply for grants', 'Submit grant applications. Students are denied — they must be sponsored.', 'grants', TRUE, 90),
+  ('grant:sponsor', 'Sponsor student applications', 'Act as the faculty or school sponsor on a student application.', 'grants', TRUE, 100),
+  ('grant:post', 'Post grant opportunities', 'Publish funding calls to the platform.', 'grants', FALSE, 110),
+  ('grant:manage_funds', 'Manage funds', 'Administer disbursement and award records. Never available to students.', 'grants', TRUE, 120),
+  ('project:create', 'Create projects', 'Publish a new project.', 'projects', FALSE, 130),
+  ('project:manage', 'Manage own projects', 'Edit, archive and manage collaborators on owned projects.', 'projects', FALSE, 140),
+  ('forum:post', 'Create forum posts', 'Start discussions on forum boards.', 'community', FALSE, 150),
+  ('forum:comment', 'Reply & comment', 'Reply to forum posts and comment on projects.', 'community', FALSE, 160),
+  ('mentorship:offer', 'Offer mentorship', 'Appear in mentor discovery and accept mentorship requests.', 'community', FALSE, 170),
+  ('dm:initiate', 'Start direct messages', 'Open a 1-to-1 conversation. Denied to students — they use supervised channels only.', 'messaging', TRUE, 180),
+  ('dm:receive', 'Receive messages', 'Participate in conversations they have been added to.', 'messaging', FALSE, 190),
+  ('dm:supervise', 'Supervise student channels', 'Counts as the designated educator that makes a student channel monitored.', 'messaging', TRUE, 200),
+  ('sme:verify', 'Verify SMEs', 'Chamber of Commerce review of corporate registry data; issues Verified SME status.', 'verification', FALSE, 210),
+  ('institution:verify', 'Verify institutions', 'Approve schools and chambers, and the email domains they own.', 'verification', FALSE, 220),
+  ('institution:approve_students', 'Approve student accounts', 'Approve students registering on the institution''s verified email domain.', 'verification', TRUE, 230)
+ON CONFLICT (key) DO UPDATE SET
+  label = EXCLUDED.label,
+  description = EXCLUDED.description,
+  category = EXCLUDED.category,
+  is_safeguard = EXCLUDED.is_safeguard,
+  sort_order = EXCLUDED.sort_order;
+
+-- ============================================================
+-- 3. The matrix
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS role_permissions (
+  role_slug TEXT NOT NULL REFERENCES role_definitions(slug) ON DELETE CASCADE,
+  permission_key TEXT NOT NULL REFERENCES permission_definitions(key) ON DELETE CASCADE,
+  allowed BOOLEAN NOT NULL DEFAULT FALSE,
+  updated_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (role_slug, permission_key)
+);
+
+-- has_permission() reads by (role, key) on every policy evaluation.
+CREATE INDEX IF NOT EXISTS idx_role_permissions_lookup
+  ON role_permissions (role_slug, permission_key) WHERE allowed;
+
+-- Append-only audit of every toggle. Written by trigger only; see the
+-- zero-write-policy pattern used by employer_verification_events (058).
+CREATE TABLE IF NOT EXISTS role_permission_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  role_slug TEXT NOT NULL,
+  permission_key TEXT NOT NULL,
+  from_allowed BOOLEAN,
+  to_allowed BOOLEAN NOT NULL,
+  actor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_role_permission_events_created
+  ON role_permission_events (created_at DESC);
+
+-- ============================================================
+-- 4. Default matrix
+-- ============================================================
+
+-- Kept as a function rather than a one-time INSERT so "Reset to defaults" in
+-- the admin UI and the seed below share exactly one definition. Mirrors
+-- DEFAULT_ROLE_PERMISSIONS in src/lib/permissions.ts.
+CREATE OR REPLACE FUNCTION default_role_permissions()
+RETURNS TABLE (role_slug TEXT, permission_key TEXT)
+LANGUAGE SQL
+STABLE
+SET search_path = public
+AS $$
+  -- Super Admin holds everything, including permissions added later.
+  SELECT 'super_admin'::TEXT, pd.key FROM permission_definitions pd
+  UNION ALL
+  SELECT * FROM (VALUES
+    ('safety_admin', 'audit:view'),
+    ('safety_admin', 'moderation:view'),
+    ('safety_admin', 'moderation:action'),
+    ('safety_admin', 'moderation:escalate'),
+    ('safety_admin', 'grant:view'),
+    ('safety_admin', 'forum:post'),
+    ('safety_admin', 'forum:comment'),
+    ('safety_admin', 'dm:initiate'),
+    ('safety_admin', 'dm:receive'),
+    ('safety_admin', 'dm:supervise'),
+
+    ('investor', 'grant:view'),
+    ('investor', 'grant:post'),
+    ('investor', 'grant:manage_funds'),
+    ('investor', 'forum:post'),
+    ('investor', 'forum:comment'),
+    ('investor', 'mentorship:offer'),
+    ('investor', 'dm:initiate'),
+    ('investor', 'dm:receive'),
+
+    ('sme', 'grant:view'),
+    ('sme', 'grant:apply'),
+    ('sme', 'project:create'),
+    ('sme', 'project:manage'),
+    ('sme', 'forum:post'),
+    ('sme', 'forum:comment'),
+    ('sme', 'mentorship:offer'),
+    ('sme', 'dm:initiate'),
+    ('sme', 'dm:receive'),
+
+    ('private_sector', 'grant:view'),
+    ('private_sector', 'project:create'),
+    ('private_sector', 'project:manage'),
+    ('private_sector', 'forum:post'),
+    ('private_sector', 'forum:comment'),
+    ('private_sector', 'dm:initiate'),
+    ('private_sector', 'dm:receive'),
+
+    ('educational_partner', 'institution:approve_students'),
+    ('educational_partner', 'grant:view'),
+    ('educational_partner', 'grant:apply'),
+    ('educational_partner', 'grant:sponsor'),
+    ('educational_partner', 'project:create'),
+    ('educational_partner', 'project:manage'),
+    ('educational_partner', 'forum:post'),
+    ('educational_partner', 'forum:comment'),
+    ('educational_partner', 'dm:initiate'),
+    ('educational_partner', 'dm:receive'),
+    ('educational_partner', 'dm:supervise'),
+
+    ('chamber_admin', 'sme:verify'),
+    ('chamber_admin', 'grant:view'),
+    ('chamber_admin', 'forum:post'),
+    ('chamber_admin', 'forum:comment'),
+    ('chamber_admin', 'dm:initiate'),
+    ('chamber_admin', 'dm:receive'),
+
+    ('entrepreneur', 'grant:view'),
+    ('entrepreneur', 'grant:apply'),
+    ('entrepreneur', 'project:create'),
+    ('entrepreneur', 'project:manage'),
+    ('entrepreneur', 'forum:post'),
+    ('entrepreneur', 'forum:comment'),
+    ('entrepreneur', 'dm:initiate'),
+    ('entrepreneur', 'dm:receive'),
+
+    ('faculty', 'institution:approve_students'),
+    ('faculty', 'grant:view'),
+    ('faculty', 'grant:apply'),
+    ('faculty', 'grant:sponsor'),
+    ('faculty', 'project:create'),
+    ('faculty', 'project:manage'),
+    ('faculty', 'forum:post'),
+    ('faculty', 'forum:comment'),
+    ('faculty', 'mentorship:offer'),
+    ('faculty', 'dm:initiate'),
+    ('faculty', 'dm:receive'),
+    ('faculty', 'dm:supervise'),
+
+    ('researcher', 'grant:view'),
+    ('researcher', 'grant:apply'),
+    ('researcher', 'project:create'),
+    ('researcher', 'project:manage'),
+    ('researcher', 'forum:post'),
+    ('researcher', 'forum:comment'),
+    ('researcher', 'dm:initiate'),
+    ('researcher', 'dm:receive'),
+
+    ('mentor', 'grant:view'),
+    ('mentor', 'project:create'),
+    ('mentor', 'project:manage'),
+    ('mentor', 'forum:post'),
+    ('mentor', 'forum:comment'),
+    ('mentor', 'mentorship:offer'),
+    ('mentor', 'dm:initiate'),
+    ('mentor', 'dm:receive'),
+
+    -- Read-only on grants, receives messages but never initiates.
+    ('student', 'grant:view'),
+    ('student', 'project:create'),
+    ('student', 'project:manage'),
+    ('student', 'forum:post'),
+    ('student', 'forum:comment'),
+    ('student', 'dm:receive')
+  ) AS t(role_slug, permission_key);
+$$;
+
+-- Seed every (role, permission) pair so the matrix UI has a row for each cell.
+-- ON CONFLICT DO NOTHING: re-running the migration never overwrites an edit.
+INSERT INTO role_permissions (role_slug, permission_key, allowed)
+SELECT rd.slug,
+       pd.key,
+       EXISTS (SELECT 1 FROM default_role_permissions() d WHERE d.role_slug = rd.slug AND d.permission_key = pd.key)
+FROM role_definitions rd
+CROSS JOIN permission_definitions pd
+WHERE rd.alias_of IS NULL
+ON CONFLICT (role_slug, permission_key) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION reset_role_permissions()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_count INTEGER;
+BEGIN
+  -- SECURITY DEFINER bypasses RLS, so the check has to be explicit here.
+  IF NOT has_permission(v_actor, 'role:manage') THEN
+    RAISE EXCEPTION 'forbidden';
+  END IF;
+
+  UPDATE role_permissions rp
+  SET allowed = (
+        SELECT EXISTS (
+          SELECT 1 FROM default_role_permissions() d
+          WHERE d.role_slug = rp.role_slug AND d.permission_key = rp.permission_key
+        )
+      ),
+      updated_by = v_actor,
+      updated_at = now()
+  WHERE rp.allowed IS DISTINCT FROM (
+        SELECT EXISTS (
+          SELECT 1 FROM default_role_permissions() d
+          WHERE d.role_slug = rp.role_slug AND d.permission_key = rp.permission_key
+        )
+      );
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reset_role_permissions() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reset_role_permissions() TO authenticated;
+
+-- ============================================================
+-- 5. Profile columns: active context + suspension
+-- ============================================================
+
+-- Multi-role users operate in one context at a time. NULL means "all roles",
+-- which is the pre-existing behaviour, so no backfill is needed.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS active_role TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS suspended_until TIMESTAMPTZ;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS suspension_reason TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_profiles_roles ON profiles USING GIN (roles);
+
+-- ============================================================
+-- 6. Predicates
+-- ============================================================
+
+-- Resolve legacy slugs onto their modern equivalent. 'oecs' -> 'super_admin'.
+CREATE OR REPLACE FUNCTION expand_roles(p_roles TEXT[])
+RETURNS TEXT[]
+LANGUAGE SQL
+STABLE
+SET search_path = public
+AS $$
+  SELECT COALESCE(ARRAY(
+    SELECT DISTINCT slug FROM (
+      SELECT unnest(p_roles) AS slug
+      UNION
+      SELECT rd.alias_of FROM role_definitions rd
+      WHERE rd.slug = ANY(p_roles) AND rd.alias_of IS NOT NULL
+    ) s
+    WHERE slug IS NOT NULL
+  ), ARRAY[]::TEXT[]);
+$$;
+
+CREATE OR REPLACE FUNCTION is_suspended(p_user UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    (SELECT p.is_suspended AND (p.suspended_until IS NULL OR p.suspended_until > now())
+     FROM profiles p WHERE p.id = p_user),
+    FALSE
+  );
+$$;
+
+-- The helper 012_admin_dashboard_policies.sql documented in a comment but
+-- never created. New policies use this; the ~60 legacy inline EXISTS clauses
+-- are intentionally left alone.
+CREATE OR REPLACE FUNCTION is_platform_admin(p_user UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = p_user AND 'super_admin' = ANY(expand_roles(p.roles))
+  );
+$$;
+
+-- The single authorization predicate. Order matters:
+--   1. no user            -> deny
+--   2. suspended          -> deny everything
+--   3. safeguard denial   -> deny, regardless of what the matrix says
+--   4. matrix lookup
+CREATE OR REPLACE FUNCTION has_permission(p_user UUID, p_permission TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_roles TEXT[];
+BEGIN
+  IF p_user IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  SELECT expand_roles(p.roles) INTO v_roles FROM profiles p WHERE p.id = p_user;
+
+  IF v_roles IS NULL OR array_length(v_roles, 1) IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  IF is_suspended(p_user) THEN
+    RETURN FALSE;
+  END IF;
+
+  -- Safeguarding. Hard-coded on purpose: this must survive an admin toggling
+  -- the matrix, a bad seed, and a direct UPDATE on role_permissions. A student
+  -- who also holds an adult role is still treated as a student.
+  IF 'student' = ANY(v_roles) AND p_permission IN (
+    'dm:initiate',
+    'grant:apply',
+    'grant:manage_funds',
+    'moderation:action',
+    'moderation:escalate'
+  ) THEN
+    RETURN FALSE;
+  END IF;
+
+  RETURN EXISTS (
+    SELECT 1 FROM role_permissions rp
+    WHERE rp.role_slug = ANY(v_roles)
+      AND rp.permission_key = p_permission
+      AND rp.allowed
+  );
+END;
+$$;
+
+-- Same check, narrowed to the user's active operating context. Used where
+-- switching roles should genuinely change what is available rather than
+-- unioning every role the account holds.
+CREATE OR REPLACE FUNCTION has_permission_as(p_user UUID, p_permission TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_active TEXT;
+BEGIN
+  SELECT p.active_role INTO v_active FROM profiles p WHERE p.id = p_user;
+
+  -- No active context selected: fall back to the union of all held roles.
+  IF v_active IS NULL THEN
+    RETURN has_permission(p_user, p_permission);
+  END IF;
+
+  -- Never widen: the active context can only be a subset of what is held.
+  IF NOT has_permission(p_user, p_permission) THEN
+    RETURN FALSE;
+  END IF;
+
+  RETURN EXISTS (
+    SELECT 1 FROM role_permissions rp
+    WHERE rp.role_slug = ANY(expand_roles(ARRAY[v_active]))
+      AND rp.permission_key = p_permission
+      AND rp.allowed
+  );
+END;
+$$;
+
+-- Client bootstrap: one round trip for the whole capability set.
+CREATE OR REPLACE FUNCTION get_my_permissions()
+RETURNS TEXT[]
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(ARRAY(
+    SELECT pd.key FROM permission_definitions pd
+    WHERE has_permission(auth.uid(), pd.key)
+    ORDER BY pd.sort_order
+  ), ARRAY[]::TEXT[]);
+$$;
+
+REVOKE ALL ON FUNCTION get_my_permissions() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION get_my_permissions() TO authenticated;
+
+-- ============================================================
+-- 7. Close the privilege-escalation hole on profiles
+-- ============================================================
+
+-- Migration 000 created this policy with USING and no WITH CHECK, and
+-- ProfileSettingsTab submitted the roles column on an ordinary save, so any
+-- user could write 'oecs' to themselves. WITH CHECK alone is not enough —
+-- it only re-asserts row ownership — so the column guard is a trigger.
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+CREATE POLICY "Users can update their own profile"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- Trusted server-side paths (institution approval, chamber verification)
+-- legitimately grant roles while auth.uid() is still the calling user. They
+-- set this transaction-local flag rather than being granted a blanket bypass.
+CREATE OR REPLACE FUNCTION guard_profile_privileged_columns()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_added TEXT[];
+  v_illegal TEXT[];
+BEGIN
+  -- service_role has no JWT subject; trusted RPCs opt in explicitly.
+  IF v_actor IS NULL OR current_setting('ktip.bypass_profile_guard', TRUE) = 'on' THEN
+    RETURN NEW;
+  END IF;
+
+  IF is_platform_admin(v_actor) THEN
+    RETURN NEW;
+  END IF;
+
+  IF NEW.is_suspended IS DISTINCT FROM OLD.is_suspended
+     OR NEW.suspended_until IS DISTINCT FROM OLD.suspended_until
+     OR NEW.suspension_reason IS DISTINCT FROM OLD.suspension_reason THEN
+    RAISE EXCEPTION 'suspension state can only be changed by a platform admin';
+  END IF;
+
+  IF NEW.is_verified IS DISTINCT FROM OLD.is_verified THEN
+    RAISE EXCEPTION 'verification state can only be changed by a platform admin';
+  END IF;
+
+  -- Only newly ADDED roles are validated. Removing a role from yourself is
+  -- always allowed, and existing rows are never re-checked — which is what
+  -- keeps accounts that already hold faculty/student slugs editable.
+  IF NEW.roles IS DISTINCT FROM OLD.roles THEN
+    v_added := ARRAY(
+      SELECT unnest(COALESCE(NEW.roles, ARRAY[]::TEXT[]))
+      EXCEPT
+      SELECT unnest(COALESCE(OLD.roles, ARRAY[]::TEXT[]))
+    );
+
+    SELECT ARRAY_AGG(slug) INTO v_illegal
+    FROM unnest(v_added) AS slug
+    WHERE NOT EXISTS (
+      SELECT 1 FROM role_definitions rd
+      WHERE rd.slug = slug AND rd.is_self_assignable
+    );
+
+    IF v_illegal IS NOT NULL AND array_length(v_illegal, 1) > 0 THEN
+      RAISE EXCEPTION 'role(s) % require verification or an administrator', array_to_string(v_illegal, ', ');
+    END IF;
+  END IF;
+
+  -- The active context must be a role the account actually holds.
+  IF NEW.active_role IS NOT NULL AND NOT (NEW.active_role = ANY(COALESCE(NEW.roles, ARRAY[]::TEXT[]))) THEN
+    RAISE EXCEPTION 'active_role % is not held by this account', NEW.active_role;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS guard_profile_privileged_columns_trigger ON profiles;
+CREATE TRIGGER guard_profile_privileged_columns_trigger
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION guard_profile_privileged_columns();
+
+-- Signup metadata is unvalidated user input (see handle_new_user in 044), so
+-- the same rule applies at INSERT: a self-assignable role or nothing.
+CREATE OR REPLACE FUNCTION guard_profile_insert_roles()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF current_setting('ktip.bypass_profile_guard', TRUE) = 'on' THEN
+    RETURN NEW;
+  END IF;
+
+  NEW.roles := COALESCE(ARRAY(
+    SELECT slug FROM unnest(COALESCE(NEW.roles, ARRAY[]::TEXT[])) AS slug
+    WHERE EXISTS (
+      SELECT 1 FROM role_definitions rd WHERE rd.slug = slug AND rd.is_self_assignable
+    )
+  ), ARRAY[]::TEXT[]);
+
+  NEW.is_verified := FALSE;
+  NEW.is_suspended := FALSE;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS guard_profile_insert_roles_trigger ON profiles;
+CREATE TRIGGER guard_profile_insert_roles_trigger
+  BEFORE INSERT ON profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION guard_profile_insert_roles();
+
+-- Admin-side role assignment. Goes through a function so the audit story is
+-- one code path rather than a bare UPDATE from the browser.
+CREATE OR REPLACE FUNCTION set_user_roles(p_user UUID, p_roles TEXT[])
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_unknown TEXT[];
+BEGIN
+  IF NOT has_permission(v_actor, 'role:manage') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  SELECT ARRAY_AGG(slug) INTO v_unknown
+  FROM unnest(COALESCE(p_roles, ARRAY[]::TEXT[])) AS slug
+  WHERE NOT EXISTS (SELECT 1 FROM role_definitions rd WHERE rd.slug = slug);
+
+  IF v_unknown IS NOT NULL AND array_length(v_unknown, 1) > 0 THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'unknown_role', 'roles', v_unknown);
+  END IF;
+
+  PERFORM set_config('ktip.bypass_profile_guard', 'on', TRUE);
+
+  UPDATE profiles
+  SET roles = COALESCE(p_roles, ARRAY[]::TEXT[]),
+      active_role = CASE
+        WHEN active_role = ANY(COALESCE(p_roles, ARRAY[]::TEXT[])) THEN active_role
+        ELSE NULL
+      END,
+      updated_at = now()
+  WHERE id = p_user;
+
+  PERFORM set_config('ktip.bypass_profile_guard', 'off', TRUE);
+
+  RETURN jsonb_build_object('ok', TRUE);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION set_user_roles(UUID, TEXT[]) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION set_user_roles(UUID, TEXT[]) TO authenticated;
+
+-- Account suspension, used by the moderation engine in 065 and by admins.
+CREATE OR REPLACE FUNCTION set_user_suspension(
+  p_user UUID,
+  p_suspended BOOLEAN,
+  p_until TIMESTAMPTZ DEFAULT NULL,
+  p_reason TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+BEGIN
+  IF NOT has_permission(v_actor, 'moderation:escalate') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  PERFORM set_config('ktip.bypass_profile_guard', 'on', TRUE);
+
+  UPDATE profiles
+  SET is_suspended = p_suspended,
+      suspended_until = CASE WHEN p_suspended THEN p_until ELSE NULL END,
+      suspension_reason = CASE WHEN p_suspended THEN p_reason ELSE NULL END,
+      updated_at = now()
+  WHERE id = p_user;
+
+  PERFORM set_config('ktip.bypass_profile_guard', 'off', TRUE);
+
+  RETURN jsonb_build_object('ok', TRUE);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION set_user_suspension(UUID, BOOLEAN, TIMESTAMPTZ, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION set_user_suspension(UUID, BOOLEAN, TIMESTAMPTZ, TEXT) TO authenticated;
+
+-- ============================================================
+-- 8. Audit trail
+-- ============================================================
+
+-- UPDATE only. A BEFORE INSERT trigger fires before ON CONFLICT is evaluated,
+-- so auditing inserts would write an event for every skipped seed row each time
+-- this migration is re-run — an audit log full of changes that never happened.
+CREATE OR REPLACE FUNCTION log_role_permission_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.allowed IS NOT DISTINCT FROM OLD.allowed THEN
+    RETURN NEW;
+  END IF;
+
+  INSERT INTO role_permission_events (role_slug, permission_key, from_allowed, to_allowed, actor_id)
+  VALUES (NEW.role_slug, NEW.permission_key, OLD.allowed, NEW.allowed, auth.uid());
+
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS log_role_permission_change_trigger ON role_permissions;
+CREATE TRIGGER log_role_permission_change_trigger
+  BEFORE UPDATE ON role_permissions
+  FOR EACH ROW
+  EXECUTE FUNCTION log_role_permission_change();
+
+-- ============================================================
+-- 9. RLS
+-- ============================================================
+
+ALTER TABLE role_definitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE permission_definitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE role_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE role_permission_events ENABLE ROW LEVEL SECURITY;
+
+-- The catalog is public: the UI labels roles on member cards for signed-out
+-- visitors too. Only the matrix and the audit trail are restricted.
+DROP POLICY IF EXISTS "Anyone can view role definitions" ON role_definitions;
+CREATE POLICY "Anyone can view role definitions"
+  ON role_definitions FOR SELECT
+  USING (TRUE);
+
+DROP POLICY IF EXISTS "Anyone can view permission definitions" ON permission_definitions;
+CREATE POLICY "Anyone can view permission definitions"
+  ON permission_definitions FOR SELECT
+  USING (TRUE);
+
+DROP POLICY IF EXISTS "Authenticated users can view the matrix" ON role_permissions;
+CREATE POLICY "Authenticated users can view the matrix"
+  ON role_permissions FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Permission managers can edit the matrix" ON role_permissions;
+CREATE POLICY "Permission managers can edit the matrix"
+  ON role_permissions FOR UPDATE
+  USING (has_permission(auth.uid(), 'role:manage'))
+  WITH CHECK (has_permission(auth.uid(), 'role:manage'));
+
+DROP POLICY IF EXISTS "Auditors can view permission history" ON role_permission_events;
+CREATE POLICY "Auditors can view permission history"
+  ON role_permission_events FOR SELECT
+  USING (has_permission(auth.uid(), 'audit:view'));
+
+-- No INSERT/UPDATE/DELETE policies on role_permission_events: it is written
+-- only by log_role_permission_change(), which is SECURITY DEFINER.
+
+NOTIFY pgrst, 'reload schema';
+
+-- ============================================================
+-- 064_institutions_safeguarding_chamber.sql
+-- ============================================================
+
+-- Migration 064: Institutions, student safeguarding, Chamber of Commerce
+--
+-- Three problems this closes, all of them currently wide open:
+--
+--   1. Anyone can message anyone. conversation_participants lets the creator
+--      add any user, and nothing in the messaging policies reads a role. A
+--      platform that hosts school-verified minors cannot ship that.
+--   2. Anyone can submit a grant application. The gate is
+--      WITH CHECK (auth.uid() = user_id) and nothing else, so a student can
+--      apply for and be awarded funding with no institutional sponsor.
+--   3. "Student" and "SME" are unverified self-declared strings. There is no
+--      record of which school owns dsc.edu.dm, and no country-level authority
+--      that vets a business.
+--
+-- Institutions are one table for schools, universities, TVETs and chambers:
+-- they differ only in what their membership means, and a chamber's country is
+-- the same column as a school's country. institution_members therefore doubles
+-- as the chamber-admin mapping.
+--
+-- Employers are NOT rebuilt. 058 already models a verified company with an
+-- append-only verification event log; the chamber is a second review authority
+-- writing into the same tables, not a parallel universe.
+--
+-- Note on enforcement points: `messages` is in the supabase_realtime
+-- publication, so a rule applied after insert has already reached the
+-- recipient's socket. All messaging rules here are WITH CHECK predicates.
+--
+-- Idempotent — safe to re-run. Requires 063.
+
+-- ============================================================
+-- 1. Institutions
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS institutions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug TEXT UNIQUE NOT NULL CHECK (slug ~ '^[a-z0-9][a-z0-9-]{1,78}[a-z0-9]$'),
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('school', 'university', 'tvet', 'chamber')),
+  country_code CHAR(2) NOT NULL REFERENCES countries(code),
+  -- Domains this institution owns. A student email must match one of these
+  -- AND the institution must be verified before the student role is granted.
+  email_domains TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected')),
+  contact_email TEXT CHECK (contact_email IS NULL OR contact_email = lower(contact_email)),
+  website_url TEXT,
+  verified_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  verified_at TIMESTAMPTZ,
+  review_note TEXT,
+  created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- Same rule as employers_verified_has_evidence (058): a verified record must
+  -- name who verified it and when.
+  CONSTRAINT institutions_verified_has_evidence CHECK (
+    status <> 'verified' OR (verified_at IS NOT NULL AND verified_by IS NOT NULL)
+  )
+);
+
+CREATE INDEX IF NOT EXISTS idx_institutions_country ON institutions(country_code);
+CREATE INDEX IF NOT EXISTS idx_institutions_kind_status ON institutions(kind, status);
+CREATE INDEX IF NOT EXISTS idx_institutions_domains ON institutions USING GIN (email_domains);
+
+CREATE TABLE IF NOT EXISTS institution_members (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  institution_id UUID NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('admin', 'educator', 'student')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  approved_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  approved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (institution_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_institution_members_user ON institution_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_institution_members_pending
+  ON institution_members(institution_id) WHERE status = 'pending';
+
+-- Minor-safety record. Only the birth YEAR is stored: enough to decide minor
+-- status for COPPA/GDPR handling, without holding a full date of birth for a
+-- child. is_minor is derived, so it cannot drift from the year it came from.
+CREATE TABLE IF NOT EXISTS student_safeguarding (
+  user_id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  institution_id UUID REFERENCES institutions(id) ON DELETE SET NULL,
+  verified_domain TEXT,
+  sponsor_user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  birth_year INTEGER CHECK (birth_year IS NULL OR (birth_year > 1900 AND birth_year <= EXTRACT(YEAR FROM now()))),
+  guardian_consent_at TIMESTAMPTZ,
+  guardian_consent_ref TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Not a GENERATED column: the expression depends on the current year, and
+-- generated columns must be immutable. Maintained on write instead, and
+-- recomputed whenever the row is touched.
+ALTER TABLE student_safeguarding ADD COLUMN IF NOT EXISTS is_minor BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE OR REPLACE FUNCTION derive_student_minor_status()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  NEW.is_minor := NEW.birth_year IS NOT NULL
+    AND (EXTRACT(YEAR FROM now())::INTEGER - NEW.birth_year) < 18;
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS derive_student_minor_status_trigger ON student_safeguarding;
+CREATE TRIGGER derive_student_minor_status_trigger
+  BEFORE INSERT OR UPDATE ON student_safeguarding
+  FOR EACH ROW
+  EXECUTE FUNCTION derive_student_minor_status();
+
+-- ============================================================
+-- 2. Institution membership helpers
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION is_institution_admin(p_institution UUID, p_user UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM institution_members im
+    WHERE im.institution_id = p_institution
+      AND im.user_id = p_user
+      AND im.status = 'approved'
+      AND im.role IN ('admin', 'educator')
+  );
+$$;
+
+-- A chamber admin's authority is bounded by the country of the chamber they
+-- belong to. Returns the set of ISO codes this user may act on.
+CREATE OR REPLACE FUNCTION chamber_countries(p_user UUID)
+RETURNS TEXT[]
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(ARRAY(
+    SELECT DISTINCT i.country_code
+    FROM institution_members im
+    JOIN institutions i ON i.id = im.institution_id
+    WHERE im.user_id = p_user
+      AND im.status = 'approved'
+      AND im.role IN ('admin', 'educator')
+      AND i.kind = 'chamber'
+      AND i.status = 'verified'
+  ), ARRAY[]::TEXT[]);
+$$;
+
+-- Self-serve: a user asks to be recognised as a student of the institution
+-- that owns their email domain. Grants nothing on its own — an educator still
+-- has to approve, which is what actually assigns the student role.
+CREATE OR REPLACE FUNCTION request_student_verification()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  v_user UUID := auth.uid();
+  v_email TEXT;
+  v_domain TEXT;
+  v_institution UUID;
+BEGIN
+  IF v_user IS NULL THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'unauthenticated');
+  END IF;
+
+  SELECT lower(u.email) INTO v_email FROM auth.users u WHERE u.id = v_user;
+  IF v_email IS NULL OR position('@' IN v_email) = 0 THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'no_email');
+  END IF;
+
+  v_domain := split_part(v_email, '@', 2);
+
+  SELECT i.id INTO v_institution
+  FROM institutions i
+  WHERE i.status = 'verified'
+    AND i.kind <> 'chamber'
+    AND v_domain = ANY(i.email_domains)
+  LIMIT 1;
+
+  IF v_institution IS NULL THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'domain_not_recognised', 'domain', v_domain);
+  END IF;
+
+  INSERT INTO institution_members (institution_id, user_id, role, status)
+  VALUES (v_institution, v_user, 'student', 'pending')
+  ON CONFLICT (institution_id, user_id) DO UPDATE
+    SET status = CASE WHEN institution_members.status = 'rejected' THEN 'pending' ELSE institution_members.status END;
+
+  INSERT INTO student_safeguarding (user_id, institution_id, verified_domain)
+  VALUES (v_user, v_institution, v_domain)
+  ON CONFLICT (user_id) DO UPDATE
+    SET institution_id = EXCLUDED.institution_id,
+        verified_domain = EXCLUDED.verified_domain,
+        updated_at = now();
+
+  RETURN jsonb_build_object('ok', TRUE, 'institution_id', v_institution, 'status', 'pending');
+END;
+$$;
+
+REVOKE ALL ON FUNCTION request_student_verification() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION request_student_verification() TO authenticated;
+
+-- Educator approval. This is the only path that grants the student role, which
+-- is why it opts into the profile guard bypass from 063 rather than the caller
+-- being able to write profiles.roles directly.
+CREATE OR REPLACE FUNCTION review_institution_member(
+  p_member UUID,
+  p_approve BOOLEAN,
+  p_role TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_institution UUID;
+  v_user UUID;
+  v_role TEXT;
+  v_kind TEXT;
+  v_grant TEXT;
+BEGIN
+  SELECT im.institution_id, im.user_id, COALESCE(p_role, im.role), i.kind
+    INTO v_institution, v_user, v_role, v_kind
+  FROM institution_members im
+  JOIN institutions i ON i.id = im.institution_id
+  WHERE im.id = p_member;
+
+  IF v_institution IS NULL THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'not_found');
+  END IF;
+
+  IF NOT (is_institution_admin(v_institution, v_actor) OR has_permission(v_actor, 'institution:verify')) THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  IF v_role = 'student' AND NOT has_permission(v_actor, 'institution:approve_students')
+     AND NOT is_institution_admin(v_institution, v_actor) THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  UPDATE institution_members
+  SET status = CASE WHEN p_approve THEN 'approved' ELSE 'rejected' END,
+      role = v_role,
+      approved_by = v_actor,
+      approved_at = CASE WHEN p_approve THEN now() ELSE NULL END
+  WHERE id = p_member;
+
+  IF p_approve THEN
+    v_grant := CASE
+      WHEN v_kind = 'chamber' THEN 'chamber_admin'
+      WHEN v_role = 'student' THEN 'student'
+      WHEN v_role = 'admin' THEN 'educational_partner'
+      ELSE 'faculty'
+    END;
+
+    PERFORM set_config('ktip.bypass_profile_guard', 'on', TRUE);
+    UPDATE profiles
+    SET roles = CASE WHEN v_grant = ANY(roles) THEN roles ELSE array_append(roles, v_grant) END,
+        updated_at = now()
+    WHERE id = v_user;
+    PERFORM set_config('ktip.bypass_profile_guard', 'off', TRUE);
+
+    PERFORM send_notification(
+      v_user,
+      'institution_membership',
+      'Institution membership approved',
+      'Your account has been approved and now has the ' || v_grant || ' role.',
+      '/settings'
+    );
+  END IF;
+
+  RETURN jsonb_build_object('ok', TRUE, 'granted_role', v_grant);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION review_institution_member(UUID, BOOLEAN, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION review_institution_member(UUID, BOOLEAN, TEXT) TO authenticated;
+
+-- ============================================================
+-- 3. Chamber of Commerce SME verification
+-- ============================================================
+
+ALTER TABLE employers ADD COLUMN IF NOT EXISTS chamber_institution_id UUID REFERENCES institutions(id) ON DELETE SET NULL;
+ALTER TABLE employers ADD COLUMN IF NOT EXISTS chamber_reviewed_by UUID REFERENCES profiles(id) ON DELETE SET NULL;
+ALTER TABLE employers ADD COLUMN IF NOT EXISTS chamber_reviewed_at TIMESTAMPTZ;
+
+-- 058 fixed the method vocabulary before chambers existed.
+ALTER TABLE employers DROP CONSTRAINT IF EXISTS employers_verification_method_check;
+ALTER TABLE employers ADD CONSTRAINT employers_verification_method_check
+  CHECK (verification_method IS NULL OR verification_method IN (
+    'document_review', 'registry_lookup', 'manual_attestation', 'chamber_attestation'
+  ));
+
+-- Mirrors set_employer_verification (058) but scoped: the caller must be an
+-- approved admin of a verified chamber in the SAME country as the employer.
+CREATE OR REPLACE FUNCTION set_employer_verification_by_chamber(
+  p_employer UUID,
+  p_status TEXT,
+  p_registration_number TEXT DEFAULT NULL,
+  p_note TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_country CHAR(2);
+  v_from TEXT;
+  v_chamber UUID;
+  v_owner UUID;
+BEGIN
+  IF NOT has_permission(v_actor, 'sme:verify') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  IF p_status NOT IN ('pending', 'verified', 'rejected', 'revoked') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'bad_status');
+  END IF;
+
+  SELECT e.country_code, e.verification_status, e.created_by
+    INTO v_country, v_from, v_owner
+  FROM employers e WHERE e.id = p_employer;
+
+  IF v_country IS NULL THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'not_found');
+  END IF;
+
+  IF NOT (v_country = ANY(chamber_countries(v_actor))) THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'wrong_country', 'country', v_country);
+  END IF;
+
+  SELECT i.id INTO v_chamber
+  FROM institution_members im
+  JOIN institutions i ON i.id = im.institution_id
+  WHERE im.user_id = v_actor AND im.status = 'approved'
+    AND i.kind = 'chamber' AND i.status = 'verified' AND i.country_code = v_country
+  LIMIT 1;
+
+  UPDATE employers
+  SET verification_status = p_status,
+      verification_method = CASE WHEN p_status = 'verified' THEN 'chamber_attestation' ELSE verification_method END,
+      registration_number = COALESCE(p_registration_number, registration_number),
+      verified_at = CASE WHEN p_status = 'verified' THEN now() ELSE NULL END,
+      verified_by = CASE WHEN p_status = 'verified' THEN v_actor ELSE NULL END,
+      verification_note = COALESCE(p_note, verification_note),
+      chamber_institution_id = v_chamber,
+      chamber_reviewed_by = v_actor,
+      chamber_reviewed_at = now(),
+      updated_at = now()
+  WHERE id = p_employer;
+
+  INSERT INTO employer_verification_events (employer_id, from_status, to_status, method, note, actor_id)
+  VALUES (p_employer, v_from, p_status, 'chamber_attestation', p_note, v_actor);
+
+  -- A verified company promotes its owner to the SME role, which is what
+  -- unlocks posting industry projects and private-sector grants.
+  IF p_status = 'verified' AND v_owner IS NOT NULL THEN
+    PERFORM set_config('ktip.bypass_profile_guard', 'on', TRUE);
+    UPDATE profiles
+    SET roles = CASE WHEN 'sme' = ANY(roles) THEN roles ELSE array_append(roles, 'sme') END,
+        updated_at = now()
+    WHERE id = v_owner;
+    PERFORM set_config('ktip.bypass_profile_guard', 'off', TRUE);
+
+    PERFORM send_notification(
+      v_owner,
+      'employer_verified',
+      'Your business is verified',
+      'Your National Chamber of Commerce has verified your business. SME features are now available.',
+      '/settings'
+    );
+  END IF;
+
+  RETURN jsonb_build_object('ok', TRUE, 'status', p_status);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION set_employer_verification_by_chamber(UUID, TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION set_employer_verification_by_chamber(UUID, TEXT, TEXT, TEXT) TO authenticated;
+
+-- 058 let only platform admins create an employer, because there was no
+-- reviewer other than the Secretariat. Chambers are that reviewer, so a
+-- business can now register itself — unverified, and unable to edit itself
+-- afterwards (058 deliberately has no member-facing UPDATE policy, and that
+-- stays true: an employer that could edit its own row post-verification would
+-- put attacker-controlled data behind a verified badge).
+DROP POLICY IF EXISTS "Businesses can register themselves" ON employers;
+CREATE POLICY "Businesses can register themselves"
+  ON employers FOR INSERT
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND created_by = auth.uid()
+    AND verification_status = 'pending'
+    AND verified_at IS NULL
+    AND verified_by IS NULL
+  );
+
+DROP POLICY IF EXISTS "Registrants and chambers can view employers" ON employers;
+CREATE POLICY "Registrants and chambers can view employers"
+  ON employers FOR SELECT
+  USING (
+    created_by = auth.uid()
+    OR (has_permission(auth.uid(), 'sme:verify') AND country_code = ANY(chamber_countries(auth.uid())))
+  );
+
+DROP POLICY IF EXISTS "Chambers can view verification events" ON employer_verification_events;
+CREATE POLICY "Chambers can view verification events"
+  ON employer_verification_events FOR SELECT
+  USING (
+    has_permission(auth.uid(), 'sme:verify')
+    AND EXISTS (
+      SELECT 1 FROM employers e
+      WHERE e.id = employer_verification_events.employer_id
+        AND e.country_code = ANY(chamber_countries(auth.uid()))
+    )
+  );
+
+-- ============================================================
+-- 4. Messaging safeguards
+-- ============================================================
+
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS is_supervised BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS institution_id UUID REFERENCES institutions(id) ON DELETE SET NULL;
+
+CREATE OR REPLACE FUNCTION conversation_has_student(p_conversation UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM conversation_participants cp
+    JOIN profiles p ON p.id = cp.user_id
+    WHERE cp.conversation_id = p_conversation AND 'student' = ANY(p.roles)
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION conversation_has_supervisor(p_conversation UUID)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM conversation_participants cp
+    WHERE cp.conversation_id = p_conversation
+      AND has_permission(cp.user_id, 'dm:supervise')
+  );
+$$;
+
+-- The rule: a thread containing a student must be a group thread with at
+-- least one designated educator in it. That makes unmonitored 1-on-1 contact
+-- between an adult and a minor unrepresentable rather than merely discouraged.
+CREATE OR REPLACE FUNCTION can_message(p_sender UUID, p_conversation UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_is_group BOOLEAN;
+BEGIN
+  IF p_sender IS NULL OR p_conversation IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  IF NOT is_conversation_participant(p_conversation, p_sender) THEN
+    RETURN FALSE;
+  END IF;
+
+  IF NOT has_permission(p_sender, 'dm:receive') THEN
+    RETURN FALSE;
+  END IF;
+
+  IF NOT conversation_has_student(p_conversation) THEN
+    RETURN TRUE;
+  END IF;
+
+  SELECT c.is_group INTO v_is_group FROM conversations c WHERE c.id = p_conversation;
+
+  RETURN COALESCE(v_is_group, FALSE) AND conversation_has_supervisor(p_conversation);
+END;
+$$;
+
+-- Keeps conversations.is_supervised in step with who is actually in the room,
+-- so the UI can label a channel without recomputing the predicate per render.
+CREATE OR REPLACE FUNCTION refresh_conversation_supervision()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_conversation UUID := COALESCE(NEW.conversation_id, OLD.conversation_id);
+BEGIN
+  UPDATE conversations
+  SET is_supervised = conversation_has_supervisor(v_conversation),
+      updated_at = now()
+  WHERE id = v_conversation;
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS refresh_conversation_supervision_trigger ON conversation_participants;
+CREATE TRIGGER refresh_conversation_supervision_trigger
+  AFTER INSERT OR DELETE ON conversation_participants
+  FOR EACH ROW
+  EXECUTE FUNCTION refresh_conversation_supervision();
+
+DROP POLICY IF EXISTS "Authenticated users can create conversations" ON conversations;
+CREATE POLICY "Authenticated users can create conversations"
+  ON conversations FOR INSERT
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND created_by = auth.uid()
+    AND has_permission(auth.uid(), 'dm:initiate')
+  );
+
+-- Blocks a 1-to-1 thread from ever containing a student, in either insert
+-- order: the student cannot be added to a direct thread, and nobody can be
+-- added to a direct thread that already holds one.
+DROP POLICY IF EXISTS "Authenticated users can add participants" ON conversation_participants;
+CREATE POLICY "Authenticated users can add participants"
+  ON conversation_participants FOR INSERT
+  WITH CHECK (
+    (
+      user_id = auth.uid()
+      OR is_conversation_creator(conversation_id, auth.uid())
+      OR is_conversation_admin(conversation_id, auth.uid())
+    )
+    AND (
+      EXISTS (SELECT 1 FROM conversations c WHERE c.id = conversation_id AND c.is_group)
+      OR (
+        NOT EXISTS (SELECT 1 FROM profiles p WHERE p.id = conversation_participants.user_id AND 'student' = ANY(p.roles))
+        AND NOT conversation_has_student(conversation_id)
+      )
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can send messages to own conversations" ON messages;
+CREATE POLICY "Users can send messages to own conversations"
+  ON messages FOR INSERT
+  WITH CHECK (
+    auth.uid() = sender_id
+    AND can_message(auth.uid(), conversation_id)
+  );
+
+-- ============================================================
+-- 5. Grant application safeguards
+-- ============================================================
+
+ALTER TABLE grant_applications ADD COLUMN IF NOT EXISTS sponsor_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
+ALTER TABLE grant_applications ADD COLUMN IF NOT EXISTS sponsor_approved_at TIMESTAMPTZ;
+ALTER TABLE grant_applications ADD COLUMN IF NOT EXISTS sponsor_note TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_grant_applications_sponsor
+  ON grant_applications(sponsor_id) WHERE sponsor_id IS NOT NULL;
+
+-- Drafting is allowed to anyone who can see grants, so a student can prepare
+-- an application; only leaving 'draft' requires the right to apply. Students
+-- never hold grant:apply (063 denies it in has_permission), so for them the
+-- only route out of draft is an accepted faculty sponsor.
+CREATE OR REPLACE FUNCTION enforce_grant_application_sponsor()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_is_student BOOLEAN;
+BEGIN
+  IF NEW.status = 'draft' THEN
+    RETURN NEW;
+  END IF;
+
+  IF TG_OP = 'UPDATE' AND OLD.status = NEW.status THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT 'student' = ANY(p.roles) INTO v_is_student FROM profiles p WHERE p.id = NEW.user_id;
+
+  IF COALESCE(v_is_student, FALSE) THEN
+    IF NEW.sponsor_id IS NULL THEN
+      RAISE EXCEPTION 'a student application requires a faculty or school sponsor';
+    END IF;
+    IF NEW.sponsor_approved_at IS NULL THEN
+      RAISE EXCEPTION 'the nominated sponsor has not accepted this application yet';
+    END IF;
+    IF NOT has_permission(NEW.sponsor_id, 'grant:sponsor') THEN
+      RAISE EXCEPTION 'the nominated sponsor is not permitted to sponsor applications';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  IF NOT has_permission(NEW.user_id, 'grant:apply') THEN
+    RAISE EXCEPTION 'this account is not permitted to submit grant applications';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS enforce_grant_application_sponsor_trigger ON grant_applications;
+CREATE TRIGGER enforce_grant_application_sponsor_trigger
+  BEFORE INSERT OR UPDATE ON grant_applications
+  FOR EACH ROW
+  EXECUTE FUNCTION enforce_grant_application_sponsor();
+
+DROP POLICY IF EXISTS "Users can create applications" ON grant_applications;
+CREATE POLICY "Users can create applications"
+  ON grant_applications FOR INSERT
+  WITH CHECK (
+    auth.uid() = user_id
+    AND (
+      has_permission(auth.uid(), 'grant:apply')
+      OR (status = 'draft' AND has_permission(auth.uid(), 'grant:view'))
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can update their own applications" ON grant_applications;
+CREATE POLICY "Users can update their own applications"
+  ON grant_applications FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (
+    auth.uid() = user_id
+    AND (
+      has_permission(auth.uid(), 'grant:apply')
+      OR status = 'draft'
+      OR sponsor_approved_at IS NOT NULL
+    )
+  );
+
+-- The sponsor's side of the handshake. A student nominates; the sponsor
+-- accepts here. Without this the student could name any faculty member and
+-- submit in their name.
+CREATE OR REPLACE FUNCTION review_grant_sponsorship(
+  p_application UUID,
+  p_accept BOOLEAN,
+  p_note TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_sponsor UUID;
+  v_applicant UUID;
+BEGIN
+  SELECT ga.sponsor_id, ga.user_id INTO v_sponsor, v_applicant
+  FROM grant_applications ga WHERE ga.id = p_application;
+
+  IF v_sponsor IS NULL THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'not_found');
+  END IF;
+
+  IF v_sponsor <> v_actor OR NOT has_permission(v_actor, 'grant:sponsor') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  UPDATE grant_applications
+  SET sponsor_approved_at = CASE WHEN p_accept THEN now() ELSE NULL END,
+      sponsor_id = CASE WHEN p_accept THEN sponsor_id ELSE NULL END,
+      sponsor_note = p_note,
+      updated_at = now()
+  WHERE id = p_application;
+
+  PERFORM send_notification(
+    v_applicant,
+    'grant_sponsorship',
+    CASE WHEN p_accept THEN 'Sponsor accepted' ELSE 'Sponsor declined' END,
+    COALESCE(p_note, CASE WHEN p_accept
+      THEN 'Your sponsor accepted. You can now submit this application.'
+      ELSE 'Your nominated sponsor declined this application.' END),
+    '/grants/my-applications'
+  );
+
+  RETURN jsonb_build_object('ok', TRUE, 'accepted', p_accept);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION review_grant_sponsorship(UUID, BOOLEAN, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION review_grant_sponsorship(UUID, BOOLEAN, TEXT) TO authenticated;
+
+-- A sponsor has to be able to read what they are being asked to vouch for.
+DROP POLICY IF EXISTS "Sponsors can view applications naming them" ON grant_applications;
+CREATE POLICY "Sponsors can view applications naming them"
+  ON grant_applications FOR SELECT
+  USING (sponsor_id = auth.uid());
+
+-- ============================================================
+-- 6. Permission gates on content creation
+-- ============================================================
+
+-- has_permission() already returns FALSE for a suspended account, so these
+-- double as the suspension gate.
+
+DROP POLICY IF EXISTS "Authenticated users can create posts" ON forum_posts;
+CREATE POLICY "Authenticated users can create posts"
+  ON forum_posts FOR INSERT
+  WITH CHECK (auth.uid() = author_id AND has_permission(auth.uid(), 'forum:post'));
+
+DROP POLICY IF EXISTS "Authenticated users can create replies" ON forum_replies;
+CREATE POLICY "Authenticated users can create replies"
+  ON forum_replies FOR INSERT
+  WITH CHECK (auth.uid() = author_id AND has_permission(auth.uid(), 'forum:comment'));
+
+DROP POLICY IF EXISTS "Authenticated users can comment" ON project_comments;
+CREATE POLICY "Authenticated users can comment"
+  ON project_comments FOR INSERT
+  WITH CHECK (
+    auth.uid() = user_id
+    AND has_permission(auth.uid(), 'forum:comment')
+    AND EXISTS (
+      SELECT 1 FROM projects
+      WHERE id = project_id
+      AND (is_public = TRUE OR owner_id = auth.uid())
+    )
+  );
+
+DROP POLICY IF EXISTS "Authenticated users can create projects" ON projects;
+CREATE POLICY "Authenticated users can create projects"
+  ON projects FOR INSERT
+  WITH CHECK (auth.uid() = owner_id AND has_permission(auth.uid(), 'project:create'));
+
+-- 003 left grants writable by ANY authenticated user, including UPDATE and
+-- DELETE of rows they did not create, with a comment deferring the fix. The
+-- grant:post permission is that fix.
+DROP POLICY IF EXISTS "Authenticated users can create grants" ON grants;
+CREATE POLICY "Authenticated users can create grants"
+  ON grants FOR INSERT
+  WITH CHECK (has_permission(auth.uid(), 'grant:post'));
+
+DROP POLICY IF EXISTS "Users can update grants they created" ON grants;
+CREATE POLICY "Users can update grants they created"
+  ON grants FOR UPDATE
+  USING (has_permission(auth.uid(), 'grant:post'));
+
+DROP POLICY IF EXISTS "Users can delete grants they created" ON grants;
+CREATE POLICY "Users can delete grants they created"
+  ON grants FOR DELETE
+  USING (has_permission(auth.uid(), 'grant:post'));
+
+-- ============================================================
+-- 7. RLS
+-- ============================================================
+
+ALTER TABLE institutions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE institution_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_safeguarding ENABLE ROW LEVEL SECURITY;
+
+-- Verified institutions are public: the signup screen has to tell a student
+-- whether their school is recognised before they try.
+DROP POLICY IF EXISTS "Verified institutions are public" ON institutions;
+CREATE POLICY "Verified institutions are public"
+  ON institutions FOR SELECT
+  USING (
+    status = 'verified'
+    OR created_by = auth.uid()
+    OR has_permission(auth.uid(), 'institution:verify')
+  );
+
+DROP POLICY IF EXISTS "Authenticated users can register an institution" ON institutions;
+CREATE POLICY "Authenticated users can register an institution"
+  ON institutions FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL AND created_by = auth.uid() AND status = 'pending');
+
+DROP POLICY IF EXISTS "Institution verifiers can review" ON institutions;
+CREATE POLICY "Institution verifiers can review"
+  ON institutions FOR UPDATE
+  USING (has_permission(auth.uid(), 'institution:verify') OR is_institution_admin(id, auth.uid()))
+  WITH CHECK (has_permission(auth.uid(), 'institution:verify') OR is_institution_admin(id, auth.uid()));
+
+DROP POLICY IF EXISTS "Members can view their institution roster" ON institution_members;
+CREATE POLICY "Members can view their institution roster"
+  ON institution_members FOR SELECT
+  USING (
+    user_id = auth.uid()
+    OR is_institution_admin(institution_id, auth.uid())
+    OR has_permission(auth.uid(), 'institution:verify')
+  );
+
+DROP POLICY IF EXISTS "Users can request membership" ON institution_members;
+CREATE POLICY "Users can request membership"
+  ON institution_members FOR INSERT
+  WITH CHECK (auth.uid() = user_id AND status = 'pending');
+
+DROP POLICY IF EXISTS "Institution admins can manage the roster" ON institution_members;
+CREATE POLICY "Institution admins can manage the roster"
+  ON institution_members FOR UPDATE
+  USING (is_institution_admin(institution_id, auth.uid()) OR has_permission(auth.uid(), 'institution:verify'));
+
+-- Safeguarding records describe a minor. Readable by the student, their
+-- institution's staff, and safety admins — nobody else, including other
+-- platform admins without the moderation permission.
+DROP POLICY IF EXISTS "Safeguarding records are restricted" ON student_safeguarding;
+CREATE POLICY "Safeguarding records are restricted"
+  ON student_safeguarding FOR SELECT
+  USING (
+    user_id = auth.uid()
+    OR is_institution_admin(institution_id, auth.uid())
+    OR has_permission(auth.uid(), 'moderation:view')
+  );
+
+DROP POLICY IF EXISTS "Students can maintain their own safeguarding record" ON student_safeguarding;
+CREATE POLICY "Students can maintain their own safeguarding record"
+  ON student_safeguarding FOR UPDATE
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+NOTIFY pgrst, 'reload schema';
+
+
+-- ============================================================
+-- 065_moderation.sql
+-- ============================================================
+
+-- Migration 065: Content reporting and automated moderation
+--
+-- What exists today: grievances (018), which reports a PERSON. There is no way
+-- to report a post, a reply, a comment or a message, and no way to hide one —
+-- forum_posts has is_pinned and nothing else, and its SELECT policy is
+-- USING (TRUE), so content is world-readable the instant it is written.
+--
+-- Two design points worth stating up front.
+--
+-- Enforcement is at INSERT, not after. `messages` is in the supabase_realtime
+-- publication (004): the client is subscribed to INSERT events, so a row that
+-- is written and then hidden has already been delivered to the recipient's
+-- open socket. Anything that must never be seen has to be classified before
+-- the row lands, which is why scan_content() is a deterministic BEFORE INSERT
+-- trigger rather than a call out to a model. api/moderate.ts adds an LLM
+-- second opinion afterwards, for triage only — it never gates delivery.
+--
+-- The SELECT policies here REPLACE the permissive ones. RLS ORs policies
+-- together, so adding a status-aware policy alongside USING (TRUE) would hide
+-- nothing at all.
+--
+-- Idempotent — safe to re-run. Requires 063 and 064.
+
+-- ============================================================
+-- 1. Content status
+-- ============================================================
+
+ALTER TABLE forum_posts ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE project_comments ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+
+ALTER TABLE forum_posts DROP CONSTRAINT IF EXISTS forum_posts_status_check;
+ALTER TABLE forum_posts ADD CONSTRAINT forum_posts_status_check
+  CHECK (status IN ('active', 'quarantined', 'removed'));
+ALTER TABLE forum_replies DROP CONSTRAINT IF EXISTS forum_replies_status_check;
+ALTER TABLE forum_replies ADD CONSTRAINT forum_replies_status_check
+  CHECK (status IN ('active', 'quarantined', 'removed'));
+ALTER TABLE project_comments DROP CONSTRAINT IF EXISTS project_comments_status_check;
+ALTER TABLE project_comments ADD CONSTRAINT project_comments_status_check
+  CHECK (status IN ('active', 'quarantined', 'removed'));
+ALTER TABLE messages DROP CONSTRAINT IF EXISTS messages_status_check;
+ALTER TABLE messages ADD CONSTRAINT messages_status_check
+  CHECK (status IN ('active', 'quarantined', 'removed'));
+
+ALTER TABLE forum_posts ADD COLUMN IF NOT EXISTS moderation_severity TEXT;
+ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS moderation_severity TEXT;
+ALTER TABLE project_comments ADD COLUMN IF NOT EXISTS moderation_severity TEXT;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS moderation_severity TEXT;
+
+ALTER TABLE forum_posts ADD COLUMN IF NOT EXISTS quarantined_at TIMESTAMPTZ;
+ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS quarantined_at TIMESTAMPTZ;
+ALTER TABLE project_comments ADD COLUMN IF NOT EXISTS quarantined_at TIMESTAMPTZ;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS quarantined_at TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS idx_forum_posts_status ON forum_posts(status) WHERE status <> 'active';
+CREATE INDEX IF NOT EXISTS idx_forum_replies_status ON forum_replies(status) WHERE status <> 'active';
+CREATE INDEX IF NOT EXISTS idx_project_comments_status ON project_comments(status) WHERE status <> 'active';
+CREATE INDEX IF NOT EXISTS idx_messages_status ON messages(status) WHERE status <> 'active';
+
+-- ============================================================
+-- 2. Configuration
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS moderation_settings (
+  id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  -- N distinct reporters within X minutes auto-quarantines the target.
+  report_threshold INTEGER NOT NULL DEFAULT 3 CHECK (report_threshold > 0),
+  report_window_minutes INTEGER NOT NULL DEFAULT 1440 CHECK (report_window_minutes > 0),
+  auto_quarantine_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  low_action TEXT NOT NULL DEFAULT 'warned',
+  medium_action TEXT NOT NULL DEFAULT 'quarantined',
+  high_action TEXT NOT NULL DEFAULT 'suspended',
+  updated_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO moderation_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- Term list. country_code scopes a regional slur to the one member state where
+-- it is a slur, so a word that is innocuous in Dominica is not flagged there
+-- because it is offensive elsewhere.
+CREATE TABLE IF NOT EXISTS moderation_terms (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  pattern TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'term' CHECK (kind IN ('term', 'regex')),
+  severity TEXT NOT NULL CHECK (severity IN ('low', 'medium', 'high')),
+  category TEXT CHECK (category IS NULL OR category IN (
+    'hate_harassment', 'bullying', 'nsfw', 'spam_scam', 'grooming_risk', 'pii_leak'
+  )),
+  country_code CHAR(2) REFERENCES countries(code),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  note TEXT,
+  created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Expression index rather than a table constraint: a global rule and a
+-- country-scoped rule may share a pattern, but two global ones may not.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_moderation_terms_unique
+  ON moderation_terms (pattern, COALESCE(country_code, 'ZZ'));
+
+CREATE INDEX IF NOT EXISTS idx_moderation_terms_active ON moderation_terms(severity) WHERE is_active;
+
+-- Seed: PII and grooming patterns only. Slur lists are intentionally NOT
+-- shipped in source control — they are regional, they change, and they belong
+-- to the safety team. Admins add them from /admin/moderation.
+INSERT INTO moderation_terms (pattern, kind, severity, category, note) VALUES
+  ('(\+?\d[\d\s().-]{7,}\d)', 'regex', 'medium', 'pii_leak', 'Phone number'),
+  ('([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})', 'regex', 'low', 'pii_leak', 'Email address'),
+  ('(\d{1,5}\s+[A-Za-z0-9.\s]{3,40}\s+(street|st|road|rd|avenue|ave|lane|ln|drive|dr))', 'regex', 'medium', 'pii_leak', 'Street address'),
+  ('((instagram|snapchat|tiktok|telegram|whatsapp|wa\.me)\.?(com)?/[A-Za-z0-9_.]+)', 'regex', 'medium', 'pii_leak', 'Personal social link'),
+  ('(don''?t tell (your |any)?(parents|mum|mom|dad|teacher))', 'regex', 'high', 'grooming_risk', 'Secrecy request'),
+  ('(keep this (a )?secret between us)', 'regex', 'high', 'grooming_risk', 'Secrecy request'),
+  ('(how old are you|what''?s your age).{0,40}(send|pic|photo|alone)', 'regex', 'high', 'grooming_risk', 'Age probing plus solicitation'),
+  ('(meet me|come over).{0,30}(alone|without)', 'regex', 'high', 'grooming_risk', 'Isolation request')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- 3. Reports
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS content_reports (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  reporter_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  target_type TEXT NOT NULL CHECK (target_type IN (
+    'forum_post', 'forum_reply', 'project', 'project_comment', 'message', 'profile', 'grant'
+  )),
+  target_id UUID NOT NULL,
+  target_author_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  category TEXT NOT NULL CHECK (category IN (
+    'hate_harassment', 'bullying', 'nsfw', 'spam_scam', 'grooming_risk', 'pii_leak'
+  )),
+  detail TEXT,
+  -- Frozen at report time so triage survives the author editing or deleting.
+  content_snapshot TEXT,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'reviewing', 'actioned', 'dismissed')),
+  severity TEXT CHECK (severity IS NULL OR severity IN ('low', 'medium', 'high')),
+  admin_notes TEXT,
+  resolved_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- One report per person per item: the auto-quarantine threshold counts
+  -- reporters, so it must not be gameable by one user filing repeatedly.
+  UNIQUE (reporter_id, target_type, target_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_reports_target ON content_reports(target_type, target_id);
+CREATE INDEX IF NOT EXISTS idx_content_reports_open ON content_reports(created_at DESC) WHERE status = 'open';
+
+-- Append-only. Written by SECURITY DEFINER functions only — no write policies,
+-- the pattern 059 uses for api_access_log.
+CREATE TABLE IF NOT EXISTS moderation_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  actor_kind TEXT NOT NULL CHECK (actor_kind IN ('system', 'admin', 'reporter')),
+  actor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  target_type TEXT,
+  target_id UUID,
+  severity TEXT CHECK (severity IS NULL OR severity IN ('low', 'medium', 'high')),
+  action TEXT NOT NULL CHECK (action IN (
+    'flagged', 'warned', 'quarantined', 'restored', 'removed', 'suspended', 'escalated'
+  )),
+  detail JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_moderation_log_created ON moderation_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_moderation_log_user ON moderation_log(user_id);
+
+-- ============================================================
+-- 4. Scanner
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION scan_content(p_text TEXT, p_country CHAR(2) DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_rule RECORD;
+  v_matches JSONB := '[]'::JSONB;
+  v_rank INTEGER := 0;  -- 0 none, 1 low, 2 medium, 3 high
+  v_hit BOOLEAN;
+BEGIN
+  IF p_text IS NULL OR length(btrim(p_text)) = 0 THEN
+    RETURN jsonb_build_object('severity', NULL, 'matches', v_matches);
+  END IF;
+
+  -- Ordered high-first so matches[0] names the worst rule, which is what the
+  -- quarantine record uses as its category.
+
+  FOR v_rule IN
+    SELECT id, pattern, kind, severity, category
+    FROM moderation_terms
+    WHERE is_active
+      AND (country_code IS NULL OR country_code = p_country)
+    ORDER BY CASE severity WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END DESC
+  LOOP
+    IF v_rule.kind = 'regex' THEN
+      v_hit := p_text ~* v_rule.pattern;
+    ELSE
+      -- Word-boundary match so "class" does not trip a rule for "ass".
+      v_hit := p_text ~* ('\m' || regexp_replace(v_rule.pattern, '([.^$*+?()\[\]{}|\\])', '\\\1', 'g') || '\M');
+    END IF;
+
+    IF v_hit THEN
+      v_matches := v_matches || jsonb_build_object(
+        'rule_id', v_rule.id,
+        'severity', v_rule.severity,
+        'category', v_rule.category
+      );
+
+      -- Highest severity across all matched rules wins.
+      v_rank := GREATEST(v_rank, CASE v_rule.severity
+        WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END);
+    END IF;
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'severity', CASE v_rank WHEN 3 THEN 'high' WHEN 2 THEN 'medium' WHEN 1 THEN 'low' ELSE NULL END,
+    'matches', v_matches
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION scan_content(TEXT, CHAR) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION scan_content(TEXT, CHAR) TO authenticated;
+
+-- ============================================================
+-- 5. Insert-time moderation
+-- ============================================================
+
+-- One trigger for all four content tables. The column holding the text and
+-- the column holding the author differ per table, so both are passed as
+-- trigger arguments rather than branching on TG_TABLE_NAME.
+--   TG_ARGV[0] = text column, TG_ARGV[1] = author column
+CREATE OR REPLACE FUNCTION moderate_content()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_text TEXT;
+  v_author UUID;
+  v_country CHAR(2);
+  v_scan JSONB;
+  v_severity TEXT;
+  v_settings moderation_settings%ROWTYPE;
+  v_row JSONB := to_jsonb(NEW);
+  v_target TEXT;
+BEGIN
+  v_text := v_row ->> TG_ARGV[0];
+  v_author := (v_row ->> TG_ARGV[1])::UUID;
+
+  -- content_reports.target_type is singular; TG_TABLE_NAME is the plural table.
+  v_target := CASE TG_TABLE_NAME
+    WHEN 'forum_posts' THEN 'forum_post'
+    WHEN 'forum_replies' THEN 'forum_reply'
+    WHEN 'project_comments' THEN 'project_comment'
+    WHEN 'messages' THEN 'message'
+    ELSE TG_TABLE_NAME
+  END;
+
+  SELECT * INTO v_settings FROM moderation_settings WHERE id = 1;
+
+  SELECT upper(left(COALESCE(p.country, ''), 2)) INTO v_country FROM profiles p WHERE p.id = v_author;
+
+  v_scan := scan_content(v_text, NULLIF(v_country, ''));
+  v_severity := v_scan ->> 'severity';
+
+  IF v_severity IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  NEW.moderation_severity := v_severity;
+
+  IF v_severity = 'low' THEN
+    INSERT INTO moderation_log (actor_kind, user_id, target_type, target_id, severity, action, detail)
+    VALUES ('system', v_author, v_target, NEW.id, 'low', 'flagged', v_scan);
+
+    PERFORM send_notification(
+      v_author,
+      'moderation_warning',
+      'Community guidelines reminder',
+      'Something you posted was flagged by our automated filter. Please review the community guidelines.',
+      '/help'
+    );
+
+    RETURN NEW;
+  END IF;
+
+  -- medium and high are both withheld from view immediately.
+  NEW.status := 'quarantined';
+  NEW.quarantined_at := now();
+
+  INSERT INTO moderation_log (actor_kind, user_id, target_type, target_id, severity, action, detail)
+  VALUES ('system', v_author, v_target, NEW.id, v_severity, 'quarantined', v_scan);
+
+  -- Enters the same queue a human report would, so moderators triage one list.
+  -- reporter_id = author is what marks the row as machine-generated.
+  INSERT INTO content_reports (reporter_id, target_type, target_id, target_author_id, category, detail, content_snapshot, severity, status)
+  VALUES (
+    v_author,
+    v_target,
+    NEW.id,
+    v_author,
+    COALESCE((v_scan -> 'matches' -> 0 ->> 'category'), 'hate_harassment'),
+    'Automatically flagged by the content filter.',
+    left(v_text, 2000),
+    v_severity,
+    'open'
+  )
+  ON CONFLICT (reporter_id, target_type, target_id) DO NOTHING;
+
+  IF v_severity = 'high' THEN
+    PERFORM set_config('ktip.bypass_profile_guard', 'on', TRUE);
+    UPDATE profiles
+    SET is_suspended = TRUE,
+        suspension_reason = 'Automated safety escalation pending review',
+        updated_at = now()
+    WHERE id = v_author;
+    PERFORM set_config('ktip.bypass_profile_guard', 'off', TRUE);
+
+    INSERT INTO moderation_log (actor_kind, user_id, target_type, target_id, severity, action, detail)
+    VALUES ('system', v_author, v_target, NEW.id, 'high', 'suspended', v_scan);
+
+    PERFORM escalate_to_safety(v_author, v_target, NEW.id, v_severity);
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+-- High-severity events reach the safety team AND, when the author is a
+-- school-verified student, the staff of their institution. That second hop is
+-- the safeguarding requirement — a school has to know.
+CREATE OR REPLACE FUNCTION escalate_to_safety(
+  p_user UUID,
+  p_target_type TEXT,
+  p_target_id UUID,
+  p_severity TEXT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_admin RECORD;
+BEGIN
+  FOR v_admin IN
+    SELECT p.id FROM profiles p
+    WHERE has_permission(p.id, 'moderation:escalate') AND p.id <> p_user
+  LOOP
+    PERFORM send_notification(
+      v_admin.id,
+      'moderation_escalation',
+      'High-severity content flagged',
+      'Automated moderation quarantined a ' || p_target_type || ' and suspended the author pending review.',
+      '/admin/moderation'
+    );
+  END LOOP;
+
+  FOR v_admin IN
+    SELECT im.user_id FROM institution_members im
+    JOIN student_safeguarding ss ON ss.institution_id = im.institution_id
+    WHERE ss.user_id = p_user
+      AND im.status = 'approved'
+      AND im.role IN ('admin', 'educator')
+  LOOP
+    PERFORM send_notification(
+      v_admin.user_id,
+      'moderation_escalation',
+      'Safety escalation for one of your students',
+      'A student registered to your institution triggered a high-severity safety flag. The safety team has been notified.',
+      '/institutions'
+    );
+  END LOOP;
+
+  INSERT INTO moderation_log (actor_kind, user_id, target_type, target_id, severity, action)
+  VALUES ('system', p_user, p_target_type, p_target_id, p_severity, 'escalated');
+END;
+$$;
+
+DROP TRIGGER IF EXISTS moderate_forum_posts_trigger ON forum_posts;
+CREATE TRIGGER moderate_forum_posts_trigger
+  BEFORE INSERT ON forum_posts
+  FOR EACH ROW
+  EXECUTE FUNCTION moderate_content('content', 'author_id');
+
+DROP TRIGGER IF EXISTS moderate_forum_replies_trigger ON forum_replies;
+CREATE TRIGGER moderate_forum_replies_trigger
+  BEFORE INSERT ON forum_replies
+  FOR EACH ROW
+  EXECUTE FUNCTION moderate_content('content', 'author_id');
+
+DROP TRIGGER IF EXISTS moderate_project_comments_trigger ON project_comments;
+CREATE TRIGGER moderate_project_comments_trigger
+  BEFORE INSERT ON project_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION moderate_content('content', 'user_id');
+
+DROP TRIGGER IF EXISTS moderate_messages_trigger ON messages;
+CREATE TRIGGER moderate_messages_trigger
+  BEFORE INSERT ON messages
+  FOR EACH ROW
+  EXECUTE FUNCTION moderate_content('content', 'sender_id');
+
+-- ============================================================
+-- 6. Report-driven auto-quarantine
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION set_content_status(
+  p_target_type TEXT,
+  p_target_id UUID,
+  p_status TEXT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF p_target_type = 'forum_post' OR p_target_type = 'forum_posts' THEN
+    UPDATE forum_posts SET status = p_status,
+      quarantined_at = CASE WHEN p_status = 'quarantined' THEN now() ELSE NULL END
+      WHERE id = p_target_id;
+  ELSIF p_target_type = 'forum_reply' OR p_target_type = 'forum_replies' THEN
+    UPDATE forum_replies SET status = p_status,
+      quarantined_at = CASE WHEN p_status = 'quarantined' THEN now() ELSE NULL END
+      WHERE id = p_target_id;
+  ELSIF p_target_type = 'project_comment' OR p_target_type = 'project_comments' THEN
+    UPDATE project_comments SET status = p_status,
+      quarantined_at = CASE WHEN p_status = 'quarantined' THEN now() ELSE NULL END
+      WHERE id = p_target_id;
+  ELSIF p_target_type = 'message' OR p_target_type = 'messages' THEN
+    UPDATE messages SET status = p_status,
+      quarantined_at = CASE WHEN p_status = 'quarantined' THEN now() ELSE NULL END
+      WHERE id = p_target_id;
+  END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION apply_report_threshold()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_settings moderation_settings%ROWTYPE;
+  v_count INTEGER;
+BEGIN
+  SELECT * INTO v_settings FROM moderation_settings WHERE id = 1;
+
+  IF NOT v_settings.auto_quarantine_enabled THEN
+    RETURN NEW;
+  END IF;
+
+  -- Distinct reporters, not distinct reports: the UNIQUE constraint on
+  -- (reporter, target) already makes those the same thing, but counting
+  -- reporters states the intent.
+  SELECT COUNT(DISTINCT cr.reporter_id) INTO v_count
+  FROM content_reports cr
+  WHERE cr.target_type = NEW.target_type
+    AND cr.target_id = NEW.target_id
+    AND cr.created_at > now() - make_interval(mins => v_settings.report_window_minutes);
+
+  IF v_count >= v_settings.report_threshold THEN
+    PERFORM set_content_status(NEW.target_type, NEW.target_id, 'quarantined');
+
+    INSERT INTO moderation_log (actor_kind, user_id, target_type, target_id, severity, action, detail)
+    VALUES ('reporter', NEW.target_author_id, NEW.target_type, NEW.target_id, NEW.severity, 'quarantined',
+            jsonb_build_object('reports', v_count, 'threshold', v_settings.report_threshold));
+
+    IF NEW.category = 'grooming_risk' AND NEW.target_author_id IS NOT NULL THEN
+      PERFORM escalate_to_safety(NEW.target_author_id, NEW.target_type, NEW.target_id, 'high');
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS apply_report_threshold_trigger ON content_reports;
+CREATE TRIGGER apply_report_threshold_trigger
+  AFTER INSERT ON content_reports
+  FOR EACH ROW
+  EXECUTE FUNCTION apply_report_threshold();
+
+-- Admin action from the moderation queue.
+CREATE OR REPLACE FUNCTION moderate_report(
+  p_report UUID,
+  p_action TEXT,
+  p_notes TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor UUID := auth.uid();
+  v_report content_reports%ROWTYPE;
+BEGIN
+  IF NOT has_permission(v_actor, 'moderation:action') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'forbidden');
+  END IF;
+
+  IF p_action NOT IN ('restore', 'quarantine', 'remove', 'dismiss') THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'bad_action');
+  END IF;
+
+  SELECT * INTO v_report FROM content_reports WHERE id = p_report;
+  IF v_report.id IS NULL THEN
+    RETURN jsonb_build_object('ok', FALSE, 'reason', 'not_found');
+  END IF;
+
+  IF p_action = 'restore' THEN
+    PERFORM set_content_status(v_report.target_type, v_report.target_id, 'active');
+  ELSIF p_action = 'quarantine' THEN
+    PERFORM set_content_status(v_report.target_type, v_report.target_id, 'quarantined');
+  ELSIF p_action = 'remove' THEN
+    PERFORM set_content_status(v_report.target_type, v_report.target_id, 'removed');
+  END IF;
+
+  UPDATE content_reports
+  SET status = CASE WHEN p_action = 'dismiss' THEN 'dismissed' ELSE 'actioned' END,
+      admin_notes = COALESCE(p_notes, admin_notes),
+      resolved_by = v_actor,
+      resolved_at = now(),
+      updated_at = now()
+  WHERE id = p_report;
+
+  INSERT INTO moderation_log (actor_kind, actor_id, user_id, target_type, target_id, severity, action, detail)
+  VALUES ('admin', v_actor, v_report.target_author_id, v_report.target_type, v_report.target_id, v_report.severity,
+          CASE p_action
+            WHEN 'restore' THEN 'restored'
+            WHEN 'quarantine' THEN 'quarantined'
+            WHEN 'remove' THEN 'removed'
+            ELSE 'flagged'
+          END,
+          jsonb_build_object('report_id', p_report, 'notes', p_notes));
+
+  RETURN jsonb_build_object('ok', TRUE);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION moderate_report(UUID, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION moderate_report(UUID, TEXT, TEXT) TO authenticated;
+
+-- ============================================================
+-- 7. Visibility — these REPLACE the permissive policies
+-- ============================================================
+
+DROP POLICY IF EXISTS "Anyone can view posts" ON forum_posts;
+CREATE POLICY "Anyone can view posts"
+  ON forum_posts FOR SELECT
+  USING (
+    status = 'active'
+    OR author_id = auth.uid()
+    OR has_permission(auth.uid(), 'moderation:view')
+  );
+
+DROP POLICY IF EXISTS "Anyone can view replies" ON forum_replies;
+CREATE POLICY "Anyone can view replies"
+  ON forum_replies FOR SELECT
+  USING (
+    status = 'active'
+    OR author_id = auth.uid()
+    OR has_permission(auth.uid(), 'moderation:view')
+  );
+
+DROP POLICY IF EXISTS "Comments on public projects are viewable" ON project_comments;
+CREATE POLICY "Comments on public projects are viewable"
+  ON project_comments FOR SELECT
+  USING (
+    (status = 'active' OR user_id = auth.uid() OR has_permission(auth.uid(), 'moderation:view'))
+    AND EXISTS (
+      SELECT 1 FROM projects
+      WHERE id = project_id
+      AND (is_public = TRUE OR owner_id = auth.uid())
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can view messages in own conversations" ON messages;
+CREATE POLICY "Users can view messages in own conversations"
+  ON messages FOR SELECT
+  USING (
+    (status = 'active' OR sender_id = auth.uid() OR has_permission(auth.uid(), 'moderation:view'))
+    AND EXISTS (
+      SELECT 1 FROM conversation_participants
+      WHERE conversation_id = messages.conversation_id
+      AND user_id = auth.uid()
+    )
+  );
+
+-- Counts have to agree with what the policies show, the same way 045 patched
+-- get_grant_application_count to stop counting drafts.
+CREATE OR REPLACE FUNCTION get_board_post_count(board_uuid UUID)
+RETURNS INTEGER AS $$
+  SELECT COUNT(*)::INTEGER FROM forum_posts WHERE board_id = board_uuid AND status = 'active';
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION get_post_reply_count(post_uuid UUID)
+RETURNS INTEGER AS $$
+  SELECT COUNT(*)::INTEGER FROM forum_replies WHERE post_id = post_uuid AND status = 'active';
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION get_board_latest_post(board_uuid UUID)
+RETURNS TIMESTAMP WITH TIME ZONE AS $$
+  SELECT MAX(created_at) FROM forum_posts WHERE board_id = board_uuid AND status = 'active';
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION get_project_comment_count(project_uuid UUID)
+RETURNS INTEGER AS $$
+  SELECT COUNT(*)::INTEGER FROM project_comments WHERE project_id = project_uuid AND status = 'active';
+$$ LANGUAGE SQL STABLE;
+
+-- ============================================================
+-- 8. Queue
+-- ============================================================
+
+-- security_invoker: the view must be filtered by the caller's RLS on
+-- content_reports, not by the (superuser) view owner's.
+CREATE OR REPLACE VIEW moderation_queue WITH (security_invoker = true) AS
+SELECT
+  cr.id,
+  CASE WHEN cr.reporter_id = cr.target_author_id THEN 'automated' ELSE 'report' END AS source,
+  cr.target_type,
+  cr.target_id,
+  cr.target_author_id,
+  cr.category,
+  cr.severity,
+  cr.status,
+  cr.content_snapshot,
+  cr.created_at,
+  (SELECT COUNT(*)::INTEGER FROM content_reports x
+   WHERE x.target_type = cr.target_type AND x.target_id = cr.target_id) AS report_count
+FROM content_reports cr;
+
+-- ============================================================
+-- 9. RLS
+-- ============================================================
+
+ALTER TABLE content_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE moderation_terms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE moderation_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE moderation_log ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view their own reports" ON content_reports;
+CREATE POLICY "Users can view their own reports"
+  ON content_reports FOR SELECT
+  USING (reporter_id = auth.uid() OR has_permission(auth.uid(), 'moderation:view'));
+
+DROP POLICY IF EXISTS "Authenticated users can report content" ON content_reports;
+CREATE POLICY "Authenticated users can report content"
+  ON content_reports FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = reporter_id AND status = 'open');
+
+DROP POLICY IF EXISTS "Moderators can triage reports" ON content_reports;
+CREATE POLICY "Moderators can triage reports"
+  ON content_reports FOR UPDATE
+  USING (has_permission(auth.uid(), 'moderation:action'));
+
+-- The term list is a map of what the filter looks for. Restricted to
+-- moderators so it cannot be read for evasion.
+DROP POLICY IF EXISTS "Moderators can view terms" ON moderation_terms;
+CREATE POLICY "Moderators can view terms"
+  ON moderation_terms FOR SELECT
+  USING (has_permission(auth.uid(), 'moderation:view'));
+
+DROP POLICY IF EXISTS "Moderators can manage terms" ON moderation_terms;
+CREATE POLICY "Moderators can manage terms"
+  ON moderation_terms FOR ALL
+  USING (has_permission(auth.uid(), 'moderation:action'))
+  WITH CHECK (has_permission(auth.uid(), 'moderation:action'));
+
+DROP POLICY IF EXISTS "Moderators can view settings" ON moderation_settings;
+CREATE POLICY "Moderators can view settings"
+  ON moderation_settings FOR SELECT
+  USING (has_permission(auth.uid(), 'moderation:view'));
+
+DROP POLICY IF EXISTS "Moderators can change settings" ON moderation_settings;
+CREATE POLICY "Moderators can change settings"
+  ON moderation_settings FOR UPDATE
+  USING (has_permission(auth.uid(), 'moderation:action'))
+  WITH CHECK (has_permission(auth.uid(), 'moderation:action'));
+
+DROP POLICY IF EXISTS "Auditors can view the moderation log" ON moderation_log;
+CREATE POLICY "Auditors can view the moderation log"
+  ON moderation_log FOR SELECT
+  USING (has_permission(auth.uid(), 'audit:view') OR has_permission(auth.uid(), 'moderation:view'));
+
+-- No write policies on moderation_log: it is written only by the SECURITY
+-- DEFINER functions above.
 
 NOTIFY pgrst, 'reload schema';

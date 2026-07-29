@@ -7,7 +7,7 @@ export default function ResearchTab() {
       title="Research"
       blurb="Your publications, student projects and the research collaborations you're part of."
       icon={FlaskConical}
-      roles={['faculty']}
+      roles={['faculty', 'researcher']}
     />
   )
 }

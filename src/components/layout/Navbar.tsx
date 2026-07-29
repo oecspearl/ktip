@@ -34,6 +34,7 @@ import {
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
 import { NavbarSearchPanel } from './NavbarSearchPanel'
+import { RoleSwitcher } from './RoleSwitcher'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
@@ -672,6 +673,7 @@ export function Navbar() {
                 {/* User Dropdown Menu */}
                 {userMenuOpen && (
                   <div role="menu" className="absolute right-0 mt-2 w-56 bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 py-2 animate-scale-in">
+                    <RoleSwitcher onSwitch={() => setUserMenuOpen(false)} />
                     <Link
                       to="/dashboard"
                       onClick={() => setUserMenuOpen(false)}

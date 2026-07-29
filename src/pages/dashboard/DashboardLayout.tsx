@@ -22,7 +22,7 @@ export default function DashboardLayout() {
 
   const profile = auth.profile
   const displayName = profile?.display_name || 'Your dashboard'
-  const tabs = visibleDashboardTabs(profile?.roles)
+  const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role)
 
   return (
     <>

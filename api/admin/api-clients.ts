@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { requirePermission } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -49,31 +49,9 @@ async function sha256Hex(value: string): Promise<string> {
 export default async function handler(request: Request) {
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
-  const supabaseUrl = process.env.VITE_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY
-  if (!supabaseUrl || !serviceKey || !anonKey) {
-    return json({ error: 'Server configuration error' }, 503)
-  }
-
-  const authHeader = request.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401)
-
-  const callerClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
-  })
-
-  const { data: { user: caller } } = await callerClient.auth.getUser()
-  if (!caller) return json({ error: 'Unauthorized' }, 401)
-
-  const { data: profile } = await callerClient
-    .from('profiles')
-    .select('roles')
-    .eq('id', caller.id)
-    .single()
-  if (!profile?.roles?.includes('oecs')) {
-    return json({ error: 'Forbidden: admin access required' }, 403)
-  }
+  const guard = await requirePermission(request, 'org:manage')
+  if (!guard.ok) return guard.response
+  const { callerId, adminClient: admin } = guard
 
   let body: any
   try {
@@ -82,7 +60,6 @@ export default async function handler(request: Request) {
     return json({ error: 'Invalid JSON body' }, 400)
   }
 
-  const admin = createClient(supabaseUrl, serviceKey)
   const action = String(body?.action ?? '')
 
   // ---- list -------------------------------------------------------------
@@ -121,7 +98,7 @@ export default async function handler(request: Request) {
         key_prefix: prefix,
         key_hash: keyHash,
         scopes,
-        created_by: caller.id,
+        created_by: callerId,
       })
       .select('id,name,key_prefix,scopes,created_at')
       .single()

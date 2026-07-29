@@ -8,6 +8,7 @@ import { useMyVerificationRequest, useSubmitVerification } from '../../hooks/use
 import { useFileDrop } from '../../hooks/useFileDrop'
 import { BadgeCheck, Clock, XCircle, Upload, FileText, X } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
+import { StudentVerificationCard } from '../../components/safeguarding/StudentVerificationCard'
 
 const MAX_FILES = 3
 const MAX_SIZE = 10 * 1024 * 1024 // matches the bucket limit
@@ -74,6 +75,10 @@ export function VerificationTab() {
 
   return (
     <div className="space-y-6">
+      {/* School verification is a separate track from identity KYC below: the
+          evidence is the account's email domain, and a school approves it. */}
+      <StudentVerificationCard />
+
       <Card>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">

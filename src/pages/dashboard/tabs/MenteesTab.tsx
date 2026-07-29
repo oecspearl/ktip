@@ -7,7 +7,7 @@ export default function MenteesTab() {
       title="Mentees"
       blurb="The innovators you're guiding — their projects, milestones and the sessions you have scheduled."
       icon={GraduationCap}
-      roles={['mentor']}
+      roles={['mentor', 'faculty']}
     />
   )
 }

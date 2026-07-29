@@ -137,6 +137,7 @@ const router = createBrowserRouter([
               { path: '/collaborate/code/:id', lazy: lazyPage(() => import('./pages/collaborate/CodeEditorPage')) },
               { path: '/collaborate/video', lazy: lazyPage(() => import('./pages/collaborate/VideoConferencePage')) },
               { path: '/invitations', lazy: lazyPage(() => import('./pages/InvitationsPage')) },
+              { path: '/sme/verification', lazy: lazyPage(() => import('./pages/sme/ChamberOnboardingPage')) },
             ],
           },
 
@@ -156,6 +157,10 @@ const router = createBrowserRouter([
                   { path: '/admin/events', lazy: lazyPage(() => import('./pages/admin/events/AdminEventsPage')) },
                   { path: '/admin/events/:id', lazy: lazyPage(() => import('./pages/admin/events/AdminEventDetailPage')) },
                   { path: '/admin/users', lazy: lazyPage(() => import('./pages/admin/users/AdminUsersPage')) },
+                  { path: '/admin/roles', lazy: lazyPage(() => import('./pages/admin/roles/AdminRolesPage')) },
+                  { path: '/admin/moderation', lazy: lazyPage(() => import('./pages/admin/moderation/AdminModerationPage')) },
+                  { path: '/admin/institutions', lazy: lazyPage(() => import('./pages/admin/institutions/AdminInstitutionsPage')) },
+                  { path: '/admin/chamber', lazy: lazyPage(() => import('./pages/admin/chamber/AdminChamberPage')) },
                   { path: '/admin/grants', lazy: lazyPage(() => import('./pages/admin/grants/AdminGrantsPage')) },
                   { path: '/admin/forums', lazy: lazyPage(() => import('./pages/admin/forums/AdminForumsPage')) },
                   { path: '/admin/resources', lazy: lazyPage(() => import('./pages/admin/resources/AdminResourcesPage')) },

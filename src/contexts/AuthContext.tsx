@@ -4,12 +4,14 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type PropsWithChildren,
 } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { defaultPermissionsFor, expandRoles } from '../lib/permissions'
 import type { User, Session } from '@supabase/supabase-js'
-import type { Profile } from '../types'
+import type { PermissionKey, Profile, RoleSlug } from '../types'
 
 export interface SignupMetadata {
   display_name?: string
@@ -28,6 +30,19 @@ interface AuthContextType {
   session: Session | null
   profile: Profile | null
   loading: boolean
+  /** Roles held, with legacy slugs resolved (oecs -> super_admin). */
+  roles: RoleSlug[]
+  /**
+   * Effective capability set from the get_my_permissions() RPC. Rendering only
+   * — RLS is what actually enforces this, so a stale set can hide a control
+   * but can never grant one.
+   */
+  permissions: Set<PermissionKey>
+  can: (permission: PermissionKey) => boolean
+  isAdmin: boolean
+  /** Current operating context for multi-role accounts; null means all roles. */
+  activeRole: RoleSlug | null
+  setActiveRole: (role: RoleSlug | null) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signUp: (
     email: string,
@@ -109,6 +124,35 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   })
 
   const profile = user ? profileData ?? null : null
+
+  // Authoritative capability set. Kept as its own query rather than derived
+  // from profile.roles so an admin toggling the matrix reaches every client on
+  // the next refetch without a schema change or a sign-out.
+  const { data: permissionData } = useQuery({
+    queryKey: ['permissions', user?.id],
+    queryFn: async (): Promise<PermissionKey[]> => {
+      // Cast: src/types/database.ts is hand-written and does not list RPCs.
+      const { data, error } = await (supabase as any).rpc('get_my_permissions')
+      if (error) throw error
+      return (data as PermissionKey[]) || []
+    },
+    enabled: !!user?.id,
+    retry: 1,
+  })
+
+  const roles = useMemo(() => expandRoles(profile?.roles), [profile?.roles])
+
+  // Falls back to the compiled defaults until the RPC resolves, so the first
+  // paint after sign-in does not flash an empty navigation.
+  const permissions = useMemo(
+    () => (permissionData ? new Set(permissionData) : defaultPermissionsFor(profile?.roles)),
+    [permissionData, profile?.roles]
+  )
+
+  const can = useCallback((permission: PermissionKey) => permissions.has(permission), [permissions])
+
+  const isAdmin = roles.includes('super_admin')
+  const activeRole = (profile?.active_role as RoleSlug | null) ?? null
 
   // If profile fetch fails with an auth error, the session is corrupt — force clear it.
   useEffect(() => {
@@ -237,6 +281,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setUser(null)
     setSession(null)
     queryClient.removeQueries({ queryKey: ['profile'] })
+    queryClient.removeQueries({ queryKey: ['permissions'] })
     try {
       await supabase.auth.signOut()
     } catch {
@@ -349,11 +394,37 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     [user, queryClient]
   )
 
+  // Switching context is a profile write, not a re-authentication: the JWT is
+  // untouched and no sign-out is needed. The 063 guard trigger rejects an
+  // active_role the account does not actually hold.
+  const setActiveRole = useCallback(
+    async (role: RoleSlug | null) => {
+      if (!user) throw new Error('No user logged in')
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ active_role: role, updated_at: new Date().toISOString() } as any)
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+      await queryClient.invalidateQueries({ queryKey: ['permissions', user.id] })
+    },
+    [user, queryClient]
+  )
+
   const value: AuthContextType = {
     user,
     session,
     profile,
     loading,
+    roles,
+    permissions,
+    can,
+    isAdmin,
+    activeRole,
+    setActiveRole,
     signIn,
     signUp,
     signOut,

@@ -19,7 +19,9 @@ const MAX_HISTORY = 20
 const MAX_PERSISTED = 50
 const STORAGE_PREFIX = 'ktip_assistant_thread_'
 
-const ROLE_LABELS: Record<UserRole, string> = {
+// Partial: the prompt only needs a friendly name for roles it recognises, and
+// falls back to the raw slug for the rest.
+const ROLE_LABELS: Partial<Record<UserRole, string>> = {
   student: 'Student/Youth Innovator',
   mentor: 'Mentor',
   investor: 'Investor/Funding Agency',
@@ -27,6 +29,12 @@ const ROLE_LABELS: Record<UserRole, string> = {
   private_sector: 'Private Sector/SME Partner',
   faculty: 'Faculty/Researcher',
   oecs: 'OECS Administrator',
+  super_admin: 'OECS Administrator',
+  safety_admin: 'Safety Administrator',
+  sme: 'Verified SME',
+  educational_partner: 'Educational Partner',
+  chamber_admin: 'Chamber of Commerce Administrator',
+  researcher: 'Researcher',
 }
 
 function buildSystemPrompt(userRole?: UserRole | null, userName?: string | null): string {

@@ -1,9 +1,14 @@
 import { Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { useGrantApplications } from '../../hooks/useGrants'
+import {
+  useGrantApplications,
+  useReviewSponsorship,
+  useSponsorshipRequests,
+} from '../../hooks/useGrants'
 import { useSubmissionReceipts } from '../../hooks/useSubmissionReceipts'
 import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import {
   FileText,
   Calendar,
@@ -24,6 +29,19 @@ export default function MyApplicationsPage() {
   const auth = useAuth()
   const { applications, loading } = useGrantApplications(auth.user?.id)
   const { receipts } = useSubmissionReceipts(auth.user?.id)
+  const { requests: sponsorships, refetch: refetchSponsorships } = useSponsorshipRequests(auth.user?.id)
+  const { reviewSponsorship } = useReviewSponsorship()
+  const toast = useToast()
+
+  const handleSponsorship = async (applicationId: string, accept: boolean) => {
+    try {
+      await reviewSponsorship({ applicationId, accept })
+      toast.success(accept ? 'Sponsorship accepted' : 'Sponsorship declined')
+      refetchSponsorships()
+    } catch (err: any) {
+      toast.error(err.message || 'Could not record your decision')
+    }
+  }
 
   // application id -> receipt id, for the "submitted copy" link
   const receiptByApplication = new Map(
@@ -96,6 +114,49 @@ export default function MyApplicationsPage() {
 
       {/* Content */}
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-8">
+        {/* Sponsorship requests. Only faculty and school partners see this —
+            a student's application cannot be submitted until one is accepted. */}
+        {(sponsorships?.length ?? 0) > 0 && (
+          <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl shadow-card mb-6 overflow-hidden">
+            <div className="px-4 py-3 border-b border-ktip-sand-100">
+              <h2 className="font-display font-bold text-ktip-sand-900">Sponsorship requests</h2>
+              <p className="text-sm text-ktip-sand-600 mt-0.5">
+                Students who have nominated you as their faculty sponsor.
+              </p>
+            </div>
+            <ul className="divide-y divide-ktip-sand-100">
+              {sponsorships?.map((request: any) => (
+                <li key={request.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ktip-sand-900 truncate">
+                      {request.applicant?.display_name || 'Student'} · {request.grant?.title || 'Grant'}
+                    </p>
+                    <p className="text-xs text-ktip-sand-500">
+                      {request.sponsor_approved_at
+                        ? `Accepted ${formatDate(request.sponsor_approved_at)}`
+                        : 'Awaiting your decision'}
+                    </p>
+                  </div>
+                  {!request.sponsor_approved_at && (
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSponsorship(request.id, false)}
+                      >
+                        Decline
+                      </Button>
+                      <Button size="sm" onClick={() => handleSponsorship(request.id, true)}>
+                        Accept
+                      </Button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {loading || !applications ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
