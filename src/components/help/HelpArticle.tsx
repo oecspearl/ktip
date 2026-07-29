@@ -11,7 +11,11 @@ export function HelpArticle({ article, expanded, onToggle }: HelpArticleProps) {
   const paragraphs = article.content.split('\n\n')
 
   return (
-    <div className="border border-ktip-sand-100 rounded-xl overflow-hidden transition-colors hover:border-ktip-sand-200">
+    // The id is the scroll target for /help?article=<id> deep links
+    <div
+      id={`help-${article.id}`}
+      className="border border-ktip-sand-100 rounded-xl overflow-hidden transition-colors hover:border-ktip-sand-200"
+    >
       <button
         type="button"
         onClick={onToggle}

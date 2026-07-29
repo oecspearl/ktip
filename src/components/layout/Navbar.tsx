@@ -28,12 +28,16 @@ import {
   ChevronRight,
   HelpCircle,
   ClipboardList,
+  LayoutDashboard,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
+import { NavbarSearchPanel } from './NavbarSearchPanel'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
+import { useGlobalSearch } from '../../hooks/useGlobalSearch'
+import type { SearchRow } from '../../lib/site-search'
 
 interface DropdownItem {
   name: string
@@ -49,9 +53,15 @@ interface NavDropdown {
   items: DropdownItem[]
 }
 
+// Keyboard hint shown beside the search box
+const SHORTCUT_HINT =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '')
+    ? '⌘K'
+    : 'Ctrl K'
+
 // Standalone links rendered before the dropdowns
 const leadingLinks = [
-  { name: 'Discover', href: '/', icon: Home },
+  { name: 'Home', href: '/', icon: Home },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
   { name: 'Events', href: '/events', icon: Calendar },
 ]
@@ -97,6 +107,12 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
 
+  // Global search panel state (see NavbarSearchPanel + useGlobalSearch)
+  const [aiMode, setAiMode] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
+  const [mobileSearchFocused, setMobileSearchFocused] = useState(false)
+
   // Navbar is always transparent over page content; it only gets a dark
   // backdrop while the mobile menu is open so menu links stay readable.
 
@@ -134,14 +150,79 @@ export function Navbar() {
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  // Site-wide search: pages, features and live content, optionally AI-ranked
+  const search = useGlobalSearch(searchQuery, aiMode)
+  // The trailing "see all results" row sits one past the last result
+  const optionCount = search.rows.length + 1
+
+  const closeSearch = () => {
+    setSearchQuery('')
+    setSearchOpen(false)
+    setMobileSearchFocused(false)
+    setMobileMenuOpen(false)
+    setExpandedRowId(null)
+    setActiveIndex(0)
+  }
+
+  const seeAllResults = () => {
+    const term = searchQuery.trim()
+    if (!term) return
+    search.rememberQuery(term)
+    navigate(`/projects?search=${encodeURIComponent(term)}`)
+    closeSearch()
+  }
+
+  // Rows without an href (e.g. "Change your password" style walkthroughs) have
+  // nowhere to go, so selecting them reveals their steps instead.
+  const selectRow = (row: SearchRow) => {
+    if (!row.href) {
+      setExpandedRowId((prev) => (prev === row.id ? null : row.id))
+      return
+    }
+    search.rememberQuery(searchQuery)
+    navigate(row.href)
+    closeSearch()
+  }
+
   const handleSearch = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      navigate(`/projects?search=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
-      setSearchOpen(false)
-      setMobileMenuOpen(false)
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIndex((i) => (i + 1) % optionCount)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIndex((i) => (i - 1 + optionCount) % optionCount)
+    } else if (e.key === 'ArrowRight') {
+      const row = search.rows[activeIndex]
+      if (row) {
+        e.preventDefault()
+        setExpandedRowId((prev) => (prev === row.id ? null : row.id))
+      }
+    } else if (e.key === 'Enter' && searchQuery.trim()) {
+      e.preventDefault()
+      const row = search.rows[activeIndex]
+      if (row) selectRow(row)
+      else seeAllResults()
     }
   }
+
+  // A new query invalidates the highlight and any open explanation
+  useEffect(() => {
+    setActiveIndex(0)
+    setExpandedRowId(null)
+  }, [searchQuery])
+
+  // Ctrl/Cmd+K opens the search box from anywhere (browser find stays intact)
+  useEffect(() => {
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearchOpen(true)
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   // Collapsible desktop search: focus on expand, collapse on outside click / Escape
   useEffect(() => {
@@ -153,7 +234,10 @@ export function Navbar() {
       }
     }
     const onKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setSearchOpen(false)
+      if (e.key === 'Escape') {
+        setSearchOpen(false)
+        setExpandedRowId(null)
+      }
     }
     document.addEventListener('mousedown', onMouseDown)
     document.addEventListener('keydown', onKeyDown)
@@ -357,10 +441,13 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Search (Desktop) — collapsed to an icon, expands on click */}
+          {/* Search (Desktop) — collapsed to an icon, expands on click.
+              The results panel is a sibling of the animating wrapper so the
+              wrapper's overflow-hidden (needed for the width transition)
+              cannot clip it. */}
           <div
             ref={searchRef}
-            className="hidden md:flex items-center justify-end flex-1 max-w-md mx-4"
+            className="relative hidden md:flex items-center justify-end flex-1 max-w-md mx-4"
           >
             <div
               className={cn(
@@ -377,24 +464,54 @@ export function Navbar() {
                   <input
                     ref={searchInputRef}
                     type="text"
-                    placeholder="Search projects, events..."
-                    aria-label="Search projects and events"
+                    placeholder="Search pages, features, people..."
+                    aria-label="Search the whole platform"
+                    aria-expanded={searchOpen}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.currentTarget.value)}
                     onKeyDown={handleSearch}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white"
+                    className="w-full pl-10 pr-16 py-2 rounded-lg focus:outline-none transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white"
                   />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold tracking-wide text-ktip-sand-400">
+                    {SHORTCUT_HINT}
+                  </span>
                 </>
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
                   aria-label="Open search"
+                  title={`Search (${SHORTCUT_HINT})`}
                   className="p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
                   <Search size={20} />
                 </button>
               )}
             </div>
+
+            {searchOpen && (
+              <NavbarSearchPanel
+                query={searchQuery}
+                groups={search.groups}
+                rows={search.rows}
+                activeIndex={activeIndex}
+                onHover={setActiveIndex}
+                expandedId={expandedRowId}
+                onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
+                onSelect={selectRow}
+                onSeeAll={seeAllResults}
+                aiMode={aiMode}
+                onToggleAiMode={() => setAiMode((v) => !v)}
+                aiAnswer={search.aiAnswer}
+                aiSteps={search.aiSteps}
+                aiLoading={search.aiLoading}
+                aiError={search.aiError}
+                contentLoading={search.contentLoading}
+                suggestions={search.suggestions}
+                recent={search.recent}
+                onPickRecent={setSearchQuery}
+                onClearRecent={search.clearRecent}
+              />
+            )}
           </div>
 
           {/* User Menu / Auth Buttons */}
@@ -538,6 +655,14 @@ export function Navbar() {
                 {userMenuOpen && (
                   <div role="menu" className="absolute right-0 mt-2 w-56 bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 py-2 animate-scale-in">
                     <Link
+                      to="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                    >
+                      <LayoutDashboard size={18} />
+                      <span>My Dashboard</span>
+                    </Link>
+                    <Link
                       to="/profile/me"
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
@@ -631,14 +756,40 @@ export function Navbar() {
                 />
                 <input
                   type="text"
-                  placeholder="Search..."
-                  aria-label="Search projects and events"
+                  placeholder="Search pages, features, people..."
+                  aria-label="Search the whole platform"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.currentTarget.value)}
                   onKeyDown={handleSearch}
+                  onFocus={() => setMobileSearchFocused(true)}
                   className="w-full pl-10 pr-4 py-2 border border-white/20 bg-white/10 text-white placeholder-white/60 rounded-lg focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white focus:outline-none"
                 />
               </div>
+              {(mobileSearchFocused || searchQuery.trim()) && (
+                <NavbarSearchPanel
+                  variant="mobile"
+                  query={searchQuery}
+                  groups={search.groups}
+                  rows={search.rows}
+                  activeIndex={activeIndex}
+                  onHover={setActiveIndex}
+                  expandedId={expandedRowId}
+                  onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
+                  onSelect={selectRow}
+                  onSeeAll={seeAllResults}
+                  aiMode={aiMode}
+                  onToggleAiMode={() => setAiMode((v) => !v)}
+                  aiAnswer={search.aiAnswer}
+                  aiSteps={search.aiSteps}
+                  aiLoading={search.aiLoading}
+                  aiError={search.aiError}
+                  contentLoading={search.contentLoading}
+                  suggestions={search.suggestions}
+                  recent={search.recent}
+                  onPickRecent={setSearchQuery}
+                  onClearRecent={search.clearRecent}
+                />
+              )}
             </div>
 
             {/* Quick Actions (moved from DiscoverPage action band) */}
@@ -772,6 +923,14 @@ export function Navbar() {
               <hr className="my-2 border-white/10" />
               {auth.user ? (
                 <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
+                  >
+                    <LayoutDashboard size={20} />
+                    <span>My Dashboard</span>
+                  </Link>
                   <Link
                     to="/settings"
                     onClick={() => setMobileMenuOpen(false)}

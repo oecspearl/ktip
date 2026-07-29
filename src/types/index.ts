@@ -489,6 +489,11 @@ export interface UserBadge {
   badge?: BadgeDefinition
 }
 
+/** Directory row: profile with its earned badges embedded by the directory query. */
+export interface DirectoryMember extends Profile {
+  user_badges?: UserBadge[]
+}
+
 export interface Grievance {
   id: string
   reporter_id: string

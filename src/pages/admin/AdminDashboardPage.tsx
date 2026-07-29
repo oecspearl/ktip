@@ -6,6 +6,7 @@ import { useAdminAnalytics } from '../../hooks/useAdminAnalytics'
 import { BarChart } from '../../components/admin/analytics/BarChart'
 import { GrowthChart } from '../../components/admin/analytics/GrowthChart'
 import { ExportButton } from '../../components/admin/analytics/ExportButton'
+import { DashboardCalendar } from '../../components/calendar/DashboardCalendar'
 import {
   Users,
   Calendar,
@@ -147,6 +148,15 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Platform Calendar */}
+      <div className="border border-gray-200 rounded-lg p-5 mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar size={18} className="text-ktip-ocean-600" />
+          <h2 className="text-lg font-semibold text-gray-900">Platform Calendar</h2>
+        </div>
+        <DashboardCalendar scope="platform" />
+      </div>
 
       {/* Analytics Charts */}
       {analyticsLoading || !analytics ? (

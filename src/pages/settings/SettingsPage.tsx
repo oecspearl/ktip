@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { User, Shield, Bell, BadgeCheck } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -17,9 +18,23 @@ const tabs = [
   { id: 'verification' as const, label: 'Verification', icon: BadgeCheck, description: 'Verify your identity' },
 ]
 
+function isSettingsTab(value: string | null): value is SettingsTab {
+  return !!value && tabs.some((tab) => tab.id === value)
+}
+
 export default function SettingsPage() {
   usePageTitle('Settings')
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile')
+  // `?tab=security` lets the global search panel deep-link straight to a tab
+  const [searchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState<SettingsTab>(
+    isSettingsTab(requestedTab) ? requestedTab : 'profile'
+  )
+
+  // The page stays mounted when only the query string changes, so follow it
+  useEffect(() => {
+    if (isSettingsTab(requestedTab)) setActiveTab(requestedTab)
+  }, [requestedTab])
 
   return (
     <>

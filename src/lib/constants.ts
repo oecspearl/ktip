@@ -212,6 +212,28 @@ export const GRANT_APPLICATION_STATUS_COLORS: Record<string, string> = {
   rejected: 'bg-red-100 text-red-700 border-red-200',
 }
 
+// Dashboard Calendar Kinds
+export const CALENDAR_KIND_LABELS: Record<string, string> = {
+  event: 'Events',
+  grant_deadline: 'Grant Deadlines',
+  rsvp: 'My Registrations',
+  grant_application: 'Applications',
+}
+
+export const CALENDAR_KIND_COLORS: Record<string, string> = {
+  event: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  grant_deadline: 'bg-red-100 text-red-700 border-red-200',
+  rsvp: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  grant_application: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+}
+
+export const CALENDAR_KIND_DOT_COLORS: Record<string, string> = {
+  event: 'bg-ktip-ocean-500',
+  grant_deadline: 'bg-red-500',
+  rsvp: 'bg-ktip-tropical-500',
+  grant_application: 'bg-ktip-sun-500',
+}
+
 // Schedule Item Types
 export const SCHEDULE_TYPE_LABELS: Record<string, string> = {
   session: 'Session',

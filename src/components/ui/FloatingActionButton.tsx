@@ -82,15 +82,15 @@ export function FloatingActionButton() {
           tabIndex={open ? 0 : -1}
           className={cn(
             'relative group w-14 h-14 rounded-xl flex items-center justify-center',
-            'bg-ktip-cream/90 backdrop-blur-md border border-ktip-sand-200 text-ktip-sand-700 shadow-lg',
-            'hover:text-ktip-ocean-600',
+            'bg-ktip-cream/90 backdrop-blur-md border border-ktip-sand-200 text-ktip-sand-700 shadow-fab',
+            'hover:text-ktip-ocean-600 hover:shadow-fab-hover',
             open
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-4 scale-75 pointer-events-none'
           )}
           style={{
             transition:
-              'transform 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease, color 0.2s ease',
+              'transform 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease, color 0.2s ease, box-shadow 0.35s cubic-bezier(0.22,1,0.36,1)',
             transitionDelay: open ? `${0.03 + (visible.length - 1 - index) * 0.06}s` : '0s',
           }}
         >
@@ -106,11 +106,11 @@ export function FloatingActionButton() {
         aria-label="Quick actions"
         aria-expanded={open}
         className={cn(
-          'w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg',
+          'w-16 h-16 rounded-2xl flex items-center justify-center shadow-fab',
           'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
           open
-            ? 'bg-gray-500 text-white'
-            : 'bg-ktip-cream border border-ktip-sand-200 hover:scale-105 hover:-translate-y-0.5'
+            ? 'bg-gray-500 text-white shadow-fab-hover'
+            : 'bg-ktip-cream border border-ktip-sand-200 hover:scale-105 hover:-translate-y-0.5 hover:shadow-fab-hover'
         )}
       >
         {open ? (

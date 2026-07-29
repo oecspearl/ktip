@@ -9,7 +9,7 @@ interface PasswordChecklistProps {
 // PASSWORD_REQUIREMENTS array as the signup schema.
 export function PasswordChecklist({ password }: PasswordChecklistProps) {
   return (
-    <ul className="mt-2 space-y-1">
+    <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
       {PASSWORD_REQUIREMENTS.map((req) => {
         const met = req.test(password)
         return (

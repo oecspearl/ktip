@@ -2,28 +2,26 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import {
   addDays,
-  addMonths,
   eachDayOfInterval,
   endOfMonth,
-  endOfWeek,
   format,
   max as maxDate,
-  min as minDate,
   startOfDay,
   startOfMonth,
-  startOfWeek,
   subDays,
 } from 'date-fns'
 import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
 import { EventCalendar } from '../../components/events/EventCalendar'
 import { EventDayPanel } from '../../components/events/EventDayPanel'
+import { useCalendarMonth } from '../../components/calendar/useCalendarMonth'
 import { useEvents } from '../../hooks/useEvents'
 import { Plus, Search, CalendarX, CalendarDays, LayoutGrid } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { cn, debounce } from '../../lib/utils'
+import { groupByDay } from '../../lib/calendar'
 import { EVENT_TYPE_LABELS } from '../../lib/constants'
 import type { Event } from '../../types'
 
@@ -43,9 +41,17 @@ export default function EventsPage() {
   const [view, setView] = useState<EventsView>(() =>
     localStorage.getItem(VIEW_STORAGE_KEY) === 'grid' ? 'grid' : 'calendar'
   )
-  const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()))
-  const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()))
-  const [monthDir, setMonthDir] = useState<'left' | 'right'>('left')
+  const {
+    monthDate,
+    selectedDate,
+    direction: monthDir,
+    gridStart,
+    gridEnd,
+    setSelectedDate,
+    goPrevMonth,
+    goNextMonth,
+    goToday,
+  } = useCalendarMonth()
   const autoSelectedRef = useRef(false)
 
   // Collapsible search — expands on click, collapses on outside click / Escape when empty
@@ -76,9 +82,6 @@ export default function EventsPage() {
     }
   }, [searchOpen])
 
-  const gridStart = useMemo(() => startOfWeek(monthDate), [monthDate])
-  const gridEnd = useMemo(() => endOfWeek(endOfMonth(monthDate)), [monthDate])
-
   const { events, loading: eventsLoading } = useEvents(
     view === 'calendar'
       ? {
@@ -101,28 +104,16 @@ export default function EventsPage() {
   )
 
   // Group events by visible day, expanding multi-day spans
-  const eventsByDay = useMemo(() => {
-    const map = new Map<string, Event[]>()
-    if (view !== 'calendar' || !events) return map
-    for (const event of events) {
-      const spanStart = startOfDay(new Date(event.start_date))
-      let spanEnd = startOfDay(new Date(event.end_date ?? event.start_date))
-      if (spanEnd < spanStart) spanEnd = spanStart
-      const from = maxDate([spanStart, gridStart])
-      const to = minDate([spanEnd, gridEnd])
-      if (from > to) continue
-      for (const day of eachDayOfInterval({ start: from, end: to })) {
-        const key = format(day, 'yyyy-MM-dd')
-        const list = map.get(key)
-        if (list) list.push(event)
-        else map.set(key, [event])
-      }
-    }
-    for (const list of map.values()) {
-      list.sort((a, b) => a.start_date.localeCompare(b.start_date))
-    }
-    return map
-  }, [events, view, gridStart, gridEnd])
+  const eventsByDay = useMemo(
+    () =>
+      view === 'calendar'
+        ? groupByDay(events, gridStart, gridEnd, (event) => ({
+            start: event.start_date,
+            end: event.end_date,
+          }))
+        : new Map<string, Event[]>(),
+    [events, view, gridStart, gridEnd]
+  )
 
   // Auto-select nearest upcoming day with an event (once, on first load)
   useEffect(() => {
@@ -143,22 +134,6 @@ export default function EventsPage() {
   const changeView = (next: EventsView) => {
     setView(next)
     localStorage.setItem(VIEW_STORAGE_KEY, next)
-  }
-
-  const goPrevMonth = () => {
-    setMonthDir('right')
-    setMonthDate((m) => addMonths(m, -1))
-  }
-
-  const goNextMonth = () => {
-    setMonthDir('left')
-    setMonthDate((m) => addMonths(m, 1))
-  }
-
-  const goToday = () => {
-    setMonthDir('left')
-    setMonthDate(startOfMonth(new Date()))
-    setSelectedDate(startOfDay(new Date()))
   }
 
   const jumpToNextEvent = () => {

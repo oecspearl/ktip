@@ -84,6 +84,7 @@ const router = createBrowserRouter([
           {
             Component: ProtectedRoute,
             children: [
+              { path: '/dashboard', lazy: lazyPage(() => import('./pages/dashboard/DashboardPage')) },
               { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
               { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
               { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },

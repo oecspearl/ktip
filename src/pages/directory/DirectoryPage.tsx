@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
+import { useAllBadges } from '../../hooks/useBadges'
 import { Search, UserX, User } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
 import { BentoCard } from '../../components/ui/BentoCard'
+import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { CARIBBEAN_COUNTRIES, ROLE_LABELS, SKILL_SUGGESTIONS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { debounce } from '../../lib/utils'
@@ -14,6 +16,7 @@ export default function DirectoryPage() {
   const [selectedRole, setSelectedRole] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedSkill, setSelectedSkill] = useState<string>('')
+  const [selectedBadge, setSelectedBadge] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -23,17 +26,20 @@ export default function DirectoryPage() {
     role: selectedRole,
     country: selectedCountry,
     skill: selectedSkill,
+    badge: selectedBadge,
   })
+  const { badges: allBadges } = useAllBadges()
 
   const clearFilters = () => {
     setSelectedRole('')
     setSelectedCountry('')
     setSelectedSkill('')
+    setSelectedBadge('')
     setSearchQuery('')
     setDebouncedSearch('')
   }
 
-  const hasActiveFilters = !!(selectedRole || selectedCountry || selectedSkill || searchQuery)
+  const hasActiveFilters = !!(selectedRole || selectedCountry || selectedSkill || selectedBadge || searchQuery)
 
   return (
     <>
@@ -56,7 +62,7 @@ export default function DirectoryPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-3">
             {/* Search */}
             <div className="relative">
               <Search
@@ -106,6 +112,19 @@ export default function DirectoryPage() {
               <option value="">All Skills</option>
               {SKILL_SUGGESTIONS.map((skill) => (
                 <option key={skill} value={skill}>{skill}</option>
+              ))}
+            </select>
+
+            {/* Badge Filter */}
+            <select
+              value={selectedBadge}
+              onChange={(e) => setSelectedBadge(e.currentTarget.value)}
+              aria-label="Filter by badge"
+              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+            >
+              <option value="">All Badges</option>
+              {(allBadges || []).map((badge) => (
+                <option key={badge.slug} value={badge.slug}>{badge.name}</option>
               ))}
             </select>
           </div>
@@ -164,6 +183,18 @@ export default function DirectoryPage() {
                         {member.country && <>{member.country}</>}
                         {member.country && member.skills?.length > 0 && <> · </>}
                         {member.skills?.length > 0 && <>{member.skills[0]}</>}
+                        {(member.user_badges?.length ?? 0) > 0 && (
+                          <span className="flex flex-wrap gap-1.5 mt-2">
+                            {member.user_badges!.slice(0, 3).map((ub) => (
+                              <AchievementBadge key={ub.id} userBadge={ub} />
+                            ))}
+                            {member.user_badges!.length > 3 && (
+                              <span className="text-white/80 self-center">
+                                +{member.user_badges!.length - 3}
+                              </span>
+                            )}
+                          </span>
+                        )}
                       </>
                     }
                     cta="View Profile"

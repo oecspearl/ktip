@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
 
@@ -27,83 +27,68 @@ function getOpenAIKey(envFromVite: Record<string, string>): string | undefined {
 }
 
 /**
- * Dev-only middleware that handles /api/ai-chat requests locally,
- * so `npm run dev` works without needing `vercel dev`.
- * In production (Vercel), the Edge Function at api/ai-chat.ts handles this.
+ * Dev-only middleware that runs the real Edge Functions in `api/` (ai-chat,
+ * ai-search, …) so `npm run dev` behaves like production without needing
+ * `vercel dev`. Each request is turned into a web `Request`, handed to the
+ * route's default export, and its `Response` piped back out — so there is one
+ * implementation of every endpoint, not a dev copy that can drift.
  */
-function apiProxyPlugin(apiKey: string | undefined): Plugin {
+function edgeApiPlugin(apiKey: string | undefined): Plugin {
   return {
-    name: 'api-proxy',
+    name: 'edge-api-dev',
+    apply: 'serve',
     configureServer(server) {
       if (apiKey) {
-        console.log('[api-proxy] OPENAI_API_KEY loaded — /api/ai-chat is available')
+        console.log('[edge-api-dev] OPENAI_API_KEY loaded — /api/ai-chat and /api/ai-search are live')
       } else {
-        console.warn('[api-proxy] WARNING: OPENAI_API_KEY not found — AI chat will return 503')
+        console.warn('[edge-api-dev] WARNING: OPENAI_API_KEY not found — AI endpoints will return 503')
       }
 
-      server.middlewares.use('/api/ai-chat', async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'Method not allowed' }))
-          return
-        }
+      server.middlewares.use(async (req, res, next) => {
+        const url = req.url || ''
+        if (!url.startsWith('/api/')) return next()
 
-        if (!apiKey) {
-          res.statusCode = 503
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'OPENAI_API_KEY not set in .env' }))
-          return
-        }
+        const [pathname, query = ''] = url.split('?')
+        // Keep the lookup inside api/ — no traversal out of the project
+        const route = pathname.replace(/^\/api\//, '')
+        if (!/^[a-z0-9/_-]+$/i.test(route) || route.includes('..')) return next()
 
-        let body = ''
-        for await (const chunk of req) body += chunk
-
-        let parsed: any
-        try {
-          parsed = JSON.parse(body)
-        } catch {
-          res.statusCode = 400
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'Invalid JSON body' }))
-          return
-        }
-
-        if (!parsed.messages || !Array.isArray(parsed.messages) || parsed.messages.length === 0) {
-          res.statusCode = 400
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'messages array is required' }))
-          return
-        }
-
-        const model = parsed.model === 'gpt-4o-mini' ? parsed.model : 'gpt-4o-mini'
-        const temperature = typeof parsed.temperature === 'number' ? Math.min(Math.max(parsed.temperature, 0), 2) : 0.7
-        const max_tokens = typeof parsed.max_tokens === 'number' ? Math.min(parsed.max_tokens, 4000) : 1000
+        const modulePath = resolve(process.cwd(), 'api', `${route}.ts`)
+        if (!existsSync(modulePath)) return next()
 
         try {
-          const controller = new AbortController()
-          const timeout = setTimeout(() => controller.abort(), 30000)
+          const mod = await server.ssrLoadModule(modulePath)
+          const handler = mod.default
+          if (typeof handler !== 'function') return next()
 
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({ model, messages: parsed.messages, temperature, max_tokens }),
-            signal: controller.signal,
+          const headers = new Headers()
+          for (const [key, value] of Object.entries(req.headers)) {
+            if (typeof value === 'string') headers.set(key, value)
+            else if (Array.isArray(value)) headers.set(key, value.join(', '))
+          }
+
+          let body: string | undefined
+          if (req.method && !['GET', 'HEAD'].includes(req.method)) {
+            const chunks: Buffer[] = []
+            for await (const chunk of req) chunks.push(chunk as Buffer)
+            body = Buffer.concat(chunks).toString('utf8')
+          }
+
+          const request = new Request(`http://localhost${pathname}${query ? `?${query}` : ''}`, {
+            method: req.method || 'GET',
+            headers,
+            body,
           })
 
-          clearTimeout(timeout)
-
-          const data = await response.text()
+          const response: Response = await handler(request)
           res.statusCode = response.status
+          response.headers.forEach((value, key) => res.setHeader(key, value))
+          res.end(Buffer.from(await response.arrayBuffer()))
+        } catch (err) {
+          console.error(`[edge-api-dev] ${pathname} failed:`, err)
+          res.statusCode = 500
           res.setHeader('Content-Type', 'application/json')
-          res.end(data)
-        } catch {
-          res.statusCode = 502
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'Failed to reach AI service' }))
+          res.end(JSON.stringify({ error: 'Dev API handler threw', detail: String(err).slice(0, 300) }))
         }
       })
     },
@@ -113,11 +98,13 @@ function apiProxyPlugin(apiKey: string | undefined): Plugin {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const openaiKey = getOpenAIKey(env)
+  // The api/ handlers read process.env, exactly as they do on Vercel
+  if (openaiKey) process.env.OPENAI_API_KEY = openaiKey
 
   return {
     plugins: [
       react(),
-      apiProxyPlugin(openaiKey),
+      edgeApiPlugin(openaiKey),
       VitePWA({
         registerType: 'autoUpdate',
         manifest: false, // Use public/manifest.json

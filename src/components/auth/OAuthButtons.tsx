@@ -34,7 +34,7 @@ export function OAuthButtons({ label, onError }: OAuthButtonsProps) {
   }
 
   return (
-    <div className="mt-6">
+    <div className="mt-4">
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-ktip-sand-200"></div>
@@ -44,7 +44,7 @@ export function OAuthButtons({ label, onError }: OAuthButtonsProps) {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <Button
           type="button"
           variant="outline"

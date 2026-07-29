@@ -1,0 +1,846 @@
+import { HELP_CATEGORIES } from './help-content'
+
+/**
+ * Static index of everything the app can do — every page, every feature, every
+ * account action. It powers the navbar search panel (local fuzzy matching) and
+ * is also the ground truth handed to the AI navigator in `api/ai-search.ts`.
+ *
+ * Deliberately free of React and lucide imports: the edge function imports this
+ * module, so it must stay pure data. `icon` is a lucide component *name* that
+ * the UI resolves (same trick as `HelpCategory.icon` in help-content.ts).
+ *
+ * When you add a route to App.tsx, add it here too — `site-search.test.ts`
+ * asserts every href in this file matches a real route.
+ */
+
+/** Who can reach an entry. Entries the viewer cannot use are hidden. */
+export type SiteAccess = 'public' | 'guest' | 'auth' | 'oecs'
+
+export interface SiteEntry {
+  /** Stable slug. The AI returns these ids, so never renumber them casually. */
+  id: string
+  title: string
+  category: string
+  description: string
+  /** Synonyms and abbreviations the title/description miss. */
+  keywords: string[]
+  href?: string
+  access?: SiteAccess
+  /** Steps shown when the row is expanded instead of navigated to. */
+  howTo?: string[]
+  /** lucide-react icon name. */
+  icon?: string
+}
+
+export const SITE_CATEGORIES = [
+  'Discover',
+  'Projects',
+  'Events',
+  'Funding',
+  'Community',
+  'Collaborate',
+  'Account',
+  'Support',
+  'Admin',
+] as const
+
+export const SITE_MAP: SiteEntry[] = [
+  // ---------------------------------------------------------------- Discover
+  {
+    id: 'discover',
+    title: 'Discover',
+    category: 'Discover',
+    description: 'The KTIP home page — featured projects, events and grants',
+    keywords: ['home', 'landing', 'front page', 'start', 'dashboard', 'feed'],
+    href: '/',
+    icon: 'Home',
+  },
+  {
+    id: 'search',
+    title: 'Search the platform',
+    category: 'Discover',
+    description: 'Find any page, feature or record from the navbar search box',
+    keywords: ['find', 'lookup', 'command palette', 'ctrl k', 'cmd k', 'shortcut'],
+    icon: 'Search',
+    howTo: [
+      'Click the magnifying glass in the top navigation bar, or press Ctrl+K (Cmd+K on Mac).',
+      'Type what you are looking for — a page, a feature, or the name of a project, event or person.',
+      'Click a result to go there, or click the chevron on the right to see how to do it yourself.',
+      'Turn on the brain icon for AI-guided navigation when you are not sure what something is called.',
+    ],
+  },
+
+  // ---------------------------------------------------------------- Projects
+  {
+    id: 'projects.browse',
+    title: 'Projects',
+    category: 'Projects',
+    description: 'Browse and filter innovation projects',
+    keywords: ['ideas', 'ventures', 'startups', 'innovations', 'browse', 'explore'],
+    href: '/projects',
+    icon: 'FolderKanban',
+  },
+  {
+    id: 'projects.new',
+    title: 'Create a project',
+    category: 'Projects',
+    description: 'Publish a new innovation project',
+    keywords: ['new project', 'add project', 'submit idea', 'post project', 'contributor'],
+    href: '/projects/new',
+    access: 'auth',
+    icon: 'Plus',
+    howTo: [
+      'Go to Projects in the top navigation bar.',
+      'Click "Create Project" (you must be logged in).',
+      'Fill in the title, description, category, phase and hashtags, then submit.',
+    ],
+  },
+  {
+    id: 'projects.edit',
+    title: 'Edit your project',
+    category: 'Projects',
+    description: 'Update the details of a project you own',
+    keywords: ['update project', 'change project', 'manage project', 'delete project'],
+    access: 'auth',
+    icon: 'PenSquare',
+    howTo: [
+      'Open your project from Projects, or from your profile page.',
+      'Click "Edit" in the project header — only the owner and team members see this.',
+      'Save your changes at the bottom of the form.',
+    ],
+  },
+  {
+    id: 'projects.team',
+    title: 'Manage a project team',
+    category: 'Projects',
+    description: 'Add or remove collaborators on your project',
+    keywords: ['members', 'collaborators', 'invite', 'team', 'roles'],
+    access: 'auth',
+    icon: 'Users',
+    howTo: [
+      'Open your project detail page.',
+      'Find the Team panel in the sidebar and click "Manage Team".',
+      'Search for a member by name and add them, or remove an existing member.',
+    ],
+  },
+  {
+    id: 'projects.filter-climate',
+    title: 'Find climate-action projects',
+    category: 'Projects',
+    description: 'Filter listings down to climate and environment work',
+    keywords: ['climate', 'environment', 'green', 'sustainability', 'filter'],
+    href: '/projects',
+    icon: 'Leaf',
+    howTo: [
+      'Go to Projects.',
+      'Turn on the "Climate Action" filter above the project grid.',
+      'The same filter exists on the Events, Grants and Resources pages.',
+    ],
+  },
+
+  // ------------------------------------------------------------------ Events
+  {
+    id: 'events.browse',
+    title: 'Events',
+    category: 'Events',
+    description: 'Hackathons, workshops, meetups, conferences and demo days',
+    keywords: ['calendar', 'hackathon', 'workshop', 'meetup', 'conference', 'demo day', 'agenda'],
+    href: '/events',
+    icon: 'Calendar',
+  },
+  {
+    id: 'events.new',
+    title: 'Create an event',
+    category: 'Events',
+    description: 'Publish a new event and open registrations',
+    keywords: ['new event', 'host event', 'add event', 'organise', 'organize'],
+    href: '/events/new',
+    access: 'auth',
+    icon: 'CalendarPlus',
+    howTo: [
+      'Go to Events in the top navigation bar.',
+      'Click "Create Event" (you must be logged in).',
+      'Set the type, dates, location or virtual link, and capacity, then publish.',
+    ],
+  },
+  {
+    id: 'events.register',
+    title: 'Register for an event',
+    category: 'Events',
+    description: 'Reserve your place at an upcoming event',
+    keywords: ['sign up', 'attend', 'rsvp', 'ticket', 'join event'],
+    href: '/events',
+    icon: 'ClipboardCheck',
+    howTo: [
+      'Open the event from Events or the event calendar.',
+      'Click "Register" and complete the registration form.',
+      'You will receive a notification confirming your place.',
+    ],
+  },
+  {
+    id: 'events.calendar',
+    title: 'Event calendar',
+    category: 'Events',
+    description: 'Month-by-month view of everything scheduled',
+    keywords: ['calendar view', 'month', 'schedule', 'upcoming'],
+    href: '/events',
+    icon: 'CalendarDays',
+    howTo: ['Go to Events.', 'Switch from the list view to the calendar view using the toggle at the top.'],
+  },
+
+  // ----------------------------------------------------------------- Funding
+  {
+    id: 'grants.browse',
+    title: 'Grants',
+    category: 'Funding',
+    description: 'Browse funding opportunities',
+    keywords: ['funding', 'money', 'finance', 'award', 'sponsorship', 'capital', 'invest'],
+    href: '/grants',
+    icon: 'DollarSign',
+  },
+  {
+    id: 'grants.apply',
+    title: 'Apply for a grant',
+    category: 'Funding',
+    description: 'Guided 5-step application wizard with AI assistance',
+    keywords: ['application', 'apply', 'funding request', 'proposal', 'submit'],
+    href: '/grants',
+    access: 'auth',
+    icon: 'FileEdit',
+    howTo: [
+      'Go to Grants and open the opportunity you want.',
+      'Click "Apply" — you must be logged in.',
+      'Work through the five steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Impact & Review.',
+      'Drafts save automatically, so you can leave and resume from My Applications.',
+    ],
+  },
+  {
+    id: 'grants.my-applications',
+    title: 'My Applications',
+    category: 'Funding',
+    description: 'Track your grant applications and resume drafts',
+    keywords: ['my grants', 'drafts', 'submissions', 'application status', 'resume'],
+    href: '/grants/my-applications',
+    access: 'auth',
+    icon: 'ClipboardList',
+  },
+  {
+    id: 'grants.ai-review',
+    title: 'AI review of an application',
+    category: 'Funding',
+    description: 'Score and improve your draft before submitting',
+    keywords: ['ai', 'review', 'score', 'feedback', 'improve', 'suggestions'],
+    access: 'auth',
+    icon: 'Sparkles',
+    howTo: [
+      'Open a draft from My Applications.',
+      'Go to the final step, "Impact & Review".',
+      'Click "Run AI Review" to get a score and section-by-section suggestions.',
+      'Individual fields also have AI suggestion buttons beside them.',
+    ],
+  },
+  {
+    id: 'resources.browse',
+    title: 'Resources & Integrations',
+    category: 'Funding',
+    description: 'Guides, articles and partner tools',
+    keywords: ['guides', 'articles', 'toolkit', 'library', 'templates', 'partners', 'integrations'],
+    href: '/resources',
+    icon: 'BookOpen',
+  },
+  {
+    id: 'resources.integrations',
+    title: 'Integrations',
+    category: 'Funding',
+    description: 'Partner tools and services connected to KTIP',
+    keywords: ['integrations', 'partners', 'third party', 'apps', 'connect'],
+    href: '/resources?tab=integrations',
+    icon: 'Plug',
+  },
+
+  // --------------------------------------------------------------- Community
+  {
+    id: 'directory',
+    title: 'Member Directory',
+    category: 'Community',
+    description: 'Browse the member directory and connect with people',
+    keywords: ['people', 'members', 'users', 'network', 'mentors', 'investors', 'contacts', 'who'],
+    href: '/directory',
+    icon: 'Users',
+  },
+  {
+    id: 'directory.connect',
+    title: 'Connect with a member',
+    category: 'Community',
+    description: 'Send a connection request to someone on KTIP',
+    keywords: ['connect', 'follow', 'network', 'add friend', 'request'],
+    access: 'auth',
+    icon: 'UserPlus',
+    howTo: [
+      'Go to the Member Directory, or open someone\'s profile.',
+      'Click "Connect" on their card or profile header.',
+      'They will get a notification and can accept your request.',
+    ],
+  },
+  {
+    id: 'forums.browse',
+    title: 'Forums',
+    category: 'Community',
+    description: 'Community discussion boards',
+    keywords: ['discussion', 'boards', 'threads', 'posts', 'talk', 'community', 'q&a'],
+    href: '/forums',
+    icon: 'MessageSquare',
+  },
+  {
+    id: 'forums.new-post',
+    title: 'Start a forum discussion',
+    category: 'Community',
+    description: 'Post a new topic on a discussion board',
+    keywords: ['new post', 'ask question', 'create thread', 'write post'],
+    href: '/forums',
+    access: 'auth',
+    icon: 'PenSquare',
+    howTo: [
+      'Go to Forums and open the board that fits your topic.',
+      'Click "New Post" (you must be logged in).',
+      'Write your title and message, then publish.',
+    ],
+  },
+  {
+    id: 'messages',
+    title: 'Messages',
+    category: 'Community',
+    description: 'Direct and group messaging with other members',
+    keywords: ['chat', 'dm', 'inbox', 'conversation', 'talk', 'private message'],
+    href: '/messages',
+    access: 'auth',
+    icon: 'MessageCircle',
+  },
+  {
+    id: 'messages.new',
+    title: 'Start a conversation',
+    category: 'Community',
+    description: 'Message a member directly or create a group chat',
+    keywords: ['new message', 'dm someone', 'group chat', 'write to'],
+    access: 'auth',
+    icon: 'Send',
+    howTo: [
+      'Open the chat bubble in the bottom-right corner, or go to Messages.',
+      'Click "New Conversation".',
+      'Search for a member, or select several to create a group chat.',
+    ],
+  },
+
+  // ------------------------------------------------------------- Collaborate
+  {
+    id: 'collaborate.hub',
+    title: 'Collaborate',
+    category: 'Collaborate',
+    description: 'Real-time workspace: whiteboards, documents, code and video',
+    keywords: ['workspace', 'tools', 'together', 'realtime', 'teamwork'],
+    href: '/collaborate',
+    access: 'auth',
+    icon: 'Handshake',
+  },
+  {
+    id: 'collaborate.whiteboards',
+    title: 'Whiteboards',
+    category: 'Collaborate',
+    description: 'Your visual brainstorming boards',
+    keywords: ['whiteboard', 'canvas', 'draw', 'sketch', 'diagram', 'brainstorm', 'mind map'],
+    href: '/collaborate/whiteboards',
+    access: 'auth',
+    icon: 'Presentation',
+  },
+  {
+    id: 'collaborate.whiteboard.new',
+    title: 'New whiteboard',
+    category: 'Collaborate',
+    description: 'Open a blank collaborative canvas',
+    keywords: ['create whiteboard', 'new canvas', 'start drawing'],
+    href: '/collaborate/whiteboard/new',
+    access: 'auth',
+    icon: 'Plus',
+  },
+  {
+    id: 'collaborate.documents',
+    title: 'Documents',
+    category: 'Collaborate',
+    description: 'Your shared rich-text documents',
+    keywords: ['docs', 'document', 'write', 'notes', 'text editor', 'word'],
+    href: '/collaborate/documents',
+    access: 'auth',
+    icon: 'FileText',
+  },
+  {
+    id: 'collaborate.document.new',
+    title: 'New document',
+    category: 'Collaborate',
+    description: 'Start writing a shared document',
+    keywords: ['create document', 'new doc', 'blank document'],
+    href: '/collaborate/document/new',
+    access: 'auth',
+    icon: 'FilePlus',
+  },
+  {
+    id: 'collaborate.code',
+    title: 'Code Editor',
+    category: 'Collaborate',
+    description: 'Write and run code in the browser',
+    keywords: ['code', 'programming', 'editor', 'sandbox', 'javascript', 'python', 'html'],
+    href: '/collaborate/code',
+    access: 'auth',
+    icon: 'Code2',
+  },
+  {
+    id: 'collaborate.video',
+    title: 'Video Conference',
+    category: 'Collaborate',
+    description: 'Start or join a video call',
+    keywords: ['video', 'call', 'meeting', 'jitsi', 'zoom', 'huddle', 'webcam'],
+    href: '/collaborate/video',
+    access: 'auth',
+    icon: 'Video',
+  },
+  {
+    id: 'collaborate.share',
+    title: 'Share a whiteboard or document',
+    category: 'Collaborate',
+    description: 'Invite others to view or edit your work',
+    keywords: ['share', 'invite', 'permissions', 'collaborators', 'link'],
+    access: 'auth',
+    icon: 'Share2',
+    howTo: [
+      'Open the whiteboard or document you want to share.',
+      'Click "Share" in the toolbar.',
+      'Add members by name and choose whether they can view or edit.',
+    ],
+  },
+
+  // ----------------------------------------------------------------- Account
+  {
+    id: 'auth.login',
+    title: 'Log in',
+    category: 'Account',
+    description: 'Sign in with email, Google or Microsoft',
+    keywords: ['login', 'sign in', 'access account', 'enter'],
+    href: '/login',
+    access: 'guest',
+    icon: 'LogIn',
+  },
+  {
+    id: 'auth.signup',
+    title: 'Sign up',
+    category: 'Account',
+    description: 'Create a KTIP account',
+    keywords: ['register', 'join', 'create account', 'new user', 'get started'],
+    href: '/signup',
+    access: 'guest',
+    icon: 'UserPlus',
+  },
+  {
+    id: 'auth.forgot-password',
+    title: 'Forgot password',
+    category: 'Account',
+    description: 'Send yourself a password reset link',
+    keywords: ['reset password', 'lost password', 'cannot log in', 'recover account'],
+    href: '/forgot-password',
+    access: 'guest',
+    icon: 'KeyRound',
+  },
+  {
+    id: 'profile.me',
+    title: 'My Profile',
+    category: 'Account',
+    description: 'Your public profile, projects and badges',
+    keywords: ['profile', 'me', 'my page', 'bio', 'avatar', 'badges', 'achievements'],
+    href: '/profile/me',
+    access: 'auth',
+    icon: 'User',
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    category: 'Account',
+    description: 'Manage your account and preferences',
+    keywords: ['settings', 'account', 'options', 'configuration', 'preferences'],
+    href: '/settings',
+    access: 'auth',
+    icon: 'Settings',
+  },
+  {
+    id: 'settings.profile',
+    title: 'Edit profile details',
+    category: 'Account',
+    description: 'Change your name, bio, country, role, skills and avatar',
+    keywords: ['display name', 'bio', 'country', 'role', 'skills', 'photo', 'avatar', 'picture'],
+    href: '/settings?tab=profile',
+    access: 'auth',
+    icon: 'User',
+  },
+  {
+    id: 'settings.security',
+    title: 'Security settings',
+    category: 'Account',
+    description: 'Password, email address and account deletion',
+    keywords: ['password', 'email', 'security', 'login details', 'delete account'],
+    href: '/settings?tab=security',
+    access: 'auth',
+    icon: 'Shield',
+  },
+  {
+    id: 'account.password',
+    title: 'Change your password',
+    category: 'Account',
+    description: 'Set a new password from the Security tab',
+    keywords: ['change password', 'new password', 'update password', 'credentials'],
+    href: '/settings?tab=security',
+    access: 'auth',
+    icon: 'KeyRound',
+    howTo: [
+      'Open Settings from the avatar menu in the top-right corner.',
+      'Select the Security tab.',
+      'Enter your new password twice and save.',
+    ],
+  },
+  {
+    id: 'account.email',
+    title: 'Change your email address',
+    category: 'Account',
+    description: 'Update the address you sign in with',
+    keywords: ['change email', 'update email', 'new email address'],
+    href: '/settings?tab=security',
+    access: 'auth',
+    icon: 'Mail',
+    howTo: [
+      'Go to Settings › Security.',
+      'Enter the new email address and save.',
+      'Confirm the change from the verification email that is sent to the new address.',
+    ],
+  },
+  {
+    id: 'account.delete',
+    title: 'Delete your account',
+    category: 'Account',
+    description: 'Permanently remove your account and data',
+    keywords: ['delete account', 'close account', 'remove me', 'deactivate', 'gdpr'],
+    href: '/settings?tab=security',
+    access: 'auth',
+    icon: 'Trash2',
+    howTo: [
+      'Go to Settings › Security and scroll to the bottom.',
+      'Click "Delete Account" in the danger zone.',
+      'Confirm — this cannot be undone and your content is removed.',
+    ],
+  },
+  {
+    id: 'settings.preferences',
+    title: 'Notification & display preferences',
+    category: 'Account',
+    description: 'Choose which notifications you get and how the app looks',
+    keywords: ['notifications', 'emails', 'display', 'readable mode', 'font size', 'accessibility'],
+    href: '/settings?tab=preferences',
+    access: 'auth',
+    icon: 'Bell',
+  },
+  {
+    id: 'settings.verification',
+    title: 'Verify your identity',
+    category: 'Account',
+    description: 'Request a verified badge for your account',
+    keywords: ['verification', 'verified', 'badge', 'trust', 'kyc', 'identity'],
+    href: '/settings?tab=verification',
+    access: 'auth',
+    icon: 'BadgeCheck',
+  },
+  {
+    id: 'theme.dark-mode',
+    title: 'Switch between dark and light mode',
+    category: 'Account',
+    description: 'Flip the whole app between light and dark themes',
+    keywords: ['dark mode', 'light mode', 'night mode', 'theme', 'appearance', 'contrast'],
+    icon: 'Moon',
+    howTo: [
+      'Click the round KTIP button in the bottom-right corner of any page.',
+      'Choose the sun or moon icon that fans out above it.',
+      'Your choice is remembered on this device.',
+    ],
+  },
+  {
+    id: 'notifications',
+    title: 'Notifications',
+    category: 'Account',
+    description: 'See your alerts and mark them as read',
+    keywords: ['notifications', 'alerts', 'bell', 'unread', 'mark all read'],
+    access: 'auth',
+    icon: 'Bell',
+    howTo: [
+      'Click the bell icon in the top navigation bar.',
+      'Click a notification to open what it refers to.',
+      'Use "Mark all read" at the top of the panel to clear the unread count.',
+    ],
+  },
+  {
+    id: 'auth.signout',
+    title: 'Sign out',
+    category: 'Account',
+    description: 'End your session on this device',
+    keywords: ['sign out', 'log out', 'logout', 'leave', 'exit'],
+    access: 'auth',
+    icon: 'LogOut',
+    howTo: ['Click your avatar in the top-right corner.', 'Choose "Sign Out" at the bottom of the menu.'],
+  },
+
+  // ----------------------------------------------------------------- Support
+  {
+    id: 'help.center',
+    title: 'Help Center',
+    category: 'Support',
+    description: 'Guides and answers organised by topic',
+    keywords: ['help', 'support', 'how to', 'guide', 'documentation', 'assistance', 'stuck'],
+    href: '/help',
+    icon: 'HelpCircle',
+  },
+  {
+    id: 'help.faq',
+    title: 'FAQ',
+    category: 'Support',
+    description: 'Frequently asked questions',
+    keywords: ['faq', 'questions', 'answers', 'common problems'],
+    href: '/help/faq',
+    icon: 'MessageCircleQuestion',
+  },
+  {
+    id: 'help.ai-assistant',
+    title: 'Ask the KTIP Assistant',
+    category: 'Support',
+    description: 'Chat with the AI assistant about anything on the platform',
+    keywords: ['ai', 'assistant', 'chatbot', 'ask', 'bot', 'chat support'],
+    href: '/help',
+    icon: 'Sparkles',
+    howTo: [
+      'Go to the Help Center.',
+      'Open the "KTIP Assistant" panel.',
+      'Type your question — it knows the platform\'s features and your role.',
+    ],
+  },
+  {
+    id: 'feedback.submit',
+    title: 'Send feedback',
+    category: 'Support',
+    description: 'Report a bug or suggest an improvement',
+    keywords: ['feedback', 'bug', 'report problem', 'suggestion', 'contact', 'issue'],
+    icon: 'MessageSquarePlus',
+    howTo: [
+      'Click the feedback button on any page.',
+      'Choose whether it is a bug, an idea or a general comment.',
+      'Describe what happened and submit — the OECS team sees it in the admin dashboard.',
+    ],
+  },
+  {
+    id: 'grievances.report',
+    title: 'Report a user',
+    category: 'Support',
+    description: 'Raise a grievance about someone\'s conduct',
+    keywords: ['report', 'grievance', 'abuse', 'harassment', 'complaint', 'flag user', 'block'],
+    href: '/directory',
+    access: 'auth',
+    icon: 'Flag',
+    howTo: [
+      'Open the profile of the member you want to report, from the Directory or a post.',
+      'Click "Report" on their profile.',
+      'Describe the problem and submit — the OECS team reviews every grievance.',
+    ],
+  },
+  {
+    id: 'grievances.my-reports',
+    title: 'My Reports',
+    category: 'Support',
+    description: 'Track grievances you have submitted',
+    keywords: ['my reports', 'my grievances', 'complaint status', 'reports'],
+    href: '/grievances/my-reports',
+    access: 'auth',
+    icon: 'Flag',
+  },
+
+  // ------------------------------------------------------------------- Admin
+  {
+    id: 'admin.dashboard',
+    title: 'Admin Dashboard',
+    category: 'Admin',
+    description: 'Platform overview and moderation entry point',
+    keywords: ['admin', 'oecs', 'moderation', 'backoffice', 'management'],
+    href: '/admin',
+    access: 'oecs',
+    icon: 'ShieldCheck',
+  },
+  {
+    id: 'admin.projects',
+    title: 'Manage projects (admin)',
+    category: 'Admin',
+    description: 'Moderate every project, public or private',
+    keywords: ['admin projects', 'moderate projects', 'takedown'],
+    href: '/admin/projects',
+    access: 'oecs',
+    icon: 'FolderKanban',
+  },
+  {
+    id: 'admin.events',
+    title: 'Manage events (admin)',
+    category: 'Admin',
+    description: 'Events, registrations, speakers, schedule and page builder',
+    keywords: ['admin events', 'registrations', 'speakers', 'schedule', 'form builder', 'page builder'],
+    href: '/admin/events',
+    access: 'oecs',
+    icon: 'Calendar',
+  },
+  {
+    id: 'admin.users',
+    title: 'Manage users',
+    category: 'Admin',
+    description: 'Accounts, roles and permissions',
+    keywords: ['admin users', 'accounts', 'roles', 'permissions', 'ban'],
+    href: '/admin/users',
+    access: 'oecs',
+    icon: 'Users',
+  },
+  {
+    id: 'admin.grants',
+    title: 'Manage grants',
+    category: 'Admin',
+    description: 'Create grants and review applications',
+    keywords: ['admin grants', 'funding admin', 'applications', 'review'],
+    href: '/admin/grants',
+    access: 'oecs',
+    icon: 'DollarSign',
+  },
+  {
+    id: 'admin.forums',
+    title: 'Manage forums',
+    category: 'Admin',
+    description: 'Boards, posts and moderation',
+    keywords: ['admin forums', 'boards', 'moderate posts', 'pin'],
+    href: '/admin/forums',
+    access: 'oecs',
+    icon: 'MessageSquare',
+  },
+  {
+    id: 'admin.resources',
+    title: 'Manage resources',
+    category: 'Admin',
+    description: 'Publish and edit guides and articles',
+    keywords: ['admin resources', 'articles', 'publish', 'library'],
+    href: '/admin/resources',
+    access: 'oecs',
+    icon: 'BookOpen',
+  },
+  {
+    id: 'admin.grievances',
+    title: 'Review grievances',
+    category: 'Admin',
+    description: 'Handle user reports and complaints',
+    keywords: ['admin grievances', 'reports', 'complaints', 'abuse'],
+    href: '/admin/grievances',
+    access: 'oecs',
+    icon: 'Flag',
+  },
+  {
+    id: 'admin.feedback',
+    title: 'Review feedback',
+    category: 'Admin',
+    description: 'Bugs and suggestions submitted by users',
+    keywords: ['admin feedback', 'bugs', 'suggestions'],
+    href: '/admin/feedback',
+    access: 'oecs',
+    icon: 'MessageSquarePlus',
+  },
+  {
+    id: 'admin.verification',
+    title: 'Verification requests',
+    category: 'Admin',
+    description: 'Approve or reject identity verification',
+    keywords: ['admin verification', 'verify users', 'badges', 'kyc'],
+    href: '/admin/verification',
+    access: 'oecs',
+    icon: 'BadgeCheck',
+  },
+  {
+    id: 'admin.integrations',
+    title: 'Manage integrations',
+    category: 'Admin',
+    description: 'Partner tools shown on the Resources page',
+    keywords: ['admin integrations', 'partners', 'third party'],
+    href: '/admin/integrations',
+    access: 'oecs',
+    icon: 'Plug',
+  },
+  {
+    id: 'admin.preregistrations',
+    title: 'Pre-registrations',
+    category: 'Admin',
+    description: 'People who signed up before launch',
+    keywords: ['preregistrations', 'waitlist', 'early access', 'leads'],
+    href: '/admin/preregistrations',
+    access: 'oecs',
+    icon: 'ClipboardList',
+  },
+  {
+    id: 'admin.analytics',
+    title: 'Analytics',
+    category: 'Admin',
+    description: 'Platform usage, growth and engagement metrics',
+    keywords: ['analytics', 'stats', 'metrics', 'reports', 'charts', 'growth', 'export'],
+    href: '/admin/analytics',
+    access: 'oecs',
+    icon: 'BarChart3',
+  },
+  {
+    id: 'admin.uat',
+    title: 'UAT feedback',
+    category: 'Admin',
+    description: 'User acceptance testing responses',
+    keywords: ['uat', 'testing', 'acceptance', 'tester feedback'],
+    href: '/admin/uat',
+    access: 'oecs',
+    icon: 'ClipboardCheck',
+  },
+]
+
+/** Prefix used for help-article entries so ids stay collision-free. */
+export const HELP_ENTRY_PREFIX = 'help.article.'
+
+/**
+ * Help articles as site entries. Kept separate from SITE_MAP so the panel can
+ * group them under their own heading, and so the AI payload can include their
+ * titles without their (long) bodies.
+ */
+export const HELP_ENTRIES: SiteEntry[] = HELP_CATEGORIES.flatMap((cat) =>
+  cat.articles.map((article) => ({
+    id: `${HELP_ENTRY_PREFIX}${article.id}`,
+    title: article.title,
+    category: 'Support',
+    description: `Help article — ${cat.title}`,
+    keywords: article.tags,
+    href: `/help?article=${article.id}`,
+    icon: 'HelpCircle',
+  }))
+)
+
+/** Everything searchable, in one array. */
+export const ALL_ENTRIES: SiteEntry[] = [...SITE_MAP, ...HELP_ENTRIES]
+
+function compactLine(entry: SiteEntry): string {
+  // access is only emitted when it restricts visibility, to save tokens
+  const access = entry.access && entry.access !== 'public' ? `|${entry.access}` : ''
+  return `${entry.id}|${entry.title}|${entry.category}|${entry.description}${access}`
+}
+
+/**
+ * The whole site map as one newline-delimited string — roughly 1.7k tokens.
+ * Built once at module load and sent as a stable system-prompt prefix so
+ * OpenAI's automatic prompt caching applies across requests.
+ */
+export const SITE_MAP_COMPACT: string = ALL_ENTRIES.map(compactLine).join('\n')
+
+/** Valid ids, for rejecting anything the model invents. */
+export const SITE_ENTRY_IDS: Set<string> = new Set(ALL_ENTRIES.map((e) => e.id))

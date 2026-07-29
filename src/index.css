@@ -98,6 +98,11 @@
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-card-hover: 0 10px 25px -5px rgba(4, 30, 66, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
   --shadow-nav: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  /* Floating action button — layered falloff so the lift reads soft, not hard-edged */
+  --shadow-fab: 0 1px 2px rgba(4, 30, 66, 0.05), 0 4px 8px -2px rgba(4, 30, 66, 0.08),
+    0 12px 24px -6px rgba(4, 30, 66, 0.12), 0 24px 48px -12px rgba(4, 30, 66, 0.14);
+  --shadow-fab-hover: 0 2px 4px rgba(4, 30, 66, 0.06), 0 8px 16px -4px rgba(4, 30, 66, 0.1),
+    0 20px 36px -8px rgba(4, 30, 66, 0.16), 0 36px 64px -16px rgba(4, 30, 66, 0.18);
 
   /* Animations */
   --animate-fade-in: fadeIn 0.5s ease-in-out;
@@ -212,6 +217,12 @@ html.dark {
 
   --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06);
   --shadow-card-hover: 0 0 0 1px rgba(151, 215, 0, 0.25);
+
+  /* On black, drop shadows vanish — the FAB lifts with a soft glow instead */
+  --shadow-fab: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px -6px rgba(0, 0, 0, 0.7),
+    0 16px 40px -12px rgba(151, 215, 0, 0.12);
+  --shadow-fab-hover: 0 0 0 1px rgba(151, 215, 0, 0.28), 0 12px 32px -8px rgba(0, 0, 0, 0.8),
+    0 24px 56px -16px rgba(151, 215, 0, 0.22);
 
   /* ------------------------------------------------------------
      Tailwind default-palette overrides — raw gray/status classes

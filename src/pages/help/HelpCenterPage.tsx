@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import { HelpSearch } from '../../components/help/HelpSearch'
 import { HelpCategorySection } from '../../components/help/HelpCategory'
 import { AIAssistant } from '../../components/help/AIAssistant'
@@ -47,9 +47,31 @@ export default function HelpCenterPage() {
   usePageTitle('Help Center')
   const auth = useAuth()
 
-  const [searchQuery, setSearchQuery] = useState('')
+  // /help?article=<id> and /help?q=<text> let the global search panel land on
+  // a specific answer instead of the top of the page
+  const [searchParams] = useSearchParams()
+  const requestedArticle = searchParams.get('article')
+  const requestedQuery = searchParams.get('q')
+
+  const [searchQuery, setSearchQuery] = useState(requestedQuery ?? '')
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null)
+  const [expandedArticleId, setExpandedArticleId] = useState<string | null>(requestedArticle)
+
+  useEffect(() => {
+    if (requestedQuery !== null) setSearchQuery(requestedQuery)
+  }, [requestedQuery])
+
+  useEffect(() => {
+    if (!requestedArticle) return
+    setExpandedArticleId(requestedArticle)
+    // MainLayout scrolls to the top on navigation; rAF runs after that
+    const frame = requestAnimationFrame(() => {
+      document
+        .getElementById(`help-${requestedArticle}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [requestedArticle])
 
   const isSearching = searchQuery.trim() !== '' || selectedCategory !== ''
 
