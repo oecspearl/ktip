@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { Route, RefreshCw } from 'lucide-react'
 import { useMyTimeline } from '../../hooks/useMyTimeline'
-import { TimelineChart } from './TimelineChart'
+import { TimelineGantt } from './TimelineGantt'
 import { TimelineItemDetail } from './TimelineItemDetail'
 import { Button } from '../ui/Button'
 
@@ -70,7 +70,7 @@ export default function TimelineSection({ userId }: TimelineSectionProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          <TimelineChart items={items} selectedId={selectedId} onSelect={setSelectedId} />
+          <TimelineGantt items={items} selectedId={selectedId} onSelect={setSelectedId} />
           {selected && <TimelineItemDetail item={selected} />}
         </div>
       )}

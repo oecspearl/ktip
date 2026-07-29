@@ -9,6 +9,7 @@ import { usePublishedEventArticles } from '../../hooks/useEventArticles'
 import { usePublicEventSections } from '../../hooks/useEventPageSections'
 import { useEventSchedule } from '../../hooks/useEventSchedule'
 import { useEventSpeakers } from '../../hooks/useEventSpeakers'
+import { useEventCriteria } from '../../hooks/useEventCriteria'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -17,6 +18,7 @@ import { EventRegistrationForm } from '../../components/events/EventRegistration
 import { EventPageSectionRenderer } from '../../components/events/EventPageSectionRenderer'
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
 import { EventSpeakerGrid } from '../../components/events/EventSpeakerGrid'
+import { EventChallengeBrief } from '../../components/events/EventChallengeBrief'
 import {
   Calendar,
   MapPin,
@@ -61,6 +63,7 @@ export default function EventDetailPage() {
   const { sections: pageSections } = usePublicEventSections(params.id)
   const { schedule: scheduleItems } = useEventSchedule(params.id)
   const { speakers: eventSpeakers } = useEventSpeakers(params.id)
+  const { criteria: eventCriteria } = useEventCriteria(params.id)
 
   const [hasRSVPd, setHasRSVPd] = useState(false)
   const [rsvpCount, setRSVPCount] = useState(0)
@@ -371,6 +374,14 @@ export default function EventDetailPage() {
                 Share
               </button>
             </div>
+
+            {/* Challenge brief — only once the organizer has switched it on */}
+            {event.has_challenge && eventCriteria && eventCriteria.length > 0 && (
+              <EventChallengeBrief
+                criteria={eventCriteria}
+                submissionDeadline={event.submission_deadline}
+              />
+            )}
 
             {/* Page Sections */}
             {(pageSections || []).map((section) => (

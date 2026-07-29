@@ -131,9 +131,34 @@ export interface Event extends Ranked {
   organizer_id: string
   registration_fields: RegistrationFieldConfig[]
   is_climate_action: boolean
+  /** Migration 062 — event sets a goal attendees must accomplish. */
+  has_challenge: boolean
+  submission_deadline: string | null
   details: DetailEntry[]
   created_at: string
   organizer?: Profile
+}
+
+/** The four parts of a challenge brief; all share one table. */
+export type EventCriterionKind =
+  | 'objective'
+  | 'constraint'
+  | 'deliverable'
+  | 'judging_criterion'
+
+export interface EventCriterion {
+  id: string
+  event_id: string
+  kind: EventCriterionKind
+  title: string
+  description: string | null
+  /** Hard rule vs guidance; ignored for judging_criterion. */
+  is_required: boolean
+  /** Judging criteria only — relative weight. */
+  weight: number | null
+  sort_order: number
+  created_at: string
+  updated_at: string
 }
 
 export interface EventRSVP {

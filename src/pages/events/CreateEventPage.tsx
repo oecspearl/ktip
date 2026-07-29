@@ -12,7 +12,7 @@ import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
 import { sanitizeTag } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { eventSchema } from '../../lib/validation'
-import { Save, Calendar, MapPin, Video, Users } from 'lucide-react'
+import { Save, Calendar, MapPin, Video, Users, Target } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
@@ -37,6 +37,9 @@ export default function CreateEventPage() {
   const [capacity, setCapacity] = useState<number | undefined>(undefined)
   const [eventStatus, setEventStatus] = useState('published')
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [hasChallenge, setHasChallenge] = useState(false)
+  const [submissionDate, setSubmissionDate] = useState('')
+  const [submissionTime, setSubmissionTime] = useState('')
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
@@ -96,6 +99,11 @@ export default function CreateEventPage() {
         capacity,
         organizer_id: auth.user!.id,
         is_climate_action: isClimateAction,
+        has_challenge: hasChallenge,
+        submission_deadline:
+          hasChallenge && submissionDate
+            ? combineDatetime(submissionDate, submissionTime)
+            : null,
         details: cleanDetails(details),
         ...(isAdmin ? { status: eventStatus } : {}),
       } as any)
@@ -341,6 +349,60 @@ export default function CreateEventPage() {
               helperText="Leave empty for unlimited capacity"
               fullWidth
             />
+
+            {/* Challenge */}
+            <div className="border-2 border-ktip-sand-200 rounded-xl p-4 space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasChallenge}
+                  onChange={(e) => setHasChallenge(e.target.checked)}
+                  className="mt-0.5 w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
+                />
+                <span>
+                  <span className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
+                    <Target size={18} className="text-ktip-sand-600" />
+                    This event sets a challenge
+                  </span>
+                  <span className="block text-xs text-ktip-sand-500 mt-0.5">
+                    Attendees are given a goal to accomplish. You add the objectives, constraints,
+                    deliverables and judging criteria from the event's Challenge tab after creating
+                    it.
+                  </span>
+                </span>
+              </label>
+
+              {hasChallenge && (
+                <div className="grid md:grid-cols-2 gap-4 pl-8">
+                  <div>
+                    <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
+                      Submission Deadline (Optional)
+                    </label>
+                    <div className="relative">
+                      <Calendar
+                        size={20}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                      />
+                      <input
+                        type="date"
+                        value={submissionDate}
+                        onChange={(e) => setSubmissionDate(e.target.value)}
+                        min={today}
+                        className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <Input
+                    label="Deadline Time (Optional)"
+                    type="time"
+                    value={submissionTime}
+                    onChange={(e) => setSubmissionTime(e.target.value)}
+                    fullWidth
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Climate Action */}
             <div>

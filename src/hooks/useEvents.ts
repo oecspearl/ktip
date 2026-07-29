@@ -142,6 +142,8 @@ export function useCreateEvent() {
       capacity?: number
       organizer_id: string
       is_climate_action?: boolean
+      has_challenge?: boolean
+      submission_deadline?: string | null
       details?: DetailEntry[]
     }) => {
       const { data, error } = await supabase

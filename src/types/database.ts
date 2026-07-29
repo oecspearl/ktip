@@ -165,6 +165,8 @@ export interface Database {
           capacity: number | null
           image_url: string | null
           registration_fields: any
+          has_challenge: boolean
+          submission_deadline: string | null
           organizer_id: string
           created_at: string
         }
@@ -181,6 +183,8 @@ export interface Database {
           capacity?: number | null
           image_url?: string | null
           registration_fields?: any
+          has_challenge?: boolean
+          submission_deadline?: string | null
           organizer_id: string
           created_at?: string
         }
@@ -197,8 +201,49 @@ export interface Database {
           capacity?: number | null
           image_url?: string | null
           registration_fields?: any
+          has_challenge?: boolean
+          submission_deadline?: string | null
           organizer_id?: string
           created_at?: string
+        }
+        Relationships: []
+      }
+      event_criteria: {
+        Row: {
+          id: string
+          event_id: string
+          kind: 'objective' | 'constraint' | 'deliverable' | 'judging_criterion'
+          title: string
+          description: string | null
+          is_required: boolean
+          weight: number | null
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          kind: 'objective' | 'constraint' | 'deliverable' | 'judging_criterion'
+          title: string
+          description?: string | null
+          is_required?: boolean
+          weight?: number | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          kind?: 'objective' | 'constraint' | 'deliverable' | 'judging_criterion'
+          title?: string
+          description?: string | null
+          is_required?: boolean
+          weight?: number | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

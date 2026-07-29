@@ -1,12 +1,3 @@
-import {
-  differenceInCalendarDays,
-  eachMonthOfInterval,
-  endOfMonth,
-  max as maxDate,
-  min as minDate,
-  startOfMonth,
-  subMonths,
-} from 'date-fns'
 import type {
   GrantApplication,
   GrantApplicationEvent,
@@ -156,68 +147,4 @@ export function buildTimelineItems(
   return [...apps.map(buildGrantAppItem), ...projects.map(buildProjectItem)].sort(
     (a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime()
   )
-}
-
-export interface MonthRange {
-  months: Date[]
-  rangeStart: Date
-  rangeEnd: Date
-}
-
-export function computeMonthRange(items: TimelineItem[], today: Date = new Date()): MonthRange {
-  const starts = items.map((i) => new Date(i.startAt))
-  const ends = items.map((i) => (i.endAt ? new Date(i.endAt) : today))
-
-  let rangeStart = startOfMonth(starts.length ? minDate(starts) : today)
-  const earliestAllowed = startOfMonth(subMonths(today, 12))
-  if (rangeStart < earliestAllowed) rangeStart = earliestAllowed
-
-  let rangeEnd = endOfMonth(maxDate([...ends, today]))
-
-  // Guarantee at least 3 months so sparse data still reads as a timeline
-  if (eachMonthOfInterval({ start: rangeStart, end: rangeEnd }).length < 3) {
-    rangeStart = startOfMonth(subMonths(rangeEnd, 2))
-  }
-
-  return {
-    months: eachMonthOfInterval({ start: rangeStart, end: rangeEnd }),
-    rangeStart,
-    rangeEnd,
-  }
-}
-
-export interface BarPosition {
-  leftPct: number
-  widthPct: number
-}
-
-const MIN_WIDTH_PCT = 1.5
-
-export function positionFor(
-  item: TimelineItem,
-  rangeStart: Date,
-  rangeEnd: Date,
-  today: Date = new Date()
-): BarPosition {
-  const totalDays = Math.max(1, differenceInCalendarDays(rangeEnd, rangeStart))
-  const start = maxDate([new Date(item.startAt), rangeStart])
-  const end = minDate([item.endAt ? new Date(item.endAt) : today, rangeEnd])
-
-  const leftPct = Math.min(
-    100 - MIN_WIDTH_PCT,
-    Math.max(0, (differenceInCalendarDays(start, rangeStart) / totalDays) * 100)
-  )
-  const rawWidth = (Math.max(0, differenceInCalendarDays(end, start)) / totalDays) * 100
-  const widthPct = Math.min(100 - leftPct, Math.max(MIN_WIDTH_PCT, rawWidth))
-
-  return { leftPct, widthPct }
-}
-
-export function positionForDate(
-  date: Date,
-  rangeStart: Date,
-  rangeEnd: Date
-): number {
-  const totalDays = Math.max(1, differenceInCalendarDays(rangeEnd, rangeStart))
-  return Math.min(100, Math.max(0, (differenceInCalendarDays(date, rangeStart) / totalDays) * 100))
 }

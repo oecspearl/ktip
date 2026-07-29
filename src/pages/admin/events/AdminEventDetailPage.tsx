@@ -24,6 +24,7 @@ import {
   LayoutList,
   Clock,
   Mic,
+  Target,
 } from 'lucide-react'
 import {
   EVENT_TYPE_LABELS,
@@ -43,8 +44,18 @@ import AdminEventFormBuilderTab from './AdminEventFormBuilderTab'
 import AdminEventPageBuilderTab from './AdminEventPageBuilderTab'
 import AdminEventScheduleTab from './AdminEventScheduleTab'
 import AdminEventSpeakersTab from './AdminEventSpeakersTab'
+import AdminEventChallengeTab from './AdminEventChallengeTab'
 
-type TabId = 'overview' | 'registrations' | 'form' | 'pages' | 'schedule' | 'speakers' | 'updates' | 'articles'
+type TabId =
+  | 'overview'
+  | 'registrations'
+  | 'form'
+  | 'challenge'
+  | 'pages'
+  | 'schedule'
+  | 'speakers'
+  | 'updates'
+  | 'articles'
 
 export default function AdminEventDetailPage() {
   const params = useParams<{ id: string }>()
@@ -76,6 +87,7 @@ export default function AdminEventDetailPage() {
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'registrations', label: 'Registrations', icon: ClipboardList },
     { id: 'form', label: 'Reg. Form', icon: FormInput },
+    { id: 'challenge', label: 'Challenge', icon: Target },
     { id: 'pages', label: 'Pages', icon: LayoutList },
     { id: 'schedule', label: 'Schedule', icon: Clock },
     { id: 'speakers', label: 'Speakers', icon: Mic },
@@ -266,6 +278,17 @@ export default function AdminEventDetailPage() {
       {activeTab === 'form' && (
         <div className="animate-tab-enter">
           <AdminEventFormBuilderTab eventId={event.id} />
+        </div>
+      )}
+
+      {activeTab === 'challenge' && (
+        <div className="animate-tab-enter">
+          <AdminEventChallengeTab
+            eventId={event.id}
+            hasChallenge={event.has_challenge ?? false}
+            submissionDeadline={event.submission_deadline ?? null}
+            onEventChange={refetch}
+          />
         </div>
       )}
 

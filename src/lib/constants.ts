@@ -133,6 +133,43 @@ export const EVENT_STATUS_COLORS: Record<string, string> = {
   completed: 'bg-gray-100 text-gray-700 border-gray-200',
 }
 
+// Challenge brief (migration 062). Ordered: what to achieve, what limits you,
+// what you hand in, how it gets judged.
+export const EVENT_CRITERION_KINDS = [
+  'objective',
+  'constraint',
+  'deliverable',
+  'judging_criterion',
+] as const
+
+export const EVENT_CRITERION_LABELS: Record<string, string> = {
+  objective: 'Objective',
+  constraint: 'Constraint',
+  deliverable: 'Deliverable',
+  judging_criterion: 'Judging Criterion',
+}
+
+export const EVENT_CRITERION_GROUP_LABELS: Record<string, string> = {
+  objective: 'Objectives',
+  constraint: 'Constraints',
+  deliverable: 'Deliverables',
+  judging_criterion: 'Judging Criteria',
+}
+
+export const EVENT_CRITERION_GROUP_HINTS: Record<string, string> = {
+  objective: 'What participants must achieve',
+  constraint: 'Rules and limits entries must respect',
+  deliverable: 'What each entry has to hand in',
+  judging_criterion: 'How entries are scored',
+}
+
+export const EVENT_CRITERION_COLORS: Record<string, string> = {
+  objective: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  constraint: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  deliverable: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  judging_criterion: 'bg-purple-100 text-purple-700 border-purple-200',
+}
+
 // RSVP Statuses
 export const RSVP_STATUS_LABELS: Record<string, string> = {
   confirmed: 'Confirmed',
