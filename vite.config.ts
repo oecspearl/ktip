@@ -95,7 +95,12 @@ function edgeApiPlugin(apiKey: string | undefined): Plugin {
             body = Buffer.concat(chunks).toString('utf8')
           }
 
-          const request = new Request(`http://localhost${pathname}${query ? `?${query}` : ''}`, {
+          // Build the URL from the Host header rather than a fixed
+          // "http://localhost". A handler that derives redirects from
+          // request.url — as the Virtual Campus routes do — would otherwise
+          // send the browser to a portless origin and break the loopback.
+          const host = req.headers.host || 'localhost'
+          const request = new Request(`http://${host}${pathname}${query ? `?${query}` : ''}`, {
             method: req.method || 'GET',
             headers,
             body,
