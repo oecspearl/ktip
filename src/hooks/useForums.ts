@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { ForumBoard, ForumPost, ForumReply } from '../types'
 
 export function useForumBoards() {
@@ -121,6 +122,7 @@ export function useForumReplies(postId: string | undefined) {
 
 export function useCreateForumPost() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -140,6 +142,7 @@ export function useCreateForumPost() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: keys.all('forum_posts') })
       queryClient.invalidateQueries({ queryKey: keys.detail('forum_boards', variables.board_id) })
+      triggerCheck()
     },
   })
 
@@ -148,6 +151,7 @@ export function useCreateForumPost() {
 
 export function useCreateForumReply() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -165,6 +169,7 @@ export function useCreateForumReply() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: keys.sub('forum_posts', 'replies', variables.post_id) })
+      triggerCheck()
     },
   })
 

@@ -9,6 +9,7 @@ import {
   Handshake,
   MapPin,
   MessageSquare,
+  Trophy,
   Users,
   X,
 } from 'lucide-react'
@@ -19,6 +20,7 @@ import { ConnectButton } from './ConnectButton'
 import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
+import { useProfileStats } from '../../hooks/useProfileStats'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -48,6 +50,8 @@ export function MemberPanel() {
   const { badges } = useUserBadges(memberId ?? undefined)
   // null when this viewer isn't allowed to see the count (owner's setting)
   const { count: connectionCount } = useConnectionCount(memberId ?? undefined)
+  // null for suspended accounts; the drawer just omits the row in that case
+  const { stats } = useProfileStats(memberId ?? undefined)
 
   // Escape closes the drawer — unless an open Modal (role="dialog") owns the key.
   useEffect(() => {
@@ -158,6 +162,16 @@ export function MemberPanel() {
                     <Users size={14} />
                     <span className="font-semibold text-ktip-sand-900">{connectionCount}</span>
                     {connectionCount === 1 ? 'connection' : 'connections'}
+                  </p>
+                )}
+
+                {/* Omitted entirely at zero: "Newcomer · 0 points" on a new
+                    member reads as a scoreboard of failure. */}
+                {stats && stats.badge_count > 0 && (
+                  <p className="flex items-center gap-1.5 text-sm text-ktip-sand-600 mt-0.5">
+                    <Trophy size={14} />
+                    <span className="font-semibold text-ktip-sand-900">{stats.rank.name}</span>
+                    · {stats.points} pts
                   </p>
                 )}
               </div>
@@ -314,10 +328,21 @@ export function MemberPanel() {
               </div>
             ) : null}
 
-            <p className="flex items-center gap-1.5 text-xs text-ktip-sand-400 pt-2 border-t border-ktip-sand-100">
-              <Calendar size={13} />
-              Joined {formatDate(profile.created_at)}
-            </p>
+            <div className="pt-2 border-t border-ktip-sand-100 space-y-2">
+              <p className="flex items-center gap-1.5 text-xs text-ktip-sand-400">
+                <Calendar size={13} />
+                Joined {formatDate(profile.created_at)}
+              </p>
+              {/* The drawer stays the in-app default; this is the way out to a
+                  URL that can be shared. */}
+              <Link
+                to={`/u/${profile.id}`}
+                onClick={closeMember}
+                className="inline-block text-xs text-ktip-ocean-600 hover:underline"
+              >
+                View full profile
+              </Link>
+            </div>
           </>
         )}
       </div>

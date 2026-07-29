@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import {
   ArrowUpRight,
+  Award,
   BadgeCheck,
   BarChart3,
   Bell,
@@ -63,6 +64,7 @@ export type IconProps = { size?: number; className?: string }
 
 export const ICONS: Record<string, ComponentType<IconProps>> = {
   ArrowUpRight,
+  Award,
   BadgeCheck,
   BarChart3,
   Bell,

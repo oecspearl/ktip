@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { MessageSquare, Moon, Sun, X } from 'lucide-react'
+import { useLocation } from 'react-router'
+import { GraduationCap, MessageSquare, Moon, Sun, X } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
+import { useTutorials } from '../../contexts/TutorialContext'
+import { tutorialIdForPath } from '../../data/tutorials'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import { cn } from '../../lib/utils'
 
@@ -11,6 +14,8 @@ interface FabAction {
   icon: ReactNode
   onClick: () => void
   show?: boolean
+  /** Pulsing dot — "there is something here you haven't done yet" */
+  badge?: boolean
 }
 
 /**
@@ -24,9 +29,14 @@ interface FabAction {
 export function FloatingActionButton() {
   const auth = useAuth()
   const { togglePanel } = useMessagingPanel()
+  const { startTutorial, isTutorialCompleted } = useTutorials()
+  const { pathname } = useLocation()
   const [dark, setDark] = useThemeMode()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Only pages with a registered walkthrough show the graduation-cap action
+  const pageTutorialId = tutorialIdForPath(pathname)
 
   useEffect(() => {
     if (!open) return
@@ -48,6 +58,17 @@ export function FloatingActionButton() {
 
   const actions: FabAction[] = [
     {
+      id: 'tutorial',
+      label: 'Page tour',
+      icon: <GraduationCap size={20} />,
+      onClick: () => {
+        if (pageTutorialId) startTutorial(pageTutorialId)
+        setOpen(false)
+      },
+      show: !!pageTutorialId,
+      badge: !!pageTutorialId && !isTutorialCompleted(pageTutorialId),
+    },
+    {
       id: 'theme',
       label: dark ? 'Light mode' : 'Dark mode',
       icon: dark ? <Sun size={20} /> : <Moon size={20} />,
@@ -67,6 +88,9 @@ export function FloatingActionButton() {
   ]
 
   const visible = actions.filter((a) => a.show !== false)
+  // Surfaced on the collapsed trigger too — a dot only on the fanned-out
+  // sub-button would never be seen by the person who most needs the tour
+  const hasUnseen = visible.some((a) => a.badge)
 
   return (
     <div
@@ -95,6 +119,9 @@ export function FloatingActionButton() {
           }}
         >
           {action.icon}
+          {action.badge && (
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse-soft" />
+          )}
           <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-ktip-ink text-white text-xs font-medium opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
             {action.label}
           </span>
@@ -106,7 +133,7 @@ export function FloatingActionButton() {
         aria-label="Quick actions"
         aria-expanded={open}
         className={cn(
-          'w-16 h-16 rounded-2xl flex items-center justify-center shadow-fab',
+          'relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-fab',
           'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
           open
             ? 'bg-gray-500 text-white shadow-fab-hover'
@@ -116,11 +143,16 @@ export function FloatingActionButton() {
         {open ? (
           <X size={24} />
         ) : (
-          <img
-            src="/KTIP%20LOGO.png"
-            alt=""
-            className="w-12 h-12 object-contain"
-          />
+          <>
+            <img
+              src="/KTIP%20LOGO.png"
+              alt=""
+              className="w-12 h-12 object-contain"
+            />
+            {hasUnseen && (
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse-soft" />
+            )}
+          </>
         )}
       </button>
     </div>

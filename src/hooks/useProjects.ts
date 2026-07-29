@@ -4,6 +4,7 @@ import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
+import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { DetailEntry, Project, ProjectComment } from '../types'
 
 export function useProjects(filters?: {
@@ -144,6 +145,7 @@ export function useProject(id: string | undefined) {
 
 export function useCreateProject() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const mutation = useMutation({
     mutationFn: async (projectData: {
@@ -175,6 +177,10 @@ export function useCreateProject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('projects') })
       queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
+      // Cheap and debounced. Not required for correctness — the achievement
+      // engine re-derives everything on its own poll — but it is what makes
+      // the unlock appear the moment you finish, rather than a minute later.
+      triggerCheck()
     },
   })
 
@@ -487,6 +493,7 @@ export function useProjectComments(projectId: string | undefined) {
 
 export function useCreateProjectComment() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -504,6 +511,7 @@ export function useCreateProjectComment() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: keys.sub('projects', 'comments', variables.project_id) })
+      triggerCheck()
     },
   })
 

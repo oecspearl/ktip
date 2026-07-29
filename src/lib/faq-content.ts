@@ -61,7 +61,21 @@ export const FAQS: FAQItem[] = [
     id: 'badges',
     question: 'How do I earn achievement badges?',
     answer:
-      'Badges are awarded automatically for milestones — creating your first project, making your first connection, posting actively in the forums, getting verified, RSVPing to events, and more. They appear on your profile.',
+      'Badges are awarded automatically for what you do — creating projects, connecting with people, posting in the forums, getting verified, turning up to events, applying for grants, and more. Nothing needs to be claimed: the system checks as you go and awards anything you have already qualified for, including things you did before a badge existed. See everything you have and everything still open under Achievements.',
+    category: 'Community',
+  },
+  {
+    id: 'points-and-levels',
+    question: 'What are points and levels?',
+    answer:
+      'Every achievement is worth points depending on how rare it is, from 10 for a common one up to 200 for a legendary. Your level comes from how many achievements you have earned rather than how many points — someone who has done a bit of everything ranks higher than someone with one big win. Levels run from Newcomer to KTIP Champion.',
+    category: 'Community',
+  },
+  {
+    id: 'leaderboard-privacy',
+    question: 'Can I keep my points off the leaderboard?',
+    answer:
+      'Yes. In Settings under Preferences, switch off "Show me on the leaderboard". You keep earning achievements and can still see your own rank — nobody else can. Students are never shown on the public leaderboard regardless of this setting.',
     category: 'Community',
   },
   {

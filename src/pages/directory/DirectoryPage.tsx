@@ -4,7 +4,8 @@ import { useDirectoryMembers } from '../../hooks/useDirectory'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useAllBadges } from '../../hooks/useBadges'
 import { useConnectionCounts } from '../../hooks/useConnections'
-import { Search, UserX, User, Users } from 'lucide-react'
+import { useProfileStatsBatch } from '../../hooks/useProfileStats'
+import { Search, UserX, User, Users, Trophy } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
@@ -62,6 +63,8 @@ export default function DirectoryPage() {
   // Members who hide their count are simply absent from this map
   const memberIds = useMemo(() => (members || []).map((m) => m.id), [members])
   const { counts: connectionCounts } = useConnectionCounts(memberIds)
+  // One batched RPC for the whole page rather than a request per card.
+  const { statsById } = useProfileStatsBatch(memberIds)
 
   const clearFilters = () => {
     setSelectedRole('')
@@ -221,6 +224,15 @@ export default function DirectoryPage() {
                             <Users size={13} className="shrink-0" />
                             {connectionCounts[member.id]}{' '}
                             {connectionCounts[member.id] === 1 ? 'connection' : 'connections'}
+                          </span>
+                        )}
+                        {/* Only once there is something to show — "Newcomer,
+                            0 pts" on every new member turns the directory
+                            into a scoreboard of who has not started. */}
+                        {statsById[member.id]?.badge_count > 0 && (
+                          <span className="flex items-center gap-1.5 mt-1">
+                            <Trophy size={13} className="shrink-0" />
+                            {statsById[member.id].rank_name} · {statsById[member.id].points} pts
                           </span>
                         )}
                         {(member.user_badges?.length ?? 0) > 0 && (

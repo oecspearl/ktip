@@ -82,7 +82,10 @@ function EventCompactCard({ event, day }: { event: Event; day: Date }) {
 
 export function EventDayPanel({ date, events, loading, onJumpToNext }: EventDayPanelProps) {
   return (
-    <div className="bg-ktip-cream rounded-2xl border border-ktip-line shadow-card p-4 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+    <div
+      data-tutorial="events-day-panel"
+      className="bg-ktip-cream rounded-2xl border border-ktip-line shadow-card p-4 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+    >
       <p className="text-xs font-bold uppercase tracking-wider text-ktip-ocean-600">
         {format(date, 'EEEE')}
       </p>

@@ -330,10 +330,16 @@ export const ROUTES = {
   FORUM_BOARD: (slug: string) => `/forums/${slug}`,
   FORUM_POST: (slug: string, postId: string) => `/forums/${slug}/${postId}`,
   CREATE_FORUM_POST: (slug: string) => `/forums/${slug}/new`,
-  // Members open in a drawer over the directory; your own profile is a
-  // dashboard tab. Neither has a page of its own any more.
+  // In-app, members still open in a drawer over the directory — it is faster
+  // and keeps you in context. MEMBER_PAGE is the standalone page reintroduced
+  // in 066 for links that leave the app: a rank nobody outside KTIP can see
+  // is not worth chasing. Use PROFILE for in-app navigation, MEMBER_PAGE when
+  // the URL will be shared.
   PROFILE: (id: string) => `/directory?member=${id}`,
+  MEMBER_PAGE: (id: string) => `/u/${id}`,
   MY_PROFILE: '/dashboard/profile',
+  ACHIEVEMENTS: '/achievements',
+  LEADERBOARD: '/leaderboard',
   SETTINGS: '/settings',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
@@ -596,6 +602,9 @@ export const IMAGE_PRESETS = {
   AVATAR: { maxDim: 512, quality: 0.85, maxBytes: 300 * 1024 },
   SPEAKER: { maxDim: 800, quality: 0.85, maxBytes: 500 * 1024 },
   DOCUMENT: { maxDim: 1600, quality: 0.82, maxBytes: 1024 * 1024 },
+  // Trophies render at 128px at most and there are ~52 of them, so they are
+  // kept small: the whole set costs less over the wire than one hero image.
+  TROPHY: { maxDim: 512, quality: 0.85, maxBytes: 200 * 1024 },
 } as const
 
 // Date Formats

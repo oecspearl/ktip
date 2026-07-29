@@ -8,6 +8,7 @@ import { MessagingPanel } from '../messages/MessagingPanel'
 import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
 import { MemberPanel } from '../directory/MemberPanel'
 import { MemberPanelProvider } from '../../contexts/MemberPanelContext'
+import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function MainLayout() {
@@ -23,6 +24,9 @@ export function MainLayout() {
     <MessagingPanelProvider>
     {/* Nested inside: MemberPanel's "Message" action calls useMessagingPanel */}
     <MemberPanelProvider>
+    {/* Renders the walkthrough overlay itself; must sit above the FAB, which
+        is one of its entry points */}
+    <TutorialProvider>
     <div className="min-h-screen flex flex-col bg-ktip-canvas">
       <a
         href="#main-content"
@@ -42,6 +46,7 @@ export function MainLayout() {
       <MemberPanel />
       <Footer />
     </div>
+    </TutorialProvider>
     </MemberPanelProvider>
     </MessagingPanelProvider>
   )

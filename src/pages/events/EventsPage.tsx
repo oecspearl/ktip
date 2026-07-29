@@ -24,6 +24,8 @@ import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { cn, debounce } from '../../lib/utils'
 import { groupByDay } from '../../lib/calendar'
@@ -88,6 +90,9 @@ export default function EventsPage() {
     if (!searchOpen) return
     const handleClick = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        // Clicks on the walkthrough card are not "outside" — collapsing the
+        // search out from under the step describing it would be absurd
+        if ((e.target as Element).closest?.('[data-tutorial-overlay]')) return
         if (!searchInputRef.current?.value) setSearchOpen(false)
       }
     }
@@ -192,28 +197,39 @@ export default function EventsPage() {
 
   const selectedDayEvents = eventsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []
 
+  // First-time visitors get the guided tour once the list has actually rendered
+  useTutorialAutoStart(TUTORIAL_IDS.EVENTS, !eventsLoading)
+
   return (
     <>
-      <PageHero
-        eyebrow="Event Archives"
-        title="Events"
-        imageSeed="events"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Events List' }]}
-        actions={
-          <Link to="/events/new">
-            <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
-              Create Event
-            </Button>
-          </Link>
-        }
-      />
+      <div data-tutorial="events-hero">
+        <PageHero
+          eyebrow="Event Archives"
+          title="Events"
+          imageSeed="events"
+          breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Events List' }]}
+          actions={
+            <Link to="/events/new">
+              <Button
+                data-tutorial="events-create"
+                icon={<Plus size={16} />}
+                size="sm"
+                className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm"
+              >
+                Create Event
+              </Button>
+            </Link>
+          }
+        />
+      </div>
 
       {/* === Filter Section === */}
       <div className="bg-ktip-sand-50 py-8">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {/* Filters + collapsible search + view toggle */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div data-tutorial="events-filters" className="flex flex-wrap items-center gap-3">
             <select
+              data-tutorial="events-type-filter"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
               className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
@@ -225,7 +241,10 @@ export default function EventsPage() {
             </select>
 
             {view === 'grid' && (
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
+              <label
+                data-tutorial="events-upcoming"
+                className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700"
+              >
                 <input
                   type="checkbox"
                   checked={showUpcoming}
@@ -236,7 +255,10 @@ export default function EventsPage() {
               </label>
             )}
 
-            <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
+            <label
+              data-tutorial="events-climate"
+              className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700"
+            >
               <input
                 type="checkbox"
                 checked={climateFilter}
@@ -247,17 +269,21 @@ export default function EventsPage() {
             </label>
 
             {view === 'grid' && (
-              <SortSelect
-                value={sort}
-                onChange={setSort}
-                options={SORT_OPTIONS.event.options}
-                personalizationActive={personalizationActive}
-              />
+              // Wrapper carries the tour anchor: SortSelect renders null when
+              // there is nothing to choose, and a 0×0 span is auto-skipped
+              <span data-tutorial="events-sort" className="inline-flex">
+                <SortSelect
+                  value={sort}
+                  onChange={setSort}
+                  options={SORT_OPTIONS.event.options}
+                  personalizationActive={personalizationActive}
+                />
+              </span>
             )}
 
             <div className="ml-auto flex items-center gap-2">
               {/* Collapsible search — icon expands to input, like the navbar */}
-              <div ref={searchRef} className="flex items-center justify-end">
+              <div ref={searchRef} data-tutorial="events-search" className="flex items-center justify-end">
                 <div
                   className={cn(
                     'relative overflow-hidden transition-[width] duration-300 ease-out',
@@ -296,9 +322,13 @@ export default function EventsPage() {
                 </div>
               </div>
 
-              <div className="inline-flex rounded-lg border border-gray-300 bg-ktip-cream p-0.5">
+              <div
+                data-tutorial="events-view-toggle"
+                className="inline-flex rounded-lg border border-gray-300 bg-ktip-cream p-0.5"
+              >
               <button
                 type="button"
+                data-tutorial="events-view-calendar"
                 onClick={() => changeView('calendar')}
                 aria-pressed={view === 'calendar'}
                 aria-label="Calendar view"
@@ -314,6 +344,7 @@ export default function EventsPage() {
               </button>
               <button
                 type="button"
+                data-tutorial="events-view-grid"
                 onClick={() => changeView('grid')}
                 aria-pressed={view === 'grid'}
                 aria-label="Grid view"
@@ -348,7 +379,13 @@ export default function EventsPage() {
       <div className="bg-ktip-sand-50 pb-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {view === 'calendar' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 lg:gap-6 items-start">
+            <div
+              data-tutorial="events-calendar-view"
+              className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 lg:gap-6 items-start"
+            >
+              {/* Wrapper, not the shared CalendarGrid — the dashboard reuses
+                  that component and should not inherit this page's anchor */}
+              <div data-tutorial="events-calendar">
               <EventCalendar
                 monthDate={monthDate}
                 selectedDate={selectedDate}
@@ -359,6 +396,7 @@ export default function EventsPage() {
                 onNextMonth={goNextMonth}
                 onToday={goToday}
               />
+              </div>
               <EventDayPanel
                 date={selectedDate}
                 events={selectedDayEvents}
@@ -369,11 +407,14 @@ export default function EventsPage() {
           ) : eventsLoading || !events ? (
             <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : events.length > 0 ? (
-            <div>
+            <div data-tutorial="events-results">
               <p className="text-sm text-gray-500 mb-6">
                 Found {events.length} event{events.length !== 1 ? 's' : ''}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
+              <div
+                data-tutorial="events-grid"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children"
+              >
                 {events.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}

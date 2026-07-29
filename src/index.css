@@ -505,6 +505,16 @@ html.dark {
   .stagger-rows > * {
     animation: none;
   }
+
+  /* Walkthrough chrome: the pulsing spotlight ring, the bouncing action hint
+     and the FAB's unseen-tour dot. The tour still works, it just holds still. */
+  [data-tutorial-overlay] .animate-pulse,
+  [data-tutorial-overlay] .animate-bounce,
+  [data-tutorial-overlay] .animate-scale-in,
+  [data-tutorial-overlay].animate-fade-in,
+  [data-fab] .animate-pulse-soft {
+    animation: none;
+  }
 }
 
 /* ProseMirror / TipTap Mini Editor (RichTextField) */

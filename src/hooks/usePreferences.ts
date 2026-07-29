@@ -11,6 +11,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: Omit<NotificationPreferences, 'us
   forums: true,
   collaboration: true,
   connections: true,
+  achievements: true,
 }
 
 /**

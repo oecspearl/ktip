@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createBrowserRouter, RouterProvider, Outlet, Link, Navigate } from 'react-router'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
+import { AchievementProvider } from './contexts/AchievementContext'
+import { AchievementUnlockModal } from './components/achievements/AchievementUnlockModal'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
@@ -42,6 +44,10 @@ function AnalyticsRoot() {
   return (
     <AnalyticsProvider>
       <Outlet />
+      {/* Rendered inside the router, not beside it: the popup links to the
+          gallery, so it needs router context. AchievementProvider itself sits
+          outside, since it only needs auth and the query client. */}
+      <AchievementUnlockModal />
     </AnalyticsProvider>
   )
 }
@@ -75,6 +81,12 @@ const router = createBrowserRouter([
           { path: '/forums/:slug', lazy: lazyPage(() => import('./pages/forums/BoardPage')) },
           { path: '/forums/:slug/:postId', lazy: lazyPage(() => import('./pages/forums/PostDetailPage')) },
           { path: '/directory', lazy: lazyPage(() => import('./pages/directory/DirectoryPage')) },
+          // Public on purpose. A rank is only worth chasing if it can be
+          // shown to someone, and a shared /u/ link has to open for a
+          // signed-out visitor. Both surfaces exclude students, members who
+          // opted out, and suspended accounts — enforced in SQL, not here.
+          { path: '/leaderboard', lazy: lazyPage(() => import('./pages/leaderboard/LeaderboardPage')) },
+          { path: '/u/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
           { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
           { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
@@ -115,8 +127,14 @@ const router = createBrowserRouter([
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
-              // /profile is gone — kept only so old links and the /profile/<id>
-              // URLs already stored in notification rows keep resolving.
+              // Your own gallery. Signed-in only — it is built from
+              // check_my_achievements(), which has no anonymous meaning.
+              { path: '/achievements', lazy: lazyPage(() => import('./pages/achievements/AchievementsPage')) },
+              // Member pages came back at /u/:id (066). The drawer over
+              // /directory is still the in-app default; the page exists so a
+              // profile can be shared outside the app. /profile/* stays as a
+              // redirect for old links and for the URLs already stored in
+              // notification rows.
               { path: '/profile/me', element: <Navigate to="/dashboard" replace /> },
               { path: '/profile/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
@@ -158,6 +176,7 @@ const router = createBrowserRouter([
                   { path: '/admin/events/:id', lazy: lazyPage(() => import('./pages/admin/events/AdminEventDetailPage')) },
                   { path: '/admin/users', lazy: lazyPage(() => import('./pages/admin/users/AdminUsersPage')) },
                   { path: '/admin/roles', lazy: lazyPage(() => import('./pages/admin/roles/AdminRolesPage')) },
+                  { path: '/admin/achievements', lazy: lazyPage(() => import('./pages/admin/achievements/AdminAchievementsPage')) },
                   { path: '/admin/moderation', lazy: lazyPage(() => import('./pages/admin/moderation/AdminModerationPage')) },
                   { path: '/admin/institutions', lazy: lazyPage(() => import('./pages/admin/institutions/AdminInstitutionsPage')) },
                   { path: '/admin/chamber', lazy: lazyPage(() => import('./pages/admin/chamber/AdminChamberPage')) },
@@ -192,7 +211,9 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <AuthProvider>
-            <RouterProvider router={router} />
+            <AchievementProvider>
+              <RouterProvider router={router} />
+            </AchievementProvider>
           </AuthProvider>
         </ToastProvider>
       </QueryClientProvider>

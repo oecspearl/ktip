@@ -11,6 +11,7 @@ import {
   FlaskConical,
   Building2,
   Shield,
+  Trophy,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { UserRole } from '../../types'
@@ -31,6 +32,9 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   { to: '', label: 'Overview', icon: LayoutDashboard, description: 'Network, submissions, calendar' },
   { to: 'profile', label: 'Profile', icon: User, description: 'How others see you' },
   { to: 'progress', label: 'Progress', icon: TrendingUp, description: 'Your activity timeline' },
+  // Links out: the gallery is a full page, not a panel — it carries filters,
+  // collections and showcase editing that do not fit the tab shell.
+  { to: '/achievements', label: 'Achievements', icon: Trophy, description: 'Badges, points and rank', external: true },
   { to: 'projects', label: 'Projects', icon: FolderKanban, description: 'Projects you own' },
   { to: 'events', label: 'Events', icon: Calendar, description: 'Events you organize' },
   { to: 'connections', label: 'Connections', icon: Users, description: 'People you know' },

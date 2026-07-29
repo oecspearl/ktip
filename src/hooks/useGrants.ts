@@ -4,6 +4,7 @@ import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
+import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { DetailEntry, Grant } from '../types'
 
 export function useGrants(filters?: {
@@ -283,6 +284,7 @@ export function useReviewSponsorship() {
 
 export function useApplyForGrant() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const invalidate = (userId: string) => {
     queryClient.invalidateQueries({ queryKey: keys.sub('grants', 'applications', userId) })
@@ -333,7 +335,12 @@ export function useApplyForGrant() {
       if (error) throw error
       return data
     },
-    onSuccess: (_data, variables) => invalidate(variables.user_id),
+    // Only on submit, not on saveDraft: a draft is not an application, and
+    // autosaving one every few seconds should not keep re-checking.
+    onSuccess: (_data, variables) => {
+      invalidate(variables.user_id)
+      triggerCheck()
+    },
   })
 
   /**

@@ -153,7 +153,7 @@ export function CalendarGrid({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div data-tutorial="calendar-header" className="flex items-center justify-between mb-4">
         <h2 className="font-display font-bold text-xl text-ktip-sand-900 animate-none">
           {format(monthDate, 'MMMM yyyy')}
         </h2>

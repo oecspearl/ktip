@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   GraduationCap,
   Landmark,
+  Trophy,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -29,6 +30,7 @@ const adminNavItems = [
   { href: '/admin/events', label: 'Events', icon: Calendar },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/roles', label: 'Roles & Permissions', icon: ShieldCheck },
+  { href: '/admin/achievements', label: 'Achievements', icon: Trophy },
   { href: '/admin/moderation', label: 'Moderation', icon: ShieldAlert },
   { href: '/admin/institutions', label: 'Institutions', icon: GraduationCap },
   { href: '/admin/chamber', label: 'Chamber Review', icon: Landmark },

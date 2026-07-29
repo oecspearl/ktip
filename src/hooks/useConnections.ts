@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
+import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { Connection } from '../types'
 
 export type ConnectionState =
@@ -162,6 +163,7 @@ export function usePendingRequests(userId: string | undefined) {
 
 export function useConnectionMutations() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: keys.all('connections') })
@@ -217,7 +219,12 @@ export function useConnectionMutations() {
       }
       return data
     },
-    onSuccess: invalidate,
+    // Acceptance is the moment a connection actually counts, for the
+    // accepter as much as the requester — 039's trigger awards both parties.
+    onSuccess: () => {
+      invalidate()
+      triggerCheck()
+    },
   })
 
   const removeMutation = useMutation({

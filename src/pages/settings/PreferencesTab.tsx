@@ -41,11 +41,22 @@ export function PreferencesTab() {
   // enforced by the get_connection_count* RPCs (migration 049).
   const [connVisibility, setConnVisibility] = useState<ConnectionCountVisibility>('public')
 
+  // Leaderboard opt-out — persisted on the profile row and enforced by
+  // get_leaderboard() (migration 066). Default is visible; students are
+  // excluded server-side regardless of this setting.
+  const [onLeaderboard, setOnLeaderboard] = useState(true)
+
   useEffect(() => {
     if (auth.profile?.connection_count_visibility) {
       setConnVisibility(auth.profile.connection_count_visibility)
     }
   }, [auth.profile?.connection_count_visibility])
+
+  useEffect(() => {
+    if (auth.profile?.leaderboard_visibility) {
+      setOnLeaderboard(auth.profile.leaderboard_visibility === 'public')
+    }
+  }, [auth.profile?.leaderboard_visibility])
 
   // Sync DB row into local state; migrate any legacy localStorage
   // notification prefs the first time the user has no DB row.
@@ -68,6 +79,7 @@ export function PreferencesTab() {
       forums: preferences.forums ?? legacy?.notifications?.forums ?? true,
       collaboration: preferences.collaboration ?? true,
       connections: preferences.connections ?? true,
+      achievements: preferences.achievements ?? true,
     })
 
     if (legacy?.privacy) {
@@ -86,6 +98,10 @@ export function PreferencesTab() {
       await savePreferences(auth.user.id, notif)
       if (connVisibility !== auth.profile?.connection_count_visibility) {
         await auth.updateProfile({ connection_count_visibility: connVisibility })
+      }
+      const nextLeaderboard = onLeaderboard ? 'public' : 'private'
+      if (nextLeaderboard !== auth.profile?.leaderboard_visibility) {
+        await auth.updateProfile({ leaderboard_visibility: nextLeaderboard })
       }
       // Remaining privacy toggles stay local until enforced server-side
       localStorage.setItem(
@@ -155,6 +171,12 @@ export function PreferencesTab() {
             label="Connections"
             description="Connection requests and acceptances"
           />
+          <Toggle
+            checked={notif.achievements}
+            onChange={setNotifField('achievements')}
+            label="Achievements"
+            description="Badges you unlock and milestones you reach"
+          />
         </div>
       </Card>
 
@@ -188,6 +210,13 @@ export function PreferencesTab() {
             onChange={setShowCountry}
             label="Show Country"
             description="Display your country on your profile"
+          />
+
+          <Toggle
+            checked={onLeaderboard}
+            onChange={setOnLeaderboard}
+            label="Show me on the leaderboard"
+            description="Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can."
           />
 
           {/* Connection count audience */}

@@ -126,6 +126,12 @@ export interface Profile {
   open_to: string[]
   is_verified: boolean
   connection_count_visibility: ConnectionCountVisibility
+  /**
+   * Leaderboard opt-out (066). 'private' keeps the member off the public
+   * board while they keep earning and keep seeing their own rank. Students
+   * are excluded server-side whatever this says.
+   */
+  leaderboard_visibility?: 'public' | 'private'
   created_at: string
   updated_at: string
 }
@@ -742,6 +748,12 @@ export interface NotificationPreferences {
   forums: boolean
   collaboration: boolean
   connections: boolean
+  /**
+   * Added in 066. Before it existed, 'badge_awarded' fell through the
+   * enforcement trigger's CASE to ELSE TRUE and could not be switched off —
+   * tolerable for six badges, not for a points engine.
+   */
+  achievements: boolean
   updated_at: string
 }
 
@@ -802,15 +814,44 @@ export interface Integration {
   updated_at: string
 }
 
-// Badge types
+// ============================================================
+// Badges and gamification (migrations 039, 066, 067)
+// ============================================================
+
+/** Drives points via rarity_points() in SQL — never set points client-side. */
+export type BadgeRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+
+/** Position on a bronze->diamond ladder. Null for standalone badges. */
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'diamond'
+
+/** Pill styling. All four are OECS brand primitives; see index.css. */
+export type BadgeColor = 'ocean' | 'tropical' | 'sand' | 'sun'
+
 export interface BadgeDefinition {
   id: string
   slug: string
   name: string
   description: string
+  /** Kebab-case lucide name; resolved by src/lib/badge-icons.ts. */
   icon: string
-  color: string
+  color: BadgeColor | string
   created_at: string
+
+  // Added in 066. Optional so rows read through older queries still typecheck.
+  category?: string
+  rarity?: BadgeRarity
+  points?: number
+  tier?: BadgeTier | null
+  tier_group?: string | null
+  /** Key into achievement_counts(); null means trigger-awarded only. */
+  check_key?: string | null
+  check_value?: number | null
+  is_hidden?: boolean
+  sort_order?: number
+  /** Resolves with `tier` to shared artwork in trophy_assets. */
+  trophy_type?: string | null
+  /** Per-badge artwork override, wins over trophy_type. */
+  image_url?: string | null
 }
 
 export interface UserBadge {
@@ -820,6 +861,140 @@ export interface UserBadge {
   awarded_at: string
   badge?: BadgeDefinition
 }
+
+/** One shared trophy image, keyed by type x tier. */
+export interface TrophyAsset {
+  id: string
+  type: string
+  tier: BadgeTier
+  image_url: string | null
+  alt_text: string
+  sort_order: number
+  updated_at: string
+}
+
+/** type -> tier -> asset, the shape every trophy renderer looks up against. */
+export type TrophyAssetMap = Record<string, Partial<Record<BadgeTier, TrophyAsset>>>
+
+/**
+ * A member's standing. `next_required` is null at the highest rank —
+ * render "highest rank reached" rather than a progress bar.
+ */
+export interface MemberRank {
+  level: number
+  name: string
+  earned: number
+  next_name: string | null
+  next_required: number | null
+}
+
+/** Enough of a badge to render an unlock popup without a second fetch. */
+export interface NewlyEarnedAchievement {
+  slug: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  rarity: BadgeRarity
+  tier: BadgeTier | null
+  points: number
+  category: string
+  trophy_type: string | null
+  image_url: string | null
+}
+
+export interface AchievementProgress {
+  slug: string
+  /** Clamped to `target` server-side, so a bar can never exceed 100%. */
+  current: number
+  target: number
+}
+
+export interface AchievementCollection {
+  slug: string
+  name: string
+  description: string
+  icon: string
+  total: number
+  earned: number
+}
+
+export interface AchievementStats {
+  points: number
+  earned: number
+  total_available: number
+  streak_days: number
+  total_active_days: number
+  rank: MemberRank
+  by_category: Record<string, number>
+}
+
+/** Whole payload of check_my_achievements() — one round trip. */
+export interface AchievementCheckResult {
+  newly_earned: NewlyEarnedAchievement[]
+  stats: AchievementStats
+  progress: AchievementProgress[]
+  collections: AchievementCollection[]
+}
+
+export type LeaderboardScope = 'global' | 'country' | 'role'
+export type LeaderboardWindow = 'all' | 'month'
+
+export interface LeaderboardEntry {
+  rank: number
+  user_id: string
+  display_name: string | null
+  avatar_url: string | null
+  country: string | null
+  roles: string[] | null
+  is_verified: boolean | null
+  points: number
+  badge_count: number
+  level: number
+  rank_name: string
+}
+
+/** Own standing, returned even when outside the top N. */
+export interface MyLeaderboardRank {
+  rank: number
+  points: number
+  badge_count: number
+  board_size: number
+  /** False when opted out, suspended, or a student: your score, seen only by you. */
+  listed: boolean
+}
+
+export interface ShowcaseEntry {
+  position: number
+  badge: BadgeDefinition
+}
+
+/** Public-profile stats. `streak_days` is null unless viewing your own. */
+export interface ProfileStats {
+  user_id: string
+  points: number
+  badge_count: number
+  rank: MemberRank
+  streak_days: number | null
+  showcase: ShowcaseEntry[]
+}
+
+/** Batched variant for directory cards and leaderboard rows. */
+export interface ProfileStatsRow {
+  user_id: string
+  points: number
+  badge_count: number
+  level: number
+  rank_name: string
+}
+
+/** Frontend-only signals; the SQL allowlist in track_my_flag() must match. */
+export type TrackableFlag =
+  | 'leaderboard_views'
+  | 'achievements_views'
+  | 'directory_views'
+  | 'search_uses'
+  | 'ai_assistant_uses'
 
 /** Directory row: profile with its earned badges embedded by the directory query. */
 export interface DirectoryMember extends Profile {

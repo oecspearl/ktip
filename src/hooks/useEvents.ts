@@ -4,6 +4,7 @@ import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
+import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { DetailEntry, Event } from '../types'
 
 export function useEvents(filters?: {
@@ -219,6 +220,7 @@ export function useDeleteEvent() {
 
 export function useRSVP() {
   const queryClient = useQueryClient()
+  const triggerCheck = useAchievementTrigger()
 
   const rsvpMutation = useMutation({
     mutationFn: async ({ eventId, userId }: { eventId: string; userId: string }) => {
@@ -236,6 +238,7 @@ export function useRSVP() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: keys.sub('events', 'rsvp', variables.eventId) })
+      triggerCheck()
     },
   })
 
