@@ -971,16 +971,6 @@ export const SITE_MAP: SiteEntry[] = [
     icon: 'KeyRound',
   },
   {
-    id: 'admin.preregistrations',
-    title: 'Pre-registrations',
-    category: 'Admin',
-    description: 'People who signed up before launch',
-    keywords: ['preregistrations', 'waitlist', 'early access', 'leads'],
-    href: '/admin/preregistrations',
-    access: 'oecs',
-    icon: 'ClipboardList',
-  },
-  {
     id: 'admin.analytics',
     title: 'Analytics',
     category: 'Admin',
