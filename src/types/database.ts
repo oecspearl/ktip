@@ -751,9 +751,101 @@ export interface Database {
         }
         Relationships: []
       }
+      // CV / résumé documents (migration 069). `data` and `sources` are the
+      // shapes in src/types/resume.ts, declared loosely here because this file
+      // describes the wire schema and the document shape is versioned by the
+      // `template` column, not by the table definition.
+      resumes: {
+        Row: {
+          id: string
+          user_id: string
+          template: string
+          data: Record<string, unknown>
+          sources: Record<string, string>
+          is_public: boolean
+          vc_synced_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          template?: string
+          data?: Record<string, unknown>
+          sources?: Record<string, string>
+          is_public?: boolean
+          vc_synced_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          template?: string
+          data?: Record<string, unknown>
+          sources?: Record<string, string>
+          is_public?: boolean
+          vc_synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // OECS Virtual Campus identity links (migration 068). Readable by the
+      // owner; every write is service_role from api/auth/vc/callback.ts.
+      vc_identities: {
+        Row: {
+          id: string
+          issuer: string
+          vc_sub: string
+          user_id: string
+          email: string | null
+          raw_claims: Record<string, unknown>
+          linked_at: string
+          last_seen_at: string
+        }
+        Insert: {
+          id?: string
+          issuer: string
+          vc_sub: string
+          user_id: string
+          email?: string | null
+          raw_claims?: Record<string, unknown>
+          linked_at?: string
+          last_seen_at?: string
+        }
+        Update: {
+          email?: string | null
+          raw_claims?: Record<string, unknown>
+          last_seen_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
+      // Returns null unless the résumé is published and its owner is not
+      // suspended, so a signed-out visitor can call it safely.
+      public_resume: {
+        Args: { p_user: string; p_template?: string }
+        Returns: {
+          template: string
+          data: Record<string, unknown>
+          updated_at: string
+          display_name: string | null
+          avatar_url: string | null
+        } | null
+      }
+      // Scoped to auth.uid() in SQL — the caller cannot ask about anyone else.
+      vc_my_identity: {
+        Args: Record<string, never>
+        Returns: {
+          issuer: string
+          vc_sub: string
+          email: string
+          linked_at: string
+          last_seen_at: string
+        } | null
+      }
       find_conversation_between: {
         Args: { user1: string; user2: string }
         Returns: string | null

@@ -63,6 +63,11 @@ const router = createBrowserRouter([
       { path: '/forgot-password', lazy: lazyPage(() => import('./pages/auth/ForgotPasswordPage')) },
       { path: '/reset-password', lazy: lazyPage(() => import('./pages/auth/ResetPasswordPage')) },
       { path: '/auth/callback', lazy: lazyPage(() => import('./pages/auth/AuthCallbackPage')) },
+      // OECS Virtual Campus handoff. /auth/vc/callback is NOT here — vercel.json
+      // rewrites it to an Edge Function before the SPA sees it (mirrored for
+      // `npm run dev` in vite.config.ts). This is where that function lands the
+      // browser afterwards, carrying a one-time ticket instead of a session.
+      { path: '/auth/vc/land', lazy: lazyPage(() => import('./pages/auth/VcLandingPage')) },
       { path: '/verify-email/:token', lazy: lazyPage(() => import('./pages/auth/VerifyEmailAliasPage')) },
       { path: '/onboarding', lazy: lazyPage(() => import('./pages/onboarding/OnboardingPage')) },
 
@@ -87,6 +92,11 @@ const router = createBrowserRouter([
           // opted out, and suspended accounts — enforced in SQL, not here.
           { path: '/leaderboard', lazy: lazyPage(() => import('./pages/leaderboard/LeaderboardPage')) },
           { path: '/u/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
+          // Public on purpose, like /u/:id — a CV only a signed-in member can
+          // open is not one you can send to an employer. public_resume()
+          // returns nothing unless the owner published it, so the page 404s
+          // itself rather than relying on this route to hide anything.
+          { path: '/u/:id/cv', lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
           { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
           { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
@@ -130,6 +140,10 @@ const router = createBrowserRouter([
               // Your own gallery. Signed-in only — it is built from
               // check_my_achievements(), which has no anonymous meaning.
               { path: '/achievements', lazy: lazyPage(() => import('./pages/achievements/AchievementsPage')) },
+              // The CV. Auto-populated for members who arrive from the OECS
+              // Virtual Campus, hand-written by everyone else.
+              { path: '/cv', lazy: lazyPage(() => import('./pages/cv/CvPage')) },
+              { path: '/cv/edit', lazy: lazyPage(() => import('./pages/cv/CvEditPage')) },
               // Member pages came back at /u/:id (066). The drawer over
               // /directory is still the in-app default; the page exists so a
               // profile can be shared outside the app. /profile/* stays as a

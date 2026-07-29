@@ -1,4 +1,4 @@
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -10,8 +10,36 @@ import { APP_FULL_NAME } from '../../lib/constants'
 import { clearSupabaseSession } from '../../lib/auth-utils'
 import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 import { OAuthButtons } from '../../components/auth/OAuthButtons'
+import { VirtualCampusButton } from '../../components/auth/VirtualCampusButton'
 import { analytics } from '../../hooks/useAnalytics'
 import { usePageTitle } from '../../hooks/usePageTitle'
+
+/**
+ * Why the Virtual Campus handoff fails, in words a learner can act on.
+ *
+ * api/auth/vc/callback.ts never renders an error page — that URL is reached by
+ * somebody clicking a button, so it redirects here with ?vc_error=<code>. The
+ * codes are deliberately coarse: the server distinguishes a bad signature from
+ * a wrong audience for its logs, but telling that apart in the UI helps only an
+ * attacker.
+ */
+const VC_ERRORS: Record<string, string> = {
+  not_configured: 'Virtual Campus sign-in is not switched on yet. Please use another method.',
+  rate_limited: 'Too many sign-in attempts. Please wait a few minutes and try again.',
+  email_unverified:
+    'Your Virtual Campus email address has not been verified yet. Verify it there, then try again.',
+  token_replayed: 'That sign-in link has already been used. Please start again from the Virtual Campus.',
+  account_suspended: 'This account is suspended. Contact support if you think that is a mistake.',
+  subject_bound_elsewhere:
+    'That Virtual Campus account is already linked to a different KTIP account.',
+}
+
+function vcErrorMessage(code: string): string {
+  return (
+    VC_ERRORS[code] ??
+    'We could not complete sign-in from the Virtual Campus. Please try again from there.'
+  )
+}
 
 interface LoginActionState {
   errors: Record<string, string>
@@ -97,8 +125,21 @@ export default function LoginPage() {
 
   const [state, formAction, pending] = useActionState(submitAction, initialState)
   const [oauthError, setOauthError] = useState('')
+  const [vcError, setVcError] = useState('')
 
-  const displayedError = state.errorMessage || oauthError
+  // The Virtual Campus callback redirects here on failure. Read it once and
+  // strip it, so a reload does not resurrect an error the user has moved past.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('vc_error')
+    if (!code) return
+    setVcError(vcErrorMessage(code))
+    params.delete('vc_error')
+    const query = params.toString()
+    window.history.replaceState(null, '', `/login${query ? `?${query}` : ''}`)
+  }, [])
+
+  const displayedError = state.errorMessage || oauthError || vcError
 
   const handleClearSession = () => {
     clearSupabaseSession()
@@ -175,6 +216,8 @@ export default function LoginPage() {
         </form>
 
         <OAuthButtons label="Or continue with" onError={setOauthError} />
+
+        <VirtualCampusButton />
 
         <p className="mt-8 text-center text-sm text-ktip-sand-600">
           Don't have an account?{' '}

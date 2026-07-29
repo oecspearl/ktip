@@ -27,6 +27,24 @@ function getOpenAIKey(envFromVite: Record<string, string>): string | undefined {
 }
 
 /**
+ * Non-/api paths that vercel.json rewrites to an Edge Function, mirrored here
+ * so `npm run dev` routes them the same way.
+ *
+ * These exist because the OECS Virtual Campus was given
+ * `https://oecsinnovation.org/auth/vc/callback` as the redirect URI — a path
+ * with no /api prefix, registered on their side, so it cannot be moved. In
+ * production the rewrite in vercel.json catches it before the SPA catch-all.
+ * Without the same mapping here, the dev server would hand those URLs to
+ * index.html and the flow could only ever be tested against a deploy.
+ *
+ * Keep this table and vercel.json's `rewrites` in step.
+ */
+const DEV_REWRITES: Record<string, string> = {
+  '/auth/vc/callback': 'auth/vc/callback',
+  '/auth/vc/start': 'auth/vc/start',
+}
+
+/**
  * Dev-only middleware that runs the real Edge Functions in `api/` (ai-chat,
  * ai-search, …) so `npm run dev` behaves like production without needing
  * `vercel dev`. Each request is turned into a web `Request`, handed to the
@@ -46,11 +64,14 @@ function edgeApiPlugin(apiKey: string | undefined): Plugin {
 
       server.middlewares.use(async (req, res, next) => {
         const url = req.url || ''
-        if (!url.startsWith('/api/')) return next()
-
         const [pathname, query = ''] = url.split('?')
+
         // Keep the lookup inside api/ — no traversal out of the project
-        const route = pathname.replace(/^\/api\//, '')
+        const route = pathname.startsWith('/api/')
+          ? pathname.replace(/^\/api\//, '')
+          : DEV_REWRITES[pathname]
+
+        if (!route) return next()
         if (!/^[a-z0-9/_-]+$/i.test(route) || route.includes('..')) return next()
 
         const modulePath = resolve(process.cwd(), 'api', `${route}.ts`)
@@ -105,7 +126,21 @@ export default defineConfig(({ mode }) => {
   // The service-role key is needed by every privileged handler — api/admin/*,
   // api/auth/*, api/partner/* — and lives in .env, but loadEnv() does not put
   // it on process.env by itself.
-  for (const key of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY']) {
+  // The Virtual Campus SSO routes need theirs for the same reason.
+  for (const key of [
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'VC_ISSUER',
+    'VC_JWKS_URL',
+    'VC_CLIENT_ID',
+    'VC_CLIENT_SECRET',
+    'VC_AUTHORIZE_URL',
+    'VC_TOKEN_URL',
+    'VC_USERINFO_URL',
+    'COMMONS_BASE_URLS',
+    'COMMONS_API_KEY',
+  ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }
 

@@ -992,3 +992,118 @@ html.dark {
     border: none !important;
   }
 }
+
+/* ===========================================================================
+   CV / résumé print — /cv "Download B&W (A4)" and "Download Color (A4)"
+   ===========================================================================
+   The on-screen sheet IS the artifact: a true 210mm × 296mm block authored in
+   millimetres and points, so the PDF is what you were already looking at. What
+   these rules do is get everything else out of the way.
+
+   Almost every declaration here is load-bearing and was arrived at by fixing a
+   specific broken output. Read the notes before simplifying anything.
+
+   Note the `body:has(.resume-sheet)` guard on the destructive rules: the sheet
+   is only mounted on the CV pages, so printing any other page of KTIP is
+   completely unaffected. It also keeps this block from fighting the proposal
+   print rules above.
+   =========================================================================== */
+
+.resume-sheet {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+@media print {
+  @page {
+    size: A4;
+    /* Top/bottom breathing room on every page; left/right stays 0 so the dark
+       sidebar strip still bleeds to the paper edge. (top / L-R / bottom) */
+    margin: 8mm 0 12mm;
+  }
+
+  body:has(.resume-sheet),
+  html:has(.resume-sheet) {
+    background: #fff !important;
+  }
+
+  /* The dark left strip, as a FIXED pseudo-element. Chrome repeats
+     fixed-position boxes on every printed page, so this fills the full-height
+     left column on ALL pages — including a short last page, where the sheet's
+     own panel would stop early and leave a white notch. Sits behind the sheet
+     (z-index 0 < the sheet's 1).
+
+     The colour comes from --resume-sidebar, published on :root by CvPage,
+     because a pseudo-element on body cannot read a variable set on the sheet. */
+  body:has(.resume-sheet)::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 74mm;
+    background: var(--resume-sidebar, #171717);
+    z-index: 0;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Force the print/screen twin swap explicitly rather than relying on
+     Tailwind's print: variant. If print:block / print:hidden fail to flip, the
+     on-screen résumé prints (blank, via the visibility rules below) while the
+     sheet stays display:none — four blank pages. These two rules guarantee it. */
+  body:has(.resume-sheet) .resume-screen-wrap {
+    display: none !important;
+  }
+  .resume-print-wrap {
+    display: block !important;
+  }
+
+  /* Site chrome. */
+  body:has(.resume-sheet) header,
+  body:has(.resume-sheet) footer,
+  body:has(.resume-sheet) nav {
+    display: none !important;
+  }
+
+  /* Hide everything, then re-reveal only the sheet. */
+  body:has(.resume-sheet) * {
+    visibility: hidden;
+  }
+  /* !important is required: the hide rule above (0,1,1) outranks this reveal
+     (0,1,0), so without it the sheet's children stay hidden and the PDF prints
+     blank. Do NOT "simplify" the pair to display:none — that collapses the
+     layout the fixed sidebar bleed is measured against. */
+  .resume-sheet,
+  .resume-sheet * {
+    visibility: visible !important;
+  }
+
+  /* Page shell padding and max-width would push the sheet onto a second page
+     or off-centre. */
+  #cv-root,
+  #cv-root > div {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .resume-sheet {
+    margin: 0 !important;
+    box-shadow: none !important;
+    /* Pin to the page origin. visibility:hidden siblings still occupy layout,
+       which would otherwise push the (visible) sheet down past the printable
+       area — the classic "blank PDF" symptom. Absolute at 0,0 overlays it at
+       the top of page 1 and paginates down from there. */
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 210mm !important;
+    z-index: 1 !important;
+  }
+
+  /* Keep timeline entries and table rows whole across page breaks. */
+  .resume-avoid-break {
+    break-inside: avoid;
+  }
+}

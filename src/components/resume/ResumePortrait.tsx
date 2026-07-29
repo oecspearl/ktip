@@ -1,0 +1,94 @@
+/**
+ * Pop-out portrait: the member's avatar rising past a gradient backdrop panel
+ * so the head breaks the frame.
+ *
+ * The source template shipped a hand-cut background-removed PNG. KTIP has no
+ * such asset per member — it has whatever avatar they uploaded, on whatever
+ * background. So the photo is masked into a circle that overlaps the panel,
+ * which reads as deliberate framing rather than as a cutout that failed. With
+ * no avatar at all it falls back to initials, which is what the rest of the app
+ * does.
+ *
+ * Three skins:
+ *  • mono   — printed sheet, B&W: gray panel, grayscale photo.
+ *  • color  — printed sheet, brand: accent panel, full colour.
+ *  • screen — on-screen résumé: accent panel with a diagonal cut and a fade
+ *    into the card below.
+ */
+
+export type PortraitTheme = 'mono' | 'color' | 'screen'
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '—'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+export function ResumePortrait({
+  name,
+  avatarUrl,
+  theme,
+  accent,
+  className = '',
+}: {
+  name: string
+  avatarUrl: string | null
+  theme: PortraitTheme
+  accent: string
+  className?: string
+}) {
+  const isScreen = theme === 'screen'
+
+  const panelStyle =
+    theme === 'mono'
+      ? { background: 'linear-gradient(to bottom, #d4d4d4, #a3a3a3)' }
+      : theme === 'color'
+        ? { background: `linear-gradient(to bottom, ${accent}, ${accent}99)` }
+        : {
+            background: `linear-gradient(to bottom, ${accent}66, ${accent}22, transparent)`,
+            clipPath: 'polygon(0 0, 100% 14%, 100% 100%, 0 100%)',
+          }
+
+  return (
+    <div className={`relative ${className}`}>
+      <div aria-hidden className="absolute inset-x-0 bottom-0 top-[24%]" style={panelStyle} />
+
+      <div className="absolute inset-0 flex items-end justify-center pb-2">
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={`${name} — portrait`}
+            // eager + high priority: on the printed sheet a lazily-loaded image
+            // is an image the print engine may capture before it arrives.
+            loading="eager"
+            fetchPriority="high"
+            crossOrigin="anonymous"
+            className={`aspect-square h-[78%] w-auto rounded-full border-4 border-white object-cover shadow-[0_10px_18px_rgba(0,0,0,0.35)] ${
+              theme === 'mono' ? 'grayscale' : ''
+            }`}
+          />
+        ) : (
+          <div
+            aria-hidden
+            className="grid aspect-square h-[78%] place-items-center rounded-full border-4 border-white bg-white/90 shadow-[0_10px_18px_rgba(0,0,0,0.35)]"
+          >
+            <span
+              className="font-display text-[28pt] font-bold leading-none"
+              style={{ color: theme === 'mono' ? '#171717' : accent }}
+            >
+              {initials(name)}
+            </span>
+          </div>
+        )}
+
+        {isScreen && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 -bottom-px h-24 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-ktip-sand-900 dark:via-ktip-sand-900/60"
+          />
+        )}
+      </div>
+    </div>
+  )
+}

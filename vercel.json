@@ -25,6 +25,8 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/auth/vc/callback", "destination": "/api/auth/vc/callback" },
+    { "source": "/auth/vc/start", "destination": "/api/auth/vc/start" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
