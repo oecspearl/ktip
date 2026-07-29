@@ -30,6 +30,13 @@ interface AuthContextType {
   session: Session | null
   profile: Profile | null
   loading: boolean
+  /**
+   * True while the profile row is still in flight. Guards must wait on this:
+   * `profile` is null both for "not loaded yet" and "has no profile", and a
+   * check that treats those the same either flashes a denial at legitimate
+   * users or waves through a user whose roles it has not seen.
+   */
+  profileLoading: boolean
   /** Roles held, with legacy slugs resolved (oecs -> super_admin). */
   roles: RoleSlug[]
   /**
@@ -115,7 +122,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true)
   const queryClient = useQueryClient()
 
-  const { data: profileData, error: profileError } = useQuery({
+  const {
+    data: profileData,
+    error: profileError,
+    isPending: profilePending,
+  } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: () => fetchProfileQuery(user!.id, user),
     enabled: !!user?.id,
@@ -124,6 +135,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   })
 
   const profile = user ? profileData ?? null : null
+  // A disabled query also reports `pending`, so the signed-out case has to be
+  // excluded or every guard would wait forever on the login screen.
+  const profileLoading = !!user && profilePending
 
   // Authoritative capability set. Kept as its own query rather than derived
   // from profile.roles so an admin toggling the matrix reaches every client on
@@ -419,6 +433,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     session,
     profile,
     loading,
+    profileLoading,
     roles,
     permissions,
     can,

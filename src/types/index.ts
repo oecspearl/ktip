@@ -198,6 +198,18 @@ export interface Event extends Ranked {
   /** Migration 062 — event sets a goal attendees must accomplish. */
   has_challenge: boolean
   submission_deadline: string | null
+  /**
+   * Migration 070 — the event runs a live virtual venue. Like has_challenge,
+   * this is a flag rather than an event_type: a conference may want a
+   * networking area and a hackathon may not want a venue at all.
+   */
+  has_venue: boolean
+  venue_floorplan_url: string | null
+  /** Non-organizers cannot enter outside this window. NULL = always open. */
+  venue_opens_at: string | null
+  venue_closes_at: string | null
+  spectators_enabled: boolean
+  spectator_scope: SpectatorScope
   details: DetailEntry[]
   created_at: string
   organizer?: Profile
@@ -299,6 +311,134 @@ export interface EventScheduleItem {
   sort_order: number
   created_at: string
   speaker?: EventSpeaker
+}
+
+// ============================================================
+// Virtual venue (migration 070)
+//
+// Generic on purpose: nothing here knows what a team is. The hackathon layer
+// (072+) references these types; they never reference it.
+// ============================================================
+
+export type SpectatorScope = 'members' | 'registered' | 'public'
+
+/**
+ * What a room is for. Drives the icon, the default audio policy and which
+ * panels the room page renders — a networking room shows the full occupant
+ * list, a stage does not.
+ */
+export type VenueRoomKind =
+  | 'main_hall'
+  | 'networking'
+  | 'workshop'
+  | 'help_desk'
+  | 'sponsor_booth'
+  | 'team'
+  | 'judging'
+  | 'stage'
+  | 'breakout'
+
+/** Who may publish audio/video. Consumed by venue_room_grant() in 071. */
+export type VenueAudioMode = 'open' | 'moderated' | 'listen_only'
+
+export type VenueRole = 'participant' | 'mentor' | 'judge' | 'organizer' | 'spectator'
+
+/**
+ * Self-reported status. 'offline' is never written by a client — the reducer
+ * derives it for members with no live presence entry and a stale last_seen_at.
+ */
+export type VenueAvailability = 'working' | 'away' | 'busy' | 'help_wanted' | 'offline'
+
+export interface VenueRoom {
+  id: string
+  event_id: string
+  /** Stable slug. Deep links use this, never the name. */
+  key: string
+  name: string
+  kind: VenueRoomKind
+  description: string | null
+  /** id attribute of a shape in the event's floorplan SVG. */
+  svg_zone_id: string | null
+  capacity: number | null
+  audio_mode: VenueAudioMode
+  max_publishers: number
+  recording_enabled: boolean
+  is_open: boolean
+  sponsor_name: string | null
+  sponsor_logo_url: string | null
+  sponsor_url: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface EventVenueMember {
+  id: string
+  event_id: string
+  user_id: string
+  role: VenueRole
+  /** Cold mirror of presence. Live presence wins while a client is connected. */
+  availability: VenueAvailability
+  status_note: string | null
+  current_room_id: string | null
+  skills: string[]
+  looking_for_team: boolean
+  is_discoverable: boolean
+  /** Extension point — a future walking map writes { x, y } here. */
+  meta: Record<string, any>
+  first_entered_at: string
+  last_seen_at: string
+  created_at: string
+  updated_at: string
+  user?: Profile
+}
+
+export interface VenueRoomMessage {
+  id: string
+  room_id: string
+  event_id: string
+  author_id: string | null
+  body: string
+  kind: 'chat' | 'system'
+  reply_to: string | null
+  is_removed: boolean
+  created_at: string
+  author?: Profile
+}
+
+/**
+ * What a client tracks on the `venue:{eventId}` presence channel.
+ *
+ * `pos` is reserved and always null in this version: the schema and the payload
+ * both leave room for a walking map so adding one later is a client-only
+ * change. `v` lets a mixed-version crowd degrade cleanly — a v1 reader ignores
+ * fields it does not know.
+ */
+export interface VenuePresencePayload {
+  user_id: string
+  display_name: string | null
+  avatar_url: string | null
+  role: VenueRole
+  availability: Exclude<VenueAvailability, 'offline'>
+  status_note: string | null
+  room_id: string | null
+  team_id: string | null
+  pos: { x: number; y: number } | null
+  v: 1
+}
+
+/** One person as the floorplan and occupant lists see them. */
+export interface VenueOccupant {
+  user_id: string
+  display_name: string | null
+  avatar_url: string | null
+  role: VenueRole
+  availability: VenueAvailability
+  status_note: string | null
+  room_id: string | null
+  team_id: string | null
+  /** False when derived from the DB mirror rather than a live presence entry. */
+  is_live: boolean
 }
 
 export interface Grant extends Ranked {

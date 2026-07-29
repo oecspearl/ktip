@@ -7,6 +7,7 @@ import { AchievementUnlockModal } from './components/achievements/AchievementUnl
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
+import { PermissionRoute } from './components/PermissionRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { MainLayout } from './components/layout/MainLayout'
 import { AdminLayout } from './components/layout/AdminLayout'
@@ -130,10 +131,29 @@ const router = createBrowserRouter([
               },
               // Full-page receipt, deliberately outside the tab shell
               { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
-              { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
+              // Creating a project needs project:create (migration 064 put that
+              // check in the INSERT policy). Gated here so a role without it —
+              // investor, say — gets told why instead of filling in the whole
+              // form and collecting a 403 from RLS on submit.
+              {
+                element: <PermissionRoute require="project:create" />,
+                children: [
+                  { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
+                ],
+              },
               { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
               { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
               { path: '/events/:id/edit', lazy: lazyPage(() => import('./pages/events/EditEventPage')) },
+              // Virtual Hackathon (migration 070). Absolute literal paths —
+              // site-search.test.ts matches route paths literally, and only
+              // /hackathons is reachable from site-map.ts because a site-map
+              // href can never contain a :param.
+              { path: '/hackathons', lazy: lazyPage(() => import('./pages/hackathons/HackathonsPage')) },
+              { path: '/events/:id/venue', lazy: lazyPage(() => import('./pages/events/EventVenuePage')) },
+              {
+                path: '/events/:id/venue/room/:roomId',
+                lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+              },
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },

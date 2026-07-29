@@ -8,7 +8,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useCreateProject } from '../../hooks/useProjects'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
-import { normalizeHashtags } from '../../lib/utils'
+import { isPermissionDenied, normalizeHashtags } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { projectSchema } from '../../lib/validation'
 import { PROJECT_CATEGORIES, CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
@@ -78,8 +78,15 @@ export default function CreateProjectPage() {
       toast.success('Project created successfully!')
       navigate(`/projects/${project.id}`)
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create project')
-      setErrorMessage(error.message || 'Failed to create project')
+      // /projects/new is gated on project:create, so RLS should never be the
+      // one to refuse. It still can if the permission was revoked mid-session,
+      // and "new row violates row-level security policy" tells a member
+      // nothing — least of all that their role, not their input, is the problem.
+      const message = isPermissionDenied(error)
+        ? 'Your role does not include permission to publish projects. Contact your organization if this looks wrong.'
+        : error.message || 'Failed to create project'
+      toast.error(message)
+      setErrorMessage(message)
     }
   }
 

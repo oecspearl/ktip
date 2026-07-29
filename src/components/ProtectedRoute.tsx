@@ -1,27 +1,24 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
+import { RouteSplash } from './RouteSplash'
 
 export const ProtectedRoute = () => {
   const auth = useAuth()
   const location = useLocation()
 
   if (auth.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
-        <div className="text-center">
-          <img
-            src="/KTIP%20LOGO.png"
-            alt="KTIP Logo"
-            className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
-          />
-          <p className="mt-4 text-ktip-sand-600">Loading...</p>
-        </div>
-      </div>
-    )
+    return <RouteSplash />
   }
 
   if (!auth.user) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  // The role check below reads profile.roles, so it has to wait for the row to
+  // arrive. Falling through while the fetch is in flight let unonboarded users
+  // reach pages whose writes RLS then refused with a bare 403.
+  if (auth.profileLoading) {
+    return <RouteSplash />
   }
 
   // OAuth users who never finished onboarding have no role yet — send them

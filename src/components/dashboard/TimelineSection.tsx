@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Route, RefreshCw } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
 import { useMyTimeline } from '../../hooks/useMyTimeline'
 import { TimelineGantt } from './TimelineGantt'
 import { TimelineItemDetail } from './TimelineItemDetail'
@@ -11,6 +12,7 @@ interface TimelineSectionProps {
 }
 
 export default function TimelineSection({ userId }: TimelineSectionProps) {
+  const auth = useAuth()
   const { items, loading, error, refetch } = useMyTimeline(userId)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
@@ -63,9 +65,11 @@ export default function TimelineSection({ userId }: TimelineSectionProps) {
             <Link to="/grants">
               <Button variant="primary">Browse Grants</Button>
             </Link>
-            <Link to="/projects/new">
-              <Button variant="outline">Start a Project</Button>
-            </Link>
+            {auth.can('project:create') && (
+              <Link to="/projects/new">
+                <Button variant="outline">Start a Project</Button>
+              </Link>
+            )}
           </div>
         </div>
       ) : (
