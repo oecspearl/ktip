@@ -614,14 +614,15 @@ export const SITE_MAP: SiteEntry[] = [
     id: 'help.ai-assistant',
     title: 'Ask the KTIP Assistant',
     category: 'Support',
-    description: 'Chat with the AI assistant about anything on the platform',
-    keywords: ['ai', 'assistant', 'chatbot', 'ask', 'bot', 'chat support'],
-    href: '/help',
+    description:
+      'Chat with the AI assistant in Messages — it answers questions and can take you anywhere on the platform',
+    keywords: ['ai', 'assistant', 'chatbot', 'ask', 'bot', 'chat support', 'navigate', 'guide'],
+    href: '/messages?assistant=1',
     icon: 'Sparkles',
     howTo: [
-      'Go to the Help Center.',
-      'Open the "KTIP Assistant" panel.',
-      'Type your question — it knows the platform\'s features and your role.',
+      'Open Messages from the chat button at the bottom-right.',
+      'Pick "KTIP Assistant" at the top of the Chats list.',
+      'Ask a question, or say where you want to go and it will link you there.',
     ],
   },
   {

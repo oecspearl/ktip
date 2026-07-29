@@ -1,8 +1,13 @@
 import { useState } from 'react'
-import { MessageSquare, Plus, Search, Users } from 'lucide-react'
+import { MessageSquare, Plus, Search, Sparkles, Users } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useMyConnections } from '../../hooks/useConnections'
 import type { Conversation, Profile } from '../../types'
+import {
+  ASSISTANT_CONVERSATION_ID,
+  ASSISTANT_NAME,
+  ASSISTANT_TAGLINE,
+} from '../../lib/assistant'
 import { cn, formatRelativeTime, generateAvatarColor, getInitials } from '../../lib/utils'
 
 interface ChatSidebarProps {
@@ -93,6 +98,38 @@ export function ChatSidebar({
     )
   }
 
+  // Pinned above every real conversation. Not a database row — the thread is
+  // client-side, so it has no timestamp and cannot be left or deleted.
+  const assistantMatchesSearch = !query || ASSISTANT_NAME.toLowerCase().includes(query)
+
+  const renderAssistantRow = () => (
+    <button
+      className={cn(
+        'w-full text-left p-3 border-b border-ktip-sand-100 hover:bg-ktip-sand-50 transition-colors',
+        activeConversationId === ASSISTANT_CONVERSATION_ID &&
+          'bg-ktip-ocean-50 border-l-2 border-l-ktip-ocean-500'
+      )}
+      onClick={() => onSelect(ASSISTANT_CONVERSATION_ID)}
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 text-white shrink-0">
+          <Sparkles size={16} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-ktip-sand-900 text-sm truncate">
+              {ASSISTANT_NAME}
+            </span>
+            <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-ktip-ocean-100 text-ktip-ocean-700 shrink-0">
+              AI
+            </span>
+          </div>
+          <p className="text-xs text-ktip-sand-400 truncate">{ASSISTANT_TAGLINE}</p>
+        </div>
+      </div>
+    </button>
+  )
+
   const sectionHeader = (label: string) => (
     <p className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ktip-sand-400">
       {label}
@@ -146,28 +183,28 @@ export function ChatSidebar({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {tab === 'chats' ? (
-          groups.length || direct.length ? (
-            <>
-              {groups.length > 0 && (
-                <div>
-                  {sectionHeader('Groups')}
-                  {groups.map(renderConversationRow)}
-                </div>
-              )}
-              {direct.length > 0 && (
-                <div>
-                  {sectionHeader('Direct')}
-                  {direct.map(renderConversationRow)}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-12 px-4 text-ktip-sand-500">
-              <MessageSquare size={32} className="mx-auto mb-3 opacity-50" />
-              <p className="text-sm">{query ? 'No chats match.' : 'No conversations yet.'}</p>
-              {!query && <p className="text-xs mt-1">Start a new conversation!</p>}
-            </div>
-          )
+          <>
+            {assistantMatchesSearch && renderAssistantRow()}
+            {groups.length > 0 && (
+              <div>
+                {sectionHeader('Groups')}
+                {groups.map(renderConversationRow)}
+              </div>
+            )}
+            {direct.length > 0 && (
+              <div>
+                {sectionHeader('Direct')}
+                {direct.map(renderConversationRow)}
+              </div>
+            )}
+            {!groups.length && !direct.length && (
+              <div className="text-center py-12 px-4 text-ktip-sand-500">
+                <MessageSquare size={32} className="mx-auto mb-3 opacity-50" />
+                <p className="text-sm">{query ? 'No chats match.' : 'No conversations yet.'}</p>
+                {!query && <p className="text-xs mt-1">Start a new conversation!</p>}
+              </div>
+            )}
+          </>
         ) : contacts.length ? (
           contacts.map((contact) => {
             const name = contact.display_name || 'Unknown User'

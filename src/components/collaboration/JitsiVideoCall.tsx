@@ -7,9 +7,38 @@ interface JitsiVideoCallProps {
   domain?: string
 }
 
+/**
+ * Branding note — why the Jitsi watermark is still visible.
+ *
+ * `meet.jit.si` is Jitsi's free public deployment and it IGNORES the
+ * `interfaceConfig.*` and most `config.*` overrides passed in the URL hash;
+ * they are enforced server-side (which is also why the pre-join screen still
+ * appears despite `prejoinPageEnabled=false`). Their terms require the
+ * attribution to stay, so the watermark cannot be removed there.
+ *
+ * The overrides below DO take effect on a deployment you control:
+ *   - JaaS (8x8): set VITE_JITSI_DOMAIN="8x8.vc" and
+ *     VITE_JITSI_APP_ID="vpaas-magic-cookie-…" — free tier covers small teams.
+ *   - Self-hosted Jitsi Meet: set VITE_JITSI_DOMAIN to your host.
+ *
+ * Until one of those is configured we brand the frame around the call instead,
+ * which is ours to style regardless of the deployment.
+ */
+
 const DEFAULT_JITSI_DOMAIN = 'meet.jit.si'
+const KTIP_LOGO_PATH = '/ktip%20logo%20no%20bg.png'
+
+const configuredDomain = (import.meta.env.VITE_JITSI_DOMAIN as string | undefined)?.trim()
+const jaasAppId = (import.meta.env.VITE_JITSI_APP_ID as string | undefined)?.trim()
+
+/** True once the app points at a deployment whose branding we control. */
+export const jitsiBrandingAvailable = !!configuredDomain && configuredDomain !== DEFAULT_JITSI_DOMAIN
 
 function buildJitsiUrl(domain: string, roomName: string, displayName: string): string {
+  // Jitsi needs an absolute URL for logo overrides — a relative path resolves
+  // against the Jitsi host, not ours.
+  const logoUrl = `${window.location.origin}${KTIP_LOGO_PATH}`
+
   const config = [
     'config.prejoinPageEnabled=false',
     'config.startWithAudioMuted=true',
@@ -22,16 +51,31 @@ function buildJitsiUrl(domain: string, roomName: string, displayName: string): s
     'config.notifications=[]',
     'interfaceConfig.SHOW_JITSI_WATERMARK=false',
     'interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false',
+    'interfaceConfig.SHOW_POWERED_BY=false',
     'interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true',
+    // Honoured on JaaS / self-hosted; ignored by meet.jit.si.
+    'interfaceConfig.SHOW_BRAND_WATERMARK=true',
+    `interfaceConfig.BRAND_WATERMARK_LINK="${encodeURIComponent(window.location.origin)}"`,
+    `interfaceConfig.DEFAULT_LOGO_URL="${encodeURIComponent(logoUrl)}"`,
+    `interfaceConfig.DEFAULT_WELCOME_PAGE_LOGO_URL="${encodeURIComponent(logoUrl)}"`,
+    'interfaceConfig.APP_NAME="KTIP"',
+    'interfaceConfig.NATIVE_APP_NAME="KTIP"',
+    'interfaceConfig.PROVIDER_NAME="KTIP"',
     `userInfo.displayName="${encodeURIComponent(displayName)}"`,
   ]
-  return `https://${domain}/${encodeURIComponent(roomName)}#${config.join('&')}`
+
+  // JaaS namespaces every room under the tenant's app id.
+  const path = jaasAppId
+    ? `${jaasAppId}/${encodeURIComponent(roomName)}`
+    : encodeURIComponent(roomName)
+
+  return `https://${domain}/${path}#${config.join('&')}`
 }
 
 export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCallProps) {
   const [status, setStatus] = useState<'idle' | 'joined'>('idle')
 
-  const jitsiDomain = domain || DEFAULT_JITSI_DOMAIN
+  const jitsiDomain = domain || configuredDomain || DEFAULT_JITSI_DOMAIN
   const jitsiDisplayName = displayName || 'KTIP User'
 
   const joinCall = () => {
@@ -67,34 +111,52 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
       )}
 
       {status === 'joined' && (
-        <>
-          <div className="mb-4 flex items-center justify-between">
-            <a
-              href={jitsiUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50 rounded-lg text-sm font-medium transition-colors"
-            >
-              <ExternalLink size={16} />
-              Open in new tab
-            </a>
-            <button
-              type="button"
-              onClick={leaveCall}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
-            >
-              <VideoOff size={16} />
-              Leave Call
-            </button>
+        <div className="rounded-xl border border-ktip-sand-200 overflow-hidden bg-ktip-cream">
+          {/* KTIP-branded call chrome. The iframe below is cross-origin, so
+              this bar is the branding we can control on any deployment. */}
+          <div className="flex items-center justify-between gap-3 px-3 py-2 bg-ktip-sand-50 border-b border-ktip-sand-200">
+            <div className="flex items-center gap-2 min-w-0">
+              <img
+                src={KTIP_LOGO_PATH}
+                alt=""
+                className="w-7 h-7 object-contain shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-ktip-sand-900 leading-tight">
+                  KTIP Video
+                </p>
+                <p className="text-xs text-ktip-sand-500 truncate">{roomName}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href={jitsiUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium text-ktip-sand-600 hover:bg-ktip-sand-100 hover:text-ktip-sand-900 transition-colors"
+              >
+                <ExternalLink size={14} />
+                <span className="hidden sm:inline">Open in new tab</span>
+              </a>
+              <button
+                type="button"
+                onClick={leaveCall}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm font-medium transition-colors"
+              >
+                <VideoOff size={14} />
+                Leave Call
+              </button>
+            </div>
           </div>
 
           <iframe
             src={jitsiUrl}
             allow="camera; microphone; display-capture; autoplay; clipboard-write"
-            className="w-full rounded-xl border border-ktip-sand-200"
-            style={{ height: 'calc(100vh - 20rem)' }}
+            className="w-full block"
+            style={{ height: 'calc(100vh - 22rem)', border: 'none' }}
+            title={`Video call: ${roomName}`}
           />
-        </>
+        </div>
       )}
     </div>
   )

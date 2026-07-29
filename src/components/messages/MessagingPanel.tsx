@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, MessageSquare, Pin, X } from 'lucide-react'
 import { ChatSidebar } from './ChatSidebar'
 import { ChatWindow } from './ChatWindow'
+import { AssistantChatWindow } from './AssistantChatWindow'
 import { NewConversationModal } from './NewConversationModal'
 import { useConversations } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
+import { isAssistantConversation } from '../../lib/assistant'
 import { cn } from '../../lib/utils'
 
 /**
@@ -156,12 +158,16 @@ export function MessagingPanel() {
                   Back
                 </button>
               </div>
-              <ChatWindow
-                conversationId={activeConversationId}
-                otherUserName={getOtherUserName()}
-                conversation={activeConversation}
-                onLeftGroup={handleLeftGroup}
-              />
+              {isAssistantConversation(activeConversationId) ? (
+                <AssistantChatWindow />
+              ) : (
+                <ChatWindow
+                  conversationId={activeConversationId}
+                  otherUserName={getOtherUserName()}
+                  conversation={activeConversation}
+                  onLeftGroup={handleLeftGroup}
+                />
+              )}
             </>
           ) : (
             <div className="flex items-center justify-center h-full text-ktip-sand-500">

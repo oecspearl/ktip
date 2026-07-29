@@ -1,0 +1,113 @@
+import type { ComponentType } from 'react'
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Calendar,
+  CalendarDays,
+  CalendarPlus,
+  ClipboardCheck,
+  ClipboardList,
+  Code2,
+  DollarSign,
+  FileEdit,
+  FilePlus,
+  FileText,
+  Flag,
+  FolderKanban,
+  Handshake,
+  HelpCircle,
+  Home,
+  KeyRound,
+  Leaf,
+  LogIn,
+  LogOut,
+  Mail,
+  MessageCircle,
+  MessageCircleQuestion,
+  MessageSquare,
+  MessageSquarePlus,
+  Moon,
+  PenSquare,
+  Plug,
+  Plus,
+  Presentation,
+  Search,
+  Send,
+  Settings,
+  Share2,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+  Video,
+} from 'lucide-react'
+
+/**
+ * Site-map entries store a lucide icon *name* rather than a component, because
+ * `site-map.ts` must stay free of React imports — the edge function imports it.
+ * This is where names are resolved back to components.
+ *
+ * Shared by the navbar search panel and the KTIP Assistant's destination chips.
+ */
+
+export type IconProps = { size?: number; className?: string }
+
+export const ICONS: Record<string, ComponentType<IconProps>> = {
+  ArrowUpRight,
+  BadgeCheck,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Calendar,
+  CalendarDays,
+  CalendarPlus,
+  ClipboardCheck,
+  ClipboardList,
+  Code2,
+  DollarSign,
+  FileEdit,
+  FilePlus,
+  FileText,
+  Flag,
+  FolderKanban,
+  Handshake,
+  HelpCircle,
+  Home,
+  KeyRound,
+  Leaf,
+  LogIn,
+  LogOut,
+  Mail,
+  MessageCircle,
+  MessageCircleQuestion,
+  MessageSquare,
+  MessageSquarePlus,
+  Moon,
+  PenSquare,
+  Plug,
+  Plus,
+  Presentation,
+  Search,
+  Send,
+  Settings,
+  Share2,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+  Video,
+}
+
+/** Resolve an icon name, falling back to a generic search glass. */
+export function resolveIcon(name?: string): ComponentType<IconProps> {
+  return (name && ICONS[name]) || Search
+}

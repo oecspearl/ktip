@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { HelpSearch } from '../../components/help/HelpSearch'
 import { HelpCategorySection } from '../../components/help/HelpCategory'
-import { AIAssistant } from '../../components/help/AIAssistant'
 import {
   HELP_CATEGORIES,
   GETTING_STARTED_GUIDES,
@@ -22,8 +21,11 @@ import {
   Building2,
   Globe,
   Briefcase,
+  Sparkles,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
+import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
+import { ASSISTANT_CONVERSATION_ID, ASSISTANT_NAME } from '../../lib/assistant'
 
 const ROLE_ICONS: Record<string, any> = {
   student: GraduationCap,
@@ -46,6 +48,7 @@ const ROLE_COLORS: Record<string, string> = {
 export default function HelpCenterPage() {
   usePageTitle('Help Center')
   const auth = useAuth()
+  const { openPanel } = useMessagingPanel()
 
   // /help?article=<id> and /help?q=<text> let the global search panel land on
   // a specific answer instead of the top of the page
@@ -229,7 +232,8 @@ export default function HelpCenterPage() {
                 No articles found
               </h3>
               <p className="text-gray-500 mb-4 max-w-md mx-auto">
-                We could not find any articles matching your search. Try different keywords or ask the AI assistant for help.
+                We could not find any articles matching your search. Try different keywords, or ask
+                the {ASSISTANT_NAME} in Messages.
               </p>
               <button
                 type="button"
@@ -255,9 +259,17 @@ export default function HelpCenterPage() {
                   If you could not find what you are looking for, reach out to the community or chat with our AI assistant.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => openPanel({ conversationId: ASSISTANT_CONVERSATION_ID })}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-cream text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
+                  >
+                    <Sparkles size={18} />
+                    Ask the {ASSISTANT_NAME}
+                  </button>
                   <Link
                     to="/messages"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-cream text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
                   >
                     <MessageSquare size={18} />
                     Send a Message
@@ -276,8 +288,6 @@ export default function HelpCenterPage() {
         </div>
       </div>
 
-      {/* AI Assistant floating widget */}
-      <AIAssistant />
     </>
   )
 }

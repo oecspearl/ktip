@@ -1,58 +1,15 @@
-import type { ComponentType } from 'react'
 import {
   ArrowUpRight,
-  BadgeCheck,
-  BarChart3,
-  Bell,
-  BookOpen,
   Brain,
-  Calendar,
-  CalendarDays,
-  CalendarPlus,
   ChevronRight,
-  ClipboardCheck,
-  ClipboardList,
   Clock,
-  Code2,
   CornerDownLeft,
-  DollarSign,
-  FileEdit,
-  FilePlus,
-  FileText,
-  Flag,
-  FolderKanban,
-  Handshake,
-  HelpCircle,
-  Home,
-  KeyRound,
-  Leaf,
   Loader2,
-  LogIn,
-  LogOut,
-  Mail,
-  MessageCircle,
-  MessageCircleQuestion,
-  MessageSquare,
-  MessageSquarePlus,
-  Moon,
-  PenSquare,
-  Plug,
-  Plus,
-  Presentation,
   Search,
-  Send,
-  Settings,
-  Share2,
-  Shield,
-  ShieldCheck,
   Sparkles,
-  Trash2,
-  User,
-  UserPlus,
-  Users,
-  Video,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { resolveIcon } from '../../lib/icon-map'
 import type { SearchGroup, SearchRow } from '../../lib/site-search'
 
 /**
@@ -64,59 +21,6 @@ import type { SearchGroup, SearchRow } from '../../lib/site-search'
  * Two affordances per row: clicking the row navigates, clicking the chevron
  * expands it in place to explain how to get there or do the thing yourself.
  */
-
-type IconProps = { size?: number; className?: string }
-
-// Site-map entries store a lucide icon *name* (the map file must stay free of
-// React imports so the edge function can import it). Resolve it here.
-const ICONS: Record<string, ComponentType<IconProps>> = {
-  ArrowUpRight,
-  BadgeCheck,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Calendar,
-  CalendarDays,
-  CalendarPlus,
-  ClipboardCheck,
-  ClipboardList,
-  Code2,
-  DollarSign,
-  FileEdit,
-  FilePlus,
-  FileText,
-  Flag,
-  FolderKanban,
-  Handshake,
-  HelpCircle,
-  Home,
-  KeyRound,
-  Leaf,
-  LogIn,
-  LogOut,
-  Mail,
-  MessageCircle,
-  MessageCircleQuestion,
-  MessageSquare,
-  MessageSquarePlus,
-  Moon,
-  PenSquare,
-  Plug,
-  Plus,
-  Presentation,
-  Search,
-  Send,
-  Settings,
-  Share2,
-  Shield,
-  ShieldCheck,
-  Sparkles,
-  Trash2,
-  User,
-  UserPlus,
-  Users,
-  Video,
-}
 
 export interface NavbarSearchPanelProps {
   query: string
@@ -436,6 +340,6 @@ export function NavbarSearchPanel({
 }
 
 function RowIcon({ name }: { name?: string }) {
-  const Icon = (name && ICONS[name]) || Search
+  const Icon = resolveIcon(name)
   return <Icon size={16} className="text-ktip-sand-400 shrink-0" />
 }
