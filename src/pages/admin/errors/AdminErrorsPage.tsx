@@ -17,7 +17,6 @@ import {
 import {
   ArrowUpRight,
   BellOff,
-  Check,
   ChevronDown,
   ChevronUp,
   CircleCheck,
@@ -68,13 +67,6 @@ import {
 } from './ui/input-group'
 import { Label } from './ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select'
 import { Skeleton } from './ui/skeleton'
 import { useCopyToClipboard } from './ui/use-copy-to-clipboard'
 import { useToast } from '../../../contexts/ToastContext'
@@ -93,15 +85,7 @@ import {
 } from '../../../types/sentry'
 import { SentryIssueDetail } from './SentryIssueDetail'
 import { usePageTitle } from '../../../hooks/usePageTitle'
-
-const PERIOD_OPTIONS: Array<{ value: SentryStatsPeriod; label: string }> = [
-  { value: '1h', label: 'Last hour' },
-  { value: '24h', label: 'Last 24 hours' },
-  { value: '7d', label: 'Last 7 days' },
-  { value: '14d', label: 'Last 14 days' },
-  { value: '30d', label: 'Last 30 days' },
-  { value: '90d', label: 'Last 90 days' },
-]
+import { StatsPeriodSelect } from './StatsPeriodSelect'
 
 const SCOPE_LABELS: Record<SentryIssueScope, string> = {
   unresolved: 'Unresolved',
@@ -652,7 +636,7 @@ export default function AdminErrorsPage() {
     return (
       <div className="errors-console space-y-5">
         <PageHeading />
-        <SetupNotice message={error.message} hint={error.hint} />
+        <SetupNotice />
       </div>
     )
   }
@@ -662,21 +646,10 @@ export default function AdminErrorsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <PageHeading />
         <div className="flex items-center gap-1.5">
-          <Select
+          <StatsPeriodSelect
             value={statsPeriod}
-            onValueChange={(value) => setStatsPeriod(value as SentryStatsPeriod)}
-          >
-            <SelectTrigger size="sm" className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {PERIOD_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={setStatsPeriod}
+          />
           <Button
             variant="outline"
             size="sm"
@@ -951,51 +924,21 @@ function PageHeading() {
 }
 
 /**
- * Shown when the proxy reports 501: the dashboard is deployed but no Sentry
- * auth token is configured, so the fix is an operator action, not a retry.
+ * Shown when the proxy reports 501: error monitoring is not wired up on the
+ * server. Deliberately says nothing about the specific configuration — the fix
+ * is an operator action, and the details stay server-side.
  */
-function SetupNotice({ message, hint }: { message: string; hint: string }) {
-  const { copyToClipboard, isCopied } = useCopyToClipboard()
-  const snippet = [
-    'SENTRY_AUTH_TOKEN=sntrys_…    # event:read, project:read (+ event:write to triage)',
-    'SENTRY_ORG=your-org-slug',
-    'SENTRY_PROJECT=your-project-slug',
-    '# EU-region orgs only (DSN host contains ".de."):',
-    'SENTRY_API_BASE_URL=https://de.sentry.io/api/0',
-  ].join('\n')
-
+function SetupNotice() {
   return (
     <Frame className="w-full">
       <FramePanel>
         <div className="flex items-start gap-3">
           <TriangleAlert className="text-warning mt-0.5 size-4 shrink-0" />
-          <div className="min-w-0 space-y-3">
-            <div>
-              <h2 className="text-sm font-semibold">{message}</h2>
-              <p className="text-muted-foreground mt-1 text-sm">{hint}</p>
-            </div>
-            <div className="border-border bg-muted/40 relative rounded-lg border p-3">
-              <div className="text-muted-foreground mb-2 text-[0.6875rem] font-semibold tracking-wider uppercase">
-                Required environment variables
-              </div>
-              <pre className="overflow-x-auto font-mono text-[0.6875rem] leading-relaxed">
-                {snippet}
-              </pre>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="absolute end-2 top-2"
-                onClick={() => copyToClipboard(snippet)}
-                aria-label="Copy environment variables"
-              >
-                {isCopied ? <Check className="size-3" /> : <Copy className="size-3" />}
-              </Button>
-            </div>
-            <p className="text-muted-foreground text-xs">
-              Set these in <code className="font-mono">.env</code> for local development and in the
-              Vercel project's environment variables for deployments. They are server-side only —
-              the token is never sent to the browser. Restart the dev server after editing{' '}
-              <code className="font-mono">.env</code>.
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-sm font-semibold">Error monitoring is unavailable</h2>
+            <p className="text-muted-foreground text-sm">
+              This dashboard is not connected to the monitoring service. Please contact your system
+              administrator.
             </p>
           </div>
         </div>

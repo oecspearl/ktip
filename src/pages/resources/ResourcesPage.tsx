@@ -6,6 +6,7 @@ import { CourseCard } from '../../components/courses/CourseCard'
 import { useResources } from '../../hooks/useResources'
 import { useIntegrations } from '../../hooks/useIntegrations'
 import { useExternalCourses } from '../../hooks/useExternalCourses'
+import { useMyKtipEnrollments } from '../../hooks/useMyKtipEnrollments'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterSelect } from '../../components/ui/TagFilterSelect'
 import { SortSelect } from '../../components/ui/SortSelect'
@@ -439,6 +440,7 @@ function CoursesTab() {
     gradeLevel,
     search: debouncedSearch,
   })
+  const { enrollmentsByCourseId, refetch: refetchEnrollments } = useMyKtipEnrollments()
 
   // Subject/grade values are free text set by Virtual Campus course admins,
   // not a closed KTIP-owned enum — so options come from the live catalog
@@ -508,7 +510,14 @@ function CoursesTab() {
         ) : courses && courses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
             {courses.map((course) => (
-              <CourseCard key={course.course_id} course={course} />
+              <CourseCard
+                key={course.course_id}
+                course={course}
+                enrollment={enrollmentsByCourseId.get(course.course_id)}
+                onEnrolled={() => {
+                  void refetchEnrollments()
+                }}
+              />
             ))}
           </div>
         ) : (

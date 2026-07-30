@@ -1,22 +1,24 @@
-import { useState } from 'react'
 import { ExternalLink, GraduationCap } from 'lucide-react'
 import { useEnrollInCourse } from '../../hooks/useEnrollInCourse'
 import { useToast } from '../../contexts/ToastContext'
-import type { CourseEnrollmentResult, ExternalCourse } from '../../types'
+import type { ExternalCourse, KtipEnrollment } from '../../types'
 
 interface CourseCardProps {
   course: ExternalCourse
+  enrollment?: KtipEnrollment | null
+  onEnrolled?: () => void
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) {
   const { enroll, enrolling } = useEnrollInCourse()
   const toast = useToast()
-  const [result, setResult] = useState<CourseEnrollmentResult | null>(null)
+
+  const courseUrl = enrollment?.course_url
 
   const handleEnroll = async () => {
     try {
       const res = await enroll(course.course_id)
-      setResult(res)
+      onEnrolled?.()
       toast.success(
         res.is_new_user
           ? 'Enrolled! Check your email to set up your Virtual Campus sign-in.'
@@ -71,9 +73,9 @@ export function CourseCard({ course }: CourseCardProps) {
         </div>
       )}
 
-      {result ? (
+      {courseUrl ? (
         <a
-          href={result.course_url}
+          href={courseUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ktip-tropical-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-tropical-700 transition-colors"

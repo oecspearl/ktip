@@ -150,6 +150,8 @@ export default defineConfig(({ mode }) => {
     'VC_USERINFO_URL',
     'COMMONS_BASE_URLS',
     'COMMONS_API_KEY',
+    'KTIP_CATALOG_BASE_URL',
+    'MYPD_KTIP_API_KEY',
     // /api/admin/sentry reads these; without them it answers 501 and the
     // dashboard shows setup instructions instead of issues.
     'SENTRY_AUTH_TOKEN',
@@ -158,6 +160,14 @@ export default defineConfig(({ mode }) => {
     'SENTRY_API_BASE_URL',
     'SENTRY_DSN',
     'SENTRY_ENVIRONMENT',
+    // Outbound email. Without these, /api/invite/send answers 503 and the
+    // alias flows fall back to logging a dev link instead of mailing one.
+    'RESEND_API_KEY',
+    'EMAIL_FROM',
+    // Deprecated alias of EMAIL_FROM; still promoted for un-migrated .env files.
+    'INVITE_FROM_EMAIL',
+    // The origin baked into links inside those emails.
+    'SITE_URL',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }

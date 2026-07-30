@@ -72,18 +72,6 @@ feature reach production.
 
 ## Also worth doing
 
-### Set the Resend keys
-
-`RESEND_API_KEY` and `INVITE_FROM_EMAIL` (documented in `.env.example`) are not
-configured. Without them:
-
-- `/api/invite/send` returns 503 — email invitations do not work at all;
-- `/api/auth/add-alias` cannot mail a verification link. Outside production it
-  logs the link and returns it as `dev_link` instead, so the flow is testable;
-  in production it returns 503.
-
-The sending domain must be verified at https://resend.com/domains first.
-
 ### Two things verified only by reading, not by running
 
 - **`auth.user.identities` population.** The OAuth-only caveat in the Secondary

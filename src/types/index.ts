@@ -1139,6 +1139,14 @@ export interface CourseEnrollmentResult {
   course_url: string
 }
 
+export interface KtipEnrollment {
+  enrollment_id: string
+  course_id: string
+  course_url: string
+  enrolled_at: string | null
+  progress_percentage: number | null
+}
+
 // ============================================================
 // Badges and gamification (migrations 039, 066, 067)
 // ============================================================

@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -57,9 +60,9 @@
     "lucide-react": "^0.563.0",
     "mammoth": "^1.12.0",
     "pdfjs-dist": "^6.2.108",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router": "^7.9.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router": "^8.3.0",
     "tailwind-merge": "^3.4.0",
     "tldraw": "^4.3.1",
     "turndown": "^7.2.2",
@@ -75,7 +78,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.13",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/turndown": "^5.0.6",
     "@vitejs/plugin-react": "^5.0.0",

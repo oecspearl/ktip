@@ -1,9 +1,12 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { keys } from '../queries/keys'
 import type { CourseEnrollmentResult } from '../types'
 
 /** Enrolls the signed-in user in a Virtual Campus course via /api/ktip/enroll. */
 export function useEnrollInCourse() {
+  const queryClient = useQueryClient()
+
   const mutation = useMutation({
     mutationFn: async (courseId: string): Promise<CourseEnrollmentResult> => {
       const {
@@ -23,6 +26,9 @@ export function useEnrollInCourse() {
       const body = await res.json().catch(() => ({ error: 'Enrollment failed' }))
       if (!res.ok) throw new Error(body.error || 'Enrollment failed')
       return body as CourseEnrollmentResult
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.list('ktip-enrollments') })
     },
   })
 

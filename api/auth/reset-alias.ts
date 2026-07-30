@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
 
 export const config = { runtime: 'edge' }
 
@@ -162,12 +163,12 @@ export default async function handler(request: Request) {
     return settle(OK_BODY, 200)
   }
 
-  const origin = new URL(request.url).origin
-
   const { data: link, error: linkError } = await admin.auth.admin.generateLink({
     type: 'recovery',
     email: alias.primary_email,
-    options: { redirectTo: `${origin}/reset-password` },
+    // Must be allow-listed under Supabase Auth → URL Configuration, or GoTrue
+    // silently substitutes the project's own Site URL.
+    options: { redirectTo: `${siteOrigin(request)}/reset-password` },
   })
 
   const actionLink = link?.properties?.action_link
@@ -176,14 +177,14 @@ export default async function handler(request: Request) {
     return settle(OK_BODY, 200)
   }
 
-  const resendKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.INVITE_FROM_EMAIL
-  if (!resendKey || !fromEmail) {
+  const apiKey = resendKey()
+  const fromEmail = emailFrom()
+  if (!apiKey || !fromEmail) {
     // Dev only — never log a live recovery link from production.
     if (process.env.VERCEL_ENV !== 'production') {
       console.log(`[reset-alias] recovery link (dev only): ${actionLink}`)
     } else {
-      console.error('[reset-alias] RESEND_API_KEY unset; recovery mail not sent')
+      console.error('[reset-alias] RESEND_API_KEY/EMAIL_FROM unset; recovery mail not sent')
     }
     return settle(OK_BODY, 200)
   }
@@ -191,7 +192,7 @@ export default async function handler(request: Request) {
   const resendResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${resendKey}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
