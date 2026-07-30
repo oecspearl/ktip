@@ -139,6 +139,10 @@ export function Navbar() {
 
   // Auto-hide on scroll down, reappear on scroll up or top-edge hover
   const [navHidden, setNavHidden] = useState(false)
+  // Past the first screen the bar is over page content, not over a hero, so
+  // white-on-nothing links stop being readable. Scrolling back up re-shows the
+  // bar there, which is exactly when it needs a backdrop.
+  const [scrolledPastHero, setScrolledPastHero] = useState(false)
   const lastScrollY = useRef(0)
 
   useEffect(() => {
@@ -151,6 +155,7 @@ export function Navbar() {
       } else if (y < lastScrollY.current - 4) {
         setNavHidden(false)
       }
+      setScrolledPastHero(y > 120)
       lastScrollY.current = y
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -309,9 +314,14 @@ export function Navbar() {
 
   // Every nav link is white, which only works over the full-bleed dark hero the
   // public pages put behind this bar. Admin pages use `<PageHero inset>`, whose
-  // hero starts BELOW the bar — leaving white text on the cream canvas. Those
-  // routes get the same dark backdrop the open mobile menu already uses.
-  const needsBackdrop = location.pathname.startsWith('/admin')
+  // hero starts BELOW the bar — leaving white text on the cream canvas. Same for
+  // the venue pages, which render straight onto the canvas with no hero at all.
+  // And once any page is scrolled past its hero the bar is over body content.
+  // All of those get the same dark backdrop the open mobile menu already uses.
+  const noHeroBehindBar =
+    location.pathname.startsWith('/admin') ||
+    /^\/events\/[^/]+\/venue/.test(location.pathname)
+  const needsBackdrop = noHeroBehindBar || scrolledPastHero
 
   const isDropdownActive = (dropdown: NavDropdown) =>
     dropdown.items.some((item) => isActive(item.href))
@@ -341,16 +351,19 @@ export function Navbar() {
     <nav
       onMouseEnter={() => setNavHidden(false)}
       className={cn(
+        // The bar row is exactly --nav-h (set on the row below, so the mobile
+        // menu can still expand past it). Height used to be whatever the logo
+        // plus inline padding happened to add up to, which meant every page
+        // guessed its own clearance — see the token's note in index.css.
         'top-0 z-40 transition-all duration-300 fixed inset-x-0',
         hidden ? '-translate-y-full' : 'translate-y-0',
         mobileMenuOpen || needsBackdrop
           ? 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
           : 'bg-transparent border-b border-transparent'
       )}
-      style={{ paddingTop: '1rem', paddingBottom: '1rem' }}
     >
-      <div className="w-full px-4">
-        <div className="flex items-center justify-between">
+      <div className={cn('w-full px-4', mobileMenuOpen && 'pb-4')}>
+        <div className="flex items-center justify-between h-[var(--nav-h)]">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">

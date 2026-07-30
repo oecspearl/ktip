@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Flame, Pin, Trophy, Users } from 'lucide-react'
+import { Flame, Pin, Search, Trophy, Users, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
+import { Modal } from '../../components/ui/Modal'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { TrophyCard, SecretTrophyCard } from '../../components/achievements/TrophyCard'
 import { FireworksOverlay } from '../../components/achievements/FireworksOverlay'
@@ -18,6 +19,7 @@ import {
   rarityOf,
 } from '../../lib/achievement-style'
 import { cn } from '../../lib/utils'
+import type { BadgeDefinition } from '../../types'
 
 const CATEGORY_LABELS: Record<string, string> = {
   projects: 'Projects',
@@ -34,6 +36,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const MAX_SHOWCASE = 5
+
+type StatusFilter = 'all' | 'progress' | 'earned' | 'locked'
+
+const STATUS_TABS: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'progress', label: 'In progress' },
+  { key: 'earned', label: 'Earned' },
+  { key: 'locked', label: 'Locked' },
+]
 
 /**
  * `embedded` renders the same gallery inside the dashboard tab shell: the tab
@@ -55,8 +66,11 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
 
   const [category, setCategory] = useState<string>('all')
   const [rarities, setRarities] = useState<string[]>([])
+  const [status, setStatus] = useState<StatusFilter>('all')
+  const [search, setSearch] = useState('')
   const [pinning, setPinning] = useState(false)
   const [pinned, setPinned] = useState<string[]>([])
+  const [detail, setDetail] = useState<BadgeDefinition | null>(null)
 
   // Powers the 'curious' hidden achievement. Once per mount, not per render.
   useEffect(() => {
@@ -77,6 +91,30 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
     return map
   }, [achievements])
 
+  /**
+   * One lookup for both key spaces. `earnedById` is keyed on badge id and
+   * `progressBySlug` on slug, which is a standing trap when reading a tile —
+   * everything below goes through this instead of picking the wrong map.
+   * Falls back to the badge's own `check_value` so a countable achievement with
+   * no server progress row still shows 0 / target rather than nothing.
+   */
+  const readBadge = useMemo(() => {
+    return (badge: BadgeDefinition) => {
+      const earnedAt = earnedById.get(badge.id) ?? null
+      const serverProgress = progressBySlug.get(badge.slug) ?? null
+      const progress =
+        serverProgress ??
+        (badge.check_value && badge.check_value > 0
+          ? { current: 0, target: badge.check_value }
+          : null)
+      const pct =
+        !earnedAt && progress && progress.target > 0
+          ? Math.min(1, progress.current / progress.target)
+          : 0
+      return { earnedAt, progress, pct, started: !earnedAt && pct > 0 }
+    }
+  }, [earnedById, progressBySlug])
+
   // Hidden badges are dropped from the grid until earned; only their count is
   // shown. They arrive from the API because the table is public — masking is a
   // presentation choice, not a security boundary.
@@ -93,13 +131,45 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
     return Array.from(set).sort()
   }, [visible])
 
+  const statusCounts = useMemo(() => {
+    let earned = 0
+    let progress = 0
+    for (const b of visible) {
+      const read = readBadge(b)
+      if (read.earnedAt) earned++
+      else if (read.started) progress++
+    }
+    return { all: visible.length, earned, progress, locked: visible.length - earned }
+  }, [visible, readBadge])
+
   const filtered = useMemo(() => {
-    return visible.filter((b) => {
+    const needle = search.trim().toLowerCase()
+    const rows = visible.filter((b) => {
       if (category !== 'all' && (b.category || 'community') !== category) return false
       if (rarities.length && !rarities.includes(RARITY_LABEL[rarityOf(b.rarity)])) return false
+      if (needle && !`${b.name} ${b.description}`.toLowerCase().includes(needle)) return false
+
+      const read = readBadge(b)
+      if (status === 'earned' && !read.earnedAt) return false
+      if (status === 'locked' && read.earnedAt) return false
+      if (status === 'progress' && !read.started) return false
       return true
     })
-  }, [visible, category, rarities])
+
+    // Closest to unlocking first, then everything else earned-most-recent
+    // first. A flat alphabetical list of 75 buried the three tiles that
+    // actually tell you what to do next.
+    return rows.sort((a, b) => {
+      const ra = readBadge(a)
+      const rb = readBadge(b)
+      const rank = (r: typeof ra) => (r.started ? 0 : r.earnedAt ? 1 : 2)
+      const diff = rank(ra) - rank(rb)
+      if (diff !== 0) return diff
+      if (rank(ra) === 0) return rb.pct - ra.pct
+      if (rank(ra) === 1) return (rb.earnedAt || '').localeCompare(ra.earnedAt || '')
+      return (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name)
+    })
+  }, [visible, category, rarities, status, search, readBadge])
 
   const stats = achievements?.stats
   const rank = stats?.rank
@@ -149,15 +219,20 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
     )
   }
 
+  const detailRead = detail ? readBadge(detail) : null
+
   return (
     <div className={shell}>
-      {/* ---------- Rank header ---------- */}
+      {/* ---------- Rank header ----------
+          Rank and the level bar only. The Points / Streak / Active-days figures
+          moved to their own strip below: six numbers, a bar and three buttons
+          in one card was the densest thing on the page. */}
       <section className="relative overflow-hidden rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
         {/* Only fires when a rank has actually been reached, so the page does
             not celebrate an empty account on first visit. */}
         {(rank?.level ?? 1) > 1 && <FireworksOverlay runKey={rank?.level} durationMs={1400} />}
 
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
               Level {rank?.level ?? 1}
@@ -174,33 +249,28 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
             )}
             <p className="mt-1 text-sm text-ktip-sand-600">
               {stats?.earned ?? 0} of {stats?.total_available ?? 0} achievements
+              {statusCounts.progress > 0 && ` · ${statusCounts.progress} in progress`}
               {unearnedSecrets > 0 && ` · ${unearnedSecrets} still secret`}
             </p>
           </div>
 
-          <dl className="flex gap-6">
-            <div className="text-center">
-              <dt className="text-xs uppercase tracking-wider text-ktip-sand-500">Points</dt>
-              <dd className="font-display text-2xl font-bold text-ktip-ocean-700 tabular-nums">
-                {stats?.points ?? 0}
-              </dd>
-            </div>
-            <div className="text-center">
-              <dt className="flex items-center gap-1 text-xs uppercase tracking-wider text-ktip-sand-500">
-                <Flame size={12} aria-hidden="true" />
-                Streak
-              </dt>
-              <dd className="font-display text-2xl font-bold text-ktip-ocean-700 tabular-nums">
-                {stats?.streak_days ?? 0}
-              </dd>
-            </div>
-            <div className="text-center">
-              <dt className="text-xs uppercase tracking-wider text-ktip-sand-500">Active days</dt>
-              <dd className="font-display text-2xl font-bold text-ktip-ocean-700 tabular-nums">
-                {stats?.total_active_days ?? 0}
-              </dd>
-            </div>
-          </dl>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={pinning ? savePins : startPinning}>
+              <Pin size={14} aria-hidden="true" />
+              {pinning ? `Save showcase (${pinned.length}/${MAX_SHOWCASE})` : 'Edit showcase'}
+            </Button>
+            {pinning && (
+              <Button size="sm" variant="ghost" onClick={() => setPinning(false)}>
+                Cancel
+              </Button>
+            )}
+            <Link to="/leaderboard">
+              <Button size="sm" variant="ghost">
+                <Trophy size={14} aria-hidden="true" />
+                Leaderboard
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="relative z-10 mt-5">
@@ -223,25 +293,35 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
               : 'Highest rank reached'}
           </p>
         </div>
+      </section>
 
-        <div className="relative z-10 mt-5 flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" onClick={pinning ? savePins : startPinning}>
-            <Pin size={14} aria-hidden="true" />
-            {pinning ? `Save showcase (${pinned.length}/${MAX_SHOWCASE})` : 'Edit showcase'}
-          </Button>
-          {pinning && (
+      {/* ---------- Stat strip ---------- */}
+      <dl className="grid grid-cols-3 gap-3">
+        <StatTile label="Points" value={stats?.points ?? 0} />
+        <StatTile label="Streak" value={stats?.streak_days ?? 0} icon={<Flame size={12} />} />
+        <StatTile label="Active days" value={stats?.total_active_days ?? 0} />
+      </dl>
+
+      {/* ---------- Showcase mode banner ----------
+          Turning on pinning used to change nothing but the button label, so a
+          click on a locked tile did nothing and read as broken. */}
+      {pinning && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50/60 px-4 py-3">
+          <p className="text-sm text-ktip-ocean-800">
+            <strong className="font-semibold">Choosing your showcase.</strong> Click up to{' '}
+            {MAX_SHOWCASE} earned trophies — {pinned.length} picked so far. Locked trophies cannot
+            be pinned.
+          </p>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={savePins} loading={showcaseMutation.isPending}>
+              Save showcase
+            </Button>
             <Button size="sm" variant="ghost" onClick={() => setPinning(false)}>
               Cancel
             </Button>
-          )}
-          <Link to="/leaderboard">
-            <Button size="sm" variant="ghost">
-              <Trophy size={14} aria-hidden="true" />
-              Leaderboard
-            </Button>
-          </Link>
+          </div>
         </div>
-      </section>
+      )}
 
       {/* ---------- Collections ---------- */}
       {!!achievements?.collections?.length && (
@@ -286,29 +366,76 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
         </section>
       )}
 
-      {/* ---------- Filters ---------- */}
-      <section>
-        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Achievement categories">
-          <CategoryTab
-            label="All"
-            active={category === 'all'}
-            count={visible.length}
-            earned={visible.filter((b) => earnedById.has(b.id)).length}
-            onClick={() => setCategory('all')}
-          />
-          {categories.map((cat) => {
-            const inCat = visible.filter((b) => (b.category || 'community') === cat)
-            return (
-              <CategoryTab
-                key={cat}
-                label={CATEGORY_LABELS[cat] || cat}
-                active={category === cat}
-                count={inCat.length}
-                earned={inCat.filter((b) => earnedById.has(b.id)).length}
-                onClick={() => setCategory(cat)}
-              />
-            )
-          })}
+      {/* ---------- Filters ----------
+          One bar. There used to be two rows of identical-looking pills, the top
+          one single-select and the bottom one multi-select, above a wrapping
+          12-tab category row. Status is the question people actually ask, so it
+          leads; category is a select because there are eleven of them. */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            className="inline-flex rounded-full border border-ktip-sand-200 p-0.5"
+            role="tablist"
+            aria-label="Achievement status"
+          >
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={status === tab.key}
+                onClick={() => setStatus(tab.key)}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                  status === tab.key
+                    ? 'bg-ktip-ocean-600 text-white'
+                    : 'text-ktip-sand-600 hover:text-ktip-ocean-700'
+                )}
+              >
+                {tab.label}
+                <span className="ml-1.5 tabular-nums text-xs opacity-75">
+                  {statusCounts[tab.key]}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <label className="sr-only" htmlFor="achievement-category">
+            Category
+          </label>
+          <select
+            id="achievement-category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="rounded-full border border-ktip-sand-200 bg-ktip-cream px-3 py-1.5 text-sm font-medium text-ktip-sand-700"
+          >
+            <option value="all">All categories ({visible.length})</option>
+            {categories.map((cat) => {
+              const inCat = visible.filter((b) => (b.category || 'community') === cat)
+              const earned = inCat.filter((b) => earnedById.has(b.id)).length
+              return (
+                <option key={cat} value={cat}>
+                  {CATEGORY_LABELS[cat] || cat} ({earned}/{inCat.length})
+                </option>
+              )
+            })}
+          </select>
+
+          <div className="relative min-w-[12rem] flex-1">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search achievements"
+              aria-label="Search achievements"
+              className="w-full rounded-full border border-ktip-sand-200 bg-ktip-cream py-1.5 pl-9 pr-3 text-sm text-ktip-sand-800 placeholder:text-ktip-sand-400"
+            />
+          </div>
         </div>
 
         <TagFilterChips
@@ -320,53 +447,52 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
         />
       </section>
 
-      {/* ---------- Grid ---------- */}
+      {/* ---------- Grid ----------
+          Four columns, not five: inside the dashboard the 16rem rail already
+          took a quarter of the width, so five columns rendered as slivers. */}
       <section>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((badge) => {
-            const earnedAt = earnedById.get(badge.id)
+            const { earnedAt, progress } = readBadge(badge)
             const isPinned = pinned.includes(badge.id)
+            const pinnable = pinning && !!earnedAt
 
-            const card = (
-              <TrophyCard
-                name={badge.name}
-                description={badge.description}
-                icon={badge.icon}
-                rarity={badge.rarity}
-                tier={badge.tier}
-                trophyType={badge.trophy_type}
-                imageUrl={badge.image_url}
-                points={badge.points}
-                assetMap={assetMap}
-                locked={!earnedAt}
-                earnedAt={earnedAt}
-                progress={progressBySlug.get(badge.slug) || null}
-                className={cn('h-full', isPinned && 'ring-2 ring-ktip-sun-500')}
-              />
+            return (
+              <button
+                key={badge.id}
+                type="button"
+                aria-pressed={pinning ? isPinned : undefined}
+                // While pinning, the tile picks; otherwise it opens the detail
+                // popup that carries the description the tile no longer shows.
+                onClick={() => (pinnable ? togglePin(badge.id) : setDetail(badge))}
+                disabled={pinning && !earnedAt}
+                className="text-left rounded-2xl focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <TrophyCard
+                  name={badge.name}
+                  description={badge.description}
+                  icon={badge.icon}
+                  rarity={badge.rarity}
+                  tier={badge.tier}
+                  trophyType={badge.trophy_type}
+                  imageUrl={badge.image_url}
+                  points={badge.points}
+                  assetMap={assetMap}
+                  locked={!earnedAt}
+                  earnedAt={earnedAt}
+                  progress={progress}
+                  compact
+                  className={cn('h-full', isPinned && 'ring-2 ring-ktip-sun-500')}
+                />
+              </button>
             )
-
-            // Pinning is only offered on earned trophies; the card is inert
-            // otherwise, so the whole tile becomes a button only when it can act.
-            if (pinning && earnedAt) {
-              return (
-                <button
-                  key={badge.id}
-                  type="button"
-                  aria-pressed={isPinned}
-                  onClick={() => togglePin(badge.id)}
-                  className="text-left rounded-2xl focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500"
-                >
-                  {card}
-                </button>
-              )
-            }
-
-            return <div key={badge.id}>{card}</div>
           })}
 
           {/* Secrets appear only in the unfiltered view — a rarity filter that
               revealed how many epics are hidden would leak the thing itself. */}
           {category === 'all' &&
+            status === 'all' &&
+            !search.trim() &&
             rarities.length === 0 &&
             Array.from({ length: Math.min(unearnedSecrets, 5) }, (_, i) => (
               <SecretTrophyCard key={`secret-${i}`} />
@@ -384,40 +510,61 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
         <Users size={12} aria-hidden="true" />
         Achievements are awarded automatically from what you do on KTIP.
       </p>
+
+      {/* ---------- Detail ---------- */}
+      <Modal
+        open={!!detail}
+        onClose={() => setDetail(null)}
+        title={detail?.name}
+        size="sm"
+      >
+        {detail && detailRead && (
+          <div className="space-y-4">
+            <TrophyCard
+              name={detail.name}
+              description={detail.description}
+              icon={detail.icon}
+              rarity={detail.rarity}
+              tier={detail.tier}
+              trophyType={detail.trophy_type}
+              imageUrl={detail.image_url}
+              points={detail.points}
+              assetMap={assetMap}
+              locked={!detailRead.earnedAt}
+              earnedAt={detailRead.earnedAt}
+              progress={detailRead.progress}
+              size="lg"
+            />
+            <p className="text-center text-xs text-ktip-sand-500">
+              {CATEGORY_LABELS[detail.category || 'community'] || detail.category}
+            </p>
+            <Button variant="ghost" size="sm" fullWidth onClick={() => setDetail(null)}>
+              <X size={14} aria-hidden="true" />
+              Close
+            </Button>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }
 
-function CategoryTab({
+function StatTile({
   label,
-  active,
-  count,
-  earned,
-  onClick,
+  value,
+  icon,
 }: {
   label: string
-  active: boolean
-  count: number
-  earned: number
-  onClick: () => void
+  value: number
+  icon?: ReactNode
 }) {
   return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={cn(
-        'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
-        active
-          ? 'border-ktip-ocean-300 bg-ktip-ocean-50 text-ktip-ocean-700'
-          : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700'
-      )}
-    >
-      {label}
-      <span className="ml-1.5 tabular-nums text-xs text-ktip-sand-500">
-        {earned}/{count}
-      </span>
-    </button>
+    <div className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream px-4 py-3 text-center">
+      <dt className="flex items-center justify-center gap-1 text-xs uppercase tracking-wider text-ktip-sand-500">
+        {icon}
+        {label}
+      </dt>
+      <dd className="font-display text-2xl font-bold text-ktip-ocean-700 tabular-nums">{value}</dd>
+    </div>
   )
 }

@@ -146,7 +146,15 @@ export default function DocumentsListPage() {
                         Edited {formatRelativeTime(doc.updated_at)}
                       </p>
                     </div>
-                    <span className="text-xs text-ktip-sand-400 px-2 py-1 bg-ktip-sand-50 rounded">View only</span>
+                    {doc.share_permission === 'edit' ? (
+                      <span className="text-xs text-ktip-ocean-700 px-2 py-1 bg-ktip-ocean-50 rounded">
+                        Can edit
+                      </span>
+                    ) : (
+                      <span className="text-xs text-ktip-sand-400 px-2 py-1 bg-ktip-sand-50 rounded">
+                        View only
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { HERO_WASH, pageHeroFor } from '../../lib/hero-images'
 import { Reveal } from '../ui/Reveal'
 
@@ -51,6 +51,12 @@ export function PageHero({
       typeof title === 'string' ? title : null
     )
 
+  // The full breadcrumb is desktop-only, which left phones with no way back to
+  // the parent listing at all — the browser button was it. The last crumb that
+  // still has an href is that parent, so it doubles as a one-tap back chip.
+  const linkedCrumbs = breadcrumb?.filter((c) => c.href) ?? []
+  const backCrumb = linkedCrumbs[linkedCrumbs.length - 1]
+
   // The band under the photo is brand-navy, not gray-900: the gray scale
   // inverts under html.dark, so it flashed white at night while the image
   // loaded (and stayed white if the image 404'd).
@@ -75,10 +81,20 @@ export function PageHero({
         className={`relative w-full ${
           inset
             ? 'px-6 py-6 md:py-8'
-            // pt clears the fixed navbar (~88px tall); pb sets the band height
-            : 'w-full max-w-[calc(50vw+48rem)] mx-auto px-6 md:px-12 pt-24 pb-6 md:pb-8'
+            // pt clears the fixed navbar; pb sets the band height
+            : 'w-full max-w-[calc(50vw+48rem)] mx-auto px-6 md:px-12 pt-[calc(var(--nav-h)+1.5rem)] pb-6 md:pb-8'
         }`}
       >
+        {backCrumb && (
+          <Link
+            to={backCrumb.href!}
+            className="md:hidden mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            {backCrumb.label}
+          </Link>
+        )}
+
         <div className="flex flex-col md:flex-row-reverse md:items-end justify-between gap-4">
           <div className="min-w-0 md:text-right">
             <Reveal order={0}>

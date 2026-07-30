@@ -409,6 +409,21 @@ html.dark {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* Height of the fixed navbar (components/layout/Navbar).
+       The bar is position:fixed and transparent, so it reserves no space and is
+       invisible over a dark hero — anything a page puts at the top of the
+       viewport lands underneath it and is not clickable. Every surface that
+       must clear the bar reads this one value instead of guessing:
+       pt-[var(--nav-h)] to clear it, top-[var(--nav-h)] to stick below it.
+       Tracks the logo, which is w-10 h-10 below lg and w-14 h-14 at lg+. */
+    --nav-h: 4.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    :root {
+      --nav-h: 5.5rem;
+    }
   }
 
   body {

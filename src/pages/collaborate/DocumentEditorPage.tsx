@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
+import { Share2 } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
 import { TiptapEditor } from '../../components/collaboration/TiptapEditor'
 import { EditorMenuBar } from '../../components/collaboration/editor/EditorMenuBar'
@@ -17,6 +18,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useToolAutoSave } from '../../hooks/useToolAutoSave'
+import { Button } from '../../components/ui/Button'
 import { ToolPanelShell, ToolNotFound } from '../../components/ui/ToolPanelShell'
 import { ToolTitleInput } from '../../components/ui/ToolTitleInput'
 import { ToolStatusBar, StatusMetric, SaveIndicator } from '../../components/ui/ToolStatusBar'
@@ -128,6 +130,14 @@ export default function DocumentEditorPage() {
 
   const notFound = !isNew && !!dbDocumentError
 
+  // A brand-new document has no row yet, so there is nothing to share against —
+  // ShareEntityModal would just say "save this first". Save, then open, the same
+  // way the whiteboard and code sandbox do.
+  const handleShare = async () => {
+    if (!docId) await saveNow()
+    setShareOpen(true)
+  }
+
   return (
     <>
       <ToolPanelShell
@@ -161,6 +171,13 @@ export default function DocumentEditorPage() {
             </span>
           )
         }
+        actions={
+          isOwner && !notFound ? (
+            <Button size="sm" icon={<Share2 size={14} />} onClick={() => void handleShare()}>
+              Invite
+            </Button>
+          ) : undefined
+        }
         fallback={
           notFound ? (
             <ToolNotFound
@@ -179,7 +196,7 @@ export default function DocumentEditorPage() {
             onDownloadPDF={() => editor && printForPDF(editor)}
             onDownloadHTML={() => editor && downloadHTML(editor, docTitle)}
             onDownloadMarkdown={() => editor && downloadMarkdown(editor, docTitle)}
-            onShare={() => setShareOpen(true)}
+            onShare={isOwner ? () => void handleShare() : undefined}
             onInsertLink={() => setLinkOpen(true)}
             onInsertImage={() => setImageOpen(true)}
           />

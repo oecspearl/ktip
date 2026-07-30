@@ -3,6 +3,7 @@ import { CalendarDays, Inbox } from 'lucide-react'
 import { DashboardCalendar } from '../../../components/calendar/DashboardCalendar'
 import { RecentSubmissions } from '../../../components/dashboard/RecentSubmissions'
 import { ForYouRail } from '../../../components/personalization/ForYouRail'
+import { NextUpStrip } from '../../../components/achievements/NextUpStrip'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 
 export default function OverviewTab() {
@@ -12,6 +13,9 @@ export default function OverviewTab() {
     <>
       {/* Renders nothing when personalization is off or there is no signal */}
       <ForYouRail limit={6} title="For You" />
+
+      {/* Renders nothing until something is partly done */}
+      <NextUpStrip />
 
       {/* Copies of everything the member has submitted */}
       <div className="flex items-center justify-between gap-2 mb-4">
