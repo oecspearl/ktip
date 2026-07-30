@@ -51,6 +51,41 @@ interface HeroItem {
 const MAX_ITEMS = 6
 const VISIBLE_COUNT = 5
 
+// The strip's cards are fluid but never shrink below ~5.5rem, so how many fit
+// is a function of viewport width — not a fixed 5. Without this the strip
+// overran the content column on anything narrower than ~1600px.
+const visibleCountFor = (w: number) => (w < 640 ? 2 : w < 768 ? 3 : w < 1280 ? 4 : VISIBLE_COUNT)
+
+// The hero is height-locked, so its content has to give way as the viewport
+// shortens. 1080p at 100% (or any panel at 125% OS scaling) lands near 900px of
+// usable height; 1080p at 150% lands near 600px. Each tier drops a detail row.
+const heightTierFor = (h: number): 'tall' | 'short' | 'tiny' =>
+  h <= 700 ? 'tiny' : h <= 900 ? 'short' : 'tall'
+
+function useHeightTier() {
+  const [tier, setTier] = useState<'tall' | 'short' | 'tiny'>(() =>
+    typeof window === 'undefined' ? 'tall' : heightTierFor(window.innerHeight),
+  )
+  useEffect(() => {
+    const update = () => setTier(heightTierFor(window.innerHeight))
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  return tier
+}
+
+function useVisibleCount() {
+  const [n, setN] = useState(() =>
+    typeof window === 'undefined' ? VISIBLE_COUNT : visibleCountFor(window.innerWidth),
+  )
+  useEffect(() => {
+    const onResize = () => setN(visibleCountFor(window.innerWidth))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  return n
+}
+
 interface Feature {
   title: string
   category: string
@@ -258,7 +293,10 @@ export default function DiscoverPage() {
   // settles at the right end. The track renders the items reversed (and
   // tripled for circular wrapping) so ascending selection slides rightward.
   const ring = count > 1
-  const slots = Math.min(VISIBLE_COUNT, Math.max(count, 1))
+  const visibleCount = useVisibleCount()
+  const heightTier = useHeightTier()
+  const detailRows = heightTier === 'tiny' ? 1 : heightTier === 'short' ? 2 : 3
+  const slots = Math.min(visibleCount, Math.max(count, 1))
   const revItems = [...items].reverse()
   const trackItems = ring ? [...revItems, ...revItems, ...revItems] : items
   // Item index shown at track position t (reversed mapping when wrapping)
@@ -467,7 +505,9 @@ export default function DiscoverPage() {
         // grid down
         data-spy-hide
         // brand-navy, not gray-900: the gray scale inverts under html.dark
-        className="sticky top-0 h-screen bg-brand-navy overflow-hidden"
+        // svh, not vh: on mobile Chrome/Safari `100vh` is the *largest* viewport
+        // (URL bar collapsed), so the bottom of the hero sits under the bar
+        className="sticky top-0 h-[100svh] bg-brand-navy overflow-hidden"
       >
         {/* Full-bleed hero image — follows the selected item */}
         <img
@@ -525,7 +565,7 @@ export default function DiscoverPage() {
                 <img src={anim.src} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="px-3 py-2.5">
-                <p className="text-sm font-display font-semibold line-clamp-2 min-h-10 text-white">
+                <p className="text-sm font-display font-semibold line-clamp-2 min-h-10 [@media(max-height:900px)]:min-h-0 text-white">
                   {anim.title}
                 </p>
                 <p className="text-[10px] mt-0.5 uppercase tracking-wider truncate text-white/50">
@@ -537,8 +577,10 @@ export default function DiscoverPage() {
         )}
 
 
-        {/* Content — pt clears the fixed transparent navbar */}
-        <div className="relative container mx-auto px-6 md:px-12 flex flex-col h-full pt-28 md:pt-32 pb-8 md:pb-10">
+        {/* Content — pt clears the fixed transparent navbar (88px tall at lg:
+            1rem padding + 3.5rem logo + 1rem). Floor of 6rem keeps that
+            clearance on short viewports where 10vh would fall under it. */}
+        <div className="relative container mx-auto px-6 md:px-12 flex flex-col h-full pt-[clamp(6rem,10vh,8rem)] pb-[clamp(1rem,2.5vh,2.5rem)]">
           {/* Counter */}
           <div className="flex items-center justify-end">
             {count > 0 && (
@@ -550,8 +592,11 @@ export default function DiscoverPage() {
 
           {/* Active item content — right side */}
           <div className="flex-1 min-h-0 flex flex-col items-start md:items-end">
-            {/* Text region — vertically centered in whatever space the locked CTA leaves */}
-            <div className="flex-1 min-h-0 w-full flex flex-col justify-center items-start md:items-end">
+            {/* Text region — vertically centered in whatever space the locked CTA
+                leaves. overflow-hidden is load-bearing: a centered flex child
+                taller than its box spills BOTH ways, and the top half was
+                bleeding up through the nav padding and under the fixed navbar. */}
+            <div className="flex-1 min-h-0 w-full flex flex-col justify-center items-start md:items-end overflow-hidden">
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
@@ -560,16 +605,16 @@ export default function DiscoverPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] mb-3 text-white/60">
                   {activeMode.label} &middot; {active.meta}
                 </p>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-white leading-[1.08] tracking-tight">
+                <h1 className="text-[clamp(1.75rem,3.4vw,3.75rem)] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   {active.title}
                 </h1>
-                <p className="mt-5 text-base md:text-lg text-white/80 max-w-xl leading-relaxed line-clamp-3 md:ml-auto">
+                <p className="mt-[clamp(0.75rem,2vh,1.25rem)] text-base md:text-lg text-white/80 max-w-xl leading-relaxed line-clamp-3 [@media(max-height:900px)]:line-clamp-2 [@media(max-height:700px)]:line-clamp-1 md:ml-auto">
                   {active.description}
                 </p>
 
                 {active.details && active.details.length > 0 && (
-                  <div className="mt-5 max-w-xl md:ml-auto inline-block text-left">
-                    <DetailsList details={active.details} tone="dark" compact max={3} />
+                  <div className="mt-[clamp(0.75rem,2vh,1.25rem)] max-w-xl md:ml-auto inline-block text-left">
+                    <DetailsList details={active.details} tone="dark" compact max={detailRows} />
                   </div>
                 )}
               </div>
@@ -578,7 +623,7 @@ export default function DiscoverPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] mb-3 text-white/60">
                   {activeMode.label}
                 </p>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-white leading-[1.08] tracking-tight">
+                <h1 className="text-[clamp(1.75rem,3.4vw,3.75rem)] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   Innovate. Collaborate.
                 </h1>
                 <p className="mt-5 text-base md:text-lg text-white/80 max-w-xl leading-relaxed md:ml-auto">
@@ -591,7 +636,7 @@ export default function DiscoverPage() {
 
             {/* CTA — fixed-height row anchored to the bottom of the content column, so
                 the button holds one Y no matter how tall the active item's text runs */}
-            <div className="shrink-0 w-full h-14 mt-8 mb-0 flex items-center md:justify-end">
+            <div className="shrink-0 w-full h-14 mt-[clamp(1rem,3vh,2rem)] mb-0 flex items-center md:justify-end">
               <Link
                 to={active ? active.href : activeMode.href}
                 className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-brand-navy text-white text-sm font-medium tracking-wide shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
@@ -606,7 +651,7 @@ export default function DiscoverPage() {
           <div className="flex items-end justify-between gap-6">
             <div className="min-w-0">
               {/* Slide toggle */}
-              <div className="relative inline-flex bg-white/10 backdrop-blur-sm p-1 mb-4 rounded-lg">
+              <div className="relative inline-flex bg-white/10 backdrop-blur-sm p-1 mb-[clamp(0.5rem,1.5vh,1rem)] rounded-lg">
                 <div
                   className="absolute top-1 bottom-1 w-[calc((100%-0.5rem)/3)] bg-ktip-cream rounded-md transition-transform duration-300 ease-out"
                   style={{ transform: `translateX(${modeIndex * 100}%)` }}
@@ -680,14 +725,14 @@ export default function DiscoverPage() {
                         pointerEvents: hidden ? 'none' : undefined,
                       }}
                       onClick={() => select(itemIdx)}
-                      className={`group text-left shrink-0 w-28 sm:w-32 rounded-lg overflow-hidden transition-all duration-300 ${
+                      className={`group text-left shrink-0 w-[clamp(5.5rem,7vw,8rem)] rounded-lg overflow-hidden transition-all duration-300 ${
                         isActive
                           ? 'bg-ktip-cream shadow-hard -translate-y-1'
                           : 'bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-hard'
                       }`}
                     >
                       <div
-                        className={`h-28 sm:h-36 overflow-hidden flex items-center justify-center ${
+                        className={`h-[clamp(4.5rem,9vh,9rem)] [@media(max-height:700px)]:h-14 overflow-hidden flex items-center justify-center ${
                           isActive ? 'bg-ktip-sand-50' : ''
                         }`}
                       >
@@ -707,7 +752,7 @@ export default function DiscoverPage() {
                       </div>
                       <div className="px-3 py-2.5">
                         <p
-                          className={`text-sm font-display font-semibold line-clamp-2 min-h-10 ${
+                          className={`text-sm font-display font-semibold line-clamp-2 min-h-10 [@media(max-height:900px)]:min-h-0 ${
                             isActive ? 'text-ktip-sand-900' : 'text-white'
                           }`}
                         >
@@ -725,12 +770,12 @@ export default function DiscoverPage() {
                   )
                 })}
                   {count === 0 &&
-                    Array.from({ length: VISIBLE_COUNT }, (_, i) => (
+                    Array.from({ length: visibleCount }, (_, i) => (
                       <div
                         key={i}
-                        className="shrink-0 w-28 sm:w-32 rounded-lg overflow-hidden bg-white/10 backdrop-blur-sm animate-pulse"
+                        className="shrink-0 w-[clamp(5.5rem,7vw,8rem)] rounded-lg overflow-hidden bg-white/10 backdrop-blur-sm animate-pulse"
                       >
-                        <div className="h-28 sm:h-36 flex items-center justify-center">
+                        <div className="h-[clamp(4.5rem,9vh,9rem)] [@media(max-height:700px)]:h-14 flex items-center justify-center">
                           <activeMode.icon size={30} className="text-white/30" />
                         </div>
                         <div className="px-3 py-2.5 space-y-2">

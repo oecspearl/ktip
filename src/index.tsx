@@ -7,12 +7,17 @@ import * as Sentry from '@sentry/react'
 import './index.css'
 import App from './App.tsx'
 import type { ErrorCode } from './lib/app-error'
-import { watchForServiceWorkerTakeover } from './lib/service-worker'
+import { watchForServiceWorkerTakeover, purgeSupabaseResponseCache } from './lib/service-worker'
 
 // Must run before anything can navigate: a tab still driven by an older
 // service worker gets the build it was served, routing bugs included. Sits below
 // the './instrument' import so a failure in here is itself reported.
 watchForServiceWorkerTakeover()
+
+// Fire-and-forget: drops the cross-account response cache an older build left
+// behind. Not awaited — nothing in the first paint depends on it, and the
+// entries it removes are only ever read on a network failure.
+void purgeSupabaseResponseCache()
 
 const root = document.getElementById('root')
 
