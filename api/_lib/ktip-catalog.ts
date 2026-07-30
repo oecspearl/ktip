@@ -130,7 +130,7 @@ export function normalizeKtipEnrollResult(result: KtipEnrollResult): KtipEnrollR
   return {
     ...result,
     sign_in_url: `${base}/auth/signin`,
-    course_url: `${base}/courses/${result.course_id}`,
+    course_url: `${base}/course/${result.course_id}`,
   }
 }
 

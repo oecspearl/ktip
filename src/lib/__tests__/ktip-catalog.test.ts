@@ -130,7 +130,7 @@ describe('enrollInKtipCourse', () => {
         enrollment_id: 'e1',
         is_new_user: false,
         sign_in_url: `${DEFAULT_BASE}/auth/signin`,
-        course_url: `${DEFAULT_BASE}/courses/c1`,
+        course_url: `${DEFAULT_BASE}/course/c1`,
       }),
     }))
     vi.stubGlobal('fetch', fetchMock)
@@ -159,13 +159,13 @@ describe('enrollInKtipCourse', () => {
           enrollment_id: 'e1',
           is_new_user: false,
           sign_in_url: 'http://localhost:3000/auth/signin',
-          course_url: 'http://localhost:3000/courses/c1',
+          course_url: 'http://localhost:3000/course/c1',
         }),
       }))
     )
 
     const result = await enrollInKtipCourse({ email: 'a@b.com', course_id: 'c1' })
-    expect(result.course_url).toBe(`${DEFAULT_BASE}/courses/c1`)
+    expect(result.course_url).toBe(`${DEFAULT_BASE}/course/c1`)
     expect(result.sign_in_url).toBe(`${DEFAULT_BASE}/auth/signin`)
   })
 
@@ -179,9 +179,9 @@ describe('enrollInKtipCourse', () => {
       enrollment_id: 'e1',
       is_new_user: false,
       sign_in_url: 'http://localhost:3000/auth/signin',
-      course_url: 'http://localhost:3000/courses/abc',
+      course_url: 'http://localhost:3000/course/abc',
     })
-    expect(normalized.course_url).toBe('https://commons.oecscampus.org/courses/abc')
+    expect(normalized.course_url).toBe('https://commons.oecscampus.org/course/abc')
   })
 
   it.each([401, 403, 404])('maps a %d upstream response to a KtipEnrollError with that status', async (status) => {
