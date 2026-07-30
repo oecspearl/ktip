@@ -166,7 +166,11 @@ describe('SITE_MAP integrity', () => {
     const lines = SITE_MAP_COMPACT.split('\n')
     expect(lines).toHaveLength(ALL_ENTRIES.length)
     expect(lines.every((line) => line.split('|').length >= 4)).toBe(true)
-    // Bodies of help articles must never reach the prompt — keep it small
-    expect(SITE_MAP_COMPACT.length).toBeLessThan(20_000)
+    // Bodies of help articles must never reach the prompt — keep it small.
+    // 87 page entries (~7.8k chars) plus one title-only line per help article
+    // (~12.5k chars across 124 of them). The ceiling is set well above that but
+    // far below what a single leaked article body would add, which is the
+    // regression this guards.
+    expect(SITE_MAP_COMPACT.length).toBeLessThan(24_000)
   })
 })

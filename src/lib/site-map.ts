@@ -1086,7 +1086,7 @@ function compactLine(entry: SiteEntry): string {
 }
 
 /**
- * The whole site map as one newline-delimited string — roughly 1.7k tokens.
+ * The whole site map as one newline-delimited string — roughly 5k tokens.
  * Built once at module load and sent as a stable system-prompt prefix so
  * OpenAI's automatic prompt caching applies across requests.
  */
