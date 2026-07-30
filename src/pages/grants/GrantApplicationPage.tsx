@@ -241,7 +241,7 @@ export default function GrantApplicationPage() {
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
           {/* Stepper */}
-          <div id="steps" data-spy="Steps" className="scroll-mt-24 border border-gray-200 rounded-2xl p-4 mb-6">
+          <div id="steps" data-spy="Steps" className="scroll-mt-24 border border-ktip-sand-200 rounded-2xl p-4 mb-6">
             <Stepper
               steps={stepNames}
               currentStep={currentStep}
@@ -253,7 +253,7 @@ export default function GrantApplicationPage() {
           <div
             id="form"
             data-spy="Form"
-            className="scroll-mt-24 border border-gray-200 rounded-2xl p-6 md:p-8"
+            className="scroll-mt-24 border border-ktip-sand-200 rounded-2xl p-6 md:p-8"
           >
             <StepForm
               step={currentStepConfig}

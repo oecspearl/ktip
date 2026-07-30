@@ -184,7 +184,30 @@ html.readable {
 
 /* Dark mode — toggled via html.dark (see useThemeMode + index.html FOUC guard).
    Tailwind v4 utilities compile to var(--color-*) references, so overriding
-   the variables here re-themes every component with zero markup changes. */
+   the variables here re-themes every component with zero markup changes.
+
+   THREE RULES follow from that, and breaking them is the source of every
+   dark-mode bug this file has had:
+
+   1. Write light-mode classes ONLY. `text-ktip-sand-600` is already the light
+      grey at night because the variable flipped. Adding `dark:text-ktip-sand-300`
+      asks for the DARK end of the inverted ramp — near-black text on black.
+      A `dark:` variant on ktip-sand / ktip-ocean / ktip-tropical / ktip-sun /
+      gray / red / … is almost always a bug. Delete it, don't "fix" it.
+
+   2. A fill that must stay dark in BOTH modes cannot come from a scale that
+      inverts. `bg-gray-900` becomes #F4F4F4 at night. Use a fixed token —
+      bg-brand-navy, bg-ktip-ink, bg-black — or the neutral-* scale, which is
+      deliberately left un-inverted below as the escape hatch (see
+      components/resume/ResumePaper, which needs a dark "desk" in both modes).
+
+   3. The one legitimate use of `dark:` is where a pairing that reads in light
+      mode CANNOT survive the flip. The case in this app is a filled ocean
+      surface with white text: ocean-500/600/700 invert to pale blue, so
+      `bg-ktip-ocean-600 text-white` drops to 1.99:1. Those sites carry
+      `dark:bg-ktip-ocean-200` (or -100/-300) to pin a dark navy fill. Same
+      idea for brand green/yellow as TEXT, which needs 700+ on a light
+      surface but wants the vivid 500 on a dark one. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 html.dark {
@@ -361,6 +384,11 @@ html.dark {
 
   --color-rose-50: #2B0D12;
   --color-rose-600: #FB7185;
+
+  /* NOTE: neutral-* is absent on purpose and must stay absent. It is the only
+     scale that means the same thing in both modes, which makes it the tool for
+     surfaces that must not flip (a dark "desk" behind white A4 paper) and for
+     print artifacts that are always ink-on-paper. */
 }
 
 @layer base {
@@ -638,7 +666,8 @@ html.dark {
   font-family: var(--font-sans);
   font-size: 0.875rem;
   line-height: 1.65;
-  color: #1c1917;
+  /* Token, not a literal: a hardcoded near-black stayed black in dark mode */
+  color: var(--color-ktip-sand-900);
 }
 
 .prose-editor-mini .ProseMirror p {

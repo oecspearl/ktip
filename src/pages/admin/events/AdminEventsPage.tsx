@@ -95,7 +95,7 @@ export default function AdminEventsPage() {
 
       {/* Flat Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="border border-gray-200 p-4 rounded-lg">
+        <div className="border border-ktip-sand-200 p-4 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
               <Calendar size={20} className="text-ktip-ocean-600" />
@@ -106,7 +106,7 @@ export default function AdminEventsPage() {
             </div>
           </div>
         </div>
-        <div className="border border-gray-200 p-4 rounded-lg">
+        <div className="border border-ktip-sand-200 p-4 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-ktip-tropical-100 flex items-center justify-center">
               <Send size={20} className="text-ktip-tropical-600" />
@@ -117,7 +117,7 @@ export default function AdminEventsPage() {
             </div>
           </div>
         </div>
-        <div className="border border-gray-200 p-4 rounded-lg">
+        <div className="border border-ktip-sand-200 p-4 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
               <FileText size={20} className="text-ktip-sun-600" />
@@ -128,7 +128,7 @@ export default function AdminEventsPage() {
             </div>
           </div>
         </div>
-        <div className="border border-gray-200 p-4 rounded-lg">
+        <div className="border border-ktip-sand-200 p-4 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
               <Users size={20} className="text-ktip-ocean-600" />
@@ -151,13 +151,13 @@ export default function AdminEventsPage() {
               placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Statuses</option>
             <option value="draft">Draft</option>
@@ -168,7 +168,7 @@ export default function AdminEventsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Types</option>
             <option value="hackathon">Hackathon</option>
@@ -219,7 +219,7 @@ export default function AdminEventsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-ktip-sand-200">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Event</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
@@ -227,9 +227,9 @@ export default function AdminEventsPage() {
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 stagger-rows">
+              <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                 {events.map((event) => (
-                  <tr className="hover:bg-gray-50 transition-colors" key={event.id}>
+                  <tr className="hover:bg-ktip-sand-50 transition-colors" key={event.id}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div>

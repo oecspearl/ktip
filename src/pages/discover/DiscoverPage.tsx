@@ -466,7 +466,8 @@ export default function DiscoverPage() {
         // rail stays hidden over the full-bleed hero, fading in from the bento
         // grid down
         data-spy-hide
-        className="sticky top-0 h-screen bg-gray-900 overflow-hidden"
+        // brand-navy, not gray-900: the gray scale inverts under html.dark
+        className="sticky top-0 h-screen bg-brand-navy overflow-hidden"
       >
         {/* Full-bleed hero image — follows the selected item */}
         <img

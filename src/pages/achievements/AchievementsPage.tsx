@@ -35,7 +35,14 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const MAX_SHOWCASE = 5
 
-export default function AchievementsPage() {
+/**
+ * `embedded` renders the same gallery inside the dashboard tab shell: the tab
+ * panel already supplies the width, padding and page heading, so the standalone
+ * page's own container and h1 would nest a page inside a page. Everything else —
+ * showcase pinning, filters, fireworks — is identical, deliberately one
+ * component rather than a tab-sized copy of it.
+ */
+export default function AchievementsPage({ embedded = false }: { embedded?: boolean }) {
   usePageTitle('Achievements')
   const auth = useAuth()
   const toast = useToast()
@@ -131,9 +138,11 @@ export default function AchievementsPage() {
     }
   }
 
+  const shell = embedded ? 'space-y-6' : 'max-w-6xl mx-auto px-4 py-8 space-y-6'
+
   if (loading && !achievements) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-4">
+      <div className={shell}>
         <div className="h-32 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
         <div className="h-96 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
       </div>
@@ -141,7 +150,7 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div className={shell}>
       {/* ---------- Rank header ---------- */}
       <section className="relative overflow-hidden rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
         {/* Only fires when a rank has actually been reached, so the page does
@@ -153,9 +162,16 @@ export default function AchievementsPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
               Level {rank?.level ?? 1}
             </p>
-            <h1 className="font-display text-3xl font-bold text-ktip-sand-900">
-              {rank?.name ?? 'Newcomer'}
-            </h1>
+            {/* h2 inside the dashboard, whose PageHero already owns the h1 */}
+            {embedded ? (
+              <h2 className="font-display text-3xl font-bold text-ktip-sand-900">
+                {rank?.name ?? 'Newcomer'}
+              </h2>
+            ) : (
+              <h1 className="font-display text-3xl font-bold text-ktip-sand-900">
+                {rank?.name ?? 'Newcomer'}
+              </h1>
+            )}
             <p className="mt-1 text-sm text-ktip-sand-600">
               {stats?.earned ?? 0} of {stats?.total_available ?? 0} achievements
               {unearnedSecrets > 0 && ` · ${unearnedSecrets} still secret`}

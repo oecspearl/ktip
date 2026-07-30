@@ -17,6 +17,8 @@
  * WYSIWYG sheet replaced. Dropped with it: the sheet is now what is on screen.
  */
 
+import { useState } from 'react'
+
 export type PortraitTheme = 'mono' | 'color'
 
 function initials(name: string): string {
@@ -39,6 +41,13 @@ export function ResumePortrait({
   accent: string
   className?: string
 }) {
+  // A stale or private avatar URL is common — the account keeps the column after
+  // the object is gone, and `crossOrigin` makes a bucket without CORS headers
+  // fail too. Untreated, the browser paints the alt text across the panel, which
+  // is what a CV must never do. Fall back to initials the moment it fails.
+  const [broken, setBroken] = useState(false)
+  const showPhoto = !!avatarUrl && !broken
+
   const panelStyle =
     theme === 'mono'
       ? { background: 'linear-gradient(to bottom, #d4d4d4, #a3a3a3)' }
@@ -49,10 +58,11 @@ export function ResumePortrait({
       <div aria-hidden className="absolute inset-x-0 bottom-0 top-[24%]" style={panelStyle} />
 
       <div className="absolute inset-0 flex items-end justify-center pb-2">
-        {avatarUrl ? (
+        {showPhoto ? (
           <img
-            src={avatarUrl}
+            src={avatarUrl!}
             alt={`${name} — portrait`}
+            onError={() => setBroken(true)}
             // eager + high priority: on the printed sheet a lazily-loaded image
             // is an image the print engine may capture before it arrives.
             loading="eager"

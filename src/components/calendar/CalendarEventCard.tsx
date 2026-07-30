@@ -98,7 +98,7 @@ export function CalendarEventCard({
               <Avatar url={item.avatarUrl} name={item.avatarName} />
             )}
             {item.statusLabel && (
-              <span className="truncate rounded-full bg-white/60 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-ktip-sand-700">
+              <span className="truncate rounded-full bg-white/60 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-ktip-sand-700 dark:text-ktip-sand-100">
                 {item.statusLabel}
               </span>
             )}

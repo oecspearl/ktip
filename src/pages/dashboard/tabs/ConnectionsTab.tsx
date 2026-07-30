@@ -40,7 +40,7 @@ export default function ConnectionsTab() {
         return (
           <div
             key={connection.id}
-            className="flex items-center justify-between gap-3 bg-ktip-cream border border-gray-200 rounded-lg p-4"
+            className="flex items-center justify-between gap-3 bg-ktip-cream border border-ktip-sand-200 rounded-lg p-4"
           >
             <button
               type="button"

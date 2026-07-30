@@ -221,13 +221,13 @@ export default function AdminUsersPage() {
                 setSearchQuery(e.currentTarget.value)
                 debouncedSetSearch(e.currentTarget.value)
               }}
-              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Roles</option>
             {ALL_ROLES.map((role) => (
@@ -237,7 +237,7 @@ export default function AdminUsersPage() {
           <select
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Status</option>
             <option value="true">Verified</option>
@@ -284,7 +284,7 @@ export default function AdminUsersPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-ktip-sand-200">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Roles</th>
@@ -292,9 +292,9 @@ export default function AdminUsersPage() {
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 stagger-rows">
+              <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                 {users.map((user) => (
-                  <tr className="hover:bg-gray-50 transition-colors" key={user.id}>
+                  <tr className="hover:bg-ktip-sand-50 transition-colors" key={user.id}>
                     {/* User */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -446,7 +446,7 @@ export default function AdminUsersPage() {
               value={newEmail}
               onChange={(e) => setNewEmail(e.currentTarget.value)}
               placeholder="user@example.com"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <div>
@@ -456,7 +456,7 @@ export default function AdminUsersPage() {
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.currentTarget.value)}
               placeholder="John Doe"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <div>
@@ -467,7 +467,7 @@ export default function AdminUsersPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.currentTarget.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
               />
               <button
                 type="button"
@@ -488,7 +488,7 @@ export default function AdminUsersPage() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     newRoles.includes(role)
                       ? 'bg-ktip-ocean-50 border-ktip-ocean-300 text-ktip-ocean-700'
-                      : 'bg-ktip-cream border-gray-200 text-gray-600 hover:border-gray-300'
+                      : 'bg-ktip-cream border-ktip-sand-200 text-gray-600 hover:border-ktip-sand-300'
                   }`}
                   key={role}
                 >
@@ -497,7 +497,7 @@ export default function AdminUsersPage() {
               ))}
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
             <Button
               variant="outline"
               size="sm"
@@ -549,7 +549,7 @@ export default function AdminUsersPage() {
                 value={resetNewPassword}
                 onChange={(e) => setResetNewPassword(e.currentTarget.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
               />
               <button
                 type="button"
@@ -560,7 +560,7 @@ export default function AdminUsersPage() {
               </button>
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
             <Button
               variant="outline"
               size="sm"
@@ -598,12 +598,12 @@ export default function AdminUsersPage() {
           </p>
           <div className="space-y-3">
             {ALL_ROLES.map((role) => (
-              <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" key={role}>
+              <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-ktip-sand-50 cursor-pointer transition-colors" key={role}>
                 <input
                   type="checkbox"
                   checked={selectedRoles.includes(role)}
                   onChange={() => toggleRole(role)}
-                  className="w-4 h-4 rounded border-gray-300 text-ktip-ocean-600 focus:ring-ktip-ocean-500"
+                  className="w-4 h-4 rounded border-ktip-sand-300 text-ktip-ocean-600 focus:ring-ktip-ocean-500"
                 />
                 <div className="flex items-center gap-2">
                   <Badge size="sm" className={ROLE_COLORS[role]}>
@@ -613,7 +613,7 @@ export default function AdminUsersPage() {
               </label>
             ))}
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
             <Button
               variant="outline"
               size="sm"

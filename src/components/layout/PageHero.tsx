@@ -51,11 +51,14 @@ export function PageHero({
       typeof title === 'string' ? title : null
     )
 
+  // The band under the photo is brand-navy, not gray-900: the gray scale
+  // inverts under html.dark, so it flashed white at night while the image
+  // loaded (and stayed white if the image 404'd).
   return (
     <div
       id={spyLabel ? 'page-top' : undefined}
       data-spy={spyLabel ?? undefined}
-      className={`relative bg-gray-900 overflow-hidden flex items-end ${
+      className={`relative bg-brand-navy overflow-hidden flex items-end ${
         compact ? 'min-h-[190px]' : 'min-h-[250px] md:min-h-[280px]'
       } ${inset ? 'rounded-2xl shadow-medium mb-8' : ''}`}
     >

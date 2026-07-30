@@ -142,7 +142,7 @@ export function WeekView({
         <span
           className={cn(
             'flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold transition-colors',
-            today ? 'bg-ktip-ocean-600 text-white' : selected ? 'text-ktip-ocean-700' : 'text-ktip-sand-800'
+            today ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white' : selected ? 'text-ktip-ocean-700' : 'text-ktip-sand-800'
           )}
         >
           {format(day, 'd')}

@@ -76,7 +76,7 @@ export default function DashboardLayout() {
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Tab column */}
           <div className="w-full lg:w-64 shrink-0">
-            <div className="bg-ktip-cream border border-gray-200 rounded-2xl p-2 lg:sticky lg:top-28">
+            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 lg:sticky lg:top-28">
               <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto" aria-label="Dashboard sections">
                 {tabs.map((tab) => {
                   const to = tab.external ? tab.to : `/dashboard${tab.to ? `/${tab.to}` : ''}`

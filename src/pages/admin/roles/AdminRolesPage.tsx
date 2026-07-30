@@ -238,8 +238,7 @@ export default function AdminRolesPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-                        style={{ backgroundColor: generateAvatarColor(user.display_name || user.id) }}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${generateAvatarColor(user.display_name || user.id)}`}
                       >
                         {getInitials(user.display_name || 'User')}
                       </div>

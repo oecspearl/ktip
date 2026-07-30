@@ -90,7 +90,7 @@ export default function GrantDetailPage() {
     }
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Wallet size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -279,7 +279,7 @@ export default function GrantDetailPage() {
                   )}
 
                   {!grant.is_active && !hasApplied && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
+                    <div className="bg-ktip-sand-50 border border-ktip-sand-200 rounded-xl p-4 mb-4">
                       <p className="text-sm text-gray-700">
                         This grant is currently inactive.
                       </p>
@@ -336,7 +336,7 @@ export default function GrantDetailPage() {
                 Grant Information
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Key details</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500">Currency</span>
                   <span className="font-medium text-ktip-sand-900">

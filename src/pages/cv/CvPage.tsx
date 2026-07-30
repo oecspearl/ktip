@@ -124,13 +124,13 @@ export default function CvPage() {
         <p className="text-xs font-medium uppercase tracking-widest text-ktip-sand-500">Résumé</p>
         {/* The sheet carries the document's own h1 (the member's name), so this
             page-level title is a label rather than a second first-level heading. */}
-        <p className="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700 dark:text-ktip-sand-50">
+        <p className="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700">
           My CV
         </p>
       </div>
 
       {!exists && (
-        <div className="mb-8 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 p-5 text-sm text-ktip-sand-700 print:hidden dark:border-ktip-sand-700 dark:bg-ktip-sand-800 dark:text-ktip-sand-200">
+        <div className="mb-8 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 p-5 text-sm text-ktip-sand-700 print:hidden">
           <p className="font-semibold">You haven&rsquo;t saved a CV yet.</p>
           <p className="mt-1">
             What you see below is drawn from your profile. Sign in from the OECS Virtual Campus to

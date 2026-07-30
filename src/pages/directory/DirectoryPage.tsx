@@ -124,7 +124,7 @@ export default function DirectoryPage() {
                 aria-label="Search members"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
             </div>
 
@@ -132,7 +132,7 @@ export default function DirectoryPage() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Roles</option>
               {Object.entries(ROLE_LABELS).map(([value, label]) => (
@@ -144,7 +144,7 @@ export default function DirectoryPage() {
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Countries</option>
               {CARIBBEAN_COUNTRIES.map((country) => (
@@ -156,7 +156,7 @@ export default function DirectoryPage() {
             <select
               value={selectedSkill}
               onChange={(e) => setSelectedSkill(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Skills</option>
               {SKILL_SUGGESTIONS.map((skill) => (
@@ -169,7 +169,7 @@ export default function DirectoryPage() {
               value={selectedBadge}
               onChange={(e) => setSelectedBadge(e.currentTarget.value)}
               aria-label="Filter by badge"
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Badges</option>
               {(allBadges || []).map((badge) => (
@@ -271,7 +271,7 @@ export default function DirectoryPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UserX size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">

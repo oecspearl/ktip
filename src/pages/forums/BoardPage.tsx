@@ -26,7 +26,9 @@ export default function BoardPage() {
   if (boardLoading) {
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
-        <div className="bg-gray-800 min-h-[180px] rounded-none animate-pulse-soft mb-0" />
+        {/* Stands in for the hero band, so it matches PageHero's brand-navy
+            base rather than a gray that inverts to white in dark mode */}
+        <div className="bg-brand-navy min-h-[180px] rounded-none animate-pulse-soft mb-0" />
         <div className="py-8 space-y-4">
           <div className="h-12 w-64 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
           <div className="h-24 bg-ktip-sand-100 rounded-xl animate-pulse-soft" />
@@ -40,7 +42,7 @@ export default function BoardPage() {
   if (!board) {
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <MessageCircle size={32} className="text-ktip-sand-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -86,7 +88,7 @@ export default function BoardPage() {
                   debouncedSetSearch(e.target.value)
                 }}
                 placeholder="Search posts..."
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               />
             </div>
             <Link to={`/forums/${params.slug}/new`} className="shrink-0">
@@ -99,7 +101,7 @@ export default function BoardPage() {
 
           {/* Posts List */}
           {posts?.length ? (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-ktip-sand-200">
               {posts.map((post) => (
                 <div key={post.id} className="py-4">
                   <PostCard post={post} boardSlug={params.slug!} />
@@ -108,7 +110,7 @@ export default function BoardPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle size={32} className="text-gray-400" />
               </div>
               <p className="text-lg font-medium text-ktip-sand-700 mb-2">No posts yet</p>

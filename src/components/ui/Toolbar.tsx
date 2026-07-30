@@ -47,8 +47,10 @@ const variantClasses: Record<ToolbarButtonVariant, { idle: string; active: strin
     active: 'bg-ktip-ocean-100 text-ktip-ocean-700 hover:bg-ktip-ocean-200',
   },
   primary: {
-    idle: 'bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700',
-    active: 'bg-ktip-ocean-700 text-white',
+    // The ocean scale inverts under html.dark, so 600/700 turn pale there and
+    // white text washes out. Pin a dark navy fill for the dark side.
+    idle: 'bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 dark:bg-ktip-ocean-200 dark:hover:bg-ktip-ocean-300',
+    active: 'bg-ktip-ocean-700 text-white dark:bg-ktip-ocean-300',
   },
   accent: {
     idle: 'bg-ktip-sun-500 text-ktip-ink hover:bg-ktip-sun-600',

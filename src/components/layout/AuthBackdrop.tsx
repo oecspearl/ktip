@@ -3,9 +3,11 @@ import { FALLBACK_IMAGE } from '../../lib/hero-images'
 
 // Homepage-style backdrop for the bare auth pages (login/signup/reset):
 // hero photo + frosted blur + dark gradient overlays behind a centered card.
+// The base fill is brand-navy rather than gray-900 — the gray scale inverts
+// under html.dark, which turned this whole backdrop white at night.
 export function AuthBackdrop({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
-    <div className="relative bg-gray-900 min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div className="relative bg-brand-navy min-h-screen flex items-center justify-center p-4 overflow-hidden">
       <img
         src={FALLBACK_IMAGE}
         alt=""

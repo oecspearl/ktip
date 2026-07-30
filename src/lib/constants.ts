@@ -61,7 +61,7 @@ export const PHASE_LABELS: Record<string, string> = {
 }
 
 export const PHASE_COLORS: Record<string, string> = {
-  concept: 'bg-gray-100 text-gray-700 border-gray-200',
+  concept: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
   prototype: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   funding: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   launch: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
@@ -149,7 +149,7 @@ export const EVENT_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   published: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   cancelled: 'bg-red-100 text-red-700 border-red-200',
-  completed: 'bg-gray-100 text-gray-700 border-gray-200',
+  completed: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
 }
 
 // Challenge brief (migration 062). Ordered: what to achieve, what limits you,
@@ -261,7 +261,7 @@ export const GRANT_APPLICATION_STATUS_LABELS: Record<string, string> = {
 }
 
 export const GRANT_APPLICATION_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-600 border-gray-200',
+  draft: 'bg-ktip-sand-100 text-gray-600 border-ktip-sand-200',
   pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   under_review: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   approved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
@@ -293,8 +293,11 @@ export const CALENDAR_KIND_DOT_COLORS: Record<string, string> = {
 export const CALENDAR_KIND_GRADIENTS: Record<string, string> = {
   event:
     'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
+  // No dark: variants on any kind — the red/ocean/tropical/sun scales all
+  // invert under html.dark, so the base classes already produce a dark tint
+  // with light text. Adding dark: overrides here flipped the ramp back.
   grant_deadline:
-    'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-800 dark:from-red-950 dark:to-red-900 dark:border-red-800 dark:text-red-200',
+    'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-800',
   rsvp: 'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
   grant_application:
     'bg-gradient-to-br from-ktip-sun-50 to-ktip-sun-100 border-ktip-sun-200 text-ktip-sun-800',
@@ -316,7 +319,7 @@ export const SCHEDULE_TYPE_COLORS: Record<string, string> = {
   keynote: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   workshop: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   networking: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  other: 'bg-gray-100 text-gray-600 border-gray-200',
+  other: 'bg-ktip-sand-100 text-gray-600 border-ktip-sand-200',
 }
 
 // Caribbean Countries
@@ -583,7 +586,7 @@ export const GRIEVANCE_CATEGORY_COLORS: Record<string, string> = {
   ip_infringement: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   abusive_interactions: 'bg-red-100 text-red-700 border-red-200',
   harassment: 'bg-red-100 text-red-700 border-red-200',
-  spam_scam: 'bg-gray-100 text-gray-700 border-gray-200',
+  spam_scam: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
   impersonation: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   hate_speech: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   privacy_violations: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
@@ -608,7 +611,7 @@ export const GRIEVANCE_STATUS_COLORS: Record<string, string> = {
   pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   under_review: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   resolved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-  dismissed: 'bg-gray-100 text-gray-700 border-gray-200',
+  dismissed: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
 }
 
 // API Limits

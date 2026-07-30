@@ -272,7 +272,7 @@ function ResourcesTab() {
             )
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BookOpen size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
@@ -397,7 +397,7 @@ function IntegrationsTab() {
           )
         ) : (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Puzzle size={32} className="text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No integrations found</h3>

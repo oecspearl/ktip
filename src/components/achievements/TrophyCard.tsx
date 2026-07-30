@@ -81,7 +81,7 @@ export function TrophyCard({
             'font-display font-bold leading-tight',
             size === 'lg' ? 'text-xl' : 'text-sm',
             // Legendary cards are navy-filled, so their text has to invert.
-            isLegendary ? 'text-ktip-cream' : locked ? 'text-ktip-sand-500' : 'text-ktip-sand-900'
+            isLegendary ? 'text-white' : locked ? 'text-ktip-sand-500' : 'text-ktip-sand-900'
           )}
         >
           {name}
@@ -89,7 +89,7 @@ export function TrophyCard({
         <p
           className={cn(
             'text-xs leading-snug',
-            isLegendary ? 'text-ktip-sand-200' : 'text-ktip-sand-600'
+            isLegendary ? 'text-white/80' : 'text-ktip-sand-600'
           )}
         >
           {description}
@@ -140,7 +140,7 @@ export function TrophyCard({
       )}
 
       {!locked && earnedAt && (
-        <p className={cn('text-[11px]', isLegendary ? 'text-ktip-sand-300' : 'text-ktip-sand-500')}>
+        <p className={cn('text-[11px]', isLegendary ? 'text-white/70' : 'text-ktip-sand-500')}>
           Earned {new Date(earnedAt).toLocaleDateString()}
         </p>
       )}

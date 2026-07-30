@@ -48,12 +48,12 @@ export default function AdminDashboardPage() {
       {statsLoading || !stats ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
           {[1, 2, 3, 4].map((i) => (
-            <div className="border border-gray-200 rounded-lg p-4 animate-pulse" key={i}>
+            <div className="border border-ktip-sand-200 rounded-lg p-4 animate-pulse" key={i}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gray-100" />
+                <div className="w-10 h-10 rounded-lg bg-ktip-sand-100" />
                 <div className="space-y-2">
-                  <div className="h-6 w-12 bg-gray-100 rounded" />
-                  <div className="h-3 w-16 bg-gray-100 rounded" />
+                  <div className="h-6 w-12 bg-ktip-sand-100 rounded" />
+                  <div className="h-3 w-16 bg-ktip-sand-100 rounded" />
                 </div>
               </div>
             </div>
@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 stagger-children">
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-ktip-sand-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
                 <Users size={20} className="text-ktip-ocean-600" />
@@ -73,7 +73,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-ktip-sand-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-ktip-tropical-100 flex items-center justify-center">
                 <Calendar size={20} className="text-ktip-tropical-600" />
@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-ktip-sand-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
                 <DollarSign size={20} className="text-ktip-ocean-600" />
@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-ktip-sand-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
                 <MessageSquare size={20} className="text-ktip-sun-600" />
@@ -110,7 +110,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {analytics && (
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
                   <BookOpen size={20} className="text-ktip-sun-700" />
@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
 
       {/* Climate Action Stats */}
       {stats && (
-        <div className="border border-gray-200 rounded-lg p-5 mb-8">
+        <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <Leaf size={18} className="text-ktip-tropical-700" />
             <h2 className="text-sm font-semibold text-ktip-tropical-900">Climate Action</h2>
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Platform Calendar */}
-      <div className="border border-gray-200 rounded-lg p-5 mb-8">
+      <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Calendar size={18} className="text-ktip-ocean-600" />
           <h2 className="text-lg font-semibold text-gray-900">Platform Calendar</h2>
@@ -162,12 +162,12 @@ export default function AdminDashboardPage() {
       {analyticsLoading || !analytics ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
-            <div className="border border-gray-200 rounded-lg p-6 animate-pulse" key={i}>
-              <div className="h-5 w-32 bg-gray-100 rounded mb-4" />
+            <div className="border border-ktip-sand-200 rounded-lg p-6 animate-pulse" key={i}>
+              <div className="h-5 w-32 bg-ktip-sand-100 rounded mb-4" />
               <div className="space-y-3">
-                <div className="h-3 w-full bg-gray-100 rounded" />
-                <div className="h-3 w-3/4 bg-gray-100 rounded" />
-                <div className="h-3 w-1/2 bg-gray-100 rounded" />
+                <div className="h-3 w-full bg-ktip-sand-100 rounded" />
+                <div className="h-3 w-3/4 bg-ktip-sand-100 rounded" />
+                <div className="h-3 w-1/2 bg-ktip-sand-100 rounded" />
               </div>
             </div>
           ))}
@@ -176,7 +176,7 @@ export default function AdminDashboardPage() {
         <>
           {/* User Growth Chart */}
           {analytics.userGrowth.length > 0 && (
-            <div className="border border-gray-200 rounded-lg p-6 mb-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6 mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-lg font-semibold text-gray-900">User Growth</h2>
@@ -188,7 +188,7 @@ export default function AdminDashboardPage() {
           {/* Distribution Charts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Users by Role */}
-            <div className="border border-gray-200 rounded-lg p-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Users size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Users by Role</h2>
@@ -197,7 +197,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Users by Country */}
-            <div className="border border-gray-200 rounded-lg p-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Globe size={18} className="text-ktip-tropical-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Users by Country</h2>
@@ -206,7 +206,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Projects by Category */}
-            <div className="border border-gray-200 rounded-lg p-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <FolderKanban size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Projects by Category</h2>
@@ -215,7 +215,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Projects by Phase */}
-            <div className="border border-gray-200 rounded-lg p-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3 size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Projects by Phase</h2>
@@ -224,7 +224,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Events by Type */}
-            <div className="border border-gray-200 rounded-lg p-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar size={18} className="text-ktip-tropical-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Events by Type</h2>
@@ -233,7 +233,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Grant Application Pipeline */}
-            <div className="border border-gray-200 rounded-lg p-6">
+            <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <DollarSign size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Grant Application Pipeline</h2>
@@ -245,7 +245,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <div className="border border-gray-200 rounded-lg p-6">
+      <div className="border border-ktip-sand-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link to="/events/new">
@@ -275,7 +275,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
         <Link
           to="/admin/events"
-          className="group border border-gray-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -293,7 +293,7 @@ export default function AdminDashboardPage() {
 
         <Link
           to="/admin/users"
-          className="group border border-gray-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -311,7 +311,7 @@ export default function AdminDashboardPage() {
 
         <Link
           to="/admin/grants"
-          className="group border border-gray-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -329,7 +329,7 @@ export default function AdminDashboardPage() {
 
         <Link
           to="/admin/forums"
-          className="group border border-gray-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -347,7 +347,7 @@ export default function AdminDashboardPage() {
 
         <Link
           to="/admin/resources"
-          className="group border border-gray-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

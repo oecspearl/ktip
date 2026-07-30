@@ -11,7 +11,7 @@ interface IntegrationCardProps {
 
 export function IntegrationCard({ integration }: IntegrationCardProps) {
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3 mb-3">
         {integration.logo_url ? (
           <img

@@ -99,7 +99,7 @@ export function DeleteEntityControl({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-600 hover:text-white"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-ktip-cream px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-600 hover:text-white"
           >
             <Trash2 size={14} />
             Delete this {noun}

@@ -16,7 +16,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
   const { profile } = data
 
   return (
-    <article className="mx-auto max-w-2xl space-y-8 rounded-xl border border-ktip-sand-200 bg-ktip-cream p-6 dark:border-ktip-sand-700">
+    <article className="mx-auto max-w-2xl space-y-8 rounded-xl border border-ktip-sand-200 bg-ktip-cream p-6">
       <header>
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">{profile.name}</h1>
         {profile.role && <p className="mt-1 text-ktip-sand-600">{profile.role}</p>}
@@ -168,7 +168,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="text-sm text-ktip-sand-700 dark:text-ktip-sand-200">
+    <section className="text-sm text-ktip-sand-700">
       <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-ktip-sand-500">
         {title}
       </h2>

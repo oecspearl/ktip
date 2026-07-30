@@ -142,7 +142,7 @@ export default function HelpCenterPage() {
                   ))
                 ) : (
                   <div className="text-center py-16">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <HelpCircle size={28} className="text-gray-400" />
                     </div>
                     <h3 className="text-xl font-display font-bold text-ktip-sand-900 mb-2">
@@ -168,9 +168,9 @@ export default function HelpCenterPage() {
           {/* Contact CTA */}
           {!isFiltered && (
             <section id="contact" data-spy="Contact" className="scroll-mt-24 mt-12">
-              <div className="bg-ktip-ocean-700 rounded-2xl text-center py-10 px-6">
+              <div className="bg-ktip-ocean-700 dark:bg-ktip-ocean-200 rounded-2xl text-center py-10 px-6">
                 <h3 className="text-xl font-display font-bold text-white mb-2">Still need help?</h3>
-                <p className="text-ktip-ocean-100 mb-6 max-w-lg mx-auto">
+                <p className="text-white/80 mb-6 max-w-lg mx-auto">
                   If you could not find what you are looking for, reach out to the community or chat with our AI assistant.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">

@@ -32,7 +32,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
     >
       <div className="flex flex-wrap items-center gap-2">
         {resource.category && (
-          <Badge size="sm" className="bg-white/90 text-gray-700 border-transparent">
+          <Badge size="sm" className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent">
             {RESOURCE_CATEGORY_LABELS[resource.category!] || resource.category}
           </Badge>
         )}

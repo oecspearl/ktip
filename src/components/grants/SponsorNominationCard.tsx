@@ -120,8 +120,7 @@ export function SponsorNominationCard({
         >
           <div className="flex items-center gap-3 min-w-0">
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-              style={{ backgroundColor: generateAvatarColor(sponsor.display_name || sponsor.id) }}
+              className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${generateAvatarColor(sponsor.display_name || sponsor.id)}`}
             >
               {getInitials(sponsor.display_name || 'User')}
             </div>
@@ -168,8 +167,7 @@ export function SponsorNominationCard({
               <li key={candidate.id} className="py-2 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-                    style={{ backgroundColor: generateAvatarColor(candidate.display_name || candidate.id) }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${generateAvatarColor(candidate.display_name || candidate.id)}`}
                   >
                     {getInitials(candidate.display_name || 'User')}
                   </div>

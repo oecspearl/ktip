@@ -47,7 +47,7 @@ const STATUS_COLORS: Record<string, string> = {
   open: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   reviewing: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   actioned: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-  dismissed: 'bg-gray-100 text-gray-700 border-gray-200',
+  dismissed: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
 }
 
 const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(

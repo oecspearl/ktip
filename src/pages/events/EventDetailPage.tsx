@@ -159,7 +159,7 @@ export default function EventDetailPage() {
     }
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CalendarX size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -234,7 +234,7 @@ export default function EventDetailPage() {
 
       {/* === Past Event Banner === */}
       {isPastEvent && (
-        <div className="bg-ktip-sand-50 border-b border-gray-200 py-3">
+        <div className="bg-ktip-sand-50 border-b border-ktip-sand-200 py-3">
           <p className="text-gray-700 text-center text-sm">
             This event has already passed
           </p>
@@ -275,7 +275,7 @@ export default function EventDetailPage() {
             <div
               id="key-details"
               data-spy="Key details"
-              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded border border-gray-200"
+              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-6 p-4 bg-ktip-sand-50 rounded border border-ktip-sand-200"
             >
               {/* Date */}
               <div className="flex items-start gap-3">
@@ -386,7 +386,7 @@ export default function EventDetailPage() {
             )}
 
             {/* Engagement row */}
-            <div className="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4 mb-6">
+            <div className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 mb-6">
               <button
                 className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
                 onClick={() => {
@@ -484,10 +484,10 @@ export default function EventDetailPage() {
                 <p className="text-ktip-ocean-600 text-xs italic mb-4">Related reading</p>
                 <div className="space-y-6">
                   {eventArticles.map((article) => (
-                    <div key={article.id} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
+                    <div key={article.id} className="border-b border-ktip-sand-200 pb-4 last:border-0 last:pb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="text-lg font-semibold text-ktip-sand-900">{article.title}</h4>
-                        <Badge size="sm" className="bg-gray-100 text-gray-600 border-gray-200">
+                        <Badge size="sm" className="bg-ktip-sand-100 text-gray-600 border-ktip-sand-200">
                           {EVENT_ARTICLE_TYPE_LABELS[article.article_type] || article.article_type}
                         </Badge>
                       </div>
@@ -582,7 +582,7 @@ export default function EventDetailPage() {
               )}
 
               {/* Attendee Count */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-ktip-sand-200">
                 <p className="text-sm text-gray-500">
                   {rsvpCount} {rsvpCount === 1 ? 'person' : 'people'} attending
                 </p>
@@ -625,7 +625,7 @@ export default function EventDetailPage() {
                 Event Details
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500">Type</span>
                   <span className="font-medium text-ktip-sand-900">

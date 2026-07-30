@@ -61,7 +61,7 @@ export default function MyApplicationsPage() {
       case 'draft':
         return 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200'
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200'
+        return 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'
     }
   }
 
@@ -171,9 +171,9 @@ export default function MyApplicationsPage() {
           <div
             id="applications"
             data-spy="Applications"
-            className="scroll-mt-24 bg-ktip-cream border border-gray-200 rounded-lg"
+            className="scroll-mt-24 bg-ktip-cream border border-ktip-sand-200 rounded-lg"
           >
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-ktip-sand-200">
               <p className="text-sm text-ktip-sand-600">
                 {applications.length} application
                 {applications.length !== 1 ? 's' : ''}
@@ -183,7 +183,7 @@ export default function MyApplicationsPage() {
             {applications.map((application, index) => (
               <div
                 key={application.id}
-                className={`px-6 py-5 ${index < applications.length - 1 ? 'border-b border-gray-200' : ''}`}
+                className={`px-6 py-5 ${index < applications.length - 1 ? 'border-b border-ktip-sand-200' : ''}`}
               >
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   {/* Grant Info */}
@@ -289,7 +289,7 @@ export default function MyApplicationsPage() {
 
                 {/* Summary */}
                 {getSummary(application.application_data) && (
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-4 pt-4 border-t border-ktip-sand-100">
                     <p className="text-sm text-ktip-sand-600 mb-1">
                       Executive Summary
                     </p>
@@ -302,7 +302,7 @@ export default function MyApplicationsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-ktip-cream border border-gray-200 rounded-lg p-6">
+          <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg p-6">
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText size={32} className="text-ktip-sand-400" />

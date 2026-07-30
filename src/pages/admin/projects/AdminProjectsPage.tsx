@@ -68,10 +68,13 @@ export default function AdminProjectsPage() {
         subtitle="Toggle featured status to showcase projects on the homepage"
         imageSeed="admin-projects"
         actions={
-          <div className="flex items-center gap-2 bg-ktip-sun-900/30 border border-ktip-sun-700/50 rounded-xl px-4 py-2">
-            <Star size={18} className="text-ktip-sun-400" />
-            <span className="text-ktip-sun-300 font-bold text-lg">{featuredCount}</span>
-            <span className="text-ktip-sun-400/70 text-sm">featured</span>
+          // Sits on the hero photo, dark in both modes: translucent black plus
+          // sun-500, the one yellow that means the same thing in light and dark.
+          // (The sun-900/700/400/300 shades this used all invert.)
+          <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm border border-ktip-sun-500/40 rounded-xl px-4 py-2">
+            <Star size={18} className="text-ktip-sun-500" />
+            <span className="text-ktip-sun-500 font-bold text-lg">{featuredCount}</span>
+            <span className="text-white/70 text-sm">featured</span>
           </div>
         }
       />
@@ -85,7 +88,7 @@ export default function AdminProjectsPage() {
             placeholder="Search projects..."
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:border-ktip-ocean-500 focus:outline-none text-sm"
+            className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:outline-none text-sm"
           />
         </div>
       </div>
@@ -93,16 +96,16 @@ export default function AdminProjectsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((n) => (
-            <div key={n} className="border border-gray-200 rounded-lg p-4 animate-pulse">
-              <div className="h-5 w-48 bg-gray-100 rounded" />
+            <div key={n} className="border border-ktip-sand-200 rounded-lg p-4 animate-pulse">
+              <div className="h-5 w-48 bg-ktip-sand-100 rounded" />
             </div>
           ))}
         </div>
       ) : (
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="border border-ktip-sand-200 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
+              <tr className="bg-ktip-sand-50 border-b border-ktip-sand-200">
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Project</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Owner</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden sm:table-cell">Phase</th>
@@ -115,7 +118,7 @@ export default function AdminProjectsPage() {
                 <tr
                   key={project.id}
                   className={cn(
-                    'border-b border-gray-100 hover:bg-gray-50/50 transition-colors',
+                    'border-b border-ktip-sand-100 hover:bg-ktip-sand-50/50 transition-colors',
                     project.is_featured && 'bg-ktip-sun-50/50'
                   )}
                 >
@@ -123,7 +126,7 @@ export default function AdminProjectsPage() {
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
-                        project.is_featured ? 'bg-ktip-sun-100' : 'bg-gray-100'
+                        project.is_featured ? 'bg-ktip-sun-100' : 'bg-ktip-sand-100'
                       )}>
                         <FolderKanban size={18} className={project.is_featured ? 'text-ktip-sun-600' : 'text-gray-500'} />
                       </div>
@@ -139,7 +142,7 @@ export default function AdminProjectsPage() {
                   <td className="px-4 py-3 hidden sm:table-cell">
                     <span className={cn(
                       'px-2 py-0.5 rounded-full text-xs font-medium capitalize',
-                      PHASE_COLORS[project.phase] || 'bg-gray-100 text-gray-600'
+                      PHASE_COLORS[project.phase] || 'bg-ktip-sand-100 text-gray-600'
                     )}>
                       {project.phase}
                     </span>
@@ -155,7 +158,7 @@ export default function AdminProjectsPage() {
                         'p-2 rounded-lg transition-all',
                         project.is_featured
                           ? 'bg-ktip-sun-100 text-ktip-sun-600 hover:bg-ktip-sun-200'
-                          : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600',
+                          : 'bg-ktip-sand-100 text-gray-400 hover:bg-ktip-sand-200 hover:text-gray-600',
                         toggling === project.id && 'opacity-50 cursor-not-allowed'
                       )}
                       title={project.is_featured ? 'Remove from featured' : 'Add to featured'}

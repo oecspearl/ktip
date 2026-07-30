@@ -69,13 +69,13 @@ export function TagFilterSelect({
         aria-haspopup="listbox"
         className={cn(
           'flex items-center gap-2 px-3 py-2 border rounded-lg bg-ktip-cream text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500',
-          count > 0 ? 'border-ktip-ocean-400 text-ktip-ocean-700' : 'border-gray-300 text-ktip-sand-700'
+          count > 0 ? 'border-ktip-ocean-400 text-ktip-ocean-700' : 'border-ktip-sand-300 text-ktip-sand-700'
         )}
       >
         <Tag size={14} />
         {label}
         {count > 0 && (
-          <span className="rounded-full bg-ktip-ocean-600 px-1.5 text-[10px] font-bold leading-4 text-white">
+          <span className="rounded-full bg-ktip-ocean-600 dark:bg-ktip-ocean-200 px-1.5 text-[10px] font-bold leading-4 text-white">
             {count}
           </span>
         )}
@@ -93,7 +93,7 @@ export function TagFilterSelect({
               onChange={(e) => setQuery(e.target.value)}
               placeholder={`Filter ${label.toLowerCase()}…`}
               aria-label={`Filter ${label.toLowerCase()}`}
-              className="mb-2 w-full rounded-lg border border-gray-300 bg-ktip-canvas px-2.5 py-1.5 text-sm focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
+              className="mb-2 w-full rounded-lg border border-ktip-sand-300 bg-ktip-canvas px-2.5 py-1.5 text-sm focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
             />
           )}
 
@@ -121,8 +121,8 @@ export function TagFilterSelect({
                       className={cn(
                         'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
                         active
-                          ? 'border-ktip-ocean-600 bg-ktip-ocean-600 text-white'
-                          : 'border-gray-300'
+                          ? 'border-ktip-ocean-600 bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white'
+                          : 'border-ktip-sand-300'
                       )}
                     >
                       {active && <Check size={11} />}

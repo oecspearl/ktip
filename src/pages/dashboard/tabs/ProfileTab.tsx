@@ -34,11 +34,11 @@ export default function ProfileTab() {
   const Sheet = sheetFor(design.id)
 
   if (isLoading) {
-    return <div className="bg-ktip-cream rounded-2xl border border-gray-200 h-96 animate-pulse-soft" />
+    return <div className="bg-ktip-cream rounded-2xl border border-ktip-sand-200 h-96 animate-pulse-soft" />
   }
 
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-2xl p-6">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="font-display font-bold text-xl text-ktip-sand-900">Your CV</h2>

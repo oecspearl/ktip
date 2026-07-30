@@ -67,7 +67,7 @@ function CalendarDayCell({
         className={cn(
           'text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full shrink-0 transition-colors',
           today
-            ? 'bg-ktip-ocean-600 text-white'
+            ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white'
             : selected
               ? 'text-ktip-ocean-700'
               : 'text-ktip-sand-800'

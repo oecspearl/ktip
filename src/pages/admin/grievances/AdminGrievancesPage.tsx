@@ -212,14 +212,14 @@ export default function AdminGrievancesPage() {
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                           >
                             {GRIEVANCE_CATEGORY_LABELS[grievance.category] || grievance.category}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                           >
                             {GRIEVANCE_STATUS_LABELS[grievance.status] || grievance.status}
                           </span>
@@ -293,7 +293,7 @@ export default function AdminGrievancesPage() {
                         <p className="text-xs text-ktip-sand-500">reported by {reporterName}</p>
                       </div>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border shrink-0 ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border shrink-0 ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                       >
                         {GRIEVANCE_STATUS_LABELS[grievance.status] || grievance.status}
                       </span>
@@ -301,7 +301,7 @@ export default function AdminGrievancesPage() {
 
                     <div className="flex items-center gap-2">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                       >
                         {GRIEVANCE_CATEGORY_LABELS[grievance.category] || grievance.category}
                       </span>
@@ -390,7 +390,7 @@ export default function AdminGrievancesPage() {
                 {/* Category & Status */}
                 <div className="flex flex-wrap gap-2">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[g.category] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[g.category] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                   >
                     {GRIEVANCE_CATEGORY_LABELS[g.category] || g.category}
                   </span>

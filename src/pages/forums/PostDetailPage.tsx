@@ -107,7 +107,7 @@ export default function PostDetailPage() {
   if (!post) {
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <FileText size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -175,7 +175,7 @@ export default function PostDetailPage() {
           {/* === Main Column === */}
           <div className="lg:col-span-2">
             {/* Author info */}
-            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-ktip-sand-200">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(authorName)}`}
               >
@@ -205,7 +205,7 @@ export default function PostDetailPage() {
             </div>
 
             {/* Replies Section */}
-            <div id="replies" data-spy="Replies" className="scroll-mt-24 border-t border-gray-200 pt-8">
+            <div id="replies" data-spy="Replies" className="scroll-mt-24 border-t border-ktip-sand-200 pt-8">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                 Replies ({replies?.length || 0})
               </h3>
@@ -230,7 +230,7 @@ export default function PostDetailPage() {
               )}
 
               {/* Reply Form */}
-              <form onSubmit={handleSubmitReply} className="mt-4 pt-4 border-t border-gray-200">
+              <form onSubmit={handleSubmitReply} className="mt-4 pt-4 border-t border-ktip-sand-200">
                 <Textarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
@@ -281,7 +281,7 @@ export default function PostDetailPage() {
                 Post Details
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500">Posted</span>
                   <span className="font-medium text-ktip-sand-900">

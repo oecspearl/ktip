@@ -88,7 +88,7 @@ export function CalendarShell({
                   className={cn(
                     'rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none',
                     active
-                      ? 'bg-ktip-ocean-600 text-white shadow-soft'
+                      ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
                       : 'text-ktip-sand-600 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50'
                   )}
                 >

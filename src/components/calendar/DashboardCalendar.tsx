@@ -100,7 +100,7 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
                 'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all',
                 on
                   ? 'border-ktip-ocean-300 bg-ktip-ocean-50 text-ktip-ocean-700'
-                  : 'border-gray-200 bg-transparent text-gray-500 hover:bg-ktip-sand-50'
+                  : 'border-ktip-sand-200 bg-transparent text-gray-500 hover:bg-ktip-sand-50'
               )}
             >
               <span

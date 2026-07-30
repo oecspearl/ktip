@@ -97,7 +97,7 @@ export default function SubmissionReceiptPage() {
           <SubmissionKindBadge kind={receipt.kind} />
         </div>
 
-        <div className="border border-gray-200 rounded-2xl p-6 md:p-8 bg-white print:border-0 print:p-0 print:rounded-none">
+        <div className="border border-ktip-sand-200 rounded-2xl p-6 md:p-8 bg-ktip-cream print:border-0 print:p-0 print:rounded-none">
           <ReceiptDocument
             title={receipt.title}
             subtitle={receipt.subtitle}

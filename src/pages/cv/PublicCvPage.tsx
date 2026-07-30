@@ -65,10 +65,10 @@ export default function PublicCvPage() {
   if (!published) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-ocean-700 dark:text-ktip-sand-50">
+        <h1 className="font-display text-2xl font-bold text-ktip-ocean-700">
           This CV is not public
         </h1>
-        <p className="mt-3 text-ktip-sand-600 dark:text-ktip-sand-300">
+        <p className="mt-3 text-ktip-sand-600">
           The member may have unpublished it, or the link may be wrong.
         </p>
         <Link to={`/u/${id}`} className="mt-6 inline-block text-ktip-ocean-600 hover:underline">

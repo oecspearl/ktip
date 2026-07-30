@@ -37,7 +37,7 @@ export function EventCard({ event }: EventCardProps) {
           <Badge className={EVENT_STATUS_COLORS['cancelled']}>Cancelled</Badge>
         )}
         {isPastEvent && event.status !== 'cancelled' && (
-          <Badge variant="default" className="bg-white/90 text-gray-700 border-transparent">
+          <Badge variant="default" className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent">
             Past Event
           </Badge>
         )}

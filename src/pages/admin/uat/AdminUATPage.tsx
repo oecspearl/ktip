@@ -242,7 +242,7 @@ export default function AdminUATPage() {
         actions={
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors"
+            className="btn-brand flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
           >
             <Download size={16} />
             Export CSV
@@ -253,11 +253,11 @@ export default function AdminUATPage() {
       {isPending ? (
         <div className="space-y-4">
           {[1, 2, 3].map((n) => (
-            <div className="border border-gray-200 rounded-lg p-6 animate-pulse" key={n}>
-              <div className="h-5 w-32 bg-gray-100 rounded mb-4" />
+            <div className="border border-ktip-sand-200 rounded-lg p-6 animate-pulse" key={n}>
+              <div className="h-5 w-32 bg-ktip-sand-100 rounded mb-4" />
               <div className="space-y-3">
-                <div className="h-3 w-full bg-gray-100 rounded" />
-                <div className="h-3 w-3/4 bg-gray-100 rounded" />
+                <div className="h-3 w-full bg-ktip-sand-100 rounded" />
+                <div className="h-3 w-3/4 bg-ktip-sand-100 rounded" />
               </div>
             </div>
           ))}
@@ -266,7 +266,7 @@ export default function AdminUATPage() {
         <>
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
                   <Users size={20} className="text-ktip-ocean-600" />
@@ -278,7 +278,7 @@ export default function AdminUATPage() {
               </div>
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
                   <Star size={20} className="text-ktip-sun-600" />
@@ -290,7 +290,7 @@ export default function AdminUATPage() {
               </div>
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-tropical-100 flex items-center justify-center">
                   <TrendingUp size={20} className="text-ktip-tropical-600" />
@@ -302,7 +302,7 @@ export default function AdminUATPage() {
               </div>
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
                   <Zap size={20} className="text-red-600" />
@@ -317,7 +317,7 @@ export default function AdminUATPage() {
 
           {/* Distribution Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <BarChart3 size={16} className="text-ktip-ocean-600" />
                 Q1: Platform Usefulness
@@ -325,7 +325,7 @@ export default function AdminUATPage() {
               <DistributionBar counts={countValues(data, 'q1_usefulness')} labels={USEFULNESS_LABELS} total={data.length} />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <BarChart3 size={16} className="text-ktip-tropical-600" />
                 Q2: Most Valuable Features
@@ -337,7 +337,7 @@ export default function AdminUATPage() {
               }} />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <BarChart3 size={16} className="text-ktip-ocean-600" />
                 Q3: Connecting Innovators
@@ -345,7 +345,7 @@ export default function AdminUATPage() {
               <DistributionBar counts={countValues(data, 'q3_connect_innovators')} labels={CONNECT_LABELS} total={data.length} />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <BarChart3 size={16} className="text-ktip-sun-700" />
                 Q4: Discovering Opportunities
@@ -353,7 +353,7 @@ export default function AdminUATPage() {
               <DistributionBar counts={countValues(data, 'q4_discover_opportunities')} labels={CONNECT_LABELS} total={data.length} />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Star size={16} className="text-ktip-sun-600" />
                 Q5: Recommendation Rating (1-5)
@@ -366,7 +366,7 @@ export default function AdminUATPage() {
               />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <BarChart3 size={16} className="text-ktip-ocean-600" />
                 Q6: Ease of Navigation
@@ -374,7 +374,7 @@ export default function AdminUATPage() {
               <DistributionBar counts={countValues(data, 'q6_ease_of_navigation')} labels={NAVIGATION_LABELS} total={data.length} />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <BarChart3 size={16} className="text-ktip-sun-600" />
                 Q8: Overall Experience
@@ -382,7 +382,7 @@ export default function AdminUATPage() {
               <DistributionBar counts={countValues(data, 'q8_overall_experience')} labels={EXPERIENCE_LABELS} total={data.length} />
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-5">
+            <div className="border border-ktip-sand-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Zap size={16} className="text-ktip-tropical-700" />
                 Q10: Performance
@@ -392,7 +392,7 @@ export default function AdminUATPage() {
           </div>
 
           {/* Reported Issues */}
-          <div className="border border-gray-200 rounded-lg p-5 mb-8">
+          <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Zap size={18} className="text-red-600" />
               Reported Issues
@@ -414,7 +414,7 @@ export default function AdminUATPage() {
           </div>
 
           {/* Open-ended Feedback */}
-          <div className="border border-gray-200 rounded-lg p-5 mb-8">
+          <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <MessageSquare size={18} className="text-ktip-ocean-600" />
               Feature Requests & Comments
@@ -424,7 +424,7 @@ export default function AdminUATPage() {
                 {data
                   .filter((r) => r.q11_improvements || r.q12_comments)
                   .map((r) => (
-                    <div className="border border-gray-100 rounded-xl p-4 bg-gray-50/50" key={r.id}>
+                    <div className="border border-ktip-sand-100 rounded-xl p-4 bg-ktip-sand-50/50" key={r.id}>
                       <p className="text-xs text-ktip-sand-500 mb-2">{formatDate(r.created_at, 'PPp')}</p>
                       {r.q11_improvements && (
                         <div className="mb-2">
@@ -447,16 +447,16 @@ export default function AdminUATPage() {
           </div>
 
           {/* Individual Responses */}
-          <div className="border border-gray-200 rounded-lg p-5">
+          <div className="border border-ktip-sand-200 rounded-lg p-5">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Individual Responses ({data.length})
             </h3>
             <div className="space-y-2 stagger-children">
               {data.map((r, idx) => (
-                <div className="border border-gray-100 rounded-xl overflow-hidden" key={r.id}>
+                <div className="border border-ktip-sand-100 rounded-xl overflow-hidden" key={r.id}>
                   <button
                     onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors text-left"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-ktip-sand-50 transition-colors text-left"
                   >
                     <div className="flex items-center gap-3">
                       <div className={cn(
@@ -480,7 +480,7 @@ export default function AdminUATPage() {
                     )}
                   </button>
                   {expandedId === r.id && (
-                    <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+                    <div className="px-4 pb-4 border-t border-ktip-sand-100 pt-3">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         <div><span className="text-gray-500">Q1 Usefulness:</span> <span className="font-medium">{USEFULNESS_LABELS[r.q1_usefulness]}</span></div>
                         <div><span className="text-gray-500">Q2 Features:</span> <span className="font-medium">{r.q2_valuable_features.map((f) => FEATURE_LABELS[f] || f).join(', ')}</span></div>
@@ -506,7 +506,7 @@ export default function AdminUATPage() {
                         </div>
                       )}
                       {r.q12_comments && (
-                        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                        <div className="mt-2 p-3 bg-ktip-sand-50 rounded-lg">
                           <p className="text-xs font-semibold text-gray-600">Comments</p>
                           <p className="text-sm text-gray-800 mt-1">{r.q12_comments}</p>
                         </div>

@@ -60,8 +60,8 @@ export function DesignPicker({
                 'group relative overflow-hidden rounded-xl border-2 p-2 text-left transition-colors',
                 'disabled:cursor-default',
                 selected
-                  ? 'border-ktip-ocean-600 bg-ktip-ocean-50/60 dark:bg-ktip-ocean-900/30'
-                  : 'border-ktip-sand-200 hover:border-ktip-ocean-300 dark:border-ktip-sand-700'
+                  ? 'border-ktip-ocean-600 bg-ktip-ocean-50/60'
+                  : 'border-ktip-sand-200 hover:border-ktip-ocean-300'
               )}
             >
               {/* Fixed box; the sheet inside is scaled, and a transform does not
@@ -90,7 +90,7 @@ export function DesignPicker({
 
               <div className="mt-2 flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-ktip-sand-900 dark:text-ktip-sand-50">
+                  <p className="truncate text-sm font-semibold text-ktip-sand-900">
                     {design.label}
                   </p>
                   <p className="mt-0.5 text-[11px] leading-snug text-ktip-sand-500">
@@ -98,7 +98,7 @@ export function DesignPicker({
                   </p>
                 </div>
                 {selected && (
-                  <span className="mt-0.5 shrink-0 rounded-full bg-ktip-ocean-600 p-1 text-white">
+                  <span className="mt-0.5 shrink-0 rounded-full bg-ktip-ocean-600 dark:bg-ktip-ocean-200 p-1 text-white">
                     <Check size={11} />
                   </span>
                 )}

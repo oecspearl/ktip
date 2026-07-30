@@ -45,8 +45,8 @@ if (!who) {
 
 const db = createClient(url, serviceKey, { auth: { persistSession: false } })
 
-// Marker so --clean never touches real data.
-const TAG = '[demo-seed]'
+// Titles are shown verbatim in the UI, so they carry no visible marker:
+// --clean matches the exact demo titles below instead of a prefix.
 
 // --- helpers -----------------------------------------------------------
 const DAY = 24 * 60 * 60 * 1000
@@ -85,28 +85,28 @@ async function setEvents(table, fkColumn, id, rows) {
 // --- demo content ------------------------------------------------------
 const DEMO_GRANTS = [
   {
-    title: `${TAG} OECS Blue Economy Innovation Fund`,
+    title: `OECS Blue Economy Innovation Fund`,
     description: 'Seed capital for marine-tech and sustainable fisheries ventures across the OECS.',
     amount_min: 15000,
     amount_max: 75000,
     grant_type: 'innovation',
   },
   {
-    title: `${TAG} Caribbean AgriTech Accelerator Grant`,
+    title: `Caribbean AgriTech Accelerator Grant`,
     description: 'Funding for climate-resilient agriculture pilots in the Eastern Caribbean.',
     amount_min: 10000,
     amount_max: 50000,
     grant_type: 'startup',
   },
   {
-    title: `${TAG} Digital Skills & EdTech Research Award`,
+    title: `Digital Skills & EdTech Research Award`,
     description: 'Applied research into digital learning delivery for small island states.',
     amount_min: 5000,
     amount_max: 30000,
     grant_type: 'research',
   },
   {
-    title: `${TAG} Renewable Energy Feasibility Grant`,
+    title: `Renewable Energy Feasibility Grant`,
     description: 'Feasibility studies for community-scale solar and geothermal projects.',
     amount_min: 20000,
     amount_max: 120000,
@@ -161,7 +161,7 @@ const APPLICATIONS = [
 
 const PROJECTS = [
   {
-    title: `${TAG} Reef Guard — Coral Health Monitoring`,
+    title: `Reef Guard — Coral Health Monitoring`,
     summary: 'Low-cost sensor buoys streaming reef temperature and turbidity to a public dashboard.',
     description:
       'Reef Guard pairs solar buoys with a shore-side gateway so fisheries officers can spot bleaching conditions days earlier. Piloting in Soufrière Bay.',
@@ -177,7 +177,7 @@ const PROJECTS = [
     ],
   },
   {
-    title: `${TAG} HarvestLink — Farmer to Hotel Marketplace`,
+    title: `HarvestLink — Farmer to Hotel Marketplace`,
     summary: 'Matching smallholder produce with hotel kitchens on a weekly ordering cycle.',
     description:
       'HarvestLink aggregates weekly availability from farm cooperatives and turns it into a single order sheet for hotel procurement teams.',
@@ -192,7 +192,7 @@ const PROJECTS = [
     ],
   },
   {
-    title: `${TAG} SkillBridge — Offline-First Learning`,
+    title: `SkillBridge — Offline-First Learning`,
     summary: 'Course delivery that survives patchy connectivity on smaller islands.',
     description:
       'A sync-on-reconnect learning client so students keep progressing through modules during outages, then reconcile with the campus LMS.',
@@ -206,7 +206,7 @@ const PROJECTS = [
     ],
   },
   {
-    title: `${TAG} CareRoute — Island Telehealth Triage`,
+    title: `CareRoute — Island Telehealth Triage`,
     summary: 'Nurse-led triage routing for clinics without a resident physician.',
     description:
       'A triage queue that routes clinic visits to the right remote specialist and keeps a shared case record across islands.',
@@ -220,7 +220,10 @@ const PROJECTS = [
 
 // --- clean -------------------------------------------------------------
 async function removeSeed(userId) {
-  const { data: grants } = await db.from('grants').select('id').like('title', `${TAG}%`)
+  const { data: grants } = await db
+    .from('grants')
+    .select('id')
+    .in('title', DEMO_GRANTS.map((g) => g.title))
   const grantIds = (grants ?? []).map((g) => g.id)
 
   if (grantIds.length) {
@@ -233,7 +236,7 @@ async function removeSeed(userId) {
     .from('projects')
     .delete()
     .eq('owner_id', userId)
-    .like('title', `${TAG}%`)
+    .in('title', PROJECTS.map((p) => p.title))
   if (delProjects.error) throw delProjects.error
 
   console.log(`Removed ${grantIds.length} demo grants (+ their applications) and demo projects.`)
@@ -275,7 +278,7 @@ async function main() {
         user_id: user.id,
         status: spec.status,
         application_data: {
-          summary: `Demo application for ${grant.title.replace(`${TAG} `, '')}.`,
+          summary: `Demo application for ${grant.title}.`,
           amount_requested: 25000,
           seeded: true,
         },

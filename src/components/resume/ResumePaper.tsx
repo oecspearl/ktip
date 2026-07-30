@@ -29,6 +29,8 @@ import { Maximize2, Minimize2 } from 'lucide-react'
 
 /** 210mm in CSS pixels. Fixed by spec (96dpi), so no probe element needed. */
 const A4_WIDTH_PX = (210 * 96) / 25.4
+/** The desk's own padding, both sides, at the widest breakpoint (sm:p-6). */
+const DESK_PADDING = 48
 
 export function ResumePaper({ children }: { children: ReactNode }) {
   const deskRef = useRef<HTMLDivElement>(null)
@@ -61,7 +63,8 @@ export function ResumePaper({ children }: { children: ReactNode }) {
 
   // Clamped at 1: scaling a document UP past its real size makes "100%"
   // meaningless and softens every hairline rule.
-  const scale = mode === 'fit' && deskWidth > 0 ? Math.min(1, deskWidth / A4_WIDTH_PX) : 1
+  const available = Math.max(0, deskWidth - DESK_PADDING)
+  const scale = mode === 'fit' && available > 0 ? Math.min(1, available / A4_WIDTH_PX) : 1
 
   return (
     <div className="print:contents">
@@ -69,32 +72,36 @@ export function ResumePaper({ children }: { children: ReactNode }) {
         <button
           type="button"
           onClick={() => setMode(mode === 'fit' ? 'full' : 'fit')}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-3 py-1.5 text-xs font-semibold text-ktip-sand-600 transition-colors hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 dark:border-ktip-sand-700 dark:text-ktip-sand-300"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-3 py-1.5 text-xs font-semibold text-ktip-sand-600 transition-colors hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
         >
           {mode === 'fit' ? <Maximize2 size={13} /> : <Minimize2 size={13} />}
           {mode === 'fit' ? 'Actual size' : 'Fit to width'}
         </button>
       </div>
 
-      {/* The desk. Dark in both themes so the white page reads as paper rather
-          than as the page background having failed to load. */}
-      <div
-        ref={deskRef}
-        className="resume-desk overflow-x-auto rounded-xl bg-neutral-800 p-3 shadow-inner dark:bg-neutral-950 sm:p-6"
-      >
-        <div
-          className="resume-fit mx-auto"
-          style={{
-            width: scale < 1 ? `${A4_WIDTH_PX * scale}px` : undefined,
-            height: sheetHeight > 0 ? `${sheetHeight * scale}px` : undefined,
-          }}
-        >
+      {/* Two elements on purpose. The outer one measures the space available and
+          is never styled; the desk inside it is `w-fit`, so it hugs the page
+          instead of leaving a wide dark gutter beside it. Measuring the desk
+          itself would be a feedback loop — its width would depend on the scale
+          derived from its width. */}
+      <div ref={deskRef} className="w-full">
+        <div className="resume-desk mx-auto w-fit max-w-full overflow-x-auto rounded-xl bg-neutral-800 p-3 shadow-inner dark:bg-neutral-950 sm:p-6">
           <div
-            ref={sheetRef}
-            className="resume-scale w-[210mm] shadow-2xl shadow-black/60"
-            style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}
+            className="resume-fit"
+            style={{
+              // Always explicit, at every scale: without it the box is a full-width
+              // block and the page sits against the left edge of the desk.
+              width: `${A4_WIDTH_PX * scale}px`,
+              height: sheetHeight > 0 ? `${sheetHeight * scale}px` : undefined,
+            }}
           >
-            {children}
+            <div
+              ref={sheetRef}
+              className="resume-scale w-[210mm] shadow-2xl shadow-black/60"
+              style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}
+            >
+              {children}
+            </div>
           </div>
         </div>
       </div>

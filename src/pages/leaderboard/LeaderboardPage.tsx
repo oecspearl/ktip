@@ -104,7 +104,7 @@ export default function LeaderboardPage() {
             value={scope}
             onChange={(e) => setScope(e.currentTarget.value as LeaderboardScope)}
             aria-label="Leaderboard scope"
-            className="rounded-lg border border-gray-300 bg-ktip-cream px-3 py-2 text-sm transition-colors focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
+            className="rounded-lg border border-ktip-sand-300 bg-ktip-cream px-3 py-2 text-sm transition-colors focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
           >
             {scopeOptions.map((option) => (
               <option key={option.value} value={option.value} disabled={option.disabled}>

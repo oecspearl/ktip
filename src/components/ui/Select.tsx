@@ -238,7 +238,7 @@ export function Select<T extends string = string>({
         onClick={() => (open ? close(false) : openWith(selectedIndex >= 0 ? selectedIndex : firstEnabled(0, 1)))}
         onKeyDown={onTriggerKeyDown}
         className={cn(
-          'flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm text-left text-ktip-sand-800 transition-colors',
+          'flex items-center justify-between gap-2 px-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm text-left text-ktip-sand-800 transition-colors',
           'focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none',
           open && 'border-ktip-ocean-500 ring-2 ring-ktip-ocean-500/20',
           disabled && 'opacity-50 cursor-not-allowed',

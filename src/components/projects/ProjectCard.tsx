@@ -25,7 +25,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       cta="View Project"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <Badge className="bg-white/90 text-gray-900 border-transparent">
+        <Badge className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent">
           {PHASE_LABELS[project.phase]}
         </Badge>
         {project.is_climate_action && <ClimateBadge />}

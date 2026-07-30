@@ -321,7 +321,7 @@ export default function VideoConferencePage() {
 
             {/* Search Results Dropdown */}
             {showDropdown && searchResults.length > 0 && (
-              <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-white shadow-medium max-h-48 overflow-y-auto">
+              <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-ktip-cream shadow-medium max-h-48 overflow-y-auto">
                 {searchResults.map((user) => {
                   const color = generateAvatarColor(user.display_name || user.id)
                   const initials = getInitials(user.display_name || 'U')
@@ -358,7 +358,7 @@ export default function VideoConferencePage() {
 
             {/* No results message */}
             {showDropdown && searchResults.length === 0 && inviteQuery.trim() && !searchLoading && (
-              <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-white shadow-medium px-3 py-3">
+              <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-ktip-cream shadow-medium px-3 py-3">
                 <p className="text-sm text-ktip-sand-500 text-center">No users found</p>
               </div>
             )}

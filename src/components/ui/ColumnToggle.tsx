@@ -14,7 +14,7 @@ export function ColumnToggle({ value, onChange, className }: ColumnToggleProps) 
       role="group"
       aria-label="Cards per row"
       className={cn(
-        'hidden sm:inline-flex rounded-lg border border-gray-300 bg-ktip-cream p-0.5',
+        'hidden sm:inline-flex rounded-lg border border-ktip-sand-300 bg-ktip-cream p-0.5',
         className
       )}
     >
@@ -28,7 +28,7 @@ export function ColumnToggle({ value, onChange, className }: ColumnToggleProps) 
           className={cn(
             'px-2.5 py-1.5 rounded-md text-xs font-bold tracking-wider transition-colors',
             value === count
-              ? 'bg-ktip-ocean-600 text-white shadow-soft'
+              ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
               : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
           )}
         >

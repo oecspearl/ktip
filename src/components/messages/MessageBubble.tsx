@@ -44,7 +44,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           <div
             className={`px-4 py-2.5 ${
               isOwn
-                ? 'bg-ktip-ocean-500 text-white rounded-2xl rounded-br-md'
+                ? 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white rounded-2xl rounded-br-md'
                 : 'bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-900 rounded-2xl rounded-bl-md'
             }`}
           >

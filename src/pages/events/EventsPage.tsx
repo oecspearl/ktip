@@ -300,7 +300,7 @@ export default function EventsPage() {
 
               <div
                 data-tutorial="events-view-toggle"
-                className="inline-flex rounded-lg border border-gray-300 bg-ktip-cream p-0.5"
+                className="inline-flex rounded-lg border border-ktip-sand-300 bg-ktip-cream p-0.5"
               >
               <button
                 type="button"
@@ -311,7 +311,7 @@ export default function EventsPage() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
                   view === 'calendar'
-                    ? 'bg-ktip-ocean-600 text-white shadow-soft'
+                    ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
                     : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
                 )}
               >
@@ -327,7 +327,7 @@ export default function EventsPage() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
                   view === 'grid'
-                    ? 'bg-ktip-ocean-600 text-white shadow-soft'
+                    ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
                     : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
                 )}
               >
@@ -450,7 +450,7 @@ export default function EventsPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CalendarX size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
