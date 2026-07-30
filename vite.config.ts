@@ -159,6 +159,18 @@ export default defineConfig(({ mode }) => {
         workbox: {
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          // Any .html sitting in public/ gets precached by the pattern above,
+          // and Workbox's precache route defaults to cleanURLs: true — so a
+          // file at public/auth/callback.html silently answers /auth/callback
+          // and the SPA route of that name never runs. index.html is the only
+          // HTML this app should ever serve; keep stray pages out of the
+          // manifest so that shadowing cannot come back.
+          globIgnores: ['**/node_modules/**/*', '**/auth/**'],
+          // vercel.json rewrites these two paths to Edge Functions rather than
+          // to the SPA. They are reached by a top-level navigation, so the
+          // navigation fallback would answer them with index.html and the
+          // Virtual Campus handoff would never touch the server.
+          navigateFallbackDenylist: [/^\/api\//, /^\/auth\/vc\//],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,

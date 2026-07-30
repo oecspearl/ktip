@@ -2,6 +2,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { watchForServiceWorkerTakeover } from './lib/service-worker'
+
+// Must run before anything can navigate: a tab still driven by an older
+// service worker gets the build it was served, routing bugs included.
+watchForServiceWorkerTakeover()
 
 // Custom overlay scrollbar: native scrollbars are hidden in CSS (no gutter),
 // this thumb tracks window scroll and fades in via html[data-scrolling].
