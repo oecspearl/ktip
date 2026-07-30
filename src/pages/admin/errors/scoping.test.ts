@@ -96,6 +96,38 @@ describe('console stylesheet scopes its own tokens', () => {
   it('does not redefine the dark variant', () => {
     expect(css).not.toMatch(/@custom-variant\s+dark\b/)
   })
+
+  it('extends the colour tokens to Base UI portals', () => {
+    // Overlays mount at body > [data-base-ui-portal], outside .errors-console.
+    // Without this selector every dropdown, popover and select listbox renders
+    // fully transparent because bg-popover resolves to nothing.
+    const colourBlock = css.slice(css.indexOf('--background:'))
+    const selector = css.slice(0, css.indexOf('--background:')).lastIndexOf('[data-base-ui-portal]')
+    expect(selector, 'the colour block must also target [data-base-ui-portal]').toBeGreaterThan(-1)
+    expect(colourBlock).toMatch(/--popover:/)
+  })
+
+  it('keeps the radius scale off the portals', () => {
+    // Radius tokens must NOT reach the portal scope: --radius-* re-points
+    // rounded-xl / rounded-2xl, which KTIP's own cards and nav use.
+    const radiusBlockStart = css.indexOf('--radius:')
+    const selectorBefore = css.slice(0, radiusBlockStart)
+    const lastSelector = selectorBefore.slice(selectorBefore.lastIndexOf('}') + 1)
+    expect(lastSelector).toContain('.errors-console')
+    expect(lastSelector).not.toContain('data-base-ui-portal')
+  })
+
+  it('reproduces the style base layer without a global reset', () => {
+    // base-nova ships `* { @apply border-border outline-ring/50 }`. Applied
+    // globally it repaints every border in KTIP, so it must stay scoped.
+    expect(css).toMatch(/@layer base\s*\{/)
+    expect(css).toMatch(/border-color:\s*var\(--border\)/)
+    const baseLayer = css.slice(css.indexOf('@layer base'))
+    expect(baseLayer).toContain('.errors-console *')
+    expect(baseLayer).toContain('[data-base-ui-portal] *')
+    // never an unqualified universal selector
+    expect(baseLayer).not.toMatch(/\n\s*\*\s*[,{]/)
+  })
 })
 
 describe('no other part of the app depends on the console UI', () => {

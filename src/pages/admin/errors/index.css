@@ -30,6 +30,19 @@
    @utility / @custom-variant / @keyframes — no selectors, no token values. */
 @import "shadcn/tailwind.css";
 
+/* The other half of what the base-nova style declares (see its registry item's
+   `css` field). Provides animate-in / animate-out / fade-in-* / zoom-in-* /
+   slide-in-from-* — the enter and exit animations that the vendored popover,
+   dropdown-menu and select compile against. `shadcn init` was meant to add this
+   import and the package is in package.json, but the import went into the
+   scratch stylesheet, so none of those utilities existed and the grid's menus
+   appeared instantly with no transition.
+
+   Safe for the scoping rule: this file contributes only @property, @theme inline
+   and @utility. No :root values and no element selectors. Verified against
+   node_modules/tw-animate-css/dist/tw-animate.css. */
+@import "tw-animate-css";
+
 /* Registers the semantic utility NAMES so Tailwind emits bg-background,
    border-input, text-muted-foreground and friends. The values stay undefined
    at this level, which makes every one of these utilities inert outside
@@ -62,20 +75,47 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-invert: var(--invert);
   --color-invert-foreground: var(--invert-foreground);
+  --color-focus: var(--focus);
+  --color-focus-foreground: var(--focus-foreground);
 }
 
-/* ── Token values — scoped to the dashboard container ────────────────────── */
+/* ── Radius — container only ─────────────────────────────────────────────── */
+/* Deliberately NOT extended to the body scope below. Overriding the --radius-*
+   scale re-points rounded-md / rounded-lg / rounded-2xl for every descendant,
+   and KTIP's own admin cards and nav use rounded-xl / rounded-2xl — putting
+   these on the body would reshape them on this route. Portalled menus fall back
+   to Tailwind's defaults, which are within a hair of these values. */
 .errors-console {
-  /* Corner radius for the vendored components only. Overriding the --radius-*
-     scale here re-points rounded-md / rounded-lg for descendants of this
-     container while leaving Tailwind's defaults intact everywhere else. */
   --radius: 0.5rem;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
+}
 
+/* ── Colour tokens — the console and its portals ──────────────────────────── */
+/*
+ * WHY THERE ARE TWO SELECTORS
+ * ---------------------------
+ * Base UI portals its overlays out to document.body. An open dropdown, popover
+ * or select listbox mounts at
+ *
+ *     body > div[data-base-ui-portal] > div.isolate > div[role=menu]
+ *
+ * which is OUTSIDE .errors-console. Tokens declared only on the container never
+ * reach it, so `bg-popover` resolved to nothing and every menu rendered fully
+ * transparent — computed background-color: rgba(0, 0, 0, 0).
+ *
+ * `[data-base-ui-portal]` is Base UI's own marker on the portal root, so it
+ * names exactly the containers that need the tokens. It needs no `.errors-console`
+ * qualifier because Base UI is used by nothing else in this application — only
+ * the nine vendored components in ./ui import @base-ui/react.
+ *
+ * Do not "simplify" either selector to :root — that themes the whole app.
+ */
+.errors-console,
+[data-base-ui-portal] {
   /* Surfaces come from the KTIP palette rather than shadcn's neutral greys, so
      the grid reads as part of the admin area instead of a pasted-in widget. */
   --background: var(--color-ktip-cream);
@@ -86,11 +126,17 @@
   --popover-foreground: var(--color-ktip-sand-900);
   --primary: var(--color-ktip-ocean-700);
   --primary-foreground: #fff;
-  --secondary: var(--color-ktip-sand-50);
+  /* Contrast against --background matters more than it looks. The console sits
+     on KTIP cream (#fffef9), so sand-50 (#fafaf9) is only 5/255 away from it —
+     mapped there, every muted and secondary surface was invisible. Each of
+     these is one step darker than reads "correct" in isolation for that reason.
+     The dark theme inverts the sand scale itself, so the gaps hold both ways. */
+  --secondary: var(--color-ktip-sand-100);
   --secondary-foreground: var(--color-ktip-sand-800);
-  --muted: var(--color-ktip-sand-50);
+  --muted: var(--color-ktip-sand-100);
   --muted-foreground: var(--color-ktip-sand-600);
-  --accent: var(--color-ktip-sand-100);
+  /* Hover and highlight, so it has to be visible against --popover as well. */
+  --accent: var(--color-ktip-sand-200);
   --accent-foreground: var(--color-ktip-sand-900);
   --border: var(--color-ktip-sand-200);
   --input: var(--color-ktip-sand-200);
@@ -109,9 +155,180 @@
   --warning-foreground: var(--color-amber-900);
   --invert: var(--color-ktip-sand-900);
   --invert-foreground: var(--color-ktip-sand-50);
+
+  /* ReUI's badge has focus / focus-light / focus-outline variants that compile
+     against a --focus family. It is not in any registry item's cssVars — the
+     values live in base-nova's own theme item, which reui.io serves only to
+     licence holders — so it has to be supplied here or those variants render
+     with no background and inherited text. Mapped to the ocean accent, which is
+     what KTIP already uses to mean "draw the eye here". */
+  --focus: var(--color-ktip-ocean-600);
+  --focus-foreground: var(--color-ktip-ocean-900);
 }
 
 /* No dark-mode block is needed: html.dark in src/index.css inverts the ktip-*
    scales themselves (sand-900 becomes near-white), so every mapping above
    follows the theme switch for free. Re-declaring them would invert twice and
    produce a light grid on a dark page. */
+
+/* ── The style's base layer, scoped ───────────────────────────────────────── */
+/*
+ * base-nova declares `@layer base { * { @apply border-border outline-ring/50 } }`
+ * (see the `css` field of its registry item). Applied globally that repaints
+ * every border in KTIP, so it is reproduced here against the console and its
+ * portals only.
+ *
+ * It is not cosmetic. Tailwind's preflight leaves border-color at currentColor,
+ * so without this any vendored component using a bare `border` utility — the
+ * buttons, inputs, frame panels and menu items all do — draws a near-black edge
+ * instead of the token colour. `@layer base` keeps it beneath every utility, so
+ * an explicit `border-red-500` still wins.
+ */
+@layer base {
+  .errors-console,
+  .errors-console *,
+  [data-base-ui-portal],
+  [data-base-ui-portal] * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
+  }
+}
+
+/* ── Utilities Tailwind v4 does not ship but ReUI compiles against ───────── */
+/*
+ * The data grid writes `inset-s-0` (selection indicator) and `inset-e-0`
+ * (scrollbar overlay). Tailwind has no logical-inset utilities under those
+ * names, so both emitted nothing and the elements lost their horizontal anchor.
+ * Supplying them here keeps the vendored components byte-identical to the
+ * registry, so a re-sync stays a clean overwrite.
+ */
+@utility inset-s-0 {
+  inset-inline-start: 0;
+}
+
+@utility inset-e-0 {
+  inset-inline-end: 0;
+}
+
+/* ── Skeleton contrast ────────────────────────────────────────────────────── */
+/*
+ * The vendored Skeleton is `bg-muted animate-pulse`. --muted has to stay subtle
+ * because it also paints large surfaces (the frame body, pinned column cells),
+ * but the pulse keyframe drops opacity to ~0.5, which halves whatever contrast
+ * it has — on cream that left the loading rows correctly sized and completely
+ * invisible.
+ *
+ * Targeted through `data-slot`, which is exactly what shadcn exposes it for, so
+ * the component file stays byte-identical to the registry.
+ */
+.errors-console [data-slot="skeleton"],
+[data-base-ui-portal] [data-slot="skeleton"] {
+  background-color: var(--color-ktip-sand-200);
+}
+
+/* ── Grid viewport height ─────────────────────────────────────────────────── */
+/*
+ * The height cap has to sit on the viewport, not on DataGridScrollArea.
+ *
+ * `className` on DataGridScrollArea lands on [data-slot=data-grid-scroll-area],
+ * whose overflow is `visible`. The element that actually scrolls is its child
+ * viewport, and that child is `size-full` — so `height: 100%` resolved against a
+ * parent carrying only `max-height` and no definite height, which computes to
+ * auto. The viewport therefore grew to the full content height (1704px for one
+ * expanded row) and never scrolled; the frame's `overflow: hidden` simply cut it
+ * off, leaving the stack trace unreachable.
+ *
+ * Capping the viewport itself gives `overflow-y: scroll` something to act on, and
+ * the custom scrollbar's metrics — measured from viewport.clientHeight against
+ * scrollHeight — start reporting real numbers. max-height rather than height, so
+ * a short table still collapses to its content.
+ */
+.errors-console [data-slot="scroll-area-viewport"] {
+  max-height: 38rem;
+
+  /*
+   * `auto`, never `scroll`.
+   *
+   * Base UI sets `overflow: scroll` inline on the viewport, and `scroll` reserves
+   * and paints both gutters permanently, whether or not there is anything to
+   * scroll. That was invisible while Base UI was also hiding the scrollbars; the
+   * moment the native ones are restored below it shows up as two empty tracks on
+   * a grid that does not scroll. `auto` paints a scrollbar only when that axis
+   * actually overflows.
+   *
+   * !important is needed to beat the inline declaration — there is no prop or
+   * class for it. Base UI's own overflow detection is unaffected: it derives
+   * --scroll-area-overflow-* in JS from scrollWidth/scrollLeft, which behave
+   * identically under `auto`.
+   */
+  overflow: auto !important;
+
+  /*
+   * Give the scroll a visible affordance.
+   *
+   * Base UI hides the native scrollbar (`.base-ui-disable-scrollbar` sets
+   * scrollbar-width: none and ::-webkit-scrollbar { display: none }) because the
+   * grid draws its own. But the grid's custom vertical scrollbar only renders
+   * when its measured metrics report overflow, and those metrics are taken from
+   * the viewport at mount — expanding a row grows the content without
+   * re-measuring, so it stays hidden exactly when it is needed most. The result
+   * was a region that scrolled but looked static, which reads as "cannot scroll".
+   *
+   * Restoring the native scrollbar is the reliable fix and needs no change to the
+   * component. If the custom one does appear the two simply agree.
+   */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ktip-sand-300) transparent;
+}
+
+.errors-console [data-slot="scroll-area-viewport"]::-webkit-scrollbar,
+.errors-console [data-scroll-x]::-webkit-scrollbar {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+
+.errors-console [data-slot="scroll-area-viewport"]::-webkit-scrollbar-thumb,
+.errors-console [data-scroll-x]::-webkit-scrollbar-thumb {
+  background-color: var(--color-ktip-sand-300);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+
+.errors-console [data-slot="scroll-area-viewport"]::-webkit-scrollbar-thumb:hover,
+.errors-console [data-scroll-x]::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-ktip-sand-400);
+}
+
+.errors-console [data-slot="scroll-area-viewport"]::-webkit-scrollbar-track,
+.errors-console [data-scroll-x]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Sideways scrollers inside the expanded row ───────────────────────────── */
+/*
+ * The stack trace and breadcrumb lists opt in with `data-scroll-x`. Their content
+ * is `whitespace-nowrap` on a `w-max min-w-full` card, so a long bundler path or
+ * a serialised class list extends the row and can be scrolled to instead of being
+ * cut off with an ellipsis.
+ *
+ * `auto`, so no gutter appears on events whose frames all fit.
+ */
+.errors-console [data-scroll-x] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ktip-sand-300) transparent;
+}
+
+/*
+ * The pinned category and level columns inside these lists have to stick to the
+ * scroller. Card sets `overflow: hidden` (to clip its own rounded corners), which
+ * makes the Card the nearest scroll container and cancels the stickiness — the
+ * pinned cells scrolled away with the row. The card is sized to its content here
+ * (`w-max min-w-full`), so there is nothing for it to clip.
+ */
+.errors-console [data-scroll-x] [data-slot="card"] {
+  overflow: visible;
+}

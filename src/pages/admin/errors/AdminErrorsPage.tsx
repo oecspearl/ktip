@@ -387,6 +387,17 @@ export default function AdminErrorsPage() {
     )
   }
 
+  /**
+   * Per-column loading placeholders.
+   *
+   * The grid renders `meta.skeleton` inside each cell of a skeleton row (see
+   * ui/data-grid/data-grid-table.tsx), and a column that omits it renders an
+   * EMPTY cell. With none declared, `loadingMode="skeleton"` produced pageSize
+   * collapsed hairlines instead of a table.
+   *
+   * Shapes mirror the real cell content — the issue cell is two lines, level and
+   * status are pills — so the layout does not jump when the data lands.
+   */
   const columns = useMemo<ColumnDef<SentryIssueRow>[]>(
     () => [
       {
@@ -397,6 +408,7 @@ export default function AdminErrorsPage() {
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+        meta: { skeleton: <Skeleton className="size-4 rounded-[4px]" /> },
       },
       {
         id: 'expand',
@@ -427,6 +439,7 @@ export default function AdminErrorsPage() {
         meta: {
           expandedContent: (issue: SentryIssueRow) => <SentryIssueDetail issue={issue} />,
           cellClassName: 'align-top',
+          skeleton: <Skeleton className="size-4 rounded-sm" />,
         },
       },
       {
@@ -461,7 +474,16 @@ export default function AdminErrorsPage() {
           </div>
         ),
         size: 300,
-        meta: { headerTitle: 'Issue', autoSize: true },
+        meta: {
+          headerTitle: 'Issue',
+          autoSize: true,
+          skeleton: (
+            <div className="space-y-1.5 py-0.5">
+              <Skeleton className="h-3.5 w-[70%]" />
+              <Skeleton className="h-2.5 w-[45%]" />
+            </div>
+          ),
+        },
         enableSorting: true,
         enableHiding: false,
       },
@@ -477,7 +499,7 @@ export default function AdminErrorsPage() {
           </Badge>
         ),
         size: 76,
-        meta: { headerTitle: 'Level' },
+        meta: { headerTitle: 'Level', skeleton: <Skeleton className="h-5 w-14 rounded-md" /> },
       },
       {
         accessorKey: 'status',
@@ -491,7 +513,7 @@ export default function AdminErrorsPage() {
           </Badge>
         ),
         size: 92,
-        meta: { headerTitle: 'Status' },
+        meta: { headerTitle: 'Status', skeleton: <Skeleton className="h-5 w-16 rounded-md" /> },
       },
       {
         accessorKey: 'count',
@@ -508,7 +530,15 @@ export default function AdminErrorsPage() {
           </div>
         ),
         size: 104,
-        meta: { headerTitle: 'Events' },
+        meta: {
+          headerTitle: 'Events',
+          skeleton: (
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-3 w-4" />
+            </div>
+          ),
+        },
       },
       {
         accessorKey: 'userCount',
@@ -522,7 +552,7 @@ export default function AdminErrorsPage() {
           </span>
         ),
         size: 56,
-        meta: { headerTitle: 'Users' },
+        meta: { headerTitle: 'Users', skeleton: <Skeleton className="h-3 w-5" /> },
       },
       {
         id: 'lastSeen',
@@ -542,7 +572,7 @@ export default function AdminErrorsPage() {
             <span className="text-muted-foreground/60 text-xs">—</span>
           ),
         size: 88,
-        meta: { headerTitle: 'Last seen' },
+        meta: { headerTitle: 'Last seen', skeleton: <Skeleton className="h-3 w-12" /> },
       },
       {
         id: 'firstSeen',
@@ -562,7 +592,7 @@ export default function AdminErrorsPage() {
             <span className="text-muted-foreground/60 text-xs">—</span>
           ),
         size: 88,
-        meta: { headerTitle: 'First seen' },
+        meta: { headerTitle: 'First seen', skeleton: <Skeleton className="h-3 w-12" /> },
       },
       {
         id: 'actions',
@@ -572,6 +602,7 @@ export default function AdminErrorsPage() {
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+        meta: { skeleton: <Skeleton className="size-6 rounded-md" /> },
       },
     ],
     // applyStatus / deleteIssues close over stable setters and the mutation
@@ -885,7 +916,10 @@ export default function AdminErrorsPage() {
           </FrameHeader>
 
           <FramePanel className="p-0 shadow-none">
-            <DataGridScrollArea className="max-h-[38rem]">
+            {/* The height cap cannot be passed here: this className lands on the
+                scroll-area wrapper, not on the viewport that actually scrolls.
+                It lives on [data-slot=scroll-area-viewport] in ./index.css. */}
+            <DataGridScrollArea>
               <DataGridTable />
             </DataGridScrollArea>
           </FramePanel>

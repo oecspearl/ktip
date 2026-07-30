@@ -113,6 +113,41 @@ for (const file of walk(CONSOLE_DIR)) {
 }
 console.log(rewritten ? `\nRewrote imports in ${rewritten} file(s).` : '\nNo imports needed rewriting.')
 
+// ── Report what the vendored code needs from our stylesheet ───────────────
+// NOTHING here writes to the component files. They are used exactly as the
+// registry ships them, so a re-sync is a clean overwrite and upstream fixes
+// arrive for free. Anything they need that this repo does not provide is
+// supplied from src/pages/admin/errors/index.css instead, and reported here.
+const notes = []
+
+for (const file of walk(UI_DIR)) {
+  if (!/\.tsx?$/.test(file)) continue
+  const source = readFileSync(file, 'utf8')
+  const where = relative(process.cwd(), file)
+
+  // ReUI's registry generator truncates some arbitrary-property utilities on the
+  // way out: `[--frame-panel-px-base:--spacing(1)]` arrives as `(1)]`. Verified
+  // in the registry JSON itself and reproducible on both the `base-nova` and
+  // `default` styles, so it is upstream. Such a token cannot match any class, so
+  // it is inert — harmless only while something else supplies the value (in
+  // frame.tsx the `spacing` variant re-declares every *-base token). This note
+  // is the warning if a future pull truncates something with no such backstop.
+  const truncated = source.match(/(?<=")\([^)"]*\)\](?=[ "])|(?<=[ "])\([^)"]*\)\](?=[ "])/g)
+  if (truncated) notes.push(`${where}: ${truncated.length} truncated token(s) from the registry: ${truncated.join(' ')}`)
+
+  // Logical-inset utilities Tailwind v4 does not ship. Supplied as @utility in
+  // index.css rather than rewritten here.
+  const logical = source.match(/\binset-[se]-[\w.]+/g)
+  if (logical) notes.push(`${where}: uses ${[...new Set(logical)].join(', ')} — supplied by index.css`)
+}
+
+if (notes.length) {
+  console.log('\nNotes on the vendored code (no files were modified):')
+  for (const note of notes) console.log('  -', note)
+} else {
+  console.log('\nNothing unusual in the vendored code.')
+}
+
 // ── Reconcile vendored code with this repo's strict compiler flags ────────
 // KTIP builds with noUnusedLocals/noUnusedParameters; the registry does not,
 // so a fresh pull can ship unused type params and fail `tsc -b`. Excluding the

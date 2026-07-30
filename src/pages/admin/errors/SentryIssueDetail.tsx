@@ -173,21 +173,25 @@ function StackTrace({ frames }: { frames: SentryEventDetail['frames'] }) {
   }
 
   return (
-    <Card className="divide-border divide-y p-0">
+    // Scrolls sideways instead of truncating: bundler paths are long and the
+    // interesting part is the end of them. `w-max min-w-full` lets the card grow
+    // to the widest frame while still filling the panel when every frame is short.
+    <div data-scroll-x className="max-w-full">
+      <Card className="divide-border w-max min-w-full divide-y p-0">
       {frames.map((frame, index) => (
         <div
           key={`${frame.filename}:${frame.lineNo}:${index}`}
           className={
             frame.inApp
-              ? 'flex items-baseline gap-2 px-2.5 py-1.5 font-mono text-[0.6875rem]'
-              : 'text-muted-foreground flex items-baseline gap-2 px-2.5 py-1.5 font-mono text-[0.6875rem]'
+              ? 'flex items-baseline gap-2 px-2.5 py-1.5 font-mono text-[0.6875rem] whitespace-nowrap'
+              : 'text-muted-foreground flex items-baseline gap-2 px-2.5 py-1.5 font-mono text-[0.6875rem] whitespace-nowrap'
           }
         >
           <span className="text-muted-foreground/60 w-4 shrink-0 text-right tabular-nums">
             {index}
           </span>
           <span className="text-foreground shrink-0 font-medium">{frame.function ?? '<anon>'}</span>
-          <span className="min-w-0 flex-1 truncate" title={frame.filename ?? undefined}>
+          <span className="shrink-0">
             {frame.filename ?? 'unknown'}
             {frame.lineNo !== null && (
               <span className="text-muted-foreground">
@@ -197,13 +201,14 @@ function StackTrace({ frames }: { frames: SentryEventDetail['frames'] }) {
             )}
           </span>
           {frame.inApp && (
-            <Badge variant="primary-light" size="xs" className="shrink-0">
+            <Badge variant="primary-light" size="xs" className="ml-auto shrink-0 ps-4">
               app
             </Badge>
           )}
         </div>
       ))}
-    </Card>
+      </Card>
+    </div>
   )
 }
 
@@ -213,19 +218,37 @@ function Breadcrumbs({ breadcrumbs }: { breadcrumbs: SentryEventDetail['breadcru
   }
 
   return (
-    <Card className="divide-border divide-y p-0">
-      {breadcrumbs.map((crumb, index) => (
-        <div key={index} className="flex items-baseline gap-2 px-2.5 py-1.5 text-[0.6875rem]">
-          <span className="text-muted-foreground w-24 shrink-0 font-mono">
-            {crumb.category ?? '—'}
-          </span>
-          <span className="min-w-0 flex-1 truncate" title={crumb.message ?? undefined}>
-            {crumb.message ?? '—'}
-          </span>
-          <span className="text-muted-foreground/70 shrink-0 font-mono">{crumb.level ?? ''}</span>
-        </div>
-      ))}
-    </Card>
+    // Same as the stack trace: breadcrumb messages carry things like full
+    // serialised class lists, so they scroll rather than get cut off.
+    <div data-scroll-x className="max-w-full">
+      <Card className="divide-border w-max min-w-full divide-y p-0">
+        {breadcrumbs.map((crumb, index) => (
+          <div
+            key={index}
+            className="flex items-baseline gap-2 px-2.5 py-1.5 text-[0.6875rem] whitespace-nowrap"
+          >
+            {/* Category and level stay pinned while the message scrolls between
+                them, so a half-scrolled row still says what it is and how bad it
+                is. Both need an opaque background to cover the text passing
+                underneath — bg-card matches the row.
+
+                `truncate` belongs on the category even though the row scrolls: one
+                longer than the fixed width (sentry.simulator) would otherwise
+                overrun the message. The full value is on the title. */}
+            <span
+              className="text-muted-foreground bg-card sticky start-0 z-10 w-28 shrink-0 truncate font-mono"
+              title={crumb.category ?? undefined}
+            >
+              {crumb.category ?? '—'}
+            </span>
+            <span className="shrink-0">{crumb.message ?? '—'}</span>
+            <span className="text-muted-foreground/70 bg-card sticky end-0 z-10 ml-auto shrink-0 ps-4 font-mono">
+              {crumb.level ?? ''}
+            </span>
+          </div>
+        ))}
+      </Card>
+    </div>
   )
 }
 
@@ -234,6 +257,36 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <h4 className="text-muted-foreground mb-1.5 text-[0.6875rem] font-semibold tracking-wider uppercase">
       {children}
     </h4>
+  )
+}
+
+/**
+ * The full issue title, wrapped rather than truncated.
+ *
+ * The parent row has a fixed-width Issue column and truncates to one line, which
+ * is right for scanning but means a long `Error: ...` message is unreadable. This
+ * repeats it in the expanded panel with no truncation, so opening a row is how
+ * you read the whole name. It renders in the loading and error states too — the
+ * title comes from the row that is already in hand, so there is nothing to wait
+ * for.
+ */
+function IssueHeading({ issue }: { issue: SentryIssueRow }) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <div className="flex flex-wrap items-start gap-1.5">
+        <h3 className="text-[0.8125rem] leading-snug font-semibold break-words">{issue.title}</h3>
+        {issue.isUnhandled && (
+          <Badge variant="destructive-light" size="xs" className="mt-px shrink-0">
+            unhandled
+          </Badge>
+        )}
+      </div>
+      {issue.culprit && (
+        <p className="text-muted-foreground font-mono text-[0.6875rem] break-all">
+          {issue.culprit}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -251,6 +304,7 @@ export function SentryIssueDetail({ issue }: { issue: SentryIssueRow }) {
   if (loading) {
     return (
       <div className="bg-muted/30 space-y-3 p-3 pl-12">
+        <IssueHeading issue={issue} />
         <Skeleton className="h-3 w-48" />
         <Skeleton className="h-52 w-full" />
       </div>
@@ -259,15 +313,22 @@ export function SentryIssueDetail({ issue }: { issue: SentryIssueRow }) {
 
   if (error || !event) {
     return (
-      <div className="bg-muted/30 text-muted-foreground flex items-center gap-2 p-3 pl-12 text-xs">
-        <AlertCircle className="size-3.5 shrink-0" />
-        {error instanceof Error ? error.message : 'Could not load the latest event for this issue.'}
+      <div className="bg-muted/30 min-w-0 space-y-3 p-3 pl-12">
+        <IssueHeading issue={issue} />
+        <div className="text-muted-foreground flex items-center gap-2 text-xs">
+          <AlertCircle className="size-3.5 shrink-0" />
+          {error instanceof Error
+            ? error.message
+            : 'Could not load the latest event for this issue.'}
+        </div>
       </div>
     )
   }
 
   return (
     <div className="bg-muted/30 min-w-0 space-y-3 p-3 pl-12">
+      <IssueHeading issue={issue} />
+
       {/* Occurrence header */}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
         <span className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
