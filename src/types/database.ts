@@ -184,7 +184,7 @@ export interface Database {
           id: string
           title: string
           description: string | null
-          event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day'
+          event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
           status: 'draft' | 'published' | 'cancelled' | 'completed'
           location: string | null
           is_virtual: boolean
@@ -202,7 +202,7 @@ export interface Database {
           id?: string
           title: string
           description?: string | null
-          event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day'
+          event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
           status?: 'draft' | 'published' | 'cancelled' | 'completed'
           location?: string | null
           is_virtual?: boolean
@@ -220,7 +220,7 @@ export interface Database {
           id?: string
           title?: string
           description?: string | null
-          event_type?: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day'
+          event_type?: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
           status?: 'draft' | 'published' | 'cancelled' | 'completed'
           location?: string | null
           is_virtual?: boolean

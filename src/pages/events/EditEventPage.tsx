@@ -42,7 +42,6 @@ export default function EditEventPage() {
   const [endDate, setEndDate] = useState('')
   const [endTime, setEndTime] = useState('')
   const [capacity, setCapacity] = useState<number | undefined>(undefined)
-  const [isClimateAction, setIsClimateAction] = useState(false)
   const [hasChallenge, setHasChallenge] = useState(false)
   const [submissionDate, setSubmissionDate] = useState('')
   const [submissionTime, setSubmissionTime] = useState('')
@@ -51,6 +50,11 @@ export default function EditEventPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const formRef = useRef<HTMLFormElement>(null)
+
+  // The Challenge event type always runs a brief; other types can still opt in
+  // via the checkbox (existing hackathons/workshops keep their challenges).
+  const isChallengeEvent = eventType === 'challenge'
+  const challengeOn = isChallengeEvent || hasChallenge
 
   /** Schema field name -> the label the user actually sees on the input. */
   const FIELD_LABELS: Record<string, string> = {
@@ -86,7 +90,6 @@ export default function EditEventPage() {
       setLocation(event.location || '')
       setIsVirtual(event.is_virtual ?? false)
       setCapacity(event.capacity ?? undefined)
-      setIsClimateAction(event.is_climate_action ?? false)
       setHasChallenge(event.has_challenge ?? false)
       setDetails(event.details || [])
 
@@ -171,10 +174,9 @@ export default function EditEventPage() {
         start_date: startDatetime,
         end_date: endDatetime,
         capacity,
-        is_climate_action: isClimateAction,
-        has_challenge: hasChallenge,
+        has_challenge: challengeOn,
         submission_deadline:
-          hasChallenge && submissionDate
+          challengeOn && submissionDate
             ? combineDatetime(submissionDate, submissionTime)
             : null,
         details: cleanDetails(details),
@@ -306,6 +308,7 @@ export default function EditEventPage() {
                 <option value="meetup">Meetup</option>
                 <option value="conference">Conference</option>
                 <option value="demo_day">Demo Day</option>
+                <option value="challenge">Challenge</option>
               </select>
             </div>
 
@@ -426,26 +429,40 @@ export default function EditEventPage() {
 
             {/* Challenge */}
             <div data-tutorial="event-form-challenge" className="border-2 border-ktip-sand-200 rounded-xl p-4 space-y-4">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasChallenge}
-                  onChange={(e) => setHasChallenge(e.target.checked)}
-                  className="mt-0.5 w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
-                />
-                <span>
+              {isChallengeEvent ? (
+                <div>
                   <span className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
                     <Target size={18} className="text-ktip-sand-600" />
-                    This event sets a challenge
+                    Challenge Details
                   </span>
                   <span className="block text-xs text-ktip-sand-500 mt-0.5">
-                    Attendees are given a goal to accomplish. Objectives, constraints, deliverables
-                    and judging criteria are managed from the event's Challenge tab.
+                    Challenge events always set a goal for attendees. Solutions, objectives,
+                    constraints, deliverables and judging criteria are managed from the event's
+                    Challenge tab.
                   </span>
-                </span>
-              </label>
+                </div>
+              ) : (
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hasChallenge}
+                    onChange={(e) => setHasChallenge(e.target.checked)}
+                    className="mt-0.5 w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
+                  />
+                  <span>
+                    <span className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
+                      <Target size={18} className="text-ktip-sand-600" />
+                      This event sets a challenge
+                    </span>
+                    <span className="block text-xs text-ktip-sand-500 mt-0.5">
+                      Attendees are given a goal to accomplish. Objectives, constraints, deliverables
+                      and judging criteria are managed from the event's Challenge tab.
+                    </span>
+                  </span>
+                </label>
+              )}
 
-              {hasChallenge && (
+              {challengeOn && (
                 <div className="grid md:grid-cols-2 gap-4 pl-8">
                   <div>
                     <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
@@ -474,21 +491,6 @@ export default function EditEventPage() {
                   />
                 </div>
               )}
-            </div>
-
-            {/* Climate Action */}
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isClimateAction}
-                  onChange={(e) => setIsClimateAction(e.target.checked)}
-                  className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
-                />
-                <span className="text-sm text-ktip-sand-700">
-                  This event focuses on climate change solutions
-                </span>
-              </label>
             </div>
 
             {/* Second copy, next to the button — where the user is looking. */}

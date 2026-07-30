@@ -51,7 +51,7 @@ KTIP has these features:
 
 PROJECTS: Users create, browse, and edit innovation projects. Projects have categories (Technology, Healthcare, Education, Agriculture, Environment), phases (Concept, Prototype, Funding, Launch), and hashtags. Project owners can receive comments and likes.
 
-EVENTS: Create and browse hackathons, workshops, meetups, conferences, and demo days. Events can be virtual or in-person with location, dates, and capacity.
+EVENTS: Create and browse hackathons, workshops, meetups, conferences, demo days, and challenges. Events can be virtual or in-person with location, dates, and capacity. Challenge events set a goal for attendees, with solutions the organizer is looking for.
 
 GRANTS & FUNDING: Browse grant opportunities with amounts, deadlines, and eligibility. Logged-in users apply through a guided 5-step application wizard (Basics, Summary & Problem, Solution & Plan, Budget & Team, Impact & Review) with AI-powered content suggestions, AI review scoring, auto-save drafts, and rich text editing. Applications are tracked from "My Applications", where drafts can be resumed.
 

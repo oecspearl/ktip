@@ -10,6 +10,7 @@ import { usePublicEventSections } from '../../hooks/useEventPageSections'
 import { useEventSchedule } from '../../hooks/useEventSchedule'
 import { useEventSpeakers } from '../../hooks/useEventSpeakers'
 import { useEventCriteria } from '../../hooks/useEventCriteria'
+import { useEntityDocuments } from '../../hooks/useEntityDocuments'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -19,6 +20,7 @@ import { EventPageSectionRenderer } from '../../components/events/EventPageSecti
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
 import { EventSpeakerGrid } from '../../components/events/EventSpeakerGrid'
 import { EventChallengeBrief } from '../../components/events/EventChallengeBrief'
+import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeEventDeletion } from '../../lib/delete-guard'
 import {
@@ -68,6 +70,7 @@ export default function EventDetailPage() {
   const { schedule: scheduleItems } = useEventSchedule(params.id)
   const { speakers: eventSpeakers } = useEventSpeakers(params.id)
   const { criteria: eventCriteria } = useEventCriteria(params.id)
+  const { documents: eventDocuments } = useEntityDocuments('event', params.id)
 
   const [hasRSVPd, setHasRSVPd] = useState(false)
   const [rsvpCount, setRSVPCount] = useState(0)
@@ -429,6 +432,19 @@ export default function EventDetailPage() {
                 criteria={eventCriteria}
                 submissionDeadline={event.submission_deadline}
               />
+            )}
+
+            {/* Documents — files the organizer attached (briefs, rules, datasets).
+                An empty panel is only useful to the person who can fill it. */}
+            {(isOrganizer || (eventDocuments && eventDocuments.length > 0)) && (
+              <div id="documents" data-spy="Documents" className="scroll-mt-24 mt-10">
+                <DocumentsPanel
+                  entityType="event"
+                  entityId={event.id}
+                  canEditEntity={isOrganizer}
+                  entity={event}
+                />
+              </div>
             )}
 
             {/* Page Sections */}

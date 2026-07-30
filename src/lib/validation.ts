@@ -76,7 +76,7 @@ export const projectSchema = z.object({
 export const eventSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title too long'),
   description: z.string().max(5000, 'Description too long').optional(),
-  event_type: z.enum(['hackathon', 'workshop', 'meetup', 'conference', 'demo_day']),
+  event_type: z.enum(['hackathon', 'workshop', 'meetup', 'conference', 'demo_day', 'challenge']),
   location: z.string().max(200, 'Location too long').optional(),
   is_virtual: z.boolean(),
   start_date: z.string().datetime('Invalid date format'),

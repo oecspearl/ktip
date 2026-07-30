@@ -89,15 +89,17 @@ const HERO = {
   design: { width: 2000, height: 1150 },
   /**
    * Deliberate uplift over the authored size. Bounded by design.height / the
-   * hero's real content height (~1000px at scale 1): past ~1.15 the content is
-   * taller than the guard's own reference box and height-limited viewports
-   * (1280×720) start clipping.
+   * hero's real content height: the content grew (3-line titles + details
+   * list), so past ~1.05 it is taller than the guard's own reference box and
+   * the centered text column clips top and bottom under its overflow-hidden.
    */
-  zoom: 1.15,
+  zoom: 1.05,
   /** Side inset, both edges, every breakpoint */
   gutter: '5%',
-  // max sits above `zoom` — otherwise the reference display clamps itself
-  scale: { min: 0.62, max: 1.25 },
+  // max sits above `zoom` — otherwise the reference display clamps itself.
+  // min floors small laptops (1366×768) — below 0.7 the description and
+  // mini-card text drop under ~11px and stop being readable.
+  scale: { min: 0.7, max: 1.25 },
 }
 
 interface Feature {
@@ -607,10 +609,10 @@ export default function DiscoverPage() {
                 <img src={anim.src} alt="" className="w-full h-full object-cover photo-dimmable" />
               </div>
               <div className="px-[0.75em] py-[0.625em]">
-                <p className="text-[0.875em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] text-white">
+                <p className="text-[1em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] text-white">
                   {anim.title}
                 </p>
-                <p className="text-[0.625em] mt-[0.2em] uppercase tracking-wider truncate text-white/50">
+                <p className="text-[0.75em] mt-[0.2em] uppercase tracking-wider truncate text-white/50">
                   {anim.meta}
                 </p>
               </div>
@@ -661,7 +663,7 @@ export default function DiscoverPage() {
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   {active.title}
                 </h1>
-                <p className="mt-[1.25em] text-[1.2em] text-white/80 max-w-[30em] leading-relaxed line-clamp-3 md:ml-auto">
+                <p className="mt-[1.25em] text-[1.35em] text-white/80 max-w-[30em] leading-relaxed line-clamp-3 md:ml-auto">
                   {active.description}
                 </p>
 
@@ -687,7 +689,7 @@ export default function DiscoverPage() {
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   Innovate. Collaborate.
                 </h1>
-                <p className="mt-[1.25em] text-[1.2em] text-white/80 max-w-[30em] leading-relaxed md:ml-auto">
+                <p className="mt-[1.25em] text-[1.35em] text-white/80 max-w-[30em] leading-relaxed md:ml-auto">
                   Nothing to show here yet — explore the platform to see what&apos;s happening
                   across the Caribbean.
                 </p>
@@ -816,14 +818,14 @@ export default function DiscoverPage() {
                       </div>
                       <div className="px-[0.75em] py-[0.625em]">
                         <p
-                          className={`text-[0.875em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] ${
+                          className={`text-[1em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] ${
                             isActive ? 'text-ktip-sand-900' : 'text-white'
                           }`}
                         >
                           {item.title}
                         </p>
                         <p
-                          className={`text-[0.625em] mt-[0.2em] uppercase tracking-wider truncate ${
+                          className={`text-[0.75em] mt-[0.2em] uppercase tracking-wider truncate ${
                             isActive ? 'text-ktip-sand-500' : 'text-white/50'
                           }`}
                         >

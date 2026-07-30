@@ -84,6 +84,7 @@ export const EVENT_TYPES = {
   MEETUP: 'meetup',
   CONFERENCE: 'conference',
   DEMO_DAY: 'demo_day',
+  CHALLENGE: 'challenge',
 } as const
 
 export const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -92,6 +93,7 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
   meetup: 'Meetup',
   conference: 'Conference',
   demo_day: 'Demo Day',
+  challenge: 'Challenge',
 }
 
 export const EVENT_TYPE_COLORS: Record<string, string> = {
@@ -100,6 +102,7 @@ export const EVENT_TYPE_COLORS: Record<string, string> = {
   meetup: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   conference: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   demo_day: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  challenge: 'bg-purple-100 text-purple-700 border-purple-200',
 }
 
 // Solid accent colors for calendar day dots / compact-card accent bars
@@ -109,6 +112,7 @@ export const EVENT_TYPE_DOT_COLORS: Record<string, string> = {
   meetup: 'bg-ktip-sun-500',
   conference: 'bg-ktip-ocean-500',
   demo_day: 'bg-ktip-tropical-500',
+  challenge: 'bg-purple-500',
 }
 
 // Soft gradient fills for week-view cards and month chips. Built from brand
@@ -124,6 +128,8 @@ export const EVENT_TYPE_GRADIENTS: Record<string, string> = {
     'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
   demo_day:
     'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+  challenge:
+    'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 text-purple-800',
 }
 
 /** Neutral gradient for items with no type-specific color. */
@@ -155,6 +161,7 @@ export const EVENT_STATUS_COLORS: Record<string, string> = {
 // Challenge brief (migration 062). Ordered: what to achieve, what limits you,
 // what you hand in, how it gets judged.
 export const EVENT_CRITERION_KINDS = [
+  'solution',
   'objective',
   'constraint',
   'deliverable',
@@ -162,6 +169,7 @@ export const EVENT_CRITERION_KINDS = [
 ] as const
 
 export const EVENT_CRITERION_LABELS: Record<string, string> = {
+  solution: 'Solution',
   objective: 'Objective',
   constraint: 'Constraint',
   deliverable: 'Deliverable',
@@ -169,6 +177,7 @@ export const EVENT_CRITERION_LABELS: Record<string, string> = {
 }
 
 export const EVENT_CRITERION_GROUP_LABELS: Record<string, string> = {
+  solution: 'Solutions',
   objective: 'Objectives',
   constraint: 'Constraints',
   deliverable: 'Deliverables',
@@ -176,6 +185,7 @@ export const EVENT_CRITERION_GROUP_LABELS: Record<string, string> = {
 }
 
 export const EVENT_CRITERION_GROUP_HINTS: Record<string, string> = {
+  solution: 'Solutions the organizer is looking for',
   objective: 'What participants must achieve',
   constraint: 'Rules and limits entries must respect',
   deliverable: 'What each entry has to hand in',
@@ -183,6 +193,7 @@ export const EVENT_CRITERION_GROUP_HINTS: Record<string, string> = {
 }
 
 export const EVENT_CRITERION_COLORS: Record<string, string> = {
+  solution: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   objective: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   constraint: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   deliverable: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',

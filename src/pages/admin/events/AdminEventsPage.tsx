@@ -176,6 +176,7 @@ export default function AdminEventsPage() {
             <option value="meetup">Meetup</option>
             <option value="conference">Conference</option>
             <option value="demo_day">Demo Day</option>
+            <option value="challenge">Challenge</option>
           </select>
           {(statusFilter || typeFilter || searchQuery) && (
             <button

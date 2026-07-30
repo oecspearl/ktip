@@ -57,7 +57,7 @@ export type PermissionKey =
 
 export type ProjectPhase = 'concept' | 'prototype' | 'funding' | 'launch'
 
-export type EventType = 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day'
+export type EventType = 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
 
 export type EventStatus = 'draft' | 'published' | 'cancelled' | 'completed'
 
@@ -266,8 +266,9 @@ export interface Event extends Ranked {
   organizer?: Profile
 }
 
-/** The four parts of a challenge brief; all share one table. */
+/** The parts of a challenge brief; all share one table. 'solution' added in 084. */
 export type EventCriterionKind =
+  | 'solution'
   | 'objective'
   | 'constraint'
   | 'deliverable'
@@ -1338,8 +1339,8 @@ export interface DirectoryMember extends Profile {
 // Entity document library (migration 048)
 // ============================================================
 
-/** What a document can be attached to. 'grant_application' added in 080. */
-export type DocumentEntityType = 'grant' | 'project' | 'grant_application'
+/** What a document can be attached to. 'grant_application' added in 080, 'event' in 084. */
+export type DocumentEntityType = 'grant' | 'project' | 'grant_application' | 'event'
 
 /**
  * private     — owner (and OECS admins) only; not even listed to others

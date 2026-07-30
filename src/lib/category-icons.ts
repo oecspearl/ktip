@@ -15,6 +15,7 @@ import {
   Rocket,
   Sparkles,
   Sprout,
+  Target,
   Wallet,
   Wrench,
   Globe,
@@ -36,6 +37,7 @@ export const EVENT_TYPE_ICONS: Record<string, LucideIcon> = {
   meetup: Handshake,
   conference: Mic,
   demo_day: Rocket,
+  challenge: Target,
 }
 
 export const GRANT_TYPE_ICONS: Record<string, LucideIcon> = {
