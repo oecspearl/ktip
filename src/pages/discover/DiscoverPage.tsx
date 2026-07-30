@@ -907,9 +907,21 @@ export default function DiscoverPage() {
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   {active.title}
                 </h1>
-                <p className="mt-[1.25em] text-[1.35em] text-white/80 max-w-[30em] leading-relaxed line-clamp-3 md:ml-auto">
-                  {active.description}
-                </p>
+                {/* Description — pinned to the mini-card title size so the two
+                    read as one size. The cards live OUTSIDE the fit group, so
+                    they render at a flat 1em of the hero base while everything
+                    in here carries the `fit` multiplier; dividing it back out
+                    lands this on exactly that same size. The wrapper keeps the
+                    margin and measure on the fit-scaled em, so only the type is
+                    pinned — spacing still tightens with the rest of the column. */}
+                <div className="mt-[1.25em] max-w-[40em] md:ml-auto">
+                  <p
+                    className="text-white/80 leading-relaxed line-clamp-3"
+                    style={{ fontSize: `calc(1em / ${fit})` }}
+                  >
+                    {active.description}
+                  </p>
+                </div>
 
                 {/* DetailsList sizes itself in rem, so its type would stay put
                     while the hero scaled around it. The wrapper sets the size
@@ -933,10 +945,16 @@ export default function DiscoverPage() {
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   Innovate. Collaborate.
                 </h1>
-                <p className="mt-[1.25em] text-[1.35em] text-white/80 max-w-[30em] leading-relaxed md:ml-auto">
-                  Nothing to show here yet — explore the platform to see what&apos;s happening
-                  across the Caribbean.
-                </p>
+                {/* Same pinning as the active-item description above */}
+                <div className="mt-[1.25em] max-w-[40em] md:ml-auto">
+                  <p
+                    className="text-white/80 leading-relaxed"
+                    style={{ fontSize: `calc(1em / ${fit})` }}
+                  >
+                    Nothing to show here yet — explore the platform to see what&apos;s happening
+                    across the Caribbean.
+                  </p>
+                </div>
               </div>
             )}
 
