@@ -115,6 +115,30 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
         </Block>
       )}
 
+      {data.credentials.length > 0 && (
+        <Block title="Certificates">
+          <ul className="space-y-2">
+            {data.credentials.map((credential) => {
+              const year = credential.date ? new Date(credential.date).getUTCFullYear() : null
+              const meta = [
+                credential.issuer,
+                year && !Number.isNaN(year) ? String(year) : null,
+                credential.verified ? 'verified' : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')
+              return (
+                <li key={`${credential.title}-${credential.code}`}>
+                  <p className="font-semibold text-ktip-sand-900">{credential.title}</p>
+                  {meta && <p className="text-ktip-sand-600">{meta}</p>}
+                  {credential.code && <p>Code {credential.code}</p>}
+                </li>
+              )
+            })}
+          </ul>
+        </Block>
+      )}
+
       {data.projects.length > 0 && (
         <Block title="Projects">
           <ul className="space-y-3">

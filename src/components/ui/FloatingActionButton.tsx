@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useTutorials } from '../../contexts/TutorialContext'
+import { useUnreadMessageCount } from '../../hooks/useMessages'
 import { tutorialIdForPath } from '../../data/tutorials'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import {
@@ -101,6 +102,7 @@ export function FloatingActionButton() {
   const auth = useAuth()
   const { togglePanel } = useMessagingPanel()
   const { startTutorial, isTutorialCompleted } = useTutorials()
+  const { unreadCount } = useUnreadMessageCount(auth.user?.id)
   const { pathname } = useLocation()
   const [dark, setDark] = useThemeMode()
   const [a11y, setA11y] = useAccessibilityPrefs()
@@ -172,6 +174,7 @@ export function FloatingActionButton() {
         setOpen(false)
       },
       show: !!auth.user,
+      badge: unreadCount > 0,
     },
   ]
 

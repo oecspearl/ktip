@@ -3,7 +3,12 @@ import { Send, Settings, Users } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { MessageBubble } from './MessageBubble'
 import { GroupSettingsModal } from './GroupSettingsModal'
-import { useMessages, useRealtimeMessages, useSendMessage } from '../../hooks/useMessages'
+import {
+  useMarkConversationRead,
+  useMessages,
+  useRealtimeMessages,
+  useSendMessage,
+} from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Conversation } from '../../types'
 
@@ -23,12 +28,24 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   // local mirror only produced duplicate state updates per incoming message.
   const { messages } = useMessages(conversationId)
   const { sendMessage, loading } = useSendMessage()
+  const { markRead } = useMarkConversationRead(auth.user?.id)
 
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   // Realtime: writes into the query cache inside the hook.
   useRealtimeMessages(conversationId)
+
+  // Looking at the thread is what clears its share of the FAB dot. Keyed on the
+  // message count as well as the id, so a message that lands while the thread is
+  // already open does not relight the dot behind the panel.
+  useEffect(() => {
+    if (!auth.user) return
+    markRead(conversationId).catch((err) => {
+      console.error('Failed to mark conversation read:', err)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, messages?.length, auth.user?.id])
 
   // Auto-scroll to bottom
   useEffect(() => {

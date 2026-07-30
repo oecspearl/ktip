@@ -205,7 +205,7 @@ async function mintSession(
  * avatar must not have it replaced every time they arrive from the campus.
  */
 async function seedProfile(admin: SupabaseClient, userId: string, claims: VcClaims) {
-  const base = 'display_name, avatar_url, country, organization'
+  const base = 'display_name, avatar_url, country, organization, skills'
   // 082 may not be applied on this deploy. Selecting a column PostgREST has
   // never seen fails the whole statement, and a profile seed is not worth
   // failing a sign-in over, so the contact columns are probed separately.
@@ -234,6 +234,14 @@ async function seedProfile(admin: SupabaseClient, userId: string, claims: VcClai
   if (hasContactColumns) {
     if (!profile?.phone && claims.phone) updates.phone = claims.phone
     if (!profile?.website && claims.website) updates.website = claims.website
+  }
+
+  // Only ever seeds an empty list. Merging into a list the member has curated
+  // would keep re-adding skills they deliberately removed, and every sign-in
+  // would undo the edit — the same reason the CV merges whole sections.
+  const storedSkills = Array.isArray(profile?.skills) ? (profile.skills as string[]) : []
+  if (storedSkills.length === 0 && claims.skills.length > 0) {
+    updates.skills = claims.skills.map((skill) => skill.name).slice(0, 30)
   }
 
   if (Object.keys(updates).length === 0) return
@@ -270,6 +278,8 @@ async function syncResume(admin: SupabaseClient, userId: string, claims: VcClaim
         gradeLevel: claims.gradeLevel,
         role: claims.role,
         website: claims.website,
+        credentials: claims.credentials,
+        skills: claims.skills,
       },
       enrollments,
       catalog

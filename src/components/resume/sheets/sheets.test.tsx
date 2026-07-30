@@ -53,6 +53,16 @@ const FULL: ResumeData = {
       courseUrl: null,
     },
   ],
+  credentials: [
+    {
+      title: 'Climate Data Foundations Certificate',
+      issuer: 'SALCC',
+      date: '2025-06-11T00:00:00.000Z',
+      code: 'VC-8842-KQ',
+      verifyUrl: 'https://oecscampus.org/verify/VC-8842-KQ',
+      verified: true,
+    },
+  ],
   skills: [{ area: 'Software', abbr: 'So', skills: ['TypeScript', 'Postgres'] }],
   languages: ['English', 'French'],
   professionalSkills: ['Mentoring'],

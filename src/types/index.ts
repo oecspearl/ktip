@@ -631,6 +631,8 @@ export interface ConversationParticipant {
   user_id: string
   role: ConversationParticipantRole
   joined_at: string
+  /** When this member last had the thread open — drives the unread dot (086) */
+  last_read_at: string
   user?: Profile
 }
 

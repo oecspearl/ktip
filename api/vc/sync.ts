@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { loadCatalog, loadEnrollments } from '../_lib/vc-catalog'
 import { buildResumeData, mergeResume } from '../_lib/cv-build'
+import { parseCredentials, parseSkills } from '../_lib/vc-oidc'
 import { RESUME_PATHS, type ResumeData, type ResumeSources } from '../../src/types/resume'
 
 export const config = { runtime: 'edge' }
@@ -126,6 +127,11 @@ export default async function handler(request: Request): Promise<Response> {
       gradeLevel: str('grade_level') ?? str('grade'),
       role: str('role'),
       website: str('website'),
+      // raw_claims is the whole verified payload as it arrived, so the shared
+      // certificates and skills are already here — parsed through the same
+      // validators the callback uses rather than trusted because they are ours.
+      credentials: parseCredentials(claims),
+      skills: parseSkills(claims),
     },
     enrollments,
     catalog

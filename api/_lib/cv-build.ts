@@ -1,8 +1,10 @@
 import type { CatalogItem, Enrollment } from './vc-catalog'
+import type { VcCredential, VcSkill } from './vc-oidc'
 import {
   RESUME_SOURCE_RANK,
   type ResumeAward,
   type ResumeCourse,
+  type ResumeCredential,
   type ResumeData,
   type ResumeEducation,
   type ResumeFieldSource,
@@ -37,9 +39,19 @@ export interface CvIdentityInput {
   gradeLevel: string | null
   role: string | null
   website: string | null
+  /**
+   * Certificates and skills the learner chose to share, straight off the
+   * verified token. Optional because the campus only sends them when the
+   * learner opted in, and a sign-in that carries neither is ordinary.
+   */
+  credentials?: VcCredential[]
+  skills?: VcSkill[]
 }
 
 const VC_INSTITUTION_FALLBACK = 'OECS Virtual Campus'
+
+/** Bucket for shared skills the campus sent without a category of their own. */
+const VC_SKILL_GROUP = 'Verified Skills'
 
 /** ISO-639 codes the OECS actually sees. Anything else passes through as-is. */
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -126,21 +138,61 @@ export function buildCourses(
  * Courses with no subject tag are dropped rather than bucketed into "Other" —
  * an untagged group reads as filler on a printed page.
  */
-export function buildSkills(courses: ResumeCourse[]): ResumeSkillGroup[] {
+export function buildSkills(
+  courses: ResumeCourse[],
+  vcSkills: VcSkill[] = []
+): ResumeSkillGroup[] {
   const byArea = new Map<string, string[]>()
+
+  const add = (area: string, entry: string) => {
+    const list = byArea.get(area) ?? []
+    // Case-insensitive, because "Data analysis" from a course title and "Data
+    // Analysis" from a skill claim are one skill listed twice on a printed page.
+    if (!list.some((existing) => existing.toLowerCase() === entry.toLowerCase())) list.push(entry)
+    byArea.set(area, list)
+  }
 
   for (const course of courses) {
     if (course.status !== 'completed') continue
     const area = course.subjectArea?.trim()
     if (!area) continue
-    const list = byArea.get(area) ?? []
-    if (!list.includes(course.title)) list.push(course.title)
-    byArea.set(area, list)
+    add(area, course.title)
+  }
+
+  // Skills the learner shared from the campus. Unlike courses these are already
+  // skills rather than evidence of one, so they need no completion test — the
+  // campus decides what it is willing to assert, and it flags each one.
+  for (const skill of vcSkills) {
+    const name = skill.name.trim()
+    if (!name) continue
+    add(skill.category?.trim() || VC_SKILL_GROUP, name)
   }
 
   return Array.from(byArea.entries())
     .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
     .map(([area, skills]) => ({ area, abbr: abbreviate(area), skills: skills.sort() }))
+}
+
+/**
+ * Campus certificates -> CV credentials.
+ *
+ * `issuer` falls back to the learner's institution because the claim names no
+ * issuer of its own: the campus is describing certificates it holds for a
+ * learner enrolled somewhere, and attributing them to nobody would leave a row
+ * an employer cannot place.
+ */
+export function buildCredentials(
+  credentials: VcCredential[],
+  institution: string
+): ResumeCredential[] {
+  return credentials.map((credential) => ({
+    title: credential.title,
+    issuer: institution,
+    date: credential.issuedAt ?? '',
+    code: credential.verificationCode,
+    verifyUrl: credential.verifyUrl ?? '',
+    verified: credential.verified,
+  }))
 }
 
 /** "Academic Competencies" — one line per subject, the course titles as prose. */
@@ -183,8 +235,9 @@ export function buildResumeData(
   catalog: Map<string, CatalogItem>
 ): ResumeData {
   const courses = buildCourses(enrollments, catalog)
-  const skills = buildSkills(courses)
+  const skills = buildSkills(courses, identity.skills ?? [])
   const institution = identity.institution || VC_INSTITUTION_FALLBACK
+  const credentials = buildCredentials(identity.credentials ?? [], institution)
 
   const socials = identity.website
     ? [{ label: 'Website', href: identity.website }]
@@ -216,6 +269,7 @@ export function buildResumeData(
         ]
       : [],
     courses,
+    credentials,
     skills,
     languages: languageFromLocale(identity.locale),
     // Completed course titles read as claims of competence, so they are listed
@@ -343,9 +397,10 @@ export function buildKtipResumeData(input: KtipCvInput): ResumeData {
     // Empty on purpose — see the file header.
     roles: [],
     education,
-    // The campus owns these three; KTIP has no equivalent record, and a
-    // generated empty array must never be what wipes a synced course list.
+    // The campus owns these; KTIP has no equivalent record, and a generated
+    // empty array must never be what wipes a synced course or certificate list.
     courses: [],
+    credentials: [],
     skills:
       skills.length > 0 ? [{ area: 'Skills', abbr: abbreviate('Skills'), skills: [...skills] }] : [],
     languages: (p.languages ?? []).filter((l) => l.trim()),

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCourses,
+  buildCredentials,
   buildKtipResumeData,
   buildResumeData,
   buildSkills,
@@ -126,6 +127,67 @@ describe('buildSkills', () => {
     const byArea = Object.fromEntries(buildSkills(courses).map((g) => [g.area, g.abbr]))
     expect(byArea['Language Arts']).toBe('LA')
     expect(byArea['Science']).toBe('Sc')
+  })
+})
+
+describe('shared credentials and skills', () => {
+  const credential = {
+    title: 'Climate Data Foundations',
+    verificationCode: 'VC-8842-KQ',
+    issuedAt: '2026-03-04T00:00:00.000Z',
+    verified: true,
+    verifyUrl: 'https://oecscampus.org/verify/VC-8842-KQ',
+  }
+
+  it('attributes a certificate to the learner institution, which the claim omits', () => {
+    const [built] = buildCredentials([credential], 'Sir Arthur Lewis Community College')
+    expect(built.issuer).toBe('Sir Arthur Lewis Community College')
+    expect(built.code).toBe('VC-8842-KQ')
+    expect(built.verifyUrl).toBe('https://oecscampus.org/verify/VC-8842-KQ')
+    expect(built.verified).toBe(true)
+  })
+
+  it('lands them on the CV as credentials, not as awards', () => {
+    const data = buildResumeData(
+      { ...IDENTITY, credentials: [credential] },
+      [],
+      catalog([])
+    )
+    expect(data.credentials.map((c) => c.title)).toEqual(['Climate Data Foundations'])
+    // awards belongs to the KTIP generator. If the campus sync claimed it, a
+    // learner's KTIP badges would never reach the page again.
+    expect(data.awards).toEqual([])
+  })
+
+  it('groups shared skills by their category, uncategorised ones together', () => {
+    const skills = buildSkills(
+      [],
+      [
+        { name: 'Data Analysis', category: 'Digital', level: null, verified: true, source: null },
+        { name: 'Public Speaking', category: null, level: null, verified: false, source: null },
+      ]
+    )
+    const byArea = Object.fromEntries(skills.map((g) => [g.area, g.skills]))
+    expect(byArea['Digital']).toEqual(['Data Analysis'])
+    expect(byArea['Verified Skills']).toEqual(['Public Speaking'])
+  })
+
+  it('does not list a skill twice when a course title already says it', () => {
+    const courses = buildCourses(
+      [enrollment('a', 100, 'Data Analysis')],
+      catalog([{ course_id: 'a', subject_area: 'Digital' }])
+    )
+    const skills = buildSkills(courses, [
+      { name: 'data analysis', category: 'Digital', level: null, verified: true, source: null },
+    ])
+    expect(skills).toHaveLength(1)
+    expect(skills[0].skills).toEqual(['Data Analysis'])
+  })
+
+  it('leaves the sections empty when the learner shared nothing', () => {
+    const data = buildResumeData(IDENTITY, [], catalog([]))
+    expect(data.credentials).toEqual([])
+    expect(data.skills).toEqual([])
   })
 })
 

@@ -7,7 +7,15 @@
 
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { SignJWT, exportJWK, generateKeyPair, type CryptoKey, type JWTPayload } from 'jose'
-import { mapClaims, readVcConfig, replayKey, verifyVcToken, VcTokenError } from '../../../api/_lib/vc-oidc'
+import {
+  mapClaims,
+  parseCredentials,
+  parseSkills,
+  readVcConfig,
+  replayKey,
+  verifyVcToken,
+  VcTokenError,
+} from '../../../api/_lib/vc-oidc'
 
 /**
  * Virtual Campus token verification.
@@ -278,11 +286,124 @@ describe('mapClaims', () => {
     expect(claims.raw.something_unexpected).toBe('keep me')
   })
 
+  it('carries the shared credentials and skills through to the claims', () => {
+    const claims = mapClaims({
+      ...base,
+      'vc:credentials': [{ title: 'Climate Data Foundations', verified: true }],
+      'vc:skills': [{ name: 'Data Analysis' }],
+    } as JWTPayload)
+    expect(claims.credentials.map((c) => c.title)).toEqual(['Climate Data Foundations'])
+    expect(claims.skills.map((s) => s.name)).toEqual(['Data Analysis'])
+  })
+
   it('drops protocol claims from raw — they say nothing about the person', () => {
     const claims = mapClaims({ ...base, exp: 1, iat: 2, jti: 'j', nonce: 'n' } as JWTPayload)
     expect(claims.raw).not.toHaveProperty('exp')
     expect(claims.raw).not.toHaveProperty('jti')
     expect(claims.raw).not.toHaveProperty('nonce')
+  })
+})
+
+/**
+ * `vc:credentials` / `vc:skills`.
+ *
+ * A signed token is authentic, not well-formed. These claims are the only part
+ * of the payload that reaches a printed CV verbatim, so the parsers are written
+ * to drop anything they cannot vouch for rather than render it.
+ */
+describe('parseCredentials', () => {
+  const credential = {
+    title: 'Climate Data Foundations',
+    verification_code: 'VC-8842-KQ',
+    issued_at: '2026-03-04',
+    verified: true,
+    verify_url: 'https://oecscampus.org/verify/VC-8842-KQ',
+  }
+
+  it('reads the namespaced claim', () => {
+    const [parsed] = parseCredentials({ 'vc:credentials': [credential] })
+    expect(parsed.title).toBe('Climate Data Foundations')
+    expect(parsed.verificationCode).toBe('VC-8842-KQ')
+    expect(parsed.verified).toBe(true)
+    expect(parsed.verifyUrl).toBe('https://oecscampus.org/verify/VC-8842-KQ')
+    expect(parsed.issuedAt).toBe('2026-03-04T00:00:00.000Z')
+  })
+
+  it('returns an empty list when the learner shared nothing', () => {
+    expect(parseCredentials({ sub: 'u1' })).toEqual([])
+    expect(parseCredentials({ 'vc:credentials': 'not an array' })).toEqual([])
+  })
+
+  it('drops entries with no title — a bare code names nothing', () => {
+    expect(parseCredentials({ 'vc:credentials': [{ verification_code: 'X' }, null, 7] })).toEqual([])
+  })
+
+  it('treats verified as an assertion, not a default', () => {
+    const [parsed] = parseCredentials({
+      'vc:credentials': [{ title: 'Unchecked', verified: 'yes' }],
+    })
+    expect(parsed.verified).toBe(false)
+  })
+
+  it('rejects a verify_url that is not http(s) — it is rendered as a link', () => {
+    const [parsed] = parseCredentials({
+      'vc:credentials': [{ title: 'X', verify_url: 'javascript:alert(1)' }],
+    })
+    expect(parsed.verifyUrl).toBeNull()
+  })
+
+  it('rejects a garbled issued_at rather than dating the certificate wrongly', () => {
+    const [parsed] = parseCredentials({ 'vc:credentials': [{ title: 'X', issued_at: 'Tuesday' }] })
+    expect(parsed.issuedAt).toBeNull()
+  })
+
+  it('sorts newest first and puts undated entries last', () => {
+    const titles = parseCredentials({
+      'vc:credentials': [
+        { title: 'Undated' },
+        { title: 'Older', issued_at: '2024-01-01' },
+        { title: 'Newer', issued_at: '2026-01-01' },
+      ],
+    }).map((c) => c.title)
+    expect(titles).toEqual(['Newer', 'Older', 'Undated'])
+  })
+
+  it('deduplicates the same certificate shared twice', () => {
+    expect(parseCredentials({ 'vc:credentials': [credential, { ...credential }] })).toHaveLength(1)
+  })
+
+  it('caps the list so one issuer cannot make the CV unrenderable', () => {
+    const many = Array.from({ length: 80 }, (_, i) => ({ title: `Cert ${i}` }))
+    expect(parseCredentials({ 'vc:credentials': many })).toHaveLength(50)
+  })
+})
+
+describe('parseSkills', () => {
+  it('reads objects and bare strings alike', () => {
+    const parsed = parseSkills({
+      'vc:skills': [
+        { name: 'Data Analysis', category: 'Digital', level: 'Intermediate', verified: true },
+        'Public Speaking',
+      ],
+    })
+    expect(parsed).toHaveLength(2)
+    expect(parsed[0].category).toBe('Digital')
+    expect(parsed[1]).toEqual({
+      name: 'Public Speaking',
+      category: null,
+      level: null,
+      verified: false,
+      source: null,
+    })
+  })
+
+  it('deduplicates case-insensitively', () => {
+    expect(parseSkills({ 'vc:skills': ['Excel', 'excel'] })).toHaveLength(1)
+  })
+
+  it('caps the list', () => {
+    const many = Array.from({ length: 150 }, (_, i) => `Skill ${i}`)
+    expect(parseSkills({ 'vc:skills': many })).toHaveLength(100)
   })
 })
 

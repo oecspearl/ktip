@@ -2,6 +2,7 @@ import { ResumePortrait } from '../ResumePortrait'
 import {
   AcademicTable,
   AwardList,
+  CredentialList,
   ContactList,
   CourseTable,
   ProjectList,
@@ -173,6 +174,15 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
               Courses
             </RuleHeading>
             <CourseTable data={data} />
+          </section>
+        )}
+
+        {data.credentials.length > 0 && (
+          <section className="mt-8">
+            <RuleHeading color={color} design={design}>
+              Certificates
+            </RuleHeading>
+            <CredentialList data={data} />
           </section>
         )}
 

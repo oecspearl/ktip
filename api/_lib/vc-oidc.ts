@@ -175,6 +175,36 @@ const CLAIM_ALIASES = {
   website: ['website', 'profile', 'url', 'homepage'],
 } as const
 
+/**
+ * A certificate or award the learner chose to share at sign-in.
+ *
+ * `vc:credentials` is a namespaced claim, so it survives none of the alias
+ * guessing above — it is read by name, from a list of spellings, and every
+ * field is re-validated here. The token is signed, which makes it authentic,
+ * not well-formed: a signed array of nulls is still an array of nulls, and this
+ * data ends up on a document somebody hands to an employer.
+ */
+export interface VcCredential {
+  title: string
+  /** The code an employer quotes when checking it. '' when none was shared. */
+  verificationCode: string
+  /** ISO timestamp, or null when the campus supplied no date. */
+  issuedAt: string | null
+  /** The campus asserts this is confirmed, not merely recorded. */
+  verified: boolean
+  /** Public verification page. null unless it is an absolute http(s) URL. */
+  verifyUrl: string | null
+}
+
+/** A skill the learner chose to share. `vc:skills`; same handling as above. */
+export interface VcSkill {
+  name: string
+  category: string | null
+  level: string | null
+  verified: boolean
+  source: string | null
+}
+
 export interface VcClaims {
   sub: string
   issuer: string
@@ -190,6 +220,10 @@ export interface VcClaims {
   role: string | null
   birthYear: number | null
   website: string | null
+  /** Shared certificates. Empty when the learner shared none — not an error. */
+  credentials: VcCredential[]
+  /** Shared skills. Empty when the learner shared none — not an error. */
+  skills: VcSkill[]
   /** The full verified payload, minus the noise every JWT carries. */
   raw: Record<string, unknown>
 }
@@ -205,6 +239,141 @@ function pick(payload: Record<string, unknown>, keys: readonly string[]): string
     }
   }
   return null
+}
+
+/**
+ * Caps. A token is 8KB at most, so neither list can be enormous, but the CV is
+ * a paginated document and an issuer that starts emitting one credential per
+ * lesson should cost the learner a truncated list, not an unrenderable page.
+ */
+const MAX_CREDENTIALS = 50
+const MAX_SKILLS = 100
+const MAX_FIELD = 200
+
+const CREDENTIAL_CLAIMS = ['vc:credentials', 'vc_credentials', 'credentials'] as const
+const SKILL_CLAIMS = ['vc:skills', 'vc_skills', 'skills'] as const
+
+function firstArray(p: Record<string, unknown>, keys: readonly string[]): unknown[] {
+  for (const key of keys) {
+    const value = p[key]
+    if (Array.isArray(value)) return value
+  }
+  return []
+}
+
+/** Trimmed, length-capped, or null. Numbers are accepted — codes arrive as both. */
+function field(value: unknown): string | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  return trimmed ? trimmed.slice(0, MAX_FIELD) : null
+}
+
+/**
+ * An ISO date, or null. `new Date(x).toISOString()` would happily normalise
+ * "Tuesday" into a real timestamp on some runtimes; requiring the string to
+ * start with a date keeps a garbled value out rather than dating a certificate
+ * wrongly on a CV.
+ */
+function isoDate(value: unknown): string | null {
+  const raw = field(value)
+  if (!raw || !/^\d{4}-\d{2}-\d{2}/.test(raw)) return null
+  const parsed = new Date(raw)
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString()
+}
+
+/**
+ * An absolute http(s) URL, or null.
+ *
+ * This one is rendered as a link on a public CV, so `javascript:` and `data:`
+ * are excluded here rather than left to whatever sanitiser happens to be
+ * downstream of the renderer.
+ */
+function httpUrl(value: unknown): string | null {
+  const raw = field(value)
+  if (!raw) return null
+  try {
+    const url = new URL(raw)
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * `vc:credentials` -> validated list. Entries without a title are dropped: a
+ * verification code with nothing to name is not a credential, and rendering it
+ * as an untitled row helps nobody.
+ */
+export function parseCredentials(payload: Record<string, unknown>): VcCredential[] {
+  const seen = new Set<string>()
+  const out: VcCredential[] = []
+
+  for (const entry of firstArray(payload, CREDENTIAL_CLAIMS)) {
+    if (!entry || typeof entry !== 'object') continue
+    const item = entry as Record<string, unknown>
+    const title = field(item.title ?? item.name)
+    if (!title) continue
+
+    const code = field(item.verification_code ?? item.verificationCode) ?? ''
+    // The same certificate can arrive twice when a learner shares overlapping
+    // sets. Title+code identifies it; two distinct certificates never share both.
+    const key = `${title.toLowerCase()}|${code.toLowerCase()}`
+    if (seen.has(key)) continue
+    seen.add(key)
+
+    out.push({
+      title,
+      verificationCode: code,
+      issuedAt: isoDate(item.issued_at ?? item.issuedAt),
+      verified: item.verified === true,
+      verifyUrl: httpUrl(item.verify_url ?? item.verifyUrl),
+    })
+    if (out.length >= MAX_CREDENTIALS) break
+  }
+
+  // Newest first, undated last — a CV leads with the most recent achievement.
+  return out.sort((a, b) => {
+    if (a.issuedAt && b.issuedAt) return b.issuedAt.localeCompare(a.issuedAt)
+    if (a.issuedAt) return -1
+    if (b.issuedAt) return 1
+    return a.title.localeCompare(b.title)
+  })
+}
+
+/** `vc:skills` -> validated list. Plain strings are accepted alongside objects. */
+export function parseSkills(payload: Record<string, unknown>): VcSkill[] {
+  const seen = new Set<string>()
+  const out: VcSkill[] = []
+
+  for (const entry of firstArray(payload, SKILL_CLAIMS)) {
+    // profiles.skills is a text[] and some providers send the same shape, so a
+    // bare string is a legitimate entry rather than a malformed object.
+    const item =
+      typeof entry === 'string'
+        ? ({ name: entry } as Record<string, unknown>)
+        : entry && typeof entry === 'object'
+          ? (entry as Record<string, unknown>)
+          : null
+    if (!item) continue
+
+    const name = field(item.name ?? item.title)
+    if (!name) continue
+    const key = name.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+
+    out.push({
+      name,
+      category: field(item.category),
+      level: field(item.level),
+      verified: item.verified === true,
+      source: field(item.source),
+    })
+    if (out.length >= MAX_SKILLS) break
+  }
+
+  return out
 }
 
 /**
@@ -277,6 +446,8 @@ export function mapClaims(payload: JWTPayload): VcClaims {
     role: pick(p, CLAIM_ALIASES.role),
     birthYear,
     website: pick(p, CLAIM_ALIASES.website),
+    credentials: parseCredentials(p),
+    skills: parseSkills(p),
     raw,
   }
 }

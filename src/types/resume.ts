@@ -53,6 +53,31 @@ export interface ResumeCourse {
   courseUrl: string | null
 }
 
+/**
+ * A certificate or award issued *outside* KTIP and vouched for by its issuer —
+ * today, the Virtual Campus certificates a learner chose to share at sign-in.
+ *
+ * Deliberately not a `ResumeAward`. A badge earned on KTIP is our own record and
+ * nobody can check it; a campus credential carries a code and a public URL an
+ * employer can type in, and flattening the two would either drop that evidence
+ * or imply KTIP badges carry it too. The separation is also what keeps the merge
+ * policy honest: `awards` stays owned by the KTIP generator and `credentials` by
+ * the campus sync, so neither writer erases the other's section.
+ */
+export interface ResumeCredential {
+  title: string
+  /** Who issued it. The learner's institution when the payload names no other. */
+  issuer: string
+  /** ISO timestamp, or '' when the issuer supplied no date. */
+  date: string
+  /** The code an employer quotes when checking it. '' when none was shared. */
+  code: string
+  /** Public verification page. '' when the issuer published none. */
+  verifyUrl: string
+  /** The issuer asserts this credential is confirmed, not merely recorded. */
+  verified: boolean
+}
+
 /** Renders as one labelled circle plus a tag cloud. `abbr` is the circle text. */
 export interface ResumeSkillGroup {
   area: string
@@ -113,6 +138,7 @@ export interface ResumeData {
   roles: ResumeRole[]
   education: ResumeEducation[]
   courses: ResumeCourse[]
+  credentials: ResumeCredential[]
   skills: ResumeSkillGroup[]
   languages: string[]
   professionalSkills: string[]
@@ -206,6 +232,7 @@ export const RESUME_PATHS = [
   'roles',
   'education',
   'courses',
+  'credentials',
   'skills',
   'languages',
   'professionalSkills',
@@ -232,6 +259,7 @@ export function emptyResumeData(): ResumeData {
     roles: [],
     education: [],
     courses: [],
+    credentials: [],
     skills: [],
     languages: [],
     professionalSkills: [],
@@ -268,6 +296,7 @@ export function normalizeResumeData(raw: unknown): ResumeData {
     roles: list(stored.roles, base.roles),
     education: list(stored.education, base.education),
     courses: list(stored.courses, base.courses),
+    credentials: list(stored.credentials, base.credentials),
     skills: list(stored.skills, base.skills),
     languages: list(stored.languages, base.languages),
     professionalSkills: list(stored.professionalSkills, base.professionalSkills),

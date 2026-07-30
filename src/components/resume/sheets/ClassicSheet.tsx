@@ -1,6 +1,7 @@
 import {
   AcademicTable,
   AwardList,
+  CredentialList,
   ContactList,
   CourseTable,
   PlainHeading,
@@ -117,6 +118,15 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
             Courses
           </PlainHeading>
           <CourseTable data={data} />
+        </section>
+      )}
+
+      {data.credentials.length > 0 && (
+        <section className="mt-6">
+          <PlainHeading color={color} design={design}>
+            Certificates
+          </PlainHeading>
+          <CredentialList data={data} />
         </section>
       )}
 

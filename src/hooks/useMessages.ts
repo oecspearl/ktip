@@ -58,6 +58,73 @@ export function useMessages(conversationId: string | undefined) {
   return { messages: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/**
+ * Unread messages across every thread, for the FAB's notification dot.
+ *
+ * Counted server-side (086) — the alternative is fetching every thread on
+ * every page load just to compare timestamps. Subscribes to `messages`
+ * INSERTs with no conversation filter: realtime applies the table's RLS, so
+ * only rows in the member's own conversations arrive.
+ */
+export function useUnreadMessageCount(userId: string | undefined) {
+  const queryClient = useQueryClient()
+  const queryKey = keys.sub('messages', 'unread', userId)
+
+  const query = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc('unread_message_count')
+      if (error) throw error
+      return (data as number) ?? 0
+    },
+    enabled: !!userId,
+  })
+
+  useEffect(() => {
+    if (!userId) return
+
+    const channel = supabase
+      .channel(`messages:unread:${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          // Own sends never count as unread, and re-asking the server for them
+          // would only race the mark-read that follows in the open thread.
+          if ((payload.new as any)?.sender_id === userId) return
+          queryClient.invalidateQueries({ queryKey })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, queryClient])
+
+  return { unreadCount: query.data ?? 0, loading: query.isPending }
+}
+
+/** Stamps the caller's last_read_at for one thread, then refreshes the dot */
+export function useMarkConversationRead(userId: string | undefined) {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const { error } = await (supabase as any).rpc('mark_conversation_read', {
+        p_conversation_id: conversationId,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.sub('messages', 'unread', userId) })
+    },
+  })
+
+  return { markRead: mutation.mutateAsync }
+}
+
 export function useRealtimeMessages(
   conversationId: string | undefined,
   onNewMessage?: (msg: Message) => void

@@ -454,6 +454,57 @@ export default function CvEditPage() {
         </section>
       )}
 
+      {/* ── Certificates (read-only) ── */}
+      {draft.credentials.length > 0 && (
+        <section className="mt-12">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
+            Certificates
+          </h2>
+          <p className="mt-2 text-sm text-ktip-sand-500">
+            Shared from your Virtual Campus account. Remove one and it stays off your CV — the
+            next sign-in will not put it back.
+          </p>
+          <ul className="mt-4 divide-y divide-ktip-sand-200 rounded-lg border border-ktip-sand-200">
+            {draft.credentials.map((credential, index) => (
+              <li
+                key={`${credential.title}-${credential.code}`}
+                className="flex items-center gap-3 px-4 py-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-ktip-ocean-700">
+                    {credential.title}
+                  </p>
+                  <p className="truncate text-xs text-ktip-sand-500">
+                    {[
+                      credential.issuer,
+                      credential.code ? `Code ${credential.code}` : null,
+                      credential.verified ? 'Verified' : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Trash2 size={15} />}
+                  aria-label={`Remove ${credential.title}`}
+                  onClick={() => {
+                    setDraft((prev) => ({
+                      ...prev,
+                      credentials: prev.credentials.filter((_, i) => i !== index),
+                    }))
+                    mark('credentials')
+                  }}
+                >
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {/* ── Awards (read-only) ── */}
       {draft.awards.length > 0 && (
         <section className="mt-12">

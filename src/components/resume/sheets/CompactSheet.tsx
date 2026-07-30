@@ -1,6 +1,7 @@
 import {
   AcademicTable,
   AwardList,
+  CredentialList,
   ContactList,
   CourseTable,
   PlainHeading,
@@ -117,6 +118,15 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
                 Courses
               </PlainHeading>
               <CourseTable data={data} dense />
+            </section>
+          )}
+
+          {data.credentials.length > 0 && (
+            <section className="mt-5">
+              <PlainHeading color={color} design={design} size="9.5pt">
+                Certificates
+              </PlainHeading>
+              <CredentialList data={data} dense />
             </section>
           )}
 

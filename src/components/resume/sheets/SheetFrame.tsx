@@ -378,6 +378,55 @@ export function ProjectList({ data, dense = false }: { data: ResumeData; dense?:
 }
 
 /**
+ * Certificates issued elsewhere and vouched for by their issuer.
+ *
+ * The verification code is printed rather than hidden behind the link, because
+ * this sheet is a PDF as often as it is a web page and a reader holding paper
+ * cannot click anything. The URL is shown as bare text for the same reason.
+ */
+export function CredentialList({ data, dense = false }: { data: ResumeData; dense?: boolean }) {
+  const body = dense ? 'text-[7.5pt]' : 'text-[8pt]'
+  return (
+    <ul className="space-y-2.5">
+      {data.credentials.map((credential) => {
+        const year = credential.date ? new Date(credential.date).getUTCFullYear() : null
+        const meta = [
+          credential.issuer,
+          year && !Number.isNaN(year) ? String(year) : null,
+          // Only claimed when the issuer claimed it. An unverified certificate
+          // is still worth listing; calling it verified is not ours to do.
+          credential.verified ? 'Verified' : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+
+        return (
+          <li key={`${credential.title}-${credential.code}`} className="resume-avoid-break">
+            <p className={cn('font-bold leading-tight', dense ? 'text-[8.5pt]' : 'text-[9pt]')}>
+              {credential.title}
+            </p>
+            {meta && (
+              <p className="text-[7.5pt] uppercase tracking-wide text-neutral-500">{meta}</p>
+            )}
+            {(credential.code || credential.verifyUrl) && (
+              <p className={cn('leading-snug text-neutral-700', body)}>
+                {credential.code && <>Code {credential.code}</>}
+                {credential.code && credential.verifyUrl && ' · '}
+                {credential.verifyUrl && (
+                  <a href={credential.verifyUrl} className="underline">
+                    {credential.verifyUrl.replace(/^https?:\/\//, '')}
+                  </a>
+                )}
+              </p>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+/**
  * Badges and recognitions.
  *
  * The year alone, never the full timestamp: `awarded_at` is precise to the
