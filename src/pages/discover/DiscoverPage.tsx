@@ -11,11 +11,9 @@ import { Link } from 'react-router'
 import { format } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
-import { PreRegistrationModal } from '../../components/PreRegistrationModal'
 import { useAuth } from '../../contexts/AuthContext'
 import { ForYouRail } from '../../components/personalization/ForYouRail'
 import { FALLBACK_IMAGE, heroImageFor } from '../../lib/hero-images'
-import { analytics } from '../../hooks/useAnalytics'
 import { useProjects } from '../../hooks/useProjects'
 import { useEvents } from '../../hooks/useEvents'
 import { useGrants } from '../../hooks/useGrants'
@@ -137,25 +135,6 @@ function grantAmount(g: Grant): string {
 export default function DiscoverPage() {
   usePageTitle('Discover')
   const auth = useAuth()
-
-  // Pre-registration modal — auto-open for unauthenticated visitors (once per session)
-  const [preregOpen, setPreregOpen] = useState(false)
-
-  useEffect(() => {
-    if (!auth.user && !sessionStorage.getItem('ktip_prereg_dismissed')) {
-      const timer = setTimeout(() => {
-        setPreregOpen(true)
-        analytics.funnel('prereg', 'modal_auto_opened')
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handlePreregClose = () => {
-    setPreregOpen(false)
-    sessionStorage.setItem('ktip_prereg_dismissed', '1')
-  }
 
   // --- Mode toggle + live data ---
   const [mode, setMode] = useState<Mode>('grants')
@@ -568,18 +547,6 @@ export default function DiscoverPage() {
                     View Details
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  {!auth.user && (
-                    <button
-                      onClick={() => {
-                        setPreregOpen(true)
-                        analytics.click('hero_prereg_cta', 'Pre-Register Now')
-                        analytics.funnel('prereg', 'modal_cta_opened')
-                      }}
-                      className="px-7 py-3 rounded-lg border border-white/40 text-white text-sm font-medium tracking-wide hover:bg-white/10 transition-colors"
-                    >
-                      Pre-Register
-                    </button>
-                  )}
                 </div>
               </div>
             ) : (
@@ -840,8 +807,6 @@ export default function DiscoverPage() {
           </div>
         </div>
       </section>
-
-      <PreRegistrationModal open={preregOpen} onClose={handlePreregClose} />
     </>
   )
 }
