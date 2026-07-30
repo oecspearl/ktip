@@ -118,12 +118,18 @@ export async function loadKtipCatalog(): Promise<{ items: KtipCourse[]; total: n
  * KTIP-visible course. Throws KtipEnrollError with the upstream status so the
  * edge handler can map 401/403/404 to a caller-appropriate response.
  */
+/** Server-side bearer for POST/GET .../api/external/ktip/enrollments. */
+export function ktipApiKey(): string | null {
+  const key = (process.env.MYPD_KTIP_API_KEY || '').trim()
+  return key || null
+}
+
 export async function enrollInKtipCourse(input: {
   email: string
   course_id: string
   name?: string | null
 }): Promise<KtipEnrollResult> {
-  const apiKey = process.env.MYPD_KTIP_API_KEY
+  const apiKey = ktipApiKey()
   if (!apiKey) throw new KtipEnrollError(503, 'Server configuration error')
 
   const res = await fetch(`${catalogBaseUrl()}/api/external/ktip/enrollments`, {
