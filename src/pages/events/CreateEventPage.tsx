@@ -7,7 +7,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateEvent } from '../../hooks/useEvents'
 import { useUploadDocument } from '../../hooks/useEntityDocuments'
-import { supabase } from '../../lib/supabase'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
 import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
@@ -21,8 +20,6 @@ import {
   Video,
   Users,
   Target,
-  Lightbulb,
-  Plus,
   Trash2,
   FileText,
   Upload,
@@ -30,11 +27,6 @@ import {
 import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
-
-interface SolutionEntry {
-  title: string
-  description: string
-}
 
 /** Formats accepted by the document scraper (plus plain text). */
 const DOCUMENT_ACCEPT =
@@ -61,7 +53,6 @@ export default function CreateEventPage() {
   const [eventStatus, setEventStatus] = useState('published')
   const [submissionDate, setSubmissionDate] = useState('')
   const [submissionTime, setSubmissionTime] = useState('')
-  const [solutions, setSolutions] = useState<SolutionEntry[]>([])
   const [documents, setDocuments] = useState<File[]>([])
   const [finishing, setFinishing] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
@@ -78,14 +69,6 @@ export default function CreateEventPage() {
 
   const formRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const updateSolution = (index: number, patch: Partial<SolutionEntry>) => {
-    setSolutions((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)))
-  }
-
-  const removeSolution = (index: number) => {
-    setSolutions((prev) => prev.filter((_, i) => i !== index))
-  }
 
   const addFiles = (list: FileList | null) => {
     if (!list?.length) return
@@ -194,28 +177,11 @@ export default function CreateEventPage() {
         ...(isAdmin ? { status: eventStatus } : {}),
       } as any)
 
-      // The event exists from here on. Solutions and documents are attachments —
-      // a failure downgrades to a warning (both are editable afterwards), it
+      // The event exists from here on. Documents are attachments — a failure
+      // downgrades to a warning (they can be added from the event page), it
       // never strands the user on the form with a created event behind it.
       setFinishing(true)
       const attachmentErrors: string[] = []
-
-      const cleanSolutions = solutions
-        .map((s) => ({ title: s.title.trim(), description: s.description.trim() }))
-        .filter((s) => s.title)
-
-      if (isChallengeEvent && cleanSolutions.length > 0) {
-        const { error: solutionsError } = await supabase.from('event_criteria').insert(
-          cleanSolutions.map((s, index) => ({
-            event_id: event.id,
-            kind: 'solution',
-            title: s.title,
-            description: s.description || null,
-            sort_order: index,
-          })) as any
-        )
-        if (solutionsError) attachmentErrors.push('challenge solutions')
-      }
 
       for (const file of documents) {
         try {
@@ -354,9 +320,9 @@ export default function CreateEventPage() {
               </select>
               {isChallengeEvent && (
                 <p className="mt-1 text-xs text-ktip-sand-500">
-                  Attendees are given a goal to accomplish. Outline the solutions you are looking
-                  for below; objectives, constraints, deliverables and judging criteria can be
-                  added from the event's Challenge tab after creating it.
+                  Attendees are given a goal to accomplish and submit their solutions on the event
+                  page. Objectives, constraints, deliverables and judging criteria are added from
+                  the event's Challenge tab after creating it.
                 </p>
               )}
             </div>
@@ -537,63 +503,10 @@ export default function CreateEventPage() {
                   />
                 </div>
 
-                {/* Solutions */}
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-700">
-                    <Lightbulb size={16} className="text-ktip-sand-600" />
-                    Solutions
-                  </div>
-                  <p className="text-xs text-ktip-sand-500 mt-0.5 mb-3">
-                    The solutions you are looking for from participants. Shown in the challenge
-                    brief on the event page.
-                  </p>
-
-                  <div className="space-y-3">
-                    {solutions.map((solution, index) => (
-                      <div
-                        key={index}
-                        className="border border-ktip-sand-200 rounded-xl p-3 space-y-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 text-xs font-semibold flex items-center justify-center">
-                            {index + 1}
-                          </span>
-                          <input
-                            type="text"
-                            value={solution.title}
-                            onChange={(e) => updateSolution(index, { title: e.target.value })}
-                            placeholder="e.g. An early-warning app for flood-prone communities"
-                            className="flex-1 px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeSolution(index)}
-                            className="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
-                            title="Remove solution"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                        <textarea
-                          value={solution.description}
-                          onChange={(e) => updateSolution(index, { description: e.target.value })}
-                          rows={2}
-                          placeholder="Detail participants need in order to act on this (optional)..."
-                          className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors resize-none"
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setSolutions((prev) => [...prev, { title: '', description: '' }])}
-                    className="mt-3 inline-flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-                  >
-                    <Plus size={16} />
-                    Add solution
-                  </button>
-                </div>
+                <p className="text-xs text-ktip-sand-500">
+                  Participants submit their solutions — with their own supporting files — from the
+                  event page, up until the deadline above.
+                </p>
               </div>
             )}
 

@@ -5,6 +5,7 @@ import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
+import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import type { DetailEntry, Event } from '../types'
 
 export function useEvents(
@@ -216,12 +217,22 @@ export function useDeleteEvent() {
 
   const mutation = useMutation({
     mutationFn: async (eventId: string) => {
+      // Enumerate the uploads first — after the row is gone the RPC's ownership
+      // check has nothing to check against. For an event this covers both the
+      // organizer's documents and the files on every submitted solution, since
+      // deleting the event cascades to those too.
+      const uploadPaths = await listEntityUploadPaths('event', eventId)
+
       const { error } = await supabase.from('events').delete().eq('id', eventId)
 
       if (error) throw error
+
+      // The triggers reaped the rows; this clears the objects they pointed at.
+      await removeEntityUploads(uploadPaths)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('events') })
+      queryClient.invalidateQueries({ queryKey: keys.all('entity-documents') })
     },
   })
 

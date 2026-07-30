@@ -4,7 +4,7 @@ import {
   EVENT_CRITERION_GROUP_LABELS,
   EVENT_CRITERION_GROUP_HINTS,
 } from '../../lib/constants'
-import { Target, Ban, Package, Scale, Clock, Lightbulb } from 'lucide-react'
+import { Target, Ban, Package, Scale, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface EventChallengeBriefProps {
@@ -13,7 +13,6 @@ interface EventChallengeBriefProps {
 }
 
 const GROUP_ICONS = {
-  solution: Lightbulb,
   objective: Target,
   constraint: Ban,
   deliverable: Package,

@@ -25,7 +25,14 @@
       "Bash(sed -i 's|className=\"w-8 h-8 rounded-full object-cover\"|loading=\"lazy\" decoding=\"async\" width={32} height={32} className=\"w-8 h-8 rounded-full object-cover\"|' pages/admin/users/AdminUsersPage.tsx)",
       "Bash(sed -i 's|className=\"w-9 h-9 rounded-full object-cover shrink-0\"|loading=\"lazy\" decoding=\"async\" width={36} height={36} className=\"w-9 h-9 rounded-full object-cover shrink-0\"|' components/messages/ChatSidebar.tsx)",
       "Bash(sed -i \"s|className={cn\\('rounded-full object-cover ring-2 ring-ktip-cream', s.box\\)}|loading=\\\\\"lazy\\\\\" decoding=\\\\\"async\\\\\" className={cn\\('rounded-full object-cover ring-2 ring-ktip-cream', s.box\\)}|\" components/venue/AvatarCluster.tsx)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.app.json 2>&1)",
+      "PowerShell(if \\($?\\) { \"typecheck OK\" })",
+      "PowerShell(npx vite build --mode development 2>&1)",
+      "Bash(node -e \"try{require.resolve\\('playwright'\\);console.log\\('playwright ok'\\)}catch\\(e\\){try{require.resolve\\('@playwright/test'\\);console.log\\('@playwright/test ok'\\)}catch\\(e2\\){console.log\\('no playwright'\\)}}\")",
+      "Bash(node -e ' *)",
+      "Bash(curl -s \"http://localhost:5199/src/pages/discover/DiscoverPage.tsx\" -o /tmp/dp2.js -w \"hmr module: %{http_code}\\\\n\")",
+      "Read(//tmp/**)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

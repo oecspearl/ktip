@@ -20,6 +20,7 @@ import { EventPageSectionRenderer } from '../../components/events/EventPageSecti
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
 import { EventSpeakerGrid } from '../../components/events/EventSpeakerGrid'
 import { EventChallengeBrief } from '../../components/events/EventChallengeBrief'
+import { EventSolutionsPanel } from '../../components/events/EventSolutionsPanel'
 import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeEventDeletion } from '../../lib/delete-guard'
@@ -434,8 +435,9 @@ export default function EventDetailPage() {
               />
             )}
 
-            {/* Documents — files the organizer attached (briefs, rules, datasets).
-                An empty panel is only useful to the person who can fill it. */}
+            {/* Documents the organizer attached (briefs, rules, datasets) — part
+                of the ask, so they sit with the brief. An empty panel is only
+                useful to the person who can fill it. */}
             {(isOrganizer || (eventDocuments && eventDocuments.length > 0)) && (
               <div id="documents" data-spy="Documents" className="scroll-mt-24 mt-10">
                 <DocumentsPanel
@@ -443,6 +445,18 @@ export default function EventDetailPage() {
                   entityId={event.id}
                   canEditEntity={isOrganizer}
                   entity={event}
+                />
+              </div>
+            )}
+
+            {/* What participants submitted back: the ask, then the answers. */}
+            {event.has_challenge && (
+              <div id="solutions" data-spy="Solutions" className="scroll-mt-24">
+                <EventSolutionsPanel
+                  eventId={event.id}
+                  eventStatus={event.status}
+                  submissionDeadline={event.submission_deadline}
+                  isOrganizer={isOrganizer}
                 />
               </div>
             )}

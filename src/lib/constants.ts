@@ -161,7 +161,6 @@ export const EVENT_STATUS_COLORS: Record<string, string> = {
 // Challenge brief (migration 062). Ordered: what to achieve, what limits you,
 // what you hand in, how it gets judged.
 export const EVENT_CRITERION_KINDS = [
-  'solution',
   'objective',
   'constraint',
   'deliverable',
@@ -169,7 +168,6 @@ export const EVENT_CRITERION_KINDS = [
 ] as const
 
 export const EVENT_CRITERION_LABELS: Record<string, string> = {
-  solution: 'Solution',
   objective: 'Objective',
   constraint: 'Constraint',
   deliverable: 'Deliverable',
@@ -177,7 +175,6 @@ export const EVENT_CRITERION_LABELS: Record<string, string> = {
 }
 
 export const EVENT_CRITERION_GROUP_LABELS: Record<string, string> = {
-  solution: 'Solutions',
   objective: 'Objectives',
   constraint: 'Constraints',
   deliverable: 'Deliverables',
@@ -185,7 +182,6 @@ export const EVENT_CRITERION_GROUP_LABELS: Record<string, string> = {
 }
 
 export const EVENT_CRITERION_GROUP_HINTS: Record<string, string> = {
-  solution: 'Solutions the organizer is looking for',
   objective: 'What participants must achieve',
   constraint: 'Rules and limits entries must respect',
   deliverable: 'What each entry has to hand in',
@@ -193,7 +189,6 @@ export const EVENT_CRITERION_GROUP_HINTS: Record<string, string> = {
 }
 
 export const EVENT_CRITERION_COLORS: Record<string, string> = {
-  solution: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   objective: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   constraint: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   deliverable: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',

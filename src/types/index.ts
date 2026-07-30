@@ -266,9 +266,8 @@ export interface Event extends Ranked {
   organizer?: Profile
 }
 
-/** The parts of a challenge brief; all share one table. 'solution' added in 084. */
+/** The four parts of a challenge brief; all share one table. */
 export type EventCriterionKind =
-  | 'solution'
   | 'objective'
   | 'constraint'
   | 'deliverable'
@@ -287,6 +286,26 @@ export interface EventCriterion {
   sort_order: number
   created_at: string
   updated_at: string
+}
+
+/**
+ * What a participant submits against a challenge (migration 085).
+ *
+ * The mirror image of EventCriterion: the brief is written by the organizer,
+ * a solution is written by an entrant, and carries uploads of its own through
+ * entity_documents (entity_type 'event_solution').
+ */
+export interface EventSolution {
+  id: string
+  event_id: string
+  author_id: string
+  title: string
+  description: string | null
+  /** Demo, repo or write-up hosted elsewhere. */
+  link_url: string | null
+  created_at: string
+  updated_at: string
+  author?: Profile
 }
 
 export interface EventRSVP {
@@ -1339,8 +1358,16 @@ export interface DirectoryMember extends Profile {
 // Entity document library (migration 048)
 // ============================================================
 
-/** What a document can be attached to. 'grant_application' added in 080, 'event' in 084. */
-export type DocumentEntityType = 'grant' | 'project' | 'grant_application' | 'event'
+/**
+ * What a document can be attached to. 'grant_application' added in 080,
+ * 'event' in 084, 'event_solution' in 085.
+ */
+export type DocumentEntityType =
+  | 'grant'
+  | 'project'
+  | 'grant_application'
+  | 'event'
+  | 'event_solution'
 
 /**
  * private     — owner (and OECS admins) only; not even listed to others

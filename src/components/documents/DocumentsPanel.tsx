@@ -84,7 +84,9 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
                 ? 'Uploaded files, with an editable copy of their contents'
                 : entityType === 'grant'
                   ? 'Published by the funder — the call, annexes and any templates'
-                  : 'Files attached to this project'}
+                  : entityType === 'event'
+                    ? 'Published by the organizer — briefs, rules and any datasets'
+                    : 'Files attached to this project'}
             </p>
           </div>
         </div>
@@ -106,10 +108,14 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
         <p className="py-8 text-center text-sm text-ktip-sand-500">
           No documents yet.{' '}
           {canEditEntity
-            ? 'Upload the call for proposals, annexes or budget templates.'
+            ? entityType === 'event'
+              ? 'Upload the challenge brief, rules or any datasets participants need.'
+              : 'Upload the call for proposals, annexes or budget templates.'
             : entityType === 'grant'
               ? 'Your own supporting documents belong on your application, not here.'
-              : ''}
+              : entityType === 'event'
+                ? 'Your solution and its files go in the Solutions section below.'
+                : ''}
         </p>
       ) : (
         <div className="space-y-3">

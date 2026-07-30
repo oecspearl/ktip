@@ -81,8 +81,11 @@ export function describeEventDeletion(facts: EventDeleteFacts): DeleteImpact {
     cascades.push('Every RSVP and registration response')
   }
   if (hasChallenge) {
-    cascades.push('The challenge brief, its criteria and any submissions against them')
+    cascades.push(
+      'The challenge brief, its criteria, every solution participants submitted and the files attached to them'
+    )
   }
+  cascades.push('Documents attached to the event')
   if (hasVenue) {
     cascades.push('The virtual venue: rooms, room chat history and member records')
   }

@@ -275,6 +275,40 @@ export interface Database {
         }
         Relationships: []
       }
+      // 085 — what participants submit back against a challenge.
+      event_solutions: {
+        Row: {
+          id: string
+          event_id: string
+          author_id: string
+          title: string
+          description: string | null
+          link_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          author_id: string
+          title: string
+          description?: string | null
+          link_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          author_id?: string
+          title?: string
+          description?: string | null
+          link_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           id: string

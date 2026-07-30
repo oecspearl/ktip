@@ -1,8 +1,7 @@
 -- ============================================================
--- Migration 084: Challenge as an event type, solutions on the brief,
---                and documents on events
+-- Migration 084: Challenge as an event type, and documents on events
 --
--- Three changes, one release:
+-- Two changes, one release:
 --
 --   1. 'challenge' joins the event_type enum. The create form no longer has a
 --      separate "sets a challenge" checkbox — picking the Challenge type is
@@ -10,12 +9,9 @@
 --      it). has_challenge stays, unchanged, for every existing event and for
 --      organizers who still want a brief on a hackathon or workshop.
 --
---   2. 'solution' joins event_criteria.kind. Challenge creators outline the
---      solutions they are looking for at creation time; the rows land in the
---      same brief table so the Challenge tab and public brief render them.
---
---   3. 'event' joins entity_documents.entity_type, so organizers can attach
---      files (briefs, rules, datasets) when creating an event.
+--   2. 'event' joins entity_documents.entity_type, so organizers can attach
+--      files (briefs, rules, datasets) when creating an event. What
+--      participants submit is a separate parent — see migration 085.
 --
 -- Idempotent — safe to re-run.
 -- ============================================================
@@ -29,18 +25,7 @@ ALTER TABLE events
   CHECK (event_type IN ('hackathon', 'workshop', 'meetup', 'conference', 'demo_day', 'challenge'));
 
 -- ------------------------------------------------------------
--- 2. Solutions on the brief
--- ------------------------------------------------------------
-ALTER TABLE event_criteria DROP CONSTRAINT IF EXISTS event_criteria_kind_check;
-ALTER TABLE event_criteria
-  ADD CONSTRAINT event_criteria_kind_check
-  CHECK (kind IN ('solution', 'objective', 'constraint', 'deliverable', 'judging_criterion'));
-
-COMMENT ON COLUMN event_criteria.kind IS
-  'solution | objective | constraint | deliverable | judging_criterion';
-
--- ------------------------------------------------------------
--- 3. Documents may hang off an event
+-- 2. Documents may hang off an event
 -- ------------------------------------------------------------
 ALTER TABLE entity_documents DROP CONSTRAINT IF EXISTS entity_documents_entity_type_check;
 ALTER TABLE entity_documents
