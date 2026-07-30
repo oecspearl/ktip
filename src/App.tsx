@@ -2,11 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from '@sentry/react'
 import {
   createBrowserRouter as createBrowserRouterBase,
-  RouterProvider,
   Outlet,
   Link,
   Navigate,
 } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AchievementProvider } from './contexts/AchievementContext'

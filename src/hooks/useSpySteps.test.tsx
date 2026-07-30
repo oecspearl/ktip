@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { act, cleanup, render } from '@testing-library/react'
-import { createMemoryRouter, RouterProvider } from 'react-router'
+import { createMemoryRouter } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import { useSpySteps, type SpyStep } from './useSpySteps'
 
 // The hook scans #main-content, which MainLayout renders — the harness stands in
