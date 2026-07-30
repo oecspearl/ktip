@@ -124,14 +124,62 @@ export function ktipApiKey(): string | null {
   return key || null
 }
 
+export function ktipCourseUrl(courseId: string): string {
+  return `${catalogBaseUrl()}/course/${courseId}`
+}
+
 /** VC may return localhost URLs when NEXT_PUBLIC_APP_URL is unset — always use our configured base. */
 export function normalizeKtipEnrollResult(result: KtipEnrollResult): KtipEnrollResult {
   const base = catalogBaseUrl()
   return {
     ...result,
     sign_in_url: `${base}/auth/signin`,
-    course_url: `${base}/course/${result.course_id}`,
+    course_url: ktipCourseUrl(result.course_id),
   }
+}
+
+export interface KtipEnrollment {
+  enrollment_id: string
+  course_id: string
+  course_url: string
+  enrolled_at: string | null
+  progress_percentage: number | null
+}
+
+/** Active KTIP enrollments for the signed-in learner's email. */
+export async function loadKtipEnrollments(email: string): Promise<KtipEnrollment[]> {
+  const apiKey = ktipApiKey()
+  if (!apiKey) throw new KtipEnrollError(503, 'Server configuration error')
+
+  const url = `${catalogBaseUrl()}/api/external/ktip/enrollments?email=${encodeURIComponent(email)}`
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+  })
+
+  if (res.status === 404) return []
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string }
+    const message = body.error || body.message || `Enrollment lookup failed (${res.status})`
+    throw new KtipEnrollError(res.status, message)
+  }
+
+  const body = (await res.json()) as {
+    enrollments?: Array<{
+      id: string
+      course_id: string
+      enrolled_at?: string | null
+      progress_percentage?: number | null
+    }>
+  }
+
+  const list = Array.isArray(body.enrollments) ? body.enrollments : []
+  return list.map((row) => ({
+    enrollment_id: row.id,
+    course_id: row.course_id,
+    course_url: ktipCourseUrl(row.course_id),
+    enrolled_at: row.enrolled_at ?? null,
+    progress_percentage: row.progress_percentage ?? null,
+  }))
 }
 
 export async function enrollInKtipCourse(input: {

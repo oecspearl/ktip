@@ -9,6 +9,7 @@ import {
   enrollInKtipCourse,
   KtipCatalogUnavailableError,
   loadKtipCatalog,
+  loadKtipEnrollments,
   normalizeKtipEnrollResult,
 } from '../../../api/_lib/ktip-catalog'
 
@@ -195,5 +196,45 @@ describe('enrollInKtipCourse', () => {
       status,
       message: 'upstream said no',
     })
+  })
+})
+
+describe('loadKtipEnrollments', () => {
+  it('returns normalized enrollments with commons course URLs', async () => {
+    vi.stubEnv('MYPD_KTIP_API_KEY', 'secret-key')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          enrollments: [
+            {
+              id: 'e1',
+              course_id: 'c1',
+              enrolled_at: '2026-01-01T00:00:00Z',
+              progress_percentage: 10,
+            },
+          ],
+        }),
+      }))
+    )
+
+    const rows = await loadKtipEnrollments('learner@example.com')
+    expect(rows).toEqual([
+      {
+        enrollment_id: 'e1',
+        course_id: 'c1',
+        course_url: `${DEFAULT_BASE}/course/c1`,
+        enrolled_at: '2026-01-01T00:00:00Z',
+        progress_percentage: 10,
+      },
+    ])
+  })
+
+  it('returns an empty list on upstream 404', async () => {
+    vi.stubEnv('MYPD_KTIP_API_KEY', 'secret-key')
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 404, json: async () => ({}) })))
+
+    await expect(loadKtipEnrollments('nobody@example.com')).resolves.toEqual([])
   })
 })
