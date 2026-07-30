@@ -17,6 +17,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
+import { grantImageFor } from '../../lib/hero-images'
 import { formatCurrency, formatDate, truncate } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -89,7 +90,7 @@ export default function GrantDetailPage() {
     }
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Wallet size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -100,7 +101,7 @@ export default function GrantDetailPage() {
         </p>
         <button
           onClick={() => navigate('/grants')}
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
           Back to Grants
         </button>
@@ -113,6 +114,7 @@ export default function GrantDetailPage() {
       <PageHero
         eyebrow="Grant Detail"
         title={grant.title}
+        image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
         imageSeed={grant.id}
         breadcrumb={[
           { label: 'Home', href: '/' },
@@ -158,7 +160,11 @@ export default function GrantDetailPage() {
             </div>
 
             {/* Key Details */}
-            <div className="grid md:grid-cols-2 gap-4 mb-8 p-4 bg-ktip-canvas rounded-xl">
+            <div
+              id="key-details"
+              data-spy="Key details"
+              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-8 p-4 bg-ktip-canvas rounded-xl"
+            >
               {grant.deadline && (
                 <div className="flex items-start gap-3">
                   <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
@@ -188,7 +194,7 @@ export default function GrantDetailPage() {
 
             {/* Description */}
             {grant.description && (
-              <div className="mb-8">
+              <div id="about" data-spy="About" className="scroll-mt-24 mb-8">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                   About this Grant
                 </h3>
@@ -201,7 +207,7 @@ export default function GrantDetailPage() {
 
             {/* Additional Details */}
             {grant.details && grant.details.length > 0 && (
-              <div className="mb-8">
+              <div id="details" data-spy="Details" className="scroll-mt-24 mb-8">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                   Additional Details
                 </h3>
@@ -212,7 +218,7 @@ export default function GrantDetailPage() {
 
             {/* Eligibility */}
             {grant.eligibility && (
-              <div className="mb-8">
+              <div id="eligibility" data-spy="Eligibility" className="scroll-mt-24 mb-8">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
                   <Users size={18} />
                   Eligibility Requirements
@@ -225,7 +231,7 @@ export default function GrantDetailPage() {
             )}
 
             {/* Documents */}
-            <div className="mb-8">
+            <div id="documents" data-spy="Documents" className="scroll-mt-24 mb-8">
               <DocumentsPanel
                 entityType="grant"
                 entityId={grant.id}
@@ -273,7 +279,7 @@ export default function GrantDetailPage() {
                   )}
 
                   {!grant.is_active && !hasApplied && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
+                    <div className="bg-ktip-sand-50 border border-ktip-sand-200 rounded-xl p-4 mb-4">
                       <p className="text-sm text-gray-700">
                         This grant is currently inactive.
                       </p>
@@ -330,7 +336,7 @@ export default function GrantDetailPage() {
                 Grant Information
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Key details</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500">Currency</span>
                   <span className="font-medium text-ktip-sand-900">

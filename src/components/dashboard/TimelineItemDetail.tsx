@@ -60,8 +60,8 @@ export function TimelineItemDetail({ item }: TimelineItemDetailProps) {
                   className={cn(
                     'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all',
                     isRejectedStep && 'bg-red-500 border-red-500 text-white',
-                    !isRejectedStep && isCompleted && 'bg-ktip-ocean-500 border-ktip-ocean-500 text-white',
-                    !isRejectedStep && isCurrent && 'bg-ktip-ocean-500 border-ktip-ocean-500 text-white ring-4 ring-ktip-ocean-100',
+                    !isRejectedStep && isCompleted && 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 border-ktip-ocean-500 text-white',
+                    !isRejectedStep && isCurrent && 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 border-ktip-ocean-500 text-white ring-4 ring-ktip-ocean-100',
                     !isRejectedStep && !isCompleted && !isCurrent && 'bg-ktip-cream border-ktip-sand-300 text-ktip-sand-400'
                   )}
                 >

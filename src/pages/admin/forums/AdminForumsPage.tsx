@@ -94,7 +94,7 @@ export default function AdminForumsPage() {
       />
 
       {/* Flat Tabs */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-ktip-sand-200 mb-6">
         <div className="flex gap-6">
           <button
             type="button"
@@ -103,7 +103,7 @@ export default function AdminForumsPage() {
               'flex items-center gap-2 px-1 py-3 text-sm font-medium transition-colors border-b-2 -mb-px',
               activeTab === 'boards'
                 ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
             )}
           >
             <MessageSquare size={16} />
@@ -116,7 +116,7 @@ export default function AdminForumsPage() {
               'flex items-center gap-2 px-1 py-3 text-sm font-medium transition-colors border-b-2 -mb-px',
               activeTab === 'posts'
                 ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
             )}
           >
             <FileText size={16} />
@@ -140,7 +140,7 @@ export default function AdminForumsPage() {
             {boards.map((board) => {
               const IconComp = boardIconMap[board.icon || 'MessageSquare'] || MessageSquare
               return (
-                <div key={board.id} className="border border-gray-200 p-4 rounded-lg">
+                <div key={board.id} className="border border-ktip-sand-200 p-4 rounded-lg">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center flex-shrink-0">
                       <IconComp size={20} className="text-ktip-ocean-600" />
@@ -186,13 +186,13 @@ export default function AdminForumsPage() {
                     setSearchQuery(e.currentTarget.value)
                     debouncedSetSearch(e.currentTarget.value)
                   }}
-                  className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
                 />
               </div>
               <select
                 value={boardFilter}
                 onChange={(e) => setBoardFilter(e.currentTarget.value)}
-                className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+                className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
               >
                 <option value="">All Boards</option>
                 {(boards || []).map((board) => (
@@ -231,7 +231,7 @@ export default function AdminForumsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-ktip-sand-200">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Title
                       </th>
@@ -252,9 +252,9 @@ export default function AdminForumsPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 stagger-rows">
+                  <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                     {posts.map((post) => (
-                      <tr key={post.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={post.id} className="hover:bg-ktip-sand-50 transition-colors">
                         <td className="px-4 py-3">
                           <span className="truncate max-w-xs block font-medium text-gray-900 text-sm">
                             {post.title}

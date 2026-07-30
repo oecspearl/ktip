@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import {
   describeEventDeletion,
+  describeGrantDeletion,
   describeProjectDeletion,
   isDeleteConfirmed,
   type EventDeleteFacts,
+  type GrantDeleteFacts,
   type ProjectDeleteFacts,
 } from './delete-guard'
 
@@ -119,6 +121,61 @@ describe('describeProjectDeletion', () => {
     expect(describeProjectDeletion(project()).cascades.some((c) => c.includes('membership'))).toBe(false)
     expect(
       describeProjectDeletion(project({ memberCount: 1 })).cascades.some((c) => c.includes('membership'))
+    ).toBe(true)
+  })
+})
+
+const grant = (over: Partial<GrantDeleteFacts> = {}): GrantDeleteFacts => ({
+  isActive: false,
+  applicationCount: 0,
+  ...over,
+})
+
+describe('describeGrantDeletion', () => {
+  it('treats an inactive grant with no applications as a low-friction delete', () => {
+    const impact = describeGrantDeletion(grant())
+    expect(impact.affectsOthers).toBe(false)
+    expect(impact.requiresTitleConfirmation).toBe(false)
+    expect(impact.warning).toBe(null)
+  })
+
+  it('requires the title once anyone has applied', () => {
+    const impact = describeGrantDeletion(grant({ applicationCount: 3 }))
+    expect(impact.affectsOthers).toBe(true)
+    expect(impact.requiresTitleConfirmation).toBe(true)
+    expect(impact.warning).toContain('3 applications')
+  })
+
+  it('pluralises a single application', () => {
+    expect(describeGrantDeletion(grant({ applicationCount: 1 })).warning).toContain('1 application will')
+  })
+
+  it('requires the title for a live grant with no applications', () => {
+    const impact = describeGrantDeletion(grant({ isActive: true }))
+    expect(impact.requiresTitleConfirmation).toBe(true)
+    expect(impact.warning).toContain('Existing links')
+  })
+
+  // Active plus uncounted is the case the admin table actually hits.
+  it('treats an uncounted total on a live grant as possibly non-zero', () => {
+    const impact = describeGrantDeletion(grant({ isActive: true, applicationCount: null }))
+    expect(impact.affectsOthers).toBe(true)
+    expect(impact.requiresTitleConfirmation).toBe(true)
+    expect(impact.warning).toContain('Deactivating it instead')
+  })
+
+  it('does not escalate an uncounted total on an inactive grant', () => {
+    const impact = describeGrantDeletion(grant({ isActive: false, applicationCount: null }))
+    expect(impact.affectsOthers).toBe(false)
+    expect(impact.requiresTitleConfirmation).toBe(false)
+  })
+
+  it('names applications in the cascade list unless the total is a known zero', () => {
+    expect(describeGrantDeletion(grant()).cascades.some((c) => c.includes('application'))).toBe(false)
+    expect(
+      describeGrantDeletion(grant({ applicationCount: null })).cascades.some((c) =>
+        c.includes('application')
+      )
     ).toBe(true)
   })
 })

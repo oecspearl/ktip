@@ -4,11 +4,16 @@
  * This bypasses the Supabase client entirely, which is necessary when
  * the client's internal auth lock is stuck (e.g., a hanging token refresh
  * from a stale/corrupt session blocks all subsequent auth operations).
+ *
+ * Leaves the PKCE code verifier alone. It lives under an `sb-` key too, but
+ * it belongs to an OAuth sign-in that is still mid-flight — dropping it makes
+ * the code-for-session exchange on /auth/callback fail and bounces the user
+ * back to /login.
  */
 export function clearSupabaseSession() {
   const keys = Object.keys(localStorage)
   for (const key of keys) {
-    if (key.startsWith('sb-')) {
+    if (key.startsWith('sb-') && !key.endsWith('-code-verifier')) {
       localStorage.removeItem(key)
     }
   }

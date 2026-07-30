@@ -458,6 +458,12 @@ export interface Grant extends Ranked {
   is_active: boolean
   is_climate_action: boolean
   details: DetailEntry[]
+  /**
+   * Migration 077 — who posted it. NULL on rows created before 077, which are
+   * manageable by OECS admins only; before 077 there was no creator to check,
+   * so any `grant:post` holder could edit or delete anyone's grant.
+   */
+  created_by: string | null
   created_at: string
 }
 

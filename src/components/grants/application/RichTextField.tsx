@@ -263,7 +263,7 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error, 
                     placeholder="https://..."
                     className="flex-1 px-2 py-1 rounded border border-ktip-sand-300 bg-ktip-cream text-sm focus:outline-none focus:border-ktip-ocean-600"
                   />
-                  <button type="button" className="px-2 py-1 rounded bg-ktip-ocean-600 text-white text-sm" onClick={insertLink}>Add</button>
+                  <button type="button" className="px-2 py-1 rounded bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white text-sm" onClick={insertLink}>Add</button>
                 </div>
               )}
             </div>
@@ -281,7 +281,7 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error, 
                     placeholder="Image URL..."
                     className="flex-1 px-2 py-1 rounded border border-ktip-sand-300 bg-ktip-cream text-sm focus:outline-none focus:border-ktip-ocean-600"
                   />
-                  <button type="button" className="px-2 py-1 rounded bg-ktip-ocean-600 text-white text-sm" onClick={insertImage}>Add</button>
+                  <button type="button" className="px-2 py-1 rounded bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white text-sm" onClick={insertImage}>Add</button>
                 </div>
               )}
             </div>

@@ -115,7 +115,7 @@ function GanttGridOverlay({ todayLeft }: { todayLeft: number | null }) {
       ))}
       {todayLeft !== null && (
         <div className="absolute inset-y-0 w-px bg-ktip-ocean-400/60" style={{ left: todayLeft }}>
-          <span className="absolute -top-0.5 start-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-ktip-ocean-500 text-white text-[10px] font-medium leading-none whitespace-nowrap">
+          <span className="absolute -top-0.5 start-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white text-[10px] font-medium leading-none whitespace-nowrap">
             Today
           </span>
         </div>

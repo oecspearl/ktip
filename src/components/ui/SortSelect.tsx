@@ -1,4 +1,6 @@
+import { useId } from 'react'
 import type { ContentSort } from '../../lib/personalization'
+import { Select } from './Select'
 
 interface SortSelectProps {
   value: ContentSort
@@ -19,6 +21,8 @@ export function SortSelect({
   options,
   personalizationActive,
 }: SortSelectProps) {
+  const labelId = useId()
+
   const visible = personalizationActive
     ? options
     : options.filter((o) => o.value !== 'for_you')
@@ -26,20 +30,17 @@ export function SortSelect({
   if (visible.length < 2) return null
 
   return (
-    <label className="flex items-center gap-2 text-sm text-ktip-sand-600">
-      <span className="shrink-0">Sort</span>
-      <select
+    <span className="flex items-center gap-2 text-sm text-ktip-sand-600">
+      <span id={labelId} className="shrink-0">
+        Sort
+      </span>
+      <Select<ContentSort>
         value={value}
-        onChange={(e) => onChange(e.currentTarget.value as ContentSort)}
-        aria-label="Sort results"
-        className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-      >
-        {visible.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        onChange={onChange}
+        options={visible}
+        ariaLabelledBy={labelId}
+        align="end"
+      />
+    </span>
   )
 }

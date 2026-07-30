@@ -98,7 +98,7 @@ function AcceptDecline({
         type="button"
         onClick={onAccept}
         disabled={disabled}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-brand text-sm font-medium disabled:opacity-50"
       >
         <Check size={14} />
         {acceptLabel}

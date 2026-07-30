@@ -46,18 +46,18 @@ export default function FAQPage() {
             placeholder="Search questions..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 border border-gray-300 bg-ktip-cream rounded-xl text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            className="w-full pl-11 pr-4 py-3 border border-ktip-sand-300 bg-ktip-cream rounded-xl text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
           />
         </div>
 
         {grouped.length > 0 ? (
           <div className="space-y-8">
             {grouped.map(({ category, items }) => (
-              <div key={category}>
+              <div key={category} data-spy={category} className="scroll-mt-24">
                 <h2 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-3">
                   {category}
                 </h2>
-                <div className="border border-gray-200 rounded-xl divide-y divide-gray-100 bg-ktip-cream overflow-hidden">
+                <div className="border border-ktip-sand-200 rounded-xl divide-y divide-ktip-sand-100 bg-ktip-cream overflow-hidden">
                   {items.map((faq) => {
                     const isOpen = openId === faq.id
                     return (
@@ -89,7 +89,7 @@ export default function FAQPage() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <HelpCircle size={32} className="text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No matching questions</h3>
@@ -101,7 +101,11 @@ export default function FAQPage() {
         )}
 
         {/* Didn't find an answer */}
-        <div className="mt-12 p-6 bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-2xl text-center">
+        <div
+          id="feedback"
+          data-spy="Feedback"
+          className="scroll-mt-24 mt-12 p-6 bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-2xl text-center"
+        >
           <p className="text-sm font-semibold text-ktip-sand-900 mb-1">
             Didn't find what you were looking for?
           </p>
@@ -110,7 +114,7 @@ export default function FAQPage() {
           </p>
           <button
             onClick={() => setShowFeedback(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 btn-brand text-sm font-bold rounded-lg"
           >
             <MessageCircle size={16} />
             Send Feedback

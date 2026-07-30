@@ -12,6 +12,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useAutoSave } from '../../hooks/useAutoSave'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { grantImageFor } from '../../lib/hero-images'
 import { SponsorNominationCard } from '../../components/grants/SponsorNominationCard'
 import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
 import { truncate } from '../../lib/utils'
@@ -222,6 +223,7 @@ export default function GrantApplicationPage() {
       <PageHero
         eyebrow="Grant Application"
         title={grant.title}
+        image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
         imageSeed={grant.id}
         breadcrumb={[
           { label: 'Home', href: '/' },
@@ -239,7 +241,7 @@ export default function GrantApplicationPage() {
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
           {/* Stepper */}
-          <div className="border border-gray-200 rounded-2xl p-4 mb-6">
+          <div id="steps" data-spy="Steps" className="scroll-mt-24 border border-ktip-sand-200 rounded-2xl p-4 mb-6">
             <Stepper
               steps={stepNames}
               currentStep={currentStep}
@@ -248,7 +250,11 @@ export default function GrantApplicationPage() {
           </div>
 
           {/* Content */}
-          <div className="border border-gray-200 rounded-2xl p-6 md:p-8">
+          <div
+            id="form"
+            data-spy="Form"
+            className="scroll-mt-24 border border-ktip-sand-200 rounded-2xl p-6 md:p-8"
+          >
             <StepForm
               step={currentStepConfig}
               data={applicationData}
@@ -270,7 +276,7 @@ export default function GrantApplicationPage() {
             )}
 
             {isReviewStep && (
-              <div className="mt-8">
+              <div id="review" data-spy="Review" className="scroll-mt-24 mt-8">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-ktip-sand-900">Review & Submit</h3>
                   <p className="text-sm text-ktip-sand-500 mt-1">
@@ -334,7 +340,7 @@ export default function GrantApplicationPage() {
                   type="button"
                   onClick={handleNext}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-ocean-500 text-white rounded-xl text-sm font-medium hover:bg-ktip-ocean-600 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-xl text-sm font-medium hover:bg-brand-green hover:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-colors disabled:opacity-50"
                 >
                   {saving ? <Loader2 size={16} className="animate-spin" /> : 'Next'}
                   {!saving && <ArrowRight size={16} />}

@@ -5,6 +5,7 @@ import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
+import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import type { DetailEntry, Grant } from '../types'
 
 export function useGrants(filters?: {
@@ -123,13 +124,20 @@ export function useCreateGrant() {
       is_climate_action?: boolean
       details?: DetailEntry[]
     }) => {
+      // Migration 077's INSERT policy requires created_by = auth.uid(): a grant
+      // filed under someone else's name is one its author cannot then manage.
+      const { data: session } = await supabase.auth.getUser()
+      const createdBy = session?.user?.id
+      if (!createdBy) throw new Error('You must be signed in to post a grant')
+
       const { data, error } = await supabase
         .from('grants')
         .insert({
           ...grantData,
+          created_by: createdBy,
           currency: grantData.currency || 'USD',
           is_active: true,
-        })
+        } as any)
         .select()
         .single()
 
@@ -174,6 +182,28 @@ export function useUpdateGrant() {
     mutation.mutateAsync({ grantId, updates })
 
   return { updateGrant, loading: mutation.isPending, error: mutation.error }
+}
+
+export function useDeleteGrant() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (grantId: string) => {
+      // Uploads first, while the parent still exists for the RPC to check.
+      const uploadPaths = await listEntityUploadPaths('grant', grantId)
+
+      const { error } = await supabase.from('grants').delete().eq('id', grantId)
+      if (error) throw error
+
+      await removeEntityUploads(uploadPaths)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('grants') })
+      queryClient.invalidateQueries({ queryKey: keys.all('entity-documents') })
+    },
+  })
+
+  return { deleteGrant: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 // Grant Applications

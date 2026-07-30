@@ -80,7 +80,8 @@ interface SectionProps {
 
 function Section({ icon, iconClass, title, subtitle, children }: SectionProps) {
   return (
-    <Card>
+    // Title doubles as the scrollspy rail label
+    <Card id={title.toLowerCase().replace(/\s+/g, '-')} data-spy={title} className="scroll-mt-24">
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconClass}`}>
           {icon}

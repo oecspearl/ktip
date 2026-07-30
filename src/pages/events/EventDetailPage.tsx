@@ -159,7 +159,7 @@ export default function EventDetailPage() {
     }
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CalendarX size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -170,7 +170,7 @@ export default function EventDetailPage() {
         </p>
         <button
           onClick={() => navigate('/events')}
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
           Back to Events
         </button>
@@ -194,7 +194,7 @@ export default function EventDetailPage() {
           isOrganizer ? (
             <>
               <Link to={`/events/${params.id}/edit`}>
-                <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
                   <Edit size={14} />
                   Edit
                 </button>
@@ -234,7 +234,7 @@ export default function EventDetailPage() {
 
       {/* === Past Event Banner === */}
       {isPastEvent && (
-        <div className="bg-ktip-sand-50 border-b border-gray-200 py-3">
+        <div className="bg-ktip-sand-50 border-b border-ktip-sand-200 py-3">
           <p className="text-gray-700 text-center text-sm">
             This event has already passed
           </p>
@@ -272,7 +272,11 @@ export default function EventDetailPage() {
             )}
 
             {/* Event Details Grid */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded border border-gray-200">
+            <div
+              id="key-details"
+              data-spy="Key details"
+              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-6 p-4 bg-ktip-sand-50 rounded border border-ktip-sand-200"
+            >
               {/* Date */}
               <div className="flex items-start gap-3">
                 <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
@@ -359,7 +363,7 @@ export default function EventDetailPage() {
 
             {/* Description */}
             {event.description && (
-              <div className="mb-6">
+              <div id="about" data-spy="About" className="scroll-mt-24 mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                   About This Event
                 </h3>
@@ -382,7 +386,7 @@ export default function EventDetailPage() {
             )}
 
             {/* Engagement row */}
-            <div className="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4 mb-6">
+            <div className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 mb-6">
               <button
                 className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
                 onClick={() => {
@@ -431,17 +435,21 @@ export default function EventDetailPage() {
 
             {/* Schedule */}
             {scheduleItems && scheduleItems.length > 0 && (
-              <EventScheduleTimeline items={scheduleItems} />
+              <div id="schedule" data-spy="Schedule" className="scroll-mt-24">
+                <EventScheduleTimeline items={scheduleItems} />
+              </div>
             )}
 
             {/* Speakers */}
             {eventSpeakers && eventSpeakers.length > 0 && (
-              <EventSpeakerGrid speakers={eventSpeakers} />
+              <div id="speakers" data-spy="Speakers" className="scroll-mt-24">
+                <EventSpeakerGrid speakers={eventSpeakers} />
+              </div>
             )}
 
             {/* Event Updates */}
             {eventUpdates && eventUpdates.length > 0 && (
-              <div className="mt-10">
+              <div id="updates" data-spy="Updates" className="scroll-mt-24 mt-10">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
                   <Megaphone size={18} className="text-ktip-ocean-600" />
                   Updates
@@ -476,10 +484,10 @@ export default function EventDetailPage() {
                 <p className="text-ktip-ocean-600 text-xs italic mb-4">Related reading</p>
                 <div className="space-y-6">
                   {eventArticles.map((article) => (
-                    <div key={article.id} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
+                    <div key={article.id} className="border-b border-ktip-sand-200 pb-4 last:border-0 last:pb-0">
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="text-lg font-semibold text-ktip-sand-900">{article.title}</h4>
-                        <Badge size="sm" className="bg-gray-100 text-gray-600 border-gray-200">
+                        <Badge size="sm" className="bg-ktip-sand-100 text-gray-600 border-ktip-sand-200">
                           {EVENT_ARTICLE_TYPE_LABELS[article.article_type] || article.article_type}
                         </Badge>
                       </div>
@@ -574,7 +582,7 @@ export default function EventDetailPage() {
               )}
 
               {/* Attendee Count */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-ktip-sand-200">
                 <p className="text-sm text-gray-500">
                   {rsvpCount} {rsvpCount === 1 ? 'person' : 'people'} attending
                 </p>
@@ -617,7 +625,7 @@ export default function EventDetailPage() {
                 Event Details
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500">Type</span>
                   <span className="font-medium text-ktip-sand-900">

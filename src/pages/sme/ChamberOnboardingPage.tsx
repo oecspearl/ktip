@@ -128,7 +128,7 @@ export default function ChamberOnboardingPage() {
   const statusCopy = status ? STATUS_COPY[status] : null
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--nav-h)+1.5rem)] pb-12">
       <PageHero
         compact
         eyebrow="Private sector"

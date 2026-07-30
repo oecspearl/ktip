@@ -1,33 +1,16 @@
 import { Search, X } from 'lucide-react'
-import type { HelpCategory } from '../../lib/help-content'
 
 interface HelpSearchProps {
   searchQuery: string
   setSearchQuery: (val: string) => void
-  selectedCategory: string
-  setSelectedCategory: (val: string) => void
-  categories: HelpCategory[]
   resultCount?: number
 }
 
-export function HelpSearch({
-  searchQuery,
-  setSearchQuery,
-  selectedCategory,
-  setSelectedCategory,
-  categories,
-  resultCount,
-}: HelpSearchProps) {
-  const hasFilters = searchQuery.trim() !== '' || selectedCategory !== ''
-
-  const clearAll = () => {
-    setSearchQuery('')
-    setSelectedCategory('')
-  }
-
+// Category filtering moved out of here into HelpCategoryNav — the chip row did
+// not belong on the hero image, and 20 categories will not fit in one.
+export function HelpSearch({ searchQuery, setSearchQuery, resultCount }: HelpSearchProps) {
   return (
-    <div className="space-y-4">
-      {/* Search Input */}
+    <div>
       <div className="relative">
         <Search
           size={20}
@@ -52,50 +35,8 @@ export function HelpSearch({
         )}
       </div>
 
-      {/* Category Filters */}
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setSelectedCategory('')}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            selectedCategory === ''
-              ? 'bg-ktip-ocean-500 text-white'
-              : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
-          }`}
-        >
-          All
-        </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() =>
-              setSelectedCategory(selectedCategory === cat.id ? '' : cat.id)
-            }
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              selectedCategory === cat.id
-                ? 'bg-ktip-ocean-500 text-white'
-                : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
-            }`}
-          >
-            {cat.title}
-          </button>
-        ))}
-
-        {hasFilters && (
-          <button
-            type="button"
-            onClick={clearAll}
-            className="ml-auto text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
-          >
-            Clear all
-          </button>
-        )}
-      </div>
-
-      {/* Results count */}
-      {hasFilters && resultCount !== undefined && (
-        <p className="text-sm text-ktip-sand-500">
+      {resultCount !== undefined && (
+        <p className="mt-2 text-sm text-white/80 md:text-right">
           Found {resultCount} article{resultCount !== 1 ? 's' : ''}
         </p>
       )}

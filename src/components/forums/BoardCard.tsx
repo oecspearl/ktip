@@ -21,9 +21,11 @@ const iconMap: Record<string, ComponentType<{ size?: number; className?: string 
 
 interface BoardCardProps {
   board: ForumBoard
+  /** Bento span/sizing classes from lib/bento.ts. */
+  className?: string
 }
 
-export function BoardCard({ board }: BoardCardProps) {
+export function BoardCard({ board, className }: BoardCardProps) {
   const Icon = iconMap[board.icon || 'MessageSquare'] || MessageSquare
 
   return (
@@ -39,6 +41,7 @@ export function BoardCard({ board }: BoardCardProps) {
       title={board.name}
       description={board.description}
       cta="Open Board"
+      className={className}
     />
   )
 }

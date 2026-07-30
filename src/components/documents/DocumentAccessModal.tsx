@@ -25,8 +25,7 @@ function Avatar({ name, url }: { name: string; url: string | null | undefined })
   }
   return (
     <div
-      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0"
-      style={{ background: generateAvatarColor(name) }}
+      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0 ${generateAvatarColor(name)}`}
     >
       {getInitials(name)}
     </div>

@@ -1,6 +1,6 @@
 import {
   LayoutDashboard,
-  User,
+  FileText,
   TrendingUp,
   FolderKanban,
   Calendar,
@@ -30,11 +30,13 @@ export interface DashboardTab {
 
 export const DASHBOARD_TABS: DashboardTab[] = [
   { to: '', label: 'Overview', icon: LayoutDashboard, description: 'Network, submissions, calendar' },
-  { to: 'profile', label: 'Profile', icon: User, description: 'How others see you' },
+  // Kept at 'profile' so existing /dashboard/profile links and bookmarks still
+  // land somewhere; the panel is the member's CV.
+  { to: 'profile', label: 'My CV', icon: FileText, description: 'Your résumé, ready to send' },
   { to: 'progress', label: 'Progress', icon: TrendingUp, description: 'Your activity timeline' },
-  // Links out: the gallery is a full page, not a panel — it carries filters,
-  // collections and showcase editing that do not fit the tab shell.
-  { to: '/achievements', label: 'Achievements', icon: Trophy, description: 'Badges, points and rank', external: true },
+  // A real panel, not a link out. The gallery renders in embedded mode (see
+  // AchievementsTab); /achievements stays reachable for direct links.
+  { to: 'achievements', label: 'Achievements', icon: Trophy, description: 'Badges, points and rank' },
   { to: 'projects', label: 'Projects', icon: FolderKanban, description: 'Projects you own' },
   { to: 'events', label: 'Events', icon: Calendar, description: 'Events you organize' },
   { to: 'connections', label: 'Connections', icon: Users, description: 'People you know' },

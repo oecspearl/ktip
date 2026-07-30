@@ -512,7 +512,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
           className="absolute z-[10007] -translate-x-1/2 animate-bounce pointer-events-none"
           style={{ top: hintBox.top - PAD - 40, left: hintBox.left + hintBox.width / 2 }}
         >
-          <span className="inline-block whitespace-nowrap rounded-full bg-ktip-ocean-600 px-3 py-1.5 text-xs font-bold text-white shadow-hard">
+          <span className="inline-block whitespace-nowrap rounded-full bg-ktip-ocean-600 dark:bg-ktip-ocean-200 px-3 py-1.5 text-xs font-bold text-white shadow-hard">
             {step.actionHint}
           </span>
         </div>
@@ -614,12 +614,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
                 Back
               </Button>
             )}
-            <Button
-              size="sm"
-              disabled={awaitingAction}
-              onClick={handleNext}
-              className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700"
-            >
+            <Button size="sm" disabled={awaitingAction} onClick={handleNext}>
               {awaitingAction ? 'Waiting…' : isLast ? 'Finish' : 'Next'}
               {!awaitingAction && !isLast && <ChevronRight size={14} />}
             </Button>

@@ -1,5 +1,6 @@
 import { useAnalyticsData, type DateRange } from '../../../hooks/useAnalyticsData'
 import { PageHero } from '../../../components/layout/PageHero'
+import { Card } from '../../../components/ui/Card'
 import {
   BarChart3,
   Eye,
@@ -10,6 +11,13 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+
+/**
+ * Surfaces here are ktip tokens (cream panels, sand text), not raw gray-800/900.
+ * The gray scale inverts under html.dark, so the old hardcoded dark panels were
+ * a black page in light mode and — worse — flipped to white-on-white at night.
+ * Every colour below reads correctly in both modes with no dark: overrides.
+ */
 
 const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { value: '7d', label: '7 days' },
@@ -31,6 +39,8 @@ const CONVERSION_LABELS: Record<string, string> = {
   login_success: 'Login',
   signup_success: 'Signup',
 }
+
+const PANEL_HEADING = 'text-lg font-semibold text-ktip-sand-900 mb-4 flex items-center gap-2'
 
 export default function AdminAnalyticsPage() {
   const {
@@ -57,15 +67,17 @@ export default function AdminAnalyticsPage() {
         subtitle="Track page views, feature usage, funnels, and conversions"
         imageSeed="admin-analytics"
         actions={
-          <div className="flex gap-1 bg-gray-800 p-1">
+          // Sits on the hero photo, which is dark in both modes — hence the
+          // translucent black shell and white type rather than page tokens.
+          <div className="flex gap-1 rounded-lg bg-black/30 backdrop-blur-sm p-1">
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setRange(opt.value)}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   range === opt.value
-                    ? 'bg-ktip-ocean-600 text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-ktip-ocean-600 text-white dark:bg-ktip-ocean-200'
+                    : 'text-white/70 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -76,7 +88,7 @@ export default function AdminAnalyticsPage() {
       />
 
       {loading ? (
-        <div className="text-gray-400 py-12 text-center">Loading analytics...</div>
+        <div className="text-ktip-sand-500 py-12 text-center">Loading analytics...</div>
       ) : (
         <>
           {/* Summary Cards */}
@@ -88,8 +100,8 @@ export default function AdminAnalyticsPage() {
           </div>
 
           {/* Daily Page Views Chart */}
-          <div className="bg-gray-900 border border-gray-800 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Card className="mb-6">
+            <h2 className={PANEL_HEADING}>
               <Activity size={20} className="text-ktip-ocean-500" />
               Daily Page Views
             </h2>
@@ -104,7 +116,7 @@ export default function AdminAnalyticsPage() {
                         className="w-full bg-ktip-ocean-600 min-h-[2px] transition-all hover:bg-ktip-ocean-400"
                         style={{ height: `${pct}%` }}
                       />
-                      <span className="text-[10px] text-gray-600 hidden group-hover:block absolute -bottom-5">
+                      <span className="text-[10px] text-ktip-sand-500 hidden group-hover:block absolute -bottom-5">
                         {day.date.slice(5)}
                       </span>
                     </div>
@@ -112,14 +124,14 @@ export default function AdminAnalyticsPage() {
                 })}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No data yet</p>
+              <p className="text-ktip-sand-500 text-sm">No data yet</p>
             )}
-          </div>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Top Pages */}
-            <div className="bg-gray-900 border border-gray-800 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Card>
+              <h2 className={PANEL_HEADING}>
                 <Eye size={20} className="text-ktip-ocean-500" />
                 Top Pages
               </h2>
@@ -130,13 +142,13 @@ export default function AdminAnalyticsPage() {
                     const pct = (page.count / max) * 100
                     return (
                       <div key={page.path} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 w-5 text-right">{i + 1}</span>
+                        <span className="text-xs text-ktip-sand-500 w-5 text-right">{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-sm text-gray-300 truncate">{page.path}</span>
-                            <span className="text-sm text-white font-medium ml-2">{page.count}</span>
+                            <span className="text-sm text-ktip-sand-700 truncate">{page.path}</span>
+                            <span className="text-sm text-ktip-sand-900 font-medium ml-2">{page.count}</span>
                           </div>
-                          <div className="h-1.5 bg-gray-800">
+                          <div className="h-1.5 bg-ktip-sand-200">
                             <div className="h-full bg-ktip-ocean-600" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
@@ -145,14 +157,14 @@ export default function AdminAnalyticsPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No data yet</p>
+                <p className="text-ktip-sand-500 text-sm">No data yet</p>
               )}
-            </div>
+            </Card>
 
             {/* Feature Usage */}
-            <div className="bg-gray-900 border border-gray-800 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <BarChart3 size={20} className="text-ktip-tropical-500" />
+            <Card>
+              <h2 className={PANEL_HEADING}>
+                <BarChart3 size={20} className="text-ktip-tropical-700 dark:text-ktip-tropical-500" />
                 Feature Usage
               </h2>
               {featureUsage?.length ? (
@@ -164,15 +176,17 @@ export default function AdminAnalyticsPage() {
                       <div key={`${feat.feature}-${feat.action}-${i}`} className="flex items-center gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-sm text-gray-300 truncate">
-                              <span className="text-ktip-tropical-400">{feat.feature}</span>
+                            <span className="text-sm text-ktip-sand-700 truncate">
+                              {/* Brand green only carries as text from 700 up on
+                                  a light surface (500 is 1.7:1) */}
+                              <span className="text-ktip-tropical-800 dark:text-ktip-tropical-500">{feat.feature}</span>
                               {feat.action && (
-                                <span className="text-gray-500"> : {feat.action}</span>
+                                <span className="text-ktip-sand-500"> : {feat.action}</span>
                               )}
                             </span>
-                            <span className="text-sm text-white font-medium ml-2">{feat.count}</span>
+                            <span className="text-sm text-ktip-sand-900 font-medium ml-2">{feat.count}</span>
                           </div>
-                          <div className="h-1.5 bg-gray-800">
+                          <div className="h-1.5 bg-ktip-sand-200">
                             <div className="h-full bg-ktip-tropical-600" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
@@ -181,16 +195,16 @@ export default function AdminAnalyticsPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No data yet</p>
+                <p className="text-ktip-sand-500 text-sm">No data yet</p>
               )}
-            </div>
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Pre-Registration Funnel */}
-            <div className="bg-gray-900 border border-gray-800 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Target size={20} className="text-ktip-sun-500" />
+            <Card>
+              <h2 className={PANEL_HEADING}>
+                <Target size={20} className="text-ktip-sun-700 dark:text-ktip-sun-500" />
                 Pre-Registration Funnel
               </h2>
               {preregFunnel?.some(s => s.count > 0) ? (
@@ -204,12 +218,12 @@ export default function AdminAnalyticsPage() {
                         <div key={step.step}>
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                              {i > 0 && <ArrowRight size={12} className="text-gray-600" />}
-                              <span className="text-sm text-gray-300">{FUNNEL_LABELS[step.step] || step.step}</span>
+                              {i > 0 && <ArrowRight size={12} className="text-ktip-sand-400" />}
+                              <span className="text-sm text-ktip-sand-700">{FUNNEL_LABELS[step.step] || step.step}</span>
                             </div>
-                            <span className="text-sm text-white font-medium">{step.count} <span className="text-gray-500 text-xs">({pct}%)</span></span>
+                            <span className="text-sm text-ktip-sand-900 font-medium">{step.count} <span className="text-ktip-sand-500 text-xs">({pct}%)</span></span>
                           </div>
-                          <div className="h-2 bg-gray-800">
+                          <div className="h-2 bg-ktip-sand-200">
                             <div className="h-full bg-ktip-sun-600 transition-all" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
@@ -220,44 +234,44 @@ export default function AdminAnalyticsPage() {
                     const dismissed = preregFunnel?.find(s => s.step === 'modal_dismissed')
                     if (!dismissed) return null
                     return (
-                      <div className="pt-2 border-t border-gray-800">
+                      <div className="pt-2 border-t border-ktip-sand-200">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">Dismissed</span>
-                          <span className="text-sm text-gray-400">{dismissed.count}</span>
+                          <span className="text-sm text-ktip-sand-500">Dismissed</span>
+                          <span className="text-sm text-ktip-sand-600">{dismissed.count}</span>
                         </div>
                       </div>
                     )
                   })()}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No funnel data yet</p>
+                <p className="text-ktip-sand-500 text-sm">No funnel data yet</p>
               )}
-            </div>
+            </Card>
 
             {/* Conversions */}
-            <div className="bg-gray-900 border border-gray-800 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Target size={20} className="text-ktip-tropical-500" />
+            <Card>
+              <h2 className={PANEL_HEADING}>
+                <Target size={20} className="text-ktip-tropical-700 dark:text-ktip-tropical-500" />
                 Conversions
               </h2>
               {conversions?.length ? (
                 <div className="space-y-3">
                   {conversions.map((conv) => (
-                    <div key={conv.name} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                      <span className="text-sm text-gray-300">{CONVERSION_LABELS[conv.name] || conv.name}</span>
-                      <span className="text-lg font-bold text-white">{conv.count}</span>
+                    <div key={conv.name} className="flex items-center justify-between py-2 border-b border-ktip-sand-200 last:border-0">
+                      <span className="text-sm text-ktip-sand-700">{CONVERSION_LABELS[conv.name] || conv.name}</span>
+                      <span className="text-lg font-bold text-ktip-sand-900">{conv.count}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No conversions yet</p>
+                <p className="text-ktip-sand-500 text-sm">No conversions yet</p>
               )}
-            </div>
+            </Card>
           </div>
 
           {/* User Journeys / Recent Sessions */}
-          <div className="bg-gray-900 border border-gray-800 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Card>
+            <h2 className={PANEL_HEADING}>
               <Users size={20} className="text-ktip-ocean-500" />
               Recent User Journeys
             </h2>
@@ -265,7 +279,7 @@ export default function AdminAnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-gray-500 text-left border-b border-gray-800">
+                    <tr className="text-ktip-sand-500 text-left border-b border-ktip-sand-200">
                       <th className="pb-2 pr-4">Session</th>
                       <th className="pb-2 pr-4">User</th>
                       <th className="pb-2 pr-4">Pages</th>
@@ -275,31 +289,31 @@ export default function AdminAnalyticsPage() {
                   </thead>
                   <tbody className="stagger-rows">
                     {recentSessions.slice(0, 25).map((session) => (
-                      <tr key={session.session_id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                        <td className="py-2 pr-4 text-gray-400 font-mono text-xs">{session.session_id.slice(0, 8)}</td>
+                      <tr key={session.session_id} className="border-b border-ktip-sand-100 hover:bg-ktip-sand-50">
+                        <td className="py-2 pr-4 text-ktip-sand-600 font-mono text-xs">{session.session_id.slice(0, 8)}</td>
                         <td className="py-2 pr-4">
                           {session.user_id ? (
-                            <span className="text-gray-300 font-mono text-xs">{session.user_id.slice(0, 8)}</span>
+                            <span className="text-ktip-sand-700 font-mono text-xs">{session.user_id.slice(0, 8)}</span>
                           ) : (
-                            <span className="text-gray-600">Anonymous</span>
+                            <span className="text-ktip-sand-500">Anonymous</span>
                           )}
                         </td>
-                        <td className="py-2 pr-4 text-white font-medium">{session.page_count}</td>
-                        <td className="py-2 pr-4 text-gray-400 text-xs">
+                        <td className="py-2 pr-4 text-ktip-sand-900 font-medium">{session.page_count}</td>
+                        <td className="py-2 pr-4 text-ktip-sand-600 text-xs">
                           {new Date(session.started_at).toLocaleString()}
                         </td>
                         <td className="py-2">
                           <div className="flex items-center gap-1 flex-wrap">
                             {session.pages.slice(0, 6).map((page, i) => (
                               <span key={i} className="flex items-center gap-1">
-                                {i > 0 && <ArrowRight size={10} className="text-gray-700 shrink-0" />}
-                                <span className="text-xs bg-gray-800 text-gray-300 px-1.5 py-0.5 truncate max-w-[120px]">
+                                {i > 0 && <ArrowRight size={10} className="text-ktip-sand-400 shrink-0" />}
+                                <span className="text-xs bg-ktip-sand-100 text-ktip-sand-700 px-1.5 py-0.5 truncate max-w-[120px]">
                                   {page}
                                 </span>
                               </span>
                             ))}
                             {session.pages.length > 6 && (
-                              <span className="text-xs text-gray-600">+{session.pages.length - 6} more</span>
+                              <span className="text-xs text-ktip-sand-500">+{session.pages.length - 6} more</span>
                             )}
                           </div>
                         </td>
@@ -309,9 +323,9 @@ export default function AdminAnalyticsPage() {
                 </table>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No session data yet</p>
+              <p className="text-ktip-sand-500 text-sm">No session data yet</p>
             )}
-          </div>
+          </Card>
         </>
       )}
     </>
@@ -320,16 +334,16 @@ export default function AdminAnalyticsPage() {
 
 function StatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 p-4">
+    <Card padding="sm">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-800 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-ktip-ocean-50 flex items-center justify-center">
           <Icon size={20} className="text-ktip-ocean-500" />
         </div>
         <div>
-          <p className="text-2xl font-bold text-white">{value.toLocaleString()}</p>
-          <p className="text-xs text-gray-500">{label}</p>
+          <p className="text-2xl font-bold text-ktip-sand-900">{value.toLocaleString()}</p>
+          <p className="text-xs text-ktip-sand-500">{label}</p>
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

@@ -173,7 +173,7 @@ export function RoomChatPanel({
             type="submit"
             disabled={sending || !draft.trim()}
             aria-label="Send"
-            className="rounded-lg bg-ktip-ocean-700 p-2 text-white transition-colors hover:bg-ktip-ocean-600 disabled:opacity-50 dark:bg-ktip-ocean-300 dark:hover:bg-ktip-ocean-400"
+            className="rounded-lg bg-brand-navy p-2 text-white transition-colors hover:bg-brand-green hover:text-brand-navy disabled:opacity-50 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green"
           >
             <Send size={16} aria-hidden="true" />
           </button>

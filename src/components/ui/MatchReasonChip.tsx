@@ -26,7 +26,7 @@ export function MatchReasonChip({ reasons, className = '' }: MatchReasonChipProp
   return (
     <span
       title={title}
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200 max-w-full ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200 max-w-full ${className}`}
     >
       <Sparkles size={11} className="shrink-0" />
       <span className="truncate">{top.label}</span>

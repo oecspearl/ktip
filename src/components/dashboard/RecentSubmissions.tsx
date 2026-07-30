@@ -12,7 +12,7 @@ export function RecentSubmissions({ limit = 5 }: { limit?: number }) {
 
   if (loading) {
     return (
-      <div className="bg-ktip-cream border border-gray-200 rounded-lg px-6 py-8 text-center text-sm text-ktip-sand-500">
+      <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg px-6 py-8 text-center text-sm text-ktip-sand-500">
         Loading submissions...
       </div>
     )
@@ -20,7 +20,7 @@ export function RecentSubmissions({ limit = 5 }: { limit?: number }) {
 
   if (!receipts || receipts.length === 0) {
     return (
-      <div className="bg-ktip-cream border border-gray-200 rounded-lg px-6 py-8 text-center">
+      <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg px-6 py-8 text-center">
         <Inbox size={24} className="text-ktip-sand-400 mx-auto mb-2" />
         <p className="text-sm text-ktip-sand-600">
           Nothing submitted yet. Applications and registrations you send will appear
@@ -31,13 +31,13 @@ export function RecentSubmissions({ limit = 5 }: { limit?: number }) {
   }
 
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-lg">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg">
       {receipts.map((receipt, index) => (
         <Link
           key={receipt.id}
           to={`/dashboard/submissions/${receipt.id}`}
           className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-ktip-sand-50 transition-colors ${
-            index < receipts.length - 1 ? 'border-b border-gray-200' : ''
+            index < receipts.length - 1 ? 'border-b border-ktip-sand-200' : ''
           }`}
         >
           <div className="min-w-0">

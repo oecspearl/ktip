@@ -1,6 +1,5 @@
 import { Badge } from '../ui/Badge'
 import { ClimateBadge } from '../ui/ClimateBadge'
-import { MatchReasonChip } from '../ui/MatchReasonChip'
 import { BentoCard } from '../ui/BentoCard'
 import {
   RESOURCE_TYPE_LABELS,
@@ -33,13 +32,11 @@ export function ResourceCard({ resource }: ResourceCardProps) {
     >
       <div className="flex flex-wrap items-center gap-2">
         {resource.category && (
-          <Badge size="sm" className="bg-white/90 text-gray-700 border-transparent">
+          <Badge size="sm" className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent">
             {RESOURCE_CATEGORY_LABELS[resource.category!] || resource.category}
           </Badge>
         )}
         {resource.is_climate_action && <ClimateBadge />}
-        {/* Only present when the list was fetched under the "For You" sort. */}
-        <MatchReasonChip reasons={resource.match_reasons} />
       </div>
     </BentoCard>
   )

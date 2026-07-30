@@ -67,7 +67,7 @@ export default function HackathonsPage() {
             {/* Happening now gets its own treatment — a live venue is the one
                 thing on this page with a deadline attached to reading it. */}
             {live.length > 0 && (
-              <section className="mb-12">
+              <section id="live" data-spy="Live" className="scroll-mt-24 mb-12">
                 <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold text-ktip-sand-900">
                   <Radio size={18} className="text-ktip-tropical-700" aria-hidden="true" />
                   Happening now
@@ -81,7 +81,7 @@ export default function HackathonsPage() {
             )}
 
             {upcoming.length > 0 && (
-              <section className="mb-12">
+              <section id="upcoming" data-spy="Coming up" className="scroll-mt-24 mb-12">
                 <h2 className="mb-4 font-display text-xl font-bold text-ktip-sand-900">Coming up</h2>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {upcoming.map((event) => (
@@ -92,7 +92,7 @@ export default function HackathonsPage() {
             )}
 
             {past.length > 0 && (
-              <section>
+              <section id="past" data-spy="Past" className="scroll-mt-24">
                 <h2 className="mb-4 font-display text-xl font-bold text-ktip-sand-900">Past</h2>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {past.slice(0, 6).map((event) => (

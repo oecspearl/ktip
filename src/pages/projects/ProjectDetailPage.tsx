@@ -95,7 +95,7 @@ export default function ProjectDetailPage() {
   if (projectLoading || !project) {
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Inbox size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -106,7 +106,7 @@ export default function ProjectDetailPage() {
         </p>
         <button
           onClick={() => navigate('/projects')}
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
           Back to Projects
         </button>
@@ -134,8 +134,10 @@ export default function ProjectDetailPage() {
                 disabled={togglingFeatured}
                 className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
                   project.is_featured
-                    ? 'bg-ktip-sun-500 text-white hover:bg-ktip-sun-600'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    // Yellow takes ink, never white (1.6:1); the unfeatured
+                    // state uses the sand scale so it inverts with the theme
+                    ? 'bg-ktip-sun-500 text-ktip-ink hover:bg-ktip-sun-600'
+                    : 'bg-ktip-sand-100 text-ktip-sand-700 hover:bg-ktip-sand-200'
                 } ${togglingFeatured ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Star size={14} className={project.is_featured ? 'fill-current' : ''} />
@@ -144,7 +146,7 @@ export default function ProjectDetailPage() {
             )}
             {canEdit && (
               <Link to={`/projects/${params.id}/edit`}>
-                <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
                   <Edit size={14} />
                   Edit
                 </button>
@@ -184,7 +186,11 @@ export default function ProjectDetailPage() {
           {/* === Main Column === */}
           <div className="lg:col-span-2">
             {/* Post title repeat */}
-            <h2 className="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
+            <h2
+              id="overview"
+              data-spy="Overview"
+              className="scroll-mt-24 text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2"
+            >
               {project.title}
             </h2>
 
@@ -213,7 +219,7 @@ export default function ProjectDetailPage() {
             {project.hashtags?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
                 {project.hashtags.map((tag) => (
-                  <span key={tag} className="border border-gray-300 rounded-full px-3 py-1 text-sm text-gray-600">
+                  <span key={tag} className="border border-ktip-sand-300 rounded-full px-3 py-1 text-sm text-gray-600">
                     #{tag}
                   </span>
                 ))}
@@ -236,7 +242,7 @@ export default function ProjectDetailPage() {
 
             {/* Additional Details */}
             {project.details && project.details.length > 0 && (
-              <div className="mb-6">
+              <div id="details" data-spy="Details" className="scroll-mt-24 mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                   Additional Details
                 </h3>
@@ -246,7 +252,7 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Engagement row */}
-            <div className="border-t border-gray-200 pt-4 mt-6 flex items-center gap-4 flex-wrap">
+            <div className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 flex-wrap">
               <LikeButton projectId={params.id!} />
               <FollowButton projectId={params.id!} />
               <span className="flex items-center gap-1.5 text-sm text-gray-500">
@@ -266,7 +272,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Documents */}
-            <div className="mt-10">
+            <div id="documents" data-spy="Documents" className="scroll-mt-24 mt-10">
               <DocumentsPanel
                 entityType="project"
                 entityId={project.id}
@@ -276,7 +282,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Comments Section */}
-            <div className="mt-10">
+            <div id="discussion" data-spy="Discussion" className="scroll-mt-24 mt-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                 Discussion
               </h3>
@@ -304,7 +310,7 @@ export default function ProjectDetailPage() {
                         navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
                       }
                     }}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                   />
                 </div>
                 <button
@@ -313,7 +319,7 @@ export default function ProjectDetailPage() {
                       navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
                     }
                   }}
-                  className="px-4 py-2 bg-ktip-ocean-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0"
+                  className="px-4 py-2 btn-brand text-xs font-bold uppercase tracking-wider rounded-lg shrink-0"
                 >
                   Search
                 </button>
@@ -382,7 +388,7 @@ export default function ProjectDetailPage() {
               </div>
               <button
                 onClick={() => openMember(project.owner_id)}
-                className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center gap-1.5"
+                className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
               >
                 <User size={16} />
                 View Profile
@@ -396,7 +402,7 @@ export default function ProjectDetailPage() {
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Project Details</h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500">Created</span>
                   <span className="font-medium text-ktip-sand-900">

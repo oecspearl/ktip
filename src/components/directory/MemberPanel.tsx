@@ -1,16 +1,11 @@
-import { useEffect, useRef } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
 import {
-  Briefcase,
   Calendar,
   CheckCircle,
+  ChevronRight,
   Flag,
-  FolderKanban,
-  Handshake,
-  MapPin,
   MessageSquare,
-  Trophy,
-  Users,
   X,
 } from 'lucide-react'
 import { Badge } from '../ui/Badge'
@@ -24,6 +19,7 @@ import { useProfileStats } from '../../hooks/useProfileStats'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { heroImageFor, gradientFor } from '../../lib/hero-images'
 import {
   ROLE_LABELS,
   ROLE_COLORS,
@@ -32,17 +28,72 @@ import {
 } from '../../lib/constants'
 import { formatDate, getInitials, generateAvatarColor, cn } from '../../lib/utils'
 
+/** Squarer than the app default — the drawer reads as a document, not pills. */
+const CHIP = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border'
+/** Applied to shared Badge/AchievementBadge so their pills match the chips. */
+const SQUARE_PILL = 'rounded-md'
+
+/** Titled block: green tick, heading, hairline above. */
+function Section({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <section className="px-6 py-6 border-t border-ktip-sand-100 first:border-t-0">
+      <h3 className="flex items-center gap-2 text-base font-display font-bold text-ktip-sand-900 mb-3">
+        <span aria-hidden className="w-1 h-4 rounded-sm bg-brand-green" />
+        {label}
+      </h3>
+      {children}
+    </section>
+  )
+}
+
+/** One label/value pair in the identity rail's fact list. */
+function Fact({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div>
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ktip-sand-400">
+        {label}
+      </dt>
+      <dd className="text-sm font-medium text-ktip-sand-800 mt-0.5">{value}</dd>
+    </div>
+  )
+}
+
+/** Compact link row used for projects and events. */
+function LinkRow({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="group flex items-center justify-between gap-3 px-3 py-2.5 -mx-3 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-700 transition-colors"
+    >
+      <span className="truncate">{label}</span>
+      <ChevronRight
+        size={15}
+        className="shrink-0 text-ktip-sand-300 group-hover:text-ktip-ocean-500 group-hover:translate-x-0.5 transition-all"
+      />
+    </Link>
+  )
+}
+
 /**
  * Read-only member preview, opened from anywhere a member's name appears.
- * Replaces the old /profile/:id page — see MemberPanelContext. Non-modal like
- * MessagingPanel: no backdrop, closes via X, Escape, or an outside click.
- * z-40 keeps it under Modal (z-50) and the FAB (z-[9999]).
+ * Replaces the old /profile/:id page — see MemberPanelContext. Slides in from
+ * the right edge over the whole page, dimmed backdrop behind it; closes via X,
+ * Escape, the backdrop, or an outside click.
+ * z-[45] sits above the navbar (z-40) but under Modal (z-50) and the FAB
+ * (z-[9999]), so a dialog opened from the drawer still layers on top.
+ *
+ * Layout is a profile page, not a stack of rows: an identity rail (avatar,
+ * facts, actions) beside the narrative sections. Container queries — not
+ * viewport breakpoints — split the columns, because the drawer is 45vw and only
+ * it knows whether it is wide enough.
  */
 export function MemberPanel() {
   const { memberId, isOpen, closeMember } = useMemberPanel()
   const { openPanel } = useMessagingPanel()
   const auth = useAuth()
   const panelRef = useRef<HTMLElement>(null)
+  const { pathname } = useLocation()
+  const openedAt = useRef<string | null>(null)
 
   const { profile, loading } = useProfile(memberId ?? undefined)
   const { projects } = useUserProjects(memberId ?? undefined)
@@ -79,273 +130,345 @@ export function MemberPanel() {
     return () => document.removeEventListener('mousedown', onMouseDown)
   }, [isOpen, closeMember])
 
+  // Leaving the page closes the drawer. The links inside must NOT close it
+  // themselves: react-router runs navigation inside startTransition, so an
+  // urgent closeMember() from an onClick commits first, and DirectoryPage's
+  // still-mounted URL sync then replaces the location to drop `?member=` —
+  // which supersedes the transition and the click appears to do nothing.
+  // Watching the pathname instead means the navigation always wins.
+  useEffect(() => {
+    if (!isOpen) {
+      openedAt.current = null
+      return
+    }
+    if (openedAt.current === null) {
+      openedAt.current = pathname
+      return
+    }
+    if (openedAt.current !== pathname) closeMember()
+  }, [isOpen, pathname, closeMember])
+
+  // The drawer scrolls its own content, so freeze the page behind it —
+  // otherwise a wheel over the backdrop scrolls the list out from under it.
+  useEffect(() => {
+    if (!isOpen) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [isOpen])
+
   if (!isOpen) return null
 
   const isSelf = memberId === auth.user?.id
   const displayName = profile?.display_name || 'Unknown User'
+  // Same seeded photo the member's directory card uses, so opening a card feels
+  // like the card expanding rather than a jump to an unrelated screen.
+  const coverSeed = memberId ?? 'member'
+  const hasSections = !!(
+    profile?.bio ||
+    badges?.length ||
+    profile?.skills?.length ||
+    profile?.interests?.length ||
+    profile?.open_to?.length ||
+    projects?.length ||
+    events?.length
+  )
 
   return (
-    <section
-      ref={panelRef}
-      role="complementary"
-      aria-label="Member preview"
-      className={cn(
-        'fixed z-40 inset-x-2 top-20 bottom-24',
-        'lg:inset-auto lg:right-6 lg:top-24 lg:bottom-24 lg:w-[min(420px,calc(100vw-3rem))]',
-        'bg-ktip-cream rounded-2xl shadow-hard border border-ktip-sand-200',
-        'overflow-hidden flex flex-col animate-scale-in origin-top-right'
-      )}
-    >
-      <div className="flex items-center justify-between px-4 py-2 border-b border-ktip-sand-200 shrink-0">
-        <h2 className="font-display font-bold text-ktip-sand-900 text-sm">Member</h2>
+    <>
+      {/* Dims the page so the drawer reads as the foreground layer */}
+      <div
+        aria-hidden
+        onClick={closeMember}
+        className="fixed inset-0 z-[44] bg-brand-navy/45 backdrop-blur-[3px] animate-fade-in"
+      />
+      <section
+        ref={panelRef}
+        role="complementary"
+        aria-label="Member preview"
+        className={cn(
+          'fixed z-[45] inset-y-0 right-0 w-full sm:w-[45vw] sm:min-w-[420px]',
+          'bg-ktip-cream shadow-hard border-l border-ktip-sand-200 sm:rounded-l-2xl',
+          'overflow-hidden flex flex-col animate-slide-in-right'
+        )}
+      >
+        {/* Floats over both the cover photo and the cream below it, so it stays
+            reachable no matter how far the content has scrolled */}
         <button
           onClick={closeMember}
           aria-label="Close member preview"
-          className="p-1.5 rounded-lg hover:bg-ktip-sand-100 text-ktip-sand-500 transition-colors"
+          className="absolute top-4 right-4 z-20 p-2 rounded-lg bg-brand-navy/25 hover:bg-brand-navy/45 backdrop-blur-sm text-white transition-colors"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
-      </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
-        {loading || !profile ? (
-          <div className="space-y-3">
-            <div className="h-20 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
-            <div className="h-32 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
+        <div className="@container flex-1 min-h-0 overflow-y-auto">
+          {/* Cover: a texture band, not a subject — the wash keeps type legible */}
+          <div className="relative h-24 shrink-0">
+            <img
+              src={heroImageFor(coverSeed)}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradientFor(coverSeed)}`} />
+            <p className="absolute left-6 top-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">
+              Member
+            </p>
           </div>
-        ) : (
-          <>
-            {/* Identity */}
-            <div className="flex items-start gap-4 mb-4">
-              {profile.avatar_url ? (
+
+          {/* Stretched rows, so the rail's divider runs the full column height */}
+          <div className="@[46rem]:grid @[46rem]:grid-cols-[17rem_1fr]">
+            {/* === Identity rail === */}
+            {/* relative lifts it over the cover — the cover is positioned, so a
+                static sibling would paint underneath it */}
+            <aside className="relative px-6 pb-6 @[46rem]:border-r @[46rem]:border-ktip-sand-100">
+              {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt={displayName}
-                  className="w-16 h-16 rounded-full object-cover shrink-0"
+                  className="w-20 h-20 rounded-xl object-cover -mt-10 ring-4 ring-ktip-cream shadow-soft"
                 />
               ) : (
                 <div
-                  className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0 ${generateAvatarColor(displayName)}`}
+                  className={cn(
+                    'w-20 h-20 rounded-xl -mt-10 ring-4 ring-ktip-cream shadow-soft',
+                    'flex items-center justify-center text-2xl font-bold text-white',
+                    profile ? generateAvatarColor(displayName) : 'bg-ktip-sand-300'
+                  )}
                 >
-                  {getInitials(displayName)}
+                  {profile ? getInitials(displayName) : null}
                 </div>
               )}
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-xl font-display font-bold text-ktip-sand-900 truncate">
-                    {displayName}
-                  </h3>
-                  {profile.is_verified && (
-                    <span className="text-ktip-ocean-500 shrink-0" title="Verified">
-                      <CheckCircle size={18} />
-                    </span>
+              {!profile ? (
+                <div className="space-y-2 mt-4">
+                  <div className="h-6 w-40 rounded-md bg-ktip-sand-100 animate-pulse-soft" />
+                  <div className="h-4 w-28 rounded-md bg-ktip-sand-100 animate-pulse-soft" />
+                  <div className="h-24 w-full rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
+                </div>
+              ) : (
+                <>
+                  <h2 className="flex items-start gap-2 text-2xl font-display font-bold text-ktip-sand-900 leading-tight mt-4">
+                    <span className="min-w-0 break-words">{displayName}</span>
+                    {profile.is_verified && (
+                      <CheckCircle
+                        size={18}
+                        className="text-ktip-ocean-500 shrink-0 mt-1.5"
+                        aria-label="Verified"
+                      />
+                    )}
+                  </h2>
+
+                  {profile.roles?.length ? (
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      {profile.roles.map((role) => (
+                        <Badge
+                          key={role}
+                          size="sm"
+                          className={cn(ROLE_COLORS[role], SQUARE_PILL)}
+                        >
+                          {ROLE_LABELS[role] || role}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {/* Facts, not sentences — scannable in one pass */}
+                  <dl className="grid grid-cols-2 @[46rem]:grid-cols-1 gap-x-4 gap-y-3.5 mt-5 pt-5 border-t border-ktip-sand-100">
+                    {profile.country && <Fact label="Location" value={profile.country} />}
+                    {profile.organization && (
+                      <Fact label="Organization" value={profile.organization} />
+                    )}
+                    {profile.industry && <Fact label="Industry" value={profile.industry} />}
+                    {connectionCount !== null && (
+                      <Fact
+                        label="Connections"
+                        value={`${connectionCount} ${connectionCount === 1 ? 'member' : 'members'}`}
+                      />
+                    )}
+                    {/* Omitted entirely at zero: "Newcomer · 0 points" on a new
+                        member reads as a scoreboard of failure. */}
+                    {stats && stats.badge_count > 0 && (
+                      <Fact
+                        label="Standing"
+                        value={`${stats.rank.name} · ${stats.points} pts`}
+                      />
+                    )}
+                    <Fact label="Joined" value={formatDate(profile.created_at)} />
+                  </dl>
+
+                  {/* Actions — hidden when you somehow land on yourself */}
+                  {!isSelf && (
+                    <div className="flex flex-wrap items-center gap-2 mt-5 pt-5 border-t border-ktip-sand-100">
+                      <ConnectButton otherUserId={profile.id} size="sm" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={<MessageSquare size={14} />}
+                        onClick={() => openPanel({ userId: profile.id })}
+                      >
+                        Message
+                      </Button>
+                    </div>
                   )}
-                </div>
 
-                {profile.country && (
-                  <p className="flex items-center gap-1.5 text-sm text-ktip-sand-600 mt-0.5">
-                    <MapPin size={14} />
-                    {profile.country}
-                  </p>
-                )}
-
-                {(profile.organization || profile.industry) && (
-                  <p className="flex items-center gap-1.5 text-sm text-ktip-sand-600 mt-0.5">
-                    <Briefcase size={14} />
-                    {[profile.organization, profile.industry].filter(Boolean).join(' · ')}
-                  </p>
-                )}
-
-                {connectionCount !== null && (
-                  <p className="flex items-center gap-1.5 text-sm text-ktip-sand-600 mt-0.5">
-                    <Users size={14} />
-                    <span className="font-semibold text-ktip-sand-900">{connectionCount}</span>
-                    {connectionCount === 1 ? 'connection' : 'connections'}
-                  </p>
-                )}
-
-                {/* Omitted entirely at zero: "Newcomer · 0 points" on a new
-                    member reads as a scoreboard of failure. */}
-                {stats && stats.badge_count > 0 && (
-                  <p className="flex items-center gap-1.5 text-sm text-ktip-sand-600 mt-0.5">
-                    <Trophy size={14} />
-                    <span className="font-semibold text-ktip-sand-900">{stats.rank.name}</span>
-                    · {stats.points} pts
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Actions — hidden when you somehow land on yourself */}
-            {!isSelf && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                <ConnectButton otherUserId={profile.id} />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={<MessageSquare size={16} />}
-                  onClick={() => openPanel({ userId: profile.id })}
-                >
-                  Message
-                </Button>
-                <Link to={`/grievances/report/${profile.id}`} onClick={closeMember}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<Flag size={16} />}
-                    className="text-ktip-sand-500 hover:bg-red-50 hover:text-red-600"
-                  >
-                    Report
-                  </Button>
-                </Link>
-              </div>
-            )}
-
-            {/* Roles */}
-            {profile.roles?.length ? (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {profile.roles.map((role) => (
-                  <Badge key={role} className={ROLE_COLORS[role]}>
-                    {ROLE_LABELS[role] || role}
-                  </Badge>
-                ))}
-              </div>
-            ) : null}
-
-            {/* Achievements */}
-            {badges?.length ? (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {badges.map((userBadge) => (
-                  <AchievementBadge key={userBadge.id} userBadge={userBadge} />
-                ))}
-              </div>
-            ) : null}
-
-            {profile.bio && (
-              <p className="text-sm text-ktip-sand-700 whitespace-pre-wrap mb-3">{profile.bio}</p>
-            )}
-
-            {profile.skills?.length ? (
-              <div className="mb-3">
-                <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">
-                  Skills
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {profile.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {profile.interests?.length ? (
-              <div className="mb-3">
-                <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">
-                  Interests
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {profile.interests.map((interest) => (
-                    <span
-                      key={interest}
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-tropical-50 text-ktip-tropical-700 border border-ktip-tropical-200"
-                    >
-                      {interest}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {profile.open_to?.length ? (
-              <div className="mb-3">
-                <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">
-                  Open To
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {profile.open_to.map((value) => (
-                    <span
-                      key={value}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        value === COLLAB_EXCLUSIVE_VALUE
-                          ? 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200'
-                          : 'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-200'
-                      }`}
-                    >
-                      <Handshake size={12} />
-                      {COLLABORATION_LABELS[value] || value}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {/* Public projects — compact rows; the drawer is too narrow for cards */}
-            {projects?.length ? (
-              <div className="mb-3">
-                <p className="flex items-center gap-1.5 text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">
-                  <FolderKanban size={13} />
-                  Projects
-                </p>
-                <div className="space-y-1">
-                  {projects.map((project) => (
+                  <div className="flex items-center gap-3 mt-4">
+                    {/* The drawer stays the in-app default; this is the way out
+                        to a URL that can be shared. */}
                     <Link
-                      key={project.id}
-                      to={`/projects/${project.id}`}
-                      onClick={closeMember}
-                      className="block px-3 py-2 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-700 transition-colors truncate"
+                      to={`/u/${profile.id}`}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:gap-1.5 transition-all"
                     >
-                      {project.title}
+                      View full profile
+                      <ChevronRight size={13} />
                     </Link>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+                    {!isSelf && (
+                      <Link
+                        to={`/grievances/report/${profile.id}`}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-ktip-sand-400 hover:text-red-600 transition-colors ml-auto"
+                      >
+                        <Flag size={12} />
+                        Report
+                      </Link>
+                    )}
+                  </div>
+                </>
+              )}
+            </aside>
 
-            {events?.length ? (
-              <div className="mb-3">
-                <p className="flex items-center gap-1.5 text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">
-                  <Calendar size={13} />
-                  Events
-                </p>
-                <div className="space-y-1">
-                  {events.map((event) => (
-                    <Link
-                      key={event.id}
-                      to={`/events/${event.id}`}
-                      onClick={closeMember}
-                      className="block px-3 py-2 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-700 transition-colors truncate"
-                    >
-                      {event.title}
-                    </Link>
-                  ))}
+            {/* === Narrative column === */}
+            <div className="border-t border-ktip-sand-100 @[46rem]:border-t-0">
+              {loading || !profile ? (
+                <div className="p-6 space-y-3">
+                  <div className="h-24 rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
+                  <div className="h-32 rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
                 </div>
-              </div>
-            ) : null}
+              ) : (
+                <>
+                  {profile.bio && (
+                    <Section label="About">
+                      <p className="text-sm leading-relaxed text-ktip-sand-700 whitespace-pre-wrap">
+                        {profile.bio}
+                      </p>
+                    </Section>
+                  )}
 
-            <div className="pt-2 border-t border-ktip-sand-100 space-y-2">
-              <p className="flex items-center gap-1.5 text-xs text-ktip-sand-400">
-                <Calendar size={13} />
-                Joined {formatDate(profile.created_at)}
-              </p>
-              {/* The drawer stays the in-app default; this is the way out to a
-                  URL that can be shared. */}
-              <Link
-                to={`/u/${profile.id}`}
-                onClick={closeMember}
-                className="inline-block text-xs text-ktip-ocean-600 hover:underline"
-              >
-                View full profile
-              </Link>
+                  {badges?.length ? (
+                    <Section label="Achievements">
+                      <div className="flex flex-wrap gap-2">
+                        {badges.map((userBadge) => (
+                          <AchievementBadge
+                            key={userBadge.id}
+                            userBadge={userBadge}
+                            className={SQUARE_PILL}
+                          />
+                        ))}
+                      </div>
+                    </Section>
+                  ) : null}
+
+                  {profile.skills?.length ? (
+                    <Section label="Skills">
+                      <div className="flex flex-wrap gap-2">
+                        {profile.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className={cn(
+                              CHIP,
+                              'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-100'
+                            )}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </Section>
+                  ) : null}
+
+                  {profile.interests?.length ? (
+                    <Section label="Interests">
+                      <div className="flex flex-wrap gap-2">
+                        {profile.interests.map((interest) => (
+                          <span
+                            key={interest}
+                            className={cn(
+                              CHIP,
+                              'bg-ktip-tropical-50 text-ktip-tropical-700 border-ktip-tropical-100'
+                            )}
+                          >
+                            {interest}
+                          </span>
+                        ))}
+                      </div>
+                    </Section>
+                  ) : null}
+
+                  {profile.open_to?.length ? (
+                    <Section label="Open to">
+                      <div className="flex flex-wrap gap-2">
+                        {profile.open_to.map((value) => (
+                          <span
+                            key={value}
+                            className={cn(
+                              CHIP,
+                              value === COLLAB_EXCLUSIVE_VALUE
+                                ? 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200'
+                                : 'bg-ktip-sun-50 text-ktip-sand-800 border-ktip-sun-200'
+                            )}
+                          >
+                            {COLLABORATION_LABELS[value] || value}
+                          </span>
+                        ))}
+                      </div>
+                    </Section>
+                  ) : null}
+
+                  {/* Compact rows, not cards — the column is too narrow for them */}
+                  {projects?.length ? (
+                    <Section label="Projects">
+                      <div className="space-y-0.5">
+                        {projects.map((project) => (
+                          <LinkRow
+                            key={project.id}
+                            to={`/projects/${project.id}`}
+                            label={project.title}
+                          />
+                        ))}
+                      </div>
+                    </Section>
+                  ) : null}
+
+                  {events?.length ? (
+                    <Section label="Events">
+                      <div className="space-y-0.5">
+                        {events.map((event) => (
+                          <LinkRow
+                            key={event.id}
+                            to={`/events/${event.id}`}
+                            label={event.title}
+                          />
+                        ))}
+                      </div>
+                    </Section>
+                  ) : null}
+
+                  {/* A rail with nothing beside it looks broken, so say why */}
+                  {!hasSections && (
+                    <div className="px-6 py-10 text-center">
+                      <Calendar size={20} className="mx-auto text-ktip-sand-300 mb-2" />
+                      <p className="text-sm text-ktip-sand-500">
+                        {displayName.split(' ')[0]} hasn't filled out a profile yet.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          </>
-        )}
-      </div>
-    </section>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }

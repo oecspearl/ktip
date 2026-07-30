@@ -7,16 +7,21 @@ import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { DetailEntry, Event } from '../types'
 
-export function useEvents(filters?: {
-  type?: string
-  upcoming?: boolean
-  search?: string
-  status?: string
-  climateAction?: boolean
-  dateRange?: { start: string; end: string }
-  tags?: string[]
-  sort?: ContentSort
-}) {
+export function useEvents(
+  filters?: {
+    type?: string
+    upcoming?: boolean
+    /** Events already finished, newest first. Ignored when `upcoming` is set. */
+    past?: boolean
+    search?: string
+    status?: string
+    climateAction?: boolean
+    dateRange?: { start: string; end: string }
+    tags?: string[]
+    sort?: ContentSort
+  },
+  options?: { enabled?: boolean }
+) {
   // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
   const tags = filters?.tags?.length
     ? [...filters.tags].map(sanitizeTag).filter(Boolean).sort()
@@ -30,13 +35,14 @@ export function useEvents(filters?: {
   const normalized = { ...filters, tags, sort, uid: sort === 'for_you' ? uid : undefined }
 
   const fetchEvents = async (): Promise<Event[]> => {
+    // Past events read best newest-first; everything else runs forwards in time.
     let query = supabase
       .from('events')
       .select(`
         *,
         organizer:profiles(*)
       `)
-      .order('start_date', { ascending: true })
+      .order('start_date', { ascending: !(filters?.past && !filters?.upcoming && !filters?.dateRange) })
 
     // Exclude drafts from public listing by default
     if (filters?.status) {
@@ -53,6 +59,9 @@ export function useEvents(filters?: {
     } else if (filters?.upcoming) {
       const now = new Date().toISOString()
       query = query.gte('start_date', now)
+    } else if (filters?.past) {
+      const now = new Date().toISOString()
+      query = query.lt('start_date', now)
     }
 
     // Filter by event type
@@ -95,6 +104,7 @@ export function useEvents(filters?: {
   const query = useQuery({
     queryKey: keys.list('events', normalized),
     queryFn: fetchEvents,
+    enabled: options?.enabled ?? true,
     // The second round trip is only worth paying for once a minute.
     staleTime: sort === 'for_you' ? 60_000 : undefined,
   })

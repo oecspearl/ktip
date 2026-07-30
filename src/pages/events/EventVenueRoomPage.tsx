@@ -80,7 +80,7 @@ export default function EventVenueRoomPage() {
 
   if (eventLoading || roomLoading || joining) {
     return (
-      <div className="mx-auto max-w-7xl space-y-4 px-4 py-8">
+      <div className="mx-auto max-w-7xl space-y-4 px-4 pb-8 pt-[calc(var(--nav-h)+2rem)]">
         <div className="h-14 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
         <div className="h-96 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
       </div>
@@ -89,7 +89,7 @@ export default function EventVenueRoomPage() {
 
   if (!event || !room || room.event_id !== event.id) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Room not found</h1>
         <Link
           to={eventId ? `/events/${eventId}/venue` : '/events'}
@@ -103,7 +103,7 @@ export default function EventVenueRoomPage() {
 
   if (joinError || !membership) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
           You are not in this venue
         </h1>
@@ -123,7 +123,8 @@ export default function EventVenueRoomPage() {
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
 
   return (
-    <div className="min-h-screen bg-ktip-canvas pb-12">
+    // pt clears the fixed navbar — see the note on EventVenuePage.
+    <div className="min-h-screen bg-ktip-canvas pb-12 pt-[var(--nav-h)]">
       <VenueTopBar
         eventId={event.id}
         eventTitle={event.title}

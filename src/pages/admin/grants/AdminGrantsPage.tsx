@@ -5,9 +5,12 @@ import { Modal } from '../../../components/ui/Modal'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { ApplicationPreview } from '../../../components/grants/application/ApplicationPreview'
 import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
-import { useGrants, useUpdateGrant } from '../../../hooks/useGrants'
+import { useGrants, useUpdateGrant, useDeleteGrant } from '../../../hooks/useGrants'
 import { useAdminGrantApplications, useAdminApplicationActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
+import { useAuth } from '../../../contexts/AuthContext'
+import { DeleteEntityControl } from '../../../components/shared/DeleteEntityControl'
+import { describeGrantDeletion } from '../../../lib/delete-guard'
 import {
   GRANT_TYPE_LABELS,
   GRANT_TYPE_COLORS,
@@ -34,6 +37,7 @@ type TabId = 'grants' | 'applications'
 
 export default function AdminGrantsPage() {
   const toast = useToast()
+  const auth = useAuth()
   const [activeTab, setActiveTab] = useState<TabId>('grants')
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [editingGrant, setEditingGrant] = useState<Grant | null>(null)
@@ -42,6 +46,14 @@ export default function AdminGrantsPage() {
   // Grants data
   const { grants, loading: grantsLoading, refetch: refetchGrants } = useGrants()
   const { updateGrant, loading: updateLoading } = useUpdateGrant()
+  const { deleteGrant } = useDeleteGrant()
+
+  // Mirrors migration 077's DELETE policy. Grants created before 077 have no
+  // created_by and are OECS-only — showing the button to their original poster
+  // would only produce a refusal, because the DB cannot know who that was.
+  const isOecs = auth.can('org:manage')
+  const canDeleteGrant = (grant: Grant) =>
+    isOecs || (!!grant.created_by && grant.created_by === auth.user?.id)
 
   // Applications data
   const { applications, loading: applicationsLoading, refetch: refetchApplications } = useAdminGrantApplications({
@@ -138,7 +150,7 @@ export default function AdminGrantsPage() {
       />
 
       {/* Flat Tabs */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-ktip-sand-200 mb-6">
         <div className="flex gap-6">
           <button
             type="button"
@@ -147,7 +159,7 @@ export default function AdminGrantsPage() {
               'flex items-center gap-2 px-1 py-3 text-sm font-medium transition-colors border-b-2 -mb-px',
               activeTab === 'grants'
                 ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
             )}
           >
             <DollarSign size={16} />
@@ -160,7 +172,7 @@ export default function AdminGrantsPage() {
               'flex items-center gap-2 px-1 py-3 text-sm font-medium transition-colors border-b-2 -mb-px',
               activeTab === 'applications'
                 ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
             )}
           >
             <FileText size={16} />
@@ -197,7 +209,7 @@ export default function AdminGrantsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-ktip-sand-200">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</th>
@@ -206,9 +218,9 @@ export default function AdminGrantsPage() {
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 stagger-rows">
+                  <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                     {grants.map((grant) => (
-                      <tr className="hover:bg-gray-50 transition-colors" key={grant.id}>
+                      <tr className="hover:bg-ktip-sand-50 transition-colors" key={grant.id}>
                         <td className="px-4 py-3">
                           <span className="font-medium text-gray-900">{grant.title}</span>
                         </td>
@@ -244,7 +256,7 @@ export default function AdminGrantsPage() {
                             className={
                               grant.is_active
                                 ? 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200'
-                                : 'bg-gray-100 text-gray-500 border-gray-200'
+                                : 'bg-ktip-sand-100 text-gray-500 border-ktip-sand-200'
                             }
                           >
                             {grant.is_active ? 'Active' : 'Inactive'}
@@ -269,6 +281,24 @@ export default function AdminGrantsPage() {
                             >
                               {grant.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
+                            {canDeleteGrant(grant) && (
+                              // applicationCount is null on purpose: the
+                              // applications list here is status-filtered and
+                              // excludes drafts, so it cannot give an honest
+                              // per-grant total. The guard reads null on a live
+                              // grant as "assume there are some".
+                              <DeleteEntityControl
+                                variant="icon"
+                                noun="grant"
+                                title={grant.title}
+                                impact={describeGrantDeletion({
+                                  isActive: grant.is_active,
+                                  applicationCount: null,
+                                })}
+                                onDelete={() => deleteGrant(grant.id)}
+                                onDeleted={refetchGrants}
+                              />
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -290,7 +320,7 @@ export default function AdminGrantsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.currentTarget.value)}
-                className="px-3 py-2 bg-ktip-cream border border-gray-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+                className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -330,7 +360,7 @@ export default function AdminGrantsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-ktip-sand-200">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Applicant</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Grant Title</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -338,9 +368,9 @@ export default function AdminGrantsPage() {
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 stagger-rows">
+                  <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                     {applications.map((application) => (
-                      <tr className="hover:bg-gray-50 transition-colors" key={application.id}>
+                      <tr className="hover:bg-ktip-sand-50 transition-colors" key={application.id}>
                         <td className="px-4 py-3">
                           <span className="font-medium text-gray-900">
                             {application.applicant?.display_name || 'Unknown'}

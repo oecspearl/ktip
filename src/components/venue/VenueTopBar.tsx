@@ -43,7 +43,10 @@ export function VenueTopBar({
   return (
     <div
       className={cn(
-        'sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm',
+        // Sticks below the fixed navbar, not under it. At top-0 the bar's own
+        // ~88px covered this whole row, so "Event page" was unclickable exactly
+        // where the page loads — the click hit the navbar logo and went to /.
+        'sticky top-[var(--nav-h)] z-30 flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm',
         className
       )}
     >

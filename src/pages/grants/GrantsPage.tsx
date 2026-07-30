@@ -3,22 +3,38 @@ import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { GrantCard } from '../../components/grants/GrantCard'
 import { useGrants } from '../../hooks/useGrants'
-import { Search, Wallet, FileText } from 'lucide-react'
+import { Wallet, FileText } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
-import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { TagFilterSelect } from '../../components/ui/TagFilterSelect'
 import { SortSelect } from '../../components/ui/SortSelect'
+import { Select } from '../../components/ui/Select'
+import { ColumnToggle } from '../../components/ui/ColumnToggle'
+import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useGridColumns } from '../../hooks/useGridColumns'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { grantTypeIcon } from '../../lib/category-icons'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
-import { debounce } from '../../lib/utils'
+import { cn, debounce } from '../../lib/utils'
+import { isPast } from 'date-fns'
+import type { Grant } from '../../types'
+
+const GRANT_TYPES = [
+  { value: 'startup', label: 'Startup Funding' },
+  { value: 'research', label: 'Research Grants' },
+  { value: 'innovation', label: 'Innovation Awards' },
+  { value: 'development', label: 'Development Funds' },
+  { value: 'education', label: 'Education Grants' },
+]
+
+const TYPE_OPTIONS = [{ value: '', label: 'All Grant Types' }, ...GRANT_TYPES]
 
 export default function GrantsPage() {
   usePageTitle('Grants')
   const [selectedType, setSelectedType] = useState<string>('')
-  const [showActive, setShowActive] = useState(true)
-  const [climateFilter, setClimateFilter] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -26,6 +42,7 @@ export default function GrantsPage() {
 
   const { tags: tagOptions } = useTagVocabulary('grants')
   const [searchParams, setSearchParams] = useSearchParams()
+  const { columns, setColumns, gridClass } = useGridColumns('grants:columns')
 
   // Sort lives in the URL so it is shareable and survives back/forward. The
   // fallback here is deadline order, which is what the query already does.
@@ -38,50 +55,72 @@ export default function GrantsPage() {
     setSearchParams(params, { replace: true })
   }
 
+  // Closed grants are no longer filtered out at the query — they are split off
+  // below and parked in a folded section at the end of the list.
   const { grants, loading } = useGrants({
     type: selectedType,
-    active: showActive,
     search: debouncedSearch,
-    climateAction: climateFilter,
     tags: selectedTags,
     sort,
   })
 
+  // A grant is closed once it is flagged inactive or its deadline has passed.
+  const { openGrants, closedGrants } = useMemo(() => {
+    const open: Grant[] = []
+    const closed: Grant[] = []
+    for (const grant of grants ?? []) {
+      const expired = !!grant.deadline && isPast(new Date(grant.deadline))
+      ;(grant.is_active === false || expired ? closed : open).push(grant)
+    }
+    return { openGrants: open, closedGrants: closed }
+  }, [grants])
+
+  // Type sections replace the flat grid whenever the open list spans more than
+  // one type. Picking a single type collapses back to one grid.
+  const typeGroups = useMemo(() => {
+    if (selectedType) return []
+    const buckets = new Map<string, Grant[]>()
+    for (const grant of openGrants) {
+      const type = grant.grant_type || 'other'
+      const bucket = buckets.get(type)
+      if (bucket) bucket.push(grant)
+      else buckets.set(type, [grant])
+    }
+    // Under "For You" the sections follow the ranking; otherwise fixed
+    // vocabulary order first, then anything the vocabulary does not know.
+    const known = GRANT_TYPES.map((t) => t.value)
+    const ordered =
+      sort === 'for_you'
+        ? [...buckets.keys()]
+        : [...known, ...[...buckets.keys()].filter((t) => !known.includes(t))]
+    return ordered.flatMap((value) => {
+      const items = buckets.get(value)
+      if (!items?.length) return []
+      const label = GRANT_TYPES.find((t) => t.value === value)?.label ?? 'Other Funding'
+      return [{ value, label, items }]
+    })
+  }, [openGrants, selectedType, sort])
+
   const clearFilters = () => {
     setSelectedType('')
-    setShowActive(true)
     setSearchQuery('')
     setDebouncedSearch('')
-    setClimateFilter(false)
     setSelectedTags([])
   }
 
-  const hasActiveFilters = !!(
-    selectedType ||
-    !showActive ||
-    searchQuery ||
-    climateFilter ||
-    selectedTags.length
-  )
-
-  const grantTypes = [
-    { value: 'startup', label: 'Startup Funding' },
-    { value: 'research', label: 'Research Grants' },
-    { value: 'innovation', label: 'Innovation Awards' },
-    { value: 'development', label: 'Development Funds' },
-    { value: 'education', label: 'Education Grants' },
-  ]
+  const hasActiveFilters = !!(selectedType || searchQuery || selectedTags.length)
 
   return (
     <>
       <PageHero
         eyebrow="Grant Archives"
         title="Grants & Funding"
+        image="/grants/grant-startup.jpg"
         imageSeed="grants"
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Grants' }]}
         actions={
           <Link to="/grants/my-applications">
-            <Button icon={<FileText size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
+            <Button icon={<FileText size={16} />} size="sm" className="text-sm">
               My Applications
             </Button>
           </Link>
@@ -89,70 +128,45 @@ export default function GrantsPage() {
       />
 
       {/* === Filter Section === */}
-      <div className="bg-ktip-sand-50 py-8">
+      <div id="filters" data-spy="Filters" className="scroll-mt-24 bg-ktip-sand-50 py-8">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
-          {/* Row 1: Search */}
-          <div className="flex gap-2 mb-3">
-            <div className="relative flex-1">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search grants..."
-                aria-label="Search grants"
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
-              />
-            </div>
-            <button className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0">
-              Search
-            </button>
-          </div>
-
-          {/* Row 2: Filters */}
           <div className="flex flex-wrap items-center gap-3">
-            <select
+            <Select
               value={selectedType}
-              onChange={(e) => setSelectedType(e.currentTarget.value)}
-              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-            >
-              <option value="">All Grant Types</option>
-              {grantTypes.map((type) => (
-                <option key={type.value} value={type.value}>{type.label}</option>
-              ))}
-            </select>
+              onChange={setSelectedType}
+              options={TYPE_OPTIONS}
+              ariaLabel="Filter by grant type"
+            />
 
-            <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
-              <input
-                type="checkbox"
-                checked={showActive}
-                onChange={(e) => setShowActive(e.currentTarget.checked)}
-                className="w-4 h-4 text-ktip-ocean-600 border-gray-300 rounded focus:ring-ktip-ocean-500"
-              />
-              Active Only
-            </label>
+            <TagFilterSelect
+              options={tagOptions}
+              selected={selectedTags}
+              onChange={setSelectedTags}
+            />
 
-            <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
-              <input
-                type="checkbox"
-                checked={climateFilter}
-                onChange={(e) => setClimateFilter(e.currentTarget.checked)}
-                className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
-              />
-              Climate Action
-            </label>
+            {!loading && grants && (
+              <p className="text-sm text-gray-500">
+                Found {openGrants.length} open grant{openGrants.length !== 1 ? 's' : ''}
+                {closedGrants.length > 0 && ` · ${closedGrants.length} closed`}
+              </p>
+            )}
 
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
               <SortSelect
                 value={sort}
                 onChange={setSort}
                 options={SORT_OPTIONS.grant.options}
                 personalizationActive={personalizationActive}
               />
+              <CollapsibleSearch
+                value={searchQuery}
+                onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                placeholder="Search grants..."
+                ariaLabel="Search grants"
+              />
+              <ColumnToggle value={columns} onChange={setColumns} />
             </div>
           </div>
-
-          <TagFilterChips options={tagOptions} selected={selectedTags} onChange={setSelectedTags} />
 
           {hasActiveFilters && (
             <button
@@ -166,22 +180,58 @@ export default function GrantsPage() {
       </div>
 
       {/* === Grants List === */}
-      <div className="bg-ktip-sand-50 pb-12">
+      <div id="grants" data-spy="Grants" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading || !grants ? (
-            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
+            <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
           ) : grants.length > 0 ? (
             <div>
-              <p className="text-sm text-gray-500 mb-6">
-                Found {grants.length} grant{grants.length !== 1 ? 's' : ''}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
-                {grants.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
-              </div>
+              {openGrants.length === 0 ? (
+                <p className="text-sm text-gray-500 mb-8">
+                  No open grants match these filters — the closed ones are below.
+                </p>
+              ) : typeGroups.length > 1 ? (
+                <div className="space-y-2">
+                  {typeGroups.map((group) => {
+                    const Icon = grantTypeIcon(group.value)
+                    return (
+                      <CollapsibleSection
+                        key={group.value}
+                        title={group.label}
+                        count={group.items.length}
+                        icon={<Icon size={16} className="text-ktip-sand-400" />}
+                        className="first:border-t-0 first:pt-0"
+                      >
+                        <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
+                          {group.items.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
+                        </div>
+                      </CollapsibleSection>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
+                  {openGrants.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
+                </div>
+              )}
+
+              {closedGrants.length > 0 && (
+                <CollapsibleSection
+                  title="Closed grants"
+                  count={closedGrants.length}
+                  subtitle="Expired or no longer accepting applications"
+                  defaultOpen={false}
+                  className="mt-10"
+                >
+                  <div className={cn(gridClass, 'gap-4 auto-rows-fr opacity-75')}>
+                    {closedGrants.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
+                  </div>
+                </CollapsibleSection>
+              )}
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Wallet size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">

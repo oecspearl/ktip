@@ -760,6 +760,8 @@ export interface Database {
           id: string
           user_id: string
           template: string
+          /** Chosen presentation (migration 078). Purely visual; never the row key. */
+          design: string
           data: Record<string, unknown>
           sources: Record<string, string>
           is_public: boolean
@@ -771,6 +773,7 @@ export interface Database {
           id?: string
           user_id: string
           template?: string
+          design?: string
           data?: Record<string, unknown>
           sources?: Record<string, string>
           is_public?: boolean
@@ -782,6 +785,7 @@ export interface Database {
           id?: string
           user_id?: string
           template?: string
+          design?: string
           data?: Record<string, unknown>
           sources?: Record<string, string>
           is_public?: boolean

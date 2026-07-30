@@ -1,28 +1,32 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import {
   addDays,
   eachDayOfInterval,
-  endOfMonth,
   format,
   max as maxDate,
   startOfDay,
-  startOfMonth,
   subDays,
 } from 'date-fns'
 import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
 import { EventCalendar } from '../../components/events/EventCalendar'
-import { EventDayPanel } from '../../components/events/EventDayPanel'
-import { useCalendarMonth } from '../../components/calendar/useCalendarMonth'
+import { eventToCalendarItem } from '../../components/events/event-calendar-item'
+import { CalendarDayPanel } from '../../components/calendar/CalendarDayPanel'
+import { useCalendarRange, type CalendarView } from '../../components/calendar/useCalendarRange'
 import { useEvents } from '../../hooks/useEvents'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
-import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { TagFilterSelect } from '../../components/ui/TagFilterSelect'
 import { SortSelect } from '../../components/ui/SortSelect'
-import { Plus, Search, CalendarX, CalendarDays, LayoutGrid } from 'lucide-react'
+import { Select } from '../../components/ui/Select'
+import { ColumnToggle } from '../../components/ui/ColumnToggle'
+import { Plus, CalendarX, CalendarDays, LayoutGrid } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
+import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
@@ -35,12 +39,16 @@ import type { Event } from '../../types'
 type EventsView = 'calendar' | 'grid'
 
 const VIEW_STORAGE_KEY = 'events:view'
+const CALENDAR_VIEW_STORAGE_KEY = 'events:calendar-view'
+
+const TYPE_OPTIONS = [
+  { value: '', label: 'All Event Types' },
+  ...Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+]
 
 export default function EventsPage() {
   usePageTitle('Events')
   const [selectedType, setSelectedType] = useState('')
-  const [showUpcoming, setShowUpcoming] = useState(true)
-  const [climateFilter, setClimateFilter] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -64,55 +72,38 @@ export default function EventsPage() {
     localStorage.getItem(VIEW_STORAGE_KEY) === 'grid' ? 'grid' : 'calendar'
   )
   const {
+    view: calendarView,
+    setView: setCalendarView,
     monthDate,
     selectedDate,
     direction: monthDir,
     gridStart,
     gridEnd,
     setSelectedDate,
-    goPrevMonth,
-    goNextMonth,
+    goPrev,
+    goNext,
     goToday,
-  } = useCalendarMonth()
+  } = useCalendarRange(
+    localStorage.getItem(CALENDAR_VIEW_STORAGE_KEY) === 'week' ? 'week' : 'month'
+  )
+
+  const changeCalendarView = (next: CalendarView) => {
+    setCalendarView(next)
+    localStorage.setItem(CALENDAR_VIEW_STORAGE_KEY, next)
+  }
   const autoSelectedRef = useRef(false)
 
-  // Collapsible search — expands on click, collapses on outside click / Escape when empty
+  // Collapsible search — the page owns the open state so Clear all filters can
+  // fold it back up
   const [searchOpen, setSearchOpen] = useState(false)
-  const searchRef = useRef<HTMLDivElement>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  useLayoutEffect(() => {
-    if (!searchOpen) return
-    searchInputRef.current?.focus()
-  }, [searchOpen])
-
-  useEffect(() => {
-    if (!searchOpen) return
-    const handleClick = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        // Clicks on the walkthrough card are not "outside" — collapsing the
-        // search out from under the step describing it would be absurd
-        if ((e.target as Element).closest?.('[data-tutorial-overlay]')) return
-        if (!searchInputRef.current?.value) setSearchOpen(false)
-      }
-    }
-    const handleKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setSearchOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [searchOpen])
+  const { columns, setColumns, gridClass } = useGridColumns('events:columns')
 
   const { events, loading: eventsLoading } = useEvents(
     view === 'calendar'
       ? {
           type: selectedType,
           search: debouncedSearch,
-          climateAction: climateFilter,
           tags: tagFilter,
           upcoming: false,
           // 31-day back-buffer catches multi-day events starting before the grid
@@ -123,12 +114,24 @@ export default function EventsPage() {
         }
       : {
           type: selectedType,
-          upcoming: showUpcoming,
+          upcoming: true,
           search: debouncedSearch,
-          climateAction: climateFilter,
           tags: tagFilter,
           sort,
         }
+  )
+
+  // Events that already happened. Kept as its own query rather than dropping
+  // the upcoming filter: one combined fetch runs oldest-first and its row cap
+  // would spend itself on the archive before reaching what is coming up.
+  const { events: pastEvents, loading: pastLoading } = useEvents(
+    {
+      type: selectedType,
+      past: true,
+      search: debouncedSearch,
+      tags: tagFilter,
+    },
+    { enabled: view === 'grid' }
   )
 
   // Group events by visible day, expanding multi-day spans
@@ -148,8 +151,9 @@ export default function EventsPage() {
     if (view !== 'calendar' || !events || autoSelectedRef.current) return
     autoSelectedRef.current = true
     const today = startOfDay(new Date())
-    const scanStart = maxDate([startOfMonth(monthDate), today])
-    const scanEnd = endOfMonth(monthDate)
+    // Scan the visible window — a week view only shows seven days of it
+    const scanStart = maxDate([gridStart, today])
+    const scanEnd = gridEnd
     if (scanStart > scanEnd) return
     for (const day of eachDayOfInterval({ start: scanStart, end: scanEnd })) {
       if (eventsByDay.has(format(day, 'yyyy-MM-dd'))) {
@@ -157,7 +161,7 @@ export default function EventsPage() {
         return
       }
     }
-  }, [view, events, eventsByDay, monthDate])
+  }, [view, events, eventsByDay, gridStart, gridEnd])
 
   const changeView = (next: EventsView) => {
     setView(next)
@@ -174,28 +178,56 @@ export default function EventsPage() {
         }
       }
     }
-    goNextMonth()
+    goNext()
   }
 
   const clearFilters = () => {
     setSelectedType('')
-    setShowUpcoming(true)
     setSearchQuery('')
     setDebouncedSearch('')
-    setClimateFilter(false)
     setSearchOpen(false)
     setTagFilter([])
   }
 
+  // The calendar earns a wider container than the card grid — seven day columns
+  // need the horizontal room. Filters share it so both edges stay flush.
+  const containerWidth =
+    view === 'calendar' ? 'max-w-[calc(80vw+16rem)]' : 'max-w-[calc(50vw+32rem)]'
+
   const hasActiveFilters = Boolean(
-    selectedType ||
-      (view === 'grid' && !showUpcoming) ||
-      searchQuery ||
-      climateFilter ||
-      tagFilter.length
+    selectedType || searchQuery || tagFilter.length
   )
 
-  const selectedDayEvents = eventsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []
+  // Type sections replace the flat grid whenever the upcoming list spans more
+  // than one type. Picking a single type collapses back to one grid.
+  const typeGroups = useMemo(() => {
+    if (!events || view !== 'grid' || selectedType) return []
+    const buckets = new Map<string, Event[]>()
+    for (const event of events) {
+      const type = event.event_type || 'other'
+      const bucket = buckets.get(type)
+      if (bucket) bucket.push(event)
+      else buckets.set(type, [event])
+    }
+    // Under "For You" the sections follow the ranking; otherwise fixed
+    // vocabulary order first, then anything the vocabulary does not know.
+    const known = Object.keys(EVENT_TYPE_LABELS)
+    const ordered =
+      sort === 'for_you'
+        ? [...buckets.keys()]
+        : [...known, ...[...buckets.keys()].filter((t) => !known.includes(t))]
+    return ordered.flatMap((type) => {
+      const items = buckets.get(type)
+      return items?.length
+        ? [{ value: type, label: EVENT_TYPE_LABELS[type] ?? 'Other', items }]
+        : []
+    })
+  }, [events, view, selectedType, sort])
+
+  const selectedDayItems = useMemo(
+    () => (eventsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []).map(eventToCalendarItem),
+    [eventsByDay, selectedDate]
+  )
 
   // First-time visitors get the guided tour once the list has actually rendered
   useTutorialAutoStart(TUTORIAL_IDS.EVENTS, !eventsLoading)
@@ -208,65 +240,35 @@ export default function EventsPage() {
           title="Events"
           imageSeed="events"
           breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Events List' }]}
-          actions={
-            <Link to="/events/new">
-              <Button
-                data-tutorial="events-create"
-                icon={<Plus size={16} />}
-                size="sm"
-                className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm"
-              >
-                Create Event
-              </Button>
-            </Link>
-          }
         />
       </div>
 
       {/* === Filter Section === */}
-      <div className="bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      <div id="filters" data-spy="Filters" className="scroll-mt-24 bg-ktip-sand-50 py-8">
+        <div className={cn('mx-auto px-4', containerWidth)}>
           {/* Filters + collapsible search + view toggle */}
           <div data-tutorial="events-filters" className="flex flex-wrap items-center gap-3">
-            <select
-              data-tutorial="events-type-filter"
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-            >
-              <option value="">All Event Types</option>
-              {Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-
-            {view === 'grid' && (
-              <label
-                data-tutorial="events-upcoming"
-                className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700"
-              >
-                <input
-                  type="checkbox"
-                  checked={showUpcoming}
-                  onChange={(e) => setShowUpcoming(e.target.checked)}
-                  className="w-4 h-4 text-ktip-ocean-600 border-gray-300 rounded focus:ring-ktip-ocean-500"
-                />
-                Upcoming Only
-              </label>
-            )}
-
-            <label
-              data-tutorial="events-climate"
-              className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700"
-            >
-              <input
-                type="checkbox"
-                checked={climateFilter}
-                onChange={(e) => setClimateFilter(e.target.checked)}
-                className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
+            <div data-tutorial="events-type-filter">
+              <Select
+                value={selectedType}
+                onChange={setSelectedType}
+                options={TYPE_OPTIONS}
+                ariaLabel="Filter by event type"
               />
-              Climate Action
-            </label>
+            </div>
+
+            <TagFilterSelect
+              options={tagOptions}
+              selected={tagFilter}
+              onChange={setTagFilter}
+            />
+
+            {view === 'grid' && !eventsLoading && events && (
+              <p className="text-sm text-gray-500">
+                Found {events.length} upcoming event{events.length !== 1 ? 's' : ''}
+                {(pastEvents?.length ?? 0) > 0 && ` · ${pastEvents!.length} past`}
+              </p>
+            )}
 
             {view === 'grid' && (
               // Wrapper carries the tour anchor: SortSelect renders null when
@@ -283,48 +285,22 @@ export default function EventsPage() {
 
             <div className="ml-auto flex items-center gap-2">
               {/* Collapsible search — icon expands to input, like the navbar */}
-              <div ref={searchRef} data-tutorial="events-search" className="flex items-center justify-end">
-                <div
-                  className={cn(
-                    'relative overflow-hidden transition-[width] duration-300 ease-out',
-                    searchOpen ? 'w-48 sm:w-64' : 'w-10'
-                  )}
-                >
-                  {searchOpen ? (
-                    <>
-                      <Search
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        ref={searchInputRef}
-                        type="text"
-                        placeholder="Search events..."
-                        aria-label="Search events"
-                        value={searchQuery}
-                        onChange={(e) => { setSearchQuery(e.target.value); debouncedSetSearch(e.target.value) }}
-                        className="w-full pl-9 pr-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
-                      />
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setSearchOpen(true)}
-                      aria-label="Open search"
-                      className={cn(
-                        'p-2 rounded-lg transition-all duration-200 hover:bg-ktip-sand-100 hover:scale-110',
-                        searchQuery ? 'text-ktip-ocean-600' : 'text-ktip-sand-700'
-                      )}
-                    >
-                      <Search size={18} />
-                    </button>
-                  )}
-                </div>
+              <div data-tutorial="events-search">
+                <CollapsibleSearch
+                  value={searchQuery}
+                  onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                  open={searchOpen}
+                  onOpenChange={setSearchOpen}
+                  placeholder="Search events..."
+                  ariaLabel="Search events"
+                />
               </div>
+
+              {view === 'grid' && <ColumnToggle value={columns} onChange={setColumns} />}
 
               <div
                 data-tutorial="events-view-toggle"
-                className="inline-flex rounded-lg border border-gray-300 bg-ktip-cream p-0.5"
+                className="inline-flex rounded-lg border border-ktip-sand-300 bg-ktip-cream p-0.5"
               >
               <button
                 type="button"
@@ -335,7 +311,7 @@ export default function EventsPage() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
                   view === 'calendar'
-                    ? 'bg-ktip-ocean-600 text-white shadow-soft'
+                    ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
                     : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
                 )}
               >
@@ -351,7 +327,7 @@ export default function EventsPage() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
                   view === 'grid'
-                    ? 'bg-ktip-ocean-600 text-white shadow-soft'
+                    ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
                     : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
                 )}
               >
@@ -359,10 +335,19 @@ export default function EventsPage() {
                 <span className="hidden sm:inline">Grid</span>
               </button>
               </div>
+
+              <Link to="/events/new">
+                <Button
+                  data-tutorial="events-create"
+                  icon={<Plus size={16} />}
+                  size="sm"
+                  className="text-sm"
+                >
+                  Create Event
+                </Button>
+              </Link>
             </div>
           </div>
-
-          <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
 
           {hasActiveFilters && (
             <button
@@ -376,53 +361,96 @@ export default function EventsPage() {
       </div>
 
       {/* === Events === */}
-      <div className="bg-ktip-sand-50 pb-12">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      <div id="events" data-spy="Events" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
+        <div className={cn('mx-auto px-4', containerWidth)}>
           {view === 'calendar' ? (
             <div
               data-tutorial="events-calendar-view"
-              className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 lg:gap-6 items-start"
+              className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 lg:gap-6 items-start"
             >
               {/* Wrapper, not the shared CalendarGrid — the dashboard reuses
                   that component and should not inherit this page's anchor */}
               <div data-tutorial="events-calendar">
-              <EventCalendar
-                monthDate={monthDate}
-                selectedDate={selectedDate}
-                eventsByDay={eventsByDay}
-                direction={monthDir}
-                onSelectDate={setSelectedDate}
-                onPrevMonth={goPrevMonth}
-                onNextMonth={goNextMonth}
-                onToday={goToday}
-              />
+                <EventCalendar
+                  view={calendarView}
+                  onViewChange={changeCalendarView}
+                  monthDate={monthDate}
+                  gridStart={gridStart}
+                  gridEnd={gridEnd}
+                  selectedDate={selectedDate}
+                  eventsByDay={eventsByDay}
+                  direction={monthDir}
+                  onSelectDate={setSelectedDate}
+                  onPrev={goPrev}
+                  onNext={goNext}
+                  onToday={goToday}
+                />
               </div>
-              <EventDayPanel
+              <CalendarDayPanel
                 date={selectedDate}
-                events={selectedDayEvents}
+                items={selectedDayItems}
                 loading={eventsLoading}
+                itemNoun="event"
+                emptyLabel="No events on this day"
                 onJumpToNext={jumpToNextEvent}
+                dataTutorial="events-day-panel"
               />
             </div>
           ) : eventsLoading || !events ? (
-            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
-          ) : events.length > 0 ? (
+            <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
+          ) : events.length > 0 || (pastEvents?.length ?? 0) > 0 ? (
             <div data-tutorial="events-results">
-              <p className="text-sm text-gray-500 mb-6">
-                Found {events.length} event{events.length !== 1 ? 's' : ''}
-              </p>
-              <div
-                data-tutorial="events-grid"
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children"
-              >
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
+              {events.length === 0 ? (
+                <p className="text-sm text-gray-500 mb-8">
+                  Nothing coming up under these filters — past events are below.
+                </p>
+              ) : typeGroups.length > 1 ? (
+                <div data-tutorial="events-grid" className="space-y-2">
+                  {typeGroups.map((group) => (
+                    <CollapsibleSection
+                      key={group.value}
+                      title={group.label}
+                      count={group.items.length}
+                      className="first:border-t-0 first:pt-0"
+                    >
+                      <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
+                        {group.items.map((event) => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+                      </div>
+                    </CollapsibleSection>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  data-tutorial="events-grid"
+                  className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}
+                >
+                  {events.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              )}
+
+              {!pastLoading && pastEvents && pastEvents.length > 0 && (
+                <CollapsibleSection
+                  title="Past events"
+                  count={pastEvents.length}
+                  subtitle="Already happened, most recent first"
+                  defaultOpen={false}
+                  className="mt-10"
+                >
+                  <div className={cn(gridClass, 'gap-4 auto-rows-fr opacity-75')}>
+                    {pastEvents.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CalendarX size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">

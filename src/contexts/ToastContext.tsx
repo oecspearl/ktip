@@ -39,10 +39,13 @@ const styleMap = {
   info: 'bg-ktip-ocean-50 border-ktip-ocean-200 text-ktip-ocean-800',
 }
 
+// Brand green and yellow at 500 are ~1.7:1 on their own light chips, so the
+// light side uses the 700 shades and the vivid brand tone is kept for dark,
+// where the chip background is a near-black tint.
 const iconColorMap = {
-  success: 'text-ktip-tropical-500',
+  success: 'text-ktip-tropical-700 dark:text-ktip-tropical-500',
   error: 'text-red-500',
-  warning: 'text-ktip-sun-500',
+  warning: 'text-ktip-sun-700 dark:text-ktip-sun-500',
   info: 'text-ktip-ocean-500',
 }
 

@@ -158,7 +158,7 @@ function RatingScale(ratingProps: {
             className={cn(
               'w-12 h-12 rounded-xl border-2 font-bold text-lg transition-all',
               ratingProps.value === n
-                ? 'border-ktip-ocean-500 bg-ktip-ocean-500 text-white scale-110'
+                ? 'border-ktip-ocean-500 bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white scale-110'
                 : 'border-ktip-sand-200 hover:border-ktip-ocean-300 text-ktip-sand-600 hover:bg-ktip-ocean-50'
             )}
           >
@@ -298,9 +298,9 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             className={cn(
               'flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all',
               idx < currentIdx
-                ? 'bg-ktip-ocean-500 text-white'
+                ? 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white'
                 : idx === currentIdx
-                  ? 'bg-ktip-ocean-500 text-white ring-4 ring-ktip-ocean-100'
+                  ? 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white ring-4 ring-ktip-ocean-100'
                   : 'bg-ktip-sand-100 text-ktip-sand-500'
             )}
           >

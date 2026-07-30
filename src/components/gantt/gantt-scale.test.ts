@@ -10,7 +10,7 @@ import {
   shiftAnchor,
   windowBoundsFor,
 } from './gantt-scale'
-import { MIN_BAR_PX, type GanttEvent } from './gantt-types'
+import { DEFAULT_OFF_DAYS, MIN_BAR_PX, type GanttEvent } from './gantt-types'
 
 const d = (y: number, m: number, day: number, h = 0) => new Date(y, m - 1, day, h)
 
@@ -80,6 +80,24 @@ describe('buildWindow', () => {
     expect(week.offDayBands[0].width).toBe(2 * 48)
     expect(buildWindow(d(2026, 2, 11), 'month').offDayBands).toEqual([])
     expect(buildWindow(d(2026, 2, 11), 'quarter').offDayBands).toEqual([])
+  })
+
+  it('stretches every layer when given a pxPerDay override', () => {
+    const days = 89 // Feb 1 – May 1 2026
+    const fitted = 1200 / days
+    const win = buildWindow(d(2026, 2, 11), 'month', DEFAULT_OFF_DAYS, fitted)
+
+    expect(win.pxPerDay).toBe(fitted)
+    expect(win.totalWidth).toBeCloseTo(1200, 6)
+    expect(win.major[win.major.length - 1].left + win.major[win.major.length - 1].width).toBeCloseTo(
+      1200,
+      6
+    )
+    expect(win.minor.reduce((sum, t) => sum + t.width, 0)).toBeCloseTo(1200, 6)
+  })
+
+  it('ignores a non-positive override and keeps the scale density', () => {
+    expect(buildWindow(d(2026, 2, 11), 'month', DEFAULT_OFF_DAYS, 0).pxPerDay).toBe(8)
   })
 
   it('labels a clipped first tick with the unit it belongs to', () => {

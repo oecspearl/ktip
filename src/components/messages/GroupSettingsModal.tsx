@@ -110,19 +110,19 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
               />
             </div>
             <button
               onClick={handleSearch}
               disabled={searching}
-              className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg disabled:opacity-50"
             >
               Search
             </button>
           </div>
           {results.length > 0 && (
-            <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-40 overflow-y-auto">
+            <div className="border border-ktip-sand-200 rounded-lg divide-y divide-ktip-sand-100 max-h-40 overflow-y-auto">
               {results.map((user) => (
                 <div key={user.id} className="flex items-center justify-between px-3 py-2">
                   <span className="text-sm font-medium text-ktip-sand-900 truncate">
@@ -148,7 +148,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
         <label className="block text-sm font-semibold text-ktip-sand-900 mb-2">
           Members ({participants.length})
         </label>
-        <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-56 overflow-y-auto">
+        <div className="border border-ktip-sand-200 rounded-lg divide-y divide-ktip-sand-100 max-h-56 overflow-y-auto">
           {participants.map((participant) => {
             const pname = participant.user?.display_name || 'Unknown User'
             return (

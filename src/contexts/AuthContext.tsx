@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { purgeSupabaseResponseCache } from '../lib/service-worker'
 import { defaultPermissionsFor, expandRoles } from '../lib/permissions'
 import type { User, Session } from '@supabase/supabase-js'
 import type { PermissionKey, Profile, RoleSlug } from '../types'
@@ -189,11 +190,31 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Initialize auth state — use onAuthStateChange as single source of truth
   useEffect(() => {
     let resolved = false
+    // Account the caches currently hold data for. `undefined` until the first
+    // event, which is what keeps an ordinary page load from wiping a warm cache
+    // before it has anything to compare against.
+    let cachedUserId: string | null | undefined
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       resolved = true
+      const nextUserId = newSession?.user?.id ?? null
+
+      // A different account now owns this tab. Most query keys carry no user
+      // id, so without this every one of them keeps serving the previous
+      // user's rows — and the ones pinned to staleTime: Infinity would never
+      // refetch at all. Signing out and back in with a second Google account
+      // is the ordinary way to hit this.
+      //
+      // TOKEN_REFRESHED and USER_UPDATED leave the id alone, so the common
+      // events cost nothing.
+      if (cachedUserId !== undefined && cachedUserId !== nextUserId) {
+        queryClient.clear()
+        void purgeSupabaseResponseCache()
+      }
+      cachedUserId = nextUserId
+
       setSession(newSession)
       setUser(newSession?.user ?? null)
 
@@ -226,7 +247,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       clearTimeout(timeout)
       subscription.unsubscribe()
     }
-  }, [])
+  }, [queryClient])
 
   // Sign in with email and password.
   //
@@ -294,8 +315,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     // Clear local state immediately so the UI updates
     setUser(null)
     setSession(null)
-    queryClient.removeQueries({ queryKey: ['profile'] })
-    queryClient.removeQueries({ queryKey: ['permissions'] })
+    // Everything, not only profile and permissions. Most query keys do not
+    // carry a user id, so whatever is left behind is handed to whoever signs in
+    // next; several hooks also set staleTime: Infinity, which means it is never
+    // refetched away.
+    queryClient.clear()
+    void purgeSupabaseResponseCache()
     try {
       await supabase.auth.signOut()
     } catch {

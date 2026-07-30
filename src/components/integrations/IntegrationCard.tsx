@@ -11,7 +11,7 @@ interface IntegrationCardProps {
 
 export function IntegrationCard({ integration }: IntegrationCardProps) {
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3 mb-3">
         {integration.logo_url ? (
           <img
@@ -58,7 +58,7 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
         href={integration.website_url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 btn-brand text-sm font-bold rounded-lg"
       >
         Visit
         <ExternalLink size={14} />
