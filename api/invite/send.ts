@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
 
 export const config = { runtime: 'edge' }
 
@@ -64,7 +65,9 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
-function inviteEmailHtml(params: {
+// Exported so the template can be rendered and previewed without going through
+// the authenticated handler (which writes an email_invites row as a side effect).
+export function inviteEmailHtml(params: {
   inviterName: string
   resourceLabel: string
   resourceTitle: string
@@ -226,12 +229,15 @@ export default async function handler(request: Request) {
   if (insertError) return json({ error: insertError.message }, 400)
 
   // --- Send ---
-  const resendKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.INVITE_FROM_EMAIL
-  if (!resendKey || !fromEmail) {
+  const apiKey = resendKey()
+  const fromEmail = emailFrom()
+  if (!apiKey || !fromEmail) {
     // The invite row exists and the link works; only delivery is unconfigured.
     return json(
-      { error: 'Email delivery is not configured yet. Ask an administrator to set RESEND_API_KEY.' },
+      {
+        error:
+          'Email delivery is not configured yet. Ask an administrator to set RESEND_API_KEY and EMAIL_FROM.',
+      },
       503
     )
   }
@@ -244,13 +250,12 @@ export default async function handler(request: Request) {
 
   const inviterName =
     (inviterProfile as any)?.display_name || caller.email?.split('@')[0] || 'A KTIP member'
-  const origin = new URL(request.url).origin
-  const joinUrl = `${origin}/join/${token}`
+  const joinUrl = `${siteOrigin(request)}/join/${token}`
 
   const resendResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${resendKey}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

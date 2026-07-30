@@ -157,6 +157,15 @@ export default defineConfig(({ mode }) => {
     'SENTRY_API_BASE_URL',
     'SENTRY_DSN',
     'SENTRY_ENVIRONMENT',
+    // Outbound email. Without these, /api/invite/send answers 503 and the
+    // alias flows fall back to logging a dev link instead of mailing one.
+    'RESEND_API_KEY',
+    'EMAIL_FROM',
+    // Deprecated alias of EMAIL_FROM; still promoted for un-migrated .env files.
+    'INVITE_FROM_EMAIL',
+    // The origin baked into links inside those emails.
+    'SITE_URL',
+    'NOTIFICATION_WEBHOOK_SECRET',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }

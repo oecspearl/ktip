@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
 
 export const config = { runtime: 'edge' }
 
@@ -180,13 +181,12 @@ export default async function handler(request: Request) {
     return json({ error: writeError.message }, 400)
   }
 
-  const origin = new URL(request.url).origin
-  const verifyUrl = `${origin}/verify-email/${token}`
+  const verifyUrl = `${siteOrigin(request)}/verify-email/${token}`
 
   // --- Send ---
-  const resendKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.INVITE_FROM_EMAIL
-  if (!resendKey || !fromEmail) {
+  const apiKey = resendKey()
+  const fromEmail = emailFrom()
+  if (!apiKey || !fromEmail) {
     // Outside production, hand the link back so the flow is testable without
     // Resend. Gated on VERCEL_ENV so a production misconfiguration can never
     // emit a live token into a response body or the logs.
@@ -200,7 +200,10 @@ export default async function handler(request: Request) {
       .update({ verification_token: null, token_expires_at: null })
       .eq('user_id', caller.id)
     return json(
-      { error: 'Email delivery is not configured yet. Ask an administrator to set RESEND_API_KEY.' },
+      {
+        error:
+          'Email delivery is not configured yet. Ask an administrator to set RESEND_API_KEY and EMAIL_FROM.',
+      },
       503
     )
   }
@@ -216,7 +219,7 @@ export default async function handler(request: Request) {
   const resendResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${resendKey}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
