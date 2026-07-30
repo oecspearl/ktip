@@ -90,6 +90,12 @@ export function catalogBases(): string[] {
   return configured
 }
 
+/** Server-side bearer for GET /api/external/enrollments. */
+export function commonsApiKey(): string | null {
+  const key = (process.env.COMMONS_API_KEY || '').trim()
+  return key || null
+}
+
 /**
  * Catalogue cache, module-scope so a warm isolate reuses it. The catalogue is
  * public and changes on the order of days, while a sync may look up dozens of
@@ -168,7 +174,7 @@ export interface EnrollmentsResult {
  * set so the caller can say so, and the next sync fills it in.
  */
 export async function loadEnrollments(email: string): Promise<EnrollmentsResult> {
-  const apiKey = process.env.COMMONS_API_KEY
+  const apiKey = commonsApiKey()
   if (!apiKey) {
     console.warn('[vc-catalog] COMMONS_API_KEY not set — course history unavailable')
     return { enrollments: [], unavailable: true }

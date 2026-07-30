@@ -149,6 +149,8 @@ export default defineConfig(({ mode }) => {
     'VC_USERINFO_URL',
     'COMMONS_BASE_URLS',
     'COMMONS_API_KEY',
+    'KTIP_CATALOG_BASE_URL',
+    'MYPD_KTIP_API_KEY',
     // /api/admin/sentry reads these; without them it answers 501 and the
     // dashboard shows setup instructions instead of issues.
     'SENTRY_AUTH_TOKEN',

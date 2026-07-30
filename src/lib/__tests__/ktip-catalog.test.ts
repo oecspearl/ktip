@@ -9,12 +9,13 @@ import {
   enrollInKtipCourse,
   KtipCatalogUnavailableError,
   loadKtipCatalog,
+  normalizeKtipEnrollResult,
 } from '../../../api/_lib/ktip-catalog'
 
 /** Gives vi.fn a real (url, init) signature so mock.calls indexes as [url, init]. */
 type FetchArgs = [string, RequestInit?]
 
-const DEFAULT_BASE = 'https://mypd.oecscampus.org'
+const DEFAULT_BASE = 'https://commons.oecscampus.org'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -22,7 +23,7 @@ afterEach(() => {
 })
 
 describe('catalogBaseUrl', () => {
-  it('defaults to mypd.oecscampus.org when unset', () => {
+  it('defaults to commons.oecscampus.org when unset', () => {
     vi.stubEnv('KTIP_CATALOG_BASE_URL', '')
     expect(catalogBaseUrl()).toBe(DEFAULT_BASE)
   })
@@ -142,6 +143,45 @@ describe('enrollInKtipCourse', () => {
     const headers = init?.headers as Record<string, string>
     expect(headers.Authorization).toBe('Bearer secret-key')
     expect(JSON.parse(init?.body as string)).toEqual({ email: 'a@b.com', course_id: 'c1' })
+  })
+
+  it('rewrites localhost course URLs from the campus to the configured base', async () => {
+    vi.stubEnv('MYPD_KTIP_API_KEY', 'secret-key')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          consumer: 'ktip',
+          message: 'Enrolled successfully',
+          user_id: 'u1',
+          course_id: 'c1',
+          enrollment_id: 'e1',
+          is_new_user: false,
+          sign_in_url: 'http://localhost:3000/auth/signin',
+          course_url: 'http://localhost:3000/courses/c1',
+        }),
+      }))
+    )
+
+    const result = await enrollInKtipCourse({ email: 'a@b.com', course_id: 'c1' })
+    expect(result.course_url).toBe(`${DEFAULT_BASE}/courses/c1`)
+    expect(result.sign_in_url).toBe(`${DEFAULT_BASE}/auth/signin`)
+  })
+
+  it('normalizeKtipEnrollResult uses KTIP_CATALOG_BASE_URL when set', () => {
+    vi.stubEnv('KTIP_CATALOG_BASE_URL', 'https://commons.oecscampus.org')
+    const normalized = normalizeKtipEnrollResult({
+      consumer: 'ktip',
+      message: 'ok',
+      user_id: 'u1',
+      course_id: 'abc',
+      enrollment_id: 'e1',
+      is_new_user: false,
+      sign_in_url: 'http://localhost:3000/auth/signin',
+      course_url: 'http://localhost:3000/courses/abc',
+    })
+    expect(normalized.course_url).toBe('https://commons.oecscampus.org/courses/abc')
   })
 
   it.each([401, 403, 404])('maps a %d upstream response to a KtipEnrollError with that status', async (status) => {
