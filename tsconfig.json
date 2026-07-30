@@ -3,5 +3,18 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  /*
+   * Duplicated from tsconfig.app.json purely for tooling that reads the root
+   * config and does not follow project references — the shadcn CLI is one.
+   * Without it the CLI cannot resolve the "@/..." aliases in components.json
+   * and writes files into a literal "@" directory at the repo root.
+   * `files: []` means this block affects no compilation.
+   */
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
 }

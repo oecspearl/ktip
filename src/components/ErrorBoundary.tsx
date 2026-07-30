@@ -1,6 +1,8 @@
 import { Component, type ErrorInfo, type PropsWithChildren } from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { Button } from './ui/Button'
+import { AppError } from '../lib/app-error'
+import { captureException } from '../lib/monitoring'
 
 interface State {
   hasError: boolean
@@ -16,6 +18,17 @@ export class AppErrorBoundary extends Component<PropsWithChildren, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('AppErrorBoundary caught an error:', error, errorInfo)
+    // Wrapped rather than reported raw: the original message can contain
+    // proposal text or an email, which the scrubber would strip and leave the
+    // issue untitled. The AppError code survives scrubbing and groups the issue.
+    captureException(
+      new AppError({
+        code: 'REACT_COMPONENT_ERROR',
+        area: 'react-render',
+        operation: 'error-boundary',
+        cause: error,
+      })
+    )
   }
 
   reset = () => {

@@ -1,5 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, RouterProvider, Outlet, Link, Navigate } from 'react-router'
+import * as Sentry from '@sentry/react'
+import {
+  createBrowserRouter as createBrowserRouterBase,
+  RouterProvider,
+  Outlet,
+  Link,
+  Navigate,
+} from 'react-router'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AchievementProvider } from './contexts/AchievementContext'
@@ -9,8 +16,16 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { PermissionRoute } from './components/PermissionRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
+import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { MainLayout } from './components/layout/MainLayout'
 import { AdminLayout } from './components/layout/AdminLayout'
+import { AppError } from './lib/app-error'
+import { captureException } from './lib/monitoring'
+
+// Wrapped so Sentry names transactions after the matched route pattern
+// (/projects/:id) instead of the literal URL, which would otherwise create one
+// transaction per record and make performance data unaggregatable.
+const createBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRouterBase)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,7 +51,20 @@ function Placeholder() {
 
 function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
   return async () => {
-    const mod = await importer().catch(() => ({ default: Placeholder }))
+    const mod = await importer().catch((error: unknown) => {
+      // The Placeholder fallback is kept, but it is no longer silent: after a
+      // deploy this is how a stale chunk reference presents, and it looked
+      // identical to a page that was never ported.
+      captureException(
+        new AppError({
+          code: 'ROUTE_IMPORT_FAILED',
+          area: 'routing',
+          operation: 'lazy-import',
+          cause: error,
+        })
+      )
+      return { default: Placeholder }
+    })
     return { Component: mod.default }
   }
 }
@@ -226,6 +254,11 @@ const router = createBrowserRouter([
                   { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
                   { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
                   { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
+                  { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
+                  // Sends deliberate events to the live Sentry project, so it is
+                  // gated by AdminRoute like every other page here rather than
+                  // by a build flag.
+                  { path: '/admin/errors/simulate', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorSimulatorPage')) },
                 ],
               },
             ],
@@ -242,6 +275,10 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AppErrorBoundary>
+      {/* Outside the router: the choice gates analytics and performance tracing
+          for the whole app, including the auth pages, and it needs no route
+          context of its own. */}
+      <AnalyticsConsentBanner />
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <AuthProvider>

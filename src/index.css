@@ -2,6 +2,13 @@
 
 @import "tailwindcss";
 
+/* Admin error console (src/pages/admin/errors) — shadcn/ReUI runtime and its
+   scoped tokens. Imported here, not from the page component, because Tailwind
+   only evaluates @theme/@utility inside an entrypoint's import graph; see the
+   header of that file. Its tokens are confined to .errors-console, so this
+   line adds utility definitions but restyles nothing. */
+@import "./pages/admin/errors/index.css";
+
 @theme {
   /* ============================================================
      OECS BRAND PRIMITIVES — the ONLY 5 colors in the system.

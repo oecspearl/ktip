@@ -15,7 +15,7 @@ export default async function handler(request: Request) {
   }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !supabaseServiceKey) {
     return new Response(
       JSON.stringify({ error: 'Server configuration error' }),
@@ -31,7 +31,8 @@ export default async function handler(request: Request) {
     })
   }
 
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY!
+  const anonKey = (process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY)!
   const callerClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   })
