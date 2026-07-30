@@ -5,9 +5,12 @@ import { Modal } from '../../../components/ui/Modal'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { ApplicationPreview } from '../../../components/grants/application/ApplicationPreview'
 import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
-import { useGrants, useUpdateGrant } from '../../../hooks/useGrants'
+import { useGrants, useUpdateGrant, useDeleteGrant } from '../../../hooks/useGrants'
 import { useAdminGrantApplications, useAdminApplicationActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
+import { useAuth } from '../../../contexts/AuthContext'
+import { DeleteEntityControl } from '../../../components/shared/DeleteEntityControl'
+import { describeGrantDeletion } from '../../../lib/delete-guard'
 import {
   GRANT_TYPE_LABELS,
   GRANT_TYPE_COLORS,
@@ -34,6 +37,7 @@ type TabId = 'grants' | 'applications'
 
 export default function AdminGrantsPage() {
   const toast = useToast()
+  const auth = useAuth()
   const [activeTab, setActiveTab] = useState<TabId>('grants')
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [editingGrant, setEditingGrant] = useState<Grant | null>(null)
@@ -42,6 +46,14 @@ export default function AdminGrantsPage() {
   // Grants data
   const { grants, loading: grantsLoading, refetch: refetchGrants } = useGrants()
   const { updateGrant, loading: updateLoading } = useUpdateGrant()
+  const { deleteGrant } = useDeleteGrant()
+
+  // Mirrors migration 077's DELETE policy. Grants created before 077 have no
+  // created_by and are OECS-only — showing the button to their original poster
+  // would only produce a refusal, because the DB cannot know who that was.
+  const isOecs = auth.can('org:manage')
+  const canDeleteGrant = (grant: Grant) =>
+    isOecs || (!!grant.created_by && grant.created_by === auth.user?.id)
 
   // Applications data
   const { applications, loading: applicationsLoading, refetch: refetchApplications } = useAdminGrantApplications({
@@ -269,6 +281,24 @@ export default function AdminGrantsPage() {
                             >
                               {grant.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
+                            {canDeleteGrant(grant) && (
+                              // applicationCount is null on purpose: the
+                              // applications list here is status-filtered and
+                              // excludes drafts, so it cannot give an honest
+                              // per-grant total. The guard reads null on a live
+                              // grant as "assume there are some".
+                              <DeleteEntityControl
+                                variant="icon"
+                                noun="grant"
+                                title={grant.title}
+                                impact={describeGrantDeletion({
+                                  isActive: grant.is_active,
+                                  applicationCount: null,
+                                })}
+                                onDelete={() => deleteGrant(grant.id)}
+                                onDeleted={refetchGrants}
+                              />
+                            )}
                           </div>
                         </td>
                       </tr>

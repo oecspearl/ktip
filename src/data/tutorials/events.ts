@@ -48,7 +48,7 @@ export const eventsTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="events-results"]',
     title: 'Grid view',
     description:
-      'The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.\n\nGrid view also unlocks two controls back in the filter bar: a sort order (what is coming up next, newest, or For You once you have set your interests in your profile) and an Upcoming Only tick box. Untick it to reach the archive of events that have already happened.',
+      'The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.\n\nUpcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n\nGrid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile.',
     position: 'top',
     scrollMode: 'top',
     secondaryTarget: '[data-tutorial="events-filters"]',

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, UserRoundCheck } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useResume } from '../../hooks/useResume'
+import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import type {
@@ -37,6 +38,7 @@ export default function CvEditPage() {
   usePageTitle('Edit CV')
   const navigate = useNavigate()
   const toast = useToast()
+  const { profile } = useAuth()
   const { data, save, isLoading } = useResume()
 
   const [draft, setDraft] = useState<ResumeData>(() => structuredClone(data))
@@ -78,6 +80,77 @@ export default function CvEditPage() {
     mark(path)
   }
 
+  /**
+   * Copies what the KTIP profile already knows into the blanks.
+   *
+   * Fill-if-empty, never overwrite: this is a convenience, not a sync, and a
+   * button that silently replaced a hand-written summary with a profile bio
+   * would be a trap. Only the paths it actually filled get marked — marking a
+   * path stamps it 'manual' and permanently stops the Virtual Campus from
+   * touching it, so marking a field this did not write would quietly freeze it.
+   */
+  const fillFromProfile = () => {
+    if (!profile) return
+    const next = structuredClone(draft)
+    const filled: ResumePath[] = []
+
+    const fill = (path: ResumePath, isEmpty: boolean, apply: () => void) => {
+      if (!isEmpty) return
+      apply()
+      filled.push(path)
+    }
+
+    fill('profile.name', next.profile.name.trim() === '', () => {
+      next.profile.name = profile.display_name ?? ''
+    })
+    fill('profile.location', next.profile.location.trim() === '', () => {
+      next.profile.location = profile.country ?? ''
+    })
+    fill('profile.role', next.profile.role.trim() === '', () => {
+      next.profile.role = [profile.organization, profile.industry].filter(Boolean).join(' · ')
+    })
+    fill('profile.about', next.profile.about.length === 0, () => {
+      next.profile.about = profile.bio ? [profile.bio] : []
+    })
+    fill('skills', next.skills.length === 0, () => {
+      const skills = profile.skills ?? []
+      next.skills = skills.length > 0 ? [{ area: 'Skills', abbr: 'Sk', skills: [...skills] }] : []
+    })
+    fill('interests', next.interests.trim() === '', () => {
+      next.interests = (profile.interests ?? []).join(' · ')
+    })
+    fill('professionalSkills', next.professionalSkills.length === 0, () => {
+      next.professionalSkills = [...(profile.open_to ?? [])]
+    })
+
+    // A path counted as filled but written empty (nothing on the profile to
+    // copy) would be marked for nothing, so drop those before marking.
+    const written = filled.filter((path) => {
+      if (path === 'skills') return next.skills.length > 0
+      if (path === 'professionalSkills') return next.professionalSkills.length > 0
+      if (path === 'interests') return next.interests.trim() !== ''
+      if (path === 'profile.about') return next.profile.about.length > 0
+      if (path === 'profile.name') return next.profile.name.trim() !== ''
+      if (path === 'profile.location') return next.profile.location.trim() !== ''
+      return next.profile.role.trim() !== ''
+    })
+
+    if (written.length === 0) {
+      toast.info('Nothing to copy — your profile has nothing these blanks can use.')
+      return
+    }
+
+    setDraft(next)
+    setTouched((prev) => {
+      const merged = new Set(prev)
+      for (const path of written) merged.add(path)
+      return merged
+    })
+    toast.success(
+      `Filled ${written.length} ${written.length === 1 ? 'field' : 'fields'} from your profile. Save to keep them.`
+    )
+  }
+
   const onSave = async () => {
     try {
       await save.mutateAsync({ data: draft, touched: Array.from(touched) })
@@ -99,6 +172,21 @@ export default function CvEditPage() {
       <p className="mt-2 text-sm text-ktip-sand-600 dark:text-ktip-sand-300">
         Anything you change here is yours — syncing from the Virtual Campus will leave it alone.
       </p>
+
+      <div className="mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          icon={<UserRoundCheck size={15} />}
+          onClick={fillFromProfile}
+        >
+          Fill blanks from my profile
+        </Button>
+        <p className="mt-1.5 text-xs text-ktip-sand-500">
+          Copies your name, location, organisation, bio, skills and interests into any field that is
+          still empty. Never overwrites something you have written.
+        </p>
+      </div>
 
       {/* ── Identity ── */}
       <section className="mt-10 space-y-4">

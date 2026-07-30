@@ -1,7 +1,6 @@
 import { Badge } from '../ui/Badge'
 import type { Project } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
-import { MatchReasonChip } from '../ui/MatchReasonChip'
 import { BentoCard } from '../ui/BentoCard'
 import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
@@ -30,8 +29,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {PHASE_LABELS[project.phase]}
         </Badge>
         {project.is_climate_action && <ClimateBadge />}
-        {/* Only present when the list was fetched under the "For You" sort. */}
-        <MatchReasonChip reasons={project.match_reasons} />
       </div>
     </BentoCard>
   )

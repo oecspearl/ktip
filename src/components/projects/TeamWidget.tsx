@@ -53,7 +53,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
             <button
               onClick={() => handleRespond(true)}
               disabled={loading}
-              className="flex items-center gap-1 px-3 py-1.5 bg-ktip-ocean-600 text-white text-xs font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 px-3 py-1.5 btn-brand text-xs font-bold rounded-lg disabled:opacity-50"
             >
               <Check size={14} />
               Accept

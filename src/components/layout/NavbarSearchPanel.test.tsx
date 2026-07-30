@@ -27,6 +27,7 @@ const rows: SearchRow[] = [
 
 function renderPanel(overrides: Partial<Parameters<typeof NavbarSearchPanel>[0]> = {}) {
   const props = {
+    open: true,
     query: 'pass',
     groups: groupRows(rows),
     rows,

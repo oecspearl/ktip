@@ -88,7 +88,7 @@ export function ConnectButton({ otherUserId, size = 'md' }: ConnectButtonProps) 
   if (state === 'pending_received') {
     return (
       <span className="flex items-center gap-1.5">
-        <button onClick={() => handleRespond(true)} disabled={busy} className={`${base} bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700`}>
+        <button onClick={() => handleRespond(true)} disabled={busy} className={`${base} btn-brand`}>
           <Check size={iconSize} />
           Accept
         </button>
@@ -101,7 +101,7 @@ export function ConnectButton({ otherUserId, size = 'md' }: ConnectButtonProps) 
   }
 
   return (
-    <button onClick={handleConnect} disabled={busy} className={`${base} bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700`}>
+    <button onClick={handleConnect} disabled={busy} className={`${base} btn-brand`}>
       <UserPlus size={iconSize} />
       Connect
     </button>

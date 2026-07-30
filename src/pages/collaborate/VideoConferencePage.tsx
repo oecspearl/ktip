@@ -396,7 +396,7 @@ export default function VideoConferencePage() {
                 type="button"
                 onClick={handleInviteAndStart}
                 disabled={!roomName.trim() || inviting}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 btn-brand rounded-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {inviting ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

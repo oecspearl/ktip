@@ -1,41 +1,47 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { Download, Eye, EyeOff, Pencil, RefreshCw } from 'lucide-react'
+import { Download, Eye, EyeOff, FileText, LayoutTemplate, Pencil, RefreshCw } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-import { ResumeScreen } from '../../components/resume/ResumeScreen'
-import { ResumeSheet } from '../../components/resume/ResumeSheet'
+import { ResumePaper } from '../../components/resume/ResumePaper'
+import { ResumeOutline } from '../../components/resume/ResumeOutline'
+import { DesignPicker } from '../../components/resume/DesignPicker'
+import { sheetFor } from '../../components/resume/sheets'
 import { useResume } from '../../hooks/useResume'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { resolveTemplate, sheetSidebar } from '../../lib/resume-templates'
-import type { ResumeTheme, ResumeVariant } from '../../types/resume'
+import { bleedVars, resolveDesign } from '../../lib/resume-designs'
+import type { ResumeTheme } from '../../types/resume'
 
 /**
  * The member's CV.
  *
- * Rendered twice from one document: ResumeScreen is what people browse,
- * ResumeSheet is the white print-real A4 artifact, mounted display-none and
- * swapped in only for print. "Download" is window.print() — index.css isolates
- * the sheet on @page A4 and the browser's own "Save as PDF" does the rest. No
- * PDF library, and nothing to keep in step with the on-screen design.
+ * WYSIWYG: there is one rendering of the document — the true 210mm A4 sheet —
+ * scaled down to fit the column on screen and printed at full size. What you
+ * are looking at is the PDF. (It used to be two renderings, a responsive screen
+ * version plus a print-only sheet, which meant the thing you chose and the
+ * thing you sent were different components.)
  *
- * Two independent choices:
- *  • Curated ↔ Full CV — affects the screen only. The PDF is always complete.
- *  • B&W ↔ Color — picks which sheet theme prints.
+ * "Download" is window.print(); index.css isolates the sheet on @page A4 and
+ * the browser's own "Save as PDF" does the rest. No PDF library, so nothing can
+ * fall out of step with the design, and the text stays real selectable text
+ * rather than a raster of it.
  */
 export default function CvPage() {
   usePageTitle('My CV')
   const { profile } = useAuth()
   const toast = useToast()
   const [searchParams] = useSearchParams()
-  const { resume, data, isLoading, exists, sync, setPublic } = useResume()
+  const { resume, data, design: designId, isLoading, exists, sync, setPublic, setDesign } = useResume()
 
-  const [variant, setVariant] = useState<ResumeVariant>('curated')
   const [sheetTheme, setSheetTheme] = useState<ResumeTheme>('mono')
   const [pendingPrint, setPendingPrint] = useState(false)
+  const [asText, setAsText] = useState(
+    () => typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches
+  )
 
-  const template = resolveTemplate(resume?.template)
+  const design = resolveDesign(designId)
+  const Sheet = sheetFor(design.id)
 
   // Print only once the chosen theme has committed to the DOM. window.print()
   // is synchronous, so calling it in the click handler captures the previous
@@ -46,15 +52,18 @@ export default function CvPage() {
     setPendingPrint(false)
   }, [pendingPrint])
 
-  // The printed full-height sidebar bleed is a fixed pseudo-element on <body>,
+  // The printed full-height bleed strip is a fixed pseudo-element on <body>,
   // which cannot read a variable set on the sheet — so publish it at the root.
+  // Colour and geometry travel together: a strip at the wrong edge, or a 74mm
+  // one under a design that has no rail, is worse than no strip at all.
   useEffect(() => {
     const root = document.documentElement
-    root.style.setProperty('--resume-sidebar', sheetSidebar(sheetTheme, template))
+    const vars = bleedVars(sheetTheme, design)
+    for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value)
     return () => {
-      root.style.removeProperty('--resume-sidebar')
+      for (const name of Object.keys(vars)) root.style.removeProperty(name)
     }
-  }, [sheetTheme, template])
+  }, [sheetTheme, design])
 
   useEffect(() => {
     if (searchParams.get('welcome') === 'vc') {
@@ -65,8 +74,19 @@ export default function CvPage() {
   }, [])
 
   const download = (theme: ResumeTheme) => {
+    // The outline has no page geometry, so printing from it would print nothing
+    // recognisable. Flip back to the sheet first.
+    setAsText(false)
     setSheetTheme(theme)
     setPendingPrint(true)
+  }
+
+  const pickDesign = async (id: string) => {
+    try {
+      await setDesign.mutateAsync(id)
+    } catch (err) {
+      toast.error((err as Error).message)
+    }
   }
 
   const runSync = async () => {
@@ -102,9 +122,11 @@ export default function CvPage() {
     <div id="cv-root" className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-8 print:hidden">
         <p className="text-xs font-medium uppercase tracking-widest text-ktip-sand-500">Résumé</p>
-        <h1 className="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700 dark:text-ktip-sand-50">
+        {/* The sheet carries the document's own h1 (the member's name), so this
+            page-level title is a label rather than a second first-level heading. */}
+        <p className="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700 dark:text-ktip-sand-50">
           My CV
-        </h1>
+        </p>
       </div>
 
       {!exists && (
@@ -117,7 +139,7 @@ export default function CvPage() {
         </div>
       )}
 
-      <div className="mb-10 flex flex-wrap items-center gap-3 print:hidden">
+      <div className="mb-6 flex flex-wrap items-center gap-3 print:hidden">
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('mono')}>
           Download B&amp;W (A4)
         </Button>
@@ -125,28 +147,13 @@ export default function CvPage() {
           Download Color (A4)
         </Button>
 
-        {/* Screen-only view switch — the PDF stays complete regardless. */}
-        <div
-          className="inline-flex rounded-lg border border-ktip-sand-200 p-1 dark:border-ktip-sand-700"
-          role="group"
-          aria-label="CV detail level"
+        <Button
+          variant="ghost"
+          icon={asText ? <LayoutTemplate size={16} /> : <FileText size={16} />}
+          onClick={() => setAsText(!asText)}
         >
-          {(['curated', 'full'] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setVariant(option)}
-              aria-pressed={variant === option}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                variant === option
-                  ? 'bg-ktip-ocean-700 text-white dark:bg-ktip-ocean-300 dark:text-ktip-ocean-900'
-                  : 'text-ktip-sand-600 hover:text-ktip-ocean-700 dark:text-ktip-sand-300'
-              }`}
-            >
-              {option === 'curated' ? 'Curated' : 'Full CV'}
-            </button>
-          ))}
-        </div>
+          {asText ? 'Show the page' : 'Read as text'}
+        </Button>
 
         <Button
           variant="ghost"
@@ -176,30 +183,38 @@ export default function CvPage() {
       </div>
 
       <p className="mb-8 text-xs text-ktip-sand-500 print:hidden">
-        Choose &ldquo;Save as PDF&rdquo; in the print dialog, and turn on background graphics. The
-        PDF is always the full CV.
+        Choose &ldquo;Save as PDF&rdquo; in the print dialog. The{' '}
+        <strong className="font-semibold">Signature</strong> design also needs &ldquo;Background
+        graphics&rdquo; switched on for its navy sidebar; Classic and Compact print correctly either
+        way.
       </p>
 
-      <div className="resume-screen-wrap print:hidden">
-        <ResumeScreen
+      <div className="mb-8 print:hidden">
+        <DesignPicker
           data={data}
           avatarUrl={profile?.avatar_url ?? null}
-          variant={variant}
-          template={template}
+          current={design}
+          onPick={pickDesign}
+          busy={setDesign.isPending}
         />
       </div>
 
-      {/* Print-only A4 twin. Display is forced in index.css @media print via the
-          .resume-*-wrap classes rather than the print: utility variant, so the
-          sheet always shows and the on-screen twin never prints blank. */}
-      <div className="resume-print-wrap hidden print:block">
-        <ResumeSheet
-          data={data}
-          avatarUrl={profile?.avatar_url ?? null}
-          theme={sheetTheme}
-          template={template}
-        />
-      </div>
+      {/* One document. Exactly one of these is mounted, so the CV is never in
+          the accessibility tree twice. */}
+      {asText ? (
+        <div className="print:hidden">
+          <ResumeOutline data={data} />
+        </div>
+      ) : (
+        <ResumePaper>
+          <Sheet
+            data={data}
+            avatarUrl={profile?.avatar_url ?? null}
+            theme={sheetTheme}
+            design={design}
+          />
+        </ResumePaper>
+      )}
     </div>
   )
 }

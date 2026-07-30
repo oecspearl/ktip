@@ -84,19 +84,33 @@
   --radius-xl: 0.375rem;
   --radius-2xl: 0.5rem;
   --radius-3xl: 0.5rem;
+  /* Calendar surfaces only — softer corners than the tight global scale, so
+     the month grid and week time-grid read modern without moving the system */
+  --radius-cal: 0.875rem;
+  --radius-cal-sm: 0.5rem;
+
+  /* Calendar hour rules + column dividers — a hairline far lighter than
+     --color-ktip-line, which is pure black and would fence in every cell */
+  --color-cal-line: rgba(4, 30, 66, 0.1);
 
   /* Font Families */
   --font-sans: 'Mulish', system-ui, sans-serif;
   --font-display: 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif;
 
-  /* Box Shadows */
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-hard: 0 8px 32px rgba(0, 0, 0, 0.16);
+  /* Box Shadows — layered navy-tinted falloff so elevation reads soft and
+     modern (tight contact shadow + wide ambient), never a hard gray edge */
+  --shadow-soft: 0 1px 3px rgba(4, 30, 66, 0.08), 0 4px 10px -2px rgba(4, 30, 66, 0.12),
+    0 10px 24px -6px rgba(4, 30, 66, 0.16);
+  --shadow-medium: 0 2px 5px rgba(4, 30, 66, 0.1), 0 10px 24px -4px rgba(4, 30, 66, 0.16),
+    0 20px 40px -8px rgba(4, 30, 66, 0.2);
+  --shadow-hard: 0 4px 10px rgba(4, 30, 66, 0.12), 0 16px 36px -6px rgba(4, 30, 66, 0.22),
+    0 32px 64px -12px rgba(4, 30, 66, 0.26);
   --shadow-glow-ocean: 0 0 24px rgba(4, 30, 66, 0.3);
   --shadow-glow-tropical: 0 0 24px rgba(151, 215, 0, 0.3);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 10px 25px -5px rgba(4, 30, 66, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(4, 30, 66, 0.06), 0 4px 10px -2px rgba(4, 30, 66, 0.08),
+    0 12px 28px -8px rgba(4, 30, 66, 0.12);
+  --shadow-card-hover: 0 3px 6px rgba(4, 30, 66, 0.08), 0 14px 30px -5px rgba(4, 30, 66, 0.16),
+    0 28px 56px -10px rgba(4, 30, 66, 0.18);
   --shadow-nav: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   /* Floating action button — layered falloff so the lift reads soft, not hard-edged */
   --shadow-fab: 0 1px 2px rgba(4, 30, 66, 0.05), 0 4px 8px -2px rgba(4, 30, 66, 0.08),
@@ -109,6 +123,8 @@
   --animate-slide-up: slideUp 0.5s ease-out;
   --animate-scale-in: scaleIn 0.3s ease-out;
   --animate-pulse-soft: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  /* Right-edge drawers (member preview) — slide in over the page */
+  --animate-slide-in-right: slideInRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   --animate-char-flip: charFlip 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-reveal-up: revealUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 
@@ -137,9 +153,23 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
+  @keyframes slideInRight {
+    0% { transform: translateX(100%); opacity: 0.4; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
   @keyframes pulse-soft {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
+  }
+
+  /* Partner logo marquee — track holds two copies of the row, so sliding from
+     -50% to 0 scrolls rightward and loops seamlessly */
+  --animate-marquee-right: marqueeRight 35s linear infinite;
+
+  @keyframes marqueeRight {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
   }
 }
 
@@ -214,9 +244,16 @@ html.dark {
 
   --color-ktip-ink: #050505;  /* navbar/footer go black-black */
   --color-ktip-line: #97D700; /* design line reads green on black */
+  --color-cal-line: rgba(255, 255, 255, 0.1); /* hour rules stay neutral, not green */
 
-  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --shadow-card-hover: 0 0 0 1px rgba(151, 215, 0, 0.25);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 10px 28px -8px rgba(0, 0, 0, 0.75);
+  --shadow-card-hover: 0 0 0 1px rgba(151, 215, 0, 0.3), 0 16px 40px -10px rgba(0, 0, 0, 0.85);
+
+  /* Navy-tinted button/elevation shadows disappear on black — swap for a
+     faint hairline plus deep black falloff so lift still reads */
+  --shadow-soft: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 6px 16px -2px rgba(0, 0, 0, 0.7);
+  --shadow-medium: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 30px -6px rgba(0, 0, 0, 0.8);
+  --shadow-hard: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 48px -10px rgba(0, 0, 0, 0.9);
 
   /* On black, drop shadows vanish — the FAB lifts with a soft glow instead */
   --shadow-fab: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px -6px rgba(0, 0, 0, 0.7),
@@ -356,9 +393,9 @@ html.dark {
     box-sizing: border-box;
   }
 
-  /* Overlay scrollbar: native scrollbars are hidden entirely (no gutter,
-     no white column) and a custom thumb (#overlay-scrollbar, built in
-     index.tsx) fades in while scrolling. */
+  /* Native scrollbars are hidden entirely (no gutter, no white column). Page
+     scroll is instead navigated by the scrollspy rail (components/ui/SpyRail),
+     which builds its steps from each page's data-spy markers. */
   * {
     scrollbar-width: none;
   }
@@ -366,40 +403,37 @@ html.dark {
   ::-webkit-scrollbar {
     display: none;
   }
-
-  #overlay-scrollbar {
-    position: fixed;
-    top: 0;
-    right: 4px;
-    width: 6px;
-    border-radius: 9999px;
-    background: rgba(120, 113, 108, 0.55);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 9999;
-    pointer-events: none;
-  }
-
-  html[data-scrolling] #overlay-scrollbar {
-    opacity: 1;
-  }
 }
 
 @layer components {
   /* Caribbean Modern Component Styles */
-  /* Navy primary: brand navy in light; dark mode uses mid navy (ocean-700
-     inverts to a light tint, so pin interactive navy via dark:) */
+  /* Primary button — mode-distinct brand pairs (fixed Pantone tokens):
+     light: navy fill / white text → hover green fill / navy text;
+     dark: green fill / navy text → hover navy fill / green text */
   .btn-primary {
-    @apply bg-ktip-ocean-700 text-white px-6 py-3 rounded-xl font-medium shadow-soft hover:bg-ktip-ocean-600 hover:shadow-medium hover:-translate-y-0.5 transition-all duration-200 dark:bg-ktip-ocean-300 dark:hover:bg-ktip-ocean-400;
+    @apply bg-brand-navy text-white px-6 py-3 rounded-xl font-medium shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green dark:hover:shadow-glow-tropical;
   }
 
   .btn-secondary {
-    @apply border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 px-6 py-3 rounded-xl font-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 transition-all duration-200;
+    @apply border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 px-6 py-3 rounded-xl font-medium shadow-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200;
   }
 
+  /* Skin only — brand pair, homepage shadow depth, lift on hover — with no
+     padding, radius or type of its own, so a call site keeps its own geometry.
+     This is what the hand-rolled `bg-ktip-ocean-600 … hover:bg-ktip-ocean-700`
+     buttons across the app were replaced with, so every page's action buttons
+     read like the homepage hero CTA. */
+  .btn-brand {
+    @apply bg-brand-navy text-white shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green dark:hover:shadow-glow-tropical;
+    /* A disabled button must not flip colour or lift — it only dims. Matches
+       the disabled handling in the Button component. */
+    @apply disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-medium disabled:hover:bg-brand-navy disabled:hover:text-white dark:disabled:hover:bg-brand-green dark:disabled:hover:text-brand-navy;
+  }
+
+  /* Same depth as the homepage bento tiles (medium at rest → hard on hover),
+     so panels on the inner pages sit at the same elevation as the landing. */
   .card {
-    @apply bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300;
+    @apply bg-ktip-cream rounded-2xl shadow-medium border border-ktip-sand-100 p-6 hover:shadow-hard hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300;
   }
 
   .input-field {
@@ -447,6 +481,66 @@ html.dark {
 }
 .animate-cal-right {
   animation: calRight 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Week view: cards settle in rather than slide sideways — a horizontal slide
+   fights the absolute positioning that places them against the hour grid */
+@keyframes calWeekEnter {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+.animate-cal-week {
+  animation: calWeekEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Now-line marker on the week grid */
+@keyframes nowPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.35); }
+}
+.animate-now-pulse {
+  animation: nowPulse 2.4s ease-in-out infinite;
+}
+
+/* Dropdowns / popovers: enter AND exit. Transition-driven rather than a
+   @keyframes — a keyframe cannot run backwards, which is why the old
+   animate-scale-in panels vanished with a hard cut. Pair with an origin-*
+   utility on the consumer so the panel grows from its trigger corner.
+   Driven by data-state from useDisclosureAnimation. */
+.dropdown-panel {
+  transition:
+    opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dropdown-panel[data-state='open'] {
+  opacity: 1;
+  transform: none;
+}
+.dropdown-panel[data-state='closed'] {
+  opacity: 0;
+  transform: scale(0.96) translateY(-4px);
+  pointer-events: none;
+  /* Exits read better slightly quicker than entrances */
+  transition-duration: 150ms;
+}
+
+/* Height collapse for folding sections. The grid-rows trick animates to
+   content height without measuring it. Clipping is released once open and
+   settled, or the cards inside would have their hover lift cut off. */
+.disclosure-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.disclosure-collapse[data-state='open'] {
+  grid-template-rows: 1fr;
+}
+.disclosure-collapse > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.disclosure-collapse[data-state='open'][data-settled='true'] > * {
+  overflow: visible;
 }
 
 /* Section headings reveal on navigation (routed subtree remounts via
@@ -500,10 +594,22 @@ html.dark {
   .page-reveal :where(h2),
   .animate-cal-left,
   .animate-cal-right,
+  .animate-cal-week,
+  .animate-now-pulse,
   .animate-tab-enter,
   .stagger-children > *,
-  .stagger-rows > * {
+  .stagger-rows > *,
+  .animate-scale-in,
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-in-right {
     animation: none;
+  }
+
+  /* Dropdowns and folding sections snap open/shut instead of easing */
+  .dropdown-panel,
+  .disclosure-collapse {
+    transition: none;
   }
 
   /* Walkthrough chrome: the pulsing spotlight ring, the bouncing action hint
@@ -514,6 +620,13 @@ html.dark {
   [data-tutorial-overlay].animate-fade-in,
   [data-fab] .animate-pulse-soft {
     animation: none;
+  }
+
+  /* Scrollspy rail: dashes still change width/colour to mark the active
+     section, they just don't lift or scale under the cursor. */
+  [data-spy-rail] button {
+    transition: none;
+    transform: none !important;
   }
 }
 
@@ -1027,36 +1140,67 @@ html.dark {
     background: #fff !important;
   }
 
-  /* The dark left strip, as a FIXED pseudo-element. Chrome repeats
+  /* The dark rail strip, as a FIXED pseudo-element. Chrome repeats
      fixed-position boxes on every printed page, so this fills the full-height
-     left column on ALL pages — including a short last page, where the sheet's
-     own panel would stop early and leave a white notch. Sits behind the sheet
+     column on ALL pages — including a short last page, where the sheet's own
+     panel would stop early and leave a white notch. Sits behind the sheet
      (z-index 0 < the sheet's 1).
 
-     The colour comes from --resume-sidebar, published on :root by CvPage,
-     because a pseudo-element on body cannot read a variable set on the sheet. */
+     Colour AND geometry come from custom properties published on :root by the
+     CV pages (bleedVars() in src/lib/resume-designs.ts), because a
+     pseudo-element on body cannot read a variable set on the sheet. Only the
+     Signature design has a rail; the others publish width 0, and a zero-width
+     box paints nothing. Get the geometry wrong and you print a navy stripe
+     through the middle of a design that has no sidebar. */
   body:has(.resume-sheet)::before {
     content: '';
     position: fixed;
     top: 0;
     bottom: 0;
-    left: 0;
-    width: 74mm;
-    background: var(--resume-sidebar, #171717);
+    left: var(--resume-bleed-left, auto);
+    right: var(--resume-bleed-right, auto);
+    width: var(--resume-bleed-width, 0);
+    background: var(--resume-sidebar, transparent);
     z-index: 0;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  /* Force the print/screen twin swap explicitly rather than relying on
-     Tailwind's print: variant. If print:block / print:hidden fail to flip, the
-     on-screen résumé prints (blank, via the visibility rules below) while the
-     sheet stays display:none — four blank pages. These two rules guarantee it. */
-  body:has(.resume-sheet) .resume-screen-wrap {
-    display: none !important;
+  /* The on-screen sheet is scaled to fit its column by a transform (see
+     ResumePaper). Every part of that shell has to be undone here.
+
+     `transform: none`, not `scale(1)`: any transform other than none makes the
+     element a containing block for absolutely AND fixed positioned descendants,
+     which would re-anchor the sheet's `position: absolute; top: 0` below the
+     toolbar instead of at the page origin. `height: auto` because the shell
+     carries a scaled-down height that is meaningless on paper. `overflow:
+     visible` because an overflow ancestor CLIPS an absolutely positioned
+     descendant — with `auto` for horizontal panning left in place, a two-page
+     CV would lose everything after page one and look like a design decision.
+
+     This replaces the old print/screen twin swap. The failure mode it used to
+     guard against has not gone away, it has moved: get these three wrong and
+     the PDF comes out offset, clipped, or blank. */
+  .resume-fit {
+    height: auto !important;
   }
-  .resume-print-wrap {
-    display: block !important;
+  .resume-scale {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .resume-desk {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Candidate designs in the picker render the real sheet component. They carry
+     `resume-thumb` rather than `resume-sheet` so the rules below cannot pin them
+     all to the page origin; this hides the whole control anyway. */
+  .resume-picker {
+    display: none !important;
   }
 
   /* Site chrome. */

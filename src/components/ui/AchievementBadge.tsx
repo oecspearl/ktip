@@ -1,6 +1,6 @@
 import { Lock } from 'lucide-react'
 import { Badge } from './Badge'
-import { formatDate } from '../../lib/utils'
+import { cn, formatDate } from '../../lib/utils'
 import { resolveBadgeIcon } from '../../lib/badge-icons'
 import { RARITY_PILL, TIER_LABEL } from '../../lib/achievement-style'
 import type { BadgeDefinition, UserBadge } from '../../types'
@@ -20,13 +20,15 @@ interface AchievementBadgeProps {
   size?: 'sm' | 'md'
   /** Colour the pill by rarity instead of the badge's own colour. */
   byRarity?: boolean
+  /** Merged last, so a surface can override shape/spacing (e.g. squarer pills). */
+  className?: string
 }
 
 /**
  * The compact inline pill: directory cards, the member drawer, profile rows.
  * Artwork-bearing surfaces use TrophyImage / TrophyCard instead.
  */
-export function AchievementBadge({ userBadge, size, byRarity }: AchievementBadgeProps) {
+export function AchievementBadge({ userBadge, size, byRarity, className }: AchievementBadgeProps) {
   const badge = userBadge.badge
   if (!badge) return null
 
@@ -41,7 +43,7 @@ export function AchievementBadge({ userBadge, size, byRarity }: AchievementBadge
 
   return (
     <Badge
-      className={colorClass}
+      className={cn(colorClass, className)}
       size={size || 'sm'}
       title={`${badge.description} — earned ${formatDate(userBadge.awarded_at)}`}
     >

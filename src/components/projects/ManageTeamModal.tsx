@@ -99,7 +99,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
           <button
             onClick={handleSearch}
             disabled={searching}
-            className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg disabled:opacity-50"
           >
             Search
           </button>

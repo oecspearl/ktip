@@ -106,7 +106,7 @@ export default function ProjectDetailPage() {
         </p>
         <button
           onClick={() => navigate('/projects')}
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
           Back to Projects
         </button>
@@ -144,7 +144,7 @@ export default function ProjectDetailPage() {
             )}
             {canEdit && (
               <Link to={`/projects/${params.id}/edit`}>
-                <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
                   <Edit size={14} />
                   Edit
                 </button>
@@ -184,7 +184,11 @@ export default function ProjectDetailPage() {
           {/* === Main Column === */}
           <div className="lg:col-span-2">
             {/* Post title repeat */}
-            <h2 className="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
+            <h2
+              id="overview"
+              data-spy="Overview"
+              className="scroll-mt-24 text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2"
+            >
               {project.title}
             </h2>
 
@@ -236,7 +240,7 @@ export default function ProjectDetailPage() {
 
             {/* Additional Details */}
             {project.details && project.details.length > 0 && (
-              <div className="mb-6">
+              <div id="details" data-spy="Details" className="scroll-mt-24 mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                   Additional Details
                 </h3>
@@ -266,7 +270,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Documents */}
-            <div className="mt-10">
+            <div id="documents" data-spy="Documents" className="scroll-mt-24 mt-10">
               <DocumentsPanel
                 entityType="project"
                 entityId={project.id}
@@ -276,7 +280,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Comments Section */}
-            <div className="mt-10">
+            <div id="discussion" data-spy="Discussion" className="scroll-mt-24 mt-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                 Discussion
               </h3>
@@ -313,7 +317,7 @@ export default function ProjectDetailPage() {
                       navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
                     }
                   }}
-                  className="px-4 py-2 bg-ktip-ocean-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0"
+                  className="px-4 py-2 btn-brand text-xs font-bold uppercase tracking-wider rounded-lg shrink-0"
                 >
                   Search
                 </button>
@@ -382,7 +386,7 @@ export default function ProjectDetailPage() {
               </div>
               <button
                 onClick={() => openMember(project.owner_id)}
-                className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center gap-1.5"
+                className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
               >
                 <User size={16} />
                 View Profile

@@ -170,7 +170,7 @@ export default function EventDetailPage() {
         </p>
         <button
           onClick={() => navigate('/events')}
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
           Back to Events
         </button>
@@ -194,7 +194,7 @@ export default function EventDetailPage() {
           isOrganizer ? (
             <>
               <Link to={`/events/${params.id}/edit`}>
-                <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
                   <Edit size={14} />
                   Edit
                 </button>
@@ -272,7 +272,11 @@ export default function EventDetailPage() {
             )}
 
             {/* Event Details Grid */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded border border-gray-200">
+            <div
+              id="key-details"
+              data-spy="Key details"
+              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded border border-gray-200"
+            >
               {/* Date */}
               <div className="flex items-start gap-3">
                 <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
@@ -359,7 +363,7 @@ export default function EventDetailPage() {
 
             {/* Description */}
             {event.description && (
-              <div className="mb-6">
+              <div id="about" data-spy="About" className="scroll-mt-24 mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                   About This Event
                 </h3>
@@ -431,17 +435,21 @@ export default function EventDetailPage() {
 
             {/* Schedule */}
             {scheduleItems && scheduleItems.length > 0 && (
-              <EventScheduleTimeline items={scheduleItems} />
+              <div id="schedule" data-spy="Schedule" className="scroll-mt-24">
+                <EventScheduleTimeline items={scheduleItems} />
+              </div>
             )}
 
             {/* Speakers */}
             {eventSpeakers && eventSpeakers.length > 0 && (
-              <EventSpeakerGrid speakers={eventSpeakers} />
+              <div id="speakers" data-spy="Speakers" className="scroll-mt-24">
+                <EventSpeakerGrid speakers={eventSpeakers} />
+              </div>
             )}
 
             {/* Event Updates */}
             {eventUpdates && eventUpdates.length > 0 && (
-              <div className="mt-10">
+              <div id="updates" data-spy="Updates" className="scroll-mt-24 mt-10">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
                   <Megaphone size={18} className="text-ktip-ocean-600" />
                   Updates

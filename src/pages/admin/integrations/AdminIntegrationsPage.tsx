@@ -119,12 +119,13 @@ export default function AdminIntegrationsPage() {
         title="Integration Directory"
         subtitle="Curate external tools shown at /integrations"
         imageSeed="admin-integrations"
-        actions={
-          <Button onClick={openCreate} icon={<Plus size={16} />}>
-            Add Integration
-          </Button>
-        }
       />
+
+      <div className="flex justify-end mb-4">
+        <Button onClick={openCreate} icon={<Plus size={16} />}>
+          Add Integration
+        </Button>
+      </div>
 
       {/* List */}
       <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">

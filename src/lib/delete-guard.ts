@@ -57,6 +57,16 @@ export interface ProjectDeleteFacts {
   memberCount: number
 }
 
+export interface GrantDeleteFacts {
+  isActive: boolean
+  /**
+   * Submitted applications. `null` when not counted — the admin grants table
+   * loads applications filtered by status, so it cannot produce an honest
+   * per-grant total, and guessing zero would be the wrong way to be wrong.
+   */
+  applicationCount: number | null
+}
+
 /** Published and completed events are already public and already indexed. */
 function isEventPubliclyVisible(status: EventStatus): boolean {
   return status === 'published' || status === 'completed'
@@ -118,6 +128,38 @@ export function describeProjectDeletion(facts: ProjectDeleteFacts): DeleteImpact
     cascades,
     affectsOthers: memberCount > 0,
     requiresTitleConfirmation: memberCount > 0 || isPublic,
+    warning,
+  }
+}
+
+export function describeGrantDeletion(facts: GrantDeleteFacts): DeleteImpact {
+  const { isActive, applicationCount } = facts
+
+  const cascades = ['The grant listing and everything attached to it']
+  if (applicationCount === null || applicationCount > 0) {
+    cascades.push('Every application to this grant, including saved drafts')
+  }
+  cascades.push('Uploaded documents and their extracted fields')
+
+  // An active grant is one people can still apply to, so an uncounted total is
+  // more likely to be non-zero than zero. Deactivating first is the safe path
+  // and the copy says so.
+  const applicantsAffected = applicationCount === null ? isActive : applicationCount > 0
+
+  let warning: string | null = null
+  if (applicationCount !== null && applicationCount > 0) {
+    warning = `${applicationCount} ${applicationCount === 1 ? 'application' : 'applications'} will be destroyed along with any drafts. Applicants will not be notified.`
+  } else if (applicationCount === null && isActive) {
+    warning =
+      'This grant is still accepting applications. Any application or saved draft against it will be destroyed, and applicants will not be notified. Deactivating it instead keeps the record.'
+  } else if (isActive) {
+    warning = 'This grant is live. Existing links to it will break.'
+  }
+
+  return {
+    cascades,
+    affectsOthers: applicantsAffected,
+    requiresTitleConfirmation: applicantsAffected || isActive,
     warning,
   }
 }

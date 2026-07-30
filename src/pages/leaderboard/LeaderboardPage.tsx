@@ -77,7 +77,7 @@ export default function LeaderboardPage() {
       </header>
 
       {/* ---------- Controls ---------- */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div id="filters" data-spy="Filters" className="scroll-mt-24 flex flex-wrap items-center gap-4">
         <div className="flex gap-1.5" role="tablist" aria-label="Time period">
           {WINDOWS.map((w) => (
             <button
@@ -125,7 +125,11 @@ export default function LeaderboardPage() {
       ) : (
         // Wide content scrolls inside its own container so the page body never
         // scrolls sideways on a phone.
-        <div className="overflow-x-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream">
+        <div
+          id="rankings"
+          data-spy="Rankings"
+          className="scroll-mt-24 overflow-x-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream"
+        >
           <table className="w-full min-w-[34rem] text-sm">
             <caption className="sr-only">
               {`Top members by achievement points, ${
@@ -217,7 +221,11 @@ export default function LeaderboardPage() {
 
       {/* ---------- Own standing ---------- */}
       {myRank && !inTop && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50/60 px-4 py-3">
+        <div
+          id="your-rank"
+          data-spy="Your rank"
+          className="scroll-mt-24 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50/60 px-4 py-3"
+        >
           <div className="flex items-center gap-2 text-sm">
             <Trophy size={16} className="text-ktip-ocean-600" aria-hidden="true" />
             <span className="font-medium text-ktip-sand-900">

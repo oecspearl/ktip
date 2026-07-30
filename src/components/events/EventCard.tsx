@@ -1,7 +1,6 @@
 import { Badge } from '../ui/Badge'
 import type { Event } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
-import { MatchReasonChip } from '../ui/MatchReasonChip'
 import { BentoCard } from '../ui/BentoCard'
 import { EVENT_TYPE_LABELS, EVENT_STATUS_COLORS } from '../../lib/constants'
 import { format, isSameDay, isPast } from 'date-fns'
@@ -43,8 +42,6 @@ export function EventCard({ event }: EventCardProps) {
           </Badge>
         )}
         {event.is_climate_action && <ClimateBadge />}
-        {/* Only present when the list was fetched under the "For You" sort. */}
-        <MatchReasonChip reasons={event.match_reasons} />
       </div>
     </BentoCard>
   )

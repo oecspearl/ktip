@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ComponentType, type KeyboardEvent } f
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { Badge } from '../ui/Badge'
 import {
   Menu,
   X,
@@ -33,12 +32,14 @@ import {
   Trophy,
   CalendarDays,
   CalendarPlus,
+  FileText,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
+import { DropdownPanel } from '../ui/DropdownPanel'
 import { NavbarSearchPanel } from './NavbarSearchPanel'
 import { RoleSwitcher } from './RoleSwitcher'
-import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
+import { ROLE_LABELS } from '../../lib/constants'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
@@ -72,6 +73,7 @@ const leadingLinks = [
 
 // Standalone links rendered after the dropdowns
 const trailingLinks = [
+  { name: 'Resources & Integrations', href: '/resources', icon: BookOpen },
   { name: 'Help', href: '/help', icon: HelpCircle },
 ]
 
@@ -100,7 +102,6 @@ const navDropdowns: NavDropdown[] = [
       { name: 'Grants', href: '/grants', icon: DollarSign, description: 'Browse funding opportunities' },
       { name: 'My Applications', href: '/grants/my-applications', icon: ClipboardList, description: 'Track your grant applications' },
       { name: 'My Submissions', href: '/dashboard/submissions', icon: Inbox, description: 'Your copy of everything you submitted' },
-      { name: 'Resources & Integrations', href: '/resources', icon: BookOpen, description: 'Guides, articles & partner tools' },
     ],
   },
   {
@@ -406,32 +407,31 @@ export function Navbar() {
                   />
                 </button>
 
-                {openDropdownId === dropdown.id && (
-                  <div
-                    role="menu"
-                    className="absolute right-0 mt-2 w-64 bg-ktip-cream rounded-xl shadow-hard overflow-hidden animate-scale-in z-50"
-                  >
-                    {dropdown.items.map((item) => (
-                      <FlowingMenuItem
-                        key={item.name}
-                        to={item.href}
-                        label={item.name}
-                        onClick={() => setOpenDropdownId(null)}
-                        className={cn(
-                          'flex items-start justify-end gap-3 px-4 py-3 transition-colors',
-                          isActive(item.href)
-                            ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                            : 'text-ktip-sand-700'
-                        )}
-                      >
-                        <div className="text-right">
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-xs text-ktip-sand-500 mt-0.5">{item.description}</p>
-                        </div>
-                      </FlowingMenuItem>
-                    ))}
-                  </div>
-                )}
+                <DropdownPanel
+                  open={openDropdownId === dropdown.id}
+                  role="menu"
+                  className="absolute right-0 mt-2 w-64 origin-top-right bg-ktip-cream rounded-xl shadow-hard overflow-hidden z-50"
+                >
+                  {dropdown.items.map((item) => (
+                    <FlowingMenuItem
+                      key={item.name}
+                      to={item.href}
+                      label={item.name}
+                      onClick={() => setOpenDropdownId(null)}
+                      className={cn(
+                        'flex items-start justify-end gap-3 px-4 py-3 transition-colors',
+                        isActive(item.href)
+                          ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                          : 'text-ktip-sand-700'
+                      )}
+                    >
+                      <div className="text-right">
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-xs text-ktip-sand-500 mt-0.5">{item.description}</p>
+                      </div>
+                    </FlowingMenuItem>
+                  ))}
+                </DropdownPanel>
               </div>
             ))}
 
@@ -514,30 +514,29 @@ export function Navbar() {
               )}
             </div>
 
-            {searchOpen && (
-              <NavbarSearchPanel
-                query={searchQuery}
-                groups={search.groups}
-                rows={search.rows}
-                activeIndex={activeIndex}
-                onHover={setActiveIndex}
-                expandedId={expandedRowId}
-                onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
-                onSelect={selectRow}
-                onSeeAll={seeAllResults}
-                aiMode={aiMode}
-                onToggleAiMode={() => setAiMode((v) => !v)}
-                aiAnswer={search.aiAnswer}
-                aiSteps={search.aiSteps}
-                aiLoading={search.aiLoading}
-                aiError={search.aiError}
-                contentLoading={search.contentLoading}
-                suggestions={search.suggestions}
-                recent={search.recent}
-                onPickRecent={setSearchQuery}
-                onClearRecent={search.clearRecent}
-              />
-            )}
+            <NavbarSearchPanel
+              open={searchOpen}
+              query={searchQuery}
+              groups={search.groups}
+              rows={search.rows}
+              activeIndex={activeIndex}
+              onHover={setActiveIndex}
+              expandedId={expandedRowId}
+              onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
+              onSelect={selectRow}
+              onSeeAll={seeAllResults}
+              aiMode={aiMode}
+              onToggleAiMode={() => setAiMode((v) => !v)}
+              aiAnswer={search.aiAnswer}
+              aiSteps={search.aiSteps}
+              aiLoading={search.aiLoading}
+              aiError={search.aiError}
+              contentLoading={search.contentLoading}
+              suggestions={search.suggestions}
+              recent={search.recent}
+              onPickRecent={setSearchQuery}
+              onClearRecent={search.clearRecent}
+            />
           </div>
 
           {/* User Menu / Auth Buttons */}
@@ -558,8 +557,10 @@ export function Navbar() {
                   )}
                 </button>
 
-                {notifOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 animate-scale-in z-50 max-h-96 flex flex-col">
+                <DropdownPanel
+                  open={notifOpen}
+                  className="absolute right-0 mt-2 w-80 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 z-50 max-h-96 flex flex-col"
+                >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-ktip-sand-100">
                       <h3 className="text-sm font-semibold text-ktip-sand-800">Notifications</h3>
@@ -643,8 +644,7 @@ export function Navbar() {
                     >
                       View all invitations
                     </Link>
-                  </div>
-                )}
+                </DropdownPanel>
               </div>
             )}
 
@@ -662,17 +662,11 @@ export function Navbar() {
                     <p className="text-sm font-medium text-white transition-colors group-hover:text-ktip-nav-accent">
                       {auth.profile?.display_name || 'User'}
                     </p>
-                    <div className="flex gap-1 justify-end mt-0.5">
-                      {auth.profile?.roles?.[0] && (
-                        <Badge
-                          variant="primary"
-                          size="sm"
-                          className={ROLE_COLORS[auth.profile?.roles[0] || '']}
-                        >
-                          {ROLE_LABELS[auth.profile?.roles[0] || '']}
-                        </Badge>
-                      )}
-                    </div>
+                    {auth.profile?.roles?.[0] && (
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/60 mt-0.5">
+                        {ROLE_LABELS[auth.profile?.roles[0] || '']}
+                      </p>
+                    )}
                   </div>
                   {auth.profile?.avatar_url ? (
                     <img
@@ -688,8 +682,11 @@ export function Navbar() {
                 </button>
 
                 {/* User Dropdown Menu */}
-                {userMenuOpen && (
-                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 py-2 animate-scale-in">
+                <DropdownPanel
+                  open={userMenuOpen}
+                  role="menu"
+                  className="absolute right-0 mt-2 w-56 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 py-2"
+                >
                     <RoleSwitcher onSwitch={() => setUserMenuOpen(false)} />
                     <Link
                       to="/dashboard"
@@ -698,6 +695,16 @@ export function Navbar() {
                     >
                       <LayoutDashboard size={18} />
                       <span>My Dashboard</span>
+                    </Link>
+                    {/* /cv had no entry point anywhere in the app — the only way
+                        in was the Virtual Campus handoff redirect. */}
+                    <Link
+                      to="/cv"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                    >
+                      <FileText size={18} />
+                      <span>My CV</span>
                     </Link>
                     <Link
                       to="/settings"
@@ -731,8 +738,7 @@ export function Navbar() {
                       <LogOut size={18} />
                       <span>Sign Out</span>
                     </button>
-                  </div>
-                )}
+                </DropdownPanel>
               </div>
             ) : (
               <>
@@ -794,8 +800,8 @@ export function Navbar() {
                   className="w-full pl-10 pr-4 py-2 border border-white/20 bg-white/10 text-white placeholder-white/60 rounded-lg focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white focus:outline-none"
                 />
               </div>
-              {(mobileSearchFocused || searchQuery.trim()) && (
-                <NavbarSearchPanel
+              <NavbarSearchPanel
+                  open={Boolean(mobileSearchFocused || searchQuery.trim())}
                   variant="mobile"
                   query={searchQuery}
                   groups={search.groups}
@@ -818,7 +824,6 @@ export function Navbar() {
                   onPickRecent={setSearchQuery}
                   onClearRecent={search.clearRecent}
                 />
-              )}
             </div>
 
             {/* Quick Actions (moved from DiscoverPage action band) */}
@@ -964,6 +969,14 @@ export function Navbar() {
                   >
                     <LayoutDashboard size={20} />
                     <span>My Dashboard</span>
+                  </Link>
+                  <Link
+                    to="/cv"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
+                  >
+                    <FileText size={20} />
+                    <span>My CV</span>
                   </Link>
                   <Link
                     to="/settings"

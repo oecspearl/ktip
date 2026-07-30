@@ -9,8 +9,10 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { useCalendarFeed, type CalendarScope } from '../../hooks/useCalendarFeed'
 import { CalendarGrid } from './CalendarGrid'
+import { CalendarShell } from './CalendarShell'
 import { CalendarDayPanel } from './CalendarDayPanel'
-import { useCalendarMonth } from './useCalendarMonth'
+import { WeekView } from './WeekView'
+import { useCalendarRange } from './useCalendarRange'
 import type { CalendarItemKind } from '../../lib/calendar'
 
 interface DashboardCalendarProps {
@@ -37,16 +39,18 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
   const [activeKinds, setActiveKinds] = useState<CalendarItemKind[]>(availableKinds)
 
   const {
+    view,
+    setView,
     monthDate,
     selectedDate,
     direction,
     gridStart,
     gridEnd,
     setSelectedDate,
-    goPrevMonth,
-    goNextMonth,
+    goPrev,
+    goNext,
     goToday,
-  } = useCalendarMonth()
+  } = useCalendarRange()
 
   const { items, loading } = useCalendarFeed({
     scope,
@@ -79,14 +83,12 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
         }
       }
     }
-    goNextMonth()
+    goNext()
   }
 
-  return (
-    <div className={cn('flex flex-col gap-4', className)}>
-      {/* Kind filters */}
-      <div className="flex flex-wrap items-center gap-2">
-        {availableKinds.map((kind) => {
+  const kindFilters = (
+    <div className="flex flex-wrap items-center gap-2">
+      {availableKinds.map((kind) => {
           const on = activeKinds.includes(kind)
           return (
             <button
@@ -109,32 +111,64 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
                 )}
               />
               {CALENDAR_KIND_LABELS[kind]}
-            </button>
-          )
-        })}
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 lg:gap-6 items-start',
+        className
+      )}
+    >
+      {/* Filters sit above the card — four pills plus the view switch would
+          crowd the header row */}
+      <div className="flex flex-col gap-3">
+        {kindFilters}
+        <CalendarShell
+          view={view}
+          onViewChange={setView}
+          monthDate={monthDate}
+          gridStart={gridStart}
+          gridEnd={gridEnd}
+          onPrev={goPrev}
+          onNext={goNext}
+          onToday={goToday}
+        >
+          {view === 'week' ? (
+            <WeekView
+              gridStart={gridStart}
+              gridEnd={gridEnd}
+              selectedDate={selectedDate}
+              itemsByDay={itemsByDay}
+              direction={direction}
+              onSelectDate={setSelectedDate}
+              itemNoun="item"
+            />
+          ) : (
+            <CalendarGrid
+              monthDate={monthDate}
+              selectedDate={selectedDate}
+              itemsByDay={itemsByDay}
+              direction={direction}
+              onSelectDate={setSelectedDate}
+              itemNoun="item"
+            />
+          )}
+        </CalendarShell>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 lg:gap-6 items-start">
-        <CalendarGrid
-          monthDate={monthDate}
-          selectedDate={selectedDate}
-          itemsByDay={itemsByDay}
-          direction={direction}
-          onSelectDate={setSelectedDate}
-          onPrevMonth={goPrevMonth}
-          onNextMonth={goNextMonth}
-          onToday={goToday}
-          itemNoun="item"
-        />
-        <CalendarDayPanel
-          date={selectedDate}
-          items={selectedDayItems}
-          loading={loading}
-          itemNoun="item"
-          emptyLabel="Nothing scheduled on this day"
-          onJumpToNext={jumpToNextItem}
-        />
-      </div>
+      <CalendarDayPanel
+        date={selectedDate}
+        items={selectedDayItems}
+        loading={loading}
+        itemNoun="item"
+        emptyLabel="Nothing scheduled on this day"
+        onJumpToNext={jumpToNextItem}
+      />
     </div>
   )
 }

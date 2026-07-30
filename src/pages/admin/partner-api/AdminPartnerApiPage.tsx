@@ -73,12 +73,13 @@ export default function AdminPartnerApiPage() {
         title="Partner API"
         subtitle="Keys that let external platforms pull verified employer data"
         imageSeed="admin-partner-api"
-        actions={
-          <Button onClick={() => setShowCreate(true)} icon={<Plus size={16} />}>
-            Issue Key
-          </Button>
-        }
       />
+
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => setShowCreate(true)} icon={<Plus size={16} />}>
+          Issue Key
+        </Button>
+      </div>
 
       <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">
         {loading ? (

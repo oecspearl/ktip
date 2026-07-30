@@ -6,6 +6,7 @@ import {
   VENUE_AVAILABILITY_PILL_COLORS,
 } from '../../lib/constants'
 import { AvailabilityDot } from './AvailabilityDot'
+import { DropdownPanel } from '../ui/DropdownPanel'
 import type { VenueAvailability } from '../../types'
 
 type Choice = Exclude<VenueAvailability, 'offline'>
@@ -78,10 +79,10 @@ export function AvailabilityPicker({
         <ChevronDown size={14} className={cn('transition-transform', open && 'rotate-180')} />
       </button>
 
-      {open && (
-        <div
+      <DropdownPanel
+          open={open}
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-hard animate-scale-in"
+          className="absolute right-0 z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-hard"
         >
           {CHOICES.map((choice) => (
             <button
@@ -106,8 +107,7 @@ export function AvailabilityPicker({
               </span>
             </button>
           ))}
-        </div>
-      )}
+      </DropdownPanel>
     </div>
   )
 }

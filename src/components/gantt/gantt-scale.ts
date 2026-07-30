@@ -149,14 +149,20 @@ function buildOffDayBands(
   return bands
 }
 
+/**
+ * `pxPerDayOverride` lets the view stretch a window that would otherwise be
+ * narrower than its container. Layout stays purely a function of it, so the
+ * ticks, bands and bars all widen together.
+ */
 export function buildWindow(
   anchor: Date,
   scale: GanttScale,
-  offDays: readonly number[] = DEFAULT_OFF_DAYS
+  offDays: readonly number[] = DEFAULT_OFF_DAYS,
+  pxPerDayOverride?: number
 ): GanttWindow {
   const spec = SCALE_SPECS[scale]
   const { start, end } = windowBoundsFor(anchor, scale)
-  const pxPerDay = spec.pxPerDay
+  const pxPerDay = pxPerDayOverride && pxPerDayOverride > 0 ? pxPerDayOverride : spec.pxPerDay
 
   return {
     start,

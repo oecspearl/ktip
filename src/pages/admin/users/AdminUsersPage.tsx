@@ -200,12 +200,6 @@ export default function AdminUsersPage() {
         title="User Management"
         subtitle="Create accounts, manage roles, reset passwords, and verify users"
         imageSeed="admin-users"
-        actions={
-          <Button onClick={() => setCreateModalOpen(true)} className="shrink-0">
-            <UserPlus size={16} />
-            Create User
-          </Button>
-        }
       >
         {users && (
           <Badge size="sm" variant="primary">
@@ -263,6 +257,10 @@ export default function AdminUsersPage() {
               Clear all
             </button>
           )}
+          <Button onClick={() => setCreateModalOpen(true)} className="sm:ml-auto shrink-0">
+            <UserPlus size={16} />
+            Create User
+          </Button>
         </div>
       </div>
 

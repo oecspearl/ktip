@@ -10,10 +10,12 @@ import {
 import type { RefObject } from 'react'
 import { cn } from '../../lib/utils'
 import { buildRows } from './gantt-model'
-import { buildWindow, initialAnchorFor, shiftAnchor } from './gantt-scale'
+import { buildWindow, dayOffset, initialAnchorFor, shiftAnchor, windowBoundsFor } from './gantt-scale'
 import {
   DEFAULT_OFF_DAYS,
   DEFAULT_TREE_WIDTH,
+  NARROW_TREE_WIDTH,
+  SCALE_SPECS,
   type GanttApi,
   type GanttEvent,
   type GanttProps,
@@ -66,6 +68,39 @@ export function useGantt(): GanttContextValue {
   const ctx = useContext(GanttContext)
   if (!ctx) throw new Error('useGantt must be used within <Gantt>')
   return ctx
+}
+
+/** Width of the scroll viewport, or 0 before it has been measured. */
+function useElementWidth(ref: RefObject<HTMLElement | null>): number {
+  const [width, setWidth] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    setWidth(el.clientWidth)
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [ref])
+
+  return width
+}
+
+/** Mirrors the `sm:` breakpoint that swaps the tree column width in GanttView. */
+function useIsSmUp(): boolean {
+  const [matches, setMatches] = useState(true)
+
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return
+    const mq = matchMedia('(min-width: 640px)')
+    setMatches(mq.matches)
+    const onChange = (e: MediaQueryListEvent) => setMatches(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  return matches
 }
 
 export function Gantt({
@@ -173,10 +208,24 @@ export function Gantt({
     [isSelectionControlled, onSelectEvent]
   )
 
-  const window = useMemo(
-    () => buildWindow(anchor, resolvedScale, offDays),
-    [anchor, resolvedScale, offDays]
-  )
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const treeWidth = treePanel?.width ?? DEFAULT_TREE_WIDTH
+
+  // A window narrower than the viewport would otherwise leave dead space to the
+  // right of the last column — at month scale, 3 months × 8px/day is only 736px.
+  // Stretch the day width to fill instead; never shrink below the scale's own
+  // density, so wide windows keep scrolling as before.
+  const viewportWidth = useElementWidth(scrollRef)
+  const smUp = useIsSmUp()
+  const gridViewport = Math.max(0, viewportWidth - (smUp ? treeWidth : NARROW_TREE_WIDTH))
+
+  const window = useMemo(() => {
+    const bounds = windowBoundsFor(anchor, resolvedScale)
+    const days = dayOffset(bounds.end, bounds.start)
+    const fitted = gridViewport > 0 && days > 0 ? gridViewport / days : 0
+    const pxPerDay = Math.max(SCALE_SPECS[resolvedScale].pxPerDay, fitted)
+    return buildWindow(anchor, resolvedScale, offDays, pxPerDay)
+  }, [anchor, resolvedScale, offDays, gridViewport])
   const rows = useMemo(
     () => buildRows({ resources, events: resolvedEvents, collapsed, pxPerDay: window.pxPerDay }),
     [resources, resolvedEvents, collapsed, window.pxPerDay]
@@ -222,9 +271,6 @@ export function Gantt({
       apiRef.current = null
     }
   }, [apiRef, api])
-
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const treeWidth = treePanel?.width ?? DEFAULT_TREE_WIDTH
 
   const value = useMemo<GanttContextValue>(
     () => ({

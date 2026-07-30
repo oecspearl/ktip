@@ -387,7 +387,7 @@ export function ShareEntityModal({
               type="button"
               onClick={handleEmailInvite}
               disabled={sending || !email.trim()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 btn-brand rounded-lg font-medium text-sm disabled:opacity-50"
             >
               {sending ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
               {sending ? 'Sending…' : 'Send email invitation'}
@@ -443,7 +443,7 @@ export function ShareEntityModal({
               type="button"
               onClick={handleShare}
               disabled={sending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 btn-brand rounded-lg font-medium text-sm disabled:opacity-50"
             >
               {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {sending

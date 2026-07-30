@@ -116,7 +116,7 @@ export default function PostDetailPage() {
         <p className="text-gray-500 mb-6">This post doesn't exist or was deleted.</p>
         <button
           onClick={() => navigate('/forums')}
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
           Back to Forums
         </button>
@@ -196,12 +196,16 @@ export default function PostDetailPage() {
             </div>
 
             {/* Content */}
-            <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base mb-8">
+            <div
+              id="post"
+              data-spy="Post"
+              className="scroll-mt-24 text-gray-700 whitespace-pre-wrap leading-relaxed text-base mb-8"
+            >
               {post.content}
             </div>
 
             {/* Replies Section */}
-            <div className="border-t border-gray-200 pt-8">
+            <div id="replies" data-spy="Replies" className="scroll-mt-24 border-t border-gray-200 pt-8">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                 Replies ({replies?.length || 0})
               </h3>
@@ -264,7 +268,7 @@ export default function PostDetailPage() {
                   {post.board.description}
                 </p>
                 <Link to={`/forums/${params.slug}`}>
-                  <button className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center gap-1.5">
+                  <button className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5">
                     View All Posts
                   </button>
                 </Link>

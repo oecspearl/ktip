@@ -174,7 +174,7 @@ export function SecuritySettingsTab() {
   return (
     <div className="space-y-6">
       {/* Change Password */}
-      <Card>
+      <Card id="password" data-spy="Password" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
             <Lock size={20} className="text-ktip-ocean-600" />
@@ -228,7 +228,7 @@ export function SecuritySettingsTab() {
       </Card>
 
       {/* Change Email */}
-      <Card>
+      <Card id="email" data-spy="Email" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
             <Mail size={20} className="text-ktip-ocean-600" />
@@ -273,7 +273,7 @@ export function SecuritySettingsTab() {
       </Card>
 
       {/* Secondary Email */}
-      <Card>
+      <Card id="secondary-email" data-spy="Secondary email" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
             <MailPlus size={20} className="text-ktip-ocean-600" />
@@ -381,7 +381,7 @@ export function SecuritySettingsTab() {
       </Card>
 
       {/* Delete Account */}
-      <Card className="border-red-200">
+      <Card id="delete-account" data-spy="Delete account" className="scroll-mt-24 border-red-200">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
             <Trash2 size={20} className="text-red-600" />

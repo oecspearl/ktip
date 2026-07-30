@@ -4,6 +4,7 @@ import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
 import { FloatingActionButton } from '../ui/FloatingActionButton'
+import { SpyRail } from '../ui/SpyRail'
 import { MessagingPanel } from '../messages/MessagingPanel'
 import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
 import { MemberPanel } from '../directory/MemberPanel'
@@ -41,6 +42,9 @@ export function MainLayout() {
           <Outlet />
         </div>
       </main>
+      {/* Page-scroll affordance: builds itself from the current page's
+          data-spy markers, renders nothing when a page has none */}
+      <SpyRail />
       <FloatingActionButton />
       <MessagingPanel />
       <MemberPanel />

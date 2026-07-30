@@ -104,6 +104,7 @@ export default function MyApplicationsPage() {
         eyebrow="My Applications"
         title="Grant Applications"
         subtitle="Track the status of your funding applications"
+        image="/grants/grant-pitch.jpg"
         imageSeed="grants"
         breadcrumb={[
           { label: 'Home', href: '/' },
@@ -117,7 +118,11 @@ export default function MyApplicationsPage() {
         {/* Sponsorship requests. Only faculty and school partners see this —
             a student's application cannot be submitted until one is accepted. */}
         {(sponsorships?.length ?? 0) > 0 && (
-          <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl shadow-card mb-6 overflow-hidden">
+          <div
+            id="sponsorships"
+            data-spy="Sponsorships"
+            className="scroll-mt-24 bg-ktip-cream border border-ktip-sand-200 rounded-2xl shadow-card mb-6 overflow-hidden"
+          >
             <div className="px-4 py-3 border-b border-ktip-sand-100">
               <h2 className="font-display font-bold text-ktip-sand-900">Sponsorship requests</h2>
               <p className="text-sm text-ktip-sand-600 mt-0.5">
@@ -163,7 +168,11 @@ export default function MyApplicationsPage() {
             <p className="mt-4 text-ktip-sand-600">Loading applications...</p>
           </div>
         ) : applications.length > 0 ? (
-          <div className="bg-ktip-cream border border-gray-200 rounded-lg">
+          <div
+            id="applications"
+            data-spy="Applications"
+            className="scroll-mt-24 bg-ktip-cream border border-gray-200 rounded-lg"
+          >
             <div className="px-6 py-4 border-b border-gray-200">
               <p className="text-sm text-ktip-sand-600">
                 {applications.length} application

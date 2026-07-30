@@ -98,7 +98,11 @@ export default function PublicProfilePage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       {/* ---------- Identity ---------- */}
-      <header className="rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
+      <header
+        id="profile"
+        data-spy="Profile"
+        className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
+      >
         <div className="flex flex-wrap items-start gap-5">
           {profile.avatar_url ? (
             <img
@@ -193,7 +197,11 @@ export default function PublicProfilePage() {
           Rendered only when there is something to show: a zeroed-out card on a
           brand-new member reads as a scoreboard of failure. */}
       {stats && stats.badge_count > 0 && (
-        <section className="rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
+        <section
+          id="standing"
+          data-spy="Standing"
+          className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
+        >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
@@ -263,7 +271,11 @@ export default function PublicProfilePage() {
 
       {/* ---------- About ---------- */}
       {(profile.bio || profile.skills?.length || profile.interests?.length || profile.open_to?.length) && (
-        <section className="space-y-4 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
+        <section
+          id="about"
+          data-spy="About"
+          className="scroll-mt-24 space-y-4 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
+        >
           {profile.bio && (
             <p className="whitespace-pre-wrap text-ktip-sand-700">{profile.bio}</p>
           )}
@@ -302,7 +314,11 @@ export default function PublicProfilePage() {
 
       {/* ---------- Every badge ---------- */}
       {badges?.length ? (
-        <section className="rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
+        <section
+          id="achievements"
+          data-spy="Achievements"
+          className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
+        >
           <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900">Achievements</h2>
           <div className="flex flex-wrap gap-2">
             {badges.map((userBadge) => (
@@ -375,7 +391,11 @@ function LinkSection({
   items: { id: string; label: string; to: string }[]
 }) {
   return (
-    <section className="rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
+    <section
+      id={title.toLowerCase()}
+      data-spy={title}
+      className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
+    >
       <h2 className="mb-3 flex items-center gap-1.5 font-display text-lg font-bold text-ktip-sand-900">
         {icon}
         {title}

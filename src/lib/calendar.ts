@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from 'react'
 import {
   eachDayOfInterval,
   format,
@@ -35,6 +36,18 @@ export interface CalendarItem {
   /** Secondary line in the day panel, e.g. "Virtual", "Deadline" */
   subtitle?: string
   dimmed?: boolean
+  /** Soft gradient fill (bg + border + text) used by week-view cards and month chips */
+  gradientClass?: string
+  /** Owner/organizer avatar shown on week cards */
+  avatarUrl?: string | null
+  /** Owner/organizer name — avatar alt text and initials fallback */
+  avatarName?: string | null
+  /** Muted overlay label for non-live items: "Cancelled", "Draft", "Pending" */
+  statusLabel?: string
+  /** Leading icon in the day panel, e.g. MapPin for in-person, Video for virtual */
+  icon?: ComponentType<{ size?: number | string; className?: string }>
+  /** Extra badges rendered after the subtitle in the day panel */
+  badges?: ReactNode
 }
 
 /**

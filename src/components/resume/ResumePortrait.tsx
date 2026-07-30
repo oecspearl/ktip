@@ -9,14 +9,15 @@
  * no avatar at all it falls back to initials, which is what the rest of the app
  * does.
  *
- * Three skins:
- *  • mono   — printed sheet, B&W: gray panel, grayscale photo.
- *  • color  — printed sheet, brand: accent panel, full colour.
- *  • screen — on-screen résumé: accent panel with a diagonal cut and a fade
- *    into the card below.
+ * Two skins, matching the sheet's two themes:
+ *  • mono  — B&W: gray panel, grayscale photo.
+ *  • color — brand: accent panel, full colour.
+ *
+ * There was a third, 'screen', for the separate on-screen résumé that the
+ * WYSIWYG sheet replaced. Dropped with it: the sheet is now what is on screen.
  */
 
-export type PortraitTheme = 'mono' | 'color' | 'screen'
+export type PortraitTheme = 'mono' | 'color'
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -38,17 +39,10 @@ export function ResumePortrait({
   accent: string
   className?: string
 }) {
-  const isScreen = theme === 'screen'
-
   const panelStyle =
     theme === 'mono'
       ? { background: 'linear-gradient(to bottom, #d4d4d4, #a3a3a3)' }
-      : theme === 'color'
-        ? { background: `linear-gradient(to bottom, ${accent}, ${accent}99)` }
-        : {
-            background: `linear-gradient(to bottom, ${accent}66, ${accent}22, transparent)`,
-            clipPath: 'polygon(0 0, 100% 14%, 100% 100%, 0 100%)',
-          }
+      : { background: `linear-gradient(to bottom, ${accent}, ${accent}99)` }
 
   return (
     <div className={`relative ${className}`}>
@@ -80,13 +74,6 @@ export function ResumePortrait({
               {initials(name)}
             </span>
           </div>
-        )}
-
-        {isScreen && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 -bottom-px h-24 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-ktip-sand-900 dark:via-ktip-sand-900/60"
-          />
         )}
       </div>
     </div>

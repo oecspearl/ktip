@@ -11,12 +11,13 @@ import { Link } from 'react-router'
 import { format } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
-import { useAuth } from '../../contexts/AuthContext'
-import { ForYouRail } from '../../components/personalization/ForYouRail'
-import { FALLBACK_IMAGE, heroImageFor } from '../../lib/hero-images'
+import { FALLBACK_IMAGE, HERO_WASH, grantImageFor, heroImageFor } from '../../lib/hero-images'
+import { eventHeroDetails, grantHeroDetails, projectHeroDetails } from '../../lib/hero-details'
 import { useProjects } from '../../hooks/useProjects'
 import { useEvents } from '../../hooks/useEvents'
 import { useGrants } from '../../hooks/useGrants'
+import { usePlatformStats, type PlatformStats } from '../../hooks/usePlatformStats'
+import { StatsWheel } from '../../components/ui/StatsWheel'
 import type { DetailEntry, Grant } from '../../types'
 import { DetailsList } from '../../components/shared/DetailsList'
 import {
@@ -126,6 +127,24 @@ const FEATURES: Feature[] = [
   },
 ]
 
+// Partner logo wall. Entries without a `logo` render as styled wordmarks —
+// swap in real logo files under /public/partners as they become available.
+const PARTNERS: { name: string; logo?: string }[] = [
+  { name: 'OECS Commission', logo: '/oecs.png' },
+  { name: 'World Bank Group', logo: '/worldbank.jpeg' },
+  { name: 'Caribbean Development Bank' },
+  { name: 'CARICOM' },
+  { name: 'UNDP' },
+  { name: 'ECCB' },
+]
+
+const STAT_TILES: { key: keyof PlatformStats; label: string }[] = [
+  { key: 'memberCount', label: 'Members' },
+  { key: 'projectCount', label: 'Projects' },
+  { key: 'grantCount', label: 'Active Grants' },
+  { key: 'eventCount', label: 'Events' },
+]
+
 function grantAmount(g: Grant): string {
   if (g.amount_max) return `Up to ${g.currency || 'USD'} ${g.amount_max.toLocaleString()}`
   if (g.amount_min) return `From ${g.currency || 'USD'} ${g.amount_min.toLocaleString()}`
@@ -134,13 +153,13 @@ function grantAmount(g: Grant): string {
 
 export default function DiscoverPage() {
   usePageTitle('Discover')
-  const auth = useAuth()
 
   // --- Mode toggle + live data ---
   const [mode, setMode] = useState<Mode>('grants')
   const { grants } = useGrants({ active: true })
   const { projects } = useProjects()
   const { events } = useEvents({ upcoming: true })
+  const { stats, loading: statsLoading } = usePlatformStats()
 
   const items = useMemo<HeroItem[]>(() => {
     if (mode === 'grants') {
@@ -149,9 +168,11 @@ export default function DiscoverPage() {
         title: g.title,
         meta: grantAmount(g),
         description: g.summary || g.description || 'Funding opportunity for Caribbean innovators.',
-        details: g.details,
+        // Hand-authored details win; otherwise synthesise a block from the
+        // columns the record already has, so no hero item reads bare
+        details: g.details?.length ? g.details : grantHeroDetails(g),
         href: `/grants/${g.id}`,
-        image: heroImageFor(g.id),
+        image: grantImageFor(g.id, g.grant_type, g.is_climate_action),
       }))
     }
     if (mode === 'projects') {
@@ -160,7 +181,7 @@ export default function DiscoverPage() {
         title: p.title,
         meta: (p.category as string) || 'Project',
         description: p.summary || p.description || 'An innovation project from the OECS community.',
-        details: p.details,
+        details: p.details?.length ? p.details : projectHeroDetails(p),
         href: `/projects/${p.id}`,
         image: p.image_url || heroImageFor(p.id),
       }))
@@ -170,7 +191,7 @@ export default function DiscoverPage() {
       title: e.title,
       meta: `${format(new Date(e.start_date), 'MMM d, yyyy')}${e.location ? ` · ${e.location}` : ''}`,
       description: e.summary || e.description || 'An upcoming event for the OECS community.',
-      details: e.details,
+      details: e.details?.length ? e.details : eventHeroDetails(e),
       href: `/events/${e.id}`,
       image: e.image_url || heroImageFor(e.id),
     }))
@@ -438,7 +459,15 @@ export default function DiscoverPage() {
   }
   return (
     <>
-      <section ref={sectionRef} className="sticky top-0 h-screen bg-gray-900 overflow-hidden">
+      <section
+        ref={sectionRef}
+        id="hero"
+        data-spy="Top"
+        // rail stays hidden over the full-bleed hero, fading in from the bento
+        // grid down
+        data-spy-hide
+        className="sticky top-0 h-screen bg-gray-900 overflow-hidden"
+      >
         {/* Full-bleed hero image — follows the selected item */}
         <img
           src={shownSrc}
@@ -449,7 +478,9 @@ export default function DiscoverPage() {
         {/* Frosted blur over the left side, fading out toward the right */}
         <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-2xl bg-black/10 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
         {/* Neutral dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/40 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/30 to-black/20" />
+        {/* Brand wash — navy by day, green by night (OECS palette) */}
+        <div className={`absolute inset-0 bg-gradient-to-l ${HERO_WASH}`} />
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 to-transparent" />
 
         {/* Ghost card: expands from the new hero's card in the strip to fill the hero, then fades */}
@@ -517,7 +548,9 @@ export default function DiscoverPage() {
           </div>
 
           {/* Active item content — right side */}
-          <div className="flex-1 min-h-0 flex flex-col justify-center items-start md:items-end">
+          <div className="flex-1 min-h-0 flex flex-col items-start md:items-end">
+            {/* Text region — vertically centered in whatever space the locked CTA leaves */}
+            <div className="flex-1 min-h-0 w-full flex flex-col justify-center items-start md:items-end">
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
@@ -538,16 +571,6 @@ export default function DiscoverPage() {
                     <DetailsList details={active.details} tone="dark" compact max={3} />
                   </div>
                 )}
-
-                <div className="mt-8 flex items-center gap-4 md:justify-end">
-                  <Link
-                    to={active.href}
-                    className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-ktip-cream text-gray-900 text-sm font-medium tracking-wide hover:bg-white/90 transition-colors"
-                  >
-                    View Details
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
               </div>
             ) : (
               <div className="max-w-2xl animate-fade-in text-left md:text-right">
@@ -561,17 +584,21 @@ export default function DiscoverPage() {
                   Nothing to show here yet — explore the platform to see what&apos;s happening
                   across the Caribbean.
                 </p>
-                <div className="mt-8 md:flex md:justify-end">
-                  <Link
-                    to={activeMode.href}
-                    className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-ktip-cream text-gray-900 text-sm font-medium tracking-wide hover:bg-white/90 transition-colors"
-                  >
-                    Browse {activeMode.label}
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
               </div>
             )}
+            </div>
+
+            {/* CTA — fixed-height row anchored to the bottom of the content column, so
+                the button holds one Y no matter how tall the active item's text runs */}
+            <div className="shrink-0 w-full h-14 mt-8 mb-0 flex items-center md:justify-end">
+              <Link
+                to={active ? active.href : activeMode.href}
+                className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-brand-navy text-white text-sm font-medium tracking-wide shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
+              >
+                {active ? 'View Details' : `Browse ${activeMode.label}`}
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
 
           {/* Bottom-left: mode toggle + mini cards */}
@@ -655,7 +682,7 @@ export default function DiscoverPage() {
                       className={`group text-left shrink-0 w-28 sm:w-32 rounded-lg overflow-hidden transition-all duration-300 ${
                         isActive
                           ? 'bg-ktip-cream shadow-hard -translate-y-1'
-                          : 'bg-white/10 backdrop-blur-sm hover:bg-white/20'
+                          : 'bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-hard'
                       }`}
                     >
                       <div
@@ -720,14 +747,14 @@ export default function DiscoverPage() {
                     <button
                       onClick={prev}
                       aria-label="Previous"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-ktip-cream text-gray-900 shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 transition-opacity duration-200"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 hover:bg-brand-green hover:text-brand-navy hover:scale-110 dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
                     >
                       <ChevronLeft size={16} />
                     </button>
                     <button
                       onClick={next}
                       aria-label="Next"
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-9 h-9 rounded-full bg-ktip-cream text-gray-900 shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 transition-opacity duration-200"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-9 h-9 rounded-full bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 hover:bg-brand-green hover:text-brand-navy hover:scale-110 dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
                     >
                       <ChevronRight size={16} />
                     </button>
@@ -739,23 +766,18 @@ export default function DiscoverPage() {
         </div>
       </section>
 
-      {/* Personalized rail — renders nothing for signed-out visitors, so the
-          public landing page is byte-identical to what it was before. */}
-      {auth.user && (
-        <section className="relative z-10 bg-ktip-sand-50 pt-12">
-          <div className="container mx-auto px-6 md:px-12">
-            <ForYouRail limit={6} title="Picked for you" />
-          </div>
-        </section>
-      )}
-
       {/* Bento feature grid */}
-      <section className="relative z-10 bg-ktip-sand-50 py-20 md:py-28 overflow-x-clip">
-        {/* Watermark straddles the hero/bento boundary: top 25% floats over the
-            dark hero (light tint), the rest sits on the light section (dark tint) */}
+      <section
+        id="platform"
+        data-spy="Platform"
+        className="scroll-mt-24 relative z-10 bg-ktip-sand-50 py-20 md:py-28 overflow-x-clip"
+      >
+        {/* First light section — the watermark straddles the hero/bento boundary:
+            top 25% floats over the dark hero (light tint), the rest sits on the
+            light section (dark tint) */}
         <FlipWatermark
           className="-top-[0.25em] right-0 md:-right-4"
-          charClassName="text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.16)_25%,rgba(28,25,23,0.1)_25%)]"
+          charClassName="text-transparent bg-clip-text bg-[linear-gradient(to_bottom,rgba(255,255,255,0.16)_25%,rgba(28,25,23,0.1)_25%)] dark:bg-[linear-gradient(to_bottom,rgba(255,255,255,0.18)_25%,rgba(255,255,255,0.08)_25%)]"
         />
 
         <div className="relative container mx-auto px-6 md:px-12">
@@ -776,7 +798,7 @@ export default function DiscoverPage() {
               <Link
                 key={f.title}
                 to={f.href}
-                className={`group relative rounded-2xl p-6 flex flex-col justify-between gap-6 overflow-hidden shadow-medium hover:shadow-hard hover:-translate-y-0.5 transition-all duration-300 ${f.span}`}
+                className={`group relative rounded-2xl p-6 flex flex-col justify-between gap-6 overflow-hidden shadow-medium hover:shadow-hard hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 ${f.span}`}
               >
                 {/* Photo + brand color wash (solid at top-left, photo shows through bottom-right) */}
                 <img
@@ -799,11 +821,75 @@ export default function DiscoverPage() {
                   </p>
                 </div>
 
-                <span className="relative self-start inline-flex items-center gap-1.5 bg-ktip-cream text-gray-900 rounded-lg px-4 py-2 text-xs font-semibold shadow-md group-hover:gap-2.5 transition-all">
+                <span className="relative self-start inline-flex items-center gap-1.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-lg px-4 py-2 text-xs font-semibold shadow-soft group-hover:shadow-medium group-hover:bg-brand-green group-hover:text-brand-navy group-hover:-translate-y-0.5 group-hover:scale-[1.03] dark:group-hover:bg-brand-navy dark:group-hover:text-brand-green group-hover:gap-2.5 transition-all">
                   Explore <ArrowRight size={13} />
                 </span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Partners (65%) + platform stats (35%) */}
+      <section
+        id="partners"
+        data-spy="Partners"
+        className="scroll-mt-24 relative z-10 bg-ktip-cream pt-8 md:pt-10 pb-20 md:pb-28"
+      >
+        <div className="container mx-auto px-6 md:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-10 lg:gap-14 items-stretch">
+            {/* Partners — min-w-0 so the w-max marquee track can't blow the
+                grid column out to its min-content width */}
+            <div className="flex flex-col min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-ktip-sand-500 mb-3">
+                Our Partners
+              </p>
+              <h2 className="text-2xl md:text-4xl font-display font-extrabold text-ktip-sand-900 tracking-tight">
+                Backed by regional and global institutions
+              </h2>
+              <p className="mt-3 text-ktip-sand-600 max-w-xl">
+                KTIP is delivered with the support of organizations committed to
+                advancing knowledge, technology, and innovation across the OECS.
+              </p>
+
+              {/* Single-row marquee, scrolling right; pauses on hover. The
+                  track holds two copies of the row for a seamless loop. */}
+              <div className="mt-10 relative max-w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+                <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-right hover:[animation-play-state:paused]">
+                  {[...PARTNERS, ...PARTNERS].map((p, i) => (
+                    <div
+                      key={`${p.name}-${i}`}
+                      className="group/logo flex items-center justify-center h-20 shrink-0 rounded-xl px-4 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-ktip-cream hover:shadow-medium"
+                      aria-hidden={i >= PARTNERS.length}
+                    >
+                      {p.logo ? (
+                        <img
+                          src={p.logo}
+                          alt={p.name}
+                          className="max-h-16 w-auto object-contain transition-transform duration-300 group-hover/logo:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-lg font-display font-semibold text-ktip-sand-500 whitespace-nowrap transition-colors duration-300 group-hover/logo:text-ktip-sand-900">
+                          {p.name}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Platform stats — auto-rotating option wheel, no card chrome */}
+            <div className="flex flex-col justify-center text-ktip-sand-900">
+              <StatsWheel
+                className="h-[26rem]"
+                items={STAT_TILES.map((t) => ({
+                  value: statsLoading || !stats ? '—' : stats[t.key].toLocaleString(),
+                  label: t.label,
+                }))}
+              />
+            </div>
           </div>
         </div>
       </section>

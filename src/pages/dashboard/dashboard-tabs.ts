@@ -1,6 +1,6 @@
 import {
   LayoutDashboard,
-  User,
+  FileText,
   TrendingUp,
   FolderKanban,
   Calendar,
@@ -30,7 +30,9 @@ export interface DashboardTab {
 
 export const DASHBOARD_TABS: DashboardTab[] = [
   { to: '', label: 'Overview', icon: LayoutDashboard, description: 'Network, submissions, calendar' },
-  { to: 'profile', label: 'Profile', icon: User, description: 'How others see you' },
+  // Kept at 'profile' so existing /dashboard/profile links and bookmarks still
+  // land somewhere; the panel is the member's CV.
+  { to: 'profile', label: 'My CV', icon: FileText, description: 'Your résumé, ready to send' },
   { to: 'progress', label: 'Progress', icon: TrendingUp, description: 'Your activity timeline' },
   // Links out: the gallery is a full page, not a panel — it carries filters,
   // collections and showcase editing that do not fit the tab shell.

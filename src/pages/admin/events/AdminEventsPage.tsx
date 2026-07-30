@@ -91,13 +91,6 @@ export default function AdminEventsPage() {
         title="Events Management"
         subtitle="Manage all events, registrations, and content"
         imageSeed="admin-events"
-        actions={
-          <Link to="/events/new">
-            <Button size="sm" icon={<Plus size={16} />}>
-              Create Event
-            </Button>
-          </Link>
-        }
       />
 
       {/* Flat Stat Cards */}
@@ -198,6 +191,11 @@ export default function AdminEventsPage() {
               Clear all
             </button>
           )}
+          <Link to="/events/new" className="sm:ml-auto shrink-0">
+            <Button size="sm" icon={<Plus size={16} />}>
+              Create Event
+            </Button>
+          </Link>
         </div>
       </div>
 

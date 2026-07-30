@@ -24,16 +24,20 @@ export function Button({
   ...others
 }: ButtonProps) {
   const variantStyles = {
-    // Navy primary; ocean-700 inverts to a light tint in dark mode, so pin
-    // an interactive mid navy there via dark:
+    // Mode-distinct brand pairs (brand-navy/-green are fixed Pantone tokens):
+    // light — navy fill, white text, hover flips to green fill + navy text;
+    // dark — green fill, navy text, hover inverts to navy fill + green text.
+    // Shadow depth matches the homepage hero CTA: raised at rest (medium),
+    // lifting to hard on hover, rather than the flatter soft→medium pair.
     primary:
-      'bg-ktip-ocean-700 text-white shadow-soft hover:bg-ktip-ocean-600 hover:shadow-medium hover:-translate-y-0.5 disabled:bg-ktip-ocean-400 dark:bg-ktip-ocean-300 dark:hover:bg-ktip-ocean-400 dark:disabled:bg-ktip-ocean-200',
+      'bg-brand-navy text-white shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard disabled:bg-ktip-ocean-400 disabled:hover:text-white dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green dark:hover:shadow-glow-tropical dark:disabled:hover:text-brand-navy',
     secondary:
-      'border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 hover:bg-ktip-sand-50 hover:border-ktip-sand-300',
-    outline: 'border border-ktip-ocean-500 text-ktip-ocean-600 hover:bg-ktip-ocean-50',
+      'border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 hover:shadow-hard',
+    outline:
+      'border border-ktip-ocean-500 text-ktip-ocean-600 shadow-medium hover:bg-ktip-ocean-50 hover:shadow-hard',
     ghost: 'text-ktip-sand-600 hover:bg-ktip-sand-100',
     danger:
-      'bg-red-600 text-white shadow-soft hover:bg-red-700 hover:shadow-medium hover:-translate-y-0.5 dark:bg-red-500 dark:hover:bg-red-400',
+      'bg-red-600 text-white shadow-medium hover:bg-red-700 hover:shadow-hard dark:bg-red-500 dark:hover:bg-red-400',
   }
 
   const sizeStyles = {
@@ -45,7 +49,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100',
         variantStyles[variant || 'primary'],
         sizeStyles[size || 'md'],
         fullWidth && 'w-full',
@@ -55,7 +59,7 @@ export function Button({
       {...others}
     >
       {loading && (
-        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
       )}
       {!loading && icon}
       {children}

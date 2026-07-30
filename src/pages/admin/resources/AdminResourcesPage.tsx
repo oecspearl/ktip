@@ -64,12 +64,17 @@ export default function AdminResourcesPage() {
         title="Resources"
         subtitle="Manage knowledge base articles, guides, and case studies"
         imageSeed="admin-resources"
-        actions={
+      />
+
+      {/* The empty state carries its own CTA, so this row only matters once the
+          table has rows. */}
+      {!!resources?.length && (
+        <div className="flex justify-end mb-4">
           <Button icon={<Plus size={16} />} onClick={openCreate}>
             Add Resource
           </Button>
-        }
-      />
+        </div>
+      )}
 
       {/* Table */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">

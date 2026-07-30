@@ -614,12 +614,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
                 Back
               </Button>
             )}
-            <Button
-              size="sm"
-              disabled={awaitingAction}
-              onClick={handleNext}
-              className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700"
-            >
+            <Button size="sm" disabled={awaitingAction} onClick={handleNext}>
               {awaitingAction ? 'Waiting…' : isLast ? 'Finish' : 'Next'}
               {!awaitingAction && !isLast && <ChevronRight size={14} />}
             </Button>

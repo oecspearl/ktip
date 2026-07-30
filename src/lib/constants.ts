@@ -111,6 +111,25 @@ export const EVENT_TYPE_DOT_COLORS: Record<string, string> = {
   demo_day: 'bg-ktip-tropical-500',
 }
 
+// Soft gradient fills for week-view cards and month chips. Built from brand
+// ramps only, so the dark-mode token flip re-themes them with no extra classes.
+export const EVENT_TYPE_GRADIENTS: Record<string, string> = {
+  hackathon:
+    'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
+  workshop:
+    'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+  meetup:
+    'bg-gradient-to-br from-ktip-sun-50 to-ktip-sun-100 border-ktip-sun-200 text-ktip-sun-800',
+  conference:
+    'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
+  demo_day:
+    'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+}
+
+/** Neutral gradient for items with no type-specific color. */
+export const CALENDAR_FALLBACK_GRADIENT =
+  'bg-gradient-to-br from-ktip-sand-50 to-ktip-sand-100 border-ktip-sand-200 text-ktip-sand-800'
+
 // Event Statuses
 export const EVENT_STATUSES = {
   DRAFT: 'draft',
@@ -269,6 +288,16 @@ export const CALENDAR_KIND_DOT_COLORS: Record<string, string> = {
   grant_deadline: 'bg-red-500',
   rsvp: 'bg-ktip-tropical-500',
   grant_application: 'bg-ktip-sun-500',
+}
+
+export const CALENDAR_KIND_GRADIENTS: Record<string, string> = {
+  event:
+    'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
+  grant_deadline:
+    'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-800 dark:from-red-950 dark:to-red-900 dark:border-red-800 dark:text-red-200',
+  rsvp: 'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+  grant_application:
+    'bg-gradient-to-br from-ktip-sun-50 to-ktip-sun-100 border-ktip-sun-200 text-ktip-sun-800',
 }
 
 // Schedule Item Types
