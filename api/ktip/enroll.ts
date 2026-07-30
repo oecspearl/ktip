@@ -103,7 +103,7 @@ export default async function handler(request: Request): Promise<Response> {
         }
         if (err.status === 401 || err.status === 503) {
           console.error(
-            `[ktip-enroll] upstream ${err.status} from ${process.env.KTIP_CATALOG_BASE_URL || 'https://mypd.oecscampus.org'}: ${err.message}`
+            `[ktip-enroll] upstream ${err.status} from ${process.env.KTIP_CATALOG_BASE_URL || 'https://commons.oecscampus.org'}: ${err.message}`
           )
           return json({ error: 'Enrollment service is not configured correctly. Contact support.' }, 503)
         }

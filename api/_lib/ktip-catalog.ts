@@ -40,7 +40,7 @@ export interface KtipEnrollResult {
   course_url: string
 }
 
-const DEFAULT_BASE_URL = 'https://mypd.oecscampus.org'
+const DEFAULT_BASE_URL = 'https://commons.oecscampus.org'
 
 /**
  * Validated base URL — a malformed override (stray comma, truncated host)
@@ -124,6 +124,16 @@ export function ktipApiKey(): string | null {
   return key || null
 }
 
+/** VC may return localhost URLs when NEXT_PUBLIC_APP_URL is unset — always use our configured base. */
+export function normalizeKtipEnrollResult(result: KtipEnrollResult): KtipEnrollResult {
+  const base = catalogBaseUrl()
+  return {
+    ...result,
+    sign_in_url: `${base}/auth/signin`,
+    course_url: `${base}/courses/${result.course_id}`,
+  }
+}
+
 export async function enrollInKtipCourse(input: {
   email: string
   course_id: string
@@ -151,5 +161,5 @@ export async function enrollInKtipCourse(input: {
     throw new KtipEnrollError(res.status, message)
   }
 
-  return (await res.json()) as KtipEnrollResult
+  return normalizeKtipEnrollResult((await res.json()) as KtipEnrollResult)
 }
