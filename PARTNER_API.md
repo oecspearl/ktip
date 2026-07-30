@@ -227,4 +227,4 @@ Relevant code:
 | API clients, access log, auth RPC | `supabase/migrations/059_partner_api.sql` |
 
 No new environment variables are required; the endpoint reuses
-`VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+`VITE_SUPABASE_URL` and `SUPABASE_SECRET_KEY`.

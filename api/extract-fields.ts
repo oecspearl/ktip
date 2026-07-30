@@ -62,7 +62,7 @@ export default async function handler(request: Request) {
   }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY
+  const anonKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
   if (!supabaseUrl || !anonKey) {
     return json({ error: 'Server configuration error' }, 503)
   }

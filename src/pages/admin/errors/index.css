@@ -1,0 +1,117 @@
+/**
+ * shadcn/ui + ReUI stylesheet for the admin error console.
+ *
+ * Everything the vendored ./ui components need lives here, and nothing else in
+ * KTIP depends on it. It is pulled into the build by a single `@import` at the
+ * top of src/index.css.
+ *
+ * WHY IT IS IMPORTED FROM src/index.css RATHER THAN A COMPONENT
+ * ------------------------------------------------------------
+ * Tailwind v4 only evaluates `@theme`, `@utility` and `@custom-variant` inside
+ * the import graph of a Tailwind entrypoint. A CSS file imported from a .tsx is
+ * its own PostCSS entry, so its `@theme` would be ignored and every
+ * `bg-background` here would silently emit nothing. Making this file a second
+ * entry (`@import "tailwindcss"`) is worse: it re-emits Tailwind's default
+ * theme at `:root`, and because the lazy chunk loads after src/index.css it
+ * would override KTIP's --font-sans and radius scale app-wide.
+ *
+ * WHY THE VALUES ARE ON .errors-console AND NOT :root
+ * ---------------------------------------------------
+ * Living in this directory does not scope CSS — rules are global the moment
+ * they load. The container selector is what actually confines these tokens to
+ * the dashboard. `shadcn init` writes them to `:root`; if you re-run the CLI
+ * and it does that again, move them back under .errors-console or the whole
+ * app gets shadcn's neutral palette and 0.625rem radius.
+ */
+
+/* base-nova runtime: data-* custom variants (data-open, data-closed,
+   data-checked, …), accordion keyframes, and the scroll-fade / shimmer /
+   no-scrollbar utilities the ReUI data grid compiles against. Contributes only
+   @utility / @custom-variant / @keyframes — no selectors, no token values. */
+@import "shadcn/tailwind.css";
+
+/* Registers the semantic utility NAMES so Tailwind emits bg-background,
+   border-input, text-muted-foreground and friends. The values stay undefined
+   at this level, which makes every one of these utilities inert outside
+   .errors-console. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-invert: var(--invert);
+  --color-invert-foreground: var(--invert-foreground);
+}
+
+/* ── Token values — scoped to the dashboard container ────────────────────── */
+.errors-console {
+  /* Corner radius for the vendored components only. Overriding the --radius-*
+     scale here re-points rounded-md / rounded-lg for descendants of this
+     container while leaving Tailwind's defaults intact everywhere else. */
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+
+  /* Surfaces come from the KTIP palette rather than shadcn's neutral greys, so
+     the grid reads as part of the admin area instead of a pasted-in widget. */
+  --background: var(--color-ktip-cream);
+  --foreground: var(--color-ktip-sand-900);
+  --card: var(--color-ktip-cream);
+  --card-foreground: var(--color-ktip-sand-900);
+  --popover: var(--color-ktip-cream);
+  --popover-foreground: var(--color-ktip-sand-900);
+  --primary: var(--color-ktip-ocean-700);
+  --primary-foreground: #fff;
+  --secondary: var(--color-ktip-sand-50);
+  --secondary-foreground: var(--color-ktip-sand-800);
+  --muted: var(--color-ktip-sand-50);
+  --muted-foreground: var(--color-ktip-sand-600);
+  --accent: var(--color-ktip-sand-100);
+  --accent-foreground: var(--color-ktip-sand-900);
+  --border: var(--color-ktip-sand-200);
+  --input: var(--color-ktip-sand-200);
+  --ring: var(--color-ktip-ocean-500);
+
+  /* Level and status colours. These carry meaning in the grid — an error badge
+     must not be mistakable for a warning — so they are the saturated scales,
+     not brand tints. */
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-red-800);
+  --info: var(--color-ktip-ocean-500);
+  --info-foreground: var(--color-ktip-ocean-900);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-900);
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-900);
+  --invert: var(--color-ktip-sand-900);
+  --invert-foreground: var(--color-ktip-sand-50);
+}
+
+/* No dark-mode block is needed: html.dark in src/index.css inverts the ktip-*
+   scales themselves (sand-900 becomes near-white), so every mapping above
+   follows the theme switch for free. Re-declaring them would invert twice and
+   produce a light grid on a dark page. */

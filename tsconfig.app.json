@@ -22,7 +22,14 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Import alias. Mirrored in vite.config.ts AND vitest.config.ts — all three
+       must agree or a module resolves in the editor but not at runtime. */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src"],
   /* Server-side tests — typechecked by tsconfig.node.json instead. */

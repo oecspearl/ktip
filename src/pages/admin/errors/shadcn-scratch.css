@@ -1,0 +1,55 @@
+/**
+ * Scratch target for the shadcn CLI. NOT imported anywhere — deliberately.
+ *
+ * `shadcn add` appends whatever tokens a component wants to the file named in
+ * components.json. Pointed at the real index.css it wrote a global `:root`
+ * block and a second `@custom-variant dark (&:is(.dark *))` that conflicts with
+ * KTIP's `&:where(.dark, .dark *)` — silently breaking dark mode app-wide.
+ *
+ * Pointing it here makes those writes reviewable instead of destructive. After
+ * running scripts/sync-errors-ui.mjs, diff this file: anything genuinely new
+ * gets copied by hand into the `.errors-console` block in ./index.css, scoped.
+ * Nothing here reaches the browser.
+ */
+/*---break---
+ */
+@custom-variant dark (&:is(.dark *));
+/*---break---
+ */
+:root {
+    --destructive-foreground: var(--color-red-800);
+    --success: var(--color-emerald-500);
+    --success-foreground: var(--color-emerald-900);
+    --info: var(--color-violet-500);
+    --info-foreground: var(--color-violet-900);
+    --warning: var(--color-yellow-500);
+    --warning-foreground: var(--color-yellow-900);
+    --invert: var(--color-zinc-900);
+    --invert-foreground: var(--color-zinc-50);
+}
+/*---break---
+ */
+.dark {
+    --destructive-foreground: var(--color-red-600);
+    --success: var(--color-emerald-500);
+    --success-foreground: var(--color-emerald-600);
+    --info: var(--color-violet-500);
+    --info-foreground: var(--color-violet-600);
+    --warning: var(--color-yellow-500);
+    --warning-foreground: var(--color-yellow-600);
+    --invert: var(--color-zinc-700);
+    --invert-foreground: var(--color-zinc-50);
+}
+/*---break---
+ */
+@theme inline {
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-invert: var(--invert);
+    --color-invert-foreground: var(--invert-foreground);
+}

@@ -1000,6 +1000,26 @@ export const SITE_MAP: SiteEntry[] = [
     access: 'oecs',
     icon: 'ClipboardCheck',
   },
+  {
+    id: 'admin.errors',
+    title: 'Errors',
+    category: 'Admin',
+    description: 'Live Sentry issues from the browser and the API',
+    keywords: ['errors', 'sentry', 'exceptions', 'crashes', 'monitoring', 'issues', 'stack trace'],
+    href: '/admin/errors',
+    access: 'oecs',
+    icon: 'Bug',
+  },
+  {
+    id: 'admin.errors.simulate',
+    title: 'Error simulator',
+    category: 'Admin',
+    description: 'Send controlled test failures through the live monitoring pipeline',
+    keywords: ['error simulator', 'test error', 'sentry test', 'monitoring drill', 'verify alerts'],
+    href: '/admin/errors/simulate',
+    access: 'oecs',
+    icon: 'FlaskConical',
+  },
 ]
 
 /** Prefix used for help-article entries so ids stay collision-free. */

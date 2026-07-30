@@ -81,7 +81,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const serviceKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
   const cfg = readVcConfig()
   if (!supabaseUrl || !serviceKey || !cfg) return redirectToLogin('not_configured')
 

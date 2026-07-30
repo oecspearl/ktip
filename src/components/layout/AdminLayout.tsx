@@ -21,6 +21,8 @@ import {
   GraduationCap,
   Landmark,
   Trophy,
+  Bug,
+  FlaskConical,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -46,6 +48,9 @@ const adminNavItems = [
   { href: '/admin/preregistrations', label: 'Pre-Registrations', icon: ClipboardList },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck },
+  // exact, or the simulator route below would light both entries up.
+  { href: '/admin/errors', label: 'Errors', icon: Bug, exact: true },
+  { href: '/admin/errors/simulate', label: 'Error Simulator', icon: FlaskConical },
 ]
 
 export function AdminLayout() {
