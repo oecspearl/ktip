@@ -285,17 +285,50 @@ COMMENT ON FUNCTION can_use_channel(UUID, TEXT) IS 'Topic dispatcher for realtim
 -- Only channels created with { config: { private: true } } are checked against
 -- these policies. The existing postgres_changes subscriptions in
 -- useMessages.ts and useNotifications.ts are unaffected.
-ALTER TABLE realtime.messages ENABLE ROW LEVEL SECURITY;
+--
+-- realtime.messages is owned by supabase_admin, not by the role the dashboard
+-- SQL editor runs as, so a bare ALTER TABLE here fails with
+-- "must be owner of table messages" and takes the whole migration with it.
+-- Supabase enables RLS on that table by default, so the ALTER is normally a
+-- no-op anyway — it is attempted only if RLS is actually off, and a privilege
+-- error is downgraded to a warning.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'realtime' AND c.relname = 'messages' AND c.relrowsecurity
+  ) THEN
+    BEGIN
+      ALTER TABLE realtime.messages ENABLE ROW LEVEL SECURITY;
+      RAISE NOTICE 'Enabled RLS on realtime.messages.';
+    EXCEPTION WHEN insufficient_privilege THEN
+      RAISE WARNING 'RLS is OFF on realtime.messages and this role cannot enable it. Private channels will NOT be access-controlled. Enable it from the Supabase dashboard (Database > Tables > realtime.messages) before opening a venue.';
+    END;
+  END IF;
+END $$;
 
-DROP POLICY IF EXISTS "Venue channels require membership" ON realtime.messages;
-CREATE POLICY "Venue channels require membership"
-  ON realtime.messages FOR SELECT TO authenticated
-  USING (can_use_channel(auth.uid(), realtime.topic()));
+-- Policies are created through EXECUTE inside a guarded block for the same
+-- ownership reason. Failing closed is safe: with RLS on and no policy, a
+-- private channel subscribe is denied, so a missing policy breaks the venue
+-- rather than exposing it.
+DO $$
+BEGIN
+  EXECUTE 'DROP POLICY IF EXISTS "Venue channels require membership" ON realtime.messages';
+  EXECUTE 'CREATE POLICY "Venue channels require membership" ON realtime.messages '
+       || 'FOR SELECT TO authenticated USING (can_use_channel(auth.uid(), realtime.topic()))';
 
-DROP POLICY IF EXISTS "Venue channels require write membership" ON realtime.messages;
-CREATE POLICY "Venue channels require write membership"
-  ON realtime.messages FOR INSERT TO authenticated
-  WITH CHECK (can_use_channel(auth.uid(), realtime.topic()));
+  EXECUTE 'DROP POLICY IF EXISTS "Venue channels require write membership" ON realtime.messages';
+  EXECUTE 'CREATE POLICY "Venue channels require write membership" ON realtime.messages '
+       || 'FOR INSERT TO authenticated WITH CHECK (can_use_channel(auth.uid(), realtime.topic()))';
+
+  RAISE NOTICE 'Channel authorization policies installed on realtime.messages.';
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE WARNING 'Could not create the channel policies on realtime.messages (need table owner). Run section 6''s two CREATE POLICY statements as supabase_admin. Until then private channels deny everyone and the venue will not connect.';
+  WHEN undefined_function THEN
+    RAISE WARNING 'realtime.topic() does not exist on this project — Realtime Authorization is unavailable. Upgrade the realtime extension before opening a venue.';
+END $$;
 
 -- ============================================================
 -- 7. RLS — venue_rooms (the 062 trio)
@@ -721,3 +754,32 @@ GRANT EXECUTE ON FUNCTION venue_room_occupancy(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION seed_default_venue_rooms(UUID) TO authenticated;
 
 NOTIFY pgrst, 'reload schema';
+
+-- ============================================================
+-- 14. Verification (run separately; safe read-only checks)
+-- ============================================================
+--
+-- 1. RLS is on for private channels, and both policies exist:
+--
+--    SELECT c.relrowsecurity AS rls_enabled
+--    FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+--    WHERE n.nspname = 'realtime' AND c.relname = 'messages';
+--
+--    SELECT policyname, cmd FROM pg_policies
+--    WHERE schemaname = 'realtime' AND tablename = 'messages';
+--
+--    Expect rls_enabled = true and two rows (SELECT + INSERT). If either is
+--    missing, private channels deny everyone and the venue will not connect.
+--
+-- 2. The dispatcher denies malformed and unknown topics:
+--
+--    SELECT can_use_channel(auth.uid(), 'room:not-a-uuid')  AS malformed,  -- false
+--           can_use_channel(auth.uid(), 'nonsense:abc')     AS unknown,    -- false
+--           can_use_channel(auth.uid(), 'ydoc:team_whiteboard:'
+--             || gen_random_uuid()::text)                   AS ydoc_closed; -- false until 073
+--
+-- 3. Publication members (venue_room_messages and venue_rooms, exactly once):
+--
+--    SELECT tablename FROM pg_publication_tables
+--    WHERE pubname = 'supabase_realtime' AND schemaname = 'public'
+--    ORDER BY tablename;
