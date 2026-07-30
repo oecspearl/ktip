@@ -45,16 +45,22 @@ export function truncate(text: string, length: number): string {
 }
 
 /**
- * Generate a random color for avatars
+ * Tailwind background CLASS (not a colour value) for an initials avatar.
+ * Callers render white initials on top, so every entry has to clear 4.5:1
+ * against white in BOTH modes. Two constraints shape the list:
+ *   - the ktip scales invert under html.dark, so each fill names the dark-mode
+ *     shade that lands on the same darkness (e.g. ocean-700 → ocean-200);
+ *   - the light 400/500 tints the palette used to carry (sun-400 at 1.6:1,
+ *     tropical-400 at 1.7:1) are gone — they never passed in either mode.
  */
 export function generateAvatarColor(name: string): string {
   const colors = [
-    'bg-ktip-ocean-400',
-    'bg-ktip-tropical-400',
-    'bg-ktip-sun-400',
-    'bg-ktip-ocean-600',
-    'bg-ktip-sun-500',
-    'bg-ktip-tropical-600',
+    'bg-ktip-ocean-700 dark:bg-ktip-ocean-200',
+    'bg-ktip-ocean-500 dark:bg-ktip-ocean-300',
+    'bg-ktip-tropical-800 dark:bg-ktip-tropical-300',
+    'bg-ktip-sun-800 dark:bg-ktip-sun-300',
+    'bg-ktip-ocean-600 dark:bg-ktip-ocean-100',
+    'bg-ktip-tropical-900 dark:bg-ktip-tropical-200',
   ]
   const index = name.charCodeAt(0) % colors.length
   return colors[index]

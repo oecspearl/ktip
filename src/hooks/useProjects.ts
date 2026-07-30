@@ -5,6 +5,7 @@ import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
+import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import type { DetailEntry, Project, ProjectComment } from '../types'
 
 export function useProjects(filters?: {
@@ -228,15 +229,24 @@ export function useDeleteProject() {
 
   const mutation = useMutation({
     mutationFn: async (projectId: string) => {
+      // Enumerate the uploads first — after the row is gone the RPC's ownership
+      // check has nothing to check against. See lib/entity-uploads.ts on why
+      // the blobs cannot be removed by the migration 077 trigger.
+      const uploadPaths = await listEntityUploadPaths('project', projectId)
+
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', projectId)
 
       if (error) throw error
+
+      // The trigger reaped the rows; this clears the objects they pointed at.
+      await removeEntityUploads(uploadPaths)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+      queryClient.invalidateQueries({ queryKey: keys.all('entity-documents') })
     },
   })
 

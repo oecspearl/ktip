@@ -27,8 +27,8 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
               <div
                 className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all',
-                  isCompleted && 'bg-ktip-ocean-500 border-ktip-ocean-500 text-white',
-                  isCurrent && 'bg-ktip-ocean-500 border-ktip-ocean-500 text-white ring-4 ring-ktip-ocean-100',
+                  isCompleted && 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 border-ktip-ocean-500 text-white',
+                  isCurrent && 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 border-ktip-ocean-500 text-white ring-4 ring-ktip-ocean-100',
                   !isCompleted && !isCurrent && 'bg-ktip-cream border-ktip-sand-300 text-ktip-sand-400',
                   isClickable && 'group-hover:border-ktip-ocean-400'
                 )}

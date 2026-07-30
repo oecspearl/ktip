@@ -64,24 +64,29 @@ export default function AdminResourcesPage() {
         title="Resources"
         subtitle="Manage knowledge base articles, guides, and case studies"
         imageSeed="admin-resources"
-        actions={
+      />
+
+      {/* The empty state carries its own CTA, so this row only matters once the
+          table has rows. */}
+      {!!resources?.length && (
+        <div className="flex justify-end mb-4">
           <Button icon={<Plus size={16} />} onClick={openCreate}>
             Add Resource
           </Button>
-        }
-      />
+        </div>
+      )}
 
       {/* Table */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-ktip-sand-200 rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="h-16 bg-gray-50 rounded-lg animate-pulse" />
+              <div key={n} className="h-16 bg-ktip-sand-50 rounded-lg animate-pulse" />
             ))}
           </div>
         ) : !resources?.length ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <BookOpen size={32} className="text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">No resources yet</h3>
@@ -94,7 +99,7 @@ export default function AdminResourcesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
+                <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50">
                   <th className="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider px-6 py-3">Resource</th>
                   <th className="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider px-4 py-3">Type</th>
                   <th className="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider px-4 py-3">Category</th>
@@ -103,9 +108,9 @@ export default function AdminResourcesPage() {
                   <th className="text-right text-xs font-semibold text-gray-600 uppercase tracking-wider px-6 py-3">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 stagger-rows">
+              <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                 {resources.map((resource) => (
-                  <tr key={resource.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={resource.id} className="hover:bg-ktip-sand-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div>
                         <p className="font-medium text-gray-900 line-clamp-1">{resource.title}</p>
@@ -144,7 +149,7 @@ export default function AdminResourcesPage() {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEdit(resource)}
-                          className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                          className="p-2 rounded-lg hover:bg-ktip-sand-100 text-gray-500 hover:text-gray-700 transition-colors"
                           title="Edit"
                         >
                           <Edit size={16} />

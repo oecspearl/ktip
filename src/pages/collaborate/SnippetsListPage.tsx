@@ -118,7 +118,7 @@ export default function SnippetsListPage() {
                     type="button"
                     onClick={importDrafts}
                     disabled={importing}
-                    className="px-3 py-1.5 rounded-lg bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-lg btn-brand text-sm font-medium disabled:opacity-50"
                   >
                     {importing ? 'Importing…' : 'Import drafts'}
                   </button>
@@ -156,7 +156,7 @@ export default function SnippetsListPage() {
             <button
               type="button"
               onClick={() => navigate('/collaborate/code/new')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg font-medium text-sm transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 btn-brand rounded-lg font-medium text-sm"
             >
               <Plus size={16} />
               New Snippet
@@ -211,7 +211,7 @@ export default function SnippetsListPage() {
               <button
                 type="button"
                 onClick={() => navigate('/collaborate/code/new')}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-lg text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 btn-brand rounded-lg text-sm font-medium"
               >
                 <Plus size={16} />
                 Create Snippet

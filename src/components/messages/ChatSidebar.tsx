@@ -67,7 +67,7 @@ export function ChatSidebar({
       >
         <div className="flex items-center gap-3">
           {conversation.is_group ? (
-            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 text-white shrink-0">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shrink-0">
               <Users size={16} />
             </div>
           ) : (
@@ -112,7 +112,7 @@ export function ChatSidebar({
       onClick={() => onSelect(ASSISTANT_CONVERSATION_ID)}
     >
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 text-white shrink-0">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shrink-0">
           <Sparkles size={16} />
         </div>
         <div className="flex-1 min-w-0">

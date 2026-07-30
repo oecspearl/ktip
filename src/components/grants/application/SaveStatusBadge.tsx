@@ -18,7 +18,7 @@ export function SaveStatusBadge({ status }: SaveStatusBadgeProps) {
       )}
       {status === 'saved' && (
         <>
-          <Check size={12} className="text-ktip-tropical-500" />
+          <Check size={12} className="text-ktip-tropical-700 dark:text-ktip-tropical-500" />
           <span className="text-ktip-tropical-600">Saved</span>
         </>
       )}

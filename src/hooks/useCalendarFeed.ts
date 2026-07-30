@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { format, subDays } from 'date-fns'
+import { FileText, MapPin, Timer, Video } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import {
   CALENDAR_KIND_COLORS,
   CALENDAR_KIND_DOT_COLORS,
+  CALENDAR_KIND_GRADIENTS,
   EVENT_TYPE_COLORS,
   EVENT_TYPE_DOT_COLORS,
+  EVENT_TYPE_GRADIENTS,
   EVENT_TYPE_LABELS,
   GRANT_APPLICATION_STATUS_LABELS,
   RSVP_STATUS_LABELS,
@@ -39,6 +42,7 @@ function eventItem(event: Event, dimmed: boolean): CalendarItem {
     href: `/events/${event.id}`,
     chipClass: EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event,
     dotClass: EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event,
+    gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event,
     badgeLabel: EVENT_TYPE_LABELS[event.event_type] ?? 'Event',
     subtitle:
       event.status === 'draft'
@@ -46,6 +50,11 @@ function eventItem(event: Event, dimmed: boolean): CalendarItem {
         : event.is_virtual
           ? 'Virtual'
           : event.location || 'Location TBA',
+    icon: event.is_virtual ? Video : MapPin,
+    avatarUrl: event.organizer?.avatar_url,
+    avatarName: event.organizer?.display_name,
+    statusLabel:
+      event.status === 'cancelled' ? 'Cancelled' : event.status === 'draft' ? 'Draft' : undefined,
     dimmed,
   }
 }
@@ -73,7 +82,8 @@ export function useCalendarFeed({
         ? (async () => {
             let query = supabase
               .from('events')
-              .select('*')
+              // organizer joined for the week view's avatar chips
+              .select('*, organizer:profiles(*)')
               .gte('start_date', eventsFrom)
               .lte('start_date', end)
               .order('start_date', { ascending: true })
@@ -81,7 +91,9 @@ export function useCalendarFeed({
             if (scope === 'personal') query = query.neq('status', 'draft' as any)
             const { data, error } = await query
             if (error) throw error
-            return (data as Event[]) || []
+            // Same laundering as useEvents — the generated row type does not
+            // model the profiles join
+            return ((data as any[]) || []) as Event[]
           })()
         : Promise.resolve([] as Event[]),
 
@@ -144,8 +156,10 @@ export function useCalendarFeed({
         href: `/grants/${grant.id}`,
         chipClass: CALENDAR_KIND_COLORS.grant_deadline,
         dotClass: CALENDAR_KIND_DOT_COLORS.grant_deadline,
+        gradientClass: CALENDAR_KIND_GRADIENTS.grant_deadline,
         badgeLabel: 'Grant Deadline',
         subtitle: 'Applications close',
+        icon: Timer,
       })
     }
 
@@ -165,8 +179,12 @@ export function useCalendarFeed({
         href: `/events/${event.id}`,
         chipClass: CALENDAR_KIND_COLORS.rsvp,
         dotClass: CALENDAR_KIND_DOT_COLORS.rsvp,
+        gradientClass: CALENDAR_KIND_GRADIENTS.rsvp,
         badgeLabel: 'Registered',
         subtitle: RSVP_STATUS_LABELS[rsvp.status] ?? undefined,
+        icon: event.is_virtual ? Video : MapPin,
+        statusLabel:
+          rsvp.status === 'confirmed' ? undefined : RSVP_STATUS_LABELS[rsvp.status] ?? undefined,
         dimmed: rsvp.status === 'cancelled',
       })
     }
@@ -181,8 +199,11 @@ export function useCalendarFeed({
         href: scope === 'platform' ? '/admin/grants' : '/grants/my-applications',
         chipClass: CALENDAR_KIND_COLORS.grant_application,
         dotClass: CALENDAR_KIND_DOT_COLORS.grant_application,
+        gradientClass: CALENDAR_KIND_GRADIENTS.grant_application,
         badgeLabel: 'Application',
         subtitle: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
+        icon: FileText,
+        statusLabel: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
       })
     }
 

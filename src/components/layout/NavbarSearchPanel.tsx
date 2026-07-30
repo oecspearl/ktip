@@ -9,6 +9,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { DropdownPanel } from '../ui/DropdownPanel'
 import { resolveIcon } from '../../lib/icon-map'
 import type { SearchGroup, SearchRow } from '../../lib/site-search'
 
@@ -46,6 +47,8 @@ export interface NavbarSearchPanelProps {
   onPickRecent: (term: string) => void
   onClearRecent: () => void
   variant?: 'desktop' | 'mobile'
+  /** Drives the open/close animation; the panel owns its own mounting. */
+  open: boolean
 }
 
 export function NavbarSearchPanel({
@@ -70,19 +73,21 @@ export function NavbarSearchPanel({
   onPickRecent,
   onClearRecent,
   variant = 'desktop',
+  open,
 }: NavbarSearchPanelProps) {
   const hasQuery = query.trim().length > 0
   const showEmptyState = !hasQuery
 
   return (
-    <div
+    <DropdownPanel
+      open={open}
       role="listbox"
       aria-label="Search results"
       className={cn(
-        'bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 animate-scale-in overflow-hidden',
+        'bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 overflow-hidden',
         variant === 'desktop'
-          ? 'absolute right-0 top-full mt-2 w-[min(34rem,calc(100vw-2rem))] z-50'
-          : 'mt-2 w-full'
+          ? 'absolute right-0 top-full mt-2 w-[min(34rem,calc(100vw-2rem))] origin-top-right z-50'
+          : 'mt-2 w-full origin-top'
       )}
     >
       {/* Mode row */}
@@ -335,7 +340,7 @@ export function NavbarSearchPanel({
           <span className="ml-auto">esc close</span>
         </div>
       )}
-    </div>
+    </DropdownPanel>
   )
 }
 

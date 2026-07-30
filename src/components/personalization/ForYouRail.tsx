@@ -33,7 +33,7 @@ function FeedCard({ item }: { item: FeedItem }) {
   return (
     <Link
       to={personalizedHref(item.entity, item.id)}
-      className="group flex flex-col gap-2 bg-ktip-cream border border-gray-200 rounded-2xl p-4 hover:border-ktip-ocean-300 transition-colors"
+      className="group flex flex-col gap-2 bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-4 hover:border-ktip-ocean-300 transition-colors"
     >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
         {ENTITY_LABELS[item.entity]}

@@ -1,9 +1,9 @@
 import { Badge } from '../ui/Badge'
 import type { Grant } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
-import { MatchReasonChip } from '../ui/MatchReasonChip'
 import { BentoCard } from '../ui/BentoCard'
 import { formatCurrency, formatDate } from '../../lib/utils'
+import { grantImageFor } from '../../lib/hero-images'
 import { isPast } from 'date-fns'
 
 interface GrantCardProps {
@@ -28,6 +28,7 @@ export function GrantCard({ grant }: GrantCardProps) {
   return (
     <BentoCard
       to={`/grants/${grant.id}`}
+      image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
       imageSeed={grant.id}
       eyebrow={grant.grant_type ? grant.grant_type.replace('_', ' ') : 'Funding'}
       title={grant.title}
@@ -49,8 +50,6 @@ export function GrantCard({ grant }: GrantCardProps) {
         )}
         {!grant.is_active && !isExpired && <Badge variant="default">Inactive</Badge>}
         {grant.is_climate_action && <ClimateBadge />}
-        {/* Only present when the list was fetched under the "For You" sort. */}
-        <MatchReasonChip reasons={grant.match_reasons} />
       </div>
     </BentoCard>
   )

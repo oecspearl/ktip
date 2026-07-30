@@ -26,7 +26,7 @@ export const SORT_OPTIONS: Record<
 > = {
   project: {
     options: [
-      { value: 'for_you', label: 'For You' },
+      { value: 'for_you', label: 'Top Picks' },
       { value: 'newest', label: 'Newest' },
     ],
     fallback: 'newest',

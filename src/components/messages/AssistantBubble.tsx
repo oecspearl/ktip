@@ -23,7 +23,7 @@ export function AssistantBubble({ message, onNavigate }: AssistantBubbleProps) {
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3`}>
       <div className={`flex gap-2 max-w-[85%] ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
         {!isOwn && (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-ktip-ocean-600 text-white shrink-0 mt-1">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shrink-0 mt-1">
             <Sparkles size={14} />
           </div>
         )}
@@ -34,7 +34,7 @@ export function AssistantBubble({ message, onNavigate }: AssistantBubbleProps) {
           <div
             className={`px-4 py-2.5 ${
               isOwn
-                ? 'bg-ktip-ocean-500 text-white rounded-2xl rounded-br-md'
+                ? 'bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white rounded-2xl rounded-br-md'
                 : 'bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-900 rounded-2xl rounded-bl-md'
             }`}
           >

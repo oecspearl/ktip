@@ -186,7 +186,7 @@ export function ProfileSettingsTab() {
   return (
     <div className="space-y-6">
       {/* Avatar Section */}
-      <Card>
+      <Card id="photo" data-spy="Photo" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Photo</h2>
         <div className="flex items-center gap-6" {...avatarDropProps}>
           <div
@@ -205,7 +205,7 @@ export function ProfileSettingsTab() {
                 {getInitials(displayNameValue)}
               </div>
             )}
-            <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-ktip-ocean-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-ktip-ocean-600 transition-colors shadow-soft">
+            <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-full flex items-center justify-center cursor-pointer hover:bg-brand-green hover:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-colors shadow-soft">
               <Camera size={14} className="text-white" />
               <input
                 type="file"
@@ -232,7 +232,7 @@ export function ProfileSettingsTab() {
       </Card>
 
       {/* Profile Info */}
-      <Card>
+      <Card id="profile-info" data-spy="Profile" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Information</h2>
         <div className="space-y-4">
           <Input
@@ -281,7 +281,7 @@ export function ProfileSettingsTab() {
       </Card>
 
       {/* Roles */}
-      <Card>
+      <Card id="roles" data-spy="Roles" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Roles</h2>
         <p className="text-sm text-ktip-sand-600 mb-4">Select the roles that describe you. You can choose multiple.</p>
         <div className="flex flex-wrap gap-2">
@@ -327,7 +327,7 @@ export function ProfileSettingsTab() {
       </Card>
 
       {/* Skills */}
-      <Card>
+      <Card id="skills" data-spy="Skills" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Skills</h2>
         <TagInput
           description="Add skills to help others find you in the directory."
@@ -340,7 +340,7 @@ export function ProfileSettingsTab() {
       </Card>
 
       {/* Interests */}
-      <Card>
+      <Card id="interests" data-spy="Interests" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Interests</h2>
         <TagInput
           description="Topics you care about — used to surface relevant people and opportunities."
@@ -353,7 +353,7 @@ export function ProfileSettingsTab() {
       </Card>
 
       {/* Openness to Collaborate */}
-      <Card>
+      <Card id="collaborate" data-spy="Collaborate" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Openness to Collaborate</h2>
         <p className="text-sm text-ktip-sand-600 mb-4">Let others know what kinds of collaboration you're open to.</p>
         <CollabSelect values={openTo} onChange={setOpenTo} />

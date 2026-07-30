@@ -53,7 +53,7 @@ export default function SettingsPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Tabs */}
           <div className="lg:w-64 shrink-0">
-            <div className="bg-ktip-cream border border-gray-200 rounded-lg p-2">
+            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg p-2">
               <nav className="space-y-1">
                 {tabs.map((tab) => (
                   <button

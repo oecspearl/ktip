@@ -33,7 +33,9 @@ export default function ResourceDetailPage() {
       return (
         <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
           <div className="max-w-[calc(50vw+36rem)] mx-auto">
-            <div className="bg-gray-800 min-h-[180px] rounded-none animate-pulse" />
+            {/* Hero-band stand-in: brand-navy like PageHero, not a gray that
+                inverts to white in dark mode */}
+            <div className="bg-brand-navy min-h-[180px] rounded-none animate-pulse" />
             <div className="p-8 animate-pulse">
               <div className="h-4 w-24 bg-ktip-sand-100 rounded mb-4" />
               <div className="h-8 w-3/4 bg-ktip-sand-100 rounded mb-4" />
@@ -46,7 +48,7 @@ export default function ResourceDetailPage() {
     }
     return (
       <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <BookOpen size={32} className="text-ktip-sand-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
@@ -57,7 +59,7 @@ export default function ResourceDetailPage() {
         </p>
         <Link
           to="/resources"
-          className="px-6 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors inline-flex items-center gap-2"
+          className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg inline-flex items-center gap-2"
         >
           Back to Resources
         </Link>
@@ -108,7 +110,11 @@ export default function ResourceDetailPage() {
             )}
 
             {/* Title */}
-            <h2 className="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
+            <h2
+              id="overview"
+              data-spy="Overview"
+              className="scroll-mt-24 text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2"
+            >
               {resource.title}
             </h2>
 
@@ -133,14 +139,18 @@ export default function ResourceDetailPage() {
 
             {/* Content */}
             {resource.content && (
-              <div className="prose prose-ktip max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed mb-6">
+              <div
+                id="content"
+                data-spy="Content"
+                className="scroll-mt-24 prose prose-ktip max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed mb-6"
+              >
                 {resource.content}
               </div>
             )}
 
             {/* Download */}
             {resource.download_url && (
-              <div className="mt-8 border-t border-gray-200 pt-6">
+              <div id="download" data-spy="Download" className="scroll-mt-24 mt-8 border-t border-ktip-sand-200 pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Download size={20} className="text-ktip-ocean-600" />
@@ -169,7 +179,7 @@ export default function ResourceDetailPage() {
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Details</h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Resource information</p>
-              <div className="text-sm divide-y divide-gray-100">
+              <div className="text-sm divide-y divide-ktip-sand-100">
                 {resource.author && (
                   <div className="flex items-center gap-2 py-2.5">
                     <User size={16} className="text-gray-400 shrink-0" />
@@ -217,7 +227,7 @@ export default function ResourceDetailPage() {
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Explore</h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Discover more resources</p>
               <Link to="/resources">
-                <button className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center justify-center gap-1.5">
+                <button className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5">
                   <BookOpen size={16} />
                   Browse All Resources
                 </button>

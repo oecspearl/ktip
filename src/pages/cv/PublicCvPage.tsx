@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { Download } from 'lucide-react'
+import { Download, FileText, LayoutTemplate } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-import { ResumeScreen } from '../../components/resume/ResumeScreen'
-import { ResumeSheet } from '../../components/resume/ResumeSheet'
+import { ResumePaper } from '../../components/resume/ResumePaper'
+import { ResumeOutline } from '../../components/resume/ResumeOutline'
+import { sheetFor } from '../../components/resume/sheets'
 import { usePublicResume } from '../../hooks/useResume'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { resolveTemplate, sheetSidebar } from '../../lib/resume-templates'
+import { bleedVars, resolveDesign } from '../../lib/resume-designs'
 import type { ResumeTheme } from '../../types/resume'
 
 /**
@@ -18,19 +19,23 @@ import type { ResumeTheme } from '../../types/resume'
  * published it and is not suspended, so there is no visibility rule duplicated
  * here to drift out of step.
  *
- * Always renders the full document. Curated is an editing convenience for the
- * owner, not a thing a reader should have to discover a toggle for.
+ * Shows it in the design its owner chose (`design`, migration 078) — a reader
+ * following a shared link sees the document the way it was composed.
  */
 export default function PublicCvPage() {
   const { id } = useParams<{ id: string }>()
   const { data: published, isLoading } = usePublicResume(id)
   const [sheetTheme, setSheetTheme] = useState<ResumeTheme>('mono')
   const [pendingPrint, setPendingPrint] = useState(false)
+  const [asText, setAsText] = useState(
+    () => typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches
+  )
 
   const name = published?.data?.profile?.name || published?.display_name || 'CV'
   usePageTitle(published ? `${name} — CV` : 'CV')
 
-  const template = resolveTemplate(published?.template)
+  const design = resolveDesign(published?.design ?? published?.template)
+  const Sheet = sheetFor(design.id)
 
   useEffect(() => {
     if (!pendingPrint) return
@@ -40,13 +45,15 @@ export default function PublicCvPage() {
 
   useEffect(() => {
     const root = document.documentElement
-    root.style.setProperty('--resume-sidebar', sheetSidebar(sheetTheme, template))
+    const vars = bleedVars(sheetTheme, design)
+    for (const [key, value] of Object.entries(vars)) root.style.setProperty(key, value)
     return () => {
-      root.style.removeProperty('--resume-sidebar')
+      for (const key of Object.keys(vars)) root.style.removeProperty(key)
     }
-  }, [sheetTheme, template])
+  }, [sheetTheme, design])
 
   const download = (theme: ResumeTheme) => {
+    setAsText(false)
     setSheetTheme(theme)
     setPendingPrint(true)
   }
@@ -58,10 +65,10 @@ export default function PublicCvPage() {
   if (!published) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-ocean-700 dark:text-ktip-sand-50">
+        <h1 className="font-display text-2xl font-bold text-ktip-ocean-700">
           This CV is not public
         </h1>
-        <p className="mt-3 text-ktip-sand-600 dark:text-ktip-sand-300">
+        <p className="mt-3 text-ktip-sand-600">
           The member may have unpublished it, or the link may be wrong.
         </p>
         <Link to={`/u/${id}`} className="mt-6 inline-block text-ktip-ocean-600 hover:underline">
@@ -80,28 +87,32 @@ export default function PublicCvPage() {
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('color')}>
           Download Color (A4)
         </Button>
+        <Button
+          variant="ghost"
+          icon={asText ? <LayoutTemplate size={16} /> : <FileText size={16} />}
+          onClick={() => setAsText(!asText)}
+        >
+          {asText ? 'Show the page' : 'Read as text'}
+        </Button>
         <Link to={`/u/${id}`} className="text-sm text-ktip-ocean-600 hover:underline">
           View profile
         </Link>
       </div>
 
-      <div className="resume-screen-wrap print:hidden">
-        <ResumeScreen
-          data={published.data}
-          avatarUrl={published.avatar_url}
-          variant="full"
-          template={template}
-        />
-      </div>
-
-      <div className="resume-print-wrap hidden print:block">
-        <ResumeSheet
-          data={published.data}
-          avatarUrl={published.avatar_url}
-          theme={sheetTheme}
-          template={template}
-        />
-      </div>
+      {asText ? (
+        <div className="print:hidden">
+          <ResumeOutline data={published.data} />
+        </div>
+      ) : (
+        <ResumePaper>
+          <Sheet
+            data={published.data}
+            avatarUrl={published.avatar_url}
+            theme={sheetTheme}
+            design={design}
+          />
+        </ResumePaper>
+      )}
     </div>
   )
 }

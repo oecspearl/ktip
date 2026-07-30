@@ -215,7 +215,7 @@ export default function AdminEventDetailPage() {
       </PageHero>
 
       {/* Flat Tab Navigation */}
-      <div className="relative border-b border-gray-200 mb-6" role="tablist" aria-label="Event management">
+      <div className="relative border-b border-ktip-sand-200 mb-6" role="tablist" aria-label="Event management">
         <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
@@ -227,7 +227,7 @@ export default function AdminEventDetailPage() {
                 'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
                 activeTab === tab.id
                   ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
               )}
               key={tab.id}
             >
@@ -240,7 +240,7 @@ export default function AdminEventDetailPage() {
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <div className="animate-tab-enter border border-gray-200 rounded-lg p-6">
+        <div className="animate-tab-enter border border-ktip-sand-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
           {event.description ? (
             <div className="prose prose-sm max-w-none">
@@ -250,7 +250,7 @@ export default function AdminEventDetailPage() {
             <p className="text-gray-400 italic">No description provided</p>
           )}
 
-          <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="mt-6 pt-6 border-t border-ktip-sand-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Organizer</p>
               <p className="text-sm font-medium text-gray-900">{event.organizer?.display_name || 'Unknown'}</p>

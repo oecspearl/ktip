@@ -292,7 +292,13 @@ export default function CodeEditorPage() {
             )}
 
             <ToolbarButton
-              icon={copied ? <Check size={16} className="text-ktip-tropical-500" /> : <Copy size={16} />}
+              icon={
+                copied ? (
+                  <Check size={16} className="text-ktip-tropical-700 dark:text-ktip-tropical-500" />
+                ) : (
+                  <Copy size={16} />
+                )
+              }
               onClick={handleCopy}
               title="Copy code"
               aria-label="Copy code"

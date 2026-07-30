@@ -7,20 +7,27 @@ import { useResources } from '../../hooks/useResources'
 import { useIntegrations } from '../../hooks/useIntegrations'
 import { useExternalCourses } from '../../hooks/useExternalCourses'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
-import { TagFilterChips } from '../../components/ui/TagFilterChips'
+import { TagFilterSelect } from '../../components/ui/TagFilterSelect'
 import { SortSelect } from '../../components/ui/SortSelect'
+import { Select } from '../../components/ui/Select'
+import { ColumnToggle } from '../../components/ui/ColumnToggle'
+import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { Search, BookOpen, Puzzle, GraduationCap } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
+import { integrationCategoryIcon, resourceCategoryIcon } from '../../lib/category-icons'
 import { cn, debounce } from '../../lib/utils'
 import {
   RESOURCE_TYPE_LABELS,
   RESOURCE_CATEGORY_LABELS,
   INTEGRATION_CATEGORY_LABELS,
 } from '../../lib/constants'
+import type { Integration, Resource } from '../../types'
 
 type Tab = 'resources' | 'integrations' | 'courses'
 
@@ -29,6 +36,46 @@ const TABS: { id: Tab; label: string; icon: typeof BookOpen }[] = [
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
   { id: 'courses', label: 'Courses', icon: GraduationCap },
 ]
+
+const RESOURCE_TYPE_OPTIONS = [
+  { value: '', label: 'All Types' },
+  ...Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+]
+
+const RESOURCE_CATEGORY_OPTIONS = [
+  { value: '', label: 'All Categories' },
+  ...Object.entries(RESOURCE_CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
+]
+
+const INTEGRATION_CATEGORY_OPTIONS = [
+  { value: '', label: 'All Categories' },
+  ...Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
+]
+
+/**
+ * Buckets a list into category sections. Fixed vocabulary order, then any
+ * category the vocabulary does not know; a single bucket means the caller
+ * should stay on a flat grid.
+ */
+function groupByCategory<T>(
+  items: T[],
+  categoryOf: (item: T) => string | null | undefined,
+  labels: Record<string, string>
+) {
+  const buckets = new Map<string, T[]>()
+  for (const item of items) {
+    const key = categoryOf(item) || 'other'
+    const bucket = buckets.get(key)
+    if (bucket) bucket.push(item)
+    else buckets.set(key, [item])
+  }
+  const known = Object.keys(labels)
+  const ordered = [...known, ...[...buckets.keys()].filter((k) => !known.includes(k))]
+  return ordered.flatMap((value) => {
+    const group = buckets.get(value)
+    return group?.length ? [{ value, label: labels[value] ?? 'Other', items: group }] : []
+  })
+}
 
 /** Unique, sorted, non-empty values — used to build filter options from live data. */
 function uniqueValues<T>(items: T[], pick: (item: T) => string | null | undefined): string[] {
@@ -90,13 +137,15 @@ export default function ResourcesPage() {
 
 function ResourcesTab() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
-  const [climateFilter, setClimateFilter] = useState(false)
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
 
   const { tags: tagOptions } = useTagVocabulary('resources')
+  const { columns, setColumns, gridClass } = useGridColumns('resources:columns')
 
   // Sort lives in the URL so it is shareable and survives back/forward.
   const { active: personalizationActive } = usePersonalizationActive()
@@ -109,98 +158,81 @@ function ResourcesTab() {
   }
 
   const { resources, loading } = useResources({
-    search: searchQuery,
+    search: debouncedSearch,
     type: typeFilter,
     category: categoryFilter,
-    climateAction: climateFilter,
     tags: tagFilter,
     sort,
   })
 
-  const hasActiveFilters = !!(
-    searchQuery ||
-    typeFilter ||
-    categoryFilter ||
-    climateFilter ||
-    tagFilter.length
+  // Category sections replace the flat grid unless a single category is picked
+  const categoryGroups = useMemo(
+    () =>
+      resources && !categoryFilter
+        ? groupByCategory<Resource>(
+            resources,
+            (resource) => resource.category,
+            RESOURCE_CATEGORY_LABELS
+          )
+        : [],
+    [resources, categoryFilter]
   )
+
+  const hasActiveFilters = !!(searchQuery || typeFilter || categoryFilter || tagFilter.length)
 
   const clearFilters = () => {
     setSearchQuery('')
+    setDebouncedSearch('')
     setTypeFilter('')
     setCategoryFilter('')
-    setClimateFilter(false)
     setTagFilter([])
   }
 
   return (
     <>
       {/* === Filter Section === */}
-      <div className="bg-ktip-sand-50 py-8">
+      <div id="filters" data-spy="Filters" className="scroll-mt-24 bg-ktip-sand-50 py-8">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
-          {/* Row 1: Search */}
-          <div className="flex gap-2 mb-3">
-            <div className="relative flex-1">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search resources..."
-                aria-label="Search resources"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
-              />
-            </div>
-            <button className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0">
-              Search
-            </button>
-          </div>
-
-          {/* Row 2: Filters */}
           <div className="flex flex-wrap items-center gap-3">
-            <select
+            <Select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.currentTarget.value)}
-              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-            >
-              <option value="">All Types</option>
-              {Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
+              onChange={setTypeFilter}
+              options={RESOURCE_TYPE_OPTIONS}
+              ariaLabel="Filter by resource type"
+            />
 
-            <select
+            <Select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.currentTarget.value)}
-              className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-            >
-              <option value="">All Categories</option>
-              {Object.entries(RESOURCE_CATEGORY_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
+              onChange={setCategoryFilter}
+              options={RESOURCE_CATEGORY_OPTIONS}
+              ariaLabel="Filter by category"
+            />
 
-            <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
-              <input
-                type="checkbox"
-                checked={climateFilter}
-                onChange={(e) => setClimateFilter(e.currentTarget.checked)}
-                className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
-              />
-              Climate Action
-            </label>
+            <TagFilterSelect options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
 
-            <div className="ml-auto">
+            {!loading && resources && (
+              <p className="text-sm text-gray-500">
+                Found {resources.length} resource{resources.length !== 1 ? 's' : ''}
+                {categoryGroups.length > 1 && ` in ${categoryGroups.length} categories`}
+              </p>
+            )}
+
+            <div className="ml-auto flex items-center gap-2">
               <SortSelect
                 value={sort}
                 onChange={setSort}
                 options={SORT_OPTIONS.resource.options}
                 personalizationActive={personalizationActive}
               />
+              <CollapsibleSearch
+                value={searchQuery}
+                onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                placeholder="Search resources..."
+                ariaLabel="Search resources"
+              />
+              <ColumnToggle value={columns} onChange={setColumns} />
             </div>
           </div>
-
-          <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
 
           {hasActiveFilters && (
             <button
@@ -214,19 +246,42 @@ function ResourcesTab() {
       </div>
 
       {/* === Resources List === */}
-      <div className="bg-ktip-sand-50 pb-12">
+      <div id="resources" data-spy="Resources" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           {loading || !resources ? (
-            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
+            <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
           ) : resources.length ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
-              {resources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} />
-              ))}
-            </div>
+            categoryGroups.length > 1 ? (
+              <div className="space-y-2">
+                {categoryGroups.map((group) => {
+                  const Icon = resourceCategoryIcon(group.value)
+                  return (
+                    <CollapsibleSection
+                      key={group.value}
+                      title={group.label}
+                      count={group.items.length}
+                      icon={<Icon size={16} className="text-ktip-sand-400" />}
+                      className="first:border-t-0 first:pt-0"
+                    >
+                      <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
+                        {group.items.map((resource) => (
+                          <ResourceCard key={resource.id} resource={resource} />
+                        ))}
+                      </div>
+                    </CollapsibleSection>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
+                {resources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))}
+              </div>
+            )
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BookOpen size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
@@ -240,7 +295,7 @@ function ResourcesTab() {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+                  className="px-5 py-2.5 btn-brand text-sm rounded-lg"
                 >
                   Clear Filters
                 </button>
@@ -266,6 +321,7 @@ function IntegrationsTab() {
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
 
   const { tags: tagOptions } = useTagVocabulary('integrations')
+  const { columns, setColumns, gridClass } = useGridColumns('integrations:columns')
 
   const { integrations, loading } = useIntegrations({
     category,
@@ -273,51 +329,84 @@ function IntegrationsTab() {
     tags: tagFilter,
   })
 
+  const categoryGroups = useMemo(
+    () =>
+      integrations && !category
+        ? groupByCategory<Integration>(
+            integrations,
+            (integration) => integration.category,
+            INTEGRATION_CATEGORY_LABELS
+          )
+        : [],
+    [integrations, category]
+  )
+
   return (
-    <div className="bg-ktip-sand-50 pb-12">
+    <div id="integrations" data-spy="Integrations" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
       <div className="max-w-[calc(50vw+32rem)] mx-auto px-4 py-8">
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8">
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search integrations..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                debouncedSetSearch(e.target.value)
-              }}
-              className="w-full pl-9 pr-3 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-            />
-          </div>
-          <select
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <Select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
-          >
-            <option value="">All Categories</option>
-            {Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => (
-              <option value={value} key={value}>{label}</option>
-            ))}
-          </select>
-        </div>
+            onChange={setCategory}
+            options={INTEGRATION_CATEGORY_OPTIONS}
+            ariaLabel="Filter by category"
+          />
 
-        <div className="mb-8 -mt-4">
-          <TagFilterChips options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
+          <TagFilterSelect options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
+
+          {!loading && integrations && (
+            <p className="text-sm text-gray-500">
+              Found {integrations.length} integration{integrations.length !== 1 ? 's' : ''}
+              {categoryGroups.length > 1 && ` in ${categoryGroups.length} categories`}
+            </p>
+          )}
+
+          <div className="ml-auto flex items-center gap-2">
+            <CollapsibleSearch
+              value={searchQuery}
+              onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+              placeholder="Search integrations..."
+              ariaLabel="Search integrations"
+            />
+            <ColumnToggle value={columns} onChange={setColumns} />
+          </div>
         </div>
 
         {loading ? (
-          <SkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" />
+          <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
         ) : integrations && integrations.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-            {integrations.map((integration) => (
-              <IntegrationCard key={integration.id} integration={integration} />
-            ))}
-          </div>
+          categoryGroups.length > 1 ? (
+            <div className="space-y-2">
+              {categoryGroups.map((group) => {
+                const Icon = integrationCategoryIcon(group.value)
+                return (
+                  <CollapsibleSection
+                    key={group.value}
+                    title={group.label}
+                    count={group.items.length}
+                    icon={<Icon size={16} className="text-ktip-sand-400" />}
+                    className="first:border-t-0 first:pt-0"
+                  >
+                    <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
+                      {group.items.map((integration) => (
+                        <IntegrationCard key={integration.id} integration={integration} />
+                      ))}
+                    </div>
+                  </CollapsibleSection>
+                )
+              })}
+            </div>
+          ) : (
+            <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
+              {integrations.map((integration) => (
+                <IntegrationCard key={integration.id} integration={integration} />
+              ))}
+            </div>
+          )
         ) : (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Puzzle size={32} className="text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No integrations found</h3>

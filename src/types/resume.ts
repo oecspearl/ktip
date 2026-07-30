@@ -113,7 +113,10 @@ export type ResumeSources = Record<string, ResumeFieldSource>
 export interface Resume {
   id: string
   user_id: string
+  /** Row key / document schema version — always 'viridion'. See migration 078. */
   template: string
+  /** Chosen presentation. Resolved by src/lib/resume-designs.ts. */
+  design: string
   data: ResumeData
   sources: ResumeSources
   is_public: boolean
@@ -122,7 +125,26 @@ export interface Resume {
   updated_at: string
 }
 
-/** Which view of the CV is on screen. The printed sheet is always full. */
+/**
+ * The one `template` value in use.
+ *
+ * It is the row key, not a look — UNIQUE (user_id, template), the conflict
+ * target of the upsert, and `p_template` of public_resume(). How a CV is drawn
+ * lives in `design` (migration 078). Exported here rather than beside the
+ * design registry so the edge routes under api/ can use it without pulling in
+ * anything from the component tree.
+ */
+export const RESUME_TEMPLATE_KEY = 'viridion'
+
+/**
+ * Which view of the CV is on screen.
+ *
+ * Nothing renders this today: with one WYSIWYG sheet there is no "screen only"
+ * view left to abridge, and nothing has ever written `pointsCurated` or
+ * `curatedHide`, so "curated" only ever subtracted whole sections — a member
+ * who left the switch on printed a CV missing four of them. The type stays for
+ * a future editor that actually writes the curated fields.
+ */
 export type ResumeVariant = 'curated' | 'full'
 
 /** Printed sheet palette. Mono is the safe default for photocopying. */

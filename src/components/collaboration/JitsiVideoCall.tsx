@@ -102,7 +102,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
             type="button"
             onClick={joinCall}
             disabled={!roomName.trim()}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-6 py-2.5 btn-brand rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Video size={18} />
             Join Video Call

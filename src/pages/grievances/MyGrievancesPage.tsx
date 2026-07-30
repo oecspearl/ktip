@@ -83,7 +83,7 @@ export default function MyGrievancesPage() {
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className="font-semibold text-ktip-sand-900">{reportedName}</span>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                         >
                           {GRIEVANCE_CATEGORY_LABELS[grievance.category] || grievance.category}
                         </span>
@@ -95,7 +95,7 @@ export default function MyGrievancesPage() {
 
                       <div className="flex flex-wrap items-center gap-3 text-xs text-ktip-sand-500">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium border ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium border ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                         >
                           {GRIEVANCE_STATUS_LABELS[grievance.status] || grievance.status}
                         </span>

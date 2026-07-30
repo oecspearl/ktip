@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
@@ -23,25 +23,38 @@ export default function DirectoryPage() {
   const requestedMember = searchParams.get('member')
   const { memberId, openMember, closeMember } = useMemberPanel()
 
-  useEffect(() => {
-    if (requestedMember) openMember(requestedMember)
-    else closeMember()
-  }, [requestedMember, openMember, closeMember])
+  // URL and drawer are two views of one value, so the sync lives in ONE effect:
+  // as separate effects they raced on mount — the "drop the param when closed"
+  // side read the pre-open memberId (still null) and stripped `?member=` before
+  // the open landed, closing the drawer the instant a card was clicked.
+  // Whichever side changed since the last run wins; refs start at null so a
+  // deep-linked `?member=` on mount counts as a URL change.
+  const prevRequested = useRef<string | null>(null)
+  const prevMemberId = useRef<string | null>(null)
 
-  // Closing the drawer (Escape, X, outside click) should drop the param too,
-  // otherwise the effect above can never reopen the same member.
   useEffect(() => {
-    if (requestedMember && memberId === null) {
+    const urlChanged = requestedMember !== prevRequested.current
+    prevRequested.current = requestedMember
+    const panelChanged = memberId !== prevMemberId.current
+    prevMemberId.current = memberId
+
+    if (requestedMember === memberId) return
+
+    if (urlChanged) {
+      if (requestedMember) openMember(requestedMember)
+      else closeMember()
+    } else if (panelChanged) {
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev)
-          next.delete('member')
+          if (memberId) next.set('member', memberId)
+          else next.delete('member')
           return next
         },
         { replace: true }
       )
     }
-  }, [requestedMember, memberId, setSearchParams])
+  }, [requestedMember, memberId, openMember, closeMember, setSearchParams])
 
   const [selectedRole, setSelectedRole] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
@@ -87,7 +100,7 @@ export default function DirectoryPage() {
       />
 
       {/* === Search and Filter Section === */}
-      <div className="bg-ktip-sand-50 py-12">
+      <div id="search" data-spy="Search" className="scroll-mt-24 bg-ktip-sand-50 py-12">
         <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
           <div className="mb-8">
             <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-1">
@@ -111,7 +124,7 @@ export default function DirectoryPage() {
                 aria-label="Search members"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
               />
             </div>
 
@@ -119,7 +132,7 @@ export default function DirectoryPage() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Roles</option>
               {Object.entries(ROLE_LABELS).map(([value, label]) => (
@@ -131,7 +144,7 @@ export default function DirectoryPage() {
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Countries</option>
               {CARIBBEAN_COUNTRIES.map((country) => (
@@ -143,7 +156,7 @@ export default function DirectoryPage() {
             <select
               value={selectedSkill}
               onChange={(e) => setSelectedSkill(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Skills</option>
               {SKILL_SUGGESTIONS.map((skill) => (
@@ -156,7 +169,7 @@ export default function DirectoryPage() {
               value={selectedBadge}
               onChange={(e) => setSelectedBadge(e.currentTarget.value)}
               aria-label="Filter by badge"
-              className="px-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Badges</option>
               {(allBadges || []).map((badge) => (
@@ -177,7 +190,7 @@ export default function DirectoryPage() {
       </div>
 
       {/* === Members Grid Section === */}
-      <div className="bg-ktip-sand-50 pb-16">
+      <div id="members" data-spy="Members" className="scroll-mt-24 bg-ktip-sand-50 pb-16">
         <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
           {loading || !members ? (
             <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
@@ -258,7 +271,7 @@ export default function DirectoryPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UserX size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">

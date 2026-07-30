@@ -6,7 +6,13 @@ import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useTutorials } from '../../contexts/TutorialContext'
 import { tutorialIdForPath } from '../../data/tutorials'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import { useViewportScale } from '../../hooks/useViewportScale'
 import { cn } from '../../lib/utils'
+
+// Authored against the same 2000px-wide reference viewport as the hero. Width
+// only — the cluster is corner-anchored, so viewport height doesn't affect it.
+// Floor of 0.8 keeps the trigger at 51px, above the 44px minimum touch target.
+const FAB_DESIGN = { width: 2000, min: 0.8, max: 1 }
 
 interface FabAction {
   id: string
@@ -34,6 +40,10 @@ export function FloatingActionButton() {
   const [dark, setDark] = useThemeMode()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  // Every length below is `em` against this, so the cluster keeps its authored
+  // proportions instead of looking oversized on a smaller CSS viewport
+  const scale = useViewportScale(FAB_DESIGN)
+  const px = (n: number) => Math.round(n * scale)
 
   // Only pages with a registered walkthrough show the graduation-cap action
   const pageTutorialId = tutorialIdForPath(pathname)
@@ -60,7 +70,7 @@ export function FloatingActionButton() {
     {
       id: 'tutorial',
       label: 'Page tour',
-      icon: <GraduationCap size={20} />,
+      icon: <GraduationCap size={px(20)} />,
       onClick: () => {
         if (pageTutorialId) startTutorial(pageTutorialId)
         setOpen(false)
@@ -71,14 +81,14 @@ export function FloatingActionButton() {
     {
       id: 'theme',
       label: dark ? 'Light mode' : 'Dark mode',
-      icon: dark ? <Sun size={20} /> : <Moon size={20} />,
+      icon: dark ? <Sun size={px(20)} /> : <Moon size={px(20)} />,
       // Stays open so the flip is visible
       onClick: () => setDark(!dark),
     },
     {
       id: 'messages',
       label: 'Messages',
-      icon: <MessageSquare size={20} />,
+      icon: <MessageSquare size={px(20)} />,
       onClick: () => {
         togglePanel()
         setOpen(false)
@@ -96,7 +106,8 @@ export function FloatingActionButton() {
     <div
       ref={containerRef}
       data-fab
-      className="fixed bottom-6 right-6 z-[9999] flex flex-col items-center gap-3"
+      className="fixed bottom-[1.5em] right-[1.5em] z-[9999] flex flex-col items-center gap-[0.75em]"
+      style={{ fontSize: `${16 * scale}px` }}
     >
       {visible.map((action, index) => (
         <button
@@ -105,7 +116,7 @@ export function FloatingActionButton() {
           aria-label={action.label}
           tabIndex={open ? 0 : -1}
           className={cn(
-            'relative group w-14 h-14 rounded-xl flex items-center justify-center',
+            'relative group w-[3.5em] h-[3.5em] rounded-[0.75em] flex items-center justify-center',
             'bg-ktip-cream/90 backdrop-blur-md border border-ktip-sand-200 text-ktip-sand-700 shadow-fab',
             'hover:text-ktip-ocean-600 hover:shadow-fab-hover',
             open
@@ -120,9 +131,11 @@ export function FloatingActionButton() {
         >
           {action.icon}
           {action.badge && (
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse-soft" />
+            <span className="absolute top-[0.5em] right-[0.5em] w-[0.5em] h-[0.5em] rounded-full bg-red-500 animate-pulse-soft" />
           )}
-          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-ktip-ink text-white text-xs font-medium opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+          {/* text-[0.75em] resets the em basis for this element, so its own
+              padding is divided by 0.75 to land back on the authored 10px/6px */}
+          <span className="absolute right-full mr-[0.75em] top-1/2 -translate-y-1/2 whitespace-nowrap px-[0.833em] py-[0.5em] rounded-[0.667em] bg-ktip-ink text-white text-[0.75em] font-medium opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
             {action.label}
           </span>
         </button>
@@ -133,7 +146,7 @@ export function FloatingActionButton() {
         aria-label="Quick actions"
         aria-expanded={open}
         className={cn(
-          'relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-fab',
+          'relative w-[4em] h-[4em] rounded-[1em] flex items-center justify-center shadow-fab',
           'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
           open
             ? 'bg-gray-500 text-white shadow-fab-hover'
@@ -141,16 +154,16 @@ export function FloatingActionButton() {
         )}
       >
         {open ? (
-          <X size={24} />
+          <X size={px(24)} />
         ) : (
           <>
             <img
               src="/KTIP%20LOGO.png"
               alt=""
-              className="w-12 h-12 object-contain"
+              className="w-[3em] h-[3em] object-contain"
             />
             {hasUnseen && (
-              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse-soft" />
+              <span className="absolute top-[0.625em] right-[0.625em] w-[0.625em] h-[0.625em] rounded-full bg-red-500 animate-pulse-soft" />
             )}
           </>
         )}

@@ -4,6 +4,7 @@ import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
 import { FloatingActionButton } from '../ui/FloatingActionButton'
+import { SpyRail } from '../ui/SpyRail'
 import { MessagingPanel } from '../messages/MessagingPanel'
 import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
 import { MemberPanel } from '../directory/MemberPanel'
@@ -30,7 +31,7 @@ export function MainLayout() {
     <div className="min-h-screen flex flex-col bg-ktip-canvas">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 dark:focus:bg-ktip-ocean-200 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
       >
         Skip to main content
       </a>
@@ -41,6 +42,9 @@ export function MainLayout() {
           <Outlet />
         </div>
       </main>
+      {/* Page-scroll affordance: builds itself from the current page's
+          data-spy markers, renders nothing when a page has none */}
+      <SpyRail />
       <FloatingActionButton />
       <MessagingPanel />
       <MemberPanel />

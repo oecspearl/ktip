@@ -77,9 +77,11 @@ export function VerificationTab() {
     <div className="space-y-6">
       {/* School verification is a separate track from identity KYC below: the
           evidence is the account's email domain, and a school approves it. */}
-      <StudentVerificationCard />
+      <div id="student" data-spy="Student" className="scroll-mt-24">
+        <StudentVerificationCard />
+      </div>
 
-      <Card>
+      <Card id="identity" data-spy="Identity" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
             <BadgeCheck size={20} className="text-ktip-ocean-600" />

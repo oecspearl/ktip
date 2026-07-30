@@ -25,14 +25,14 @@ export function RoleTabStub({
 
   // Wait for the profile before judging — on a hard reload it resolves late.
   if (!auth.profile) {
-    return <div className="bg-ktip-cream rounded-2xl border border-gray-200 h-48 animate-pulse-soft" />
+    return <div className="bg-ktip-cream rounded-2xl border border-ktip-sand-200 h-48 animate-pulse-soft" />
   }
 
   const allowed = roles.some((role) => auth.profile?.roles?.includes(role))
   if (!allowed) return <Navigate to="/dashboard" replace />
 
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-2xl p-6">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-6">
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Icon size={32} className="text-ktip-sand-400" />

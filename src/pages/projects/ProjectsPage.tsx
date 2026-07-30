@@ -4,18 +4,31 @@ import { Button } from '../../components/ui/Button'
 import { ProjectCard } from '../../components/projects/ProjectCard'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProjects } from '../../hooks/useProjects'
-import { useTagVocabulary } from '../../hooks/useTagVocabulary'
-import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { SortSelect } from '../../components/ui/SortSelect'
-import { Plus, Search, Inbox, Leaf } from 'lucide-react'
+import { Select } from '../../components/ui/Select'
+import { ColumnToggle } from '../../components/ui/ColumnToggle'
+import { Plus, Inbox } from 'lucide-react'
+import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
-import { PROJECT_CATEGORIES } from '../../lib/constants'
+import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
-import { debounce, formatDate } from '../../lib/utils'
+import { cn, debounce } from '../../lib/utils'
+
+const CATEGORY_OPTIONS = [
+  { value: '', label: 'All Categories' },
+  ...PROJECT_CATEGORIES.map((c) => ({ value: c.value as string, label: c.label })),
+]
+
+const PHASE_OPTIONS = [
+  { value: '', label: 'All Phases' },
+  ...Object.entries(PHASE_LABELS).map(([value, label]) => ({ value, label })),
+]
 
 export default function ProjectsPage() {
   usePageTitle('Projects')
@@ -28,18 +41,16 @@ export default function ProjectsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedPhase, setSelectedPhase] = useState<string>('')
-  const [climateFilter, setClimateFilter] = useState(false)
   const initialSearch = searchParams.get('search') || ''
   const [searchQuery, setSearchQuery] = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
-  const [tagFilter, setTagFilter] = useState<string[]>([])
 
-  const { tags: tagOptions } = useTagVocabulary('projects')
+  const { columns, setColumns, gridClass } = useGridColumns('projects:columns')
 
   // Sort lives in the URL so it is shareable and survives back/forward, the
-  // same convention as ?tab= elsewhere. With no param it resolves to "For
-  // You" for a personalized member and to "Newest" for everyone else.
+  // same convention as ?tab= elsewhere. With no param it resolves to "Top
+  // Picks" for a personalized member and to "Newest" for everyone else.
   const { active: personalizationActive } = usePersonalizationActive()
   const sort = resolveSort(searchParams.get('sort'), personalizationActive, 'newest')
 
@@ -53,8 +64,6 @@ export default function ProjectsPage() {
     category: selectedCategory,
     phase: selectedPhase,
     search: debouncedSearch,
-    climateAction: climateFilter,
-    tags: tagFilter,
     sort,
   })
 
@@ -63,25 +72,37 @@ export default function ProjectsPage() {
     setSelectedPhase('')
     setSearchQuery('')
     setDebouncedSearch('')
-    setClimateFilter(false)
-    setTagFilter([])
   }
 
-  const hasActiveFilters = Boolean(
-    selectedCategory || selectedPhase || searchQuery || climateFilter || tagFilter.length
-  )
+  const hasActiveFilters = Boolean(selectedCategory || selectedPhase || searchQuery)
 
-  // Derive category counts from current projects data
-  const categoryCounts = useMemo(() => {
-    const data = projects
-    if (!data) return {} as Record<string, number>
-    const counts: Record<string, number> = {}
-    for (const p of data) {
-      const cat = p.category || 'other'
-      counts[cat] = (counts[cat] || 0) + 1
+  // Category sections replace the flat grid whenever the list spans more than
+  // one category. Picking a single category collapses back to one grid.
+  const categoryGroups = useMemo(() => {
+    if (!projects || selectedCategory) return []
+    const buckets = new Map<string, typeof projects>()
+    for (const project of projects) {
+      const cat = PROJECT_CATEGORIES.some((c) => c.value === project.category)
+        ? (project.category as string)
+        : 'other'
+      const bucket = buckets.get(cat)
+      if (bucket) bucket.push(project)
+      else buckets.set(cat, [project])
     }
-    return counts
-  }, [projects])
+    // Under "For You" the sections follow the ranking — best match's category
+    // first. Otherwise fixed vocabulary order, so the page reads the same on
+    // every visit.
+    const order =
+      sort === 'for_you'
+        ? [...buckets.keys()]
+        : PROJECT_CATEGORIES.map((c) => c.value as string)
+    return order.flatMap((value) => {
+      const items = buckets.get(value)
+      if (!items?.length) return []
+      const label = PROJECT_CATEGORIES.find((c) => c.value === value)?.label ?? 'Other'
+      return [{ value, label, items }]
+    })
+  }, [projects, selectedCategory, sort])
 
   return (
     <>
@@ -90,101 +111,66 @@ export default function ProjectsPage() {
         title="Projects"
         imageSeed="projects"
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Projects' }]}
-        actions={
-          canCreateProject ? (
-            <Link to="/projects/new">
-              <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
-                Create Project
-              </Button>
-            </Link>
-          ) : undefined
-        }
       />
 
-      {/* === Two-Column Content Area === */}
+      {/* === Content Area — full width, no sidebar === */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
+        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
 
-          {/* === Main Column === */}
-          <div className="lg:col-span-2">
+          <div>
             {/* Filter Bar */}
-            <div className="mb-8">
-              {/* Search row */}
-              <div className="flex gap-2 mb-3">
-                <div className="relative flex-1">
-                  <Search
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search projects..."
-                    aria-label="Search projects"
-                    value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); debouncedSetSearch(e.target.value) }}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
-                  />
-                </div>
-                <button
-                  className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors shrink-0"
-                >
-                  Search
-                </button>
-              </div>
-
-              {/* Filter row */}
+            <div id="filters" data-spy="Filters" className="scroll-mt-24 mb-8">
+              {/* Filter row — search collapses into it, same as the events page */}
               <div className="flex flex-wrap items-center gap-3">
-                <select
+                <Select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                >
-                  <option value="">All Categories</option>
-                  {PROJECT_CATEGORIES.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedCategory}
+                  options={CATEGORY_OPTIONS}
+                  ariaLabel="Filter by category"
+                />
 
-                <select
+                <Select
                   value={selectedPhase}
-                  onChange={(e) => setSelectedPhase(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                >
-                  <option value="">All Phases</option>
-                  <option value="concept">Concept</option>
-                  <option value="prototype">Prototype</option>
-                  <option value="funding">Funding</option>
-                  <option value="launch">Launch</option>
-                </select>
+                  onChange={setSelectedPhase}
+                  options={PHASE_OPTIONS}
+                  ariaLabel="Filter by phase"
+                />
 
-                <label className="flex items-center gap-2 cursor-pointer text-sm text-ktip-sand-700">
-                  <input
-                    type="checkbox"
-                    checked={climateFilter}
-                    onChange={(e) => setClimateFilter(e.target.checked)}
-                    className="w-4 h-4 text-ktip-tropical-700 border-gray-300 rounded focus:ring-ktip-tropical-500"
-                  />
-                  Climate Action
-                </label>
+                {/* Result count rides the filter row rather than sitting above
+                    the grid */}
+                {!projectsLoading && projects && (
+                  <p className="text-sm text-gray-500">
+                    Found {projects.length} project{projects.length !== 1 ? 's' : ''}
+                    {categoryGroups.length > 1 && ` in ${categoryGroups.length} categories`}
+                  </p>
+                )}
 
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center gap-2">
                   <SortSelect
                     value={sort}
                     onChange={setSort}
                     options={SORT_OPTIONS.project.options}
                     personalizationActive={personalizationActive}
                   />
+                  <CollapsibleSearch
+                    value={searchQuery}
+                    onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                    placeholder="Search projects..."
+                    ariaLabel="Search projects"
+                  />
+
+                  <ColumnToggle value={columns} onChange={setColumns} />
+
+                  {canCreateProject && (
+                    <Link to="/projects/new">
+                      <button className="flex items-center gap-1.5 px-4 py-2 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
+                        <Plus size={16} />
+                        Create Project
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
-
-              <TagFilterChips
-                label="Hashtags"
-                options={tagOptions}
-                selected={tagFilter}
-                onChange={setTagFilter}
-              />
 
               {hasActiveFilters && (
                 <button
@@ -197,22 +183,43 @@ export default function ProjectsPage() {
             </div>
 
             {/* Project List */}
+            <div id="projects" data-spy="Projects" className="scroll-mt-24">
             {projectsLoading || !projects ? (
-              <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr" />
+              <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
             ) : projects.length > 0 ? (
               <div>
-                <p className="text-sm text-gray-500 mb-6">
-                  Found {projects.length} project{projects.length !== 1 ? 's' : ''}
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr stagger-children">
-                  {projects.map((project) => (
-                    <ProjectCard key={project.id} project={project} />
-                  ))}
-                </div>
+                {categoryGroups.length > 1 ? (
+                  <div className="space-y-2">
+                    {categoryGroups.map((group) => {
+                      const Icon = projectCategoryIcon(group.value)
+                      return (
+                        <CollapsibleSection
+                          key={group.value}
+                          title={group.label}
+                          count={group.items.length}
+                          icon={<Icon size={16} className="text-ktip-sand-400" />}
+                          className="first:border-t-0 first:pt-0"
+                        >
+                          <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
+                            {group.items.map((project) => (
+                              <ProjectCard key={project.id} project={project} />
+                            ))}
+                          </div>
+                        </CollapsibleSection>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
+                    {projects.map((project) => (
+                      <ProjectCard key={project.id} project={project} />
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Inbox size={32} className="text-gray-400" />
                 </div>
                 <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
@@ -230,128 +237,6 @@ export default function ProjectsPage() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* === Sidebar === */}
-          <div className="lg:col-span-1">
-            {/* Widget 1: Start a Project CTA */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Start a Project</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Have an idea? Bring it to life.</p>
-              <Link to="/projects/new">
-                <button className="w-full px-4 py-2.5 bg-ktip-ocean-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-ktip-ocean-700 transition-colors">
-                  Create Project
-                </button>
-              </Link>
-            </div>
-
-            {/* Widget 2: Recent Projects */}
-            {projects && projects.length > 0 && (
-              <div className="mb-10">
-                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  {sort === 'for_you' ? 'Top Matches' : 'Recent Projects'}
-                </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">
-                  {sort === 'for_you' ? 'Closest to your interests' : 'Explore the latest work'}
-                </p>
-                <div className="space-y-4">
-                  {projects.slice(0, 3).map((project) => (
-                    <Link key={project.id} to={`/projects/${project.id}`} className="flex gap-3 group">
-                      {project.image_url ? (
-                        <img
-                          src={project.image_url}
-                          alt={project.title}
-                          className="w-16 h-16 object-cover rounded shrink-0"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center shrink-0">
-                          {(() => {
-                            const Icon = projectCategoryIcon(project.category)
-                            return <Icon size={22} className="text-ktip-ocean-600" />
-                          })()}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-xs text-gray-400 mb-0.5">
-                          {formatDate(project.created_at, 'MMM dd, yyyy')}
-                        </p>
-                        <p className="text-sm font-semibold text-ktip-sand-900 line-clamp-2 group-hover:text-ktip-ocean-600 transition-colors">
-                          {project.title}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Widget 3: Categories */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Categories</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Browse by category</p>
-              <div className="space-y-0">
-                {PROJECT_CATEGORIES.map((category) => {
-                  const count = categoryCounts[category.value] || 0
-                  return (
-                    <button
-                      key={category.value}
-                      onClick={() => setSelectedCategory(
-                        selectedCategory === category.value ? '' : category.value
-                      )}
-                      className={`w-full flex items-center justify-between py-2.5 border-b border-gray-100 text-sm transition-colors ${
-                        selectedCategory === category.value
-                          ? 'text-ktip-ocean-600 font-semibold'
-                          : 'text-ktip-sand-700 hover:text-ktip-ocean-600'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {(() => {
-                          const Icon = projectCategoryIcon(category.value)
-                          return <Icon size={14} className="text-ktip-sand-400" />
-                        })()}
-                        {category.label}
-                      </span>
-                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                        {count}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Widget 4: Tags */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-4">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {PROJECT_CATEGORIES.map((category) => (
-                  <button
-                    key={category.value}
-                    onClick={() => setSelectedCategory(
-                      selectedCategory === category.value ? '' : category.value
-                    )}
-                    className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                      selectedCategory === category.value
-                        ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-600'
-                        : 'border-gray-300 text-gray-600 hover:border-ktip-ocean-400 hover:text-ktip-ocean-600'
-                    }`}
-                  >
-                    {category.label}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setClimateFilter(!climateFilter)}
-                  className={`px-3 py-1 text-sm rounded-full border transition-colors flex items-center gap-1 ${
-                    climateFilter
-                      ? 'border-ktip-tropical-500 bg-ktip-tropical-50 text-ktip-tropical-700'
-                      : 'border-gray-300 text-gray-600 hover:border-ktip-tropical-400 hover:text-ktip-tropical-700'
-                  }`}
-                >
-                  <Leaf size={12} />
-                  Climate Action
-                </button>
-              </div>
             </div>
           </div>
         </div>

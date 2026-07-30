@@ -146,7 +146,7 @@ export default function JoinInvitePage() {
                   <>
                     <Link
                       to="/login"
-                      className="px-4 py-2 rounded-lg bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg btn-brand text-sm font-medium"
                     >
                       Sign in
                     </Link>
@@ -160,7 +160,7 @@ export default function JoinInvitePage() {
                 ) : (
                   <Link
                     to="/collaborate"
-                    className="px-4 py-2 rounded-lg bg-ktip-ocean-600 hover:bg-ktip-ocean-700 text-white text-sm font-medium transition-colors"
+                    className="px-4 py-2 rounded-lg btn-brand text-sm font-medium"
                   >
                     Go to Collaborate
                   </Link>

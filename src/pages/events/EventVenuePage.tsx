@@ -74,7 +74,7 @@ export default function EventVenuePage() {
 
   if (eventLoading || joining) {
     return (
-      <div className="mx-auto max-w-7xl space-y-4 px-4 py-8">
+      <div className="mx-auto max-w-7xl space-y-4 px-4 pb-8 pt-[calc(var(--nav-h)+2rem)]">
         <div className="h-14 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
         <div className="h-96 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
       </div>
@@ -83,7 +83,7 @@ export default function EventVenuePage() {
 
   if (!event) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Event not found</h1>
         <Link to="/events" className="mt-3 inline-block text-ktip-ocean-600 hover:underline">
           Browse events
@@ -94,7 +94,7 @@ export default function EventVenuePage() {
 
   if (!event.has_venue) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <MapIcon size={32} className="mx-auto mb-3 text-ktip-sand-400" aria-hidden="true" />
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
           This event has no virtual venue
@@ -116,7 +116,7 @@ export default function EventVenuePage() {
   // answer, not a failure, so it is rendered as one.
   if (joinError || !membership) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
           You are not in this venue yet
         </h1>
@@ -131,7 +131,10 @@ export default function EventVenuePage() {
   }
 
   return (
-    <div className="min-h-screen bg-ktip-canvas pb-12">
+    // pt clears the fixed navbar: this page has no PageHero, so without it the
+    // sticky VenueTopBar (and its back link) renders underneath the bar and the
+    // click lands on the navbar logo instead.
+    <div className="min-h-screen bg-ktip-canvas pb-12 pt-[var(--nav-h)]">
       <VenueTopBar
         eventId={event.id}
         eventTitle={event.title}

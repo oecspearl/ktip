@@ -46,7 +46,8 @@ interface EditorMenuBarProps {
   onDownloadPDF: () => void
   onDownloadHTML: () => void
   onDownloadMarkdown: () => void
-  onShare: () => void
+  /** Omitted for non-owners: only the owner can create shares (RLS on document_shares). */
+  onShare?: () => void
   onInsertLink: () => void
   onInsertImage: () => void
 }
@@ -75,8 +76,14 @@ export function EditorMenuBar(props: EditorMenuBarProps) {
     { label: 'Download as PDF', icon: FileDown, action: props.onDownloadPDF },
     { label: 'Download as HTML', icon: FileText, action: props.onDownloadHTML },
     { label: 'Download as Markdown', icon: FileCode, action: props.onDownloadMarkdown },
-    { label: '', separator: true },
-    { label: 'Share Document', icon: Share2, action: props.onShare },
+    // Share also has a primary button above the panel — this stays as the
+    // keyboard/menu route to the same modal, and disappears for non-owners.
+    ...(props.onShare
+      ? ([
+          { label: '', separator: true },
+          { label: 'Share Document', icon: Share2, action: props.onShare },
+        ] as MenuItem[])
+      : []),
   ]
 
   const editItems: MenuItem[] = [

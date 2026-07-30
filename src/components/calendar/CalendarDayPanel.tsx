@@ -11,9 +11,12 @@ interface CalendarDayPanelProps {
   itemNoun?: string
   emptyLabel?: string
   onJumpToNext?: () => void
+  /** Walkthrough anchor — the events page targets its own panel */
+  dataTutorial?: string
 }
 
 function CalendarItemRow({ item, day }: { item: CalendarItem; day: Date }) {
+  const Icon = item.icon
   const start = new Date(item.start)
   const end = item.end ? new Date(item.end) : start
   const isMultiDay = !isSameDay(start, end)
@@ -55,15 +58,19 @@ function CalendarItemRow({ item, day }: { item: CalendarItem; day: Date }) {
             </span>
           )}
           {item.subtitle && (
-            <span className="text-xs text-gray-500 truncate min-w-0">{item.subtitle}</span>
+            <span className="flex items-center gap-1 text-xs text-gray-500 min-w-0">
+              {Icon && <Icon size={12} className="shrink-0" />}
+              <span className="truncate">{item.subtitle}</span>
+            </span>
           )}
+          {item.badges}
         </span>
       </span>
     </>
   )
 
   const shell =
-    'group flex gap-3 rounded-2xl border border-ktip-line bg-ktip-canvas/70 p-3 transition-all duration-200'
+    'group flex gap-3 rounded-cal border border-ktip-line bg-ktip-canvas/70 p-3 transition-all duration-200'
 
   if (!item.href) {
     return <div className={cn(shell, item.dimmed && 'opacity-60')}>{body}</div>
@@ -93,9 +100,13 @@ export function CalendarDayPanel({
   itemNoun = 'item',
   emptyLabel,
   onJumpToNext,
+  dataTutorial,
 }: CalendarDayPanelProps) {
   return (
-    <div className="bg-ktip-cream rounded-2xl border border-ktip-line shadow-card p-4 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+    <div
+      data-tutorial={dataTutorial}
+      className="bg-ktip-cream rounded-cal border border-ktip-line shadow-card p-4 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+    >
       <p className="text-xs font-bold uppercase tracking-wider text-ktip-ocean-600">
         {format(date, 'EEEE')}
       </p>
@@ -109,7 +120,7 @@ export function CalendarDayPanel({
       {loading ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="animate-pulse bg-ktip-sand-100 rounded-2xl h-20" />
+            <div key={i} className="animate-pulse bg-ktip-sand-100 rounded-cal h-20" />
           ))}
         </div>
       ) : items.length > 0 ? (

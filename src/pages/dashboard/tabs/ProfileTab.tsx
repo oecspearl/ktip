@@ -1,130 +1,93 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
-import { Calendar, Edit, Handshake } from 'lucide-react'
-import { Badge } from '../../../components/ui/Badge'
+import { Download, Pencil, UserRoundCheck } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
-import { AchievementBadge } from '../../../components/ui/AchievementBadge'
+import { ResumePaper } from '../../../components/resume/ResumePaper'
+import { ResumeOutline } from '../../../components/resume/ResumeOutline'
+import { sheetFor } from '../../../components/resume/sheets'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useUserBadges } from '../../../hooks/useBadges'
+import { useResume } from '../../../hooks/useResume'
 import { usePageTitle } from '../../../hooks/usePageTitle'
-import {
-  ROLE_LABELS,
-  ROLE_COLORS,
-  COLLABORATION_LABELS,
-  COLLAB_EXCLUSIVE_VALUE,
-} from '../../../lib/constants'
-import { formatDate } from '../../../lib/utils'
+import { resolveDesign } from '../../../lib/resume-designs'
 
 /**
- * Read-only view of what other members see in the member drawer. Editing lives
- * in /settings?tab=profile — that form already covers strictly more fields.
+ * The member's CV, in the design they chose.
+ *
+ * This tab used to be a third rendering of the profile — roles, badges, bio,
+ * skills — after the member drawer and /u/:id, and it was the copy nobody kept
+ * up to date. The CV is the document that actually represents a member, so this
+ * is that instead.
+ *
+ * Read-only on purpose: design, download and publish live on /cv and this links
+ * there rather than growing a second copy of the toolbar. Same components as
+ * /cv, so the two cannot disagree about how the document looks.
  */
 export default function ProfileTab() {
-  usePageTitle('My Profile')
-  const auth = useAuth()
-  const profile = auth.profile
-  const { badges } = useUserBadges(auth.user?.id)
+  usePageTitle('My CV')
+  const { profile } = useAuth()
+  const { data, design: designId, isLoading, exists, resume } = useResume()
+  const [asText, setAsText] = useState(
+    () => typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches
+  )
 
-  if (!profile) {
-    return <div className="bg-ktip-cream rounded-2xl border border-gray-200 h-64 animate-pulse-soft" />
+  const design = resolveDesign(designId)
+  const Sheet = sheetFor(design.id)
+
+  if (isLoading) {
+    return <div className="bg-ktip-cream rounded-2xl border border-ktip-sand-200 h-96 animate-pulse-soft" />
   }
 
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-2xl p-6">
-      <div className="flex items-start justify-between gap-4 mb-4">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="font-display font-bold text-xl text-ktip-sand-900">Your profile</h2>
-          <p className="text-sm text-ktip-sand-600">This is how other members see you.</p>
+          <h2 className="font-display font-bold text-xl text-ktip-sand-900">Your CV</h2>
+          <p className="text-sm text-ktip-sand-600">
+            {exists
+              ? `${design.label} design · ${
+                  resume?.is_public ? 'published — anyone with your link can read it' : 'private to you'
+                }`
+              : 'Started from your profile. Nothing saved yet.'}
+          </p>
         </div>
-        <Link to="/settings?tab=profile" className="shrink-0">
-          <Button variant="outline" size="sm" icon={<Edit size={16} />}>
-            Edit
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => setAsText(!asText)}>
+            {asText ? 'Show the page' : 'Read as text'}
           </Button>
-        </Link>
+          <Link to="/cv/edit">
+            <Button variant="outline" size="sm" icon={<Pencil size={15} />}>
+              Edit
+            </Button>
+          </Link>
+          <Link to="/cv">
+            <Button variant="secondary" size="sm" icon={<Download size={15} />}>
+              Design &amp; download
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {profile.roles?.length ? (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {profile.roles.map((role) => (
-            <Badge key={role} className={ROLE_COLORS[role]}>
-              {ROLE_LABELS[role] || role}
-            </Badge>
-          ))}
-        </div>
-      ) : null}
-
-      {badges?.length ? (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {badges.map((userBadge) => (
-            <AchievementBadge key={userBadge.id} userBadge={userBadge} />
-          ))}
-        </div>
-      ) : null}
-
-      {profile.bio ? (
-        <p className="text-ktip-sand-700 whitespace-pre-wrap mb-3">{profile.bio}</p>
-      ) : (
-        <p className="text-sm text-ktip-sand-400 italic mb-3">
-          No bio yet — add one so members know what you work on.
+      {!exists && (
+        <p className="mb-5 flex items-start gap-2 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 p-3 text-xs text-ktip-sand-600">
+          <UserRoundCheck size={14} className="mt-0.5 shrink-0" />
+          <span>
+            Built from your KTIP profile. Sign in from the OECS Virtual Campus to pull in your course
+            history, or fill in the rest from{' '}
+            <Link to="/cv/edit" className="font-semibold text-ktip-ocean-600 hover:underline">
+              Edit
+            </Link>
+            .
+          </span>
         </p>
       )}
 
-      {profile.skills?.length ? (
-        <div className="mb-3">
-          <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">Skills</p>
-          <div className="flex flex-wrap gap-1.5">
-            {profile.skills.map((skill) => (
-              <span
-                key={skill}
-                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {profile.interests?.length ? (
-        <div className="mb-3">
-          <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">Interests</p>
-          <div className="flex flex-wrap gap-1.5">
-            {profile.interests.map((interest) => (
-              <span
-                key={interest}
-                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-tropical-50 text-ktip-tropical-700 border border-ktip-tropical-200"
-              >
-                {interest}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {profile.open_to?.length ? (
-        <div className="mb-3">
-          <p className="text-xs font-medium text-ktip-sand-500 uppercase tracking-wide mb-1.5">Open To</p>
-          <div className="flex flex-wrap gap-1.5">
-            {profile.open_to.map((value) => (
-              <span
-                key={value}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                  value === COLLAB_EXCLUSIVE_VALUE
-                    ? 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200'
-                    : 'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-200'
-                }`}
-              >
-                <Handshake size={12} />
-                {COLLABORATION_LABELS[value] || value}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <p className="flex items-center gap-1.5 text-sm text-ktip-sand-400">
-        <Calendar size={14} />
-        Joined {formatDate(profile.created_at)}
-      </p>
+      {asText ? (
+        <ResumeOutline data={data} />
+      ) : (
+        <ResumePaper>
+          <Sheet data={data} avatarUrl={profile?.avatar_url ?? null} theme="color" design={design} />
+        </ResumePaper>
+      )}
     </div>
   )
 }

@@ -241,15 +241,10 @@ export default function AdminEmployersPage() {
         title="Employers"
         subtitle="Verify employers and choose which ones the partner API may publish"
         imageSeed="admin-employers"
-        actions={
-          <Button onClick={openCreate} icon={<Plus size={16} />}>
-            Add Employer
-          </Button>
-        }
       />
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -266,6 +261,9 @@ export default function AdminEmployersPage() {
           placeholder="Search by name…"
           className="min-w-[220px]"
         />
+        <Button onClick={openCreate} icon={<Plus size={16} />} className="ml-auto shrink-0">
+          Add Employer
+        </Button>
       </div>
 
       {/* List */}

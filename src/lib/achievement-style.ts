@@ -37,7 +37,8 @@ export const RARITY_PILL: Record<BadgeRarity, string> = {
   uncommon: 'bg-ktip-tropical-50 text-ktip-tropical-700 border-ktip-tropical-200',
   rare: 'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-200',
   epic: 'bg-ktip-sun-50 text-ktip-sun-700 border-ktip-sun-300',
-  legendary: 'bg-ktip-ocean-700 text-ktip-sun-300 border-ktip-sun-500',
+  legendary:
+    'bg-ktip-ocean-700 text-ktip-sun-300 border-ktip-sun-500 dark:bg-ktip-ocean-200 dark:text-ktip-sun-700',
 }
 
 /** Card frame in the gallery and unlock popup. */
@@ -46,7 +47,7 @@ export const RARITY_CARD: Record<BadgeRarity, string> = {
   uncommon: 'border-ktip-tropical-200 bg-ktip-tropical-50/60',
   rare: 'border-ktip-ocean-200 bg-ktip-ocean-50/60',
   epic: 'border-ktip-sun-300 bg-ktip-sun-50/70',
-  legendary: 'border-ktip-sun-500 bg-ktip-ocean-700 text-ktip-cream shadow-lg',
+  legendary: 'border-ktip-sun-500 bg-ktip-ocean-700 dark:bg-ktip-ocean-200 text-white shadow-lg',
 }
 
 /** Halo behind the trophy image. Legendary is the only one that glows. */

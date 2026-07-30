@@ -59,7 +59,7 @@ export function AssistantChatWindow() {
       {/* Header */}
       <div className="p-4 border-b border-ktip-sand-200 bg-ktip-cream flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 text-white shrink-0">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shrink-0">
             <Sparkles size={16} />
           </div>
           <div className="min-w-0">

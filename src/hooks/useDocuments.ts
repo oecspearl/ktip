@@ -37,21 +37,29 @@ export function useDocuments(filters?: { search?: string }) {
   return { documents: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/** A document shared with me, carrying the share's own permission. */
+export type SharedDocument = Document & { share_permission: 'view' | 'edit' }
+
 export function useSharedDocuments() {
-  const fetchShared = async (): Promise<Document[]> => {
+  const fetchShared = async (): Promise<SharedDocument[]> => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
 
-    // Get document IDs shared with this user
+    // Get document IDs shared with this user. The permission comes along: the
+    // list used to label every shared row "View only" regardless, which was
+    // wrong for anyone actually granted edit.
     const { data: shares, error: sharesError } = await (supabase
       .from('document_shares') as any)
-      .select('document_id')
+      .select('document_id, permission')
       .eq('shared_with', user.id)
       // A pending invitation is not access yet — it lives in /invitations.
       .eq('status', 'accepted')
 
     if (sharesError || !shares || shares.length === 0) return []
 
+    const permissionByDoc = new Map<string, 'view' | 'edit'>(
+      shares.map((s: any) => [s.document_id as string, (s.permission || 'view') as 'view' | 'edit'])
+    )
     const docIds = shares.map((s: any) => s.document_id)
     const { data, error } = await supabase
       .from('documents')
@@ -60,7 +68,10 @@ export function useSharedDocuments() {
       .order('updated_at', { ascending: false })
 
     if (error) throw error
-    return (data as any[]) || []
+    return ((data as any[]) || []).map((doc) => ({
+      ...doc,
+      share_permission: permissionByDoc.get(doc.id) ?? 'view',
+    }))
   }
 
   const query = useQuery({

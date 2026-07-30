@@ -23,7 +23,7 @@ export default function SubmissionsTab() {
 
   if (!receipts.length) {
     return (
-      <div className="bg-ktip-cream border border-gray-200 rounded-lg p-6">
+      <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg p-6">
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Inbox size={32} className="text-ktip-sand-400" />
@@ -44,8 +44,8 @@ export default function SubmissionsTab() {
   }
 
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
+    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg">
+      <div className="px-6 py-4 border-b border-ktip-sand-200">
         <p className="text-sm text-ktip-sand-600">
           {receipts.length} submission{receipts.length !== 1 ? 's' : ''}
         </p>
@@ -54,7 +54,7 @@ export default function SubmissionsTab() {
       {receipts.map((receipt, index) => (
         <div
           key={receipt.id}
-          className={`px-6 py-5 ${index < receipts.length - 1 ? 'border-b border-gray-200' : ''}`}
+          className={`px-6 py-5 ${index < receipts.length - 1 ? 'border-b border-ktip-sand-200' : ''}`}
         >
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex-1">

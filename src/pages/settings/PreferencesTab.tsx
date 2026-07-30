@@ -117,7 +117,7 @@ export function PreferencesTab() {
   return (
     <div className="space-y-6">
       {/* Notification Preferences */}
-      <Card>
+      <Card id="notifications" data-spy="Notifications" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-tropical-100 rounded-xl flex items-center justify-center">
             <Bell size={20} className="text-ktip-tropical-600" />
@@ -181,7 +181,7 @@ export function PreferencesTab() {
       </Card>
 
       {/* Privacy Preferences */}
-      <Card>
+      <Card id="privacy" data-spy="Privacy" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
             <Eye size={20} className="text-ktip-ocean-600" />
@@ -262,7 +262,7 @@ export function PreferencesTab() {
       </Card>
 
       {/* Accessibility — applies instantly, stored locally, not part of Save */}
-      <Card>
+      <Card id="accessibility" data-spy="Accessibility" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
             <Type size={20} className="text-ktip-ocean-600" />
@@ -284,7 +284,7 @@ export function PreferencesTab() {
       </Card>
 
       {/* Appearance — applies instantly, stored locally, not part of Save */}
-      <Card>
+      <Card id="appearance" data-spy="Appearance" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-ktip-sun-100 rounded-xl flex items-center justify-center">
             <Moon size={20} className="text-ktip-sun-700" />

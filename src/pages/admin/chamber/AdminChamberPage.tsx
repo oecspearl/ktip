@@ -16,7 +16,7 @@ import { formatDate } from '../../../lib/utils'
 import type { Employer } from '../../../types'
 
 const STATUS_COLORS: Record<string, string> = {
-  unverified: 'bg-gray-100 text-gray-700 border-gray-200',
+  unverified: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
   pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   verified: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   rejected: 'bg-red-100 text-red-700 border-red-200',

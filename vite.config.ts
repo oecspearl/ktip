@@ -202,16 +202,38 @@ export default defineConfig(({ mode }) => {
           // HTML this app should ever serve; keep stray pages out of the
           // manifest so that shadowing cannot come back.
           globIgnores: ['**/node_modules/**/*', '**/auth/**'],
-          // vercel.json rewrites these two paths to Edge Functions rather than
-          // to the SPA. They are reached by a top-level navigation, so the
+          // vercel.json rewrites /auth/vc/* to Edge Functions rather than to
+          // the SPA. Those are reached by a top-level navigation, so the
           // navigation fallback would answer them with index.html and the
           // Virtual Campus handoff would never touch the server.
-          navigateFallbackDenylist: [/^\/api\//, /^\/auth\/vc\//],
+          //
+          // /auth/ is denied wholesale rather than just /auth/vc/, because the
+          // OAuth return from Google is this app's only routine top-level
+          // navigation — every other route change is client-side and issues no
+          // navigation request at all. That makes /auth/callback the one URL
+          // the navigation fallback can answer out of a precache belonging to
+          // an older build, handing back an index.html whose hashed chunks
+          // cleanupOutdatedCaches has already deleted. The sign-in then
+          // dead-ends on a blank page or a stuck spinner. Going to the network
+          // here costs one request and guarantees the current build.
+          navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
           runtimeCaching: [
             {
-              urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+              // Public storage objects only.
+              //
+              // The previous entry matched every *.supabase.co URL, which put
+              // /auth/v1/user and /rest/v1/* responses into a cache keyed by
+              // URL alone — Authorization is not part of a Cache Storage key
+              // and these responses carry no Vary — so after an account switch
+              // one slow request could serve the previous user's rows. Nothing
+              // RLS-scoped belongs in a worker cache; only objects that are
+              // public by definition do.
+              urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
               handler: 'NetworkFirst',
-              options: { cacheName: 'supabase-api', expiration: { maxEntries: 50, maxAgeSeconds: 300 } },
+              options: {
+                cacheName: 'supabase-storage',
+                expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
+              },
             },
           ],
         },

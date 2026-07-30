@@ -30,7 +30,9 @@ ON CONFLICT (id) DO NOTHING;
 -- Now UPDATE the auto-created profiles with full demo data
 UPDATE profiles SET display_name = 'Marcia Joseph', bio = 'OECS Innovation Director with 15 years of experience in Caribbean development policy and technology transfer.', avatar_url = 'https://images.unsplash.com/photo-1676694047749-ee0fa2709893?w=400&h=400&fit=crop&crop=face', country = 'Saint Lucia', roles = ARRAY['oecs','mentor'], skills = ARRAY['Policy & Governance','Project Management','Climate Resilience','Community Development'], is_verified = true, created_at = NOW() - INTERVAL '180 days' WHERE id = 'a0000000-0000-0000-0000-000000000001';
 UPDATE profiles SET display_name = 'Devon Charles', bio = 'Senior Programme Officer at the OECS Commission. Passionate about digital transformation in small island states.', avatar_url = 'https://images.unsplash.com/photo-1696603865152-74514c198a07?w=400&h=400&fit=crop&crop=face', country = 'Dominica', roles = ARRAY['oecs'], skills = ARRAY['Business Strategy','Finance','Supply Chain'], is_verified = true, created_at = NOW() - INTERVAL '170 days' WHERE id = 'a0000000-0000-0000-0000-000000000002';
-UPDATE profiles SET display_name = 'Dr. Althea Williams', bio = 'Marine biologist and climate researcher at UWI. Mentor for environment and blue economy projects.', avatar_url = 'https://images.unsplash.com/photo-1581518869825-41b2eafe38b7?w=400&h=400&fit=crop&crop=face', country = 'Grenada', roles = ARRAY['mentor'], skills = ARRAY['Marine Conservation','Climate Resilience','Data Science','Renewable Energy'], is_verified = true, created_at = NOW() - INTERVAL '150 days' WHERE id = 'a0000000-0000-0000-0000-000000000003';
+-- faculty role: holds grant:sponsor, so she can sponsor the student grant
+-- applications below (064's enforce_grant_application_sponsor trigger).
+UPDATE profiles SET display_name = 'Dr. Althea Williams', bio = 'Marine biologist and climate researcher at UWI. Mentor for environment and blue economy projects.', avatar_url = 'https://images.unsplash.com/photo-1581518869825-41b2eafe38b7?w=400&h=400&fit=crop&crop=face', country = 'Grenada', roles = ARRAY['mentor','faculty'], skills = ARRAY['Marine Conservation','Climate Resilience','Data Science','Renewable Energy'], is_verified = true, created_at = NOW() - INTERVAL '150 days' WHERE id = 'a0000000-0000-0000-0000-000000000003';
 UPDATE profiles SET display_name = 'James Pierre', bio = 'Serial entrepreneur and tech investor. Founded 3 startups across the Caribbean.', avatar_url = 'https://images.unsplash.com/photo-1546884786-4a76106c9191?w=400&h=400&fit=crop&crop=face', country = 'Saint Kitts and Nevis', roles = ARRAY['mentor','investor'], skills = ARRAY['Software Development','Business Strategy','Marketing','Finance'], is_verified = true, created_at = NOW() - INTERVAL '140 days' WHERE id = 'a0000000-0000-0000-0000-000000000004';
 UPDATE profiles SET display_name = 'Keisha Baptiste', bio = 'Founder of AgriTech SVG — using IoT sensors to help smallholder farmers in the Grenadines.', avatar_url = 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=400&h=400&fit=crop&crop=face', country = 'Saint Vincent and the Grenadines', roles = ARRAY['entrepreneur'], skills = ARRAY['Agriculture Technology','Software Development','UX/UI Design'], is_verified = false, created_at = NOW() - INTERVAL '120 days' WHERE id = 'a0000000-0000-0000-0000-000000000005';
 UPDATE profiles SET display_name = 'Rashid Mohammed', bio = 'Building EduCarib — a localized e-learning platform for Caribbean schools.', avatar_url = 'https://images.unsplash.com/photo-1649433658557-54cf58577c68?w=400&h=400&fit=crop&crop=face', country = 'Trinidad and Tobago', roles = ARRAY['entrepreneur'], skills = ARRAY['Education Technology','Software Development','Project Management'], is_verified = false, created_at = NOW() - INTERVAL '110 days' WHERE id = 'a0000000-0000-0000-0000-000000000006';
@@ -39,7 +41,9 @@ UPDATE profiles SET display_name = 'Tariq Phillip', bio = 'Computer Science stud
 UPDATE profiles SET display_name = 'Shania Lewis', bio = 'Environmental science major passionate about coral reef monitoring with AI.', avatar_url = 'https://images.unsplash.com/photo-1606735819077-62180cf1fc97?w=400&h=400&fit=crop&crop=face', country = 'Grenada', roles = ARRAY['student'], skills = ARRAY['Marine Conservation','Data Science','Climate Resilience'], is_verified = false, created_at = NOW() - INTERVAL '80 days' WHERE id = 'a0000000-0000-0000-0000-000000000009';
 UPDATE profiles SET display_name = 'Marcus George', bio = 'Business student interested in social entrepreneurship and community development.', avatar_url = 'https://images.unsplash.com/photo-1576558656222-ba66febe3dec?w=400&h=400&fit=crop&crop=face', country = 'Saint Lucia', roles = ARRAY['student'], skills = ARRAY['Business Strategy','Community Development','Marketing'], is_verified = false, created_at = NOW() - INTERVAL '70 days' WHERE id = 'a0000000-0000-0000-0000-000000000010';
 UPDATE profiles SET display_name = 'Sandra Mitchell', bio = 'Angel investor focused on Caribbean cleantech and sustainable agriculture.', avatar_url = 'https://images.unsplash.com/photo-1630959305606-3123a081dada?w=400&h=400&fit=crop&crop=face', country = 'Barbados', roles = ARRAY['investor','private_sector'], skills = ARRAY['Finance','Renewable Energy','Agriculture Technology','Business Strategy'], is_verified = true, created_at = NOW() - INTERVAL '130 days' WHERE id = 'a0000000-0000-0000-0000-000000000011';
-UPDATE profiles SET display_name = 'Andre Williams', bio = 'CTO at CaribbeanCloud Ltd. Advocates for open data and digital government in the OECS.', avatar_url = 'https://images.unsplash.com/photo-1528892952291-009c663ce843?w=400&h=400&fit=crop&crop=face', country = 'Montserrat', roles = ARRAY['private_sector'], skills = ARRAY['Software Development','Healthcare Innovation','Water Management','Disaster Preparedness'], is_verified = true, created_at = NOW() - INTERVAL '60 days' WHERE id = 'a0000000-0000-0000-0000-000000000012';
+-- entrepreneur role added: private_sector alone has no grant:apply, and Andre
+-- has a grant application below (064 trigger enforces the permission).
+UPDATE profiles SET display_name = 'Andre Williams', bio = 'CTO at CaribbeanCloud Ltd. Advocates for open data and digital government in the OECS.', avatar_url = 'https://images.unsplash.com/photo-1528892952291-009c663ce843?w=400&h=400&fit=crop&crop=face', country = 'Montserrat', roles = ARRAY['private_sector','entrepreneur'], skills = ARRAY['Software Development','Healthcare Innovation','Water Management','Disaster Preparedness'], is_verified = true, created_at = NOW() - INTERVAL '60 days' WHERE id = 'a0000000-0000-0000-0000-000000000012';
 
 
 -- ============================================================
@@ -408,39 +412,127 @@ INSERT INTO grants (id, title, description, amount_min, amount_max, currency, de
 
 ON CONFLICT (id) DO NOTHING;
 
+-- Hero copy (042 summary + 043 details). Applied as a separate UPDATE rather
+-- than columns on the insert above so it also reaches databases seeded before
+-- this block existed — the insert is ON CONFLICT DO NOTHING and would skip them.
+-- Guarded on empty, so anything edited through the admin grant form survives.
+UPDATE grants AS g
+SET summary = v.summary,
+    details = v.details
+FROM (VALUES
+  ('f0000000-0000-0000-0000-000000000001'::uuid,
+   'Seed funding of US$5,000–US$25,000 for early-stage OECS innovators.',
+   '[{"id":"funding","label":"Funding","items":[
+       {"id":"f1","label":"Type","value":"Non-dilutive seed grant"},
+       {"id":"f2","label":"Disbursement","value":"Two tranches, milestone-based"},
+       {"id":"f3","label":"Priority sectors","value":"Climate resilience, food security, digital inclusion"}]},
+     {"id":"elig","label":"Eligibility","items":[
+       {"id":"e1","label":"Residency","value":"Citizen or resident of an OECS member state"},
+       {"id":"e2","label":"Stage","value":"Individuals and businesses under 3 years old"}]},
+     {"id":"contact","label":"Contact","value":"innovation@oecs.int"}]'::jsonb),
+
+  ('f0000000-0000-0000-0000-000000000002'::uuid,
+   'Up to US$50,000 for technology that improves Caribbean public services.',
+   '[{"id":"funding","label":"Funding","items":[
+       {"id":"f1","label":"Type","value":"Development grant"},
+       {"id":"f2","label":"Mentorship","value":"12 months with a CDB advisor"},
+       {"id":"f3","label":"Co-financing","value":"10% match required"}]},
+     {"id":"elig","label":"Eligibility","items":[
+       {"id":"e1","label":"Applicant","value":"Registered entities in CDB member countries"},
+       {"id":"e2","label":"Impact","value":"Must show regional impact potential"}]},
+     {"id":"contact","label":"Contact","value":"techgrant@caribank.org"}]'::jsonb),
+
+  ('f0000000-0000-0000-0000-000000000003'::uuid,
+   'Research grants of US$15,000–US$40,000 for ocean and coastal science in OECS waters.',
+   '[{"id":"funding","label":"Funding","items":[
+       {"id":"f1","label":"Type","value":"Research fellowship"},
+       {"id":"f2","label":"Duration","value":"18 months"},
+       {"id":"f3","label":"Covers","value":"Stipend, fieldwork and publication costs"}]},
+     {"id":"elig","label":"Eligibility","items":[
+       {"id":"e1","label":"Level","value":"PhD candidates and post-doctoral researchers"},
+       {"id":"e2","label":"Affiliation","value":"Recognised institution; OECS nationals preferred"}]},
+     {"id":"contact","label":"Contact","value":"bluefellowship@oecs.int"}]'::jsonb),
+
+  ('f0000000-0000-0000-0000-000000000004'::uuid,
+   'Up to US$30,000 plus six months of mentorship for Caribbean ed-tech startups.',
+   '[{"id":"funding","label":"Funding","items":[
+       {"id":"f1","label":"Type","value":"Accelerator grant"},
+       {"id":"f2","label":"Programme","value":"6-month mentorship cohort"},
+       {"id":"f3","label":"Disbursement","value":"Split across cohort milestones"}]},
+     {"id":"elig","label":"Eligibility","items":[
+       {"id":"e1","label":"Stage","value":"At least a working MVP"},
+       {"id":"e2","label":"Team","value":"One or more Caribbean co-founders"}]},
+     {"id":"contact","label":"Contact","value":"apply@edtechcaribbean.org"}]'::jsonb),
+
+  ('f0000000-0000-0000-0000-000000000005'::uuid,
+   'Green Climate Fund small grants of US$10,000–US$50,000 for community climate adaptation.',
+   '[{"id":"funding","label":"Funding","items":[
+       {"id":"f1","label":"Type","value":"Climate adaptation small grant"},
+       {"id":"f2","label":"Duration","value":"24 months"},
+       {"id":"f3","label":"Co-financing","value":"In-kind community contribution encouraged"}]},
+     {"id":"elig","label":"Eligibility","items":[
+       {"id":"e1","label":"Applicant","value":"Community organisations and NGOs in SIDS"},
+       {"id":"e2","label":"Beneficiaries","value":"Must directly benefit vulnerable communities"}]},
+     {"id":"contact","label":"Contact","value":"sids@greenclimate.fund"}]'::jsonb),
+
+  ('f0000000-0000-0000-0000-000000000006'::uuid,
+   'Top three pitches take US$20,000–US$75,000 in angel investment.',
+   '[{"id":"funding","label":"Funding","items":[
+       {"id":"f1","label":"Type","value":"Equity angel investment"},
+       {"id":"f2","label":"Awards","value":"Three winners per cycle"},
+       {"id":"f3","label":"Terms","value":"Negotiated per deal with the lead angel"}]},
+     {"id":"elig","label":"Eligibility","items":[
+       {"id":"e1","label":"Stage","value":"Working prototype or beyond"},
+       {"id":"e2","label":"Attendance","value":"Must pitch in person in Barbados"}]},
+     {"id":"contact","label":"Contact","value":"pitch@caribbeanangelnetwork.com"}]'::jsonb)
+) AS v(id, summary, details)
+WHERE g.id = v.id
+  AND (g.summary IS NULL OR g.summary = '' OR g.details IS NULL OR g.details = '[]'::jsonb);
+
 
 -- ============================================================
 -- 9. GRANT APPLICATIONS
 -- ============================================================
 
-INSERT INTO grant_applications (id, grant_id, user_id, application_data, status, created_at) VALUES
+-- Student applications (Tariq a08, Shania a09) carry an accepted faculty
+-- sponsor (Dr. Williams a03) — 064's enforce_grant_application_sponsor
+-- trigger rejects any non-draft student application without one.
+INSERT INTO grant_applications (id, grant_id, user_id, application_data, status, sponsor_id, sponsor_note, sponsor_approved_at, created_at) VALUES
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000005',
    '{"project_name": "AgriSense SVG", "summary": "IoT sensors for smallholder farmers in SVG", "amount_requested": 20000}'::jsonb,
-   'under_review', NOW() - INTERVAL '50 days'),
+   'under_review', NULL, NULL, NULL, NOW() - INTERVAL '50 days'),
 
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000008',
    '{"project_name": "SolarGrid Antigua", "summary": "Community micro-grid for 100 households", "amount_requested": 25000}'::jsonb,
-   'pending', NOW() - INTERVAL '40 days'),
+   'pending',
+   'a0000000-0000-0000-0000-000000000003',
+   'Tariq is a dedicated student — the SolarGrid pilot is well scoped and I am glad to sponsor it.',
+   NOW() - INTERVAL '41 days',
+   NOW() - INTERVAL '40 days'),
 
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000012',
    '{"project_name": "CaribbeanCloud Gov", "summary": "Open-source cloud toolkit for OECS governments", "amount_requested": 45000}'::jsonb,
-   'approved', NOW() - INTERVAL '35 days'),
+   'approved', NULL, NULL, NULL, NOW() - INTERVAL '35 days'),
 
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000009',
    '{"project_name": "ReefWatch AI", "summary": "ML-based coral reef monitoring in Grenada", "amount_requested": 30000}'::jsonb,
-   'under_review', NOW() - INTERVAL '25 days'),
+   'under_review',
+   'a0000000-0000-0000-0000-000000000003',
+   'I supervise Shania''s reef monitoring research and fully support this fellowship application.',
+   NOW() - INTERVAL '26 days',
+   NOW() - INTERVAL '25 days'),
 
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000006',
    '{"project_name": "EduCarib Platform", "summary": "Localised e-learning for Caribbean schools", "amount_requested": 28000}'::jsonb,
-   'pending', NOW() - INTERVAL '15 days'),
+   'pending', NULL, NULL, NULL, NOW() - INTERVAL '15 days'),
 
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005',
    '{"project_name": "AgriSense Climate Module", "summary": "Climate adaptation extension for AgriSense", "amount_requested": 35000}'::jsonb,
-   'pending', NOW() - INTERVAL '10 days'),
+   'pending', NULL, NULL, NULL, NOW() - INTERVAL '10 days'),
 
   (gen_random_uuid(), 'f0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000007',
    '{"project_name": "Dominica Heritage Trails", "summary": "AR heritage walking tours for Dominica", "amount_requested": 40000}'::jsonb,
-   'rejected', NOW() - INTERVAL '8 days')
+   'rejected', NULL, NULL, NULL, NOW() - INTERVAL '8 days')
 
 ON CONFLICT DO NOTHING;
 
