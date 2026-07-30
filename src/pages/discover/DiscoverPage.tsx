@@ -71,6 +71,26 @@ function useVisibleCount() {
 }
 
 /**
+ * The hero's motion is inline styles and Tailwind `transition-*`, neither of
+ * which the global `prefers-reduced-motion` block in index.css touches — that
+ * one only disables keyframe animations. So it is checked here by hand.
+ */
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(
+    () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    if (!mq) return
+    const update = () => setReduced(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  return reduced
+}
+
+/**
  * Hero ratio map — how the hero translates across screens.
  *
  *   SIZE     one multiplier drives a base font-size; every length inside the
@@ -88,12 +108,13 @@ function useVisibleCount() {
 const HERO = {
   design: { width: 2000, height: 1150 },
   /**
-   * Deliberate uplift over the authored size. Bounded by design.height / the
-   * hero's real content height: the content grew (3-line titles + details
-   * list), so past ~1.05 it is taller than the guard's own reference box and
-   * the centered text column clips top and bottom under its overflow-hidden.
+   * Deliberate uplift over the authored size. This used to be capped by the
+   * tallest item's content — past ~1.05 a three-line title plus a details list
+   * overran the text column and clipped. FIT below now measures that case and
+   * shrinks only the column, so this can be tuned for how big the hero should
+   * READ on a typical item rather than for the worst one.
    */
-  zoom: 1.05,
+  zoom: 1.15,
   /** Side inset, both edges, every breakpoint */
   gutter: '5%',
   // max sits above `zoom` — otherwise the reference display clamps itself.
@@ -101,6 +122,77 @@ const HERO = {
   // mini-card text drop under ~11px and stop being readable.
   scale: { min: 0.7, max: 1.25 },
 }
+
+/**
+ * Second, independent multiplier for the hero's text column only (eyebrow,
+ * headline, description, details list, CTA). HERO.scale answers "how big is
+ * this display"; this answers "how much text does THIS item have" — a grant
+ * with a three-line title and a full details list runs ~40% taller than a
+ * short project, and no single authored size serves both. Measured at runtime
+ * rather than authored, because the column's natural height is not knowable
+ * from the viewport.
+ *
+ * `min` bounds the shrink: past it the column clips again, which is the lesser
+ * evil against 8px type.
+ */
+const FIT = { min: 0.6, max: 1 }
+
+/**
+ * Motion budget for the card → hero handoff.
+ *
+ * Everything leaves at high velocity and settles slowly (`expOut` / `easeOutCubic`)
+ * rather than easing in from rest — a click has to look answered inside the first
+ * frame or the whole sequence reads as lag, no matter how short it is.
+ *
+ * The expand animates ONLY `transform` (a uniform scale, so nothing distorts) and
+ * a short `border-radius`. Nothing here may animate a layout property: the ghost
+ * is a full-viewport element carrying a filtered photo, and relaying it out per
+ * frame is what made this stutter.
+ */
+const MOTION = {
+  /**
+   * Ghost card → full hero.
+   *
+   * The curve is eased at BOTH ends and weighted toward the finish, which looks
+   * backwards for a "snappy" interaction but is what makes a large zoom read as
+   * smooth. Scale interpolates linearly while the apparent speed of a zoom goes
+   * with its RATIO: across this ~14× jump, 0.1→0.5 is a five-fold visual change
+   * and 0.6→1.0 is barely two-fold. A front-loaded curve therefore explodes and
+   * then crawls. Perceptually uniform growth wants scale ∝ k^(1−t), which in
+   * linear terms is an ease-IN: ~18% of the distance at a quarter of the time,
+   * ~48% at half. Pure exponential zoom also arrives at full speed and never
+   * settles, so the curve below is that ideal time-warped to land softly — it
+   * tracks it to within 1% at every quarter. The result is gentle at both ends
+   * and near-constant in apparent rate through the middle.
+   *
+   * None of this costs responsiveness: the click is already answered by the
+   * strip slide and the origin card fading out, both of which start on it.
+   */
+  expand: 700,
+  expandEase: 'cubic-bezier(0.35, 0.1, 0.7, 0.95)',
+  /** Corner rounding is paint-bound, so it finishes early while the ghost is small. */
+  radius: 300,
+  /**
+   * The hero's frost and washes settling onto the expanding photo. Timed to
+   * finish just inside `expand`, so the transform lands on a ghost that already
+   * matches the base and the handover is a straight cut rather than a crossfade.
+   */
+  overlay: 340,
+  overlayDelay: 300,
+  /** Origin card handing itself off to the ghost — outlasts the ghost's slow start. */
+  cardOut: 240,
+  /** Strip slide: base + per-slot, capped. */
+  slideBase: 0.36,
+  slidePerStep: 0.07,
+  slideMax: 0.62,
+  slideEase: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  /**
+   * Fraction of the slide after which the pending card is promoted and the expand
+   * begins. The slide's tail covers little distance, so waiting for its
+   * `transitionend` would spend a third of the interaction on nothing.
+   */
+  promoteAt: 0.55,
+} as const
 
 interface Feature {
   title: string
@@ -195,6 +287,31 @@ const STAT_TILES: { key: keyof PlatformStats; label: string }[] = [
   { key: 'grantCount', label: 'Active Grants' },
   { key: 'eventCount', label: 'Events' },
 ]
+
+/**
+ * The hero's treatment: frost on the left, then three stacked washes whose
+ * opacities MULTIPLY — at the right edge, where the text sits, they used to
+ * pass only 0.90 × 0.40 × 0.30 = 11% of the photo through, which flattened the
+ * photography to a near-solid navy. Retuned to 0.95 × 0.65 × 0.55 = 34%; the
+ * type keeps its contrast through text-shadow-hero instead of through darkness.
+ *
+ * Shared, not duplicated, because the expanding ghost has to settle into exactly
+ * this before it hands over — any drift between the two would show up as a pop
+ * at the commit, which is the whole thing this is here to avoid.
+ */
+function HeroOverlays() {
+  return (
+    <>
+      {/* Frosted blur over the left side, fading out toward the right */}
+      <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-md bg-black/5 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
+      {/* Neutral dark overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/18 to-black/12" />
+      {/* Brand wash — navy by day, green by night (OECS palette) */}
+      <div className={`absolute inset-0 bg-gradient-to-l ${HERO_WASH}`} />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/50 to-transparent" />
+    </>
+  )
+}
 
 function grantAmount(g: Grant): string {
   if (g.amount_max) return `Up to ${g.currency || 'USD'} ${g.amount_max.toLocaleString()}`
@@ -335,7 +452,8 @@ export default function DiscoverPage() {
   const [pos, setPos] = useState(0) // track position of the first visible card
   const [trackAnimating, setTrackAnimating] = useState(false)
   const [trackTransition, setTrackTransition] = useState(false)
-  const [trackDur, setTrackDur] = useState(0.7)
+  const [trackDur, setTrackDur] = useState<number>(MOTION.slideBase)
+  const reducedMotion = useReducedMotion()
   // 8em at design scale; the ResizeObserver below replaces this with the real
   // measurement on mount, so it only has to be right for the first frame
   const [cardW, setCardW] = useState(() => 128 * scale)
@@ -361,6 +479,29 @@ export default function DiscoverPage() {
     return base - ((cur - target + count) % count)
   })()
 
+  // The promotion that starts the expand is fired on a timer partway through the
+  // slide rather than on its `transitionend`, so the two motions overlap. The ref
+  // mirror keeps that timer reading the live pending value, not a stale closure.
+  const pendingRef = useRef<number | null>(null)
+  pendingRef.current = pendingIndex
+  const trackRef = useRef<HTMLDivElement>(null)
+  const recentered = useRef(false)
+  const promoteTimer = useRef<number | null>(null)
+  const clearPromote = useCallback(() => {
+    if (promoteTimer.current !== null) {
+      clearTimeout(promoteTimer.current)
+      promoteTimer.current = null
+    }
+  }, [])
+  const promote = useCallback(() => {
+    clearPromote()
+    const p = pendingRef.current
+    if (p === null) return
+    if (p < count) setIndex(p)
+    setPendingIndex(null)
+  }, [clearPromote, count])
+  useEffect(() => clearPromote, [clearPromote])
+
   // Layout effect so the slide's transform+transition commit in the same
   // paint frame as the ghost mount and origin-card hide — zero-jitter start
   useLayoutEffect(() => {
@@ -370,16 +511,37 @@ export default function DiscoverPage() {
     if (pos < count || pos >= 2 * count) {
       setTrackTransition(false)
       setPos(count + (pos % count))
+      recentered.current = true
       return
     }
     if (targetPos === pos) return
-    // Single-step = 1.0s — the exact expand duration, same curve, so the
-    // slide and the expansion run in lockstep; longer jumps scale gently
-    setTrackDur(Math.min(1.2, 0.85 + 0.15 * (pos - targetPos)))
+    if (recentered.current) {
+      recentered.current = false
+      // Commit the un-animated re-centre as the NEXT transition's start value.
+      // Both commits otherwise land before a single paint, so the browser never
+      // observes the jump and animates the following step from where the strip
+      // was BEFORE it — a full-width whip across the track that reads as the
+      // cards resetting. Same forced-flush trick as the ghost's FLIP kick.
+      trackRef.current?.getBoundingClientRect()
+    }
+    if (reducedMotion) {
+      setTrackTransition(false)
+      setPos(targetPos)
+      return
+    }
+    const dur = Math.min(MOTION.slideMax, MOTION.slideBase + MOTION.slidePerStep * (pos - targetPos))
+    setTrackDur(dur)
     setTrackTransition(true)
     setTrackAnimating(true)
     setPos(targetPos)
-  }, [targetPos, pos, ring, count, trackAnimating])
+    // Hand over to the expand before the slide's long tail has run — the card is
+    // already visually in its slot by then, and the ghost measures its live
+    // mid-flight rect, so the handoff is seamless rather than staged.
+    if (pendingRef.current !== null) {
+      clearPromote()
+      promoteTimer.current = window.setTimeout(promote, dur * MOTION.promoteAt * 1000)
+    }
+  }, [targetPos, pos, ring, count, trackAnimating, reducedMotion, promote, clearPromote])
 
   // Once the pending card has rotated into the rightmost slot, promote it:
   // index changes, the ghost expands from the rightmost rect, and the strip
@@ -428,6 +590,55 @@ export default function DiscoverPage() {
 
   const active: HeroItem | null = count > 0 ? items[index] : null
 
+  // --- Fit the text column to the space the counter and strip leave ---
+  // Every length in the column is em-based, so one font-size on the group
+  // scales the whole thing — headline, description, details list and the CTA
+  // riding under them — as a single piece. It has to be measured rather than
+  // authored: how tall the column wants to be depends on the active item, and
+  // the viewport scale cannot know that.
+  const fitBoxRef = useRef<HTMLDivElement>(null)
+  const fitContentRef = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState(FIT.max)
+
+  useLayoutEffect(() => {
+    const box = fitBoxRef.current
+    const content = fitContentRef.current
+    if (!box || !content) return
+    // Each pass corrects the last one's error, so this settles in two or three
+    // renders. The counter is the stop for content whose height is NOT
+    // monotonic in font-size — a headline that re-wraps to fewer lines as it
+    // shrinks can grow the block back — which would otherwise ping-pong.
+    let passes = 0
+    let lastAvail = 0
+    const measure = () => {
+      const avail = box.clientHeight
+      const needed = content.scrollHeight
+      if (!avail || !needed) return
+      // A change in the box itself is new information, not an oscillation
+      if (Math.abs(avail - lastAvail) > 1) {
+        passes = 0
+        lastAvail = avail
+      }
+      if (passes > 8) return
+      setFit((prev) => {
+        // `needed` was measured AT prev, so the size that fits exactly is
+        // prev × (avail / needed); 0.995 keeps sub-pixel rounding off the edge
+        const next = Math.min(FIT.max, Math.max(FIT.min, prev * (avail / needed) * 0.995))
+        // Deadband — without it the 0.995 alone would creep forever
+        if (Math.abs(next - prev) < 0.01) return prev
+        passes += 1
+        return next
+      })
+    }
+    measure()
+    // Both ends move: the box on viewport resize, the content on font load,
+    // late-arriving data, and each correction pass above
+    const ro = new ResizeObserver(measure)
+    ro.observe(box)
+    ro.observe(content)
+    return () => ro.disconnect()
+  }, [active?.id, mode, heroFontSize])
+
   // Hero image swap: the moment the selection changes, a ghost mounts exactly
   // on top of the new hero's card in the strip (the rightmost/on-deck card
   // for auto-rotate, the clicked card otherwise) and expands in place to fill
@@ -437,14 +648,13 @@ export default function DiscoverPage() {
   const [shownSrc, setShownSrc] = useState(heroSrc)
   const [anim, setAnim] = useState<{
     src: string
-    phase: 'start' | 'expand' | 'fade'
+    phase: 'start' | 'expand'
     fromT: number
-    title: string
-    meta: string
     imgH: number
     from: { x: number; y: number; w: number; h: number }
     sec: { w: number; h: number }
   } | null>(null)
+  const [overlaysIn, setOverlaysIn] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const ghostRef = useRef<HTMLDivElement>(null)
@@ -455,11 +665,17 @@ export default function DiscoverPage() {
   useLayoutEffect(() => {
     if (heroSrc === shownSrc || anim?.src === heroSrc) return
     const sec = sectionRef.current
-    if (!sec) {
+    if (!sec || reducedMotion) {
       setShownSrc(heroSrc)
       return
     }
     const s = sec.getBoundingClientRect()
+    // Zero-width section (not laid out yet) would make the ghost's scale factor
+    // infinite — swap outright instead
+    if (!s.width || !s.height) {
+      setShownSrc(heroSrc)
+      return
+    }
     // Expand from the new hero's card copy currently in the visible window
     let fromT = -1
     for (let t = pos; t < pos + slots; t++) {
@@ -482,8 +698,6 @@ export default function DiscoverPage() {
       src: heroSrc,
       phase: 'start',
       fromT,
-      title: active?.title ?? '',
-      meta: active?.meta ?? '',
       imgH,
       from,
       sec: { w: s.width, h: s.height },
@@ -500,35 +714,70 @@ export default function DiscoverPage() {
     setAnim((a) => (a && a.phase === 'start' ? { ...a, phase: 'expand' } : a))
   }, [anim])
 
+  // Hold the treatment off until the bloom is mostly resolved, then let it
+  // settle onto the photo. Mount-driven rather than an opacity toggle: the
+  // frost layer is a backdrop-filter, which is not free even at opacity 0.
+  useEffect(() => {
+    if (anim?.phase !== 'expand') {
+      setOverlaysIn(false)
+      return
+    }
+    const t = window.setTimeout(() => setOverlaysIn(true), MOTION.overlayDelay)
+    return () => clearTimeout(t)
+  }, [anim?.phase, anim?.src])
+
+  /**
+   * Transform FLIP. The ghost is laid out ONCE at its final geometry and is
+   * shrunk onto the card by an inverse transform, then released to identity —
+   * so the browser composites one cached layer instead of relaying out and
+   * re-rastering a full-viewport photo every frame.
+   *
+   * Two deliberate choices:
+   *
+   *   Uniform scale. The card is portrait and the hero is landscape, so a
+   *   non-uniform scale would squash the photo, and the usual remedy —
+   *   counter-scaling the child — cannot work through a CSS transition: CSS
+   *   interpolates 1/s₀ → 1 linearly, which is not 1/s(t), and at the ~14×
+   *   factor in play here the product drifts to ~4 by the midpoint instead of
+   *   staying at 1. A uniform factor needs no counter-transform at all. It does
+   *   mean the ghost starts as a letterboxed sliver inside the card's image area
+   *   rather than filling it; the card fades out over it and the ghost is past
+   *   card size within a few frames, so it reads as a bloom.
+   *   (Tuning knob: `imgH / sec.h` matches the card's height instead, at the
+   *   cost of overflowing its width.)
+   *
+   *   Shrink-then-grow, never grow-from-small. The layer rasters at scale 1, so
+   *   the final frame is always crisp; expanding a small raster would not be.
+   */
   const ghostStyle = (): CSSProperties => {
     if (!anim) return {}
-    const { from, sec, phase } = anim
-    if (phase === 'start')
-      return {
-        left: from.x,
-        top: from.y,
-        width: from.w,
-        height: from.h,
-        borderRadius: 8,
-        transition: 'none',
-        willChange: 'left, top, width, height',
-        contain: 'layout paint',
-      }
-    // easeInOutCubic: starts and ends at zero velocity, in step with the
-    // concurrently-running strip slide — the two read as one motion
-    return {
+    const { from, sec, imgH, phase } = anim
+    const k = from.w / sec.w
+    // Centre the shrunk hero on the card's IMAGE area, not the whole card —
+    // the title block below it is not part of what appears to expand
+    const dy = from.y + imgH / 2 - (sec.h * k) / 2
+    const base: CSSProperties = {
       left: 0,
       top: 0,
       width: sec.w,
       height: sec.h,
+      transformOrigin: '0 0',
+      willChange: 'transform',
+      backfaceVisibility: 'hidden',
+    }
+    if (phase === 'start')
+      return {
+        ...base,
+        transform: `translate3d(${from.x}px, ${dy}px, 0) scale(${k})`,
+        // Authored pre-scale so it *renders* as the card's 8px at t=0
+        borderRadius: 8 / k,
+        transition: 'none',
+      }
+    return {
+      ...base,
+      transform: 'translate3d(0, 0, 0) scale(1)',
       borderRadius: 0,
-      opacity: phase === 'fade' ? 0 : 1,
-      willChange: 'left, top, width, height',
-      contain: 'layout paint',
-      transition:
-        phase === 'fade'
-          ? 'opacity 0.6s ease'
-          : 'left 1s cubic-bezier(0.65, 0, 0.35, 1), top 1s cubic-bezier(0.65, 0, 0.35, 1), width 1s cubic-bezier(0.65, 0, 0.35, 1), height 1s cubic-bezier(0.65, 0, 0.35, 1), border-radius 1s cubic-bezier(0.65, 0, 0.35, 1)',
+      transition: `transform ${MOTION.expand}ms ${MOTION.expandEase}, border-radius ${MOTION.radius}ms ${MOTION.expandEase}`,
     }
   }
   return (
@@ -552,71 +801,50 @@ export default function DiscoverPage() {
           className="absolute inset-0 w-full h-full object-cover animate-fade-in photo-dimmable"
           loading="eager" fetchPriority="high"
         />
-        {/* Three stacked overlays, so their opacities MULTIPLY: at the right
-            edge, where the text sits, they used to pass only 0.90 × 0.40 × 0.30
-            = 11% of the photo through, which flattened the photography to a
-            near-solid navy. Retuned to 0.95 × 0.65 × 0.55 = 34%; the type keeps
-            its contrast through text-shadow-hero instead of through darkness. */}
-        {/* Frosted blur over the left side, fading out toward the right */}
-        <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-md bg-black/5 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
-        {/* Neutral dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/18 to-black/12" />
-        {/* Brand wash — navy by day, green by night (OECS palette) */}
-        <div className={`absolute inset-0 bg-gradient-to-l ${HERO_WASH}`} />
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/50 to-transparent" />
+        <HeroOverlays />
 
-        {/* Ghost card: expands from the new hero's card in the strip to fill the hero, then fades */}
+        {/* Ghost card: expands from the new hero's card in the strip to fill the
+            hero, then fades. Deliberately one <img> and nothing else — every
+            extra layer here (a backdrop-filter especially) is paid for on every
+            frame of the expand. The handoff is carried by the origin card
+            fading out underneath it, not by a replica drawn inside it. */}
         {anim && (
           <div
             ref={ghostRef}
-            className="absolute overflow-hidden shadow-2xl pointer-events-none"
-            // The ghost is a sibling of the scaled content column, not a child,
-            // so it needs the same base size or its card replica would render at
-            // 16px while the strip card it replaces is scaled
-            style={{ fontSize: heroFontSize, ...ghostStyle() }}
+            className="absolute overflow-hidden pointer-events-none"
+            style={ghostStyle()}
             onTransitionEnd={(e) => {
-              // Child layers crossfade opacity too — only the container's own
-              // transitions may advance the phase
+              // border-radius reports per-corner longhands on this same element,
+              // so only the property that defines the motion may commit it
               if (!anim || e.target !== e.currentTarget) return
-              if (anim.phase === 'expand' && e.propertyName === 'width') {
-                setShownSrc(anim.src)
-                setAnim({ ...anim, phase: 'fade' })
-              } else if (anim.phase === 'fade' && e.propertyName === 'opacity') {
-                setAnim(null)
-              }
+              if (e.propertyName !== 'transform') return
+              // Commit. The ghost is now the section's exact size, showing this
+              // same image under this same treatment, so swapping the base and
+              // dropping the ghost in one render is a visual no-op. Nothing to
+              // cross-fade — the fade already happened, on the overlays.
+              setShownSrc(anim.src)
+              setAnim(null)
             }}
           >
-            {/* Hero image — fades in as the card chrome fades out */}
             <img
               src={anim.src}
               alt=""
               className="absolute inset-0 w-full h-full object-cover photo-dimmable"
-              style={{
-                opacity: anim.phase === 'start' ? 0 : 1,
-                transition: 'opacity 0.3s ease',
-              }}
             />
-            {/* Mini-card chrome — pixel replica of the strip card at takeover,
-                so it's the card itself that appears to bloom into the hero */}
-            <div
-              className="absolute inset-0 flex flex-col bg-white/10 backdrop-blur-sm"
-              style={{
-                opacity: anim.phase === 'start' ? 1 : 0,
-                transition: 'opacity 0.3s ease',
-              }}
-            >
-              <div className="overflow-hidden shrink-0" style={{ height: anim.imgH }}>
-                <img src={anim.src} alt="" className="w-full h-full object-cover photo-dimmable" />
+            {/* The hero's frost and washes settle onto the photo while it is
+                still growing, so that by the time the transform lands the ghost
+                already matches the base exactly. Mounted late rather than held
+                at opacity 0: backdrop-filter forces its own render surface even
+                when fully transparent, and this one sits inside the layer that
+                is being scaled every frame. */}
+            {overlaysIn && (
+              <div
+                className="absolute inset-0"
+                style={{ animation: `fadeIn ${MOTION.overlay}ms ease both` }}
+              >
+                <HeroOverlays />
               </div>
-              <div className="px-[0.75em] py-[0.625em]">
-                <p className="text-[1em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] text-white">
-                  {anim.title}
-                </p>
-                <p className="text-[0.75em] mt-[0.2em] uppercase tracking-wider truncate text-white/50">
-                  {anim.meta}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -643,13 +871,29 @@ export default function DiscoverPage() {
             )}
           </div>
 
-          {/* Active item content — right side */}
-          <div className="flex-1 min-h-0 flex flex-col items-start md:items-end">
-            {/* Text region — vertically centered in whatever space the locked CTA
-                leaves. overflow-hidden is load-bearing: a centered flex child
-                taller than its box spills BOTH ways, and the top half was
-                bleeding up through the nav padding and under the fixed navbar. */}
-            <div className="flex-1 min-h-0 w-full flex flex-col justify-center items-start md:items-end overflow-hidden">
+          {/* Active item content — right side.
+              The BOX is whatever vertical space the counter above and the strip
+              below leave. The GROUP inside it is measured against that box and
+              scaled by `fit`, so text and CTA move together and the button sits
+              directly under however much text the active item has, instead of
+              holding one Y while the text overruns it.
+
+              overflow-hidden stays as the backstop for content that will not
+              fit even at FIT.min: a centered flex child taller than its box
+              spills BOTH ways, and the top half bled up under the fixed navbar. */}
+          <div
+            ref={fitBoxRef}
+            className="flex-1 min-h-0 w-full flex flex-col justify-center items-start md:items-end overflow-hidden"
+          >
+            {/* shrink-0 is for the measurement, not the look: as a flex child
+                this would otherwise be squeezed to the box height and report a
+                clamped scrollHeight, so the fit pass could never see how much
+                taller than the box the content actually wants to be. */}
+            <div
+              ref={fitContentRef}
+              className="w-full shrink-0 flex flex-col items-start md:items-end"
+              style={{ fontSize: `${fit}em` }}
+            >
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
@@ -695,11 +939,10 @@ export default function DiscoverPage() {
                 </p>
               </div>
             )}
-            </div>
 
-            {/* CTA — fixed-height row anchored to the bottom of the content column, so
-                the button holds one Y no matter how tall the active item's text runs */}
-            <div className="shrink-0 w-full h-[3.5em] mt-[2em] mb-0 flex items-center md:justify-end">
+            {/* CTA — in flow directly under the text, so it rides with the
+                content instead of anchoring to the column's bottom edge */}
+            <div className="shrink-0 mt-[2em] flex items-center">
               <Link
                 to={active ? active.href : activeMode.href}
                 // px/py/gap are divided by 0.875 because an `em` length on an
@@ -708,8 +951,14 @@ export default function DiscoverPage() {
                 className="group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.571em] bg-brand-navy text-white text-[0.875em] font-medium tracking-wide shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
               >
                 {active ? 'View Details' : `Browse ${activeMode.label}`}
-                <ArrowRight size={px(16)} className="group-hover:translate-x-1 transition-transform" />
+                {/* Icons take numeric px, so the fit multiplier that the `em`
+                    lengths get for free has to be applied by hand here */}
+                <ArrowRight
+                  size={Math.round(16 * scale * fit)}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
               </Link>
+            </div>
             </div>
           </div>
 
@@ -748,35 +997,36 @@ export default function DiscoverPage() {
                   style={count > 0 ? { width: slots * step - GAP } : undefined}
                 >
                 <div
+                  ref={trackRef}
                   className="flex items-end gap-[0.75em]"
                   style={{
                     transform: `translateX(${-pos * step}px)`,
-                    // Same curve as the ghost expand — the two motions share
-                    // one clock and read as a single gesture
+                    // Leaves fast and settles — the expand is kicked off partway
+                    // through this (MOTION.promoteAt), so the two overlap and
+                    // read as a single gesture rather than two staged legs
                     transition: trackTransition
-                      ? `transform ${trackDur}s cubic-bezier(0.65, 0, 0.35, 1)`
+                      ? `transform ${trackDur}s ${MOTION.slideEase}`
                       : 'none',
                     willChange: trackTransition ? 'transform' : undefined,
                   }}
                   onTransitionEnd={(e) => {
                     if (e.propertyName !== 'transform' || e.target !== e.currentTarget) return
                     setTrackAnimating(false)
-                    // Promote in the same event batch — rotate-finish and
-                    // expand-start commit in one render, no dead frames
-                    if (pendingIndex !== null && pendingIndex < count && pos === targetPos) {
-                      setIndex(pendingIndex)
-                      setPendingIndex(null)
-                    }
+                    // Backstop only: the timer normally promotes at 60% of this
+                    // slide. Still needed for the case where the transition is
+                    // cut short or never fires.
+                    if (pendingIndex !== null && pendingIndex < count && pos === targetPos) promote()
                   }}
                 >
                 {trackItems.map((item, t) => {
                   const itemIdx = itemIdxAt(t)
                   const isActive = itemIdx === index
-                  // The ghost's origin copy snap-hides the instant the ghost
-                  // mounts on its exact rect — the card visually "becomes" the
-                  // expanding hero. Rightward-only rotation then carries this
-                  // hidden copy out through the clipped right edge, so it
-                  // never leaves a hole in the settled strip.
+                  // The ghost's origin copy hands itself over the instant the
+                  // ghost mounts on its rect — a short fade rather than a snap,
+                  // which is what lets the ghost be a bare image instead of
+                  // carrying a replica of this card inside it. Rightward-only
+                  // rotation then carries the hidden copy out through the
+                  // clipped right edge, so it never leaves a hole in the strip.
                   const hidden = anim?.fromT === t
                   return (
                     <button
@@ -787,11 +1037,13 @@ export default function DiscoverPage() {
                       }}
                       style={{
                         opacity: hidden ? 0 : 1,
-                        transition: hidden ? 'none' : undefined,
+                        transition: hidden
+                          ? `opacity ${reducedMotion ? 0 : MOTION.cardOut}ms linear`
+                          : undefined,
                         pointerEvents: hidden ? 'none' : undefined,
                       }}
                       onClick={() => select(itemIdx)}
-                      className={`group text-left shrink-0 w-[8.6em] rounded-[0.5em] overflow-hidden transition-all duration-300 ${
+                      className={`group text-left shrink-0 w-[8.6em] rounded-[0.5em] overflow-hidden transition-[transform,background-color,box-shadow,opacity] duration-200 ease-out motion-reduce:transition-none ${
                         isActive
                           ? 'bg-ktip-cream shadow-hard -translate-y-[0.25em]'
                           : 'bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:-translate-y-[0.25em] hover:scale-[1.03] hover:shadow-hard'
@@ -807,7 +1059,13 @@ export default function DiscoverPage() {
                             src={item.image}
                             alt=""
                             className="w-full h-full object-cover photo-dimmable"
-                            loading="lazy"
+                            // NOT lazy. There are at most MAX_ITEMS distinct
+                            // images and the hero has already fetched them, but
+                            // the track is tripled and clipped, so lazy copies
+                            // decode only as rotation reveals them — cards
+                            // visibly popping in mid-slide, which reads as the
+                            // strip reloading itself.
+                            decoding="sync"
                           />
                         ) : (
                           <activeMode.icon
