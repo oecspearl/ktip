@@ -3,11 +3,15 @@ import type { Database } from '../types/database'
 import { hasStaleSession, clearSupabaseSession } from './auth-utils'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Supabase's current key scheme issues a `sb_publishable_…` key; the older
+// `anon` JWT is still accepted, so both names are read and the new one wins.
+// Both are safe in the browser — they carry no privileges beyond RLS.
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'Missing Supabase environment variables. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
+    'Missing Supabase environment variables. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or the legacy VITE_SUPABASE_ANON_KEY) are set.'
   )
 }
 

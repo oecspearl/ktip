@@ -30,6 +30,9 @@ import {
   ClipboardList,
   LayoutDashboard,
   Inbox,
+  Trophy,
+  CalendarDays,
+  CalendarPlus,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
@@ -65,7 +68,6 @@ const SHORTCUT_HINT =
 const leadingLinks = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
-  { name: 'Events', href: '/events', icon: Calendar },
 ]
 
 // Standalone links rendered after the dropdowns
@@ -75,6 +77,21 @@ const trailingLinks = [
 
 // Dropdown groups
 const navDropdowns: NavDropdown[] = [
+  {
+    // Events moved out of leadingLinks when the virtual hackathon landed. A
+    // dropdown trigger is a <button>, not a <Link>, so /events has to be the
+    // first item or the listing becomes unreachable from the bar.
+    id: 'events',
+    name: 'Events',
+    icon: Calendar,
+    items: [
+      { name: 'All Events', href: '/events', icon: Calendar, description: 'Hackathons, workshops, meetups and conferences' },
+      { name: 'Virtual Hackathon', href: '/hackathons', icon: Trophy, description: 'Enter the live venue, find a team and build' },
+      { name: 'Event Calendar', href: '/events?view=calendar', icon: CalendarDays, description: 'Month-by-month view of what is scheduled' },
+      { name: 'Create an Event', href: '/events/new', icon: CalendarPlus, description: 'Publish an event and open registrations' },
+      { name: 'My Events', href: '/dashboard/events', icon: LayoutDashboard, description: 'Events you organise or registered for' },
+    ],
+  },
   {
     id: 'funding',
     name: 'Funding',
@@ -806,17 +823,22 @@ export function Navbar() {
 
             {/* Quick Actions (moved from DiscoverPage action band) */}
             <div className="space-y-1 px-2 mb-3">
-              <Link
-                to="/projects/new"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-lg bg-ktip-tropical-50 text-ktip-tropical-700 hover:bg-ktip-tropical-100 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Zap size={18} />
-                  <span className="font-semibold text-sm">Become a Contributor</span>
-                </div>
-                <ChevronRight size={16} />
-              </Link>
+              {/* Signed-out visitors keep the CTA — it routes them to login,
+                  which is the point. Hidden only for members whose role cannot
+                  create a project, where it would dead-end at a denial. */}
+              {(!auth.user || auth.can('project:create')) && (
+                <Link
+                  to="/projects/new"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-ktip-tropical-50 text-ktip-tropical-700 hover:bg-ktip-tropical-100 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Zap size={18} />
+                    <span className="font-semibold text-sm">Become a Contributor</span>
+                  </div>
+                  <ChevronRight size={16} />
+                </Link>
+              )}
               <Link
                 to="/grants"
                 onClick={() => setMobileMenuOpen(false)}

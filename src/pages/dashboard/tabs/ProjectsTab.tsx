@@ -18,9 +18,11 @@ export default function ProjectsTab() {
           <FolderKanban size={32} className="text-ktip-sand-400" />
         </div>
         <p className="text-ktip-sand-600 mb-4">No projects yet.</p>
-        <Link to="/projects/new">
-          <Button icon={<Plus size={18} />}>Create a project</Button>
-        </Link>
+        {auth.can('project:create') && (
+          <Link to="/projects/new">
+            <Button icon={<Plus size={18} />}>Create a project</Button>
+          </Link>
+        )}
       </div>
     )
   }

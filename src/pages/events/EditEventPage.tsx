@@ -1,11 +1,13 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useRef, useState, useEffect, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { useEvent, useUpdateEvent } from '../../hooks/useEvents'
+import { useEvent, useUpdateEvent, useDeleteEvent } from '../../hooks/useEvents'
+import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
+import { describeEventDeletion } from '../../lib/delete-guard'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
 import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
@@ -23,6 +25,7 @@ export default function EditEventPage() {
   const toast = useToast()
   const { event, loading: eventLoading } = useEvent(params.id)
   const { updateEvent, loading: updating } = useUpdateEvent()
+  const { deleteEvent } = useDeleteEvent()
 
   usePageTitle(event?.title ? `Edit: ${event.title}` : 'Edit Event')
 
@@ -46,6 +49,32 @@ export default function EditEventPage() {
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
+
+  const formRef = useRef<HTMLFormElement>(null)
+
+  /** Schema field name -> the label the user actually sees on the input. */
+  const FIELD_LABELS: Record<string, string> = {
+    title: 'Event Title',
+    description: 'Description',
+    event_type: 'Event Type',
+    location: 'Location',
+    start_date: 'Start Date',
+    end_date: 'End Date',
+    capacity: 'Capacity',
+  }
+
+  /**
+   * Inline errors sit beside their inputs, hundreds of pixels above the submit
+   * button on a form this long, so a failure reads as a dead button. Every
+   * failure names its fields in a banner rendered at both ends of the form and
+   * scrolls back to them.
+   */
+  const surfaceError = (message: string) => {
+    setErrorMessage(message)
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   useEffect(() => {
     if (event && !initialized) {
@@ -120,6 +149,13 @@ export default function EditEventPage() {
         }
       })
       setErrors(fieldErrors)
+
+      const named = Object.keys(fieldErrors).map((key) => FIELD_LABELS[key] || key)
+      surfaceError(
+        named.length === 1
+          ? `${named[0]}: ${fieldErrors[Object.keys(fieldErrors)[0]]}`
+          : `Please fix ${named.length} fields before saving: ${named.join(', ')}.`
+      )
       return
     }
 
@@ -147,8 +183,10 @@ export default function EditEventPage() {
       toast.success('Event updated successfully!')
       navigate(`/events/${params.id}`)
     } catch (error: any) {
+      // A row-level-security refusal arrives here. The toast dismisses itself
+      // after 4s, so the banner is the durable copy.
       toast.error(error.message || 'Failed to update event')
-      setErrorMessage(error.message || 'Failed to update event')
+      surfaceError(error.message || 'Failed to update event')
     }
   }
 
@@ -191,9 +229,12 @@ export default function EditEventPage() {
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              <div
+                role="alert"
+                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"
+              >
                 {errorMessage}
               </div>
             )}
@@ -450,6 +491,16 @@ export default function EditEventPage() {
               </label>
             </div>
 
+            {/* Second copy, next to the button — where the user is looking. */}
+            {errorMessage && (
+              <div
+                role="alert"
+                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"
+              >
+                {errorMessage}
+              </div>
+            )}
+
             {/* Submit Button */}
             <div className="flex items-center gap-4">
               <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>
@@ -465,6 +516,25 @@ export default function EditEventPage() {
               </button>
             </div>
           </form>
+
+          {/* Outside the form so Enter in a text field can never reach it.
+              The RSVP count is not loaded on this page, so the guard gets null
+              and falls back to the event's publication status. */}
+          <div className="mt-10">
+            <DeleteEntityControl
+              variant="zone"
+              noun="event"
+              title={event.title}
+              impact={describeEventDeletion({
+                status: event.status,
+                rsvpCount: null,
+                hasVenue: !!event.has_venue,
+                hasChallenge: !!event.has_challenge,
+              })}
+              onDelete={() => deleteEvent(event.id)}
+              redirectTo="/events"
+            />
+          </div>
         </div>
       </div>
     </>

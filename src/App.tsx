@@ -1,5 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, RouterProvider, Outlet, Link, Navigate } from 'react-router'
+import * as Sentry from '@sentry/react'
+import {
+  createBrowserRouter as createBrowserRouterBase,
+  RouterProvider,
+  Outlet,
+  Link,
+  Navigate,
+} from 'react-router'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AchievementProvider } from './contexts/AchievementContext'
@@ -7,9 +14,18 @@ import { AchievementUnlockModal } from './components/achievements/AchievementUnl
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
+import { PermissionRoute } from './components/PermissionRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
+import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { MainLayout } from './components/layout/MainLayout'
 import { AdminLayout } from './components/layout/AdminLayout'
+import { AppError } from './lib/app-error'
+import { captureException } from './lib/monitoring'
+
+// Wrapped so Sentry names transactions after the matched route pattern
+// (/projects/:id) instead of the literal URL, which would otherwise create one
+// transaction per record and make performance data unaggregatable.
+const createBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRouterBase)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,7 +51,20 @@ function Placeholder() {
 
 function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
   return async () => {
-    const mod = await importer().catch(() => ({ default: Placeholder }))
+    const mod = await importer().catch((error: unknown) => {
+      // The Placeholder fallback is kept, but it is no longer silent: after a
+      // deploy this is how a stale chunk reference presents, and it looked
+      // identical to a page that was never ported.
+      captureException(
+        new AppError({
+          code: 'ROUTE_IMPORT_FAILED',
+          area: 'routing',
+          operation: 'lazy-import',
+          cause: error,
+        })
+      )
+      return { default: Placeholder }
+    })
     return { Component: mod.default }
   }
 }
@@ -130,10 +159,29 @@ const router = createBrowserRouter([
               },
               // Full-page receipt, deliberately outside the tab shell
               { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
-              { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
+              // Creating a project needs project:create (migration 064 put that
+              // check in the INSERT policy). Gated here so a role without it —
+              // investor, say — gets told why instead of filling in the whole
+              // form and collecting a 403 from RLS on submit.
+              {
+                element: <PermissionRoute require="project:create" />,
+                children: [
+                  { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
+                ],
+              },
               { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
               { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
               { path: '/events/:id/edit', lazy: lazyPage(() => import('./pages/events/EditEventPage')) },
+              // Virtual Hackathon (migration 070). Absolute literal paths —
+              // site-search.test.ts matches route paths literally, and only
+              // /hackathons is reachable from site-map.ts because a site-map
+              // href can never contain a :param.
+              { path: '/hackathons', lazy: lazyPage(() => import('./pages/hackathons/HackathonsPage')) },
+              { path: '/events/:id/venue', lazy: lazyPage(() => import('./pages/events/EventVenuePage')) },
+              {
+                path: '/events/:id/venue/room/:roomId',
+                lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+              },
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
@@ -205,6 +253,11 @@ const router = createBrowserRouter([
                   { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
                   { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
                   { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
+                  { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
+                  // Sends deliberate events to the live Sentry project, so it is
+                  // gated by AdminRoute like every other page here rather than
+                  // by a build flag.
+                  { path: '/admin/errors/simulate', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorSimulatorPage')) },
                 ],
               },
             ],
@@ -221,6 +274,10 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AppErrorBoundary>
+      {/* Outside the router: the choice gates analytics and performance tracing
+          for the whole app, including the auth pages, and it needs no route
+          context of its own. */}
+      <AnalyticsConsentBanner />
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <AuthProvider>

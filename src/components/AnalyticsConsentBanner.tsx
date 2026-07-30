@@ -1,0 +1,43 @@
+import { BarChart3, ShieldCheck } from 'lucide-react'
+import { setAnalyticsConsent, useAnalyticsConsent } from '../lib/analytics-consent'
+import { Button } from './ui/Button'
+
+export function AnalyticsConsentBanner() {
+  const consent = useAnalyticsConsent()
+  if (consent !== 'pending') return null
+
+  return (
+    <section
+      aria-label="Analytics preferences"
+      className="fixed inset-x-4 bottom-4 z-[110] mx-auto max-w-3xl rounded-xl border border-ktip-sand-200 bg-ktip-cream p-5 shadow-xl"
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="flex flex-1 items-start gap-3">
+          <div className="mt-0.5 rounded-lg bg-ktip-ocean-100 p-2 text-ktip-ocean-700">
+            <BarChart3 size={20} />
+          </div>
+          <div>
+            <h2 className="font-display font-bold text-ktip-sand-900">Help us improve KTIP</h2>
+            <p className="mt-1 text-sm leading-relaxed text-ktip-sand-600">
+              Optional usage analytics help us understand which pages and features are useful. We do not
+              record message or proposal content, and you can change this choice in Settings.
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<ShieldCheck size={17} />}
+            onClick={() => setAnalyticsConsent('denied')}
+          >
+            Necessary only
+          </Button>
+          <Button size="sm" onClick={() => setAnalyticsConsent('granted')}>
+            Allow analytics
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}

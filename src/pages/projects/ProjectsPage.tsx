@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { ProjectCard } from '../../components/projects/ProjectCard'
+import { useAuth } from '../../contexts/AuthContext'
 import { useProjects } from '../../hooks/useProjects'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
@@ -18,6 +19,12 @@ import { debounce, formatDate } from '../../lib/utils'
 
 export default function ProjectsPage() {
   usePageTitle('Projects')
+  const auth = useAuth()
+  // This page is public. Signed-out visitors keep every Create Project CTA —
+  // it sends them to login, which is the funnel. Members whose role lacks
+  // project:create (investor, for one) do not, since migration 064 made that
+  // permission the RLS insert check and the form would only end in a denial.
+  const canCreateProject = !auth.user || auth.can('project:create')
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedPhase, setSelectedPhase] = useState<string>('')
@@ -84,11 +91,13 @@ export default function ProjectsPage() {
         imageSeed="projects"
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Projects' }]}
         actions={
-          <Link to="/projects/new">
-            <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
-              Create Project
-            </Button>
-          </Link>
+          canCreateProject ? (
+            <Link to="/projects/new">
+              <Button icon={<Plus size={16} />} size="sm" className="bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700 text-sm">
+                Create Project
+              </Button>
+            </Link>
+          ) : undefined
         }
       />
 
@@ -214,7 +223,7 @@ export default function ProjectsPage() {
                     ? 'Try adjusting your filters or search query'
                     : 'Be the first to create a project!'}
                 </p>
-                {!hasActiveFilters && (
+                {!hasActiveFilters && canCreateProject && (
                   <Link to="/projects/new">
                     <Button icon={<Plus size={20} />}>Create First Project</Button>
                   </Link>

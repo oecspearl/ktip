@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -46,6 +46,33 @@ export default function CreateEventPage() {
 
   const isAdmin = auth.profile?.roles?.includes('oecs')
 
+  const formRef = useRef<HTMLFormElement>(null)
+
+  /** Schema field name → the label the user actually sees on the input. */
+  const FIELD_LABELS: Record<string, string> = {
+    title: 'Event Title',
+    description: 'Description',
+    event_type: 'Event Type',
+    location: 'Location',
+    start_date: 'Start Date',
+    end_date: 'End Date',
+    capacity: 'Capacity',
+  }
+
+  /**
+   * Every inline error on this form sits beside its input, and the inputs are
+   * roughly 800px above the submit button. Without this, a validation failure
+   * is indistinguishable from a dead button — which is exactly how it was
+   * reported. So a failure always does two things: names the fields in a banner
+   * rendered on both sides of the form, and scrolls back to them.
+   */
+  const surfaceError = (message: string) => {
+    setErrorMessage(message)
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
   const combineDatetime = (date: string, time: string): string => {
     if (!date) return ''
     const datetime = time ? `${date}T${time}:00` : `${date}T00:00:00`
@@ -82,6 +109,13 @@ export default function CreateEventPage() {
         }
       })
       setErrors(fieldErrors)
+
+      const named = Object.keys(fieldErrors).map((key) => FIELD_LABELS[key] || key)
+      surfaceError(
+        named.length === 1
+          ? `${named[0]}: ${fieldErrors[Object.keys(fieldErrors)[0]]}`
+          : `Please fix ${named.length} fields before creating this event: ${named.join(', ')}.`
+      )
       return
     }
 
@@ -112,8 +146,10 @@ export default function CreateEventPage() {
       toast.success('Event created successfully!')
       navigate(`/events/${event.id}`)
     } catch (error: any) {
+      // A row-level-security refusal or a missing column arrives here. The toast
+      // dismisses itself after 4s, so the banner is the durable copy.
       toast.error(error.message || 'Failed to create event')
-      setErrorMessage(error.message || 'Failed to create event')
+      surfaceError(error.message || 'Failed to create event')
     }
   }
 
@@ -136,9 +172,12 @@ export default function CreateEventPage() {
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              <div
+                role="alert"
+                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"
+              >
                 {errorMessage}
               </div>
             )}
@@ -418,6 +457,20 @@ export default function CreateEventPage() {
                 </span>
               </label>
             </div>
+
+            {/*
+              Second copy of the banner, next to the button. The first one is at
+              the top of a form this long, which is nowhere near where the user
+              is looking when they click submit.
+            */}
+            {errorMessage && (
+              <div
+                role="alert"
+                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"
+              >
+                {errorMessage}
+              </div>
+            )}
 
             {/* Submit Button */}
             <div className="flex items-center gap-4">

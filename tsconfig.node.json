@@ -35,6 +35,9 @@
     "api/_lib",
     "api/auth",
     "api/vc",
+    "api/_monitoring.ts",
+    "api/_sentry-api.ts",
+    "api/admin/sentry.ts",
     "src/lib/__tests__"
   ]
 }

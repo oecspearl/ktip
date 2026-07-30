@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
@@ -135,6 +136,9 @@ export default defineConfig(({ mode }) => {
   for (const key of [
     'VITE_SUPABASE_URL',
     'VITE_SUPABASE_ANON_KEY',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
+    'SUPABASE_SECRET_KEY',
+    // Deprecated; still promoted so an un-migrated local .env keeps working.
     'SUPABASE_SERVICE_ROLE_KEY',
     'VC_ISSUER',
     'VC_JWKS_URL',
@@ -145,20 +149,64 @@ export default defineConfig(({ mode }) => {
     'VC_USERINFO_URL',
     'COMMONS_BASE_URLS',
     'COMMONS_API_KEY',
+    // /api/admin/sentry reads these; without them it answers 501 and the
+    // dashboard shows setup instructions instead of issues.
+    'SENTRY_AUTH_TOKEN',
+    'SENTRY_ORG',
+    'SENTRY_PROJECT',
+    'SENTRY_API_BASE_URL',
+    'SENTRY_DSN',
+    'SENTRY_ENVIRONMENT',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }
 
+  // Stamped into the bundle so a browser error can be tied to the exact commit
+  // that produced it, and matched against the uploaded source maps.
+  const sentryRelease = env.VITE_SENTRY_RELEASE || env.VERCEL_GIT_COMMIT_SHA || ''
+  // Source maps are only emitted when they can actually be uploaded and then
+  // deleted; shipping them publicly would hand out the unminified source.
+  const uploadSentrySourceMaps = Boolean(
+    env.SENTRY_AUTH_TOKEN && env.SENTRY_ORG && env.SENTRY_PROJECT && sentryRelease
+  )
+
   return {
+    define: {
+      'import.meta.env.VITE_SENTRY_RELEASE': JSON.stringify(sentryRelease),
+    },
+    build: {
+      sourcemap: uploadSentrySourceMaps ? ('hidden' as const) : false,
+    },
     plugins: [
       react(),
       edgeApiPlugin(openaiKey),
+      uploadSentrySourceMaps &&
+        sentryVitePlugin({
+          authToken: env.SENTRY_AUTH_TOKEN,
+          org: env.SENTRY_ORG,
+          project: env.SENTRY_PROJECT,
+          release: { name: sentryRelease },
+          sourcemaps: { filesToDeleteAfterUpload: ['dist/**/*.map'] },
+          telemetry: false,
+        }),
       VitePWA({
         registerType: 'autoUpdate',
         manifest: false, // Use public/manifest.json
         workbox: {
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          // Any .html sitting in public/ gets precached by the pattern above,
+          // and Workbox's precache route defaults to cleanURLs: true — so a
+          // file at public/auth/callback.html silently answers /auth/callback
+          // and the SPA route of that name never runs. index.html is the only
+          // HTML this app should ever serve; keep stray pages out of the
+          // manifest so that shadowing cannot come back.
+          globIgnores: ['**/node_modules/**/*', '**/auth/**'],
+          // vercel.json rewrites these two paths to Edge Functions rather than
+          // to the SPA. They are reached by a top-level navigation, so the
+          // navigation fallback would answer them with index.html and the
+          // Virtual Campus handoff would never touch the server.
+          navigateFallbackDenylist: [/^\/api\//, /^\/auth\/vc\//],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
@@ -170,6 +218,12 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     resolve: {
+      // Kept in step with tsconfig.app.json "paths" and vitest.config.ts.
+      alias: {
+        // process.cwd(), not __dirname: this config is ESM, where __dirname is
+        // undefined. Matches how loadEnv and the api/ loader above resolve.
+        '@': resolve(process.cwd(), 'src'),
+      },
       dedupe: ['react', 'react-dom', '@codemirror/state', '@codemirror/view', '@codemirror/language'],
     },
   }

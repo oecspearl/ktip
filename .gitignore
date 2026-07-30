@@ -35,3 +35,9 @@ build
 
 # Supabase
 .supabase
+
+# Local scratch notes — may contain test credentials
+.info
+
+# Playwright MCP screenshots and snapshots
+.playwright-mcp

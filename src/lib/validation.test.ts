@@ -31,7 +31,7 @@ describe('signupSchema', () => {
   it('accepts valid signup data', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
-      password: 'password123',
+      password: 'Password123!',
       display_name: 'John Doe',
       role: 'student',
     })
@@ -41,7 +41,7 @@ describe('signupSchema', () => {
   it('rejects invalid role', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
-      password: 'password123',
+      password: 'Password123!',
       display_name: 'John Doe',
       role: 'invalid_role',
     })
@@ -51,7 +51,7 @@ describe('signupSchema', () => {
   it('rejects short display name', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
-      password: 'password123',
+      password: 'Password123!',
       display_name: 'J',
       role: 'student',
     })
