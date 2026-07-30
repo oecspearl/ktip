@@ -100,7 +100,7 @@ export default async function handler(request: Request): Promise<Response> {
     return typeof value === 'string' && value.trim() ? value.trim() : null
   }
 
-  const [enrollments, catalog] = await Promise.all([
+  const [{ enrollments, unavailable }, catalog] = await Promise.all([
     loadEnrollments(identity.email),
     loadCatalog(),
   ])
@@ -142,7 +142,8 @@ export default async function handler(request: Request): Promise<Response> {
     (existing?.data as ResumeData) ?? null,
     (existing?.sources as ResumeSources) ?? null,
     generated,
-    RESUME_PATHS
+    RESUME_PATHS,
+    'vc'
   )
 
   // Written through the caller's client so RLS is the thing that decides this
@@ -167,6 +168,13 @@ export default async function handler(request: Request): Promise<Response> {
       courses: merged.data.courses.length,
       completed: merged.data.courses.filter((c) => c.status === 'completed').length,
       skipped: RESUME_PATHS.filter((p) => merged.sources[p] === 'manual'),
+      /**
+       * No host could be asked — a missing COMMONS_API_KEY or a campus outage.
+       * Reported separately because "0 courses" as a result is a claim about the
+       * learner's education, and the caller must be able to say "we could not
+       * reach the campus" instead.
+       */
+      coursesUnavailable: unavailable,
     },
     200
   )

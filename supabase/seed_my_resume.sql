@@ -17,12 +17,16 @@
 --   psql "$DATABASE_URL" -f supabase/seed_my_resume.sql
 -- ============================================================================
 
--- ── The account. Change this one line to seed somebody else. ────────────────
+-- ── The account. Put YOUR sign-in address on the line below before running. ──
 -- A temp table rather than psql's \set, so the same file works pasted into the
 -- Supabase SQL editor, which does not process backslash commands.
+--
+-- Left as a placeholder on purpose: this file is committed, and a real address
+-- baked into it is one `git log` away from being a shared record of somebody's
+-- personal email. The block raises rather than guessing if you forget.
 DROP TABLE IF EXISTS seed_target;
 CREATE TEMP TABLE seed_target(email TEXT);
-INSERT INTO seed_target VALUES ('delonpierre758@gmail.com');
+INSERT INTO seed_target VALUES ('you@example.com');
 
 DO $$
 DECLARE
@@ -32,12 +36,18 @@ DECLARE
 BEGIN
   SELECT email INTO v_email FROM seed_target LIMIT 1;
 
+  IF v_email = 'you@example.com' THEN
+    RAISE EXCEPTION 'Set the email at the top of seed_my_resume.sql to your own sign-in address first.';
+  END IF;
+
   SELECT id INTO v_user FROM auth.users WHERE lower(email) = lower(v_email);
   IF v_user IS NULL THEN
     RAISE EXCEPTION 'No auth user with email %. Sign in once first.', v_email;
   END IF;
 
-  SELECT COALESCE(NULLIF(display_name, ''), 'Delon Pierre') INTO v_name
+  -- Falls back to the address rather than a name, so the placeholder document
+  -- never carries a real person's name they did not put there.
+  SELECT COALESCE(NULLIF(display_name, ''), split_part(v_email, '@', 1)) INTO v_name
   FROM profiles WHERE id = v_user;
 
   -- ── Profile: only the blanks ──────────────────────────────────────────────

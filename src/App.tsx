@@ -126,6 +126,11 @@ const router = createBrowserRouter([
           // returns nothing unless the owner published it, so the page 404s
           // itself rather than relying on this route to hide anything.
           { path: '/u/:id/cv', lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
+          // The organisation's answer to /u/:id, and public for the same
+          // reason. public_employer() returns nothing unless the business is
+          // Chamber-verified, so an unverified registration cannot masquerade
+          // as a credential by having a page at all.
+          { path: '/org/:slug', lazy: lazyPage(() => import('./pages/sme/OrgProfilePage')) },
           { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
           { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
@@ -219,6 +224,8 @@ const router = createBrowserRouter([
               { path: '/collaborate/video', lazy: lazyPage(() => import('./pages/collaborate/VideoConferencePage')) },
               { path: '/invitations', lazy: lazyPage(() => import('./pages/InvitationsPage')) },
               { path: '/sme/verification', lazy: lazyPage(() => import('./pages/sme/ChamberOnboardingPage')) },
+              // Organisation-tier counterpart to /cv/edit.
+              { path: '/org/edit', lazy: lazyPage(() => import('./pages/sme/OrgProfileEditPage')) },
             ],
           },
 

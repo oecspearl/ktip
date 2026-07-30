@@ -1,8 +1,10 @@
 import {
   AcademicTable,
+  AwardList,
   ContactList,
   CourseTable,
   PlainHeading,
+  ProjectList,
   SheetFrame,
   type SheetProps,
 } from './SheetFrame'
@@ -115,6 +117,24 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
             Courses
           </PlainHeading>
           <CourseTable data={data} />
+        </section>
+      )}
+
+      {data.projects.length > 0 && (
+        <section className="mt-6">
+          <PlainHeading color={color} design={design}>
+            Projects
+          </PlainHeading>
+          <ProjectList data={data} />
+        </section>
+      )}
+
+      {data.awards.length > 0 && (
+        <section className="mt-6">
+          <PlainHeading color={color} design={design}>
+            Awards &amp; Recognition
+          </PlainHeading>
+          <AwardList data={data} />
         </section>
       )}
 

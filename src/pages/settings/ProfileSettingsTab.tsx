@@ -50,6 +50,10 @@ export function ProfileSettingsTab() {
   const [skills, setSkills] = useState<string[]>(auth.profile?.skills || [])
   const [interests, setInterests] = useState<string[]>(auth.profile?.interests || [])
   const [openTo, setOpenTo] = useState<string[]>(auth.profile?.open_to || [])
+  // 082. These three feed the CV — see buildKtipResumeData in api/_lib/cv-build.ts.
+  const [phone, setPhone] = useState(auth.profile?.phone || '')
+  const [website, setWebsite] = useState(auth.profile?.website || '')
+  const [languages, setLanguages] = useState<string[]>(auth.profile?.languages || [])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -68,6 +72,9 @@ export function ProfileSettingsTab() {
       setSkills(p.skills || [])
       setInterests(p.interests || [])
       setOpenTo(p.open_to || [])
+      setPhone(p.phone || '')
+      setWebsite(p.website || '')
+      setLanguages(p.languages || [])
       setInitialized(true)
     }
   }, [auth.profile, initialized])
@@ -142,6 +149,9 @@ export function ProfileSettingsTab() {
       skills,
       interests,
       open_to: openTo as any,
+      phone: phone || undefined,
+      website: website || undefined,
+      languages,
     }
 
     const result = profileUpdateSchema.safeParse(input)
@@ -174,6 +184,9 @@ export function ProfileSettingsTab() {
         skills,
         interests,
         open_to: openTo,
+        phone: phone || null,
+        website: website || null,
+        languages,
       })
       toast.success('Profile updated!')
     } catch (err: any) {
@@ -264,6 +277,31 @@ export function ProfileSettingsTab() {
 
           <IndustrySelect value={industry} onChange={setIndustry} />
 
+          {/* Both land on the CV — phone in the contact block, website as the
+              "Website" social. Kept here rather than in the CV editor so the
+              directory and a public profile can read the same value. */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="Phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              error={errors.phone}
+              placeholder="+1 758 000 0000"
+              helperText="Shown on your CV. Never shown in the member directory."
+              fullWidth
+            />
+            <Input
+              label="Website"
+              type="url"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              error={errors.website}
+              placeholder="https://example.org"
+              fullWidth
+            />
+          </div>
+
           <div className="flex flex-col gap-1.5 w-full">
             <label className="text-sm font-medium text-ktip-sand-700">Country</label>
             <select
@@ -349,6 +387,18 @@ export function ProfileSettingsTab() {
           suggestions={INTEREST_SUGGESTIONS}
           max={LIMITS.MAX_INTERESTS}
           placeholder="Type an interest and press Enter..."
+        />
+      </Card>
+
+      {/* Languages */}
+      <Card id="languages" data-spy="Languages" className="scroll-mt-24">
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Languages</h2>
+        <TagInput
+          description="Languages you speak. These appear on your CV — without them it can only guess one from your Virtual Campus locale."
+          values={languages}
+          onChange={setLanguages}
+          max={12}
+          placeholder="Type a language and press Enter..."
         />
       </Card>
 

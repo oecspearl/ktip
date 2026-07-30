@@ -1,8 +1,10 @@
 import { ResumePortrait } from '../ResumePortrait'
 import {
   AcademicTable,
+  AwardList,
   ContactList,
   CourseTable,
+  ProjectList,
   RuleHeading,
   SheetFrame,
   SkillCircles,
@@ -171,6 +173,24 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
               Courses
             </RuleHeading>
             <CourseTable data={data} />
+          </section>
+        )}
+
+        {data.projects.length > 0 && (
+          <section className="mt-8">
+            <RuleHeading color={color} design={design}>
+              Projects
+            </RuleHeading>
+            <ProjectList data={data} />
+          </section>
+        )}
+
+        {data.awards.length > 0 && (
+          <section className="mt-8">
+            <RuleHeading color={color} design={design}>
+              Awards &amp; Recognition
+            </RuleHeading>
+            <AwardList data={data} />
           </section>
         )}
 

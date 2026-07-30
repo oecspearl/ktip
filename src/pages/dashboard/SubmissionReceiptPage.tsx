@@ -81,7 +81,7 @@ export default function SubmissionReceiptPage() {
             All submissions
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div data-tutorial="receipt-actions" className="flex items-center gap-3">
             <Link to={receipt.link}>
               <Button variant="outline" size="sm" icon={<ExternalLink size={16} />}>
                 {SOURCE_LINK_LABELS[receipt.kind] || 'View source'}
@@ -97,7 +97,10 @@ export default function SubmissionReceiptPage() {
           <SubmissionKindBadge kind={receipt.kind} />
         </div>
 
-        <div className="border border-ktip-sand-200 rounded-2xl p-6 md:p-8 bg-ktip-cream print:border-0 print:p-0 print:rounded-none">
+        <div
+          data-tutorial="receipt-document"
+          className="border border-ktip-sand-200 rounded-2xl p-6 md:p-8 bg-ktip-cream print:border-0 print:p-0 print:rounded-none"
+        >
           <ReceiptDocument
             title={receipt.title}
             subtitle={receipt.subtitle}

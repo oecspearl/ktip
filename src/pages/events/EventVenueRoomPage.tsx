@@ -203,15 +203,17 @@ export default function EventVenueRoomPage() {
               </p>
             </div>
 
-            <RoomChatPanel
-              room={room}
-              canPost={canPost && room.is_open}
-              canModerate={isHost}
-              className="h-[32rem]"
-            />
+            <div data-tutorial="room-chat">
+              <RoomChatPanel
+                room={room}
+                canPost={canPost && room.is_open}
+                canModerate={isHost}
+                className="h-[32rem]"
+              />
+            </div>
           </div>
 
-          <aside>
+          <aside data-tutorial="room-presence">
             <RoomOccupantList
               occupants={inRoom}
               title="In this room"

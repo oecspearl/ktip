@@ -156,7 +156,7 @@ export default function ReportUserPage() {
         {/* Report Form */}
         {reportedUser && (
           <Card>
-            <form onSubmit={handleSubmitClick} className="space-y-6">
+            <form data-tutorial="report-form" onSubmit={handleSubmitClick} className="space-y-6">
               {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-2">

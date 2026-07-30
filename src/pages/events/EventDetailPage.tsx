@@ -404,7 +404,10 @@ export default function EventDetailPage() {
               one thing an attendee is looking for is the way in.
             */}
             {event.has_venue && (
-              <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50 p-5 sm:flex-row sm:items-center">
+              <div
+                data-tutorial="event-venue-door"
+                className="mb-8 flex flex-col gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50 p-5 sm:flex-row sm:items-center"
+              >
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-lg font-bold text-ktip-ocean-800">
                     This event has a live virtual venue
@@ -506,7 +509,7 @@ export default function EventDetailPage() {
           {/* === Sidebar === */}
           <div className="lg:col-span-1">
             {/* Widget 1: Event Registration */}
-            <div className="mb-10">
+            <div data-tutorial="event-registration" className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                 Event Registration
               </h3>

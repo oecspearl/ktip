@@ -167,6 +167,8 @@ export const BENTO_GRADIENTS = [
 export const gradientFor = (seed: string) => BENTO_GRADIENTS[hash(seed) % BENTO_GRADIENTS.length]
 
 // Full-bleed hero wash — same navy-by-day / green-by-night rule, tuned lighter
-// so the brighter photos still read through it.
+// so the brighter photos still read through it. This wash stacks with other
+// overlays wherever it is used, and opacities multiply, so it is deliberately
+// well under half: at /70 the Discover hero was passing 11% of its photography.
 export const HERO_WASH =
-  'from-[#041E42]/70 via-[#041E42]/25 to-transparent dark:from-[#06210A]/75 dark:via-[#123D08]/28 dark:to-transparent'
+  'from-[#041E42]/45 via-[#041E42]/15 to-transparent dark:from-[#06210A]/50 dark:via-[#123D08]/18 dark:to-transparent'

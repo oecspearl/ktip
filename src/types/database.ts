@@ -17,8 +17,20 @@ export interface Database {
           skills: string[]
           interests: string[]
           open_to: string[]
+          // 082. Optional because a deploy can precede the migration.
+          phone?: string | null
+          website?: string | null
+          languages?: string[]
           is_verified: boolean
           connection_count_visibility: string
+          // 063. Long missing from this hand-written file; src/types/index.ts
+          // Profile has always been the accurate one.
+          active_role: string | null
+          is_suspended: boolean
+          suspended_until: string | null
+          suspension_reason: string | null
+          // 066.
+          leaderboard_visibility?: string
           created_at: string
           updated_at: string
         }
@@ -34,8 +46,16 @@ export interface Database {
           skills?: string[]
           interests?: string[]
           open_to?: string[]
+          phone?: string | null
+          website?: string | null
+          languages?: string[]
           is_verified?: boolean
           connection_count_visibility?: string
+          active_role?: string | null
+          is_suspended?: boolean
+          suspended_until?: string | null
+          suspension_reason?: string | null
+          leaderboard_visibility?: string
           created_at?: string
           updated_at?: string
         }
@@ -51,8 +71,16 @@ export interface Database {
           skills?: string[]
           interests?: string[]
           open_to?: string[]
+          phone?: string | null
+          website?: string | null
+          languages?: string[]
           is_verified?: boolean
           connection_count_visibility?: string
+          active_role?: string | null
+          is_suspended?: boolean
+          suspended_until?: string | null
+          suspension_reason?: string | null
+          leaderboard_visibility?: string
           created_at?: string
           updated_at?: string
         }

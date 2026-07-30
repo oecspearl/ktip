@@ -21,7 +21,7 @@ export const GRANTS_CATEGORY: HelpCategory = {
     {
       id: 'apply-grant',
       title: 'Applying in KTIP versus on an external site',
-      content: `There are two routes, and the grant decides which one you get.\n\nIf the funder supplied their own application link, the grant page shows "Apply on External Site" and takes you to their form. Nothing about that application is tracked in KTIP.\n\nOtherwise you get KTIP's built-in five-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.\n\nEither way, the deadline on the grant page is the one that counts.`,
+      content: `There are two routes, and the grant decides which one you get.\n\nIf the funder supplied their own application link, the grant page shows "Apply on External Site" and takes you to their form. Nothing about that application is tracked in KTIP.\n\nOtherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.\n\nEither way, the deadline on the grant page is the one that counts.`,
       tags: ['apply', 'external', 'wizard', 'grant', 'submit', 'deadline'],
     },
     {
@@ -48,8 +48,14 @@ export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
     {
       id: 'apply-for-grant',
       title: 'How do I use the application wizard?',
-      content: `Open a grant and click the apply button — it reads "Apply Now", or "Start Application" if your role needs a sponsor.\n\nThe wizard has five steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, and Impact & Review.\n\nYour work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n\nThe final step shows the whole application for review before you submit.`,
+      content: `Open a grant and click the apply button — it reads "Apply Now", or "Start Application" if your role needs a sponsor.\n\nThe wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Supporting documents, and Impact & Review.\n\nYour work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n\nThe final step shows the whole application for review before you submit.`,
       tags: ['apply', 'grant', 'application', 'wizard', 'steps'],
+    },
+    {
+      id: 'application-documents',
+      title: 'What do I upload on the Supporting documents step?',
+      content: `Step five of the wizard lists exactly what this call asks for. Every funder sets their own list, so read the one on your grant rather than assuming.\n\nA typical list is: a detailed budget covering the full amount requested, proof of registration, recent financial statements, a workplan, and any letters of support. Required items are marked; the rest strengthen the application without being mandatory.\n\nAccepted formats are PDF, Word, Excel, CSV, Markdown, plain text and images, up to 25MB per file. If a file is refused, the reason appears under the file picker — it is either the size or the format, nothing else.\n\nName each file for what it is. An assessor reading twenty applications should be able to tell your budget from your workplan without opening either.\n\nThese files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission.`,
+      tags: ['documents', 'upload', 'attach', 'budget', 'files', 'supporting', 'evidence', 'private'],
     },
     {
       id: 'sponsor-nomination',

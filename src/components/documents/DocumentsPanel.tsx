@@ -80,12 +80,20 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
           <div className="min-w-0">
             <h2 className="text-lg font-display font-bold text-ktip-sand-900">Documents</h2>
             <p className="text-sm text-ktip-sand-600">
-              Uploaded files, with an editable copy of their contents
+              {canEditEntity
+                ? 'Uploaded files, with an editable copy of their contents'
+                : entityType === 'grant'
+                  ? 'Published by the funder — the call, annexes and any templates'
+                  : 'Files attached to this project'}
             </p>
           </div>
         </div>
 
-        {auth.user && (
+        {/* Uploading here is the owner's act, not any member's. Migration 080
+            narrowed the INSERT policy to match; showing the button to everyone
+            only produced a refusal — and, before 080, published an applicant's
+            private files on a public grant page. */}
+        {auth.user && canEditEntity && (
           <Button size="sm" icon={<Upload size={14} />} onClick={() => open('upload')}>
             Upload
           </Button>
@@ -97,7 +105,11 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
       ) : !documents || documents.length === 0 ? (
         <p className="py-8 text-center text-sm text-ktip-sand-500">
           No documents yet.{' '}
-          {auth.user ? 'Upload the call for proposals, annexes or budget templates.' : 'Sign in to add one.'}
+          {canEditEntity
+            ? 'Upload the call for proposals, annexes or budget templates.'
+            : entityType === 'grant'
+              ? 'Your own supporting documents belong on your application, not here.'
+              : ''}
         </p>
       ) : (
         <div className="space-y-3">
@@ -116,7 +128,7 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
         </div>
       )}
 
-      {auth.user && (
+      {auth.user && canEditEntity && (
         <DocumentUploadModal
           open={modal === 'upload'}
           onClose={closeModal}

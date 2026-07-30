@@ -115,6 +115,44 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
         </Block>
       )}
 
+      {data.projects.length > 0 && (
+        <Block title="Projects">
+          <ul className="space-y-3">
+            {data.projects.map((project) => (
+              <li key={project.title}>
+                <p className="font-semibold text-ktip-sand-900">{project.title}</p>
+                {[project.category, project.phase].filter(Boolean).length > 0 && (
+                  <p className="text-ktip-sand-600">
+                    {[project.category, project.phase].filter(Boolean).join(' · ')}
+                  </p>
+                )}
+                {project.summary && <p className="mt-0.5">{project.summary}</p>}
+              </li>
+            ))}
+          </ul>
+        </Block>
+      )}
+
+      {data.awards.length > 0 && (
+        <Block title="Awards and recognition">
+          <ul className="space-y-2">
+            {data.awards.map((award) => {
+              const year = award.date ? new Date(award.date).getUTCFullYear() : null
+              return (
+                <li key={`${award.name}-${award.date}`}>
+                  <p className="font-semibold text-ktip-sand-900">
+                    {[award.name, year && !Number.isNaN(year) ? String(year) : null]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                  {award.description && <p>{award.description}</p>}
+                </li>
+              )
+            })}
+          </ul>
+        </Block>
+      )}
+
       {data.skills.length > 0 && (
         <Block title="Skills">
           <dl className="space-y-2">

@@ -262,6 +262,9 @@ export default function GrantApplicationPage() {
               errors={errors}
               grantTitle={grant.title}
               applicationTitle={getTitle()}
+              applicationId={applicationId}
+              requiredDocuments={grant.required_documents}
+              onSaveDraft={persistDraft}
             />
 
             {isReviewStep && isStudent && (

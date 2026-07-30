@@ -451,7 +451,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
           Four columns, not five: inside the dashboard the 16rem rail already
           took a quarter of the width, so five columns rendered as slivers. */}
       <section>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        <div data-tutorial="achievements-gallery" className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((badge) => {
             const { earnedAt, progress } = readBadge(badge)
             const isPinned = pinned.includes(badge.id)

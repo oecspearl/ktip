@@ -58,6 +58,21 @@ const FULL: ResumeData = {
   professionalSkills: ['Mentoring'],
   academic: [{ subject: 'Data', skills: 'Modelling, analysis' }],
   interests: 'Sailing, open data.',
+  projects: [
+    {
+      title: 'Island Water Telemetry',
+      summary: 'Open sensor network publishing reservoir levels hourly.',
+      category: 'Climate',
+      phase: 'launch',
+    },
+  ],
+  awards: [
+    {
+      name: 'First Project Published',
+      description: 'Published a project to the KTIP directory.',
+      date: '2025-04-02T10:00:00.000Z',
+    },
+  ],
 }
 
 describe.each(Object.keys(RESUME_DESIGNS))('%s sheet', (id) => {

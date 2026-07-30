@@ -128,6 +128,17 @@ export const profileUpdateSchema = z.object({
   skills: z.array(z.string()).max(20, 'Maximum 20 skills').optional(),
   interests: z.array(z.string()).max(20, 'Maximum 20 interests').optional(),
   open_to: z.array(z.enum(COLLABORATION_VALUES)).optional(),
+  // 082. Length-capped only. No phone pattern: OECS members hold numbers from a
+  // dozen national plans plus diaspora numbers, and a regex tight enough to be
+  // worth having would reject somebody's real number.
+  phone: z.string().max(40, 'Phone number too long').optional(),
+  website: z
+    .string()
+    .max(300)
+    .url('Enter a full URL, including https://')
+    .or(z.literal(''))
+    .optional(),
+  languages: z.array(z.string()).max(12, 'Maximum 12 languages').optional(),
 })
 
 // Change Password Schema

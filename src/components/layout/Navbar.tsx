@@ -33,6 +33,7 @@ import {
   CalendarDays,
   CalendarPlus,
   FileText,
+  Building2,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
@@ -40,6 +41,7 @@ import { DropdownPanel } from '../ui/DropdownPanel'
 import { NavbarSearchPanel } from './NavbarSearchPanel'
 import { RoleSwitcher } from './RoleSwitcher'
 import { ROLE_LABELS } from '../../lib/constants'
+import { isOrganizationAccount } from '../../lib/permissions'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
@@ -134,8 +136,10 @@ export function Navbar() {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
   const [mobileSearchFocused, setMobileSearchFocused] = useState(false)
 
-  // Navbar is always transparent over page content; it only gets a dark
-  // backdrop while the mobile menu is open so menu links stay readable.
+  // Navbar is transparent over a page's hero; it takes a dark backdrop
+  // wherever its white links would otherwise sit on the cream canvas — the
+  // open mobile menu, admin, the venue pages, and past the first screen.
+  // See `needsBackdrop` below.
 
   // Auto-hide on scroll down, reappear on scroll up or top-edge hover
   const [navHidden, setNavHidden] = useState(false)
@@ -161,6 +165,9 @@ export function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // Organisation-tier accounts see a business profile where a person sees a CV.
+  const isOrgAccount = isOrganizationAccount(auth.profile?.roles)
 
   const anyMenuOpen = mobileMenuOpen || userMenuOpen || notifOpen || openDropdownId !== null
   const hidden = navHidden && !anyMenuOpen
@@ -486,6 +493,7 @@ export function Navbar() {
               cannot clip it. */}
           <div
             ref={searchRef}
+            data-tutorial="nav-search"
             className="relative hidden md:flex items-center justify-end flex-1 max-w-md mx-4"
           >
             <div
@@ -710,15 +718,28 @@ export function Navbar() {
                       <span>My Dashboard</span>
                     </Link>
                     {/* /cv had no entry point anywhere in the app — the only way
-                        in was the Virtual Campus handoff redirect. */}
-                    <Link
-                      to="/cv"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                    >
-                      <FileText size={18} />
-                      <span>My CV</span>
-                    </Link>
+                        in was the Virtual Campus handoff redirect. It is a
+                        person's résumé, so an organisation account gets its
+                        business profile here instead. */}
+                    {isOrgAccount ? (
+                      <Link
+                        to="/org/edit"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                      >
+                        <Building2 size={18} />
+                        <span>Business profile</span>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/cv"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                      >
+                        <FileText size={18} />
+                        <span>My CV</span>
+                      </Link>
+                    )}
                     <Link
                       to="/settings"
                       onClick={() => setUserMenuOpen(false)}
@@ -984,12 +1005,12 @@ export function Navbar() {
                     <span>My Dashboard</span>
                   </Link>
                   <Link
-                    to="/cv"
+                    to={isOrgAccount ? '/org/edit' : '/cv'}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
-                    <FileText size={20} />
-                    <span>My CV</span>
+                    {isOrgAccount ? <Building2 size={20} /> : <FileText size={20} />}
+                    <span>{isOrgAccount ? 'Business profile' : 'My CV'}</span>
                   </Link>
                   <Link
                     to="/settings"

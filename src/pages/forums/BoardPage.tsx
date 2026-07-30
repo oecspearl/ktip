@@ -77,7 +77,10 @@ export default function BoardPage() {
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
           {/* Search + new post */}
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div
+            data-tutorial="board-toolbar"
+            className="mb-8 flex flex-col sm:flex-row sm:items-center gap-3"
+          >
             <div className="relative flex-1">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -101,7 +104,7 @@ export default function BoardPage() {
 
           {/* Posts List */}
           {posts?.length ? (
-            <div className="divide-y divide-ktip-sand-200">
+            <div data-tutorial="board-posts" className="divide-y divide-ktip-sand-200">
               {posts.map((post) => (
                 <div key={post.id} className="py-4">
                   <PostCard post={post} boardSlug={params.slug!} />

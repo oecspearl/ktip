@@ -1,8 +1,10 @@
 import type { StepConfig } from '../../../lib/grant-application-template'
 import { RichTextField } from './RichTextField'
 import { AIFieldActions } from './AIFieldActions'
+import { ApplicationDocumentsField } from './ApplicationDocumentsField'
 import { HelpCircle } from 'lucide-react'
 import { cn } from '../../../lib/utils'
+import type { RequiredDocument } from '../../../types'
 
 interface StepFormProps {
   step: StepConfig
@@ -11,9 +13,23 @@ interface StepFormProps {
   errors?: Record<string, string>
   grantTitle?: string
   applicationTitle?: string
+  /** Everything the 'documents' field needs; unused by the other steps. */
+  applicationId?: string | null
+  requiredDocuments?: RequiredDocument[]
+  onSaveDraft?: () => Promise<void>
 }
 
-export function StepForm({ step, data, onChange, errors, grantTitle, applicationTitle }: StepFormProps) {
+export function StepForm({
+  step,
+  data,
+  onChange,
+  errors,
+  grantTitle,
+  applicationTitle,
+  applicationId = null,
+  requiredDocuments,
+  onSaveDraft,
+}: StepFormProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -40,7 +56,13 @@ export function StepForm({ step, data, onChange, errors, grantTitle, application
                 </p>
               )}
 
-              {field.type === 'textarea' ? (
+              {field.type === 'documents' ? (
+                <ApplicationDocumentsField
+                  applicationId={applicationId}
+                  requiredDocuments={requiredDocuments || []}
+                  onSaveDraft={onSaveDraft || (async () => {})}
+                />
+              ) : field.type === 'textarea' ? (
                 <>
                   <RichTextField
                     value={value}

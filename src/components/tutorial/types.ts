@@ -45,4 +45,10 @@ export interface Tutorial {
   name: string
   description: string
   steps: TutorialStep[]
+  /** Fire once, unprompted, on a first-time visitor's first view of the page.
+   *  Reserved for the handful of hub pages — every other tour is FAB-launch
+   *  only. Keeping the policy here rather than in whichever pages happen to
+   *  call useTutorialAutoStart makes "stop ambushing people on X" a one-word
+   *  diff. */
+  autoStart?: boolean
 }

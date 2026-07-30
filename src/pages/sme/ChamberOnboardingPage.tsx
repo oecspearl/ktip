@@ -190,7 +190,7 @@ export default function ChamberOnboardingPage() {
             They check it against the national corporate registry.
           </p>
 
-          <div className="space-y-4">
+          <div data-tutorial="chamber-form" className="space-y-4">
             <Input
               label="Registered legal name"
               value={form.legal_name}

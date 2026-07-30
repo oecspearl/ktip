@@ -80,7 +80,7 @@ export default function PublicCvPage() {
 
   return (
     <div id="cv-root" className="mx-auto max-w-7xl px-4 py-10">
-      <div className="mb-8 flex flex-wrap items-center gap-3 print:hidden">
+      <div data-tutorial="public-cv-actions" className="mb-8 flex flex-wrap items-center gap-3 print:hidden">
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('mono')}>
           Download B&amp;W (A4)
         </Button>

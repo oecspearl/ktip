@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { Upload, FileText, X, Lock, Users, Globe, KeyRound } from 'lucide-react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
@@ -17,6 +17,16 @@ interface DocumentUploadModalProps {
   entityId: string
   /** Skips the AI pass for people who could not apply the results anyway. */
   canEditEntity: boolean
+  /**
+   * Forces the visibility and hides the picker. Grant applicants upload
+   * privately, full stop — offering them a choice that includes "listed to
+   * everyone" on a document they think of as confidential is the trap.
+   */
+  lockedVisibility?: DocumentVisibility
+  /** Pre-fills the title, e.g. from a required-documents checklist row. */
+  defaultTitle?: string
+  /** Overrides the modal's subtitle when the audience is not a funder. */
+  descriptionCopy?: string
 }
 
 export const VISIBILITY_OPTIONS: {
@@ -50,21 +60,35 @@ export function DocumentUploadModal({
   entityType,
   entityId,
   canEditEntity,
+  lockedVisibility,
+  defaultTitle,
+  descriptionCopy,
 }: DocumentUploadModalProps) {
   const auth = useAuth()
   const toast = useToast()
   const { uploadDocument, loading, stage, resetStage } = useUploadDocument()
 
   const [file, setFile] = useState<File | null>(null)
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState(defaultTitle || '')
   const [description, setDescription] = useState('')
-  const [visibility, setVisibility] = useState<DocumentVisibility>('restricted')
+  const [visibility, setVisibility] = useState<DocumentVisibility>(
+    lockedVisibility || 'restricted'
+  )
+  // A rejected file used to vanish into a toast; the reason now stays on the
+  // dropzone until a valid file replaces it.
+  const [fileError, setFileError] = useState<string | null>(null)
+
+  // The checklist row the modal was opened from decides the title.
+  useEffect(() => {
+    if (open) setTitle(defaultTitle || '')
+  }, [open, defaultTitle])
 
   const reset = () => {
     setFile(null)
-    setTitle('')
+    setTitle(defaultTitle || '')
     setDescription('')
-    setVisibility('restricted')
+    setVisibility(lockedVisibility || 'restricted')
+    setFileError(null)
     resetStage()
   }
 
@@ -81,10 +105,12 @@ export function DocumentUploadModal({
 
     const problem = validateFile(picked)
     if (problem) {
+      setFileError(problem)
       toast.error(problem)
       return
     }
 
+    setFileError(null)
     setFile(picked)
     // Default the title to the file name without its extension
     if (!title.trim()) {
@@ -119,7 +145,10 @@ export function DocumentUploadModal({
       open={open}
       onClose={handleClose}
       title="Upload a document"
-      description="Word, PDF, CSV, Markdown or an image. Text documents are read into an editable copy."
+      description={
+        descriptionCopy ??
+        'Word, PDF, Excel, CSV, Markdown or an image. Text documents are read into an editable copy.'
+      }
       size="xl"
       className="max-w-2xl"
     >
@@ -144,12 +173,24 @@ export function DocumentUploadModal({
             )}
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed border-ktip-sand-300 rounded-xl cursor-pointer hover:border-ktip-ocean-500 hover:bg-ktip-sand-50 transition-colors">
-            <Upload size={24} className="text-ktip-sand-400" />
-            <span className="text-sm font-medium text-ktip-sand-700">Choose a file</span>
-            <span className="text-xs text-ktip-sand-500">PDF, DOCX, CSV, MD, TXT or image — up to 25MB</span>
-            <input type="file" accept={ACCEPT_ATTRIBUTE} onChange={handleFile} className="hidden" />
-          </label>
+          <>
+            <label
+              className={`flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed rounded-xl cursor-pointer hover:border-ktip-ocean-500 hover:bg-ktip-sand-50 transition-colors ${
+                fileError ? 'border-red-300 bg-red-50/40' : 'border-ktip-sand-300'
+              }`}
+            >
+              <Upload size={24} className="text-ktip-sand-400" />
+              <span className="text-sm font-medium text-ktip-sand-700">Choose a file</span>
+              {/* Spreadsheets and .doc are accepted by both the bucket and
+                  validateFile(); the old hint left them out, so people
+                  reasonably assumed an .xlsx budget would be rejected. */}
+              <span className="text-xs text-ktip-sand-500">
+                PDF, Word, Excel, CSV, Markdown, text or image — up to 25MB
+              </span>
+              <input type="file" accept={ACCEPT_ATTRIBUTE} onChange={handleFile} className="hidden" />
+            </label>
+            {fileError && <p className="text-xs text-red-600">{fileError}</p>}
+          </>
         )}
 
         <Input
@@ -171,7 +212,16 @@ export function DocumentUploadModal({
           disabled={loading}
         />
 
-        {/* Visibility */}
+        {/* Visibility. Hidden entirely when the caller has fixed it — see
+            lockedVisibility. */}
+        {lockedVisibility ? (
+          <div className="flex items-start gap-2 rounded-xl border border-ktip-sand-200 bg-ktip-sand-50 p-3">
+            <Lock size={16} className="mt-0.5 shrink-0 text-ktip-sand-500" />
+            <p className="text-xs text-ktip-sand-600">
+              {VISIBILITY_OPTIONS.find((o) => o.value === lockedVisibility)?.hint}
+            </p>
+          </div>
+        ) : (
         <div className="space-y-2">
           <p className="text-sm font-medium text-ktip-sand-700">Who can open it</p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -200,6 +250,7 @@ export function DocumentUploadModal({
             })}
           </div>
         </div>
+        )}
 
         {loading && stage !== 'idle' && (
           <div className="flex items-center gap-3 p-3 bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-xl">

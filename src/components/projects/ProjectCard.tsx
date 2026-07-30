@@ -1,3 +1,4 @@
+import { Users } from 'lucide-react'
 import { Badge } from '../ui/Badge'
 import type { Project } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
@@ -29,6 +30,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {PHASE_LABELS[project.phase]}
         </Badge>
         {project.is_climate_action && <ClimateBadge />}
+        {/* Team size, so a browsing member can tell a solo project from one
+            already running a group before opening it. */}
+        {project.member_count > 0 && (
+          <Badge className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent inline-flex items-center gap-1">
+            <Users size={12} aria-hidden="true" />
+            {project.member_count}
+          </Badge>
+        )}
       </div>
     </BentoCard>
   )

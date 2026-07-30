@@ -125,6 +125,13 @@
   --shadow-fab-hover: 0 2px 4px rgba(4, 30, 66, 0.06), 0 8px 16px -4px rgba(4, 30, 66, 0.1),
     0 20px 36px -8px rgba(4, 30, 66, 0.16), 0 36px 64px -16px rgba(4, 30, 66, 0.18);
 
+  /* Hero text over photography — --shadow-medium's layered navy falloff retuned
+     for glyphs: same tight-contact + wide-ambient structure, radii scaled down
+     to glyph size, higher alpha because the backdrop is a photo rather than a
+     light surface, and no spread because text-shadow has no spread parameter. */
+  --text-shadow-hero: 0 1px 3px rgba(4, 30, 66, 0.45), 0 6px 14px rgba(4, 30, 66, 0.4),
+    0 14px 32px rgba(4, 30, 66, 0.32);
+
   /* Animations */
   --animate-fade-in: fadeIn 0.5s ease-in-out;
   --animate-slide-up: slideUp 0.5s ease-out;

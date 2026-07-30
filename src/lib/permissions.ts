@@ -178,6 +178,30 @@ export const TIER_LABELS: Record<RoleTier, string> = {
   individual: 'Individual',
 }
 
+/** Every role of a tier, aliases collapsed. */
+export function rolesOfTier(tier: RoleTier): RoleSlug[] {
+  return ROLE_DEFINITIONS.filter((r) => r.tier === tier).map((r) => r.slug)
+}
+
+export const ORGANIZATION_ROLES = rolesOfTier('organization')
+export const INDIVIDUAL_ROLES = rolesOfTier('individual')
+
+/**
+ * Does this account act as an organisation rather than a person?
+ *
+ * The distinction is what decides between a CV and a business profile: a
+ * résumé is a person's evidence of work, and there is no version of it that
+ * makes sense for a company. An account holding both (a founder who is also a
+ * mentor) keeps the CV — only a purely organisational account loses it.
+ */
+export function isOrganizationAccount(roles: RoleSlug[] | undefined): boolean {
+  const held = roles || []
+  if (held.length === 0) return false
+  const org = new Set<string>(ORGANIZATION_ROLES)
+  const individual = new Set<string>(INDIVIDUAL_ROLES)
+  return held.some((r) => org.has(r)) && !held.some((r) => individual.has(r))
+}
+
 /**
  * Per-resource roles that already exist on other tables (project_members,
  * institution_members, employer_members). They are scoped to a single record,

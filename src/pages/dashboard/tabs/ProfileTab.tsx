@@ -47,7 +47,7 @@ export default function ProfileTab() {
               ? `${design.label} design · ${
                   resume?.is_public ? 'published — anyone with your link can read it' : 'private to you'
                 }`
-              : 'Started from your profile. Nothing saved yet.'}
+              : 'Nothing saved yet.'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -71,8 +71,8 @@ export default function ProfileTab() {
         <p className="mb-5 flex items-start gap-2 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 p-3 text-xs text-ktip-sand-600">
           <UserRoundCheck size={14} className="mt-0.5 shrink-0" />
           <span>
-            Built from your KTIP profile. Sign in from the OECS Virtual Campus to pull in your course
-            history, or fill in the rest from{' '}
+            Your CV couldn&rsquo;t be started automatically. Sign in from the OECS Virtual Campus to
+            pull in your course history, or write it yourself from{' '}
             <Link to="/cv/edit" className="font-semibold text-ktip-ocean-600 hover:underline">
               Edit
             </Link>

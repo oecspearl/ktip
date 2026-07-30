@@ -10,6 +10,8 @@ import { useResume } from '../../hooks/useResume'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { bleedVars, resolveDesign } from '../../lib/resume-designs'
 import type { ResumeTheme } from '../../types/resume'
 
@@ -42,6 +44,10 @@ export default function CvPage() {
 
   const design = resolveDesign(designId)
   const Sheet = sheetFor(design.id)
+
+  // Above the isLoading early return: hooks cannot run conditionally, and the
+  // hook is a no-op until `ready` goes true anyway.
+  useTutorialAutoStart(TUTORIAL_IDS.CV, !isLoading)
 
   // Print only once the chosen theme has committed to the DOM. window.print()
   // is synchronous, so calling it in the click handler captures the previous
@@ -92,6 +98,17 @@ export default function CvPage() {
   const runSync = async () => {
     try {
       const result = await sync.mutateAsync()
+
+      // "Synced 0 courses" is a statement about the member's education. When no
+      // campus could be reached it is not true, and saying it anyway sends
+      // somebody off to look for the courses they know they finished.
+      if (result.coursesUnavailable) {
+        toast.error(
+          'The Virtual Campus course service could not be reached, so your course list was left as it was. Try again shortly.'
+        )
+        return
+      }
+
       const skipped = result.skipped?.length ?? 0
       toast.success(
         `Synced ${result.courses ?? 0} course${result.courses === 1 ? '' : 's'}` +
@@ -131,15 +148,19 @@ export default function CvPage() {
 
       {!exists && (
         <div className="mb-8 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 p-5 text-sm text-ktip-sand-700 print:hidden">
-          <p className="font-semibold">You haven&rsquo;t saved a CV yet.</p>
+          <p className="font-semibold">Your CV couldn&rsquo;t be started automatically.</p>
           <p className="mt-1">
-            What you see below is drawn from your profile. Sign in from the OECS Virtual Campus to
-            pull in your course history automatically, or start writing it yourself.
+            What you see below is empty. Sign in from the OECS Virtual Campus to pull in your course
+            history, or write it yourself from{' '}
+            <Link to="/cv/edit" className="font-semibold text-ktip-ocean-600 hover:underline">
+              Edit
+            </Link>
+            .
           </p>
         </div>
       )}
 
-      <div className="mb-6 flex flex-wrap items-center gap-3 print:hidden">
+      <div data-tutorial="cv-actions" className="mb-6 flex flex-wrap items-center gap-3 print:hidden">
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('mono')}>
           Download B&amp;W (A4)
         </Button>
@@ -189,7 +210,7 @@ export default function CvPage() {
         way.
       </p>
 
-      <div className="mb-8 print:hidden">
+      <div data-tutorial="cv-designs" className="mb-8 print:hidden">
         <DesignPicker
           data={data}
           avatarUrl={profile?.avatar_url ?? null}
@@ -200,21 +221,24 @@ export default function CvPage() {
       </div>
 
       {/* One document. Exactly one of these is mounted, so the CV is never in
-          the accessibility tree twice. */}
-      {asText ? (
-        <div className="print:hidden">
-          <ResumeOutline data={data} />
-        </div>
-      ) : (
-        <ResumePaper>
-          <Sheet
-            data={data}
-            avatarUrl={profile?.avatar_url ?? null}
-            theme={sheetTheme}
-            design={design}
-          />
-        </ResumePaper>
-      )}
+          the accessibility tree twice. The wrapper is the tour's anchor for
+          "the document" — it has to survive the sheet/outline swap. */}
+      <div data-tutorial="cv-sheet">
+        {asText ? (
+          <div className="print:hidden">
+            <ResumeOutline data={data} />
+          </div>
+        ) : (
+          <ResumePaper>
+            <Sheet
+              data={data}
+              avatarUrl={profile?.avatar_url ?? null}
+              theme={sheetTheme}
+              design={design}
+            />
+          </ResumePaper>
+        )}
+      </div>
     </div>
   )
 }

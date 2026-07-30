@@ -1,7 +1,13 @@
 // Grant application wizard step definitions.
 // Condensed from the former proposal wizard's funding template.
 
-export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select'
+/**
+ * `documents` is not a value the applicant types — it renders the upload
+ * checklist for the call and stores nothing in application_data. It is a field
+ * type rather than a bespoke step so the wizard's stepper, validation and
+ * navigation all keep working unchanged.
+ */
+export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'documents'
 
 export interface FieldConfig {
   name: string
@@ -20,8 +26,9 @@ export interface StepConfig {
   fields: FieldConfig[]
 }
 
-// Steps 1-4 are standard form steps; step 5 ("Impact & Review") renders its
-// field above the application preview + AI review + submit controls.
+// Steps 1-4 are standard form steps; step 5 is the upload checklist; step 6
+// ("Impact & Review") renders its field above the application preview + AI
+// review + submit controls.
 export const GRANT_APPLICATION_STEPS: StepConfig[] = [
   {
     title: 'Basics',
@@ -67,6 +74,20 @@ export const GRANT_APPLICATION_STEPS: StepConfig[] = [
         helpText: 'Be as specific as possible. Reviewers look for realistic and justified budgets.' },
       { name: 'team_description', label: 'Team / Personnel', type: 'textarea', rows: 4,
         placeholder: 'Describe key team members, their roles, and relevant qualifications.' },
+    ],
+  },
+  {
+    title: 'Supporting documents',
+    description:
+      'Attach the evidence behind the narrative. Everything you upload here is private to you and the grant assessors — it is never listed on the public grant page.',
+    fields: [
+      {
+        name: 'documents',
+        label: 'Documents for this application',
+        type: 'documents',
+        helpText:
+          'PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them.',
+      },
     ],
   },
   {

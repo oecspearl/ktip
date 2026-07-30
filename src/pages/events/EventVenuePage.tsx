@@ -160,7 +160,7 @@ export default function EventVenuePage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-          <div>
+          <div data-tutorial="venue-floorplan">
             {roomsLoading ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -197,7 +197,7 @@ export default function EventVenuePage() {
             )}
           </div>
 
-          <aside className="space-y-4">
+          <aside data-tutorial="venue-presence" className="space-y-4">
             <RoomOccupantList
               occupants={lobby}
               title="In the venue"
