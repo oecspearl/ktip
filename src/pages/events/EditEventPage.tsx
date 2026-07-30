@@ -5,7 +5,9 @@ import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { useEvent, useUpdateEvent } from '../../hooks/useEvents'
+import { useEvent, useUpdateEvent, useDeleteEvent } from '../../hooks/useEvents'
+import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
+import { describeEventDeletion } from '../../lib/delete-guard'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
 import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
@@ -23,6 +25,7 @@ export default function EditEventPage() {
   const toast = useToast()
   const { event, loading: eventLoading } = useEvent(params.id)
   const { updateEvent, loading: updating } = useUpdateEvent()
+  const { deleteEvent } = useDeleteEvent()
 
   usePageTitle(event?.title ? `Edit: ${event.title}` : 'Edit Event')
 
@@ -513,6 +516,25 @@ export default function EditEventPage() {
               </button>
             </div>
           </form>
+
+          {/* Outside the form so Enter in a text field can never reach it.
+              The RSVP count is not loaded on this page, so the guard gets null
+              and falls back to the event's publication status. */}
+          <div className="mt-10">
+            <DeleteEntityControl
+              variant="zone"
+              noun="event"
+              title={event.title}
+              impact={describeEventDeletion({
+                status: event.status,
+                rsvpCount: null,
+                hasVenue: !!event.has_venue,
+                hasChallenge: !!event.has_challenge,
+              })}
+              onDelete={() => deleteEvent(event.id)}
+              redirectTo="/events"
+            />
+          </div>
         </div>
       </div>
     </>

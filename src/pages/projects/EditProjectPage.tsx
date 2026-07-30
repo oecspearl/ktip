@@ -5,7 +5,9 @@ import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { useProject, useUpdateProject } from '../../hooks/useProjects'
+import { useProject, useUpdateProject, useDeleteProject } from '../../hooks/useProjects'
+import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
+import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
@@ -24,6 +26,7 @@ export default function EditProjectPage() {
   const toast = useToast()
   const { project, loading: projectLoading } = useProject(params.id)
   const { updateProject, loading: updating } = useUpdateProject()
+  const { deleteProject } = useDeleteProject()
 
   usePageTitle(project?.title ? `Edit: ${project.title}` : 'Edit Project')
 
@@ -290,6 +293,27 @@ export default function EditProjectPage() {
               </button>
             </div>
           </form>
+
+          {/* Owner only — an editor member reaches this page but the delete RLS
+              policy is owner-only, so the affordance would only ever refuse.
+              Outside the form so Enter in a text field cannot reach it. */}
+          {isOwner && (
+            <div className="mt-10">
+              <DeleteEntityControl
+                variant="zone"
+                noun="project"
+                title={project.title}
+                impact={describeProjectDeletion({
+                  isPublic: project.is_public,
+                  memberCount: (members || []).filter(
+                    (m) => m.status === 'accepted' && m.user_id !== project.owner_id
+                  ).length,
+                })}
+                onDelete={() => deleteProject(project.id)}
+                redirectTo="/projects"
+              />
+            </div>
+          )}
         </div>
       </div>
     </>

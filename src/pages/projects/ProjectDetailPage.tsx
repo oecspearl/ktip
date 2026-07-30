@@ -7,7 +7,9 @@ import { FollowButton } from '../../components/projects/FollowButton'
 import { CommentSection } from '../../components/projects/CommentSection'
 import { TeamWidget } from '../../components/projects/TeamWidget'
 import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
-import { useProject, useProjects, trackProjectView } from '../../hooks/useProjects'
+import { useProject, useProjects, useDeleteProject, trackProjectView } from '../../hooks/useProjects'
+import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
+import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -40,6 +42,7 @@ export default function ProjectDetailPage() {
   usePageTitle(project?.title)
 
   const { members } = useProjectMembers(params.id)
+  const { deleteProject } = useDeleteProject()
 
   const isOwner = project?.owner_id === auth.user?.id
   const isAdmin = auth.profile?.roles?.includes('oecs')
@@ -47,6 +50,11 @@ export default function ProjectDetailPage() {
     (m) => m.user_id === auth.user?.id && m.status === 'accepted'
   )
   const canEdit = isOwner || myMembership?.role === 'editor'
+  // Editors can edit but not delete — the RLS policy is owner-only, so
+  // offering it to an editor would only produce a refusal.
+  const collaboratorCount = (members || []).filter(
+    (m) => m.status === 'accepted' && m.user_id !== project?.owner_id
+  ).length
 
   // Count a view once per browser session per project
   useEffect(() => {
@@ -141,6 +149,18 @@ export default function ProjectDetailPage() {
                   Edit
                 </button>
               </Link>
+            )}
+            {isOwner && (
+              <DeleteEntityControl
+                noun="project"
+                title={project.title}
+                impact={describeProjectDeletion({
+                  isPublic: project.is_public,
+                  memberCount: collaboratorCount,
+                })}
+                onDelete={() => deleteProject(project.id)}
+                redirectTo="/projects"
+              />
             )}
           </>
         }

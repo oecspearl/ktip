@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { useEvent, useRSVP } from '../../hooks/useEvents'
+import { useEvent, useRSVP, useDeleteEvent } from '../../hooks/useEvents'
 import { useSubmitRegistration } from '../../hooks/useEventRegistrationForm'
 import { usePublishedEventUpdates } from '../../hooks/useEventUpdates'
 import { usePublishedEventArticles } from '../../hooks/useEventArticles'
@@ -19,6 +19,8 @@ import { EventPageSectionRenderer } from '../../components/events/EventPageSecti
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
 import { EventSpeakerGrid } from '../../components/events/EventSpeakerGrid'
 import { EventChallengeBrief } from '../../components/events/EventChallengeBrief'
+import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
+import { describeEventDeletion } from '../../lib/delete-guard'
 import {
   Calendar,
   MapPin,
@@ -59,6 +61,7 @@ export default function EventDetailPage() {
   const toast = useToast()
   const { rsvp, cancelRSVP, checkRSVP, getRSVPCount, loading: rsvpLoading } = useRSVP()
   const { submitRegistration, loading: regLoading } = useSubmitRegistration()
+  const { deleteEvent } = useDeleteEvent()
   const { updates: eventUpdates } = usePublishedEventUpdates(params.id)
   const { articles: eventArticles } = usePublishedEventArticles(params.id)
   const { sections: pageSections } = usePublicEventSections(params.id)
@@ -189,12 +192,28 @@ export default function EventDetailPage() {
         ]}
         actions={
           isOrganizer ? (
-            <Link to={`/events/${params.id}/edit`}>
-              <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
-                <Edit size={14} />
-                Edit
-              </button>
-            </Link>
+            <>
+              <Link to={`/events/${params.id}/edit`}>
+                <button className="px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-semibold rounded-lg hover:bg-ktip-ocean-700 transition-colors flex items-center gap-1.5">
+                  <Edit size={14} />
+                  Edit
+                </button>
+              </Link>
+              {/* `checking` still true means the RSVP count has not landed; the
+                  guard reads null as "might not be zero" rather than as zero. */}
+              <DeleteEntityControl
+                noun="event"
+                title={event.title}
+                impact={describeEventDeletion({
+                  status: event.status,
+                  rsvpCount: checking ? null : rsvpCount,
+                  hasVenue: !!event.has_venue,
+                  hasChallenge: !!event.has_challenge,
+                })}
+                onDelete={() => deleteEvent(event.id)}
+                redirectTo="/events"
+              />
+            </>
           ) : undefined
         }
       >
