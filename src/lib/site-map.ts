@@ -187,6 +187,50 @@ export const SITE_MAP: SiteEntry[] = [
     icon: 'CalendarDays',
     howTo: ['Go to Events.', 'Switch from the list view to the calendar view using the toggle at the top.'],
   },
+  {
+    id: 'events.hackathons',
+    title: 'Virtual Hackathon',
+    category: 'Events',
+    description: 'Enter the live venue, find a team, build and submit',
+    keywords: ['hackathon', 'virtual venue', 'venue', 'team', 'homebase', 'sprint', 'jam', 'challenge', 'codefest'],
+    href: '/hackathons',
+    access: 'auth',
+    icon: 'Trophy',
+  },
+  // The surfaces below are all parameterised by event id, and a site-map href
+  // can never contain a :param — site-search.test.ts matches route paths
+  // literally. So they are howTo-only entries: still searchable, still answered
+  // by the AI navigator, just not directly navigable.
+  {
+    id: 'events.venue',
+    title: 'Enter an event venue',
+    category: 'Events',
+    description: 'The floorplan: rooms, who is online right now, and open audio',
+    keywords: ['venue', 'floorplan', 'map', 'rooms', 'main hall', 'networking area', 'help desk', 'presence', 'who is online'],
+    access: 'auth',
+    icon: 'Map',
+    howTo: [
+      'Open Events → Virtual Hackathon and pick a live hackathon.',
+      'Click "Enter the venue" (you must be registered for the event).',
+      'Click any room on the floorplan to join it.',
+      'Set your status from the pill in the top bar — green for working, "Do not disturb" to be left alone.',
+    ],
+  },
+  {
+    id: 'events.venue.setup',
+    title: 'Set up a virtual venue for your event',
+    category: 'Events',
+    description: 'Turn the venue on, create rooms, and upload a floorplan',
+    keywords: ['create venue', 'venue setup', 'rooms', 'floorplan svg', 'organiser', 'organizer', 'host'],
+    access: 'auth',
+    icon: 'Map',
+    howTo: [
+      'Open the event in the admin console and choose the Venue tab.',
+      'Turn the venue on.',
+      'Click "Create starter rooms" for a Main Hall, networking area, workshop room, help desk, stage and quiet room — or add your own.',
+      'A floorplan SVG is optional: without one the rooms render as a grid of cards that works the same way.',
+    ],
+  },
 
   // ----------------------------------------------------------------- Funding
   {
@@ -969,16 +1013,6 @@ export const SITE_MAP: SiteEntry[] = [
     href: '/admin/partner-api',
     access: 'oecs',
     icon: 'KeyRound',
-  },
-  {
-    id: 'admin.preregistrations',
-    title: 'Pre-registrations',
-    category: 'Admin',
-    description: 'People who signed up before launch',
-    keywords: ['preregistrations', 'waitlist', 'early access', 'leads'],
-    href: '/admin/preregistrations',
-    access: 'oecs',
-    icon: 'ClipboardList',
   },
   {
     id: 'admin.analytics',

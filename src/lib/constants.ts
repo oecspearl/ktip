@@ -614,3 +614,93 @@ export const DATE_FORMATS = {
   WITH_TIME: 'MMM d, yyyy h:mm a',
   FULL: 'EEEE, MMMM d, yyyy',
 } as const
+
+// ============================================================
+// Virtual venue (migration 070)
+// ============================================================
+
+// Green 300-500 is ~1.8:1 on white — see the contrast rule in src/index.css.
+// Green fills take navy text; green text starts at 700.
+export const VENUE_ROOM_KIND_LABELS: Record<string, string> = {
+  main_hall: 'Main Hall',
+  networking: 'Networking',
+  workshop: 'Workshop',
+  help_desk: 'Help Desk',
+  sponsor_booth: 'Sponsor Booth',
+  team: 'Team Space',
+  judging: 'Judging',
+  stage: 'Stage',
+  breakout: 'Breakout',
+}
+
+export const VENUE_ROOM_KIND_ICONS: Record<string, string> = {
+  main_hall: 'Landmark',
+  networking: 'Users',
+  workshop: 'Wrench',
+  help_desk: 'LifeBuoy',
+  sponsor_booth: 'Store',
+  team: 'Rocket',
+  judging: 'Gavel',
+  stage: 'Presentation',
+  breakout: 'DoorOpen',
+}
+
+export const VENUE_ROOM_KIND_COLORS: Record<string, string> = {
+  main_hall: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  networking: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  workshop: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  help_desk: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  sponsor_booth: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  team: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  judging: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
+  stage: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  breakout: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
+}
+
+export const VENUE_AVAILABILITY_LABELS: Record<string, string> = {
+  working: 'Working',
+  away: 'Away',
+  busy: 'Do not disturb',
+  help_wanted: 'Needs help',
+  offline: 'Offline',
+}
+
+// Solid dots. Colour alone never carries the meaning — every dot ships with a
+// title and an sr-only label, because "grey vs green" is invisible to a
+// significant share of members.
+export const VENUE_AVAILABILITY_DOT_COLORS: Record<string, string> = {
+  working: 'bg-ktip-tropical-500',
+  away: 'bg-ktip-sand-400',
+  busy: 'bg-red-500',
+  help_wanted: 'bg-ktip-sun-500',
+  offline: 'bg-ktip-sand-300',
+}
+
+export const VENUE_AVAILABILITY_PILL_COLORS: Record<string, string> = {
+  working: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  away: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
+  busy: 'bg-red-50 text-red-700 border-red-200',
+  help_wanted: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  offline: 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200',
+}
+
+export const VENUE_ROLE_LABELS: Record<string, string> = {
+  participant: 'Participant',
+  mentor: 'Mentor',
+  judge: 'Judge',
+  organizer: 'Organizer',
+  spectator: 'Spectator',
+}
+
+export const VENUE = {
+  /** Presence entries older than this render as offline. */
+  STALE_AFTER_MS: 2 * 60 * 1000,
+  /** Cold-path heartbeat floor. One write per member per 45s, not per tick. */
+  HEARTBEAT_THROTTLE_MS: 45 * 1000,
+  /** Hidden/idle tab flips to 'away' unless the member set a manual status. */
+  IDLE_AFTER_MS: 5 * 60 * 1000,
+  /** Avatars drawn on a floorplan zone before collapsing to "+N". */
+  CLUSTER_VISIBLE: 4,
+  /** Room chat page size. */
+  MESSAGE_PAGE_SIZE: 50,
+} as const

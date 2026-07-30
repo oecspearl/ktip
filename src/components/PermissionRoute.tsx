@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { ShieldX } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { RouteSplash } from './RouteSplash'
 import { PERMISSION_BY_KEY } from '../lib/permissions'
 import type { PermissionKey } from '../types'
 
@@ -21,19 +22,11 @@ export const PermissionRoute = ({ require, children }: PermissionRouteProps) => 
   const required = Array.isArray(require) ? require : [require]
   const allowed = required.some((key) => auth.can(key))
 
-  if (auth.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
-        <div className="text-center">
-          <img
-            src="/KTIP%20LOGO.png"
-            alt="KTIP Logo"
-            className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
-          />
-          <p className="mt-4 text-ktip-sand-600">Loading...</p>
-        </div>
-      </div>
-    )
+  // `can()` falls back to the compiled defaults for profile.roles until the
+  // permissions RPC resolves, so it reads as "no permissions" while the profile
+  // itself is still loading. Waiting keeps that from flashing a denial.
+  if (auth.loading || auth.profileLoading) {
+    return <RouteSplash />
   }
 
   if (!auth.user) {

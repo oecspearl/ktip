@@ -7,6 +7,12 @@ import * as Sentry from '@sentry/react'
 import './index.css'
 import App from './App.tsx'
 import type { ErrorCode } from './lib/app-error'
+import { watchForServiceWorkerTakeover } from './lib/service-worker'
+
+// Must run before anything can navigate: a tab still driven by an older
+// service worker gets the build it was served, routing bugs included. Sits below
+// the './instrument' import so a failure in here is itself reported.
+watchForServiceWorkerTakeover()
 
 // Custom overlay scrollbar: native scrollbars are hidden in CSS (no gutter),
 // this thumb tracks window scroll and fades in via html[data-scrolling].

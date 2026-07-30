@@ -167,3 +167,18 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return false
   }
 }
+
+/**
+ * True when a Supabase error is an RLS refusal rather than a bad request.
+ *
+ * PostgREST reports a failed `WITH CHECK` as 42501 / "insufficient privilege",
+ * which surfaces to the browser as a bare 403. The raw message names the policy
+ * and means nothing to a member, so callers swap in something actionable.
+ */
+export function isPermissionDenied(error: unknown): boolean {
+  const err = error as { code?: string; message?: string; status?: number } | null
+  if (!err) return false
+  if (err.code === '42501' || err.status === 403) return true
+  const msg = err.message?.toLowerCase() ?? ''
+  return msg.includes('row-level security') || msg.includes('violates row')
+}

@@ -8,7 +8,6 @@ import {
   MessageSquare,
   BookOpen,
   Flag,
-  ClipboardList,
   BarChart3,
   ClipboardCheck,
   BadgeCheck,
@@ -45,7 +44,6 @@ const adminNavItems = [
   { href: '/admin/integrations', label: 'Integrations', icon: Puzzle },
   { href: '/admin/employers', label: 'Employers', icon: Building2 },
   { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound },
-  { href: '/admin/preregistrations', label: 'Pre-Registrations', icon: ClipboardList },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck },
   // exact, or the simulator route below would light both entries up.
