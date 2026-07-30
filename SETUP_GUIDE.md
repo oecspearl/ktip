@@ -122,7 +122,56 @@ This will create:
    - Add redirect URI
    - Copy credentials to Supabase
 
-### Step 2: Start Development Server
+### Step 2: Configure Outbound Email
+
+KTIP sends collaboration invitations, secondary-address verification emails,
+and secondary-address password recovery emails through Resend.
+
+Set these server-side variables in `.env` for local development and in the
+Vercel project's environment variables for each deployed environment:
+
+```env
+RESEND_API_KEY=re_...
+EMAIL_FROM=KTIP <admin@oecsinnovation.org>
+SITE_URL=https://your-public-ktip-domain.example
+```
+
+- `EMAIL_FROM` must use a domain verified in the Resend dashboard.
+- `SITE_URL` is the public origin placed in email links. Do not include a
+  trailing slash. Local development can use `http://localhost:5173`.
+- Restart `npm run dev` after changing `.env`; Vite loads these values when the
+  development server starts.
+- Add `${SITE_URL}/reset-password` to **Supabase > Authentication > URL
+  Configuration > Redirect URLs**. Otherwise Supabase may replace the requested
+  recovery redirect with the project's configured Site URL.
+
+For reliable delivery, publish the records Resend provides for DKIM and its
+`send` return-path subdomain. Also publish DMARC on the sending domain. The
+current `oecsinnovation.org` configuration uses this monitoring policy:
+
+```dns
+Type  Name     Value
+TXT   _dmarc   v=DMARC1; p=none; rua=mailto:dmarc@oecsinnovation.org; fo=1; adkim=r; aspf=r
+```
+
+Keep `p=none` while checking aggregate reports and confirming all legitimate
+senders pass and align. Move to `p=quarantine`, then optionally `p=reject`, only
+after that validation. The address in `rua` must be able to receive reports.
+
+To verify a received message, inspect its original/raw headers and confirm:
+
+```text
+spf=pass
+dkim=pass
+dmarc=pass
+```
+
+Resend's `delivered` event means the receiving server accepted the message; it
+does not guarantee inbox placement. New domains still need gradual, low-volume
+sending and recipient engagement to establish reputation. Avoid test-shaped
+content and localhost links when evaluating production inbox placement.
+
+### Step 3: Start Development Server
 
 ```bash
 cd ~/Desktop/ktip
@@ -131,7 +180,7 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173)
 
-### Step 3: Test Authentication
+### Step 4: Test Authentication
 
 1. Click **"Sign up"**
 2. Create an account:
@@ -143,9 +192,9 @@ Open [http://localhost:5173](http://localhost:5173)
 4. Click your avatar in the navbar to see the user menu
 5. Try signing out and logging back in
 
-### Step 4: Test Projects Module
+### Step 5: Test Projects Module
 
-#### 4.1 Create a Project
+#### 5.1 Create a Project
 
 1. Click **"Projects"** in the navbar
 2. Click **"Create Project"** button
@@ -159,7 +208,7 @@ Open [http://localhost:5173](http://localhost:5173)
 4. Click **"Create Project"**
 5. You'll be redirected to your project's detail page
 
-#### 4.2 View Projects
+#### 5.2 View Projects
 
 1. Go to **Projects** page
 2. You should see your newly created project
@@ -169,7 +218,7 @@ Open [http://localhost:5173](http://localhost:5173)
    - Filter by phase
 4. Click on a project card to view details
 
-#### 4.3 Edit a Project (Future)
+#### 5.3 Edit a Project (Future)
 
 The edit functionality is referenced but not yet implemented. To add it, you'll need to:
 - Create `EditProjectPage.tsx`
