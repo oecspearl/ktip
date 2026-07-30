@@ -67,13 +67,6 @@ import {
 } from './ui/input-group'
 import { Label } from './ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select'
 import { Skeleton } from './ui/skeleton'
 import { useCopyToClipboard } from './ui/use-copy-to-clipboard'
 import { useToast } from '../../../contexts/ToastContext'
@@ -92,15 +85,7 @@ import {
 } from '../../../types/sentry'
 import { SentryIssueDetail } from './SentryIssueDetail'
 import { usePageTitle } from '../../../hooks/usePageTitle'
-
-const PERIOD_OPTIONS: Array<{ value: SentryStatsPeriod; label: string }> = [
-  { value: '1h', label: 'Last hour' },
-  { value: '24h', label: 'Last 24 hours' },
-  { value: '7d', label: 'Last 7 days' },
-  { value: '14d', label: 'Last 14 days' },
-  { value: '30d', label: 'Last 30 days' },
-  { value: '90d', label: 'Last 90 days' },
-]
+import { StatsPeriodSelect } from './StatsPeriodSelect'
 
 const SCOPE_LABELS: Record<SentryIssueScope, string> = {
   unresolved: 'Unresolved',
@@ -661,21 +646,10 @@ export default function AdminErrorsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <PageHeading />
         <div className="flex items-center gap-1.5">
-          <Select
+          <StatsPeriodSelect
             value={statsPeriod}
-            onValueChange={(value) => setStatsPeriod(value as SentryStatsPeriod)}
-          >
-            <SelectTrigger size="sm" className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {PERIOD_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={setStatsPeriod}
+          />
           <Button
             variant="outline"
             size="sm"
