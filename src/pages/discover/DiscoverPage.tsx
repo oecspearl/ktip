@@ -10,8 +10,7 @@ import {
 import { Link } from 'react-router'
 import { format } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
-import { TUTORIAL_IDS } from '../../data/tutorials'
+import { useAccessibilityPrefs } from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
 import { FALLBACK_IMAGE, HERO_WASH, grantImageFor, heroImageFor } from '../../lib/hero-images'
@@ -88,8 +87,13 @@ function useVisibleCount() {
  */
 const HERO = {
   design: { width: 2000, height: 1150 },
-  /** Deliberate uplift over the authored size */
-  zoom: 1.1,
+  /**
+   * Deliberate uplift over the authored size. Bounded by design.height / the
+   * hero's real content height (~1000px at scale 1): past ~1.15 the content is
+   * taller than the guard's own reference box and height-limited viewports
+   * (1280×720) start clipping.
+   */
+  zoom: 1.15,
   /** Side inset, both edges, every breakpoint */
   gutter: '5%',
   // max sits above `zoom` — otherwise the reference display clamps itself
@@ -112,7 +116,7 @@ const FEATURES: Feature[] = [
     category: 'Collaboration',
     description: 'Launch and collaborate on innovative projects with creators across the Caribbean.',
     href: '/projects',
-    image: '/hero/hero-1.jpg',
+    image: '/hero/hero-1.webp',
     gradient: 'from-[#041E42] via-[#163A63]/70 to-[#2A5788]/10',
     span: 'md:col-span-2 md:row-span-2',
   },
@@ -121,7 +125,7 @@ const FEATURES: Feature[] = [
     category: 'Community',
     description: 'Discover workshops, hackathons, and networking events happening near you.',
     href: '/events',
-    image: '/hero/hero-2.jpg',
+    image: '/hero/hero-2.webp',
     gradient: 'from-[#2C4100] via-[#5E8A00]/70 to-[#97D700]/10',
     span: 'md:col-span-2',
   },
@@ -130,7 +134,7 @@ const FEATURES: Feature[] = [
     category: 'Funding',
     description: 'Find funding opportunities and grants to turn your ideas into reality.',
     href: '/grants',
-    image: '/hero/hero-3.jpg',
+    image: '/hero/hero-3.webp',
     gradient: 'from-[#020F21] via-[#041E42]/70 to-[#4F7AAE]/10',
     span: '',
   },
@@ -139,7 +143,7 @@ const FEATURES: Feature[] = [
     category: 'Discussion',
     description: 'Join discussions, share knowledge, and engage with the community.',
     href: '/forums',
-    image: '/hero/hero-4.jpg',
+    image: '/hero/hero-4.webp',
     gradient: 'from-[#806000] via-[#B38500]/70 to-[#FFC72C]/10',
     span: '',
   },
@@ -148,7 +152,7 @@ const FEATURES: Feature[] = [
     category: 'Communication',
     description: 'Connect directly with mentors, investors, and fellow innovators.',
     href: '/messages',
-    image: '/hero/hero-5.jpg',
+    image: '/hero/hero-5.webp',
     gradient: 'from-[#163A63] via-[#2A5788]/70 to-[#7AB000]/10',
     span: '',
   },
@@ -157,7 +161,7 @@ const FEATURES: Feature[] = [
     category: 'Knowledge',
     description: 'Access articles, guides, case studies, and tools for Caribbean innovation.',
     href: '/resources',
-    image: '/hero/hero-6.jpg',
+    image: '/hero/hero-6.webp',
     gradient: 'from-[#4D3900] via-[#E6AC09]/70 to-[#FFD75C]/10',
     span: 'md:col-span-2',
   },
@@ -166,7 +170,7 @@ const FEATURES: Feature[] = [
     category: 'Network',
     description: 'Browse the member directory and connect with innovators across the Caribbean.',
     href: '/directory',
-    image: '/ktiphero.png',
+    image: '/ktiphero.webp',
     gradient: 'from-[#446400] via-[#7AB000]/70 to-[#AEE12B]/10',
     span: '',
   },
@@ -175,8 +179,8 @@ const FEATURES: Feature[] = [
 // Partner logo wall. Entries without a `logo` render as styled wordmarks —
 // swap in real logo files under /public/partners as they become available.
 const PARTNERS: { name: string; logo?: string }[] = [
-  { name: 'OECS Commission', logo: '/oecs.png' },
-  { name: 'World Bank Group', logo: '/worldbank.jpeg' },
+  { name: 'OECS Commission', logo: '/oecs.webp' },
+  { name: 'World Bank Group', logo: '/worldbank.webp' },
   { name: 'Caribbean Development Bank' },
   { name: 'CARICOM' },
   { name: 'UNDP' },
@@ -205,10 +209,6 @@ export default function DiscoverPage() {
   const { projects } = useProjects()
   const { events } = useEvents({ upcoming: true })
   const { stats, loading: statsLoading } = usePlatformStats()
-
-  // Spotlighting a skeleton measures the wrong rect, and the hero strip is the
-  // first thing the tour frames — wait for the counts to land.
-  useTutorialAutoStart(TUTORIAL_IDS.DISCOVER, !statsLoading)
 
   const items = useMemo<HeroItem[]>(() => {
     if (mode === 'grants') {
@@ -318,7 +318,11 @@ export default function DiscoverPage() {
     ...HERO.scale,
   })
   // One base font-size drives every `em` in the hero — this is the whole knob.
-  const heroFontSize = `${16 * scale}px`
+  // The reader's text-size preference multiplies into it here: the hero sets its
+  // own px base from JS, so unlike the rest of the app it is immune to the root
+  // font-size that preference otherwise works through.
+  const [a11y] = useAccessibilityPrefs()
+  const heroFontSize = `${16 * scale * a11y.fontScale}px`
   // Icons take numeric px props, so they scale by hand off the same factor
   const px = (n: number) => Math.round(n * scale)
   const slots = Math.min(visibleCount, Math.max(count, 1))
@@ -543,8 +547,8 @@ export default function DiscoverPage() {
         <img
           src={shownSrc}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover animate-fade-in"
-          loading="eager"
+          className="absolute inset-0 w-full h-full object-cover animate-fade-in photo-dimmable"
+          loading="eager" fetchPriority="high"
         />
         {/* Three stacked overlays, so their opacities MULTIPLY: at the right
             edge, where the text sits, they used to pass only 0.90 × 0.40 × 0.30
@@ -584,7 +588,7 @@ export default function DiscoverPage() {
             <img
               src={anim.src}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover photo-dimmable"
               style={{
                 opacity: anim.phase === 'start' ? 0 : 1,
                 transition: 'opacity 0.3s ease',
@@ -600,7 +604,7 @@ export default function DiscoverPage() {
               }}
             >
               <div className="overflow-hidden shrink-0" style={{ height: anim.imgH }}>
-                <img src={anim.src} alt="" className="w-full h-full object-cover" />
+                <img src={anim.src} alt="" className="w-full h-full object-cover photo-dimmable" />
               </div>
               <div className="px-[0.75em] py-[0.625em]">
                 <p className="text-[0.875em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] text-white">
@@ -654,10 +658,10 @@ export default function DiscoverPage() {
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {activeMode.label} &middot; {active.meta}
                 </p>
-                <h1 className="text-[3.75em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
+                <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   {active.title}
                 </h1>
-                <p className="mt-[1.25em] text-[1.125em] text-white/80 max-w-[32em] leading-relaxed line-clamp-3 md:ml-auto">
+                <p className="mt-[1.25em] text-[1.2em] text-white/80 max-w-[30em] leading-relaxed line-clamp-3 md:ml-auto">
                   {active.description}
                 </p>
 
@@ -669,7 +673,7 @@ export default function DiscoverPage() {
                     the list nests, and a fractional em there would compound. */}
                 {active.details && active.details.length > 0 && (
                   <div className="mt-[1.25em] max-w-[36em] md:ml-auto inline-block text-left">
-                    <div className="text-[0.875em] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.143em] [&_li+li]:mt-[0.571em]">
+                    <div className="text-[0.9375em] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.067em] [&_li+li]:mt-[0.533em]">
                       <DetailsList details={active.details} tone="dark" compact max={3} />
                     </div>
                   </div>
@@ -680,10 +684,10 @@ export default function DiscoverPage() {
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {activeMode.label}
                 </p>
-                <h1 className="text-[3.75em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
+                <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   Innovate. Collaborate.
                 </h1>
-                <p className="mt-[1.25em] text-[1.125em] text-white/80 max-w-[32em] leading-relaxed md:ml-auto">
+                <p className="mt-[1.25em] text-[1.2em] text-white/80 max-w-[30em] leading-relaxed md:ml-auto">
                   Nothing to show here yet — explore the platform to see what&apos;s happening
                   across the Caribbean.
                 </p>
@@ -711,10 +715,7 @@ export default function DiscoverPage() {
           <div className="flex items-end justify-between gap-[1.5em]">
             <div className="min-w-0">
               {/* Slide toggle */}
-              <div
-                data-tutorial="discover-modes"
-                className="relative inline-flex bg-white/10 backdrop-blur-sm p-[0.25em] mb-[1em] rounded-[0.5em]"
-              >
+              <div className="relative inline-flex bg-white/10 backdrop-blur-sm p-[0.25em] mb-[1em] rounded-[0.5em]">
                 <div
                   className="absolute top-[0.25em] bottom-[0.25em] w-[calc((100%-0.5em)/3)] bg-ktip-cream rounded-[0.375em] transition-transform duration-300 ease-out"
                   style={{ transform: `translateX(${modeIndex * 100}%)` }}
@@ -735,7 +736,6 @@ export default function DiscoverPage() {
 
               {/* Portrait mini cards — click selects, hover shows arrows and pauses rotation */}
               <div
-                data-tutorial="discover-cards"
                 className="relative group/cards"
                 onMouseEnter={() => setPaused(true)}
                 onMouseLeave={() => setPaused(false)}
@@ -789,14 +789,14 @@ export default function DiscoverPage() {
                         pointerEvents: hidden ? 'none' : undefined,
                       }}
                       onClick={() => select(itemIdx)}
-                      className={`group text-left shrink-0 w-[8em] rounded-[0.5em] overflow-hidden transition-all duration-300 ${
+                      className={`group text-left shrink-0 w-[8.6em] rounded-[0.5em] overflow-hidden transition-all duration-300 ${
                         isActive
                           ? 'bg-ktip-cream shadow-hard -translate-y-[0.25em]'
                           : 'bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:-translate-y-[0.25em] hover:scale-[1.03] hover:shadow-hard'
                       }`}
                     >
                       <div
-                        className={`h-[9em] overflow-hidden flex items-center justify-center ${
+                        className={`h-[9.7em] overflow-hidden flex items-center justify-center ${
                           isActive ? 'bg-ktip-sand-50' : ''
                         }`}
                       >
@@ -804,7 +804,7 @@ export default function DiscoverPage() {
                           <img
                             src={item.image}
                             alt=""
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover photo-dimmable"
                             loading="lazy"
                           />
                         ) : (
@@ -837,9 +837,10 @@ export default function DiscoverPage() {
                     Array.from({ length: visibleCount }, (_, i) => (
                       <div
                         key={i}
-                        className="shrink-0 w-[8em] rounded-[0.5em] overflow-hidden bg-white/10 backdrop-blur-sm animate-pulse"
+                        className="shrink-0 w-[8.6em] rounded-[0.5em] overflow-hidden bg-white/10 backdrop-blur-sm animate-pulse"
+                        aria-hidden="true"
                       >
-                        <div className="h-[9em] flex items-center justify-center">
+                        <div className="h-[9.7em] flex items-center justify-center">
                           <activeMode.icon size={px(30)} className="text-white/30" />
                         </div>
                         <div className="px-[0.75em] py-[0.625em] space-y-[0.5em]">

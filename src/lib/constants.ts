@@ -490,6 +490,30 @@ export const CONNECTION_VISIBILITY_LABELS: Record<string, string> = Object.fromE
   CONNECTION_VISIBILITY_OPTIONS.map((o) => [o.value, o.label])
 )
 
+// Profile privacy (083). Private is not invisible — the directory teaser
+// stays, because a member nobody can find is a member nobody can ask.
+export const PROFILE_VISIBILITY_OPTIONS: {
+  value: 'public' | 'private'
+  label: string
+  description: string
+}[] = [
+  {
+    value: 'public',
+    label: 'Public',
+    description: 'Any signed-in member can see your full profile and message you',
+  },
+  {
+    value: 'private',
+    label: 'Private',
+    description:
+      'Only your connections can see your full profile or message you. Everyone still sees your name, role and country in the directory, so they can send you a connection request.',
+  },
+]
+
+export const PROFILE_VISIBILITY_LABELS: Record<string, string> = Object.fromEntries(
+  PROFILE_VISIBILITY_OPTIONS.map((o) => [o.value, o.label])
+)
+
 // Resource Types
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   article: 'Article',

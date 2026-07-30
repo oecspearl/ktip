@@ -21,7 +21,7 @@ export function EventSpeakerGrid({ speakers }: EventSpeakerGridProps) {
                 <img
                   src={speaker.photo_url}
                   alt={speaker.name}
-                  className="w-20 h-20 rounded-full object-cover mb-3"
+                  loading="lazy" decoding="async" width={80} height={80} className="w-20 h-20 rounded-full object-cover mb-3"
                 />
               ) : (
                 <div className="w-20 h-20 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-2xl font-bold text-ktip-ocean-700 mb-3">

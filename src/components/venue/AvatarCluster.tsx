@@ -43,7 +43,7 @@ export function AvatarCluster({
               <img
                 src={o.avatar_url}
                 alt={name}
-                className={cn('rounded-full object-cover ring-2 ring-ktip-cream', s.box)}
+                loading="lazy" decoding="async" className={cn('rounded-full object-cover ring-2 ring-ktip-cream', s.box)}
               />
             ) : (
               <span

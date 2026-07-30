@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Barlow+Semi+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
+/* Fonts load from index.html via <link> so the browser discovers them before
+   this stylesheet finishes downloading; keep the family list in sync there. */
 @import "tailwindcss";
 
 /* Admin error console (src/pages/admin/errors) — shadcn/ReUI runtime and its
@@ -101,8 +101,12 @@
   --color-cal-line: rgba(4, 30, 66, 0.1);
 
   /* Font Families */
+  /* FONT-SWAP: original values kept for revert
   --font-sans: 'Mulish', system-ui, sans-serif;
   --font-display: 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif;
+  */
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-display: Arial, Helvetica, sans-serif;
 
   /* Box Shadows — layered navy-tinted falloff so elevation reads soft and
      modern (tight contact shadow + wide ambient), never a hard gray edge */
@@ -504,6 +508,13 @@ html.dark {
 
 @utility text-balance {
   text-wrap: balance;
+}
+
+/* Photography that honours the reader's brightness preference (set on <html>
+   by useAccessibilityPrefs). Defaults to 1 so an unset preference is a no-op
+   and the filter never has to be conditionally applied. */
+@utility photo-dimmable {
+  filter: brightness(var(--photo-brightness, 1));
 }
 
 /* Scrollbar hide utility for horizontal tab scrolling */

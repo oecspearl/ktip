@@ -17,6 +17,15 @@ import { cn } from '../../lib/utils'
  * overlay it, and under the FAB (z-[9999]) which stays visible as the toggle.
  */
 export function MessagingPanel() {
+  // Thin gate so the conversations query (and everything else in the panel)
+  // only runs once the panel is actually opened — not on every page view.
+  const auth = useAuth()
+  const { isOpen } = useMessagingPanel()
+  if (!auth.user || !isOpen) return null
+  return <MessagingPanelContent />
+}
+
+function MessagingPanelContent() {
   const auth = useAuth()
   const { isOpen, activeConversationId, closePanel, setActiveConversation, openPanel } =
     useMessagingPanel()

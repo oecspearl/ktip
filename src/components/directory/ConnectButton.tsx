@@ -1,22 +1,34 @@
 import { UserPlus, UserCheck, Clock, Check, X } from 'lucide-react'
-import { useConnectionStatus, useConnectionMutations } from '../../hooks/useConnections'
+import {
+  useConnectionStatus,
+  useConnectionMutations,
+  type ConnectionStatus,
+} from '../../hooks/useConnections'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 
 interface ConnectButtonProps {
   otherUserId: string
   size?: 'sm' | 'md'
+  /** Pre-fetched via useConnectionStatuses (directory grid) — skips the per-card query. */
+  status?: ConnectionStatus
+  /** Pair with `status` while the batch query is still in flight. */
+  statusPending?: boolean
 }
 
 /**
  * State-aware connect control: Connect -> Pending -> (other side)
  * Accept/Decline -> Connected.
  */
-export function ConnectButton({ otherUserId, size = 'md' }: ConnectButtonProps) {
+export function ConnectButton({ otherUserId, size = 'md', status, statusPending }: ConnectButtonProps) {
   const auth = useAuth()
   const toast = useToast()
   const myId = auth.user?.id
-  const { state, connection, loading: statusLoading } = useConnectionStatus(myId, otherUserId)
+  // Standalone fallback only; a provided `status` prop disables this query.
+  const own = useConnectionStatus(status ? undefined : myId, otherUserId)
+  const state = status ? status.state : own.state
+  const connection = status ? status.connection : own.connection
+  const statusLoading = status ? Boolean(statusPending) : own.loading
   const { sendRequest, respondToRequest, removeConnection, loading } = useConnectionMutations()
 
   if (!myId || myId === otherUserId) return null

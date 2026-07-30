@@ -1,11 +1,28 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router'
-import { GraduationCap, MessageSquare, Moon, Sun, X } from 'lucide-react'
+import {
+  Accessibility,
+  GraduationCap,
+  MessageSquare,
+  Minus,
+  Moon,
+  Plus,
+  RotateCcw,
+  Sun,
+  SunMedium,
+  Type,
+  X,
+} from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useTutorials } from '../../contexts/TutorialContext'
 import { tutorialIdForPath } from '../../data/tutorials'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import {
+  A11Y_DEFAULTS,
+  A11Y_RANGE,
+  useAccessibilityPrefs,
+} from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { cn } from '../../lib/utils'
 
@@ -24,6 +41,54 @@ interface FabAction {
   badge?: boolean
 }
 
+interface StepperProps {
+  icon: ReactNode
+  label: string
+  value: string
+  onDecrease: () => void
+  onIncrease: () => void
+  atMin: boolean
+  atMax: boolean
+  /** px size for the +/− glyphs, scaled by the caller off the FAB factor */
+  iconSize: number
+}
+
+/** One labelled −/value/+ row in the accessibility panel */
+function Stepper({
+  icon,
+  label,
+  value,
+  onDecrease,
+  onIncrease,
+  atMin,
+  atMax,
+  iconSize,
+}: StepperProps) {
+  const button =
+    'w-[1.75em] h-[1.75em] rounded-[0.375em] flex items-center justify-center border border-ktip-sand-200 text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-600 disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-ktip-sand-700 transition-colors'
+
+  return (
+    <div className="mt-[0.75em] first:mt-0">
+      <div className="flex items-center gap-[0.375em] text-[0.75em] text-ktip-sand-600 mb-[0.375em]">
+        {icon}
+        {label}
+      </div>
+      <div className="flex items-center gap-[0.5em]">
+        <button onClick={onDecrease} disabled={atMin} aria-label={`Decrease ${label}`} className={button}>
+          <Minus size={iconSize} />
+        </button>
+        {/* tabular-nums so the row does not reflow as the number changes */}
+        <span className="flex-1 text-center text-[0.8125em] font-medium tabular-nums text-ktip-sand-900">
+          {value}
+        </span>
+        <button onClick={onIncrease} disabled={atMax} aria-label={`Increase ${label}`} className={button}>
+          <Plus size={iconSize} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /**
  * Expandable quick-actions cluster fixed to the bottom-right corner.
  * Collapsed: single round button with the KTIP logo. Expanded: sub-buttons
@@ -38,7 +103,9 @@ export function FloatingActionButton() {
   const { startTutorial, isTutorialCompleted } = useTutorials()
   const { pathname } = useLocation()
   const [dark, setDark] = useThemeMode()
+  const [a11y, setA11y] = useAccessibilityPrefs()
   const [open, setOpen] = useState(false)
+  const [a11yOpen, setA11yOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   // Every length below is `em` against this, so the cluster keeps its authored
   // proportions instead of looking oversized on a smaller CSS viewport
@@ -53,10 +120,14 @@ export function FloatingActionButton() {
     const onMouseDown = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false)
+        setA11yOpen(false)
       }
     }
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key !== 'Escape') return
+      // Escape backs out one level at a time: panel first, then the cluster
+      if (a11yOpen) setA11yOpen(false)
+      else setOpen(false)
     }
     document.addEventListener('mousedown', onMouseDown)
     document.addEventListener('keydown', onKeyDown)
@@ -64,7 +135,7 @@ export function FloatingActionButton() {
       document.removeEventListener('mousedown', onMouseDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [open])
+  }, [open, a11yOpen])
 
   const actions: FabAction[] = [
     {
@@ -86,6 +157,13 @@ export function FloatingActionButton() {
       onClick: () => setDark(!dark),
     },
     {
+      id: 'accessibility',
+      label: 'Accessibility',
+      icon: <Accessibility size={px(20)} />,
+      // Opens a panel rather than acting directly, so the cluster stays open
+      onClick: () => setA11yOpen((v) => !v),
+    },
+    {
       id: 'messages',
       label: 'Messages',
       icon: <MessageSquare size={px(20)} />,
@@ -102,6 +180,9 @@ export function FloatingActionButton() {
   // sub-button would never be seen by the person who most needs the tour
   const hasUnseen = visible.some((a) => a.badge)
 
+  const atDefaults =
+    a11y.fontScale === A11Y_DEFAULTS.fontScale && a11y.brightness === A11Y_DEFAULTS.brightness
+
   return (
     <div
       ref={containerRef}
@@ -109,6 +190,50 @@ export function FloatingActionButton() {
       className="fixed bottom-[1.5em] right-[1.5em] z-[9999] flex flex-col items-center gap-[0.75em]"
       style={{ fontSize: `${16 * scale}px` }}
     >
+      {/* Accessibility panel — anchored above the cluster, inside containerRef
+          so the outside-click handler treats it as part of the FAB */}
+      {open && a11yOpen && (
+        <div
+          role="group"
+          aria-label="Accessibility settings"
+          className="absolute bottom-full right-0 mb-[0.75em] w-[15em] rounded-[0.75em] border border-ktip-sand-200 bg-ktip-cream p-[1em] shadow-fab-hover animate-slide-up"
+        >
+          <div className="flex items-center justify-between mb-[0.75em]">
+            <p className="text-[0.8125em] font-semibold text-ktip-sand-900">Accessibility</p>
+            <button
+              onClick={() => setA11y(A11Y_DEFAULTS)}
+              disabled={atDefaults}
+              className="flex items-center gap-[0.25em] text-[0.6875em] text-ktip-sand-500 hover:text-ktip-ocean-600 disabled:opacity-40 disabled:hover:text-ktip-sand-500 transition-colors"
+            >
+              <RotateCcw size={px(11)} />
+              Reset
+            </button>
+          </div>
+
+          <Stepper
+            icon={<Type size={px(14)} />}
+            label="Text size"
+            value={`${Math.round(a11y.fontScale * 100)}%`}
+            onDecrease={() => setA11y({ fontScale: a11y.fontScale - A11Y_RANGE.fontScale.step })}
+            onIncrease={() => setA11y({ fontScale: a11y.fontScale + A11Y_RANGE.fontScale.step })}
+            atMin={a11y.fontScale <= A11Y_RANGE.fontScale.min}
+            atMax={a11y.fontScale >= A11Y_RANGE.fontScale.max}
+            iconSize={px(13)}
+          />
+
+          <Stepper
+            icon={<SunMedium size={px(14)} />}
+            label="Photo brightness"
+            value={`${Math.round(a11y.brightness * 100)}%`}
+            onDecrease={() => setA11y({ brightness: a11y.brightness - A11Y_RANGE.brightness.step })}
+            onIncrease={() => setA11y({ brightness: a11y.brightness + A11Y_RANGE.brightness.step })}
+            atMin={a11y.brightness <= A11Y_RANGE.brightness.min}
+            atMax={a11y.brightness >= A11Y_RANGE.brightness.max}
+            iconSize={px(13)}
+          />
+        </div>
+      )}
+
       {visible.map((action, index) => (
         <button
           key={action.id}
@@ -158,7 +283,7 @@ export function FloatingActionButton() {
         ) : (
           <>
             <img
-              src="/KTIP%20LOGO.png"
+              src="/ktip-logo.webp"
               alt=""
               className="w-[3em] h-[3em] object-contain"
             />

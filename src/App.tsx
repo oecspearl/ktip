@@ -18,7 +18,7 @@ import { PermissionRoute } from './components/PermissionRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { MainLayout } from './components/layout/MainLayout'
-import { AdminLayout } from './components/layout/AdminLayout'
+import { RouteSplash } from './components/RouteSplash'
 import { AppError } from './lib/app-error'
 import { captureException } from './lib/monitoring'
 
@@ -84,7 +84,8 @@ function AnalyticsRoot() {
 const router = createBrowserRouter([
   {
     Component: AnalyticsRoot,
-    HydrateFallback: () => null,
+    // Splash instead of a blank screen while a route chunk downloads.
+    HydrateFallback: RouteSplash,
     children: [
       // Bare auth routes (no layout)
       { path: '/login', lazy: lazyPage(() => import('./pages/auth/LoginPage')) },
@@ -114,17 +115,19 @@ const router = createBrowserRouter([
           { path: '/forums', lazy: lazyPage(() => import('./pages/forums/ForumsPage')) },
           { path: '/forums/:slug', lazy: lazyPage(() => import('./pages/forums/BoardPage')) },
           { path: '/forums/:slug/:postId', lazy: lazyPage(() => import('./pages/forums/PostDetailPage')) },
+          // The list stays open — being findable is the point of a directory,
+          // and it is how a signed-out visitor decides the platform is worth
+          // joining. The member behind a card is not: /u/:id and the drawer
+          // both require a session (083).
           { path: '/directory', lazy: lazyPage(() => import('./pages/directory/DirectoryPage')) },
           // Public on purpose. A rank is only worth chasing if it can be
-          // shown to someone, and a shared /u/ link has to open for a
-          // signed-out visitor. Both surfaces exclude students, members who
-          // opted out, and suspended accounts — enforced in SQL, not here.
+          // shown to someone. Excludes students, members who opted out, and
+          // suspended accounts — enforced in SQL, not here.
           { path: '/leaderboard', lazy: lazyPage(() => import('./pages/leaderboard/LeaderboardPage')) },
-          { path: '/u/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
-          // Public on purpose, like /u/:id — a CV only a signed-in member can
-          // open is not one you can send to an employer. public_resume()
-          // returns nothing unless the owner published it, so the page 404s
-          // itself rather than relying on this route to hide anything.
+          // Public on purpose, unlike /u/:id — a CV only a signed-in member
+          // can open is not one you can send to an employer. public_resume()
+          // returns nothing unless the owner published it and their profile is
+          // public, so the page 404s itself rather than relying on this route.
           { path: '/u/:id/cv', lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
           // The organisation's answer to /u/:id, and public for the same
           // reason. public_employer() returns nothing unless the business is
@@ -203,6 +206,11 @@ const router = createBrowserRouter([
               // profile can be shared outside the app. /profile/* stays as a
               // redirect for old links and for the URLs already stored in
               // notification rows.
+              // Signed-in only since 083. A member page is a person, not a
+              // brochure: you have to have an account before you can read one,
+              // and ProtectedRoute carries `state.from` so a shared /u/ link
+              // still lands on the profile once you have signed in.
+              { path: '/u/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
               { path: '/profile/me', element: <Navigate to="/dashboard" replace /> },
               { path: '/profile/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
@@ -238,7 +246,12 @@ const router = createBrowserRouter([
             Component: AdminRoute,
             children: [
               {
-                Component: AdminLayout,
+                // Router-level lazy: the admin shell never loads for non-admin
+                // visitors and stays out of the public entry chunk.
+                lazy: async () => {
+                  const m = await import('./components/layout/AdminLayout')
+                  return { Component: m.AdminLayout }
+                },
                 children: [
                   { path: '/admin', lazy: lazyPage(() => import('./pages/admin/AdminDashboardPage')) },
                   { path: '/admin/projects', lazy: lazyPage(() => import('./pages/admin/projects/AdminProjectsPage')) },

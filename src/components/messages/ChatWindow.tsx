@@ -5,7 +5,7 @@ import { MessageBubble } from './MessageBubble'
 import { GroupSettingsModal } from './GroupSettingsModal'
 import { useMessages, useRealtimeMessages, useSendMessage } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
-import type { Conversation, Message } from '../../types'
+import type { Conversation } from '../../types'
 
 interface ChatWindowProps {
   conversationId: string
@@ -18,28 +18,17 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   const auth = useAuth()
   const [showGroupSettings, setShowGroupSettings] = useState(false)
   const isGroup = conversation?.is_group ?? false
-  const { messages: fetchedMessages } = useMessages(conversationId)
+  // The query cache is the single source of truth: realtime INSERTs and our
+  // own sends both land there (useRealtimeMessages / useSendMessage), so a
+  // local mirror only produced duplicate state updates per incoming message.
+  const { messages } = useMessages(conversationId)
   const { sendMessage, loading } = useSendMessage()
 
-  const [localMessages, setLocalMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
-  // Sync fetched messages to local state
-  useEffect(() => {
-    if (fetchedMessages) {
-      setLocalMessages(fetchedMessages)
-    }
-  }, [fetchedMessages])
-
-  // Realtime: append new messages
-  useRealtimeMessages(conversationId, (newMsg) => {
-    // Avoid duplicates (if the sender is us, we already added it optimistically)
-    setLocalMessages((prev) => {
-      if (prev.some((m) => m.id === newMsg.id)) return prev
-      return [...prev, newMsg]
-    })
-  })
+  // Realtime: writes into the query cache inside the hook.
+  useRealtimeMessages(conversationId)
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -47,7 +36,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, 50)
     return () => clearTimeout(timeout)
-  }, [localMessages])
+  }, [messages])
 
   const handleSend = async (e: FormEvent) => {
     e.preventDefault()
@@ -57,18 +46,11 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
     setInput('')
 
     try {
-      const sent = await sendMessage({
+      await sendMessage({
         conversation_id: conversationId,
         sender_id: auth.user.id,
         content,
       })
-      if (sent) {
-        // Add to local messages if not already there from realtime
-        setLocalMessages((prev) => {
-          if (prev.some((m) => m.id === (sent as any).id)) return prev
-          return [...prev, sent as unknown as Message]
-        })
-      }
     } catch (err) {
       console.error('Failed to send message:', err)
     }
@@ -117,8 +99,8 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 bg-ktip-canvas">
-        {localMessages.length ? (
-          localMessages.map((message) => (
+        {messages?.length ? (
+          messages.map((message) => (
             <MessageBubble
               key={message.id}
               message={message}

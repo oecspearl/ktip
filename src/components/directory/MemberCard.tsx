@@ -6,6 +6,7 @@ import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { truncate } from '../../lib/utils'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface MemberCardProps {
   member: Profile
@@ -14,6 +15,10 @@ interface MemberCardProps {
 export function MemberCard({ member }: MemberCardProps) {
   const { openMember } = useMemberPanel()
   const { openPanel } = useMessagingPanel()
+  const auth = useAuth()
+  // Signed-out visitors browse the list; messaging needs a session, and a
+  // private member needs an accepted connection on top of that (083).
+  const canMessage = !!auth.user && member.profile_visibility !== 'private'
   return (
     <Card hover className="h-full flex flex-col">
       {/* Avatar & Name */}
@@ -22,7 +27,7 @@ export function MemberCard({ member }: MemberCardProps) {
           <img
             src={member.avatar_url!}
             alt={member.display_name || 'Member'}
-            className="w-14 h-14 rounded-full object-cover shrink-0"
+            loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 rounded-full object-cover shrink-0"
           />
         ) : (
           <div className="w-14 h-14 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-xl font-bold text-ktip-ocean-700 shrink-0">
@@ -85,14 +90,16 @@ export function MemberCard({ member }: MemberCardProps) {
         >
           View Profile
         </button>
-        <button
-          type="button"
-          onClick={() => openPanel({ userId: member.id })}
-          className="flex items-center justify-center gap-1.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-700 py-1.5 px-3 rounded-lg hover:bg-ktip-sand-50 transition-colors"
-        >
-          <MessageSquare size={14} />
-          Message
-        </button>
+        {canMessage && (
+          <button
+            type="button"
+            onClick={() => openPanel({ userId: member.id })}
+            className="flex items-center justify-center gap-1.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-700 py-1.5 px-3 rounded-lg hover:bg-ktip-sand-50 transition-colors"
+          >
+            <MessageSquare size={14} />
+            Message
+          </button>
+        )}
       </div>
     </Card>
   )

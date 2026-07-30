@@ -453,29 +453,56 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     [user, queryClient]
   )
 
-  const value: AuthContextType = {
-    user,
-    session,
-    profile,
-    loading,
-    profileLoading,
-    roles,
-    permissions,
-    can,
-    isAdmin,
-    activeRole,
-    setActiveRole,
-    signIn,
-    signUp,
-    signOut,
-    signInWithGoogle,
-    signInWithMicrosoft,
-    updateProfile,
-    updatePassword,
-    updateEmail,
-    resetPassword,
-    deleteAccount,
-  }
+  // Memoized so the 100+ useAuth consumers only re-render when a field
+  // actually changes, not on every provider render.
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      session,
+      profile,
+      loading,
+      profileLoading,
+      roles,
+      permissions,
+      can,
+      isAdmin,
+      activeRole,
+      setActiveRole,
+      signIn,
+      signUp,
+      signOut,
+      signInWithGoogle,
+      signInWithMicrosoft,
+      updateProfile,
+      updatePassword,
+      updateEmail,
+      resetPassword,
+      deleteAccount,
+    }),
+    [
+      user,
+      session,
+      profile,
+      loading,
+      profileLoading,
+      roles,
+      permissions,
+      can,
+      isAdmin,
+      activeRole,
+      setActiveRole,
+      signIn,
+      signUp,
+      signOut,
+      signInWithGoogle,
+      signInWithMicrosoft,
+      updateProfile,
+      updatePassword,
+      updateEmail,
+      resetPassword,
+      deleteAccount,
+    ]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

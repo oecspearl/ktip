@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { useAuth } from './AuthContext'
+import { useToast } from './ToastContext'
 import { useCreateConversation } from '../hooks/useMessages'
 
 interface OpenPanelOptions {
@@ -22,6 +23,7 @@ const MessagingPanelContext = createContext<MessagingPanelContextValue | null>(n
 
 export function MessagingPanelProvider({ children }: { children: ReactNode }) {
   const auth = useAuth()
+  const toast = useToast()
   const { createConversation } = useCreateConversation()
   const [isOpen, setIsOpen] = useState(false)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
@@ -39,10 +41,17 @@ export function MessagingPanelProvider({ children }: { children: ReactNode }) {
         // invalidates ['messages'] so the conversation list refreshes.
         createConversation(auth.user.id, userId)
           .then((convId) => setActiveConversationId(convId))
-          .catch((err) => console.error('Failed to open conversation:', err))
+          .catch((err: any) => {
+            // The refusals that reach here are the ones a member can act on —
+            // a private profile to request access to, a student account that
+            // needs a supervised channel. Logging them to the console left the
+            // panel sitting open and empty with no reason given.
+            console.error('Failed to open conversation:', err)
+            toast.error(err?.message || 'Could not open that conversation')
+          })
       }
     },
-    [auth.user, createConversation]
+    [auth.user, createConversation, toast]
   )
 
   const closePanel = useCallback(() => setIsOpen(false), [])

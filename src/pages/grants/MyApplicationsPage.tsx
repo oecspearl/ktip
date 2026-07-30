@@ -104,7 +104,7 @@ export default function MyApplicationsPage() {
         eyebrow="My Applications"
         title="Grant Applications"
         subtitle="Track the status of your funding applications"
-        image="/grants/grant-pitch.jpg"
+        image="/grants/grant-pitch.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: 'Home', href: '/' },

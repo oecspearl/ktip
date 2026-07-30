@@ -26,7 +26,7 @@ interface JitsiVideoCallProps {
  */
 
 const DEFAULT_JITSI_DOMAIN = 'meet.jit.si'
-const KTIP_LOGO_PATH = '/ktip%20logo%20no%20bg.png'
+const KTIP_LOGO_PATH = '/ktip-logo-nobg.webp'
 
 const configuredDomain = (import.meta.env.VITE_JITSI_DOMAIN as string | undefined)?.trim()
 const jaasAppId = (import.meta.env.VITE_JITSI_APP_ID as string | undefined)?.trim()

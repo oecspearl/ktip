@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router'
 import { useDirectoryMembers } from '../../hooks/useDirectory'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useAllBadges } from '../../hooks/useBadges'
-import { useConnectionCounts } from '../../hooks/useConnections'
+import { useConnectionCounts, useConnectionStatuses } from '../../hooks/useConnections'
+import { useAuth } from '../../contexts/AuthContext'
 import { useProfileStatsBatch } from '../../hooks/useProfileStats'
 import { usePublicEmployers } from '../../hooks/useEmployerProfile'
-import { Briefcase, Building2, Search, UserX, User, Users, Trophy } from 'lucide-react'
+import { Briefcase, Building2, Lock, Search, UserX, User, Users, Trophy } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
@@ -67,12 +68,21 @@ export default function DirectoryPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
 
+  // The profiles query used to be unbounded; the grid now loads a page at a
+  // time and "Load more" raises the cap.
+  const PAGE_SIZE = 48
+  const [pageLimit, setPageLimit] = useState(PAGE_SIZE)
+  useEffect(() => {
+    setPageLimit(PAGE_SIZE)
+  }, [debouncedSearch, selectedRole, selectedCountry, selectedSkill, selectedBadge])
+
   const { members, loading } = useDirectoryMembers({
     search: debouncedSearch,
     role: selectedRole,
     country: selectedCountry,
     skill: selectedSkill,
     badge: selectedBadge,
+    limit: pageLimit,
   })
   const { badges: allBadges } = useAllBadges()
 
@@ -98,6 +108,12 @@ export default function DirectoryPage() {
   const { counts: connectionCounts } = useConnectionCounts(memberIds)
   // One batched RPC for the whole page rather than a request per card.
   const { statsById } = useProfileStatsBatch(memberIds)
+  // Same batching for connect-button state — was one query per card.
+  const auth = useAuth()
+  const { statuses: connectionStatuses, loading: statusesLoading } = useConnectionStatuses(
+    auth.user?.id,
+    memberIds
+  )
 
   useTutorialAutoStart(TUTORIAL_IDS.DIRECTORY, !loading)
 
@@ -332,7 +348,7 @@ export default function DirectoryPage() {
                           <img
                             src={member.avatar_url!}
                             alt=""
-                            className="w-10 h-10 rounded-full object-cover ring-2 ring-white/60 shrink-0"
+                            loading="lazy" decoding="async" width={40} height={40} className="w-10 h-10 rounded-full object-cover ring-2 ring-white/60 shrink-0"
                           />
                         ) : (
                           <span className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full ring-2 ring-white/60 flex items-center justify-center text-base font-bold text-white shrink-0">
@@ -347,6 +363,14 @@ export default function DirectoryPage() {
                         {member.country && <>{member.country}</>}
                         {member.country && member.skills?.length > 0 && <> · </>}
                         {member.skills?.length > 0 && <>{member.skills[0]}</>}
+                        {/* Said on the card, so the closed profile behind it
+                            is not a surprise after the click. */}
+                        {member.profile_visibility === 'private' && (
+                          <span className="flex items-center gap-1.5 mt-1">
+                            <Lock size={13} className="shrink-0" />
+                            Private profile
+                          </span>
+                        )}
                         {connectionCounts?.[member.id] !== undefined && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Users size={13} className="shrink-0" />
@@ -379,10 +403,26 @@ export default function DirectoryPage() {
                     }
                     cta="View Profile"
                   >
-                    <ConnectButton otherUserId={member.id} size="sm" />
+                    <ConnectButton
+                      otherUserId={member.id}
+                      size="sm"
+                      status={connectionStatuses?.[member.id] ?? { state: 'none', connection: null }}
+                      statusPending={statusesLoading}
+                    />
                   </BentoCard>
                 ))}
               </div>
+
+              {members.length >= pageLimit && (
+                <div className="text-center mt-8">
+                  <button
+                    onClick={() => setPageLimit((l) => l + PAGE_SIZE)}
+                    className="px-6 py-2.5 text-sm font-bold rounded-lg btn-brand"
+                  >
+                    Load more members
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-16">

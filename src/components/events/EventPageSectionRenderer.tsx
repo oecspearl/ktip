@@ -103,7 +103,7 @@ export function EventPageSectionRenderer({ section }: EventPageSectionRendererPr
                     <img
                       src={sponsor.logo_url}
                       alt={sponsor.name}
-                      className="w-16 h-16 object-contain rounded-lg mb-3"
+                      loading="lazy" decoding="async" width={64} height={64} className="w-16 h-16 object-contain rounded-lg mb-3"
                     />
                   ) : (
                     <div className="w-16 h-16 rounded-full bg-ktip-sand-100 flex items-center justify-center text-ktip-sand-500 font-display font-bold text-lg mb-3">

@@ -173,13 +173,13 @@ export function AuthSplitShell({
             <img
               src={hero}
               alt=""
-              loading="eager"
+              loading="eager" fetchPriority="high"
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/75 via-brand-navy/10 to-brand-navy/35" />
             <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5">
-              <img src="/ktip logo no bg.png" alt="KTIP" className="h-9 w-auto drop-shadow" />
+              <img src="/ktip-logo-nobg.webp" alt="KTIP" className="h-9 w-auto drop-shadow" />
               <Link
                 to="/"
                 className="inline-flex items-center gap-1.5 rounded-full bg-brand-white/15 px-4 py-1.5 text-sm font-medium text-brand-white backdrop-blur-sm hover:bg-brand-white/25 transition-colors"

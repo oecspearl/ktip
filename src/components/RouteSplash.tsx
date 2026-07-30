@@ -7,7 +7,7 @@ export const RouteSplash = () => (
   <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
     <div className="text-center">
       <img
-        src="/KTIP%20LOGO.png"
+        src="/ktip-logo.webp"
         alt="KTIP Logo"
         className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
       />

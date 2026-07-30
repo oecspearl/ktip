@@ -63,7 +63,7 @@ export function RoomOccupantList({
               <li key={o.user_id} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="relative shrink-0">
                   {o.avatar_url ? (
-                    <img src={o.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                    <img src={o.avatar_url} alt="" loading="lazy" decoding="async" width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
                   ) : (
                     <span
                       className={cn(

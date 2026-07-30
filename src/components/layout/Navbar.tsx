@@ -327,6 +327,8 @@ export function Navbar() {
   // All of those get the same dark backdrop the open mobile menu already uses.
   const noHeroBehindBar =
     location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/cv') ||
+    /^\/u\/[^/]+\/cv$/.test(location.pathname) ||
     /^\/events\/[^/]+\/venue/.test(location.pathname)
   const needsBackdrop = noHeroBehindBar || scrolledPastHero
 
@@ -374,7 +376,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src="/KTIP%20LOGO.png" alt="KTIP Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
+              <img src="/ktip-logo.webp" alt="KTIP Logo" width={56} height={56} decoding="async" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
               <div className="hidden sm:block">
                 <h1 className="text-2xl font-display font-bold whitespace-nowrap text-white">OECS KTIP</h1>
               </div>
@@ -493,7 +495,6 @@ export function Navbar() {
               cannot clip it. */}
           <div
             ref={searchRef}
-            data-tutorial="nav-search"
             className="relative hidden md:flex items-center justify-end flex-1 max-w-md mx-4"
           >
             <div

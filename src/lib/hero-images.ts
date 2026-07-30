@@ -1,15 +1,15 @@
-export const FALLBACK_IMAGE = '/ktiphero.png'
+export const FALLBACK_IMAGE = '/ktiphero.webp'
 
 // Pool of stock hero images assigned to items that have no image of their own.
 // The pick is a stable hash of the seed so each page/card keeps its image
 // across renders instead of reshuffling.
 export const HERO_IMAGES = [
-  '/hero/hero-1.jpg',
-  '/hero/hero-2.jpg',
-  '/hero/hero-3.jpg',
-  '/hero/hero-4.jpg',
-  '/hero/hero-5.jpg',
-  '/hero/hero-6.jpg',
+  '/hero/hero-1.webp',
+  '/hero/hero-2.webp',
+  '/hero/hero-3.webp',
+  '/hero/hero-4.webp',
+  '/hero/hero-5.webp',
+  '/hero/hero-6.webp',
 ]
 
 const hash = (seed: string) => {
@@ -22,34 +22,34 @@ const hash = (seed: string) => {
 // so a page band shows something to do with the page instead of a random beach.
 // Most specific patterns first — the first match wins.
 export const PAGE_HERO_IMAGES = {
-  projects: '/pages/page-projects.jpg',
-  events: '/pages/page-events.jpg',
-  eventDetail: '/pages/page-event-detail.jpg',
-  forums: '/pages/page-forums.jpg',
-  community: '/pages/page-community.jpg',
-  directory: '/pages/page-directory.jpg',
-  resources: '/pages/page-resources.jpg',
-  collaborate: '/pages/page-collaborate.jpg',
-  documents: '/pages/page-documents.jpg',
-  code: '/pages/page-code.jpg',
-  video: '/pages/page-video.jpg',
-  whiteboards: '/pages/page-whiteboards.jpg',
-  hackathon: '/pages/page-hackathon.jpg',
-  help: '/pages/page-help.jpg',
-  admin: '/pages/page-admin.jpg',
-  analytics: '/pages/page-analytics.jpg',
-  applications: '/pages/page-applications.jpg',
-  institutions: '/pages/page-institutions.jpg',
-  office: '/pages/page-office.jpg',
-  integrations: '/pages/page-integrations.jpg',
-  api: '/pages/page-api.jpg',
-  security: '/pages/page-security.jpg',
-  network: '/pages/page-network.jpg',
-  settings: '/pages/page-settings.jpg',
-  notFound: '/pages/page-404.jpg',
-  chamber: '/pages/page-chamber.jpg',
-  meeting: '/pages/page-meeting.jpg',
-  dev: '/pages/page-dev.jpg',
+  projects: '/pages/page-projects.webp',
+  events: '/pages/page-events.webp',
+  eventDetail: '/pages/page-event-detail.webp',
+  forums: '/pages/page-forums.webp',
+  community: '/pages/page-community.webp',
+  directory: '/pages/page-directory.webp',
+  resources: '/pages/page-resources.webp',
+  collaborate: '/pages/page-collaborate.webp',
+  documents: '/pages/page-documents.webp',
+  code: '/pages/page-code.webp',
+  video: '/pages/page-video.webp',
+  whiteboards: '/pages/page-whiteboards.webp',
+  hackathon: '/pages/page-hackathon.webp',
+  help: '/pages/page-help.webp',
+  admin: '/pages/page-admin.webp',
+  analytics: '/pages/page-analytics.webp',
+  applications: '/pages/page-applications.webp',
+  institutions: '/pages/page-institutions.webp',
+  office: '/pages/page-office.webp',
+  integrations: '/pages/page-integrations.webp',
+  api: '/pages/page-api.webp',
+  security: '/pages/page-security.webp',
+  network: '/pages/page-network.webp',
+  settings: '/pages/page-settings.webp',
+  notFound: '/pages/page-404.webp',
+  chamber: '/pages/page-chamber.webp',
+  meeting: '/pages/page-meeting.webp',
+  dev: '/pages/page-dev.webp',
 } as const
 
 // Domain nouns run before the generic admin/community catch-alls so
@@ -114,29 +114,29 @@ export const pageHeroFor = (...seeds: Array<string | null | undefined>) => {
 // narrowed by grant_type (and by the climate flag, which wins) so a marine
 // research fellowship never lands on an office photo.
 export const GRANT_IMAGES = [
-  '/grants/grant-startup.jpg',
-  '/grants/grant-research.jpg',
-  '/grants/grant-development.jpg',
-  '/grants/grant-education.jpg',
-  '/grants/grant-climate.jpg',
-  '/grants/grant-marine.jpg',
-  '/grants/grant-nature.jpg',
-  '/grants/grant-pitch.jpg',
+  '/grants/grant-startup.webp',
+  '/grants/grant-research.webp',
+  '/grants/grant-development.webp',
+  '/grants/grant-education.webp',
+  '/grants/grant-climate.webp',
+  '/grants/grant-marine.webp',
+  '/grants/grant-nature.webp',
+  '/grants/grant-pitch.webp',
 ]
 
 const GRANT_TYPE_IMAGES: Record<string, string[]> = {
-  startup: ['/grants/grant-startup.jpg', '/grants/grant-pitch.jpg'],
-  research: ['/grants/grant-research.jpg', '/grants/grant-marine.jpg'],
-  innovation: ['/grants/grant-climate.jpg', '/grants/grant-startup.jpg'],
-  development: ['/grants/grant-development.jpg', '/grants/grant-nature.jpg'],
-  education: ['/grants/grant-education.jpg', '/grants/grant-pitch.jpg'],
+  startup: ['/grants/grant-startup.webp', '/grants/grant-pitch.webp'],
+  research: ['/grants/grant-research.webp', '/grants/grant-marine.webp'],
+  innovation: ['/grants/grant-climate.webp', '/grants/grant-startup.webp'],
+  development: ['/grants/grant-development.webp', '/grants/grant-nature.webp'],
+  education: ['/grants/grant-education.webp', '/grants/grant-pitch.webp'],
 }
 
 const CLIMATE_GRANT_IMAGES = [
-  '/grants/grant-climate.jpg',
-  '/grants/grant-marine.jpg',
-  '/grants/grant-nature.jpg',
-  '/grants/grant-research.jpg',
+  '/grants/grant-climate.webp',
+  '/grants/grant-marine.webp',
+  '/grants/grant-nature.webp',
+  '/grants/grant-research.webp',
 ]
 
 export const grantImageFor = (

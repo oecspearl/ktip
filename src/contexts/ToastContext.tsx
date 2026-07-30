@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type PropsWithChildren } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, type PropsWithChildren } from 'react'
 import { createPortal } from 'react-dom'
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react'
 import { cn } from '../lib/utils'
@@ -65,14 +65,19 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
     [removeToast]
   )
 
-  const value: ToastContextValue = {
-    toast: {
-      success: (msg, dur) => addToast('success', msg, dur),
-      error: (msg, dur) => addToast('error', msg, dur),
-      warning: (msg, dur) => addToast('warning', msg, dur),
-      info: (msg, dur) => addToast('info', msg, dur),
-    },
-  }
+  // Stable across toast show/dismiss renders, so consumers holding `toast` in
+  // dependency arrays don't re-run whenever any toast appears or expires.
+  const value: ToastContextValue = useMemo(
+    () => ({
+      toast: {
+        success: (msg, dur) => addToast('success', msg, dur),
+        error: (msg, dur) => addToast('error', msg, dur),
+        warning: (msg, dur) => addToast('warning', msg, dur),
+        info: (msg, dur) => addToast('info', msg, dur),
+      },
+    }),
+    [addToast]
+  )
 
   return (
     <ToastContext.Provider value={value}>

@@ -32,8 +32,13 @@ export function PreferencesTab() {
   // table and enforced by a DB trigger on the notifications table.
   const [notif, setNotif] = useState<NotifPrefs>({ ...DEFAULT_NOTIFICATION_PREFERENCES })
 
-  // Privacy preferences — still local-only (no enforcement yet)
+  // Profile privacy — persisted on the profile row and enforced by
+  // get_profile_view() and the conversation_participants policy (083).
+  // Private is not invisible: the directory teaser stays either way.
   const [profilePublic, setProfilePublic] = useState(true)
+
+  // Still local-only, enforced nowhere. There is no email column on profiles
+  // at all, so "Show Email" has nothing to show yet.
   const [showEmail, setShowEmail] = useState(false)
   const [showCountry, setShowCountry] = useState(true)
 
@@ -57,6 +62,14 @@ export function PreferencesTab() {
       setOnLeaderboard(auth.profile.leaderboard_visibility === 'public')
     }
   }, [auth.profile?.leaderboard_visibility])
+
+  // Absent when the deploy is ahead of migration 083 — read that as public,
+  // which is what the column defaults to.
+  useEffect(() => {
+    if (auth.profile) {
+      setProfilePublic(auth.profile.profile_visibility !== 'private')
+    }
+  }, [auth.profile?.profile_visibility, auth.profile])
 
   // Sync DB row into local state; migrate any legacy localStorage
   // notification prefs the first time the user has no DB row.
@@ -82,8 +95,10 @@ export function PreferencesTab() {
       achievements: preferences.achievements ?? true,
     })
 
+    // profilePublic is no longer read back from localStorage — the profile row
+    // is the source of truth for it now, and a stale legacy value would
+    // silently re-open a profile the member had closed.
     if (legacy?.privacy) {
-      setProfilePublic(legacy.privacy.profilePublic ?? true)
       setShowEmail(legacy.privacy.showEmail ?? false)
       setShowCountry(legacy.privacy.showCountry ?? true)
     }
@@ -103,10 +118,14 @@ export function PreferencesTab() {
       if (nextLeaderboard !== auth.profile?.leaderboard_visibility) {
         await auth.updateProfile({ leaderboard_visibility: nextLeaderboard })
       }
+      const nextProfileVisibility = profilePublic ? 'public' : 'private'
+      if (nextProfileVisibility !== (auth.profile?.profile_visibility ?? 'public')) {
+        await auth.updateProfile({ profile_visibility: nextProfileVisibility })
+      }
       // Remaining privacy toggles stay local until enforced server-side
       localStorage.setItem(
         'ktip_preferences',
-        JSON.stringify({ privacy: { profilePublic, showEmail, showCountry } })
+        JSON.stringify({ privacy: { showEmail, showCountry } })
       )
       toast.success('Preferences saved!')
     } catch {
@@ -197,7 +216,7 @@ export function PreferencesTab() {
             checked={profilePublic}
             onChange={setProfilePublic}
             label="Public Profile"
-            description="Allow others to view your profile page"
+            description="On, any signed-in member can see your full profile and message you. Off, only your connections can — everyone still sees your name, role and country in the directory, so they can send you a connection request."
           />
           <Toggle
             checked={showEmail}

@@ -55,7 +55,8 @@ describe('global stylesheet stays free of shadcn tokens', () => {
   })
 
   it('keeps KTIP typography', () => {
-    expect(css).toMatch(/--font-sans:\s*'Mulish'/)
+    // FONT-SWAP: was expect(css).toMatch(/--font-sans:\s*'Mulish'/)
+    expect(css).toMatch(/--font-sans:\s*Arial/)
     expect(css).not.toMatch(/Figtree|Roboto Slab/)
   })
 

@@ -216,7 +216,7 @@ export function ChatSidebar({
               >
                 <div className="flex items-center gap-3">
                   {contact.avatar_url ? (
-                    <img src={contact.avatar_url} alt={name} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                    <img src={contact.avatar_url} alt={name} loading="lazy" decoding="async" width={36} height={36} className="w-9 h-9 rounded-full object-cover shrink-0" />
                   ) : (
                     <div
                       className={cn(

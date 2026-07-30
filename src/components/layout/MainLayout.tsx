@@ -1,14 +1,21 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
 import { FloatingActionButton } from '../ui/FloatingActionButton'
 import { SpyRail } from '../ui/SpyRail'
-import { MessagingPanel } from '../messages/MessagingPanel'
 import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
-import { MemberPanel } from '../directory/MemberPanel'
 import { MemberPanelProvider } from '../../contexts/MemberPanelContext'
+
+// Overlay panels: closed on first paint, so their code (and the messaging /
+// directory trees behind them) stays out of the entry chunk.
+const MessagingPanel = lazy(() =>
+  import('../messages/MessagingPanel').then((m) => ({ default: m.MessagingPanel }))
+)
+const MemberPanel = lazy(() =>
+  import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel }))
+)
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -46,8 +53,10 @@ export function MainLayout() {
           data-spy markers, renders nothing when a page has none */}
       <SpyRail />
       <FloatingActionButton />
-      <MessagingPanel />
-      <MemberPanel />
+      <Suspense fallback={null}>
+        <MessagingPanel />
+        <MemberPanel />
+      </Suspense>
       <Footer />
     </div>
     </TutorialProvider>

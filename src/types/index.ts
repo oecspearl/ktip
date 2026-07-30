@@ -107,6 +107,14 @@ export type ProjectCategory =
 /** Who may see a member's connection count. */
 export type ConnectionCountVisibility = 'public' | 'connections' | 'private'
 
+/**
+ * Whether a member's profile is open to every signed-in member, or only to
+ * the connections they have accepted (083). Everyone still sees the teaser —
+ * name, avatar, roles, country — so a private member stays findable and can
+ * be sent a connection request.
+ */
+export type ProfileVisibility = 'public' | 'private'
+
 export interface Profile {
   id: string
   display_name: string | null
@@ -140,8 +148,40 @@ export interface Profile {
    * are excluded server-side whatever this says.
    */
   leaderboard_visibility?: 'public' | 'private'
+  /**
+   * Profile privacy (083). Optional for the same reason as the 082 contact
+   * fields: a deploy can run ahead of the migration, and a missing column
+   * has to read as 'public' rather than crash the directory.
+   */
+  profile_visibility?: ProfileVisibility
   created_at: string
   updated_at: string
+}
+
+/**
+ * One row of `get_profile_view()` (083). The teaser fields are always
+ * populated; everything under `can_view` is NULL when the viewer has not
+ * been granted access, so a member page renders one shape either way.
+ */
+export interface ProfileView {
+  id: string
+  display_name: string | null
+  avatar_url: string | null
+  roles: UserRole[]
+  country: string | null
+  is_verified: boolean
+  created_at: string
+  profile_visibility: ProfileVisibility
+  can_view: boolean
+  bio: string | null
+  skills: string[] | null
+  interests: string[] | null
+  open_to: string[] | null
+  organization: string | null
+  industry: string | null
+  phone: string | null
+  website: string | null
+  languages: string[] | null
 }
 
 /**

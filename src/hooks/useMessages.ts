@@ -136,8 +136,23 @@ export function useSendMessage() {
       if (error) throw error
       return message
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: keys.all('messages') })
+    onSuccess: (message, vars) => {
+      // Append to the thread cache directly — invalidating ['messages']
+      // refetched the entire thread plus the conversations list on every send,
+      // when realtime and this response already carry the new row.
+      const msg = message as any as Message
+      queryClient.setQueryData<Message[]>(
+        keys.sub('messages', 'thread', vars.conversation_id),
+        (old) => {
+          if (!old) return [msg]
+          if (old.some((m) => (m as any).id === (msg as any).id)) return old
+          return [...old, msg]
+        }
+      )
+      // The sidebar only needs its ordering/preview refreshed.
+      queryClient.invalidateQueries({
+        queryKey: keys.sub('messages', 'conversations', vars.sender_id),
+      })
     },
   })
 
@@ -168,7 +183,7 @@ export function useCreateConversation() {
       // reads as a generic permission error, so name the actual reason here.
       const { data: parties } = await (supabase as any)
         .from('profiles')
-        .select('id, roles')
+        .select('id, roles, profile_visibility')
         .in('id', [currentUserId, otherUserId])
 
       const studentInvolved = (parties || []).some((p: any) => (p.roles || []).includes('student'))
@@ -176,6 +191,29 @@ export function useCreateConversation() {
         throw new Error(
           'Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.'
         )
+      }
+
+      // Privacy (083). Same reasoning as the student check above: the
+      // conversation_participants policy refuses this anyway, but a raw policy
+      // violation reads as "something went wrong" when the actual answer is
+      // "ask them first", which is a thing the member can act on.
+      const recipient = (parties || []).find((p: any) => p.id === otherUserId)
+      if (recipient?.profile_visibility === 'private') {
+        const { data: accepted } = await (supabase as any)
+          .from('connections')
+          .select('id')
+          .eq('status', 'accepted')
+          .or(
+            `and(requester_id.eq.${currentUserId},addressee_id.eq.${otherUserId}),` +
+              `and(requester_id.eq.${otherUserId},addressee_id.eq.${currentUserId})`
+          )
+          .limit(1)
+
+        if (!accepted?.length) {
+          throw new Error(
+            'This member only accepts messages from their connections. Send them a connection request first.'
+          )
+        }
       }
 
       // Create new conversation with client-generated ID

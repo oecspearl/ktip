@@ -10,12 +10,15 @@ export const AdminRoute = () => {
   // the console by the matrix without being made a Secretariat admin.
   const isAdmin = auth.can('org:manage') || auth.can('moderation:view')
 
-  if (auth.loading) {
+  // `can()` falls back to the compiled defaults for profile.roles until the
+  // permissions RPC resolves, so it reads as "no permissions" while the profile
+  // itself is still loading. Waiting keeps that from flashing a denial.
+  if (auth.loading || auth.profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
         <div className="text-center">
           <img
-            src="/KTIP%20LOGO.png"
+            src="/ktip-logo.webp"
             alt="KTIP Logo"
             className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
           />

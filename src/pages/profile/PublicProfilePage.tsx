@@ -11,6 +11,7 @@ import {
   FolderKanban,
   Flame,
   Handshake,
+  Lock,
   MapPin,
   MessageSquare,
   Trophy,
@@ -21,7 +22,8 @@ import { Button } from '../../components/ui/Button'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { MiniTrophy } from '../../components/achievements/TrophyCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
-import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfile'
+import { useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
+import { useConnectionStatus } from '../../hooks/useConnections'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
 import { usePublicResume } from '../../hooks/useResume'
@@ -48,7 +50,9 @@ import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
  * a URL someone can send to a funder, post in a chat, or screenshot. A rank
  * nobody outside the app can see is not worth chasing.
  *
- * Public by design, so it renders for a signed-out visitor following that link.
+ * Signed-in only since 083 — a member page is a person, not a brochure — and
+ * a member who has gone private shows the teaser plus a way to ask, nothing
+ * more. get_profile_view() decides that; the page only branches on can_view.
  * Points and rank come from get_profile_stats(), which returns nothing for a
  * suspended account and hides the streak from everyone but its owner.
  */
@@ -58,30 +62,38 @@ export default function PublicProfilePage() {
   const { openPanel } = useMessagingPanel()
   const trackFlag = useTrackFlag()
 
-  const { profile, loading } = useProfile(id)
-  const { projects } = useUserProjects(id)
-  const { events } = useUserEvents(id)
-  const { badges } = useUserBadges(id)
-  const { count: connectionCount } = useConnectionCount(id)
-  const { stats } = useProfileStats(id)
+  const { view: profile, canView, loading } = useProfileView(id)
+  // Everything below the teaser hangs off this. Passing undefined disables
+  // the query outright, so a gated page makes one request, not nine.
+  const detailId = canView ? id : undefined
+
+  const { projects } = useUserProjects(detailId)
+  const { events } = useUserEvents(detailId)
+  const { badges } = useUserBadges(detailId)
+  const { count: connectionCount } = useConnectionCount(detailId)
+  const { stats } = useProfileStats(detailId)
   const { assetMap } = useTrophyAssets()
   // The business this member belongs to, if it has been Chamber-verified.
   // profiles.organization is free text and links nowhere; this is the entity.
-  const { employer } = useEmployerForUser(id)
+  const { employer } = useEmployerForUser(detailId)
   const { items: portfolio } = useEmployerPortfolio(employer?.id)
   // The published CV was orphaned: /u/:id/cv existed and nothing linked to it.
   // public_resume() returns nothing unless it is published, so this both
   // decides whether to show the link and guarantees it goes somewhere.
-  const { data: publicResume } = usePublicResume(id)
+  const { data: publicResume } = usePublicResume(detailId)
+  // Drives the copy on the private panel: "request sent" is a different thing
+  // to say than "send a request", and the button already knows which it is.
+  const { state: connectionState } = useConnectionStatus(auth.user?.id, id)
 
   const displayName = profile?.display_name || 'Member'
   usePageTitle(profile ? displayName : 'Member')
 
   // Powers the 'explorer' hidden achievement. Viewing your own page does not
-  // count — that would be a free badge for reloading.
+  // count — that would be a free badge for reloading. Neither does bouncing
+  // off a private one: there is nothing there to have explored.
   useEffect(() => {
-    if (id && auth.user?.id && id !== auth.user.id) trackFlag('directory_views')
-  }, [id, auth.user?.id, trackFlag])
+    if (id && auth.user?.id && id !== auth.user.id && canView) trackFlag('directory_views')
+  }, [id, auth.user?.id, canView, trackFlag])
 
   if (loading) {
     return (
@@ -199,14 +211,18 @@ export default function PublicProfilePage() {
         {!isSelf && auth.user && (
           <div className="mt-5 flex flex-wrap gap-2">
             <ConnectButton otherUserId={profile.id} />
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<MessageSquare size={16} />}
-              onClick={() => openPanel({ userId: profile.id })}
-            >
-              Message
-            </Button>
+            {/* A private member is unreachable until they accept. Showing the
+                button anyway would only produce a permission error from RLS. */}
+            {canView && (
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<MessageSquare size={16} />}
+                onClick={() => openPanel({ userId: profile.id })}
+              >
+                Message
+              </Button>
+            )}
             <Link to={`/grievances/report/${profile.id}`}>
               <Button
                 variant="ghost"
@@ -220,6 +236,33 @@ export default function PublicProfilePage() {
           </div>
         )}
       </header>
+
+      {/* ---------- Private ----------
+          Everything below this point is driven by queries that were never
+          issued when can_view is false, so they collapse on their own. This
+          panel exists so the page says why rather than looking broken. */}
+      {canView === false && (
+        <section className="rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-8 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ktip-sand-100">
+            <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
+          </div>
+          <h2 className="mt-4 font-display text-xl font-bold text-ktip-sand-900">
+            This profile is private
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-ktip-sand-600">
+            {connectionState === 'pending_sent'
+              ? `${displayName} has your connection request. Once they accept it you will see their full profile and be able to message them.`
+              : connectionState === 'pending_received'
+                ? `${displayName} has asked to connect with you. Accept and you will both see each other's full profile.`
+                : `Only ${displayName}'s connections can see their full profile or send them a message. Send a connection request to ask.`}
+          </p>
+          {!isSelf && auth.user && (
+            <div className="mt-5 flex justify-center">
+              <ConnectButton otherUserId={profile.id} />
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ---------- Organisation ----------
           profiles.organization has always been free text that links nowhere.

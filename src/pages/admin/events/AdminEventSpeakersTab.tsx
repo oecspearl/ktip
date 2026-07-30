@@ -283,7 +283,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
                   <img
                     src={speaker.photo_url}
                     alt={speaker.name}
-                    className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                    loading="lazy" decoding="async" width={64} height={64} className="w-16 h-16 rounded-full object-cover flex-shrink-0"
                   />
                 ) : (
                   <div className="w-16 h-16 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-xl font-bold text-ktip-ocean-700 flex-shrink-0">

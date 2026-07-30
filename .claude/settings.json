@@ -12,7 +12,19 @@
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "PowerShell(Get-Process | Where-Object { $_.ProcessName -match 'claude|node' } | Select-Object Id, ProcessName, StartTime | Sort-Object StartTime)",
       "PowerShell(npx vitest run src/components/dashboard/TimelineGantt.test.tsx src/components/resume/sheets/sheets.test.tsx 2>&1)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(cd \"c:/Users/LG/Downloads/ktip-main/OECS KTIP\")",
+      "Bash(git rev-parse *)",
+      "Bash(echo 'SAFETY POINT: __TRACKED_VAR__')",
+      "Bash(git commit -q -m ' *)",
+      "PowerShell(npm test -- --run 2>&1)",
+      "PowerShell($env:PATH=\"$env:PATH\"; npx supabase --version 2>&1 | Select-Object -First 3; echo \"---\"; if \\(Test-Path \"supabase/config.toml\"\\) { echo \"config.toml exists\" } else { echo \"no config.toml\" }; if \\(Test-Path \".env\"\\) { Select-String -Path \".env\" -Pattern \"SUPABASE\" | ForEach-Object { \\($_ -split \"=\"\\)[0] } } else { echo \"no .env\" })",
+      "PowerShell(git check-ignore -v .env; echo \"IGNORED_EXIT=$LASTEXITCODE\"; echo \"--- tracked? ---\"; git ls-files --error-unmatch .env 2>&1 | Select-Object -First 2)",
+      "Bash(sed -i 's|className=\"w-14 h-14 rounded-full object-cover shrink-0\"|loading=\"lazy\" decoding=\"async\" width={56} height={56} className=\"w-14 h-14 rounded-full object-cover shrink-0\"|' components/directory/MemberCard.tsx)",
+      "Bash(sed -i 's|className=\"w-10 h-10 rounded-full object-cover ring-2 ring-white/60 shrink-0\"|loading=\"lazy\" decoding=\"async\" width={40} height={40} className=\"w-10 h-10 rounded-full object-cover ring-2 ring-white/60 shrink-0\"|' pages/directory/DirectoryPage.tsx)",
+      "Bash(sed -i 's|className=\"w-8 h-8 rounded-full object-cover\"|loading=\"lazy\" decoding=\"async\" width={32} height={32} className=\"w-8 h-8 rounded-full object-cover\"|' pages/admin/users/AdminUsersPage.tsx)",
+      "Bash(sed -i 's|className=\"w-9 h-9 rounded-full object-cover shrink-0\"|loading=\"lazy\" decoding=\"async\" width={36} height={36} className=\"w-9 h-9 rounded-full object-cover shrink-0\"|' components/messages/ChatSidebar.tsx)",
+      "Bash(sed -i \"s|className={cn\\('rounded-full object-cover ring-2 ring-ktip-cream', s.box\\)}|loading=\\\\\"lazy\\\\\" decoding=\\\\\"async\\\\\" className={cn\\('rounded-full object-cover ring-2 ring-ktip-cream', s.box\\)}|\" components/venue/AvatarCluster.tsx)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

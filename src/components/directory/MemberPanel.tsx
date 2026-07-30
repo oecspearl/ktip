@@ -5,6 +5,7 @@ import {
   CheckCircle,
   ChevronRight,
   Flag,
+  Lock,
   MessageSquare,
   X,
 } from 'lucide-react'
@@ -12,7 +13,7 @@ import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { AchievementBadge } from '../ui/AchievementBadge'
 import { ConnectButton } from './ConnectButton'
-import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfile'
+import { useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
 import { useProfileStats } from '../../hooks/useProfileStats'
@@ -95,14 +96,25 @@ export function MemberPanel() {
   const { pathname } = useLocation()
   const openedAt = useRef<string | null>(null)
 
-  const { profile, loading } = useProfile(memberId ?? undefined)
-  const { projects } = useUserProjects(memberId ?? undefined)
-  const { events } = useUserEvents(memberId ?? undefined)
-  const { badges } = useUserBadges(memberId ?? undefined)
+  // The directory list is open to anyone; the member behind a card is not.
+  // Nothing is fetched at all for a signed-out visitor — the drawer shows the
+  // sign-in gate instead (083).
+  const signedIn = !!auth.user
+  const { view: profile, canView, loading } = useProfileView(
+    memberId ?? undefined,
+    signedIn
+  )
+  // Undefined disables the query outright, so a private member costs one
+  // request rather than six that each come back empty.
+  const detailId = canView ? (memberId ?? undefined) : undefined
+
+  const { projects } = useUserProjects(detailId)
+  const { events } = useUserEvents(detailId)
+  const { badges } = useUserBadges(detailId)
   // null when this viewer isn't allowed to see the count (owner's setting)
-  const { count: connectionCount } = useConnectionCount(memberId ?? undefined)
+  const { count: connectionCount } = useConnectionCount(detailId)
   // null for suspended accounts; the drawer just omits the row in that case
-  const { stats } = useProfileStats(memberId ?? undefined)
+  const { stats } = useProfileStats(detailId)
 
   // Escape closes the drawer — unless an open Modal (role="dialog") owns the key.
   useEffect(() => {
@@ -210,7 +222,7 @@ export function MemberPanel() {
             <img
               src={heroImageFor(coverSeed)}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover"
             />
             <div className={`absolute inset-0 bg-gradient-to-br ${gradientFor(coverSeed)}`} />
             <p className="absolute left-6 top-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">
@@ -218,7 +230,33 @@ export function MemberPanel() {
             </p>
           </div>
 
-          {/* Stretched rows, so the rail's divider runs the full column height */}
+          {/* A signed-out visitor gets the list, not the people in it. The
+              prompt carries `from` so signing in returns to this card. */}
+          {!signedIn ? (
+            <div className="px-6 py-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ktip-sand-100">
+                <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
+              </div>
+              <h2 className="mt-4 font-display text-xl font-bold text-ktip-sand-900">
+                Sign in to view this member
+              </h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-ktip-sand-600">
+                Member profiles and messages are for members of the network. Joining takes a
+                minute.
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                <Link to="/login" state={{ from: { pathname, search: window.location.search } }}>
+                  <Button size="sm">Sign in</Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="outline" size="sm">
+                    Create an account
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+          /* Stretched rows, so the rail's divider runs the full column height */
           <div className="@[46rem]:grid @[46rem]:grid-cols-[17rem_1fr]">
             {/* === Identity rail === */}
             {/* relative lifts it over the cover — the cover is positioned, so a
@@ -228,7 +266,7 @@ export function MemberPanel() {
                 <img
                   src={profile.avatar_url}
                   alt={displayName}
-                  className="w-20 h-20 rounded-xl object-cover -mt-10 ring-4 ring-ktip-cream shadow-soft"
+                  loading="lazy" decoding="async" width={80} height={80} className="w-20 h-20 rounded-xl object-cover -mt-10 ring-4 ring-ktip-cream shadow-soft"
                 />
               ) : (
                 <div
@@ -303,14 +341,18 @@ export function MemberPanel() {
                   {!isSelf && (
                     <div className="flex flex-wrap items-center gap-2 mt-5 pt-5 border-t border-ktip-sand-100">
                       <ConnectButton otherUserId={profile.id} size="sm" />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={<MessageSquare size={14} />}
-                        onClick={() => openPanel({ userId: profile.id })}
-                      >
-                        Message
-                      </Button>
+                      {/* A private member is unreachable until they accept —
+                          offering the button would only produce an RLS error. */}
+                      {canView && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={<MessageSquare size={14} />}
+                          onClick={() => openPanel({ userId: profile.id })}
+                        >
+                          Message
+                        </Button>
+                      )}
                     </div>
                   )}
 
@@ -344,6 +386,26 @@ export function MemberPanel() {
                 <div className="p-6 space-y-3">
                   <div className="h-24 rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
                   <div className="h-32 rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
+                </div>
+              ) : canView === false ? (
+                /* Every section below is fed by a query that was never issued.
+                   Say why, and leave the Connect button in the rail to act on. */
+                <div className="px-6 py-12 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ktip-sand-100">
+                    <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-4 font-display text-lg font-bold text-ktip-sand-900">
+                    This profile is private
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-sm text-sm text-ktip-sand-600">
+                    Only {displayName.split(' ')[0]}'s connections can see their full profile or
+                    send them a message. Send a connection request to ask.
+                  </p>
+                  <Link to={`/u/${profile.id}`} onClick={closeMember} className="mt-4 inline-block">
+                    <Button variant="ghost" size="sm">
+                      Open member page
+                    </Button>
+                  </Link>
                 </div>
               ) : (
                 <>
@@ -467,6 +529,7 @@ export function MemberPanel() {
               )}
             </div>
           </div>
+          )}
         </div>
       </section>
     </>

@@ -45,7 +45,6 @@ import {
   dashboardSubmissionsTutorialSteps,
 } from './dashboard-tabs'
 import { directoryTutorialSteps } from './directory'
-import { discoverTutorialSteps } from './discover'
 import { eventDetailTutorialSteps } from './event-detail'
 import { eventFormTutorialSteps } from './event-form'
 import { eventsTutorialSteps } from './events'
@@ -79,7 +78,7 @@ import { submissionReceiptTutorialSteps } from './submission-receipt'
 import { venueRoomTutorialSteps, venueTutorialSteps } from './venue'
 
 export const TUTORIAL_IDS = {
-  DISCOVER: 'discover',
+  // No entry for '/' — the home page deliberately has no tour.
   PROJECTS: 'projects',
   PROJECT_DETAIL: 'project-detail',
   PROJECT_FORM: 'project-form',
@@ -739,16 +738,6 @@ const REGISTRY: RegisteredTutorial[] = [
     name: 'Admin',
     description: 'Platform administration and analytics.',
     steps: adminTutorialSteps,
-    autoStart: true,
-  },
-
-  // ---------------------------------------------------------------- Discover
-  {
-    id: TUTORIAL_IDS.DISCOVER,
-    route: '/',
-    name: 'Discover',
-    description: 'The KTIP home page — featured projects, events and grants.',
-    steps: discoverTutorialSteps,
     autoStart: true,
   },
 ]

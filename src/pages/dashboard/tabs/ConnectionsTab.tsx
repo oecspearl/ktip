@@ -51,7 +51,7 @@ export default function ConnectionsTab() {
                 <img
                   src={other.avatar_url}
                   alt={otherName}
-                  className="w-11 h-11 rounded-full object-cover shrink-0"
+                  loading="lazy" decoding="async" width={44} height={44} className="w-11 h-11 rounded-full object-cover shrink-0"
                 />
               ) : (
                 <div

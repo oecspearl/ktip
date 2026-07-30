@@ -68,7 +68,12 @@ export function PageHero({
         compact ? 'min-h-[190px]' : 'min-h-[250px] md:min-h-[280px]'
       } ${inset ? 'rounded-2xl shadow-medium mb-8' : ''}`}
     >
-      <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
+      <img
+        src={src}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover photo-dimmable"
+        loading="eager" fetchPriority="high" decoding="async"
+      />
       {/* Frosted blur over the right side, fading out toward the left */}
       <div className="absolute inset-y-0 right-0 w-full md:w-[80%] backdrop-blur-2xl bg-black/10 [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
       {/* Neutral dark overlays for text readability */}

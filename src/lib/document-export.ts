@@ -12,17 +12,21 @@ export function downloadHTML(editor: Editor, filename = 'document') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${filename}</title>
+  <!-- FONT-SWAP: original webfont link kept for revert
   <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  -->
   <style>
     body {
-      font-family: 'Mulish', system-ui, sans-serif;
+      /* FONT-SWAP: was 'Mulish', system-ui, sans-serif */
+      font-family: Arial, Helvetica, sans-serif;
       line-height: 1.7;
       color: #1c1917;
       max-width: 800px;
       margin: 2rem auto;
       padding: 0 1.5rem;
     }
-    h1, h2, h3, h4 { font-family: 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif; font-weight: 700; }
+    /* FONT-SWAP: was 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif */
+    h1, h2, h3, h4 { font-family: Arial, Helvetica, sans-serif; font-weight: 700; }
     h1 { font-size: 1.875rem; margin-bottom: 0.75rem; }
     h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
@@ -92,16 +96,20 @@ export function printForPDF(editor: Editor) {
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
+  <!-- FONT-SWAP: original webfont link kept for revert
   <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  -->
   <style>
     @page { margin: 1in; }
     body {
-      font-family: 'Mulish', system-ui, sans-serif;
+      /* FONT-SWAP: was 'Mulish', system-ui, sans-serif */
+      font-family: Arial, Helvetica, sans-serif;
       line-height: 1.7;
       color: #1c1917;
       max-width: 100%;
     }
-    h1, h2, h3, h4 { font-family: 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif; font-weight: 700; page-break-after: avoid; }
+    /* FONT-SWAP: was 'Barlow Semi Condensed', 'Mulish', system-ui, sans-serif */
+    h1, h2, h3, h4 { font-family: Arial, Helvetica, sans-serif; font-weight: 700; page-break-after: avoid; }
     h1 { font-size: 20pt; margin-bottom: 8pt; }
     h2 { font-size: 16pt; margin-bottom: 6pt; }
     h3 { font-size: 13pt; margin-bottom: 4pt; }

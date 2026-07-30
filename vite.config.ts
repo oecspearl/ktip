@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { visualizer } from 'rollup-plugin-visualizer'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
@@ -180,6 +181,9 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       edgeApiPlugin(openaiKey),
+      // ANALYZE=1 npm run build -> dist/stats.html treemap of the bundle.
+      Boolean(process.env.ANALYZE) &&
+        visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: false }),
       uploadSentrySourceMaps &&
         sentryVitePlugin({
           authToken: env.SENTRY_AUTH_TOKEN,
@@ -193,8 +197,10 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         manifest: false, // Use public/manifest.json
         workbox: {
-          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          maximumFileSizeToCacheInBytes: 2 * 1024 * 1024, // 2 MB
+          // png deliberately absent: photos/logos are served as webp over the
+          // network with HTTP caching; only the two PWA icons are precached.
+          globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'pwa-192x192.png', 'pwa-512x512.png'],
           // Any .html sitting in public/ gets precached by the pattern above,
           // and Workbox's precache route defaults to cleanURLs: true — so a
           // file at public/auth/callback.html silently answers /auth/callback

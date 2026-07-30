@@ -302,7 +302,7 @@ export default function AdminUsersPage() {
                           <img
                             src={user.avatar_url}
                             alt={user.display_name || 'User'}
-                            className="w-8 h-8 rounded-full object-cover"
+                            loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-ktip-ocean-100 flex items-center justify-center text-xs font-semibold text-ktip-ocean-700">

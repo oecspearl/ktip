@@ -41,8 +41,10 @@ export function useMyAchievements(enabled: boolean) {
     queryFn: runCheck,
     enabled,
     staleTime: 60_000,
-    refetchInterval: 120_000,
-    refetchOnWindowFocus: true,
+    // Awards are not time-critical; tools call triggerCheck() after saves, so
+    // a long interval only bounds how late a *missed* award can surface.
+    refetchInterval: 600_000,
+    refetchOnWindowFocus: false,
   })
 
   return {

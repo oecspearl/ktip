@@ -52,6 +52,57 @@ export function useConnectionStatus(myId: string | undefined, otherId: string | 
   }
 }
 
+export interface ConnectionStatus {
+  state: ConnectionState
+  connection: Connection | null
+}
+
+/**
+ * Batch variant of useConnectionStatus for the directory grid: one query per
+ * 50 members instead of one per card. No RPC needed — connections RLS already
+ * limits reads to rows the viewer is party to, which is exactly this set.
+ */
+export function useConnectionStatuses(myId: string | undefined, otherIds: string[] | undefined) {
+  const ids = (otherIds || []).filter((id) => id !== myId)
+  const idKey = ids.join(',')
+
+  const fetchStatuses = async (): Promise<Record<string, ConnectionStatus>> => {
+    const map: Record<string, ConnectionStatus> = {}
+    for (let i = 0; i < ids.length; i += 50) {
+      const inList = `(${ids.slice(i, i + 50).join(',')})`
+      const { data, error } = await (supabase as any)
+        .from('connections')
+        .select('*')
+        .or(
+          `and(requester_id.eq.${myId},addressee_id.in.${inList}),and(addressee_id.eq.${myId},requester_id.in.${inList})`
+        )
+        .neq('status', 'declined')
+      if (error) throw error
+      for (const row of ((data as Connection[]) || [])) {
+        const otherId = row.requester_id === myId ? row.addressee_id : row.requester_id
+        map[otherId] = {
+          state:
+            row.status === 'accepted'
+              ? 'connected'
+              : row.requester_id === myId
+                ? 'pending_sent'
+                : 'pending_received',
+          connection: row,
+        }
+      }
+    }
+    return map
+  }
+
+  const query = useQuery({
+    queryKey: keys.sub('connections', 'statuses', myId ? `${myId}:${idKey}` : undefined),
+    queryFn: fetchStatuses,
+    enabled: !!myId && ids.length > 0,
+  })
+
+  return { statuses: query.data, loading: query.isPending, error: query.error }
+}
+
 /** All accepted connections for a user, with the other party's profile joined. */
 export function useMyConnections(userId: string | undefined) {
   const fetchConnections = async (uid: string): Promise<Connection[]> => {

@@ -27,7 +27,7 @@ export function UATReminderPopup({ open, onDismiss, onOpen }: UATReminderPopupPr
           <img
             src="/pwa-512x512.png"
             alt="KTIP Logo"
-            className="w-10 h-10 rounded-full object-cover shrink-0"
+            loading="lazy" decoding="async" width={40} height={40} className="w-10 h-10 rounded-full object-cover shrink-0"
           />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-ktip-sand-900">

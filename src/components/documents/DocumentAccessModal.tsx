@@ -21,7 +21,7 @@ interface DocumentAccessModalProps {
 
 function Avatar({ name, url }: { name: string; url: string | null | undefined }) {
   if (url) {
-    return <img src={url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+    return <img src={url} alt="" loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 rounded-full object-cover shrink-0" />
   }
   return (
     <div

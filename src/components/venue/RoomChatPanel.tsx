@@ -102,7 +102,7 @@ export function RoomChatPanel({
             return (
               <div key={m.id} className="group flex items-start gap-2.5">
                 {m.author?.avatar_url ? (
-                  <img src={m.author.avatar_url} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover" />
+                  <img src={m.author.avatar_url} alt="" loading="lazy" decoding="async" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full object-cover" />
                 ) : (
                   <span
                     className={cn(
