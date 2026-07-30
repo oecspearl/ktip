@@ -165,7 +165,6 @@ export default defineConfig(({ mode }) => {
     'INVITE_FROM_EMAIL',
     // The origin baked into links inside those emails.
     'SITE_URL',
-    'NOTIFICATION_WEBHOOK_SECRET',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }

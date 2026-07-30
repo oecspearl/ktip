@@ -138,7 +138,8 @@ SITE_URL=https://your-public-ktip-domain.example
 
 - `EMAIL_FROM` must use a domain verified in the Resend dashboard.
 - `SITE_URL` is the public origin placed in email links. Do not include a
-  trailing slash. Local development can use `http://localhost:5173`.
+  trailing slash. Local development can use `http://localhost:5173`. An invalid
+  or non-HTTP(S) value stops the send instead of falling back to a preview host.
 - Restart `npm run dev` after changing `.env`; Vite loads these values when the
   development server starts.
 - Add `${SITE_URL}/reset-password` to **Supabase > Authentication > URL

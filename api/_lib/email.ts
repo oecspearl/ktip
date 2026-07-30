@@ -31,12 +31,16 @@ export function resendKey(): string | null {
 export function siteOrigin(request: Request): string {
   const configured = process.env.SITE_URL?.trim()
   if (configured) {
+    let url: URL
     try {
-      return new URL(configured).origin
+      url = new URL(configured)
     } catch {
-      // A malformed SITE_URL must not take email delivery down with it.
-      console.error(`[email] SITE_URL is not a valid URL: ${configured}`)
+      throw new Error('SITE_URL must be an absolute HTTP(S) URL')
     }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('SITE_URL must be an absolute HTTP(S) URL')
+    }
+    return url.origin
   }
   return new URL(request.url).origin
 }

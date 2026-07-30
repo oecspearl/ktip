@@ -65,9 +65,7 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
-// Exported so the template can be rendered and previewed without going through
-// the authenticated handler (which writes an email_invites row as a side effect).
-export function inviteEmailHtml(params: {
+function inviteEmailHtml(params: {
   inviterName: string
   resourceLabel: string
   resourceTitle: string

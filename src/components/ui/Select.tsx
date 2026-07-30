@@ -146,28 +146,6 @@ export function Select<T extends string = string>({
     }
   }
 
-  const onTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (disabled) return
-    switch (event.key) {
-      case 'Enter':
-      case ' ':
-      case 'ArrowDown':
-        event.preventDefault()
-        openWith(selectedIndex >= 0 ? selectedIndex : firstEnabled(0, 1))
-        break
-      case 'ArrowUp':
-        event.preventDefault()
-        openWith(selectedIndex >= 0 ? selectedIndex : firstEnabled(options.length - 1, -1))
-        break
-      default:
-        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
-          event.preventDefault()
-          setOpen(true)
-          runTypeahead(event.key)
-        }
-    }
-  }
-
   const move = (delta: number) => {
     const from = activeIndex >= 0 ? activeIndex : selectedIndex >= 0 ? selectedIndex : 0
     // Clamped, no wrap — that is how a native select behaves
@@ -176,7 +154,7 @@ export function Select<T extends string = string>({
     if (next >= 0) setActiveIndex(next)
   }
 
-  const onListKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+  const onListKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault()
@@ -219,6 +197,35 @@ export function Select<T extends string = string>({
       default:
         if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
           event.preventDefault()
+          runTypeahead(event.key)
+        }
+    }
+  }
+
+  const onTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) return
+    // Opening and transferring focus happen in separate React/browser turns.
+    // Route keys through the listbox immediately so fast keyboard input does
+    // not reopen the trigger or get lost before the focus effect runs.
+    if (open) {
+      onListKeyDown(event)
+      return
+    }
+    switch (event.key) {
+      case 'Enter':
+      case ' ':
+      case 'ArrowDown':
+        event.preventDefault()
+        openWith(selectedIndex >= 0 ? selectedIndex : firstEnabled(0, 1))
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        openWith(selectedIndex >= 0 ? selectedIndex : firstEnabled(options.length - 1, -1))
+        break
+      default:
+        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          event.preventDefault()
+          setOpen(true)
           runTypeahead(event.key)
         }
     }
