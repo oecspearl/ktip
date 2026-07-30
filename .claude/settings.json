@@ -11,7 +11,8 @@
       "Bash(npx --no tsc --noEmit)",
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "PowerShell(Get-Process | Where-Object { $_.ProcessName -match 'claude|node' } | Select-Object Id, ProcessName, StartTime | Sort-Object StartTime)",
-      "PowerShell(npx vitest run src/components/dashboard/TimelineGantt.test.tsx src/components/resume/sheets/sheets.test.tsx 2>&1)"
+      "PowerShell(npx vitest run src/components/dashboard/TimelineGantt.test.tsx src/components/resume/sheets/sheets.test.tsx 2>&1)",
+      "Bash(git add *)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

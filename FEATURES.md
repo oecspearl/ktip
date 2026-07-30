@@ -313,14 +313,16 @@
 - Dual render from one document: on-screen `ResumeScreen` + print-real A4 `ResumeSheet`
 - Downloads via the browser print dialog (B&W or Color themes), no PDF library
 - Screen-only **Curated ↔ Full CV** toggle (the PDF is always complete)
-- **Sync from Virtual Campus** — pulls course history, reports how many courses synced and how many hand-edited sections were left alone
+- **Sync from Virtual Campus** — pulls course history, reports how many courses synced and how many hand-edited sections were left alone. Says plainly when no campus could be reached instead of reporting "0 courses"
+- **Auto-created on first view** — a member who never came from the Virtual Campus gets a real CV row built from their KTIP profile, public projects, badges and institution membership (`/api/cv/generate`)
 - **Publish/unpublish** toggle for the public link
-- First-run banner when no CV has been saved yet
+- Banner only when the automatic build could not run
 
 ### 9.2 Edit CV — `/cv/edit`
 - Sections: identity (name, headline, location, phone, email, about), experience (repeatable roles with bullet points), education (repeatable), languages, professional skills, interests
-- Courses are read-only (campus record of truth) but removable — removal sticks across future syncs
-- **Provenance tracking**: only fields you touch are stamped `manual`, so sync never overwrites your edits and editing never freezes your course list
+- Courses, projects and awards are read-only records but removable — removal sticks across future syncs and regenerates
+- **Provenance tracking**: three sources ranked `manual` > `vc` > `ktip`. Only fields you touch are stamped `manual`, so no generator overwrites your edits; the campus outranks KTIP's own guess at the same field; and editing one section never freezes another
+- **Fill blanks from my profile** runs the same server-side generator as first view — one profile→CV mapping, not a second client-side copy
 - Counter of how many sections will be marked as yours
 
 ### 9.3 Public CV — `/u/:id/cv` (public)
@@ -607,6 +609,7 @@ Sticky sidebar (desktop) / scrollable pill nav (mobile) across 20 sections.
 | `ai-chat`, `ai-search`, `extract-fields`, `moderate` | AI assistant, AI navigation ranking, document field extraction, moderation second opinion |
 | `invite/send` | Emailed collaboration invitations |
 | `vc/sync` | Course-history sync into the CV |
+| `cv/generate` | Builds the CV from KTIP's own records (profile, public projects, badges, institution membership) |
 | `partner/v1/employers` | Public partner API for verified employer data |
 | `delete-account` | Self-service account deletion |
 
