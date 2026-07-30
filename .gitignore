@@ -38,6 +38,7 @@ build
 
 # Local scratch notes — may contain test credentials
 .info
+STALE_CACHING_RESEARCH.md
 
 # Playwright MCP screenshots and snapshots
 .playwright-mcp
