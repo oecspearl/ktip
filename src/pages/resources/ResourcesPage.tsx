@@ -2,15 +2,17 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { ResourceCard } from '../../components/resources/ResourceCard'
 import { IntegrationCard } from '../../components/integrations/IntegrationCard'
+import { CourseCard } from '../../components/courses/CourseCard'
 import { useResources } from '../../hooks/useResources'
 import { useIntegrations } from '../../hooks/useIntegrations'
+import { useExternalCourses } from '../../hooks/useExternalCourses'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { SortSelect } from '../../components/ui/SortSelect'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
-import { Search, BookOpen, Puzzle } from 'lucide-react'
+import { Search, BookOpen, Puzzle, GraduationCap } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { cn, debounce } from '../../lib/utils'
@@ -20,17 +22,24 @@ import {
   INTEGRATION_CATEGORY_LABELS,
 } from '../../lib/constants'
 
-type Tab = 'resources' | 'integrations'
+type Tab = 'resources' | 'integrations' | 'courses'
 
 const TABS: { id: Tab; label: string; icon: typeof BookOpen }[] = [
   { id: 'resources', label: 'Resources', icon: BookOpen },
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
+  { id: 'courses', label: 'Courses', icon: GraduationCap },
 ]
+
+/** Unique, sorted, non-empty values — used to build filter options from live data. */
+function uniqueValues<T>(items: T[], pick: (item: T) => string | null | undefined): string[] {
+  return [...new Set(items.map(pick).filter((v): v is string => !!v))].sort()
+}
 
 export default function ResourcesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab: Tab = searchParams.get('tab') === 'integrations' ? 'integrations' : 'resources'
-  usePageTitle(tab === 'integrations' ? 'Integrations' : 'Resources')
+  const tabParam = searchParams.get('tab')
+  const tab: Tab = tabParam === 'integrations' ? 'integrations' : tabParam === 'courses' ? 'courses' : 'resources'
+  usePageTitle(tab === 'integrations' ? 'Integrations' : tab === 'courses' ? 'Courses' : 'Resources')
 
   const setTab = (t: Tab) => {
     // Keep ?sort= across tab switches; only the tab itself is rewritten.
@@ -74,7 +83,7 @@ export default function ResourcesPage() {
         </div>
       </div>
 
-      {tab === 'resources' ? <ResourcesTab /> : <IntegrationsTab />}
+      {tab === 'resources' ? <ResourcesTab /> : tab === 'integrations' ? <IntegrationsTab /> : <CoursesTab />}
     </>
   )
 }
@@ -316,6 +325,108 @@ function IntegrationsTab() {
               {searchQuery || category || tagFilter.length
                 ? 'Try adjusting your search, category or tag filters.'
                 : 'The directory is being curated — check back soon.'}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CoursesTab() {
+  const [subjectArea, setSubjectArea] = useState('')
+  const [gradeLevel, setGradeLevel] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
+
+  const { courses, allCourses, loading, error, refetch } = useExternalCourses({
+    subjectArea,
+    gradeLevel,
+    search: debouncedSearch,
+  })
+
+  // Subject/grade values are free text set by Virtual Campus course admins,
+  // not a closed KTIP-owned enum — so options come from the live catalog
+  // rather than a constants.ts label map. Built from the unfiltered list so
+  // picking one filter doesn't hide the options for the other.
+  const subjectAreaOptions = useMemo(() => uniqueValues(allCourses ?? [], (c) => c.subject_area), [allCourses])
+  const gradeLevelOptions = useMemo(() => uniqueValues(allCourses ?? [], (c) => c.grade_level), [allCourses])
+
+  return (
+    <div className="bg-ktip-sand-50 pb-12">
+      <div className="max-w-[calc(50vw+32rem)] mx-auto px-4 py-8">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                debouncedSetSearch(e.target.value)
+              }}
+              className="w-full pl-9 pr-3 py-2.5 border border-gray-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            />
+          </div>
+          <select
+            value={subjectArea}
+            onChange={(e) => setSubjectArea(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+          >
+            <option value="">All Subjects</option>
+            {subjectAreaOptions.map((value) => (
+              <option value={value} key={value}>{value}</option>
+            ))}
+          </select>
+          <select
+            value={gradeLevel}
+            onChange={(e) => setGradeLevel(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+          >
+            <option value="">All Grade Levels</option>
+            {gradeLevelOptions.map((value) => (
+              <option value={value} key={value}>{value}</option>
+            ))}
+          </select>
+        </div>
+
+        {loading ? (
+          <SkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" />
+        ) : error ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <GraduationCap size={32} className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">
+              Course catalog is temporarily unavailable
+            </h3>
+            <p className="text-gray-500 text-sm mb-4">Please try again shortly.</p>
+            <button
+              onClick={() => refetch()}
+              className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        ) : courses && courses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
+            {courses.map((course) => (
+              <CourseCard key={course.course_id} course={course} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <GraduationCap size={32} className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No courses found</h3>
+            <p className="text-gray-500 text-sm">
+              {searchQuery || subjectArea || gradeLevel
+                ? 'Try adjusting your search, subject or grade level filters.'
+                : 'The catalog is being curated — check back soon.'}
             </p>
           </div>
         )}

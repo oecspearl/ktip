@@ -954,6 +954,36 @@ export interface Integration {
   updated_at: string
 }
 
+// OECS Virtual Campus course catalog (see ktip-catalog-api.md). Sourced live
+// from the campus, not a KTIP-owned table — no id/timestamps of our own.
+export interface ExternalCourse {
+  catalog_type: 'external' | 'native'
+  course_id: string
+  candidate_id?: string | null
+  title: string
+  short_description?: string | null
+  thumbnail_url?: string | null
+  difficulty?: string | null
+  subject_area?: string | null
+  grade_level?: string | null
+  language?: string | null
+  is_external?: boolean
+  external_launch_url?: string | null
+  provider_key?: string | null
+  provider_name?: string | null
+  canonical_url?: string | null
+  enrollable?: boolean
+  published?: boolean
+}
+
+export interface CourseEnrollmentResult {
+  message: string
+  enrollment_id: string
+  is_new_user: boolean
+  sign_in_url: string
+  course_url: string
+}
+
 // ============================================================
 // Badges and gamification (migrations 039, 066, 067)
 // ============================================================
