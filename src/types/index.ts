@@ -124,6 +124,14 @@ export interface Profile {
   skills: string[]
   interests: string[]
   open_to: string[]
+  /**
+   * Contact details (082). Optional on the type, not because the columns are
+   * nullable — they are — but because a deploy can run ahead of the migration
+   * and PostgREST then omits them from every row.
+   */
+  phone?: string | null
+  website?: string | null
+  languages?: string[]
   is_verified: boolean
   connection_count_visibility: ConnectionCountVisibility
   /**
@@ -171,6 +179,9 @@ export interface Project extends Ranked {
   is_climate_action: boolean
   is_featured: boolean
   view_count: number
+  /** Accepted collaborators, kept in step by a trigger (migration 079).
+   *  Denormalised because project_members is unreadable to non-members. */
+  member_count: number
   details: DetailEntry[]
   owner_id: string
   created_at: string
@@ -464,7 +475,20 @@ export interface Grant extends Ranked {
    * so any `grant:post` holder could edit or delete anyone's grant.
    */
   created_by: string | null
+  /**
+   * Migration 080 — what this call asks applicants to attach. Copy the funder
+   * writes once per grant, so it is JSONB rather than a relation.
+   */
+  required_documents: RequiredDocument[]
   created_at: string
+}
+
+/** One row of a grant's supporting-documents checklist. */
+export interface RequiredDocument {
+  key: string
+  label: string
+  description: string
+  required: boolean
 }
 
 export type GrantApplicationStatus = 'draft' | 'pending' | 'under_review' | 'approved' | 'rejected'
@@ -748,6 +772,37 @@ export interface ProjectMember {
   project?: Project
 }
 
+/**
+ * A member asking to join a project they don't own (migration 079).
+ *
+ * Separate from ProjectMember on purpose: a request is a conversation the
+ * owner has not answered yet, while a membership row is a decision. Approving
+ * one writes the other, atomically, in decide_project_join_request().
+ */
+export type ProjectJoinRequestStatus = 'pending' | 'approved' | 'denied'
+
+export interface ProjectJoinRequest {
+  id: string
+  project_id: string
+  requester_id: string
+  message: string | null
+  status: ProjectJoinRequestStatus
+  decided_by: string | null
+  decided_at: string | null
+  created_at: string
+  requester?: Profile
+  project?: Project
+}
+
+/** Row shape of get_project_team() — the roster a visitor is allowed to see. */
+export interface ProjectTeamMember {
+  user_id: string
+  role: ProjectMemberRole
+  display_name: string | null
+  avatar_url: string | null
+  country: string | null
+}
+
 // Connection types
 export type ConnectionStatus = 'pending' | 'accepted' | 'declined'
 
@@ -846,6 +901,60 @@ export interface Employer {
   updated_at: string
 
   country?: Country
+}
+
+/**
+ * What a public reader is allowed to see of an employer (migration 081).
+ *
+ * A strict subset of Employer, named separately because the difference is the
+ * point: `verification_note` is internal reviewer commentary and
+ * `document_paths` are private bucket paths, and neither is in this shape.
+ */
+export interface PublicEmployer {
+  id: string
+  slug: string
+  legal_name: string
+  trading_name: string | null
+  industry: string | null
+  website_url: string | null
+  logo_url: string | null
+  description: string | null
+  country_code: string
+  locality: string | null
+  verification_status: EmployerVerificationStatus
+  verified_at: string | null
+  created_by: string | null
+  created_at: string
+}
+
+/** A directory row — PublicEmployer plus how much work it has published. */
+export interface PublicEmployerSummary {
+  id: string
+  slug: string
+  legal_name: string
+  trading_name: string | null
+  industry: string | null
+  logo_url: string | null
+  description: string | null
+  country_code: string
+  portfolio_count: number
+}
+
+/** One piece of work a business wants to be judged on (migration 081). */
+export interface EmployerPortfolioItem {
+  id: string
+  employer_id: string
+  title: string
+  summary: string | null
+  description: string | null
+  image_url: string | null
+  link_url: string | null
+  client_name: string | null
+  completed_on: string | null
+  tags: string[]
+  sort_order: number
+  created_at: string
+  updated_at: string
 }
 
 export type EmployerMemberRole = 'owner' | 'admin' | 'recruiter'
@@ -1151,8 +1260,8 @@ export interface DirectoryMember extends Profile {
 // Entity document library (migration 048)
 // ============================================================
 
-/** What a document can be attached to. */
-export type DocumentEntityType = 'grant' | 'project'
+/** What a document can be attached to. 'grant_application' added in 080. */
+export type DocumentEntityType = 'grant' | 'project' | 'grant_application'
 
 /**
  * private     — owner (and OECS admins) only; not even listed to others

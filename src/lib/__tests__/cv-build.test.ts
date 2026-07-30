@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCourses,
+  buildKtipResumeData,
   buildResumeData,
   buildSkills,
   mergeResume,
   type CvIdentityInput,
+  type KtipCvInput,
 } from '../../../api/_lib/cv-build'
 import type { CatalogItem, Enrollment } from '../../../api/_lib/vc-catalog'
 import { RESUME_PATHS, emptyResumeData, type ResumeData } from '../../types/resume'
@@ -225,5 +227,185 @@ describe('mergeResume', () => {
     }
     mergeResume(stored, {}, generated(), RESUME_PATHS)
     expect(stored.profile.name).toBe('Original')
+  })
+
+  it('claims only the paths it actually filled', () => {
+    // The campus generates no `interests` and no `projects`. Stamping them 'vc'
+    // anyway is how the sync came to own fields it never writes, which locked
+    // the KTIP generator out of them permanently.
+    const result = mergeResume(null, null, generated(), RESUME_PATHS, 'vc')
+    expect(result.sources['profile.name']).toBe('vc')
+    expect(result.sources['interests']).toBeUndefined()
+    expect(result.sources['projects']).toBeUndefined()
+  })
+})
+
+describe('mergeResume provenance ranks', () => {
+  const named = (name: string): ResumeData => ({
+    ...emptyResumeData(),
+    profile: { ...emptyResumeData().profile, name },
+  })
+
+  it('lets the campus overwrite what KTIP guessed', () => {
+    const result = mergeResume(
+      named('KTIP Guess'),
+      { 'profile.name': 'ktip' },
+      named('From Campus'),
+      RESUME_PATHS,
+      'vc'
+    )
+    expect(result.data.profile.name).toBe('From Campus')
+    expect(result.sources['profile.name']).toBe('vc')
+  })
+
+  it('does not let KTIP overwrite what the campus supplied', () => {
+    const result = mergeResume(
+      named('From Campus'),
+      { 'profile.name': 'vc' },
+      named('KTIP Guess'),
+      RESUME_PATHS,
+      'ktip'
+    )
+    expect(result.data.profile.name).toBe('From Campus')
+    expect(result.sources['profile.name']).toBe('vc')
+  })
+
+  it('lets KTIP fill a path nobody has written', () => {
+    const result = mergeResume(emptyResumeData(), {}, named('KTIP Guess'), RESUME_PATHS, 'ktip')
+    expect(result.data.profile.name).toBe('KTIP Guess')
+    expect(result.sources['profile.name']).toBe('ktip')
+  })
+
+  it('leaves a hand edit alone whichever generator runs', () => {
+    for (const owner of ['vc', 'ktip'] as const) {
+      const result = mergeResume(
+        named('My Own Name'),
+        { 'profile.name': 'manual' },
+        named('Generated'),
+        RESUME_PATHS,
+        owner
+      )
+      expect(result.data.profile.name).toBe('My Own Name')
+      expect(result.sources['profile.name']).toBe('manual')
+    }
+  })
+})
+
+describe('buildKtipResumeData', () => {
+  const input = (over: Partial<KtipCvInput> = {}): KtipCvInput => ({
+    email: 'ama@example.org',
+    profile: {
+      display_name: 'Ama Charles',
+      bio: 'Builds things for schools.',
+      country: 'Saint Lucia',
+      organization: 'OECS Commission',
+      industry: 'Education & Training',
+      skills: ['Curriculum Design', 'Monitoring & Evaluation'],
+      interests: ['Education Technology', 'Youth Development'],
+      open_to: ['mentoring'],
+      phone: '+1 758 555 0100',
+      website: 'https://example.org',
+      languages: ['English', 'Kwéyòl'],
+    },
+    projects: [],
+    awards: [],
+    institutions: [],
+    employers: [],
+    ...over,
+  })
+
+  it('leaves experience empty — a project is not a job', () => {
+    const data = buildKtipResumeData(
+      input({
+        projects: [
+          {
+            title: 'Water Telemetry',
+            summary: 'Sensor network.',
+            description: null,
+            category: 'Climate',
+            phase: 'launch',
+          },
+        ],
+      })
+    )
+    expect(data.roles).toEqual([])
+    expect(data.projects).toHaveLength(1)
+    expect(data.projects[0].title).toBe('Water Telemetry')
+  })
+
+  it('never generates courses — those are the campus\'s to own', () => {
+    expect(buildKtipResumeData(input()).courses).toEqual([])
+    expect(buildKtipResumeData(input()).academic).toEqual([])
+  })
+
+  it('maps the profile contact fields onto the document', () => {
+    const data = buildKtipResumeData(input())
+    expect(data.profile.phone).toBe('+1 758 555 0100')
+    expect(data.profile.socials).toEqual([{ label: 'Website', href: 'https://example.org' }])
+    expect(data.languages).toEqual(['English', 'Kwéyòl'])
+    expect(data.interests).toBe('Education Technology · Youth Development')
+  })
+
+  it('derives the skill-circle abbreviation rather than hardcoding it', () => {
+    // The old client-side copy wrote abbr: 'Sk' literally, and the two mappings
+    // produced visibly different CVs depending on which page created the row.
+    const data = buildKtipResumeData(input())
+    expect(data.skills).toHaveLength(1)
+    expect(data.skills[0].abbr).toBe('Sk')
+    expect(data.skills[0].abbr).toBe(buildSkills(
+      buildCourses([enrollment('a', 100, 'X')], catalog([{ course_id: 'a', subject_area: 'Skills' }]))
+    )[0].abbr)
+  })
+
+  it('turns an approved institution membership into an education entry', () => {
+    const data = buildKtipResumeData(
+      input({
+        institutions: [
+          { name: 'Sir Arthur Lewis Community College', role: 'student', approved_at: '2025-09-01T00:00:00Z' },
+        ],
+      })
+    )
+    expect(data.education).toEqual([
+      { credential: 'Student', school: 'Sir Arthur Lewis Community College', year: '2025' },
+    ])
+  })
+
+  it('falls back to an employer only when the profile names no organisation', () => {
+    const withOrg = buildKtipResumeData(
+      input({ employers: [{ name: 'CaribbeanCloud Ltd', role: 'owner' }] })
+    )
+    expect(withOrg.profile.role).toBe('OECS Commission · Education & Training')
+
+    const withoutOrg = buildKtipResumeData(
+      input({
+        profile: { ...input().profile, organization: null },
+        employers: [{ name: 'CaribbeanCloud Ltd', role: 'owner' }],
+      })
+    )
+    expect(withoutOrg.profile.role).toBe('CaribbeanCloud Ltd · Education & Training')
+  })
+
+  it('survives a profile with nothing on it', () => {
+    const data = buildKtipResumeData({
+      email: 'nobody@example.org',
+      profile: {
+        display_name: null,
+        bio: null,
+        country: null,
+        organization: null,
+        industry: null,
+        skills: null,
+        interests: null,
+        open_to: null,
+      },
+      projects: [],
+      awards: [],
+      institutions: [],
+      employers: [],
+    })
+    expect(data.profile.email).toBe('nobody@example.org')
+    expect(data.profile.name).toBe('')
+    expect(data.skills).toEqual([])
+    expect(data.languages).toEqual([])
   })
 })

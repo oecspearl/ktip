@@ -9,6 +9,10 @@ import {
   RESOURCE_SPECS,
 } from '../hooks/useCollabInvites'
 import { useMyProjectInvites, useProjectMemberMutations } from '../hooks/useProjectMembers'
+import {
+  useIncomingJoinRequests,
+  useProjectJoinRequestMutations,
+} from '../hooks/useProjectJoinRequests'
 import { usePendingRequests, useConnectionMutations } from '../hooks/useConnections'
 import { PageHero } from '../components/layout/PageHero'
 import { formatRelativeTime, getInitials, generateAvatarColor } from '../lib/utils'
@@ -132,10 +136,13 @@ export default function InvitationsPage() {
   const sent = useSentCollabInvites(myId)
   const emailInvites = useSentEmailInvites(myId)
   const projectInvites = useMyProjectInvites(myId)
+  // The other direction: people asking to join projects I own (migration 079).
+  const joinRequests = useIncomingJoinRequests(myId)
   const connectionRequests = usePendingRequests(myId)
 
   const collabMutations = useCollabInviteMutations()
   const projectMutations = useProjectMemberMutations()
+  const joinRequestMutations = useProjectJoinRequestMutations()
   const connectionMutations = useConnectionMutations()
 
   const respondToCollab = (invite: CollabInvite, accept: boolean) => {
@@ -149,12 +156,17 @@ export default function InvitationsPage() {
 
   const collabCount = collab.invites?.length ?? 0
   const projectCount = projectInvites.invites?.length ?? 0
+  const joinRequestCount = joinRequests.requests?.length ?? 0
   const connectionCount = connectionRequests.requests?.length ?? 0
   const sentCount = (sent.invites?.length ?? 0) + (emailInvites.invites?.length ?? 0)
-  const pendingTotal = collabCount + projectCount + connectionCount
+  const pendingTotal = collabCount + projectCount + joinRequestCount + connectionCount
 
   const loading =
-    collab.loading || projectInvites.loading || connectionRequests.loading || sent.loading
+    collab.loading ||
+    projectInvites.loading ||
+    joinRequests.loading ||
+    connectionRequests.loading ||
+    sent.loading
 
   return (
     <>
@@ -186,7 +198,7 @@ export default function InvitationsPage() {
               </p>
             </div>
           ) : (
-            <>
+            <div data-tutorial="invitations-list">
               <Section icon={Inbox} title="Collaboration invitations" count={collabCount}>
                 {collab.invites?.map((invite) => {
                   const Icon = RESOURCE_ICON[invite.resource_type]
@@ -250,6 +262,58 @@ export default function InvitationsPage() {
                         projectMutations
                           .respondToInvite({ membershipId: member.id, accept: false })
                           .then(() => projectInvites.refetch())
+                          .catch(() => {})
+                      }}
+                    />
+                  </Row>
+                ))}
+              </Section>
+
+              <Section
+                icon={FolderKanban}
+                title="Requests to collaborate on your projects"
+                count={joinRequestCount}
+              >
+                {joinRequests.requests?.map((req) => (
+                  <Row key={req.id}>
+                    <Avatar profile={req.requester} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-ktip-sand-900">
+                        <span className="font-semibold">
+                          {req.requester?.display_name || 'Someone'}
+                        </span>{' '}
+                        wants to join{' '}
+                        <span className="font-semibold">{req.project?.title || 'your project'}</span>
+                      </p>
+                      {req.message && (
+                        <p className="mt-1 text-xs italic text-ktip-sand-600">"{req.message}"</p>
+                      )}
+                      <p className="text-xs text-ktip-sand-500 mt-1">
+                        {formatRelativeTime(req.created_at)}
+                      </p>
+                    </div>
+                    <AcceptDecline
+                      disabled={joinRequestMutations.deciding}
+                      onAccept={() => {
+                        joinRequestMutations
+                          .decideRequest({
+                            requestId: req.id,
+                            approve: true,
+                            requesterId: req.requester_id,
+                            projectId: req.project_id,
+                            projectTitle: req.project?.title || 'your project',
+                          })
+                          .catch(() => {})
+                      }}
+                      onDecline={() => {
+                        joinRequestMutations
+                          .decideRequest({
+                            requestId: req.id,
+                            approve: false,
+                            requesterId: req.requester_id,
+                            projectId: req.project_id,
+                            projectTitle: req.project?.title || 'your project',
+                          })
                           .catch(() => {})
                       }}
                     />
@@ -366,7 +430,7 @@ export default function InvitationsPage() {
                   </Row>
                 ))}
               </Section>
-            </>
+            </div>
           )}
         </div>
       </div>

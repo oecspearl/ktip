@@ -13,6 +13,8 @@ import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { useGridColumns } from '../../hooks/useGridColumns'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
@@ -101,6 +103,8 @@ export default function GrantsPage() {
     })
   }, [openGrants, selectedType, sort])
 
+  useTutorialAutoStart(TUTORIAL_IDS.GRANTS, !loading)
+
   const clearFilters = () => {
     setSelectedType('')
     setSearchQuery('')
@@ -119,7 +123,7 @@ export default function GrantsPage() {
         imageSeed="grants"
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Grants' }]}
         actions={
-          <Link to="/grants/my-applications">
+          <Link to="/grants/my-applications" data-tutorial="grants-applications">
             <Button icon={<FileText size={16} />} size="sm" className="text-sm">
               My Applications
             </Button>

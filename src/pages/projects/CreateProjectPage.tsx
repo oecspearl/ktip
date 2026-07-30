@@ -106,7 +106,7 @@ export default function CreateProjectPage() {
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form data-tutorial="project-form" onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 {errorMessage}
@@ -157,7 +157,7 @@ export default function CreateProjectPage() {
             </div>
 
             {/* Category */}
-            <div>
+            <div data-tutorial="project-form-category">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
                 Category <span className="text-red-500">*</span>
               </label>
@@ -180,7 +180,7 @@ export default function CreateProjectPage() {
             </div>
 
             {/* Phase */}
-            <div>
+            <div data-tutorial="project-form-phase">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
                 Current Phase <span className="text-red-500">*</span>
               </label>
@@ -197,7 +197,7 @@ export default function CreateProjectPage() {
             </div>
 
             {/* Hashtags */}
-            <div>
+            <div data-tutorial="project-form-tags">
               <TagInput
                 label="Hashtags (Max 10)"
                 description="Topics people can filter and search projects by."
@@ -228,7 +228,7 @@ export default function CreateProjectPage() {
             </div>
 
             {/* Visibility */}
-            <div>
+            <div data-tutorial="project-form-visibility">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"

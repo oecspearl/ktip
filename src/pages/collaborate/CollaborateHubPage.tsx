@@ -1,4 +1,6 @@
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { analytics } from '../../hooks/useAnalytics'
 import { Pen, FileText, Code, Video } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -41,6 +43,8 @@ const tools = [
 
 export default function CollaborateHubPage() {
   usePageTitle('Collaborate')
+  // Static page — nothing to wait for.
+  useTutorialAutoStart(TUTORIAL_IDS.COLLABORATE, true)
 
   return (
     <>
@@ -54,7 +58,10 @@ export default function CollaborateHubPage() {
       {/* Tools Grid */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr stagger-children">
+          <div
+            data-tutorial="collaborate-tools"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr stagger-children"
+          >
             {tools.map((tool) => (
               <BentoCard
                 key={tool.href}

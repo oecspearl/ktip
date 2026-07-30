@@ -11,6 +11,8 @@ import { useProject, useProjects, useDeleteProject, trackProjectView } from '../
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
+import { useMyJoinRequest } from '../../hooks/useProjectJoinRequests'
+import { RequestCollaborationModal } from '../../components/projects/RequestCollaborationModal'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
@@ -23,6 +25,9 @@ import {
   Inbox,
   Star,
   Eye,
+  Users,
+  UserPlus,
+  Clock,
 } from 'lucide-react'
 import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
@@ -55,6 +60,16 @@ export default function ProjectDetailPage() {
   const collaboratorCount = (members || []).filter(
     (m) => m.status === 'accepted' && m.user_id !== project?.owner_id
   ).length
+
+  // The roster above is invisible to anyone not already on the team
+  // (project_members SELECT is members-only), so the headcount a visitor sees
+  // is the denormalised column maintained by migration 079.
+  const teamCount = project?.member_count ?? 0
+  const { request: myJoinRequest } = useMyJoinRequest(params.id, auth.user?.id)
+  const [requestOpen, setRequestOpen] = useState(false)
+
+  const canRequestToCollaborate =
+    !!auth.user && !!project && !isOwner && !myMembership && project.is_public
 
   // Count a view once per browser session per project
   useEffect(() => {
@@ -252,12 +267,19 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Engagement row */}
-            <div className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 flex-wrap">
+            <div
+              data-tutorial="project-engagement"
+              className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 flex-wrap"
+            >
               <LikeButton projectId={params.id!} />
               <FollowButton projectId={params.id!} />
               <span className="flex items-center gap-1.5 text-sm text-gray-500">
                 <Eye size={16} />
                 {project.view_count ?? 0} views
+              </span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                <Users size={16} />
+                {teamCount} {teamCount === 1 ? 'team member' : 'team members'}
               </span>
               <button
                 className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
@@ -269,7 +291,36 @@ export default function ProjectDetailPage() {
                 <Share2 size={16} />
                 Share
               </button>
+
+              {/* Until 079 there was no way to ask — membership was owner-push
+                  only, and the RLS policy refused a self-inserted row. */}
+              {canRequestToCollaborate &&
+                (myJoinRequest ? (
+                  <span className="ml-auto flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-3 py-1.5 text-sm text-ktip-sand-600">
+                    <Clock size={16} />
+                    Request pending
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setRequestOpen(true)}
+                    className="ml-auto flex items-center gap-1.5 rounded-lg border border-ktip-ocean-600 px-3 py-1.5 text-sm font-bold text-ktip-ocean-600 transition-colors hover:bg-ktip-ocean-50"
+                  >
+                    <UserPlus size={16} />
+                    Request to collaborate
+                  </button>
+                ))}
             </div>
+
+            {project && (
+              <RequestCollaborationModal
+                open={requestOpen}
+                onClose={() => setRequestOpen(false)}
+                projectId={project.id}
+                projectTitle={project.title}
+                ownerId={project.owner_id}
+                ownerName={project.owner?.display_name}
+              />
+            )}
 
             {/* Documents */}
             <div id="documents" data-spy="Documents" className="scroll-mt-24 mt-10">
@@ -372,13 +423,14 @@ export default function ProjectDetailPage() {
                   {project.owner?.display_name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => openMember(project.owner_id)}
+                  {/* A real link to /u/:id, not just the drawer — the name has
+                      to be shareable and open in a new tab like any profile. */}
+                  <Link
+                    to={`/u/${project.owner_id}`}
                     className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                   >
                     {project.owner?.display_name || 'Unknown User'}
-                  </button>
+                  </Link>
                   {project.owner?.country && (
                     <p className="text-sm text-gray-500">
                       {project.owner.country}

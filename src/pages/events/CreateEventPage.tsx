@@ -172,7 +172,7 @@ export default function CreateEventPage() {
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
-          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+          <form data-tutorial="event-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div
                 role="alert"
@@ -236,7 +236,7 @@ export default function CreateEventPage() {
             </div>
 
             {/* Event Type */}
-            <div>
+            <div data-tutorial="event-form-type">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
                 Event Type <span className="text-red-500">*</span>
               </label>
@@ -274,7 +274,7 @@ export default function CreateEventPage() {
             )}
 
             {/* Virtual Toggle */}
-            <div className="flex items-center gap-3">
+            <div data-tutorial="event-form-venue" className="flex items-center gap-3">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -390,7 +390,7 @@ export default function CreateEventPage() {
             />
 
             {/* Challenge */}
-            <div className="border-2 border-ktip-sand-200 rounded-xl p-4 space-y-4">
+            <div data-tutorial="event-form-challenge" className="border-2 border-ktip-sand-200 rounded-xl p-4 space-y-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"

@@ -244,7 +244,7 @@ export default function GrantDetailPage() {
           {/* === Sidebar === */}
           <div className="lg:col-span-1">
             {/* Widget 1: Apply for Grant */}
-            <div className="mb-10">
+            <div data-tutorial="grant-apply" className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
                 Apply for Grant
               </h3>

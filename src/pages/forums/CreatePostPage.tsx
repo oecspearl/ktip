@@ -96,7 +96,7 @@ export default function CreatePostPage() {
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form data-tutorial="post-form" onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Title"
               value={title}

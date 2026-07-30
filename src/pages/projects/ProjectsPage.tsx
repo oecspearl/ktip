@@ -15,6 +15,8 @@ import { projectCategoryIcon } from '../../lib/category-icons'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
@@ -66,6 +68,8 @@ export default function ProjectsPage() {
     search: debouncedSearch,
     sort,
   })
+
+  useTutorialAutoStart(TUTORIAL_IDS.PROJECTS, !projectsLoading)
 
   const clearFilters = () => {
     setSelectedCategory('')
@@ -162,7 +166,7 @@ export default function ProjectsPage() {
                   <ColumnToggle value={columns} onChange={setColumns} />
 
                   {canCreateProject && (
-                    <Link to="/projects/new">
+                    <Link to="/projects/new" data-tutorial="projects-create">
                       <button className="flex items-center gap-1.5 px-4 py-2 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
                         <Plus size={16} />
                         Create Project

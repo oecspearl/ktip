@@ -64,7 +64,7 @@ export default function MyGrievancesPage() {
             <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft h-32" />
           </div>
         ) : grievances && grievances.length > 0 ? (
-          <div className="space-y-4">
+          <div data-tutorial="grievances-list" className="space-y-4">
             {grievances.map((grievance) => {
               const reportedName = grievance.reported_user?.display_name || 'Unknown User'
 

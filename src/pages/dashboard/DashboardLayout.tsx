@@ -3,6 +3,8 @@ import { CheckCircle, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { useAuth } from '../../contexts/AuthContext'
 import { useConnectionCount } from '../../hooks/useConnections'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { visibleDashboardTabs } from './dashboard-tabs'
 import { ROLE_LABELS } from '../../lib/constants'
 import { cn, getInitials, generateAvatarColor } from '../../lib/utils'
@@ -21,6 +23,10 @@ export default function DashboardLayout() {
   const profile = auth.profile
   const displayName = profile?.display_name || 'Your dashboard'
   const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role)
+
+  // The rail is role-aware, so the tour has to wait for the profile — otherwise
+  // it spotlights a shorter rail than the member actually has.
+  useTutorialAutoStart(TUTORIAL_IDS.DASHBOARD, !!profile)
 
   return (
     <>
@@ -77,7 +83,11 @@ export default function DashboardLayout() {
           {/* Tab column */}
           <div className="w-full lg:w-64 shrink-0">
             <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 lg:sticky lg:top-[calc(var(--nav-h)+1.5rem)]">
-              <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto" aria-label="Dashboard sections">
+              <nav
+                data-tutorial="dashboard-tabs"
+                className="flex flex-row lg:flex-col gap-1 overflow-x-auto"
+                aria-label="Dashboard sections"
+              >
                 {tabs.map((tab) => {
                   const to = tab.external ? tab.to : `/dashboard${tab.to ? `/${tab.to}` : ''}`
                   // NavLink's `end` only fixes the index tab; role links out of
@@ -111,7 +121,7 @@ export default function DashboardLayout() {
             </div>
           </div>
 
-          <div className="flex-1 min-w-0 w-full">
+          <div data-tutorial="dashboard-panel" className="flex-1 min-w-0 w-full">
             <Outlet />
           </div>
         </div>

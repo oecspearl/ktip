@@ -9,7 +9,9 @@
       "Bash(done)",
       "Bash(head -5 grep -rn \"UPDATE\\\\|is_featured\" /Users/roystonemmanuel/Desktop/Applications/ktip/supabase/migrations/*.sql)",
       "Bash(npx --no tsc --noEmit)",
-      "Bash(./node_modules/.bin/tsc --noEmit)"
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "PowerShell(Get-Process | Where-Object { $_.ProcessName -match 'claude|node' } | Select-Object Id, ProcessName, StartTime | Sort-Object StartTime)",
+      "PowerShell(npx vitest run src/components/dashboard/TimelineGantt.test.tsx src/components/resume/sheets/sheets.test.tsx 2>&1)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

@@ -23,6 +23,7 @@ function grant(overrides: Partial<Grant> = {}): Grant {
     is_climate_action: false,
     details: [],
     created_by: null,
+    required_documents: [],
     created_at: '2026-07-01T00:00:00Z',
     ...overrides,
   }

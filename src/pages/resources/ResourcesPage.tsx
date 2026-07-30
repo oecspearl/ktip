@@ -99,7 +99,12 @@ export default function ResourcesPage() {
       {/* === Tabs === */}
       <div className="bg-ktip-sand-50 pt-6">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
-          <div role="tablist" aria-label="Knowledge base sections" className="flex gap-1 border-b border-ktip-sand-200">
+          <div
+          role="tablist"
+          data-tutorial="resources-tabs"
+          aria-label="Knowledge base sections"
+          className="flex gap-1 border-b border-ktip-sand-200"
+        >
             {TABS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}

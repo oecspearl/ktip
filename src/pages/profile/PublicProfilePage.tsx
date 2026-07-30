@@ -4,6 +4,9 @@ import {
   Briefcase,
   Calendar,
   CheckCircle,
+  Building2,
+  ExternalLink,
+  FileText,
   Flag,
   FolderKanban,
   Flame,
@@ -21,6 +24,7 @@ import { ConnectButton } from '../../components/directory/ConnectButton'
 import { useProfile, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
+import { usePublicResume } from '../../hooks/useResume'
 import { useProfileStats } from '../../hooks/useProfileStats'
 import { useTrophyAssets, useTrackFlag } from '../../hooks/useAchievements'
 import { useAuth } from '../../contexts/AuthContext'
@@ -32,6 +36,8 @@ import {
   COLLABORATION_LABELS,
   COLLAB_EXCLUSIVE_VALUE,
 } from '../../lib/constants'
+import { isOrganizationAccount } from '../../lib/permissions'
+import { useEmployerForUser, useEmployerPortfolio } from '../../hooks/useEmployerProfile'
 import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
 
 /**
@@ -59,6 +65,14 @@ export default function PublicProfilePage() {
   const { count: connectionCount } = useConnectionCount(id)
   const { stats } = useProfileStats(id)
   const { assetMap } = useTrophyAssets()
+  // The business this member belongs to, if it has been Chamber-verified.
+  // profiles.organization is free text and links nowhere; this is the entity.
+  const { employer } = useEmployerForUser(id)
+  const { items: portfolio } = useEmployerPortfolio(employer?.id)
+  // The published CV was orphaned: /u/:id/cv existed and nothing linked to it.
+  // public_resume() returns nothing unless it is published, so this both
+  // decides whether to show the link and guarantees it goes somewhere.
+  const { data: publicResume } = usePublicResume(id)
 
   const displayName = profile?.display_name || 'Member'
   usePageTitle(profile ? displayName : 'Member')
@@ -94,6 +108,9 @@ export default function PublicProfilePage() {
 
   const isSelf = id === auth.user?.id
   const showcase = stats?.showcase || []
+  // An organisation account's page leads with the business, not a CV it will
+  // never have. Individual accounts are untouched.
+  const isOrgAccount = isOrganizationAccount(profile.roles)
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -168,6 +185,17 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
+        {/* Only rendered when the CV is actually published — see publicResume. */}
+        {!isOrgAccount && publicResume && (
+          <div className="mt-5">
+            <Link to={`/u/${profile.id}/cv`}>
+              <Button variant="outline" size="sm" icon={<FileText size={16} />}>
+                View CV
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {!isSelf && auth.user && (
           <div className="mt-5 flex flex-wrap gap-2">
             <ConnectButton otherUserId={profile.id} />
@@ -192,6 +220,76 @@ export default function PublicProfilePage() {
           </div>
         )}
       </header>
+
+      {/* ---------- Organisation ----------
+          profiles.organization has always been free text that links nowhere.
+          This is the registered entity behind it, with the work it publishes —
+          the business equivalent of the CV an individual member gets. */}
+      {employer && (
+        <section
+          id="organisation"
+          data-spy="Organisation"
+          className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
+        >
+          <div className="flex flex-wrap items-start gap-4">
+            {employer.logo_url ? (
+              <img
+                src={employer.logo_url}
+                alt=""
+                className="h-14 w-14 shrink-0 rounded-xl object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-ktip-ocean-100">
+                <Building2 size={24} className="text-ktip-ocean-600" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <Link
+                to={`/org/${employer.slug}`}
+                className="flex items-center gap-1.5 font-display text-lg font-bold text-ktip-sand-900 hover:text-ktip-ocean-600"
+              >
+                {employer.trading_name || employer.legal_name}
+                <ExternalLink size={14} aria-hidden="true" />
+              </Link>
+              {employer.industry && (
+                <p className="text-sm text-ktip-sand-500">{employer.industry}</p>
+              )}
+              {employer.description && (
+                <p className="mt-2 line-clamp-3 text-sm text-ktip-sand-700">
+                  {employer.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {portfolio && portfolio.length > 0 && (
+            <div className="mt-5 border-t border-ktip-sand-100 pt-4">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ktip-sand-500">
+                Portfolio
+              </p>
+              <ul className="space-y-1.5">
+                {portfolio.slice(0, 4).map((item) => (
+                  <li key={item.id} className="text-sm text-ktip-sand-800">
+                    <span className="font-medium">{item.title}</span>
+                    {item.summary && (
+                      <span className="text-ktip-sand-600"> — {item.summary}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {portfolio.length > 4 && (
+                <Link
+                  to={`/org/${employer.slug}`}
+                  className="mt-2 inline-block text-sm font-medium text-ktip-ocean-600 hover:underline"
+                >
+                  All {portfolio.length} pieces of work
+                </Link>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ---------- Standing ----------
           Rendered only when there is something to show: a zeroed-out card on a

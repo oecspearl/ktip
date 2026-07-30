@@ -71,6 +71,29 @@ export interface ResumeSocial {
   href: string
 }
 
+/**
+ * A project the member owns on KTIP.
+ *
+ * Deliberately not a `ResumeRole`: a project is something they built, not a
+ * position they held, and folding the two together would put an employment
+ * claim on the page that the member never made.
+ */
+export interface ResumeProject {
+  title: string
+  summary: string
+  category: string
+  /** Where the project has got to — "Prototype", "Launched", etc. */
+  phase: string
+}
+
+/** A badge, trophy or other recognition earned on KTIP. */
+export interface ResumeAward {
+  name: string
+  description: string
+  /** ISO timestamp it was granted, or '' when the source has no date. */
+  date: string
+}
+
 export interface ResumeProfile {
   name: string
   /** One-line role descriptor under the name, e.g. "Student · OECS Virtual Campus". */
@@ -95,19 +118,34 @@ export interface ResumeData {
   professionalSkills: string[]
   academic: ResumeAcademic[]
   interests: string
+  projects: ResumeProject[]
+  awards: ResumeAward[]
 }
 
 /**
  * Who last wrote a given dot-path in `data`.
  *
- * 'vc'     — written by the Virtual Campus sync; safe to overwrite on re-sync
- * 'manual' — written by the user; sync must leave it alone
+ * 'manual' — written by the user; no generator may touch it
+ * 'vc'     — written by the Virtual Campus sync
+ * 'ktip'   — written by the KTIP generator from profile/projects/badges
  *
- * Absent means never written, which sync treats as 'vc'. See the header of
- * migration 069 for why this exists.
+ * Precedence: manual > vc > ktip > unset. A writer may overwrite a path only
+ * when that path's recorded source ranks at or below its own — so the campus
+ * (which holds the authoritative course and identity record) wins over KTIP's
+ * own guess, KTIP fills what the campus left blank, and a hand edit survives
+ * both. Absent means never written and is overwritable by anyone.
+ *
+ * See the header of migration 069 for why this exists.
  */
-export type ResumeFieldSource = 'vc' | 'manual'
+export type ResumeFieldSource = 'vc' | 'ktip' | 'manual'
 export type ResumeSources = Record<string, ResumeFieldSource>
+
+/** Precedence rank. Higher wins; see ResumeFieldSource. */
+export const RESUME_SOURCE_RANK: Record<ResumeFieldSource, number> = {
+  ktip: 1,
+  vc: 2,
+  manual: 3,
+}
 
 /** A row of the `resumes` table. */
 export interface Resume {
@@ -173,6 +211,8 @@ export const RESUME_PATHS = [
   'professionalSkills',
   'academic',
   'interests',
+  'projects',
+  'awards',
 ] as const
 
 export type ResumePath = (typeof RESUME_PATHS)[number]
@@ -197,5 +237,43 @@ export function emptyResumeData(): ResumeData {
     professionalSkills: [],
     academic: [],
     interests: '',
+    projects: [],
+    awards: [],
+  }
+}
+
+/**
+ * A stored document, guaranteed to have every key the current shape declares.
+ *
+ * Rows written before a section existed are missing its key entirely, and a
+ * sheet reading `data.projects.length` on one of those throws and white-screens
+ * the page. This is the single place that repairs them — do not scatter `?? []`
+ * through the renderers, because the next new section would need the same
+ * treatment in every one of them and would only be noticed when it crashed.
+ */
+export function normalizeResumeData(raw: unknown): ResumeData {
+  const base = emptyResumeData()
+  if (!raw || typeof raw !== 'object') return base
+
+  const stored = raw as Partial<ResumeData>
+  // A present-but-null key is as fatal as an absent one, and JSONB holds both.
+  const list = <T,>(value: unknown, fallback: T[]): T[] =>
+    Array.isArray(value) ? (value as T[]) : fallback
+
+  // Spelled out field by field rather than spread, so adding a section to
+  // ResumeData without repairing it here is a compile error instead of a
+  // white screen on somebody's old row.
+  return {
+    profile: { ...base.profile, ...(stored.profile ?? {}) },
+    roles: list(stored.roles, base.roles),
+    education: list(stored.education, base.education),
+    courses: list(stored.courses, base.courses),
+    skills: list(stored.skills, base.skills),
+    languages: list(stored.languages, base.languages),
+    professionalSkills: list(stored.professionalSkills, base.professionalSkills),
+    academic: list(stored.academic, base.academic),
+    interests: typeof stored.interests === 'string' ? stored.interests : base.interests,
+    projects: list(stored.projects, base.projects),
+    awards: list(stored.awards, base.awards),
   }
 }

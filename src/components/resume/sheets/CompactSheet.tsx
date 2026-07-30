@@ -1,8 +1,10 @@
 import {
   AcademicTable,
+  AwardList,
   ContactList,
   CourseTable,
   PlainHeading,
+  ProjectList,
   SheetFrame,
   StackedList,
   type SheetProps,
@@ -115,6 +117,25 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
                 Courses
               </PlainHeading>
               <CourseTable data={data} dense />
+            </section>
+          )}
+
+          {data.projects.length > 0 && (
+            <section className="mt-5">
+              <PlainHeading color={color} design={design} size="9.5pt">
+                Projects
+              </PlainHeading>
+              {/* Dense, like everything else in this design's main column. */}
+              <ProjectList data={data} dense />
+            </section>
+          )}
+
+          {data.awards.length > 0 && (
+            <section className="mt-5">
+              <PlainHeading color={color} design={design} size="9.5pt">
+                Awards &amp; Recognition
+              </PlainHeading>
+              <AwardList data={data} dense />
             </section>
           )}
 

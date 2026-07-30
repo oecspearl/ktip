@@ -132,10 +132,10 @@ async function resolveExistingUser(
  * already verified this address, we checked that it said so, and sending our
  * own confirmation email would ask the learner to prove something twice.
  *
- * The metadata is read by handle_new_user() (migration 044), which seeds the
- * profile row in the same transaction as the insert. Roles are deliberately
- * absent — the trigger's insert guard would strip `student` anyway, and
- * granting it is vc_provision_identity's job.
+ * The metadata is read by handle_new_user() (migration 044, extended in 082),
+ * which seeds the profile row in the same transaction as the insert. Roles are
+ * deliberately absent — the trigger's insert guard would strip `student` anyway,
+ * and granting it is vc_provision_identity's job.
  */
 async function createUser(admin: SupabaseClient, claims: VcClaims) {
   const { data, error } = await admin.auth.admin.createUser({
@@ -147,6 +147,11 @@ async function createUser(admin: SupabaseClient, claims: VcClaims) {
       avatar_url: claims.picture ?? undefined,
       country: claims.country ?? undefined,
       organization: claims.institution ?? undefined,
+      // 082 columns. Landing them on the profile rather than leaving them in
+      // vc_identities.raw_claims is what lets the KTIP generator, the directory
+      // and the CV all see the same phone number and website.
+      phone_number: claims.phone || undefined,
+      website: claims.website ?? undefined,
       vc_sub: claims.sub,
     },
   })
@@ -200,17 +205,36 @@ async function mintSession(
  * avatar must not have it replaced every time they arrive from the campus.
  */
 async function seedProfile(admin: SupabaseClient, userId: string, claims: VcClaims) {
-  const { data: profile } = await admin
+  const base = 'display_name, avatar_url, country, organization'
+  // 082 may not be applied on this deploy. Selecting a column PostgREST has
+  // never seen fails the whole statement, and a profile seed is not worth
+  // failing a sign-in over, so the contact columns are probed separately.
+  let profile: Record<string, unknown> | null = null
+  let hasContactColumns = true
+
+  const full = await admin
     .from('profiles')
-    .select('display_name, avatar_url, country, organization')
+    .select(`${base}, phone, website`)
     .eq('id', userId)
     .maybeSingle()
+
+  if (full.error) {
+    hasContactColumns = false
+    const fallback = await admin.from('profiles').select(base).eq('id', userId).maybeSingle()
+    profile = (fallback.data as Record<string, unknown> | null) ?? null
+  } else {
+    profile = (full.data as Record<string, unknown> | null) ?? null
+  }
 
   const updates: Record<string, unknown> = {}
   if (!profile?.display_name && claims.name) updates.display_name = claims.name
   if (!profile?.avatar_url && claims.picture) updates.avatar_url = claims.picture
   if (!profile?.country && claims.country) updates.country = claims.country
   if (!profile?.organization && claims.institution) updates.organization = claims.institution
+  if (hasContactColumns) {
+    if (!profile?.phone && claims.phone) updates.phone = claims.phone
+    if (!profile?.website && claims.website) updates.website = claims.website
+  }
 
   if (Object.keys(updates).length === 0) return
   updates.updated_at = new Date().toISOString()
@@ -229,7 +253,7 @@ async function seedProfile(admin: SupabaseClient, userId: string, claims: VcClai
  */
 async function syncResume(admin: SupabaseClient, userId: string, claims: VcClaims) {
   try {
-    const [enrollments, catalog] = await Promise.all([
+    const [{ enrollments }, catalog] = await Promise.all([
       loadEnrollments(claims.email),
       loadCatalog(),
     ])
@@ -262,7 +286,8 @@ async function syncResume(admin: SupabaseClient, userId: string, claims: VcClaim
       (existing?.data as ResumeData) ?? null,
       (existing?.sources as ResumeSources) ?? null,
       generated,
-      RESUME_PATHS
+      RESUME_PATHS,
+      'vc'
     )
 
     await admin.from('resumes').upsert(

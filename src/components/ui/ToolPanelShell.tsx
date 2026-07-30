@@ -68,7 +68,9 @@ export function ToolPanelShell({
       <div className="bg-ktip-sand-100 py-6 min-h-[calc(100vh-230px)]">
         <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-4">
-            <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            {/* Tour anchors live on the shell, so all four tools are tourable
+                without any of them carrying markup of its own. */}
+            <nav data-tutorial="tool-nav" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <Link
                 to="/collaborate"
                 className="inline-flex items-center gap-1.5 font-medium text-ktip-sand-600 hover:text-ktip-ocean-600 transition-colors"
@@ -96,11 +98,18 @@ export function ToolPanelShell({
                 </Link>
               ))}
             </nav>
-            {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+            {actions && (
+              <div data-tutorial="tool-actions" className="flex flex-wrap items-center gap-2">
+                {actions}
+              </div>
+            )}
           </div>
 
           {fallback ?? (
-            <div className="rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-card overflow-hidden">
+            <div
+              data-tutorial="tool-panel"
+              className="rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-card overflow-hidden"
+            >
               {menuBar}
               {toolbar}
               {children}

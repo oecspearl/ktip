@@ -1,4 +1,5 @@
 import type { TutorialStep } from '../../components/tutorial/types'
+import { replayStep } from './shared'
 
 /**
  * Guided tour of the public /events page.
@@ -53,11 +54,5 @@ export const eventsTutorialSteps: TutorialStep[] = [
     scrollMode: 'top',
     secondaryTarget: '[data-tutorial="events-filters"]',
   },
-  {
-    target: '[data-fab]',
-    title: 'Replay this any time',
-    description:
-      'Open the quick-actions button in the corner and choose Page tour to run this walkthrough again — here, or on any other page that has one.',
-    position: 'left',
-  },
+  replayStep,
 ]

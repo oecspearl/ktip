@@ -1,9 +1,15 @@
 import type { CatalogItem, Enrollment } from './vc-catalog'
-import type {
-  ResumeCourse,
-  ResumeData,
-  ResumeSkillGroup,
-  ResumeSources,
+import {
+  RESUME_SOURCE_RANK,
+  type ResumeAward,
+  type ResumeCourse,
+  type ResumeData,
+  type ResumeEducation,
+  type ResumeFieldSource,
+  type ResumeProject,
+  type ResumeSkillGroup,
+  type ResumeSocial,
+  type ResumeSources,
 } from '../../src/types/resume'
 
 /**
@@ -220,6 +226,134 @@ export function buildResumeData(
       .map((c) => `${c.title} — completed via ${c.provider}`),
     academic: buildAcademic(skills),
     interests: '',
+    // The campus knows nothing about either. They are filled by the KTIP
+    // generator below, which is why the merge must not stamp them 'vc'.
+    projects: [],
+    awards: [],
+  }
+}
+
+// ---------------------------------------------------------------------------
+// KTIP's own records
+// ---------------------------------------------------------------------------
+
+/**
+ * Everything KTIP itself knows about a member, already read and RLS-checked by
+ * the caller. Passed in rather than fetched here so this stays a pure function
+ * the tests can drive without a database.
+ */
+export interface KtipCvInput {
+  email: string
+  profile: {
+    display_name: string | null
+    bio: string | null
+    country: string | null
+    organization: string | null
+    industry: string | null
+    skills: string[] | null
+    interests: string[] | null
+    open_to: string[] | null
+    /** Migration 082. Absent on deploys that predate it. */
+    phone?: string | null
+    website?: string | null
+    languages?: string[] | null
+  }
+  /** Public projects the member owns. */
+  projects: Array<{
+    title: string
+    summary: string | null
+    description: string | null
+    category: string | null
+    phase: string | null
+  }>
+  /** Earned badges, hidden ones already filtered out. */
+  awards: Array<{ name: string; description: string | null; awarded_at: string | null }>
+  /** Approved institution memberships, most recent first. */
+  institutions: Array<{ name: string; role: string | null; approved_at: string | null }>
+  /** Employer memberships — a workplace, not a job title we may invent. */
+  employers: Array<{ name: string; role: string | null }>
+}
+
+/** "student_lead" -> "Student lead". Roles are stored as enum slugs. */
+function humanizeRole(role: string | null): string {
+  if (!role) return ''
+  const words = role.replace(/[_-]+/g, ' ').trim()
+  return words ? words[0].toUpperCase() + words.slice(1) : ''
+}
+
+function ktipAbout(input: KtipCvInput): string[] {
+  if (input.profile.bio?.trim()) return [input.profile.bio.trim()]
+  return []
+}
+
+/**
+ * A CV built from KTIP's own records.
+ *
+ * This is the one profile→CV mapping in the codebase. It replaced a render-only
+ * `seeded()` in useResume and a second, already-divergent copy in the editor's
+ * "fill blanks from my profile" — two mappings of the same thing is how a
+ * member's CV came to look different depending on which page created it.
+ *
+ * Same restraint as the Virtual Campus generator: `roles` stays empty. A
+ * project is not a job and a badge is not employment, so neither is promoted
+ * into the experience timeline, however much emptier that leaves the page.
+ */
+export function buildKtipResumeData(input: KtipCvInput): ResumeData {
+  const p = input.profile
+  const skills = (p.skills ?? []).filter((s) => s.trim())
+
+  const socials: ResumeSocial[] = p.website?.trim()
+    ? [{ label: 'Website', href: p.website.trim() }]
+    : []
+
+  // The profile's own organisation first; an employer membership is only a
+  // fallback for a member who never filled that field in.
+  const org = p.organization?.trim() || input.employers[0]?.name || ''
+  const role = [org, p.industry?.trim()].filter(Boolean).join(' · ')
+
+  const education: ResumeEducation[] = input.institutions.map((inst) => ({
+    credential: humanizeRole(inst.role) || 'Member',
+    school: inst.name,
+    year: inst.approved_at ? String(new Date(inst.approved_at).getUTCFullYear()) : '',
+  }))
+
+  const projects: ResumeProject[] = input.projects.map((project) => ({
+    title: project.title,
+    summary: (project.summary || project.description || '').trim(),
+    category: project.category ?? '',
+    phase: project.phase ?? '',
+  }))
+
+  const awards: ResumeAward[] = input.awards.map((award) => ({
+    name: award.name,
+    description: (award.description ?? '').trim(),
+    date: award.awarded_at ?? '',
+  }))
+
+  return {
+    profile: {
+      name: p.display_name ?? '',
+      role,
+      location: p.country ?? '',
+      email: input.email,
+      phone: p.phone?.trim() ?? '',
+      socials,
+      about: ktipAbout(input),
+    },
+    // Empty on purpose — see the file header.
+    roles: [],
+    education,
+    // The campus owns these three; KTIP has no equivalent record, and a
+    // generated empty array must never be what wipes a synced course list.
+    courses: [],
+    skills:
+      skills.length > 0 ? [{ area: 'Skills', abbr: abbreviate('Skills'), skills: [...skills] }] : [],
+    languages: (p.languages ?? []).filter((l) => l.trim()),
+    professionalSkills: (p.open_to ?? []).filter((s) => s.trim()),
+    academic: [],
+    interests: (p.interests ?? []).filter((i) => i.trim()).join(' · '),
+    projects,
+    awards,
   }
 }
 
@@ -257,14 +391,21 @@ export interface MergeResult {
 }
 
 /**
- * Folds freshly generated Virtual Campus data into the stored document.
+ * Folds a freshly generated document into the stored one.
  *
- * For each path:
- *   - source 'manual'  -> keep what the user wrote, always.
- *   - anything else    -> take the generated value, unless it is empty and the
- *                         stored value is not. An empty generated field means
- *                         "the campus told us nothing this time", which must
- *                         not erase a value an earlier sync did produce.
+ * `owner` is who is doing the writing. For each path:
+ *   - the recorded source outranks `owner` -> leave it alone. 'manual' outranks
+ *     everyone, so a hand edit always survives; 'vc' outranks 'ktip', so the
+ *     campus's authoritative record is not overwritten by KTIP's guess at the
+ *     same field.
+ *   - otherwise -> take the generated value, unless it is empty and the stored
+ *     value is not. An empty generated field means "this source told us nothing
+ *     this time", which must not erase a value an earlier run did produce.
+ *
+ * A path is stamped only when something is actually written to it. Stamping an
+ * empty generated value would claim a field this source does not populate at
+ * all — which is how the campus sync came to own `interests` and `projects`
+ * (it generates neither) and locked the KTIP generator out of them forever.
  *
  * Paths are whole sections for arrays (`courses`, `roles`, `skills`). Merging
  * an array element-by-element would resurrect entries the user deleted, and a
@@ -274,26 +415,24 @@ export function mergeResume(
   stored: ResumeData | null,
   storedSources: ResumeSources | null,
   generated: ResumeData,
-  paths: readonly string[]
+  paths: readonly string[],
+  owner: ResumeFieldSource = 'vc'
 ): MergeResult {
-  if (!stored) {
-    const sources: ResumeSources = {}
-    for (const path of paths) sources[path] = 'vc'
-    return { data: generated, sources }
-  }
-
-  const data = JSON.parse(JSON.stringify(stored)) as Record<string, unknown>
+  const data = JSON.parse(JSON.stringify(stored ?? generated)) as Record<string, unknown>
   const sources: ResumeSources = { ...(storedSources ?? {}) }
+  const rank = RESUME_SOURCE_RANK[owner]
 
   for (const path of paths) {
-    if (sources[path] === 'manual') continue
+    const held = sources[path]
+    if (held && RESUME_SOURCE_RANK[held] > rank) continue
 
     const next = getPath(generated, path)
-    const current = getPath(stored, path)
+    const current = getPath(stored ?? generated, path)
     if (isEmpty(next) && !isEmpty(current)) continue
 
     setPath(data, path, next)
-    sources[path] = 'vc'
+    // Claim the path only if there is something on it. See the note above.
+    if (!isEmpty(next)) sources[path] = owner
   }
 
   return { data: data as unknown as ResumeData, sources }

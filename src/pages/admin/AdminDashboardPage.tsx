@@ -3,6 +3,8 @@ import { Button } from '../../components/ui/Button'
 import { PageHero } from '../../components/layout/PageHero'
 import { useAdminStats } from '../../hooks/useAdminDashboard'
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { BarChart } from '../../components/admin/analytics/BarChart'
 import { GrowthChart } from '../../components/admin/analytics/GrowthChart'
 import { ExportButton } from '../../components/admin/analytics/ExportButton'
@@ -32,6 +34,8 @@ export default function AdminDashboardPage() {
   const { stats, loading: statsLoading } = useAdminStats()
   const { analytics, loading: analyticsLoading } = useAdminAnalytics()
 
+  useTutorialAutoStart(TUTORIAL_IDS.ADMIN, !statsLoading && !analyticsLoading)
+
   return (
     <>
       <PageHero
@@ -60,7 +64,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 stagger-children">
+        <div data-tutorial="admin-stats" className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 stagger-children">
           <div className="border border-ktip-sand-200 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
@@ -127,7 +131,7 @@ export default function AdminDashboardPage() {
 
       {/* Climate Action Stats */}
       {stats && (
-        <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+        <div data-tutorial="admin-climate" className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <Leaf size={18} className="text-ktip-tropical-700" />
             <h2 className="text-sm font-semibold text-ktip-tropical-900">Climate Action</h2>
@@ -186,7 +190,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* Distribution Charts Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div data-tutorial="admin-charts" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Users by Role */}
             <div className="border border-ktip-sand-200 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
@@ -245,7 +249,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <div className="border border-ktip-sand-200 rounded-lg p-6">
+      <div data-tutorial="admin-quick-actions" className="border border-ktip-sand-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link to="/events/new">

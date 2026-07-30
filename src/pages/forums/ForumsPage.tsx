@@ -5,11 +5,15 @@ import { MessageSquare } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { BENTO_GRID, BENTO_TILE, bentoSpans, sortNewestFirst } from '../../lib/bento'
 
 export default function ForumsPage() {
   usePageTitle('Forums')
   const { boards, loading } = useForumBoards()
+
+  useTutorialAutoStart(TUTORIAL_IDS.FORUMS, !loading)
 
   // Newest board leads the bento; sizes/positions follow from the count, so a
   // new board just shifts everything down a slot without touching this file.
@@ -31,7 +35,7 @@ export default function ForumsPage() {
           {loading ? (
             <SkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : ordered.length ? (
-            <div className={`${BENTO_GRID} stagger-children`}>
+            <div data-tutorial="forums-boards" className={`${BENTO_GRID} stagger-children`}>
               {ordered.map((board, i) => (
                 <BoardCard
                   key={board.id}

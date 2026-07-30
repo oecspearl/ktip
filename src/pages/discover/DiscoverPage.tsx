@@ -10,6 +10,8 @@ import {
 import { Link } from 'react-router'
 import { format } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
+import { TUTORIAL_IDS } from '../../data/tutorials'
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
 import { FALLBACK_IMAGE, HERO_WASH, grantImageFor, heroImageFor } from '../../lib/hero-images'
@@ -69,10 +71,30 @@ function useVisibleCount() {
   return n
 }
 
-// The hero was authored against a 2000×1150 CSS viewport (a 2560×1600 panel at
-// 125% OS scaling). Height is part of the reference because the hero is locked
-// to 100svh — see useViewportScale for why one factor beats per-property clamps.
-const HERO_DESIGN = { width: 2000, height: 1150, min: 0.62, max: 1.15 }
+/**
+ * Hero ratio map — how the hero translates across screens.
+ *
+ *   SIZE     one multiplier drives a base font-size; every length inside the
+ *            hero is `em`, so type, cards, gaps and padding move as one piece.
+ *   POSITION viewport percentages. A percentage is already a ratio, so the
+ *            gutters hold at any width without JS or breakpoints. A centred
+ *            max-width column cannot: it scales with the viewport while the
+ *            viewport does not, so its leftover gutters grow as a fraction of
+ *            the screen — 14% of width here, 17% on a 1366px laptop.
+ *
+ * `design` is the viewport this was authored against: a 2560×1600 panel at 125%
+ * OS scaling. Height is part of it because the hero is locked to 100svh, so a
+ * wide-but-short window has to scale down or its content overruns the bottom.
+ */
+const HERO = {
+  design: { width: 2000, height: 1150 },
+  /** Deliberate uplift over the authored size */
+  zoom: 1.1,
+  /** Side inset, both edges, every breakpoint */
+  gutter: '5%',
+  // max sits above `zoom` — otherwise the reference display clamps itself
+  scale: { min: 0.62, max: 1.25 },
+}
 
 interface Feature {
   title: string
@@ -184,6 +206,10 @@ export default function DiscoverPage() {
   const { events } = useEvents({ upcoming: true })
   const { stats, loading: statsLoading } = usePlatformStats()
 
+  // Spotlighting a skeleton measures the wrong rect, and the hero strip is the
+  // first thing the tour frames — wait for the counts to land.
+  useTutorialAutoStart(TUTORIAL_IDS.DISCOVER, !statsLoading)
+
   const items = useMemo<HeroItem[]>(() => {
     if (mode === 'grants') {
       return (grants || []).slice(0, MAX_ITEMS).map((g) => ({
@@ -282,7 +308,15 @@ export default function DiscoverPage() {
   // tripled for circular wrapping) so ascending selection slides rightward.
   const ring = count > 1
   const visibleCount = useVisibleCount()
-  const scale = useViewportScale(HERO_DESIGN)
+  // zoom divides the design box rather than multiplying the font-size, so the
+  // height-fit guard inside useViewportScale still accounts for the uplift —
+  // multiplying afterwards would make the content 10% taller than the guard
+  // measured and reopen the overflow-under-the-navbar bug on short viewports.
+  const scale = useViewportScale({
+    width: HERO.design.width / HERO.zoom,
+    height: HERO.design.height / HERO.zoom,
+    ...HERO.scale,
+  })
   // One base font-size drives every `em` in the hero — this is the whole knob.
   const heroFontSize = `${16 * scale}px`
   // Icons take numeric px props, so they scale by hand off the same factor
@@ -512,13 +546,18 @@ export default function DiscoverPage() {
           className="absolute inset-0 w-full h-full object-cover animate-fade-in"
           loading="eager"
         />
+        {/* Three stacked overlays, so their opacities MULTIPLY: at the right
+            edge, where the text sits, they used to pass only 0.90 × 0.40 × 0.30
+            = 11% of the photo through, which flattened the photography to a
+            near-solid navy. Retuned to 0.95 × 0.65 × 0.55 = 34%; the type keeps
+            its contrast through text-shadow-hero instead of through darkness. */}
         {/* Frosted blur over the left side, fading out toward the right */}
-        <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-2xl bg-black/10 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
+        <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-md bg-black/5 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
         {/* Neutral dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/30 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/18 to-black/12" />
         {/* Brand wash — navy by day, green by night (OECS palette) */}
         <div className={`absolute inset-0 bg-gradient-to-l ${HERO_WASH}`} />
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/50 to-transparent" />
 
         {/* Ghost card: expands from the new hero's card in the strip to fill the hero, then fades */}
         {anim && (
@@ -577,20 +616,22 @@ export default function DiscoverPage() {
 
 
         {/* Content — every length below is in `em` against heroFontSize, so the
-            hero renders at design proportions on any viewport. max-w-[96em]
-            reproduces the 1536px column of the reference viewport, and pt-[8em]
-            the 128px that clears the fixed navbar. That top pad is the one
-            length that cannot scale freely: the navbar is a fixed 88px (1rem pad
-            + 3.5rem logo + 1rem), so max() floors the gap at 6rem — otherwise a
-            scaled-down 8em drops under it and the counter slides beneath. */}
+            hero renders at design proportions on any viewport, and the column is
+            full-bleed to a percentage gutter so those proportions hold in
+            POSITION too (see HERO above).
+
+            pt is the one length that cannot scale freely: the navbar is a fixed
+            88px (1rem pad + 3.5rem logo + 1rem) and does not scale with the map,
+            so max() floors the gap at 6rem — otherwise a scaled-down 8em drops
+            under it and the counter slides beneath. */}
         <div
-          className="relative mx-auto w-full max-w-[96em] px-[1.5em] md:px-[3em] flex flex-col h-full pt-[max(6rem,8em)] pb-[2.5em]"
+          className="relative w-full flex flex-col h-full px-[5%] pt-[max(6rem,8em)] pb-[2.5em]"
           style={{ fontSize: heroFontSize }}
         >
           {/* Counter */}
           <div className="flex items-center justify-end">
             {count > 0 && (
-              <p className="text-[0.75em] font-mono text-white/60 tabular-nums">
+              <p className="text-[0.75em] font-mono text-white/60 tabular-nums text-shadow-hero">
                 {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
               </p>
             )}
@@ -606,7 +647,9 @@ export default function DiscoverPage() {
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
-                className="max-w-[42em] animate-reveal-up text-left md:text-right"
+                // text-shadow inherits, so one class here covers the eyebrow,
+                // headline, description and the whole DetailsList subtree
+                className="max-w-[42em] animate-reveal-up text-left md:text-right text-shadow-hero"
               >
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {activeMode.label} &middot; {active.meta}
@@ -633,7 +676,7 @@ export default function DiscoverPage() {
                 )}
               </div>
             ) : (
-              <div className="max-w-[42em] animate-fade-in text-left md:text-right">
+              <div className="max-w-[42em] animate-fade-in text-left md:text-right text-shadow-hero">
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {activeMode.label}
                 </p>
@@ -668,7 +711,10 @@ export default function DiscoverPage() {
           <div className="flex items-end justify-between gap-[1.5em]">
             <div className="min-w-0">
               {/* Slide toggle */}
-              <div className="relative inline-flex bg-white/10 backdrop-blur-sm p-[0.25em] mb-[1em] rounded-[0.5em]">
+              <div
+                data-tutorial="discover-modes"
+                className="relative inline-flex bg-white/10 backdrop-blur-sm p-[0.25em] mb-[1em] rounded-[0.5em]"
+              >
                 <div
                   className="absolute top-[0.25em] bottom-[0.25em] w-[calc((100%-0.5em)/3)] bg-ktip-cream rounded-[0.375em] transition-transform duration-300 ease-out"
                   style={{ transform: `translateX(${modeIndex * 100}%)` }}
@@ -689,6 +735,7 @@ export default function DiscoverPage() {
 
               {/* Portrait mini cards — click selects, hover shows arrows and pauses rotation */}
               <div
+                data-tutorial="discover-cards"
                 className="relative group/cards"
                 onMouseEnter={() => setPaused(true)}
                 onMouseLeave={() => setPaused(false)}

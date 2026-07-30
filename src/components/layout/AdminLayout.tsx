@@ -65,7 +65,9 @@ export function AdminLayout() {
         {/* Sidebar — desktop */}
         <div className="hidden lg:block lg:w-56 shrink-0">
           <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 sticky top-[calc(var(--nav-h)+1.5rem)]">
-            <nav className="space-y-1">
+            {/* Both navs carry the anchor; only one has a non-zero rect at any
+                width, and findVisible picks that one. */}
+            <nav data-tutorial="admin-sidebar" className="space-y-1">
               {adminNavItems.map((item) => (
                 <Link
                   key={item.href}
@@ -87,7 +89,10 @@ export function AdminLayout() {
 
         {/* Mobile nav */}
         <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
-          <nav className="flex gap-1 min-w-max bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2">
+          <nav
+            data-tutorial="admin-sidebar"
+            className="flex gap-1 min-w-max bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2"
+          >
             {adminNavItems.map((item) => (
               <Link
                 key={item.href}
@@ -107,7 +112,7 @@ export function AdminLayout() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div data-tutorial="admin-content" className="flex-1 min-w-0">
           <div key={location.pathname} className="contents page-reveal">
             <Outlet />
           </div>

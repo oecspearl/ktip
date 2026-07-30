@@ -345,6 +345,68 @@ export function CourseTable({ data, dense = false }: { data: ResumeData; dense?:
   )
 }
 
+/**
+ * Projects the member owns on KTIP.
+ *
+ * Not a Timeline: a project has no period, and inventing one from the row's
+ * created_at would date the work rather than the record of it. Category and
+ * phase ride along as a quiet meta line — a reader needs to know a prototype is
+ * a prototype.
+ */
+export function ProjectList({ data, dense = false }: { data: ResumeData; dense?: boolean }) {
+  const body = dense ? 'text-[7.5pt]' : 'text-[8pt]'
+  return (
+    <ul className="space-y-3">
+      {data.projects.map((project) => {
+        const meta = [project.category, project.phase].filter(Boolean).join(' · ')
+        return (
+          <li key={project.title} className="resume-avoid-break">
+            <p className={cn('font-bold leading-tight', dense ? 'text-[8.5pt]' : 'text-[9.5pt]')}>
+              {project.title}
+            </p>
+            {meta && (
+              <p className="text-[7.5pt] uppercase tracking-wide text-neutral-500">{meta}</p>
+            )}
+            {project.summary && (
+              <p className={cn('mt-0.5 leading-snug text-neutral-700', body)}>{project.summary}</p>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+/**
+ * Badges and recognitions.
+ *
+ * The year alone, never the full timestamp: `awarded_at` is precise to the
+ * second, and "14 March 2026, 09:41" on a printed CV reads as a database dump.
+ */
+export function AwardList({ data, dense = false }: { data: ResumeData; dense?: boolean }) {
+  const body = dense ? 'text-[7.5pt]' : 'text-[8pt]'
+  return (
+    <ul className="space-y-2.5">
+      {data.awards.map((award) => {
+        const year = award.date ? new Date(award.date).getUTCFullYear() : null
+        return (
+          <li key={`${award.name}-${award.date}`} className="resume-avoid-break">
+            <p className={cn('font-bold leading-tight', dense ? 'text-[8.5pt]' : 'text-[9pt]')}>
+              {award.name}
+              {year && !Number.isNaN(year) && (
+                <span className="ml-1.5 font-semibold text-neutral-500">{year}</span>
+              )}
+            </p>
+            {award.description && (
+              <p className={cn('leading-snug text-neutral-700', body)}>{award.description}</p>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 /** Academic competencies: subject in the stub column, skills in the body. */
 export function AcademicTable({
   data,

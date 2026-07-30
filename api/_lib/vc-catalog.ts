@@ -144,23 +144,38 @@ export async function loadCatalog(): Promise<Map<string, CatalogItem>> {
   return byId
 }
 
+export interface EnrollmentsResult {
+  enrollments: Enrollment[]
+  /**
+   * True when nothing could be asked, as opposed to "asked and the learner has
+   * no courses". Set when COMMONS_API_KEY is absent or every host errored. A
+   * 404 does not count — that is the ordinary "no account on this host" answer
+   * and it is a real, empty result.
+   *
+   * The distinction matters because the two look identical downstream (an empty
+   * course list) and the UI would otherwise report a broken integration to the
+   * learner as the truth about their own education.
+   */
+  unavailable: boolean
+}
+
 /**
  * Every enrollment held by this email, across every configured host.
  *
- * Returns [] rather than throwing when the key is missing or every host fails.
- * The caller is either signing somebody in or running a background sync, and
- * neither should collapse because the course service is unavailable — the CV
- * simply lands without a course section, and the next sync fills it in.
+ * Never throws. The caller is either signing somebody in or running a
+ * background sync, and neither should collapse because the course service is
+ * unavailable — the CV simply lands without a course section, `unavailable` is
+ * set so the caller can say so, and the next sync fills it in.
  */
-export async function loadEnrollments(email: string): Promise<Enrollment[]> {
+export async function loadEnrollments(email: string): Promise<EnrollmentsResult> {
   const apiKey = process.env.COMMONS_API_KEY
   if (!apiKey) {
     console.warn('[vc-catalog] COMMONS_API_KEY not set — course history unavailable')
-    return []
+    return { enrollments: [], unavailable: true }
   }
 
   const results = await Promise.all(
-    catalogBases().map(async (base) => {
+    catalogBases().map(async (base): Promise<{ list: Enrollment[]; failed: boolean }> => {
       try {
         const url = `${base}/api/external/enrollments?email=${encodeURIComponent(email)}`
         const res = await fetch(url, {
@@ -168,14 +183,14 @@ export async function loadEnrollments(email: string): Promise<Enrollment[]> {
         })
         // 404 is the ordinary "this learner has no account on this host"
         // answer when a learner exists on only one of the two campuses.
-        if (res.status === 404) return []
+        if (res.status === 404) return { list: [], failed: false }
         if (!res.ok) throw new Error(`enrollments ${res.status}`)
         const body = (await res.json()) as { enrollments?: Enrollment[] }
         const list = Array.isArray(body.enrollments) ? body.enrollments : []
-        return list.map((e) => ({ ...e, source_base: base }))
+        return { list: list.map((e) => ({ ...e, source_base: base })), failed: false }
       } catch (err) {
         console.warn(`[vc-catalog] enrollments failed for ${base}: ${(err as Error).message}`)
-        return []
+        return { list: [], failed: true }
       }
     })
   )
@@ -183,14 +198,21 @@ export async function loadEnrollments(email: string): Promise<Enrollment[]> {
   // Same course_id can legitimately appear on both hosts; keep the furthest
   // progressed, since that is the one the learner actually did.
   const byCourse = new Map<string, Enrollment>()
-  for (const enrollment of results.flat()) {
+  for (const enrollment of results.flatMap((r) => r.list)) {
     if (!enrollment?.course_id) continue
     const existing = byCourse.get(enrollment.course_id)
     if (!existing || (enrollment.progress_percentage ?? 0) > (existing.progress_percentage ?? 0)) {
       byCourse.set(enrollment.course_id, enrollment)
     }
   }
-  return Array.from(byCourse.values())
+
+  return {
+    enrollments: Array.from(byCourse.values()),
+    // One host answering is enough to call the history known: a learner with an
+    // account on only one campus is the common case, and half an answer is
+    // still an answer.
+    unavailable: results.length > 0 && results.every((r) => r.failed),
+  }
 }
 
 /** Test seam — the cache is module-scope and would otherwise leak across cases. */
