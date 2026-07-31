@@ -350,7 +350,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       provider: 'azure',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'email',
+        // GoTrue asks Azure for `openid` and appends whatever is passed here.
+        // `email` alone is not enough: `profile` is what carries the `name`
+        // claim, and without it handle_new_user() falls all the way through to
+        // NEW.email, so Microsoft users land in the member directory with
+        // their email address as their display name. Azure has no `picture`
+        // claim at any scope, so their avatar starts empty either way.
+        scopes: 'openid profile email',
       },
     })
     if (error) throw error

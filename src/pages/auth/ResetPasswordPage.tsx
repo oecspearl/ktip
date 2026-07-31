@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { Lock, CheckCircle } from 'lucide-react'
+import { Lock, CheckCircle, MailWarning } from 'lucide-react'
 import { changePasswordSchema } from '../../lib/validation'
 import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
+import { RouteSplash } from '../../components/RouteSplash'
 
 interface ResetPasswordActionState {
   errors: Record<string, string>
@@ -63,6 +64,42 @@ export default function ResetPasswordPage() {
     const timer = setTimeout(() => navigate('/'), 3000)
     return () => clearTimeout(timer)
   }, [state.success, navigate])
+
+  // The recovery link is what puts a session on this page — updatePassword has
+  // nothing to authenticate without it. Rendering the form regardless meant a
+  // dead link failed only at submit time, with GoTrue's "Auth session missing!"
+  // as the entire explanation.
+  if (auth.loading) {
+    return <RouteSplash />
+  }
+
+  if (!auth.user) {
+    return (
+      <AuthBackdrop>
+        <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-md mx-auto shadow-lg text-center">
+          <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MailWarning size={32} className="text-ktip-sand-600" />
+          </div>
+          <h1 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
+            This reset link can't be used here
+          </h1>
+          <p className="text-ktip-sand-600 mb-6 text-sm">
+            Reset links work once, expire after an hour, and only open in the browser that
+            requested them — a link opened inside a mail app, or on a different device, lands
+            here. Request a fresh one and open it in this browser.
+          </p>
+          <Link to="/forgot-password">
+            <Button fullWidth>Request a new link</Button>
+          </Link>
+          <p className="mt-6 text-sm text-ktip-sand-600">
+            <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
+              Back to Sign In
+            </Link>
+          </p>
+        </div>
+      </AuthBackdrop>
+    )
+  }
 
   return (
     <AuthBackdrop>
