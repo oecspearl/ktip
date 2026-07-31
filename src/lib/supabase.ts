@@ -29,5 +29,18 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    // supabase-js still defaults to the implicit flow, which hands back the
+    // access *and* refresh token in the URL fragment — through a document a
+    // service worker is free to redirect, which is exactly how OAuth broke
+    // here before. PKCE returns a single-use code instead, and it is what the
+    // code-verifier carve-out in auth-utils.ts and the reload guard in
+    // service-worker.ts were already written to protect.
+    //
+    // Trade-off, deliberately accepted: email links now carry `?code=` and can
+    // only be redeemed in the browser that requested them, because the
+    // verifier lives in that browser's localStorage. Opening a reset link in a
+    // mail client's in-app browser therefore lands with no session, which is
+    // why ResetPasswordPage now says so instead of failing at submit time.
+    flowType: 'pkce',
   },
 })
