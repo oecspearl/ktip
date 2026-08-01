@@ -15,6 +15,7 @@ import { PROJECT_CATEGORIES, CONTENT_TAG_SUGGESTIONS } from '../../lib/constants
 import { analytics } from '../../hooks/useAnalytics'
 import { Save } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
+import { entityPath } from '../../lib/slug'
 
 export default function CreateProjectPage() {
   const auth = useAuth()
@@ -76,7 +77,7 @@ export default function CreateProjectPage() {
 
       analytics.feature('project', 'created', { category })
       toast.success('Project created successfully!')
-      navigate(`/projects/${project.id}`)
+      navigate(entityPath('project', project))
     } catch (error: any) {
       // /projects/new is gated on project:create, so RLS should never be the
       // one to refuse. It still can if the permission was revoked mid-session,

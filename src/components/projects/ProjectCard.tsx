@@ -5,6 +5,7 @@ import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
+import { entityPath } from '../../lib/slug'
 
 interface ProjectCardProps {
   project: Project
@@ -15,7 +16,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <BentoCard
-      to={`/projects/${project.id}`}
+      to={entityPath('project', project)}
       image={project.image_url}
       imageSeed={project.id}
       eyebrow={categoryLabel || 'Project'}

@@ -14,7 +14,7 @@ import { resolveDesign } from '../../../lib/resume-designs'
  * The member's CV, in the design they chose.
  *
  * This tab used to be a third rendering of the profile — roles, badges, bio,
- * skills — after the member drawer and /u/:id, and it was the copy nobody kept
+ * skills — after the member drawer and /user/:id, and it was the copy nobody kept
  * up to date. The CV is the document that actually represents a member, so this
  * is that instead.
  *

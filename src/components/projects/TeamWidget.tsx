@@ -11,6 +11,10 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
+// The public roster comes from a SECURITY DEFINER function with fixed columns
+// and no username, so those rows still link by uuid and the profile page
+// rewrites the URL on arrival. Join requests embed the whole profile.
+import { memberPath } from '../../lib/slug'
 
 interface TeamWidgetProps {
   projectId: string
@@ -110,7 +114,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
           {pendingRequests.map((req) => (
             <div key={req.id} className="text-sm">
               <Link
-                to={`/u/${req.requester_id}`}
+                to={memberPath(req.requester ?? { id: req.requester_id })}
                 className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600"
               >
                 {req.requester?.display_name || 'A member'}
@@ -167,7 +171,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
               </button>
               <div className="min-w-0">
                 <Link
-                  to={`/u/${member.user_id}`}
+                  to={`/user/${member.user_id}`}
                   className="block text-sm font-medium text-ktip-sand-900 truncate hover:text-ktip-ocean-600 transition-colors"
                 >
                   {member.display_name || 'Unknown User'}

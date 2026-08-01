@@ -85,7 +85,7 @@ export function MemberCard({ member }: MemberCardProps) {
       <div className="mt-auto pt-3 border-t border-ktip-sand-100 flex gap-2">
         <button
           type="button"
-          onClick={() => openMember(member.id)}
+          onClick={() => openMember(member.username || member.id)}
           className="flex-1 text-center text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 py-1.5 rounded-lg hover:bg-ktip-ocean-50 transition-colors"
         >
           View Profile

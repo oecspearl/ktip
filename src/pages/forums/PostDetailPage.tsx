@@ -12,6 +12,7 @@ import {
   useDeleteForumReply,
 } from '../../hooks/useForums'
 import { useAuth } from '../../contexts/AuthContext'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { forumReplySchema } from '../../lib/validation'
 import { truncate } from '../../lib/utils'
@@ -38,6 +39,7 @@ export default function PostDetailPage() {
   const { openMember } = useMemberPanel()
 
   const { post, loading: postLoading } = useForumPost(params.postId)
+  useCanonicalSlug(params.postId, post)
   const { replies, refetch: refetchReplies } = useForumReplies(params.postId)
   const { createReply, loading: replyLoading } = useCreateForumReply()
   const { deletePost } = useDeleteForumPost()

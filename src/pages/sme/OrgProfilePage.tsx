@@ -7,7 +7,7 @@ import { useEmployerPortfolio, usePublicEmployer } from '../../hooks/useEmployer
 import { formatDate } from '../../lib/utils'
 
 /**
- * A business's public page — the organisation's answer to /u/:id.
+ * A business's public page — the organisation's answer to /user/:id.
  *
  * Only reachable for a Chamber-verified employer (or by the business itself
  * while it waits): an unverified registration is a claim, and a public page

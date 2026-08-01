@@ -1,10 +1,14 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 
 interface MemberPanelContextValue {
-  /** Profile id currently shown in the drawer, or null when closed */
+  /**
+   * Who the drawer is showing, as a username where the caller had one and a
+   * uuid otherwise — it goes straight into `?member=`, so it is whichever form
+   * should appear in the URL. MemberPanel resolves it to an id.
+   */
   memberId: string | null
   isOpen: boolean
-  openMember: (userId: string) => void
+  openMember: (userSegment: string) => void
   closeMember: () => void
 }
 
@@ -17,7 +21,7 @@ const MemberPanelContext = createContext<MemberPanelContextValue | null>(null)
 export function MemberPanelProvider({ children }: { children: ReactNode }) {
   const [memberId, setMemberId] = useState<string | null>(null)
 
-  const openMember = useCallback((userId: string) => setMemberId(userId), [])
+  const openMember = useCallback((userSegment: string) => setMemberId(userSegment), [])
   const closeMember = useCallback(() => setMemberId(null), [])
 
   const value = useMemo(

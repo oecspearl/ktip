@@ -2,11 +2,14 @@ import { Link } from 'react-router'
 import { ArrowLeft, Radio, Users, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { VENUE_ROLE_LABELS } from '../../lib/constants'
+import { venuePath } from '../../lib/event-slug'
 import { AvailabilityPicker } from './AvailabilityPicker'
 import type { VenueAvailability, VenueRole } from '../../types'
 
 interface VenueTopBarProps {
   eventId: string
+  /** events.slug — null on a row that predates migration 087's backfill. */
+  eventSlug: string | null
   eventTitle: string
   role: VenueRole
   headcount: number
@@ -30,6 +33,7 @@ interface VenueTopBarProps {
  */
 export function VenueTopBar({
   eventId,
+  eventSlug,
   eventTitle,
   role,
   headcount,
@@ -51,7 +55,11 @@ export function VenueTopBar({
       )}
     >
       <Link
-        to={backToMap ? `/events/${eventId}/venue` : `/events/${eventId}`}
+        to={
+          backToMap
+            ? venuePath({ id: eventId, slug: eventSlug })
+            : `/events/${eventSlug || eventId}`
+        }
         className="inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"
       >
         <ArrowLeft size={15} aria-hidden="true" />

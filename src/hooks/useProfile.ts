@@ -1,15 +1,53 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
+import { isUuid } from '../lib/slug'
 import type { Profile, Project, Event, ProfileView } from '../types'
 
+/**
+ * A /u/<segment> route param resolved to both spellings of the same person.
+ *
+ * get_profile_view() and public_resume() take a uuid, so a username has to be
+ * traded for one before either can run. The username comes back too, so a page
+ * that was opened on a uuid can rewrite its own URL — the lookup is one indexed
+ * row either way and react-query caches it per segment.
+ */
+export function useProfileId(param: string | undefined) {
+  const query = useQuery({
+    queryKey: keys.sub('profiles', 'by-segment', param),
+    queryFn: async (): Promise<{ id: string; username: string | null } | null> => {
+      const base = supabase.from('profiles').select('id, username')
+      const { data, error } = await (isUuid(param)
+        ? base.eq('id', param as string)
+        : // ilike with no wildcards is case-insensitive equality, matching the
+          // lower(username) unique index.
+          base.ilike('username', param as string)
+      ).maybeSingle()
+      if (error) throw error
+      return (data as { id: string; username: string | null } | null) ?? null
+    },
+    enabled: !!param,
+  })
+
+  return {
+    id: query.data?.id,
+    username: query.data?.username ?? null,
+    // A disabled query stays isPending forever, hence the gate.
+    loading: !!param && query.isPending,
+    notFound: !!param && !query.isPending && !query.data,
+  }
+}
+
+/** Accepts either a uuid or a username — see src/lib/slug.ts. */
 export function useProfile(id: string | undefined) {
   const fetchProfile = async (profileId: string): Promise<Profile | null> => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', profileId)
-      .single()
+    const query = supabase.from('profiles').select('*')
+    const { data, error } = await (isUuid(profileId)
+      ? query.eq('id', profileId)
+      : // ilike with no wildcards is case-insensitive equality, which matches
+        // the lower(username) unique index.
+        query.ilike('username', profileId)
+    ).single()
     if (error) throw error
     return data as Profile
   }

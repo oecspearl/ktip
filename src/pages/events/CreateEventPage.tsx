@@ -27,6 +27,7 @@ import {
 import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
+import { entityPath } from '../../lib/slug'
 
 /** Formats accepted by the document scraper (plus plain text). */
 const DOCUMENT_ACCEPT =
@@ -208,7 +209,7 @@ export default function CreateEventPage() {
       } else {
         toast.success('Event created successfully!')
       }
-      navigate(`/events/${event.id}`)
+      navigate(entityPath('event', event))
     } catch (error: any) {
       // A row-level-security refusal or a missing column arrives here. The toast
       // dismisses itself after 4s, so the banner is the durable copy.

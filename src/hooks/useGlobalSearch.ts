@@ -5,6 +5,7 @@ import { escapeIlike, truncate } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { useAuth } from '../contexts/AuthContext'
 import { ALL_ENTRIES, SITE_MAP, type SiteEntry } from '../lib/site-map'
+import { entityPath, forumPostPath } from '../lib/slug'
 import {
   applyAiRanking,
   filterByAccess,
@@ -102,33 +103,33 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
 
   const projects = db
     .from('projects')
-    .select('id, title, summary, description')
+    .select('id, slug, title, summary, description')
     .eq('is_public', true)
     .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const events = db
     .from('events')
-    .select('id, title, summary, description')
+    .select('id, slug, title, summary, description')
     .neq('status', 'draft')
     .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const grants = db
     .from('grants')
-    .select('id, title, summary, description')
+    .select('id, slug, title, summary, description')
     .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,eligibility.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const posts = db
     .from('forum_posts')
-    .select('id, title, content, board:forum_boards(slug, name)')
+    .select('id, slug, title, content, board:forum_boards(slug, name)')
     .or(`title.ilike.%${q}%,content.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
   const resources = db
     .from('resources')
-    .select('id, title, summary, description')
+    .select('id, slug, title, summary, description')
     .eq('is_published', true)
     .or(`title.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
@@ -167,7 +168,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       title: p.title,
       description: truncate(plainText(p.summary || p.description), 100),
       category: 'Projects',
-      href: `/projects/${p.id}`,
+      href: entityPath('project', p),
       icon: 'FolderKanban',
     })
   }
@@ -179,7 +180,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       title: e.title,
       description: truncate(plainText(e.summary || e.description), 100),
       category: 'Events',
-      href: `/events/${e.id}`,
+      href: entityPath('event', e),
       icon: 'Calendar',
     })
   }
@@ -191,7 +192,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       title: g.title,
       description: truncate(plainText(g.summary || g.description), 100),
       category: 'Funding',
-      href: `/grants/${g.id}`,
+      href: entityPath('grant', g),
       icon: 'DollarSign',
     })
   }
@@ -205,7 +206,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       title: post.title,
       description: truncate(plainText(post.content), 100),
       category: post.board?.name || 'Forums',
-      href: `/forums/${slug}/${post.id}`,
+      href: forumPostPath(slug, post),
       icon: 'MessageSquare',
     })
   }
@@ -217,7 +218,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       title: r.title,
       description: truncate(plainText(r.summary || r.description), 100),
       category: 'Resources',
-      href: `/resources/${r.id}`,
+      href: entityPath('resource', r),
       icon: 'BookOpen',
     })
   }

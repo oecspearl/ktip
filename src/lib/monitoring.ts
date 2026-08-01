@@ -67,6 +67,25 @@ export function scrubEvent(event: Sentry.ErrorEvent): Sentry.ErrorEvent {
 }
 
 /**
+ * Collections whose next path segment identifies one record.
+ *
+ * Since migration 087 that segment is usually a slug, not a uuid, so shape
+ * alone can no longer tell an identifier from a route. Position can:
+ * /grants/<anything> is one grant, and without this every grant would become
+ * its own Sentry transaction.
+ */
+const ID_BEARING_COLLECTIONS = ['grants', 'events', 'projects', 'resources', 'user']
+
+/**
+ * Literal child routes that are pages in their own right rather than records —
+ * /events/new is one page, /grants/my-applications is one page, and
+ * /events/virtual-hackathon/… is a whole surface worth watching separately.
+ * The trailing (?:/|$) is what stops "new" from also matching a grant slugged
+ * "newton-fund".
+ */
+const RESERVED_SEGMENTS = ['new', 'my-applications', 'virtual-hackathon']
+
+/**
  * Redacts a transaction event and normalises record IDs out of its name.
  *
  * The name is normalised so routes aggregate instead of fragmenting into one
@@ -83,6 +102,15 @@ export function scrubTransaction(event: TransactionEvent): TransactionEvent {
   event.transaction = event.transaction
     ?.replace(/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, ':id')
     .replace(/\/\d+(?=\/|$)/g, '/:id')
+    .replace(
+      new RegExp(
+        `/(${ID_BEARING_COLLECTIONS.join('|')})/(?!(?:${RESERVED_SEGMENTS.join('|')})(?:/|$))[^/]+`,
+        'g'
+      ),
+      '/$1/:id'
+    )
+    // A board slug is one of six and worth keeping; the thread under it is not.
+    .replace(/\/forums\/([^/]+)\/(?!new(?:\/|$))[^/]+/g, '/forums/$1/:id')
   event.spans = event.spans?.map((span) => redactDeep(span))
   return event
 }

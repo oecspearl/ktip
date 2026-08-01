@@ -21,6 +21,7 @@ import { grantImageFor } from '../../lib/hero-images'
 import { formatCurrency, formatDate, truncate } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 
 export default function GrantDetailPage() {
   const params = useParams()
@@ -28,6 +29,7 @@ export default function GrantDetailPage() {
   const auth = useAuth()
 
   const { grant, loading: grantLoading } = useGrant(params.id)
+  useCanonicalSlug(params.id, grant)
   usePageTitle(grant?.title)
   const { getApplicationCount } = useApplyForGrant()
   const { application, loading: applicationChecking } = useDraftApplication(

@@ -15,6 +15,7 @@ import {
   RSVP_STATUS_LABELS,
 } from '../lib/constants'
 import type { CalendarItem, CalendarItemKind } from '../lib/calendar'
+import { entityPath } from '../lib/slug'
 import type { Event, Grant } from '../types'
 
 export type CalendarScope = 'platform' | 'personal'
@@ -39,7 +40,7 @@ function eventItem(event: Event, dimmed: boolean): CalendarItem {
     title: event.title,
     start: event.start_date,
     end: event.end_date,
-    href: `/events/${event.id}`,
+    href: entityPath('event', event),
     chipClass: EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event,
     dotClass: EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event,
     gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event,
@@ -153,7 +154,7 @@ export function useCalendarFeed({
         kind: 'grant_deadline',
         title: `Deadline: ${grant.title}`,
         start: grant.deadline,
-        href: `/grants/${grant.id}`,
+        href: entityPath('grant', grant),
         chipClass: CALENDAR_KIND_COLORS.grant_deadline,
         dotClass: CALENDAR_KIND_DOT_COLORS.grant_deadline,
         gradientClass: CALENDAR_KIND_GRADIENTS.grant_deadline,
@@ -176,7 +177,7 @@ export function useCalendarFeed({
         title: event.title,
         start: event.start_date,
         end: event.end_date,
-        href: `/events/${event.id}`,
+        href: entityPath('event', event),
         chipClass: CALENDAR_KIND_COLORS.rsvp,
         dotClass: CALENDAR_KIND_DOT_COLORS.rsvp,
         gradientClass: CALENDAR_KIND_GRADIENTS.rsvp,

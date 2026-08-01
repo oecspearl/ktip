@@ -5,6 +5,7 @@ import { ClimateBadge } from '../../components/ui/ClimateBadge'
 import { useResource } from '../../hooks/useResources'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import {
   BookOpen,
   Download,
@@ -25,6 +26,7 @@ export default function ResourceDetailPage() {
   const { openMember } = useMemberPanel()
 
   const { resource, loading } = useResource(params.id)
+  useCanonicalSlug(params.id, resource)
 
   usePageTitle(resource?.title ? `${resource.title} — Resources` : 'Resource')
 

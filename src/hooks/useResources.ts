@@ -4,6 +4,7 @@ import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
+import { isUuid } from '../lib/slug'
 import type { Resource } from '../types'
 
 export function useResources(filters?: {
@@ -81,12 +82,13 @@ export function useResources(filters?: {
   return { resources: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/** Accepts either a uuid or a slug — see src/lib/slug.ts. */
 export function useResource(id: string | undefined) {
   const fetchResource = async (resourceId: string): Promise<Resource | null> => {
     const { data, error } = await (supabase as any)
       .from('resources')
       .select('*, author:profiles(*)')
-      .eq('id', resourceId)
+      .eq(isUuid(resourceId) ? 'id' : 'slug', resourceId)
       .single()
 
     if (error) throw error

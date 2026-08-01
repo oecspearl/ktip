@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Info, Map as MapIcon, Sparkles } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
+import { venueRoomPath } from '../../lib/event-slug'
 import { useVenueRoster, useVenueSession } from '../../hooks/useVenue'
 import { useEnterVenueRoom, useVenueRooms } from '../../hooks/useVenueRooms'
 import { useVenuePresence } from '../../hooks/useVenuePresence'
@@ -14,6 +15,7 @@ import { RoomOccupantList } from '../../components/venue/RoomOccupantList'
 import { Button } from '../../components/ui/Button'
 import { occupantsUnassigned } from '../../lib/venue-presence'
 import type { VenueRoom } from '../../types'
+import { entityPath } from '../../lib/slug'
 
 /**
  * The venue floorplan — the front door of a virtual hackathon.
@@ -28,11 +30,16 @@ export default function EventVenuePage() {
   const auth = useAuth()
   const toast = useToast()
 
-  const eventId = params.id
-  const { event, loading: eventLoading } = useEvent(eventId)
+  // Addressed by slug — /events/virtual-hackathon/<slug> — so the id only
+  // exists once the event has resolved. useEvent takes either shape.
+  const { event, loading: eventLoading } = useEvent(params.slug)
+  const eventId = event?.id
   usePageTitle(event ? `Venue — ${event.title}` : 'Venue')
 
-  const { membership, loading: joining, error: joinError } = useVenueSession(eventId)
+  // A disabled query reports isPending forever, so an unresolvable slug would
+  // sit on the skeleton instead of reaching the "not found" branch below.
+  const { membership, loading: joinPending, error: joinError } = useVenueSession(eventId)
+  const joining = !!eventId && joinPending
   const { rooms, loading: roomsLoading } = useVenueRooms(eventId)
   const { roster } = useVenueRoster(eventId)
   const { enterRoom } = useEnterVenueRoom()
@@ -63,10 +70,10 @@ export default function EventVenuePage() {
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
 
   const handleEnter = async (room: VenueRoom) => {
-    if (!eventId) return
+    if (!eventId || !event) return
     try {
       await enterRoom(eventId, room.id)
-      navigate(`/events/${eventId}/venue/room/${room.id}`)
+      navigate(venueRoomPath(event, room.key))
     } catch (err: any) {
       toast.error(err?.message || 'Could not enter that room')
     }
@@ -103,7 +110,7 @@ export default function EventVenuePage() {
           The organizer has not turned one on. Everything about the event is on its main page.
         </p>
         <Link
-          to={`/events/${event.id}`}
+          to={entityPath('event', event)}
           className="mt-4 inline-block text-ktip-ocean-600 hover:underline"
         >
           Go to {event.title}
@@ -123,7 +130,7 @@ export default function EventVenuePage() {
         <p className="mt-2 text-ktip-sand-600">
           {(joinError as any)?.message || 'Register for this event to enter the venue.'}
         </p>
-        <Link to={`/events/${event.id}`} className="mt-5 inline-block">
+        <Link to={entityPath('event', event)} className="mt-5 inline-block">
           <Button>Go to the event page</Button>
         </Link>
       </div>
@@ -137,6 +144,7 @@ export default function EventVenuePage() {
     <div className="min-h-screen bg-ktip-canvas pb-12 pt-[var(--nav-h)]">
       <VenueTopBar
         eventId={event.id}
+        eventSlug={event.slug}
         eventTitle={event.title}
         role={membership.role}
         headcount={headcount}

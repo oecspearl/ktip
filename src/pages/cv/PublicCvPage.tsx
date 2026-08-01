@@ -6,12 +6,14 @@ import { ResumePaper } from '../../components/resume/ResumePaper'
 import { ResumeOutline } from '../../components/resume/ResumeOutline'
 import { sheetFor } from '../../components/resume/sheets'
 import { usePublicResume } from '../../hooks/useResume'
+import { useProfileId } from '../../hooks/useProfile'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { bleedVars, resolveDesign } from '../../lib/resume-designs'
 import type { ResumeTheme } from '../../types/resume'
 
 /**
- * A shared CV at /u/:id/cv.
+ * A shared CV at /user/:id/cv.
  *
  * Open to signed-out visitors on purpose — a CV that only opens for members is
  * not something anyone can send to an employer. Whether it opens at all is
@@ -23,7 +25,11 @@ import type { ResumeTheme } from '../../types/resume'
  * following a shared link sees the document the way it was composed.
  */
 export default function PublicCvPage() {
-  const { id } = useParams<{ id: string }>()
+  // /u/<username>/cv and /u/<uuid>/cv both land here; public_resume() takes a
+  // uuid, so a username is traded for one first.
+  const { id: routeParam } = useParams<{ id: string }>()
+  const { id, username, loading: resolvingId } = useProfileId(routeParam)
+  useCanonicalSlug(routeParam, id ? { id, slug: username } : null)
   const { data: published, isLoading } = usePublicResume(id)
   const [sheetTheme, setSheetTheme] = useState<ResumeTheme>('mono')
   const [pendingPrint, setPendingPrint] = useState(false)
@@ -58,7 +64,9 @@ export default function PublicCvPage() {
     setPendingPrint(true)
   }
 
-  if (isLoading) {
+  // `id` stays undefined for an unknown username, and a disabled query reports
+  // isLoading forever — so an unknown name has to fall through to "not found".
+  if (resolvingId || (id && isLoading)) {
     return <div className="mx-auto max-w-7xl px-4 py-16 text-center text-ktip-sand-500">Loading…</div>
   }
 
@@ -71,7 +79,7 @@ export default function PublicCvPage() {
         <p className="mt-3 text-ktip-sand-600">
           The member may have unpublished it, or the link may be wrong.
         </p>
-        <Link to={`/u/${id}`} className="mt-6 inline-block text-ktip-ocean-600 hover:underline">
+        <Link to={`/user/${routeParam}`} className="mt-6 inline-block text-ktip-ocean-600 hover:underline">
           View their profile instead
         </Link>
       </div>
@@ -94,7 +102,7 @@ export default function PublicCvPage() {
         >
           {asText ? 'Show the page' : 'Read as text'}
         </Button>
-        <Link to={`/u/${id}`} className="text-sm text-ktip-ocean-600 hover:underline">
+        <Link to={`/user/${routeParam}`} className="text-sm text-ktip-ocean-600 hover:underline">
           View profile
         </Link>
       </div>

@@ -130,6 +130,36 @@ describe('scrubTransaction', () => {
     expect(event.transaction).toBe('/projects/:id/tasks/:id')
   })
 
+  // Migration 087 put slugs in these positions, and a slug has no shape a regex
+  // can spot — without the position rule every grant is its own transaction.
+  it('normalises a slug in a record position', () => {
+    const name = (transaction: string) =>
+      scrubTransaction({ type: 'transaction', transaction } as Parameters<
+        typeof scrubTransaction
+      >[0]).transaction
+
+    expect(name('/grants/oecs-blue-economy-innovation-fund')).toBe('/grants/:id')
+    expect(name('/events/oecs-climathon')).toBe('/events/:id')
+    expect(name('/user/delon-pierre/cv')).toBe('/user/:id/cv')
+    expect(name('/forums/showcase/my-first-build')).toBe('/forums/showcase/:id')
+  })
+
+  it('leaves literal child routes alone, including slugs that start like one', () => {
+    const name = (transaction: string) =>
+      scrubTransaction({ type: 'transaction', transaction } as Parameters<
+        typeof scrubTransaction
+      >[0]).transaction
+
+    expect(name('/grants/my-applications')).toBe('/grants/my-applications')
+    expect(name('/events/new')).toBe('/events/new')
+    expect(name('/forums/showcase/new')).toBe('/forums/showcase/new')
+    expect(name('/events/virtual-hackathon/oecs-climathon')).toBe(
+      '/events/virtual-hackathon/oecs-climathon'
+    )
+    // "newton-fund" begins with "new" and is still a record.
+    expect(name('/grants/newton-fund')).toBe('/grants/:id')
+  })
+
   it('keeps span descriptions and data, redacted', () => {
     const event = scrubTransaction({
       type: 'transaction',

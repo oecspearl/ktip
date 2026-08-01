@@ -52,7 +52,7 @@ async function postAuthed<T>(path: string): Promise<T> {
  *
  * A member who has never arrived from the Virtual Campus used to have no
  * `resumes` row at all, and the document was rebuilt in the browser on every
- * render — so nothing was shareable at /u/:id/cv and the campus sync had nothing
+ * render — so nothing was shareable at /user/:id/cv and the campus sync had nothing
  * to merge into. Now the row is created for them on first view by
  * /api/cv/generate, from their KTIP profile, projects and badges.
  */
@@ -262,7 +262,7 @@ export function useResume(template: string = RESUME_TEMPLATE_KEY) {
 }
 
 /**
- * A public CV at /u/:id/cv.
+ * A public CV at /user/:id/cv.
  *
  * Goes through the public_resume() function rather than a table select: the
  * viewer may be signed out, and the function returns nothing at all unless the

@@ -6,6 +6,7 @@ import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
+import { isUuid } from '../lib/slug'
 import type { DetailEntry, Event } from '../types'
 
 export function useEvents(
@@ -58,11 +59,12 @@ export function useEvents(
         .gte('start_date', filters.dateRange.start)
         .lte('start_date', filters.dateRange.end)
     } else if (filters?.upcoming) {
+      // In-progress multi-day events still count as upcoming until end_date passes
       const now = new Date().toISOString()
-      query = query.gte('start_date', now)
+      query = query.or(`end_date.gte.${now},and(end_date.is.null,start_date.gte.${now})`)
     } else if (filters?.past) {
       const now = new Date().toISOString()
-      query = query.lt('start_date', now)
+      query = query.or(`end_date.lt.${now},and(end_date.is.null,start_date.lt.${now})`)
     }
 
     // Filter by event type
@@ -113,6 +115,7 @@ export function useEvents(
   return { events: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/** Accepts either a uuid or a slug — see src/lib/slug.ts. */
 export function useEvent(id: string | undefined) {
   const fetchEvent = async (eventId: string): Promise<Event | null> => {
     const { data, error } = await supabase
@@ -121,7 +124,7 @@ export function useEvent(id: string | undefined) {
         *,
         organizer:profiles(*)
       `)
-      .eq('id', eventId)
+      .eq(isUuid(eventId) ? 'id' : 'slug', eventId)
       .single()
 
     if (error) throw error

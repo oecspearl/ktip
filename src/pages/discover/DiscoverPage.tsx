@@ -22,6 +22,7 @@ import { usePlatformStats, type PlatformStats } from '../../hooks/usePlatformSta
 import { StatsWheel } from '../../components/ui/StatsWheel'
 import type { DetailEntry, Grant } from '../../types'
 import { DetailsList } from '../../components/shared/DetailsList'
+import { entityPath } from '../../lib/slug'
 import {
   FolderKanban,
   Calendar,
@@ -339,7 +340,7 @@ export default function DiscoverPage() {
         // Hand-authored details win; otherwise synthesise a block from the
         // columns the record already has, so no hero item reads bare
         details: g.details?.length ? g.details : grantHeroDetails(g),
-        href: `/grants/${g.id}`,
+        href: entityPath('grant', g),
         image: grantImageFor(g.id, g.grant_type, g.is_climate_action),
       }))
     }
@@ -350,7 +351,7 @@ export default function DiscoverPage() {
         meta: (p.category as string) || 'Project',
         description: p.summary || p.description || 'An innovation project from the OECS community.',
         details: p.details?.length ? p.details : projectHeroDetails(p),
-        href: `/projects/${p.id}`,
+        href: entityPath('project', p),
         image: p.image_url || heroImageFor(p.id),
       }))
     }
@@ -360,7 +361,7 @@ export default function DiscoverPage() {
       meta: `${format(new Date(e.start_date), 'MMM d, yyyy')}${e.location ? ` · ${e.location}` : ''}`,
       description: e.summary || e.description || 'An upcoming event for the OECS community.',
       details: e.details?.length ? e.details : eventHeroDetails(e),
-      href: `/events/${e.id}`,
+      href: entityPath('event', e),
       image: e.image_url || heroImageFor(e.id),
     }))
   }, [mode, grants, projects, events])

@@ -6,6 +6,7 @@ import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
+import { isUuid } from '../lib/slug'
 import type { DetailEntry, Grant } from '../types'
 
 export function useGrants(filters?: {
@@ -85,12 +86,13 @@ export function useGrants(filters?: {
   return { grants: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/** Accepts either a uuid or a slug — see src/lib/slug.ts. */
 export function useGrant(id: string | undefined) {
   const fetchGrant = async (grantId: string): Promise<Grant | null> => {
     const { data, error } = await supabase
       .from('grants')
       .select('*')
-      .eq('id', grantId)
+      .eq(isUuid(grantId) ? 'id' : 'slug', grantId)
       .single()
 
     if (error) throw error

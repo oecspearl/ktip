@@ -53,7 +53,7 @@ export default function AdminEventsPage() {
     const list = events || []
     return {
       total: list.length,
-      upcoming: list.filter(e => !isPast(new Date(e.start_date))).length,
+      upcoming: list.filter(e => !isPast(new Date(e.end_date || e.start_date))).length,
       drafts: list.filter(e => e.status === 'draft').length,
       published: list.filter(e => e.status === 'published').length,
     }

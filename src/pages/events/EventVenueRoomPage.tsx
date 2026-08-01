@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router'
 import { Lock, Video } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
 import { useVenueRoster, useVenueSession } from '../../hooks/useVenue'
-import { useVenueRoom } from '../../hooks/useVenueRooms'
+import { useVenueRooms } from '../../hooks/useVenueRooms'
+import { venuePath } from '../../lib/event-slug'
 import { useVenuePresence } from '../../hooks/useVenuePresence'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -17,6 +18,7 @@ import {
   VENUE_ROOM_KIND_LABELS,
 } from '../../lib/constants'
 import { resolveIcon } from '../../lib/icon-map'
+import { entityPath } from '../../lib/slug'
 
 /**
  * Inside one room.
@@ -33,12 +35,22 @@ export default function EventVenueRoomPage() {
   const params = useParams()
   const auth = useAuth()
 
-  const eventId = params.id
-  const roomId = params.roomId
-
-  const { event, loading: eventLoading } = useEvent(eventId)
-  const { room, loading: roomLoading } = useVenueRoom(roomId)
-  const { membership, loading: joining, error: joinError } = useVenueSession(eventId)
+  // /events/virtual-hackathon/<slug>/room/<room key> — both segments are
+  // readable slugs, so the room is found through the venue's room list rather
+  // than fetched by uuid. That list is already cached by the floorplan.
+  const { event, loading: eventLoading } = useEvent(params.slug)
+  const eventId = event?.id
+  const { rooms, loading: roomsPending } = useVenueRooms(eventId)
+  // Both of these queries are disabled until the slug resolves, and a disabled
+  // query reports isPending — without the gate an unknown slug never renders.
+  const roomLoading = !!eventId && roomsPending
+  const room = useMemo(
+    () => rooms?.find((r) => r.key === params.roomKey) ?? null,
+    [rooms, params.roomKey]
+  )
+  const roomId = room?.id
+  const { membership, loading: joinPending, error: joinError } = useVenueSession(eventId)
+  const joining = !!eventId && joinPending
   const { roster } = useVenueRoster(eventId)
 
   usePageTitle(room ? `${room.name} — ${event?.title ?? 'Venue'}` : 'Venue room')
@@ -92,7 +104,7 @@ export default function EventVenueRoomPage() {
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Room not found</h1>
         <Link
-          to={eventId ? `/events/${eventId}/venue` : '/events'}
+          to={event ? venuePath(event) : '/events'}
           className="mt-3 inline-block text-ktip-ocean-600 hover:underline"
         >
           Back to the map
@@ -110,7 +122,7 @@ export default function EventVenueRoomPage() {
         <p className="mt-2 text-ktip-sand-600">
           {(joinError as any)?.message || 'Register for this event to enter the venue.'}
         </p>
-        <Link to={`/events/${event.id}`} className="mt-5 inline-block">
+        <Link to={entityPath('event', event)} className="mt-5 inline-block">
           <Button>Go to the event page</Button>
         </Link>
       </div>
@@ -127,6 +139,7 @@ export default function EventVenueRoomPage() {
     <div className="min-h-screen bg-ktip-canvas pb-12 pt-[var(--nav-h)]">
       <VenueTopBar
         eventId={event.id}
+        eventSlug={event.slug}
         eventTitle={event.title}
         role={membership.role}
         headcount={headcount}

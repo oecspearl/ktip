@@ -32,8 +32,10 @@ import {
 import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
+import { entityPath, memberPath } from '../../lib/slug'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -43,6 +45,7 @@ export default function ProjectDetailPage() {
   const { openMember } = useMemberPanel()
 
   const { project, loading: projectLoading } = useProject(params.id)
+  useCanonicalSlug(params.id, project)
   const { projects: recentProjects } = useProjects()
   usePageTitle(project?.title)
 
@@ -384,7 +387,7 @@ export default function ProjectDetailPage() {
                 <p className="text-ktip-ocean-600 text-xs italic mb-4">Explore the latest work</p>
                 <div className="space-y-4">
                   {recentProjects.slice(0, 3).map((p) => (
-                    <Link key={p.id} to={`/projects/${p.id}`} className="flex gap-3 group">
+                    <Link key={p.id} to={entityPath('project', p)} className="flex gap-3 group">
                       {p.image_url ? (
                         <img
                           src={p.image_url}
@@ -423,10 +426,10 @@ export default function ProjectDetailPage() {
                   {project.owner?.display_name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  {/* A real link to /u/:id, not just the drawer — the name has
+                  {/* A real link to /user/:id, not just the drawer — the name has
                       to be shareable and open in a new tab like any profile. */}
                   <Link
-                    to={`/u/${project.owner_id}`}
+                    to={memberPath(project.owner ?? { id: project.owner_id })}
                     className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                   >
                     {project.owner?.display_name || 'Unknown User'}

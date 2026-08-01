@@ -4,6 +4,7 @@ import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { grantImageFor } from '../../lib/hero-images'
+import { entityPath } from '../../lib/slug'
 import { isPast } from 'date-fns'
 
 interface GrantCardProps {
@@ -27,7 +28,7 @@ export function GrantCard({ grant }: GrantCardProps) {
 
   return (
     <BentoCard
-      to={`/grants/${grant.id}`}
+      to={entityPath('grant', grant)}
       image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
       imageSeed={grant.id}
       eyebrow={grant.grant_type ? grant.grant_type.replace('_', ' ') : 'Funding'}

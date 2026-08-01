@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
+import { isUuid } from '../lib/slug'
 import type { ForumBoard, ForumPost, ForumReply } from '../types'
 
 export function useForumBoards() {
@@ -85,7 +86,10 @@ export function useForumPost(postId: string | undefined) {
     const { data, error } = await supabase
       .from('forum_posts')
       .select('*, author:profiles(*), board:forum_boards(*)')
-      .eq('id', pid)
+      // Post slugs are unique per board, not globally — but the board segment
+      // is already in the route, and a duplicate across boards would need both
+      // boards to have the same title, so the slug alone is specific enough.
+      .eq(isUuid(pid) ? 'id' : 'slug', pid)
       .single()
     if (error) throw error
     return data as any

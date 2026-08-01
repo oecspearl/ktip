@@ -7,6 +7,7 @@ import {
 } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import type { Resource } from '../../types'
+import { entityPath } from '../../lib/slug'
 
 interface ResourceCardProps {
   resource: Resource
@@ -15,7 +16,7 @@ interface ResourceCardProps {
 export function ResourceCard({ resource }: ResourceCardProps) {
   return (
     <BentoCard
-      to={`/resources/${resource.id}`}
+      to={entityPath('resource', resource)}
       image={resource.thumbnail_url}
       imageSeed={resource.id}
       eyebrow={RESOURCE_TYPE_LABELS[resource.resource_type] || resource.resource_type}

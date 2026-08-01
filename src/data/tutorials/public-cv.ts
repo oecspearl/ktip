@@ -2,7 +2,7 @@ import type { TutorialStep } from '../../components/tutorial/types'
 import { replayStep } from './shared'
 
 /**
- * Guided tour of a published CV (/u/:id/cv).
+ * Guided tour of a published CV (/user/:id/cv).
  *
  * Deliberately short. This page is usually opened by someone outside KTIP —
  * an employer following a link — so the tour explains the two controls and

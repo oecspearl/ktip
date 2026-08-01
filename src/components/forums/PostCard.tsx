@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
 import type { ForumPost } from '../../types'
+import { forumPostPath } from '../../lib/slug'
 import { MessageCircle, Pin } from 'lucide-react'
 import {
   formatRelativeTime,
@@ -19,7 +20,7 @@ export function PostCard({ post, boardSlug }: PostCardProps) {
   const authorName = post.author?.display_name || 'Unknown User'
 
   return (
-    <Link to={`/forums/${boardSlug}/${post.id}`}>
+    <Link to={forumPostPath(boardSlug, post)}>
       <Card hover>
         <div className="flex items-start gap-3">
           {/* Author avatar */}

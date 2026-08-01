@@ -117,19 +117,22 @@ const router = createBrowserRouter([
           { path: '/forums/:slug/:postId', lazy: lazyPage(() => import('./pages/forums/PostDetailPage')) },
           // The list stays open — being findable is the point of a directory,
           // and it is how a signed-out visitor decides the platform is worth
-          // joining. The member behind a card is not: /u/:id and the drawer
+          // joining. The member behind a card is not: /user/:id and the drawer
           // both require a session (083).
           { path: '/directory', lazy: lazyPage(() => import('./pages/directory/DirectoryPage')) },
           // Public on purpose. A rank is only worth chasing if it can be
           // shown to someone. Excludes students, members who opted out, and
           // suspended accounts — enforced in SQL, not here.
           { path: '/leaderboard', lazy: lazyPage(() => import('./pages/leaderboard/LeaderboardPage')) },
-          // Public on purpose, unlike /u/:id — a CV only a signed-in member
+          // Public on purpose, unlike /user/:id — a CV only a signed-in member
           // can open is not one you can send to an employer. public_resume()
           // returns nothing unless the owner published it and their profile is
           // public, so the page 404s itself rather than relying on this route.
-          { path: '/u/:id/cv', lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
-          // The organisation's answer to /u/:id, and public for the same
+          { path: '/user/:id/cv', lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
+          // The member page and CV lived at /u/:id until the URLs were made
+          // readable. Both spellings are in bookmarks and chat logs.
+          { path: '/u/:id/cv', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
+          // The organisation's answer to /user/:id, and public for the same
           // reason. public_employer() returns nothing unless the business is
           // Chamber-verified, so an unverified registration cannot masquerade
           // as a credential by having a page at all.
@@ -186,10 +189,25 @@ const router = createBrowserRouter([
               // /hackathons is reachable from site-map.ts because a site-map
               // href can never contain a :param.
               { path: '/hackathons', lazy: lazyPage(() => import('./pages/hackathons/HackathonsPage')) },
-              { path: '/events/:id/venue', lazy: lazyPage(() => import('./pages/events/EventVenuePage')) },
+              // Readable venue URLs. The slug is derived from the event title
+              // (src/lib/event-slug.ts) and the room segment is venue_rooms.key,
+              // so a venue link reads as a place rather than as two uuids.
+              {
+                path: '/events/virtual-hackathon/:slug',
+                lazy: lazyPage(() => import('./pages/events/EventVenuePage')),
+              },
+              {
+                path: '/events/virtual-hackathon/:slug/room/:roomKey',
+                lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+              },
+              // The id-shaped originals, kept as redirects for old links.
+              {
+                path: '/events/:id/venue',
+                lazy: lazyPage(() => import('./pages/events/VenueRedirectPage')),
+              },
               {
                 path: '/events/:id/venue/room/:roomId',
-                lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+                lazy: lazyPage(() => import('./pages/events/VenueRedirectPage')),
               },
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
@@ -201,7 +219,7 @@ const router = createBrowserRouter([
               // Virtual Campus, hand-written by everyone else.
               { path: '/cv', lazy: lazyPage(() => import('./pages/cv/CvPage')) },
               { path: '/cv/edit', lazy: lazyPage(() => import('./pages/cv/CvEditPage')) },
-              // Member pages came back at /u/:id (066). The drawer over
+              // Member pages came back at /user/:id (066). The drawer over
               // /directory is still the in-app default; the page exists so a
               // profile can be shared outside the app. /profile/* stays as a
               // redirect for old links and for the URLs already stored in
@@ -210,9 +228,10 @@ const router = createBrowserRouter([
               // brochure: you have to have an account before you can read one,
               // and ProtectedRoute carries `state.from` so a shared /u/ link
               // still lands on the profile once you have signed in.
-              { path: '/u/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
+              { path: '/user/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
               { path: '/profile/me', element: <Navigate to="/dashboard" replace /> },
               { path: '/profile/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
+              { path: '/u/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
               { path: '/settings', lazy: lazyPage(() => import('./pages/settings/SettingsPage')) },
               { path: '/grievances/report/:userId', lazy: lazyPage(() => import('./pages/grievances/ReportUserPage')) },

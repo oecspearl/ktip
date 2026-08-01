@@ -117,6 +117,11 @@ export type ProfileVisibility = 'public' | 'private'
 
 export interface Profile {
   id: string
+  /**
+   * Vanity segment for /u/<username> (migration 087). display_name is neither
+   * unique nor stable, so it cannot be the URL.
+   */
+  username: string | null
   display_name: string | null
   bio: string | null
   avatar_url: string | null
@@ -208,6 +213,8 @@ export interface Ranked {
 
 export interface Project extends Ranked {
   id: string
+  /** URL segment (migration 087). Assigned on insert, frozen after. */
+  slug: string | null
   title: string
   description: string | null
   summary: string | null
@@ -231,6 +238,8 @@ export interface Project extends Ranked {
 
 export interface Event extends Ranked {
   id: string
+  /** URL segment (migration 087). Assigned on insert, frozen after. */
+  slug: string | null
   title: string
   description: string | null
   summary: string | null
@@ -514,6 +523,8 @@ export interface VenueOccupant {
 
 export interface Grant extends Ranked {
   id: string
+  /** URL segment (migration 087). Assigned on insert, frozen after. */
+  slug: string | null
   title: string
   description: string | null
   summary: string | null
@@ -670,6 +681,8 @@ export interface ForumBoard {
 
 export interface ForumPost {
   id: string
+  /** URL segment (migration 087). Unique within a board, not globally. */
+  slug: string | null
   board_id: string
   author_id: string
   title: string
@@ -698,6 +711,8 @@ export type ResourceCategory = 'technology' | 'healthcare' | 'education' | 'agri
 
 export interface Resource extends Ranked {
   id: string
+  /** URL segment (migration 087). Assigned on insert, frozen after. */
+  slug: string | null
   title: string
   description: string | null
   summary: string | null

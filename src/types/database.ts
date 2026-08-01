@@ -7,6 +7,7 @@ export interface Database {
       profiles: {
         Row: {
           id: string
+          username: string | null
           display_name: string | null
           bio: string | null
           avatar_url: string | null
@@ -36,6 +37,7 @@ export interface Database {
         }
         Insert: {
           id: string
+          username?: string | null
           display_name?: string | null
           bio?: string | null
           avatar_url?: string | null
@@ -61,6 +63,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          username?: string | null
           display_name?: string | null
           bio?: string | null
           avatar_url?: string | null
@@ -89,6 +92,7 @@ export interface Database {
       projects: {
         Row: {
           id: string
+          slug: string | null
           title: string
           description: string | null
           category: string | null
@@ -103,6 +107,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          slug?: string | null
           title: string
           description?: string | null
           category?: string | null
@@ -117,6 +122,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          slug?: string | null
           title?: string
           description?: string | null
           category?: string | null
@@ -182,6 +188,7 @@ export interface Database {
       events: {
         Row: {
           id: string
+          slug: string | null
           title: string
           description: string | null
           event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
@@ -200,6 +207,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          slug?: string | null
           title: string
           description?: string | null
           event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
@@ -218,6 +226,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          slug?: string | null
           title?: string
           description?: string | null
           event_type?: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
@@ -528,6 +537,7 @@ export interface Database {
       grants: {
         Row: {
           id: string
+          slug: string | null
           title: string
           description: string | null
           amount_min: number | null
@@ -543,6 +553,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          slug?: string | null
           title: string
           description?: string | null
           amount_min?: number | null
@@ -558,6 +569,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          slug?: string | null
           title?: string
           description?: string | null
           amount_min?: number | null
@@ -702,6 +714,7 @@ export interface Database {
       forum_posts: {
         Row: {
           id: string
+          slug: string | null
           board_id: string
           author_id: string
           title: string
@@ -712,6 +725,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          slug?: string | null
           board_id: string
           author_id: string
           title: string
@@ -722,6 +736,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          slug?: string | null
           board_id?: string
           author_id?: string
           title?: string

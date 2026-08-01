@@ -6,6 +6,7 @@ import { rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
+import { isUuid } from '../lib/slug'
 import type { DetailEntry, Project, ProjectComment } from '../types'
 
 export function useProjects(filters?: {
@@ -120,6 +121,7 @@ export function useAdminProjects() {
 // now earns its keep as a +15 contribution in the personalization ranker
 // (migration 061) rather than as a separate unused query.
 
+/** Accepts either a uuid or a slug — see src/lib/slug.ts. */
 export function useProject(id: string | undefined) {
   const fetchProject = async (projectId: string): Promise<Project | null> => {
     const { data, error } = await supabase
@@ -128,7 +130,7 @@ export function useProject(id: string | undefined) {
         *,
         owner:profiles(*)
       `)
-      .eq('id', projectId)
+      .eq(isUuid(projectId) ? 'id' : 'slug', projectId)
       .single()
 
     if (error) throw error

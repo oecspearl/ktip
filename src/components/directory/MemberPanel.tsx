@@ -13,7 +13,7 @@ import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { AchievementBadge } from '../ui/AchievementBadge'
 import { ConnectButton } from './ConnectButton'
-import { useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
+import { useProfileId, useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
 import { useProfileStats } from '../../hooks/useProfileStats'
@@ -28,6 +28,7 @@ import {
   COLLAB_EXCLUSIVE_VALUE,
 } from '../../lib/constants'
 import { formatDate, getInitials, generateAvatarColor, cn } from '../../lib/utils'
+import { entityPath, memberPath } from '../../lib/slug'
 
 /** Squarer than the app default — the drawer reads as a document, not pills. */
 const CHIP = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border'
@@ -100,13 +101,22 @@ export function MemberPanel() {
   // Nothing is fetched at all for a signed-out visitor — the drawer shows the
   // sign-in gate instead (083).
   const signedIn = !!auth.user
-  const { view: profile, canView, loading } = useProfileView(
-    memberId ?? undefined,
+  // `memberId` is whatever is in `?member=` — a username since the URLs were
+  // made readable, a uuid on an older link. get_profile_view() takes a uuid.
+  const { id: resolvedId, username, loading: resolvingId } = useProfileId(
+    memberId ?? undefined
+  )
+  const { view: rawProfile, canView, loading: viewLoading } = useProfileView(
+    resolvedId,
     signedIn
   )
+  const loading = resolvingId || viewLoading
+  // get_profile_view() has a fixed return signature with no username in it, so
+  // the "view full profile" link below gets it from the lookup instead.
+  const profile = rawProfile ? { ...rawProfile, username } : rawProfile
   // Undefined disables the query outright, so a private member costs one
   // request rather than six that each come back empty.
-  const detailId = canView ? (memberId ?? undefined) : undefined
+  const detailId = canView ? resolvedId : undefined
 
   const { projects } = useUserProjects(detailId)
   const { events } = useUserEvents(detailId)
@@ -173,11 +183,13 @@ export function MemberPanel() {
 
   if (!isOpen) return null
 
-  const isSelf = memberId === auth.user?.id
+  const isSelf = resolvedId === auth.user?.id
   const displayName = profile?.display_name || 'Unknown User'
   // Same seeded photo the member's directory card uses, so opening a card feels
   // like the card expanding rather than a jump to an unrelated screen.
-  const coverSeed = memberId ?? 'member'
+  // Seeded off the id, not the URL segment: the same member must get the same
+  // cover whether they were opened by username or by uuid.
+  const coverSeed = resolvedId ?? 'member'
   const hasSections = !!(
     profile?.bio ||
     badges?.length ||
@@ -360,7 +372,7 @@ export function MemberPanel() {
                     {/* The drawer stays the in-app default; this is the way out
                         to a URL that can be shared. */}
                     <Link
-                      to={`/u/${profile.id}`}
+                      to={memberPath(profile)}
                       className="inline-flex items-center gap-1 text-xs font-semibold text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:gap-1.5 transition-all"
                     >
                       View full profile
@@ -401,7 +413,7 @@ export function MemberPanel() {
                     Only {displayName.split(' ')[0]}'s connections can see their full profile or
                     send them a message. Send a connection request to ask.
                   </p>
-                  <Link to={`/u/${profile.id}`} onClick={closeMember} className="mt-4 inline-block">
+                  <Link to={memberPath(profile)} onClick={closeMember} className="mt-4 inline-block">
                     <Button variant="ghost" size="sm">
                       Open member page
                     </Button>
@@ -494,7 +506,7 @@ export function MemberPanel() {
                         {projects.map((project) => (
                           <LinkRow
                             key={project.id}
-                            to={`/projects/${project.id}`}
+                            to={entityPath('project', project)}
                             label={project.title}
                           />
                         ))}
@@ -508,7 +520,7 @@ export function MemberPanel() {
                         {events.map((event) => (
                           <LinkRow
                             key={event.id}
-                            to={`/events/${event.id}`}
+                            to={entityPath('event', event)}
                             label={event.title}
                           />
                         ))}

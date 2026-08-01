@@ -23,6 +23,7 @@ import {
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { entityPath } from '../../lib/slug'
 
 export default function MyApplicationsPage() {
   usePageTitle('My Grant Applications')
@@ -191,7 +192,7 @@ export default function MyApplicationsPage() {
                     <div className="flex items-start gap-3 mb-3">
                       <div className="flex-1">
                         <Link
-                          to={`/grants/${application.grant.id}`}
+                          to={entityPath('grant', application.grant)}
                           className="text-2xl font-display font-bold text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                         >
                           {application.grant.title}
@@ -277,7 +278,7 @@ export default function MyApplicationsPage() {
                             </Button>
                           </Link>
                         )}
-                        <Link to={`/grants/${application.grant.id}`}>
+                        <Link to={entityPath('grant', application.grant)}>
                           <Button variant="outline" size="sm">
                             View Grant
                           </Button>

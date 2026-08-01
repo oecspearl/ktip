@@ -21,8 +21,10 @@ import { debounce } from '../../lib/utils'
 
 export default function DirectoryPage() {
   usePageTitle('Member Directory')
-  // `?member=<id>` is the shareable form of a member preview — it's what old
-  // /profile/<id> links and notification rows redirect to.
+  // `?member=<username>` is the shareable form of a member preview — it's what
+  // old /profile/<id> links and notification rows redirect to. The segment is
+  // a username where there is one and a uuid otherwise; the drawer resolves
+  // either, so a stored uuid link keeps working.
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedMember = searchParams.get('member')
   const { memberId, openMember, closeMember } = useMemberPanel()
@@ -335,7 +337,7 @@ export default function DirectoryPage() {
                 {members.map((member) => (
                   <BentoCard
                     key={member.id}
-                    to={`/directory?member=${member.id}`}
+                    to={`/directory?member=${member.username || member.id}`}
                     imageSeed={member.id}
                     eyebrow={
                       member.roles?.length > 0

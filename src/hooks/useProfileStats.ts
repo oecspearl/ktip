@@ -7,7 +7,7 @@ import type { ProfileStats, ProfileStatsRow } from '../types'
 /**
  * Points, rank and pinned trophies for one member's public profile.
  *
- * Anonymous-callable: /u/:id has to render for a signed-out visitor following
+ * Anonymous-callable: /user/:id has to render for a signed-out visitor following
  * a shared link, which is the whole reason the page exists. Returns null for
  * suspended accounts rather than an empty shell.
  */

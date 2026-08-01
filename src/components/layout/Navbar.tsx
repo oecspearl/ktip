@@ -328,7 +328,8 @@ export function Navbar() {
   const noHeroBehindBar =
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/cv') ||
-    /^\/u\/[^/]+\/cv$/.test(location.pathname) ||
+    /^\/user\/[^/]+\/cv$/.test(location.pathname) ||
+    location.pathname.startsWith('/events/virtual-hackathon/') ||
     /^\/events\/[^/]+\/venue/.test(location.pathname)
   const needsBackdrop = noHeroBehindBar || scrolledPastHero
 

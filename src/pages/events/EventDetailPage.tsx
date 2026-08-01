@@ -3,6 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useEvent, useRSVP, useDeleteEvent } from '../../hooks/useEvents'
+// Lives in the admin hook file but the RLS policy is organizer-scoped, so an
+// event's own host can flip it out of draft from here.
+import { useEventStatusUpdate } from '../../hooks/useAdminEvents'
 import { useSubmitRegistration } from '../../hooks/useEventRegistrationForm'
 import { usePublishedEventUpdates } from '../../hooks/useEventUpdates'
 import { usePublishedEventArticles } from '../../hooks/useEventArticles'
@@ -24,6 +27,7 @@ import { EventSolutionsPanel } from '../../components/events/EventSolutionsPanel
 import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeEventDeletion } from '../../lib/delete-guard'
+import { venuePath } from '../../lib/event-slug'
 import {
   Calendar,
   MapPin,
@@ -37,6 +41,7 @@ import {
   Megaphone,
   FileText,
   CalendarX,
+  Send,
   Map as MapIcon,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -51,6 +56,7 @@ import {
 } from '../../lib/constants'
 import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { truncate } from '../../lib/utils'
 
 export default function EventDetailPage() {
@@ -60,11 +66,13 @@ export default function EventDetailPage() {
   const { openMember } = useMemberPanel()
 
   const { event, loading: eventLoading } = useEvent(params.id)
+  useCanonicalSlug(params.id, event)
   usePageTitle(event?.title)
   const toast = useToast()
   const { rsvp, cancelRSVP, checkRSVP, getRSVPCount, loading: rsvpLoading } = useRSVP()
   const { submitRegistration, loading: regLoading } = useSubmitRegistration()
   const { deleteEvent } = useDeleteEvent()
+  const { updateStatus, loading: publishing } = useEventStatusUpdate()
   const { updates: eventUpdates } = usePublishedEventUpdates(params.id)
   const { articles: eventArticles } = usePublishedEventArticles(params.id)
   const { sections: pageSections } = usePublicEventSections(params.id)
@@ -81,7 +89,21 @@ export default function EventDetailPage() {
   const hasCustomFields = (event?.registration_fields || []).length > 0
 
   const isOrganizer = event?.organizer_id === auth.user?.id
-  const isPastEvent = !!(event && isPast(new Date(event.start_date)))
+  // An event is only past once it has finished — multi-day events stay active until end_date
+  const isPastEvent = !!(event && isPast(new Date(event.end_date || event.start_date)))
+  // Events are created as drafts, and a draft is invisible everywhere except to
+  // its own organizer — so the organizer is the one who has to be told.
+  const isDraft = event?.status === 'draft'
+
+  const handlePublish = async () => {
+    if (!event) return
+    try {
+      await updateStatus(event.id, 'published')
+      toast.success('Event published — it now shows in public listings')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to publish event')
+    }
+  }
 
   // Check RSVP status and count
   useEffect(() => {
@@ -197,8 +219,25 @@ export default function EventDetailPage() {
         actions={
           isOrganizer ? (
             <>
+              {isDraft && (
+                <button
+                  onClick={handlePublish}
+                  disabled={publishing}
+                  className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Send size={14} />
+                  {publishing ? 'Publishing…' : 'Publish'}
+                </button>
+              )}
               <Link to={`/events/${params.id}/edit`}>
-                <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
+                {/* Publish takes the brand fill on a draft, so Edit steps back */}
+                <button
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 ${
+                    isDraft
+                      ? 'border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 transition-colors'
+                      : 'btn-brand'
+                  }`}
+                >
                   <Edit size={14} />
                   Edit
                 </button>
@@ -230,11 +269,27 @@ export default function EventDetailPage() {
               {EVENT_STATUS_LABELS['cancelled']}
             </Badge>
           )}
+          {isDraft && (
+            <Badge className={EVENT_STATUS_COLORS['draft']}>
+              {EVENT_STATUS_LABELS['draft']}
+            </Badge>
+          )}
           {isPastEvent && event.status !== 'cancelled' && (
             <Badge variant="default">Past Event</Badge>
           )}
         </div>
       </PageHero>
+
+      {/* === Draft Banner === */}
+      {isDraft && (
+        <div className="bg-ktip-sun-50 border-b border-ktip-sun-200 py-3">
+          <p className="text-center text-sm text-ktip-sand-800">
+            {isOrganizer
+              ? 'This event is a draft — only you can see it. Publish it to list it on Events and the hackathon pages.'
+              : 'This event is a draft and is not published yet.'}
+          </p>
+        </div>
+      )}
 
       {/* === Past Event Banner === */}
       {isPastEvent && (
@@ -421,7 +476,7 @@ export default function EventDetailPage() {
                     walk straight in.
                   </p>
                 </div>
-                <Link to={`/events/${event.id}/venue`} className="shrink-0">
+                <Link to={venuePath(event)} className="shrink-0">
                   <Button icon={<MapIcon size={16} />}>Enter the venue</Button>
                 </Link>
               </div>

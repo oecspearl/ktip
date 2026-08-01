@@ -7,7 +7,9 @@ import { PageHero } from '../../components/layout/PageHero'
 import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
 import { formatDate } from '../../lib/utils'
+import { venuePath } from '../../lib/event-slug'
 import type { Event } from '../../types'
+import { entityPath } from '../../lib/slug'
 
 /**
  * The Virtual Hackathon index — and the only static route in this feature.
@@ -131,7 +133,7 @@ function LiveHackathonRow({ event }: { event: Event }) {
           <Radio size={11} aria-hidden="true" /> Live
         </span>
         <h3 className="font-display text-lg font-bold text-ktip-sand-900">
-          <Link to={`/events/${event.id}`} className="hover:text-ktip-ocean-600 hover:underline">
+          <Link to={entityPath('event', event)} className="hover:text-ktip-ocean-600 hover:underline">
             {event.title}
           </Link>
         </h3>
@@ -158,11 +160,11 @@ function LiveHackathonRow({ event }: { event: Event }) {
 
       <div className="flex shrink-0 flex-wrap gap-2">
         {event.has_venue && (
-          <Link to={`/events/${event.id}/venue`}>
+          <Link to={venuePath(event)}>
             <Button size="sm">Enter the venue</Button>
           </Link>
         )}
-        <Link to={`/events/${event.id}`}>
+        <Link to={entityPath('event', event)}>
           <Button size="sm" variant="secondary">
             Details
           </Button>

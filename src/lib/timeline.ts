@@ -6,6 +6,7 @@ import type {
   ProjectPhaseEvent,
 } from '../types'
 import { PHASE_LABELS } from './constants'
+import { entityPath } from './slug'
 
 export interface TimelineStage {
   key: string
@@ -92,7 +93,7 @@ export function buildGrantAppItem(app: AppWithEvents): TimelineItem {
     id: `app-${app.id}`,
     kind: 'grant_application',
     title: app.grant?.title ?? 'Grant Application',
-    href: `/grants/${app.grant_id}`,
+    href: `/grants/${app.grant?.slug || app.grant_id}`,
     startAt,
     endAt,
     currentKey: app.status,
@@ -129,7 +130,7 @@ export function buildProjectItem(project: ProjectWithEvents): TimelineItem {
     id: `project-${project.id}`,
     kind: 'project',
     title: project.title,
-    href: `/projects/${project.id}`,
+    href: entityPath('project', project),
     startAt,
     endAt,
     currentKey: project.phase,

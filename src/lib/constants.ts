@@ -374,7 +374,7 @@ export const ROUTES = {
   // is not worth chasing. Use PROFILE for in-app navigation, MEMBER_PAGE when
   // the URL will be shared.
   PROFILE: (id: string) => `/directory?member=${id}`,
-  MEMBER_PAGE: (id: string) => `/u/${id}`,
+  MEMBER_PAGE: (id: string) => `/user/${id}`,
   MY_PROFILE: '/dashboard/profile',
   ACHIEVEMENTS: '/achievements',
   LEADERBOARD: '/leaderboard',

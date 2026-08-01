@@ -2,7 +2,7 @@ import type { TutorialStep } from '../../components/tutorial/types'
 import { replayStep } from './shared'
 
 /**
- * Guided tour of a member page (/u/:id).
+ * Guided tour of a member page (/user/:id).
  *
  * Public on purpose — a profile you can only open when signed in is not one you
  * can share — so the copy assumes the reader may be a visitor, not a member.

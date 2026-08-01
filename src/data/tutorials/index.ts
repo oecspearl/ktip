@@ -212,14 +212,14 @@ const REGISTRY: RegisteredTutorial[] = [
   // ------------------------------------------------------------------ Events
   {
     id: TUTORIAL_IDS.VENUE_ROOM,
-    route: '/events/:id/venue/room/:roomId',
+    route: '/events/virtual-hackathon/:slug/room/:roomKey',
     name: 'Venue room',
     description: 'Chat, presence and what is coming next.',
     steps: venueRoomTutorialSteps,
   },
   {
     id: TUTORIAL_IDS.VENUE,
-    route: '/events/:id/venue',
+    route: '/events/virtual-hackathon/:slug',
     name: 'Virtual venue',
     description: 'Rooms, presence and how to move between them.',
     steps: venueTutorialSteps,
@@ -327,14 +327,14 @@ const REGISTRY: RegisteredTutorial[] = [
   },
   {
     id: TUTORIAL_IDS.PUBLIC_CV,
-    route: '/u/:id/cv',
+    route: '/user/:id/cv',
     name: 'Published CV',
     description: 'Downloading someone’s published résumé.',
     steps: publicCvTutorialSteps,
   },
   {
     id: TUTORIAL_IDS.PUBLIC_PROFILE,
-    route: '/u/:id',
+    route: '/user/:id',
     name: 'Member page',
     description: 'Reading a profile and connecting.',
     steps: publicProfileTutorialSteps,

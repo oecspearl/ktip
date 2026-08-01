@@ -9,6 +9,7 @@ import {
 } from '../../lib/constants'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import type { CalendarItem } from '../../lib/calendar'
+import { entityPath } from '../../lib/slug'
 import type { Event } from '../../types'
 
 /** Only non-live events carry a status overlay — a published event needs none. */
@@ -26,7 +27,7 @@ export function eventToCalendarItem(event: Event): CalendarItem {
     title: event.title,
     start: event.start_date,
     end: event.end_date,
-    href: `/events/${event.id}`,
+    href: entityPath('event', event),
     chipClass: EVENT_TYPE_COLORS[event.event_type],
     dotClass: EVENT_TYPE_DOT_COLORS[event.event_type],
     gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_FALLBACK_GRADIENT,

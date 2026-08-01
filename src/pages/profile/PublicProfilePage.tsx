@@ -22,7 +22,7 @@ import { Button } from '../../components/ui/Button'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { MiniTrophy } from '../../components/achievements/TrophyCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
-import { useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
+import { useProfileId, useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useConnectionStatus } from '../../hooks/useConnections'
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
@@ -32,6 +32,7 @@ import { useTrophyAssets, useTrackFlag } from '../../hooks/useAchievements'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import {
   ROLE_LABELS,
   ROLE_COLORS,
@@ -41,6 +42,7 @@ import {
 import { isOrganizationAccount } from '../../lib/permissions'
 import { useEmployerForUser, useEmployerPortfolio } from '../../hooks/useEmployerProfile'
 import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
+import { entityPath } from '../../lib/slug'
 
 /**
  * The shareable member page, back after being folded into a drawer.
@@ -57,12 +59,19 @@ import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
  * suspended account and hides the streak from everyone but its owner.
  */
 export default function PublicProfilePage() {
-  const { id } = useParams()
+  // The route segment is a username or a uuid; everything downstream wants the
+  // uuid, but links keep whichever form the visitor arrived on.
+  const { id: routeParam } = useParams()
+  const { id, username, loading: resolvingId } = useProfileId(routeParam)
+  // Arriving on /u/<uuid> — an old link, or one built from a row that only
+  // carried a user id — rewrites itself to /u/<username>.
+  useCanonicalSlug(routeParam, id ? { id, slug: username } : null)
   const auth = useAuth()
   const { openPanel } = useMessagingPanel()
   const trackFlag = useTrackFlag()
 
-  const { view: profile, canView, loading } = useProfileView(id)
+  const { view: profile, canView, loading: viewLoading } = useProfileView(id)
+  const loading = resolvingId || viewLoading
   // Everything below the teaser hangs off this. Passing undefined disables
   // the query outright, so a gated page makes one request, not nine.
   const detailId = canView ? id : undefined
@@ -77,7 +86,7 @@ export default function PublicProfilePage() {
   // profiles.organization is free text and links nowhere; this is the entity.
   const { employer } = useEmployerForUser(detailId)
   const { items: portfolio } = useEmployerPortfolio(employer?.id)
-  // The published CV was orphaned: /u/:id/cv existed and nothing linked to it.
+  // The published CV was orphaned: /user/:id/cv existed and nothing linked to it.
   // public_resume() returns nothing unless it is published, so this both
   // decides whether to show the link and guarantees it goes somewhere.
   const { data: publicResume } = usePublicResume(detailId)
@@ -200,7 +209,7 @@ export default function PublicProfilePage() {
         {/* Only rendered when the CV is actually published — see publicResume. */}
         {!isOrgAccount && publicResume && (
           <div className="mt-5">
-            <Link to={`/u/${profile.id}/cv`}>
+            <Link to={`/user/${routeParam}/cv`}>
               <Button variant="outline" size="sm" icon={<FileText size={16} />}>
                 View CV
               </Button>
@@ -474,7 +483,7 @@ export default function PublicProfilePage() {
         <LinkSection
           title="Projects"
           icon={<FolderKanban size={14} aria-hidden="true" />}
-          items={projects.map((p) => ({ id: p.id, label: p.title, to: `/projects/${p.id}` }))}
+          items={projects.map((p) => ({ id: p.id, label: p.title, to: entityPath('project', p) }))}
         />
       ) : null}
 
@@ -482,7 +491,7 @@ export default function PublicProfilePage() {
         <LinkSection
           title="Events"
           icon={<Calendar size={14} aria-hidden="true" />}
-          items={events.map((e) => ({ id: e.id, label: e.title, to: `/events/${e.id}` }))}
+          items={events.map((e) => ({ id: e.id, label: e.title, to: entityPath('event', e) }))}
         />
       ) : null}
     </div>

@@ -14,6 +14,7 @@ import { supabase } from '../../lib/supabase'
 import { keys } from '../../queries/keys'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Employer } from '../../types'
+import { slugify } from '../../lib/slug'
 
 const STATUS_COPY: Record<string, { title: string; body: string; tone: string }> = {
   pending: {
@@ -82,13 +83,6 @@ export default function ChamberOnboardingPage() {
     return <Navigate to="/login" replace />
   }
 
-  const slugify = (value: string) =>
-    value
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 60)
-
   const handleSubmit = async () => {
     if (!auth.user) return
     if (!form.legal_name.trim() || !form.country_code || !form.contact_email.trim()) {
@@ -99,7 +93,10 @@ export default function ChamberOnboardingPage() {
     setSaving(true)
     try {
       const { error } = await (supabase as any).from('employers').insert({
-        slug: `${slugify(form.legal_name)}-${form.country_code.toLowerCase()}`,
+        // employers.slug is written here rather than by a trigger, and the
+        // column caps at 60 — the country code is what disambiguates two
+        // businesses sharing a name across member states.
+        slug: `${slugify(form.legal_name).slice(0, 60)}-${form.country_code.toLowerCase()}`,
         legal_name: form.legal_name.trim(),
         trading_name: form.trading_name.trim() || null,
         country_code: form.country_code,

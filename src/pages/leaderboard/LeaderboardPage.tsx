@@ -172,7 +172,7 @@ export default function LeaderboardPage() {
                     </td>
                     <td className="px-4 py-3">
                       <Link
-                        to={`/u/${entry.user_id}`}
+                        to={`/user/${entry.user_id}`}
                         className="flex items-center gap-2 hover:underline"
                       >
                         {entry.avatar_url ? (
