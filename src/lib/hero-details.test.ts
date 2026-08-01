@@ -8,6 +8,7 @@ import type { Event, Grant, Project } from '../types'
 function grant(overrides: Partial<Grant> = {}): Grant {
   return {
     id: 'g1',
+    slug: null,
     title: 'EdTech Caribbean Accelerator Grant',
     description: null,
     summary: null,
@@ -82,6 +83,7 @@ describe('grantHeroDetails', () => {
 describe('projectHeroDetails', () => {
   const project = {
     id: 'p1',
+    slug: null,
     title: 'AgriSense',
     category: 'agriculture',
     phase: 'prototype',
@@ -113,6 +115,7 @@ describe('projectHeroDetails', () => {
 describe('eventHeroDetails', () => {
   const event = {
     id: 'e1',
+    slug: null,
     title: 'Blue Economy Hack',
     event_type: 'hackathon',
     start_date: '2026-09-01T12:00:00',
