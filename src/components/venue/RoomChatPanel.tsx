@@ -12,6 +12,8 @@ import {
 } from '../../hooks/useVenueRoomMessages'
 import type { VenueRoom } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { EmojiPickerButton, insertAtCaret } from '../ui/EmojiPicker'
+import { LinkedText } from '../ui/LinkedText'
 
 interface RoomChatPanelProps {
   room: VenueRoom
@@ -45,6 +47,8 @@ export function RoomChatPanel({
 
   const [draft, setDraft] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+  // So the emoji picker can insert at the caret, not on the end of the line.
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Stick to the bottom as messages arrive. Chat that does not is broken chat.
   useEffect(() => {
@@ -118,7 +122,7 @@ export function RoomChatPanel({
                     </span>
                   </div>
                   <p className="whitespace-pre-wrap break-words text-sm text-ktip-sand-700">
-                    {m.body}
+                    <LinkedText text={m.body} linkClassName="text-ktip-ocean-600" />
                   </p>
                 </div>
 
@@ -150,8 +154,13 @@ export function RoomChatPanel({
           <label htmlFor={`room-chat-${room.id}`} className="sr-only">
             Message {room.name}
           </label>
+          <EmojiPickerButton
+            className="shrink-0"
+            onPick={(emoji) => setDraft((value) => insertAtCaret(inputRef.current, value, emoji))}
+          />
           <input
             id={`room-chat-${room.id}`}
+            ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={`Message ${room.name}…`}

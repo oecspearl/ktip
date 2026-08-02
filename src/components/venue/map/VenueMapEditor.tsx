@@ -55,6 +55,17 @@ import {
   type RoomSectionSetting,
   type SponsorLink,
 } from '../../../lib/venue-room-sections'
+import {
+  ROOM_CAMERA_LABELS,
+  ROOM_CAMERA_MODES,
+  cameraModeFor,
+  hostHeroOf,
+  layoutFor,
+  setCameraMode,
+  setHeroSection,
+  canBeHero,
+  type RoomCameraMode,
+} from '../../../lib/venue-room-layout'
 import { VENUE_ROLE_LABELS, VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
 import type { VenueMapRoomInput } from '../../../hooks/useVenueMap'
 import type { VenueAudioMode, VenueRole, VenueRoom, VenueRoomKind } from '../../../types'
@@ -1494,6 +1505,67 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   </button>
                 )}
 
+                {/* ---- the big panel ----
+                    Which cell is drawn largest. Only ever a starting point:
+                    whoever is presenting takes it while they present, and a
+                    member who promotes something else keeps their choice. */}
+                {heroOptions(selected).length > 1 && (
+                  <div className="mt-2.5 border-t border-ktip-sand-100 pt-2">
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-400">
+                      Big panel
+                    </p>
+                    <div className="space-y-1">
+                      {heroOptions(selected).map(({ def, active, isDefault }) => (
+                        <label
+                          key={def.id}
+                          className="flex items-center gap-2 text-xs text-ktip-sand-700"
+                        >
+                          <input
+                            type="radio"
+                            name={`hero-${selected.id}`}
+                            checked={active}
+                            onChange={() =>
+                              patchRoom(selected.id, {
+                                sections: setHeroSection(selected, def.id),
+                              })
+                            }
+                          />
+                          {def.label}
+                          {isDefault && (
+                            <span className="text-[10px] text-ktip-sand-400">default</span>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ---- cameras ----
+                    One presenter, a grid of equals, or a huddle. The room
+                    already knows which it is; this is where a host disagrees.
+                    See docs/VIDEO-SETUP.md for what each becomes in phase 2. */}
+                {sectionIsOn(selected, 'av_placeholder') && (
+                  <label className="mt-2.5 block border-t border-ktip-sand-100 pt-2 text-xs">
+                    <span className="mb-1 block font-medium text-ktip-sand-700">Cameras</span>
+                    <select
+                      value={cameraModeFor(selected)}
+                      onChange={(e) =>
+                        patchRoom(selected.id, {
+                          sections: setCameraMode(selected, e.target.value as RoomCameraMode),
+                        })
+                      }
+                      className="w-full rounded-lg border border-ktip-sand-200 px-2 py-1.5 text-[11px]"
+                    >
+                      {ROOM_CAMERA_MODES.map((mode) => (
+                        <option key={mode} value={mode}>
+                          {ROOM_CAMERA_LABELS[mode]}
+                          {mode === layoutFor(selected.kind).camera ? ' (default)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
                 {/* The sections whose content is typed here rather than read
                     from somewhere else. Shown only once the box is ticked. */}
                 {(['objectives', 'rules'] as const).map((id) =>
@@ -1610,6 +1682,26 @@ function toDraft(room: VenueRoom): DraftRoom | null {
  */
 function sectionIsOn(room: DraftRoom, id: RoomSectionId): boolean {
   return sectionChoices(room).some((c) => c.def.id === id && c.enabled)
+}
+
+/**
+ * The panels this room could draw largest, with which one currently is.
+ *
+ * Only ticked sections, and only ones big enough to carry the cell — a
+ * countdown promoted to a hero is four digits and a lot of empty card. The
+ * kind's own default is marked rather than pre-selected, so "no radio chosen"
+ * stays readable as "following the defaults".
+ */
+function heroOptions(room: DraftRoom) {
+  const stored = hostHeroOf(room)
+  const fallback = layoutFor(room.kind).hero
+  return sectionChoices(room)
+    .filter((c) => c.enabled && canBeHero(room.kind, c.def.id))
+    .map(({ def }) => ({
+      def,
+      isDefault: def.id === fallback,
+      active: stored ? def.id === stored : def.id === fallback,
+    }))
 }
 
 function sectionBody(room: DraftRoom, id: RoomSectionId): string {

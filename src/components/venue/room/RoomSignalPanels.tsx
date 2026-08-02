@@ -1,5 +1,6 @@
 import { Hand } from 'lucide-react'
 import { ROOM_REACTIONS, type useRoomSignals } from '../../../hooks/useRoomSignals'
+import { REACTION_ART, reactionArt } from '../../../lib/reaction-emoji'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
 
@@ -12,6 +13,10 @@ type Signals = ReturnType<typeof useRoomSignals>
  * emoji drift up out of the strip and are gone in four seconds; nothing is
  * written down, so nothing has to be cleaned up or moderated after the fact.
  *
+ * Drawn from a shipped set rather than left to the reader's emoji font — see
+ * src/lib/reaction-emoji.ts. The character still travels on the wire; only the
+ * picture is ours.
+ *
  * The buttons stay enabled while the channel is down. A reaction that goes
  * nowhere is a smaller disappointment than a row of dead buttons, and the
  * channel usually comes back within a second.
@@ -19,17 +24,28 @@ type Signals = ReturnType<typeof useRoomSignals>
 export function ReactionsBar({ signals }: { signals: Signals }) {
   return (
     <div className="relative flex items-center gap-1.5 overflow-hidden rounded-2xl border border-ktip-sand-100 bg-ktip-cream px-3 py-2">
-      {ROOM_REACTIONS.map((emoji) => (
-        <button
-          key={emoji}
-          type="button"
-          onClick={() => signals.react(emoji)}
-          aria-label={`React with ${emoji}`}
-          className="rounded-lg px-2 py-1 text-lg transition-transform hover:scale-125 hover:bg-ktip-sand-50"
-        >
-          {emoji}
-        </button>
-      ))}
+      {ROOM_REACTIONS.map((emoji) => {
+        const art = REACTION_ART[emoji]
+        return (
+          <button
+            key={emoji}
+            type="button"
+            onClick={() => signals.react(emoji)}
+            aria-label={art.label}
+            title={art.label}
+            className="rounded-lg px-1.5 py-1 leading-none transition-transform duration-150 ease-out hover:scale-125 hover:bg-ktip-sand-50 active:scale-95"
+          >
+            <img
+              src={art.src}
+              alt=""
+              width={26}
+              height={26}
+              draggable={false}
+              className="h-[26px] w-[26px] select-none"
+            />
+          </button>
+        )
+      })}
 
       <span className="ml-auto text-[11px] text-ktip-sand-400">
         {signals.connected ? 'Everyone here sees these' : 'Reconnecting…'}
@@ -38,15 +54,25 @@ export function ReactionsBar({ signals }: { signals: Signals }) {
       {/* The drift. pointer-events-none so a burst of applause never eats a
           click meant for the button underneath it. */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        {signals.reactions.map((r) => (
-          <span
-            key={r.id}
-            className="absolute bottom-0 animate-float-up text-xl"
-            style={{ left: `${8 + r.offset * 78}%` }}
-          >
-            {r.emoji}
-          </span>
-        ))}
+        {signals.reactions.map((r) => {
+          const art = reactionArt(r.emoji)
+          return (
+            <span
+              key={r.id}
+              className="absolute bottom-0 animate-float-up text-xl leading-none"
+              style={{ left: `${8 + r.offset * 78}%` }}
+            >
+              {/* The character is the fallback, not the plan: a reaction from a
+                  newer build carrying an emoji this one has no picture for
+                  still floats, in whatever font the reader has. */}
+              {art ? (
+                <img src={art.src} alt="" width={24} height={24} className="h-6 w-6" />
+              ) : (
+                r.emoji
+              )}
+            </span>
+          )
+        })}
       </div>
     </div>
   )

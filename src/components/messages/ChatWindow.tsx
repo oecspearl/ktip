@@ -1,6 +1,15 @@
-import { useState, useEffect, useRef, type FormEvent, type KeyboardEvent } from 'react'
-import { Send, Settings, Users } from 'lucide-react'
+import {
+  useState,
+  useEffect,
+  useRef,
+  type ClipboardEvent,
+  type DragEvent,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
+import { Paperclip, Send, Settings, Upload, Users, X } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { EmojiPickerButton, insertAtCaret } from '../ui/EmojiPicker'
 import { MessageBubble } from './MessageBubble'
 import { GroupSettingsModal } from './GroupSettingsModal'
 import {
@@ -10,7 +19,14 @@ import {
   useSendMessage,
 } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
-import type { Conversation } from '../../types'
+import {
+  MAX_ATTACHMENTS_PER_MESSAGE,
+  attachmentRejection,
+  discardAttachments,
+  formatFileSize,
+  uploadAttachment,
+} from '../../lib/chat-attachments'
+import type { Conversation, MessageAttachment } from '../../types'
 
 interface ChatWindowProps {
   conversationId: string
@@ -31,7 +47,18 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   const { markRead } = useMarkConversationRead(auth.user?.id)
 
   const [input, setInput] = useState('')
+  // Files staged for the next send. They are uploaded on submit, not on drop,
+  // so a member can drop the wrong thing and simply take it back off.
+  const [staged, setStaged] = useState<File[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [attachError, setAttachError] = useState<string | null>(null)
+  // Counted, not a boolean: dragging over a child fires dragleave on the
+  // parent, and a boolean flickers the overlay off on every inner element.
+  const [dragDepth, setDragDepth] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  // Held so the emoji picker can insert at the caret rather than on the end.
+  const inputRef = useRef<HTMLTextAreaElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Realtime: writes into the query cache inside the hook.
   useRealtimeMessages(conversationId)
@@ -55,21 +82,118 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
     return () => clearTimeout(timeout)
   }, [messages])
 
+  // Switching threads must not carry a staged file into a different
+  // conversation — the note it belonged to is no longer on screen.
+  useEffect(() => {
+    setStaged([])
+    setAttachError(null)
+    setDragDepth(0)
+  }, [conversationId])
+
+  const stageFiles = (incoming: File[]) => {
+    if (incoming.length === 0) return
+
+    const accepted: File[] = []
+    const problems: string[] = []
+
+    for (const file of incoming) {
+      const rejection = attachmentRejection(file)
+      if (rejection) {
+        problems.push(rejection)
+        continue
+      }
+      accepted.push(file)
+    }
+
+    setStaged((current) => {
+      const room = MAX_ATTACHMENTS_PER_MESSAGE - current.length
+      if (accepted.length > room) {
+        problems.push(`A message can carry ${MAX_ATTACHMENTS_PER_MESSAGE} files at most.`)
+      }
+      return [...current, ...accepted.slice(0, Math.max(room, 0))]
+    })
+
+    setAttachError(problems.length > 0 ? problems[0] : null)
+  }
+
+  const unstage = (index: number) => {
+    setStaged((current) => current.filter((_, i) => i !== index))
+    setAttachError(null)
+  }
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault()
+    setDragDepth(0)
+    stageFiles(Array.from(e.dataTransfer?.files ?? []))
+  }
+
+  const carriesFiles = (e: DragEvent) => Array.from(e.dataTransfer?.types ?? []).includes('Files')
+
+  const handleDragEnter = (e: DragEvent) => {
+    if (!carriesFiles(e)) return
+    e.preventDefault()
+    setDragDepth((depth) => depth + 1)
+  }
+
+  const handleDragOver = (e: DragEvent) => {
+    if (!carriesFiles(e)) return
+    // Without this the browser navigates away to the dropped file.
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }
+
+  const handleDragLeave = () => {
+    setDragDepth((depth) => Math.max(0, depth - 1))
+  }
+
+  // Screenshots arrive on the clipboard, not through a file dialog.
+  const handlePaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(e.clipboardData?.files ?? [])
+    if (files.length === 0) return
+    e.preventDefault()
+    stageFiles(files)
+  }
+
   const handleSend = async (e: FormEvent) => {
     e.preventDefault()
     const content = input.trim()
-    if (!content || !auth.user) return
+    if ((!content && staged.length === 0) || !auth.user || uploading) return
 
+    const files = staged
     setInput('')
+    setStaged([])
+    setAttachError(null)
+
+    let uploaded: MessageAttachment[] = []
 
     try {
+      if (files.length > 0) {
+        setUploading(true)
+        // Sequential: a thread of five 25MB uploads at once is worse for the
+        // member on a Caribbean mobile link than five that finish in order.
+        for (const file of files) {
+          uploaded.push(await uploadAttachment({ conversationId, senderId: auth.user.id, file }))
+        }
+      }
+
       await sendMessage({
         conversation_id: conversationId,
         sender_id: auth.user.id,
         content,
+        attachments: uploaded,
       })
+      uploaded = []
     } catch (err) {
       console.error('Failed to send message:', err)
+      // Give the member their draft back — the alternative is retyping a note
+      // and re-finding files they already chose.
+      setInput((current) => current || content)
+      setStaged(files)
+      setAttachError(err instanceof Error ? err.message : 'That message could not be sent.')
+      // Blobs whose message never landed are invisible to everyone; drop them.
+      await discardAttachments(uploaded.map((a) => a.path))
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -80,8 +204,17 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
     }
   }
 
+  const busy = loading || uploading
+  const canSend = (input.trim().length > 0 || staged.length > 0) && !busy
+
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className="relative flex flex-col h-full"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* Header */}
       <div className="p-4 border-b border-ktip-sand-200 bg-ktip-cream flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -134,25 +267,94 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
 
       {/* Input area */}
       <form onSubmit={handleSend} className="p-4 border-t border-ktip-sand-200 bg-ktip-cream">
-        <div className="flex items-end gap-3">
+        {staged.length > 0 && (
+          <ul className="mb-2 flex flex-wrap gap-2">
+            {staged.map((file, index) => (
+              <li
+                key={`${file.name}-${index}`}
+                className="flex items-center gap-2 rounded-xl border border-ktip-sand-200 bg-white px-3 py-1.5 text-xs text-ktip-sand-700"
+              >
+                <Paperclip size={13} className="shrink-0 text-ktip-ocean-600" aria-hidden="true" />
+                <span className="max-w-[12rem] truncate font-medium">{file.name}</span>
+                <span className="text-ktip-sand-400">{formatFileSize(file.size)}</span>
+                <button
+                  type="button"
+                  onClick={() => unstage(index)}
+                  disabled={busy}
+                  aria-label={`Remove ${file.name}`}
+                  className="rounded-md p-0.5 text-ktip-sand-400 transition-colors hover:bg-ktip-sand-100 hover:text-red-600 disabled:opacity-40"
+                >
+                  <X size={13} aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {attachError && (
+          <p role="alert" className="mb-2 text-xs text-red-600">
+            {attachError}
+          </p>
+        )}
+
+        <div className="flex items-end gap-2">
+          <EmojiPickerButton
+            className="shrink-0 pb-1"
+            onPick={(emoji) => setInput((value) => insertAtCaret(inputRef.current, value, emoji))}
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              stageFiles(Array.from(e.target.files ?? []))
+              // Reset, so choosing the same file twice in a row still fires.
+              e.target.value = ''
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={busy || staged.length >= MAX_ATTACHMENTS_PER_MESSAGE}
+            aria-label="Attach a file"
+            title="Attach a file"
+            className="shrink-0 rounded-lg p-2 pb-1 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600 disabled:opacity-40"
+          >
+            <Paperclip size={18} aria-hidden="true" />
+          </button>
           <textarea
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
+            onPaste={handlePaste}
+            placeholder={staged.length > 0 ? 'Add a note to these files…' : 'Type a message...'}
             rows={1}
             className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
           />
           <Button
             type="submit"
             size="sm"
-            disabled={!input.trim() || loading}
+            disabled={!canSend}
             icon={<Send size={18} />}
           >
-            Send
+            {uploading ? 'Sending…' : 'Send'}
           </Button>
         </div>
       </form>
+
+      {dragDepth > 0 && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-ktip-ocean-500 bg-ktip-ocean-500/10 backdrop-blur-[1px]">
+          <div className="rounded-2xl bg-white/95 px-5 py-3 text-center shadow-lg">
+            <Upload size={20} className="mx-auto mb-1 text-ktip-ocean-600" aria-hidden="true" />
+            <p className="text-sm font-semibold text-ktip-sand-900">Drop to attach</p>
+            <p className="text-xs text-ktip-sand-500">
+              Up to {MAX_ATTACHMENTS_PER_MESSAGE} files, with a note if you like
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

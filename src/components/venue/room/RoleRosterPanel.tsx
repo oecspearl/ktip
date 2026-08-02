@@ -4,7 +4,9 @@ import { sortOccupants } from '../../../lib/venue-presence'
 import { venueRoomPath } from '../../../lib/event-slug'
 import { AvailabilityDot } from '../AvailabilityDot'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
-import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
+import { floorTag } from './RoomWayfindingPanels'
+import type { VenueMapFloor } from '../../../lib/venue-map'
 import type { Event, VenueOccupant, VenueRole, VenueRoom } from '../../../types'
 
 interface RoleRosterPanelProps {
@@ -14,6 +16,9 @@ interface RoleRosterPanelProps {
   emptyLabel: string
   event: Pick<Event, 'id' | 'slug' | 'title'>
   rooms: VenueRoom[] | undefined
+  /** Floors from the map config, so the room chip can say which level. */
+  floors?: VenueMapFloor[]
+  fill?: boolean
 }
 
 /**
@@ -33,6 +38,8 @@ export function RoleRosterPanel({
   emptyLabel,
   event,
   rooms,
+  floors,
+  fill,
 }: RoleRosterPanelProps) {
   const { openMember } = useMemberPanel()
 
@@ -41,11 +48,15 @@ export function RoleRosterPanel({
   const roomsById = new Map((rooms || []).map((r) => [r.id, r]))
 
   return (
-    <RoomPanel title={title} meta={people.length ? `${available}/${people.length}` : undefined}>
+    <RoomPanel
+      title={title}
+      meta={people.length ? `${available}/${people.length}` : undefined}
+      className={panelShell(fill)}
+    >
       {people.length === 0 ? (
         <RoomPanelEmpty>{emptyLabel}</RoomPanelEmpty>
       ) : (
-        <ul className="max-h-[24rem] divide-y divide-ktip-sand-100 overflow-y-auto">
+        <ul className={`divide-y divide-ktip-sand-100 ${panelScroll(fill, 'max-h-[24rem]')}`}>
           {people.map((person) => {
             const name = person.display_name || 'Member'
             const room = person.room_id ? roomsById.get(person.room_id) : undefined
@@ -73,10 +84,18 @@ export function RoleRosterPanel({
                 {room && (
                   <Link
                     to={venueRoomPath(event, room.key)}
-                    className="shrink-0 truncate rounded-lg border border-ktip-sand-200 px-2 py-1 text-[10px] font-medium text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
+                    className="flex shrink-0 items-center gap-1 truncate rounded-lg border border-ktip-sand-200 px-2 py-1 text-[10px] font-medium text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
                     title={`Go to ${room.name}`}
                   >
-                    {room.name}
+                    <span className="truncate">{room.name}</span>
+                    {/* Which level, when there is more than one — "the mentor is
+                        two rooms over" and "the mentor is upstairs" are
+                        different answers to the same question. */}
+                    {floorTag(room.floor, floors) && (
+                      <span className="shrink-0 font-mono text-[9px] text-ktip-sand-400">
+                        {floorTag(room.floor, floors)}
+                      </span>
+                    )}
                   </Link>
                 )}
               </li>

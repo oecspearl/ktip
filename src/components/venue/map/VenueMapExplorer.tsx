@@ -66,6 +66,15 @@ const APPROACH_SPEED = VENUE.WALK_SPEED * 1.8
 /** How far in the camera sits at the moment of entering, and of coming back. */
 const ARRIVE_ZOOM = 2.6
 
+/**
+ * Breathing room around the fitted floor, in pixels.
+ *
+ * Tighter than the projection's own default: this view has a frame around it
+ * already, and the slack the editor needs for handles is, here, just a smaller
+ * building. Enough is kept for the name tags, which are drawn above the walls.
+ */
+const VIEW_PAD = 52
+
 /** A member may enter unless the room is shut or its role list excludes them. */
 export function canEnterRoom(room: VenueRoom, role: VenueRole): boolean {
   if (role === 'organizer') return true
@@ -158,6 +167,7 @@ export function VenueMapExplorer({
         height: size.height,
         zoom,
         topZ,
+        padding: VIEW_PAD,
       }),
     [config.cols, config.rows, tilt, size, zoom, topZ]
   )
@@ -215,6 +225,7 @@ export function VenueMapExplorer({
         height: size.height,
         zoom: { k: ARRIVE_ZOOM, px: 0, py: 0 },
         topZ,
+        padding: VIEW_PAD,
       })
       const [sx, sy] = zoomed.project(from.centroid[0], from.centroid[1], 0)
       setZoom({ k: ARRIVE_ZOOM, px: size.width / 2 - sx, py: size.height / 2 - sy })
@@ -533,7 +544,11 @@ export function VenueMapExplorer({
     .filter(Boolean) as Array<{ occupant: VenueOccupant; pos: VenuePosition }>
 
   return (
-    <div className="flex h-[32rem] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card md:h-[36rem]">
+    // Sized to the window, not to a card. The floor is the content, so it takes
+    // what is left of the viewport under the page chrome — and stops there, so
+    // the first scroll reaches the footer rather than more map. Clamped at both
+    // ends: never so short it cannot be walked, never taller than the screen.
+    <div className="flex h-[clamp(26rem,calc(100vh-var(--nav-h)-19rem),46rem)] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card md:h-[clamp(28rem,calc(100vh-var(--nav-h)-16rem),46rem)]">
       {/* ---- rooms rail ----
           Attached to the map rather than floating beside it, and collapsible,
           because on a small screen the list and the floor are competing for the

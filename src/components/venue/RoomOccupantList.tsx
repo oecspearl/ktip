@@ -14,6 +14,8 @@ interface RoomOccupantListProps {
   title?: string
   emptyLabel?: string
   className?: string
+  /** Grow to the height given rather than to the hand-tuned cap below. */
+  fill?: boolean
 }
 
 /**
@@ -30,6 +32,7 @@ export function RoomOccupantList({
   title = 'In this room',
   emptyLabel = 'Nobody here yet.',
   className,
+  fill,
 }: RoomOccupantListProps) {
   const auth = useAuth()
   const { openMember } = useMemberPanel()
@@ -38,7 +41,13 @@ export function RoomOccupantList({
   const canInitiateDm = auth.can('dm:initiate')
 
   return (
-    <div className={cn('rounded-2xl border border-ktip-sand-100 bg-ktip-cream shadow-card', className)}>
+    <div
+      className={cn(
+        'rounded-2xl border border-ktip-sand-100 bg-ktip-cream shadow-card',
+        fill && 'flex h-full flex-col',
+        className
+      )}
+    >
       <div className="flex items-center justify-between border-b border-ktip-sand-100 px-4 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
           {title}
@@ -49,7 +58,12 @@ export function RoomOccupantList({
       {occupants.length === 0 ? (
         <p className="px-4 py-6 text-sm text-ktip-sand-500">{emptyLabel}</p>
       ) : (
-        <ul className="max-h-[28rem] divide-y divide-ktip-sand-100 overflow-y-auto">
+        <ul
+          className={cn(
+            'divide-y divide-ktip-sand-100 overflow-y-auto',
+            fill ? 'min-h-0 flex-1 max-h-[28rem] lg:max-h-none' : 'max-h-[28rem]'
+          )}
+        >
           {occupants.map((o) => {
             const name = o.display_name || 'Member'
             const isSelf = o.user_id === auth.user?.id

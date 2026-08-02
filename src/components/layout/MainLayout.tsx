@@ -16,6 +16,12 @@ const MessagingPanel = lazy(() =>
 const MemberPanel = lazy(() =>
   import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel }))
 )
+// Renders nothing until there is a note to draw, so the editor, the folder
+// graphics and the drag handling stay out of the entry chunk for everyone else.
+const StickyNoteOverlay = lazy(() =>
+  import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay }))
+)
+import { StickyNotesProvider } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -35,6 +41,8 @@ export function MainLayout() {
     {/* Renders the walkthrough overlay itself; must sit above the FAB, which
         is one of its entry points */}
     <TutorialProvider>
+    {/* Holds the notes, so the FAB can create one and the layer can draw it */}
+    <StickyNotesProvider>
     <div className="min-h-screen flex flex-col bg-ktip-canvas">
       <a
         href="#main-content"
@@ -56,9 +64,11 @@ export function MainLayout() {
       <Suspense fallback={null}>
         <MessagingPanel />
         <MemberPanel />
+        <StickyNoteOverlay />
       </Suspense>
       <Footer />
     </div>
+    </StickyNotesProvider>
     </TutorialProvider>
     </MemberPanelProvider>
     </MessagingPanelProvider>

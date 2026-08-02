@@ -42,3 +42,17 @@ export function RoomPanel({ title, meta, children, className }: RoomPanelProps) 
 export function RoomPanelEmpty({ children }: { children: ReactNode }) {
   return <p className="px-4 py-6 text-sm text-ktip-sand-500">{children}</p>
 }
+
+/**
+ * A panel that fills the bento cell it was given.
+ *
+ * The layout decides how tall a rail is, so a list inside one must stop using
+ * its own max-height and become the flexible part of a column instead. Both
+ * halves are needed together — `panelShell` on the card, `panelScroll` on the
+ * scrolling list — and the hand-tuned cap is still the answer when the panel is
+ * stacked rather than placed, which is every screen narrower than `lg`.
+ */
+export const panelShell = (fill?: boolean) => (fill ? 'flex h-full flex-col' : undefined)
+
+export const panelScroll = (fill: boolean | undefined, cap: string) =>
+  fill ? `min-h-0 flex-1 overflow-y-auto ${cap} lg:max-h-none` : `${cap} overflow-y-auto`

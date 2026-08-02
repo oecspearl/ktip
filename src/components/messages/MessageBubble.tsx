@@ -1,15 +1,89 @@
-import type { Message } from '../../types'
+import { Download, FileText, Image as ImageIcon } from 'lucide-react'
+import type { Message, MessageAttachment } from '../../types'
 import { formatRelativeTime } from '../../lib/utils'
+import { formatFileSize, isImageAttachment } from '../../lib/chat-attachments'
+import { useAttachmentUrl } from '../../hooks/useMessages'
 import { ReportButton } from '../moderation/ReportButton'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { LinkedText } from '../ui/LinkedText'
 
 interface MessageBubbleProps {
   message: Message
   isOwn: boolean
 }
 
+/**
+ * One attached file.
+ *
+ * The bucket is private, so both the thumbnail and the download link hang off
+ * a signed URL. Until it arrives the card still shows the file's name and size
+ * — the useful part of an attachment is knowing what it is, and that is
+ * already in the message row.
+ */
+function AttachmentCard({ attachment, isOwn }: { attachment: MessageAttachment; isOwn: boolean }) {
+  const { url } = useAttachmentUrl(attachment.path)
+  const isImage = isImageAttachment(attachment)
+
+  const frame = isOwn
+    ? 'border-white/30 bg-white/10 hover:bg-white/20'
+    : 'border-ktip-sand-200 bg-white hover:bg-ktip-sand-50'
+  const meta = isOwn ? 'text-white/70' : 'text-ktip-sand-500'
+
+  if (isImage) {
+    return (
+      <a
+        href={url ?? undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-disabled={!url}
+        className={`block overflow-hidden rounded-xl border ${frame} ${
+          url ? '' : 'pointer-events-none'
+        }`}
+      >
+        {url ? (
+          <img
+            src={url}
+            alt={attachment.name}
+            loading="lazy"
+            className="max-h-64 w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-24 items-center justify-center">
+            <ImageIcon size={18} className={meta} aria-hidden="true" />
+          </div>
+        )}
+        <span className={`block truncate px-2.5 py-1.5 text-[11px] ${meta}`}>
+          {attachment.name} · {formatFileSize(attachment.size)}
+        </span>
+      </a>
+    )
+  }
+
+  return (
+    <a
+      href={url ?? undefined}
+      target="_blank"
+      rel="noopener noreferrer"
+      download={attachment.name}
+      aria-disabled={!url}
+      className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 transition-colors ${frame} ${
+        url ? '' : 'pointer-events-none opacity-70'
+      }`}
+    >
+      <FileText size={16} className="shrink-0" aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-xs font-medium">{attachment.name}</span>
+        <span className={`block text-[11px] ${meta}`}>{formatFileSize(attachment.size)}</span>
+      </span>
+      <Download size={14} className={`shrink-0 ${meta}`} aria-hidden="true" />
+    </a>
+  )
+}
+
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
   const senderName = message.sender?.display_name || 'Unknown'
+  const attachments = message.attachments ?? []
+  const hasText = message.content.trim().length > 0
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3`}>
@@ -24,7 +98,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           />
         )}
 
-        <div className="group">
+        <div className="group min-w-0">
           {/* Sender name for other users */}
           {!isOwn && (
             <div className="flex items-center gap-1 mb-1 ml-1">
@@ -50,7 +124,26 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
                 : 'bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-900 rounded-2xl rounded-bl-md'
             }`}
           >
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            {attachments.length > 0 && (
+              <div className={`flex flex-col gap-1.5 ${hasText ? 'mb-2' : ''}`}>
+                {attachments.map((attachment) => (
+                  <AttachmentCard
+                    key={attachment.path}
+                    attachment={attachment}
+                    isOwn={isOwn}
+                  />
+                ))}
+              </div>
+            )}
+
+            {hasText && (
+              <p className="text-sm whitespace-pre-wrap break-words">
+                <LinkedText
+                  text={message.content}
+                  linkClassName={isOwn ? 'text-white' : 'text-ktip-ocean-600'}
+                />
+              </p>
+            )}
           </div>
 
           {/* Timestamp */}

@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { Textarea } from '../../../components/ui/Textarea'
 import { Modal } from '../../../components/ui/Modal'
 import { useAdminFeedback, useUpdateFeedback } from '../../../hooks/useFeedback'
 import { useToast } from '../../../contexts/ToastContext'
+import { supabase } from '../../../lib/supabase'
 import { formatDate } from '../../../lib/utils'
 import type { Feedback, FeedbackStatus } from '../../../types'
-import { MessageCircle, Filter, X, Clock, FileText } from 'lucide-react'
+import { MessageCircle, Filter, X, Clock, FileText, Star } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
@@ -16,6 +17,7 @@ export const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
   feature_request: 'Feature Request',
   general: 'General',
   content: 'Content',
+  praise: 'Praise',
 }
 
 const FEEDBACK_CATEGORY_COLORS: Record<string, string> = {
@@ -23,6 +25,65 @@ const FEEDBACK_CATEGORY_COLORS: Record<string, string> = {
   feature_request: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   general: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   content: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
+  praise: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+}
+
+/** Compact read-only rating. Absent on most rows — a report with no stars is
+ *  the common case, so nothing is rendered rather than five empty outlines. */
+function Rating({ value, size = 12 }: { value?: number | null; size?: number }) {
+  if (!value) return null
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label={`${value} out of 5`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          size={size}
+          className={n <= value ? 'text-ktip-sun-500 fill-ktip-sun-500' : 'text-ktip-sand-300'}
+        />
+      ))}
+    </span>
+  )
+}
+
+/**
+ * The screenshot lives in a private bucket, so it is fetched through a
+ * short-lived signed URL rather than a public link — the image routinely shows
+ * another member's data, and a public URL would outlive the triage session.
+ */
+function FeedbackScreenshot({ path }: { path: string }) {
+  const [url, setUrl] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    supabase.storage
+      .from('feedback-screenshots')
+      .createSignedUrl(path, 300)
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error || !data) setFailed(true)
+        else setUrl(data.signedUrl)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [path])
+
+  if (failed) {
+    return <p className="text-xs text-ktip-sand-500">The screenshot could not be loaded.</p>
+  }
+  if (!url) {
+    return <div className="h-40 rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
+  }
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      <img
+        src={url}
+        alt="Screenshot attached to this report"
+        className="w-full rounded-lg border border-ktip-sand-200"
+      />
+    </a>
+  )
 }
 
 export const FEEDBACK_STATUS_LABELS: Record<string, string> = {
@@ -153,6 +214,12 @@ export default function AdminFeedbackPage() {
                           </span>
                         </p>
                         <p className="text-sm text-ktip-sand-600 line-clamp-2 mt-1">{item.message}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Rating value={item.rating} />
+                          {item.page_path && (
+                            <span className="text-xs text-ktip-sand-400 truncate">{item.page_path}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
@@ -197,7 +264,13 @@ export default function AdminFeedbackPage() {
               <p className="text-sm font-medium text-ktip-sand-900">{selected.subject}</p>
               <p className="text-xs text-ktip-sand-500 mt-1">
                 From {selected.user?.display_name || 'Anonymous'} · {formatDate(selected.created_at)}
+                {selected.page_path && <> · on <code>{selected.page_path}</code></>}
               </p>
+              {selected.rating ? (
+                <div className="mt-2">
+                  <Rating value={selected.rating} size={16} />
+                </div>
+              ) : null}
             </div>
 
             <div>
@@ -206,6 +279,13 @@ export default function AdminFeedbackPage() {
                 {selected.message}
               </p>
             </div>
+
+            {selected.screenshot_path && (
+              <div>
+                <p className="text-xs font-medium text-ktip-sand-500 mb-1">Screenshot</p>
+                <FeedbackScreenshot path={selected.screenshot_path} />
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-medium text-ktip-sand-500 mb-1">Status</label>

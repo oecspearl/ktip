@@ -732,11 +732,21 @@ export interface Conversation {
   last_message?: Message
 }
 
+/** One file sent inside a message; `path` is a key in `message-attachments` (095). */
+export interface MessageAttachment {
+  path: string
+  name: string
+  mime: string
+  size: number
+}
+
 export interface Message {
   id: string
   conversation_id: string
   sender_id: string
   content: string
+  /** Files sent with the message. Absent on rows written before 095. */
+  attachments?: MessageAttachment[]
   created_at: string
   sender?: Profile
 }
@@ -1186,7 +1196,9 @@ export interface UserPersonalization {
 }
 
 // Feedback types
-export type FeedbackCategory = 'bug' | 'feature_request' | 'general' | 'content'
+// 093 added 'praise': a channel that only accepts complaints under-reports how
+// the site is actually doing.
+export type FeedbackCategory = 'bug' | 'feature_request' | 'general' | 'content' | 'praise'
 export type FeedbackStatus = 'new' | 'in_review' | 'resolved' | 'dismissed'
 
 export interface Feedback {
@@ -1197,6 +1209,12 @@ export interface Feedback {
   message: string
   status: FeedbackStatus
   admin_note: string | null
+  // 093. Optional because a deploy can precede the migration.
+  rating?: number | null
+  page_path?: string | null
+  /** Object key in the private feedback-screenshots bucket, not a URL —
+   *  reading it needs a signed URL. */
+  screenshot_path?: string | null
   created_at: string
   updated_at: string
   user?: Profile

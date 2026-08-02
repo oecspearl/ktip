@@ -6,7 +6,7 @@ import { useVenueDiscoverable } from '../../../hooks/useVenue'
 import { canDirectMessage } from '../../../lib/venue-actions'
 import { AvailabilityDot } from '../AvailabilityDot'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
-import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
 import type { VenueAvailability, VenueOccupant } from '../../../types'
 
 /** Skills before the row would start wrapping into a paragraph. */
@@ -27,9 +27,11 @@ const SKILL_CAP = 4
 export function LookingForTeamPanel({
   eventId,
   occupants,
+  fill,
 }: {
   eventId: string
   occupants: VenueOccupant[]
+  fill?: boolean
 }) {
   const auth = useAuth()
   const { openMember } = useMemberPanel()
@@ -51,7 +53,11 @@ export function LookingForTeamPanel({
   })
 
   return (
-    <RoomPanel title="Looking for a team" meta={people.length || undefined}>
+    <RoomPanel
+      title="Looking for a team"
+      meta={people.length || undefined}
+      className={panelShell(fill)}
+    >
       {loading ? (
         <div className="space-y-2 p-4">
           <div className="h-3 w-2/3 rounded bg-ktip-sand-100 animate-pulse-soft" />
@@ -63,7 +69,7 @@ export function LookingForTeamPanel({
           here.
         </RoomPanelEmpty>
       ) : (
-        <ul className="max-h-[24rem] divide-y divide-ktip-sand-100 overflow-y-auto">
+        <ul className={`divide-y divide-ktip-sand-100 ${panelScroll(fill, 'max-h-[24rem]')}`}>
           {people.map(({ member, availability, isLive, name, avatar }) => {
             const isSelf = member.user_id === auth.user?.id
             const skills = (member.skills || []).slice(0, SKILL_CAP)

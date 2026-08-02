@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { Info, Map as MapIcon, PencilRuler, Sparkles } from 'lucide-react'
+import { Map as MapIcon, PencilRuler, Sparkles } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
 import { venueRoomPath, venueSetupPath } from '../../lib/event-slug'
 import { useVenueRoster, useVenueSession } from '../../hooks/useVenue'
@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
+import { VenueAwayBanner } from '../../components/venue/VenueAwayBanner'
 import { VenueFloorplan } from '../../components/venue/VenueFloorplan'
 import { VenueMapExplorer, canEnterRoom } from '../../components/venue/map/VenueMapExplorer'
 import { VenueRoomBrief } from '../../components/venue/map/VenueRoomBrief'
@@ -93,6 +94,17 @@ export default function EventVenuePage() {
     () => mapped.find((r) => r.id === standingRoomId) ?? null,
     [mapped, standingRoomId]
   )
+
+  // The idle rule only ever fires while this tab is hidden, and coming back to
+  // the tab clears it — so a banner keyed on "is away right now" would be gone
+  // before it was ever on screen. It latches instead, and stays until the
+  // member either says they are back or dismisses it.
+  const autoAway =
+    presence.availability === 'away' && (presence.manual === null || presence.manual === 'working')
+  const [awayNotice, setAwayNotice] = useState(false)
+  useEffect(() => {
+    if (autoAway) setAwayNotice(true)
+  }, [autoAway])
 
 
   const handleEnter = async (room: VenueRoom) => {
@@ -180,7 +192,20 @@ export default function EventVenuePage() {
         onAvailabilityChange={presence.setAvailability}
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      {awayNotice && (
+        <VenueAwayBanner
+          stillAway={autoAway}
+          onResume={() => {
+            presence.setAvailability('working')
+            setAwayNotice(false)
+          }}
+          onDismiss={() => setAwayNotice(false)}
+        />
+      )}
+
+      {/* Wider than the site's max-w-7xl on purpose: this page is a map, and the
+          map is the content. Half the gutter a text page wants. */}
+      <div className="mx-auto max-w-[120rem] px-4 py-6 sm:px-6 lg:px-10">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
@@ -298,14 +323,6 @@ export default function EventVenuePage() {
                 onEnter={() => handleEnter(standingRoom)}
               />
             )}
-
-            <div className="flex items-start gap-2 rounded-2xl border border-ktip-ocean-100 bg-ktip-ocean-50 p-3 text-xs text-ktip-ocean-800">
-              <Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
-              <p>
-                Your dot turns grey automatically after five minutes in a background tab. Set
-                “Do not disturb” and it stays put.
-              </p>
-            </div>
           </aside>
         </div>
       </div>

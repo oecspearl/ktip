@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { attachmentUrl } from '../lib/chat-attachments'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
-import type { Conversation, Message, Profile } from '../types'
+import type { Conversation, Message, MessageAttachment, Profile } from '../types'
 
 async function fetchConversations(uid: string): Promise<Conversation[]> {
   // Get conversation IDs for user
@@ -194,10 +195,20 @@ export function useSendMessage() {
       conversation_id: string
       sender_id: string
       content: string
+      attachments?: MessageAttachment[]
     }) => {
-      const { data: message, error } = await supabase
+      // Files ride on the row itself (095), so the recipient's realtime INSERT
+      // carries the note and its attachments in one delivery.
+      const row = {
+        conversation_id: data.conversation_id,
+        sender_id: data.sender_id,
+        content: data.content,
+        attachments: data.attachments ?? [],
+      }
+
+      const { data: message, error } = await (supabase as any)
         .from('messages')
-        .insert(data)
+        .insert(row)
         .select('*, sender:profiles(*)')
         .single()
       if (error) throw error
@@ -224,6 +235,25 @@ export function useSendMessage() {
   })
 
   return { sendMessage: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
+}
+
+/**
+ * Signed URL for one attachment.
+ *
+ * The bucket is private (095), so every download needs a fresh signature.
+ * Cached per object key for well under the hour the signature lasts — a thread
+ * with a dozen files would otherwise re-sign all of them on every re-render.
+ */
+export function useAttachmentUrl(path: string | undefined) {
+  const query = useQuery({
+    queryKey: keys.sub('messages', 'attachment', path),
+    queryFn: () => attachmentUrl(path as string),
+    enabled: !!path,
+    staleTime: 45 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+  })
+
+  return { url: query.data ?? null, loading: query.isPending }
 }
 
 export function useCreateConversation() {

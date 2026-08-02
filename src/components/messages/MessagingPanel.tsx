@@ -4,10 +4,14 @@ import { ChatSidebar } from './ChatSidebar'
 import { ChatWindow } from './ChatWindow'
 import { AssistantChatWindow } from './AssistantChatWindow'
 import { NewConversationModal } from './NewConversationModal'
-import { useConversations } from '../../hooks/useMessages'
+import { useConversations, useUnreadMessageCount } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { isAssistantConversation } from '../../lib/assistant'
+import {
+  useDisclosureAnimation,
+  type DisclosureState,
+} from '../ui/useDisclosureAnimation'
 import { cn } from '../../lib/utils'
 
 /**
@@ -19,18 +23,33 @@ import { cn } from '../../lib/utils'
 export function MessagingPanel() {
   // Thin gate so the conversations query (and everything else in the panel)
   // only runs once the panel is actually opened — not on every page view.
+  //
+  // The gate itself is always mounted, which is what lets the open/close
+  // transition run: the animation state lives out here and survives the
+  // content being unmounted at the end of the exit.
   const auth = useAuth()
   const { isOpen } = useMessagingPanel()
-  if (!auth.user || !isOpen) return null
-  return <MessagingPanelContent />
+  const { mounted, state } = useDisclosureAnimation(isOpen, {
+    enterMs: PANEL_ENTER_MS,
+    exitMs: PANEL_EXIT_MS,
+  })
+
+  if (!auth.user || !mounted) return null
+  return <MessagingPanelContent state={state} />
 }
 
-function MessagingPanelContent() {
+/** Must match the .messaging-panel timings in index.css. */
+const PANEL_ENTER_MS = 260
+const PANEL_EXIT_MS = 200
+
+function MessagingPanelContent({ state }: { state: DisclosureState }) {
   const auth = useAuth()
   const { isOpen, activeConversationId, closePanel, setActiveConversation, openPanel } =
     useMessagingPanel()
 
   const { conversations, refetch } = useConversations(auth.user?.id)
+  const { unreadCount } = useUnreadMessageCount(auth.user?.id)
+  const threadCount = conversations?.length ?? 0
   const [showNewModal, setShowNewModal] = useState(false)
   const [newModalMode, setNewModalMode] = useState<'dm' | 'group'>('dm')
   const [showChat, setShowChat] = useState(false) // mobile toggle
@@ -69,7 +88,7 @@ function MessagingPanelContent() {
     return () => document.removeEventListener('mousedown', onMouseDown)
   }, [isOpen, pinned, closePanel])
 
-  if (!auth.user || !isOpen) return null
+  if (!auth.user) return null
 
   const activeConversation = conversations?.find((c) => c.id === activeConversationId)
 
@@ -97,16 +116,37 @@ function MessagingPanelContent() {
       ref={panelRef}
       role="complementary"
       aria-label="Messages panel"
+      data-state={state}
       className={cn(
         'fixed z-40 inset-x-2 top-20 bottom-24',
         'lg:inset-auto lg:right-6 lg:bottom-24 lg:w-[min(900px,calc(100vw-3rem))] lg:h-[min(70vh,44rem)]',
         'bg-ktip-cream rounded-2xl shadow-hard border border-ktip-sand-200',
-        'overflow-hidden flex flex-col animate-scale-in origin-bottom-right'
+        // Transition-driven, not @keyframes: a keyframe cannot run backwards,
+        // which is why closing used to be a hard cut while opening eased in.
+        'overflow-hidden flex flex-col messaging-panel origin-bottom-right'
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-ktip-sand-200 shrink-0">
-        <h2 className="font-display font-bold text-ktip-sand-900 text-sm">Messages</h2>
+        <div className="flex items-center gap-2 min-w-0">
+          <h2 className="font-display font-bold text-ktip-sand-900 text-sm">Messages</h2>
+          {/* Same number the FAB carries, kept on the panel itself: the badge
+              on the trigger is hidden behind the panel once it is open, and
+              "how many am I behind on" is the reason the panel was opened. */}
+          {unreadCount > 0 && (
+            <span
+              className="min-w-[1.25rem] rounded-full bg-red-500 px-1.5 py-0.5 text-[0.6875rem] font-bold leading-none text-white tabular-nums"
+              aria-label={`${unreadCount} unread ${unreadCount === 1 ? 'message' : 'messages'}`}
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+          {threadCount > 0 && (
+            <span className="text-xs text-ktip-sand-500 tabular-nums">
+              {threadCount} {threadCount === 1 ? 'conversation' : 'conversations'}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setPinned(!pinned)}

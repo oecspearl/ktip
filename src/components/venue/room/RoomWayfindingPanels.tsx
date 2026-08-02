@@ -3,10 +3,18 @@ import { Map as MapIcon, Users } from 'lucide-react'
 import { occupancyByRoom } from '../../../lib/venue-presence'
 import { venuePath, venueRoomPath } from '../../../lib/event-slug'
 import { VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
-import { colorForRoom } from '../../../lib/venue-map'
+import { venueRoomIcon } from '../../../lib/category-icons'
+import { colorForRoom, floorBadge, floorLabel } from '../../../lib/venue-map'
+import type { VenueMapFloor } from '../../../lib/venue-map'
 import { VENUE_AVAILABILITY_LABELS } from '../../../lib/constants'
-import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
 import type { Event, VenueOccupant, VenueRoom } from '../../../types'
+
+/** Which level a room is on. Nothing when the venue only has the one. */
+export function floorTag(floor: number, floors: VenueMapFloor[] | undefined): string | null {
+  if (!floors || floors.length < 2) return null
+  return floorBadge(Math.max(0, Math.trunc(Number(floor) || 0)))
+}
 
 /**
  * Where else there is to go.
@@ -15,60 +23,120 @@ import type { Event, VenueOccupant, VenueRoom } from '../../../types'
  * wants the whole viewport, and the question this answers — "which rooms have
  * people in them" — is one a sorted list answers better than a picture. The way
  * back to the actual map is the last row.
+ *
+ * On a venue with more than one level the list is grouped by floor, current
+ * floor first. Two rooms called "Team Pod" are otherwise the same row twice,
+ * and "which one is upstairs" is exactly the thing somebody reading this list
+ * is trying to find out.
  */
 export function WayfindingPanel({
   event,
   rooms,
   currentRoomId,
   occupants,
+  floors,
+  fill,
 }: {
   event: Pick<Event, 'id' | 'slug' | 'title'>
   rooms: VenueRoom[] | undefined
   currentRoomId: string
   occupants: VenueOccupant[]
+  /** Floors from the event's map config, for the level badges. */
+  floors?: VenueMapFloor[]
+  fill?: boolean
 }) {
   const counts = occupancyByRoom(occupants)
-  const others = (rooms || [])
+  const all = rooms || []
+  const others = all
     .filter((r) => r.id !== currentRoomId && r.kind !== 'team')
     .sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0) || a.sort_order - b.sort_order)
 
+  const levels = floors || []
+  const multiFloor = levels.length > 1
+  const currentFloor = Math.max(
+    0,
+    Math.trunc(Number(all.find((r) => r.id === currentRoomId)?.floor) || 0)
+  )
+
+  // Current floor first, then upwards. Somebody who has to change level wants
+  // to know that before they click, and everything on this floor is a shorter
+  // walk than anything that is not.
+  const groups = multiFloor
+    ? levels
+        .map((floor, index) => ({
+          index,
+          name: floor.name || floorLabel(index),
+          rooms: others.filter((r) => (Number(r.floor) || 0) === index),
+        }))
+        .filter((g) => g.rooms.length > 0)
+        .sort((a, b) => Number(b.index === currentFloor) - Number(a.index === currentFloor) || a.index - b.index)
+    : [{ index: 0, name: '', rooms: others }]
+
   return (
-    <RoomPanel title="Elsewhere in the venue">
+    <RoomPanel title="Elsewhere in the venue" className={panelShell(fill)}>
       {others.length === 0 ? (
         <RoomPanelEmpty>This is the only room.</RoomPanelEmpty>
       ) : (
-        <ul className="max-h-[20rem] divide-y divide-ktip-sand-100 overflow-y-auto">
-          {others.map((room) => {
-            const here = counts[room.id] || 0
-            return (
-              <li key={room.id}>
-                <Link
-                  to={venueRoomPath(event, room.key)}
-                  className="flex items-center gap-2.5 px-4 py-2 hover:bg-ktip-sand-50"
-                >
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: colorForRoom(room) }}
-                    aria-hidden="true"
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-ktip-sand-900">{room.name}</span>
-                    <span className="block text-[10px] uppercase tracking-wider text-ktip-sand-400">
-                      {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
-                      {!room.is_open && ' · closed'}
-                    </span>
+        <div className={panelScroll(fill, 'max-h-[20rem]')}>
+          {groups.map((group) => (
+            <div key={group.index}>
+              {multiFloor && (
+                <p className="sticky top-0 z-10 flex items-center gap-1.5 border-b border-ktip-sand-100 bg-ktip-cream px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-500">
+                  <span className="rounded border border-ktip-sand-200 px-1 py-0.5 font-mono text-[9px] text-ktip-sand-500">
+                    {floorBadge(group.index)}
                   </span>
-                  {here > 0 && (
-                    <span className="flex shrink-0 items-center gap-1 text-xs text-ktip-sand-500">
-                      <Users size={12} aria-hidden="true" />
-                      {here}
+                  {group.name}
+                  {group.index === currentFloor && (
+                    <span className="ml-auto font-normal normal-case text-ktip-sand-400">
+                      this floor
                     </span>
                   )}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+                </p>
+              )}
+              <ul className="divide-y divide-ktip-sand-100">
+                {group.rooms.map((room) => {
+                  const here = counts[room.id] || 0
+                  const tag = floorTag(room.floor, levels)
+                  // The same glyph the map draws, in the same room colour: a
+                  // coloured dot said "this room is green", which is not
+                  // something anybody was asking. See VenueRoomList.
+                  const Icon = venueRoomIcon(room.kind)
+                  return (
+                    <li key={room.id}>
+                      <Link
+                        to={venueRoomPath(event, room.key)}
+                        className="flex items-center gap-2.5 px-4 py-2 hover:bg-ktip-sand-50"
+                      >
+                        <Icon
+                          size={15}
+                          className="shrink-0"
+                          style={{ color: colorForRoom(room) }}
+                          aria-hidden="true"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm text-ktip-sand-900">
+                            {room.name}
+                          </span>
+                          <span className="block text-[10px] uppercase tracking-wider text-ktip-sand-400">
+                            {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
+                            {tag && ` · ${tag}`}
+                            {!room.is_open && ' · closed'}
+                          </span>
+                        </span>
+                        {here > 0 && (
+                          <span className="flex shrink-0 items-center gap-1 text-xs text-ktip-sand-500">
+                            <Users size={12} aria-hidden="true" />
+                            {here}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
       )}
       <Link
         to={venuePath(event)}

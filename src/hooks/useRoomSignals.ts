@@ -2,11 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 /**
- * The two things a room needs to say that are not worth a row.
+ * The three things a room needs to say that are not worth a row.
  *
- * A raised hand and a clap are true for a few seconds and then they are not.
- * Writing them to venue_room_messages would mean a table that grows by a row
- * per clap and a chat scrollback full of 👏, so both ride broadcast on
+ * A raised hand, a clap and "I am presenting right now" are true for a few
+ * seconds or a few minutes and then they are not. Writing them to
+ * venue_room_messages would mean a table that grows by a row per clap and a
+ * chat scrollback full of 👏, so all three ride broadcast on
  * `room:{roomId}` — the channel migration 070 already authorizes through
  * can_use_room_channel(). No migration, no cleanup, and a member who cannot
  * read the room cannot see its hands either.
@@ -25,6 +26,17 @@ import { supabase } from '../lib/supabase'
 const REACTION_TTL_MS = 4000
 /** A hand goes down on its own after this, so a closed tab does not hold a slot. */
 const HAND_TTL_MS = 5 * 60 * 1000
+/**
+ * A presentation ends by itself after this.
+ *
+ * The host's browser sends `presenting: false` when they toggle it off, but a
+ * closed laptop sends nothing — and a room stuck in "Dana is presenting" for
+ * the rest of the hackathon is worse than one that forgets. The host re-toggles
+ * to extend, which is the same shape as the hand queue's expiry.
+ */
+const PRESENT_TTL_MS = 30 * 60 * 1000
+/** How often the presenter repeats themselves, for whoever walked in late. */
+const PRESENT_BEAT_MS = 45 * 1000
 /** Most simultaneous floating reactions. Past this it is not a room, it is weather. */
 const MAX_REACTIONS = 24
 
@@ -47,6 +59,15 @@ export interface RaisedHand {
   at: number
 }
 
+export interface RoomPresenter {
+  userId: string
+  name: string
+  /** When this presentation started, in *this* client's clock. */
+  since: number
+  /** Last heartbeat, for expiry. Distinct from `since`, which must not move. */
+  beat: number
+}
+
 interface UseRoomSignalsArgs {
   roomId: string | undefined
   me: { userId: string; name: string; avatarUrl: string | null } | null
@@ -56,6 +77,7 @@ interface UseRoomSignalsArgs {
 export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArgs) {
   const [reactions, setReactions] = useState<FloatingReaction[]>([])
   const [hands, setHands] = useState<RaisedHand[]>([])
+  const [presenter, setPresenter] = useState<RoomPresenter | null>(null)
   const [connected, setConnected] = useState(false)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
   const seqRef = useRef(0)
@@ -67,6 +89,7 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
       setConnected(false)
       setReactions([])
       setHands([])
+      setPresenter(null)
       return
     }
 
@@ -131,6 +154,29 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
             ]
           })
         })
+        .on('broadcast', { event: 'stage' }, ({ payload }: any) => {
+          const userId = typeof payload?.user_id === 'string' ? payload.user_id : ''
+          if (!userId) return
+
+          setPresenter((prev) => {
+            if (payload?.presenting === false) {
+              // Only the person presenting can end it. Otherwise a second host
+              // toggling their own button off would clear the first one's talk.
+              return prev?.userId === userId ? null : prev
+            }
+            const now = Date.now()
+            // A repeat from the same presenter is the heartbeat, not a new
+            // presentation — keeping `since` is what stops it re-stealing the
+            // hero from someone who has pinned a panel since it began.
+            if (prev && prev.userId === userId) return { ...prev, beat: now }
+            return {
+              userId,
+              name: typeof payload?.name === 'string' ? payload.name : 'The host',
+              since: now,
+              beat: now,
+            }
+          })
+        })
         .subscribe((status) => {
           if (!cancelled) setConnected(status === 'SUBSCRIBED')
         })
@@ -160,6 +206,7 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
         const next = prev.filter((h) => now - h.at < HAND_TTL_MS)
         return next.length === prev.length ? prev : next
       })
+      setPresenter((prev) => (prev && now - prev.beat > PRESENT_TTL_MS ? null : prev))
     }, 1000)
     return () => window.clearInterval(id)
   }, [active])
@@ -190,14 +237,40 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
     [me]
   )
 
+  const setPresenting = useCallback(
+    (on: boolean) => {
+      const channel = channelRef.current
+      if (!channel || !me) return
+      void channel.send({
+        type: 'broadcast',
+        event: 'stage',
+        payload: { presenting: on, user_id: me.userId, name: me.name },
+      })
+    },
+    [me]
+  )
+
   const myHandUp = !!me && hands.some((h) => h.userId === me.userId)
+  const iAmPresenting = !!me && presenter?.userId === me.userId
+
+  // Broadcast has no history, so somebody who walks in mid-talk hears nothing.
+  // The presenter's own tab repeats itself until they stop, which is also what
+  // keeps PRESENT_TTL_MS from ending a talk that is still going.
+  useEffect(() => {
+    if (!active || !iAmPresenting) return
+    const id = window.setInterval(() => setPresenting(true), PRESENT_BEAT_MS)
+    return () => window.clearInterval(id)
+  }, [active, iAmPresenting, setPresenting])
 
   return {
     reactions,
     hands: [...hands].sort((a, b) => a.at - b.at),
     myHandUp,
+    presenter,
+    iAmPresenting,
     connected,
     react,
     setHand,
+    setPresenting,
   }
 }

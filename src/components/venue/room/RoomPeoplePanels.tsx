@@ -6,7 +6,9 @@ import { useVenueRoster } from '../../../hooks/useVenue'
 import { venueRoomPath } from '../../../lib/event-slug'
 import { AvailabilityDot } from '../AvailabilityDot'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
-import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
+import { floorTag } from './RoomWayfindingPanels'
+import type { VenueMapFloor } from '../../../lib/venue-map'
 import type { Event, VenueOccupant, VenueRoom } from '../../../types'
 
 /** Skill chips offered before the panel becomes a tag cloud. */
@@ -23,9 +25,11 @@ const TOP_SKILLS = 10
 export function SkillFinderPanel({
   eventId,
   occupants,
+  fill,
 }: {
   eventId: string
   occupants: VenueOccupant[]
+  fill?: boolean
 }) {
   const { openMember } = useMemberPanel()
   const { roster, loading } = useVenueRoster(eventId)
@@ -58,7 +62,7 @@ export function SkillFinderPanel({
   })
 
   return (
-    <RoomPanel title="Find someone">
+    <RoomPanel title="Find someone" className={panelShell(fill)}>
       <div className="p-3">
         <label className="relative block">
           <Search
@@ -102,7 +106,9 @@ export function SkillFinderPanel({
       ) : matches.length === 0 ? (
         <RoomPanelEmpty>Nobody matches “{query.trim()}”.</RoomPanelEmpty>
       ) : (
-        <ul className="max-h-[20rem] divide-y divide-ktip-sand-100 border-t border-ktip-sand-100 overflow-y-auto">
+        <ul
+          className={`divide-y divide-ktip-sand-100 border-t border-ktip-sand-100 ${panelScroll(fill, 'max-h-[20rem]')}`}
+        >
           {matches.slice(0, 20).map((member) => {
             const presence = live.get(member.user_id)
             const name = presence?.display_name || member.user?.display_name || 'Member'
@@ -147,21 +153,25 @@ export function HelpNudgePanel({
   occupants,
   event,
   rooms,
+  floors,
+  fill,
 }: {
   occupants: VenueOccupant[]
   event: Pick<Event, 'id' | 'slug' | 'title'>
   rooms: VenueRoom[] | undefined
+  floors?: VenueMapFloor[]
+  fill?: boolean
 }) {
   const { openMember } = useMemberPanel()
   const roomsById = useMemo(() => new Map((rooms || []).map((r) => [r.id, r])), [rooms])
   const stuck = occupants.filter((o) => o.availability === 'help_wanted')
 
   return (
-    <RoomPanel title="Needs help" meta={stuck.length || undefined}>
+    <RoomPanel title="Needs help" meta={stuck.length || undefined} className={panelShell(fill)}>
       {stuck.length === 0 ? (
         <RoomPanelEmpty>Nobody has asked for help.</RoomPanelEmpty>
       ) : (
-        <ul className="divide-y divide-ktip-sand-100">
+        <ul className={`divide-y divide-ktip-sand-100 ${panelScroll(fill, 'max-h-[24rem]')}`}>
           {stuck.map((person) => {
             const name = person.display_name || 'Member'
             const room = person.room_id ? roomsById.get(person.room_id) : undefined
@@ -179,6 +189,14 @@ export function HelpNudgePanel({
                   {person.status_note && (
                     <span className="block truncate text-xs italic text-ktip-sand-500">
                       “{person.status_note}”
+                    </span>
+                  )}
+                  {/* Where they are, not only that they are stuck: a mentor
+                      deciding whether to walk needs the room and the level. */}
+                  {room && (
+                    <span className="block truncate text-[10px] uppercase tracking-wider text-ktip-sand-400">
+                      {room.name}
+                      {floorTag(room.floor, floors) && ` · ${floorTag(room.floor, floors)}`}
                     </span>
                   )}
                 </div>

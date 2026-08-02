@@ -15,6 +15,9 @@ import type { RoomSectionContext } from '../../components/venue/room/RoomSection
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
 import { roomUsesSignals } from '../../lib/venue-room-sections'
+import { roomUsesStage } from '../../lib/venue-room-layout'
+import { mapConfigOf } from '../../hooks/useVenueMap'
+import { floorLabel } from '../../lib/venue-map'
 import {
   VENUE_ROOM_KIND_ICONS,
   VENUE_ROOM_KIND_LABELS,
@@ -52,6 +55,9 @@ export default function EventVenueRoomPage() {
     [rooms, params.roomKey]
   )
   const roomId = room?.id
+  // Already on the event row (089) and already fetched — the floors are what
+  // let every panel that names another room say which level it is on.
+  const mapConfig = useMemo(() => mapConfigOf(event), [event])
   const { membership, loading: joinPending, error: joinError } = useVenueSession(eventId)
   const joining = !!eventId && joinPending
   const { roster } = useVenueRoster(eventId)
@@ -93,15 +99,16 @@ export default function EventVenueRoomPage() {
     me: me
       ? { userId: me.user_id, name: me.display_name || 'Member', avatarUrl: me.avatar_url }
       : null,
-    // Only when a panel on this room actually uses it. Most rooms have neither
-    // reactions nor a hand queue, and an unused private channel is an auth
-    // round trip plus a rejoin on every reconnect for nothing.
+    // Only when a panel on this room actually uses it: reactions, a hand queue,
+    // or a call somebody could present in. A room with none of the three opens
+    // no channel, because an unused private channel is an auth round trip plus
+    // a rejoin on every reconnect for nothing.
     enabled:
       !!room &&
       room.is_open &&
       room.kind !== 'team' &&
       !!membership &&
-      roomUsesSignals(room, membership.role),
+      (roomUsesSignals(room, membership.role) || roomUsesStage(room, membership.role)),
   })
 
   // Leaving the page puts you back on the floorplan rather than leaving a ghost
@@ -165,8 +172,13 @@ export default function EventVenueRoomPage() {
     viewerRole: membership.role,
     isHost,
     membership,
+    mapConfig,
     signals,
   }
+
+  const floorName = mapConfig.floors.length > 1
+    ? mapConfig.floors[room.floor]?.name || floorLabel(room.floor)
+    : null
 
   return (
     // pt clears the fixed navbar — see the note on EventVenuePage.
@@ -192,6 +204,8 @@ export default function EventVenueRoomPage() {
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
               {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
+              {/* Which level, on a venue that has more than one. */}
+              {floorName && <span className="text-ktip-sand-400"> · {floorName}</span>}
             </p>
             <h1 className="font-display text-2xl font-bold text-ktip-sand-900">{room.name}</h1>
             {room.description && (
@@ -206,16 +220,12 @@ export default function EventVenueRoomPage() {
         </div>
 
         {/*
-          What a room contains is data, not layout: venue_rooms.sections, or the
-          default set for its kind. Adding a panel is a registry entry plus a
-          case in RoomSections — never a branch here.
+          What a room contains is data, and so is where it sits:
+          venue_rooms.sections resolved against the kind's defaults (091), laid
+          out by the kind's bento (src/lib/venue-room-layout.ts). Adding a panel
+          is a registry entry plus a case in RoomSections — never a branch here.
         */}
-        <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-          <RoomSections slot="main" context={sectionContext} className="space-y-6" />
-          <aside>
-            <RoomSections slot="aside" context={sectionContext} className="space-y-4" />
-          </aside>
-        </div>
+        <RoomSections context={sectionContext} />
       </div>
     </div>
   )

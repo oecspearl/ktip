@@ -715,6 +715,27 @@ html.dark {
   transition-duration: 150ms;
 }
 
+/* The docked messaging panel. Same data-state contract as .dropdown-panel,
+   but its own timings and its own closed transform: it is a 900px surface
+   that folds back down into the FAB it grew out of, and the dropdown's
+   200/150ms upward nudge reads as a flicker at that size. */
+.messaging-panel {
+  transition:
+    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.messaging-panel[data-state='open'] {
+  opacity: 1;
+  transform: none;
+}
+.messaging-panel[data-state='closed'] {
+  opacity: 0;
+  /* Toward the trigger, not away from it — paired with origin-bottom-right. */
+  transform: scale(0.92) translateY(1.25rem);
+  pointer-events: none;
+  transition-duration: 200ms;
+}
+
 /* Height collapse for folding sections. The grid-rows trick animates to
    content height without measuring it. Clipping is released once open and
    settled, or the cards inside would have their hover lift cut off. */
@@ -802,8 +823,10 @@ html.dark {
     animation: none;
   }
 
-  /* Dropdowns and folding sections snap open/shut instead of easing */
+  /* Dropdowns, folding sections and the messaging panel snap open/shut
+     instead of easing */
   .dropdown-panel,
+  .messaging-panel,
   .disclosure-collapse {
     transition: none;
   }
@@ -823,6 +846,70 @@ html.dark {
   [data-spy-rail] button {
     transition: none;
     transform: none !important;
+  }
+}
+
+/* Emoji drawn as emoji.
+   A bare character in a UI font can fall back to a monochrome outline glyph —
+   Segoe UI Symbol rather than Segoe UI Emoji — which is how a picker ends up
+   full of little black-and-white boxes. Naming the emoji fonts first, and
+   asking for the emoji presentation explicitly, settles it on every platform. */
+.emoji-font {
+  font-family:
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Twemoji Mozilla',
+    'Android Emoji', sans-serif;
+  font-variant-emoji: emoji;
+}
+
+/* ---------------------------------------------------------------------------
+   Venue room bento — promoting a panel to the big cell
+
+   The layout change is a grid reflow: col-span and row-span are not animatable
+   properties, so without this every cell teleports to its new box. Each cell
+   carries its own view-transition-name (RoomSections.tsx), which is what lets
+   the browser move each one from where it was to where it is going instead of
+   dissolving the whole grid.
+
+   Nothing outside the grid changes, so the page-wide crossfade is switched off:
+   with a fixed navbar and a live chat scroller on screen, fading a snapshot of
+   the whole document over itself is the one thing that actually looks broken.
+   --------------------------------------------------------------------------- */
+::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(root) {
+  animation: none;
+  opacity: 1;
+}
+
+::view-transition-group(*) {
+  animation-duration: 320ms;
+  /* Overshoot-free ease-out: panels arrive and settle, they do not bounce. */
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+/* A panel that changes size would otherwise have its old frame stretched to the
+   new box — headers smeared, text squashed. Cropping both snapshots to the top
+   left keeps the header pinned where the eye already is while the box grows. */
+::view-transition-old(*),
+::view-transition-new(*) {
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  overflow: clip;
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The JS bails out before starting a transition at all; this is the belt to
+     that pair of braces, for a transition started by anything else. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

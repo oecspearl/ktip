@@ -34,6 +34,12 @@ export function useCreateFeedback() {
       category: string
       subject: string
       message: string
+      /** 1-5 stars, or null when the report is not a review */
+      rating?: number | null
+      /** Route the report was filed from, captured automatically */
+      page_path?: string | null
+      /** Object key in the private feedback-screenshots bucket */
+      screenshot_path?: string | null
     }) => {
       const { data, error } = await (supabase as any)
         .from('feedback')
