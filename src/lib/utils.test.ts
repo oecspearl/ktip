@@ -22,6 +22,31 @@ describe('cn', () => {
   it('deduplicates tailwind classes', () => {
     expect(cn('text-red-500', 'text-ktip-ocean-500')).toBe('text-ktip-ocean-500')
   })
+
+  // Without extendTailwindMerge these all emit BOTH classes and CSS source
+  // order picks the winner, so a component's `className` override silently
+  // stops working. Each case names a token namespace added to @theme.
+  it.each([
+    ['text-sm text-body', 'text-body'],
+    ['text-body text-caption', 'text-caption'],
+    ['text-2xl text-display', 'text-display'],
+    ['p-6 p-card-pad', 'p-card-pad'],
+    ['gap-2 gap-card-gap', 'gap-card-gap'],
+    ['size-4 size-icon-md', 'size-icon-md'],
+    ['min-h-40 min-h-tile-min', 'min-h-tile-min'],
+    ['rounded-xl rounded-surface', 'rounded-surface'],
+    ['max-w-4xl max-w-page', 'max-w-page'],
+    ['z-50 z-modal', 'z-modal'],
+    ['z-modal z-toast', 'z-toast'],
+  ])('resolves %s to %s', (input, expected) => {
+    expect(cn(input)).toBe(expected)
+  })
+
+  it('still distinguishes a text size from a text colour', () => {
+    // The failure mode this guards: tailwind-merge treating `text-body` as a
+    // colour would make it cancel the colour instead of the size.
+    expect(cn('text-body', 'text-ktip-ocean-500')).toBe('text-body text-ktip-ocean-500')
+  })
 })
 
 describe('truncate', () => {

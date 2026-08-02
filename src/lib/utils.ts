@@ -1,12 +1,60 @@
 import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { extendTailwindMerge } from 'tailwind-merge'
 import { format, formatDistanceToNow } from 'date-fns'
+
+/**
+ * tailwind-merge only knows Tailwind's stock scales. Left unextended it
+ * classifies `text-body` as a text *colour* rather than a font size, so
+ * `cn('text-sm', 'text-body')` emits both and CSS source order — not the
+ * caller — decides which wins. Nothing errors; the wrong size just shows up.
+ *
+ * That matters because `className` overrides are how this app composes: Button
+ * has 100+ importers, and the domain cards built on BentoCard carry no size
+ * classes of their own. So every design token added to @theme has to be
+ * declared here too, or overriding it silently stops working.
+ *
+ * `theme` keys feed all the class groups derived from a scale at once (spacing
+ * covers p-*, gap-*, w-*, size-*, inset-* …). Z-index is not a tailwind-merge
+ * theme key, so its group is extended by hand.
+ */
+const SPACING_TOKENS = [
+  'gutter', 'gutter-lg', 'section-gap', 'stack',
+  'card-pad', 'card-pad-sm', 'card-pad-lg', 'card-gap',
+  'tile-min', 'tile-min-sm',
+  'hero-band', 'hero-band-compact',
+  'control-sm', 'control-md', 'control-lg',
+  'icon-xs', 'icon-sm', 'icon', 'icon-md', 'icon-lg', 'icon-xl',
+  'fab-inset', 'fab-stack', 'fab-clear',
+]
+
+const Z_TOKENS = [
+  'base', 'raised', 'sticky', 'rail', 'nav', 'dropdown', 'drawer',
+  'scrim', 'modal', 'fab', 'toast', 'tutorial', 'max',
+]
+
+const twMergeKtip = extendTailwindMerge({
+  extend: {
+    theme: {
+      text: [
+        'micro', 'caption', 'label', 'body', 'body-lg',
+        'title-sm', 'title', 'title-lg',
+        'display-sm', 'display', 'display-lg', 'display-xl',
+      ],
+      spacing: SPACING_TOKENS,
+      radius: ['control', 'surface', 'surface-lg', 'cal', 'cal-sm'],
+      container: ['page', 'page-narrow', 'page-mid', 'page-tight', 'page-wide'],
+    },
+    classGroups: {
+      z: [{ z: Z_TOKENS }],
+    },
+  },
+})
 
 /**
  * Merge Tailwind CSS classes with proper precedence
  */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMergeKtip(clsx(inputs))
 }
 
 /**

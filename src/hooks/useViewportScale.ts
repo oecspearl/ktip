@@ -31,6 +31,18 @@ interface ViewportScaleOptions {
  * Note that an `em` length on an element that also sets `font-size` resolves
  * against that new size, so it compounds — divide by the font-size factor when
  * both live on one element (`text-[0.875em]` + 28px of padding → `px-[2em]`).
+ *
+ * SCOPE. The app now sizes itself from the --scale-* ramps and the --text-* /
+ * --spacing-* tokens in index.css, which are stepped by media query and cover
+ * everything a width ladder can express. This hook remains for the two blocks
+ * that a width ladder cannot: both pass `height`, so they fit to the viewport's
+ * HEIGHT, and no `@media (min-width: …)` step can describe that.
+ *
+ *   - pages/discover/DiscoverPage — the full-bleed hero
+ *   - components/ui/FloatingActionButton — the dock
+ *
+ * Those two are deliberate exceptions. Anything else reaching for this hook
+ * almost certainly wants a token instead.
  */
 export function useViewportScale({ width, height, min = 0.6, max = 1 }: ViewportScaleOptions) {
   const [scale, setScale] = useState(() =>

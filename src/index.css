@@ -9,6 +9,13 @@
    line adds utility definitions but restyles nothing. */
 @import "./pages/admin/errors/index.css";
 
+/* Test files are scanned for class names like any other source, so a string
+   fixture asserting that cn('p-6 p-card-pad') collapses correctly would ship
+   `.p-card-pad` into the production bundle even though no component uses it.
+   Excluding them keeps the emitted CSS a description of the real UI. */
+@source not "./**/*.test.ts";
+@source not "./**/*.test.tsx";
+
 @theme {
   /* ============================================================
      OECS BRAND PRIMITIVES — the ONLY 5 colors in the system.
@@ -95,6 +102,177 @@
      the month grid and week time-grid read modern without moving the system */
   --radius-cal: 0.875rem;
   --radius-cal-sm: 0.5rem;
+
+  /* Semantic radii. The five steps above collapse to three real values
+     (rounded-lg and rounded-xl are both 0.375rem; rounded-2xl and
+     rounded-3xl are both 0.5rem), so the numeric names say nothing about
+     intent and picking between them is a coin flip. These say what the
+     corner is for.
+
+     The numeric aliases below cannot be deleted yet. Around 900 call sites
+     still say rounded-lg / rounded-xl / rounded-2xl, and four of them are in
+     components/resume — a directory the token system deliberately does not
+     govern, so no codemod will reach them. Dropping an alias would hand those
+     Tailwind's stock radius (0.5rem where this app means 0.375rem) rather
+     than an error. They go once the radius swap has run everywhere.
+
+     Radii deliberately do NOT ride a scale ramp: at 0.375rem, scaling by
+     0.88 moves a corner 0.7px — a runtime dependency for no visual gain. */
+  --radius-control: 0.375rem; /* buttons, inputs, chips, small pills */
+  --radius-surface: 0.5rem; /* cards, panels, modals, tiles */
+  --radius-surface-lg: 0.75rem; /* drawers, inset hero cards */
+
+  /* ── TYPE SCALE ───────────────────────────────────────────────────────
+     Sizes are the literal px value at the 1440 anchor, where every ramp
+     is 1. See the ramp block in @layer base for how the three ramps
+     differ and why there are three.
+
+     Everything is rem so useAccessibilityPrefs (which scales the root
+     font-size 0.9x–1.4x) still composes; a px token would silently opt
+     out of the reader's own text-size control. */
+
+  /* Reading type — rides --scale-text, which is flat from phone to laptop
+     and only grows above it. 13px is a hard floor at every width. */
+  --text-micro: calc(0.8125rem * var(--scale-text)); /* 13px — timestamps, counts, eyebrows */
+  --text-micro--line-height: 1.35;
+  --text-micro--letter-spacing: 0.02em;
+
+  --text-caption: calc(0.875rem * var(--scale-text)); /* 14px — meta, helper text */
+  --text-caption--line-height: 1.45;
+  --text-caption--letter-spacing: 0.01em;
+
+  --text-label: calc(0.9375rem * var(--scale-text)); /* 15px — buttons, labels, tabs, cells */
+  --text-label--line-height: 1.4;
+
+  --text-body: calc(1rem * var(--scale-text)); /* 16px — paragraphs, descriptions */
+  --text-body--line-height: 1.6;
+
+  --text-body-lg: calc(1.125rem * var(--scale-text)); /* 18px — lede, hero subtitle */
+  --text-body-lg--line-height: 1.55;
+
+  /* Card and section titles ride --scale-layout, not --scale-display: they
+     are structure, and must not collapse to caption size on a phone the
+     way a hero headline should. */
+  --text-title-sm: calc(1.25rem * var(--scale-layout)); /* 20px */
+  --text-title-sm--line-height: 1.3;
+  --text-title-sm--letter-spacing: -0.005em;
+
+  --text-title: calc(1.5rem * var(--scale-layout)); /* 24px */
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.01em;
+
+  --text-title-lg: calc(1.875rem * var(--scale-layout)); /* 30px */
+  --text-title-lg--line-height: 1.2;
+  --text-title-lg--letter-spacing: -0.015em;
+
+  /* Display type is graphic, not structural, so it takes the steepest
+     ramp — collapsing hard on a phone and opening up on a wide desktop.
+     One of these replaces a whole `text-3xl sm:text-4xl md:text-5xl`
+     ladder and keeps scaling past the 1280px ceiling that ladder had. */
+  --text-display-sm: calc(2.25rem * var(--scale-display)); /* 36px */
+  --text-display-sm--line-height: 1.14;
+  --text-display-sm--letter-spacing: -0.02em;
+
+  --text-display: calc(3rem * var(--scale-display)); /* 48px */
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.022em;
+
+  --text-display-lg: calc(3.75rem * var(--scale-display)); /* 60px */
+  --text-display-lg--line-height: 1.05;
+  --text-display-lg--letter-spacing: -0.025em;
+
+  --text-display-xl: calc(4.5rem * var(--scale-display)); /* 72px */
+  --text-display-xl--line-height: 1.02;
+  --text-display-xl--letter-spacing: -0.03em;
+
+  /* ── DENSITY & GEOMETRY ───────────────────────────────────────────────
+     Named --spacing-* entries generate p-*, m-*, gap-*, w-*, h-*, size-*,
+     min-h-*, inset-* and friends, so `p-card-pad` and `gap-card-gap` both
+     come from one declaration. Values are px at the 1440 anchor. */
+
+  /* Page rhythm */
+  --spacing-gutter: calc(1.5rem * var(--scale-layout)); /* 24 */
+  --spacing-gutter-lg: calc(3rem * var(--scale-layout)); /* 48 */
+  --spacing-section-gap: calc(3rem * var(--scale-layout)); /* 48 */
+  --spacing-stack: calc(1rem * var(--scale-layout)); /* 16 */
+
+  /* Card padding. Replaces p-4/p-5/p-6/p-8 chosen by feel — four values
+     with no rule telling them apart. */
+  --spacing-card-pad-sm: calc(1rem * var(--scale-layout)); /* 16 */
+  --spacing-card-pad: calc(1.5rem * var(--scale-layout)); /* 24 */
+  --spacing-card-pad-lg: calc(2rem * var(--scale-layout)); /* 32 */
+  --spacing-card-gap: calc(1rem * var(--scale-layout)); /* 16 */
+
+  /* Tile heights. The same visual tile is currently authored four ways —
+     13rem, 180px, minmax(11rem,auto) and minmax(10.5rem,auto). Two. */
+  --spacing-tile-min: calc(13rem * var(--scale-layout)); /* 208 */
+  --spacing-tile-min-sm: calc(11rem * var(--scale-layout)); /* 176 */
+
+  /* Hero bands take the display ramp — they frame display type, so they
+     have to shrink at the same rate or the headline outgrows its band. */
+  --spacing-hero-band: calc(17.5rem * var(--scale-display)); /* 280 */
+  --spacing-hero-band-compact: calc(11.875rem * var(--scale-display)); /* 190 */
+
+  /* Control heights. max() is load-bearing, not decorative: --scale-layout
+     is 0.88 on a phone, so control-md would compute to 42.2px and fall
+     under the 44px minimum hit area. The floor catches it. A coarse
+     pointer raises these further — see @layer base. */
+  --spacing-control-sm: max(2.25rem, calc(2.25rem * var(--scale-layout))); /* 36 */
+  --spacing-control-md: max(2.75rem, calc(3rem * var(--scale-layout))); /* 48, floor 44 */
+  --spacing-control-lg: max(3rem, calc(3.5rem * var(--scale-layout))); /* 56 */
+
+  /* Icon boxes. Applied as size-icon-* on the svg, replacing the pixel
+     literal `size={16}` prop — which no ramp and no accessibility setting
+     can reach, because it renders as an HTML attribute. */
+  --spacing-icon-xs: calc(0.75rem * var(--scale-layout)); /* 12 */
+  --spacing-icon-sm: calc(0.875rem * var(--scale-layout)); /* 14 */
+  --spacing-icon: calc(1rem * var(--scale-layout)); /* 16 */
+  --spacing-icon-md: calc(1.25rem * var(--scale-layout)); /* 20 */
+  --spacing-icon-lg: calc(1.5rem * var(--scale-layout)); /* 24 */
+  --spacing-icon-xl: calc(2rem * var(--scale-layout)); /* 32 */
+
+  /* Floating dock. The bottom-right corner is claimed by four separate
+     components today at four different offsets; they all read this. */
+  --spacing-fab-inset: calc(1.5rem * var(--scale-layout)); /* 24 */
+  --spacing-fab-stack: calc(0.75rem * var(--scale-layout)); /* 12 */
+  /* How far up the bottom-right corner the dock reaches: its 24px inset plus
+     the ~72px trigger. Anything else anchored to that corner starts here, so
+     it stacks above the dock instead of on top of it. Toasts sit above the
+     FAB in the layer scale, which makes them visible but still leaves them
+     covering the button they were reporting on. */
+  --spacing-fab-clear: calc(6.5rem * var(--scale-layout)); /* 104 */
+
+  /* ── PAGE CONTAINERS ──────────────────────────────────────────────────
+     The `calc(50vw + Nrem)` form is already fluid by construction, so it
+     takes no ramp. Named here because the six widths are currently copied
+     by hand across 60+ files with nothing saying which to reach for. */
+  --container-page: calc(50vw + 48rem); /* the default */
+  --container-page-narrow: calc(50vw + 32rem);
+  --container-page-mid: calc(50vw + 36rem);
+  --container-page-tight: calc(50vw + 24rem); /* forms, auth, single-column reading */
+  --container-page-wide: calc(50vw + 64rem); /* dashboards, wide tables */
+
+  /* ── LAYER SCALE ──────────────────────────────────────────────────────
+     Replaces 19 hand-picked z-index values. The numbers are spaced so a
+     new layer can slot between two without renumbering; what matters is
+     the order, which is the app's actual stacking contract.
+
+     Nested stacking inside one overlay does NOT get tokens here — give
+     the overlay root `z-tutorial isolation-isolate` and use plain z-0..40
+     within it. Skipping that is how the tutorial ended up at z-10009. */
+  --z-index-base: 0;
+  --z-index-raised: 10; /* in-card overlays, cancel-nav wrappers */
+  --z-index-sticky: 20; /* sticky sub-headers, filter and toolbar bars */
+  --z-index-rail: 30; /* SpyRail, venue and dashboard top bars */
+  --z-index-nav: 40; /* the fixed Navbar */
+  --z-index-scrim: 44; /* a drawer's own backdrop — under the drawer it dims */
+  --z-index-drawer: 45; /* MemberPanel, MessagingPanel */
+  --z-index-dropdown: 50; /* DropdownPanel, NavbarSearchPanel, selects */
+  --z-index-modal: 60; /* Modal, ConfirmModal */
+  --z-index-fab: 70; /* the floating dock */
+  --z-index-toast: 80; /* toasts, session recovery, consent banner */
+  --z-index-tutorial: 90; /* TutorialOverlay */
+  --z-index-max: 100; /* escape hatch; a use here is a bug report */
 
   /* Calendar hour rules + column dividers — a hairline far lighter than
      --color-ktip-line, which is pure black and would fence in every cell */
@@ -454,10 +632,153 @@ html.dark {
     }
   }
 
+  /* ── RESPONSIVE SCALE RAMPS ───────────────────────────────────────────
+     The app is authored for a 2560x1600 desktop but the ramps are
+     NORMALISED at 1440, so every token reads as its literal size on a
+     laptop (--text-micro: 0.8125rem really is 13px) and the day these
+     landed had to produce a zero-pixel diff at that width.
+
+     Three ramps, not one. Three things behave differently as a viewport
+     narrows, and one factor per group means proportions inside a group
+     can never drift apart:
+
+       --scale-display  hero type + hero bands      0.64 .. 1.24
+       --scale-layout   padding/boxes/controls      0.88 .. 1.14
+       --scale-text     reading type only           1.00 .. 1.125
+
+     A hero title and a card's padding want different curves: a 48px title
+     should land near 30px on a phone, while 24px of padding should land
+     near 21px, not 15px. Reading type is flat from phone to laptop on
+     purpose — legibility is absolute, so a 13px caption must not become
+     11px on a tablet.
+
+     Stepped @media rather than per-property clamp(): clamp() gives every
+     property its own interpolation curve, so the ratios between them
+     drift and the layout stops looking authored. Same argument as
+     hooks/useViewportScale.ts, and the same single-free-variable idea as
+     .dm-wrap further down this file.
+
+     These steps are deliberately NOT --breakpoint-* overrides. Tailwind
+     inlines those at build time and the sm:/md:/lg: classes plus the
+     --nav-h query above all depend on the stock values; this ladder only
+     moves variable values, so it is invisible to class authors.
+
+     rem in a media query resolves against the browser's INITIAL font size
+     (16px), never against the root font-size useAccessibilityPrefs
+     writes — so a reader at 140% text still gets the same breakpoints. */
+  :root {
+    --scale-display: 0.64;
+    --scale-layout: 0.88;
+    --scale-text: 1;
+  }
+
+  /* 640 — large phone / phone landscape */
+  @media (min-width: 40rem) {
+    :root { --scale-display: 0.7; --scale-layout: 0.9; }
+  }
+  /* 768 — tablet portrait */
+  @media (min-width: 48rem) {
+    :root { --scale-display: 0.76; --scale-layout: 0.92; }
+  }
+  /* 1024 — tablet landscape / 11" laptop */
+  @media (min-width: 64rem) {
+    :root { --scale-display: 0.84; --scale-layout: 0.95; }
+  }
+  /* 1280 — 13" laptop */
+  @media (min-width: 80rem) {
+    :root { --scale-display: 0.92; --scale-layout: 0.98; }
+  }
+  /* 1440 — the anchor. Every ramp is 1 here, so this width renders exactly
+     as it did before the token system existed. */
+  @media (min-width: 90rem) {
+    :root { --scale-display: 1; --scale-layout: 1; }
+  }
+  /* 1680 — 16" scaled / 1080p windowed */
+  @media (min-width: 105rem) {
+    :root { --scale-display: 1.08; --scale-layout: 1.05; --scale-text: 1.045; }
+  }
+  /* 1920 — 1080p full screen */
+  @media (min-width: 120rem) {
+    :root { --scale-display: 1.14; --scale-layout: 1.09; --scale-text: 1.08; }
+  }
+  /* 2560 — the design target */
+  @media (min-width: 160rem) {
+    :root { --scale-display: 1.24; --scale-layout: 1.14; --scale-text: 1.125; }
+  }
+
+  /* Tailwind v4 compiles every bare-numeric spacing utility to
+     calc(var(--spacing) * N), so redefining the unit here rescales all of
+     p-*, px-*, gap-*, and the numeric w-/h-/m-/inset-/top-* across every
+     component at once, with no file edits. This declaration sits in the
+     base layer, which outranks the theme layer where --spacing is
+     normally defined. 0.25rem at the 1440 anchor is exactly the stock
+     value. */
+  :root {
+    --spacing: calc(0.25rem * var(--scale-layout));
+  }
+
+  /* A 44px minimum hit area is a POINTER constraint, not a width one: a
+     1280px window driven by a mouse does not need it, a 1280px tablet
+     does. That is why there is no fourth ramp for touch targets — a
+     fourth ramp would be a fourth interpolation curve and the group
+     proportions would start drifting again.
+
+     `pointer: coarse` (not `any-pointer: coarse`) is deliberate: a laptop
+     with a touchscreen but a mouse in hand reports `fine` and correctly
+     opts out. */
+  @media (pointer: coarse) {
+    :root {
+      --spacing-control-sm: 2.75rem;
+      --spacing-control-md: 2.75rem;
+    }
+  }
+
+  /* ── RAMP RESETS ──────────────────────────────────────────────────────
+     Surfaces whose geometry must not depend on how wide the browser
+     window happens to be. */
+
+  /* A resume is a 210x296mm sheet authored in mm and pt. Without this a
+     printed CV's padding would change with window width — a shipping bug,
+     not a cosmetic one. */
+  .resume-sheet,
+  .resume-desk,
+  .resume-picker {
+    --scale-display: 1;
+    --scale-layout: 1;
+    --scale-text: 1;
+    --spacing: 0.25rem;
+  }
+
+  /* The vendored shadcn/ReUI error console is authored against stock
+     Tailwind. Its scoped tokens do not include --spacing, so without this
+     it would inherit the ramp. Portals mount outside .errors-console, so
+     they need naming separately — same reason as the colour tokens in
+     pages/admin/errors/index.css. */
+  .errors-console,
+  [data-base-ui-portal] {
+    --scale-display: 1;
+    --scale-layout: 1;
+    --scale-text: 1;
+    --spacing: 0.25rem;
+  }
+
+  @media print {
+    :root {
+      --scale-display: 1;
+      --scale-layout: 1;
+      --scale-text: 1;
+      --spacing: 0.25rem;
+    }
+  }
+
   body {
     margin: 0;
     min-width: 320px;
+    /* svh, not vh: on mobile 100vh is the viewport with the URL bar collapsed,
+       so a page sized to it extends under the browser chrome. The vh line
+       stays first as the fallback for anything without svh support. */
     min-height: 100vh;
+    min-height: 100svh;
     background-color: var(--color-ktip-canvas);
     color: var(--color-ktip-sand-900);
   }
@@ -484,42 +805,24 @@ html.dark {
 }
 
 @layer components {
-  /* Caribbean Modern Component Styles */
-  /* Primary button — mode-distinct brand pairs (fixed Pantone tokens):
-     light: navy fill / white text → hover green fill / navy text;
-     dark: green fill / navy text → hover navy fill / green text */
-  .btn-primary {
-    @apply bg-brand-navy text-white px-6 py-3 rounded-xl font-medium shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green dark:hover:shadow-glow-tropical;
-  }
-
-  .btn-secondary {
-    @apply border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 px-6 py-3 rounded-xl font-medium shadow-medium hover:bg-ktip-sand-50 hover:border-ktip-sand-300 hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200;
-  }
-
   /* Skin only — brand pair, homepage shadow depth, lift on hover — with no
      padding, radius or type of its own, so a call site keeps its own geometry.
      This is what the hand-rolled `bg-ktip-ocean-600 … hover:bg-ktip-ocean-700`
      buttons across the app were replaced with, so every page's action buttons
-     read like the homepage hero CTA. */
+     read like the homepage hero CTA.
+
+     It is the only survivor of this layer. .btn-primary, .btn-secondary,
+     .card, .input-field and .badge each restated the geometry of the
+     component of the same name in components/ui, drifted from it (.card
+     lifted by -translate-y-1 where Card.tsx used -translate-y-0.5), and had
+     zero call sites between them. Carrying geometry in two places is what
+     this token migration exists to stop; .btn-brand carries none, which is
+     why it stays. */
   .btn-brand {
     @apply bg-brand-navy text-white shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green dark:hover:shadow-glow-tropical;
     /* A disabled button must not flip colour or lift — it only dims. Matches
        the disabled handling in the Button component. */
     @apply disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-medium disabled:hover:bg-brand-navy disabled:hover:text-white dark:disabled:hover:bg-brand-green dark:disabled:hover:text-brand-navy;
-  }
-
-  /* Same depth as the homepage bento tiles (medium at rest → hard on hover),
-     so panels on the inner pages sit at the same elevation as the landing. */
-  .card {
-    @apply bg-ktip-cream rounded-2xl shadow-medium border border-ktip-sand-100 p-6 hover:shadow-hard hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300;
-  }
-
-  .input-field {
-    @apply border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all;
-  }
-
-  .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
   }
 
   /* ---- Diamond avatar -------------------------------------------------
@@ -715,6 +1018,145 @@ html.dark {
   transition-duration: 150ms;
 }
 
+/* Ghost mode: a pinned surface fades almost out and stops taking pointer
+   events, so the page underneath can be clicked and scrolled straight through
+   it. Declared BEFORE .messaging-panel[data-state='closed'] on purpose — equal
+   specificity, so source order decides, and a panel being dismissed must close
+   as a panel rather than as a ghost. */
+.ghost-surface {
+  transition-property: background-color, box-shadow, border-color;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ghost-surface[data-ghost='true'] {
+  pointer-events: none;
+  /* Unitless number in, percentage out: 0.2 → 20% of the surface's own
+     colour, the rest transparent. Consumers that already set `background`
+     inline (a sticky note owns its paper colour) do the same sum themselves —
+     inline wins over this, and it should. */
+  background-color: color-mix(
+    in srgb,
+    var(--ghost-bg, transparent) calc(var(--ghost-opacity, 0.2) * 100%),
+    transparent
+  );
+  border-color: transparent;
+  box-shadow: none;
+}
+/* The fade is applied to the children, not the root: opacity on the root would
+   take the glow and the wake control down with it, and those exist precisely to
+   be visible when nothing else is. Nested opacity multiplies and cannot be
+   undone further down, which is why the control's own row is exempted here and
+   fades its *contents* instead — that keeps the control where it has always
+   been, in the header, rather than floating somewhere over it. Rows nest:
+   mark each wrapper between the root and the control, and everything beside
+   them still fades. */
+.ghost-surface[data-ghost='true'] > *:not(.ghost-glow):not(.ghost-live-row),
+.ghost-surface[data-ghost='true'] .ghost-live-row > *:not(.ghost-live):not(.ghost-live-row) {
+  opacity: var(--ghost-opacity, 0.2);
+}
+/* The transition is declared unconditionally, on the same elements the fade
+   selects. Putting it inside the [data-ghost] rule above would only ease the
+   way IN: leaving ghost mode drops that rule and with it the transition, and
+   the surface would snap back to solid in a single frame. */
+.ghost-surface > *:not(.ghost-glow):not(.ghost-live-row),
+.ghost-surface .ghost-live-row > *:not(.ghost-live):not(.ghost-live-row) {
+  transition: opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* The exempted row is scaffolding, not a visible bar. */
+.ghost-surface .ghost-live-row {
+  transition:
+    background-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ghost-surface[data-ghost='true'] .ghost-live-row {
+  background: transparent !important;
+  border-color: transparent;
+}
+/* The panel declares its own `transition` shorthand for the open/close
+   animation, which resets transition-property to opacity and transform. Two
+   classes beat one, so the ghost's properties are added back here rather than
+   disturbing that block. */
+.messaging-panel.ghost-surface {
+  transition-property: opacity, transform, background-color, box-shadow, border-color;
+}
+
+/* The edge light. Pared down from React Bits' BorderGlow to the one idea worth
+   keeping: a cone of light at the cursor's bearing, brightening as the cursor
+   approaches the border. The original's mesh-gradient border and fill layers
+   (fourteen radial gradients, two blend modes, a six-layer mask composite) are
+   gone — they are decoration, and this thing sits over a live page at pointer
+   rate. What is left is one element, one shadow, one mask.
+
+   The glow is drawn INSIDE the border rather than as a halo around it: both
+   surfaces that use it clip their children (`overflow-hidden`, so a note's
+   paper corners stay rounded), and an outset shadow would simply be cut off.
+
+   --cursor-angle and --edge-proximity are written from useGhostMode's rAF. */
+.ghost-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  /* A wide cone at the cursor's bearing. The 6/94 wrap keeps it continuous
+     across twelve o'clock instead of blinking as the angle crosses 360. */
+  mask-image: conic-gradient(
+    from var(--cursor-angle, 0deg) at center,
+    black 6%,
+    transparent 20%,
+    transparent 80%,
+    black 94%
+  );
+  /* Dark until the cursor is past the sensitivity threshold, then ramps to
+     full at the border. Nothing paints while the number is 0. Low threshold:
+     the glow is the only thing saying where a ghost is, so it should be lit
+     for most of the time the cursor is anywhere near. */
+  opacity: calc(
+    (var(--edge-proximity, 0) - var(--ghost-edge-sensitivity, 6)) /
+      (100 - var(--ghost-edge-sensitivity, 6))
+  );
+  transition: opacity 250ms ease-out;
+  /* Inset only, and on the element itself — a mask applies to an element's
+     whole rendering, box-shadow included, so this needs no pseudo-element.
+     The colour is picked per surface from what is actually behind it (see
+     useBackdropTone in useGhostMode), because a glow that does not know
+     whether it is over a white card or a dark hero photo will be invisible
+     over one of them. */
+  box-shadow:
+    inset 0 0 0 2px var(--ghost-glow-color, oklch(0.72 0.13 220)),
+    inset 0 0 8px 0 var(--ghost-glow-color, oklch(0.72 0.13 220)),
+    inset 0 0 22px 0 color-mix(in srgb, var(--ghost-glow-color, oklch(0.72 0.13 220)) 70%, transparent),
+    inset 0 0 44px 4px color-mix(in srgb, var(--ghost-glow-color, oklch(0.72 0.13 220)) 40%, transparent);
+}
+
+/* The one control left alive on a ghost: the pin, which becomes the way back
+   in. Clickable through a surface that takes no pointer events, but no more
+   visible than the surface it sits on until the cursor is actually over it —
+   a solid dot on an almost-invisible panel is the one thing giving the ghost
+   away. Exempt from the fade rule above only so that it can be lit on its own
+   terms here; data-ghost-near is written by the same rAF that aims the glow,
+   and the pulse then overrides this opacity for as long as it runs. */
+.ghost-surface[data-ghost='true'] .ghost-live {
+  pointer-events: auto;
+  opacity: var(--ghost-opacity, 0.2);
+  transition: opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ghost-surface[data-ghost='true'][data-ghost-near] .ghost-live {
+  animation: ghostLivePulse 1.9s ease-in-out infinite;
+}
+@keyframes ghostLivePulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+/* Only the ghost glows. A woken surface is a normal surface. */
+.ghost-surface:not([data-ghost='true']) .ghost-glow {
+  opacity: 0;
+}
+
 /* The docked messaging panel. Same data-state contract as .dropdown-panel,
    but its own timings and its own closed transform: it is a 900px surface
    that folds back down into the FAB it grew out of, and the dropdown's
@@ -861,8 +1303,21 @@ html[data-capturing] [data-fab] {
   .dropdown-panel,
   .messaging-panel,
   .fab-panel,
+  .ghost-surface,
   .disclosure-collapse {
     transition: none;
+  }
+
+  /* A ghost still lights up to say where it is — it just stops chasing the
+     cursor. The whole border glows evenly instead of a cone sweeping round,
+     and its controls sit at full strength rather than breathing. */
+  .ghost-glow {
+    mask-image: none;
+    transition: none;
+  }
+  .ghost-surface[data-ghost='true'][data-ghost-near] .ghost-live {
+    animation: none;
+    opacity: 1;
   }
 
   /* The quick-actions cluster fans out and collapses on inline transitions
