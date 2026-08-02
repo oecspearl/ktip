@@ -1,5 +1,6 @@
 import { type EventSpeaker } from '../../types'
 import { Mic, Globe } from 'lucide-react'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface EventSpeakerGridProps {
   speakers: EventSpeaker[]
@@ -17,17 +18,12 @@ export function EventSpeakerGrid({ speakers }: EventSpeakerGridProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {speakers.map((speaker) => (
             <div key={speaker.id} className="flex flex-col items-center text-center">
-              {speaker.photo_url ? (
-                <img
-                  src={speaker.photo_url}
-                  alt={speaker.name}
-                  loading="lazy" decoding="async" width={80} height={80} className="w-20 h-20 rounded-full object-cover mb-3"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-2xl font-bold text-ktip-ocean-700 mb-3">
-                  {speaker.name.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <DiamondAvatar
+                src={speaker.photo_url}
+                name={speaker.name}
+                size={80}
+                className="mb-3"
+              />
 
               <span className="font-semibold text-ktip-sand-900">
                 {speaker.name}

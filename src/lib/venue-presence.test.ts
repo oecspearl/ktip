@@ -68,6 +68,7 @@ function occ(over: Partial<VenueOccupant> = {}): VenueOccupant {
     status_note: null,
     room_id: 'r1',
     team_id: null,
+    pos: null,
     is_live: true,
     ...over,
   }

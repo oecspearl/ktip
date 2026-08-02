@@ -4,6 +4,7 @@ import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS } from '../../lib/constants'
 import { format } from 'date-fns'
 import { Clock, MapPin } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface EventScheduleTimelineProps {
   items: EventScheduleItem[]
@@ -32,15 +33,6 @@ function formatTimeRange(startTime: string, endTime: string | null): string {
   if (!endTime) return start
   const end = format(new Date(endTime), 'h:mm a')
   return `${start} - ${end}`
-}
-
-function getSpeakerInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
 }
 
 export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
@@ -108,17 +100,11 @@ export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
 
                   {item.speaker && (
                     <div className="flex items-center gap-2 mt-1">
-                      {item.speaker.photo_url ? (
-                        <img
-                          src={item.speaker.photo_url}
-                          alt={item.speaker.name}
-                          loading="lazy" decoding="async" width={20} height={20} className="w-5 h-5 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 flex items-center justify-center text-[10px] font-medium">
-                          {getSpeakerInitials(item.speaker.name)}
-                        </div>
-                      )}
+                      <DiamondAvatar
+                        src={item.speaker.photo_url}
+                        name={item.speaker.name}
+                        size={20}
+                      />
                       <span className="text-sm text-ktip-sand-600">
                         {item.speaker.name}
                         {item.speaker.title && (

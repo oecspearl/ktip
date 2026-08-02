@@ -1,11 +1,8 @@
 import { Trash2 } from 'lucide-react'
 import { ReportButton } from '../moderation/ReportButton'
 import type { ForumReply } from '../../types'
-import {
-  formatRelativeTime,
-  getInitials,
-  generateAvatarColor,
-} from '../../lib/utils'
+import { formatRelativeTime } from '../../lib/utils'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface ReplyItemProps {
   reply: ForumReply
@@ -19,11 +16,7 @@ export function ReplyItem({ reply, isAuthor, onDelete }: ReplyItemProps) {
   return (
     <div className="py-4 border-b border-ktip-sand-100 last:border-b-0">
       <div className="flex items-start gap-3">
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(authorName)}`}
-        >
-          {getInitials(authorName)}
-        </div>
+        <DiamondAvatar src={reply.author?.avatar_url} name={authorName} size={36} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-medium text-ktip-sand-900 text-sm">

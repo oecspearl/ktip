@@ -5,6 +5,7 @@ import { keys } from '../queries/keys'
 import { VENUE } from '../lib/constants'
 import {
   mergeRoster,
+  normalizePos,
   occupancyByRoom,
   presenceToOccupants,
   resolveAvailability,
@@ -15,8 +16,12 @@ import type {
   EventVenueMember,
   VenueAvailability,
   VenueOccupant,
+  VenuePosition,
   VenuePresencePayload,
 } from '../types'
+
+/** A peer's last movement packet, with the arrival time used for staleness. */
+export type PeerPosition = VenuePosition & { at: number }
 
 type ManualAvailability = Exclude<VenueAvailability, 'offline'>
 
@@ -74,6 +79,17 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
   const lastInteractionRef = useRef<number>(Date.now())
   const lastHeartbeatRef = useRef<number | null>(null)
   const lastSentRef = useRef<string>('')
+
+  // ----- walking map ------------------------------------------------------
+  // Everything about positions lives in refs. A moving avatar is 8 packets a
+  // second per person; putting that through setState would re-render the whole
+  // venue 8×N times a second to move two circles. The map reads these refs from
+  // its own animation frame instead.
+  const posRef = useRef<VenuePosition | null>(null)
+  const peersRef = useRef<Map<string, PeerPosition>>(new Map())
+  const payloadRef = useRef<VenuePresencePayload | null>(null)
+  const lastBroadcastRef = useRef(0)
+  const lastCellRef = useRef('')
 
   // Resolved from the manual choice plus idle state. A manual 'busy' or
   // 'help_wanted' is sticky; only the default 'working' may be auto-downgraded.
@@ -138,7 +154,7 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       if (cancelled) return
 
       channel = supabase.channel(`venue:${eventId}`, {
-        config: { private: true, presence: { key: userId } },
+        config: { private: true, presence: { key: userId }, broadcast: { self: false } },
       })
       channelRef.current = channel
 
@@ -146,6 +162,15 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
         .on('presence', { event: 'sync' }, sync)
         .on('presence', { event: 'join' }, sync)
         .on('presence', { event: 'leave' }, sync)
+        // Movement. Same channel, same RLS check — a client that cannot read
+        // the venue's presence cannot see where anyone is walking either.
+        .on('broadcast', { event: 'move' }, ({ payload }: any) => {
+          const from = payload?.user_id
+          if (typeof from !== 'string' || from === userId) return
+          const pos = normalizePos(payload)
+          if (!pos) return
+          peersRef.current.set(from, { ...pos, at: Date.now() })
+        })
         .subscribe((status) => {
           if (cancelled) return
           setConnected(status === 'SUBSCRIBED')
@@ -183,11 +208,12 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       status_note: statusNote,
       room_id: roomId,
       team_id: me.team_id,
-      // Reserved. A walking map fills this in and needs no migration; v:1
-      // readers ignore what they do not know.
-      pos: null,
+      // The coarse position, so someone who joins mid-session paints everyone
+      // in the right place before the first movement packet arrives.
+      pos: posRef.current,
       v: 1,
     }
+    payloadRef.current = payload
 
     const fingerprint = `${availability}|${statusNote ?? ''}|${roomId ?? ''}`
     const changed = fingerprint !== lastSentRef.current
@@ -207,6 +233,9 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
           p_room_id: roomId,
           p_availability: availability,
           p_status_note: statusNote,
+          // The cold mirror of the map position. 070 reserved meta for this;
+          // it is what puts a disconnected member's dot back where they left it.
+          p_meta: posRef.current ? { pos: posRef.current } : null,
         })
         .then(() => {
           queryClient.invalidateQueries({ queryKey: keys.sub('venue', 'roster', eventId) })
@@ -228,7 +257,11 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       if (!shouldHeartbeat({ lastWriteMs: lastHeartbeatRef.current, nowMs, changed: false })) return
       lastHeartbeatRef.current = nowMs
       void (supabase as any)
-        .rpc('venue_heartbeat', { p_event_id: eventId, p_room_id: roomId })
+        .rpc('venue_heartbeat', {
+          p_event_id: eventId,
+          p_room_id: roomId,
+          p_meta: posRef.current ? { pos: posRef.current } : null,
+        })
         .catch(() => {})
     }, VENUE.HEARTBEAT_THROTTLE_MS)
 
@@ -250,10 +283,56 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
     setManual(next)
   }, [])
 
+  /**
+   * Report where this client is standing. Safe to call every animation frame:
+   * broadcast is throttled to POS_BROADCAST_MS, and the presence payload is
+   * re-tracked only when the walker crosses into a new cell — which is roughly
+   * once a second at walking pace, not sixty times.
+   */
+  const setPosition = useCallback(
+    (next: VenuePosition | null) => {
+      posRef.current = next
+      const channel = channelRef.current
+      if (!channel || !next || !userId) return
+
+      const nowMs = Date.now()
+      if (nowMs - lastBroadcastRef.current >= VENUE.POS_BROADCAST_MS) {
+        lastBroadcastRef.current = nowMs
+        void channel.send({
+          type: 'broadcast',
+          event: 'move',
+          payload: { user_id: userId, x: next.x, y: next.y, f: next.f ?? 0 },
+        })
+      }
+
+      const cell = `${Math.floor(next.x)},${Math.floor(next.y)},${next.f ?? 0}`
+      if (cell !== lastCellRef.current && payloadRef.current) {
+        lastCellRef.current = cell
+        void channel.track({ ...payloadRef.current, pos: next })
+      }
+    },
+    [userId]
+  )
+
+  /**
+   * Live positions, as a ref rather than state — see the note where these are
+   * declared. `peers` holds only what arrived over broadcast; the map falls
+   * back to each occupant's tracked `pos` for anyone who has not moved yet.
+   */
+  const positions = useMemo(
+    () => ({
+      peers: peersRef,
+      self: posRef,
+    }),
+    []
+  )
+
   return {
     occupants,
     occupancy,
     connected,
+    setPosition,
+    positions,
     /** What this client is reporting right now, idle rules applied. */
     availability,
     /** What the member explicitly chose, or null if they never chose. */

@@ -6,10 +6,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useSearchUsers, useCreateConversation, useSendMessage } from '../../hooks/useMessages'
 import { useMyConnections } from '../../hooks/useConnections'
 import { sendNotification } from '../../lib/notify'
-import { debounce, getInitials, generateAvatarColor } from '../../lib/utils'
+import { debounce, generateAvatarColor } from '../../lib/utils'
 import { Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send, ArrowLeft, Pen, FileText, Code, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import type { Profile } from '../../types'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 function generateRoomName(): string {
   const adjectives = ['swift', 'bright', 'bold', 'calm', 'keen', 'warm', 'vivid', 'crisp']
@@ -278,13 +279,7 @@ export default function VideoConferencePage() {
                       onClick={() => selectUser(user)}
                       className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full border border-ktip-sand-200 bg-ktip-cream hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/40 text-xs font-medium text-ktip-sand-700 transition-colors"
                     >
-                      <span
-                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${generateAvatarColor(
-                          user.display_name || user.id
-                        )}`}
-                      >
-                        {getInitials(user.display_name || 'U')}
-                      </span>
+                      <DiamondAvatar name={user.display_name || 'User'} size={20} />
                       {user.display_name || 'User'}
                     </button>
                   ))}
@@ -323,8 +318,6 @@ export default function VideoConferencePage() {
             {showDropdown && searchResults.length > 0 && (
               <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-ktip-cream shadow-medium max-h-48 overflow-y-auto">
                 {searchResults.map((user) => {
-                  const color = generateAvatarColor(user.display_name || user.id)
-                  const initials = getInitials(user.display_name || 'U')
                   return (
                     <button
                       key={user.id}
@@ -332,11 +325,7 @@ export default function VideoConferencePage() {
                       onClick={() => selectUser(user)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-ktip-sand-50 transition-colors text-left"
                     >
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${color}`}
-                      >
-                        {initials}
-                      </div>
+                      <DiamondAvatar name={user.display_name || 'User'} size={32} />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-ktip-sand-800 truncate">
                           {user.display_name || 'Unnamed User'}
@@ -373,9 +362,11 @@ export default function VideoConferencePage() {
                       key={user.id}
                       className={`inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium text-white ${color}`}
                     >
-                      <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
-                        {getInitials(user.display_name || 'U')}
-                      </span>
+                      <DiamondAvatar
+                        name={user.display_name || 'User'}
+                        size={20}
+                        colorClass="bg-white/20"
+                      />
                       {user.display_name || 'User'}
                       <button
                         type="button"

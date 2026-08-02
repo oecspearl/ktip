@@ -5,7 +5,8 @@ import { Button } from '../ui/Button'
 import { Textarea } from '../ui/Textarea'
 import { useProjectComments, useCreateProjectComment } from '../../hooks/useProjects'
 import { useAuth } from '../../contexts/AuthContext'
-import { formatRelativeTime, getInitials, generateAvatarColor } from '../../lib/utils'
+import { formatRelativeTime } from '../../lib/utils'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface CommentSectionProps {
   projectId: string
@@ -62,11 +63,7 @@ export function CommentSection({ projectId }: CommentSectionProps) {
             return (
               <div key={comment.id} className="py-4 border-b border-ktip-sand-100 last:border-b-0">
                 <div className="flex items-start gap-3">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(authorName)}`}
-                  >
-                    {getInitials(authorName)}
-                  </div>
+                  <DiamondAvatar src={comment.author?.avatar_url} name={authorName} size={36} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium text-ktip-sand-900 text-sm">

@@ -4,11 +4,12 @@ import { Textarea } from '../../../components/ui/Textarea'
 import { Modal } from '../../../components/ui/Modal'
 import { useAdminFeedback, useUpdateFeedback } from '../../../hooks/useFeedback'
 import { useToast } from '../../../contexts/ToastContext'
-import { formatDate, getInitials, generateAvatarColor } from '../../../lib/utils'
+import { formatDate } from '../../../lib/utils'
 import type { Feedback, FeedbackStatus } from '../../../types'
 import { MessageCircle, Filter, X, Clock, FileText } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 export const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
   bug: 'Bug Report',
@@ -141,11 +142,7 @@ export default function AdminFeedbackPage() {
                 <div key={item.id} className="p-4 hover:bg-ktip-sand-50/50 transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0">
-                      <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${generateAvatarColor(name)}`}
-                      >
-                        {getInitials(name)}
-                      </div>
+                      <DiamondAvatar name={name} size={36} />
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-ktip-sand-900 truncate">{item.subject}</p>
                         <p className="text-xs text-ktip-sand-500 flex items-center gap-2 mt-0.5">

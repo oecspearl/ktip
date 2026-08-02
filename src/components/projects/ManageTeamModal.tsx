@@ -6,6 +6,7 @@ import { useProjectMembers, useProjectMemberMutations } from '../../hooks/usePro
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import type { Profile, ProjectMemberRole } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface ManageTeamModalProps {
   open: boolean
@@ -110,9 +111,11 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
             {results.map((user) => (
               <div key={user.id} className="flex items-center justify-between px-3 py-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-sm font-medium text-ktip-ocean-700 shrink-0">
-                    {user.display_name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                  <DiamondAvatar
+                    src={user.avatar_url}
+                    name={user.display_name || 'Member'}
+                    size={32}
+                  />
                   <span className="text-sm font-medium text-ktip-sand-900 truncate">
                     {user.display_name || 'Unknown User'}
                   </span>
@@ -139,9 +142,11 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
             {members.map((member) => (
               <div key={member.id} className="flex items-center justify-between px-3 py-2 gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-sm font-medium text-ktip-ocean-700 shrink-0">
-                    {member.user?.display_name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                  <DiamondAvatar
+                    src={member.user?.avatar_url}
+                    name={member.user?.display_name || 'Member'}
+                    size={32}
+                  />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ktip-sand-900 truncate">
                       {member.user?.display_name || 'Unknown User'}

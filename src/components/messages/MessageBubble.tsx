@@ -1,6 +1,7 @@
 import type { Message } from '../../types'
-import { formatRelativeTime, getInitials, generateAvatarColor } from '../../lib/utils'
+import { formatRelativeTime } from '../../lib/utils'
 import { ReportButton } from '../moderation/ReportButton'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface MessageBubbleProps {
   message: Message
@@ -15,11 +16,12 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       <div className={`flex gap-2 max-w-[75%] ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar for other users */}
         {!isOwn && (
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0 mt-1 ${generateAvatarColor(senderName)}`}
-          >
-            {getInitials(senderName)}
-          </div>
+          <DiamondAvatar
+            src={message.sender?.avatar_url}
+            name={senderName}
+            size={32}
+            className="mt-1"
+          />
         )}
 
         <div className="group">

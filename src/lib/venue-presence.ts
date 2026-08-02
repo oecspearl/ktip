@@ -16,6 +16,7 @@ import type {
   EventVenueMember,
   VenueAvailability,
   VenueOccupant,
+  VenuePosition,
   VenuePresencePayload,
 } from '../types'
 
@@ -69,6 +70,21 @@ function isPayload(
 }
 
 /**
+ * A position off another client is untrusted input like anything else on the
+ * wire: a NaN here would put an avatar at `translate(NaN)` and remove it from
+ * the map entirely, so anything not finite becomes "no position".
+ */
+export function normalizePos(raw: unknown): VenuePosition | null {
+  const p = raw as Partial<VenuePosition> | null | undefined
+  if (!p || typeof p !== 'object') return null
+  const x = Number(p.x)
+  const y = Number(p.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  const f = Number(p.f)
+  return { x, y, f: Number.isFinite(f) ? Math.max(0, Math.trunc(f)) : 0 }
+}
+
+/**
  * Collapse raw presence state into one entry per member.
  *
  * Two tabs are one person. The room shown is the one from the *last* tracked
@@ -96,6 +112,7 @@ export function presenceToOccupants(state: RawPresenceState): VenueOccupant[] {
           status_note: raw.status_note ?? null,
           room_id: raw.room_id ?? null,
           team_id: raw.team_id ?? null,
+          pos: normalizePos(raw.pos),
           is_live: true,
         })
         continue
@@ -103,6 +120,9 @@ export function presenceToOccupants(state: RawPresenceState): VenueOccupant[] {
 
       existing.availability = strongerAvailability(existing.availability, availability)
       existing.room_id = raw.room_id ?? existing.room_id
+      // Same rule as the room: the most recent tab wins, because a person is
+      // standing in one place however many tabs they have open.
+      existing.pos = normalizePos(raw.pos) ?? existing.pos
       existing.status_note = existing.status_note ?? raw.status_note ?? null
       existing.display_name = existing.display_name ?? raw.display_name ?? null
       existing.avatar_url = existing.avatar_url ?? raw.avatar_url ?? null
@@ -146,6 +166,9 @@ export function mergeRoster(
       status_note: stale ? null : m.status_note,
       room_id: stale ? null : m.current_room_id,
       team_id: null,
+      // meta.pos is the cold mirror of where they were standing (070 reserved
+      // meta for exactly this). Stale rows contribute no position at all.
+      pos: stale ? null : normalizePos((m.meta as any)?.pos),
       is_live: false,
     })
   }

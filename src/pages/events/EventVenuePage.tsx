@@ -11,9 +11,12 @@ import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { VenueFloorplan } from '../../components/venue/VenueFloorplan'
+import { VenueMapExplorer } from '../../components/venue/map/VenueMapExplorer'
 import { RoomOccupantList } from '../../components/venue/RoomOccupantList'
 import { Button } from '../../components/ui/Button'
 import { occupantsUnassigned } from '../../lib/venue-presence'
+import { mapConfigOf } from '../../hooks/useVenueMap'
+import { isPlaced } from '../../lib/venue-map'
 import type { VenueRoom } from '../../types'
 import { entityPath } from '../../lib/slug'
 
@@ -68,6 +71,11 @@ export default function EventVenuePage() {
 
   const lobby = useMemo(() => occupantsUnassigned(presence.occupants), [presence.occupants])
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
+
+  // The drawn map wins whenever the host has actually placed a room on it; an
+  // uploaded SVG, and then the card grid, are the fallbacks behind it.
+  const mapped = useMemo(() => (rooms || []).filter(isPlaced), [rooms])
+  const mapConfig = useMemo(() => mapConfigOf(event), [event])
 
   const handleEnter = async (room: VenueRoom) => {
     if (!eventId || !event) return
@@ -163,7 +171,8 @@ export default function EventVenuePage() {
             {event.title}
           </h1>
           <p className="mt-1 text-sm text-ktip-sand-600">
-            Pick a room to join it. Everyone in a room can see who else is there.
+            Walk the floor with the arrow keys, or click a room to go in. Everyone in a room can
+            see who else is there.
           </p>
         </div>
 
@@ -194,6 +203,37 @@ export default function EventVenuePage() {
                   </Link>
                 )}
               </div>
+            ) : mapped.length > 0 ? (
+              <>
+                <VenueMapExplorer
+                  config={mapConfig}
+                  rooms={mapped}
+                  occupants={presence.occupants}
+                  occupancy={presence.occupancy}
+                  meId={auth.user?.id || ''}
+                  myRole={membership.role}
+                  peers={presence.positions.peers}
+                  onPositionChange={presence.setPosition}
+                  onEnter={handleEnter}
+                />
+
+                {/* A room the host never placed is still a room. Same reasoning
+                    as the SVG path's "Not on the map" list. */}
+                {rooms.length > mapped.length && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
+                      Not on the map
+                    </p>
+                    <VenueFloorplan
+                      rooms={rooms.filter((r) => !isPlaced(r))}
+                      occupants={presence.occupants}
+                      currentRoomId={null}
+                      floorplanUrl={null}
+                      onEnter={handleEnter}
+                    />
+                  </div>
+                )}
+              </>
             ) : (
               <VenueFloorplan
                 rooms={rooms}

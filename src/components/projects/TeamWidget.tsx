@@ -15,6 +15,7 @@ import { useToast } from '../../contexts/ToastContext'
 // and no username, so those rows still link by uuid and the profile page
 // rewrites the URL on arrival. Join requests embed the whole profile.
 import { memberPath } from '../../lib/slug'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface TeamWidgetProps {
   projectId: string
@@ -152,23 +153,13 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
               {/* The avatar opens the quick-look drawer; the name is a real
                   link, so a team member's profile can be shared or opened in a
                   new tab the same way the owner's can. */}
-              <button
-                type="button"
+              <DiamondAvatar
+                src={member.avatar_url}
+                name={member.display_name || 'Member'}
+                size={40}
                 onClick={() => openMember(member.user_id)}
-                aria-label={`Preview ${member.display_name || 'member'}`}
-                className="w-10 h-10 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-sm font-medium text-ktip-ocean-700 shrink-0 overflow-hidden"
-              >
-                {member.avatar_url ? (
-                  <img
-                    src={member.avatar_url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  member.display_name?.charAt(0).toUpperCase() || 'U'
-                )}
-              </button>
+                title={`Preview ${member.display_name || 'member'}`}
+              />
               <div className="min-w-0">
                 <Link
                   to={`/user/${member.user_id}`}

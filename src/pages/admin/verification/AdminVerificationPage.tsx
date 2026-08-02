@@ -9,11 +9,12 @@ import {
 } from '../../../hooks/useVerification'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
-import { formatDate, getInitials, generateAvatarColor } from '../../../lib/utils'
+import { formatDate } from '../../../lib/utils'
 import type { VerificationRequest } from '../../../types'
 import { BadgeCheck, CheckCircle, XCircle, ExternalLink, Filter, X, FileText } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
@@ -121,11 +122,7 @@ export default function AdminVerificationPage() {
               return (
                 <div key={request.id} className="flex items-center justify-between gap-3 p-4 hover:bg-ktip-sand-50/50 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 ${generateAvatarColor(name)}`}
-                    >
-                      {getInitials(name)}
-                    </div>
+                    <DiamondAvatar name={name} size={40} />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-ktip-sand-900 truncate">{name}</p>
                       <p className="text-xs text-ktip-sand-500">

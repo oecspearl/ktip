@@ -15,7 +15,7 @@ import {
 } from '../hooks/useProjectJoinRequests'
 import { usePendingRequests, useConnectionMutations } from '../hooks/useConnections'
 import { PageHero } from '../components/layout/PageHero'
-import { formatRelativeTime, getInitials, generateAvatarColor } from '../lib/utils'
+import { formatRelativeTime } from '../lib/utils'
 import {
   Check,
   X,
@@ -31,6 +31,7 @@ import {
   Pencil,
 } from 'lucide-react'
 import type { CollabInvite, CollabResourceType, Profile } from '../types'
+import { DiamondAvatar } from '../components/ui/DiamondAvatar'
 
 const RESOURCE_ICON: Record<CollabResourceType, typeof Pen> = {
   whiteboard: Pen,
@@ -41,13 +42,7 @@ const RESOURCE_ICON: Record<CollabResourceType, typeof Pen> = {
 function Avatar({ profile }: { profile?: Profile | null }) {
   const name = profile?.display_name || 'User'
   return (
-    <div
-      className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${generateAvatarColor(
-        name
-      )}`}
-    >
-      {getInitials(name)}
-    </div>
+    <DiamondAvatar name={name} size={36} />
   )
 }
 

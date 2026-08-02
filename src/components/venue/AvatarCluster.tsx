@@ -1,6 +1,7 @@
-import { cn, generateAvatarColor, getInitials } from '../../lib/utils'
+import { cn } from '../../lib/utils'
 import { VENUE_AVAILABILITY_DOT_COLORS } from '../../lib/constants'
 import type { VenueOccupant } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface AvatarClusterProps {
   occupants: VenueOccupant[]
@@ -11,8 +12,8 @@ interface AvatarClusterProps {
 }
 
 const SIZES = {
-  sm: { box: 'h-6 w-6', text: 'text-[9px]', dot: 'h-2 w-2' },
-  md: { box: 'h-8 w-8', text: 'text-[11px]', dot: 'h-2.5 w-2.5' },
+  sm: { box: 24, text: 'text-[9px]', dot: 'h-2 w-2' },
+  md: { box: 32, text: 'text-[11px]', dot: 'h-2.5 w-2.5' },
 }
 
 /**
@@ -37,61 +38,25 @@ export function AvatarCluster({
         const name = o.display_name || 'Member'
         const dot = VENUE_AVAILABILITY_DOT_COLORS[o.availability] || 'bg-ktip-sand-300'
 
-        const inner = (
-          <>
-            {o.avatar_url ? (
-              <img
-                src={o.avatar_url}
-                alt={name}
-                loading="lazy" decoding="async" className={cn('rounded-full object-cover ring-2 ring-ktip-cream', s.box)}
-              />
-            ) : (
-              <span
-                className={cn(
-                  'flex items-center justify-center rounded-full font-bold text-white ring-2 ring-ktip-cream',
-                  s.box,
-                  s.text,
-                  generateAvatarColor(name)
-                )}
-                aria-hidden="true"
-              >
-                {getInitials(name)}
-              </span>
-            )}
+        return (
+          <DiamondAvatar
+            key={o.user_id}
+            src={o.avatar_url}
+            name={name}
+            size={s.box}
+            title={name}
+            onClick={onSelect ? () => onSelect(o.user_id) : undefined}
+            className="-ml-2 first:ml-0 transition-transform hover:z-10 hover:-translate-y-0.5"
+            frameClassName="ring-2 ring-ktip-cream"
+          >
+            {/* On the lower-right edge rather than the corner: a diamond has no
+                corner there, so a -bottom-0.5 -right-0.5 dot would float in
+                the gap beside the tip. */}
             <span
-              className={cn(
-                'absolute -bottom-0.5 -right-0.5 rounded-full ring-2 ring-ktip-cream',
-                s.dot,
-                dot
-              )}
+              className={cn('absolute bottom-[12%] right-[12%] rounded-full ring-2 ring-ktip-cream', s.dot, dot)}
               aria-hidden="true"
             />
-          </>
-        )
-
-        return onSelect ? (
-          <button
-            key={o.user_id}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onSelect(o.user_id)
-            }}
-            title={name}
-            aria-label={name}
-            className="relative -ml-2 first:ml-0 transition-transform hover:z-10 hover:-translate-y-0.5"
-          >
-            {inner}
-          </button>
-        ) : (
-          <span
-            key={o.user_id}
-            title={name}
-            className="relative -ml-2 first:ml-0"
-          >
-            {inner}
-            <span className="sr-only">{name}</span>
-          </span>
+          </DiamondAvatar>
         )
       })}
 
@@ -99,7 +64,7 @@ export function AvatarCluster({
         <span
           className={cn(
             'relative -ml-2 flex items-center justify-center rounded-full bg-ktip-sand-200 font-semibold text-ktip-sand-700 ring-2 ring-ktip-cream',
-            s.box,
+            size === 'sm' ? 'h-6 w-6' : 'h-8 w-8',
             s.text
           )}
         >

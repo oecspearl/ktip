@@ -1,8 +1,9 @@
 import { Link } from 'react-router'
 import { format, isSameDay } from 'date-fns'
-import { cn, generateAvatarColor, getInitials } from '../../lib/utils'
+import { cn } from '../../lib/utils'
 import { CALENDAR_FALLBACK_GRADIENT } from '../../lib/constants'
 import type { CalendarItem } from '../../lib/calendar'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface CalendarEventCardProps {
   item: CalendarItem
@@ -26,27 +27,13 @@ function timeRangeLabel(item: CalendarItem): string {
 }
 
 function Avatar({ url, name }: { url?: string | null; name?: string | null }) {
-  const label = name || 'Organizer'
-  if (url) {
-    return (
-      <img
-        src={url}
-        alt={label}
-        loading="lazy"
-        className="h-5 w-5 rounded-full object-cover ring-1 ring-white/70"
-      />
-    )
-  }
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'h-5 w-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white ring-1 ring-white/70',
-        generateAvatarColor(label)
-      )}
-    >
-      {getInitials(label)}
-    </span>
+    <DiamondAvatar
+      src={url}
+      name={name || 'Organizer'}
+      size={20}
+      frameClassName="ring-1 ring-white/70"
+    />
   )
 }
 

@@ -1,5 +1,5 @@
 import { MessageSquare, UserRound } from 'lucide-react'
-import { cn, generateAvatarColor, getInitials } from '../../lib/utils'
+import { cn } from '../../lib/utils'
 import { VENUE_ROLE_LABELS } from '../../lib/constants'
 import { canDirectMessage } from '../../lib/venue-actions'
 import { useAuth } from '../../contexts/AuthContext'
@@ -7,6 +7,7 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { AvailabilityDot } from './AvailabilityDot'
 import type { VenueOccupant } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface RoomOccupantListProps {
   occupants: VenueOccupant[]
@@ -62,19 +63,7 @@ export function RoomOccupantList({
             return (
               <li key={o.user_id} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="relative shrink-0">
-                  {o.avatar_url ? (
-                    <img src={o.avatar_url} alt="" loading="lazy" decoding="async" width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
-                  ) : (
-                    <span
-                      className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white',
-                        generateAvatarColor(name)
-                      )}
-                      aria-hidden="true"
-                    >
-                      {getInitials(name)}
-                    </span>
-                  )}
+                  <DiamondAvatar src={o.avatar_url} name={name} size={36} />
                 </span>
 
                 <span className="min-w-0 flex-1">

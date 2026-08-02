@@ -4,12 +4,8 @@ import { Badge } from '../ui/Badge'
 import type { ForumPost } from '../../types'
 import { forumPostPath } from '../../lib/slug'
 import { MessageCircle, Pin } from 'lucide-react'
-import {
-  formatRelativeTime,
-  truncate,
-  getInitials,
-  generateAvatarColor,
-} from '../../lib/utils'
+import { formatRelativeTime, truncate } from '../../lib/utils'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface PostCardProps {
   post: ForumPost
@@ -24,11 +20,7 @@ export function PostCard({ post, boardSlug }: PostCardProps) {
       <Card hover>
         <div className="flex items-start gap-3">
           {/* Author avatar */}
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(authorName)}`}
-          >
-            {getInitials(authorName)}
-          </div>
+          <DiamondAvatar src={post.author?.avatar_url} name={authorName} size={40} />
 
           <div className="flex-1 min-w-0">
             {/* Title row */}

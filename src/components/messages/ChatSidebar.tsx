@@ -8,7 +8,8 @@ import {
   ASSISTANT_NAME,
   ASSISTANT_TAGLINE,
 } from '../../lib/assistant'
-import { cn, formatRelativeTime, generateAvatarColor, getInitials } from '../../lib/utils'
+import { cn, formatRelativeTime } from '../../lib/utils'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface ChatSidebarProps {
   conversations: Conversation[] | undefined
@@ -66,20 +67,14 @@ export function ChatSidebar({
         onClick={() => onSelect(conversation.id)}
       >
         <div className="flex items-center gap-3">
-          {conversation.is_group ? (
-            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shrink-0">
-              <Users size={16} />
-            </div>
-          ) : (
-            <div
-              className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0',
-                generateAvatarColor(displayName)
-              )}
-            >
-              {getInitials(displayName)}
-            </div>
-          )}
+          <DiamondAvatar
+            name={displayName}
+            size={36}
+            colorClass={
+              conversation.is_group ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200' : undefined
+            }
+            icon={conversation.is_group ? <Users size={15} /> : undefined}
+          />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <span className="font-medium text-ktip-sand-900 text-sm truncate">{displayName}</span>
@@ -215,18 +210,7 @@ export function ChatSidebar({
                 onClick={() => onStartDm(contact.id)}
               >
                 <div className="flex items-center gap-3">
-                  {contact.avatar_url ? (
-                    <img src={contact.avatar_url} alt={name} loading="lazy" decoding="async" width={36} height={36} className="w-9 h-9 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div
-                      className={cn(
-                        'w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0',
-                        generateAvatarColor(name)
-                      )}
-                    >
-                      {getInitials(name)}
-                    </div>
-                  )}
+                  <DiamondAvatar src={contact.avatar_url} name={name} size={36} />
                   <span className="font-medium text-ktip-sand-900 text-sm truncate">{name}</span>
                 </div>
               </button>

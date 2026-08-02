@@ -7,7 +7,8 @@ import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { visibleDashboardTabs } from './dashboard-tabs'
 import { ROLE_LABELS } from '../../lib/constants'
-import { cn, getInitials, generateAvatarColor } from '../../lib/utils'
+import { cn } from '../../lib/utils'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 /**
  * The single personal page. Everything that used to live on /profile/me now
@@ -33,19 +34,12 @@ export default function DashboardLayout() {
       <PageHero
         eyebrow={
           <span className="flex items-center gap-2.5 md:justify-end normal-case tracking-normal text-sm text-white/85">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={displayName}
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-white/40 shrink-0"
-              />
-            ) : (
-              <span
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white ring-2 ring-white/40 shrink-0 ${generateAvatarColor(displayName)}`}
-              >
-                {getInitials(displayName)}
-              </span>
-            )}
+            <DiamondAvatar
+              src={profile?.avatar_url}
+              name={displayName}
+              size={36}
+              frameClassName="ring-2 ring-white/40"
+            />
             <span className="font-semibold truncate">{displayName}</span>
             {profile?.is_verified && (
               <span className="text-white/90 shrink-0" title="Verified">

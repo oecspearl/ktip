@@ -8,6 +8,7 @@ import { useTrackFlag } from '../../hooks/useAchievements'
 import { ROLE_LABELS } from '../../lib/constants'
 import { cn } from '../../lib/utils'
 import type { LeaderboardScope, LeaderboardWindow } from '../../types'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 /**
  * Public board. Everything about who appears is decided in SQL by
@@ -175,18 +176,11 @@ export default function LeaderboardPage() {
                         to={`/user/${entry.user_id}`}
                         className="flex items-center gap-2 hover:underline"
                       >
-                        {entry.avatar_url ? (
-                          <img
-                            src={entry.avatar_url}
-                            alt=""
-                            width={28}
-                            height={28}
-                            loading="lazy"
-                            className="h-7 w-7 shrink-0 rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="h-7 w-7 shrink-0 rounded-full bg-ktip-sand-200" />
-                        )}
+                        <DiamondAvatar
+                          src={entry.avatar_url}
+                          name={entry.display_name || 'Member'}
+                          size={28}
+                        />
                         <span className="font-medium text-ktip-sand-900">
                           {entry.display_name || 'Member'}
                         </span>

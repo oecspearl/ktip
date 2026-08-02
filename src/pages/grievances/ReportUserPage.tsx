@@ -10,10 +10,10 @@ import { useCreateGrievance } from '../../hooks/useGrievances'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { GRIEVANCE_CATEGORY_LABELS } from '../../lib/constants'
-import { getInitials, generateAvatarColor } from '../../lib/utils'
 import { Flag, AlertTriangle, User, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function ReportUserPage() {
   const params = useParams()
@@ -130,11 +130,7 @@ export default function ReportUserPage() {
         {/* Reported User Card */}
         {reportedUser && (
           <div className="flex items-center gap-4 p-4 bg-ktip-sand-50 border border-ktip-sand-200 rounded-xl mb-6">
-            <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white shrink-0 ${generateAvatarColor(displayName)}`}
-            >
-              {getInitials(displayName)}
-            </div>
+            <DiamondAvatar name={displayName} size={48} />
             <div>
               <p className="text-sm text-ktip-sand-500">Reporting user</p>
               <p className="font-semibold text-ktip-sand-900">{displayName}</p>

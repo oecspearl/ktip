@@ -291,6 +291,7 @@ export default function AdminEventDetailPage() {
             eventId={event.id}
             hasVenue={event.has_venue ?? false}
             venueFloorplanUrl={event.venue_floorplan_url ?? null}
+            venueMap={event.venue_map ?? null}
             onEventChange={refetch}
           />
         </div>

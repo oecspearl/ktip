@@ -23,12 +23,12 @@ import {
   LIMITS,
   IMAGE_PRESETS,
 } from '../../lib/constants'
-import { getInitials, generateAvatarColor } from '../../lib/utils'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../lib/permissions'
 import type { UserRole } from '../../types'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 const IMAGE_ACCEPT = ['image/*'] as const
 
@@ -202,33 +202,27 @@ export function ProfileSettingsTab() {
       <Card id="photo" data-spy="Photo" className="scroll-mt-24">
         <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Photo</h2>
         <div className="flex items-center gap-6" {...avatarDropProps}>
-          <div
-            className={`relative rounded-full transition-shadow ${avatarDragging ? 'ring-2 ring-ktip-ocean-400 ring-offset-2' : ''}`}
-          >
-            {auth.profile?.avatar_url ? (
-              <img
-                src={auth.profile.avatar_url}
-                alt="Avatar"
-                className="w-20 h-20 rounded-full object-cover"
-              />
-            ) : (
-              <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white ${generateAvatarColor(displayNameValue)}`}
-              >
-                {getInitials(displayNameValue)}
-              </div>
-            )}
-            <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-full flex items-center justify-center cursor-pointer hover:bg-brand-green hover:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-colors shadow-soft">
-              <Camera size={14} className="text-white" />
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-                disabled={avatarUploading}
-              />
-            </label>
-          </div>
+          {/* The camera lives in the hover scrim rather than a corner chip: a
+              diamond has no corner to pin a chip to without it floating off the
+              silhouette. The whole label is the drop/click target. */}
+          <label className="cursor-pointer">
+            <DiamondAvatar
+              src={auth.profile?.avatar_url}
+              name={displayNameValue || 'You'}
+              size={80}
+              frameClassName={
+                avatarDragging ? 'ring-2 ring-ktip-ocean-400 ring-offset-2' : undefined
+              }
+              overlay={<Camera size={20} className="text-white" />}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+              disabled={avatarUploading}
+            />
+          </label>
           <div>
             <p className="text-sm text-ktip-sand-700 font-medium">
               {avatarDragging ? 'Drop photo to upload' : 'Upload a photo'}

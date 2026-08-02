@@ -11,7 +11,7 @@ import {
   GRIEVANCE_STATUS_LABELS,
   GRIEVANCE_STATUS_COLORS,
 } from '../../../lib/constants'
-import { formatDate, getInitials, generateAvatarColor } from '../../../lib/utils'
+import { formatDate } from '../../../lib/utils'
 import type { Grievance, GrievanceStatus } from '../../../types'
 import {
   Flag,
@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 export default function AdminGrievancesPage() {
   const auth = useAuth()
@@ -188,11 +189,7 @@ export default function AdminGrievancesPage() {
                       <tr className="hover:bg-ktip-sand-50/50 transition-colors" key={grievance.id}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${generateAvatarColor(reporterName)}`}
-                            >
-                              {getInitials(reporterName)}
-                            </div>
+                            <DiamondAvatar name={reporterName} size={32} />
                             <span className="text-sm text-ktip-sand-900 font-medium truncate max-w-[120px]">
                               {reporterName}
                             </span>
@@ -200,11 +197,7 @@ export default function AdminGrievancesPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${generateAvatarColor(reportedName)}`}
-                            >
-                              {getInitials(reportedName)}
-                            </div>
+                            <DiamondAvatar name={reportedName} size={32} />
                             <span className="text-sm text-ktip-sand-900 font-medium truncate max-w-[120px]">
                               {reportedName}
                             </span>
@@ -283,11 +276,7 @@ export default function AdminGrievancesPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${generateAvatarColor(reportedName)}`}
-                          >
-                            {getInitials(reportedName)}
-                          </div>
+                          <DiamondAvatar name={reportedName} size={28} />
                           <span className="text-sm font-semibold text-ktip-sand-900">{reportedName}</span>
                         </div>
                         <p className="text-xs text-ktip-sand-500">reported by {reporterName}</p>
@@ -366,22 +355,14 @@ export default function AdminGrievancesPage() {
                   <div>
                     <p className="text-xs text-ktip-sand-500 mb-1">Reporter</p>
                     <div className="flex items-center gap-2">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${generateAvatarColor(reporterName)}`}
-                      >
-                        {getInitials(reporterName)}
-                      </div>
+                      <DiamondAvatar name={reporterName} size={32} />
                       <span className="text-sm font-medium text-ktip-sand-900">{reporterName}</span>
                     </div>
                   </div>
                   <div>
                     <p className="text-xs text-ktip-sand-500 mb-1">Reported User</p>
                     <div className="flex items-center gap-2">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${generateAvatarColor(reportedName)}`}
-                      >
-                        {getInitials(reportedName)}
-                      </div>
+                      <DiamondAvatar name={reportedName} size={32} />
                       <span className="text-sm font-medium text-ktip-sand-900">{reportedName}</span>
                     </div>
                   </div>

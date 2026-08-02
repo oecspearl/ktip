@@ -504,6 +504,84 @@ html.dark {
   .badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
   }
+
+  /* ---- Diamond avatar -------------------------------------------------
+     A square tilted 45°. Every dimension is locked to one free variable
+     (--s, the square's side) so a call site sets one number and the radius,
+     the reserved box and the type scale follow. The wrapper reserves the
+     rotated bounding box (s × √2) — without it the tips overlap neighbours
+     and flex siblings sit on top of the points.
+
+     Anything placed inside .dm-frame inherits the 45° tilt, so it needs the
+     inverse rotation to read level. That applies to overlays and badges too,
+     not just the photo/initials layer. */
+  .dm-wrap {
+    --s: 88px;
+    width: calc(var(--s) * 1.414);
+    height: calc(var(--s) * 1.414);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    position: relative;
+  }
+
+  .dm-frame {
+    width: var(--s);
+    height: var(--s);
+    border-radius: calc(var(--s) * 0.11);
+    transform: rotate(45deg);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dm-inner {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* scale(1.45) ≈ √2 + slack: an un-rotated child only covers the inscribed
+     square of the tilted frame, so without the overscan the four corners show
+     background through the photo. Only the photo needs it — overscanning a
+     text or icon layer just magnifies it by 45%. */
+  img.dm-inner {
+    transform: rotate(-45deg) scale(1.45);
+    object-fit: cover;
+  }
+
+  .dm-ov {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.45);
+    opacity: 0;
+    transition: opacity 140ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dm-interactive:hover .dm-ov,
+  .dm-interactive:focus-visible .dm-ov {
+    opacity: 1;
+  }
+
+  /* Overlay contents sit inside the tilted frame — level them back out. */
+  .dm-ov > * {
+    transform: rotate(-45deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dm-ov {
+      transition: none;
+    }
+  }
 }
 
 @utility text-balance {

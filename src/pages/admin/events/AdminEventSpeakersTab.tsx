@@ -19,6 +19,7 @@ import {
   Globe,
   Mic,
 } from 'lucide-react'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 interface AdminEventSpeakersTabProps {
   eventId: string
@@ -62,16 +63,6 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
     setPhotoUrl(speaker.photo_url || '')
     setWebsite(speaker.website || '')
     setShowForm(true)
-  }
-
-  const getInitials = (fullName: string) => {
-    return fullName
-      .split(' ')
-      .map((part) => part[0])
-      .filter(Boolean)
-      .slice(0, 2)
-      .join('')
-      .toUpperCase()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -279,17 +270,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
             <div key={speaker.id} className="group bg-ktip-cream rounded-xl border border-ktip-sand-200 p-4 hover:shadow-card-hover transition-shadow">
               <div className="flex items-start gap-3">
                 {/* Photo or Initials */}
-                {speaker.photo_url ? (
-                  <img
-                    src={speaker.photo_url}
-                    alt={speaker.name}
-                    loading="lazy" decoding="async" width={64} height={64} className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-xl font-bold text-ktip-ocean-700 flex-shrink-0">
-                    {getInitials(speaker.name)}
-                  </div>
-                )}
+                <DiamondAvatar src={speaker.photo_url} name={speaker.name} size={64} />
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">

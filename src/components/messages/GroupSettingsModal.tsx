@@ -6,8 +6,8 @@ import { Button } from '../ui/Button'
 import { useSearchUsers, useGroupConversationMutations } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { getInitials, generateAvatarColor } from '../../lib/utils'
 import type { Conversation, Profile } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface GroupSettingsModalProps {
   open: boolean
@@ -154,11 +154,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
             return (
               <div key={participant.id} className="flex items-center justify-between px-3 py-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0 ${generateAvatarColor(pname)}`}
-                  >
-                    {getInitials(pname)}
-                  </div>
+                  <DiamondAvatar name={pname} size={32} />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ktip-sand-900 truncate">{pname}</p>
                     <p className="text-xs text-gray-500 capitalize">{participant.role}</p>

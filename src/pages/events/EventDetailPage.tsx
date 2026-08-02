@@ -58,6 +58,7 @@ import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { truncate } from '../../lib/utils'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function EventDetailPage() {
   const params = useParams()
@@ -684,9 +685,11 @@ export default function EventDetailPage() {
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Event host</p>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-lg font-medium text-ktip-ocean-700">
-                  {event.organizer?.display_name?.charAt(0).toUpperCase() || 'O'}
-                </div>
+                <DiamondAvatar
+                  src={event.organizer?.avatar_url}
+                  name={event.organizer?.display_name || 'Organizer'}
+                  size={48}
+                />
                 <div>
                   <button
                     type="button"

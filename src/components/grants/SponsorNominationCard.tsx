@@ -8,8 +8,8 @@ import { supabase } from '../../lib/supabase'
 import { keys } from '../../queries/keys'
 import { useToast } from '../../contexts/ToastContext'
 import { useApplyForGrant } from '../../hooks/useGrants'
-import { getInitials, generateAvatarColor } from '../../lib/utils'
 import type { Profile } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface SponsorNominationCardProps {
   applicationId: string | undefined
@@ -119,11 +119,7 @@ export function SponsorNominationCard({
           }`}
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${generateAvatarColor(sponsor.display_name || sponsor.id)}`}
-            >
-              {getInitials(sponsor.display_name || 'User')}
-            </div>
+            <DiamondAvatar name={sponsor.display_name || 'User'} size={36} />
             <div className="min-w-0">
               <p className="text-sm font-medium text-ktip-sand-900 truncate">
                 {sponsor.display_name || 'Unnamed'}
@@ -166,11 +162,7 @@ export function SponsorNominationCard({
             {candidates?.map((candidate) => (
               <li key={candidate.id} className="py-2 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${generateAvatarColor(candidate.display_name || candidate.id)}`}
-                  >
-                    {getInitials(candidate.display_name || 'User')}
-                  </div>
+                  <DiamondAvatar name={candidate.display_name || 'User'} size={32} />
                   <p className="text-sm text-ktip-sand-900 truncate">
                     {candidate.display_name || 'Unnamed'}
                   </p>

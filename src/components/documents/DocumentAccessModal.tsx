@@ -8,8 +8,9 @@ import {
   useDocumentAccessRequests,
   useDocumentGrants,
 } from '../../hooks/useDocumentAccess'
-import { formatRelativeTime, generateAvatarColor, getInitials } from '../../lib/utils'
+import { formatRelativeTime } from '../../lib/utils'
 import type { DocumentEntityType, DocumentVisibility, EntityDocumentSummary } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface DocumentAccessModalProps {
   open: boolean
@@ -20,16 +21,7 @@ interface DocumentAccessModalProps {
 }
 
 function Avatar({ name, url }: { name: string; url: string | null | undefined }) {
-  if (url) {
-    return <img src={url} alt="" loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 rounded-full object-cover shrink-0" />
-  }
-  return (
-    <div
-      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0 ${generateAvatarColor(name)}`}
-    >
-      {getInitials(name)}
-    </div>
-  )
+  return <DiamondAvatar src={url} name={name} size={32} />
 }
 
 /**

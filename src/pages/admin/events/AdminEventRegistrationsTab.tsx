@@ -21,6 +21,7 @@ import {
 import { format } from 'date-fns'
 import { downloadCSV } from '../../../lib/csv-export'
 import type { RSVPStatus, RegistrationFieldConfig } from '../../../types'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 interface AdminEventRegistrationsTabProps {
   eventId: string
@@ -207,9 +208,11 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
                     <tr className="hover:bg-ktip-sand-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-ktip-ocean-100 flex items-center justify-center text-xs font-medium text-ktip-ocean-700">
-                            {(reg.user?.display_name || '?')[0].toUpperCase()}
-                          </div>
+                          <DiamondAvatar
+                            src={reg.user?.avatar_url}
+                            name={reg.user?.display_name || 'Attendee'}
+                            size={32}
+                          />
                           <div>
                             <span className="font-medium text-sm text-ktip-sand-900">
                               {reg.user?.display_name || 'Unknown User'}

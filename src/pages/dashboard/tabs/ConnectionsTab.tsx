@@ -4,7 +4,7 @@ import { useMyConnections, useConnectionMutations } from '../../../hooks/useConn
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemberPanel } from '../../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
-import { getInitials, generateAvatarColor } from '../../../lib/utils'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 export default function ConnectionsTab() {
   usePageTitle('My Connections')
@@ -47,19 +47,7 @@ export default function ConnectionsTab() {
               onClick={() => openMember(otherId)}
               className="flex items-center gap-3 min-w-0 group text-left"
             >
-              {other?.avatar_url ? (
-                <img
-                  src={other.avatar_url}
-                  alt={otherName}
-                  loading="lazy" decoding="async" width={44} height={44} className="w-11 h-11 rounded-full object-cover shrink-0"
-                />
-              ) : (
-                <div
-                  className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 ${generateAvatarColor(otherName)}`}
-                >
-                  {getInitials(otherName)}
-                </div>
-              )}
+              <DiamondAvatar src={other?.avatar_url} name={otherName} size={44} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-ktip-sand-900 truncate group-hover:text-ktip-ocean-600 transition-colors">
                   {otherName}

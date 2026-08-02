@@ -9,10 +9,11 @@ import {
   GRIEVANCE_STATUS_LABELS,
   GRIEVANCE_STATUS_COLORS,
 } from '../../lib/constants'
-import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
+import { formatDate } from '../../lib/utils'
 import { ShieldAlert, Clock, HelpCircle, ArrowLeft, Receipt } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function MyGrievancesPage() {
   const auth = useAuth()
@@ -72,11 +73,7 @@ export default function MyGrievancesPage() {
                 <Card key={grievance.id}>
                   <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     {/* Reported User Avatar */}
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 ${generateAvatarColor(reportedName)}`}
-                    >
-                      {getInitials(reportedName)}
-                    </div>
+                    <DiamondAvatar name={reportedName} size={40} />
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">

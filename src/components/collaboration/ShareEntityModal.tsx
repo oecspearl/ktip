@@ -8,9 +8,10 @@ import { RESOURCE_SPECS } from '../../hooks/useCollabInvites'
 import { supabase } from '../../lib/supabase'
 import { sendNotification } from '../../lib/notify'
 import { keys } from '../../queries/keys'
-import { debounce, getInitials, generateAvatarColor, isValidEmail } from '../../lib/utils'
+import { debounce, isValidEmail } from '../../lib/utils'
 import { Search, X, Send, Check, Eye, Pencil, Users, Mail, Loader2 } from 'lucide-react'
 import type { CollabResourceType, Profile, SharePermission } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 type Tab = 'connections' | 'search' | 'email'
 
@@ -288,13 +289,7 @@ export function ShareEntityModal({
       onClick={onClick}
       className="w-full flex items-center gap-3 px-3 py-2 hover:bg-ktip-sand-50 transition-colors text-left"
     >
-      <div
-        className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${generateAvatarColor(
-          user.display_name || user.id
-        )}`}
-      >
-        {getInitials(user.display_name || 'U')}
-      </div>
+      <DiamondAvatar name={user.display_name || 'U'} size={28} />
       <span className="text-sm text-ktip-sand-800 truncate flex-1">
         {user.display_name || 'Unnamed User'}
       </span>
@@ -405,13 +400,7 @@ export function ShareEntityModal({
                   key={user.id}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg bg-ktip-sand-50 border border-ktip-sand-200"
                 >
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${generateAvatarColor(
-                      user.display_name || user.id
-                    )}`}
-                  >
-                    {getInitials(user.display_name || 'U')}
-                  </div>
+                  <DiamondAvatar name={user.display_name || 'U'} size={28} />
                   <span className="text-sm text-ktip-sand-800 flex-1 truncate">
                     {user.display_name || 'User'}
                   </span>

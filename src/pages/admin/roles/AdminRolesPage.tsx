@@ -25,9 +25,10 @@ import {
   TIER_LABELS,
   isCellLocked,
 } from '../../../lib/permissions'
-import { formatDate, getInitials, generateAvatarColor } from '../../../lib/utils'
+import { formatDate } from '../../../lib/utils'
 import type { PermissionCategory } from '../../../lib/permissions'
 import type { PermissionKey, Profile, RoleSlug } from '../../../types'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
 const TIER_ACCENT: Record<string, string> = {
   admin: 'text-ktip-ocean-700',
@@ -237,11 +238,7 @@ export default function AdminRolesPage() {
                 <tr key={user.id} className="hover:bg-ktip-sand-50/60 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 ${generateAvatarColor(user.display_name || user.id)}`}
-                      >
-                        {getInitials(user.display_name || 'User')}
-                      </div>
+                      <DiamondAvatar name={user.display_name || 'User'} size={36} />
                       <div className="min-w-0">
                         <p className="font-medium text-ktip-sand-900 truncate">{user.display_name || 'Unnamed'}</p>
                         {user.is_suspended && (

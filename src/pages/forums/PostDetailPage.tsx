@@ -25,12 +25,8 @@ import {
   MessageCircle,
   FileText,
 } from 'lucide-react'
-import {
-  formatDate,
-  formatRelativeTime,
-  getInitials,
-  generateAvatarColor,
-} from '../../lib/utils'
+import { formatDate, formatRelativeTime } from '../../lib/utils'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function PostDetailPage() {
   const params = useParams()
@@ -178,11 +174,7 @@ export default function PostDetailPage() {
           <div className="lg:col-span-2">
             {/* Author info */}
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-ktip-sand-200">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(authorName)}`}
-              >
-                {getInitials(authorName)}
-              </div>
+              <DiamondAvatar src={post.author?.avatar_url} name={authorName} size={40} />
               <div>
                 <button
                   type="button"

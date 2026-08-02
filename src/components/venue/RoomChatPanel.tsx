@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Send, Trash2 } from 'lucide-react'
-import { cn, formatRelativeTime, generateAvatarColor, getInitials } from '../../lib/utils'
+import { cn, formatRelativeTime } from '../../lib/utils'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -11,6 +11,7 @@ import {
   useVenueRoomMessages,
 } from '../../hooks/useVenueRoomMessages'
 import type { VenueRoom } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface RoomChatPanelProps {
   room: VenueRoom
@@ -101,19 +102,7 @@ export function RoomChatPanel({
 
             return (
               <div key={m.id} className="group flex items-start gap-2.5">
-                {m.author?.avatar_url ? (
-                  <img src={m.author.avatar_url} alt="" loading="lazy" decoding="async" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full object-cover" />
-                ) : (
-                  <span
-                    className={cn(
-                      'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white',
-                      generateAvatarColor(name)
-                    )}
-                    aria-hidden="true"
-                  >
-                    {getInitials(name)}
-                  </span>
-                )}
+                <DiamondAvatar src={m.author?.avatar_url} name={name} size={28} />
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">

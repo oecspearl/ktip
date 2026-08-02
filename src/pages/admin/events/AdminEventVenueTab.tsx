@@ -12,21 +12,25 @@ import {
 import { useVenueRoomMutations, useVenueRooms } from '../../../hooks/useVenueRooms'
 import { useVenueRoster, useVenueRosterAdmin } from '../../../hooks/useVenue'
 import { useUpdateEvent } from '../../../hooks/useEvents'
+import { mapConfigOf, useSaveVenueMap } from '../../../hooks/useVenueMap'
 import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../../components/ui/Button'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
+import { VenueMapEditor } from '../../../components/venue/map/VenueMapEditor'
 import {
   VENUE_AVAILABILITY_LABELS,
   VENUE_ROLE_LABELS,
   VENUE_ROOM_KIND_LABELS,
 } from '../../../lib/constants'
 import { formatRelativeTime } from '../../../lib/utils'
-import type { VenueAudioMode, VenueRole, VenueRoom, VenueRoomKind } from '../../../types'
+import type { Event, VenueAudioMode, VenueRole, VenueRoom, VenueRoomKind } from '../../../types'
 
 interface AdminEventVenueTabProps {
   eventId: string
   hasVenue: boolean
   venueFloorplanUrl: string | null
+  /** The drawn map's grid and floor list (089). Null until one is drawn. */
+  venueMap: Event['venue_map']
   /** Re-reads the event so the toggles reflect what was saved. */
   onEventChange: () => void
 }
@@ -73,6 +77,7 @@ export default function AdminEventVenueTab({
   eventId,
   hasVenue,
   venueFloorplanUrl,
+  venueMap,
   onEventChange,
 }: AdminEventVenueTabProps) {
   const toast = useToast()
@@ -82,6 +87,7 @@ export default function AdminEventVenueTab({
   const { roster } = useVenueRoster(eventId)
   const { setRole, removeMember } = useVenueRosterAdmin()
   const { updateEvent } = useUpdateEvent()
+  const { saveMap, saving: savingMap } = useSaveVenueMap()
 
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -186,9 +192,39 @@ export default function AdminEventVenueTab({
         </div>
       </section>
 
+      {/* ---- the drawn map ----
+          The primary way to build a venue. The SVG upload below still works and
+          is left in place for a host who already has a hand-drawn plan. */}
+      <section>
+        <div className="mb-2">
+          <h2 className="font-display text-base font-bold text-ktip-sand-900">The map</h2>
+          <p className="mt-1 text-sm text-ktip-sand-600">
+            Draw the building. Pick a ready-made room, drop it on the grid, then set its rules —
+            attendees walk this exact map, so what you draw is what they see.
+          </p>
+        </div>
+        <VenueMapEditor
+          rooms={rooms}
+          config={mapConfigOf({ venue_map: venueMap })}
+          saving={savingMap}
+          onSave={async (config, payload) => {
+            try {
+              await saveMap({ eventId, map: config, rooms: payload })
+              onEventChange()
+              toast.success('Map saved')
+            } catch (err: any) {
+              toast.error(err?.message || 'Could not save the map')
+              throw err
+            }
+          }}
+        />
+      </section>
+
       {/* ---- floorplan ---- */}
       <section className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-4">
-        <h2 className="font-display text-base font-bold text-ktip-sand-900">Floorplan (optional)</h2>
+        <h2 className="font-display text-base font-bold text-ktip-sand-900">
+          Uploaded floorplan (optional)
+        </h2>
         <p className="mt-1 text-sm text-ktip-sand-600">
           A URL to an SVG in the <code className="text-xs">event-assets</code> bucket. Give each
           room shape an <code className="text-xs">id</code>, then paste that id into the room's
@@ -207,8 +243,8 @@ export default function AdminEventVenueTab({
         </div>
         <p className="mt-2 flex items-start gap-1.5 text-xs text-ktip-sand-500">
           <Info size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
-          No floorplan is fine. Without one the venue renders the rooms as a grid of cards, which
-          works identically — occupancy, avatars and entry all behave the same.
+          Only used when no room has been placed on the drawn map above. With neither, the venue
+          renders the rooms as a grid of cards — occupancy, avatars and entry all behave the same.
         </p>
       </section>
 

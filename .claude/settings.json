@@ -32,7 +32,8 @@
       "Bash(node -e \"try{require.resolve\\('playwright'\\);console.log\\('playwright ok'\\)}catch\\(e\\){try{require.resolve\\('@playwright/test'\\);console.log\\('@playwright/test ok'\\)}catch\\(e2\\){console.log\\('no playwright'\\)}}\")",
       "Bash(node -e ' *)",
       "Bash(curl -s \"http://localhost:5199/src/pages/discover/DiscoverPage.tsx\" -o /tmp/dp2.js -w \"hmr module: %{http_code}\\\\n\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(python \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/cf4e714f-be20-4abc-aaa3-820ef424ef00/scratchpad/repair.py\")"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

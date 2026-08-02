@@ -41,8 +41,9 @@ import {
 } from '../../lib/constants'
 import { isOrganizationAccount } from '../../lib/permissions'
 import { useEmployerForUser, useEmployerPortfolio } from '../../hooks/useEmployerProfile'
-import { formatDate, getInitials, generateAvatarColor } from '../../lib/utils'
+import { formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 /**
  * The shareable member page, back after being folded into a drawer.
@@ -142,21 +143,7 @@ export default function PublicProfilePage() {
         className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
       >
         <div className="flex flex-wrap items-start gap-5">
-          {profile.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={displayName}
-              width={96}
-              height={96}
-              className="h-24 w-24 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div
-              className={`flex h-24 w-24 shrink-0 items-center justify-center rounded-full text-3xl font-bold text-white ${generateAvatarColor(displayName)}`}
-            >
-              {getInitials(displayName)}
-            </div>
-          )}
+          <DiamondAvatar src={profile.avatar_url} name={displayName} size={96} />
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
