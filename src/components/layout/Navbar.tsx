@@ -2,6 +2,10 @@ import { useEffect, useRef, useState, type ComponentType, type KeyboardEvent } f
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
+import { LanguageSwitcher } from '../ui/LanguageSwitcher'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import {
   Menu,
   X,
@@ -50,10 +54,10 @@ import type { PermissionKey } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface DropdownItem {
-  name: string
+  name: MessageDescriptor
   href: string
   icon: ComponentType<{ size?: number; className?: string }>
-  description: string
+  description: MessageDescriptor
   /**
    * Hide this item unless the viewer can act on it. Absent means "always
    * shown". Signed-out visitors are handled by the caller, not here: a CTA
@@ -64,7 +68,7 @@ interface DropdownItem {
 
 interface NavDropdown {
   id: string
-  name: string
+  name: MessageDescriptor
   icon: ComponentType<{ size?: number; className?: string }>
   items: DropdownItem[]
 }
@@ -77,14 +81,14 @@ const SHORTCUT_HINT =
 
 // Standalone links rendered before the dropdowns
 const leadingLinks = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'Projects', href: '/projects', icon: FolderKanban },
+  { name: msg`Home`, href: '/', icon: Home },
+  { name: msg`Projects`, href: '/projects', icon: FolderKanban },
 ]
 
 // Standalone links rendered after the dropdowns
 const trailingLinks = [
-  { name: 'Resources & Integrations', href: '/resources', icon: BookOpen },
-  { name: 'Help', href: '/help', icon: HelpCircle },
+  { name: msg`Resources & Integrations`, href: '/resources', icon: BookOpen },
+  { name: msg`Help`, href: '/help', icon: HelpCircle },
 ]
 
 /**
@@ -108,39 +112,43 @@ const navDropdowns: NavDropdown[] = [
     // dropdown trigger is a <button>, not a <Link>, so /events has to be the
     // first item or the listing becomes unreachable from the bar.
     id: 'events',
-    name: 'Events',
+    name: msg`Events`,
     icon: Calendar,
     items: [
-      { name: 'All Events', href: '/events', icon: Calendar, description: 'Hackathons, workshops, meetups and conferences' },
-      { name: 'Virtual Hackathon', href: '/hackathons', icon: Trophy, description: 'Enter the live venue, find a team and build' },
-      { name: 'Event Calendar', href: '/events?view=calendar', icon: CalendarDays, description: 'Month-by-month view of what is scheduled' },
-      { name: 'Create an Event', href: '/events/new', icon: CalendarPlus, description: 'Publish an event and open registrations', requires: 'event:create' },
-      { name: 'My Events', href: '/dashboard/events', icon: LayoutDashboard, description: 'Events you organise or registered for' },
+      { name: msg`All Events`, href: '/events', icon: Calendar, description: msg`Hackathons, workshops, meetups and conferences` },
+      { name: msg`Virtual Hackathon`, href: '/hackathons', icon: Trophy, description: msg`Enter the live venue, find a team and build` },
+      { name: msg`Event Calendar`, href: '/events?view=calendar', icon: CalendarDays, description: msg`Month-by-month view of what is scheduled` },
+      { name: msg`Create an Event`, href: '/events/new', icon: CalendarPlus, description: msg`Publish an event and open registrations`, requires: 'event:create' },
+      { name: msg`My Events`, href: '/dashboard/events', icon: LayoutDashboard, description: msg`Events you organise or registered for` },
     ],
   },
   {
     id: 'funding',
-    name: 'Funding',
+    name: msg`Funding`,
     icon: DollarSign,
     items: [
-      { name: 'Grants', href: '/grants', icon: DollarSign, description: 'Browse funding opportunities' },
-      { name: 'My Applications', href: '/grants/my-applications', icon: ClipboardList, description: 'Track your grant applications' },
-      { name: 'My Submissions', href: '/dashboard/submissions', icon: Inbox, description: 'Your copy of everything you submitted' },
+      { name: msg`Grants`, href: '/grants', icon: DollarSign, description: msg`Browse funding opportunities` },
+      // A funding agency posts calls, it does not answer them — and a student
+      // has to be sponsored rather than apply. Neither has an application to
+      // track, so neither gets the entry.
+      { name: msg`My Applications`, href: '/grants/my-applications', icon: ClipboardList, description: msg`Track your grant applications`, requires: 'grant:apply' },
+      { name: msg`My Submissions`, href: '/dashboard/submissions', icon: Inbox, description: msg`Your copy of everything you submitted` },
     ],
   },
   {
     id: 'community',
-    name: 'Community',
+    name: msg`Community`,
     icon: Users,
     items: [
-      { name: 'Directory', href: '/directory', icon: Users, description: 'Browse the member directory' },
-      { name: 'Forums', href: '/forums', icon: MessageSquare, description: 'Join community discussions' },
-      { name: 'Collaborate', href: '/collaborate', icon: Handshake, description: 'Work together in real-time' },
+      { name: msg`Directory`, href: '/directory', icon: Users, description: msg`Browse the member directory` },
+      { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Join community discussions` },
+      { name: msg`Collaborate`, href: '/collaborate', icon: Handshake, description: msg`Work together in real-time` },
     ],
   },
 ]
 
 export function Navbar() {
+  const { i18n, t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const location = useLocation()
@@ -188,8 +196,22 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  /**
+   * The roles this bar renders for.
+   *
+   * Switching context is meant to change what the account is doing, not just
+   * which line is ticked in the menu — the dashboard rail has narrowed this way
+   * since the switcher landed. Anything not actually held is ignored, so a stale
+   * active_role cannot invent a context.
+   */
+  const heldRoles = auth.roles
+  const effectiveRoles =
+    auth.activeRole && heldRoles.includes(auth.activeRole) ? [auth.activeRole] : heldRoles
+
   // Organisation-tier accounts see a business profile where a person sees a CV.
-  const isOrgAccount = isOrganizationAccount(auth.profile?.roles)
+  // A founder who is also a mentor keeps the CV — until they explicitly act as
+  // the organisation, at which point the business profile is what they want.
+  const isOrgAccount = isOrganizationAccount(effectiveRoles)
 
   // Mirrors AdminRoute exactly. Kept as one value so the desktop bar and the
   // mobile menu can never drift apart.
@@ -205,6 +227,12 @@ export function Navbar() {
    */
   const visibleItems = (dropdown: NavDropdown) =>
     dropdown.items.filter((item) => !item.requires || !auth.user || auth.can(item.requires))
+
+  // A group whose every entry was filtered out is a trigger that opens an empty
+  // panel, so it does not get rendered at all.
+  const visibleDropdowns = navDropdowns
+    .map((dropdown) => ({ ...dropdown, items: visibleItems(dropdown) }))
+    .filter((dropdown) => dropdown.items.length > 0)
 
   const anyMenuOpen = mobileMenuOpen || userMenuOpen || notifOpen || openDropdownId !== null
   const hidden = navHidden && !anyMenuOpen
@@ -396,9 +424,9 @@ export function Navbar() {
   const handleSignOut = async () => {
     try {
       await auth.signOut()
-      toast.success('Signed out successfully')
+      toast.success(t`Signed out successfully`)
     } catch (error) {
-      toast.error('Failed to sign out')
+      toast.error(t`Failed to sign out`)
     }
   }
 
@@ -430,7 +458,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src="/ktip-logo.webp" alt="KTIP Logo" width={56} height={56} decoding="async" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
+              <img src="/ktip-logo-128.webp" alt="KTiP" width={56} height={56} decoding="async" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
               {/* The wordmark yields to the links in the one band where both
                   do not fit. Below lg the horizontal nav is not rendered at
                   all (the mobile menu is), so the wordmark has the bar to
@@ -459,7 +487,7 @@ export function Navbar() {
             {/* Standalone links */}
             {leadingLinks.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 to={item.href}
                 className={cn(
                   NAV_ITEM_CLASS,
@@ -468,12 +496,12 @@ export function Navbar() {
                     : 'text-white/80 hover:text-ktip-nav-accent'
                 )}
               >
-                <span>{item.name}</span>
+                <span>{i18n._(item.name)}</span>
               </Link>
             ))}
 
             {/* Dropdown menus */}
-            {navDropdowns.map((dropdown) => (
+            {visibleDropdowns.map((dropdown) => (
               <div
                 key={dropdown.id}
                 className="relative"
@@ -490,7 +518,7 @@ export function Navbar() {
                       : 'text-white/80 hover:text-ktip-nav-accent'
                   )}
                 >
-                  <span>{dropdown.name}</span>
+                  <span>{i18n._(dropdown.name)}</span>
                   <ChevronDown
                     size={14}
                     className={cn(
@@ -505,11 +533,11 @@ export function Navbar() {
                   role="menu"
                   className="absolute right-0 mt-2 w-64 origin-top-right bg-ktip-cream rounded-xl shadow-hard overflow-hidden z-dropdown"
                 >
-                  {visibleItems(dropdown).map((item) => (
+                  {dropdown.items.map((item) => (
                     <FlowingMenuItem
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
-                      label={item.name}
+                      label={i18n._(item.name)}
                       onClick={() => setOpenDropdownId(null)}
                       className={cn(
                         'flex items-start justify-end gap-3 px-4 py-3 transition-colors',
@@ -519,8 +547,8 @@ export function Navbar() {
                       )}
                     >
                       <div className="text-right">
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-xs text-ktip-sand-500 mt-0.5">{item.description}</p>
+                        <p className="font-medium">{i18n._(item.name)}</p>
+                        <p className="text-xs text-ktip-sand-500 mt-0.5">{i18n._(item.description)}</p>
                       </div>
                     </FlowingMenuItem>
                   ))}
@@ -531,7 +559,7 @@ export function Navbar() {
             {/* Trailing standalone links */}
             {trailingLinks.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 to={item.href}
                 className={cn(
                   NAV_ITEM_CLASS,
@@ -540,7 +568,7 @@ export function Navbar() {
                     : 'text-white/80 hover:text-ktip-nav-accent'
                 )}
               >
-                <span>{item.name}</span>
+                <span>{i18n._(item.name)}</span>
               </Link>
             ))}
 
@@ -559,7 +587,7 @@ export function Navbar() {
                     : 'text-white/80 hover:text-ktip-nav-accent'
                 )}
               >
-                <span>Admin</span>
+                <span><Trans>Admin</Trans></span>
               </Link>
             )}
           </div>
@@ -597,8 +625,8 @@ export function Navbar() {
                   <input
                     ref={searchInputRef}
                     type="text"
-                    placeholder="Search pages, features, people..."
-                    aria-label="Search the whole platform"
+                    placeholder={t`Search pages, features, people...`}
+                    aria-label={t`Search the whole platform`}
                     aria-expanded={searchOpen}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.currentTarget.value)}
@@ -612,7 +640,7 @@ export function Navbar() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  aria-label="Open search"
+                  aria-label={t`Open search`}
                   title={`Search (${SHORTCUT_HINT})`}
                   className="p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
@@ -652,12 +680,18 @@ export function Navbar() {
               buttons ended up against the wordmark with the gap after them.
               Below md this block takes the auto margin instead. */}
           <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0">
+            {/* Language. Beside the bell rather than inside the account menu,
+                because a visitor who is not signed in has no account menu — and
+                a francophone arriving on a public page is exactly who needs to
+                find this. Icon-only here; the footer copy carries the code. */}
+            <LanguageSwitcher direction="down" compact />
+
             {/* Notification Bell */}
             {auth.user && (
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setNotifOpen(!notifOpen)}
-                  aria-label="Notifications"
+                  aria-label={t`Notifications`}
                   className="relative p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
                   <Bell size={20} />
@@ -674,7 +708,7 @@ export function Navbar() {
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-ktip-sand-100">
-                      <h3 className="text-sm font-semibold text-ktip-sand-800">Notifications</h3>
+                      <h3 className="text-sm font-semibold text-ktip-sand-800"><Trans>Notifications</Trans></h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={async () => {
@@ -687,7 +721,7 @@ export function Navbar() {
                           className="flex items-center gap-1 text-xs text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
                         >
                           <CheckCheck size={14} />
-                          Mark all read
+                          <Trans>Mark all read</Trans>
                         </button>
                       )}
                     </div>
@@ -741,7 +775,7 @@ export function Navbar() {
                       ) : (
                         <div className="px-4 py-8 text-center">
                           <Bell size={24} className="mx-auto text-ktip-sand-300 mb-2" />
-                          <p className="text-sm text-ktip-sand-500">No notifications yet</p>
+                          <p className="text-sm text-ktip-sand-500"><Trans>No notifications yet</Trans></p>
                         </div>
                       )}
                     </div>
@@ -753,7 +787,7 @@ export function Navbar() {
                       onClick={() => setNotifOpen(false)}
                       className="block px-4 py-2.5 text-center text-sm font-medium text-ktip-ocean-600 hover:bg-ktip-sand-50 border-t border-ktip-sand-100 rounded-b-xl"
                     >
-                      View all invitations
+                      <Trans>View all invitations</Trans>
                     </Link>
                 </DropdownPanel>
               </div>
@@ -764,7 +798,7 @@ export function Navbar() {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  aria-label="User menu"
+                  aria-label={t`User menu`}
                   aria-expanded={userMenuOpen}
                   aria-haspopup="true"
                   className="group flex items-center gap-3 px-3 py-2 transition-all duration-200 hover:scale-110"
@@ -773,9 +807,12 @@ export function Navbar() {
                     <p className="text-sm font-medium text-white transition-colors group-hover:text-ktip-nav-accent">
                       {auth.profile?.display_name || 'User'}
                     </p>
-                    {auth.profile?.roles?.[0] && (
+                    {/* The context being acted in, not whichever role happens to
+                        sit first in the array — on a multi-role account those
+                        are different answers, and the first one is arbitrary. */}
+                    {effectiveRoles[0] && (
                       <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/60 mt-0.5">
-                        {ROLE_LABELS[auth.profile?.roles[0] || '']}
+                        {ROLE_LABELS[effectiveRoles[0]]}
                       </p>
                     )}
                   </div>
@@ -801,7 +838,7 @@ export function Navbar() {
                       className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                     >
                       <LayoutDashboard size={18} />
-                      <span>My Dashboard</span>
+                      <span><Trans>My Dashboard</Trans></span>
                     </Link>
                     {/* /cv had no entry point anywhere in the app — the only way
                         in was the Virtual Campus handoff redirect. It is a
@@ -814,7 +851,7 @@ export function Navbar() {
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
                         <Building2 size={18} />
-                        <span>Business profile</span>
+                        <span><Trans>Business profile</Trans></span>
                       </Link>
                     ) : (
                       <Link
@@ -823,7 +860,7 @@ export function Navbar() {
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
                         <FileText size={18} />
-                        <span>My CV</span>
+                        <span><Trans>My CV</Trans></span>
                       </Link>
                     )}
                     <Link
@@ -832,7 +869,7 @@ export function Navbar() {
                       className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                     >
                       <Settings size={18} />
-                      <span>Settings</span>
+                      <span><Trans>Settings</Trans></span>
                     </Link>
                     <Link
                       to="/grievances/my-reports"
@@ -840,7 +877,7 @@ export function Navbar() {
                       className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                     >
                       <Flag size={18} />
-                      <span>My Reports</span>
+                      <span><Trans>My Reports</Trans></span>
                     </Link>
                     <Link
                       to="/help"
@@ -848,7 +885,7 @@ export function Navbar() {
                       className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                     >
                       <HelpCircle size={18} />
-                      <span>Help Center</span>
+                      <span><Trans>Help Center</Trans></span>
                     </Link>
                     <hr className="my-2 border-ktip-sand-100" />
                     <button
@@ -856,7 +893,7 @@ export function Navbar() {
                       className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <LogOut size={18} />
-                      <span>Sign Out</span>
+                      <span><Trans>Sign Out</Trans></span>
                     </button>
                 </DropdownPanel>
               </div>
@@ -871,18 +908,18 @@ export function Navbar() {
                       icon={<LogIn size={16} />}
                       className="text-white hover:bg-white/10"
                     >
-                      Log In
+                      <Trans>Log In</Trans>
                     </Button>
                   </Link>
                   <Link to="/signup">
-                    <Button size="sm">Sign Up</Button>
+                    <Button size="sm"><Trans>Sign Up</Trans></Button>
                   </Link>
                 </div>
                 {/* Below sm only one button fits beside the wordmark, so it is
                     the primary action — the same green Sign Up a tablet shows.
                     Log In is still one tap away in the mobile menu. */}
                 <Link to="/signup" className="sm:hidden">
-                  <Button size="sm">Sign Up</Button>
+                  <Button size="sm"><Trans>Sign Up</Trans></Button>
                 </Link>
               </>
             )}
@@ -911,8 +948,8 @@ export function Navbar() {
                 />
                 <input
                   type="text"
-                  placeholder="Search pages, features, people..."
-                  aria-label="Search the whole platform"
+                  placeholder={t`Search pages, features, people...`}
+                  aria-label={t`Search the whole platform`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.currentTarget.value)}
                   onKeyDown={handleSearch}
@@ -959,7 +996,7 @@ export function Navbar() {
                 >
                   <div className="flex items-center gap-3">
                     <Zap size={18} />
-                    <span className="font-semibold text-sm">Become a Contributor</span>
+                    <span className="font-semibold text-sm"><Trans>Become a Contributor</Trans></span>
                   </div>
                   <ChevronRight size={16} />
                 </Link>
@@ -971,7 +1008,7 @@ export function Navbar() {
               >
                 <div className="flex items-center gap-3">
                   <DollarSign size={18} />
-                  <span className="font-semibold text-sm">Browse Grants</span>
+                  <span className="font-semibold text-sm"><Trans>Browse Grants</Trans></span>
                 </div>
                 <ChevronRight size={16} />
               </Link>
@@ -982,7 +1019,7 @@ export function Navbar() {
               >
                 <div className="flex items-center gap-3">
                   <FolderKanban size={18} />
-                  <span className="font-semibold text-sm">Explore Projects</span>
+                  <span className="font-semibold text-sm"><Trans>Explore Projects</Trans></span>
                 </div>
                 <ChevronRight size={16} />
               </Link>
@@ -995,7 +1032,7 @@ export function Navbar() {
               {/* Standalone links */}
               {leadingLinks.map((item) => (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
@@ -1006,21 +1043,21 @@ export function Navbar() {
                   )}
                 >
                   <item.icon size={20} />
-                  <span>{item.name}</span>
+                  <span>{i18n._(item.name)}</span>
                 </Link>
               ))}
 
               {/* Grouped sections */}
-              {navDropdowns.map((dropdown) => (
+              {visibleDropdowns.map((dropdown) => (
                 <div key={dropdown.id}>
                   <div className="pt-3 pb-1 px-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                      {dropdown.name}
+                      {i18n._(dropdown.name)}
                     </p>
                   </div>
-                  {visibleItems(dropdown).map((item) => (
+                  {dropdown.items.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.href}
                       to={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
@@ -1031,7 +1068,7 @@ export function Navbar() {
                       )}
                     >
                       <item.icon size={20} />
-                      <span>{item.name}</span>
+                      <span>{i18n._(item.name)}</span>
                     </Link>
                   ))}
                 </div>
@@ -1040,7 +1077,7 @@ export function Navbar() {
               {/* Trailing standalone links */}
               {trailingLinks.map((item) => (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
@@ -1051,7 +1088,7 @@ export function Navbar() {
                   )}
                 >
                   <item.icon size={20} />
-                  <span>{item.name}</span>
+                  <span>{i18n._(item.name)}</span>
                 </Link>
               ))}
 
@@ -1060,7 +1097,7 @@ export function Navbar() {
                 <>
                   <hr className="my-2 border-white/10" />
                   <p className="px-4 py-1 text-xs font-semibold uppercase tracking-wider text-white/40">
-                    Admin
+                    <Trans>Admin</Trans>
                   </p>
                   <Link
                     to="/admin"
@@ -1073,7 +1110,7 @@ export function Navbar() {
                     )}
                   >
                     <ShieldCheck size={18} />
-                    <span>Admin</span>
+                    <span><Trans>Admin</Trans></span>
                   </Link>
                 </>
               )}
@@ -1088,7 +1125,7 @@ export function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <LayoutDashboard size={20} />
-                    <span>My Dashboard</span>
+                    <span><Trans>My Dashboard</Trans></span>
                   </Link>
                   <Link
                     to={isOrgAccount ? '/org/edit' : '/cv'}
@@ -1104,7 +1141,7 @@ export function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <Settings size={20} />
-                    <span>Settings</span>
+                    <span><Trans>Settings</Trans></span>
                   </Link>
                   <Link
                     to="/grievances/my-reports"
@@ -1112,14 +1149,14 @@ export function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <Flag size={20} />
-                    <span>My Reports</span>
+                    <span><Trans>My Reports</Trans></span>
                   </Link>
                   <button
                     onClick={() => { setMobileMenuOpen(false); handleSignOut() }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400 hover:bg-red-500/10"
                   >
                     <LogOut size={20} />
-                    <span>Sign Out</span>
+                    <span><Trans>Sign Out</Trans></span>
                   </button>
                 </>
               ) : (
@@ -1130,7 +1167,7 @@ export function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     <LogIn size={20} />
-                    <span>Log In</span>
+                    <span><Trans>Log In</Trans></span>
                   </Link>
                   <Link
                     to="/signup"
@@ -1138,7 +1175,7 @@ export function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white hover:bg-white/10"
                   >
                     <User size={20} />
-                    <span>Sign Up</span>
+                    <span><Trans>Sign Up</Trans></span>
                   </Link>
                 </>
               )}
