@@ -108,7 +108,7 @@ export default function ResourcesPage() {
 
       {/* === Tabs === */}
       <div className="bg-ktip-sand-50 pt-6">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           <div
           role="tablist"
           data-tutorial="resources-tabs"
@@ -197,8 +197,16 @@ function ResourcesTab() {
   return (
     <>
       {/* === Filter Section === */}
-      <div id="filters" data-spy="Filters" className="scroll-mt-24 bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      {/* data-spy-off: Resources / Integrations / Courses are exclusive tabs,
+          so only one grid is ever mounted — the rail would be the filter bar
+          and that grid. The marker stays for the tour. */}
+      <div
+        id="filters"
+        data-spy="Filters"
+        data-spy-off
+        className="scroll-mt-24 bg-ktip-sand-50 py-8"
+      >
+        <div className="max-w-page-narrow mx-auto px-4">
           <div className="flex flex-wrap items-center gap-3">
             <Select
               value={typeFilter}
@@ -253,7 +261,7 @@ function ResourcesTab() {
 
       {/* === Resources List === */}
       <div id="resources" data-spy="Resources" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {loading || !resources ? (
             <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
           ) : resources.length ? (
@@ -349,7 +357,7 @@ function IntegrationsTab() {
 
   return (
     <div id="integrations" data-spy="Integrations" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
-      <div className="max-w-[calc(50vw+32rem)] mx-auto px-4 py-8">
+      <div className="max-w-page-narrow mx-auto px-4 py-8">
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3 mb-8">
           <Select
@@ -451,7 +459,7 @@ function CoursesTab() {
 
   return (
     <div className="bg-ktip-sand-50 pb-12">
-      <div className="max-w-[calc(50vw+32rem)] mx-auto px-4 py-8">
+      <div className="max-w-page-narrow mx-auto px-4 py-8">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">

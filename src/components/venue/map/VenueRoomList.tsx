@@ -15,6 +15,11 @@ interface VenueRoomListProps {
   /** Drops the card chrome, for when this is a rail inside the map itself. */
   bare?: boolean
   onPick: (room: VenueRoom) => void
+  /**
+   * Room under the cursor, or focused by keyboard. Picking one walks you in, so
+   * this is how a room can be read without being committed to.
+   */
+  onHover?: (room: VenueRoom | null) => void
 }
 
 /**
@@ -33,6 +38,7 @@ export function VenueRoomList({
   lockedIds,
   bare = false,
   onPick,
+  onHover,
 }: VenueRoomListProps) {
   // Floors other than the ground one start collapsed: a six-room venue should
   // not push the presence list off the screen.
@@ -101,6 +107,13 @@ export function VenueRoomList({
                         <button
                           type="button"
                           onClick={() => onPick(room)}
+                          // Reading a room and entering it are different acts.
+                          // Pointing at the row (or tabbing to it) shows what is
+                          // in there; only the click walks you in.
+                          onMouseEnter={() => onHover?.(room)}
+                          onMouseLeave={() => onHover?.(null)}
+                          onFocus={() => onHover?.(room)}
+                          onBlur={() => onHover?.(null)}
                           className={`grid w-full grid-cols-[1.1rem_1fr_auto] items-center gap-x-2 rounded-xl border px-2.5 py-2 text-left transition-colors ${
                             active
                               ? 'bg-ktip-sand-50'

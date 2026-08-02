@@ -1,5 +1,6 @@
 import { useState, useMemo, Fragment } from 'react'
 import { useEventRegistrations, useRegistrationActions } from '../../../hooks/useAdminEvents'
+import { useEventRegistrationDecision } from '../../../hooks/useEventRegistrationRequests'
 import { useToast } from '../../../contexts/ToastContext'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
@@ -17,6 +18,7 @@ import {
 import {
   RSVP_STATUS_LABELS,
   RSVP_STATUS_COLORS,
+  ATTENDANCE_TYPE_LABELS,
 } from '../../../lib/constants'
 import { format } from 'date-fns'
 import { downloadCSV } from '../../../lib/csv-export'
@@ -38,10 +40,12 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
 
   const { registrations, loading: registrationsLoading, refetch } = useEventRegistrations(props.eventId)
   const { updateRSVPStatus, bulkCheckIn, loading: actionLoading } = useRegistrationActions()
+  const { decideRegistration, deciding } = useEventRegistrationDecision()
 
   const stats = useMemo(() => {
     const list = registrations || []
     return {
+      pending: list.filter(r => r.status === 'pending').length,
       confirmed: list.filter(r => r.status === 'confirmed').length,
       waitlisted: list.filter(r => r.status === 'waitlisted').length,
       checked_in: list.filter(r => r.status === 'checked_in').length,
@@ -58,6 +62,22 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
       (r.user?.display_name || '').toLowerCase().includes(q)
     )
   }, [registrations, search])
+
+  const handleDecision = async (rsvpId: string, registrantId: string, approve: boolean) => {
+    try {
+      await decideRegistration({
+        rsvpId,
+        approve,
+        registrantId,
+        eventId: props.eventId,
+        eventTitle: props.eventTitle,
+      })
+      toast.success(approve ? 'Registration approved' : 'Registration declined')
+      refetch()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to decide this registration')
+    }
+  }
 
   const handleStatusChange = async (rsvpId: string, status: RSVPStatus) => {
     try {
@@ -98,12 +118,14 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
     const regFields = props.registrationFields || []
     const headers = [
       'Name',
+      'Attending As',
       'Status',
       'Registered On',
       ...regFields.map(f => f.label),
     ]
     const rows = list.map(r => [
       r.user?.display_name || 'Unknown',
+      ATTENDANCE_TYPE_LABELS[r.attendance_type] || 'Participant',
       RSVP_STATUS_LABELS[r.status] || r.status,
       format(new Date(r.created_at), 'yyyy-MM-dd HH:mm'),
       ...regFields.map(f => {
@@ -122,7 +144,16 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
   return (
     <div className="space-y-6">
       {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {/* Pending leads: it is the only tile that is a to-do rather than a
+            number, and it is the reason this tab is worth opening. */}
+        <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 p-3 shadow-card">
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-ktip-sun-600" />
+            <span className="text-sm text-ktip-sand-600">Pending</span>
+          </div>
+          <p className="text-xl font-bold text-ktip-sand-900 mt-1">{stats.pending}</p>
+        </div>
         <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 p-3 shadow-card">
           <div className="flex items-center gap-2">
             <UserCheck size={16} className="text-ktip-tropical-600" />
@@ -197,6 +228,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
               <thead>
                 <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Attendee</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Attending as</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Status</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Registered</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Actions</th>
@@ -231,6 +263,11 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
                         </div>
                       </td>
                       <td className="px-4 py-3">
+                        <span className="text-sm text-ktip-sand-600">
+                          {ATTENDANCE_TYPE_LABELS[reg.attendance_type] || 'Participant'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
                         <Badge size="sm" className={RSVP_STATUS_COLORS[reg.status] || ''}>
                           {RSVP_STATUS_LABELS[reg.status] || reg.status}
                         </Badge>
@@ -241,24 +278,52 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-end">
-                          <select
-                            value={reg.status}
-                            onChange={(e) => handleStatusChange(reg.id, e.currentTarget.value as RSVPStatus)}
-                            disabled={actionLoading}
-                            className="text-xs bg-ktip-sand-50 border border-ktip-sand-200 rounded-lg px-2 py-1 focus:border-ktip-ocean-500 focus:outline-none"
-                          >
-                            <option value="confirmed">Confirmed</option>
-                            <option value="waitlisted">Waitlisted</option>
-                            <option value="checked_in">Checked In</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
+                        <div className="flex items-center justify-end gap-2">
+                          {/* A pending row gets buttons, not the status select:
+                              approving has to go through the RPC so the
+                              participant cap is re-checked and the registrant
+                              is told. The select writes the column directly. */}
+                          {reg.status === 'pending' ? (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                icon={<CheckCircle size={14} />}
+                                disabled={deciding}
+                                onClick={() => handleDecision(reg.id, reg.user_id, true)}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                icon={<XCircle size={14} />}
+                                disabled={deciding}
+                                onClick={() => handleDecision(reg.id, reg.user_id, false)}
+                              >
+                                Decline
+                              </Button>
+                            </>
+                          ) : (
+                            <select
+                              value={reg.status}
+                              onChange={(e) => handleStatusChange(reg.id, e.currentTarget.value as RSVPStatus)}
+                              disabled={actionLoading}
+                              className="text-xs bg-ktip-sand-50 border border-ktip-sand-200 rounded-lg px-2 py-1 focus:border-ktip-ocean-500 focus:outline-none"
+                            >
+                              <option value="confirmed">Confirmed</option>
+                              <option value="waitlisted">Waitlisted</option>
+                              <option value="checked_in">Checked In</option>
+                              <option value="cancelled">Cancelled</option>
+                              <option value="declined">Declined</option>
+                            </select>
+                          )}
                         </div>
                       </td>
                     </tr>
                     {expandedRow === reg.id && hasRegFields && (
                       <tr className="bg-ktip-sand-50/50">
-                        <td colSpan={4} className="px-4 py-3">
+                        <td colSpan={5} className="px-4 py-3">
                           <div className="ml-11 grid grid-cols-2 gap-x-6 gap-y-2">
                             {(props.registrationFields || []).map((field) => {
                               const val = reg.registration_data?.[field.id]

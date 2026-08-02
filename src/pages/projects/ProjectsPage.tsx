@@ -117,9 +117,11 @@ export default function ProjectsPage() {
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Projects' }]}
       />
 
-      {/* === Content Area — full width, no sidebar === */}
-      <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      {/* === Content Area — full width, no sidebar ===
+          data-spy-off: the only two sections are the filter bar and the grid
+          under it, which is not navigation. Markers stay for the tour. */}
+      <div data-spy-off className="bg-ktip-sand-50 py-12">
+        <div className="max-w-page-narrow mx-auto px-4">
 
           <div>
             {/* Filter Bar */}

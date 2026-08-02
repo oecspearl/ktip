@@ -99,8 +99,11 @@ export default function HelpCenterPage() {
         </div>
       </PageHero>
 
-      <div className="bg-ktip-sand-50 py-10">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      {/* data-spy-off: topics already have their own sidebar nav, and the only
+          other section is the contact block at the foot. Markers stay for the
+          tour. */}
+      <div data-spy-off className="bg-ktip-sand-50 py-10">
+        <div className="max-w-page-narrow mx-auto px-4">
           {/* Categories in a sidebar, articles as cards. The role-based quick
               start cards used to sit above this; they duplicated the
               "Getting Started" category (same heading, same `getting-started`

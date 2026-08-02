@@ -74,7 +74,9 @@ export function VerificationTab() {
   }
 
   return (
-    <div className="space-y-6">
+    // data-spy-off: two cards, and non-students only ever see the second — the
+    // other settings tabs are long enough to earn a rail, this one is not.
+    <div data-spy-off className="space-y-6">
       {/* School verification is a separate track from identity KYC below: the
           evidence is the account's email domain, and a school approves it. */}
       <div id="student" data-spy="Student" className="scroll-mt-24">

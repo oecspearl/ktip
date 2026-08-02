@@ -19,6 +19,7 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { EventRegistrationForm } from '../../components/events/EventRegistrationForm'
+import { AttendanceTypePicker } from '../../components/events/AttendanceTypePicker'
 import { EventPageSectionRenderer } from '../../components/events/EventPageSectionRenderer'
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
 import { EventSpeakerGrid } from '../../components/events/EventSpeakerGrid'
@@ -53,7 +54,10 @@ import {
   EVENT_UPDATE_TYPE_LABELS,
   EVENT_UPDATE_TYPE_COLORS,
   EVENT_ARTICLE_TYPE_LABELS,
+  ATTENDANCE_TYPE_LABELS,
 } from '../../lib/constants'
+import { blueprintFor } from '../../lib/event-blueprints'
+import type { AttendanceType, RSVPStatus } from '../../types'
 import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
@@ -82,12 +86,25 @@ export default function EventDetailPage() {
   const { criteria: eventCriteria } = useEventCriteria(params.id)
   const { documents: eventDocuments } = useEntityDocuments('event', params.id)
 
-  const [hasRSVPd, setHasRSVPd] = useState(false)
+  const [myRsvp, setMyRsvp] = useState<{
+    status: RSVPStatus
+    attendance_type: AttendanceType
+  } | null>(null)
   const [rsvpCount, setRSVPCount] = useState(0)
   const [checking, setChecking] = useState(true)
   const [showRegForm, setShowRegForm] = useState(false)
+  const [attendanceType, setAttendanceType] = useState<AttendanceType>('participant')
 
   const hasCustomFields = (event?.registration_fields || []).length > 0
+
+  // A row exists — but "registered" and "waiting to be let in" are different
+  // things to say, so the two are kept apart everywhere below.
+  const hasRSVPd = !!myRsvp && myRsvp.status !== 'declined'
+  const isPending = myRsvp?.status === 'pending'
+
+  // The choice is only offered where it means something: a type with an
+  // audience (blueprint) that has actually switched spectators on (event).
+  const offersViewing = !!event && blueprintFor(event.event_type).allowViewers && event.spectators_enabled
 
   const isOrganizer = event?.organizer_id === auth.user?.id
   // An event is only past once it has finished — multi-day events stay active until end_date
@@ -114,8 +131,9 @@ export default function EventDetailPage() {
       checkRSVP(event.id, auth.user.id),
       getRSVPCount(event.id),
     ])
-      .then(([hasRSVP, count]) => {
-        setHasRSVPd(hasRSVP)
+      .then(([mine, count]) => {
+        setMyRsvp(mine)
+        if (mine) setAttendanceType(mine.attendance_type)
         setRSVPCount(count)
       })
       .catch((error) => {
@@ -127,35 +145,46 @@ export default function EventDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event?.id, auth.user?.id])
 
+  const registrantName = auth.profile?.display_name || 'Someone'
+
   const handleRSVP = async () => {
     if (!auth.user || !event) return
 
     try {
-      if (hasRSVPd) {
+      if (myRsvp?.status === 'declined') {
+        // A declined row is terminal, and the unique-per-event row is the
+        // registrant's to delete — so asking again is delete-then-insert, done
+        // in one click rather than making them press the button twice.
         await cancelRSVP(event.id, auth.user.id)
-        setHasRSVPd(false)
-        setRSVPCount((c) => c - 1)
+        await rsvp(event.id, auth.user.id, attendanceType, event, registrantName)
+        setMyRsvp({ status: 'pending', attendance_type: attendanceType })
+        toast.success('Registration sent — the organizer will approve it.')
+      } else if (myRsvp) {
+        await cancelRSVP(event.id, auth.user.id)
+        // Only a confirmed registration was ever counted, so a pending one
+        // being withdrawn must not decrement the tally.
+        if (myRsvp.status !== 'pending') setRSVPCount((c) => c - 1)
+        setMyRsvp(null)
       } else if (hasCustomFields) {
         // Show registration form instead of direct RSVP
         setShowRegForm(true)
       } else {
-        await rsvp(event.id, auth.user.id)
-        setHasRSVPd(true)
-        setRSVPCount((c) => c + 1)
+        await rsvp(event.id, auth.user.id, attendanceType, event, registrantName)
+        setMyRsvp({ status: 'pending', attendance_type: attendanceType })
+        toast.success('Registration sent — the organizer will approve it.')
       }
     } catch (error: any) {
-      console.error('RSVP error:', error)
+      toast.error(error?.message || 'Failed to register')
     }
   }
 
   const handleRegistrationSubmit = async (data: Record<string, any>) => {
     if (!auth.user || !event) return
     try {
-      await submitRegistration(event.id, auth.user.id, data)
-      setHasRSVPd(true)
-      setRSVPCount((c) => c + 1)
+      await submitRegistration(event.id, auth.user.id, data, attendanceType, event, registrantName)
+      setMyRsvp({ status: 'pending', attendance_type: attendanceType })
       setShowRegForm(false)
-      toast.success('Registration submitted — a copy is saved in your dashboard.')
+      toast.success('Registration sent — the organizer will approve it.')
     } catch (error: any) {
       toast.error(error.message || 'Failed to submit registration')
     }
@@ -165,27 +194,29 @@ export default function EventDetailPage() {
   const endDate = event && event.end_date ? new Date(event.end_date) : null
   const isSingleDay = !startDate || !endDate ? true : isSameDay(startDate, endDate)
 
+  // rsvpCount is the confirmed *participant* count (096), so the cap only ever
+  // closes the door on someone registering to compete. A viewer can still ask.
+  const isFull = event?.capacity ? rsvpCount >= event.capacity : false
+
   const canRSVP = (() => {
     if (!event) return false
     if (isPastEvent) return false
     if (isOrganizer) return false
-    if (!event.capacity) return true
-    return rsvpCount < event.capacity
+    if (attendanceType === 'viewer') return true
+    return !isFull
   })()
-
-  const isFull = event?.capacity ? rsvpCount >= event.capacity : false
 
   if (eventLoading || !event) {
     if (eventLoading) {
       return (
-        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+        <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
           <p className="mt-4 text-ktip-sand-600">Loading event...</p>
         </div>
       )
     }
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CalendarX size={32} className="text-gray-400" />
         </div>
@@ -303,7 +334,7 @@ export default function EventDetailPage() {
 
       {/* === Two-Column Content Area === */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-page-mid mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
@@ -617,7 +648,21 @@ export default function EventDetailPage() {
 
                   {!isOrganizer && !isPastEvent && (
                     <>
-                      {hasRSVPd && (
+                      {isPending && (
+                        <div className="bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2 text-ktip-sun-800 mb-2">
+                            <Clock size={20} />
+                            <span className="font-medium">Waiting on the organizer</span>
+                          </div>
+                          <p className="text-sm text-ktip-sun-700">
+                            You asked to attend as a{' '}
+                            {ATTENDANCE_TYPE_LABELS[myRsvp!.attendance_type].toLowerCase()}. You'll be
+                            notified once it is approved.
+                          </p>
+                        </div>
+                      )}
+
+                      {hasRSVPd && !isPending && (
                         <div className="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-ktip-tropical-700 mb-2">
                             <CheckCircle size={20} />
@@ -629,16 +674,40 @@ export default function EventDetailPage() {
                         </div>
                       )}
 
-                      {isFull && !hasRSVPd && (
+                      {myRsvp?.status === 'declined' && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2 text-red-700 mb-2">
+                            <XCircle size={20} />
+                            <span className="font-medium">Registration declined</span>
+                          </div>
+                          <p className="text-sm text-red-600">
+                            The organizer did not approve this registration.
+                          </p>
+                        </div>
+                      )}
+
+                      {isFull && !myRsvp && attendanceType === 'participant' && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-red-700 mb-2">
                             <XCircle size={20} />
                             <span className="font-medium">Event is full</span>
                           </div>
                           <p className="text-sm text-red-600">
-                            This event has reached maximum capacity.
+                            Every participant place has been taken.
+                            {offersViewing && ' You can still register as a viewer.'}
                           </p>
                         </div>
+                      )}
+
+                      {/* Asked before the form, not inside it: it decides what
+                          you are registering as, which the form's answers are
+                          then about. */}
+                      {offersViewing && !myRsvp && (
+                        <AttendanceTypePicker
+                          value={attendanceType}
+                          onChange={setAttendanceType}
+                          disabled={rsvpLoading || regLoading}
+                        />
                       )}
 
                       {showRegForm ? (
@@ -651,12 +720,20 @@ export default function EventDetailPage() {
                       ) : (
                         <Button
                           fullWidth
-                          variant={hasRSVPd ? 'outline' : 'primary'}
+                          variant={myRsvp ? 'outline' : 'primary'}
                           onClick={handleRSVP}
                           loading={rsvpLoading}
-                          disabled={!canRSVP && !hasRSVPd}
+                          disabled={!canRSVP && !myRsvp}
                         >
-                          {hasRSVPd ? 'Cancel RSVP' : hasCustomFields ? 'Register for Event' : 'RSVP to Event'}
+                          {isPending
+                            ? 'Withdraw registration'
+                            : myRsvp?.status === 'declined'
+                              ? 'Ask again'
+                              : myRsvp
+                                ? 'Cancel RSVP'
+                                : hasCustomFields
+                                  ? 'Register for Event'
+                                  : 'Request to attend'}
                         </Button>
                       )}
                     </>

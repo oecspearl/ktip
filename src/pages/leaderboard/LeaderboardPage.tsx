@@ -78,7 +78,14 @@ export default function LeaderboardPage() {
       </header>
 
       {/* ---------- Controls ---------- */}
-      <div id="filters" data-spy="Filters" className="scroll-mt-24 flex flex-wrap items-center gap-4">
+      {/* data-spy-skip: a filter bar is not a destination — the rail keeps
+          Rankings and Your rank. The marker stays for the tour. */}
+      <div
+        id="filters"
+        data-spy="Filters"
+        data-spy-skip
+        className="scroll-mt-24 flex flex-wrap items-center gap-4"
+      >
         <div className="flex gap-1.5" role="tablist" aria-label="Time period">
           {WINDOWS.map((w) => (
             <button

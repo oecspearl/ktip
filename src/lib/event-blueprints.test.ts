@@ -77,6 +77,23 @@ describe('event blueprints', () => {
       expect(venued).toEqual(['hackathon'])
     })
 
+    it('only types with an audience offer a viewer registration', () => {
+      const watchable = ALL_TYPES.filter((t) => EVENT_BLUEPRINTS[t].allowViewers)
+      expect(watchable.sort()).toEqual(['conference', 'demo_day', 'hackathon'])
+    })
+
+    it('a type that turns spectators on can also be registered for as a viewer', () => {
+      // spectators_enabled is what join_venue() consults; allowViewers is what
+      // shows the choice. Setting the first without the second would seat a
+      // registrant as a participant no matter what they meant.
+      for (const type of ALL_TYPES) {
+        const blueprint = EVENT_BLUEPRINTS[type]
+        if (blueprint.onCreate.spectators_enabled) {
+          expect(blueprint.allowViewers, `allowViewers for ${type}`).toBe(true)
+        }
+      }
+    })
+
     it('a capacity that is shown has something to call itself', () => {
       for (const type of ALL_TYPES) {
         const blueprint = EVENT_BLUEPRINTS[type]

@@ -192,7 +192,7 @@ export default function EventsPage() {
   // The calendar earns a wider container than the card grid — seven day columns
   // need the horizontal room. Filters share it so both edges stay flush.
   const containerWidth =
-    view === 'calendar' ? 'max-w-[calc(80vw+16rem)]' : 'max-w-[calc(50vw+32rem)]'
+    view === 'calendar' ? 'max-w-[calc(80vw+16rem)]' : 'max-w-page-narrow'
 
   const hasActiveFilters = Boolean(
     selectedType || searchQuery || tagFilter.length
@@ -243,8 +243,15 @@ export default function EventsPage() {
         />
       </div>
 
-      {/* === Filter Section === */}
-      <div id="filters" data-spy="Filters" className="scroll-mt-24 bg-ktip-sand-50 py-8">
+      {/* === Filter Section ===
+          data-spy-off: the only two sections are this bar and the grid under
+          it, which is not navigation. Markers stay for the tour. */}
+      <div
+        id="filters"
+        data-spy="Filters"
+        data-spy-off
+        className="scroll-mt-24 bg-ktip-sand-50 py-8"
+      >
         <div className={cn('mx-auto px-4', containerWidth)}>
           {/* Filters + collapsible search + view toggle */}
           <div data-tutorial="events-filters" className="flex flex-wrap items-center gap-3">

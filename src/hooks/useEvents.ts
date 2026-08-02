@@ -9,7 +9,8 @@ import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import { isUuid } from '../lib/slug'
-import type { DetailEntry, Event } from '../types'
+import { announceRegistration } from '../lib/event-registration'
+import type { AttendanceType, DetailEntry, Event, RSVPStatus } from '../types'
 
 export function useEvents(
   filters?: {
@@ -253,22 +254,51 @@ export function useDeleteEvent() {
   return { deleteEvent: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
+/**
+ * Registering, cancelling, and reading back where you stand.
+ *
+ * Since 096 an insert lands as `pending` — the RLS policy pins it there, so
+ * this is a request to the organizer rather than a seat. `announceRegistration`
+ * is what tells them; nothing else does.
+ */
 export function useRSVP() {
   const queryClient = useQueryClient()
   const triggerCheck = useAchievementTrigger()
 
   const rsvpMutation = useMutation({
-    mutationFn: async ({ eventId, userId }: { eventId: string; userId: string }) => {
+    mutationFn: async ({
+      eventId,
+      userId,
+      attendanceType,
+      event,
+      registrantName,
+    }: {
+      eventId: string
+      userId: string
+      attendanceType: AttendanceType
+      event: Pick<Event, 'title' | 'organizer_id'>
+      registrantName: string
+    }) => {
       const { data, error } = await supabase
         .from('event_rsvps')
         .insert({
           event_id: eventId,
           user_id: userId,
+          attendance_type: attendanceType,
         })
         .select()
         .single()
 
       if (error) throw error
+
+      announceRegistration({
+        eventId,
+        eventTitle: event.title,
+        organizerId: event.organizer_id,
+        registrantName,
+        attendanceType,
+      })
+
       return data
     },
     onSuccess: (_data, variables) => {
@@ -292,19 +322,36 @@ export function useRSVP() {
     },
   })
 
-  const rsvp = (eventId: string, userId: string) => rsvpMutation.mutateAsync({ eventId, userId })
+  const rsvp = (
+    eventId: string,
+    userId: string,
+    attendanceType: AttendanceType,
+    event: Pick<Event, 'title' | 'organizer_id'>,
+    registrantName: string
+  ) => rsvpMutation.mutateAsync({ eventId, userId, attendanceType, event, registrantName })
+
   const cancelRSVP = (eventId: string, userId: string) => cancelMutation.mutateAsync({ eventId, userId })
 
-  const checkRSVP = async (eventId: string, userId: string): Promise<boolean> => {
+  /**
+   * Where the caller stands on this event, or null if they have not asked.
+   *
+   * Returns the row rather than a boolean because "has a row" no longer means
+   * "is attending" — a pending registration and a confirmed one need different
+   * words on the button.
+   */
+  const checkRSVP = async (
+    eventId: string,
+    userId: string
+  ): Promise<{ status: RSVPStatus; attendance_type: AttendanceType } | null> => {
     const { data, error } = await supabase
       .from('event_rsvps')
-      .select('id')
+      .select('status, attendance_type')
       .eq('event_id', eventId)
       .eq('user_id', userId)
       .maybeSingle()
 
     if (error) throw error
-    return !!data
+    return (data as any) || null
   }
 
   const getRSVPCount = async (eventId: string): Promise<number> => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import DOMPurify from 'dompurify'
 import {
   Bold,
@@ -8,6 +8,7 @@ import {
   ListOrdered,
   Minus,
   MoreHorizontal,
+  MousePointerClick,
   Pencil,
   Pin,
   Quote,
@@ -31,6 +32,8 @@ import {
   type Viewport,
 } from '../../lib/sticky-notes'
 import type { StickyNotePatch } from '../../hooks/useStickyNotes'
+import { ghostGlowColor, useGhostMode } from '../../hooks/useGhostMode'
+import { GhostOpacityControl } from '../ui/GhostOpacityControl'
 import { cn } from '../../lib/utils'
 
 /** `document.execCommand` is formally deprecated and formally irreplaceable:
@@ -113,6 +116,7 @@ export function StickyNote({
   onDragEnd,
 }: StickyNoteProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const [dragPx, setDragPx] = useState<{ left: number; top: number } | null>(null)
   const [sizePx, setSizePx] = useState<{ width: number; height: number } | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -122,6 +126,11 @@ export function StickyNote({
   /** False for the first paint only, so the note has a state to animate *from* */
   const [entered, setEntered] = useState(false)
   const gestureStart = useRef({ x: 0, y: 0, left: 0, top: 0, width: 0, height: 0 })
+
+  // A pinned note follows you from page to page, which is exactly when it is
+  // most in the way. Ghosted, it fades to a shape and lets the page take every
+  // click; hovering lights its edge and offers the way back in.
+  const ghost = useGhostMode({ enabled: note.pinned, ref: rootRef })
 
   // Two frames, not one: a single rAF can land in the same paint as the mount
   // and the browser collapses the transition to nothing.
@@ -265,7 +274,32 @@ export function StickyNote({
     window.setTimeout(onClose, 220)
   }
 
+  // The options popover cannot survive its note going see-through — it would
+  // be a faded, unclickable menu hanging off nothing.
+  useEffect(() => {
+    if (ghost.ghosted) setMenuOpen(false)
+  }, [ghost.ghosted])
+
   const head = headerColor(note.color)
+
+  /** The paper, at ghost strength. Computed here rather than in CSS because a
+   *  note sets its own `background` inline, and inline beats a stylesheet. */
+  const paper = ghost.ghosted
+    ? `color-mix(in srgb, ${note.color} ${ghost.opacity * 100}%, transparent)`
+    : note.color
+
+  /** The note glows in its own colour, so two ghosts side by side are still
+   *  telling you which is which — lifted or deepened to stay legible against
+   *  whatever page it has followed you onto. */
+  const ghostVars = {
+    '--ghost-opacity': ghost.opacity,
+    '--ghost-glow-color': ghostGlowColor(note.color, ghost.tone),
+  } as CSSProperties
+
+  const pin = () => onCommit({ pinned: true, page_path: note.page_path })
+  /** Unpinning drops the note on the page it was unpinned from, rather than
+   *  sending it back to wherever it was written. */
+  const unpin = () => onCommit({ pinned: false, page_path: window.location.pathname })
 
   /** One transform for the whole note. Dragging beats closing beats entering,
    *  because they cannot happen at once and the last state to win should be
@@ -275,19 +309,25 @@ export function StickyNote({
   if (note.minimized) {
     return (
       <div
-        className="pointer-events-auto absolute rounded-xl shadow-fab overflow-hidden"
+        ref={rootRef}
+        data-ghost={ghost.ghosted ? 'true' : undefined}
+        className={cn(
+          'ghost-surface absolute rounded-xl shadow-fab overflow-hidden',
+          ghost.ghosted ? 'pointer-events-none' : 'pointer-events-auto'
+        )}
         style={{
           left: pos.left,
           top: pos.top,
           width: Math.min(note.width, 240),
           zIndex,
+          ...ghostVars,
           // The pill animates on the same terms as the full note, so closing a
           // minimized one is not an instant disappearance
           transform: `scale(${closing ? 0.85 : entered ? 1 : 0.85})`,
           opacity: closing || !entered ? 0 : 1,
           transition: dragPx
             ? 'none'
-            : 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease',
+            : 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease, background-color 0.26s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
         <div
@@ -295,10 +335,23 @@ export function StickyNote({
           onPointerMove={onDrag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          className="flex items-center gap-2 px-3 cursor-grab active:cursor-grabbing touch-none"
+          className="ghost-live-row flex items-center gap-2 px-3 cursor-grab active:cursor-grabbing touch-none"
           style={{ background: head, color: NOTE_TEXT_COLOR, height: NOTE_MINIMIZED_HEIGHT }}
         >
           <span className="flex-1 truncate text-sm font-semibold">{note.title}</span>
+          {/* A minimized note has no pin button to turn into the way back, so
+              the way back is added for as long as it is ghosted. */}
+          {ghost.ghosted && (
+            <button
+              type="button"
+              aria-label="Wake note"
+              title="Wake — brings the note back without unpinning it"
+              onClick={ghost.wake}
+              className="ghost-live no-drag rounded bg-ktip-ocean-600 p-1 text-white shadow-fab"
+            >
+              <MousePointerClick size={14} />
+            </button>
+          )}
           <button
             type="button"
             aria-label="Expand note"
@@ -316,16 +369,22 @@ export function StickyNote({
             <X size={14} />
           </button>
         </div>
+        {ghost.ghosted && <span aria-hidden className="ghost-glow" />}
       </div>
     )
   }
 
   return (
     <div
+      ref={rootRef}
       data-sticky-id={note.id}
+      data-ghost={ghost.ghosted ? 'true' : undefined}
       onPointerDownCapture={onFront}
       className={cn(
-        'pointer-events-auto absolute flex flex-col rounded-xl overflow-hidden shadow-fab',
+        'ghost-surface absolute flex flex-col rounded-xl overflow-hidden shadow-fab',
+        // A ghost is not a drop target either: it is not there to be dragged
+        // onto, and elementsFromPoint would happily file a note into it.
+        ghost.ghosted ? 'pointer-events-none' : 'pointer-events-auto',
         dragPx ? 'shadow-fab-hover select-none' : 'transition-shadow hover:shadow-fab-hover'
       )}
       style={{
@@ -334,7 +393,8 @@ export function StickyNote({
         width: size.width,
         height: size.height,
         zIndex,
-        background: note.color,
+        ...ghostVars,
+        background: paper,
         color: NOTE_TEXT_COLOR,
         transform: `scale(${scale})`,
         opacity: closing || !entered ? 0 : 1,
@@ -343,8 +403,9 @@ export function StickyNote({
           : closing
             ? 'transform 0.22s cubic-bezier(0.4,0,1,1), opacity 0.2s ease'
             : // Overshooting spring on the way in, so a new note lands on the
-              // page rather than appearing on it
-              'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease',
+              // page rather than appearing on it. The paper fades on its own,
+              // slower curve — that one is ghost mode, not arrival.
+              'transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease, background-color 0.26s cubic-bezier(0.22,1,0.36,1)',
       }}
     >
       {/* Element styling for the editor, scoped to this note by its id so one
@@ -366,7 +427,9 @@ export function StickyNote({
         onPointerMove={onDrag}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
-        className="group/head flex items-center gap-1 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-none"
+        // ghost-live-row keeps the pin reachable while the note is ghosted —
+        // everything else in the header fades with the paper.
+        className="ghost-live-row group/head flex items-center gap-1 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-none"
         style={{ background: head }}
       >
         {/* The title is text until you ask for it. An always-live input meant
@@ -417,7 +480,7 @@ export function StickyNote({
           </button>
           {menuOpen && (
             <div
-              className="no-drag absolute right-0 top-full mt-1 w-40 rounded-lg bg-white/95 backdrop-blur p-2 shadow-fab-hover"
+              className="no-drag absolute right-0 top-full mt-1 w-56 rounded-lg bg-white/95 backdrop-blur p-2 shadow-fab-hover"
               style={{ color: NOTE_TEXT_COLOR }}
             >
               <p className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide opacity-60">
@@ -442,6 +505,12 @@ export function StickyNote({
                   />
                 ))}
               </div>
+              {/* Ghost mode is one setting shared by every pinned surface, so
+                  it is offered here rather than only from the messages panel —
+                  a note is where most people meet it first. */}
+              <div className="mt-2 border-t border-black/10 px-1 pt-1">
+                <GhostOpacityControl />
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -457,29 +526,42 @@ export function StickyNote({
           )}
         </div>
 
+        {/* One control, three states: pin it, wake it, unpin it. While the note
+            is ghosted this is the only thing on it still taking clicks, so it
+            is also the only way back in. */}
         <button
           type="button"
-          aria-label={note.pinned ? 'Unpin from other pages' : 'Pin to every page'}
-          aria-pressed={note.pinned}
-          title={note.pinned ? 'Pinned everywhere' : 'Only on this page'}
-          onClick={() =>
-            onCommit({
-              pinned: !note.pinned,
-              // Unpinning drops the note on the page it was unpinned from,
-              // rather than sending it back to wherever it was written
-              page_path: note.pinned ? window.location.pathname : note.page_path,
-            })
+          aria-label={
+            ghost.ghosted ? 'Wake note' : note.pinned ? 'Unpin from other pages' : 'Pin to every page'
           }
-          className={cn('no-drag p-1 rounded hover:bg-black/10', note.pinned && 'bg-black/10')}
+          aria-pressed={note.pinned}
+          title={
+            ghost.ghosted
+              ? 'Wake — brings the note back without unpinning it'
+              : note.pinned
+                ? 'Pinned everywhere — unpin to stop it fading'
+                : 'Only on this page'
+          }
+          onClick={() => (ghost.ghosted ? ghost.wake() : note.pinned ? unpin() : pin())}
+          className={cn(
+            'ghost-live no-drag p-1 rounded transition-colors hover:bg-black/10',
+            note.pinned && 'bg-black/10',
+            // Alone on a see-through note, the control brings its own backing.
+            ghost.ghosted && 'bg-ktip-ocean-600 text-white shadow-fab hover:bg-ktip-ocean-600'
+          )}
         >
-          {/* The pin swings down into the paper when it goes in, and back out
-              when it comes off — the state change is the animation. */}
-          <Pin
-            size={15}
-            className="transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-            style={{ transform: note.pinned ? 'rotate(45deg)' : 'rotate(0deg)' }}
-            fill={note.pinned ? 'currentColor' : 'none'}
-          />
+          {ghost.ghosted ? (
+            <MousePointerClick size={15} />
+          ) : (
+            /* The pin swings down into the paper when it goes in, and back out
+               when it comes off — the state change is the animation. */
+            <Pin
+              size={15}
+              className="transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              style={{ transform: note.pinned ? 'rotate(45deg)' : 'rotate(0deg)' }}
+              fill={note.pinned ? 'currentColor' : 'none'}
+            />
+          )}
         </button>
         <button
           type="button"
@@ -578,6 +660,8 @@ export function StickyNote({
             'linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.18) 100%)',
         }}
       />
+
+      {ghost.ghosted && <span aria-hidden className="ghost-glow" />}
     </div>
   )
 }

@@ -40,13 +40,13 @@ export function DashboardTopBar({
       className={cn(
         // --nav-offset, not --nav-h: the navbar auto-hides, and holding its full
         // height while it is off screen leaves this band floating mid-page.
-        'fixed inset-x-0 top-[var(--nav-offset)] z-30 border-b border-white/10 bg-brand-navy/95 backdrop-blur-md',
+        'fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-white/10 bg-brand-navy/95 backdrop-blur-md',
         'transition-[top,opacity,transform] duration-300',
         shown ? 'opacity-100 translate-y-0' : 'pointer-events-none -translate-y-2 opacity-0'
       )}
       style={{ height: DASH_BAR_H }}
     >
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto h-full px-4 md:px-12 flex items-center justify-between gap-4">
+      <div className="w-full max-w-page mx-auto h-full px-4 md:px-12 flex items-center justify-between gap-4">
         <nav className="flex items-center text-base text-white/70 min-w-0" aria-label="Breadcrumb">
           <Link to="/" className="hover:text-white transition-colors">
             Home

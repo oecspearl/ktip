@@ -369,24 +369,33 @@ export interface Database {
           id: string
           event_id: string
           user_id: string
-          status: 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in'
+          status: 'pending' | 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in' | 'declined'
+          attendance_type: 'participant' | 'viewer'
           registration_data: any
+          decided_by: string | null
+          decided_at: string | null
           created_at: string
         }
         Insert: {
           id?: string
           event_id: string
           user_id: string
-          status?: 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in'
+          status?: 'pending' | 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in' | 'declined'
+          attendance_type?: 'participant' | 'viewer'
           registration_data?: any
+          decided_by?: string | null
+          decided_at?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           event_id?: string
           user_id?: string
-          status?: 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in'
+          status?: 'pending' | 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in' | 'declined'
+          attendance_type?: 'participant' | 'viewer'
           registration_data?: any
+          decided_by?: string | null
+          decided_at?: string | null
           created_at?: string
         }
         Relationships: []

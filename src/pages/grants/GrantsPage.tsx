@@ -131,9 +131,16 @@ export default function GrantsPage() {
         }
       />
 
-      {/* === Filter Section === */}
-      <div id="filters" data-spy="Filters" className="scroll-mt-24 bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      {/* === Filter Section ===
+          data-spy-off: the only two sections are this bar and the grid under
+          it, which is not navigation. Markers stay for the tour. */}
+      <div
+        id="filters"
+        data-spy="Filters"
+        data-spy-off
+        className="scroll-mt-24 bg-ktip-sand-50 py-8"
+      >
+        <div className="max-w-page-narrow mx-auto px-4">
           <div className="flex flex-wrap items-center gap-3">
             <Select
               value={selectedType}
@@ -185,7 +192,7 @@ export default function GrantsPage() {
 
       {/* === Grants List === */}
       <div id="grants" data-spy="Grants" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {loading || !grants ? (
             <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
           ) : grants.length > 0 ? (

@@ -211,7 +211,7 @@ export default function GrantApplicationPage() {
 
   if (grantLoading || !grant || applicationLoading) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
         <p className="mt-4 text-ktip-sand-600">Loading application...</p>
       </div>
@@ -238,8 +238,11 @@ export default function GrantApplicationPage() {
         </p>
       </PageHero>
 
-      <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
+      {/* data-spy-off: the Stepper is already this page's section nav, and the
+          Review marker only exists on the last step, so the rail changed shape
+          under the reader mid-form. Markers stay for the tour. */}
+      <div data-spy-off className="bg-ktip-sand-50 py-12">
+        <div className="max-w-page-narrow mx-auto px-4">
           {/* Stepper — no card around it, the bars are the only chrome it needs */}
           <div id="steps" data-spy="Steps" className="scroll-mt-24 mb-8">
             <Stepper

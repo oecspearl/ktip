@@ -62,7 +62,9 @@ export default function OrgProfilePage() {
         ]}
       />
 
-      <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
+      {/* data-spy-off: one marked section besides the hero, so the rail would
+          be two dashes on a page you can see the bottom of. */}
+      <div data-spy-off className="mx-auto max-w-4xl space-y-6 px-4 py-10">
         <Card>
           <div className="flex flex-wrap items-start gap-4">
             {employer.logo_url ? (

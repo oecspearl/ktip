@@ -51,14 +51,18 @@
       "PowerShell(npx vitest run src/design/tokens.test.ts --reporter=dot 2>&1)",
       "PowerShell(npm pkg get scripts)",
       "PowerShell(git commit --only src/pages/dashboard/DashboardTopBar.tsx src/pages/dashboard/DashboardLayout.tsx -F \"C:\\\\Users\\\\LG\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\a18fb524-02d5-4b97-acd6-2904d9bc5bbc\\\\scratchpad\\\\msg2.txt\")",
-      "PowerShell(git commit --only .claude/settings.json -m \"chore\\(claude\\): allow the vitest and npm-scripts commands used this session\")"
+      "PowerShell(git commit --only .claude/settings.json -m \"chore\\(claude\\): allow the vitest and npm-scripts commands used this session\")",
+      "Bash(cp src/design/tokens.test.ts /tmp/tok.bak)",
+      "PowerShell(npx vitest run src/lib/ghost-mode.test.ts 2>&1)",
+      "PowerShell(npx tsc --noEmit 2>&1)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/admin/shared-courses",
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/components/ai",
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/ai/tutor/context",
-      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/shared-courses/[id]/lesson/[lessonId]"
+      "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/shared-courses/[id]/lesson/[lessonId]",
+      "\\tmp"
     ]
   }
 }

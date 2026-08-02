@@ -17,6 +17,14 @@ const ROOT_ID = 'main-content'
  * inside <main> carrying `data-spy="Label"` becomes a step, in document order.
  * Adding `data-spy-hide` marks a band the rail should stay hidden over.
  *
+ * Two opt-outs, both of which leave the `data-spy` markers standing. That
+ * matters: the tutorials in src/data/tutorials target sections by
+ * `[data-spy="…"]`, so deleting a marker to quiet the rail silently breaks a
+ * walkthrough step.
+ *   - `data-spy-off` anywhere in the page kills the rail for that page —
+ *     listings whose only "sections" are a filter bar and the grid under it.
+ *   - `data-spy-skip` on one marker drops that section from the rail alone.
+ *
  * Pages opt in with one attribute per section, so there is nothing to import
  * and nothing to keep in sync. Elements without an `id` get `spy-<n>` assigned
  * so the rail has a scroll target.
@@ -36,11 +44,12 @@ export function useSpySteps(): SpyStep[] {
   const derive = useCallback(() => {
     const root = document.getElementById(ROOT_ID)
     const found: SpyStep[] = []
-    if (root) {
+    if (root && !root.querySelector('[data-spy-off]')) {
       const els = root.querySelectorAll<HTMLElement>('[data-spy]')
       els.forEach((el, i) => {
         const label = el.dataset.spy?.trim()
         if (!label) return
+        if (el.hasAttribute('data-spy-skip')) return
         if (!el.id) el.id = `spy-${i}`
         found.push({ id: el.id, label, hide: el.hasAttribute('data-spy-hide') })
       })
@@ -76,7 +85,7 @@ export function useSpySteps(): SpyStep[] {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['data-spy', 'data-spy-hide'],
+        attributeFilter: ['data-spy', 'data-spy-hide', 'data-spy-off', 'data-spy-skip'],
       })
     }
 

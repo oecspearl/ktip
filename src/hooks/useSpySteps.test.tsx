@@ -87,4 +87,50 @@ describe('useSpySteps', () => {
     await setMarkers('<section>No rail here</section>')
     expect(read()).toEqual([])
   })
+
+  // Both opt-outs leave the markers in the DOM on purpose: the tutorials in
+  // src/data/tutorials anchor their steps to `[data-spy="…"]`, so quieting the
+  // rail by deleting a marker would take a walkthrough step down with it.
+  it('drops every step when the page declares data-spy-off', async () => {
+    const { read } = mount()
+    await setMarkers(`
+      <div data-spy-off>
+        <section id="one" data-spy="One"></section>
+        <section id="two" data-spy="Two"></section>
+      </div>
+    `)
+    expect(read()).toEqual([])
+    expect(document.querySelectorAll('[data-spy]')).toHaveLength(2)
+  })
+
+  it('drops a single marker flagged data-spy-skip, keeping the rest', async () => {
+    const { read } = mount()
+    await setMarkers(`
+      <section id="filters" data-spy="Filters" data-spy-skip></section>
+      <section id="rankings" data-spy="Rankings"></section>
+      <section id="mine" data-spy="Your rank"></section>
+    `)
+    expect(read()).toEqual([
+      { id: 'rankings', label: 'Rankings', hide: false },
+      { id: 'mine', label: 'Your rank', hide: false },
+    ])
+    expect(document.getElementById('filters')?.dataset.spy).toBe('Filters')
+  })
+
+  it('re-derives when data-spy-off is toggled on a live page', async () => {
+    const { read } = mount()
+    await setMarkers(`
+      <div id="page">
+        <section id="one" data-spy="One"></section>
+        <section id="two" data-spy="Two"></section>
+      </div>
+    `)
+    expect(read()).toHaveLength(2)
+
+    await act(async () => {
+      document.getElementById('page')!.setAttribute('data-spy-off', '')
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+    })
+    expect(read()).toEqual([])
+  })
 })

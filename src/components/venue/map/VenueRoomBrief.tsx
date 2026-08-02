@@ -1,4 +1,4 @@
-import { DoorOpen, Lock, Mic, MicOff, Radio, Users } from 'lucide-react'
+import { DoorOpen, Lock, Mic, MicOff, Radio, Users, X } from 'lucide-react'
 import { colorForRoom, contrastInk } from '../../../lib/venue-map'
 import { venueRoomIcon } from '../../../lib/category-icons'
 import { VENUE_ROLE_LABELS, VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
@@ -11,6 +11,14 @@ interface VenueRoomBriefProps {
   here: number
   occupants: VenueOccupant[]
   canEnter: boolean
+  /**
+   * Standing in the room's walls, or merely pointing at it. Only the wording of
+   * the header changes: the questions are the same either way, and so is the
+   * way in.
+   */
+  mode?: 'standing' | 'preview'
+  /** Given while previewing: a way to put the card away without walking. */
+  onDismiss?: () => void
   onEnter: () => void
 }
 
@@ -23,12 +31,21 @@ const AUDIO_COPY: Record<string, { label: string; icon: typeof Mic }> = {
 /**
  * What you are standing in front of.
  *
- * Shown while a member is inside a room's walls but has not entered it. Its
- * whole job is to answer the questions asked in a doorway — who is in there,
- * is there space, am I allowed, and will I be able to talk — before the
- * decision rather than after it.
+ * Shown while a member is inside a room's walls but has not entered it, and
+ * while they are pointing at one from the map or the rail. Its whole job is to
+ * answer the questions asked in a doorway — who is in there, is there space,
+ * am I allowed, and will I be able to talk — before the decision rather than
+ * after it.
  */
-export function VenueRoomBrief({ room, here, occupants, canEnter, onEnter }: VenueRoomBriefProps) {
+export function VenueRoomBrief({
+  room,
+  here,
+  occupants,
+  canEnter,
+  mode = 'standing',
+  onDismiss,
+  onEnter,
+}: VenueRoomBriefProps) {
   const color = colorForRoom(room)
   const KindIcon = venueRoomIcon(room.kind)
   const audio = AUDIO_COPY[room.audio_mode] || AUDIO_COPY.open
@@ -44,11 +61,21 @@ export function VenueRoomBrief({ room, here, occupants, canEnter, onEnter }: Ven
       >
         <KindIcon size={14} aria-hidden="true" />
         <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
-          You are at
+          {mode === 'preview' ? 'A look inside' : 'You are at'}
         </span>
         <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider opacity-80">
           {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
         </span>
+        {onDismiss && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="-mr-1 rounded p-0.5 opacity-70 transition-opacity hover:opacity-100"
+          >
+            <X size={13} aria-hidden="true" />
+            <span className="sr-only">Stop looking at {room.name}</span>
+          </button>
+        )}
       </div>
 
       <div className="p-4">

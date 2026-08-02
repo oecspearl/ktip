@@ -38,7 +38,7 @@
 - **Floating action button** — [FloatingActionButton.tsx](src/components/ui/FloatingActionButton.tsx): expandable cluster with page tour (when the page has one), light/dark toggle, messages toggle
 - **Tutorial overlay** — [TutorialOverlay.tsx](src/components/tutorial/TutorialOverlay.tsx): anchored step-by-step walkthroughs (`data-tutorial` targets), auto-start for first-time visitors, completion tracking; Events page tour shipped
 - **Achievement unlock modal** — celebratory popup when a badge is awarded, links to the gallery
-- **Toasts**, **spy rail** (page-scroll section jump built from `data-spy` markers), **skip-to-content** link, **footer**
+- **Toasts**, **spy rail** (page-scroll section jump built from `data-spy` markers; `data-spy-off` mutes it for a page and `data-spy-skip` for one section, both keeping the marker the tutorials anchor to), **skip-to-content** link, **footer**
 
 ### 0.4 Cross-cutting systems
 - Analytics provider — page views, feature events, funnels, conversions

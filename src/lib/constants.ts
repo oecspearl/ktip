@@ -254,25 +254,31 @@ export const EVENT_CRITERION_COLORS: Record<string, string> = {
 
 // RSVP Statuses
 export const RSVP_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending approval',
   confirmed: 'Confirmed',
   waitlisted: 'Waitlisted',
   cancelled: 'Cancelled',
   checked_in: 'Checked In',
+  declined: 'Declined',
 }
 
 export const RSVP_STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   confirmed: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   waitlisted: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   cancelled: 'bg-red-100 text-red-700 border-red-200',
   checked_in: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  declined: 'bg-red-100 text-red-700 border-red-200',
 }
 
 /** Solid accents for the lower half of a calendar item's split accent bar */
 export const RSVP_STATUS_DOT_COLORS: Record<string, string> = {
+  pending: 'bg-ktip-sun-500',
   confirmed: 'bg-ktip-tropical-500',
   waitlisted: 'bg-ktip-sun-500',
   cancelled: 'bg-ktip-sand-400',
   checked_in: 'bg-ktip-ocean-500',
+  declined: 'bg-ktip-sand-400',
 }
 
 /**
@@ -280,10 +286,26 @@ export const RSVP_STATUS_DOT_COLORS: Record<string, string> = {
  * "Confirmed", because the badge answers *your relation to this event*.
  */
 export const RSVP_RELATION_LABELS: Record<string, string> = {
+  pending: 'Awaiting approval',
   confirmed: 'Registered',
   waitlisted: 'Waitlisted',
   cancelled: 'Registration cancelled',
   checked_in: 'Checked in',
+  declined: 'Registration declined',
+}
+
+/**
+ * Competing or watching. The blurbs are what the registrant picks between, so
+ * they describe what you get to do rather than what you are called.
+ */
+export const ATTENDANCE_TYPE_LABELS: Record<string, string> = {
+  participant: 'Participant',
+  viewer: 'Viewer',
+}
+
+export const ATTENDANCE_TYPE_BLURBS: Record<string, string> = {
+  participant: 'Join a team, build, and submit. Takes one of the participant places.',
+  viewer: 'Watch the rooms and follow along. No team, no submission.',
 }
 
 // Event Update Types

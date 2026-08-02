@@ -114,8 +114,10 @@ export default function MyApplicationsPage() {
         ]}
       />
 
-      {/* Content */}
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-8">
+      {/* Content — data-spy-off: two stacked lists, and most members never see
+          the sponsorships one at all, so the rail would be a single dash under
+          the hero's. Markers stay for the tour. */}
+      <div data-spy-off className="w-full max-w-page mx-auto px-4 pt-8 pb-8">
         {/* Sponsorship requests. Only faculty and school partners see this —
             a student's application cannot be submitted until one is accepted. */}
         {(sponsorships?.length ?? 0) > 0 && (

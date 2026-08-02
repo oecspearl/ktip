@@ -62,7 +62,24 @@ export type EventType = 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'de
 
 export type EventStatus = 'draft' | 'published' | 'cancelled' | 'completed'
 
-export type RSVPStatus = 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in'
+/**
+ * `pending` is where every new registration starts — the organizer has to
+ * approve it before it becomes a seat (096). `declined` is terminal, but the
+ * row is the registrant's to delete, so they can ask again.
+ */
+export type RSVPStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'waitlisted'
+  | 'cancelled'
+  | 'checked_in'
+  | 'declined'
+
+/**
+ * How someone is attending: competing, or watching. Chosen at registration and
+ * read by join_venue() — a viewer enters the venue as a spectator.
+ */
+export type AttendanceType = 'participant' | 'viewer'
 
 export type EventUpdateType = 'announcement' | 'schedule_change' | 'reminder'
 
@@ -367,9 +384,14 @@ export interface EventRSVP {
   event_id: string
   user_id: string
   status: RSVPStatus
+  attendance_type: AttendanceType
   registration_data: Record<string, any>
+  decided_by?: string | null
+  decided_at?: string | null
   created_at: string
   user?: Profile
+  /** Joined for the /invitations inbox, which lists across every event. */
+  event?: Event
 }
 
 export interface EventUpdate {

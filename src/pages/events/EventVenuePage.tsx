@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Map as MapIcon, PencilRuler, Sparkles } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
@@ -90,10 +90,37 @@ export default function EventVenuePage() {
   // The room being stood in, reported by the map. Not the same thing as being
   // *in* a room: entering is still a decision, and this is what informs it.
   const [standingRoomId, setStandingRoomId] = useState<string | null>(null)
+  const [previewRoomId, setPreviewRoomId] = useState<string | null>(null)
+
+  // Walking into a room answers the question the preview was asking, so the
+  // room underfoot takes the panel back.
+  const handleStandingRoom = useCallback((roomId: string | null) => {
+    setStandingRoomId(roomId)
+    if (roomId) setPreviewRoomId(null)
+  }, [])
+
   const standingRoom = useMemo(
     () => mapped.find((r) => r.id === standingRoomId) ?? null,
     [mapped, standingRoomId]
   )
+
+  // The room being pointed at. Clicking a room walks you into it, so hover is
+  // what someone who only wants to look has — and while they are looking it
+  // takes the panel over from whatever they happen to be standing in.
+  //
+  // Latched, not tracked: the panel it fills sits off the map, so clearing on
+  // pointer-out would take the card away the moment someone moved towards its
+  // Enter button. It holds until another room is pointed at, until the room
+  // underfoot changes, or until it is dismissed.
+  const handlePreviewRoom = useCallback((roomId: string | null) => {
+    if (roomId) setPreviewRoomId(roomId)
+  }, [])
+
+  const previewRoom = useMemo(
+    () => mapped.find((r) => r.id === previewRoomId) ?? null,
+    [mapped, previewRoomId]
+  )
+  const briefRoom = previewRoom ?? standingRoom
 
   // The idle rule only ever fires while this tab is hidden, and coming back to
   // the tab clears it — so a banner keyed on "is away right now" would be gone
@@ -272,7 +299,8 @@ export default function EventVenuePage() {
                   // which is what plays the entry animation in reverse.
                   arriveFromRoomId={membership.current_room_id}
                   onPositionChange={presence.setPosition}
-                  onStandingRoomChange={setStandingRoomId}
+                  onStandingRoomChange={handleStandingRoom}
+                  onPreviewRoomChange={handlePreviewRoom}
                   onEnter={handleEnter}
                 />
 
@@ -311,16 +339,19 @@ export default function EventVenuePage() {
               emptyLabel="Everyone is inside a room."
             />
 
-            {/* Standing in a doorway is the moment someone wants to know what
-                they are about to walk into, so the room's rules appear here
-                before they commit to entering it. */}
-            {standingRoom && (
+            {/* Standing in a doorway — or pointing at a room from the map or
+                the rail — is the moment someone wants to know what they are
+                about to walk into, so the room's rules appear here before they
+                commit to entering it. */}
+            {briefRoom && (
               <VenueRoomBrief
-                room={standingRoom}
-                here={presence.occupancy[standingRoom.id] || 0}
-                occupants={occupantsInRoom(presence.occupants, standingRoom.id)}
-                canEnter={canEnterRoom(standingRoom, membership.role)}
-                onEnter={() => handleEnter(standingRoom)}
+                room={briefRoom}
+                here={presence.occupancy[briefRoom.id] || 0}
+                occupants={occupantsInRoom(presence.occupants, briefRoom.id)}
+                canEnter={canEnterRoom(briefRoom, membership.role)}
+                mode={previewRoom ? 'preview' : 'standing'}
+                onDismiss={previewRoom ? () => setPreviewRoomId(null) : undefined}
+                onEnter={() => handleEnter(briefRoom)}
               />
             )}
           </aside>

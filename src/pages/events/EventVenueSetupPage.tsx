@@ -155,6 +155,36 @@ export default function EventVenueSetupPage() {
           </p>
         )}
 
+        {/* spectators_enabled has existed since 070 and nothing ever set it, so
+            join_venue()'s spectator branch was unreachable and every registrant
+            arrived as a participant. This is the switch it was waiting for. */}
+        <label className="mb-4 flex cursor-pointer items-start gap-3 rounded-xl border border-ktip-sand-200 bg-ktip-cream px-3 py-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 rounded border-ktip-sand-300 text-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
+            checked={!!event.spectators_enabled}
+            onChange={async (e) => {
+              const next = e.currentTarget.checked
+              try {
+                await updateEvent(event.id, { spectators_enabled: next } as any)
+                refetch()
+                toast.success(next ? 'Viewers can now register' : 'Viewers turned off')
+              } catch (err: any) {
+                toast.error(err?.message || 'Could not change who may watch')
+              }
+            }}
+          />
+          <span className="min-w-0">
+            <span className="block text-sm font-medium text-ktip-sand-800">
+              Let people register as viewers
+            </span>
+            <span className="block text-xs text-ktip-sand-500">
+              Viewers watch the rooms without joining a team or submitting, and do not take up a
+              participant place. Off means everyone who registers is competing.
+            </span>
+          </span>
+        </label>
+
           {roomsLoading ? (
             <div className="h-[34rem] rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
           ) : (

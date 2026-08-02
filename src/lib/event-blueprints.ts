@@ -34,10 +34,17 @@ export interface EventBlueprint {
   registrationCloses: boolean
   teamSize: boolean
   submissionDeadline: boolean
+  /**
+   * Whether "register as a viewer" is a coherent thing to offer. A workshop
+   * seat or a meetup is attended, not watched; a hackathon, a conference and a
+   * demo day all have an audience that is not competing. This only makes the
+   * choice *possible* — the organizer still has to switch spectators on.
+   */
+  allowViewers: boolean
   /** Seeds the DetailsEditor with the rows this type nearly always needs */
   detailPresets: string[]
   /** Columns forced on at insert, because the type implies them */
-  onCreate: { has_venue?: boolean; has_challenge?: boolean }
+  onCreate: { has_venue?: boolean; has_challenge?: boolean; spectators_enabled?: boolean }
   /** null means creating it is the whole job — no second screen */
   setup: null | {
     /** Goes on the submit button ("Next: …") and in the stepper */
@@ -83,11 +90,16 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     registrationCloses: true,
     teamSize: true,
     submissionDeadline: true,
+    allowViewers: true,
     detailPresets: [],
     // has_challenge as well as has_venue: a hackathon has a brief and takes
     // submissions. Without it the criteria and solutions tables — which are
     // already built — stay unreachable for the one type that needs them most.
-    onCreate: { has_venue: true, has_challenge: true },
+    //
+    // spectators_enabled because a hackathon is the type people watch. It was
+    // the one flag join_venue() consulted that nothing ever switched on, so
+    // the spectator branch had never once been reached.
+    onCreate: { has_venue: true, has_challenge: true, spectators_enabled: true },
     setup: {
       label: 'design the rooms',
       blurb:
@@ -109,6 +121,8 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     registrationCloses: true,
     teamSize: false,
     submissionDeadline: false,
+    // A seat is a seat. There is nothing to spectate at a taught session.
+    allowViewers: false,
     detailPresets: ['Prerequisites', 'What to bring'],
     onCreate: {},
     setup: {
@@ -129,6 +143,7 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     registrationCloses: false,
     teamSize: false,
     submissionDeadline: false,
+    allowViewers: false,
     detailPresets: [],
     onCreate: {},
     // The only type with no second screen. A meetup that needed one would be
@@ -147,6 +162,7 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     registrationCloses: true,
     teamSize: false,
     submissionDeadline: false,
+    allowViewers: true,
     detailPresets: [],
     onCreate: {},
     setup: {
@@ -167,6 +183,8 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     registrationCloses: true,
     teamSize: true,
     submissionDeadline: true,
+    // The cap is already called "Audience cap" — watching is the point.
+    allowViewers: true,
     detailPresets: ['Pitch length'],
     // Judging criteria live on event_criteria, which is gated behind
     // has_challenge. A demo day is nothing but judging, so it gets the flag.
@@ -195,6 +213,8 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     registrationCloses: false,
     teamSize: true,
     submissionDeadline: true,
+    // Nobody attends a challenge, so there is nothing to watch either.
+    allowViewers: false,
     detailPresets: [],
     onCreate: { has_challenge: true },
     setup: {

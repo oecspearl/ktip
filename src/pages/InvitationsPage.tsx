@@ -13,9 +13,14 @@ import {
   useIncomingJoinRequests,
   useProjectJoinRequestMutations,
 } from '../hooks/useProjectJoinRequests'
+import {
+  useIncomingEventRegistrations,
+  useEventRegistrationDecision,
+} from '../hooks/useEventRegistrationRequests'
 import { usePendingRequests, useConnectionMutations } from '../hooks/useConnections'
 import { PageHero } from '../components/layout/PageHero'
 import { formatRelativeTime } from '../lib/utils'
+import { ATTENDANCE_TYPE_LABELS } from '../lib/constants'
 import {
   Check,
   X,
@@ -24,6 +29,7 @@ import {
   FileText,
   Code2,
   FolderKanban,
+  CalendarCheck,
   UserPlus,
   Mail,
   Send,
@@ -133,11 +139,15 @@ export default function InvitationsPage() {
   const projectInvites = useMyProjectInvites(myId)
   // The other direction: people asking to join projects I own (migration 079).
   const joinRequests = useIncomingJoinRequests(myId)
+  // Same shape again, for events I organize (migration 096). Before this, a
+  // registration confirmed itself and the organizer was never asked.
+  const eventRegistrations = useIncomingEventRegistrations(myId)
   const connectionRequests = usePendingRequests(myId)
 
   const collabMutations = useCollabInviteMutations()
   const projectMutations = useProjectMemberMutations()
   const joinRequestMutations = useProjectJoinRequestMutations()
+  const registrationDecision = useEventRegistrationDecision()
   const connectionMutations = useConnectionMutations()
 
   const respondToCollab = (invite: CollabInvite, accept: boolean) => {
@@ -152,14 +162,17 @@ export default function InvitationsPage() {
   const collabCount = collab.invites?.length ?? 0
   const projectCount = projectInvites.invites?.length ?? 0
   const joinRequestCount = joinRequests.requests?.length ?? 0
+  const eventRegistrationCount = eventRegistrations.registrations?.length ?? 0
   const connectionCount = connectionRequests.requests?.length ?? 0
   const sentCount = (sent.invites?.length ?? 0) + (emailInvites.invites?.length ?? 0)
-  const pendingTotal = collabCount + projectCount + joinRequestCount + connectionCount
+  const pendingTotal =
+    collabCount + projectCount + joinRequestCount + eventRegistrationCount + connectionCount
 
   const loading =
     collab.loading ||
     projectInvites.loading ||
     joinRequests.loading ||
+    eventRegistrations.loading ||
     connectionRequests.loading ||
     sent.loading
 
@@ -168,14 +181,14 @@ export default function InvitationsPage() {
       <PageHero
         eyebrow="Your Network"
         title="Invitations"
-        subtitle="Collaboration, project and connection requests waiting on you."
+        subtitle="Collaboration, project, event and connection requests waiting on you."
         imageSeed="invitations"
         compact
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Invitations' }]}
       />
 
       <div className="bg-ktip-sand-50 py-8 min-h-[50vh]">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
@@ -308,6 +321,56 @@ export default function InvitationsPage() {
                             requesterId: req.requester_id,
                             projectId: req.project_id,
                             projectTitle: req.project?.title || 'your project',
+                          })
+                          .catch(() => {})
+                      }}
+                    />
+                  </Row>
+                ))}
+              </Section>
+
+              <Section
+                icon={CalendarCheck}
+                title="Registrations waiting on you"
+                count={eventRegistrationCount}
+              >
+                {eventRegistrations.registrations?.map((reg) => (
+                  <Row key={reg.id}>
+                    <Avatar profile={reg.user} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-ktip-sand-900">
+                        <span className="font-semibold">
+                          {reg.user?.display_name || 'Someone'}
+                        </span>{' '}
+                        wants to attend{' '}
+                        <span className="font-semibold">{reg.event?.title || 'your event'}</span> as a{' '}
+                        {(ATTENDANCE_TYPE_LABELS[reg.attendance_type] || 'participant').toLowerCase()}
+                      </p>
+                      <p className="text-xs text-ktip-sand-500 mt-1">
+                        {formatRelativeTime(reg.created_at)}
+                      </p>
+                    </div>
+                    <AcceptDecline
+                      disabled={registrationDecision.deciding}
+                      onAccept={() => {
+                        registrationDecision
+                          .decideRegistration({
+                            rsvpId: reg.id,
+                            approve: true,
+                            registrantId: reg.user_id,
+                            eventId: reg.event_id,
+                            eventTitle: reg.event?.title || 'your event',
+                          })
+                          .catch(() => {})
+                      }}
+                      onDecline={() => {
+                        registrationDecision
+                          .decideRegistration({
+                            rsvpId: reg.id,
+                            approve: false,
+                            registrantId: reg.user_id,
+                            eventId: reg.event_id,
+                            eventTitle: reg.event?.title || 'your event',
                           })
                           .catch(() => {})
                       }}

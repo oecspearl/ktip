@@ -115,7 +115,7 @@ export default function DashboardLayout() {
       />
 
       <div
-        className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-12"
+        className="w-full max-w-page mx-auto px-4 pt-8 pb-12"
         // The rail sticks under whatever is above it: navbar alone at the top of
         // the page, navbar + collapsed band once the hero is gone.
         style={{ '--dash-bar-h': collapsed ? DASH_BAR_H : '0px' } as CSSProperties}
@@ -125,7 +125,7 @@ export default function DashboardLayout() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Tab column */}
           <div className="w-full lg:w-64 shrink-0">
-            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 transition-[top] duration-300 lg:sticky lg:top-[calc(var(--nav-offset)+var(--dash-bar-h,0px)+1rem)] lg:max-h-[calc(100vh-var(--nav-offset)-var(--dash-bar-h,0px)-2.5rem)] lg:overflow-y-auto">
+            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 transition-[top] duration-300 lg:sticky lg:top-[calc(var(--nav-offset)+var(--dash-bar-h,0px)+1rem)] lg:max-h-[calc(100svh-var(--nav-offset)-var(--dash-bar-h,0px)-2.5rem)] lg:overflow-y-auto">
               <nav
                 data-tutorial="dashboard-tabs"
                 className="flex flex-row lg:flex-col gap-1 overflow-x-auto"
