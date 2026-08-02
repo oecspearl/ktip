@@ -1,5 +1,12 @@
 import type { ComponentType, ReactNode } from 'react'
 import {
+  CALENDAR_KIND_COLORS,
+  CALENDAR_KIND_DOT_COLORS,
+  RSVP_RELATION_LABELS,
+  RSVP_STATUS_COLORS,
+  RSVP_STATUS_DOT_COLORS,
+} from './constants'
+import {
   eachDayOfInterval,
   format,
   max as maxDate,
@@ -12,6 +19,25 @@ import {
  * the dashboard calendars aggregate every kind.
  */
 export type CalendarItemKind = 'event' | 'grant_deadline' | 'rsvp' | 'grant_application'
+
+/**
+ * The viewer's own tie to an item that has no date of its own — an RSVP happens
+ * *on* an event, it is not a second thing on the calendar. Folded into the host
+ * item so one dated record renders as exactly one row.
+ */
+export interface CalendarItemRelation {
+  kind: CalendarItemKind
+  /** Short state, e.g. "Registered", "Waitlisted" */
+  label: string
+  /** Optional qualifier shown after the label in the day panel */
+  detail?: string
+  /** Solid accent used for the lower half of the item's split accent bar */
+  dotClass: string
+  /** Badge classes (bg + text + border) for the day panel */
+  chipClass: string
+  /** A withdrawn/cancelled tie — badge reads with an ✕ rather than a ✓ */
+  negative?: boolean
+}
 
 /**
  * Display-ready calendar entry. Producers (events page adapter, dashboard feed)
@@ -48,6 +74,57 @@ export interface CalendarItem {
   icon?: ComponentType<{ size?: number | string; className?: string }>
   /** Extra badges rendered after the subtitle in the day panel */
   badges?: ReactNode
+  /** The viewer's own tie to this item — drives the split accent bar */
+  relation?: CalendarItemRelation
+  /** True when this item belongs to the viewer — powers the "Only mine" lens */
+  mine?: boolean
+}
+
+/** The shape `foldRsvpsIntoEvents` needs from an `event_rsvps` row. */
+export interface RsvpLike {
+  event_id: string
+  status: string
+}
+
+/** The viewer's registration, expressed as a relation on its event's row. */
+export function rsvpRelation(status: string): CalendarItemRelation {
+  const relation: CalendarItemRelation = {
+    kind: 'rsvp',
+    label: RSVP_RELATION_LABELS[status] ?? 'Registered',
+    dotClass: RSVP_STATUS_DOT_COLORS[status] ?? CALENDAR_KIND_DOT_COLORS.rsvp,
+    chipClass: RSVP_STATUS_COLORS[status] ?? CALENDAR_KIND_COLORS.rsvp,
+  }
+  if (status === 'cancelled') {
+    relation.negative = true
+    relation.detail = 'You are no longer attending'
+  }
+  return relation
+}
+
+/**
+ * A registration has no date of its own — it happens *on* an event. Fold each
+ * one into its event's row so a registered event renders once, carrying the
+ * viewer's status, rather than as two identical entries on the same day.
+ *
+ * Returns the registrations whose event has no row on the calendar (a draft
+ * event, or the Events filter is off) so the caller can render those standalone
+ * instead of dropping them.
+ */
+export function foldRsvpsIntoEvents<R extends RsvpLike>(
+  eventItems: Map<string, CalendarItem>,
+  rsvps: R[]
+): R[] {
+  const orphans: R[] = []
+  for (const rsvp of rsvps) {
+    const host = eventItems.get(rsvp.event_id)
+    if (!host) {
+      orphans.push(rsvp)
+      continue
+    }
+    host.mine = true
+    host.relation = rsvpRelation(rsvp.status)
+  }
+  return orphans
 }
 
 /**

@@ -179,6 +179,17 @@ export const EVENT_TYPE_GRADIENTS: Record<string, string> = {
 }
 
 /** Neutral gradient for items with no type-specific color. */
+/**
+ * Chrome for the small badges on a calendar row — type badge, registration
+ * badge. Shared so the pixel-literal type sizes live in one place until the
+ * `--text-*` tokens land (see src/design/tokens.test.ts).
+ */
+export const CALENDAR_BADGE_CLASS = 'text-[10px] font-semibold px-1.5 py-0.5 rounded border'
+
+/** Same, for the tighter pills on week-view cards. */
+export const CALENDAR_PILL_CLASS =
+  'truncate rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider'
+
 export const CALENDAR_FALLBACK_GRADIENT =
   'bg-gradient-to-br from-ktip-sand-50 to-ktip-sand-100 border-ktip-sand-200 text-ktip-sand-800'
 
@@ -254,6 +265,25 @@ export const RSVP_STATUS_COLORS: Record<string, string> = {
   waitlisted: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   cancelled: 'bg-red-100 text-red-700 border-red-200',
   checked_in: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+}
+
+/** Solid accents for the lower half of a calendar item's split accent bar */
+export const RSVP_STATUS_DOT_COLORS: Record<string, string> = {
+  confirmed: 'bg-ktip-tropical-500',
+  waitlisted: 'bg-ktip-sun-500',
+  cancelled: 'bg-ktip-sand-400',
+  checked_in: 'bg-ktip-ocean-500',
+}
+
+/**
+ * How an RSVP reads once it is folded into its event — "Registered", not
+ * "Confirmed", because the badge answers *your relation to this event*.
+ */
+export const RSVP_RELATION_LABELS: Record<string, string> = {
+  confirmed: 'Registered',
+  waitlisted: 'Waitlisted',
+  cancelled: 'Registration cancelled',
+  checked_in: 'Checked in',
 }
 
 // Event Update Types

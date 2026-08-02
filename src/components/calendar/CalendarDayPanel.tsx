@@ -2,6 +2,8 @@ import { Link } from 'react-router'
 import { differenceInCalendarDays, format, isSameDay, startOfDay } from 'date-fns'
 import { ArrowRight, CalendarX } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { CALENDAR_BADGE_CLASS } from '../../lib/constants'
+import { CalendarAccentBar } from './CalendarAccentBar'
 import type { CalendarItem } from '../../lib/calendar'
 
 interface CalendarDayPanelProps {
@@ -32,7 +34,7 @@ function CalendarItemRow({ item, day }: { item: CalendarItem; day: Date }) {
 
   const body = (
     <>
-      <span className={cn('w-1 rounded-full self-stretch shrink-0', item.dotClass)} />
+      <CalendarAccentBar item={item} className="w-1 rounded-full self-stretch shrink-0" />
       <span className="w-16 shrink-0 pt-0.5 text-xs font-bold text-ktip-sand-700">{timeLabel}</span>
       <span className="min-w-0 flex-1">
         <span className="flex items-start justify-between gap-2">
@@ -48,13 +50,23 @@ function CalendarItemRow({ item, day }: { item: CalendarItem; day: Date }) {
         </span>
         <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
           {item.badgeLabel && (
+            <span className={cn(CALENDAR_BADGE_CLASS, item.chipClass)}>{item.badgeLabel}</span>
+          )}
+          {/* The viewer's own status, on the same row as the type badge — the
+              registration used to be a whole second card for the same event */}
+          {item.relation && (
             <span
               className={cn(
-                'text-[10px] font-semibold px-1.5 py-0.5 rounded border',
-                item.chipClass
+                CALENDAR_BADGE_CLASS,
+                'flex items-center gap-1',
+                item.relation.chipClass
               )}
             >
-              {item.badgeLabel}
+              <span aria-hidden="true">{item.relation.negative ? '✕' : '✓'}</span>
+              {item.relation.label}
+              {item.relation.detail && (
+                <span className="opacity-70">· {item.relation.detail}</span>
+              )}
             </span>
           )}
           {item.subtitle && (

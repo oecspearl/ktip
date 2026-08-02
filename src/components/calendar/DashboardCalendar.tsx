@@ -21,13 +21,12 @@ interface DashboardCalendarProps {
   className?: string
 }
 
-const PLATFORM_KINDS: CalendarItemKind[] = ['event', 'grant_deadline', 'grant_application']
-const PERSONAL_KINDS: CalendarItemKind[] = [
-  'event',
-  'grant_deadline',
-  'rsvp',
-  'grant_application',
-]
+/**
+ * Filter pills answer "what kind of thing is this" only. A registration is not
+ * a kind of thing — it is the viewer's tie to an event, so it rides along with
+ * `event` and is surfaced by the Only-mine lens instead of its own pill.
+ */
+const SOURCE_KINDS: CalendarItemKind[] = ['event', 'grant_deadline', 'grant_application']
 
 /**
  * Aggregate calendar used by both dashboards: events, grant deadlines, the
@@ -35,8 +34,17 @@ const PERSONAL_KINDS: CalendarItemKind[] = [
  */
 export function DashboardCalendar({ scope, className }: DashboardCalendarProps) {
   const auth = useAuth()
-  const availableKinds = scope === 'platform' ? PLATFORM_KINDS : PERSONAL_KINDS
+  const availableKinds = SOURCE_KINDS
   const [activeKinds, setActiveKinds] = useState<CalendarItemKind[]>(availableKinds)
+  const [onlyMine, setOnlyMine] = useState(false)
+  // Registrations annotate events, so they are only worth fetching alongside them
+  const feedKinds = useMemo(
+    () =>
+      scope === 'personal' && activeKinds.includes('event')
+        ? [...activeKinds, 'rsvp' as CalendarItemKind]
+        : activeKinds,
+    [scope, activeKinds]
+  )
 
   const {
     view,
@@ -56,13 +64,18 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
     scope,
     start: gridStart.toISOString(),
     end: gridEnd.toISOString(),
-    kinds: activeKinds,
+    kinds: feedKinds,
     userId: auth.user?.id,
   })
 
+  const visibleItems = useMemo(
+    () => (onlyMine ? (items ?? []).filter((item) => item.mine) : items),
+    [items, onlyMine]
+  )
+
   const itemsByDay = useMemo(
-    () => groupItemsByDay(items, gridStart, gridEnd),
-    [items, gridStart, gridEnd]
+    () => groupItemsByDay(visibleItems, gridStart, gridEnd),
+    [visibleItems, gridStart, gridEnd]
   )
 
   const selectedDayItems = itemsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []
@@ -85,6 +98,34 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
     }
     goNext()
   }
+
+  const mineLens = (
+    <div
+      role="group"
+      aria-label="Whose items to show"
+      className="flex items-center gap-0.5 rounded-full border border-ktip-line bg-ktip-canvas/70 p-0.5"
+    >
+      {[
+        { value: false, label: 'All' },
+        { value: true, label: 'Only mine' },
+      ].map((option) => (
+        <button
+          key={option.label}
+          type="button"
+          onClick={() => setOnlyMine(option.value)}
+          aria-pressed={onlyMine === option.value}
+          className={cn(
+            'rounded-full px-3 py-1 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none',
+            onlyMine === option.value
+              ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
+              : 'text-ktip-sand-600 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50'
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  )
 
   const kindFilters = (
     <div className="flex flex-wrap items-center gap-2">
@@ -114,6 +155,12 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
           </button>
         )
       })}
+      {scope === 'personal' && (
+        <>
+          <span aria-hidden="true" className="mx-1 h-5 w-px bg-ktip-line" />
+          {mineLens}
+        </>
+      )}
     </div>
   )
 

@@ -14,6 +14,7 @@ import {
   GRANT_APPLICATION_STATUS_LABELS,
   RSVP_STATUS_LABELS,
 } from '../lib/constants'
+import { foldRsvpsIntoEvents } from '../lib/calendar'
 import type { CalendarItem, CalendarItemKind } from '../lib/calendar'
 import { entityPath } from '../lib/slug'
 import type { Event, Grant } from '../types'
@@ -142,9 +143,13 @@ export function useCalendarFeed({
     ])
 
     const items: CalendarItem[] = []
+    // Keyed so an RSVP can annotate its event instead of adding a second row
+    const eventItems = new Map<string, CalendarItem>()
 
     for (const event of events) {
-      items.push(eventItem(event, event.status === 'cancelled' || event.status === 'draft'))
+      const item = eventItem(event, event.status === 'cancelled' || event.status === 'draft')
+      items.push(item)
+      eventItems.set(event.id, item)
     }
 
     for (const grant of grants) {
@@ -166,11 +171,17 @@ export function useCalendarFeed({
 
     const windowStart = new Date(eventsFrom)
     const windowEnd = new Date(end)
-    for (const rsvp of rsvps) {
+    const visibleRsvps = rsvps.filter((rsvp) => {
       const event = rsvp.event as Event | null
-      if (!event) continue
+      if (!event) return false
       const eventStart = new Date(event.start_date)
-      if (eventStart < windowStart || eventStart > windowEnd) continue
+      return eventStart >= windowStart && eventStart <= windowEnd
+    })
+
+    // Registrations ride on their event's row rather than adding a second one.
+    // Whatever has no event row left on the calendar still gets its own entry.
+    for (const rsvp of foldRsvpsIntoEvents(eventItems, visibleRsvps)) {
+      const event = rsvp.event as Event
       items.push({
         id: `rsvp:${rsvp.id}`,
         kind: 'rsvp',
@@ -187,6 +198,7 @@ export function useCalendarFeed({
         statusLabel:
           rsvp.status === 'confirmed' ? undefined : RSVP_STATUS_LABELS[rsvp.status] ?? undefined,
         dimmed: rsvp.status === 'cancelled',
+        mine: true,
       })
     }
 
@@ -205,6 +217,7 @@ export function useCalendarFeed({
         subtitle: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
         icon: FileText,
         statusLabel: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
+        mine: scope === 'personal',
       })
     }
 

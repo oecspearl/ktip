@@ -11,6 +11,7 @@ import {
 } from 'date-fns'
 import { cn } from '../../lib/utils'
 import { CALENDAR_FALLBACK_GRADIENT } from '../../lib/constants'
+import { CalendarAccentBar, calendarItemLabel } from './CalendarAccentBar'
 import type { CalendarItem } from '../../lib/calendar'
 
 interface CalendarGridProps {
@@ -82,17 +83,17 @@ function CalendarDayCell({
           {items.slice(0, MAX_CHIPS).map((item) => (
             <span
               key={item.id}
+              title={calendarItemLabel(item)}
               className={cn(
                 'relative flex items-center overflow-hidden rounded-cal-sm border pl-2 pr-1 py-0.5 text-[10px] font-semibold transition-transform hover:translate-x-0.5',
                 item.gradientClass ?? CALENDAR_FALLBACK_GRADIENT,
                 item.dimmed && 'opacity-60 saturate-50'
               )}
             >
-              <span
-                aria-hidden="true"
-                className={cn('absolute left-0 top-0 bottom-0 w-1', item.dotClass)}
-              />
+              <CalendarAccentBar item={item} className="absolute left-0 top-0 bottom-0 w-1" />
               <span className="truncate">{item.title}</span>
+              {/* Colour alone must not carry the registration — name it for AT */}
+              {item.relation && <span className="sr-only"> — {item.relation.label}</span>}
             </span>
           ))}
           {overflow > 0 && (
@@ -107,9 +108,11 @@ function CalendarDayCell({
       {items.length > 0 && (
         <span className="flex md:hidden gap-0.5 mt-auto justify-center w-full">
           {items.slice(0, MAX_DOTS).map((item) => (
-            <span
+            // Two-tone at 6px still reads as "mine" vs "not mine" at a glance
+            <CalendarAccentBar
               key={item.id}
-              className={cn('w-1.5 h-1.5 rounded-full', item.dotClass, item.dimmed && 'opacity-50')}
+              item={item}
+              className={cn('w-1.5 h-1.5 rounded-full', item.dimmed && 'opacity-50')}
             />
           ))}
         </span>

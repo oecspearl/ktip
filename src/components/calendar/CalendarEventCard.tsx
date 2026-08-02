@@ -1,7 +1,8 @@
 import { Link } from 'react-router'
 import { format, isSameDay } from 'date-fns'
 import { cn } from '../../lib/utils'
-import { CALENDAR_FALLBACK_GRADIENT } from '../../lib/constants'
+import { CALENDAR_FALLBACK_GRADIENT, CALENDAR_PILL_CLASS } from '../../lib/constants'
+import { CalendarAccentBar, calendarItemLabel } from './CalendarAccentBar'
 import type { CalendarItem } from '../../lib/calendar'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 
@@ -54,20 +55,15 @@ export function CalendarEventCard({
   const showMeta = allDay || heightPct >= 7
   const showFooter = !allDay && heightPct >= 11
 
-  const ariaLabel = [
-    item.badgeLabel,
-    item.title,
-    allDay ? 'all day' : timeLabel,
-    item.statusLabel,
-  ]
+  const ariaLabel = [calendarItemLabel(item), allDay ? 'all day' : timeLabel]
     .filter(Boolean)
     .join(', ')
 
   const body = (
     <>
-      <span
-        aria-hidden="true"
-        className={cn('absolute left-0 top-0 bottom-0 w-1 rounded-l-cal-sm', item.dotClass)}
+      <CalendarAccentBar
+        item={item}
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-cal-sm"
       />
       <span className="relative flex h-full min-w-0 flex-col gap-0.5 overflow-hidden pl-2">
         {showMeta && item.badgeLabel && (
@@ -79,13 +75,23 @@ export function CalendarEventCard({
         {showMeta && (
           <span className="truncate text-[10px] font-semibold opacity-70">{timeLabel}</span>
         )}
-        {showFooter && (item.avatarUrl || item.avatarName || item.statusLabel) && (
+        {showFooter && (item.avatarUrl || item.avatarName || item.statusLabel || item.relation) && (
           <span className="mt-auto flex items-center gap-1.5 pt-1">
             {(item.avatarUrl || item.avatarName) && (
               <Avatar url={item.avatarUrl} name={item.avatarName} />
             )}
+            {item.relation && (
+              <span className={cn(CALENDAR_PILL_CLASS, 'border', item.relation.chipClass)}>
+                {item.relation.label}
+              </span>
+            )}
             {item.statusLabel && (
-              <span className="truncate rounded-full bg-white/60 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-ktip-sand-700 dark:text-ktip-sand-100">
+              <span
+                className={cn(
+                  CALENDAR_PILL_CLASS,
+                  'bg-white/60 text-ktip-sand-700 dark:text-ktip-sand-100'
+                )}
+              >
                 {item.statusLabel}
               </span>
             )}
