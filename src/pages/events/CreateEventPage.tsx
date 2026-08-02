@@ -3,14 +3,23 @@ import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
+import { Stepper } from '../../components/ui/Stepper'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateEvent } from '../../hooks/useEvents'
+import { readDraft, useFormDraft } from '../../hooks/useFormDraft'
 import { useUploadDocument } from '../../hooks/useEntityDocuments'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
-import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
-import { sanitizeTag } from '../../lib/utils'
+import { CONTENT_TAG_SUGGESTIONS, EVENT_TYPE_LABELS } from '../../lib/constants'
+import { EVENT_TYPE_ICONS } from '../../lib/category-icons'
+import {
+  EVENT_BLUEPRINTS,
+  EVENT_TYPE_ORDER,
+  blueprintFor,
+  setupSteps,
+} from '../../lib/event-blueprints'
+import { cn, sanitizeTag } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { eventSchema } from '../../lib/validation'
 import {
@@ -24,16 +33,47 @@ import {
   FileText,
   Upload,
   ArrowRight,
+  UserPlus,
+  Timer,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
 import { entityPath } from '../../lib/slug'
-import { venueSetupPath } from '../../lib/event-slug'
+import { eventSetupPath, venueSetupPath } from '../../lib/event-slug'
 
 /** Formats accepted by the document scraper (plus plain text). */
 const DOCUMENT_ACCEPT =
   '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.rtf'
+
+/** Where the in-progress form lives between visits. See useFormDraft. */
+const EVENT_DRAFT_KEY = 'ktip:draft:event-create'
+
+/** The half of the form that can be serialized — everything except the files. */
+type EventDraft = {
+  title: string
+  summary: string
+  description: string
+  tags: string[]
+  eventType: string
+  location: string
+  isVirtual: boolean
+  startDate: string
+  startTime: string
+  endDate: string
+  endTime: string
+  capacity: number | undefined
+  eventStatus: string
+  submissionDate: string
+  submissionTime: string
+  regCloseDate: string
+  regCloseTime: string
+  teamSizeMin: number | undefined
+  teamSizeMax: number | undefined
+  details: DetailEntry[]
+  presetIds: string[]
+}
+
 
 export default function CreateEventPage() {
   const auth = useAuth()
@@ -41,43 +81,131 @@ export default function CreateEventPage() {
   const toast = useToast()
   const { createEvent, loading } = useCreateEvent()
 
-  const [title, setTitle] = useState('')
-  const [summary, setSummary] = useState('')
-  const [description, setDescription] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [eventType, setEventType] = useState('meetup')
-  const [location, setLocation] = useState('')
-  const [isVirtual, setIsVirtual] = useState(false)
-  const [startDate, setStartDate] = useState('')
-  const [startTime, setStartTime] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [endTime, setEndTime] = useState('')
-  const [capacity, setCapacity] = useState<number | undefined>(undefined)
-  const [eventStatus, setEventStatus] = useState('published')
-  const [submissionDate, setSubmissionDate] = useState('')
-  const [submissionTime, setSubmissionTime] = useState('')
+  // Read once, before the state it seeds. Anything typed here survives leaving
+  // the page and comes back until the tab is closed — see useFormDraft.
+  const [draftSeed] = useState(() => readDraft<EventDraft>(EVENT_DRAFT_KEY))
+
+  const [title, setTitle] = useState(draftSeed.title ?? '')
+  const [summary, setSummary] = useState(draftSeed.summary ?? '')
+  const [description, setDescription] = useState(draftSeed.description ?? '')
+  const [tags, setTags] = useState<string[]>(draftSeed.tags ?? [])
+  // Deliberately blank. The type decides which of the questions below even get
+  // asked, so defaulting it to 'meetup' meant most events were created by
+  // someone who never made the choice.
+  const [eventType, setEventType] = useState(draftSeed.eventType ?? '')
+  const [location, setLocation] = useState(draftSeed.location ?? '')
+  const [isVirtual, setIsVirtual] = useState(draftSeed.isVirtual ?? false)
+  const [startDate, setStartDate] = useState(draftSeed.startDate ?? '')
+  const [startTime, setStartTime] = useState(draftSeed.startTime ?? '')
+  const [endDate, setEndDate] = useState(draftSeed.endDate ?? '')
+  const [endTime, setEndTime] = useState(draftSeed.endTime ?? '')
+  const [capacity, setCapacity] = useState<number | undefined>(draftSeed.capacity)
+  const [eventStatus, setEventStatus] = useState(draftSeed.eventStatus ?? 'published')
+  const [submissionDate, setSubmissionDate] = useState(draftSeed.submissionDate ?? '')
+  const [submissionTime, setSubmissionTime] = useState(draftSeed.submissionTime ?? '')
+  const [regCloseDate, setRegCloseDate] = useState(draftSeed.regCloseDate ?? '')
+  const [regCloseTime, setRegCloseTime] = useState(draftSeed.regCloseTime ?? '')
+  const [teamSizeMin, setTeamSizeMin] = useState<number | undefined>(draftSeed.teamSizeMin)
+  const [teamSizeMax, setTeamSizeMax] = useState<number | undefined>(draftSeed.teamSizeMax)
+  // Files are the one thing a draft cannot hold — a File cannot be serialized
+  // and no browser will hand one back without a fresh picker.
   const [documents, setDocuments] = useState<File[]>([])
   const [finishing, setFinishing] = useState(false)
-  const [details, setDetails] = useState<DetailEntry[]>([])
+  const [details, setDetails] = useState<DetailEntry[]>(draftSeed.details ?? [])
+  // Which detail rows this page put there, so switching type can take back the
+  // ones the user never filled in without touching anything they wrote.
+  const [presetIds, setPresetIds] = useState<string[]>(draftSeed.presetIds ?? [])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
+
+  // Everything above except the files, written back on every change.
+  const { clear: clearDraft } = useFormDraft(EVENT_DRAFT_KEY, {
+    title,
+    summary,
+    description,
+    tags,
+    eventType,
+    location,
+    isVirtual,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    capacity,
+    eventStatus,
+    submissionDate,
+    submissionTime,
+    regCloseDate,
+    regCloseTime,
+    teamSizeMin,
+    teamSizeMax,
+    details,
+    presetIds,
+  })
 
   // Controls the draft/published selector. Capability, not slug: the literal
   // 'oecs' test meant an admin created after 063 could not choose a status and
   // silently published everything.
   const isAdmin = auth.can('org:manage')
 
-  // The old "sets a challenge" checkbox is gone — picking the Challenge event
-  // type is what switches the brief on.
-  const isChallengeEvent = eventType === 'challenge'
-  // A hackathon always gets a venue: it is the one event type whose whole
-  // format is "a place with rooms in it".
-  const isHackathon = eventType === 'hackathon'
+  // Everything type-specific below reads off this. No component compares
+  // eventType to a string — that is what put the old branches in three places.
+  const blueprint = blueprintFor(eventType)
+  const typeChosen = eventType !== ''
+  // A challenge has no room to be in, so the toggle is not offered and the
+  // answer is fixed.
+  const virtual = blueprint.format === 'virtual-only' ? true : isVirtual
+  const showLocation = !virtual && blueprint.location !== 'hidden'
 
   const { uploadDocument } = useUploadDocument()
 
   const formRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  /**
+   * Changing type re-shapes the form under the user, so it also has to reset
+   * the answers that no longer have a question, and swap the detail presets.
+   */
+  const chooseType = (next: string) => {
+    const nextBlueprint = EVENT_BLUEPRINTS[next as keyof typeof EVENT_BLUEPRINTS]
+    if (!nextBlueprint) return
+
+    setEventType(next)
+    setIsVirtual(nextBlueprint.defaultVirtual)
+    setErrors({})
+
+    if (nextBlueprint.endDate === 'hidden') {
+      setEndDate('')
+      setEndTime('')
+    }
+    if (nextBlueprint.capacity === 'hidden') setCapacity(undefined)
+    if (!nextBlueprint.registrationCloses) {
+      setRegCloseDate('')
+      setRegCloseTime('')
+    }
+    if (!nextBlueprint.teamSize) {
+      setTeamSizeMin(undefined)
+      setTeamSizeMax(undefined)
+    }
+    if (!nextBlueprint.submissionDeadline) {
+      setSubmissionDate('')
+      setSubmissionTime('')
+    }
+
+    // Untouched presets from the old type go; anything the user typed stays.
+    setDetails((prev) => {
+      const kept = prev.filter(
+        (entry) => !presetIds.includes(entry.id) || entry.value?.trim() || entry.items?.length
+      )
+      const seeded = nextBlueprint.detailPresets.map((label) => ({
+        id: crypto.randomUUID(),
+        label,
+        value: '',
+      }))
+      setPresetIds(seeded.map((entry) => entry.id))
+      return [...kept, ...seeded]
+    })
+  }
 
   const addFiles = (list: FileList | null) => {
     if (!list?.length) return
@@ -96,12 +224,16 @@ export default function CreateEventPage() {
   /** Schema field name → the label the user actually sees on the input. */
   const FIELD_LABELS: Record<string, string> = {
     title: 'Event Title',
+    summary: 'Summary',
     description: 'Description',
+    tags: 'Tags',
     event_type: 'Event Type',
     location: 'Location',
     start_date: 'Start Date',
     end_date: 'End Date',
-    capacity: 'Capacity',
+    capacity: blueprint.capacityLabel || 'Capacity',
+    registration_closes_at: 'Registration closes',
+    team_size: 'Team size',
   }
 
   /**
@@ -124,35 +256,66 @@ export default function CreateEventPage() {
     return new Date(datetime).toISOString()
   }
 
+  /**
+   * The rules zod cannot express, because they depend on the blueprint rather
+   * than on the shape of the row. Same error map, so they surface in the same
+   * banner as everything else.
+   */
+  const blueprintErrors = (): Record<string, string> => {
+    const found: Record<string, string> = {}
+
+    if (!typeChosen) {
+      found.event_type = 'Pick what kind of event this is'
+      return found
+    }
+    if (blueprint.endDate === 'required' && !endDate) {
+      found.end_date = 'This event type runs to a finish — say when'
+    }
+    if (blueprint.capacity === 'required' && !capacity) {
+      found.capacity = `${blueprint.capacityLabel} is required for a ${EVENT_TYPE_LABELS[eventType]}`
+    }
+    if (blueprint.teamSize && teamSizeMin && teamSizeMax && teamSizeMax < teamSizeMin) {
+      found.team_size = 'The largest team cannot be smaller than the smallest'
+    }
+    // A deadline the event has already started past is a deadline nobody can meet
+    if (regCloseDate && startDate && regCloseDate > startDate) {
+      found.registration_closes_at = 'Registration cannot close after the event starts'
+    }
+    return found
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setErrors({})
     setErrorMessage('')
 
     const startDatetime = combineDatetime(startDate, startTime)
-    const endDatetime = endDate
-      ? combineDatetime(endDate, endTime)
-      : undefined
+    const endDatetime =
+      blueprint.endDate !== 'hidden' && endDate ? combineDatetime(endDate, endTime) : undefined
 
     // Validate form
     const result = eventSchema.safeParse({
       title,
       description,
       event_type: eventType,
-      location: isVirtual ? 'Virtual' : location,
-      is_virtual: isVirtual,
+      location: virtual ? 'Virtual' : location,
+      is_virtual: virtual,
       start_date: startDatetime,
       end_date: endDatetime,
       capacity,
     })
 
+    const fieldErrors: Record<string, string> = {}
     if (!result.success) {
-      const fieldErrors: Record<string, string> = {}
       result.error.issues.forEach((error: any) => {
         if (error.path[0]) {
           fieldErrors[error.path[0] as string] = error.message
         }
       })
+    }
+    Object.assign(fieldErrors, blueprintErrors())
+
+    if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors)
 
       const named = Object.keys(fieldErrors).map((key) => FIELD_LABELS[key] || key)
@@ -170,24 +333,29 @@ export default function CreateEventPage() {
         summary: summary.trim() || null,
         tags: tags.map(sanitizeTag).filter(Boolean),
         description,
-        event_type: eventType as any,
-        location: isVirtual ? 'Virtual' : location,
-        is_virtual: isVirtual,
+        event_type: eventType,
+        location: virtual ? 'Virtual' : location,
+        is_virtual: virtual,
         start_date: startDatetime,
         end_date: endDatetime,
         capacity,
         organizer_id: auth.user!.id,
-        // A hackathon gets its venue switched on at creation, because the very
-        // next screen is the one where its rooms get drawn.
-        ...(isHackathon ? { has_venue: true } : {}),
-        has_challenge: isChallengeEvent,
+        // The flags the type implies — a hackathon always has a venue, and
+        // anything that takes submissions needs the criteria machinery.
+        ...blueprint.onCreate,
         submission_deadline:
-          isChallengeEvent && submissionDate
+          blueprint.submissionDeadline && submissionDate
             ? combineDatetime(submissionDate, submissionTime)
             : null,
+        registration_closes_at:
+          blueprint.registrationCloses && regCloseDate
+            ? combineDatetime(regCloseDate, regCloseTime)
+            : null,
+        team_size_min: blueprint.teamSize ? (teamSizeMin ?? null) : null,
+        team_size_max: blueprint.teamSize ? (teamSizeMax ?? null) : null,
         details: cleanDetails(details),
         ...(isAdmin ? { status: eventStatus } : {}),
-      } as any)
+      })
 
       // The event exists from here on. Documents are attachments — a failure
       // downgrades to a warning (they can be added from the event page), it
@@ -212,6 +380,10 @@ export default function CreateEventPage() {
         }
       }
 
+      // The event is real now, so the draft is not a draft any more. Left
+      // behind, it would repopulate the form the next time someone creates one.
+      clearDraft()
+
       analytics.feature('event', 'created')
       if (attachmentErrors.length > 0) {
         toast.error(
@@ -220,9 +392,16 @@ export default function CreateEventPage() {
       } else {
         toast.success('Event created successfully!')
       }
-      // Creating a hackathon is a two-step job: the listing, then the place it
-      // happens in. Anything else goes straight to its event page.
-      navigate(isHackathon ? venueSetupPath(event) : entityPath('event', event))
+      // Most types are a two-step job: the listing, then the thing that makes
+      // the listing worth reading. A hackathon's step two is the venue, which
+      // needs a full-width canvas of its own; everything else shares one page.
+      navigate(
+        !blueprint.setup
+          ? entityPath('event', event)
+          : blueprint.setup.sections.includes('venue')
+            ? venueSetupPath(event)
+            : eventSetupPath(event)
+      )
     } catch (error: any) {
       // A row-level-security refusal or a missing column arrives here. The toast
       // dismisses itself after 4s, so the banner is the durable copy.
@@ -252,6 +431,12 @@ export default function CreateEventPage() {
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
+          {/* Only drawn once the type is known and that type has a step two —
+              a one-step stepper is just a label. */}
+          {blueprint.setup && typeChosen && (
+            <Stepper steps={setupSteps(eventType)} currentStep={0} className="mb-8" />
+          )}
+
           <form data-tutorial="event-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div
@@ -261,6 +446,68 @@ export default function CreateEventPage() {
                 {errorMessage}
               </div>
             )}
+
+            {/* Event Type — first, because it decides which of the questions
+                below are even asked. */}
+            <div data-tutorial="event-form-type">
+              <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+                What kind of event is this? <span className="text-red-500">*</span>
+              </label>
+              <p className="text-xs text-ktip-sand-500 mb-3">
+                This decides what else we ask you for, and what you set up next.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {EVENT_TYPE_ORDER.map((type) => {
+                  const option = EVENT_BLUEPRINTS[type]
+                  const Icon = EVENT_TYPE_ICONS[type]
+                  const selected = eventType === type
+
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => chooseType(type)}
+                      aria-pressed={selected}
+                      className={cn(
+                        'rounded-xl border-2 p-4 text-left transition-colors',
+                        selected
+                          ? 'border-ktip-ocean-500 bg-ktip-ocean-50'
+                          : 'border-ktip-sand-200 bg-ktip-cream hover:border-ktip-ocean-300'
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        {Icon && (
+                          <Icon
+                            size={18}
+                            className={selected ? 'text-ktip-ocean-600' : 'text-ktip-sand-500'}
+                          />
+                        )}
+                        <span
+                          className={cn(
+                            'text-sm font-semibold',
+                            selected ? 'text-ktip-ocean-700' : 'text-ktip-sand-800'
+                          )}
+                        >
+                          {EVENT_TYPE_LABELS[type]}
+                        </span>
+                      </span>
+                      <span className="mt-1.5 block text-xs leading-relaxed text-ktip-sand-500">
+                        {option.tagline}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+              {errors.event_type && (
+                <p className="mt-2 text-sm text-red-600">{errors.event_type}</p>
+              )}
+              {blueprint.setup && typeChosen && (
+                <p className="mt-2 text-xs text-ktip-sand-500">
+                  After you create it, the next screen is where you {blueprint.setup.label}.{' '}
+                  {blueprint.setup.blurb}
+                </p>
+              )}
+            </div>
 
             {/* Title */}
             <Input
@@ -315,39 +562,6 @@ export default function CreateEventPage() {
               <DetailsEditor value={details} onChange={setDetails} />
             </div>
 
-            {/* Event Type */}
-            <div data-tutorial="event-form-type">
-              <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Event Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={eventType}
-                onChange={(e) => setEventType(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-              >
-                <option value="hackathon">Hackathon</option>
-                <option value="workshop">Workshop</option>
-                <option value="meetup">Meetup</option>
-                <option value="conference">Conference</option>
-                <option value="demo_day">Demo Day</option>
-                <option value="challenge">Challenge</option>
-              </select>
-              {isChallengeEvent && (
-                <p className="mt-1 text-xs text-ktip-sand-500">
-                  Attendees are given a goal to accomplish and submit their solutions on the event
-                  page. Objectives, constraints, deliverables and judging criteria are added from
-                  the event's Challenge tab after creating it.
-                </p>
-              )}
-              {isHackathon && (
-                <p className="mt-1 text-xs text-ktip-sand-500">
-                  A hackathon gets a live virtual venue. After you create it, the next screen is
-                  where you lay out its rooms — a main hall, a help desk, judging, whatever it
-                  needs.
-                </p>
-              )}
-            </div>
-
             {/* Event Status (Admin only) */}
             {isAdmin && (
               <div>
@@ -368,26 +582,28 @@ export default function CreateEventPage() {
               </div>
             )}
 
-            {/* Virtual Toggle */}
-            <div data-tutorial="event-form-venue" className="flex items-center gap-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isVirtual}
-                  onChange={(e) => setIsVirtual(e.target.checked)}
-                  className="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
-                />
-                <div className="flex items-center gap-2">
-                  <Video size={18} className="text-ktip-sand-600" />
-                  <span className="text-sm text-ktip-sand-700">
-                    This is a virtual event
-                  </span>
-                </div>
-              </label>
-            </div>
+            {/* Virtual Toggle — not offered for a type that can only be virtual */}
+            {blueprint.format === 'choice' && (
+              <div data-tutorial="event-form-venue" className="flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isVirtual}
+                    onChange={(e) => setIsVirtual(e.target.checked)}
+                    className="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Video size={18} className="text-ktip-sand-600" />
+                    <span className="text-sm text-ktip-sand-700">
+                      This is a virtual event
+                    </span>
+                  </div>
+                </label>
+              </div>
+            )}
 
             {/* Location (if not virtual) */}
-            {!isVirtual && (
+            {showLocation && (
               <Input
                 label="Location"
                 placeholder="e.g., Innovation Hub, Kingston, Jamaica"
@@ -437,62 +653,156 @@ export default function CreateEventPage() {
               />
             </div>
 
-            {/* End Date and Time (Optional) */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                  End Date (Optional)
-                </label>
-                <div className="relative">
-                  <Calendar
-                    size={20}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
-                  />
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={startDate || today}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
-                  />
+            {/* End Date and Time — hidden for a type with no run time */}
+            {blueprint.endDate !== 'hidden' && (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
+                    End Date{' '}
+                    {blueprint.endDate === 'required' ? (
+                      <span className="text-red-500">*</span>
+                    ) : (
+                      '(Optional)'
+                    )}
+                  </label>
+                  <div className="relative">
+                    <Calendar
+                      size={20}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                    />
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      min={startDate || today}
+                      className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    />
+                  </div>
+                  {errors.end_date && (
+                    <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>
+                  )}
                 </div>
-              </div>
 
+                <Input
+                  label="End Time (Optional)"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  fullWidth
+                />
+              </div>
+            )}
+
+            {/* Registration deadline — almost never the moment the event starts */}
+            {blueprint.registrationCloses && (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
+                    Registration Closes (Optional)
+                  </label>
+                  <div className="relative">
+                    <Timer
+                      size={20}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400 pointer-events-none"
+                    />
+                    <input
+                      type="date"
+                      value={regCloseDate}
+                      onChange={(e) => setRegCloseDate(e.target.value)}
+                      min={today}
+                      max={startDate || undefined}
+                      className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    />
+                  </div>
+                  {errors.registration_closes_at && (
+                    <p className="mt-1 text-sm text-red-600">{errors.registration_closes_at}</p>
+                  )}
+                  <p className="mt-1 text-xs text-ktip-sand-500">
+                    Sign-ups are refused after this. Leave empty to stay open until it starts.
+                  </p>
+                </div>
+
+                <Input
+                  label="Closing Time (Optional)"
+                  type="time"
+                  value={regCloseTime}
+                  onChange={(e) => setRegCloseTime(e.target.value)}
+                  fullWidth
+                />
+              </div>
+            )}
+
+            {/* Capacity — named for the type, and required where it matters */}
+            {blueprint.capacity !== 'hidden' && (
               <Input
-                label="End Time (Optional)"
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                label={blueprint.capacityLabel}
+                type="number"
+                min={1}
+                placeholder="Maximum number of attendees"
+                value={capacity?.toString() || ''}
+                onChange={(e) =>
+                  setCapacity(
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+                error={errors.capacity}
+                icon={<Users size={20} />}
+                helperText={blueprint.capacityHelp}
+                required={blueprint.capacity === 'required'}
                 fullWidth
               />
-            </div>
+            )}
 
-            {/* Capacity */}
-            <Input
-              label="Capacity (Optional)"
-              type="number"
-              placeholder="Maximum number of attendees"
-              value={capacity?.toString() || ''}
-              onChange={(e) =>
-                setCapacity(
-                  e.target.value ? parseInt(e.target.value) : undefined
-                )
-              }
-              error={errors.capacity}
-              icon={<Users size={20} />}
-              helperText="Leave empty for unlimited capacity"
-              fullWidth
-            />
+            {/* Team size — for the types that are entered by teams, not people */}
+            {blueprint.teamSize && (
+              <div>
+                <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+                  Team Size (Optional)
+                </label>
+                <p className="text-xs text-ktip-sand-500 mb-2">
+                  Leave both empty if people can enter on their own.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Input
+                    label="Smallest team"
+                    type="number"
+                    min={1}
+                    placeholder="e.g. 2"
+                    value={teamSizeMin?.toString() || ''}
+                    onChange={(e) =>
+                      setTeamSizeMin(e.target.value ? parseInt(e.target.value) : undefined)
+                    }
+                    icon={<UserPlus size={20} />}
+                    fullWidth
+                  />
+                  <Input
+                    label="Largest team"
+                    type="number"
+                    min={1}
+                    placeholder="e.g. 5"
+                    value={teamSizeMax?.toString() || ''}
+                    onChange={(e) =>
+                      setTeamSizeMax(e.target.value ? parseInt(e.target.value) : undefined)
+                    }
+                    icon={<UserPlus size={20} />}
+                    fullWidth
+                  />
+                </div>
+                {errors.team_size && (
+                  <p className="mt-1 text-sm text-red-600">{errors.team_size}</p>
+                )}
+              </div>
+            )}
 
-            {/* Challenge — appears when the Challenge event type is picked */}
-            {isChallengeEvent && (
+            {/* Submissions — for every type where something gets handed in */}
+            {blueprint.submissionDeadline && (
               <div
                 data-tutorial="event-form-challenge"
                 className="border-2 border-ktip-sand-200 rounded-xl p-4 space-y-4"
               >
                 <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
                   <Target size={18} className="text-ktip-sand-600" />
-                  Challenge Details
+                  Submissions
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
@@ -525,8 +835,8 @@ export default function CreateEventPage() {
                 </div>
 
                 <p className="text-xs text-ktip-sand-500">
-                  Participants submit their solutions — with their own supporting files — from the
-                  event page, up until the deadline above.
+                  Participants submit their work — with their own supporting files — from the event
+                  page, up until the deadline above.
                 </p>
               </div>
             )}
@@ -604,24 +914,30 @@ export default function CreateEventPage() {
               </div>
             )}
 
-            {/* Submit Button — a hackathon is a two-step create, so the button
+            {/* Submit Button — most types are a two-step create, so the button
                 says where it is going rather than pretending this is the end. */}
             <div className="flex items-center gap-4">
               <Button
                 type="submit"
                 loading={loading || finishing}
-                icon={isHackathon ? <ArrowRight size={20} /> : <Save size={20} />}
+                icon={blueprint.setup ? <ArrowRight size={20} /> : <Save size={20} />}
                 fullWidth
               >
                 {finishing
                   ? 'Uploading attachments…'
-                  : isHackathon
-                    ? 'Next: design the rooms'
+                  : blueprint.setup && typeChosen
+                    ? `Next: ${blueprint.setup.label}`
                     : 'Create Event'}
               </Button>
+              {/* Cancel is the one exit that means "I am not making this",
+                  so it is also the one that throws the draft away. Navigating
+                  anywhere else keeps it. */}
               <button
                 type="button"
-                onClick={() => navigate('/events')}
+                onClick={() => {
+                  clearDraft()
+                  navigate('/events')
+                }}
                 disabled={loading || finishing}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >

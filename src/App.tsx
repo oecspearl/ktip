@@ -216,6 +216,13 @@ const router = createBrowserRouter([
                 path: '/events/virtual-hackathon/:slug/setup',
                 lazy: lazyPage(() => import('./pages/events/EventVenueSetupPage')),
               },
+              // Step two for every other type that has one (092): the brief,
+              // the agenda, the speakers. Host-gated inside the page, and again
+              // by RLS on each table it writes.
+              {
+                path: '/events/:slug/setup',
+                lazy: lazyPage(() => import('./pages/events/EventSetupPage')),
+              },
               // The id-shaped originals, kept as redirects for old links.
               {
                 path: '/events/:id/venue',

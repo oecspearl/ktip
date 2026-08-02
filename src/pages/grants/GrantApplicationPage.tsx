@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { Stepper } from '../../components/grants/application/Stepper'
+import { Stepper } from '../../components/ui/Stepper'
 import { StepForm } from '../../components/grants/application/StepForm'
 import { ApplicationPreview } from '../../components/grants/application/ApplicationPreview'
 import { AIReviewPanel } from '../../components/grants/application/AIReviewPanel'
@@ -240,8 +240,8 @@ export default function GrantApplicationPage() {
 
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
-          {/* Stepper */}
-          <div id="steps" data-spy="Steps" className="scroll-mt-24 border border-ktip-sand-200 rounded-2xl p-4 mb-6">
+          {/* Stepper — no card around it, the bars are the only chrome it needs */}
+          <div id="steps" data-spy="Steps" className="scroll-mt-24 mb-8">
             <Stepper
               steps={stepNames}
               currentStep={currentStep}

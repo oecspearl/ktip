@@ -204,8 +204,22 @@ export interface Database {
           capacity: number | null
           image_url: string | null
           registration_fields: any
+          summary: string | null
+          tags: string[]
+          details: any
+          is_climate_action: boolean
           has_challenge: boolean
           submission_deadline: string | null
+          has_venue: boolean
+          venue_floorplan_url: string | null
+          venue_map: any
+          venue_opens_at: string | null
+          venue_closes_at: string | null
+          spectators_enabled: boolean
+          spectator_scope: 'members' | 'registered' | 'public'
+          registration_closes_at: string | null
+          team_size_min: number | null
+          team_size_max: number | null
           organizer_id: string
           created_at: string
         }
@@ -223,8 +237,22 @@ export interface Database {
           capacity?: number | null
           image_url?: string | null
           registration_fields?: any
+          summary?: string | null
+          tags?: string[]
+          details?: any
+          is_climate_action?: boolean
           has_challenge?: boolean
           submission_deadline?: string | null
+          has_venue?: boolean
+          venue_floorplan_url?: string | null
+          venue_map?: any
+          venue_opens_at?: string | null
+          venue_closes_at?: string | null
+          spectators_enabled?: boolean
+          spectator_scope?: 'members' | 'registered' | 'public'
+          registration_closes_at?: string | null
+          team_size_min?: number | null
+          team_size_max?: number | null
           organizer_id: string
           created_at?: string
         }
@@ -242,8 +270,22 @@ export interface Database {
           capacity?: number | null
           image_url?: string | null
           registration_fields?: any
+          summary?: string | null
+          tags?: string[]
+          details?: any
+          is_climate_action?: boolean
           has_challenge?: boolean
           submission_deadline?: string | null
+          has_venue?: boolean
+          venue_floorplan_url?: string | null
+          venue_map?: any
+          venue_opens_at?: string | null
+          venue_closes_at?: string | null
+          spectators_enabled?: boolean
+          spectator_scope?: 'members' | 'registered' | 'public'
+          registration_closes_at?: string | null
+          team_size_min?: number | null
+          team_size_max?: number | null
           organizer_id?: string
           created_at?: string
         }

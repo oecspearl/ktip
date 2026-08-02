@@ -42,7 +42,7 @@ interface FabAction {
   badge?: boolean
 }
 
-interface StepperProps {
+interface NumberStepperProps {
   icon: ReactNode
   label: string
   value: string
@@ -54,8 +54,9 @@ interface StepperProps {
   iconSize: number
 }
 
-/** One labelled −/value/+ row in the accessibility panel */
-function Stepper({
+/** One labelled −/value/+ row in the accessibility panel. Not a progress
+ *  stepper — that one lives in `ui/Stepper.tsx`. */
+function NumberStepper({
   icon,
   label,
   value,
@@ -64,7 +65,7 @@ function Stepper({
   atMin,
   atMax,
   iconSize,
-}: StepperProps) {
+}: NumberStepperProps) {
   const button =
     'w-[1.75em] h-[1.75em] rounded-[0.375em] flex items-center justify-center border border-ktip-sand-200 text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-600 disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-ktip-sand-700 transition-colors'
 
@@ -213,7 +214,7 @@ export function FloatingActionButton() {
             </button>
           </div>
 
-          <Stepper
+          <NumberStepper
             icon={<Type size={px(14)} />}
             label="Text size"
             value={`${Math.round(a11y.fontScale * 100)}%`}
@@ -224,7 +225,7 @@ export function FloatingActionButton() {
             iconSize={px(13)}
           />
 
-          <Stepper
+          <NumberStepper
             icon={<SunMedium size={px(14)} />}
             label="Photo brightness"
             value={`${Math.round(a11y.brightness * 100)}%`}

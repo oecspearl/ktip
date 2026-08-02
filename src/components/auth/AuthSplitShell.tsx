@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { HERO_IMAGES } from '../../lib/hero-images'
 import { cn } from '../../lib/utils'
+import { Stepper } from '../ui/Stepper'
 
 export interface AuthStep {
   title: string
@@ -87,25 +88,28 @@ function useDeckFlip(step: number, n: number) {
   return { panelRef, face }
 }
 
-function Dots({ count, active, onPhoto = false }: { count: number; active: number; onPhoto?: boolean }) {
+/**
+ * Progress for the signup/onboarding deck. The shared Stepper in `compact`
+ * mode — bars only, no labels — because this sits over a photo and under a
+ * caption, where the step's name is already spelled out in the copy beside it.
+ */
+function Dots({
+  steps,
+  active,
+  onPhoto = false,
+}: {
+  steps: AuthStep[]
+  /** 1-indexed, matching the `step` prop the shell is driven by */
+  active: number
+  onPhoto?: boolean
+}) {
   return (
-    <div className="flex items-center gap-1.5" aria-hidden="true">
-      {Array.from({ length: count }, (_, i) => (
-        <span
-          key={i}
-          className={cn(
-            'h-1.5 rounded-full transition-all duration-300',
-            i + 1 === active
-              ? onPhoto
-                ? 'w-6 bg-brand-white'
-                : 'w-6 bg-ktip-ocean-500'
-              : onPhoto
-                ? 'w-2 bg-brand-white/40'
-                : 'w-2 bg-ktip-sand-300',
-          )}
-        />
-      ))}
-    </div>
+    <Stepper
+      variant="compact"
+      onPhoto={onPhoto}
+      steps={steps.map((s) => s.title)}
+      currentStep={Math.min(Math.max(active, 1), steps.length) - 1}
+    />
   )
 }
 
@@ -191,7 +195,7 @@ export function AuthSplitShell({
               <p className="font-display text-2xl font-semibold text-brand-white leading-snug">
                 {current?.caption}
               </p>
-              <Dots count={n} active={face + 1} onPhoto />
+              <Dots steps={steps} active={face + 1} onPhoto />
             </div>
           </div>
         </div>
@@ -213,7 +217,7 @@ export function AuthSplitShell({
               {subheading && <p className="text-ktip-sand-600 mt-1 text-sm">{subheading}</p>}
               {topLink && <div className="text-sm text-ktip-sand-600 mt-1">{topLink}</div>}
               <div className="md:hidden mt-3">
-                <Dots count={n} active={step} />
+                <Dots steps={steps} active={step} />
               </div>
               <p className="sr-only" aria-live="polite">
                 Step {Math.min(step, n)} of {n}: {steps[Math.min(step, n) - 1]?.title}

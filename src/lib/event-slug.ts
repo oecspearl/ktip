@@ -31,3 +31,15 @@ export function venueRoomPath(event: Sluggable, roomKey: string): string {
 export function venueSetupPath(event: Sluggable): string {
   return `${venuePath(event)}/setup`
 }
+
+/**
+ * Step two for every type that is not a hackathon (092): the brief, the
+ * agenda, the speakers — whichever of those its blueprint asks for.
+ *
+ * Sits under /events/<slug> rather than /admin for the same reason the venue
+ * setup does: the person who just pressed "Create event" is not thinking about
+ * an admin console. The same editors are still reachable from there.
+ */
+export function eventSetupPath(event: Sluggable): string {
+  return `/events/${event.slug || event.id}/setup`
+}

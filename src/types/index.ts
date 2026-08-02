@@ -306,6 +306,15 @@ export interface Event extends Ranked {
   venue_closes_at: string | null
   spectators_enabled: boolean
   spectator_scope: SpectatorScope
+  /**
+   * Migration 092 — when sign-ups shut, which is rarely the moment the event
+   * starts. NULL means open until it does. Enforced by the RSVP trigger, not
+   * only by the form.
+   */
+  registration_closes_at: string | null
+  /** Migration 092 — NULL min means the event is not entered by teams. */
+  team_size_min: number | null
+  team_size_max: number | null
   details: DetailEntry[]
   created_at: string
   organizer?: Profile

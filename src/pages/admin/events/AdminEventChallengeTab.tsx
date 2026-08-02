@@ -28,6 +28,13 @@ interface AdminEventChallengeTabProps {
   submissionDeadline: string | null
   /** Re-reads the event so the toggle and deadline reflect what was saved. */
   onEventChange: () => void
+  /**
+   * `judging` narrows this to scoring criteria only, for a demo day — which is
+   * nothing but judging and has no objectives or deliverables to write. It also
+   * drops the has_challenge toggle, because on those types the flag is set by
+   * the event type rather than chosen here.
+   */
+  mode?: 'full' | 'judging'
 }
 
 /** ISO → the value format a datetime-local input accepts. */
@@ -39,13 +46,20 @@ function toLocalInput(iso: string | null): string {
 }
 
 export default function AdminEventChallengeTab(props: AdminEventChallengeTabProps) {
+  const judgingOnly = props.mode === 'judging'
+  /** The one kind a judging-only view can add, and the default everywhere else. */
+  const defaultKind: EventCriterionKind = judgingOnly ? 'judging_criterion' : 'objective'
+  const offeredKinds = judgingOnly
+    ? (['judging_criterion'] as EventCriterionKind[])
+    : EVENT_CRITERION_KINDS
+
   const toast = useToast()
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<EventCriterion | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   // Form state
-  const [kind, setKind] = useState<EventCriterionKind>('objective')
+  const [kind, setKind] = useState<EventCriterionKind>(defaultKind)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isRequired, setIsRequired] = useState(true)
@@ -62,11 +76,15 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
   const { reorder, loading: reordering } = useReorderCriteria()
   const { updateEvent, loading: savingEvent } = useUpdateEvent()
 
-  const groups = groupCriteria(criteria)
+  // A demo day that once had objectives written against it still should not
+  // show them here — the filter is on display, not just on what can be added.
+  const groups = groupCriteria(criteria).filter(
+    (group) => !judgingOnly || group.kind === 'judging_criterion'
+  )
   const isJudging = kind === 'judging_criterion'
 
   const resetForm = () => {
-    setKind('objective')
+    setKind(defaultKind)
     setTitle('')
     setDescription('')
     setIsRequired(true)
@@ -199,26 +217,28 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
     <div className="space-y-6">
       {/* Challenge settings */}
       <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6 space-y-4">
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={props.hasChallenge}
-            disabled={savingEvent}
-            onChange={(e) => toggleChallenge(e.currentTarget.checked)}
-            className="mt-0.5 w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
-          />
-          <span>
-            <span className="block text-sm font-medium text-ktip-sand-900">
-              This event sets a challenge
+        {!judgingOnly && (
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={props.hasChallenge}
+              disabled={savingEvent}
+              onChange={(e) => toggleChallenge(e.currentTarget.checked)}
+              className="mt-0.5 w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
+            />
+            <span>
+              <span className="block text-sm font-medium text-ktip-sand-900">
+                This event sets a challenge
+              </span>
+              <span className="block text-xs text-ktip-sand-500 mt-0.5">
+                Attendees are given a goal to accomplish. The brief below is shown on the public
+                event page only while this is on.
+              </span>
             </span>
-            <span className="block text-xs text-ktip-sand-500 mt-0.5">
-              Attendees are given a goal to accomplish. The brief below is shown on the public
-              event page only while this is on.
-            </span>
-          </span>
-        </label>
+          </label>
+        )}
 
-        <div className="pt-4 border-t border-ktip-sand-200">
+        <div className={judgingOnly ? '' : 'pt-4 border-t border-ktip-sand-200'}>
           <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
             Submission Deadline
           </label>
@@ -258,16 +278,18 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-ktip-sand-900">Challenge Brief</h3>
-          {!!criteria?.length && (
+          <h3 className="text-lg font-semibold text-ktip-sand-900">
+            {judgingOnly ? 'Judging Criteria' : 'Challenge Brief'}
+          </h3>
+          {!!groups.length && (
             <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-ktip-ocean-100 text-ktip-ocean-700">
-              {criteria.length}
+              {groups.reduce((n, group) => n + group.items.length, 0)}
             </span>
           )}
         </div>
         {!showForm && (
-          <Button size="sm" icon={<Plus size={14} />} onClick={() => startAdd('objective')}>
-            Add Item
+          <Button size="sm" icon={<Plus size={14} />} onClick={() => startAdd(defaultKind)}>
+            {judgingOnly ? 'Add Criterion' : 'Add Item'}
           </Button>
         )}
       </div>
@@ -292,22 +314,28 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
               </button>
             </div>
 
-            {/* Kind */}
+            {/* Kind — a judging-only view has one choice, so it just says so */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
                 Type <span className="text-red-500">*</span>
               </label>
-              <select
-                value={kind}
-                onChange={(e) => setKind(e.currentTarget.value as EventCriterionKind)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
-              >
-                {EVENT_CRITERION_KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {EVENT_CRITERION_LABELS[k]}
-                  </option>
-                ))}
-              </select>
+              {judgingOnly ? (
+                <p className="text-sm text-ktip-sand-800">
+                  {EVENT_CRITERION_LABELS.judging_criterion}
+                </p>
+              ) : (
+                <select
+                  value={kind}
+                  onChange={(e) => setKind(e.currentTarget.value as EventCriterionKind)}
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                >
+                  {offeredKinds.map((k) => (
+                    <option key={k} value={k}>
+                      {EVENT_CRITERION_LABELS[k]}
+                    </option>
+                  ))}
+                </select>
+              )}
               <p className="text-xs text-ktip-sand-500 mt-1">
                 {EVENT_CRITERION_GROUP_HINTS[kind]}
               </p>
@@ -510,13 +538,16 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
         !showForm && (
           <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-12 text-center">
             <Target size={48} className="mx-auto text-ktip-sand-300 mb-4" />
-            <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1">No brief yet</h3>
+            <h3 className="text-lg font-semibold text-ktip-sand-700 mb-1">
+              {judgingOnly ? 'Nothing to score against yet' : 'No brief yet'}
+            </h3>
             <p className="text-ktip-sand-500 text-sm mb-4">
-              Set the objectives participants must achieve, the constraints they work under, what
-              they hand in, and how entries get judged.
+              {judgingOnly
+                ? 'Set what judges are scoring each pitch on, and how much each criterion is worth.'
+                : 'Set the objectives participants must achieve, the constraints they work under, what they hand in, and how entries get judged.'}
             </p>
-            <Button size="sm" icon={<Plus size={14} />} onClick={() => startAdd('objective')}>
-              Add First Objective
+            <Button size="sm" icon={<Plus size={14} />} onClick={() => startAdd(defaultKind)}>
+              {judgingOnly ? 'Add First Criterion' : 'Add First Objective'}
             </Button>
           </div>
         )

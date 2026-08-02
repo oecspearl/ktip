@@ -1,15 +1,17 @@
 import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { ArrowLeft, ExternalLink, Info } from 'lucide-react'
-import { useEvent, useUpdateEvent } from '../../hooks/useEvents'
+import { ArrowLeft, Check, ExternalLink, Info } from 'lucide-react'
+import { useEvent, useIsEventHost, useUpdateEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { mapConfigOf, useSaveVenueMap } from '../../hooks/useVenueMap'
-import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueMapEditor } from '../../components/venue/map/VenueMapEditor'
 import { Button } from '../../components/ui/Button'
-import { venuePath } from '../../lib/event-slug'
+import { PageHero } from '../../components/layout/PageHero'
+import { Stepper } from '../../components/ui/Stepper'
+import { setupSteps } from '../../lib/event-blueprints'
+import { eventSetupPath, venuePath } from '../../lib/event-slug'
 import { entityPath } from '../../lib/slug'
 
 /**
@@ -27,7 +29,6 @@ import { entityPath } from '../../lib/slug'
 export default function EventVenueSetupPage() {
   const params = useParams()
   const navigate = useNavigate()
-  const auth = useAuth()
   const toast = useToast()
 
   const { event, loading, refetch } = useEvent(params.slug)
@@ -37,12 +38,7 @@ export default function EventVenueSetupPage() {
 
   usePageTitle(event ? `Set up the venue — ${event.title}` : 'Set up the venue')
 
-  const isHost = useMemo(() => {
-    if (!event || !auth.user) return false
-    if (event.organizer_id === auth.user.id) return true
-    const roles = auth.profile?.roles || []
-    return roles.includes('oecs') || roles.includes('super_admin')
-  }, [event, auth.user, auth.profile])
+  const isHost = useIsEventHost(event)
 
   const config = useMemo(() => mapConfigOf(event), [event])
 
@@ -80,30 +76,39 @@ export default function EventVenueSetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ktip-canvas pb-16 pt-[calc(var(--nav-h)+1.5rem)]">
-      <div className="mx-auto max-w-7xl px-4">
-        <Link
-          to={entityPath('event', event)}
-          className="mb-3 inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-ocean-600"
-        >
-          <ArrowLeft size={15} aria-hidden="true" />
-          {event.title}
-        </Link>
+    <>
+      {/* Same shell as the create form and the other step-two page, so the
+          three screens of one flow do not each look like a different product. */}
+      <PageHero
+        compact
+        eyebrow="Set up your event"
+        title="Set up the rooms"
+        subtitle="Drop the rooms your hackathon needs onto the floor, set who is allowed in each one, and add another level if you want the building to have one. Attendees walk this exact map."
+        imageSeed="events"
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: 'Events', href: '/events' },
+          { label: event.title, href: entityPath('event', event) },
+          { label: 'The venue' },
+        ]}
+      />
 
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
-              Step 2 · The venue
-            </p>
-            <h1 className="font-display text-2xl font-bold text-ktip-sand-900 md:text-3xl">
-              Set up the rooms
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-ktip-sand-600">
-              Drop the rooms your hackathon needs onto the floor, set who is allowed in each one,
-              and add another level if you want the building to have one. Attendees walk this exact
-              map.
-            </p>
-          </div>
+      <div className="bg-ktip-sand-50 py-12">
+        <div className="mx-auto max-w-7xl px-4">
+          <Stepper steps={setupSteps(event.event_type)} currentStep={1} className="mb-8" />
+
+        {/* Step one, not the event page: the same "Event details" the stepper
+            names, which for an event that already exists is its edit form.
+            Addressed by uuid, not slug — EditEventPage saves with
+            .eq('id', …), so a slug in the URL loads but cannot save. */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <Link
+            to={`/events/${event.id}/edit`}
+            className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-ocean-600"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            Back to event details
+          </Link>
 
           <div className="flex gap-2">
             {!event.has_venue && (
@@ -130,10 +135,14 @@ export default function EventVenueSetupPage() {
             >
               Open the venue
             </Button>
-            {/* The way out. Save lives on the editor's own toolbar — this is
-                "I am done for now", not a second commit. */}
-            <Button size="sm" variant="secondary" onClick={() => navigate(entityPath('event', event))}>
-              Finish
+            {/* The rooms are half the job. The brief teams build against is
+                the other half, and it lives on the shared setup page. */}
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => navigate(eventSetupPath(event))}
+            >
+              The brief
             </Button>
           </div>
         </div>
@@ -146,26 +155,46 @@ export default function EventVenueSetupPage() {
           </p>
         )}
 
-        {roomsLoading ? (
-          <div className="h-[34rem] rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
-        ) : (
-          <VenueMapEditor
-            rooms={rooms}
-            config={config}
-            saving={saving}
-            onSave={async (nextConfig, payload) => {
-              try {
-                await saveMap({ eventId: event.id, map: nextConfig, rooms: payload })
-                refetch()
-                toast.success('Venue saved')
-              } catch (err: any) {
-                toast.error(err?.message || 'Could not save the venue')
-                throw err
-              }
-            }}
-          />
-        )}
+          {roomsLoading ? (
+            <div className="h-[34rem] rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
+          ) : (
+            <VenueMapEditor
+              rooms={rooms}
+              config={config}
+              saving={saving}
+              onSave={async (nextConfig, payload) => {
+                try {
+                  await saveMap({ eventId: event.id, map: nextConfig, rooms: payload })
+                  refetch()
+                  toast.success('Venue saved')
+                } catch (err: any) {
+                  toast.error(err?.message || 'Could not save the venue')
+                  throw err
+                }
+              }}
+            />
+          )}
+
+          {/* Same shape and place as "Next" on step one, because this is the
+              same button at the other end of the same flow. Save lives on the
+              editor's own toolbar — this is "I am done", not a second commit. */}
+          <div className="mt-10 flex items-center gap-4">
+            <Button
+              fullWidth
+              icon={<Check size={20} />}
+              onClick={() => navigate(entityPath('event', event))}
+            >
+              Finish
+            </Button>
+            <Link
+              to={venuePath(event)}
+              className="whitespace-nowrap text-sm text-ktip-sand-500 transition-colors hover:text-ktip-sand-700"
+            >
+              Open the venue
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

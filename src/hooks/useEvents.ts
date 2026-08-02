@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { rankRows, type ContentSort } from '../lib/personalization'
@@ -160,6 +162,12 @@ export function useCreateEvent() {
       has_challenge?: boolean
       submission_deadline?: string | null
       details?: DetailEntry[]
+      /** Admins can publish straight from the form; everyone else gets a draft */
+      status?: string
+      has_venue?: boolean
+      registration_closes_at?: string | null
+      team_size_min?: number | null
+      team_size_max?: number | null
     }) => {
       const { data, error } = await supabase
         .from('events')
@@ -167,7 +175,10 @@ export function useCreateEvent() {
           ...eventData,
           event_type: eventData.event_type as any,
           is_virtual: eventData.is_virtual ?? false,
-          status: 'draft' as any,
+          // Must fall back rather than overwrite. Sitting after the spread as a
+          // bare `status: 'draft'`, this silently discarded the admin's
+          // "Published" choice — every event ever created landed as a draft.
+          status: (eventData.status ?? 'draft') as any,
         } as any)
         .select()
         .single()
@@ -314,4 +325,21 @@ export function useRSVP() {
     loading: rsvpMutation.isPending || cancelMutation.isPending,
     error: rsvpMutation.error || cancelMutation.error,
   }
+}
+
+/**
+ * Whether this user may configure the event: its organizer, or a platform
+ * admin. Both setup pages gate on exactly this, and the RPCs and RLS policies
+ * check the same thing server-side — so this is a courtesy that keeps people
+ * out of a screen they cannot save from, not the control itself.
+ */
+export function useIsEventHost(event: Pick<Event, 'organizer_id'> | null | undefined): boolean {
+  const auth = useAuth()
+
+  return useMemo(() => {
+    if (!event || !auth.user) return false
+    if (event.organizer_id === auth.user.id) return true
+    const roles = auth.profile?.roles || []
+    return roles.includes('oecs') || roles.includes('super_admin')
+  }, [event, auth.user, auth.profile])
 }
