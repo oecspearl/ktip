@@ -51,10 +51,29 @@
 -- screen writes 067's numbering, so none does today.
 -- ============================================================
 
+-- Guarded on a sentinel from 067 rather than the global maximum, and scoped to
+-- exclude this migration's own rows.
+--
+-- MAX(sort_order) cannot express the case the RUN ORDER note above promises is
+-- recoverable. Re-running 067 resets its badges to 10-103 but leaves this
+-- file's rows at 145-947, so the global maximum stays near 947, the `< 200`
+-- test fails, and re-running 088 restores nothing — the interleaving stays
+-- broken with no error to say so. first_project is 067's lowest row (10), so
+-- reading it directly detects exactly that state.
+--
+-- The NOT IN list is this file's own slugs. On a first run they do not exist
+-- yet and it is a no-op; on the recovery run it is what stops the already
+-- correct rows being multiplied a second time.
 DO $$
 BEGIN
-  IF (SELECT COALESCE(MAX(sort_order), 0) FROM badges) < 200 THEN
-    UPDATE badges SET sort_order = sort_order * 10;
+  IF (SELECT sort_order FROM badges WHERE slug = 'first_project') < 110 THEN
+    UPDATE badges SET sort_order = sort_order * 10
+    WHERE slug NOT IN (
+      'well_liked', 'regional_hit', 'followed_work', 'must_follow',
+      'thread_starter', 'helpful_hand', 'network_legend', 'switchboard',
+      'collab_titan', 'field_notes', 'reference_shelf', 'hundred_days',
+      'year_one'
+    );
   END IF;
 END $$;
 
@@ -203,9 +222,13 @@ BEGIN
     END;
   END LOOP;
 
+  -- v_already is the snapshot taken above, not a table. An earlier draft
+  -- selected into a temp table called _already_active_today and this DELETE
+  -- still referenced it; nothing creates that relation, so the whole block
+  -- aborted with "relation _already_active_today does not exist" — after the
+  -- backfill loop had already run, leaving every member marked active today
+  -- and their streaks silently inflated.
   DELETE FROM user_activity_days d
   WHERE d.activity_date = CURRENT_DATE
-    AND NOT EXISTS (
-      SELECT 1 FROM _already_active_today a WHERE a.user_id = d.user_id
-    );
+    AND NOT (d.user_id = ANY(v_already));
 END $$;
