@@ -40,7 +40,7 @@ export default function MyGrievancesPage() {
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'My Reports' }]}
       />
 
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8 max-w-3xl">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
         {/* Navigation helpers — back to home / on to help center */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <Link

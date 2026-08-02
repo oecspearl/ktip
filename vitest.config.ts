@@ -18,6 +18,10 @@ export default defineConfig({
     // `?raw` imports. The error-console scoping test asserts on real
     // stylesheet text, so processing has to be on.
     css: true,
+    // Registers the jest-dom matchers. Without it `toBeInTheDocument` and
+    // friends are undefined, which is why the existing component tests assert
+    // with bare `expect`.
+    setupFiles: ['src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
   },
 })

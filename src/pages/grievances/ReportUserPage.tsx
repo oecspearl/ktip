@@ -100,7 +100,7 @@ export default function ReportUserPage() {
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Report User' }]}
       />
 
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8 max-w-2xl">
+      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
         {/* Submitted confirmation — visible fallback in case redirect is delayed/blocked */}
         {submitted && (
           <div className="flex items-start gap-3 p-4 bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl mb-6">

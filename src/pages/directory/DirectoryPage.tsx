@@ -147,7 +147,7 @@ export default function DirectoryPage() {
 
       {/* === Search and Filter Section === */}
       <div id="search" data-spy="Search" className="scroll-mt-24 bg-ktip-sand-50 py-12">
-        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4">
           <div className="mb-6">
             <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-1">
               {tab === 'businesses'
@@ -274,7 +274,7 @@ export default function DirectoryPage() {
       {/* === Businesses Grid Section === */}
       {tab === 'businesses' && (
         <div id="businesses" data-spy="Businesses" className="scroll-mt-24 bg-ktip-sand-50 pb-16">
-          <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
+          <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4">
             {employersLoading || !employers ? (
               <SkeletonGrid
                 count={6}
@@ -331,7 +331,7 @@ export default function DirectoryPage() {
       {/* === Members Grid Section === */}
       {tab === 'people' && (
       <div id="members" data-spy="Members" className="scroll-mt-24 bg-ktip-sand-50 pb-16">
-        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 max-w-5xl">
+        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4">
           {loading || !members ? (
             <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : members.length > 0 ? (
