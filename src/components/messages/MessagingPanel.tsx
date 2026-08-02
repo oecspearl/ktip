@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, MessageSquare, Pin, X } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { ArrowLeft, ChevronDown, MessageSquare, MousePointerClick, Pin, X } from 'lucide-react'
 import { ChatSidebar } from './ChatSidebar'
 import { ChatWindow } from './ChatWindow'
 import { AssistantChatWindow } from './AssistantChatWindow'
@@ -12,13 +12,16 @@ import {
   useDisclosureAnimation,
   type DisclosureState,
 } from '../ui/useDisclosureAnimation'
+import { DropdownPanel } from '../ui/DropdownPanel'
+import { GhostOpacityControl } from '../ui/GhostOpacityControl'
+import { ghostGlowColor, useGhostMode } from '../../hooks/useGhostMode'
 import { cn } from '../../lib/utils'
 
 /**
  * Docked messaging panel, anchored above the FAB (bottom-right). Non-modal:
  * no backdrop, the page stays usable; closes via X, Escape, or FAB toggle.
- * z-40 keeps it under Modal (z-50) so NewConversationModal/GroupSettingsModal
- * overlay it, and under the FAB (z-[9999]) which stays visible as the toggle.
+ * z-drawer keeps it under Modal so NewConversationModal/GroupSettingsModal
+ * overlay it, and under the FAB, which stays visible as the toggle.
  */
 export function MessagingPanel() {
   // Thin gate so the conversations query (and everything else in the panel)
@@ -54,7 +57,13 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
   const [newModalMode, setNewModalMode] = useState<'dm' | 'group'>('dm')
   const [showChat, setShowChat] = useState(false) // mobile toggle
   const [pinned, setPinned] = useState(false)
+  const [ghostMenuOpen, setGhostMenuOpen] = useState(false)
   const panelRef = useRef<HTMLElement>(null)
+  const ghostMenuRef = useRef<HTMLDivElement>(null)
+
+  // Pinning does not just keep the panel open, it parks it: ghosted, the panel
+  // fades out of the way and the page underneath takes every click and scroll.
+  const ghost = useGhostMode({ enabled: pinned, ref: panelRef })
 
   // Deep-linked / contact-initiated DMs land straight in the chat view on mobile
   useEffect(() => {
@@ -88,6 +97,21 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
     return () => document.removeEventListener('mousedown', onMouseDown)
   }, [isOpen, pinned, closePanel])
 
+  // The ghost settings popover: dismissed by a press anywhere else, and by the
+  // panel ghosting out from under it.
+  useEffect(() => {
+    if (!ghostMenuOpen) return
+    if (ghost.ghosted) {
+      setGhostMenuOpen(false)
+      return
+    }
+    const onMouseDown = (e: MouseEvent) => {
+      if (!ghostMenuRef.current?.parentElement?.contains(e.target as Node)) setGhostMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [ghostMenuOpen, ghost.ghosted])
+
   if (!auth.user) return null
 
   const activeConversation = conversations?.find((c) => c.id === activeConversationId)
@@ -117,17 +141,35 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
       role="complementary"
       aria-label="Messages panel"
       data-state={state}
+      data-ghost={ghost.ghosted ? 'true' : undefined}
+      style={
+        {
+          '--ghost-opacity': ghost.opacity,
+          // The panel's own hue, brightened against whatever it is currently
+          // parked over — the dashboard hero is a photo, the forms are white.
+          '--ghost-glow-color': ghostGlowColor('#4F7AAE', ghost.tone),
+          // What the paper fades from, since the panel's background is a class
+          // rather than an inline style.
+          '--ghost-bg': 'var(--color-ktip-cream)',
+        } as CSSProperties
+      }
       className={cn(
-        'fixed z-40 inset-x-2 top-20 bottom-24',
+        'fixed z-drawer inset-x-2 top-20 bottom-24',
         'lg:inset-auto lg:right-6 lg:bottom-24 lg:w-[min(900px,calc(100vw-3rem))] lg:h-[min(70vh,44rem)]',
         'bg-ktip-cream rounded-2xl shadow-hard border border-ktip-sand-200',
         // Transition-driven, not @keyframes: a keyframe cannot run backwards,
         // which is why closing used to be a hard cut while opening eased in.
-        'overflow-hidden flex flex-col messaging-panel origin-bottom-right'
+        'overflow-hidden flex flex-col messaging-panel ghost-surface origin-bottom-right'
       )}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-ktip-sand-200 shrink-0">
+      {/* Only mounted while ghosted: the glow is a mask and a shadow over a
+          900px surface, and there is no reason to keep it composited while the
+          panel is being used normally. */}
+      {ghost.ghosted && <span aria-hidden className="ghost-glow" />}
+
+      {/* Header. ghost-live-row keeps the pin reachable while the panel is
+          ghosted — everything else in here fades with the rest. */}
+      <div className="ghost-live-row flex items-center justify-between px-4 py-2 border-b border-ktip-sand-200 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <h2 className="font-display font-bold text-ktip-sand-900 text-sm">Messages</h2>
           {/* Same number the FAB carries, kept on the panel itself: the badge
@@ -147,21 +189,64 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="ghost-live-row flex items-center gap-1">
+          {/* One control, three states: pin it, wake it, unpin it. While the
+              panel is ghosted this is the only thing on it still taking
+              clicks, so it is also the only way back in. */}
           <button
-            onClick={() => setPinned(!pinned)}
-            aria-label={pinned ? 'Unpin panel' : 'Pin panel open'}
+            onClick={ghost.ghosted ? ghost.wake : () => setPinned(!pinned)}
+            aria-label={
+              ghost.ghosted ? 'Wake panel' : pinned ? 'Unpin panel' : 'Pin panel open'
+            }
             aria-pressed={pinned}
-            title={pinned ? 'Unpin — clicking outside closes' : 'Pin — stays open when clicking outside'}
+            title={
+              ghost.ghosted
+                ? 'Wake — brings the panel back without unpinning it'
+                : pinned
+                  ? 'Unpin — the panel stops fading and closes on an outside click'
+                  : 'Pin — stays open, and fades out of the way until you need it'
+            }
             className={cn(
-              'p-1.5 rounded-lg transition-colors',
+              'ghost-live p-1.5 rounded-lg transition-colors',
               pinned
                 ? 'bg-ktip-ocean-50 text-ktip-ocean-600 hover:bg-ktip-ocean-100'
-                : 'hover:bg-ktip-sand-100 text-ktip-sand-500'
+                : 'hover:bg-ktip-sand-100 text-ktip-sand-500',
+              // On a ghost the button is alone on a see-through surface, so it
+              // brings its own backing rather than borrowing the header's.
+              ghost.ghosted && 'bg-ktip-ocean-600 text-white shadow-fab hover:bg-ktip-ocean-600'
             )}
           >
-            <Pin size={16} className={cn('transition-transform', pinned && 'rotate-45')} fill={pinned ? 'currentColor' : 'none'} />
+            {ghost.ghosted ? (
+              <MousePointerClick size={16} />
+            ) : (
+              <Pin
+                size={16}
+                className={cn('transition-transform', pinned && 'rotate-45')}
+                fill={pinned ? 'currentColor' : 'none'}
+              />
+            )}
           </button>
+          <div className="relative">
+            <button
+              onClick={() => setGhostMenuOpen((v) => !v)}
+              aria-label="Fade settings"
+              aria-expanded={ghostMenuOpen}
+              title="How a pinned panel fades"
+              className="p-1.5 rounded-lg transition-colors hover:bg-ktip-sand-100 text-ktip-sand-500"
+            >
+              <ChevronDown
+                size={14}
+                className={cn('transition-transform', ghostMenuOpen && 'rotate-180')}
+              />
+            </button>
+            <DropdownPanel
+              ref={ghostMenuRef}
+              open={ghostMenuOpen}
+              className="absolute right-0 top-full z-10 mt-1 w-64 origin-top-right rounded-xl border border-ktip-sand-200 bg-ktip-cream p-3 shadow-hard"
+            >
+              <GhostOpacityControl />
+            </DropdownPanel>
+          </div>
           <button
             onClick={closePanel}
             aria-label="Close messages"

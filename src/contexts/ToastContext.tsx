@@ -87,7 +87,7 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
           // Hidden while a screenshot frame is grabbed (index.css,
           // data-capturing) — a toast is app chrome, not part of the bug
           data-capture-hide
-          className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none"
+          className="fixed bottom-4 right-4 z-toast flex flex-col gap-2 max-w-sm w-full pointer-events-none"
         >
           {toasts.map((toast) => {
             const Icon = iconMap[toast.type]

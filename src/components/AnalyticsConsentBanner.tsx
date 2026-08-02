@@ -9,7 +9,11 @@ export function AnalyticsConsentBanner() {
   return (
     <section
       aria-label="Analytics preferences"
-      className="fixed inset-x-4 bottom-4 z-[110] mx-auto max-w-3xl rounded-xl border border-ktip-sand-200 bg-ktip-cream p-5 shadow-xl"
+      // Below lg the banner is effectively full width, so at bottom-4 it sat
+      // squarely on top of the floating dock and hid it completely on phones
+      // and tablets. It clears the dock until there is room beside it — from
+      // lg the banner is 3xl centred and the corner is free again.
+      className="fixed inset-x-4 bottom-fab-clear lg:bottom-4 z-toast mx-auto max-w-3xl rounded-xl border border-ktip-sand-200 bg-ktip-cream p-5 shadow-xl"
     >
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
         <div className="flex flex-1 items-start gap-3">

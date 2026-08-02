@@ -105,7 +105,7 @@ export function AIFieldActions(props: AIFieldActionsProps) {
               </button>
 
               {showTones && (
-                <div className="absolute left-0 top-full mt-1 bg-ktip-cream border border-ktip-sand-200 rounded-lg shadow-medium py-1 z-50 min-w-[120px]">
+                <div className="absolute left-0 top-full mt-1 bg-ktip-cream border border-ktip-sand-200 rounded-lg shadow-medium py-1 z-dropdown min-w-[120px]">
                   {TONES.map((tone) => (
                     <button
                       key={tone.value}

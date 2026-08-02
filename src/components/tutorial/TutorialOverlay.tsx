@@ -440,7 +440,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
   return createPortal(
     <div
       data-tutorial-overlay
-      className="fixed inset-0 z-[10005] pointer-events-none animate-fade-in"
+      className="fixed inset-0 z-tutorial isolation-isolate pointer-events-none animate-fade-in"
       role="dialog"
       aria-modal="false"
       aria-label="Guided tour"
@@ -495,7 +495,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
       {/* Click relay — catches the click and re-dispatches it on the real node */}
       {relayActive && targetBox && (
         <div
-          className="absolute z-[10006] cursor-pointer pointer-events-auto"
+          className="absolute z-10 cursor-pointer pointer-events-auto"
           onClick={handleRelayClick}
           style={{
             top: targetBox.top - PAD,
@@ -509,7 +509,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
       {/* Action hint pill */}
       {step.actionHint && awaitingAction && hintBox && (
         <div
-          className="absolute z-[10007] -translate-x-1/2 animate-bounce pointer-events-none"
+          className="absolute z-20 -translate-x-1/2 animate-bounce pointer-events-none"
           style={{ top: hintBox.top - PAD - 40, left: hintBox.left + hintBox.width / 2 }}
         >
           <span className="inline-block whitespace-nowrap rounded-full bg-ktip-ocean-600 dark:bg-ktip-ocean-200 px-3 py-1.5 text-xs font-bold text-white shadow-hard">
@@ -521,7 +521,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
       {/* Tooltip card */}
       <div
         ref={cardRef}
-        className="absolute z-[10008] pointer-events-auto w-[calc(100vw-2.5rem)] max-w-md max-h-[80vh] overflow-y-auto bg-ktip-cream rounded-2xl border border-ktip-line shadow-hard p-5 animate-scale-in"
+        className="absolute z-30 pointer-events-auto w-[calc(100vw-2.5rem)] max-w-md max-h-[80vh] overflow-y-auto bg-ktip-cream rounded-2xl border border-ktip-line shadow-hard p-5 animate-scale-in"
         style={{ top: placement.top, left: placement.left }}
       >
         <div className="flex items-start justify-between gap-3">
@@ -626,7 +626,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
       <button
         type="button"
         onClick={exit}
-        className="fixed z-[10009] top-4 left-1/2 -translate-x-1/2 pointer-events-auto rounded-full bg-red-600 text-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider shadow-hard hover:bg-red-700 transition-colors"
+        className="fixed z-40 top-4 left-1/2 -translate-x-1/2 pointer-events-auto rounded-full bg-red-600 text-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider shadow-hard hover:bg-red-700 transition-colors"
       >
         Exit tour
       </button>

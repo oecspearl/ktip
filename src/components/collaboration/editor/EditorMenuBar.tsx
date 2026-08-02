@@ -148,7 +148,7 @@ export function EditorMenuBar(props: EditorMenuBarProps) {
           </button>
 
           {openMenu === menu.label && (
-            <div className="absolute left-0 top-full z-50 min-w-[220px] bg-ktip-cream border border-ktip-sand-200 rounded-lg shadow-medium py-1">
+            <div className="absolute left-0 top-full z-dropdown min-w-[220px] bg-ktip-cream border border-ktip-sand-200 rounded-lg shadow-medium py-1">
               {menu.items.map((item, idx) =>
                 item.separator ? (
                   <div key={idx} className="h-px bg-ktip-sand-200 my-1 mx-2" />

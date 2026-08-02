@@ -83,8 +83,8 @@ function LinkRow({ to, label }: { to: string; label: string }) {
  * Replaces the old /profile/:id page — see MemberPanelContext. Slides in from
  * the right edge over the whole page, dimmed backdrop behind it; closes via X,
  * Escape, the backdrop, or an outside click.
- * z-[45] sits above the navbar (z-40) but under Modal (z-50) and the FAB
- * (z-[9999]), so a dialog opened from the drawer still layers on top.
+ * z-drawer sits above the navbar but under Modal and the FAB
+ * so a dialog opened from the drawer still layers on top.
  *
  * Layout is a profile page, not a stack of rows: an identity rail (avatar,
  * facts, actions) beside the narrative sections. Container queries — not
@@ -212,14 +212,14 @@ export function MemberPanel() {
       <div
         aria-hidden
         onClick={closeMember}
-        className="fixed inset-0 z-[44] bg-brand-navy/45 backdrop-blur-[3px] animate-fade-in"
+        className="fixed inset-0 z-scrim bg-brand-navy/45 backdrop-blur-[3px] animate-fade-in"
       />
       <section
         ref={panelRef}
         role="complementary"
         aria-label="Member preview"
         className={cn(
-          'fixed z-[45] inset-y-0 right-0 w-full sm:w-[45vw] sm:min-w-[420px]',
+          'fixed z-drawer inset-y-0 right-0 w-full sm:w-[45vw] sm:min-w-[420px]',
           'bg-ktip-cream shadow-hard border-l border-ktip-sand-200 sm:rounded-l-2xl',
           'overflow-hidden flex flex-col animate-slide-in-right'
         )}

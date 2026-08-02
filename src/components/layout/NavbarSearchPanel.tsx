@@ -86,7 +86,7 @@ export function NavbarSearchPanel({
       className={cn(
         'bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 overflow-hidden',
         variant === 'desktop'
-          ? 'absolute right-0 top-full mt-2 w-[min(34rem,calc(100vw-2rem))] origin-top-right z-50'
+          ? 'absolute right-0 top-full mt-2 w-[min(34rem,calc(100vw-2rem))] origin-top-right z-dropdown'
           : 'mt-2 w-full origin-top'
       )}
     >

@@ -84,7 +84,7 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="max-w-[calc(50vw+40rem)] mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--nav-h)+1.5rem)] pb-8">
+    <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--nav-h)+1.5rem)] pb-8">
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar — desktop */}
         <div className="hidden lg:block lg:w-56 shrink-0">

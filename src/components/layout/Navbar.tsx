@@ -87,6 +87,20 @@ const trailingLinks = [
   { name: 'Help', href: '/help', icon: HelpCircle },
 ]
 
+/**
+ * One nav item, shared by the standalone links, the dropdown triggers and the
+ * admin link — they were four copies of the same string and had to be tuned
+ * together anyway.
+ *
+ * The bar goes horizontal at lg (1024), where seven items plus the search and
+ * the auth buttons have to fit in 1024px. At px-4 they did not, and without
+ * whitespace-nowrap the longest label ("Resources & Integrations") broke onto
+ * a second line and pushed the bar out of alignment. Padding therefore opens
+ * up in steps rather than starting wide: tight at 1024, comfortable by 1536.
+ */
+const NAV_ITEM_CLASS =
+  'flex items-center gap-2 whitespace-nowrap px-2 xl:px-3 2xl:px-4 py-2 text-label 2xl:text-body font-medium transition-all duration-200 hover:scale-110'
+
 // Dropdown groups
 const navDropdowns: NavDropdown[] = [
   {
@@ -393,7 +407,7 @@ export function Navbar() {
     {/* Hover zone to reveal the hidden navbar */}
     {hidden && (
       <div
-        className="fixed top-0 inset-x-0 h-4 z-50"
+        className="fixed top-0 inset-x-0 h-4 z-nav"
         onMouseEnter={() => setNavHidden(false)}
       />
     )}
@@ -404,7 +418,7 @@ export function Navbar() {
         // menu can still expand past it). Height used to be whatever the logo
         // plus inline padding happened to add up to, which meant every page
         // guessed its own clearance — see the token's note in index.css.
-        'top-0 z-40 transition-all duration-300 fixed inset-x-0',
+        'top-0 z-nav transition-all duration-300 fixed inset-x-0',
         hidden ? '-translate-y-full' : 'translate-y-0',
         mobileMenuOpen || needsBackdrop
           ? 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
@@ -412,26 +426,43 @@ export function Navbar() {
       )}
     >
       <div className={cn('w-full px-4', mobileMenuOpen && 'pb-4')}>
-        <div className="flex items-center justify-between h-[var(--nav-h)]">
+        <div className="flex items-center h-[var(--nav-h)]">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center shrink-0">
             <Link to="/" className="flex items-center gap-3 group">
               <img src="/ktip-logo.webp" alt="KTIP Logo" width={56} height={56} decoding="async" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
-              <div className="hidden sm:block">
-                <h1 className="text-2xl font-display font-bold whitespace-nowrap text-white">OECS KTIP</h1>
+              {/* The wordmark yields to the links in the one band where both
+                  do not fit. Below lg the horizontal nav is not rendered at
+                  all (the mobile menu is), so the wordmark has the bar to
+                  itself; from lg to xl the seven links, the search and the
+                  auth buttons need every pixel; at xl it comes back. */}
+              {/* The wordmark yields to the links in the one band where both
+                  do not fit. Below lg the horizontal nav is not rendered at
+                  all (the mobile menu is), so the wordmark has the bar to
+                  itself; from lg to xl the seven links, the search and the
+                  auth buttons need every pixel; at xl it comes back.
+                  It used to be hidden below sm as well, which left a phone
+                  showing a bare logo where a tablet showed the brand. */}
+              <div className="block lg:hidden xl:block">
+                <h1 className="text-title-sm sm:text-title font-display font-bold whitespace-nowrap text-white">
+                  OECS KTIP
+                </h1>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1 ml-auto">
+          {/* Desktop Navigation — sits directly against the wordmark. It used
+              to carry ml-auto, which pushed the whole set to the right and
+              left a wide empty run after the logo; the free space now
+              collects on the search side instead. */}
+          <div className="hidden lg:flex items-center gap-1 ml-4 xl:ml-8">
             {/* Standalone links */}
             {leadingLinks.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
+                  NAV_ITEM_CLASS,
                   isActive(item.href)
                     ? 'text-white underline decoration-ktip-nav-accent decoration-2 underline-offset-8'
                     : 'text-white/80 hover:text-ktip-nav-accent'
@@ -453,7 +484,7 @@ export function Navbar() {
                   aria-haspopup="true"
                   aria-expanded={openDropdownId === dropdown.id}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
+                    NAV_ITEM_CLASS,
                     isDropdownActive(dropdown) || openDropdownId === dropdown.id
                       ? 'text-white underline decoration-ktip-nav-accent decoration-2 underline-offset-8'
                       : 'text-white/80 hover:text-ktip-nav-accent'
@@ -472,7 +503,7 @@ export function Navbar() {
                 <DropdownPanel
                   open={openDropdownId === dropdown.id}
                   role="menu"
-                  className="absolute right-0 mt-2 w-64 origin-top-right bg-ktip-cream rounded-xl shadow-hard overflow-hidden z-50"
+                  className="absolute right-0 mt-2 w-64 origin-top-right bg-ktip-cream rounded-xl shadow-hard overflow-hidden z-dropdown"
                 >
                   {visibleItems(dropdown).map((item) => (
                     <FlowingMenuItem
@@ -503,7 +534,7 @@ export function Navbar() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
+                  NAV_ITEM_CLASS,
                   isActive(item.href)
                     ? 'text-white underline decoration-ktip-nav-accent decoration-2 underline-offset-8'
                     : 'text-white/80 hover:text-ktip-nav-accent'
@@ -522,7 +553,7 @@ export function Navbar() {
               <Link
                 to="/admin"
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 font-medium transition-all duration-200 hover:scale-125',
+                  NAV_ITEM_CLASS,
                   isActive('/admin')
                     ? 'text-white underline decoration-ktip-sun-400 decoration-2 underline-offset-8'
                     : 'text-white/80 hover:text-ktip-nav-accent'
@@ -539,7 +570,17 @@ export function Navbar() {
               cannot clip it. */}
           <div
             ref={searchRef}
-            className="relative hidden md:flex items-center justify-end flex-1 max-w-md mx-4"
+            className={cn(
+              // ml-auto is what holds the links against the logo: it absorbs
+              // every spare pixel here, so the search and the auth buttons sit
+              // at the right edge and the nav does not drift toward centre.
+              'relative hidden md:flex items-center justify-end ml-auto mr-2 xl:mr-4',
+              // Collapsed it is a 40px icon, but it was still claiming flex-1
+              // up to max-w-md — nearly 450px of the bar reserved for nothing,
+              // which is what squeezed the links at 1024 and 1280. It only
+              // takes the space once it is actually open.
+              searchOpen ? 'flex-1 max-w-md' : 'shrink-0'
+            )}
           >
             <div
               className={cn(
@@ -605,8 +646,12 @@ export function Navbar() {
             />
           </div>
 
-          {/* User Menu / Auth Buttons */}
-          <div className="flex items-center gap-3">
+          {/* User Menu / Auth Buttons.
+              The spare width is absorbed by the search container from md up,
+              but that container is display:none below md — so on a phone the
+              buttons ended up against the wordmark with the gap after them.
+              Below md this block takes the auto margin instead. */}
+          <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0">
             {/* Notification Bell */}
             {auth.user && (
               <div className="relative" ref={notifRef}>
@@ -625,7 +670,7 @@ export function Navbar() {
 
                 <DropdownPanel
                   open={notifOpen}
-                  className="absolute right-0 mt-2 w-80 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 z-50 max-h-96 flex flex-col"
+                  className="absolute right-0 mt-2 w-80 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 z-dropdown max-h-96 flex flex-col"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-ktip-sand-100">
@@ -833,11 +878,11 @@ export function Navbar() {
                     <Button size="sm">Sign Up</Button>
                   </Link>
                 </div>
-                {/* Mobile: compact login button */}
-                <Link to="/login" className="sm:hidden">
-                  <Button variant="outline" size="sm" icon={<LogIn size={16} />}>
-                    Log In
-                  </Button>
+                {/* Below sm only one button fits beside the wordmark, so it is
+                    the primary action — the same green Sign Up a tablet shows.
+                    Log In is still one tap away in the mobile menu. */}
+                <Link to="/signup" className="sm:hidden">
+                  <Button size="sm">Sign Up</Button>
                 </Link>
               </>
             )}

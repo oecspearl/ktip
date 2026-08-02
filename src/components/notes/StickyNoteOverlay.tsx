@@ -118,7 +118,7 @@ export function StickyNoteOverlay() {
       <div
         data-sticky-notes
         aria-label="Pinned notes"
-        className="fixed inset-0 z-[900] pointer-events-none"
+        className="fixed inset-0 z-fab pointer-events-none"
       >
         {visibleGroups.map((group) => (
           <StickyNoteGroup

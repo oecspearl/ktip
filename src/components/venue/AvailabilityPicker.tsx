@@ -82,7 +82,7 @@ export function AvailabilityPicker({
       <DropdownPanel
           open={open}
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-hard"
+          className="absolute right-0 z-dropdown mt-2 w-64 origin-top-right overflow-hidden rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-hard"
         >
           {CHOICES.map((choice) => (
             <button

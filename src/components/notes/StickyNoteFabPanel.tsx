@@ -43,7 +43,7 @@ export function StickyNoteFabPanel() {
     setCollapsed((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
 
   return createPortal(
-    <div className="fixed bottom-24 right-4 z-[1100] w-72 max-h-[60vh] flex flex-col rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-fab-hover animate-slide-up">
+    <div className="fixed bottom-24 right-4 z-fab w-72 max-h-[60vh] flex flex-col rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-fab-hover animate-slide-up">
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-ktip-sand-100">
         <p className="text-sm font-semibold text-ktip-sand-900">Sticky notes</p>
         <button

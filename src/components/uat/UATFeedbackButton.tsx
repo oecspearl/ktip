@@ -93,7 +93,7 @@ export function UATFeedbackButton() {
       {!hasSubmitted && (
         <button
           onClick={() => setFormOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+          className="fixed bottom-6 right-6 z-fab flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
           aria-label="Provide UAT Feedback"
         >
           <MessageSquarePlus size={20} className="group-hover:scale-110 transition-transform" />
@@ -110,7 +110,7 @@ export function UATFeedbackButton() {
       {hasSubmitted && (
         <button
           onClick={() => setFormOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-600 rounded-full shadow-soft hover:shadow-medium hover:border-ktip-ocean-300 transition-all duration-300"
+          className="fixed bottom-6 right-6 z-fab flex items-center gap-2 px-4 py-2.5 bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-600 rounded-full shadow-soft hover:shadow-medium hover:border-ktip-ocean-300 transition-all duration-300"
           aria-label="Submit additional feedback"
         >
           <MessageSquarePlus size={18} />

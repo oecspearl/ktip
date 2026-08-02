@@ -65,7 +65,7 @@ export function StickyNoteGroupExpanded({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}

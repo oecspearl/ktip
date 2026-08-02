@@ -53,7 +53,7 @@ export function VenueTopBar({
         // to /. --nav-offset rather than --nav-h because the navbar auto-hides:
         // holding its full height while it is off screen leaves this bar
         // floating mid-page. The transition matches the navbar's own slide.
-        'sticky top-[var(--nav-offset)] z-30 flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm transition-[top] duration-300',
+        'sticky top-[var(--nav-offset)] z-rail flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm transition-[top] duration-300',
         className
       )}
     >
