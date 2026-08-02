@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { CheckCircle, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -6,6 +7,7 @@ import { useConnectionCount } from '../../hooks/useConnections'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { visibleDashboardTabs } from './dashboard-tabs'
+import { DASH_BAR_H, DashboardTopBar } from './DashboardTopBar'
 import { ROLE_LABELS } from '../../lib/constants'
 import { cn } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
@@ -28,6 +30,36 @@ export default function DashboardLayout() {
   // The rail is role-aware, so the tour has to wait for the profile — otherwise
   // it spotlights a shorter rail than the member actually has.
   useTutorialAutoStart(TUTORIAL_IDS.DASHBOARD, !!profile)
+
+  // Hand the hero off to the collapsed bar the moment the hero's bottom edge
+  // reaches the top of the viewport, so the two never both occupy that row.
+  // Measured rather than observed: an IntersectionObserver with a negative top
+  // rootMargin stops intersecting while the sentinel is still *below* the
+  // viewport top, so there is no way to tell "scrolled past" from "not yet
+  // reached" out of one entry.
+  const heroEndRef = useRef<HTMLDivElement>(null)
+  const [collapsed, setCollapsed] = useState(false)
+  useEffect(() => {
+    let frame = 0
+    const measure = () => {
+      frame = 0
+      const el = heroEndRef.current
+      if (!el) return
+      // 2px of slack so a fractional device-pixel rect cannot flap the state.
+      setCollapsed(el.getBoundingClientRect().top <= 2)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(measure)
+    }
+    measure()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
 
   return (
     <>
@@ -71,12 +103,29 @@ export default function DashboardLayout() {
           </Link>
         </div>
       </PageHero>
+      <div ref={heroEndRef} aria-hidden="true" className="h-px" />
 
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-12">
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <DashboardTopBar
+        displayName={displayName}
+        avatarUrl={profile?.avatar_url}
+        isVerified={profile?.is_verified}
+        roles={profile?.roles}
+        connectionCount={connectionCount ?? 0}
+        shown={collapsed}
+      />
+
+      <div
+        className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-12"
+        // The rail sticks under whatever is above it: navbar alone at the top of
+        // the page, navbar + collapsed band once the hero is gone.
+        style={{ '--dash-bar-h': collapsed ? DASH_BAR_H : '0px' } as CSSProperties}
+      >
+        {/* No `items-start` — the rail column has to stretch the full row height
+            or the sticky card below has no travel and scrolls away with the page. */}
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Tab column */}
           <div className="w-full lg:w-64 shrink-0">
-            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 lg:sticky lg:top-[calc(var(--nav-h)+1.5rem)]">
+            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 transition-[top] duration-300 lg:sticky lg:top-[calc(var(--nav-offset)+var(--dash-bar-h,0px)+1rem)] lg:max-h-[calc(100vh-var(--nav-offset)-var(--dash-bar-h,0px)-2.5rem)] lg:overflow-y-auto">
               <nav
                 data-tutorial="dashboard-tabs"
                 className="flex flex-row lg:flex-col gap-1 overflow-x-auto"
