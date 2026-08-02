@@ -25,7 +25,7 @@ export function ConfirmModal({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -33,7 +33,7 @@ export function ConfirmModal({
       />
 
       {/* Dialog */}
-      <div className="relative bg-ktip-cream rounded-2xl shadow-hard max-w-md w-full p-6 animate-scale-in">
+      <div className="relative bg-ktip-cream rounded-surface shadow-hard max-w-md w-full p-card-pad animate-scale-in">
         <button
           type="button"
           onClick={onCancel}
@@ -48,10 +48,10 @@ export function ConfirmModal({
             <AlertTriangle size={20} className="text-ktip-sun-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-ktip-sand-900 font-display">
+            <h3 className="text-title-sm font-semibold text-ktip-sand-900 font-display">
               {title}
             </h3>
-            <p className="mt-2 text-sm text-ktip-sand-600">{message}</p>
+            <p className="mt-2 text-body text-ktip-sand-600">{message}</p>
           </div>
         </div>
 

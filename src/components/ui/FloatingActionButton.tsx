@@ -308,7 +308,7 @@ export function FloatingActionButton() {
     <div
       ref={containerRef}
       data-fab
-      className="fixed bottom-[1.5em] right-[1.5em] z-[9999] flex flex-col items-center gap-[0.75em]"
+      className="fixed bottom-[1.5em] right-[1.5em] z-fab flex flex-col items-center gap-[0.75em]"
       style={{ fontSize: `${16 * scale}px` }}
     >
       {/* Accessibility panel — anchored above the cluster, inside containerRef

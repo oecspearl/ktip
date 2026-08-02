@@ -84,7 +84,7 @@ export function TagFilterSelect({
 
       <DropdownPanel
         open={open}
-        className="absolute left-0 top-full z-30 mt-1 w-64 origin-top-left rounded-lg border border-ktip-line bg-ktip-cream p-2 shadow-medium"
+        className="absolute left-0 top-full z-dropdown mt-1 w-64 origin-top-left rounded-lg border border-ktip-line bg-ktip-cream p-2 shadow-medium"
       >
           {options.length > searchThreshold && (
             <input

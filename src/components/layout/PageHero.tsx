@@ -64,9 +64,11 @@ export function PageHero({
     <div
       id={spyLabel ? 'page-top' : undefined}
       data-spy={spyLabel ?? undefined}
+      // The band rides the display ramp, same as the headline inside it — a
+      // band on a fixed height would crop the title as the type scaled up.
       className={`relative bg-brand-navy overflow-hidden flex items-end ${
-        compact ? 'min-h-[190px]' : 'min-h-[250px] md:min-h-[280px]'
-      } ${inset ? 'rounded-2xl shadow-medium mb-8' : ''}`}
+        compact ? 'min-h-hero-band-compact' : 'min-h-hero-band'
+      } ${inset ? 'rounded-surface shadow-medium mb-8' : ''}`}
     >
       <img
         src={src}
@@ -87,13 +89,13 @@ export function PageHero({
           inset
             ? 'px-6 py-6 md:py-8'
             // pt clears the fixed navbar; pb sets the band height
-            : 'w-full max-w-[calc(50vw+48rem)] mx-auto px-6 md:px-12 pt-[calc(var(--nav-h)+1.5rem)] pb-6 md:pb-8'
+            : 'w-full max-w-page mx-auto px-6 md:px-12 pt-[calc(var(--nav-h)+1.5rem)] pb-6 md:pb-8'
         }`}
       >
         {backCrumb && (
           <Link
             to={backCrumb.href!}
-            className="md:hidden mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+            className="md:hidden mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
           >
             <ArrowLeft size={15} aria-hidden="true" />
             {backCrumb.label}
@@ -103,14 +105,17 @@ export function PageHero({
         <div className="flex flex-col md:flex-row-reverse md:items-end justify-between gap-4">
           <div className="min-w-0 md:text-right">
             <Reveal order={0}>
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">
+              <div className="text-micro font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">
                 {eyebrow}
               </div>
             </Reveal>
             <Reveal order={1}>
               <h1
+                // One token replaces a three-step ladder. The ladder topped out
+                // at md:, so the headline was the same size on a 1280 laptop and
+                // a 2560 desktop; the display ramp keeps going past that.
                 className={`font-display font-extrabold text-white leading-[1.08] tracking-tight ${
-                  compact ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-3xl sm:text-4xl md:text-5xl'
+                  compact ? 'text-display-sm' : 'text-display'
                 }`}
               >
                 {title}
@@ -118,7 +123,9 @@ export function PageHero({
             </Reveal>
             {subtitle && (
               <Reveal order={2}>
-                <p className="mt-3 text-white/80 max-w-xl leading-relaxed md:ml-auto">{subtitle}</p>
+                <p className="mt-3 text-body text-white/80 max-w-xl leading-relaxed md:ml-auto">
+                  {subtitle}
+                </p>
               </Reveal>
             )}
             {children && (
@@ -129,8 +136,10 @@ export function PageHero({
           </div>
 
           <div className="flex flex-col items-start gap-4 shrink-0">
+            {/* The nav is hidden below md, so the old `text-base md:text-lg`
+                pair only ever rendered at its md: step — one token, same size. */}
             {breadcrumb && breadcrumb.length > 0 && (
-              <nav className="text-base md:text-lg text-white/70 hidden md:block" aria-label="Breadcrumb">
+              <nav className="text-body-lg text-white/70 hidden md:block" aria-label="Breadcrumb">
                 {breadcrumb.map((item, i) => (
                   <span key={i}>
                     {i > 0 && (

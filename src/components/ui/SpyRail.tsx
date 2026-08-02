@@ -13,6 +13,10 @@ import { useSpySteps } from '../../hooks/useSpySteps'
  * editors, venue rooms and the auth screens get no rail and need no opt-out.
  * A band marked `data-spy-hide` (Discover's full-bleed hero) keeps the rail
  * faded out while it is the active step, so it never sits over the artwork.
+ * Pages that do declare two but want no rail — the listings, where the steps
+ * would be "the filter bar" and "the grid" — carry `data-spy-off`, and a
+ * single section can drop off the rail with `data-spy-skip`; both keep the
+ * marker itself, which the tutorials use as an anchor.
  *
  * Sections should carry `scroll-mt-24` so the click target lands below the
  * fixed navbar.
@@ -102,7 +106,7 @@ export function SpyRail({
       data-spy-rail
       style={{ '--rail-accent': accent ?? 'var(--color-ktip-tropical-600)' } as CSSProperties}
       className={cn(
-        'fixed right-3 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-end gap-3 transition-opacity duration-300 sm:flex lg:right-6 lg:gap-3.5',
+        'fixed right-3 top-1/2 z-rail hidden -translate-y-1/2 flex-col items-end gap-3 transition-opacity duration-300 sm:flex lg:right-6 lg:gap-3.5',
         hidden ? 'pointer-events-none opacity-0' : 'opacity-100',
       )}
     >

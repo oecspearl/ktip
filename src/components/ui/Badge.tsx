@@ -19,16 +19,19 @@ export function Badge({ className, variant, size, children, ...others }: BadgePr
     info: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   }
 
+  // A badge is the densest text in the app, so `sm` sets the floor: 13px, not
+  // the 12px text-xs used to sit at. Below that it stops being readable at a
+  // glance, which is the only thing a badge is for.
   const sizeStyles = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-3 py-1 text-sm',
-    lg: 'px-4 py-1.5 text-base',
+    sm: 'px-2 py-0.5 text-micro',
+    md: 'px-3 py-1 text-caption',
+    lg: 'px-4 py-1.5 text-body',
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md font-medium border',
+        'inline-flex items-center gap-1 rounded-control font-medium border',
         variantStyles[variant || 'default'],
         sizeStyles[size || 'md'],
         className

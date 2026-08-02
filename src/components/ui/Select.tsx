@@ -245,7 +245,7 @@ export function Select<T extends string = string>({
         onClick={() => (open ? close(false) : openWith(selectedIndex >= 0 ? selectedIndex : firstEnabled(0, 1)))}
         onKeyDown={onTriggerKeyDown}
         className={cn(
-          'flex items-center justify-between gap-2 px-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm text-left text-ktip-sand-800 transition-colors',
+          'flex items-center justify-between gap-2 px-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-control text-label text-left text-ktip-sand-800 transition-colors',
           'focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none',
           open && 'border-ktip-ocean-500 ring-2 ring-ktip-ocean-500/20',
           disabled && 'opacity-50 cursor-not-allowed',
@@ -267,7 +267,7 @@ export function Select<T extends string = string>({
       <DropdownPanel
         open={open}
         className={cn(
-          'absolute top-full z-30 mt-1 min-w-full w-max max-w-[min(18rem,calc(100vw-2rem))] rounded-lg border border-ktip-line bg-ktip-cream py-1 shadow-medium',
+          'absolute top-full z-dropdown mt-1 min-w-full w-max max-w-[min(18rem,calc(100vw-2rem))] rounded-control border border-ktip-line bg-ktip-cream py-1 shadow-medium',
           align === 'end' ? 'right-0 origin-top-right' : 'left-0 origin-top-left',
           popoverClassName
         )}
@@ -293,7 +293,7 @@ export function Select<T extends string = string>({
               onMouseMove={() => setActiveIndex(index)}
               onClick={() => commit(option)}
               className={cn(
-                'flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm',
+                'flex cursor-pointer items-center gap-2 px-3 py-1.5 text-label',
                 index === activeIndex ? 'bg-ktip-sand-100 text-ktip-sand-900' : 'text-ktip-sand-700',
                 option.value === value && 'font-semibold text-ktip-ocean-700',
                 option.disabled && 'cursor-not-allowed opacity-40'

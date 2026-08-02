@@ -40,10 +40,15 @@ export function Button({
       'bg-red-600 text-white shadow-medium hover:bg-red-700 hover:shadow-hard dark:bg-red-500 dark:hover:bg-red-400',
   }
 
+  // min-h is what enforces the 44px minimum hit area: the control tokens carry
+  // a max() floor, and a coarse pointer raises it further. Padding alone left
+  // `sm` at roughly 34px, which is under the threshold on a phone.
+  // rounded-lg and rounded-xl were both 0.375rem, so rounded-control is the
+  // same corner under a name that says which corner it is.
   const sizeStyles = {
-    sm: 'px-4 py-2 text-sm rounded-lg',
-    md: 'px-6 py-3 text-base rounded-xl',
-    lg: 'px-8 py-4 text-lg rounded-xl',
+    sm: 'px-4 py-2 min-h-control-sm text-label rounded-control',
+    md: 'px-6 py-3 min-h-control-md text-body rounded-control',
+    lg: 'px-8 py-4 min-h-control-lg text-body-lg rounded-control',
   }
 
   return (

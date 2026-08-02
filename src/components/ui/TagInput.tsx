@@ -34,16 +34,16 @@ export function TagInput({
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-ktip-sand-700 mb-1.5">{label}</label>
+        <label className="block text-label font-medium text-ktip-sand-700 mb-1.5">{label}</label>
       )}
-      {description && <p className="text-sm text-ktip-sand-600 mb-3">{description}</p>}
+      {description && <p className="text-caption text-ktip-sand-600 mb-3">{description}</p>}
 
       {values.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {values.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-label font-medium bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200"
             >
               {tag}
               <button
@@ -71,7 +71,7 @@ export function TagInput({
             }
           }}
           placeholder={placeholder}
-          className="flex-1 border border-ktip-sand-200 rounded-xl px-4 py-2.5 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-sm"
+          className="flex-1 border border-ktip-sand-200 rounded-control px-4 py-2.5 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-body"
         />
         <Button
           type="button"
@@ -94,7 +94,7 @@ export function TagInput({
                 key={suggestion}
                 type="button"
                 onClick={() => addTag(suggestion)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50 transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-micro font-medium border border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50 transition-all"
               >
                 <Plus size={12} />
                 {suggestion}

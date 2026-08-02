@@ -114,7 +114,7 @@ function EmojiPanel({
       role="dialog"
       aria-label="Emoji"
       className={cn(
-        'absolute bottom-full z-50 mb-2 w-[19rem] overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-hard animate-scale-in',
+        'absolute bottom-full z-dropdown mb-2 w-[19rem] overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-hard animate-scale-in',
         align === 'right' ? 'right-0' : 'left-0'
       )}
     >

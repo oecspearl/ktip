@@ -99,6 +99,14 @@ const router = createBrowserRouter([
       // browser afterwards, carrying a one-time ticket instead of a session.
       { path: '/auth/vc/land', lazy: lazyPage(() => import('./pages/auth/VcLandingPage')) },
       { path: '/verify-email/:token', lazy: lazyPage(() => import('./pages/auth/VerifyEmailAliasPage')) },
+
+      // Responsive preview harness. Bare (it iframes the app, so it must not
+      // sit inside a layout) and dev-only — spreading an empty array leaves no
+      // route and no dynamic import for Rollup to follow, so the page is not
+      // in the production bundle at all.
+      ...(import.meta.env.DEV
+        ? [{ path: '/design', lazy: lazyPage(() => import('./pages/design/ResponsivePreviewPage')) }]
+        : []),
       { path: '/onboarding', lazy: lazyPage(() => import('./pages/onboarding/OnboardingPage')) },
 
       {

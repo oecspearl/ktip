@@ -1,12 +1,12 @@
 export function SkeletonCard() {
   return (
-    <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 animate-pulse-soft">
+    <div className="bg-ktip-cream rounded-surface shadow-card border border-ktip-sand-100 p-card-pad animate-pulse-soft">
       {/* Image placeholder */}
-      <div className="h-40 bg-ktip-sand-100 rounded-xl mb-4" />
+      <div className="h-40 bg-ktip-sand-100 rounded-control mb-4" />
       {/* Badge placeholder */}
       <div className="h-5 w-20 bg-ktip-sand-100 rounded-full mb-3" />
       {/* Title placeholder */}
-      <div className="h-6 bg-ktip-sand-100 rounded-lg mb-2 w-3/4" />
+      <div className="h-6 bg-ktip-sand-100 rounded-control mb-2 w-3/4" />
       {/* Description lines */}
       <div className="space-y-2 mb-4">
         <div className="h-4 bg-ktip-sand-100 rounded w-full" />

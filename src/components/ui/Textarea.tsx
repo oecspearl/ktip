@@ -23,7 +23,7 @@ export function Textarea({
   return (
     <div className={cn('flex flex-col gap-1.5', fullWidth && 'w-full')}>
       {label && (
-        <label htmlFor={textareaId} className="text-sm font-medium text-ktip-sand-700">
+        <label htmlFor={textareaId} className="text-label font-medium text-ktip-sand-700">
           {label}
         </label>
       )}
@@ -31,7 +31,7 @@ export function Textarea({
       <textarea
         id={textareaId}
         className={cn(
-          'w-full border rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all resize-none',
+          'w-full border rounded-control px-4 py-3 text-body bg-ktip-sand-50/50 transition-all resize-none',
           'focus:outline-none focus:ring-2 focus:bg-ktip-cream',
           error
             ? 'border-red-400/70 bg-red-50/30 focus:border-red-400 focus:ring-red-400/15'
@@ -42,7 +42,7 @@ export function Textarea({
       />
 
       {(error || helperText) && (
-        <p className={cn('text-sm', error ? 'text-red-500' : 'text-ktip-sand-500')}>
+        <p className={cn('text-caption', error ? 'text-red-500' : 'text-ktip-sand-500')}>
           {error || helperText}
         </p>
       )}

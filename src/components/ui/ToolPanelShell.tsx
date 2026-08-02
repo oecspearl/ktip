@@ -65,8 +65,8 @@ export function ToolPanelShell({
         {heroBadge}
       </PageHero>
 
-      <div className="bg-ktip-sand-100 py-6 min-h-[calc(100vh-230px)]">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+      <div className="bg-ktip-sand-100 py-6 min-h-[calc(100svh-230px)]">
+        <div className="max-w-page-narrow mx-auto px-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-4">
             {/* Tour anchors live on the shell, so all four tools are tourable
                 without any of them carrying markup of its own. */}
