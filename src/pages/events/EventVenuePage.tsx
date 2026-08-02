@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { Info, Map as MapIcon, Sparkles } from 'lucide-react'
+import { Info, Map as MapIcon, PencilRuler, Sparkles } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
-import { venueRoomPath } from '../../lib/event-slug'
+import { venueRoomPath, venueSetupPath } from '../../lib/event-slug'
 import { useVenueRoster, useVenueSession } from '../../hooks/useVenue'
 import { useEnterVenueRoom, useVenueRooms } from '../../hooks/useVenueRooms'
 import { useVenuePresence } from '../../hooks/useVenuePresence'
@@ -11,12 +11,13 @@ import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { VenueFloorplan } from '../../components/venue/VenueFloorplan'
-import { VenueMapExplorer } from '../../components/venue/map/VenueMapExplorer'
+import { VenueMapExplorer, canEnterRoom } from '../../components/venue/map/VenueMapExplorer'
+import { VenueRoomBrief } from '../../components/venue/map/VenueRoomBrief'
 import { RoomOccupantList } from '../../components/venue/RoomOccupantList'
 import { Button } from '../../components/ui/Button'
-import { occupantsUnassigned } from '../../lib/venue-presence'
+import { occupantsInRoom, occupantsUnassigned } from '../../lib/venue-presence'
 import { mapConfigOf } from '../../hooks/useVenueMap'
-import { isPlaced } from '../../lib/venue-map'
+import { autoLayout, isPlaced } from '../../lib/venue-map'
 import type { VenueRoom } from '../../types'
 import { entityPath } from '../../lib/slug'
 
@@ -72,10 +73,27 @@ export default function EventVenuePage() {
   const lobby = useMemo(() => occupantsUnassigned(presence.occupants), [presence.occupants])
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
 
-  // The drawn map wins whenever the host has actually placed a room on it; an
-  // uploaded SVG, and then the card grid, are the fallbacks behind it.
-  const mapped = useMemo(() => (rooms || []).filter(isPlaced), [rooms])
+  // The map is the venue. Rooms the host drew keep their geometry; rooms from
+  // before the map existed (or seeded from the room list) get auto-arranged, so
+  // a venue is never a wall of cards just because nobody opened the builder.
   const mapConfig = useMemo(() => mapConfigOf(event), [event])
+  const mapped = useMemo(
+    () => autoLayout(rooms || [], mapConfig).filter(isPlaced),
+    [rooms, mapConfig]
+  )
+  const unmappedIds = useMemo(() => {
+    const ids = new Set(mapped.map((r) => r.id))
+    return (rooms || []).filter((r) => !ids.has(r.id))
+  }, [rooms, mapped])
+
+  // The room being stood in, reported by the map. Not the same thing as being
+  // *in* a room: entering is still a decision, and this is what informs it.
+  const [standingRoomId, setStandingRoomId] = useState<string | null>(null)
+  const standingRoom = useMemo(
+    () => mapped.find((r) => r.id === standingRoomId) ?? null,
+    [mapped, standingRoomId]
+  )
+
 
   const handleEnter = async (room: VenueRoom) => {
     if (!eventId || !event) return
@@ -163,7 +181,8 @@ export default function EventVenuePage() {
       />
 
       <div className="mx-auto max-w-7xl px-4 py-6">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
             Virtual venue
           </p>
@@ -174,6 +193,15 @@ export default function EventVenuePage() {
             Walk the floor with the arrow keys, or click a room to go in. Everyone in a room can
             see who else is there.
           </p>
+          </div>
+
+          {membership.role === 'organizer' && (
+            <Link to={venueSetupPath(event)}>
+              <Button size="sm" variant="secondary" icon={<PencilRuler size={14} />}>
+                Edit the map
+              </Button>
+            </Link>
+          )}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
@@ -211,21 +239,27 @@ export default function EventVenuePage() {
                   occupants={presence.occupants}
                   occupancy={presence.occupancy}
                   meId={auth.user?.id || ''}
+                  myName={auth.profile?.display_name || 'You'}
+                  myAvatarUrl={auth.profile?.avatar_url ?? null}
                   myRole={membership.role}
                   peers={presence.positions.peers}
+                  // Set only when this member was inside a room a moment ago,
+                  // which is what plays the entry animation in reverse.
+                  arriveFromRoomId={membership.current_room_id}
                   onPositionChange={presence.setPosition}
+                  onStandingRoomChange={setStandingRoomId}
                   onEnter={handleEnter}
                 />
 
-                {/* A room the host never placed is still a room. Same reasoning
-                    as the SVG path's "Not on the map" list. */}
-                {rooms.length > mapped.length && (
+                {/* A room that would not fit on the grid is still a room. Same
+                    reasoning as the SVG path's "Not on the map" list. */}
+                {unmappedIds.length > 0 && (
                   <div className="mt-4">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
                       Not on the map
                     </p>
                     <VenueFloorplan
-                      rooms={rooms.filter((r) => !isPlaced(r))}
+                      rooms={unmappedIds}
                       occupants={presence.occupants}
                       currentRoomId={null}
                       floorplanUrl={null}
@@ -251,6 +285,19 @@ export default function EventVenuePage() {
               title="In the venue"
               emptyLabel="Everyone is inside a room."
             />
+
+            {/* Standing in a doorway is the moment someone wants to know what
+                they are about to walk into, so the room's rules appear here
+                before they commit to entering it. */}
+            {standingRoom && (
+              <VenueRoomBrief
+                room={standingRoom}
+                here={presence.occupancy[standingRoom.id] || 0}
+                occupants={occupantsInRoom(presence.occupants, standingRoom.id)}
+                canEnter={canEnterRoom(standingRoom, membership.role)}
+                onEnter={() => handleEnter(standingRoom)}
+              />
+            )}
 
             <div className="flex items-start gap-2 rounded-2xl border border-ktip-ocean-100 bg-ktip-ocean-50 p-3 text-xs text-ktip-ocean-800">
               <Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" />

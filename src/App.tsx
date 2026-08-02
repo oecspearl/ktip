@@ -209,6 +209,13 @@ const router = createBrowserRouter([
                 path: '/events/virtual-hackathon/:slug/room/:roomKey',
                 lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
               },
+              // Step two of creating a hackathon: draw the rooms (migration 089).
+              // Host-gated inside the page, and again by is_venue_host() in the
+              // save RPC.
+              {
+                path: '/events/virtual-hackathon/:slug/setup',
+                lazy: lazyPage(() => import('./pages/events/EventVenueSetupPage')),
+              },
               // The id-shaped originals, kept as redirects for old links.
               {
                 path: '/events/:id/venue',

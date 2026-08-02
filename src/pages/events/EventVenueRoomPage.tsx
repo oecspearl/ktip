@@ -1,18 +1,20 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
-import { Lock, Video } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
 import { useVenueRoster, useVenueSession } from '../../hooks/useVenue'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { venuePath } from '../../lib/event-slug'
 import { useVenuePresence } from '../../hooks/useVenuePresence'
+import { useRoomSignals } from '../../hooks/useRoomSignals'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
-import { RoomOccupantList } from '../../components/venue/RoomOccupantList'
-import { RoomChatPanel } from '../../components/venue/RoomChatPanel'
+import { RoomSections } from '../../components/venue/room/RoomSections'
+import type { RoomSectionContext } from '../../components/venue/room/RoomSections'
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
+import { roomUsesSignals } from '../../lib/venue-room-sections'
 import {
   VENUE_ROOM_KIND_ICONS,
   VENUE_ROOM_KIND_LABELS,
@@ -27,9 +29,10 @@ import { entityPath } from '../../lib/slug'
  * field on the tracked payload, not a separate subscription. The only per-room
  * subscription is chat, and it exists only while this page is mounted.
  *
- * Audio and video land in Phase 2 (LiveKit). The placeholder below is
- * deliberate: it says what is coming rather than pretending the room is silent
- * by design.
+ * The page owns the chrome — the top bar, the room header, the join gate — and
+ * nothing else. What is *inside* a room is a list of sections resolved from
+ * venue_rooms.sections (091), which is why a sponsor booth and a judging room
+ * no longer differ only by their icon.
  */
 export default function EventVenueRoomPage() {
   const params = useParams()
@@ -81,6 +84,26 @@ export default function EventVenueRoomPage() {
     [presence.occupants, roomId]
   )
 
+  // Subscribed here, not inside the panels that use it: the main and aside
+  // columns are separate trees, so a hook in each would open the same channel
+  // twice. can_use_room_channel() refuses closed and team rooms, so those get
+  // a hook that never connects rather than a failing subscribe.
+  const signals = useRoomSignals({
+    roomId,
+    me: me
+      ? { userId: me.user_id, name: me.display_name || 'Member', avatarUrl: me.avatar_url }
+      : null,
+    // Only when a panel on this room actually uses it. Most rooms have neither
+    // reactions nor a hand queue, and an unused private channel is an auth
+    // round trip plus a rejoin on every reconnect for nothing.
+    enabled:
+      !!room &&
+      room.is_open &&
+      room.kind !== 'team' &&
+      !!membership &&
+      roomUsesSignals(room, membership.role),
+  })
+
   // Leaving the page puts you back on the floorplan rather than leaving a ghost
   // in the room. The presence payload updates via the roomId prop; this only
   // has to clear the cold mirror on the way out.
@@ -131,8 +154,19 @@ export default function EventVenueRoomPage() {
 
   const Icon = resolveIcon(VENUE_ROOM_KIND_ICONS[room.kind])
   const isHost = membership.role === 'organizer'
-  const canPost = membership.role !== 'spectator'
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
+
+  const sectionContext: RoomSectionContext = {
+    event,
+    room,
+    rooms,
+    occupants: presence.occupants,
+    inRoom,
+    viewerRole: membership.role,
+    isHost,
+    membership,
+    signals,
+  }
 
   return (
     // pt clears the fixed navbar — see the note on EventVenuePage.
@@ -171,67 +205,15 @@ export default function EventVenueRoomPage() {
           )}
         </div>
 
-        {room.sponsor_name && (
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-ktip-sun-200 bg-ktip-sun-50 p-3">
-            {room.sponsor_logo_url && (
-              <img
-                src={room.sponsor_logo_url}
-                alt=""
-                className="h-9 w-9 rounded-lg object-contain"
-              />
-            )}
-            <p className="text-sm text-ktip-sun-800">
-              Hosted by <strong>{room.sponsor_name}</strong>
-              {room.sponsor_url && (
-                <>
-                  {' — '}
-                  <a
-                    href={room.sponsor_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    visit
-                  </a>
-                </>
-              )}
-            </p>
-          </div>
-        )}
-
+        {/*
+          What a room contains is data, not layout: venue_rooms.sections, or the
+          default set for its kind. Adding a panel is a registry entry plus a
+          case in RoomSections — never a branch here.
+        */}
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-          <div className="space-y-6">
-            {/*
-              Phase 2 replaces this with a LiveKit room. Saying so is better than
-              a silent empty box: a room with no audio looks broken otherwise.
-            */}
-            <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-ktip-sand-200 bg-ktip-cream px-6 py-10 text-center">
-              <Video size={26} className="text-ktip-sand-400" aria-hidden="true" />
-              <p className="font-display text-base font-bold text-ktip-sand-800">
-                Audio and video are coming to this room
-              </p>
-              <p className="max-w-md text-sm text-ktip-sand-600">
-                Presence and chat are live now. Voice, screen sharing and host controls arrive with
-                the next release. Until then, use the chat below and the member list on the right.
-              </p>
-            </div>
-
-            <div data-tutorial="room-chat">
-              <RoomChatPanel
-                room={room}
-                canPost={canPost && room.is_open}
-                canModerate={isHost}
-                className="h-[32rem]"
-              />
-            </div>
-          </div>
-
-          <aside data-tutorial="room-presence">
-            <RoomOccupantList
-              occupants={inRoom}
-              title="In this room"
-              emptyLabel="You are the first one here."
-            />
+          <RoomSections slot="main" context={sectionContext} className="space-y-6" />
+          <aside>
+            <RoomSections slot="aside" context={sectionContext} className="space-y-4" />
           </aside>
         </div>
       </div>

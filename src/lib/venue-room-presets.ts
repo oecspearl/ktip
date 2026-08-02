@@ -14,6 +14,7 @@
 
 import type { VenueAudioMode, VenueRole, VenueRoomKind } from '../types'
 import { VENUE_PALETTE } from './venue-map'
+import type { RoomSectionId } from './venue-room-sections'
 
 export interface VenueRoomPreset {
   /** Slug seed. The editor appends -2, -3 … if the key is taken. */
@@ -34,6 +35,16 @@ export interface VenueRoomPreset {
   size: { w: number; h: number }
   /** lucide-react icon name, resolved by the picker. */
   icon: string
+  /**
+   * Panels this preset needs *beyond* what its kind gives it (091).
+   *
+   * Absent means "whatever the kind does", which is right for most of them.
+   * It is set only where the preset and the kind genuinely disagree — a Quiet
+   * Room is `breakout` and must not have a chat panel, a Registration Desk is
+   * `help_desk` and is the one place check-in belongs. Storing it at placement
+   * time is deliberate: the host picked this shape, not the kind's.
+   */
+  sections?: RoomSectionId[]
 }
 
 export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
@@ -111,6 +122,19 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 1.6,
     size: { w: 9, h: 6 },
     icon: 'Presentation',
+    // A stage is for watching something, so the entries being demoed are the
+    // content and the chat is the sideline.
+    sections: [
+      'sponsor_hero',
+      'host_controls',
+      'av_placeholder',
+      'reactions',
+      'showcase_gallery',
+      'chat',
+      'occupants',
+      'hand_queue',
+      'countdown',
+    ],
   },
   {
     key: 'judging',
@@ -141,6 +165,16 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 1,
     size: { w: 5, h: 4 },
     icon: 'Coffee',
+    // Where mentors regroup — so it shows them who still needs help rather
+    // than showing them each other's availability twice.
+    sections: [
+      'host_controls',
+      'av_placeholder',
+      'chat',
+      'occupants',
+      'help_nudge',
+      'mentors_on_duty',
+    ],
   },
   {
     key: 'sponsor-booth',
@@ -171,6 +205,14 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 0.8,
     size: { w: 4, h: 3 },
     icon: 'Rocket',
+    sections: [
+      'host_controls',
+      'av_placeholder',
+      'objectives',
+      'chat',
+      'occupants',
+      'countdown',
+    ],
   },
   {
     key: 'quiet-room',
@@ -186,6 +228,9 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 0.8,
     size: { w: 6, h: 4 },
     icon: 'Moon',
+    // No chat, on purpose. A quiet room with a conversation in it is a
+    // breakout room that has been mislabelled.
+    sections: ['focus_timer', 'occupants'],
   },
   {
     key: 'registration',
@@ -201,6 +246,17 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 0.7,
     size: { w: 4, h: 3 },
     icon: 'DoorOpen',
+    // First stop: check in, find out what to do, find out where to go.
+    sections: [
+      'check_in',
+      'host_controls',
+      'rules',
+      'chat',
+      'onboarding',
+      'wayfinding',
+      'announcements',
+      'occupants',
+    ],
   },
   {
     key: 'green-room',
@@ -216,6 +272,16 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 1,
     size: { w: 4, h: 4 },
     icon: 'Sparkles',
+    // Backstage: who is on, how long is left, and a room log so a presenter
+    // can catch up on what was announced while they were rehearsing.
+    sections: [
+      'host_controls',
+      'av_placeholder',
+      'chat',
+      'occupants',
+      'countdown',
+      'activity_log',
+    ],
   },
 ]
 

@@ -47,10 +47,13 @@ export function VenueTopBar({
   return (
     <div
       className={cn(
-        // Sticks below the fixed navbar, not under it. At top-0 the bar's own
-        // ~88px covered this whole row, so "Event page" was unclickable exactly
-        // where the page loads — the click hit the navbar logo and went to /.
-        'sticky top-[var(--nav-h)] z-30 flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm',
+        // Sticks to the navbar's bottom edge, not under it. At top-0 the bar's
+        // own ~88px covered this whole row, so "Event page" was unclickable
+        // exactly where the page loads — the click hit the navbar logo and went
+        // to /. --nav-offset rather than --nav-h because the navbar auto-hides:
+        // holding its full height while it is off screen leaves this bar
+        // floating mid-page. The transition matches the navbar's own slide.
+        'sticky top-[var(--nav-offset)] z-30 flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm transition-[top] duration-300',
         className
       )}
     >

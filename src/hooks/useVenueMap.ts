@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import { parseMapConfig, type MapCell, type VenueMapConfig } from '../lib/venue-map'
+import type { RoomSectionSetting } from '../lib/venue-room-sections'
 import type { Event, VenueRoom } from '../types'
 
 /** What the editor sends for one room. Everything else the row keeps. */
@@ -22,6 +23,11 @@ export interface VenueMapRoomInput {
   allowed_roles: VenueRoom['allowed_roles']
   sponsor_name?: string | null
   sponsor_url?: string | null
+  /**
+   * Panels for this room (091). Omit the key entirely to leave whatever the row
+   * already has — the RPC only writes it when the payload carries it.
+   */
+  sections?: RoomSectionSetting[]
 }
 
 /**

@@ -3,19 +3,25 @@ import {
   Briefcase,
   Calendar,
   Code2,
+  DoorOpen,
+  Gavel,
   GraduationCap,
   Landmark,
   Leaf,
+  LifeBuoy,
   Handshake,
   HeartPulse,
   Laptop,
   Lightbulb,
   Mic,
   Microscope,
+  Presentation,
   Rocket,
   Sparkles,
   Sprout,
+  Store,
   Target,
+  Users,
   Wallet,
   Wrench,
   Globe,
@@ -67,6 +73,27 @@ export const INTEGRATION_CATEGORY_ICONS: Record<string, LucideIcon> = {
   developer: Code2,
   other: Sparkles,
 }
+
+/**
+ * A glyph per venue room kind (089). Same vocabulary as
+ * VENUE_ROOM_KIND_LABELS in constants.ts — a room's icon is the fastest way to
+ * pick it out of a list, and a colour swatch on its own only helps someone who
+ * already knows what the colours mean.
+ */
+export const VENUE_ROOM_ICONS: Record<string, LucideIcon> = {
+  main_hall: Landmark,
+  networking: Users,
+  workshop: Wrench,
+  help_desk: LifeBuoy,
+  sponsor_booth: Store,
+  team: Rocket,
+  judging: Gavel,
+  stage: Presentation,
+  breakout: DoorOpen,
+}
+
+export const venueRoomIcon = (kind: string | null | undefined): LucideIcon =>
+  (kind && VENUE_ROOM_ICONS[kind]) || DoorOpen
 
 export const projectCategoryIcon = (category: string | null | undefined): LucideIcon =>
   (category && PROJECT_CATEGORY_ICONS[category]) || Sparkles

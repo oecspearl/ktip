@@ -23,11 +23,13 @@ import {
   Trash2,
   FileText,
   Upload,
+  ArrowRight,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
 import { entityPath } from '../../lib/slug'
+import { venueSetupPath } from '../../lib/event-slug'
 
 /** Formats accepted by the document scraper (plus plain text). */
 const DOCUMENT_ACCEPT =
@@ -68,6 +70,9 @@ export default function CreateEventPage() {
   // The old "sets a challenge" checkbox is gone — picking the Challenge event
   // type is what switches the brief on.
   const isChallengeEvent = eventType === 'challenge'
+  // A hackathon always gets a venue: it is the one event type whose whole
+  // format is "a place with rooms in it".
+  const isHackathon = eventType === 'hackathon'
 
   const { uploadDocument } = useUploadDocument()
 
@@ -172,6 +177,9 @@ export default function CreateEventPage() {
         end_date: endDatetime,
         capacity,
         organizer_id: auth.user!.id,
+        // A hackathon gets its venue switched on at creation, because the very
+        // next screen is the one where its rooms get drawn.
+        ...(isHackathon ? { has_venue: true } : {}),
         has_challenge: isChallengeEvent,
         submission_deadline:
           isChallengeEvent && submissionDate
@@ -212,7 +220,9 @@ export default function CreateEventPage() {
       } else {
         toast.success('Event created successfully!')
       }
-      navigate(entityPath('event', event))
+      // Creating a hackathon is a two-step job: the listing, then the place it
+      // happens in. Anything else goes straight to its event page.
+      navigate(isHackathon ? venueSetupPath(event) : entityPath('event', event))
     } catch (error: any) {
       // A row-level-security refusal or a missing column arrives here. The toast
       // dismisses itself after 4s, so the banner is the durable copy.
@@ -327,6 +337,13 @@ export default function CreateEventPage() {
                   Attendees are given a goal to accomplish and submit their solutions on the event
                   page. Objectives, constraints, deliverables and judging criteria are added from
                   the event's Challenge tab after creating it.
+                </p>
+              )}
+              {isHackathon && (
+                <p className="mt-1 text-xs text-ktip-sand-500">
+                  A hackathon gets a live virtual venue. After you create it, the next screen is
+                  where you lay out its rooms — a main hall, a help desk, judging, whatever it
+                  needs.
                 </p>
               )}
             </div>
@@ -587,10 +604,20 @@ export default function CreateEventPage() {
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit Button — a hackathon is a two-step create, so the button
+                says where it is going rather than pretending this is the end. */}
             <div className="flex items-center gap-4">
-              <Button type="submit" loading={loading || finishing} icon={<Save size={20} />} fullWidth>
-                {finishing ? 'Uploading attachments…' : 'Create Event'}
+              <Button
+                type="submit"
+                loading={loading || finishing}
+                icon={isHackathon ? <ArrowRight size={20} /> : <Save size={20} />}
+                fullWidth
+              >
+                {finishing
+                  ? 'Uploading attachments…'
+                  : isHackathon
+                    ? 'Next: design the rooms'
+                    : 'Create Event'}
               </Button>
               <button
                 type="button"

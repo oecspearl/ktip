@@ -1,19 +1,35 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { DoorOpen, Lock, Move, Users } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  DoorOpen,
+  Lock,
+  Move,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Users,
+} from 'lucide-react'
 import { VenueMapStage } from './VenueMapStage'
+import { VenueRoomList } from './VenueRoomList'
 import { useAnimatedValue, useElementSize } from './useAnimatedValue'
 import {
+  VENUE_MAP,
   buildGeometry,
   clampToFloor,
+  contrastInk,
+  floorAlpha as floorAlphaAt,
   floorBadge,
+  isOnStairs,
   makeProjection,
   roomAt,
-  spawnPoint,
+  spawnAtDoor,
+  stairsCentre,
   stepTowards,
   type RoomGeometry,
   type VenueMapConfig,
 } from '../../../lib/venue-map'
 import { VENUE } from '../../../lib/constants'
+import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { PeerPosition } from '../../../hooks/useVenuePresence'
 import type { VenueOccupant, VenuePosition, VenueRole, VenueRoom } from '../../../types'
 
@@ -23,14 +39,32 @@ interface VenueMapExplorerProps {
   occupants: VenueOccupant[]
   occupancy: Record<string, number>
   meId: string
+  myName: string
+  myAvatarUrl: string | null
   myRole: VenueRole
   /** Live peer positions, mutated in place by the presence channel. */
   peers: React.MutableRefObject<Map<string, PeerPosition>>
+  /**
+   * The room this member was in a moment ago. Set when they have just left one,
+   * and it is what turns a hard cut back to the map into the reverse of the
+   * entry animation: the camera starts inside that room and pulls out.
+   */
+  arriveFromRoomId?: string | null
+  /** A room chosen from the sidebar. The nonce lets the same one be re-picked. */
+  focusRoom?: { roomId: string; nonce: number } | null
   onPositionChange: (pos: VenuePosition | null) => void
+  /** The room being stood in without entering, for the side panel. */
+  onStandingRoomChange?: (roomId: string | null) => void
   onEnter: (room: VenueRoom) => void
 }
 
-type EnterPhase = 'idle' | 'walking' | 'zooming'
+type EnterPhase = 'idle' | 'walking' | 'zooming' | 'arriving'
+
+/** Walking to a room is a decision already made, so it is not a stroll. */
+const APPROACH_SPEED = VENUE.WALK_SPEED * 1.8
+
+/** How far in the camera sits at the moment of entering, and of coming back. */
+const ARRIVE_ZOOM = 2.6
 
 /** A member may enter unless the room is shut or its role list excludes them. */
 export function canEnterRoom(room: VenueRoom, role: VenueRole): boolean {
@@ -57,9 +91,14 @@ export function VenueMapExplorer({
   occupants,
   occupancy,
   meId,
+  myName,
+  myAvatarUrl,
   myRole,
   peers,
+  arriveFromRoomId,
+  focusRoom,
   onPositionChange,
+  onStandingRoomChange,
   onEnter,
 }: VenueMapExplorerProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -68,6 +107,18 @@ export function VenueMapExplorer({
   const [floor, setFloor] = useState(0)
   const [zoom, setZoom] = useState({ k: 1, px: 0, py: 0 })
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  // View controls. 2D is the honest plan view — easier to judge distance in,
+  // and the one people fall back to when the walls get in the way. Stack lifts
+  // the floors apart so a multi-level venue reads as a building.
+  const [iso, setIso] = useState(true)
+  const [stacked, setStacked] = useState(false)
+  const [railOpen, setRailOpen] = useState(true)
+  /**
+   * A floor change in progress. `mix` runs 0 → 1 in the animation loop and
+   * drives every level's opacity, so the floor you left dissolves as the one
+   * you arrived on solidifies.
+   */
+  const [fade, setFade] = useState({ from: 0, to: 0, mix: 1 })
   const [phase, setPhase] = useState<EnterPhase>('idle')
   const [enteringRoomId, setEnteringRoomId] = useState<string | null>(null)
   const [veil, setVeil] = useState(0)
@@ -85,11 +136,18 @@ export function VenueMapExplorer({
   const phaseRef = useRef<EnterPhase>('idle')
   const enteredRef = useRef(false)
   const veilRef = useRef(0)
+  const fadeRef = useRef({ from: 0, to: 0, mix: 1 })
 
-  const tilt = useAnimatedValue(1)
-  const stack = 0 // one floor at a time: you can only stand on the floor you are on
+  // Both eased on animation frames rather than by CSS: the projection is
+  // recomputed from them every frame, so the map tips and lifts instead of
+  // cutting between two states.
+  const tilt = useAnimatedValue(iso ? 1 : 0)
+  const stack = useAnimatedValue(stacked && iso && config.floors.length > 1 ? 1 : 0)
 
-  const topZ = Math.max(1, ...rooms.map((r) => Number(r.wall_height) || 1))
+  const tallest = Math.max(1, ...rooms.map((r) => Number(r.wall_height) || 1))
+  const topZ = stack * (config.floors.length - 1) * VENUE_MAP.LEVEL_H + tallest
+  /** Height of the floor being stood on, once the stack is pulled apart. */
+  const zBase = stack > 0.02 ? floor * VENUE_MAP.LEVEL_H * stack : 0
   const projection = useMemo(
     () =>
       makeProjection({
@@ -104,13 +162,73 @@ export function VenueMapExplorer({
     [config.cols, config.rows, tilt, size, zoom, topZ]
   )
 
+  /**
+   * Move to another level.
+   *
+   * One routine for the stairs, the floor chips and the sidebar, so all three
+   * cross-fade identically and all three land you somewhere sensible: on the
+   * stairs if that is how you travelled, at the door otherwise.
+   */
+  const goToFloor = useCallback(
+    (level: number, viaStairs = false) => {
+      if (level < 0 || level >= config.floors.length) return
+      const current = fadeRef.current.to
+      if (level === current) return
+
+      fadeRef.current = { from: current, to: level, mix: 0 }
+      setFade({ ...fadeRef.current })
+      setFloor(level)
+      setHoveredId(null)
+
+      const landing =
+        viaStairs && config.stairs
+          ? stairsCentre(config.stairs)
+          : spawnAtDoor(config, geometry, level)
+      posRef.current = landing
+      targetRef.current = null
+      pendingRoomRef.current = null
+      onPositionChange({ ...landing, f: level })
+    },
+    [config, geometry, onPositionChange]
+  )
+
   // ---- spawn --------------------------------------------------------------
 
   useEffect(() => {
     if (posRef.current) return
-    posRef.current = spawnPoint(config, geometry, floor)
+
+    // Coming back out of a room: stand where that room is, with the camera
+    // still pushed in and the veil still up, and let the loop pull both back.
+    const from = arriveFromRoomId ? geometry[arriveFromRoomId] : null
+    if (from) {
+      posRef.current = { x: from.centroid[0], y: from.centroid[1] }
+      setFloor(from.floor)
+      fadeRef.current = { from: from.floor, to: from.floor, mix: 1 }
+      setFade({ ...fadeRef.current })
+      onPositionChange({ ...posRef.current, f: from.floor })
+
+      const zoomed = makeProjection({
+        cols: config.cols,
+        rows: config.rows,
+        tilt: 1,
+        width: size.width,
+        height: size.height,
+        zoom: { k: ARRIVE_ZOOM, px: 0, py: 0 },
+        topZ,
+      })
+      const [sx, sy] = zoomed.project(from.centroid[0], from.centroid[1], 0)
+      setZoom({ k: ARRIVE_ZOOM, px: size.width / 2 - sx, py: size.height / 2 - sy })
+      veilRef.current = 1
+      setVeil(1)
+      phaseRef.current = 'arriving'
+      setPhase('arriving')
+      return
+    }
+
+    // First arrival: through the front door, which is what a door is for.
+    posRef.current = spawnAtDoor(config, geometry, floor)
     onPositionChange({ ...posRef.current, f: floor })
-  }, [config, geometry, floor, onPositionChange])
+  }, [config, geometry, floor, size, topZ, arriveFromRoomId, onPositionChange])
 
   // ---- keyboard -----------------------------------------------------------
 
@@ -158,6 +276,7 @@ export function VenueMapExplorer({
   useEffect(() => {
     let raf = 0
     let last = performance.now()
+    let lastTick = 0
 
     const step = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -166,7 +285,7 @@ export function VenueMapExplorer({
       let moved = false
       const pos = posRef.current
 
-      if (pos && phaseRef.current !== 'zooming') {
+      if (pos && phaseRef.current !== 'zooming' && phaseRef.current !== 'arriving') {
         // Keyboard first — a held key beats a stale click target.
         const keys = keysRef.current
         let dx = 0
@@ -185,7 +304,9 @@ export function VenueMapExplorer({
           posRef.current = next
           moved = true
         } else if (targetRef.current) {
-          const { pos: next, arrived } = stepTowards(pos, targetRef.current, VENUE.WALK_SPEED, dt)
+          // Heading for a room is brisker than wandering to a spot on the floor.
+          const speed = pendingRoomRef.current ? APPROACH_SPEED : VENUE.WALK_SPEED
+          const { pos: next, arrived } = stepTowards(pos, targetRef.current, speed, dt)
           posRef.current = clampToFloor(config, next)
           moved = true
           if (arrived) {
@@ -225,10 +346,53 @@ export function VenueMapExplorer({
         }
       }
 
-      // One re-render per frame while anything is in motion. When the venue is
-      // still and nobody is walking, this settles to nothing.
-      if (moved || phaseRef.current === 'zooming' || peers.current.size > 0) {
-        setFrame((f) => (f + 1) % 1_000_000)
+      // Floor cross-fade. Eased here rather than in CSS because the same number
+      // has to reach the SVG renderer, which paints per frame from a prop.
+      if (fadeRef.current.mix < 1) {
+        fadeRef.current = {
+          ...fadeRef.current,
+          mix: Math.min(1, fadeRef.current.mix + dt * 2.4),
+        }
+        setFade({ ...fadeRef.current })
+      }
+
+      // Coming back out: the entry animation played backwards. Same easing, so
+      // leaving a room feels like the same door it was entered through.
+      if (phaseRef.current === 'arriving') {
+        setZoom((z) => ({
+          k: z.k + (1 - z.k) * Math.min(1, dt * 3.2),
+          px: z.px * (1 - Math.min(1, dt * 3.2)),
+          py: z.py * (1 - Math.min(1, dt * 3.2)),
+        }))
+        veilRef.current = Math.max(0, veilRef.current - dt * 1.6)
+        setVeil(veilRef.current)
+        if (veilRef.current <= 0.001) {
+          phaseRef.current = 'idle'
+          setPhase('idle')
+          setEnteringRoomId(null)
+        }
+      }
+
+      // Re-render only when something actually moved, and at most ~30fps for
+      // other people's dots: a venue with twenty idle avatars must not re-render
+      // this page sixty times a second forever.
+      // p.at is a wall clock (Date.now) while `now` is a monotonic frame time,
+      // so staleness has to be measured against the wall clock.
+      const wall = Date.now()
+      const peerMoving = [...peers.current.values()].some(
+        (p) => wall - p.at < VENUE.POS_BROADCAST_MS * 4
+      )
+      if (
+        moved ||
+        phaseRef.current === 'zooming' ||
+        phaseRef.current === 'arriving' ||
+        fadeRef.current.mix < 1 ||
+        peerMoving
+      ) {
+        if (now - lastTick >= 33) {
+          lastTick = now
+          setFrame((f) => (f + 1) % 1_000_000)
+        }
       }
 
       raf = requestAnimationFrame(step)
@@ -240,33 +404,59 @@ export function VenueMapExplorer({
 
   // ---- pointer ------------------------------------------------------------
 
-  const pointerToGrid = (e: React.PointerEvent): [number, number] => {
+  const pointerToGrid = (e: React.PointerEvent, z = zBase): [number, number] => {
     const rect = wrapRef.current!.getBoundingClientRect()
-    return projection.unproject(e.clientX - rect.left, e.clientY - rect.top, 0)
+    return projection.unproject(e.clientX - rect.left, e.clientY - rect.top, z)
+  }
+
+  /**
+   * What is under the cursor.
+   *
+   * Pulled apart, the floors overlap on screen, so each one is unprojected at
+   * its own height and the topmost hit wins — that is what makes clicking a
+   * room on Level 2 select the room on Level 2 and not the slab beneath it.
+   */
+  const pickAt = (e: React.PointerEvent): { floor: number; geo: RoomGeometry<VenueRoom> } | null => {
+    const levels =
+      stack > 0.5 ? config.floors.map((_, i) => i) : [floor]
+    for (let i = levels.length - 1; i >= 0; i--) {
+      const level = levels[i]
+      const [x, y] = pointerToGrid(e, level * VENUE_MAP.LEVEL_H * stack)
+      const geo = roomAt(geometry, level, x, y)
+      if (geo) return { floor: level, geo }
+    }
+    return null
   }
 
   const onPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    const [x, y] = pointerToGrid(e)
-    const geo = roomAt(geometry, floor, x, y)
-    setHoveredId(geo ? geo.room.id : null)
+    const hit = pickAt(e)
+    setHoveredId(hit ? hit.geo.room.id : null)
+  }
+
+  /** Walk to a room and go in. Crossing floors moves you there first. */
+  const approach = (room: VenueRoom, geo: RoomGeometry<VenueRoom>, level: number) => {
+    if (!canEnterRoom(room, myRole)) return
+    if (level !== floor) goToFloor(level)
+    pendingRoomRef.current = room
+    targetRef.current = { x: geo.centroid[0], y: geo.centroid[1] }
+    phaseRef.current = 'walking'
+    setPhase('walking')
+    setEnteringRoomId(room.id)
   }
 
   const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     if (phase === 'zooming') return
-    const [x, y] = pointerToGrid(e)
-    const hit = roomAt(geometry, floor, x, y)
+    const hit = pickAt(e)
 
     if (hit) {
-      const room = roomsById.get(hit.room.id)
-      if (!room || !canEnterRoom(room, myRole)) return
-      pendingRoomRef.current = room
-      targetRef.current = { x: hit.centroid[0], y: hit.centroid[1] }
-      phaseRef.current = 'walking'
-      setPhase('walking')
-      setEnteringRoomId(room.id)
+      const room = roomsById.get(hit.geo.room.id)
+      if (room) approach(room, hit.geo, hit.floor)
       return
     }
 
+    // Empty floor. Clicking one of the other slabs in a stack means "take me to
+    // that level", not "walk to a spot on the floor I am already standing on".
+    const [x, y] = pointerToGrid(e)
     pendingRoomRef.current = null
     targetRef.current = clampToFloor(config, { x, y })
     phaseRef.current = 'idle'
@@ -276,9 +466,49 @@ export function VenueMapExplorer({
 
   // ---- derived ------------------------------------------------------------
 
+  /**
+   * Per-level opacity, shared by the SVG and by the HTML labels over it.
+   *
+   * Stacked, floors you are not on stay faintly there as context. Flat, they
+   * are not drawn at all — which is what turns a floor change from a cut into
+   * a dissolve: the level you left fades to nothing exactly as the new one
+   * comes up, in the same place.
+   */
+  const alphaFor = useCallback(
+    (level: number) => floorAlphaAt(level, fade.from, fade.to, fade.mix, stack > 0.02 ? 0.12 : 0),
+    [fade, stack]
+  )
+
   const me = posRef.current
+  const onStairs = isOnStairs(config.stairs, me)
   const standingIn = me ? roomAt(geometry, floor, me.x, me.y) : null
   const standingRoom = standingIn ? roomsById.get(standingIn.room.id) || null : null
+
+  // Tell the page which room is underfoot so it can show that room's rules
+  // beside the map. Reported from an effect rather than during render because
+  // the position it reads is a ref the animation loop is writing.
+  const standingId = standingRoom?.id ?? null
+  useEffect(() => {
+    onStandingRoomChange?.(standingId)
+  }, [standingId, onStandingRoomChange])
+
+  // A room picked from the sidebar list behaves exactly like clicking it on the
+  // map. The nonce is what makes picking the same room twice work.
+  const lastFocusRef = useRef(0)
+  useEffect(() => {
+    if (!focusRoom || focusRoom.nonce === lastFocusRef.current) return
+    lastFocusRef.current = focusRoom.nonce
+    const geo = geometry[focusRoom.roomId]
+    const room = roomsById.get(focusRoom.roomId)
+    if (!geo || !room || !canEnterRoom(room, myRole)) return
+
+    if (geo.floor !== floor) goToFloor(geo.floor)
+    pendingRoomRef.current = room
+    targetRef.current = { x: geo.centroid[0], y: geo.centroid[1] }
+    phaseRef.current = 'walking'
+    setPhase('walking')
+    setEnteringRoomId(room.id)
+  }, [focusRoom, geometry, roomsById, myRole, floor, goToFloor])
 
   const mutedIds = useMemo(() => {
     const out = new Set<string>()
@@ -303,10 +533,77 @@ export function VenueMapExplorer({
     .filter(Boolean) as Array<{ occupant: VenueOccupant; pos: VenuePosition }>
 
   return (
-    <div
-      ref={wrapRef}
-      className="relative h-[32rem] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-canvas shadow-card md:h-[36rem]"
-    >
+    <div className="flex h-[32rem] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card md:h-[36rem]">
+      {/* ---- rooms rail ----
+          Attached to the map rather than floating beside it, and collapsible,
+          because on a small screen the list and the floor are competing for the
+          same space and the floor should win. */}
+      <div
+        className={`flex shrink-0 flex-col border-r border-ktip-sand-200 transition-[width] duration-300 ${
+          railOpen ? 'w-52' : 'w-9'
+        }`}
+        // The same grid the floor is drawn on, so the rail reads as part of the
+        // map rather than as a panel that happens to be next to it.
+        style={{
+          backgroundImage:
+            'linear-gradient(var(--color-ktip-sand-200) 1px, transparent 1px), linear-gradient(90deg, var(--color-ktip-sand-200) 1px, transparent 1px)',
+          backgroundSize: '14px 14px',
+          backgroundColor: 'var(--color-ktip-cream)',
+        }}
+      >
+        {/* The whole bar is the control — collapsed there is nothing else to
+            click, and expanded the header is the obvious place to press. */}
+        <button
+          type="button"
+          onClick={() => setRailOpen((v) => !v)}
+          aria-expanded={railOpen}
+          className={`border-b border-ktip-sand-200 bg-ktip-cream/70 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500 hover:bg-ktip-sand-50 ${
+            railOpen ? 'flex items-center px-2 py-2' : 'flex-1 pt-2'
+          }`}
+        >
+          {railOpen ? (
+            <>
+              {/* Centred by the two side cells being the same width — the icon
+                  is an affordance, the whole bar is still the button. */}
+              <PanelLeftClose size={14} className="shrink-0 opacity-0" aria-hidden="true" />
+              <span className="flex-1 text-center">
+                Rooms <span className="font-mono text-[10px] text-ktip-sand-400">{rooms.length}</span>
+              </span>
+              <PanelLeftClose size={14} className="shrink-0" aria-hidden="true" />
+            </>
+          ) : (
+            <span className="flex flex-col items-center gap-2">
+              <PanelLeftOpen size={14} aria-hidden="true" />
+              <span
+                className="font-mono text-[10px] tracking-widest"
+                style={{ writingMode: 'vertical-rl' }}
+              >
+                Rooms
+              </span>
+            </span>
+          )}
+          <span className="sr-only">{railOpen ? 'Collapse the room list' : 'Show the room list'}</span>
+        </button>
+
+        {railOpen && (
+          <div className="min-h-0 flex-1 overflow-y-auto bg-ktip-cream/70 p-2">
+            <VenueRoomList
+              bare
+              config={config}
+              rooms={rooms}
+              occupancy={occupancy}
+              activeRoomId={standingRoom?.id ?? null}
+              lockedIds={mutedIds}
+              onPick={(room) => {
+                const geo = geometry[room.id]
+                if (geo) approach(room, geo, geo.floor)
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div ref={wrapRef} className="relative min-w-0 flex-1 bg-ktip-canvas">
       <svg
         width="100%"
         height="100%"
@@ -320,28 +617,35 @@ export function VenueMapExplorer({
           geometry={geometry}
           projection={projection}
           floor={floor}
+          floorAlpha={alphaFor}
           tilt={tilt}
           stack={stack}
           hoveredId={hoveredId}
           selectedId={enteringRoomId}
           mutedIds={mutedIds}
+          showGrid
         />
       </svg>
 
       {/* ---- room labels ---- */}
       <div className="pointer-events-none absolute inset-0">
         {Object.values(geometry)
-          .filter((g: RoomGeometry<VenueRoom>) => g.floor === floor)
+          // Only the floor being stood on is labelled. In a stack the other
+          // levels are context, and their name tags read as clutter over the
+          // one you are actually on — they fade out with the floor itself.
+          .filter((g: RoomGeometry<VenueRoom>) => alphaFor(g.floor) > 0.35)
           .map((g: RoomGeometry<VenueRoom>) => {
             const room = g.room
-            const [sx, sy] = projection.project(g.centroid[0], g.centroid[1], g.height)
+            const levelZ = g.floor * VENUE_MAP.LEVEL_H * stack
+            const [sx, sy] = projection.project(g.centroid[0], g.centroid[1], levelZ + g.height)
             const here = occupancy[room.id] || 0
             const locked = !canEnterRoom(room, myRole)
+            const presence = alphaFor(g.floor)
             return (
               <div
                 key={room.id}
                 className="absolute -translate-x-1/2 -translate-y-full"
-                style={{ left: sx, top: sy - 8 }}
+                style={{ left: sx, top: sy - 8, opacity: Math.max(0, (presence - 0.35) / 0.65) }}
               >
                 <span
                   className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border bg-ktip-cream/90 px-2.5 py-1 text-[11px] font-semibold shadow-card backdrop-blur-sm ${
@@ -372,32 +676,42 @@ export function VenueMapExplorer({
 
         {/* ---- other people ---- */}
         {others.map(({ occupant, pos }) => {
-          const [sx, sy] = projection.project(pos.x, pos.y, 0)
+          const [sx, sy] = projection.project(pos.x, pos.y, zBase)
           return (
             <div
               key={occupant.user_id}
               className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform duration-100"
               style={{ left: sx, top: sy }}
             >
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ktip-cream bg-ktip-ocean-500 text-[9px] font-bold text-white shadow-card"
+              <DiamondAvatar
+                src={occupant.avatar_url}
+                name={occupant.display_name || 'Member'}
+                size={26}
                 title={occupant.display_name || 'Member'}
-              >
-                {initials(occupant.display_name)}
-              </span>
+                frameClassName="ring-1 ring-ktip-sand-200"
+              />
             </div>
           )
         })}
 
-        {/* ---- you ---- */}
+        {/* ---- you ----
+            Same diamond the rest of the app uses for a person, ringed in brand
+            green so it is findable in a crowd of identical shapes. */}
         {me && (
           <div
             className="absolute -translate-x-1/2 -translate-y-1/2"
-            style={{ left: projection.project(me.x, me.y, 0)[0], top: projection.project(me.x, me.y, 0)[1] }}
+            style={{
+              left: projection.project(me.x, me.y, zBase)[0],
+              top: projection.project(me.x, me.y, zBase)[1],
+            }}
           >
-            <span className="relative flex h-7 w-7 items-center justify-center rounded-full border-2 border-ktip-cream bg-ktip-tropical-500 text-[10px] font-bold text-ktip-ocean-700 shadow-card">
-              You
-            </span>
+            <DiamondAvatar
+              src={myAvatarUrl}
+              name={myName || 'You'}
+              size={34}
+              title={`${myName || 'You'} (you)`}
+              frameClassName="ring-2 ring-ktip-tropical-500 shadow-card"
+            />
           </div>
         )}
       </div>
@@ -407,9 +721,17 @@ export function VenueMapExplorer({
         <div
           className="pointer-events-none absolute z-10 max-w-56 -translate-x-1/2 rounded-xl border border-ktip-sand-200 bg-ktip-cream/95 p-2.5 text-xs shadow-card backdrop-blur"
           style={{
-            left: projection.project(hoveredGeo.centroid[0], hoveredGeo.centroid[1], hoveredGeo.height)[0],
+            left: projection.project(
+              hoveredGeo.centroid[0],
+              hoveredGeo.centroid[1],
+              hoveredGeo.floor * VENUE_MAP.LEVEL_H * stack + hoveredGeo.height
+            )[0],
             top:
-              projection.project(hoveredGeo.centroid[0], hoveredGeo.centroid[1], hoveredGeo.height)[1] + 14,
+              projection.project(
+                hoveredGeo.centroid[0],
+                hoveredGeo.centroid[1],
+                hoveredGeo.floor * VENUE_MAP.LEVEL_H * stack + hoveredGeo.height
+              )[1] + 14,
           }}
         >
           <p className="font-semibold text-ktip-sand-900">{hoveredRoom.name}</p>
@@ -431,6 +753,50 @@ export function VenueMapExplorer({
         </div>
       )}
 
+      {/* ---- view toggles ----
+          Plan view for judging distance, 2.5D for reading the place, and — in a
+          building with more than one level — Stack to lift them apart. Both
+          transitions are eased, not cut. */}
+      <div className="absolute right-3 top-3 flex items-center gap-1.5">
+        <div className="flex overflow-hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 backdrop-blur">
+          {([['2D', false], ['2.5D', true]] as Array<[string, boolean]>).map(([label, on]) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setIso(on)}
+              aria-pressed={iso === on}
+              className={`px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors ${
+                iso === on
+                  ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                  : 'text-ktip-sand-500 hover:text-ktip-sand-700'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {iso && config.floors.length > 1 && (
+          <div className="flex overflow-hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 backdrop-blur">
+            {([['Floor', false], ['Stack', true]] as Array<[string, boolean]>).map(([label, on]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setStacked(on)}
+                aria-pressed={stacked === on}
+                className={`px-2.5 py-1 font-mono text-[11px] font-semibold transition-colors ${
+                  stacked === on
+                    ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
+                    : 'text-ktip-sand-500 hover:text-ktip-sand-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ---- floors ---- */}
       {config.floors.length > 1 && (
         <div className="absolute left-3 top-3 flex flex-col gap-1">
@@ -438,13 +804,7 @@ export function VenueMapExplorer({
             <button
               key={f.key}
               type="button"
-              onClick={() => {
-                setFloor(i)
-                const landing = spawnPoint(config, geometry, i)
-                posRef.current = landing
-                targetRef.current = null
-                onPositionChange({ ...landing, f: i })
-              }}
+              onClick={() => goToFloor(i)}
               aria-pressed={i === floor}
               className={`flex items-center gap-2 rounded-lg border px-2.5 py-1 text-xs font-semibold backdrop-blur transition-colors ${
                 i === floor
@@ -460,7 +820,36 @@ export function VenueMapExplorer({
       )}
 
       {/* ---- standing-in prompt ---- */}
-      {standingRoom && phase === 'idle' && (
+      {/* ---- stairs ----
+          Standing on the block offers the levels either side of this one. The
+          floor chips do the same thing; this is the version you find by
+          walking, which is the point of drawing stairs at all. */}
+      {onStairs && phase === 'idle' && config.floors.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+          {floor + 1 < config.floors.length && (
+            <button
+              type="button"
+              onClick={() => goToFloor(floor + 1, true)}
+              className="flex items-center gap-1.5 rounded-full border border-ktip-sand-200 bg-ktip-cream/95 px-3.5 py-2 text-sm font-semibold text-ktip-sand-800 shadow-card backdrop-blur transition-transform hover:-translate-y-0.5"
+            >
+              <ArrowUp size={15} aria-hidden="true" />
+              {config.floors[floor + 1].name}
+            </button>
+          )}
+          {floor > 0 && (
+            <button
+              type="button"
+              onClick={() => goToFloor(floor - 1, true)}
+              className="flex items-center gap-1.5 rounded-full border border-ktip-sand-200 bg-ktip-cream/95 px-3.5 py-2 text-sm font-semibold text-ktip-sand-800 shadow-card backdrop-blur transition-transform hover:-translate-y-0.5"
+            >
+              <ArrowDown size={15} aria-hidden="true" />
+              {config.floors[floor - 1].name}
+            </button>
+          )}
+        </div>
+      )}
+
+      {standingRoom && standingIn && !onStairs && phase === 'idle' && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
           <button
             type="button"
@@ -469,7 +858,14 @@ export function VenueMapExplorer({
               beginEntry(standingRoom)
             }}
             disabled={!canEnterRoom(standingRoom, myRole)}
-            className="flex items-center gap-2 rounded-full border border-ktip-ocean-300 bg-ktip-ocean-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition-transform hover:-translate-y-0.5 disabled:opacity-50 dark:bg-ktip-ocean-200 dark:text-ktip-ocean-900"
+            // Wears the room's own colour: the button and the walls you are
+            // standing between should not disagree about which room this is.
+            style={{
+              background: standingIn.color,
+              color: contrastInk(standingIn.color),
+              borderColor: standingIn.color,
+            }}
+            className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-card transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
             <DoorOpen size={15} aria-hidden="true" />
             Enter {standingRoom.name}
@@ -489,18 +885,13 @@ export function VenueMapExplorer({
         style={{ opacity: veil * 0.92, transition: 'opacity 80ms linear' }}
         aria-hidden={veil < 0.02}
       >
-        {veil > 0.35 && enteringRoomId && (
+        {veil > 0.35 && enteringRoomId && phase === 'zooming' && (
           <p className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center font-display text-lg font-bold text-white">
             Entering {roomsById.get(enteringRoomId)?.name}…
           </p>
         )}
       </div>
+      </div>
     </div>
   )
-}
-
-function initials(name: string | null): string {
-  if (!name) return '?'
-  const parts = name.trim().split(/\s+/).slice(0, 2)
-  return parts.map((p) => p[0]?.toUpperCase() || '').join('') || '?'
 }

@@ -484,6 +484,12 @@ export interface VenueRoom {
   wall_height: number
   /** Venue roles allowed in. Empty = everyone; enforced by enter_venue_room(). */
   allowed_roles: VenueRole[]
+  /**
+   * Panels the room page renders (091), as [{id, enabled, order, config}].
+   * Empty = the default set for this `kind`. Parsed by src/lib/venue-room-sections.ts;
+   * left as unknown here because an id this build does not know is legal on the wire.
+   */
+  sections: unknown[]
   capacity: number | null
   audio_mode: VenueAudioMode
   max_publishers: number

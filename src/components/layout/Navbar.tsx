@@ -195,6 +195,22 @@ export function Navbar() {
   const anyMenuOpen = mobileMenuOpen || userMenuOpen || notifOpen || openDropdownId !== null
   const hidden = navHidden && !anyMenuOpen
 
+  /**
+   * Publish where the bar's bottom edge actually is.
+   *
+   * A surface that sticks *to the navbar* — the venue's own top bar is the one
+   * that does — cannot read `--nav-h`, because that is the bar's height whether
+   * or not the bar is on screen. When it slides away, anything holding that
+   * offset is left floating in the middle of the page.
+   */
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty('--nav-offset', hidden ? '0px' : 'var(--nav-h)')
+    return () => {
+      root.style.removeProperty('--nav-offset')
+    }
+  }, [hidden])
+
   // Notifications
   const { notifications, unreadCount, refetch: refetchNotifications } = useNotifications(auth.user?.id)
   const { markRead } = useMarkNotificationRead()

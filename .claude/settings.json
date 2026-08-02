@@ -33,7 +33,17 @@
       "Bash(node -e ' *)",
       "Bash(curl -s \"http://localhost:5199/src/pages/discover/DiscoverPage.tsx\" -o /tmp/dp2.js -w \"hmr module: %{http_code}\\\\n\")",
       "Read(//tmp/**)",
-      "Bash(python \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/cf4e714f-be20-4abc-aaa3-820ef424ef00/scratchpad/repair.py\")"
+      "Bash(python \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/cf4e714f-be20-4abc-aaa3-820ef424ef00/scratchpad/repair.py\")",
+      "Bash(awk 'NR==1{min=$1} {max=$1} END{print \"067 sort_order min:\",min,\" max:\",max,\" count:\",NR}')",
+      "Bash(grep -c \"^DO \\\\$\\\\$\" supabase/migrations/088_more_achievements.sql)",
+      "Bash(grep -c \"^END \\\\$\\\\$;\" supabase/migrations/088_more_achievements.sql)",
+      "PowerShell(node -e \"const p=require\\('./node_modules/react-router/package.json'\\); console.log\\(p.version\\); console.log\\(JSON.stringify\\(p.exports,null,1\\)\\)\")",
+      "PowerShell(npx vitest run src/lib/venue-presence.test.ts 2>&1)",
+      "PowerShell(npx vitest run src/lib/venue-map.test.ts 2>&1)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.app.json; \"tsc: $LASTEXITCODE\"; npx eslint src/lib/venue-map.ts src/lib/venue-room-presets.ts src/hooks/useVenueMap.ts src/hooks/useVenuePresence.ts src/components/venue/map src/pages/events/EventVenueSetupPage.tsx src/pages/events/EventVenuePage.tsx src/pages/events/CreateEventPage.tsx src/pages/admin/events/AdminEventVenueTab.tsx 2>&1 | Select-Object -Last 30)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.app.json; \"tsc: $LASTEXITCODE\"; npx vitest run src/lib 2>&1 | Select-Object -Last 6)",
+      "PowerShell(npx vite build 2>&1)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.app.json; \"tsc: $LASTEXITCODE\"; npx vitest run src/lib 2>&1 | Select-Object -Last 5)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

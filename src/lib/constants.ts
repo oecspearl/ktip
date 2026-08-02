@@ -792,6 +792,14 @@ export const VENUE_AVAILABILITY_PILL_COLORS: Record<string, string> = {
   offline: 'bg-ktip-sand-50 text-ktip-sand-500 border-ktip-sand-200',
 }
 
+// Short form, for a badge. The editor's dropdown spells out the consequence
+// ("Moderated — hosts grant the mic"); a room page only has to name the policy.
+export const VENUE_AUDIO_MODE_LABELS: Record<string, string> = {
+  open: 'Open mics',
+  moderated: 'Moderated',
+  listen_only: 'Listen only',
+}
+
 export const VENUE_ROLE_LABELS: Record<string, string> = {
   participant: 'Participant',
   mentor: 'Mentor',

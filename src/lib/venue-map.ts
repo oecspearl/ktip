@@ -32,10 +32,43 @@ export const VENUE_MAP = {
 
 export type MapCell = [number, number]
 
+/** Which edge of the grid an entrance sits on. */
+export type FloorSide = 'n' | 's' | 'e' | 'w'
+
+/**
+ * The way into a floor.
+ *
+ * One per floor, on the perimeter — not one per room. `at` is the index along
+ * that edge of the first of the two cells the opening spans, so a door is
+ * described the same way whichever edge it is on.
+ */
+export interface FloorDoor {
+  side: FloorSide
+  at: number
+}
+
+/** How many cells wide an entrance is. Two reads as a doorway, one as a crack. */
+export const DOOR_WIDTH = 2
+
 export interface VenueMapFloor {
   /** Stable slug. Rooms reference floors by index, so this is for display. */
   key: string
   name: string
+  /** Entrance for this floor. Absent on venues drawn before doors existed. */
+  door?: FloorDoor
+}
+
+/**
+ * The stair block, shared by every floor.
+ *
+ * One rectangle, not one per level: stairs that do not line up are not stairs,
+ * and storing them once is what makes that impossible to get wrong.
+ */
+export interface VenueStairs {
+  x: number
+  y: number
+  w: number
+  h: number
 }
 
 export interface VenueMapConfig {
@@ -43,13 +76,14 @@ export interface VenueMapConfig {
   cols: number
   rows: number
   floors: VenueMapFloor[]
+  stairs?: VenueStairs
 }
 
 export const DEFAULT_MAP_CONFIG: VenueMapConfig = {
   v: 1,
   cols: VENUE_MAP.COLS,
   rows: VENUE_MAP.ROWS,
-  floors: [{ key: 'ground', name: 'Ground floor' }],
+  floors: [{ key: 'ground', name: 'Ground floor', door: { side: 's', at: 13 } }],
 }
 
 /**
@@ -110,10 +144,18 @@ export function parseCells(raw: unknown): MapCell[] {
   if (!Array.isArray(raw)) return []
   const out: MapCell[] = []
   const seen = new Set<string>()
+  const coord = (value: unknown): number => {
+    // Number(null) is 0 and Number(true) is 1, which would silently invent a
+    // cell at the origin out of junk. Only a number or a numeric string counts.
+    if (typeof value === 'number') return value
+    if (typeof value === 'string' && value.trim() !== '') return Number(value)
+    return NaN
+  }
+
   for (const pair of raw) {
     if (!Array.isArray(pair) || pair.length < 2) continue
-    const x = Math.trunc(Number(pair[0]))
-    const y = Math.trunc(Number(pair[1]))
+    const x = Math.trunc(coord(pair[0]))
+    const y = Math.trunc(coord(pair[1]))
     if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0) continue
     const k = cellKey(x, y)
     if (seen.has(k)) continue
@@ -127,13 +169,154 @@ export function parseMapConfig(raw: unknown): VenueMapConfig {
   const obj = (raw || {}) as Partial<VenueMapConfig>
   const cols = clampInt(obj.cols, 8, 64, VENUE_MAP.COLS)
   const rows = clampInt(obj.rows, 8, 64, VENUE_MAP.ROWS)
-  const floors = Array.isArray(obj.floors) && obj.floors.length
-    ? obj.floors.slice(0, VENUE_MAP.MAX_FLOORS).map((f, i) => ({
-        key: typeof f?.key === 'string' && f.key ? f.key : `floor-${i}`,
-        name: typeof f?.name === 'string' && f.name ? f.name : floorLabel(i),
-      }))
-    : DEFAULT_MAP_CONFIG.floors
-  return { v: 1, cols, rows, floors }
+  const floors =
+    Array.isArray(obj.floors) && obj.floors.length
+      ? obj.floors.slice(0, VENUE_MAP.MAX_FLOORS).map((f, i) => ({
+          key: typeof f?.key === 'string' && f.key ? f.key : `floor-${i}`,
+          name: typeof f?.name === 'string' && f.name ? f.name : floorLabel(i),
+          // A venue drawn before doors existed gets one rather than none: a
+          // floor with no way in is not a floor.
+          door: parseDoor(f?.door, { cols, rows }),
+        }))
+      : DEFAULT_MAP_CONFIG.floors.map((f) => ({ ...f, door: defaultDoor({ cols, rows }) }))
+
+  return { v: 1, cols, rows, floors, stairs: parseStairs(obj.stairs, cols, rows) }
+}
+
+/** A door off the wire. Anything unusable falls back to the default entrance. */
+export function parseDoor(raw: unknown, cfg: Pick<VenueMapConfig, 'cols' | 'rows'>): FloorDoor {
+  const d = raw as Partial<FloorDoor> | null | undefined
+  const side: FloorSide =
+    d?.side === 'n' || d?.side === 's' || d?.side === 'e' || d?.side === 'w' ? d.side : 's'
+  const span = side === 'n' || side === 's' ? cfg.cols : cfg.rows
+  const at = Math.trunc(Number(d?.at))
+  if (!Number.isFinite(at)) return defaultDoor(cfg)
+  return { side, at: Math.max(0, Math.min(span - DOOR_WIDTH, at)) }
+}
+
+function parseStairs(
+  raw: unknown,
+  cols: number,
+  rows: number
+): VenueStairs | undefined {
+  const s = raw as Partial<VenueStairs> | null | undefined
+  if (!s || typeof s !== 'object') return undefined
+  const w = clampInt(s.w, 1, 6, 2)
+  const h = clampInt(s.h, 1, 6, 2)
+  const x = clampInt(s.x, 0, Math.max(0, cols - w), 0)
+  const y = clampInt(s.y, 0, Math.max(0, rows - h), 0)
+  return { x, y, w, h }
+}
+
+/** The centre of the south edge — the way a building faces the street. */
+export function defaultDoor(cfg: Pick<VenueMapConfig, 'cols' | 'rows'>): FloorDoor {
+  return { side: 's', at: Math.max(0, Math.floor(cfg.cols / 2) - 1) }
+}
+
+/**
+ * A free 2×2 for the stairs, checked against every floor.
+ *
+ * Against *every* floor because the block is shared: a spot that is clear on
+ * the ground floor but under a room on Level 2 is not a place stairs can go.
+ */
+export function defaultStairs(
+  cfg: VenueMapConfig,
+  geometry: Record<string, RoomGeometry<any>>
+): VenueStairs {
+  const taken = new Set<string>()
+  for (const g of Object.values(geometry)) {
+    for (const [x, y] of g.cells) taken.add(cellKey(x, y))
+  }
+
+  const free = (x: number, y: number, w: number, h: number) => {
+    for (let dy = 0; dy < h; dy++)
+      for (let dx = 0; dx < w; dx++) {
+        if (!inBounds(cfg, x + dx, y + dy)) return false
+        if (taken.has(cellKey(x + dx, y + dy))) return false
+      }
+    return true
+  }
+
+  // Walk in from the far corner: stairs belong against a wall, not mid-floor.
+  for (let ring = 0; ring < Math.max(cfg.cols, cfg.rows); ring++) {
+    for (const [x, y] of [
+      [cfg.cols - 2 - ring, cfg.rows - 2 - ring],
+      [ring, cfg.rows - 2 - ring],
+      [cfg.cols - 2 - ring, ring],
+      [ring, ring],
+    ] as MapCell[]) {
+      if (free(x, y, 2, 2)) return { x, y, w: 2, h: 2 }
+    }
+  }
+  return { x: Math.max(0, cfg.cols - 2), y: Math.max(0, cfg.rows - 2), w: 2, h: 2 }
+}
+
+/** The perimeter cells an entrance spans. */
+export function doorCells(cfg: VenueMapConfig, door: FloorDoor): MapCell[] {
+  const out: MapCell[] = []
+  for (let i = 0; i < DOOR_WIDTH; i++) {
+    const at = door.at + i
+    if (door.side === 'n') out.push([at, 0])
+    else if (door.side === 's') out.push([at, cfg.rows - 1])
+    else if (door.side === 'w') out.push([0, at])
+    else out.push([cfg.cols - 1, at])
+  }
+  return out.filter(([x, y]) => inBounds(cfg, x, y))
+}
+
+/**
+ * Where someone stands when they come through the door.
+ *
+ * Dead centre of the doorway cell — the same 0.5 the gateway's pillars and
+ * portal stand on. Anywhere else and the avatar reads as standing beside its
+ * own entrance, which is obvious the moment the map tips into 2.5D.
+ */
+export function doorAnchor(cfg: VenueMapConfig, door: FloorDoor): { x: number; y: number } {
+  const mid = door.at + DOOR_WIDTH / 2
+  if (door.side === 'n') return { x: mid, y: 0.5 }
+  if (door.side === 's') return { x: mid, y: cfg.rows - 0.5 }
+  if (door.side === 'w') return { x: 0.5, y: mid }
+  return { x: cfg.cols - 0.5, y: mid }
+}
+
+export function stairsCells(stairs: VenueStairs): MapCell[] {
+  return rectCells(stairs.x, stairs.y, stairs.x + stairs.w - 1, stairs.y + stairs.h - 1)
+}
+
+/** True when a walker is standing on the stair block. */
+export function isOnStairs(
+  stairs: VenueStairs | undefined,
+  pos: { x: number; y: number } | null
+): boolean {
+  if (!stairs || !pos) return false
+  return (
+    pos.x >= stairs.x && pos.x < stairs.x + stairs.w && pos.y >= stairs.y && pos.y < stairs.y + stairs.h
+  )
+}
+
+/** The stair block's middle, for landing on after a level change. */
+export function stairsCentre(stairs: VenueStairs): { x: number; y: number } {
+  return { x: stairs.x + stairs.w / 2, y: stairs.y + stairs.h / 2 }
+}
+
+/**
+ * How solid a floor is drawn while the view is moving between two of them.
+ *
+ * One function so the editor and the attendee map fade identically: at mix 0
+ * the `from` floor is the solid one, at mix 1 the `to` floor is, and in between
+ * both are partly there — which is what makes a floor change read as a move
+ * rather than a cut.
+ */
+export function floorAlpha(
+  level: number,
+  from: number,
+  to: number,
+  mix: number,
+  ghost = 0.14
+): number {
+  const at = (active: number) => (level === active ? 1 : ghost)
+  const t = Math.max(0, Math.min(1, mix))
+  return at(from) * (1 - t) + at(to) * t
 }
 
 export function floorLabel(index: number): string {
@@ -400,6 +583,50 @@ export function roomAt<T extends PlacedRoom>(
   return null
 }
 
+/**
+ * Give un-placed rooms a place.
+ *
+ * A venue authored before 089 — or seeded from the room list rather than drawn
+ * — has rooms with no cells, and a map with nothing on it is worse than no map.
+ * So the rooms are packed into the grid in `sort_order`, which produces a
+ * plain-but-correct building the host can then drag into shape.
+ *
+ * Rooms that *are* placed are returned untouched: this only ever fills gaps.
+ */
+export function autoLayout<T extends PlacedRoom>(rooms: T[], cfg: VenueMapConfig): T[] {
+  const placed = rooms.filter((r) => parseCells(r.cells).length > 0)
+  const loose = rooms.filter((r) => parseCells(r.cells).length === 0)
+  if (!loose.length) return rooms
+
+  const taken = new Set<string>()
+  for (const room of placed) {
+    if ((room.floor ?? 0) !== 0) continue
+    for (const [x, y] of parseCells(room.cells)) taken.add(cellKey(x, y))
+  }
+
+  // Three across, sized to fit the grid with a one-cell street between rooms.
+  const perRow = 3
+  const cellW = Math.max(3, Math.floor((cfg.cols - (perRow + 1)) / perRow))
+  const cellH = Math.max(3, Math.floor((cfg.rows - 3) / 2))
+
+  const out = [...placed]
+  loose.forEach((room, i) => {
+    const col = i % perRow
+    const row = Math.floor(i / perRow)
+    const x0 = 1 + col * (cellW + 1)
+    const y0 = 1 + row * (cellH + 1)
+    const cells = rectCells(x0, y0, x0 + cellW - 1, y0 + cellH - 1).filter(
+      ([x, y]) => inBounds(cfg, x, y) && !taken.has(cellKey(x, y))
+    )
+    for (const [x, y] of cells) taken.add(cellKey(x, y))
+    // A room that fell off the bottom of the grid stays unplaced rather than
+    // being crushed into a sliver — it shows up under "Not on the map".
+    out.push(cells.length >= 4 ? ({ ...room, cells, floor: 0 } as T) : room)
+  })
+
+  return out
+}
+
 // ---------------------------------------------------------------------------
 // projection
 // ---------------------------------------------------------------------------
@@ -544,6 +771,27 @@ export function spawnPoint(
     }
   }
   return best ? { x: best.x, y: best.y } : { x: cx, y: cy }
+}
+
+/**
+ * Where someone appears on a floor: just inside its door.
+ *
+ * Arriving at the entrance is the whole point of having one. If a room has been
+ * drawn over the doorway the walker would spawn inside it and be offered a room
+ * they never chose, so that case falls back to the open-floor spawn.
+ */
+export function spawnAtDoor(
+  cfg: VenueMapConfig,
+  geometry: Record<string, RoomGeometry<any>>,
+  floor: number
+): { x: number; y: number } {
+  const door = cfg.floors[floor]?.door
+  if (!door) return spawnPoint(cfg, geometry, floor)
+
+  const anchor = clampToFloor(cfg, doorAnchor(cfg, door))
+  const owners = cellOwners(geometry, floor)
+  if (!owners.has(cellKey(Math.floor(anchor.x), Math.floor(anchor.y)))) return anchor
+  return spawnPoint(cfg, geometry, floor)
 }
 
 /** Keep a walker on the floor slab. Rooms are enterable, so they do not block. */

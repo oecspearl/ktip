@@ -181,6 +181,16 @@
     50% { opacity: 0.5; }
   }
 
+  /* Venue room reactions. Runs once and the element is unmounted after; the
+     forwards fill stops it flickering back to the bottom on the last frame. */
+  --animate-float-up: floatUp 4s ease-out forwards;
+
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(0.7); opacity: 0; }
+    12% { transform: translateY(-4px) scale(1); opacity: 1; }
+    100% { transform: translateY(-90px) scale(1.1); opacity: 0; }
+  }
+
   /* Partner logo marquee — track holds two copies of the row, so sliding from
      -50% to 0 scrolls rightward and loops seamlessly */
   --animate-marquee-right: marqueeRight 35s linear infinite;
@@ -429,6 +439,13 @@ html.dark {
        pt-[var(--nav-h)] to clear it, top-[var(--nav-h)] to stick below it.
        Tracks the logo, which is w-10 h-10 below lg and w-14 h-14 at lg+. */
     --nav-h: 4.5rem;
+
+    /* How far down the navbar's bottom edge currently sits.
+       Same as --nav-h while the bar is showing, 0 once it has auto-hidden on
+       scroll. Navbar writes it; anything that sticks *to the bar* (rather than
+       merely below where it would be) reads it, so the two move together
+       instead of one chasing the other. */
+    --nav-offset: var(--nav-h);
   }
 
   @media (min-width: 64rem) {
@@ -648,6 +665,34 @@ html.dark {
   animation: nowPulse 2.4s ease-in-out infinite;
 }
 
+/* Venue map: the entrance portal (src/components/venue/map/VenueMapStage.tsx).
+   The rings live inside a matrix that maps a unit square onto the doorway, so
+   `transform-box: fill-box` is load-bearing — without it the rotation origin is
+   the SVG's own coordinate system and the rings swing off across the floor. */
+@keyframes venuePortalSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes venuePortalPulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 0.9; transform: scale(1.12); }
+}
+.venue-portal-spin,
+.venue-portal-spin-rev,
+.venue-portal-pulse {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.venue-portal-spin {
+  animation: venuePortalSpin 7s linear infinite;
+}
+.venue-portal-spin-rev {
+  animation: venuePortalSpin 4.5s linear infinite reverse;
+}
+.venue-portal-pulse {
+  animation: venuePortalPulse 2.8s ease-in-out infinite;
+}
+
 /* Dropdowns / popovers: enter AND exit. Transition-driven rather than a
    @keyframes — a keyframe cannot run backwards, which is why the old
    animate-scale-in panels vanished with a hard cut. Pair with an origin-*
@@ -748,7 +793,12 @@ html.dark {
   .animate-scale-in,
   .animate-fade-in,
   .animate-slide-up,
-  .animate-slide-in-right {
+  .animate-slide-in-right,
+  /* The portal still reads as a portal standing still — it is rings and a
+     glow, not motion carrying the meaning. */
+  .venue-portal-spin,
+  .venue-portal-spin-rev,
+  .venue-portal-pulse {
     animation: none;
   }
 

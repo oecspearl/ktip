@@ -22,3 +22,12 @@ export function venuePath(event: Sluggable): string {
 export function venueRoomPath(event: Sluggable, roomKey: string): string {
   return `${venuePath(event)}/room/${roomKey}`
 }
+
+/**
+ * Where a host builds the venue (089). Sits under the venue rather than under
+ * /admin because it is step two of creating a hackathon, and the person who
+ * just filled in the form is not thinking about an admin console.
+ */
+export function venueSetupPath(event: Sluggable): string {
+  return `${venuePath(event)}/setup`
+}

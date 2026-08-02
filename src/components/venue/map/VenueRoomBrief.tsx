@@ -1,0 +1,133 @@
+import { DoorOpen, Lock, Mic, MicOff, Radio, Users } from 'lucide-react'
+import { colorForRoom, contrastInk } from '../../../lib/venue-map'
+import { venueRoomIcon } from '../../../lib/category-icons'
+import { VENUE_ROLE_LABELS, VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
+import { DiamondAvatar } from '../../ui/DiamondAvatar'
+import type { VenueOccupant, VenueRoom } from '../../../types'
+
+interface VenueRoomBriefProps {
+  room: VenueRoom
+  /** Live headcount for this room. */
+  here: number
+  occupants: VenueOccupant[]
+  canEnter: boolean
+  onEnter: () => void
+}
+
+const AUDIO_COPY: Record<string, { label: string; icon: typeof Mic }> = {
+  open: { label: 'Anyone can speak', icon: Mic },
+  moderated: { label: 'Hosts grant the mic', icon: Radio },
+  listen_only: { label: 'Listen only — no mics', icon: MicOff },
+}
+
+/**
+ * What you are standing in front of.
+ *
+ * Shown while a member is inside a room's walls but has not entered it. Its
+ * whole job is to answer the questions asked in a doorway — who is in there,
+ * is there space, am I allowed, and will I be able to talk — before the
+ * decision rather than after it.
+ */
+export function VenueRoomBrief({ room, here, occupants, canEnter, onEnter }: VenueRoomBriefProps) {
+  const color = colorForRoom(room)
+  const KindIcon = venueRoomIcon(room.kind)
+  const audio = AUDIO_COPY[room.audio_mode] || AUDIO_COPY.open
+  const AudioIcon = audio.icon
+  const full = room.capacity != null && here >= room.capacity
+  const roles = room.allowed_roles || []
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card">
+      <div
+        className="flex items-center gap-2 px-4 py-2.5"
+        style={{ background: color, color: contrastInk(color) }}
+      >
+        <KindIcon size={14} aria-hidden="true" />
+        <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
+          You are at
+        </span>
+        <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider opacity-80">
+          {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
+        </span>
+      </div>
+
+      <div className="p-4">
+        <h3 className="font-display text-base font-bold text-ktip-sand-900">{room.name}</h3>
+        {room.description && (
+          <p className="mt-1 text-xs leading-relaxed text-ktip-sand-600">{room.description}</p>
+        )}
+
+        <dl className="mt-3 space-y-1.5 text-xs">
+          <div className="flex items-center gap-2 text-ktip-sand-700">
+            <Users size={13} className="shrink-0 text-ktip-sand-400" aria-hidden="true" />
+            <dt className="sr-only">People here</dt>
+            <dd>
+              {here} {here === 1 ? 'person' : 'people'} inside
+              {room.capacity != null && (
+                <span className="text-ktip-sand-500"> · room for {room.capacity}</span>
+              )}
+            </dd>
+          </div>
+
+          <div className="flex items-center gap-2 text-ktip-sand-700">
+            <AudioIcon size={13} className="shrink-0 text-ktip-sand-400" aria-hidden="true" />
+            <dt className="sr-only">Audio</dt>
+            <dd>{audio.label}</dd>
+          </div>
+
+          {roles.length > 0 && (
+            <div className="flex items-center gap-2 text-ktip-sand-700">
+              <Lock size={13} className="shrink-0 text-ktip-sand-400" aria-hidden="true" />
+              <dt className="sr-only">Who can enter</dt>
+              <dd>{roles.map((r) => VENUE_ROLE_LABELS[r] || r).join(', ')} only</dd>
+            </div>
+          )}
+
+          {room.recording_enabled && (
+            <div className="flex items-center gap-2 font-medium text-ktip-sun-800">
+              <Radio size={13} className="shrink-0" aria-hidden="true" />
+              <dt className="sr-only">Recording</dt>
+              <dd>This room is recorded</dd>
+            </div>
+          )}
+        </dl>
+
+        {occupants.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {occupants.slice(0, 6).map((o) => (
+              <DiamondAvatar
+                key={o.user_id}
+                src={o.avatar_url}
+                name={o.display_name || 'Member'}
+                size={26}
+                title={o.display_name || 'Member'}
+              />
+            ))}
+            {occupants.length > 6 && (
+              <span className="font-mono text-[10px] text-ktip-sand-500">
+                +{occupants.length - 6}
+              </span>
+            )}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={onEnter}
+          disabled={!canEnter || full}
+          style={canEnter && !full ? { background: color, color: contrastInk(color) } : undefined}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:bg-ktip-sand-100 disabled:text-ktip-sand-500"
+        >
+          <DoorOpen size={15} aria-hidden="true" />
+          {!room.is_open
+            ? 'Closed right now'
+            : !canEnter
+              ? 'Not open to your role'
+              : full
+                ? 'Full'
+                : `Enter ${room.name}`}
+        </button>
+      </div>
+    </div>
+  )
+}
