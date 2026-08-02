@@ -3,7 +3,6 @@ import { DoorOpen, Lock, Move, Users } from 'lucide-react'
 import { VenueMapStage } from './VenueMapStage'
 import { useAnimatedValue, useElementSize } from './useAnimatedValue'
 import {
-  VENUE_MAP,
   buildGeometry,
   clampToFloor,
   floorBadge,
