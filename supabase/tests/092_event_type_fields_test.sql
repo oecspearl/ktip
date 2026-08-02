@@ -15,7 +15,9 @@
 --   3. team_size_max below team_size_min is rejected at the database,
 --      because the form is not the only thing that writes events.
 --
--- Requires 002 and 092 to be applied first.
+-- Requires 002 and 092 to be applied first. Run it as a role that can
+-- write auth.users (the SQL editor's default is fine) — profiles.id is a
+-- FK to that table, so the fixtures cannot exist without it.
 -- ============================================================
 
 BEGIN;
@@ -30,6 +32,25 @@ DECLARE
   v_failed  BOOLEAN;
   v_message TEXT;
 BEGIN
+  -- profiles.id is a FK to auth.users (000), so the users have to exist before
+  -- the profiles do. Inserting here also fires on_auth_user_created (091),
+  -- which creates the profile row itself — the UPSERT below only sets the
+  -- roles that trigger cannot know about. Everything is rolled back at the end,
+  -- so nothing is left in the auth schema.
+  INSERT INTO auth.users (
+    id, instance_id, aud, role, email,
+    encrypted_password, email_confirmed_at, created_at, updated_at,
+    raw_app_meta_data, raw_user_meta_data
+  )
+  VALUES
+    (v_host, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+     'host-092@ktip.test', '', NOW(), NOW(), NOW(),
+     '{}'::JSONB, jsonb_build_object('display_name', 'Host 092', 'country', 'Saint Lucia')),
+    (v_person, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+     'person-092@ktip.test', '', NOW(), NOW(), NOW(),
+     '{}'::JSONB, jsonb_build_object('display_name', 'Person 092', 'country', 'Saint Lucia'))
+  ON CONFLICT (id) DO NOTHING;
+
   INSERT INTO profiles (id, display_name, roles, country)
   VALUES (v_host,   'Host 092',   ARRAY['oecs'], 'Saint Lucia'),
          (v_person, 'Person 092', ARRAY[]::TEXT[], 'Saint Lucia')
