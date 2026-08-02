@@ -190,17 +190,29 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const roles = useMemo(() => expandRoles(profile?.roles), [profile?.roles])
 
+  const activeRole = (profile?.active_role as RoleSlug | null) ?? null
+
   // Falls back to the compiled defaults until the RPC resolves, so the first
   // paint after sign-in does not flash an empty navigation.
-  const permissions = useMemo(
-    () => (permissionData ? new Set(permissionData) : defaultPermissionsFor(profile?.roles)),
-    [permissionData, profile?.roles]
-  )
+  //
+  // The fallback narrows to the active context the same way get_my_permissions()
+  // does (migration 099), or the bar would show the union of every held role for
+  // the length of one round trip and then visibly shed half of it. Intersected
+  // with the full held set rather than computed from the active role alone: that
+  // is what keeps the safeguard denials — which are a property of everything the
+  // account is, not of the hat it is currently wearing — from being switched off
+  // by choosing a context that never had them.
+  const permissions = useMemo(() => {
+    if (permissionData) return new Set(permissionData)
+    const held = defaultPermissionsFor(profile?.roles)
+    if (!activeRole || !roles.includes(activeRole)) return held
+    const scoped = defaultPermissionsFor([activeRole])
+    return new Set([...held].filter((key) => scoped.has(key)))
+  }, [permissionData, profile?.roles, activeRole, roles])
 
   const can = useCallback((permission: PermissionKey) => permissions.has(permission), [permissions])
 
   const isAdmin = roles.includes('super_admin')
-  const activeRole = (profile?.active_role as RoleSlug | null) ?? null
 
   // If profile fetch fails with an auth error, the session is corrupt — force clear it.
   useEffect(() => {
