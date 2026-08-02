@@ -35,7 +35,7 @@ export function HelpCategoryNav({
 
   return (
     <div className="w-full lg:w-64 shrink-0">
-      <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 lg:sticky lg:top-[calc(var(--nav-h)+1.5rem)] lg:max-h-[calc(100vh-var(--nav-h)-3.5rem)] lg:overflow-y-auto">
+      <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 lg:sticky lg:top-[calc(var(--nav-h)+1.5rem)] lg:max-h-[calc(100svh-var(--nav-h)-3.5rem)] lg:overflow-y-auto">
         <p className="hidden lg:block px-3 pt-2 pb-1 font-display font-bold text-ktip-sand-900 uppercase text-xs tracking-wider">
           Categories
         </p>

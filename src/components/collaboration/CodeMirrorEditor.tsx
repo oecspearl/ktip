@@ -65,7 +65,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 100svh;
 }
 `,
   json: `{
@@ -180,7 +180,7 @@ export function CodeMirrorEditor({
         theme={darkMode ? oneDark : 'light'}
         extensions={extensions}
         readOnly={readOnly}
-        height={height || 'calc(100vh - 16rem)'}
+        height={height || 'calc(100svh - 16rem)'}
       />
     </div>
   )

@@ -117,7 +117,7 @@ export function CalendarDayPanel({
   return (
     <div
       data-tutorial={dataTutorial}
-      className="bg-ktip-cream rounded-cal border border-ktip-line shadow-card p-4 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+      className="bg-ktip-cream rounded-cal border border-ktip-line shadow-card p-4 sm:p-5 lg:sticky lg:top-24 lg:max-h-[calc(100svh-8rem)] lg:overflow-y-auto"
     >
       <p className="text-xs font-bold uppercase tracking-wider text-ktip-ocean-600">
         {format(date, 'EEEE')}

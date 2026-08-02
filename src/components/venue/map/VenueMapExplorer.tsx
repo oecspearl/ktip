@@ -55,6 +55,12 @@ interface VenueMapExplorerProps {
   onPositionChange: (pos: VenuePosition | null) => void
   /** The room being stood in without entering, for the side panel. */
   onStandingRoomChange?: (roomId: string | null) => void
+  /**
+   * The room being pointed at, on the map or in the rail. Clicking a room walks
+   * you into it, so hovering is the only way to read one you are not standing
+   * in — the side panel shows this in place of the room underfoot.
+   */
+  onPreviewRoomChange?: (roomId: string | null) => void
   onEnter: (room: VenueRoom) => void
 }
 
@@ -108,6 +114,7 @@ export function VenueMapExplorer({
   focusRoom,
   onPositionChange,
   onStandingRoomChange,
+  onPreviewRoomChange,
   onEnter,
 }: VenueMapExplorerProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -116,6 +123,9 @@ export function VenueMapExplorer({
   const [floor, setFloor] = useState(0)
   const [zoom, setZoom] = useState({ k: 1, px: 0, py: 0 })
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  /** Hover in the rooms rail. Kept apart from the map's own hover so pointing
+      at a row can also light that room up on the floor. */
+  const [railHoverId, setRailHoverId] = useState<string | null>(null)
   // View controls. 2D is the honest plan view — easier to judge distance in,
   // and the one people fall back to when the walls get in the way. Stack lifts
   // the floors apart so a multi-level venue reads as a building.
@@ -503,6 +513,19 @@ export function VenueMapExplorer({
     onStandingRoomChange?.(standingId)
   }, [standingId, onStandingRoomChange])
 
+  /** The rail wins over the map: it is the deliberate pointer of the two. */
+  const activeHoverId = railHoverId ?? hoveredId
+
+  // Pointing at a room reads it in the side panel. Suppressed once an entry is
+  // under way — the camera is already committed, and suppressed for the room
+  // underfoot so standing there keeps saying "you are at" rather than flicking
+  // to a preview of where you already are.
+  const previewId =
+    phase === 'idle' && activeHoverId && activeHoverId !== standingId ? activeHoverId : null
+  useEffect(() => {
+    onPreviewRoomChange?.(previewId)
+  }, [previewId, onPreviewRoomChange])
+
   // A room picked from the sidebar list behaves exactly like clicking it on the
   // map. The nonce is what makes picking the same room twice work.
   const lastFocusRef = useRef(0)
@@ -548,7 +571,7 @@ export function VenueMapExplorer({
     // what is left of the viewport under the page chrome — and stops there, so
     // the first scroll reaches the footer rather than more map. Clamped at both
     // ends: never so short it cannot be walked, never taller than the screen.
-    <div className="flex h-[clamp(26rem,calc(100vh-var(--nav-h)-19rem),46rem)] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card md:h-[clamp(28rem,calc(100vh-var(--nav-h)-16rem),46rem)]">
+    <div className="flex h-[clamp(26rem,calc(100svh-var(--nav-h)-19rem),46rem)] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card md:h-[clamp(28rem,calc(100svh-var(--nav-h)-16rem),46rem)]">
       {/* ---- rooms rail ----
           Attached to the map rather than floating beside it, and collapsible,
           because on a small screen the list and the floor are competing for the
@@ -613,6 +636,7 @@ export function VenueMapExplorer({
                 const geo = geometry[room.id]
                 if (geo) approach(room, geo, geo.floor)
               }}
+              onHover={(room) => setRailHoverId(room?.id ?? null)}
             />
           </div>
         )}
@@ -635,7 +659,7 @@ export function VenueMapExplorer({
           floorAlpha={alphaFor}
           tilt={tilt}
           stack={stack}
-          hoveredId={hoveredId}
+          hoveredId={activeHoverId}
           selectedId={enteringRoomId}
           mutedIds={mutedIds}
           showGrid
@@ -666,7 +690,9 @@ export function VenueMapExplorer({
                   className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border bg-ktip-cream/90 px-2.5 py-1 text-[11px] font-semibold shadow-card backdrop-blur-sm ${
                     locked ? 'text-ktip-sand-500' : 'text-ktip-sand-900'
                   }`}
-                  style={{ borderColor: hoveredId === room.id ? g.color : 'var(--color-ktip-sand-200)' }}
+                  style={{
+                    borderColor: activeHoverId === room.id ? g.color : 'var(--color-ktip-sand-200)',
+                  }}
                 >
                   {locked ? (
                     <Lock size={10} aria-hidden="true" />

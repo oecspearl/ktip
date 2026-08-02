@@ -884,7 +884,7 @@ export default function DiscoverPage() {
               spills BOTH ways, and the top half bled up under the fixed navbar. */}
           <div
             ref={fitBoxRef}
-            className="flex-1 min-h-0 w-full flex flex-col justify-center items-start md:items-end overflow-hidden"
+            className="flex-1 min-h-0 w-full flex flex-col justify-center items-end overflow-hidden"
           >
             {/* shrink-0 is for the measurement, not the look: as a flex child
                 this would otherwise be squeezed to the box height and report a
@@ -892,7 +892,7 @@ export default function DiscoverPage() {
                 taller than the box the content actually wants to be. */}
             <div
               ref={fitContentRef}
-              className="w-full shrink-0 flex flex-col items-start md:items-end"
+              className="w-full shrink-0 flex flex-col items-end"
               style={{ fontSize: `${fit}em` }}
             >
             {active ? (
@@ -900,7 +900,7 @@ export default function DiscoverPage() {
                 key={`content-${mode}-${active.id}`}
                 // text-shadow inherits, so one class here covers the eyebrow,
                 // headline, description and the whole DetailsList subtree
-                className="max-w-[42em] animate-reveal-up text-left md:text-right text-shadow-hero"
+                className="max-w-[42em] animate-reveal-up text-right text-shadow-hero"
               >
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {activeMode.label} &middot; {active.meta}
@@ -931,7 +931,7 @@ export default function DiscoverPage() {
                     0,1,0). Deliberately `1em`, not `0.875em`, on the children:
                     the list nests, and a fractional em there would compound. */}
                 {active.details && active.details.length > 0 && (
-                  <div className="mt-[1.25em] max-w-[36em] md:ml-auto inline-block text-left">
+                  <div className="mt-[1.25em] max-w-[36em] ml-auto inline-block text-left">
                     <div className="text-[0.9375em] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.067em] [&_li+li]:mt-[0.533em]">
                       <DetailsList details={active.details} tone="dark" compact max={3} />
                     </div>
@@ -939,7 +939,7 @@ export default function DiscoverPage() {
                 )}
               </div>
             ) : (
-              <div className="max-w-[42em] animate-fade-in text-left md:text-right text-shadow-hero">
+              <div className="max-w-[42em] animate-fade-in text-right text-shadow-hero">
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {activeMode.label}
                 </p>

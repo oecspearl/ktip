@@ -382,7 +382,7 @@ export default function CodeEditorPage() {
           readOnly={!canEdit}
           onValueChange={handleCodeChange}
           onMetricsChange={setMetrics}
-          height={hasPanel ? 'calc(100vh - 32rem)' : 'calc(100vh - 22rem)'}
+          height={hasPanel ? 'calc(100svh - 32rem)' : 'calc(100svh - 22rem)'}
         />
 
         {outputVisible && language === 'javascript' && (

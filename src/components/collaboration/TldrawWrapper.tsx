@@ -70,7 +70,7 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-16rem)] min-h-[420px] overflow-hidden bg-ktip-cream">
+    <div className="relative w-full h-[calc(100svh-16rem)] min-h-[420px] overflow-hidden bg-ktip-cream">
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-ktip-cream z-10">
           <div className="text-center">

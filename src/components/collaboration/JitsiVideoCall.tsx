@@ -158,7 +158,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
             src={jitsiUrl}
             allow="camera; microphone; display-capture; screen-wake-lock; autoplay; clipboard-write"
             className="w-full block"
-            style={{ height: 'calc(100vh - 22rem)', border: 'none' }}
+            style={{ height: 'calc(100svh - 22rem)', border: 'none' }}
             title={`Video call: ${roomName}`}
           />
         </div>
