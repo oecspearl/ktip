@@ -106,7 +106,7 @@ export default function CreateProjectPage() {
 
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
+        <div className="max-w-page-tight mx-auto px-4">
           <form data-tutorial="project-form" onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">

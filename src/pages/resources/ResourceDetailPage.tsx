@@ -33,8 +33,8 @@ export default function ResourceDetailPage() {
   if (loading || !resource) {
     if (loading) {
       return (
-        <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
-          <div className="max-w-[calc(50vw+36rem)] mx-auto">
+        <div className="w-full max-w-page mx-auto px-4 py-8">
+          <div className="max-w-page-mid mx-auto">
             {/* Hero-band stand-in: brand-navy like PageHero, not a gray that
                 inverts to white in dark mode */}
             <div className="bg-brand-navy min-h-[180px] rounded-none animate-pulse" />
@@ -49,7 +49,7 @@ export default function ResourceDetailPage() {
       )
     }
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <BookOpen size={32} className="text-ktip-sand-400" />
         </div>
@@ -97,7 +97,7 @@ export default function ResourceDetailPage() {
 
       {/* === Two-Column Content Area === */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-page-mid mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">

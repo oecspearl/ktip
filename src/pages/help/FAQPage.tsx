@@ -37,7 +37,7 @@ export default function FAQPage() {
         ]}
       />
 
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-10">
+      <div className="w-full max-w-page mx-auto px-4 py-10">
         {/* Search */}
         <div className="relative mb-8">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />

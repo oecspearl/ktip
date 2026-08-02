@@ -100,7 +100,7 @@ export default function SnippetsListPage() {
       />
 
       <div className="bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {/* One-time offer to rescue pre-database local drafts */}
           {drafts.length > 0 && (
             <div className="flex items-start gap-3 mb-6 p-4 rounded-xl border border-ktip-sun-300 bg-ktip-sun-50">

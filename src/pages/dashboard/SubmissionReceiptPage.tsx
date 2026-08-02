@@ -25,7 +25,7 @@ export default function SubmissionReceiptPage() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
         <p className="mt-4 text-ktip-sand-600">Loading your copy...</p>
       </div>

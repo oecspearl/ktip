@@ -25,7 +25,7 @@ export default function BoardPage() {
 
   if (boardLoading) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-8">
+      <div className="w-full max-w-page mx-auto px-4 py-8">
         {/* Stands in for the hero band, so it matches PageHero's brand-navy
             base rather than a gray that inverts to white in dark mode */}
         <div className="bg-brand-navy min-h-[180px] rounded-none animate-pulse-soft mb-0" />
@@ -41,7 +41,7 @@ export default function BoardPage() {
 
   if (!board) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <MessageCircle size={32} className="text-ktip-sand-400" />
         </div>
@@ -75,7 +75,7 @@ export default function BoardPage() {
 
       {/* === Content Area === */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+28rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {/* Search + new post */}
           <div
             data-tutorial="board-toolbar"

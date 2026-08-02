@@ -110,7 +110,7 @@ export default function EventSetupPage() {
       />
 
       <div className="bg-ktip-sand-50 py-12">
-        <div className="mx-auto max-w-[calc(50vw+24rem)] px-4">
+        <div className="mx-auto max-w-page-tight px-4">
           <Stepper steps={setupSteps(event.event_type)} currentStep={1} className="mb-8" />
 
           {/* Step one, not the event page: this is the same "Event details"

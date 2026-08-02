@@ -57,7 +57,7 @@ export default function CollaborateHubPage() {
 
       {/* Tools Grid */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           <div
             data-tutorial="collaborate-tools"
             className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr stagger-children"

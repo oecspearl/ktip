@@ -194,7 +194,7 @@ export default function EditEventPage() {
 
   if (eventLoading || !event) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
         <p className="mt-4 text-ktip-sand-600">Loading event...</p>
       </div>
@@ -203,7 +203,7 @@ export default function EditEventPage() {
 
   if (!isOwner) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
           Not authorized
         </h2>
@@ -230,7 +230,7 @@ export default function EditEventPage() {
 
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
+        <div className="max-w-page-tight mx-auto px-4">
           <form data-tutorial="event-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div

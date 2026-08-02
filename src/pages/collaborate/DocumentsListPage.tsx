@@ -45,7 +45,7 @@ export default function DocumentsListPage() {
 
       {/* Content */}
       <div className="bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {/* Actions Bar */}
           <div data-tutorial="collab-list-actions" className="flex items-center gap-3 mb-6">
             <div className="relative flex-1">

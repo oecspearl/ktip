@@ -430,7 +430,7 @@ export default function CreateEventPage() {
 
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
+        <div className="max-w-page-tight mx-auto px-4">
           {/* Only drawn once the type is known and that type has a step two —
               a one-step stepper is just a label. */}
           {blueprint.setup && typeChosen && (

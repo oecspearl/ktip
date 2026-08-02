@@ -49,7 +49,7 @@ export default function SettingsPage() {
       />
 
       {/* Content */}
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 pt-8 pb-8">
+      <div className="w-full max-w-page mx-auto px-4 pt-8 pb-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Tabs */}
           <div className="lg:w-64 shrink-0">

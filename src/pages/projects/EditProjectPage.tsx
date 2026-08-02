@@ -113,7 +113,7 @@ export default function EditProjectPage() {
 
   if (projectLoading || !project) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
         <p className="mt-4 text-ktip-sand-600">Loading project...</p>
       </div>
@@ -122,7 +122,7 @@ export default function EditProjectPage() {
 
   if (!canEdit) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
           Not authorized
         </h2>
@@ -149,7 +149,7 @@ export default function EditProjectPage() {
 
       {/* Form Area */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="max-w-[calc(50vw+24rem)] mx-auto px-4">
+        <div className="max-w-page-tight mx-auto px-4">
           <form data-tutorial="project-form" onSubmit={handleSubmit} className="space-y-6">
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">

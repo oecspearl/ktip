@@ -187,7 +187,7 @@ export default function VideoConferencePage() {
 
       {/* Content Section */}
       <div className="bg-ktip-sand-50 py-8">
-        <div className="max-w-[calc(50vw+32rem)] mx-auto px-4">
+        <div className="max-w-page-narrow mx-auto px-4">
           {/* Back to hub + cross-links */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 text-sm">
             <Link

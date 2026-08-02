@@ -95,7 +95,7 @@ export default function PostDetailPage() {
 
   if (postLoading) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-12 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
         <p className="mt-4 text-ktip-sand-600">Loading post...</p>
       </div>
@@ -104,7 +104,7 @@ export default function PostDetailPage() {
 
   if (!post) {
     return (
-      <div className="w-full max-w-[calc(50vw+48rem)] mx-auto px-4 py-16 text-center">
+      <div className="w-full max-w-page mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <FileText size={32} className="text-gray-400" />
         </div>
@@ -168,7 +168,7 @@ export default function PostDetailPage() {
 
       {/* === Two-Column Content Area === */}
       <div className="bg-ktip-sand-50 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[calc(50vw+36rem)] mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-page-mid mx-auto px-4">
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
