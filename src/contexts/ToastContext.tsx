@@ -83,7 +83,12 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
     <ToastContext.Provider value={value}>
       {children}
       {createPortal(
-        <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+        <div
+          // Hidden while a screenshot frame is grabbed (index.css,
+          // data-capturing) — a toast is app chrome, not part of the bug
+          data-capture-hide
+          className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none"
+        >
           {toasts.map((toast) => {
             const Icon = iconMap[toast.type]
             return (

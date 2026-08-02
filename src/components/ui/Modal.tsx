@@ -88,6 +88,11 @@ export function Modal({ open, onClose, title, description, children, size, class
 
   return createPortal(
     <div
+      // Taken off screen while a screenshot frame is grabbed — see the
+      // data-capturing rule in index.css. Backdrop included: the dimming and
+      // the blur are as much a part of "the app on top of the page" as the
+      // dialog is.
+      data-capture-hide
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}

@@ -291,8 +291,9 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               Capture screen
             </Button>
             <p className="mt-1.5 text-xs text-ktip-sand-500">
-              Your browser will ask which window to share — pick this tab. You can circle the problem
-              before it is sent.
+              Your browser will ask which window to share — pick this tab. This form disappears for
+              the shot, so you get the page, not the form. You can circle the problem before it is
+              sent.
             </p>
           </div>
         ) : (
