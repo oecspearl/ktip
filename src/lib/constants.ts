@@ -1,5 +1,7 @@
 // Application Constants
 
+import { ROLE_DEFINITIONS } from './permissions'
+
 export const APP_NAME = 'KTIP'
 export const APP_FULL_NAME = 'Knowledge, Technology and Innovation Platform'
 export const APP_DESCRIPTION = 'Caribbean innovation and collaboration platform'
@@ -15,7 +17,12 @@ export const USER_ROLES = {
   OECS: 'oecs',
 } as const
 
-export const ROLE_LABELS: Record<string, string> = {
+// The seven original roles keep their hand-written labels — they are the ones
+// already on live profile cards, and "Student/Youth Innovator" is the platform's
+// own language for the audience rather than a description of the permission.
+// The six added by 063 fall back to the catalog, so a member holding one is
+// never rendered as a bare slug.
+const LEGACY_ROLE_LABELS: Record<string, string> = {
   student: 'Student/Youth Innovator',
   mentor: 'Mentor',
   investor: 'Investor/Funding Agency',
@@ -24,6 +31,25 @@ export const ROLE_LABELS: Record<string, string> = {
   faculty: 'Faculty/Researcher',
   oecs: 'OECS Admin',
 }
+
+export const ROLE_LABELS: Record<string, string> = {
+  ...Object.fromEntries(ROLE_DEFINITIONS.map((r) => [r.slug, r.label])),
+  ...LEGACY_ROLE_LABELS,
+}
+
+/**
+ * Roles worth offering as a filter on the public member directory.
+ *
+ * Admin-tier slugs are excluded deliberately. Letting a visitor list the
+ * platform's administrators is a reconnaissance affordance, not a browsing one,
+ * and nobody looking for a collaborator filters by "Safety Admin".
+ */
+export const DIRECTORY_ROLE_LABELS: Record<string, string> = Object.fromEntries(
+  ROLE_DEFINITIONS.filter((r) => r.tier !== 'admin').map((r) => [
+    r.slug,
+    ROLE_LABELS[r.slug] ?? r.label,
+  ])
+)
 
 export const ROLE_COLORS: Record<string, string> = {
   student: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
@@ -35,15 +61,35 @@ export const ROLE_COLORS: Record<string, string> = {
   oecs: 'bg-brand-navy text-white border-brand-navy',
 }
 
-// Roles a user can pick for themselves (excludes OECS admin)
+/**
+ * Roles offered on the "I am a..." grid at signup and onboarding.
+ *
+ * `requiresVerification` is the important column. Student and Faculty are NOT
+ * self-assignable: role_definitions marks them verification-gated, and the 063
+ * guard triggers enforce that — an INSERT silently strips them and an UPDATE
+ * raises. They stayed on this grid anyway, which meant anyone picking either
+ * one created an account that could never finish onboarding: stripped to no
+ * roles, bounced back here by ProtectedRoute, and rejected again on save.
+ *
+ * They are still offered, because "I am a student" is the truthful answer for
+ * a large part of the intended audience and hiding it would be worse. Picking
+ * one now routes into school verification instead of writing the role. See
+ * RolePicker and OnboardingPage.
+ */
 export const SELECTABLE_ROLES = [
-  { value: USER_ROLES.ENTREPRENEUR, label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations' },
-  { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects' },
-  { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia' },
-  { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators' },
-  { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects' },
-  { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators' },
+  { value: USER_ROLES.ENTREPRENEUR, label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations', requiresVerification: false },
+  { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects', requiresVerification: true },
+  { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia', requiresVerification: true },
+  { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators', requiresVerification: false },
+  { value: 'researcher', label: ROLE_LABELS.researcher, description: 'Publish research and collaborate on studies', requiresVerification: false },
+  { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects', requiresVerification: false },
+  { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators', requiresVerification: false },
 ] as const
+
+/** Slugs from SELECTABLE_ROLES that a school or chamber has to approve. */
+export const VERIFICATION_GATED_ROLES = new Set<string>(
+  SELECTABLE_ROLES.filter((r) => r.requiresVerification).map((r) => r.value)
+)
 
 // Project Phases
 export const PROJECT_PHASES = {
@@ -765,4 +811,15 @@ export const VENUE = {
   CLUSTER_VISIBLE: 4,
   /** Room chat page size. */
   MESSAGE_PAGE_SIZE: 50,
+  /**
+   * Walking map (089). Position updates ride broadcast, not presence track:
+   * tracking is a state replication and Supabase rate-limits it, while
+   * broadcast is a fire-and-forget datagram, which is exactly what a moving
+   * dot is. ~8/s is smooth once the receiver interpolates.
+   */
+  POS_BROADCAST_MS: 120,
+  /** A peer with no movement packet for this long stops being drawn walking. */
+  POS_STALE_MS: 15 * 1000,
+  /** Cells per second an avatar walks. */
+  WALK_SPEED: 6.5,
 } as const

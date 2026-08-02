@@ -24,35 +24,59 @@ import {
   FlaskConical,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { useAuth } from '../../contexts/AuthContext'
+import type { PermissionKey } from '../../types'
 
-const adminNavItems = [
+/**
+ * The admin sidebar.
+ *
+ * `requires` is what keeps this honest. AdminRoute admits anyone holding
+ * org:manage OR moderation:view, so a Safety Admin — whose whole remit is the
+ * moderation queue — was being shown all 22 entries, including Roles &
+ * Permissions and Partner API. The pages themselves were safe (RLS and the
+ * api/admin/* guards both refuse), but every one of them rendered as an empty
+ * screen or a 403, which reads as a broken console rather than a closed door.
+ *
+ * A super_admin holds every permission, so their sidebar is unchanged.
+ */
+const adminNavItems: {
+  href: string
+  label: string
+  icon: typeof LayoutDashboard
+  exact?: boolean
+  requires?: PermissionKey
+}[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/admin/events', label: 'Events', icon: Calendar },
-  { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/roles', label: 'Roles & Permissions', icon: ShieldCheck },
-  { href: '/admin/achievements', label: 'Achievements', icon: Trophy },
-  { href: '/admin/moderation', label: 'Moderation', icon: ShieldAlert },
-  { href: '/admin/institutions', label: 'Institutions', icon: GraduationCap },
-  { href: '/admin/chamber', label: 'Chamber Review', icon: Landmark },
-  { href: '/admin/grants', label: 'Grants', icon: DollarSign },
-  { href: '/admin/forums', label: 'Forums', icon: MessageSquare },
-  { href: '/admin/resources', label: 'Resources', icon: BookOpen },
-  { href: '/admin/grievances', label: 'Grievances', icon: Flag },
-  { href: '/admin/feedback', label: 'Feedback', icon: MessageCircle },
-  { href: '/admin/verification', label: 'Verification', icon: BadgeCheck },
-  { href: '/admin/integrations', label: 'Integrations', icon: Puzzle },
-  { href: '/admin/employers', label: 'Employers', icon: Building2 },
-  { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck },
+  { href: '/admin/projects', label: 'Projects', icon: FolderKanban, requires: 'org:manage' },
+  { href: '/admin/events', label: 'Events', icon: Calendar, requires: 'org:manage' },
+  { href: '/admin/users', label: 'Users', icon: Users, requires: 'members:manage' },
+  { href: '/admin/roles', label: 'Roles & Permissions', icon: ShieldCheck, requires: 'role:manage' },
+  { href: '/admin/achievements', label: 'Achievements', icon: Trophy, requires: 'org:manage' },
+  { href: '/admin/moderation', label: 'Moderation', icon: ShieldAlert, requires: 'moderation:view' },
+  { href: '/admin/institutions', label: 'Institutions', icon: GraduationCap, requires: 'institution:verify' },
+  { href: '/admin/chamber', label: 'Chamber Review', icon: Landmark, requires: 'sme:verify' },
+  { href: '/admin/grants', label: 'Grants', icon: DollarSign, requires: 'org:manage' },
+  { href: '/admin/forums', label: 'Forums', icon: MessageSquare, requires: 'org:manage' },
+  { href: '/admin/resources', label: 'Resources', icon: BookOpen, requires: 'org:manage' },
+  // Grievances and moderation are the same job seen from two directions, so
+  // this is the one non-org:manage page a Safety Admin keeps.
+  { href: '/admin/grievances', label: 'Grievances', icon: Flag, requires: 'moderation:view' },
+  { href: '/admin/feedback', label: 'Feedback', icon: MessageCircle, requires: 'org:manage' },
+  { href: '/admin/verification', label: 'Verification', icon: BadgeCheck, requires: 'org:manage' },
+  { href: '/admin/integrations', label: 'Integrations', icon: Puzzle, requires: 'org:manage' },
+  { href: '/admin/employers', label: 'Employers', icon: Building2, requires: 'org:manage' },
+  { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound, requires: 'org:manage' },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, requires: 'org:manage' },
+  { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck, requires: 'org:manage' },
   // exact, or the simulator route below would light both entries up.
-  { href: '/admin/errors', label: 'Errors', icon: Bug, exact: true },
-  { href: '/admin/errors/simulate', label: 'Error Simulator', icon: FlaskConical },
+  { href: '/admin/errors', label: 'Errors', icon: Bug, exact: true, requires: 'org:manage' },
+  { href: '/admin/errors/simulate', label: 'Error Simulator', icon: FlaskConical, requires: 'org:manage' },
 ]
 
 export function AdminLayout() {
   const location = useLocation()
+  const auth = useAuth()
+  const navItems = adminNavItems.filter((item) => !item.requires || auth.can(item.requires))
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return location.pathname === href
@@ -68,7 +92,7 @@ export function AdminLayout() {
             {/* Both navs carry the anchor; only one has a non-zero rect at any
                 width, and findVisible picks that one. */}
             <nav data-tutorial="admin-sidebar" className="space-y-1">
-              {adminNavItems.map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
@@ -93,7 +117,7 @@ export function AdminLayout() {
             data-tutorial="admin-sidebar"
             className="flex gap-1 min-w-max bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2"
           >
-            {adminNavItems.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}

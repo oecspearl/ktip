@@ -113,17 +113,39 @@ export function useAdminUserActions() {
     return `Bearer ${session.access_token}`
   }
 
+  // Goes through set_user_roles() rather than a bare UPDATE on profiles.
+  //
+  // Two reasons. The RPC is the one code path 063 built for role assignment,
+  // so every change lands in the audit trail — a direct write is invisible.
+  // And a direct write is filtered by RLS: when it matches no rows PostgREST
+  // returns success with no error, so the console reported "saved" and nothing
+  // changed. That is exactly what happened to any admin holding super_admin
+  // without the legacy oecs slug, because the policy tested the slug.
+  //
+  // The RPC returns {ok:false, reason} instead of raising, so the reason has to
+  // be turned into an error here or the same silent-success returns.
   const updateRolesMutation = useMutation({
     mutationFn: async ({ userId, roles }: { userId: string; roles: UserRole[] }) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ roles } as any)
-        .eq('id', userId)
+      const { data, error } = await (supabase as any).rpc('set_user_roles', {
+        p_user: userId,
+        p_roles: roles,
+      })
 
       if (error) throw error
+      if (data && data.ok === false) {
+        const messages: Record<string, string> = {
+          forbidden: 'You do not have permission to change roles.',
+          unknown_role: `Unknown role: ${(data.roles || []).join(', ')}`,
+        }
+        throw new Error(messages[data.reason] || 'Could not update roles.')
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+      // active_role may have been cleared server-side if the user lost the role
+      // they were operating as, and permissions are derived from roles.
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      queryClient.invalidateQueries({ queryKey: ['permissions'] })
     },
   })
 

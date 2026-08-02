@@ -46,12 +46,20 @@ import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
 import type { SearchRow } from '../../lib/site-search'
+import type { PermissionKey } from '../../types'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface DropdownItem {
   name: string
   href: string
   icon: ComponentType<{ size?: number; className?: string }>
   description: string
+  /**
+   * Hide this item unless the viewer can act on it. Absent means "always
+   * shown". Signed-out visitors are handled by the caller, not here: a CTA
+   * that routes to login is doing its job.
+   */
+  requires?: PermissionKey
 }
 
 interface NavDropdown {
@@ -92,7 +100,7 @@ const navDropdowns: NavDropdown[] = [
       { name: 'All Events', href: '/events', icon: Calendar, description: 'Hackathons, workshops, meetups and conferences' },
       { name: 'Virtual Hackathon', href: '/hackathons', icon: Trophy, description: 'Enter the live venue, find a team and build' },
       { name: 'Event Calendar', href: '/events?view=calendar', icon: CalendarDays, description: 'Month-by-month view of what is scheduled' },
-      { name: 'Create an Event', href: '/events/new', icon: CalendarPlus, description: 'Publish an event and open registrations' },
+      { name: 'Create an Event', href: '/events/new', icon: CalendarPlus, description: 'Publish an event and open registrations', requires: 'event:create' },
       { name: 'My Events', href: '/dashboard/events', icon: LayoutDashboard, description: 'Events you organise or registered for' },
     ],
   },
@@ -168,6 +176,21 @@ export function Navbar() {
 
   // Organisation-tier accounts see a business profile where a person sees a CV.
   const isOrgAccount = isOrganizationAccount(auth.profile?.roles)
+
+  // Mirrors AdminRoute exactly. Kept as one value so the desktop bar and the
+  // mobile menu can never drift apart.
+  const canSeeAdmin = auth.can('org:manage') || auth.can('moderation:view')
+
+  /**
+   * Dropdown entries this viewer can act on.
+   *
+   * Signed-out visitors keep every CTA — those route to login, which is the
+   * point. An entry is hidden only for a signed-in member whose role cannot
+   * use it, where the link would dead-end at a denial. Same rule the
+   * "Become a Contributor" button already used for project:create.
+   */
+  const visibleItems = (dropdown: NavDropdown) =>
+    dropdown.items.filter((item) => !item.requires || !auth.user || auth.can(item.requires))
 
   const anyMenuOpen = mobileMenuOpen || userMenuOpen || notifOpen || openDropdownId !== null
   const hidden = navHidden && !anyMenuOpen
@@ -435,7 +458,7 @@ export function Navbar() {
                   role="menu"
                   className="absolute right-0 mt-2 w-64 origin-top-right bg-ktip-cream rounded-xl shadow-hard overflow-hidden z-50"
                 >
-                  {dropdown.items.map((item) => (
+                  {visibleItems(dropdown).map((item) => (
                     <FlowingMenuItem
                       key={item.name}
                       to={item.href}
@@ -474,8 +497,12 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* Admin link (OECS only) */}
-            {auth.profile?.roles?.includes('oecs') && (
+            {/* Admin link. Capability, not slug — this has to agree with
+                AdminRoute, which admits org:manage OR moderation:view. Testing
+                the legacy 'oecs' slug hid the link from every admin created
+                after 063, including safety admins, while leaving them able to
+                reach /admin by typing it. */}
+            {canSeeAdmin && (
               <Link
                 to="/admin"
                 className={cn(
@@ -691,17 +718,13 @@ export function Navbar() {
                       </p>
                     )}
                   </div>
-                  {auth.profile?.avatar_url ? (
-                    <img
-                      src={auth.profile.avatar_url}
-                      alt={auth.profile?.display_name || 'User'}
-                      className="w-10 h-10 rounded-full object-cover shadow-soft"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-ktip-ocean-600 to-ktip-tropical-700 rounded-full flex items-center justify-center text-white font-medium shadow-soft">
-                      {auth.profile?.display_name?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                  )}
+                  <DiamondAvatar
+                    src={auth.profile?.avatar_url}
+                    name={auth.profile?.display_name || 'User'}
+                    size={40}
+                    colorClass="bg-gradient-to-br from-ktip-ocean-600 to-ktip-tropical-700"
+                    frameClassName="shadow-soft"
+                  />
                 </button>
 
                 {/* User Dropdown Menu */}
@@ -934,7 +957,7 @@ export function Navbar() {
                       {dropdown.name}
                     </p>
                   </div>
-                  {dropdown.items.map((item) => (
+                  {visibleItems(dropdown).map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
@@ -971,8 +994,8 @@ export function Navbar() {
                 </Link>
               ))}
 
-              {/* Admin link (OECS only) */}
-              {auth.profile?.roles?.includes('oecs') && (
+              {/* Admin link — same capability test as the desktop bar above */}
+              {canSeeAdmin && (
                 <>
                   <hr className="my-2 border-white/10" />
                   <p className="px-4 py-1 text-xs font-semibold uppercase tracking-wider text-white/40">

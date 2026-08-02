@@ -23,16 +23,23 @@ troubleshooting table at the end covers the common causes.
 2. Open `supabase/migrations/063_rbac_permissions.sql`, copy the whole file, paste, Run.
 3. Do the same for `064_institutions_safeguarding_chamber.sql`.
 4. Do the same for `065_moderation.sql`.
+5. Do the same for `090_admin_capability_and_event_permission.sql`.
 
-> Order matters. 064 and 065 both use functions created in 063.
+> Order matters. 064 and 065 both use functions created in 063, and 090 uses
+> `is_platform_admin()` from 063 plus helpers defined as late as 085.
+>
+> 090 retires the literal `'oecs' = ANY(roles)` test that 55 policies still
+> carried, and adds the `event:create` permission. Run it against a database
+> that is already up to 087 — it rewrites policies by name, so applying it to a
+> partially-migrated database will silently skip whatever is not there yet.
 
-- [ ] All three ran with no errors
+- [ ] All four ran with no errors
 
 ### 0.2 Run them a second time
 
-Paste and run all three again, in the same order.
+Paste and run all four again, in the same order.
 
-- [ ] All three ran again with no errors
+- [ ] All four ran again with no errors
 
 > This is the point of "idempotent". If a re-run fails, something is wrong —
 > stop and fix it before continuing, because your production database will be
@@ -51,8 +58,8 @@ SELECT count(*) AS audit_rows FROM role_permission_events;
 
 Expected:
 - `roles` = **13**
-- `permissions` = **23**
-- `matrix_cells` = **276** (12 non-legacy roles × 23 permissions)
+- `permissions` = **24**
+- `matrix_cells` = **288** (12 non-legacy roles × 24 permissions)
 - `audit_rows` = **0** — seeding must not write audit entries
 
 - [ ] All four numbers match
@@ -1271,7 +1278,7 @@ Run all of this at once in the SQL editor:
 
 ```sql
 -- Every permission has a matrix row for every non-legacy role
-SELECT count(*) AS should_be_276 FROM role_permissions;
+SELECT count(*) AS should_be_288 FROM role_permissions;
 
 -- No orphaned matrix rows
 SELECT count(*) AS should_be_0 FROM role_permissions rp
@@ -1301,7 +1308,7 @@ SELECT count(*) AS role_events FROM role_permission_events;
 SELECT count(*) AS mod_log FROM moderation_log;
 ```
 
-- [ ] `should_be_276` = 276
+- [ ] `should_be_288` = 288
 - [ ] Every `should_be_0` = 0
 - [ ] `legacy_admins_ok` matches your number of old admin accounts
 

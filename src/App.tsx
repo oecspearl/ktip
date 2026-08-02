@@ -182,7 +182,16 @@ const router = createBrowserRouter([
                 ],
               },
               { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
-              { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
+              // Same treatment as /projects/new: migration 090 put an
+              // event:create check on the events INSERT policy, so the guard is
+              // here too rather than letting a role without it fill in the
+              // whole form and collect a 403 from RLS on submit.
+              {
+                element: <PermissionRoute require="event:create" />,
+                children: [
+                  { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
+                ],
+              },
               { path: '/events/:id/edit', lazy: lazyPage(() => import('./pages/events/EditEventPage')) },
               // Virtual Hackathon (migration 070). Absolute literal paths —
               // site-search.test.ts matches route paths literally, and only
@@ -276,8 +285,24 @@ const router = createBrowserRouter([
                   { path: '/admin/projects', lazy: lazyPage(() => import('./pages/admin/projects/AdminProjectsPage')) },
                   { path: '/admin/events', lazy: lazyPage(() => import('./pages/admin/events/AdminEventsPage')) },
                   { path: '/admin/events/:id', lazy: lazyPage(() => import('./pages/admin/events/AdminEventDetailPage')) },
-                  { path: '/admin/users', lazy: lazyPage(() => import('./pages/admin/users/AdminUsersPage')) },
-                  { path: '/admin/roles', lazy: lazyPage(() => import('./pages/admin/roles/AdminRolesPage')) },
+                  // AdminRoute admits org:manage OR moderation:view, which is
+                  // right for the console as a whole but too wide for these
+                  // three. The server already refuses a Safety Admin here —
+                  // api/admin/* checks members:manage and org:manage, and the
+                  // matrix is UPDATE-gated on role:manage — so this only turns
+                  // an empty page or a silent 403 into a stated reason.
+                  {
+                    element: <PermissionRoute require="members:manage" />,
+                    children: [
+                      { path: '/admin/users', lazy: lazyPage(() => import('./pages/admin/users/AdminUsersPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="role:manage" />,
+                    children: [
+                      { path: '/admin/roles', lazy: lazyPage(() => import('./pages/admin/roles/AdminRolesPage')) },
+                    ],
+                  },
                   { path: '/admin/achievements', lazy: lazyPage(() => import('./pages/admin/achievements/AdminAchievementsPage')) },
                   { path: '/admin/moderation', lazy: lazyPage(() => import('./pages/admin/moderation/AdminModerationPage')) },
                   { path: '/admin/institutions', lazy: lazyPage(() => import('./pages/admin/institutions/AdminInstitutionsPage')) },
@@ -290,7 +315,12 @@ const router = createBrowserRouter([
                   { path: '/admin/verification', lazy: lazyPage(() => import('./pages/admin/verification/AdminVerificationPage')) },
                   { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
                   { path: '/admin/employers', lazy: lazyPage(() => import('./pages/admin/employers/AdminEmployersPage')) },
-                  { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
+                  {
+                    element: <PermissionRoute require="org:manage" />,
+                    children: [
+                      { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
+                    ],
+                  },
                   { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
                   { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
                   { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },

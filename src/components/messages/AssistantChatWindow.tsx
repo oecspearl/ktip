@@ -20,7 +20,9 @@ export function AssistantChatWindow() {
     userId: auth.user?.id,
     userRole: auth.profile?.roles?.[0] ?? null,
     userName: auth.profile?.display_name ?? null,
-    isOecs: auth.profile?.roles?.includes('oecs') ?? false,
+    // Capability, not slug — otherwise the assistant refuses to mention admin
+    // pages to an admin created after 063. Matches AdminRoute.
+    isOecs: auth.can('org:manage') || auth.can('moderation:view'),
   })
 
   const [input, setInput] = useState('')

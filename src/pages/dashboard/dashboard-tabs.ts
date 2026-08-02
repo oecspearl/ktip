@@ -14,7 +14,7 @@ import {
   Trophy,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { INDIVIDUAL_ROLES, ORGANIZATION_ROLES } from '../../lib/permissions'
+import { INDIVIDUAL_ROLES, ORGANIZATION_ROLES, expandRoles } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 
 export interface DashboardTab {
@@ -77,7 +77,10 @@ export function visibleDashboardTabs(
   roles: UserRole[] | undefined,
   activeRole?: UserRole | null
 ): DashboardTab[] {
-  const held = roles || []
+  // Aliases resolved first, so a tab list can be written against the modern
+  // slug alone. The Admin entry below still names 'oecs' explicitly for the
+  // same reason 063 kept the slug alive, but new entries need not.
+  const held = expandRoles(roles)
   // Never widen: the context must be a role the account actually holds.
   const effective = activeRole && held.includes(activeRole) ? [activeRole] : held
   return DASHBOARD_TABS.filter((tab) => !tab.roles || tab.roles.some((r) => effective.includes(r)))

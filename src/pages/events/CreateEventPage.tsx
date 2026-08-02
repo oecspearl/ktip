@@ -60,7 +60,10 @@ export default function CreateEventPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
-  const isAdmin = auth.profile?.roles?.includes('oecs')
+  // Controls the draft/published selector. Capability, not slug: the literal
+  // 'oecs' test meant an admin created after 063 could not choose a status and
+  // silently published everything.
+  const isAdmin = auth.can('org:manage')
 
   // The old "sets a challenge" checkbox is gone — picking the Challenge event
   // type is what switches the brief on.

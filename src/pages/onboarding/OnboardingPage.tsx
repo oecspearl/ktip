@@ -8,19 +8,22 @@ import { Textarea } from '../../components/ui/Textarea'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
-import { User, CheckCircle, ArrowLeft, ArrowRight, Building2 } from 'lucide-react'
+import { User, CheckCircle, ArrowLeft, ArrowRight, Building2, Clock, GraduationCap } from 'lucide-react'
 import {
   APP_FULL_NAME,
   CARIBBEAN_COUNTRIES,
   SKILL_SUGGESTIONS,
   INTEREST_SUGGESTIONS,
   LIMITS,
+  VERIFICATION_GATED_ROLES,
 } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useRequestStudentVerification } from '../../hooks/useInstitutions'
 import type { UserRole } from '../../types'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 const STEPS = [
   { title: 'About You', caption: 'Almost there — set up your KTIP profile.' },
@@ -55,8 +58,14 @@ export default function OnboardingPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
   const [pending, setPending] = useState(false)
+  // Set once a verification-gated role has been queued with the school. The
+  // account genuinely has no role until an educator approves, so this replaces
+  // the wizard rather than navigating away — there is nowhere to navigate to.
+  const [awaitingSchool, setAwaitingSchool] = useState<string | null>(null)
   const prefilled = useRef(false)
   const submitted = useRef(false)
+
+  const { requestVerification } = useRequestStudentVerification()
 
   // Pre-fill from the OAuth-created profile once it loads
   useEffect(() => {
@@ -67,7 +76,13 @@ export default function OnboardingPage() {
     setIndustry(auth.profile.industry || '')
     setCountry(auth.profile.country || '')
     setBio(auth.profile.bio || '')
-  }, [auth.profile])
+    // Email signup already asked for a role. A verification-gated one never
+    // reaches profiles.roles — the insert guard strips it — but it is still on
+    // the auth user's metadata, so the answer is carried over rather than
+    // asking a student to pick twice.
+    const intended = auth.user?.user_metadata?.role
+    if (typeof intended === 'string' && intended) setSelectedRole(intended)
+  }, [auth.profile, auth.user])
 
   if (!auth.loading && !auth.user) {
     return <Navigate to="/login" replace />
@@ -97,13 +112,19 @@ export default function OnboardingPage() {
       setStep(1)
       return
     }
+
+    // Student and Faculty are granted by a school, never written from here.
+    // Sending them would raise in the 063 guard trigger and strand the account,
+    // so the profile is saved without a role and the school is asked instead.
+    const needsSchool = VERIFICATION_GATED_ROLES.has(selectedRole)
+
     setPending(true)
     setErrorMessage('')
     submitted.current = true
     try {
       await auth.updateProfile({
         display_name: displayName.trim(),
-        roles: [selectedRole as UserRole],
+        ...(needsSchool ? {} : { roles: [selectedRole as UserRole] }),
         organization: organization.trim() || null,
         industry: industry.trim() || null,
         country: country || null,
@@ -114,6 +135,20 @@ export default function OnboardingPage() {
           open_to: openTo,
         }),
       })
+
+      if (needsSchool) {
+        // Only students have a self-serve request: request_student_verification()
+        // matches the account's email domain against a verified institution.
+        // Faculty is assigned by an institution admin from their side, so there
+        // is nothing to call — we say so rather than pretending to queue it.
+        if (selectedRole === 'student') {
+          await requestVerification()
+        }
+        analytics.funnel('onboarding', 'verification_requested', { role: selectedRole })
+        setAwaitingSchool(selectedRole)
+        return
+      }
+
       analytics.conversion('onboarding_complete', { role: selectedRole })
       toast.success('Welcome to KTIP!')
       navigate('/', { replace: true })
@@ -123,6 +158,73 @@ export default function OnboardingPage() {
     } finally {
       setPending(false)
     }
+  }
+
+  /** Back out of the pending state to pick a role that needs no approval. */
+  const chooseDifferentRole = () => {
+    setAwaitingSchool(null)
+    setSelectedRole('')
+    setErrorMessage('')
+    submitted.current = false
+    setStep(1)
+  }
+
+  // Waiting on a school. Deliberately terminal rather than a redirect: the
+  // account holds no role yet, so ProtectedRoute would send it straight back
+  // here. Saying so plainly beats a redirect loop.
+  if (awaitingSchool) {
+    const isStudent = awaitingSchool === 'student'
+    return (
+      <AuthSplitShell
+        step={1}
+        steps={STEPS}
+        heading={isStudent ? 'Waiting on your school' : 'Your institution adds you'}
+        subheading={APP_FULL_NAME}
+        heroOffset={3}
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-xl border border-ktip-ocean-200 bg-ktip-ocean-50 px-4 py-3">
+            {isStudent ? (
+              <Clock size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+            ) : (
+              <GraduationCap size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+            )}
+            <div className="text-sm text-ktip-sand-700">
+              {isStudent ? (
+                <>
+                  <p className="font-medium text-ktip-sand-900">Your request has been sent.</p>
+                  <p className="mt-1">
+                    We matched <strong>{auth.user?.email}</strong> to your institution. An educator
+                    there approves it, and that approval is what turns on your student account.
+                    You will get an email when it happens.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-ktip-sand-900">
+                    Faculty accounts are set up by your institution.
+                  </p>
+                  <p className="mt-1">
+                    Ask the KTIP administrator at your school or university to add{' '}
+                    <strong>{auth.user?.email}</strong> as an educator. Once they do, your faculty
+                    account is ready.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          <p className="text-sm text-ktip-sand-600">
+            Your profile is saved either way. If you would rather start using KTIP now, pick a role
+            that needs no approval — you can still verify with your school later from Settings.
+          </p>
+
+          <Button type="button" variant="secondary" fullWidth onClick={chooseDifferentRole}>
+            Choose a different role
+          </Button>
+        </div>
+      </AuthSplitShell>
+    )
   }
 
   return (
@@ -142,18 +244,18 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="space-y-3">
             <div className="flex items-center gap-4">
-              {auth.profile?.avatar_url ? (
-                <img
-                  src={auth.profile.avatar_url}
-                  alt="Your avatar"
-                  referrerPolicy="no-referrer"
-                  className="w-14 h-14 rounded-full object-cover border-2 border-ktip-ocean-200"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-ktip-ocean-100 flex items-center justify-center">
-                  <User size={24} className="text-ktip-ocean-500" />
-                </div>
-              )}
+              <DiamondAvatar
+                src={auth.profile?.avatar_url}
+                name={auth.profile?.display_name || auth.user?.email || 'You'}
+                size={56}
+                colorClass="bg-ktip-ocean-100"
+                frameClassName="border-2 border-ktip-ocean-200"
+                icon={
+                  auth.profile?.display_name ? undefined : (
+                    <User size={20} className="text-ktip-ocean-500" />
+                  )
+                }
+              />
               <p className="text-sm text-ktip-sand-600">
                 Signed in as <strong className="text-ktip-sand-800">{auth.user?.email}</strong>.
                 We pre-filled your details from your account — review and finish up below.

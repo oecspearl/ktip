@@ -7,17 +7,23 @@ import { useConnectionCounts, useConnectionStatuses } from '../../hooks/useConne
 import { useAuth } from '../../contexts/AuthContext'
 import { useProfileStatsBatch } from '../../hooks/useProfileStats'
 import { usePublicEmployers } from '../../hooks/useEmployerProfile'
-import { Briefcase, Building2, Lock, Search, UserX, User, Users, Trophy } from 'lucide-react'
+import { Briefcase, Building2, Lock, Search, UserX, Users, Trophy } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
 import { BentoCard } from '../../components/ui/BentoCard'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
-import { CARIBBEAN_COUNTRIES, ROLE_LABELS, SKILL_SUGGESTIONS } from '../../lib/constants'
+import {
+  CARIBBEAN_COUNTRIES,
+  DIRECTORY_ROLE_LABELS,
+  ROLE_LABELS,
+  SKILL_SUGGESTIONS,
+} from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { debounce } from '../../lib/utils'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function DirectoryPage() {
   usePageTitle('Member Directory')
@@ -208,7 +214,8 @@ export default function DirectoryPage() {
               className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
               <option value="">All Roles</option>
-              {Object.entries(ROLE_LABELS).map(([value, label]) => (
+              {/* Non-admin roles only — see DIRECTORY_ROLE_LABELS. */}
+              {Object.entries(DIRECTORY_ROLE_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
               ))}
             </select>
@@ -346,17 +353,13 @@ export default function DirectoryPage() {
                     }
                     title={
                       <span className="flex items-center gap-3">
-                        {member.avatar_url ? (
-                          <img
-                            src={member.avatar_url!}
-                            alt=""
-                            loading="lazy" decoding="async" width={40} height={40} className="w-10 h-10 rounded-full object-cover ring-2 ring-white/60 shrink-0"
-                          />
-                        ) : (
-                          <span className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full ring-2 ring-white/60 flex items-center justify-center text-base font-bold text-white shrink-0">
-                            {member.display_name?.charAt(0).toUpperCase() || <User size={18} />}
-                          </span>
-                        )}
+                        <DiamondAvatar
+                          src={member.avatar_url}
+                          name={member.display_name || 'Member'}
+                          size={40}
+                          colorClass="bg-white/20 backdrop-blur-sm"
+                          frameClassName="ring-2 ring-white/60"
+                        />
                         <span className="truncate">{member.display_name || 'Anonymous'}</span>
                       </span>
                     }

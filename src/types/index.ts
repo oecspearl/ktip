@@ -45,6 +45,7 @@ export type PermissionKey =
   | 'grant:manage_funds'
   | 'project:create'
   | 'project:manage'
+  | 'event:create'
   | 'forum:post'
   | 'forum:comment'
   | 'mentorship:offer'
@@ -265,6 +266,16 @@ export interface Event extends Ranked {
    */
   has_venue: boolean
   venue_floorplan_url: string | null
+  /**
+   * Migration 089 — the drawn floorplan's grid and floor list. NULL means the
+   * host never drew one; an uploaded SVG (above) may still exist.
+   */
+  venue_map: {
+    v: 1
+    cols: number
+    rows: number
+    floors: { key: string; name: string }[]
+  } | null
   /** Non-organizers cannot enter outside this window. NULL = always open. */
   venue_opens_at: string | null
   venue_closes_at: string | null
@@ -439,6 +450,15 @@ export interface VenueRoom {
   description: string | null
   /** id attribute of a shape in the event's floorplan SVG. */
   svg_zone_id: string | null
+  /** Which floor of the drawn map this room sits on (089). */
+  floor: number
+  /** Grid cells the room covers, [[x,y], ...]. Empty = not on the drawn map. */
+  cells: [number, number][]
+  /** Hex from the venue palette. NULL falls back to a colour from `kind`. */
+  color: string | null
+  wall_height: number
+  /** Venue roles allowed in. Empty = everyone; enforced by enter_venue_room(). */
+  allowed_roles: VenueRole[]
   capacity: number | null
   audio_mode: VenueAudioMode
   max_publishers: number
@@ -487,12 +507,24 @@ export interface VenueRoomMessage {
 }
 
 /**
+ * Where a member is standing on the drawn map. Grid coordinates, fractional —
+ * a walker is between cells most of the time.
+ */
+export interface VenuePosition {
+  x: number
+  y: number
+  /** Floor index. Absent means the ground floor. */
+  f?: number
+}
+
+/**
  * What a client tracks on the `venue:{eventId}` presence channel.
  *
- * `pos` is reserved and always null in this version: the schema and the payload
- * both leave room for a walking map so adding one later is a client-only
- * change. `v` lets a mixed-version crowd degrade cleanly — a v1 reader ignores
- * fields it does not know.
+ * `pos` was reserved by 070 and is filled in by the walking map: it rides the
+ * tracked payload for the coarse position (so a late joiner paints everyone
+ * immediately) while the smooth motion goes over broadcast. `v` lets a
+ * mixed-version crowd degrade cleanly — a v1 reader ignores what it does not
+ * know, and a client with no map simply sends null.
  */
 export interface VenuePresencePayload {
   user_id: string
@@ -503,7 +535,7 @@ export interface VenuePresencePayload {
   status_note: string | null
   room_id: string | null
   team_id: string | null
-  pos: { x: number; y: number } | null
+  pos: VenuePosition | null
   v: 1
 }
 
@@ -517,6 +549,8 @@ export interface VenueOccupant {
   status_note: string | null
   room_id: string | null
   team_id: string | null
+  /** Last known map position, or null for a member who is not on the map. */
+  pos: VenuePosition | null
   /** False when derived from the DB mirror rather than a live presence entry. */
   is_live: boolean
 }

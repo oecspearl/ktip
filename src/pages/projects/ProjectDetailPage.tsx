@@ -36,6 +36,7 @@ import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { entityPath, memberPath } from '../../lib/slug'
+import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -53,7 +54,9 @@ export default function ProjectDetailPage() {
   const { deleteProject } = useDeleteProject()
 
   const isOwner = project?.owner_id === auth.user?.id
-  const isAdmin = auth.profile?.roles?.includes('oecs')
+  // Capability, not slug — an admin created after 063 holds super_admin
+  // without the legacy oecs slug and was being shown the member view.
+  const isAdmin = auth.can('org:manage')
   const myMembership = (members || []).find(
     (m) => m.user_id === auth.user?.id && m.status === 'accepted'
   )
@@ -422,9 +425,11 @@ export default function ProjectDetailPage() {
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Project Owner</h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4">Created by</p>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-lg font-medium text-ktip-ocean-700">
-                  {project.owner?.display_name?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                <DiamondAvatar
+                  src={project.owner?.avatar_url}
+                  name={project.owner?.display_name || 'Owner'}
+                  size={48}
+                />
                 <div>
                   {/* A real link to /user/:id, not just the drawer — the name has
                       to be shareable and open in a new tab like any profile. */}

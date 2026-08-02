@@ -27,8 +27,9 @@ import {
   COLLABORATION_LABELS,
   COLLAB_EXCLUSIVE_VALUE,
 } from '../../lib/constants'
-import { formatDate, getInitials, generateAvatarColor, cn } from '../../lib/utils'
+import { formatDate, cn } from '../../lib/utils'
 import { entityPath, memberPath } from '../../lib/slug'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 /** Squarer than the app default — the drawer reads as a document, not pills. */
 const CHIP = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border'
@@ -274,23 +275,14 @@ export function MemberPanel() {
             {/* relative lifts it over the cover — the cover is positioned, so a
                 static sibling would paint underneath it */}
             <aside className="relative px-6 pb-6 @[46rem]:border-r @[46rem]:border-ktip-sand-100">
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={displayName}
-                  loading="lazy" decoding="async" width={80} height={80} className="w-20 h-20 rounded-xl object-cover -mt-10 ring-4 ring-ktip-cream shadow-soft"
-                />
-              ) : (
-                <div
-                  className={cn(
-                    'w-20 h-20 rounded-xl -mt-10 ring-4 ring-ktip-cream shadow-soft',
-                    'flex items-center justify-center text-2xl font-bold text-white',
-                    profile ? generateAvatarColor(displayName) : 'bg-ktip-sand-300'
-                  )}
-                >
-                  {profile ? getInitials(displayName) : null}
-                </div>
-              )}
+              <DiamondAvatar
+                src={profile?.avatar_url}
+                name={profile ? displayName : ''}
+                size={80}
+                colorClass={profile ? undefined : 'bg-ktip-sand-300'}
+                className="-mt-10"
+                frameClassName="ring-4 ring-ktip-cream shadow-soft"
+              />
 
               {!profile ? (
                 <div className="space-y-2 mt-4">
@@ -354,8 +346,13 @@ export function MemberPanel() {
                     <div className="flex flex-wrap items-center gap-2 mt-5 pt-5 border-t border-ktip-sand-100">
                       <ConnectButton otherUserId={profile.id} size="sm" />
                       {/* A private member is unreachable until they accept —
-                          offering the button would only produce an RLS error. */}
-                      {canView && (
+                          offering the button would only produce an RLS error.
+                          Same reasoning for dm:initiate, which students never
+                          hold: 064 blocks the insert inside has_permission()
+                          before the matrix is read, so the button could only
+                          ever fail. See src/lib/venue-actions.ts, which makes
+                          the same call for the venue surfaces. */}
+                      {canView && auth.can('dm:initiate') && (
                         <Button
                           variant="outline"
                           size="sm"

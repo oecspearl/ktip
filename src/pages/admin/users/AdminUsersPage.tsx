@@ -6,6 +6,7 @@ import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { useAdminUsers, useAdminUserActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
 import { ROLE_LABELS, ROLE_COLORS } from '../../../lib/constants'
+import { ROLE_DEFINITIONS } from '../../../lib/permissions'
 import { debounce } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
 import type { Profile, UserRole } from '../../../types'
@@ -23,13 +24,21 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react'
+import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 
-const ALL_ROLES: UserRole[] = ['student', 'mentor', 'investor', 'entrepreneur', 'private_sector', 'oecs']
-
-const getInitials = (name: string | null) => {
-  if (!name) return '?'
-  return name.split(' ').map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
-}
+/**
+ * Every assignable role, in catalog order.
+ *
+ * This was a hand-written list of the six roles that existed before 063, which
+ * meant an admin could neither assign nor filter by super_admin, safety_admin,
+ * sme, educational_partner, chamber_admin or researcher — the console simply
+ * had no way to express them. Derived now, so a role added to the catalog shows
+ * up here without a second edit.
+ *
+ * Aliases are excluded: 'oecs' resolves to super_admin, and offering both would
+ * let an admin assign the same authority under two names.
+ */
+const ALL_ROLES: UserRole[] = ROLE_DEFINITIONS.filter((r) => !r.aliasOf).map((r) => r.slug)
 
 export default function AdminUsersPage() {
   const toast = useToast()
@@ -298,17 +307,11 @@ export default function AdminUsersPage() {
                     {/* User */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {user.avatar_url ? (
-                          <img
-                            src={user.avatar_url}
-                            alt={user.display_name || 'User'}
-                            loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-ktip-ocean-100 flex items-center justify-center text-xs font-semibold text-ktip-ocean-700">
-                            {getInitials(user.display_name)}
-                          </div>
-                        )}
+                        <DiamondAvatar
+                          src={user.avatar_url}
+                          name={user.display_name || 'User'}
+                          size={32}
+                        />
                         <div>
                           <p className="font-medium text-gray-900 text-sm">
                             {user.display_name || 'Unnamed User'}

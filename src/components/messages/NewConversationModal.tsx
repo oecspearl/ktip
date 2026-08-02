@@ -10,8 +10,8 @@ import {
 } from '../../hooks/useMessages'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Profile } from '../../types'
-import { getInitials, generateAvatarColor } from '../../lib/utils'
 import { ROLE_LABELS } from '../../lib/constants'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface NewConversationModalProps {
   open: boolean
@@ -82,6 +82,15 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
     if (!auth.user || selected.length === 0) return
     if (mode === 'group' && selected.length < 2) {
       setError('Pick at least two people for a group')
+      return
+    }
+    // Students never hold dm:initiate — 064 denies it inside has_permission()
+    // before the matrix is consulted, so the insert cannot succeed. Saying why
+    // beats letting RLS answer with a bare policy violation.
+    if (!auth.can('dm:initiate')) {
+      setError(
+        'Your account cannot start new conversations. Student accounts use supervised group channels instead.'
+      )
       return
     }
     setError('')
@@ -191,11 +200,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
                   disabled={creating}
                   aria-pressed={isSelected}
                 >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-white shrink-0 ${generateAvatarColor(name)}`}
-                  >
-                    {getInitials(name)}
-                  </div>
+                  <DiamondAvatar name={name} size={40} />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-ktip-sand-900 text-sm truncate">{name}</p>
                     {user.roles?.length ? (

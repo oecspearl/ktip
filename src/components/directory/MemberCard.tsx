@@ -1,12 +1,13 @@
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
-import { User, MapPin, MessageSquare } from 'lucide-react'
+import { MapPin, MessageSquare } from 'lucide-react'
 import type { Profile } from '../../types'
 import { ROLE_LABELS, ROLE_COLORS } from '../../lib/constants'
 import { truncate } from '../../lib/utils'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface MemberCardProps {
   member: Profile
@@ -18,22 +19,20 @@ export function MemberCard({ member }: MemberCardProps) {
   const auth = useAuth()
   // Signed-out visitors browse the list; messaging needs a session, and a
   // private member needs an accepted connection on top of that (083).
-  const canMessage = !!auth.user && member.profile_visibility !== 'private'
+  // dm:initiate is denied to students by has_permission() itself, so without
+  // this the card offers a button that always fails. Private members are
+  // unreachable until they accept a connection, for the same reason.
+  const canMessage =
+    !!auth.user && member.profile_visibility !== 'private' && auth.can('dm:initiate')
   return (
     <Card hover className="h-full flex flex-col">
       {/* Avatar & Name */}
       <div className="flex items-center gap-4 mb-4">
-        {member.avatar_url ? (
-          <img
-            src={member.avatar_url!}
-            alt={member.display_name || 'Member'}
-            loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 rounded-full object-cover shrink-0"
-          />
-        ) : (
-          <div className="w-14 h-14 bg-ktip-ocean-100 rounded-full flex items-center justify-center text-xl font-bold text-ktip-ocean-700 shrink-0">
-            {member.display_name?.charAt(0).toUpperCase() || <User size={24} />}
-          </div>
-        )}
+        <DiamondAvatar
+          src={member.avatar_url}
+          name={member.display_name || 'Member'}
+          size={56}
+        />
         <div className="min-w-0">
           <h3 className="text-lg font-display font-bold text-ktip-sand-900 truncate">
             {member.display_name || 'Anonymous'}

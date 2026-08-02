@@ -256,7 +256,11 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
 export function useGlobalSearch(query: string, aiMode: boolean): UseGlobalSearchResult {
   const auth = useAuth()
   const signedIn = !!auth.user
-  const isOecs = !!auth.profile?.roles?.includes('oecs')
+  // The site map's 'oecs' access level means "admin console", not "holds the
+  // legacy oecs slug". Testing the slug hid all 20 admin entries from every
+  // admin created after 063 — they could open /admin but could not find it by
+  // searching. Resolved through the same capability AdminRoute uses.
+  const isOecs = auth.can('org:manage') || auth.can('moderation:view')
 
   const trimmed = query.trim()
   const debouncedQuery = useDebouncedValue(trimmed, CONTENT_DEBOUNCE_MS)
