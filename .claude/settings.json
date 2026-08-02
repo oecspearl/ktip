@@ -47,7 +47,11 @@
       "Bash(git commit *)",
       "PowerShell(Remove-Item \"c:\\\\Users\\\\LG\\\\Downloads\\\\ktip-main\\\\OECS KTIP\\\\src\\\\components\\\\venue\\\\room\\\\AvComingSoon.tsx\" -Confirm:$false)",
       "PowerShell(if \\($?\\) { \"removed\" })",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "PowerShell(npx vitest run src/design/tokens.test.ts --reporter=dot 2>&1)",
+      "PowerShell(npm pkg get scripts)",
+      "PowerShell(git commit --only src/pages/dashboard/DashboardTopBar.tsx src/pages/dashboard/DashboardLayout.tsx -F \"C:\\\\Users\\\\LG\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\a18fb524-02d5-4b97-acd6-2904d9bc5bbc\\\\scratchpad\\\\msg2.txt\")",
+      "PowerShell(git commit --only .claude/settings.json -m \"chore\\(claude\\): allow the vitest and npm-scripts commands used this session\")"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",
