@@ -7,6 +7,7 @@ import { truncate } from '../../lib/utils'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { canDmAcrossAges } from '../../lib/minor-safety'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 
 interface MemberCardProps {
@@ -22,8 +23,13 @@ export function MemberCard({ member }: MemberCardProps) {
   // dm:initiate is denied to students by has_permission() itself, so without
   // this the card offers a button that always fails. Private members are
   // unreachable until they accept a connection, for the same reason.
+  // 091 adds the last clause: a 1:1 DM that crosses the adult/minor line is
+  // refused by the server, so the button would only ever fail.
   const canMessage =
-    !!auth.user && member.profile_visibility !== 'private' && auth.can('dm:initiate')
+    !!auth.user &&
+    member.profile_visibility !== 'private' &&
+    auth.can('dm:initiate') &&
+    canDmAcrossAges(auth.profile, member)
   return (
     <Card hover className="h-full flex flex-col">
       {/* Avatar & Name */}

@@ -23,7 +23,12 @@ export const ProtectedRoute = () => {
 
   // OAuth users who never finished onboarding have no role yet — send them
   // back to complete their profile (email signups always set a role).
-  if (auth.profile && auth.profile.roles.length === 0) {
+  //
+  // requires_age_declaration catches the same accounts from the other side: a
+  // Google or Microsoft signup carries no birthday claim, so their age is only
+  // established on the onboarding form. It defaults to false, so no account that
+  // predates migration 091 is ever caught by this.
+  if (auth.profile && (auth.profile.roles.length === 0 || auth.profile.requires_age_declaration)) {
     return <Navigate to="/onboarding" replace />
   }
 

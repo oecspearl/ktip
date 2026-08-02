@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import { BadgeCheck, Clock, GraduationCap, ShieldCheck } from 'lucide-react'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
-import { Input } from '../ui/Input'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyStudentRecord, useRequestStudentVerification } from '../../hooks/useInstitutions'
-import { supabase } from '../../lib/supabase'
 
 /**
  * School verification for students.
@@ -23,9 +20,6 @@ export function StudentVerificationCard() {
   const { record, loading, refetch } = useMyStudentRecord(auth.user?.id)
   const { requestVerification, loading: requesting } = useRequestStudentVerification()
 
-  const [birthYear, setBirthYear] = useState<string>('')
-  const [savingYear, setSavingYear] = useState(false)
-
   const isStudent = (auth.profile?.roles || []).includes('student')
 
   const handleRequest = async () => {
@@ -35,33 +29,6 @@ export function StudentVerificationCard() {
       refetch()
     } catch (err: any) {
       toast.error(err.message || 'Could not request verification')
-    }
-  }
-
-  // Year only — enough to decide minor status without holding a child's full
-  // date of birth. Stored on the safeguarding record, not the public profile.
-  const handleSaveBirthYear = async () => {
-    const year = Number(birthYear)
-    if (!year || year < 1900 || year > new Date().getFullYear()) {
-      toast.error('Enter a valid year of birth')
-      return
-    }
-
-    setSavingYear(true)
-    try {
-      const { error } = await (supabase as any)
-        .from('student_safeguarding')
-        .update({ birth_year: year })
-        .eq('user_id', auth.user!.id)
-
-      if (error) throw error
-      toast.success('Saved')
-      setBirthYear('')
-      refetch()
-    } catch (err: any) {
-      toast.error(err.message || 'Could not save')
-    } finally {
-      setSavingYear(false)
     }
   }
 
@@ -128,24 +95,18 @@ export function StudentVerificationCard() {
         </div>
       )}
 
-      {record && record.birth_year == null && (
+      {/* The "add your year of birth" form that used to live here is gone (091).
+          Every account declares a date of birth at signup, and birth_year is now
+          a projection of that rather than a second value typed in separately —
+          two age records that can disagree is not a thing to have when the
+          disagreement decides whether someone is treated as a child. */}
+      {record?.birth_year != null && (
         <div className="mt-4 pt-4 border-t border-ktip-sand-100">
-          <p className="text-sm text-ktip-sand-600 mb-2">
-            Add your year of birth so we can apply the right protections for your age. We store the
-            year only — never a full date of birth.
+          <p className="text-xs text-ktip-sand-600">
+            Your institution's designated staff can see the year you were born, taken from the date
+            of birth on your account. They see the year only — never the full date. To correct it,
+            contact support.
           </p>
-          <div className="flex items-end gap-3">
-            <Input
-              type="number"
-              label="Year of birth"
-              value={birthYear}
-              onChange={(e) => setBirthYear(e.target.value)}
-              placeholder="2008"
-            />
-            <Button size="sm" loading={savingYear} onClick={handleSaveBirthYear}>
-              Save
-            </Button>
-          </div>
         </div>
       )}
     </Card>

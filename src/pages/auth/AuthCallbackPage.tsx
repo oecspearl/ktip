@@ -106,7 +106,7 @@ export default function AuthCallbackPage() {
 
   /** Single exit. `roles` is null when the profile never loaded at all. */
   const finish = useCallback(
-    (signedIn: boolean, roles: string[] | null) => {
+    (signedIn: boolean, roles: string[] | null, owesAge = false) => {
       done.current = true
 
       if (!signedIn) {
@@ -119,7 +119,11 @@ export default function AuthCallbackPage() {
       // profile that failed to load is treated the same way, because
       // ProtectedRoute would bounce them there regardless, and OnboardingPage
       // sends them home by itself once the row does arrive.
-      if (!roles || roles.length === 0) {
+      //
+      // An outstanding age declaration routes the same way even when a role is
+      // already set: no OAuth provider gives us a birthday, so a returning
+      // Google user who abandoned onboarding half-finished still owes one.
+      if (!roles || roles.length === 0 || owesAge) {
         analytics.conversion('signup_success', { provider: 'oauth' })
         navigate('/onboarding', { replace: true })
         return
@@ -147,7 +151,7 @@ export default function AuthCallbackPage() {
     // window here where the session is known but roles are not.
     if (done.current || auth.loading || auth.profileLoading) return
     if (!auth.user) return
-    finish(true, auth.profile?.roles ?? null)
+    finish(true, auth.profile?.roles ?? null, auth.profile?.requires_age_declaration === true)
   }, [auth.loading, auth.profileLoading, auth.user, auth.profile, finish])
 
   // Auth settled with nobody signed in — the exchange failed silently.
@@ -165,7 +169,7 @@ export default function AuthCallbackPage() {
     const timeout = setTimeout(() => {
       if (done.current) return
       const { user, profile } = latest.current
-      finish(!!user, profile?.roles ?? null)
+      finish(!!user, profile?.roles ?? null, profile?.requires_age_declaration === true)
     }, FALLBACK_TIMEOUT_MS)
     return () => clearTimeout(timeout)
   }, [finish])

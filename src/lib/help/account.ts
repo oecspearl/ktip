@@ -175,10 +175,22 @@ export const VERIFICATION_CATEGORY: HelpCategory = {
       tags: ['student', 'verification', 'school', 'email domain', 'institution', 'approve'],
     },
     {
+      id: 'date-of-birth',
+      title: 'Why am I asked for my date of birth?',
+      content: `Every KTIP account declares a date of birth when it is created — on the sign-up form, or on the short onboarding form straight after if you signed in with Google or Microsoft, since neither of them tells us your birthday.\n\nIt is stored separately from your profile and is never shown to other members. Only you and KTIP's safety staff can see it. What the rest of the platform gets is a single yes/no: whether the account belongs to someone under 18.\n\nYou must be at least 13 to hold a KTIP account.\n\nIt cannot be edited afterwards. If you entered it wrong, contact support and a member of staff will correct it.`,
+      tags: ['date of birth', 'birthday', 'age', 'signup', 'privacy', 'minor', '18', '13'],
+    },
+    {
+      id: 'under-18-accounts',
+      title: 'What is different about an account under 18?',
+      content: `Members under 18 use KTIP normally, with protections that cannot be switched off.\n\nThe main one is messaging: one-to-one direct messages between an adult member and a member under 18 are not available in either direction. Group channels, event rooms and forums are open as usual — those are visible to more than two people, which is the point.\n\nStudent accounts carry further rules on top, whatever their age: grant applications need a faculty sponsor, and the public leaderboard excludes them.\n\nThe protections lift by themselves on the account's 18th birthday. Nothing needs to be requested.`,
+      tags: ['under 18', 'minor', 'safeguarding', 'messages', 'dm', 'child', 'protection'],
+    },
+    {
       id: 'student-birth-year',
-      title: 'Why am I asked for my year of birth?',
-      content: `Student accounts are asked for a year of birth — the year only, never a full date.\n\nIt is stored on the safeguarding record rather than on your public profile, and it exists so age-appropriate protections can be applied correctly. Other members never see it.\n\nProviding it is part of getting a student account properly protected, so it is worth doing when prompted rather than later.`,
-      tags: ['birth year', 'age', 'student', 'safeguarding', 'privacy', 'minor'],
+      title: 'What can my school see about my age?',
+      content: `A verified student account keeps a safeguarding record with your institution, and that record carries the year you were born — the year only, never the full date.\n\nIt is taken from the date of birth on your account. You are not asked for it twice, and it cannot drift out of step with what you declared.\n\nIt is there so your school's designated staff can apply the right protections to their own students. Other members never see it. To correct it, contact support.`,
+      tags: ['birth year', 'age', 'student', 'safeguarding', 'privacy', 'minor', 'institution'],
     },
     {
       id: 'sme-verification',

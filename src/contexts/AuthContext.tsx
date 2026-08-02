@@ -5,6 +5,7 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   type PropsWithChildren,
 } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -17,6 +18,12 @@ import type { PermissionKey, Profile, RoleSlug } from '../types'
 export interface SignupMetadata {
   display_name?: string
   role?: string
+  /**
+   * `YYYY-MM-DD`. handle_new_user() (091) moves it into `account_age` and
+   * derives `is_minor` from it; it is never written to `profiles`, so it stays
+   * out of every public read of a member.
+   */
+  date_of_birth?: string
   organization?: string
   industry?: string
   country?: string
@@ -154,6 +161,32 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     enabled: !!user?.id,
     retry: 1,
   })
+
+  // profiles.is_minor is a cache of a value that changes on a birthday, and
+  // this project has no pg_cron to sweep it (see 068). So it is corrected here,
+  // once per signed-in account, in the same opportunistic-housekeeping spirit
+  // the SQL side uses: the account that turned 18 overnight is fixed the next
+  // time it appears. Only refetches when the RPC actually moved something.
+  //
+  // Failure is ignored on purpose. This is a UI hint; every check that has to be
+  // right calls account_is_minor() server-side and never reads this column.
+  const minorCheckedFor = useRef<string | null>(null)
+  useEffect(() => {
+    const id = user?.id
+    if (!id || profileLoading || minorCheckedFor.current === id) return
+    minorCheckedFor.current = id
+    let cancelled = false
+    void (async () => {
+      const { data, error } = await (supabase as any).rpc('ensure_my_minor_status')
+      if (cancelled || error) return
+      if (data !== profile?.is_minor) {
+        await queryClient.invalidateQueries({ queryKey: ['profile', id] })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, profileLoading, profile?.is_minor, queryClient])
 
   const roles = useMemo(() => expandRoles(profile?.roles), [profile?.roles])
 

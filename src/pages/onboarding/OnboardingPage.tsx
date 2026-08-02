@@ -8,7 +8,9 @@ import { Textarea } from '../../components/ui/Textarea'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
-import { User, CheckCircle, ArrowLeft, ArrowRight, Building2, Clock, GraduationCap } from 'lucide-react'
+import { User, CheckCircle, ArrowLeft, ArrowRight, Building2, Clock, GraduationCap, Cake } from 'lucide-react'
+import { dateOfBirthSchema, todayIso } from '../../lib/validation'
+import { supabase } from '../../lib/supabase'
 import {
   APP_FULL_NAME,
   CARIBBEAN_COUNTRIES,
@@ -32,6 +34,8 @@ const STEPS = [
 
 const HEADINGS = ['Complete your profile', 'Skills & collaboration']
 
+const TODAY_ISO = todayIso()
+
 /**
  * Post-OAuth profile completion. Name and avatar are pre-filled from the
  * Google/Microsoft account; the user picks a role (required) and can fill
@@ -46,6 +50,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1)
 
   const [displayName, setDisplayName] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
   const [organization, setOrganization] = useState('')
   const [industry, setIndustry] = useState('')
@@ -88,14 +93,25 @@ export default function OnboardingPage() {
     return <Navigate to="/login" replace />
   }
 
-  // Already onboarded (role set) and not mid-submit — nothing to do here
-  if (auth.profile && auth.profile.roles.length > 0 && !submitted.current) {
+  // Accounts created before 091 have this false and are never asked; a Google or
+  // Microsoft signup arrives with no birthday claim at all, so this is the only
+  // point at which their age can be established.
+  const needsDob = auth.profile?.requires_age_declaration === true
+
+  // Already onboarded (role set) and not mid-submit — nothing to do here.
+  // An outstanding age declaration keeps them here regardless of role, or
+  // ProtectedRoute would bounce them straight back and the two would loop.
+  if (auth.profile && auth.profile.roles.length > 0 && !needsDob && !submitted.current) {
     return <Navigate to="/" replace />
   }
 
   const validateStep1 = (): boolean => {
     const fieldErrors: Record<string, string> = {}
     if (!displayName.trim()) fieldErrors.display_name = 'Display name is required'
+    if (needsDob) {
+      const dob = dateOfBirthSchema.safeParse(dateOfBirth)
+      if (!dob.success) fieldErrors.date_of_birth = dob.error.issues[0]?.message ?? 'Enter a valid date of birth'
+    }
     if (!selectedRole) fieldErrors.role = 'Please select a role'
     setErrors(fieldErrors)
     return Object.keys(fieldErrors).length === 0
@@ -122,6 +138,26 @@ export default function OnboardingPage() {
     setErrorMessage('')
     submitted.current = true
     try {
+      // First, and through an RPC rather than a table write: the declaration
+      // lands in account_age, which has no INSERT policy, and the trigger there
+      // is what derives is_minor and clears requires_age_declaration. Doing it
+      // before updateProfile means the profile refetch that follows already sees
+      // the cleared flag, so ProtectedRoute does not bounce them back here.
+      if (needsDob) {
+        const { data, error } = await (supabase as any).rpc('declare_date_of_birth', {
+          p_dob: dateOfBirth,
+          p_source: 'onboarding',
+        })
+        if (error) throw error
+        if (data?.ok !== true && data?.reason !== 'already_declared') {
+          throw new Error(
+            data?.reason === 'under_minimum_age'
+              ? 'You must be at least 13 to use KTIP.'
+              : 'We could not save your date of birth. Please check it and try again.'
+          )
+        }
+      }
+
       await auth.updateProfile({
         display_name: displayName.trim(),
         ...(needsSchool ? {} : { roles: [selectedRole as UserRole] }),
@@ -273,6 +309,28 @@ export default function OnboardingPage() {
               fullWidth
               required
             />
+
+            {needsDob && (
+              <Input
+                type="date"
+                label="Date of Birth"
+                value={dateOfBirth}
+                onChange={(e) => {
+                  setDateOfBirth(e.target.value)
+                  setErrors((prev) => {
+                    const next = { ...prev }
+                    delete next.date_of_birth
+                    return next
+                  })
+                }}
+                error={errors.date_of_birth}
+                helperText="Your provider does not share this with us. Members under 18 get extra protections on their account."
+                icon={<Cake size={20} />}
+                max={TODAY_ISO}
+                fullWidth
+                required
+              />
+            )}
 
             <RolePicker
               value={selectedRole}

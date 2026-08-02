@@ -23,13 +23,13 @@ export const GETTING_STARTED_CATEGORY: HelpCategory = {
     {
       id: 'google-microsoft-login',
       title: 'Can I log in with Google or Microsoft?',
-      content: `Yes. On the Login or Sign Up page you will see "Continue with Google" and "Continue with Microsoft".\n\nClick one and you are redirected to that provider to verify your identity, then returned to KTIP already signed in.\n\nThe first time you use it, you land on a short onboarding wizard so you can confirm your name and pick a role.\n\nIf you sign up this way you have no KTIP password, so the email/password form will not work for you — always use the same provider button.`,
+      content: `Yes. On the Login or Sign Up page you will see "Continue with Google" and "Continue with Microsoft".\n\nClick one and you are redirected to that provider to verify your identity, then returned to KTIP already signed in.\n\nThe first time you use it, you land on a short onboarding wizard so you can confirm your name, give your date of birth and pick a role. Neither Google nor Microsoft shares your birthday with us, which is why we have to ask.\n\nIf you sign up this way you have no KTIP password, so the email/password form will not work for you — always use the same provider button.`,
       tags: ['google', 'microsoft', 'oauth', 'social login', 'sso'],
     },
     {
       id: 'onboarding-wizard',
       title: 'What is the onboarding wizard?',
-      content: `After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.\n\nStep 1 confirms your display name (pre-filled from your provider) and asks you to pick a role. This step is required.\n\nStep 2 is optional profile detail: organisation, industry, country, a short bio, skills, interests and your openness to collaborate.\n\nYou can skip step 2 and fill it in later from Settings, but a fuller profile makes you much easier to find in the member directory.`,
+      content: `After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.\n\nStep 1 confirms your display name (pre-filled from your provider), asks for your date of birth and asks you to pick a role. This step is required, and the site stays out of reach until it is done.\n\nStep 2 is optional profile detail: organisation, industry, country, a short bio, skills, interests and your openness to collaborate.\n\nYou can skip step 2 and fill it in later from Settings, but a fuller profile makes you much easier to find in the member directory.`,
       tags: ['onboarding', 'wizard', 'first time', 'setup', 'role'],
     },
     {

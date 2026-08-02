@@ -533,17 +533,40 @@ WHERE id = (SELECT id FROM auth.users WHERE email LIKE 'student@%');
 
 ### 6.8 Age handling
 
-1. As **STUDENT**, Settings → Verification.
+Since 091 the student record no longer holds its own age. `birth_year` is a
+projection of the date of birth the account declared at signup, kept in sync by
+trigger, and nothing types it in by hand.
 
-- [ ] A box asks for **year of birth** only — not a full date
-2. Enter a year that makes them under 18 (e.g. `2010`). Save.
+1. As **STUDENT** (signed up with a date of birth that makes them 15), Settings → Verification.
+
+- [ ] There is **no** "year of birth" input — only a note saying the school's staff see the year
+2. Confirm the projection:
 
 ```sql
-SELECT birth_year, is_minor FROM student_safeguarding
-WHERE user_id = (SELECT id FROM auth.users WHERE email LIKE 'student@%');
+SELECT s.birth_year, s.is_minor, EXTRACT(YEAR FROM a.date_of_birth) AS declared_year
+FROM student_safeguarding s
+JOIN account_age a ON a.user_id = s.user_id
+WHERE s.user_id = (SELECT id FROM auth.users WHERE email LIKE 'student@%');
 ```
 
-- [ ] `is_minor` is `true` and matches the year entered
+- [ ] `birth_year` equals `declared_year` — one age on file, not two
+- [ ] `is_minor` is `true`
+3. As **STUDENT**, console:
+
+```js
+const { supabase } = await import('/src/lib/supabase.ts')
+console.log(await supabase.from('student_safeguarding').update({ birth_year: 1990 }).eq('user_id', '<self>'))
+```
+
+- [ ] Refused — the self-UPDATE policy 064 gave them was dropped in 091
+4. Have an admin correct the date of birth, then re-run the query in step 2:
+
+```sql
+SELECT set_account_date_of_birth('<student uuid>', '2006-03-04');
+```
+
+- [ ] `birth_year` follows to 2006 without anyone touching the safeguarding row
+- [ ] `is_minor` flips to `false`
 
 ### 6.9 Safeguarding records are private
 
@@ -556,6 +579,111 @@ console.log(await supabase.from('student_safeguarding').select('*'))
 ```
 
 - [ ] Returns an empty list — an unrelated adult cannot read a minor's record
+
+### 6.10 Age declaration at signup (088)
+
+Separate from 6.8: that is the student-only birth *year* on the safeguarding
+record. This is the date of birth **every** account created from migration 088
+onwards declares. Accounts that existed before it are out of scope and must
+never be prompted.
+
+**Email signup**
+
+1. Sign up with a fresh address. Step 1 asks for a **Date of Birth**.
+
+- [ ] Leaving it empty blocks **Next**
+- [ ] A date under 13 years ago is rejected with "You must be at least 13"
+- [ ] A future date is rejected
+
+2. Complete signup with a date that makes the account 15, confirm the email, sign in.
+
+```sql
+SELECT is_minor, requires_age_declaration, age_declared_at IS NOT NULL AS declared
+FROM profiles WHERE id = (SELECT id FROM auth.users WHERE email LIKE 'teen@%');
+
+SELECT date_of_birth, source FROM account_age
+WHERE user_id = (SELECT id FROM auth.users WHERE email LIKE 'teen@%');
+```
+
+- [ ] `is_minor` `t`, `requires_age_declaration` `f`, `declared` `t`
+- [ ] `account_age` holds the date, `source = 'signup'`
+- [ ] Repeat with an adult date of birth: `is_minor` is `f`
+
+**Google / Microsoft signup** — the path that has no birthday claim at all.
+
+3. Sign up with a fresh Google account.
+
+- [ ] The callback lands on `/onboarding`, not on the dashboard
+- [ ] Step 1 shows a required **Date of Birth** field
+- [ ] Navigating straight to `/dashboard` before submitting bounces back to `/onboarding`
+- [ ] Submitting a date under 13 is refused
+4. Submit a date that makes the account 16.
+
+- [ ] `is_minor` `t`, `requires_age_declaration` `f`, `source = 'onboarding'`
+- [ ] Signing out and back in goes straight to the dashboard — asked once, not every time
+
+5. Repeat with Microsoft.
+
+**Existing accounts stay out of it**
+
+6. Sign in as **ADULT** (created before the migration).
+
+- [ ] Goes straight to the dashboard, never sees the onboarding form
+- [ ] `requires_age_declaration` is `f` and `account_age` has no row
+
+**The declaration is private and write-once**
+
+7. As **ADULT**, console:
+
+```js
+const { supabase } = await import('/src/lib/supabase.ts')
+console.log(await supabase.from('account_age').select('*'))          // other people's rows
+console.log(await supabase.from('account_age').insert({ user_id: '<self>', date_of_birth: '1990-01-01' }))
+console.log(await supabase.from('account_age').update({ date_of_birth: '1990-01-01' }).eq('user_id', '<self>'))
+```
+
+- [ ] SELECT returns only their own row, never anyone else's
+- [ ] INSERT and UPDATE are both refused — there is no policy for either
+8. As the teen account, console:
+
+```js
+const { supabase } = await import('/src/lib/supabase.ts')
+console.log(await supabase.from('profiles').update({ is_minor: false }).eq('id', '<self>'))
+console.log(await supabase.from('profiles').update({ requires_age_declaration: false }).eq('id', '<self>'))
+```
+
+- [ ] Both fail with "age status is derived from the declared date of birth"
+
+### 6.11 Adult / minor direct messages (088)
+
+Distinct from Part 7, which covers the **student** role. This applies to any
+account under 18, student or not — make the teen account an entrepreneur so the
+064 student rule is not what is being observed.
+
+1. As **ADULT**, open the teen's profile from the directory.
+
+- [ ] No **Message** button on their directory card
+- [ ] The member panel shows an explanation in place of the button
+- [ ] `/u/<teen>` shows no Message button either
+2. As the **teen**, open an adult's profile.
+
+- [ ] Same in the other direction, with copy addressed to them
+3. Force it from the console as **ADULT**:
+
+```js
+const { supabase } = await import('/src/lib/supabase.ts')
+const { data: c } = await supabase.from('conversations').insert({ is_group: false, created_by: '<adult>' }).select().single()
+await supabase.from('conversation_participants').insert({ conversation_id: c.id, user_id: '<adult>' })
+console.log(await supabase.from('conversation_participants').insert({ conversation_id: c.id, user_id: '<teen>' }))
+```
+
+- [ ] The second participant insert is refused by RLS
+4. Group conversations are unaffected:
+
+- [ ] A group containing both the adult and the teen can be created, and both can post in it
+5. Two minors may DM each other:
+
+- [ ] A second under-18 account can open a 1-to-1 thread with the teen
 
 ---
 

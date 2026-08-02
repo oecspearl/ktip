@@ -40,6 +40,7 @@ import {
   COLLAB_EXCLUSIVE_VALUE,
 } from '../../lib/constants'
 import { isOrganizationAccount } from '../../lib/permissions'
+import { canDmAcrossAges } from '../../lib/minor-safety'
 import { useEmployerForUser, useEmployerPortfolio } from '../../hooks/useEmployerProfile'
 import { formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
@@ -209,7 +210,9 @@ export default function PublicProfilePage() {
             <ConnectButton otherUserId={profile.id} />
             {/* A private member is unreachable until they accept. Showing the
                 button anyway would only produce a permission error from RLS. */}
-            {canView && (
+            {/* And a 1:1 DM across the adult/minor line is refused by the
+                server (091), so the same reasoning applies. */}
+            {canView && canDmAcrossAges(auth.profile, profile) && (
               <Button
                 variant="outline"
                 size="sm"

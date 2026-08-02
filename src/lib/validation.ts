@@ -25,6 +25,92 @@ const passwordSchema = z.string().superRefine((pw, ctx) => {
 })
 
 export const SIGNUP_ROLES = ['student', 'mentor', 'investor', 'entrepreneur', 'private_sector', 'faculty'] as const
+
+/** Youngest account KTIP will create. Under this, signup is refused outright. */
+export const MINIMUM_SIGNUP_AGE = 13
+/** At or above this, the account is an adult; below it runs in minor-safe mode. */
+export const ADULT_AGE = 18
+
+/**
+ * Whole years between a date of birth and a reference date. Calendar-correct —
+ * subtracting years and comparing month/day, not dividing milliseconds, because
+ * leap years make the arithmetic version wrong by a day around a birthday and
+ * that day is the difference between a minor and an adult account.
+ */
+export function ageOn(dob: Date, on: Date = new Date()): number {
+  let age = on.getFullYear() - dob.getFullYear()
+  const monthDelta = on.getMonth() - dob.getMonth()
+  if (monthDelta < 0 || (monthDelta === 0 && on.getDate() < dob.getDate())) age -= 1
+  return age
+}
+
+/**
+ * Today as `YYYY-MM-DD` in the *browser's* timezone, for the `max` attribute on
+ * a date input. `toISOString()` would be UTC and hand someone in the Caribbean a
+ * ceiling that is a day ahead of their own calendar.
+ */
+export function todayIso(on: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${on.getFullYear()}-${pad(on.getMonth() + 1)}-${pad(on.getDate())}`
+}
+
+/** True when a declared date of birth belongs to someone under 18. */
+export function isMinorDob(value: string, on: Date = new Date()): boolean {
+  const parsed = parseDobInput(value)
+  return parsed !== null && ageOn(parsed, on) < ADULT_AGE
+}
+
+/**
+ * `<input type="date">` yields `YYYY-MM-DD`. Parsed as local time rather than
+ * with `new Date(value)`, which reads that form as UTC and lands on the previous
+ * day for anyone west of Greenwich — i.e. every OECS member state.
+ */
+function parseDobInput(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim())
+  if (!match) return null
+  const [, y, m, d] = match
+  const date = new Date(Number(y), Number(m) - 1, Number(d))
+  // Rejects 2024-02-31 and friends, which the Date constructor silently rolls over.
+  if (
+    date.getFullYear() !== Number(y) ||
+    date.getMonth() !== Number(m) - 1 ||
+    date.getDate() !== Number(d)
+  ) {
+    return null
+  }
+  return date
+}
+
+/**
+ * Date of birth, shared by the email signup wizard and the post-OAuth
+ * onboarding form so the two can never disagree about who counts as an adult.
+ * Mirrored server-side in declare_date_of_birth() (migration 091).
+ */
+export const dateOfBirthSchema = z
+  .string()
+  .min(1, 'Date of birth is required')
+  .superRefine((value, ctx) => {
+    const parsed = parseDobInput(value)
+    if (!parsed) {
+      ctx.addIssue({ code: 'custom', message: 'Enter a valid date of birth' })
+      return
+    }
+    if (parsed.getTime() > Date.now()) {
+      ctx.addIssue({ code: 'custom', message: 'Date of birth cannot be in the future' })
+      return
+    }
+    const age = ageOn(parsed)
+    if (age < MINIMUM_SIGNUP_AGE) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `You must be at least ${MINIMUM_SIGNUP_AGE} to use KTIP`,
+      })
+      return
+    }
+    if (age > 120) {
+      ctx.addIssue({ code: 'custom', message: 'Enter a valid date of birth' })
+    }
+  })
 export const COLLABORATION_VALUES = [
   'research_co_investigation',
   'knowledge_transfer',
@@ -38,6 +124,7 @@ export const signupSchema = z.object({
   password: passwordSchema,
   display_name: z.string().min(2, 'Name must be at least 2 characters'),
   role: z.enum(SIGNUP_ROLES, { error: 'Please select a role' }),
+  date_of_birth: dateOfBirthSchema,
   organization: z.string().max(200, 'Organisation name too long').optional(),
   industry: z.string().max(100, 'Industry too long').optional(),
   country: z.string().max(100).optional(),
@@ -53,6 +140,7 @@ export const signupStep1Schema = signupSchema.pick({
   password: true,
   display_name: true,
   role: true,
+  date_of_birth: true,
 })
 
 // Project Schemas

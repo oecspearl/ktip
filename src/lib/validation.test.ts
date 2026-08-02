@@ -34,8 +34,20 @@ describe('signupSchema', () => {
       password: 'Password123!',
       display_name: 'John Doe',
       role: 'student',
+      date_of_birth: '1995-06-15',
     })
     expect(result.success).toBe(true)
+  })
+
+  // 091. Every account declares an age; the field is not optional on any path.
+  it('rejects a signup with no date of birth', () => {
+    const result = signupSchema.safeParse({
+      email: 'user@example.com',
+      password: 'Password123!',
+      display_name: 'John Doe',
+      role: 'student',
+    })
+    expect(result.success).toBe(false)
   })
 
   it('rejects invalid role', () => {

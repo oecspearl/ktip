@@ -32,6 +32,10 @@ export interface Database {
           suspension_reason: string | null
           // 066.
           leaderboard_visibility?: string
+          // 091. Derived from account_age — never written through this table.
+          is_minor?: boolean
+          requires_age_declaration?: boolean
+          age_declared_at?: string | null
           created_at: string
           updated_at: string
         }

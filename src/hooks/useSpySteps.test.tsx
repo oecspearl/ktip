@@ -1,7 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { act, cleanup, render } from '@testing-library/react'
-import { createMemoryRouter } from 'react-router'
-import { RouterProvider } from 'react-router/dom'
+import { MemoryRouter } from 'react-router'
 import { useSpySteps, type SpyStep } from './useSpySteps'
 
 // The hook scans #main-content, which MainLayout renders — the harness stands in
@@ -11,13 +10,20 @@ function Harness({ onSteps }: { onSteps: (steps: SpyStep[]) => void }) {
   return <main id="main-content" />
 }
 
+// MemoryRouter, not createMemoryRouter + RouterProvider. The hook only needs
+// useLocation to resolve, and pulling RouterProvider from 'react-router/dom'
+// while the hook imports from 'react-router' loads two copies of the package
+// under Vitest's node resolution — different context objects, so every render
+// died with "useLocation() may be used only in the context of a <Router>",
+// React Router swallowed it into its own error boundary, and the harness never
+// mounted. One import specifier, one instance.
 function mount() {
   let steps: SpyStep[] = []
-  const router = createMemoryRouter(
-    [{ path: '/', element: <Harness onSteps={(s) => { steps = s }} /> }],
-    { initialEntries: ['/'] },
+  const view = render(
+    <MemoryRouter initialEntries={['/']}>
+      <Harness onSteps={(s) => { steps = s }} />
+    </MemoryRouter>,
   )
-  const view = render(<RouterProvider router={router} />)
   return { view, read: () => steps }
 }
 

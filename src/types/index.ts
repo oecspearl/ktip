@@ -160,6 +160,22 @@ export interface Profile {
    * has to read as 'public' rather than crash the directory.
    */
   profile_visibility?: ProfileVisibility
+  /**
+   * Age state (091). Derived from the declared date of birth, never written
+   * directly — the 063 guard trigger rejects an attempt.
+   *
+   * `is_minor` is a UI hint and can be one day stale (the account turned 18
+   * overnight and has not signed in since). Anything that has to be right calls
+   * account_is_minor() server-side.
+   *
+   * `requires_age_declaration` is the onboarding gate. Optional for the same
+   * reason as the 082 contact fields: a deploy can run ahead of the migration,
+   * and a missing column must read as "nothing owed" rather than trap everyone
+   * on /onboarding.
+   */
+  is_minor?: boolean
+  requires_age_declaration?: boolean
+  age_declared_at?: string | null
   created_at: string
   updated_at: string
 }
@@ -188,6 +204,15 @@ export interface ProfileView {
   phone: string | null
   website: string | null
   languages: string[] | null
+  /**
+   * Teaser field, not gated by `can_view` (091): it decides whether a Message
+   * button may be offered at all, which matters just as much to a viewer who
+   * cannot see the rest of the profile.
+   *
+   * Optional because a deploy can run ahead of migration 091, and a missing
+   * value has to read as "adult" rather than hide every button on the page.
+   */
+  is_minor?: boolean
 }
 
 /**
@@ -1632,8 +1657,12 @@ export interface InstitutionMember {
 }
 
 /**
- * Minor-safety record. Only the birth *year* is stored — enough to decide
- * minor status for COPPA/GDPR handling without holding a full date of birth.
+ * Minor-safety record, shared with the member's institution.
+ *
+ * `birth_year` is a projection of [AccountAge].date_of_birth since 091, kept in
+ * sync by trigger and no longer writable by the student — it exists because
+ * institution staff can read this row and cannot read the declaration itself.
+ * Year only, deliberately: the school gets the coarse value.
  */
 export interface StudentSafeguarding {
   user_id: string
@@ -1648,6 +1677,32 @@ export interface StudentSafeguarding {
   updated_at: string
   institution?: Institution
   sponsor?: Profile
+}
+
+// ============================================================
+// Age declaration (migration 091)
+// ============================================================
+
+/**
+ * The date of birth every account created from 091 onwards declares, on the
+ * signup form or — for Google and Microsoft, which share no birthday claim — on
+ * the onboarding form straight after.
+ *
+ * Deliberately narrow reach. The row is readable only by the member and by
+ * moderation staff, has no INSERT or UPDATE policy (both routes in are
+ * SECURITY DEFINER RPCs), and no ordinary feature should ever query it: the
+ * derived `Profile.is_minor` is what the UI reads, and account_is_minor() is
+ * what enforcement reads.
+ *
+ * Unrelated to [StudentSafeguarding], which stores a birth *year* and only for
+ * students verified by an institution.
+ */
+export interface AccountAge {
+  user_id: string
+  /** `YYYY-MM-DD`. */
+  date_of_birth: string
+  declared_at: string
+  source: 'signup' | 'onboarding' | 'vc_sso' | 'admin'
 }
 
 // ============================================================

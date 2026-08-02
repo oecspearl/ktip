@@ -8,8 +8,8 @@ import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { PasswordChecklist } from '../../components/ui/PasswordChecklist'
-import { Mail, Lock, User, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2 } from 'lucide-react'
-import { signupSchema, signupStep1Schema } from '../../lib/validation'
+import { Mail, Lock, User, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
+import { signupSchema, signupStep1Schema, todayIso } from '../../lib/validation'
 import {
   APP_FULL_NAME,
   CARIBBEAN_COUNTRIES,
@@ -30,6 +30,9 @@ const STEPS = [
 
 const HEADINGS = ['Create an account', 'About you', 'Skills & collaboration']
 
+// Stops the picker offering a future date. The schema rejects one anyway.
+const TODAY_ISO = todayIso()
+
 export default function SignupPage() {
   const auth = useAuth()
 
@@ -39,6 +42,7 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
 
   // Step 2 — optional
@@ -65,6 +69,7 @@ export default function SignupPage() {
     email,
     password,
     role: selectedRole,
+    date_of_birth: dateOfBirth,
   }
 
   // Validate step 1; returns field errors keyed by field name
@@ -93,7 +98,7 @@ export default function SignupPage() {
       const fieldErrors = validateStep1()
       setErrors(fieldErrors)
       if (Object.keys(fieldErrors).length > 0) {
-        setTouched({ display_name: true, email: true, password: true, role: true })
+        setTouched({ display_name: true, email: true, password: true, date_of_birth: true, role: true })
         return
       }
       analytics.funnel('signup', 'step_1_complete', { role: selectedRole })
@@ -125,8 +130,14 @@ export default function SignupPage() {
       })
       setErrors(fieldErrors)
       // Required-field errors live on step 1 — jump back so user sees them
-      if (fieldErrors.display_name || fieldErrors.email || fieldErrors.password || fieldErrors.role) {
-        setTouched({ display_name: true, email: true, password: true, role: true })
+      if (
+        fieldErrors.display_name ||
+        fieldErrors.email ||
+        fieldErrors.password ||
+        fieldErrors.date_of_birth ||
+        fieldErrors.role
+      ) {
+        setTouched({ display_name: true, email: true, password: true, date_of_birth: true, role: true })
         setStep(1)
       }
       return
@@ -138,6 +149,8 @@ export default function SignupPage() {
       await auth.signUp(email, password, {
         display_name: displayName,
         role: selectedRole,
+        // Seeds account_age via handle_new_user (091). Never lands on `profiles`.
+        date_of_birth: dateOfBirth,
         ...(input.organization && { organization: input.organization }),
         ...(input.industry && { industry: input.industry }),
         ...(input.country && { country: input.country }),
@@ -237,6 +250,20 @@ export default function SignupPage() {
                     <PasswordChecklist password={password} />
                   )}
                 </div>
+
+                <Input
+                  type="date"
+                  label="Date of Birth"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  onBlur={() => handleBlur('date_of_birth')}
+                  error={visibleError('date_of_birth')}
+                  helperText="Members under 18 get extra protections on their account."
+                  icon={<Cake size={20} />}
+                  max={TODAY_ISO}
+                  fullWidth
+                  required
+                />
 
                 <RolePicker
                   value={selectedRole}

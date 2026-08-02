@@ -20,6 +20,7 @@ import { useProfileStats } from '../../hooks/useProfileStats'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { dmBlockedReason } from '../../lib/minor-safety'
 import { heroImageFor, gradientFor } from '../../lib/hero-images'
 import {
   ROLE_LABELS,
@@ -185,6 +186,10 @@ export function MemberPanel() {
   if (!isOpen) return null
 
   const isSelf = resolvedId === auth.user?.id
+  // Explains itself rather than silently dropping the button: the panel is
+  // where someone goes deliberately to contact a member, and a missing action
+  // with no reason reads as a bug.
+  const dmBlocked = dmBlockedReason(auth.profile, profile)
   const displayName = profile?.display_name || 'Unknown User'
   // Same seeded photo the member's directory card uses, so opening a card feels
   // like the card expanding rather than a jump to an unrelated screen.
@@ -353,14 +358,18 @@ export function MemberPanel() {
                           ever fail. See src/lib/venue-actions.ts, which makes
                           the same call for the venue surfaces. */}
                       {canView && auth.can('dm:initiate') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={<MessageSquare size={14} />}
-                          onClick={() => openPanel({ userId: profile.id })}
-                        >
-                          Message
-                        </Button>
+                        dmBlocked ? (
+                          <p className="text-xs text-ktip-sand-500 max-w-xs">{dmBlocked}</p>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={<MessageSquare size={14} />}
+                            onClick={() => openPanel({ userId: profile.id })}
+                          >
+                            Message
+                          </Button>
+                        )
                       )}
                     </div>
                   )}
