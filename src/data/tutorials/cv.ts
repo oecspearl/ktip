@@ -2,7 +2,7 @@ import type { TutorialStep } from '../../components/tutorial/types'
 import { replayStep } from './shared'
 
 /**
- * Guided tour of /cv.
+ * Guided tour of the CV (the My CV dashboard tab; /cv redirects there).
  *
  * The page's one non-obvious idea is that the thing on screen *is* the PDF —
  * there is no separate export step to go looking for. Step one says so.

@@ -8,6 +8,7 @@ import { AvailabilityDot } from '../AvailabilityDot'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
 import type { VenueAvailability, VenueOccupant } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Skills before the row would start wrapping into a paragraph. */
 const SKILL_CAP = 4
@@ -33,6 +34,7 @@ export function LookingForTeamPanel({
   occupants: VenueOccupant[]
   fill?: boolean
 }) {
+  const { t } = useLingui()
   const auth = useAuth()
   const { openMember } = useMemberPanel()
   const { openPanel } = useMessagingPanel()
@@ -47,14 +49,14 @@ export function LookingForTeamPanel({
       member,
       availability: (presence?.availability ?? member.availability) as VenueAvailability,
       isLive: presence?.is_live ?? false,
-      name: presence?.display_name || member.user?.display_name || 'Member',
+      name: presence?.display_name || member.user?.display_name || t`Member`,
       avatar: presence?.avatar_url ?? member.user?.avatar_url ?? null,
     }
   })
 
   return (
     <RoomPanel
-      title="Looking for a team"
+      title={t`Looking for a team`}
       meta={people.length || undefined}
       className={panelShell(fill)}
     >
@@ -65,8 +67,7 @@ export function LookingForTeamPanel({
         </div>
       ) : people.length === 0 ? (
         <RoomPanelEmpty>
-          Nobody is looking right now. Tick “looking for a team” on your own venue profile to appear
-          here.
+          <Trans>Nobody is looking right now. Tick “looking for a team” on your own venue profile to appear here.</Trans>
         </RoomPanelEmpty>
       ) : (
         <ul className={`divide-y divide-ktip-sand-100 ${panelScroll(fill, 'max-h-[24rem]')}`}>
@@ -93,7 +94,7 @@ export function LookingForTeamPanel({
                     >
                       {name}
                     </button>
-                    {isSelf && <span className="text-[10px] text-ktip-sand-400">(you)</span>}
+                    {isSelf && <span className="text-[10px] text-ktip-sand-400"><Trans>(you)</Trans></span>}
                   </div>
                   <AvailabilityDot availability={availability} size="sm" withLabel />
                   {skills.length > 0 && (
@@ -119,8 +120,8 @@ export function LookingForTeamPanel({
                   <button
                     type="button"
                     onClick={() => openPanel({ userId: member.user_id })}
-                    aria-label={`Message ${name}`}
-                    title="Message"
+                    aria-label={t`Message ${name}`}
+                    title={t`Message`}
                     className="shrink-0 rounded-lg p-1.5 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600"
                   >
                     <MessageSquare size={16} aria-hidden="true" />

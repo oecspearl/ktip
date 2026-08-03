@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUserBadges } from '../../hooks/useBadges'
 import { keys } from '../../queries/keys'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Counts of the behaviour the ranker reads. Head-only counts, and a failing
@@ -74,6 +75,7 @@ function SignalRow({ icon, label, value, empty }: SignalRowProps) {
  * are exactly the ones that are worth nothing when empty.
  */
 export function SignalSummary() {
+    const { t } = useLingui()
   const auth = useAuth()
   const profile = auth.profile
   const { badges } = useUserBadges(auth.user?.id)
@@ -105,22 +107,22 @@ export function SignalSummary() {
     <div className="rounded-xl border border-ktip-sand-200 bg-ktip-sand-50/50 p-4">
       <div className="flex items-center gap-2 mb-1">
         <Sparkles size={15} className="text-ktip-ocean-600" />
-        <h3 className="text-sm font-semibold text-ktip-sand-900">What we know about you</h3>
+        <h3 className="text-sm font-semibold text-ktip-sand-900"><Trans>What we know about you</Trans></h3>
       </div>
       <p className="text-xs text-ktip-sand-500 mb-2">
-        Only these signals feed the ranking, and only the groups you left switched on above.
+        <Trans>Only these signals feed the ranking, and only the groups you left switched on above.</Trans>
       </p>
 
       <div className="divide-y divide-ktip-sand-200/70">
         <SignalRow
           icon={<Tag size={14} />}
-          label="Interests"
+          label={t`Interests`}
           value={interests || 'Not set — add them on the Profile tab'}
           empty={!interests}
         />
         <SignalRow
           icon={<Briefcase size={14} />}
-          label="Skills & industry"
+          label={t`Skills & industry`}
           value={
             [skills, profile?.industry].filter(Boolean).join(' · ') ||
             'Not set — add them on the Profile tab'
@@ -129,19 +131,19 @@ export function SignalSummary() {
         />
         <SignalRow
           icon={<MapPin size={14} />}
-          label="Country"
+          label={t`Country`}
           value={profile?.country || 'Not set'}
           empty={!profile?.country}
         />
         <SignalRow
           icon={<Award size={14} />}
-          label="Badges earned"
+          label={t`Badges earned`}
           value={badgeNames || 'None yet'}
           empty={!badgeNames}
         />
         <SignalRow
           icon={<Heart size={14} />}
-          label="Activity"
+          label={t`Activity`}
           value={engagement || 'Nothing yet — likes, follows, RSVPs and applications count here'}
           empty={!engagement}
         />
@@ -152,7 +154,7 @@ export function SignalSummary() {
           to="/settings?tab=profile"
           className="inline-block mt-3 text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
         >
-          Complete your profile →
+          <Trans>Complete your profile →</Trans>
         </Link>
       )}
     </div>

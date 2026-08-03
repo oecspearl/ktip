@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type {
@@ -246,6 +247,7 @@ export function useMyStudentRecord(userId: string | undefined) {
  * account's email domain. Grants nothing by itself — an educator approves.
  */
 export function useRequestStudentVerification() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -253,12 +255,13 @@ export function useRequestStudentVerification() {
       const { data, error } = await (supabase as any).rpc('request_student_verification')
       if (error) throw error
       if (data && data.ok === false) {
+        const domain = data.domain
         const messages: Record<string, string> = {
-          unauthenticated: 'You must be signed in.',
-          no_email: 'No email address is attached to this account.',
-          domain_not_recognised: `No verified institution owns @${data.domain}. Ask your school to register on KTiP.`,
+          unauthenticated: t`You must be signed in.`,
+          no_email: t`No email address is attached to this account.`,
+          domain_not_recognised: t`No verified institution owns @${domain}. Ask your school to register on KTiP.`,
         }
-        throw new Error(messages[data.reason] || 'Verification request failed.')
+        throw new Error(messages[data.reason] || t`Verification request failed.`)
       }
       return data
     },

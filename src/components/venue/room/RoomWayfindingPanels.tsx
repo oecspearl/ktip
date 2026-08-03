@@ -9,6 +9,7 @@ import type { VenueMapFloor } from '../../../lib/venue-map'
 import { VENUE_AVAILABILITY_LABELS } from '../../../lib/constants'
 import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
 import type { Event, VenueOccupant, VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Which level a room is on. Nothing when the venue only has the one. */
 export function floorTag(floor: number, floors: VenueMapFloor[] | undefined): string | null {
@@ -45,6 +46,7 @@ export function WayfindingPanel({
   floors?: VenueMapFloor[]
   fill?: boolean
 }) {
+  const { t } = useLingui()
   const counts = occupancyByRoom(occupants)
   const all = rooms || []
   const others = all
@@ -73,9 +75,9 @@ export function WayfindingPanel({
     : [{ index: 0, name: '', rooms: others }]
 
   return (
-    <RoomPanel title="Elsewhere in the venue" className={panelShell(fill)}>
+    <RoomPanel title={t`Elsewhere in the venue`} className={panelShell(fill)}>
       {others.length === 0 ? (
-        <RoomPanelEmpty>This is the only room.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>This is the only room.</Trans></RoomPanelEmpty>
       ) : (
         <div className={panelScroll(fill, 'max-h-[20rem]')}>
           {groups.map((group) => (
@@ -88,7 +90,7 @@ export function WayfindingPanel({
                   {group.name}
                   {group.index === currentFloor && (
                     <span className="ml-auto font-normal normal-case text-ktip-sand-400">
-                      this floor
+                      <Trans>this floor</Trans>
                     </span>
                   )}
                 </p>
@@ -120,7 +122,7 @@ export function WayfindingPanel({
                           <span className="block text-[10px] uppercase tracking-wider text-ktip-sand-400">
                             {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
                             {tag && ` · ${tag}`}
-                            {!room.is_open && ' · closed'}
+                            {!room.is_open && t` · closed`}
                           </span>
                         </span>
                         {here > 0 && (
@@ -143,7 +145,7 @@ export function WayfindingPanel({
         className="flex items-center justify-center gap-1.5 border-t border-ktip-sand-100 px-4 py-2 text-xs font-semibold text-ktip-ocean-600 hover:bg-ktip-sand-50"
       >
         <MapIcon size={13} aria-hidden="true" />
-        Open the map
+        <Trans>Open the map</Trans>
       </Link>
     </RoomPanel>
   )
@@ -160,6 +162,7 @@ const COUNTED = ['working', 'help_wanted', 'busy', 'away'] as const
  * packed keynote means something different from an empty workshop at 3am.
  */
 export function VenueHeadcountPanel({ occupants }: { occupants: VenueOccupant[] }) {
+  const { t } = useLingui()
   const present = occupants.filter((o) => o.availability !== 'offline')
   const counts = COUNTED.map((availability) => ({
     availability,
@@ -169,9 +172,9 @@ export function VenueHeadcountPanel({ occupants }: { occupants: VenueOccupant[] 
   const inRooms = present.filter((o) => o.room_id).length
 
   return (
-    <RoomPanel title="In the venue" meta={present.length}>
+    <RoomPanel title={t`In the venue`} meta={present.length}>
       {present.length === 0 ? (
-        <RoomPanelEmpty>Nobody is here yet.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>Nobody is here yet.</Trans></RoomPanelEmpty>
       ) : (
         <div className="space-y-1.5 px-4 py-3">
           {counts.map(({ availability, n }) => (
@@ -181,7 +184,7 @@ export function VenueHeadcountPanel({ occupants }: { occupants: VenueOccupant[] 
             </p>
           ))}
           <p className="flex items-baseline justify-between border-t border-ktip-sand-100 pt-1.5 text-sm">
-            <span className="text-ktip-sand-600">In a room</span>
+            <span className="text-ktip-sand-600"><Trans>In a room</Trans></span>
             <span className="font-mono text-ktip-sand-900">
               {inRooms}/{present.length}
             </span>
@@ -206,6 +209,7 @@ export function CapacityNotice({
   room: VenueRoom
   inRoom: VenueOccupant[]
 }) {
+  const { t } = useLingui()
   if (!room.capacity) return null
 
   const here = inRoom.length
@@ -213,7 +217,7 @@ export function CapacityNotice({
   const full = here >= room.capacity
 
   return (
-    <RoomPanel title="Capacity" meta={`${here}/${room.capacity}`}>
+    <RoomPanel title={t`Capacity`} meta={`${here}/${room.capacity}`}>
       <div className="px-4 py-3">
         <div className="h-1.5 overflow-hidden rounded-full bg-ktip-sand-100">
           <div
@@ -223,8 +227,8 @@ export function CapacityNotice({
         </div>
         <p className="mt-2 text-xs text-ktip-sand-500">
           {full
-            ? 'This room is full. Nobody else can enter until someone leaves.'
-            : `Room for ${room.capacity - here} more.`}
+            ? t`This room is full. Nobody else can enter until someone leaves.`
+            : t`Room for ${room.capacity - here} more.`}
         </p>
       </div>
     </RoomPanel>

@@ -29,27 +29,31 @@ import {
   INTEGRATION_CATEGORY_LABELS,
 } from '../../lib/constants'
 import type { Integration, Resource } from '../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+import { resolveCopy, type Copy } from '../../i18n/copy'
 
 type Tab = 'resources' | 'integrations' | 'courses'
 
-const TABS: { id: Tab; label: string; icon: typeof BookOpen }[] = [
-  { id: 'resources', label: 'Resources', icon: BookOpen },
-  { id: 'integrations', label: 'Integrations', icon: Puzzle },
-  { id: 'courses', label: 'Courses', icon: GraduationCap },
+const TABS: { id: Tab; label: MessageDescriptor; icon: typeof BookOpen }[] = [
+  { id: 'resources', label: msg`Resources`, icon: BookOpen },
+  { id: 'integrations', label: msg`Integrations`, icon: Puzzle },
+  { id: 'courses', label: msg`Courses`, icon: GraduationCap },
 ]
 
-const RESOURCE_TYPE_OPTIONS = [
-  { value: '', label: 'All Types' },
+const RESOURCE_TYPE_OPTIONS: { value: string; label: Copy }[] = [
+  { value: '', label: msg`All Types` },
   ...Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => ({ value, label })),
 ]
 
-const RESOURCE_CATEGORY_OPTIONS = [
-  { value: '', label: 'All Categories' },
+const RESOURCE_CATEGORY_OPTIONS: { value: string; label: Copy }[] = [
+  { value: '', label: msg`All Categories` },
   ...Object.entries(RESOURCE_CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
 ]
 
-const INTEGRATION_CATEGORY_OPTIONS = [
-  { value: '', label: 'All Categories' },
+const INTEGRATION_CATEGORY_OPTIONS: { value: string; label: Copy }[] = [
+  { value: '', label: msg`All Categories` },
   ...Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
 ]
 
@@ -61,7 +65,8 @@ const INTEGRATION_CATEGORY_OPTIONS = [
 function groupByCategory<T>(
   items: T[],
   categoryOf: (item: T) => string | null | undefined,
-  labels: Record<string, string>
+  labels: Record<string, string>,
+  otherLabel: string
 ) {
   const buckets = new Map<string, T[]>()
   for (const item of items) {
@@ -74,7 +79,7 @@ function groupByCategory<T>(
   const ordered = [...known, ...[...buckets.keys()].filter((k) => !known.includes(k))]
   return ordered.flatMap((value) => {
     const group = buckets.get(value)
-    return group?.length ? [{ value, label: labels[value] ?? 'Other', items: group }] : []
+    return group?.length ? [{ value, label: labels[value] ?? otherLabel, items: group }] : []
   })
 }
 
@@ -84,10 +89,11 @@ function uniqueValues<T>(items: T[], pick: (item: T) => string | null | undefine
 }
 
 export default function ResourcesPage() {
+  const { t, i18n } = useLingui()
   const [searchParams, setSearchParams] = useSearchParams()
   const tabParam = searchParams.get('tab')
   const tab: Tab = tabParam === 'integrations' ? 'integrations' : tabParam === 'courses' ? 'courses' : 'resources'
-  usePageTitle(tab === 'integrations' ? 'Integrations' : tab === 'courses' ? 'Courses' : 'Resources')
+  usePageTitle(tab === 'integrations' ? t`Integrations` : tab === 'courses' ? t`Courses` : t`Resources`)
 
   const setTab = (t: Tab) => {
     // Keep ?sort= across tab switches; only the tab itself is rewritten.
@@ -100,10 +106,10 @@ export default function ResourcesPage() {
   return (
     <>
       <PageHero
-        eyebrow="Knowledge Base"
-        title="Resources & Integrations"
+        eyebrow={t`Knowledge Base`}
+        title={t`Resources & Integrations`}
         imageSeed="resources"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Resources' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Resources` }]}
       />
 
       {/* === Tabs === */}
@@ -112,7 +118,7 @@ export default function ResourcesPage() {
           <div
           role="tablist"
           data-tutorial="resources-tabs"
-          aria-label="Knowledge base sections"
+          aria-label={t`Knowledge base sections`}
           className="flex gap-1 border-b border-ktip-sand-200"
         >
             {TABS.map(({ id, label, icon: Icon }) => (
@@ -129,7 +135,7 @@ export default function ResourcesPage() {
                 )}
               >
                 <Icon size={16} />
-                {label}
+                {i18n._(label)}
               </button>
             ))}
           </div>
@@ -142,6 +148,7 @@ export default function ResourcesPage() {
 }
 
 function ResourcesTab() {
+  const { t, i18n } = useLingui()
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -178,10 +185,11 @@ function ResourcesTab() {
         ? groupByCategory<Resource>(
             resources,
             (resource) => resource.category,
-            RESOURCE_CATEGORY_LABELS
+            RESOURCE_CATEGORY_LABELS,
+            t`Other`
           )
         : [],
-    [resources, categoryFilter]
+    [resources, categoryFilter, t]
   )
 
   const hasActiveFilters = !!(searchQuery || typeFilter || categoryFilter || tagFilter.length)
@@ -211,23 +219,28 @@ function ResourcesTab() {
             <Select
               value={typeFilter}
               onChange={setTypeFilter}
-              options={RESOURCE_TYPE_OPTIONS}
-              ariaLabel="Filter by resource type"
+              options={RESOURCE_TYPE_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
+              ariaLabel={t`Filter by resource type`}
             />
 
             <Select
               value={categoryFilter}
               onChange={setCategoryFilter}
-              options={RESOURCE_CATEGORY_OPTIONS}
-              ariaLabel="Filter by category"
+              options={RESOURCE_CATEGORY_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
+              ariaLabel={t`Filter by category`}
             />
 
             <TagFilterSelect options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
 
             {!loading && resources && (
               <p className="text-sm text-gray-500">
-                Found {resources.length} resource{resources.length !== 1 ? 's' : ''}
-                {categoryGroups.length > 1 && ` in ${categoryGroups.length} categories`}
+                <Plural value={resources.length} one="Found # resource" other="Found # resources" />
+                {categoryGroups.length > 1 && (
+                  <>
+                    {' '}
+                    <Plural value={categoryGroups.length} one="in # category" other="in # categories" />
+                  </>
+                )}
               </p>
             )}
 
@@ -241,8 +254,8 @@ function ResourcesTab() {
               <CollapsibleSearch
                 value={searchQuery}
                 onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                placeholder="Search resources..."
-                ariaLabel="Search resources"
+                placeholder={t`Search resources...`}
+                ariaLabel={t`Search resources`}
               />
               <ColumnToggle value={columns} onChange={setColumns} />
             </div>
@@ -253,7 +266,7 @@ function ResourcesTab() {
               onClick={clearFilters}
               className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
             >
-              Clear all filters
+              <Trans>Clear all filters</Trans>
             </button>
           )}
         </div>
@@ -299,19 +312,19 @@ function ResourcesTab() {
                 <BookOpen size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                No resources found
+                <Trans>No resources found</Trans>
               </h3>
               <p className="text-gray-500 mb-6">
                 {hasActiveFilters
-                  ? 'Try adjusting your filters to find more resources.'
-                  : 'Resources will appear here once they are published.'}
+                  ? t`Try adjusting your filters to find more resources.`
+                  : t`Resources will appear here once they are published.`}
               </p>
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
                   className="px-5 py-2.5 btn-brand text-sm rounded-lg"
                 >
-                  Clear Filters
+                  <Trans>Clear Filters</Trans>
                 </button>
               )}
             </div>
@@ -323,6 +336,7 @@ function ResourcesTab() {
 }
 
 function IntegrationsTab() {
+  const { t, i18n } = useLingui()
   // Global search links here with ?search=<name> — there is no integration
   // detail route, so the pre-filtered list stands in for one.
   const [searchParams] = useSearchParams()
@@ -349,10 +363,11 @@ function IntegrationsTab() {
         ? groupByCategory<Integration>(
             integrations,
             (integration) => integration.category,
-            INTEGRATION_CATEGORY_LABELS
+            INTEGRATION_CATEGORY_LABELS,
+            t`Other`
           )
         : [],
-    [integrations, category]
+    [integrations, category, t]
   )
 
   return (
@@ -363,16 +378,21 @@ function IntegrationsTab() {
           <Select
             value={category}
             onChange={setCategory}
-            options={INTEGRATION_CATEGORY_OPTIONS}
-            ariaLabel="Filter by category"
+            options={INTEGRATION_CATEGORY_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
+            ariaLabel={t`Filter by category`}
           />
 
           <TagFilterSelect options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
 
           {!loading && integrations && (
             <p className="text-sm text-gray-500">
-              Found {integrations.length} integration{integrations.length !== 1 ? 's' : ''}
-              {categoryGroups.length > 1 && ` in ${categoryGroups.length} categories`}
+              <Plural value={integrations.length} one="Found # integration" other="Found # integrations" />
+              {categoryGroups.length > 1 && (
+                <>
+                  {' '}
+                  <Plural value={categoryGroups.length} one="in # category" other="in # categories" />
+                </>
+              )}
             </p>
           )}
 
@@ -380,8 +400,8 @@ function IntegrationsTab() {
             <CollapsibleSearch
               value={searchQuery}
               onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-              placeholder="Search integrations..."
-              ariaLabel="Search integrations"
+              placeholder={t`Search integrations...`}
+              ariaLabel={t`Search integrations`}
             />
             <ColumnToggle value={columns} onChange={setColumns} />
           </div>
@@ -423,11 +443,11 @@ function IntegrationsTab() {
             <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Puzzle size={32} className="text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No integrations found</h3>
+            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1"><Trans>No integrations found</Trans></h3>
             <p className="text-gray-500 text-sm">
               {searchQuery || category || tagFilter.length
-                ? 'Try adjusting your search, category or tag filters.'
-                : 'The directory is being curated — check back soon.'}
+                ? t`Try adjusting your search, category or tag filters.`
+                : t`The directory is being curated — check back soon.`}
             </p>
           </div>
         )}
@@ -437,6 +457,7 @@ function IntegrationsTab() {
 }
 
 function CoursesTab() {
+  const { t } = useLingui()
   const [subjectArea, setSubjectArea] = useState('')
   const [gradeLevel, setGradeLevel] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -466,7 +487,7 @@ function CoursesTab() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search courses..."
+              placeholder={t`Search courses...`}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value)
@@ -480,7 +501,7 @@ function CoursesTab() {
             onChange={(e) => setSubjectArea(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
-            <option value="">All Subjects</option>
+            <option value=""><Trans>All Subjects</Trans></option>
             {subjectAreaOptions.map((value) => (
               <option value={value} key={value}>{value}</option>
             ))}
@@ -490,7 +511,7 @@ function CoursesTab() {
             onChange={(e) => setGradeLevel(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
-            <option value="">All Grade Levels</option>
+            <option value=""><Trans>All Grade Levels</Trans></option>
             {gradeLevelOptions.map((value) => (
               <option value={value} key={value}>{value}</option>
             ))}
@@ -505,14 +526,14 @@ function CoursesTab() {
               <GraduationCap size={32} className="text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">
-              Course catalog is temporarily unavailable
+              <Trans>Course catalog is temporarily unavailable</Trans>
             </h3>
-            <p className="text-gray-500 text-sm mb-4">Please try again shortly.</p>
+            <p className="text-gray-500 text-sm mb-4"><Trans>Please try again shortly.</Trans></p>
             <button
               onClick={() => refetch()}
               className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm rounded-lg hover:bg-ktip-ocean-700 transition-colors"
             >
-              Retry
+              <Trans>Retry</Trans>
             </button>
           </div>
         ) : courses && courses.length > 0 ? (
@@ -533,11 +554,11 @@ function CoursesTab() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <GraduationCap size={32} className="text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No courses found</h3>
+            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1"><Trans>No courses found</Trans></h3>
             <p className="text-gray-500 text-sm">
               {searchQuery || subjectArea || gradeLevel
-                ? 'Try adjusting your search, subject or grade level filters.'
-                : 'The catalog is being curated — check back soon.'}
+                ? t`Try adjusting your search, subject or grade level filters.`
+                : t`The catalog is being curated — check back soon.`}
             </p>
           </div>
         )}

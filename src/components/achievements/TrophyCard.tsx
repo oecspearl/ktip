@@ -3,6 +3,7 @@ import { TrophyImage } from './TrophyImage'
 import { RARITY_CARD, RARITY_LABEL, TIER_LABEL, rarityOf } from '../../lib/achievement-style'
 import { cn } from '../../lib/utils'
 import type { BadgeDefinition, BadgeRarity, BadgeTier, TrophyAssetMap } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The rich trophy card: unlock popup, gallery grid, profile shelf.
@@ -54,6 +55,7 @@ export function TrophyCard({
   compact = false,
   className,
 }: TrophyCardProps) {
+    const { t } = useLingui()
   const effectiveRarity = rarityOf(rarity)
   const isLegendary = effectiveRarity === 'legendary' && !locked
   const imageSize = size === 'lg' ? 128 : 72
@@ -80,7 +82,7 @@ export function TrophyCard({
       {locked && (
         <span className="inline-flex items-center gap-1 rounded-full bg-ktip-sand-200/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-600">
           <Lock size={10} aria-hidden="true" />
-          {started ? 'In progress' : 'Locked'}
+          {started ? t`In progress` : t`Locked`}
         </span>
       )}
 
@@ -136,7 +138,7 @@ export function TrophyCard({
         {typeof points === 'number' && (
           <>
             <span aria-hidden="true">·</span>
-            <span>{points} pts</span>
+            <span><Trans>{points} pts</Trans></span>
           </>
         )}
       </div>
@@ -153,7 +155,7 @@ export function TrophyCard({
               aria-valuemin={0}
               aria-valuemax={progress.target}
               aria-valuenow={progress.current}
-              aria-label={`${name} progress`}
+              aria-label={t`${name} progress`}
             >
               <div
                 className="h-full rounded-full bg-ktip-ocean-500 transition-[width]"
@@ -165,12 +167,12 @@ export function TrophyCard({
             </p>
           </div>
         ) : (
-          <p className="text-[11px] text-ktip-sand-500">Awarded automatically</p>
+          <p className="text-[11px] text-ktip-sand-500"><Trans>Awarded automatically</Trans></p>
         ))}
 
       {!locked && earnedAt && (
         <p className={cn('text-[11px]', isLegendary ? 'text-white/70' : 'text-ktip-sand-500')}>
-          Earned {new Date(earnedAt).toLocaleDateString()}
+          <Trans>Earned {new Date(earnedAt).toLocaleDateString()}</Trans>
         </p>
       )}
     </div>
@@ -192,8 +194,8 @@ export function SecretTrophyCard({ className }: { className?: string }) {
       <span className="text-3xl text-ktip-sand-400" aria-hidden="true">
         ?
       </span>
-      <p className="text-sm font-medium text-ktip-sand-500">Secret achievement</p>
-      <p className="text-xs text-ktip-sand-400">Keep exploring to find it</p>
+      <p className="text-sm font-medium text-ktip-sand-500"><Trans>Secret achievement</Trans></p>
+      <p className="text-xs text-ktip-sand-400"><Trans>Keep exploring to find it</Trans></p>
     </div>
   )
 }

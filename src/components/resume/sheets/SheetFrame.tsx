@@ -3,6 +3,7 @@ import { Github, Globe, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
 import type { ResumeData, ResumeTheme } from '../../../types/resume'
 import type { ResumeDesign } from '../../../lib/resume-designs'
 import { cn } from '../../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The A4 page every design is drawn on, plus the pieces they share.
@@ -323,6 +324,7 @@ export function SkillCircles({
 
 /** Courses, as rows rather than cards — the column is too narrow for cards. */
 export function CourseTable({ data, dense = false }: { data: ResumeData; dense?: boolean }) {
+    const { t } = useLingui()
   const size = dense ? 'text-[7.5pt]' : 'text-[8pt]'
   return (
     <table className="w-full border-collapse text-left">
@@ -336,7 +338,7 @@ export function CourseTable({ data, dense = false }: { data: ResumeData; dense?:
               {course.subjectArea ?? course.provider}
             </td>
             <td className="w-[18%] border-b border-neutral-200 py-1.5 text-right text-[7.5pt] font-semibold text-neutral-700">
-              {course.status === 'completed' ? 'Completed' : `${course.progressPercentage}%`}
+              {course.status === 'completed' ? t`Completed` : `${course.progressPercentage}%`}
             </td>
           </tr>
         ))}
@@ -385,6 +387,7 @@ export function ProjectList({ data, dense = false }: { data: ResumeData; dense?:
  * cannot click anything. The URL is shown as bare text for the same reason.
  */
 export function CredentialList({ data, dense = false }: { data: ResumeData; dense?: boolean }) {
+  const { t } = useLingui()
   const body = dense ? 'text-[7.5pt]' : 'text-[8pt]'
   return (
     <ul className="space-y-2.5">
@@ -395,7 +398,7 @@ export function CredentialList({ data, dense = false }: { data: ResumeData; dens
           year && !Number.isNaN(year) ? String(year) : null,
           // Only claimed when the issuer claimed it. An unverified certificate
           // is still worth listing; calling it verified is not ours to do.
-          credential.verified ? 'Verified' : null,
+          credential.verified ? t`Verified` : null,
         ]
           .filter(Boolean)
           .join(' · ')
@@ -410,7 +413,9 @@ export function CredentialList({ data, dense = false }: { data: ResumeData; dens
             )}
             {(credential.code || credential.verifyUrl) && (
               <p className={cn('leading-snug text-neutral-700', body)}>
-                {credential.code && <>Code {credential.code}</>}
+                {credential.code && (
+                  <Trans>Code {credential.code}</Trans>
+                )}
                 {credential.code && credential.verifyUrl && ' · '}
                 {credential.verifyUrl && (
                   <a href={credential.verifyUrl} className="underline">

@@ -16,12 +16,16 @@ import { analytics } from '../../hooks/useAnalytics'
 import { Save } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { entityPath } from '../../lib/slug'
+import { useWarmTranslations } from '../../hooks/useTranslated'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function CreateProjectPage() {
+    const { t } = useLingui()
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
   const { createProject, loading } = useCreateProject()
+  const warmTranslations = useWarmTranslations()
 
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
@@ -76,7 +80,17 @@ export default function CreateProjectPage() {
       } as any)
 
       analytics.feature('project', 'created', { category })
-      toast.success('Project created successfully!')
+
+      // Warm the shared translation cache from the author's own browser, before
+      // any reader arrives. It costs roughly a thousand characters once, and it
+      // is what turns the first French visitor's experience from "English, then
+      // a swap ~350 ms later" into "French on the first paint" — because their
+      // request becomes a cache hit rather than a provider call. Fire-and-forget
+      // on purpose: the author must never wait on, or be told about, work done
+      // for somebody else's benefit.
+      warmTranslations([title, summary.trim(), description])
+
+      toast.success(t`Project created successfully!`)
       navigate(entityPath('project', project))
     } catch (error: any) {
       // /projects/new is gated on project:create, so RLS should never be the
@@ -94,13 +108,13 @@ export default function CreateProjectPage() {
   return (
     <>
       <PageHero
-        eyebrow="Create New Project"
-        title="New Project"
+        eyebrow={t`Create New Project`}
+        title={t`New Project`}
         imageSeed="projects"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Projects', href: '/projects' },
-          { label: 'Create' },
+          { label: t`Home`, href: '/' },
+          { label: t`Projects`, href: '/projects' },
+          { label: t`Create` },
         ]}
       />
 
@@ -116,8 +130,8 @@ export default function CreateProjectPage() {
 
             {/* Title */}
             <Input
-              label="Project Title"
-              placeholder="Enter a catchy title for your project"
+              label={t`Project Title`}
+              placeholder={t`Enter a catchy title for your project`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
@@ -127,8 +141,8 @@ export default function CreateProjectPage() {
 
             {/* Summary */}
             <Input
-              label="Summary"
-              placeholder="One short sentence shown on the homepage hero (optional)"
+              label={t`Summary`}
+              placeholder={t`One short sentence shown on the homepage hero (optional)`}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={180}
@@ -137,8 +151,8 @@ export default function CreateProjectPage() {
 
             {/* Description */}
             <Textarea
-              label="Description"
-              placeholder="Describe your project, its goals, and potential impact..."
+              label={t`Description`}
+              placeholder={t`Describe your project, its goals, and potential impact...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
@@ -149,10 +163,10 @@ export default function CreateProjectPage() {
             {/* Additional Details */}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Additional Details
+                <Trans>Additional Details</Trans>
               </label>
               <p className="text-xs text-ktip-sand-500 mb-2">
-                Optional extra metadata shown under the description — add standalone fields or groups of items
+                <Trans>Optional extra metadata shown under the description — add standalone fields or groups of items</Trans>
               </p>
               <DetailsEditor value={details} onChange={setDetails} />
             </div>
@@ -160,7 +174,7 @@ export default function CreateProjectPage() {
             {/* Category */}
             <div data-tutorial="project-form-category">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Category <span className="text-red-500">*</span>
+                <Trans>Category</Trans> <span className="text-red-500">*</span>
               </label>
               <select
                 value={category}
@@ -168,7 +182,7 @@ export default function CreateProjectPage() {
                 className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                 required
               >
-                <option value="">Select a category</option>
+                <option value=""><Trans>Select a category</Trans></option>
                 {PROJECT_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
@@ -183,26 +197,26 @@ export default function CreateProjectPage() {
             {/* Phase */}
             <div data-tutorial="project-form-phase">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Current Phase <span className="text-red-500">*</span>
+                <Trans>Current Phase</Trans> <span className="text-red-500">*</span>
               </label>
               <select
                 value={phase}
                 onChange={(e) => setPhase(e.target.value)}
                 className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               >
-                <option value="concept">Concept - Just an idea</option>
-                <option value="prototype">Prototype - Building MVP</option>
-                <option value="funding">Funding - Seeking investment</option>
-                <option value="launch">Launch - Ready to go!</option>
+                <option value="concept"><Trans>Concept - Just an idea</Trans></option>
+                <option value="prototype"><Trans>Prototype - Building MVP</Trans></option>
+                <option value="funding"><Trans>Funding - Seeking investment</Trans></option>
+                <option value="launch"><Trans>Launch - Ready to go!</Trans></option>
               </select>
             </div>
 
             {/* Hashtags */}
             <div data-tutorial="project-form-tags">
               <TagInput
-                label="Hashtags (Max 10)"
-                description="Topics people can filter and search projects by."
-                placeholder="Add a hashtag"
+                label={t`Hashtags (Max 10)`}
+                description={t`Topics people can filter and search projects by.`}
+                placeholder={t`Add a hashtag`}
                 values={hashtags}
                 onChange={(next) => setHashtags(normalizeHashtags(next))}
                 suggestions={CONTENT_TAG_SUGGESTIONS}
@@ -223,7 +237,7 @@ export default function CreateProjectPage() {
                   className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
                 />
                 <span className="text-sm text-ktip-sand-700">
-                  This project addresses climate change solutions
+                  <Trans>This project addresses climate change solutions</Trans>
                 </span>
               </label>
             </div>
@@ -238,7 +252,7 @@ export default function CreateProjectPage() {
                   className="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
                 />
                 <span className="text-sm text-ktip-sand-700">
-                  Make this project public (visible to everyone)
+                  <Trans>Make this project public (visible to everyone)</Trans>
                 </span>
               </label>
             </div>
@@ -246,7 +260,7 @@ export default function CreateProjectPage() {
             {/* Submit Button */}
             <div className="flex items-center gap-4">
               <Button type="submit" loading={loading} icon={<Save size={20} />} fullWidth>
-                Create Project
+                <Trans>Create Project</Trans>
               </Button>
               <button
                 type="button"
@@ -254,7 +268,7 @@ export default function CreateProjectPage() {
                 disabled={loading}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >
-                Cancel
+                <Trans>Cancel</Trans>
               </button>
             </div>
           </form>

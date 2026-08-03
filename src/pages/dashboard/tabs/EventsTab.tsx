@@ -5,9 +5,11 @@ import { EventCard } from '../../../components/events/EventCard'
 import { useUserEvents } from '../../../hooks/useProfile'
 import { useAuth } from '../../../contexts/AuthContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function EventsTab() {
-  usePageTitle('My Events')
+    const { t } = useLingui()
+  usePageTitle(t`My Events`)
   const auth = useAuth()
   const { events } = useUserEvents(auth.user?.id)
 
@@ -17,9 +19,9 @@ export default function EventsTab() {
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Calendar size={32} className="text-ktip-sand-400" />
         </div>
-        <p className="text-ktip-sand-600 mb-4">No events organized yet.</p>
+        <p className="text-ktip-sand-600 mb-4"><Trans>No events organized yet.</Trans></p>
         <Link to="/events/new">
-          <Button icon={<Plus size={18} />}>Create an event</Button>
+          <Button icon={<Plus size={18} />}><Trans>Create an event</Trans></Button>
         </Link>
       </div>
     )

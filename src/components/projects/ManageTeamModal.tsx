@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import type { Profile, ProjectMemberRole } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface ManageTeamModalProps {
   open: boolean
@@ -16,6 +17,7 @@ interface ManageTeamModalProps {
 }
 
 export function ManageTeamModal({ open, onClose, projectId, projectTitle }: ManageTeamModalProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { members } = useProjectMembers(projectId)
@@ -33,7 +35,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
       const memberIds = new Set((members || []).map((m) => m.user_id))
       setResults(users.filter((u) => !memberIds.has(u.id)))
     } catch {
-      toast.error('Search failed')
+      toast.error(t`Search failed`)
     }
   }
 
@@ -48,41 +50,41 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
         invitedBy: auth.user.id,
       })
       setResults((prev) => prev.filter((u) => u.id !== userId))
-      toast.success('Invitation sent')
+      toast.success(t`Invitation sent`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send invitation')
+      toast.error(err.message || t`Failed to send invitation`)
     }
   }
 
   const handleRoleChange = async (membershipId: string, role: ProjectMemberRole) => {
     try {
       await updateMemberRole({ membershipId, role })
-      toast.success('Role updated')
+      toast.success(t`Role updated`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update role')
+      toast.error(err.message || t`Failed to update role`)
     }
   }
 
   const handleRemove = async (membershipId: string) => {
     try {
       await removeMember(membershipId)
-      toast.success('Member removed')
+      toast.success(t`Member removed`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to remove member')
+      toast.error(err.message || t`Failed to remove member`)
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Manage Team" size="lg">
+    <Modal open={open} onClose={onClose} title={t`Manage Team`} size="lg">
       {/* Invite */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-ktip-sand-900 mb-2">Invite members</label>
+        <label className="block text-sm font-semibold text-ktip-sand-900 mb-2"><Trans>Invite members</Trans></label>
         <div className="flex gap-2 mb-2">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search users by name..."
+              placeholder={t`Search users by name...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -94,15 +96,15 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
             onChange={(e) => setInviteRole(e.target.value as ProjectMemberRole)}
             className="px-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:outline-none"
           >
-            <option value="viewer">Viewer</option>
-            <option value="editor">Editor</option>
+            <option value="viewer"><Trans>Viewer</Trans></option>
+            <option value="editor"><Trans>Editor</Trans></option>
           </select>
           <button
             onClick={handleSearch}
             disabled={searching}
             className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg disabled:opacity-50"
           >
-            Search
+            <Trans>Search</Trans>
           </button>
         </div>
 
@@ -117,7 +119,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
                     size={32}
                   />
                   <span className="text-sm font-medium text-ktip-sand-900 truncate">
-                    {user.display_name || 'Unknown User'}
+                    {user.display_name || t`Unknown User`}
                   </span>
                 </div>
                 <button
@@ -126,7 +128,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
                   className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-lg transition-colors disabled:opacity-50"
                 >
                   <UserPlus size={14} />
-                  Invite
+                  <Trans>Invite</Trans>
                 </button>
               </div>
             ))}
@@ -136,7 +138,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
 
       {/* Current team */}
       <div>
-        <label className="block text-sm font-semibold text-ktip-sand-900 mb-2">Team</label>
+        <label className="block text-sm font-semibold text-ktip-sand-900 mb-2"><Trans>Team</Trans></label>
         {members && members.length > 0 ? (
           <div className="border border-ktip-sand-200 rounded-lg divide-y divide-ktip-sand-100">
             {members.map((member) => (
@@ -149,10 +151,10 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
                   />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ktip-sand-900 truncate">
-                      {member.user?.display_name || 'Unknown User'}
+                      {member.user?.display_name || t`Unknown User`}
                     </p>
                     {member.status === 'pending' && (
-                      <p className="text-xs text-ktip-sun-600">Invitation pending</p>
+                      <p className="text-xs text-ktip-sun-600"><Trans>Invitation pending</Trans></p>
                     )}
                   </div>
                 </div>
@@ -163,14 +165,14 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
                     disabled={loading}
                     className="px-2 py-1 border border-ktip-sand-300 rounded text-xs focus:outline-none"
                   >
-                    <option value="viewer">Viewer</option>
-                    <option value="editor">Editor</option>
+                    <option value="viewer"><Trans>Viewer</Trans></option>
+                    <option value="editor"><Trans>Editor</Trans></option>
                   </select>
                   <button
                     onClick={() => handleRemove(member.id)}
                     disabled={loading}
                     className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                    aria-label="Remove member"
+                    aria-label={t`Remove member`}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -180,7 +182,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
           </div>
         ) : (
           <p className="text-sm text-gray-500 py-4 text-center">
-            No team members yet. Invite someone above.
+            <Trans>No team members yet. Invite someone above.</Trans>
           </p>
         )}
       </div>

@@ -11,6 +11,7 @@ import { Hash, Copy, Check, Shuffle, Search, X, UserPlus, Send, ArrowLeft, Pen, 
 import { PageHero } from '../../components/layout/PageHero'
 import type { Profile } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 function generateRoomName(): string {
   const adjectives = ['swift', 'bright', 'bold', 'calm', 'keen', 'warm', 'vivid', 'crisp']
@@ -22,7 +23,8 @@ function generateRoomName(): string {
 }
 
 export default function VideoConferencePage() {
-  usePageTitle('Video Conference')
+    const { t } = useLingui()
+  usePageTitle(t`Video Conference`)
   const auth = useAuth()
 
   // Auto-fill room name from URL query param (runs once, at mount)
@@ -60,7 +62,7 @@ export default function VideoConferencePage() {
     if (profile?.display_name) return profile.display_name
     const email = auth.user?.email
     if (email) return email.split('@')[0]
-    return 'Guest'
+    return t`Guest`
   }
 
   const handleGenerate = () => {
@@ -143,7 +145,8 @@ export default function VideoConferencePage() {
     setInviteError(null)
     try {
       const roomLink = `${window.location.origin}/collaborate/video?room=${encodeURIComponent(room)}`
-      const inviteMessage = `📹 You've been invited to a video conference!\n\nRoom: ${room}\nJoin here: ${roomLink}\n\nClick the link above to join the call.`
+      const inviterName = displayName()
+      const inviteMessage = t`📹 You've been invited to a video conference!\n\nRoom: ${room}\nJoin here: ${roomLink}\n\nClick the link above to join the call.`
 
       for (const user of selectedUsers) {
         const conversationId = await createConversation(currentUserId, user.id)
@@ -156,8 +159,8 @@ export default function VideoConferencePage() {
         sendNotification({
           userId: user.id,
           type: 'video_invite',
-          title: 'Video Conference Invitation',
-          body: `${displayName()} invited you to join room "${room}"`,
+          title: t`Video Conference Invitation`,
+          body: t`${inviterName} invited you to join room "${room}"`,
           link: `/collaborate/video?room=${encodeURIComponent(room)}`,
         })
       }
@@ -165,7 +168,7 @@ export default function VideoConferencePage() {
       setSelectedUsers([])
       setTimeout(() => setInviteSuccess(false), 3000)
     } catch (err: any) {
-      setInviteError(err?.message || 'Failed to send invitations. Please try again.')
+      setInviteError(err?.message || t`Failed to send invitations. Please try again.`)
     } finally {
       setInviting(false)
     }
@@ -174,14 +177,14 @@ export default function VideoConferencePage() {
   return (
     <>
       <PageHero
-        eyebrow="Collaboration Tools"
-        title="Video Conference"
+        eyebrow={t`Collaboration Tools`}
+        title={t`Video Conference`}
         imageSeed="video"
         compact
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Video Conference' },
+          { label: t`Home`, href: '/' },
+          { label: t`Collaborate`, href: '/collaborate' },
+          { label: t`Video Conference` },
         ]}
       />
 
@@ -195,27 +198,27 @@ export default function VideoConferencePage() {
               className="inline-flex items-center gap-1.5 text-ktip-sand-600 hover:text-ktip-ocean-600 transition-colors font-medium"
             >
               <ArrowLeft size={14} />
-              Back to Collaborate Hub
+              <Trans>Back to Collaborate Hub</Trans>
             </Link>
             <span className="text-ktip-sand-300">|</span>
             <Link to="/collaborate/whiteboards" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
               <Pen size={14} />
-              Whiteboards
+              <Trans>Whiteboards</Trans>
             </Link>
             <Link to="/collaborate/documents" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
               <FileText size={14} />
-              Documents
+              <Trans>Documents</Trans>
             </Link>
             <Link to="/collaborate/snippets" className="inline-flex items-center gap-1.5 text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors">
               <Code size={14} />
-              Code
+              <Trans>Code</Trans>
             </Link>
           </div>
 
           {/* Room Name Input */}
           <div className="border border-ktip-sand-200 p-6 mb-6">
             <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-              Room Name
+              <Trans>Room Name</Trans>
             </label>
             <div className="flex gap-3">
               <div className="relative flex-1">
@@ -225,7 +228,7 @@ export default function VideoConferencePage() {
                 />
                 <input
                   type="text"
-                  placeholder="e.g. ktip-team-standup"
+                  placeholder={t`e.g. ktip-team-standup`}
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
@@ -235,25 +238,24 @@ export default function VideoConferencePage() {
                 type="button"
                 onClick={handleGenerate}
                 className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-lg hover:bg-ktip-sand-50 text-ktip-sand-600 transition-colors"
-                title="Generate a random room name"
+                title={t`Generate a random room name`}
               >
                 <Shuffle size={16} />
-                <span className="text-sm font-medium">Generate</span>
+                <span className="text-sm font-medium"><Trans>Generate</Trans></span>
               </button>
               <button
                 type="button"
                 onClick={copyRoomLink}
                 disabled={!roomName.trim()}
                 className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-lg hover:bg-ktip-sand-50 text-ktip-sand-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                title="Copy shareable link"
+                title={t`Copy shareable link`}
               >
                 {copied ? <Check size={16} className="text-ktip-tropical-700" /> : <Copy size={16} />}
-                <span className="text-sm font-medium">{copied ? 'Copied!' : 'Share'}</span>
+                <span className="text-sm font-medium">{copied ? t`Copied!` : t`Share`}</span>
               </button>
             </div>
             <p className="mt-2 text-xs text-ktip-sand-400">
-              Enter a room name or generate one. Anyone with the same room name joins the same call.
-              Use the Share button to copy a direct link for your team.
+              <Trans>Enter a room name or generate one. Anyone with the same room name joins the same call. Use the Share button to copy a direct link for your team.</Trans>
             </p>
           </div>
 
@@ -261,7 +263,7 @@ export default function VideoConferencePage() {
           <div className="border border-ktip-sand-200 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <UserPlus size={18} className="text-ktip-ocean-600" />
-              <h2 className="text-sm font-semibold text-ktip-sand-800">Invite Participants</h2>
+              <h2 className="text-sm font-semibold text-ktip-sand-800"><Trans>Invite Participants</Trans></h2>
             </div>
 
             {/* Connections quick-pick */}
@@ -269,7 +271,7 @@ export default function VideoConferencePage() {
               <div className="mb-3">
                 <p className="flex items-center gap-1.5 text-xs font-medium text-ktip-sand-500 mb-2">
                   <Users size={12} />
-                  My connections
+                  <Trans>My connections</Trans>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {connectionProfiles.slice(0, 12).map((user) => (
@@ -279,8 +281,8 @@ export default function VideoConferencePage() {
                       onClick={() => selectUser(user)}
                       className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full border border-ktip-sand-200 bg-ktip-cream hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50/40 text-xs font-medium text-ktip-sand-700 transition-colors"
                     >
-                      <DiamondAvatar name={user.display_name || 'User'} size={20} />
-                      {user.display_name || 'User'}
+                      <DiamondAvatar name={user.display_name || t`User`} size={20} />
+                      {user.display_name || t`User`}
                     </button>
                   ))}
                 </div>
@@ -295,7 +297,7 @@ export default function VideoConferencePage() {
               />
               <input
                 type="text"
-                placeholder="Search all members..."
+                placeholder={t`Search all members...`}
                 value={inviteQuery}
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onFocus={() => {
@@ -325,10 +327,10 @@ export default function VideoConferencePage() {
                       onClick={() => selectUser(user)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-ktip-sand-50 transition-colors text-left"
                     >
-                      <DiamondAvatar name={user.display_name || 'User'} size={32} />
+                      <DiamondAvatar name={user.display_name || t`User`} size={32} />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-ktip-sand-800 truncate">
-                          {user.display_name || 'Unnamed User'}
+                          {user.display_name || t`Unnamed User`}
                         </p>
                         {user.country && (
                           <p className="text-xs text-ktip-sand-500">{user.country}</p>
@@ -348,7 +350,7 @@ export default function VideoConferencePage() {
             {/* No results message */}
             {showDropdown && searchResults.length === 0 && inviteQuery.trim() && !searchLoading && (
               <div className="mt-1 border border-ktip-sand-200 rounded-lg bg-ktip-cream shadow-medium px-3 py-3">
-                <p className="text-sm text-ktip-sand-500 text-center">No users found</p>
+                <p className="text-sm text-ktip-sand-500 text-center"><Trans>No users found</Trans></p>
               </div>
             )}
 
@@ -363,11 +365,11 @@ export default function VideoConferencePage() {
                       className={`inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium text-white ${color}`}
                     >
                       <DiamondAvatar
-                        name={user.display_name || 'User'}
+                        name={user.display_name || t`User`}
                         size={20}
                         colorClass="bg-white/20"
                       />
-                      {user.display_name || 'User'}
+                      {user.display_name || t`User`}
                       <button
                         type="button"
                         onClick={() => removeUser(user.id)}
@@ -394,9 +396,15 @@ export default function VideoConferencePage() {
                 ) : (
                   <Send size={16} />
                 )}
-                {inviting
-                  ? 'Sending invites...'
-                  : `Invite ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''} & Start Call`}
+                {inviting ? (
+                  t`Sending invites...`
+                ) : (
+                  <Plural
+                    value={selectedUsers.length}
+                    one="Invite # user & Start Call"
+                    other="Invite # users & Start Call"
+                  />
+                )}
               </button>
             )}
 
@@ -404,7 +412,7 @@ export default function VideoConferencePage() {
             {inviteSuccess && (
               <div className="mt-3 flex items-center gap-2 text-sm text-ktip-tropical-700">
                 <Check size={16} />
-                <span>Invitations sent! Users will receive a message with the room link.</span>
+                <span><Trans>Invitations sent! Users will receive a message with the room link.</Trans></span>
               </div>
             )}
 
@@ -417,7 +425,7 @@ export default function VideoConferencePage() {
             )}
 
             <p className="mt-3 text-xs text-ktip-sand-400">
-              Search for users to invite. They'll receive a direct message with a link to join the call.
+              <Trans>Search for users to invite. They'll receive a direct message with a link to join the call.</Trans>
             </p>
           </div>
 

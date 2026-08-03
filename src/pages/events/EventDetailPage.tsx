@@ -61,10 +61,12 @@ import type { AttendanceType, RSVPStatus } from '../../types'
 import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function EventDetailPage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -117,9 +119,9 @@ export default function EventDetailPage() {
     if (!event) return
     try {
       await updateStatus(event.id, 'published')
-      toast.success('Event published — it now shows in public listings')
+      toast.success(t`Event published — it now shows in public listings`)
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to publish event')
+      toast.error(error?.message || t`Failed to publish event`)
     }
   }
 
@@ -145,7 +147,7 @@ export default function EventDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event?.id, auth.user?.id])
 
-  const registrantName = auth.profile?.display_name || 'Someone'
+  const registrantName = auth.profile?.display_name || t`Someone`
 
   const handleRSVP = async () => {
     if (!auth.user || !event) return
@@ -158,7 +160,7 @@ export default function EventDetailPage() {
         await cancelRSVP(event.id, auth.user.id)
         await rsvp(event.id, auth.user.id, attendanceType, event, registrantName)
         setMyRsvp({ status: 'pending', attendance_type: attendanceType })
-        toast.success('Registration sent — the organizer will approve it.')
+        toast.success(t`Registration sent — the organizer will approve it.`)
       } else if (myRsvp) {
         await cancelRSVP(event.id, auth.user.id)
         // Only a confirmed registration was ever counted, so a pending one
@@ -171,10 +173,10 @@ export default function EventDetailPage() {
       } else {
         await rsvp(event.id, auth.user.id, attendanceType, event, registrantName)
         setMyRsvp({ status: 'pending', attendance_type: attendanceType })
-        toast.success('Registration sent — the organizer will approve it.')
+        toast.success(t`Registration sent — the organizer will approve it.`)
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to register')
+      toast.error(error?.message || t`Failed to register`)
     }
   }
 
@@ -184,9 +186,9 @@ export default function EventDetailPage() {
       await submitRegistration(event.id, auth.user.id, data, attendanceType, event, registrantName)
       setMyRsvp({ status: 'pending', attendance_type: attendanceType })
       setShowRegForm(false)
-      toast.success('Registration sent — the organizer will approve it.')
+      toast.success(t`Registration sent — the organizer will approve it.`)
     } catch (error: any) {
-      toast.error(error.message || 'Failed to submit registration')
+      toast.error(error.message || t`Failed to submit registration`)
     }
   }
 
@@ -211,7 +213,7 @@ export default function EventDetailPage() {
       return (
         <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-          <p className="mt-4 text-ktip-sand-600">Loading event...</p>
+          <p className="mt-4 text-ktip-sand-600"><Trans>Loading event...</Trans></p>
         </div>
       )
     }
@@ -221,16 +223,16 @@ export default function EventDetailPage() {
           <CalendarX size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          Event Not Found
+          <Trans>Event Not Found</Trans>
         </h2>
         <p className="text-gray-500 mb-6">
-          This event doesn't exist or has been removed.
+          <Trans>This event doesn't exist or has been removed.</Trans>
         </p>
         <button
           onClick={() => navigate('/events')}
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
-          Back to Events
+          <Trans>Back to Events</Trans>
         </button>
       </div>
     )
@@ -239,13 +241,13 @@ export default function EventDetailPage() {
   return (
     <>
       <PageHero
-        eyebrow="Event Detail"
+        eyebrow={t`Event Detail`}
         title={event.title}
         image={event.image_url}
         imageSeed={event.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Events', href: '/events' },
+          { label: t`Home`, href: '/' },
+          { label: t`Events`, href: '/events' },
           { label: truncate(event.title, 30) },
         ]}
         actions={
@@ -258,7 +260,7 @@ export default function EventDetailPage() {
                   className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Send size={14} />
-                  {publishing ? 'Publishing…' : 'Publish'}
+                  {publishing ? t`Publishing…` : t`Publish`}
                 </button>
               )}
               <Link to={`/events/${params.id}/edit`}>
@@ -271,7 +273,7 @@ export default function EventDetailPage() {
                   }`}
                 >
                   <Edit size={14} />
-                  Edit
+                  <Trans>Edit</Trans>
                 </button>
               </Link>
               {/* `checking` still true means the RSVP count has not landed; the
@@ -307,7 +309,7 @@ export default function EventDetailPage() {
             </Badge>
           )}
           {isPastEvent && event.status !== 'cancelled' && (
-            <Badge variant="default">Past Event</Badge>
+            <Badge variant="default"><Trans>Past Event</Trans></Badge>
           )}
         </div>
       </PageHero>
@@ -317,8 +319,8 @@ export default function EventDetailPage() {
         <div className="bg-ktip-sun-50 border-b border-ktip-sun-200 py-3">
           <p className="text-center text-sm text-ktip-sand-800">
             {isOrganizer
-              ? 'This event is a draft — only you can see it. Publish it to list it on Events and the hackathon pages.'
-              : 'This event is a draft and is not published yet.'}
+              ? t`This event is a draft — only you can see it. Publish it to list it on Events and the hackathon pages.`
+              : t`This event is a draft and is not published yet.`}
           </p>
         </div>
       )}
@@ -327,7 +329,7 @@ export default function EventDetailPage() {
       {isPastEvent && (
         <div className="bg-ktip-sand-50 border-b border-ktip-sand-200 py-3">
           <p className="text-gray-700 text-center text-sm">
-            This event has already passed
+            <Trans>This event has already passed</Trans>
           </p>
         </div>
       )}
@@ -346,7 +348,7 @@ export default function EventDetailPage() {
             {/* Date line */}
             {startDate && (
               <p className="text-sm text-gray-400 text-center mb-6">
-                Date: {format(startDate, 'MMMM dd, yyyy')}
+                <Trans>Date: {format(startDate, 'MMMM dd, yyyy')}</Trans>
               </p>
             )}
 
@@ -372,13 +374,13 @@ export default function EventDetailPage() {
               <div className="flex items-start gap-3">
                 <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
                 <div>
-                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="text-sm text-gray-500"><Trans>Date</Trans></p>
                   <p className="font-medium text-ktip-sand-900">
                     {format(startDate!, 'EEEE, MMMM d, yyyy')}
                     {!isSingleDay && (
                       <>
                         <br />
-                        to {format(endDate!, 'EEEE, MMMM d, yyyy')}
+                        <Trans>to {format(endDate!, 'EEEE, MMMM d, yyyy')}</Trans>
                       </>
                     )}
                   </p>
@@ -389,7 +391,7 @@ export default function EventDetailPage() {
               <div className="flex items-start gap-3">
                 <Clock size={20} className="text-ktip-ocean-600 mt-1" />
                 <div>
-                  <p className="text-sm text-gray-500">Time</p>
+                  <p className="text-sm text-gray-500"><Trans>Time</Trans></p>
                   <p className="font-medium text-ktip-sand-900">
                     {format(startDate!, 'h:mm a')}
                     {endDate && (
@@ -407,9 +409,9 @@ export default function EventDetailPage() {
                   <MapPin size={20} className="text-ktip-ocean-600 mt-1" />
                 )}
                 <div>
-                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="text-sm text-gray-500"><Trans>Location</Trans></p>
                   <p className="font-medium text-ktip-sand-900">
-                    {event.is_virtual ? 'Virtual Event' : event.location}
+                    {event.is_virtual ? t`Virtual Event` : event.location}
                   </p>
                 </div>
               </div>
@@ -419,11 +421,11 @@ export default function EventDetailPage() {
                 <div className="flex items-start gap-3">
                   <Users size={20} className="text-ktip-ocean-600 mt-1" />
                   <div>
-                    <p className="text-sm text-gray-500">Capacity</p>
+                    <p className="text-sm text-gray-500"><Trans>Capacity</Trans></p>
                     <p className="font-medium text-ktip-sand-900">
-                      {rsvpCount} / {event.capacity} attendees
+                      <Trans>{rsvpCount} / {event.capacity} attendees</Trans>
                       {isFull && (
-                        <span className="text-red-600 ml-2">(Full)</span>
+                        <span className="text-red-600 ml-2"><Trans>(Full)</Trans></span>
                       )}
                     </p>
                   </div>
@@ -456,9 +458,9 @@ export default function EventDetailPage() {
             {event.description && (
               <div id="about" data-spy="About" className="scroll-mt-24 mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  About This Event
+                  <Trans>About This Event</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-3">Event description</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-3"><Trans>Event description</Trans></p>
                 <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                   {event.description}
                 </div>
@@ -469,9 +471,9 @@ export default function EventDetailPage() {
             {event.details && event.details.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  Additional Details
+                  <Trans>Additional Details</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-3">Key facts at a glance</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-3"><Trans>Key facts at a glance</Trans></p>
                 <DetailsList details={event.details} />
               </div>
             )}
@@ -482,11 +484,11 @@ export default function EventDetailPage() {
                 className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href)
-                  toast.success('Link copied to clipboard!')
+                  toast.success(t`Link copied to clipboard!`)
                 }}
               >
                 <Share2 size={16} />
-                Share
+                <Trans>Share</Trans>
               </button>
             </div>
 
@@ -501,15 +503,14 @@ export default function EventDetailPage() {
               >
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-lg font-bold text-ktip-ocean-800">
-                    This event has a live virtual venue
+                    <Trans>This event has a live virtual venue</Trans>
                   </h2>
                   <p className="mt-1 text-sm text-ktip-ocean-700">
-                    Rooms, open audio and everyone who is online right now. Registered attendees can
-                    walk straight in.
+                    <Trans>Rooms, open audio and everyone who is online right now. Registered attendees can walk straight in.</Trans>
                   </p>
                 </div>
                 <Link to={venuePath(event)} className="shrink-0">
-                  <Button icon={<MapIcon size={16} />}>Enter the venue</Button>
+                  <Button icon={<MapIcon size={16} />}><Trans>Enter the venue</Trans></Button>
                 </Link>
               </div>
             )}
@@ -572,9 +573,9 @@ export default function EventDetailPage() {
               <div id="updates" data-spy="Updates" className="scroll-mt-24 mt-10">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
                   <Megaphone size={18} className="text-ktip-ocean-600" />
-                  Updates
+                  <Trans>Updates</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Latest announcements</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Latest announcements</Trans></p>
                 <div className="space-y-4">
                   {eventUpdates.map((update) => (
                     <div key={update.id} className="border-l-4 border-ktip-ocean-200 pl-4 py-2">
@@ -599,9 +600,9 @@ export default function EventDetailPage() {
               <div className="mt-10">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
                   <FileText size={18} className="text-ktip-ocean-600" />
-                  Articles
+                  <Trans>Articles</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Related reading</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Related reading</Trans></p>
                 <div className="space-y-6">
                   {eventArticles.map((article) => (
                     <div key={article.id} className="border-b border-ktip-sand-200 pb-4 last:border-0 last:pb-0">
@@ -614,7 +615,7 @@ export default function EventDetailPage() {
                       <p className="text-gray-700 whitespace-pre-wrap">{article.content}</p>
                       <p className="text-xs text-gray-400 mt-3">
                         {format(new Date(article.created_at), 'MMM d, yyyy')}
-                        {article.author?.display_name && ` by ${article.author.display_name}`}
+                        {article.author?.display_name && t` by ${article.author.display_name}`}
                       </p>
                     </div>
                   ))}
@@ -628,9 +629,9 @@ export default function EventDetailPage() {
             {/* Widget 1: Event Registration */}
             <div data-tutorial="event-registration" className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Event Registration
+                <Trans>Event Registration</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">RSVP & sign up</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>RSVP & sign up</Trans></p>
 
               {checking && (
                 <div className="text-center py-4">
@@ -642,7 +643,7 @@ export default function EventDetailPage() {
                 <>
                   {isOrganizer && (
                     <div className="text-center py-4 text-gray-500">
-                      <p>You are the organizer of this event</p>
+                      <p><Trans>You are the organizer of this event</Trans></p>
                     </div>
                   )}
 
@@ -652,12 +653,13 @@ export default function EventDetailPage() {
                         <div className="bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-ktip-sun-800 mb-2">
                             <Clock size={20} />
-                            <span className="font-medium">Waiting on the organizer</span>
+                            <span className="font-medium"><Trans>Waiting on the organizer</Trans></span>
                           </div>
                           <p className="text-sm text-ktip-sun-700">
-                            You asked to attend as a{' '}
-                            {ATTENDANCE_TYPE_LABELS[myRsvp!.attendance_type].toLowerCase()}. You'll be
-                            notified once it is approved.
+                            <Trans>
+                              You asked to attend as a {ATTENDANCE_TYPE_LABELS[myRsvp!.attendance_type]}. You'll be
+                              notified once it is approved.
+                            </Trans>
                           </p>
                         </div>
                       )}
@@ -666,10 +668,10 @@ export default function EventDetailPage() {
                         <div className="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-ktip-tropical-700 mb-2">
                             <CheckCircle size={20} />
-                            <span className="font-medium">You're attending!</span>
+                            <span className="font-medium"><Trans>You're attending!</Trans></span>
                           </div>
                           <p className="text-sm text-ktip-tropical-600">
-                            We look forward to seeing you at the event.
+                            <Trans>We look forward to seeing you at the event.</Trans>
                           </p>
                         </div>
                       )}
@@ -678,10 +680,10 @@ export default function EventDetailPage() {
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-red-700 mb-2">
                             <XCircle size={20} />
-                            <span className="font-medium">Registration declined</span>
+                            <span className="font-medium"><Trans>Registration declined</Trans></span>
                           </div>
                           <p className="text-sm text-red-600">
-                            The organizer did not approve this registration.
+                            <Trans>The organizer did not approve this registration.</Trans>
                           </p>
                         </div>
                       )}
@@ -690,11 +692,11 @@ export default function EventDetailPage() {
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-red-700 mb-2">
                             <XCircle size={20} />
-                            <span className="font-medium">Event is full</span>
+                            <span className="font-medium"><Trans>Event is full</Trans></span>
                           </div>
                           <p className="text-sm text-red-600">
-                            Every participant place has been taken.
-                            {offersViewing && ' You can still register as a viewer.'}
+                            <Trans>Every participant place has been taken.</Trans>
+                            {offersViewing && <Trans> You can still register as a viewer.</Trans>}
                           </p>
                         </div>
                       )}
@@ -726,14 +728,14 @@ export default function EventDetailPage() {
                           disabled={!canRSVP && !myRsvp}
                         >
                           {isPending
-                            ? 'Withdraw registration'
+                            ? t`Withdraw registration`
                             : myRsvp?.status === 'declined'
-                              ? 'Ask again'
+                              ? t`Ask again`
                               : myRsvp
-                                ? 'Cancel RSVP'
+                                ? t`Cancel RSVP`
                                 : hasCustomFields
-                                  ? 'Register for Event'
-                                  : 'Request to attend'}
+                                  ? t`Register for Event`
+                                  : t`Request to attend`}
                         </Button>
                       )}
                     </>
@@ -741,7 +743,7 @@ export default function EventDetailPage() {
 
                   {isPastEvent && (
                     <div className="text-center py-4 text-gray-500">
-                      <p>This event has already passed</p>
+                      <p><Trans>This event has already passed</Trans></p>
                     </div>
                   )}
                 </>
@@ -750,7 +752,7 @@ export default function EventDetailPage() {
               {/* Attendee Count */}
               <div className="mt-4 pt-4 border-t border-ktip-sand-200">
                 <p className="text-sm text-gray-500">
-                  {rsvpCount} {rsvpCount === 1 ? 'person' : 'people'} attending
+                  <Plural value={rsvpCount} one="# person attending" other="# people attending" />
                 </p>
               </div>
             </div>
@@ -758,13 +760,13 @@ export default function EventDetailPage() {
             {/* Widget 2: Organizer */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Organized By
+                <Trans>Organized By</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Event host</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Event host</Trans></p>
               <div className="flex items-center gap-3 mb-4">
                 <DiamondAvatar
                   src={event.organizer?.avatar_url}
-                  name={event.organizer?.display_name || 'Organizer'}
+                  name={event.organizer?.display_name || t`Organizer`}
                   size={48}
                 />
                 <div>
@@ -773,7 +775,7 @@ export default function EventDetailPage() {
                     onClick={() => openMember(event.organizer_id)}
                     className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                   >
-                    {event.organizer?.display_name || 'Unknown User'}
+                    {event.organizer?.display_name || t`Unknown User`}
                   </button>
                   {event.organizer?.country && (
                     <p className="text-sm text-gray-500">
@@ -783,44 +785,44 @@ export default function EventDetailPage() {
                 </div>
               </div>
               <Button variant="outline" fullWidth>
-                Contact Organizer
+                <Trans>Contact Organizer</Trans>
               </Button>
             </div>
 
             {/* Widget 3: Event Details */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Event Details
+                <Trans>Event Details</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
               <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Type</span>
+                  <span className="text-gray-500"><Trans>Type</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {EVENT_TYPE_LABELS[event.event_type]}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Date</span>
+                  <span className="text-gray-500"><Trans>Date</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {format(startDate!, 'MMM dd, yyyy')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Time</span>
+                  <span className="text-gray-500"><Trans>Time</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {format(startDate!, 'h:mm a')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Format</span>
+                  <span className="text-gray-500"><Trans>Format</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
-                    {event.is_virtual ? 'Virtual' : 'In-Person'}
+                    {event.is_virtual ? t`Virtual` : t`In-Person`}
                   </span>
                 </div>
                 {event.capacity && (
                   <div className="flex items-center justify-between py-2.5">
-                    <span className="text-gray-500">Capacity</span>
+                    <span className="text-gray-500"><Trans>Capacity</Trans></span>
                     <span className="font-medium text-ktip-sand-900">
                       {event.capacity}
                     </span>
@@ -832,11 +834,11 @@ export default function EventDetailPage() {
             {/* Widget 4: Share */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Share This Event
+                <Trans>Share This Event</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Spread the word</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Spread the word</Trans></p>
               <Button variant="outline" fullWidth icon={<Share2 size={18} />}>
-                Copy Link
+                <Trans>Copy Link</Trans>
               </Button>
             </div>
           </div>

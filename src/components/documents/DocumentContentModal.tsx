@@ -12,6 +12,7 @@ import {
 } from '../../hooks/useEntityDocuments'
 import { formatFileSize } from '../../lib/document-extract'
 import type { DocumentEntityType, EntityDocumentSummary } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface DocumentContentModalProps {
   open: boolean
@@ -41,6 +42,7 @@ export function DocumentContentModal({
   entity,
   canEditEntity,
 }: DocumentContentModalProps) {
+  const { t } = useLingui()
   const toast = useToast()
   const { document: full, loading } = useDocumentContent(open ? document.id : undefined)
   const { saveContent, loading: saving } = useSaveDocumentContent()
@@ -61,20 +63,20 @@ export function DocumentContentModal({
     try {
       await saveContent({ documentId: document.id, html })
       setDirty(false)
-      toast.success('Saved')
+      toast.success(t`Saved`)
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to save')
+      toast.error(err?.message || t`Failed to save`)
     }
   }
 
   const handleDownload = async () => {
     if (!document.storage_path) return
     const ok = await openDocument(document.storage_path, document.file_name)
-    if (!ok) toast.error('Could not open the original file')
+    if (!ok) toast.error(t`Could not open the original file`)
   }
 
   const handleClose = () => {
-    if (dirty && !window.confirm('Discard your unsaved changes to this document?')) return
+    if (dirty && !window.confirm(t`Discard your unsaved changes to this document?`)) return
     onClose()
   }
 
@@ -95,14 +97,14 @@ export function DocumentContentModal({
         )}
 
         {loading ? (
-          <p className="py-12 text-center text-sm text-ktip-sand-500">Loading…</p>
+          <p className="py-12 text-center text-sm text-ktip-sand-500"><Trans>Loading…</Trans></p>
         ) : noContent ? (
           <div className="flex items-start gap-3 p-4 bg-ktip-sun-50 border border-ktip-sun-200 rounded-xl">
             <FileWarning size={18} className="text-ktip-sun-700 shrink-0 mt-0.5" />
             <div className="text-sm text-ktip-sun-800">
-              <p className="font-medium">No readable text in this file.</p>
+              <p className="font-medium"><Trans>No readable text in this file.</Trans></p>
               <p className="text-ktip-sun-700">
-                {full?.extraction_error || 'Download the original to view it.'}
+                {full?.extraction_error || t`Download the original to view it.`}
               </p>
             </div>
           </div>
@@ -136,16 +138,16 @@ export function DocumentContentModal({
             onClick={handleDownload}
             disabled={!document.storage_path}
           >
-            Original file
+            <Trans>Original file</Trans>
           </Button>
 
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={handleClose}>
-              Close
+              <Trans>Close</Trans>
             </Button>
             {canEditDocument && !noContent && (
               <Button icon={<Save size={16} />} onClick={handleSave} loading={saving} disabled={!dirty}>
-                Save changes
+                <Trans>Save changes</Trans>
               </Button>
             )}
           </div>

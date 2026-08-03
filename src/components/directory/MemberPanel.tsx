@@ -31,6 +31,8 @@ import {
 import { formatDate, cn } from '../../lib/utils'
 import { entityPath, memberPath } from '../../lib/slug'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 /** Squarer than the app default — the drawer reads as a document, not pills. */
 const CHIP = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border'
@@ -92,6 +94,7 @@ function LinkRow({ to, label }: { to: string; label: string }) {
  * it knows whether it is wide enough.
  */
 export function MemberPanel() {
+  const { t, i18n } = useLingui()
   const { memberId, isOpen, closeMember } = useMemberPanel()
   const { openPanel } = useMessagingPanel()
   const auth = useAuth()
@@ -217,7 +220,7 @@ export function MemberPanel() {
       <section
         ref={panelRef}
         role="complementary"
-        aria-label="Member preview"
+        aria-label={t`Member preview`}
         className={cn(
           'fixed z-drawer inset-y-0 right-0 w-full sm:w-[45vw] sm:min-w-[420px]',
           'bg-ktip-cream shadow-hard border-l border-ktip-sand-200 sm:rounded-l-2xl',
@@ -228,7 +231,7 @@ export function MemberPanel() {
             reachable no matter how far the content has scrolled */}
         <button
           onClick={closeMember}
-          aria-label="Close member preview"
+          aria-label={t`Close member preview`}
           className="absolute top-4 right-4 z-20 p-2 rounded-lg bg-brand-navy/25 hover:bg-brand-navy/45 backdrop-blur-sm text-white transition-colors"
         >
           <X size={16} />
@@ -244,7 +247,7 @@ export function MemberPanel() {
             />
             <div className={`absolute inset-0 bg-gradient-to-br ${gradientFor(coverSeed)}`} />
             <p className="absolute left-6 top-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">
-              Member
+              <Trans>Member</Trans>
             </p>
           </div>
 
@@ -256,19 +259,18 @@ export function MemberPanel() {
                 <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
               </div>
               <h2 className="mt-4 font-display text-xl font-bold text-ktip-sand-900">
-                Sign in to view this member
+                <Trans>Sign in to view this member</Trans>
               </h2>
               <p className="mx-auto mt-2 max-w-sm text-sm text-ktip-sand-600">
-                Member profiles and messages are for members of the network. Joining takes a
-                minute.
+                <Trans>Member profiles and messages are for members of the network. Joining takes a minute.</Trans>
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <Link to="/login" state={{ from: { pathname, search: window.location.search } }}>
-                  <Button size="sm">Sign in</Button>
+                  <Button size="sm"><Trans>Sign in</Trans></Button>
                 </Link>
                 <Link to="/register">
                   <Button variant="outline" size="sm">
-                    Create an account
+                    <Trans>Create an account</Trans>
                   </Button>
                 </Link>
               </div>
@@ -303,7 +305,7 @@ export function MemberPanel() {
                       <CheckCircle
                         size={18}
                         className="text-ktip-ocean-500 shrink-0 mt-1.5"
-                        aria-label="Verified"
+                        aria-label={t`Verified`}
                       />
                     )}
                   </h2>
@@ -316,7 +318,7 @@ export function MemberPanel() {
                           size="sm"
                           className={cn(ROLE_COLORS[role], SQUARE_PILL)}
                         >
-                          {ROLE_LABELS[role] || role}
+                          {resolveCopy(i18n, ROLE_LABELS[role] || role)}
                         </Badge>
                       ))}
                     </div>
@@ -324,14 +326,14 @@ export function MemberPanel() {
 
                   {/* Facts, not sentences — scannable in one pass */}
                   <dl className="grid grid-cols-2 @[46rem]:grid-cols-1 gap-x-4 gap-y-3.5 mt-5 pt-5 border-t border-ktip-sand-100">
-                    {profile.country && <Fact label="Location" value={profile.country} />}
+                    {profile.country && <Fact label={t`Location`} value={profile.country} />}
                     {profile.organization && (
-                      <Fact label="Organization" value={profile.organization} />
+                      <Fact label={t`Organization`} value={profile.organization} />
                     )}
-                    {profile.industry && <Fact label="Industry" value={profile.industry} />}
+                    {profile.industry && <Fact label={t`Industry`} value={profile.industry} />}
                     {connectionCount !== null && (
                       <Fact
-                        label="Connections"
+                        label={t`Connections`}
                         value={`${connectionCount} ${connectionCount === 1 ? 'member' : 'members'}`}
                       />
                     )}
@@ -339,11 +341,11 @@ export function MemberPanel() {
                         member reads as a scoreboard of failure. */}
                     {stats && stats.badge_count > 0 && (
                       <Fact
-                        label="Standing"
+                        label={t`Standing`}
                         value={`${stats.rank.name} · ${stats.points} pts`}
                       />
                     )}
-                    <Fact label="Joined" value={formatDate(profile.created_at)} />
+                    <Fact label={t`Joined`} value={formatDate(profile.created_at)} />
                   </dl>
 
                   {/* Actions — hidden when you somehow land on yourself */}
@@ -367,7 +369,7 @@ export function MemberPanel() {
                             icon={<MessageSquare size={14} />}
                             onClick={() => openPanel({ userId: profile.id })}
                           >
-                            Message
+                            <Trans>Message</Trans>
                           </Button>
                         )
                       )}
@@ -413,7 +415,7 @@ export function MemberPanel() {
                     <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
                   </div>
                   <h3 className="mt-4 font-display text-lg font-bold text-ktip-sand-900">
-                    This profile is private
+                    <Trans>This profile is private</Trans>
                   </h3>
                   <p className="mx-auto mt-2 max-w-sm text-sm text-ktip-sand-600">
                     Only {displayName.split(' ')[0]}'s connections can see their full profile or
@@ -421,14 +423,14 @@ export function MemberPanel() {
                   </p>
                   <Link to={memberPath(profile)} onClick={closeMember} className="mt-4 inline-block">
                     <Button variant="ghost" size="sm">
-                      Open member page
+                      <Trans>Open member page</Trans>
                     </Button>
                   </Link>
                 </div>
               ) : (
                 <>
                   {profile.bio && (
-                    <Section label="About">
+                    <Section label={t`About`}>
                       <p className="text-sm leading-relaxed text-ktip-sand-700 whitespace-pre-wrap">
                         {profile.bio}
                       </p>
@@ -436,7 +438,7 @@ export function MemberPanel() {
                   )}
 
                   {badges?.length ? (
-                    <Section label="Achievements">
+                    <Section label={t`Achievements`}>
                       <div className="flex flex-wrap gap-2">
                         {badges.map((userBadge) => (
                           <AchievementBadge
@@ -450,7 +452,7 @@ export function MemberPanel() {
                   ) : null}
 
                   {profile.skills?.length ? (
-                    <Section label="Skills">
+                    <Section label={t`Skills`}>
                       <div className="flex flex-wrap gap-2">
                         {profile.skills.map((skill) => (
                           <span
@@ -468,7 +470,7 @@ export function MemberPanel() {
                   ) : null}
 
                   {profile.interests?.length ? (
-                    <Section label="Interests">
+                    <Section label={t`Interests`}>
                       <div className="flex flex-wrap gap-2">
                         {profile.interests.map((interest) => (
                           <span
@@ -486,7 +488,7 @@ export function MemberPanel() {
                   ) : null}
 
                   {profile.open_to?.length ? (
-                    <Section label="Open to">
+                    <Section label={t`Open to`}>
                       <div className="flex flex-wrap gap-2">
                         {profile.open_to.map((value) => (
                           <span
@@ -507,7 +509,7 @@ export function MemberPanel() {
 
                   {/* Compact rows, not cards — the column is too narrow for them */}
                   {projects?.length ? (
-                    <Section label="Projects">
+                    <Section label={t`Projects`}>
                       <div className="space-y-0.5">
                         {projects.map((project) => (
                           <LinkRow
@@ -521,7 +523,7 @@ export function MemberPanel() {
                   ) : null}
 
                   {events?.length ? (
-                    <Section label="Events">
+                    <Section label={t`Events`}>
                       <div className="space-y-0.5">
                         {events.map((event) => (
                           <LinkRow

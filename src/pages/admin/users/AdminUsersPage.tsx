@@ -25,6 +25,8 @@ import {
   EyeOff,
 } from 'lucide-react'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../../i18n/copy'
 
 /**
  * Every assignable role, in catalog order.
@@ -41,6 +43,7 @@ import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 const ALL_ROLES: UserRole[] = ROLE_DEFINITIONS.filter((r) => !r.aliasOf).map((r) => r.slug)
 
 export default function AdminUsersPage() {
+    const { i18n } = useLingui()
   const toast = useToast()
 
   // Filter state
@@ -240,7 +243,7 @@ export default function AdminUsersPage() {
           >
             <option value="">All Roles</option>
             {ALL_ROLES.map((role) => (
-              <option value={role} key={role}>{ROLE_LABELS[role]}</option>
+              <option value={role} key={role}>{resolveCopy(i18n, ROLE_LABELS[role])}</option>
             ))}
           </select>
           <select
@@ -333,7 +336,7 @@ export default function AdminUsersPage() {
                         {user.roles.length > 0 ? (
                           user.roles.map((role) => (
                             <Badge size="sm" className={ROLE_COLORS[role]} key={role}>
-                              {ROLE_LABELS[role]}
+                              {resolveCopy(i18n, ROLE_LABELS[role])}
                             </Badge>
                           ))
                         ) : (
@@ -495,7 +498,7 @@ export default function AdminUsersPage() {
                   }`}
                   key={role}
                 >
-                  {ROLE_LABELS[role]}
+                  {resolveCopy(i18n, ROLE_LABELS[role])}
                 </button>
               ))}
             </div>
@@ -610,7 +613,7 @@ export default function AdminUsersPage() {
                 />
                 <div className="flex items-center gap-2">
                   <Badge size="sm" className={ROLE_COLORS[role]}>
-                    {ROLE_LABELS[role]}
+                    {resolveCopy(i18n, ROLE_LABELS[role])}
                   </Badge>
                 </div>
               </label>

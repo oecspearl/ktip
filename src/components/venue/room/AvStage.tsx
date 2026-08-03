@@ -4,6 +4,7 @@ import { VENUE_AUDIO_MODE_LABELS } from '../../../lib/constants'
 import { ROOM_CAMERA_LABELS, type RoomCameraMode } from '../../../lib/venue-room-layout'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { VenueOccupant, VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Where the call goes.
@@ -35,6 +36,7 @@ export function AvStage({
   /** True when the layout gave this the hero cell and it should fill it. */
   fill?: boolean
 }) {
+  const { t } = useLingui()
   if (mode === 'off') return null
 
   // max_publishers has been on the row since 070 and has never been read. It is
@@ -57,12 +59,12 @@ export function AvStage({
       <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
         <Video size={14} className="shrink-0 text-white/60" aria-hidden="true" />
         <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-white/70">
-          {presenter ? `${presenter.name} is presenting` : ROOM_CAMERA_LABELS[mode]}
+          {presenter ? t`${presenter.name} is presenting` : ROOM_CAMERA_LABELS[mode]}
         </span>
         {room.recording_enabled && (
           <span className="ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-red-300">
             <span className="h-1.5 w-1.5 rounded-full bg-red-400" aria-hidden="true" />
-            Recording
+            <Trans>Recording</Trans>
           </span>
         )}
       </div>
@@ -86,7 +88,7 @@ export function AvStage({
         </span>
         <span className="flex items-center gap-1">
           <ScreenShare size={11} aria-hidden="true" />
-          Voice and screen sharing arrive with the next release
+          <Trans>Voice and screen sharing arrive with the next release</Trans>
         </span>
       </div>
     </div>
@@ -107,13 +109,14 @@ function SpotlightStage({
   cap: number
   fill?: boolean
 }) {
+  const { t } = useLingui()
   return (
     <>
       <Frame
         className={cn(fill ? 'min-h-[12rem] flex-1' : 'aspect-video w-full')}
         person={lead}
         size={72}
-        label={presenter?.name || lead?.display_name || 'Nobody on camera yet'}
+        label={presenter?.name || lead?.display_name || t`Nobody on camera yet`}
       />
       {rest.length > 0 && (
         <div className="mt-2 grid grid-cols-4 gap-2">
@@ -146,23 +149,24 @@ function GridStage({ people, cap, fill }: { people: VenueOccupant[]; cap: number
 
 /** A row of small bubbles. People who are working, not watching. */
 function HuddleStage({ people, cap }: { people: VenueOccupant[]; cap: number }) {
+  const { t } = useLingui()
   const shown = people.slice(0, cap)
   const more = Math.max(0, people.length - shown.length)
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       {shown.length === 0 && (
-        <span className="px-1 py-2 text-xs text-white/50">Nobody is in here yet.</span>
+        <span className="px-1 py-2 text-xs text-white/50"><Trans>Nobody is in here yet.</Trans></span>
       )}
       {shown.map((person) => (
         <span
           key={person.user_id}
           className="flex items-center gap-1.5 rounded-full border border-dashed border-white/20 bg-white/5 py-1 pl-1 pr-2.5"
-          title={person.display_name || 'Member'}
+          title={person.display_name || t`Member`}
         >
-          <DiamondAvatar src={person.avatar_url} name={person.display_name || 'Member'} size={26} />
+          <DiamondAvatar src={person.avatar_url} name={person.display_name || t`Member`} size={26} />
           <span className="max-w-[7rem] truncate text-xs text-white/80">
-            {person.display_name || 'Member'}
+            {person.display_name || t`Member`}
           </span>
           <VideoOff size={11} className="shrink-0 text-white/30" aria-hidden="true" />
         </span>
@@ -189,7 +193,8 @@ function Frame({
   label?: string
   className?: string
 }) {
-  const name = label || person?.display_name || 'Camera off'
+  const { t } = useLingui()
+  const name = label || person?.display_name || t`Camera off`
 
   return (
     <div
@@ -199,7 +204,7 @@ function Frame({
       )}
     >
       {person ? (
-        <DiamondAvatar src={person.avatar_url} name={person.display_name || 'Member'} size={size} />
+        <DiamondAvatar src={person.avatar_url} name={person.display_name || t`Member`} size={size} />
       ) : (
         <VideoOff size={Math.max(16, size / 2)} className="text-white/25" aria-hidden="true" />
       )}

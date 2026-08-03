@@ -1,10 +1,12 @@
-import clap from '../assets/emoji/clap.png'
-import fire from '../assets/emoji/fire.png'
-import heart from '../assets/emoji/heart.png'
-import joy from '../assets/emoji/joy.png'
-import party from '../assets/emoji/party.png'
-import thinking from '../assets/emoji/thinking.png'
+import clap from '../assets/emoji/clap.webp'
+import fire from '../assets/emoji/fire.webp'
+import heart from '../assets/emoji/heart.webp'
+import joy from '../assets/emoji/joy.webp'
+import party from '../assets/emoji/party.webp'
+import thinking from '../assets/emoji/thinking.webp'
 import type { RoomReaction } from '../hooks/useRoomSignals'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * The room's reactions, drawn rather than typed.
@@ -25,16 +27,16 @@ import type { RoomReaction } from '../hooks/useRoomSignals'
 export interface ReactionArt {
   src: string
   /** The proper name, for screen readers and tooltips. */
-  label: string
+  label: MessageDescriptor
 }
 
 export const REACTION_ART: Record<RoomReaction, ReactionArt> = {
-  '👏': { src: clap, label: 'Applause' },
-  '🔥': { src: fire, label: 'Fire' },
-  '❤️': { src: heart, label: 'Love it' },
-  '😂': { src: joy, label: 'Laughing' },
-  '🎉': { src: party, label: 'Celebrate' },
-  '🤔': { src: thinking, label: 'Thinking' },
+  '👏': { src: clap, label: msg`Applause` },
+  '🔥': { src: fire, label: msg`Fire` },
+  '❤️': { src: heart, label: msg`Love it` },
+  '😂': { src: joy, label: msg`Laughing` },
+  '🎉': { src: party, label: msg`Celebrate` },
+  '🤔': { src: thinking, label: msg`Thinking` },
 }
 
 export function reactionArt(emoji: string): ReactionArt | undefined {

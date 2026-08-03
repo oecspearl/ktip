@@ -13,6 +13,8 @@ import {
 } from '../../lib/sticky-notes'
 import type { StickyGroupPatch } from '../../hooks/useStickyNotes'
 import { cn } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 /** Remembered answer to the close dialog. Asking the same question every time
  *  is how a confirmation becomes a reflex nobody reads. */
@@ -59,6 +61,7 @@ export function StickyNoteGroup({
   onDragMove,
   onDragEnd,
 }: StickyNoteGroupProps) {
+  const { t } = useLingui()
   const [dragPx, setDragPx] = useState<{ left: number; top: number } | null>(null)
   const [hovered, setHovered] = useState(false)
   const [closing, setClosing] = useState(false)
@@ -69,6 +72,7 @@ export function StickyNoteGroup({
   const resting = fractionToPixels(clampNotePosition(group, viewport, GROUP_SIZE), viewport)
   const pos = dragPx ?? resting
   const head = headerColor(group.color)
+  const memberCountLabel = plural(members.length, { one: '# note', other: '# notes' })
 
   const startDrag = (e: React.PointerEvent) => {
     if (e.button !== 0 || (e.target as HTMLElement).closest('.no-drag')) return
@@ -135,11 +139,11 @@ export function StickyNoteGroup({
           <span className="text-xs opacity-70">{members.length}</span>
           <button
             type="button"
-            aria-label="Open folder"
+            aria-label={t`Open folder`}
             onClick={() => onCommit({ minimized: false })}
             className="no-drag p-1 rounded hover:bg-black/10 text-xs font-semibold"
           >
-            Open
+            <Trans>Open</Trans>
           </button>
         </div>
       </div>
@@ -156,7 +160,7 @@ export function StickyNoteGroup({
     >
       <button
         type="button"
-        aria-label={`${group.title} — ${members.length} notes. Opens the folder.`}
+        aria-label={t`${group.title} — ${memberCountLabel}. Opens the folder.`}
         onPointerDown={startDrag}
         onPointerMove={onDrag}
         onPointerUp={endDrag}
@@ -225,7 +229,7 @@ export function StickyNoteGroup({
       {hovered && (
         <button
           type="button"
-          aria-label="Close folder"
+          aria-label={t`Close folder`}
           onClick={requestClose}
           className="no-drag absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600"
         >
@@ -236,12 +240,12 @@ export function StickyNoteGroup({
       {closing && (
         <div
           role="dialog"
-          aria-label="Close this folder?"
+          aria-label={t`Close this folder?`}
           className="no-drag absolute left-1/2 top-full z-10 mt-2 w-56 -translate-x-1/2 rounded-xl border border-ktip-sand-200 bg-ktip-cream p-3 shadow-fab-hover"
         >
-          <p className="text-sm font-semibold text-ktip-sand-900">Close this folder?</p>
+          <p className="text-sm font-semibold text-ktip-sand-900"><Trans>Close this folder?</Trans></p>
           <p className="mt-1 text-xs text-ktip-sand-600">
-            Minimizing keeps the notes. Deleting removes all {members.length} of them.
+            <Trans>Minimizing keeps the notes. Deleting removes all {members.length} of them.</Trans>
           </p>
           <label className="mt-2 flex items-center gap-2 text-xs text-ktip-sand-600">
             <input
@@ -250,7 +254,7 @@ export function StickyNoteGroup({
               onChange={(e) => setRemember(e.target.checked)}
               className="rounded border-ktip-sand-300"
             />
-            Remember my choice
+            <Trans>Remember my choice</Trans>
           </label>
           <div className="mt-3 flex flex-wrap justify-end gap-2">
             <button
@@ -258,21 +262,21 @@ export function StickyNoteGroup({
               onClick={() => setClosing(false)}
               className="rounded-lg px-2 py-1 text-xs text-ktip-sand-600 hover:bg-ktip-sand-100"
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="button"
               onClick={() => answer('minimize')}
               className="rounded-lg border border-ktip-sand-200 px-2 py-1 text-xs font-medium text-ktip-sand-700 hover:bg-ktip-sand-50"
             >
-              Minimize
+              <Trans>Minimize</Trans>
             </button>
             <button
               type="button"
               onClick={() => answer('delete')}
               className={cn('rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700')}
             >
-              Delete all
+              <Trans>Delete all</Trans>
             </button>
           </div>
         </div>

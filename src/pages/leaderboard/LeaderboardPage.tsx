@@ -9,6 +9,10 @@ import { ROLE_LABELS } from '../../lib/constants'
 import { cn } from '../../lib/utils'
 import type { LeaderboardScope, LeaderboardWindow } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+import { resolveCopy } from '../../i18n/copy'
 
 /**
  * Public board. Everything about who appears is decided in SQL by
@@ -18,13 +22,14 @@ import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
  * only be a second, weaker copy of the rule.
  */
 
-const WINDOWS: { value: LeaderboardWindow; label: string }[] = [
-  { value: 'all', label: 'All time' },
-  { value: 'month', label: 'This month' },
+const WINDOWS: { value: LeaderboardWindow; label: MessageDescriptor }[] = [
+  { value: 'all', label: msg`All time` },
+  { value: 'month', label: msg`This month` },
 ]
 
 export default function LeaderboardPage() {
-  usePageTitle('Leaderboard')
+  const { t, i18n } = useLingui()
+  usePageTitle(t`Leaderboard`)
   const auth = useAuth()
   const trackFlag = useTrackFlag()
 
@@ -51,12 +56,14 @@ export default function LeaderboardPage() {
   const { entries, loading } = useLeaderboard(filters)
   const { myRank } = useMyRank(filters, !!auth.user?.id)
 
+  const roleLabel = myRole ? resolveCopy(i18n, ROLE_LABELS[myRole] || myRole) : null
+
   const scopeOptions: { value: LeaderboardScope; label: string; disabled?: boolean }[] = [
-    { value: 'global', label: 'Everyone' },
-    { value: 'country', label: myCountry ? `My country (${myCountry})` : 'My country', disabled: !myCountry },
+    { value: 'global', label: t`Everyone` },
+    { value: 'country', label: myCountry ? t`My country (${myCountry})` : t`My country`, disabled: !myCountry },
     {
       value: 'role',
-      label: myRole ? `My role (${ROLE_LABELS[myRole] || myRole})` : 'My role',
+      label: roleLabel ? t`My role (${roleLabel})` : t`My role`,
       disabled: !myRole,
     },
   ]
@@ -64,14 +71,17 @@ export default function LeaderboardPage() {
   const top = entries || []
   const inTop = top.some((e) => e.user_id === auth.user?.id)
 
+  const activeWindowLabel = i18n._(WINDOWS.find((w) => w.value === window_)?.label ?? WINDOWS[0].label)
+  const activeScopeLabel = scopeOptions.find((o) => o.value === scope)?.label ?? ''
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-ktip-sand-900">Leaderboard</h1>
+        <h1 className="font-display text-3xl font-bold text-ktip-sand-900"><Trans>Leaderboard</Trans></h1>
         <p className="mt-1 text-sm text-ktip-sand-600">
-          Points come from achievements earned across projects, grants, events and the community.{' '}
+          <Trans>Points come from achievements earned across projects, grants, events and the community.</Trans>{' '}
           <Link to="/achievements" className="text-ktip-ocean-600 hover:underline">
-            See how they are earned
+            <Trans>See how they are earned</Trans>
           </Link>
           .
         </p>
@@ -86,7 +96,7 @@ export default function LeaderboardPage() {
         data-spy-skip
         className="scroll-mt-24 flex flex-wrap items-center gap-4"
       >
-        <div className="flex gap-1.5" role="tablist" aria-label="Time period">
+        <div className="flex gap-1.5" role="tablist" aria-label={t`Time period`}>
           {WINDOWS.map((w) => (
             <button
               key={w.value}
@@ -101,17 +111,17 @@ export default function LeaderboardPage() {
                   : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300'
               )}
             >
-              {w.label}
+              {i18n._(w.label)}
             </button>
           ))}
         </div>
 
         <label className="flex items-center gap-2 text-sm text-ktip-sand-600">
-          <span className="shrink-0">Board</span>
+          <span className="shrink-0"><Trans>Board</Trans></span>
           <select
             value={scope}
             onChange={(e) => setScope(e.currentTarget.value as LeaderboardScope)}
-            aria-label="Leaderboard scope"
+            aria-label={t`Leaderboard scope`}
             className="rounded-lg border border-ktip-sand-300 bg-ktip-cream px-3 py-2 text-sm transition-colors focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
           >
             {scopeOptions.map((option) => (
@@ -128,7 +138,7 @@ export default function LeaderboardPage() {
         <div className="h-96 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
       ) : top.length === 0 ? (
         <p className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream py-16 text-center text-sm text-ktip-sand-500">
-          No one has scored on this board yet.
+          <Trans>No one has scored on this board yet.</Trans>
         </p>
       ) : (
         // Wide content scrolls inside its own container so the page body never
@@ -140,17 +150,15 @@ export default function LeaderboardPage() {
         >
           <table className="w-full min-w-[34rem] text-sm">
             <caption className="sr-only">
-              {`Top members by achievement points, ${
-                WINDOWS.find((w) => w.value === window_)?.label
-              }, ${scopeOptions.find((o) => o.value === scope)?.label}`}
+              {t`Top members by achievement points, ${activeWindowLabel}, ${activeScopeLabel}`}
             </caption>
             <thead>
               <tr className="border-b border-ktip-sand-200 text-left text-xs uppercase tracking-wider text-ktip-sand-500">
-                <th scope="col" className="px-4 py-3 w-16">Rank</th>
-                <th scope="col" className="px-4 py-3">Member</th>
-                <th scope="col" className="px-4 py-3">Level</th>
-                <th scope="col" className="px-4 py-3 text-right">Badges</th>
-                <th scope="col" className="px-4 py-3 text-right">Points</th>
+                <th scope="col" className="px-4 py-3 w-16"><Trans>Rank</Trans></th>
+                <th scope="col" className="px-4 py-3"><Trans>Member</Trans></th>
+                <th scope="col" className="px-4 py-3"><Trans>Level</Trans></th>
+                <th scope="col" className="px-4 py-3 text-right"><Trans>Badges</Trans></th>
+                <th scope="col" className="px-4 py-3 text-right"><Trans>Points</Trans></th>
               </tr>
             </thead>
             <tbody>
@@ -185,21 +193,21 @@ export default function LeaderboardPage() {
                       >
                         <DiamondAvatar
                           src={entry.avatar_url}
-                          name={entry.display_name || 'Member'}
+                          name={entry.display_name || t`Member`}
                           size={28}
                         />
                         <span className="font-medium text-ktip-sand-900">
-                          {entry.display_name || 'Member'}
+                          {entry.display_name || t`Member`}
                         </span>
                         {entry.is_verified && (
                           <BadgeCheck
                             size={14}
                             className="shrink-0 text-ktip-tropical-700"
-                            aria-label="Verified member"
+                            aria-label={t`Verified member`}
                           />
                         )}
                         {isMe && (
-                          <span className="text-xs text-ktip-ocean-600">(you)</span>
+                          <span className="text-xs text-ktip-ocean-600"><Trans>(you)</Trans></span>
                         )}
                       </Link>
                     </td>
@@ -230,19 +238,22 @@ export default function LeaderboardPage() {
           <div className="flex items-center gap-2 text-sm">
             <Trophy size={16} className="text-ktip-ocean-600" aria-hidden="true" />
             <span className="font-medium text-ktip-sand-900">
-              You are #{myRank.rank} of {myRank.board_size}
+              <Trans>You are #{myRank.rank} of {myRank.board_size}</Trans>
             </span>
             <span className="text-ktip-sand-600">
-              · {myRank.points} points · {myRank.badge_count} badges
+              · <Plural value={myRank.points} one="# point" other="# points" /> ·{' '}
+              <Plural value={myRank.badge_count} one="# badge" other="# badges" />
             </span>
           </div>
           {!myRank.listed && (
             <span className="flex items-center gap-1.5 text-xs text-ktip-sand-600">
               <EyeOff size={12} aria-hidden="true" />
-              Hidden from others —{' '}
-              <Link to="/settings?tab=profile" className="text-ktip-ocean-600 hover:underline">
-                change
-              </Link>
+              <Trans>
+                Hidden from others —{' '}
+                <Link to="/settings?tab=profile" className="text-ktip-ocean-600 hover:underline">
+                  change
+                </Link>
+              </Trans>
             </span>
           )}
         </div>
@@ -250,9 +261,9 @@ export default function LeaderboardPage() {
 
       {auth.user && myRank?.listed && (
         <p className="text-center text-xs text-ktip-sand-400">
-          Prefer not to appear?{' '}
+          <Trans>Prefer not to appear?</Trans>{' '}
           <Link to="/settings?tab=profile" className="text-ktip-ocean-600 hover:underline">
-            Hide yourself from the leaderboard
+            <Trans>Hide yourself from the leaderboard</Trans>
           </Link>
           .
         </p>

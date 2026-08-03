@@ -32,6 +32,7 @@ describe('signupSchema', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
       password: 'Password123!',
+      confirm_password: 'Password123!',
       display_name: 'John Doe',
       role: 'student',
       date_of_birth: '1995-06-15',
@@ -44,6 +45,7 @@ describe('signupSchema', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
       password: 'Password123!',
+      confirm_password: 'Password123!',
       display_name: 'John Doe',
       role: 'student',
     })
@@ -54,8 +56,33 @@ describe('signupSchema', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
       password: 'Password123!',
+      confirm_password: 'Password123!',
       display_name: 'John Doe',
       role: 'invalid_role',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a mismatched password confirmation', () => {
+    const result = signupSchema.safeParse({
+      email: 'user@example.com',
+      password: 'Password123!',
+      confirm_password: 'Password123?',
+      display_name: 'John Doe',
+      role: 'student',
+      date_of_birth: '1995-06-15',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0].path).toEqual(['confirm_password'])
+  })
+
+  it('rejects a signup with no password confirmation', () => {
+    const result = signupSchema.safeParse({
+      email: 'user@example.com',
+      password: 'Password123!',
+      display_name: 'John Doe',
+      role: 'student',
+      date_of_birth: '1995-06-15',
     })
     expect(result.success).toBe(false)
   })
@@ -64,6 +91,7 @@ describe('signupSchema', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
       password: 'Password123!',
+      confirm_password: 'Password123!',
       display_name: 'J',
       role: 'student',
     })

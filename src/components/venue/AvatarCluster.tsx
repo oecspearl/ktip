@@ -2,6 +2,7 @@ import { cn } from '../../lib/utils'
 import { VENUE_AVAILABILITY_DOT_COLORS } from '../../lib/constants'
 import type { VenueOccupant } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface AvatarClusterProps {
   occupants: VenueOccupant[]
@@ -30,12 +31,13 @@ export function AvatarCluster({
   onSelect,
   className,
 }: AvatarClusterProps) {
+  const { t } = useLingui()
   const s = SIZES[size]
 
   return (
     <div className={cn('flex items-center', className)}>
       {occupants.map((o) => {
-        const name = o.display_name || 'Member'
+        const name = o.display_name || t`Member`
         const dot = VENUE_AVAILABILITY_DOT_COLORS[o.availability] || 'bg-ktip-sand-300'
 
         return (
@@ -69,7 +71,9 @@ export function AvatarCluster({
           )}
         >
           +{overflow}
-          <span className="sr-only">and {overflow} more</span>
+          <span className="sr-only">
+            <Trans>and {overflow} more</Trans>
+          </span>
         </span>
       )}
     </div>

@@ -8,9 +8,11 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { BENTO_GRID, BENTO_TILE, bentoSpans, sortNewestFirst } from '../../lib/bento'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function ForumsPage() {
-  usePageTitle('Forums')
+  const { t } = useLingui()
+  usePageTitle(t`Forums`)
   const { boards, loading } = useForumBoards()
 
   useTutorialAutoStart(TUTORIAL_IDS.FORUMS, !loading)
@@ -23,10 +25,10 @@ export default function ForumsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Community Forums"
-        title="Forums"
+        eyebrow={t`Community Forums`}
+        title={t`Forums`}
         imageSeed="forums"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Forums' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Forums` }]}
       />
 
       {/* === Board Grid === */}
@@ -50,9 +52,9 @@ export default function ForumsPage() {
                 <MessageSquare size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                No forum boards available yet
+                <Trans>No forum boards available yet</Trans>
               </h3>
-              <p className="text-gray-500">Check back soon for community discussions.</p>
+              <p className="text-gray-500"><Trans>Check back soon for community discussions.</Trans></p>
             </div>
           )}
         </div>

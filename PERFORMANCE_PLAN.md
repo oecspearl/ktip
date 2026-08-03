@@ -226,7 +226,7 @@ attributes.
   [useAnimatedValue](src/components/venue/map/useAnimatedValue.ts#L21), [useDisclosureAnimation](src/components/ui/useDisclosureAnimation.ts#L69),
   [AuthSplitShell](src/components/auth/AuthSplitShell.tsx#L61), [FloatingActionButton](src/components/ui/FloatingActionButton.tsx#L295),
   [DiscoverPage](src/pages/discover/DiscoverPage.tsx#L81)) — one `|| isLiteMode()` each. Plus [FlipWatermark](src/components/ui/FlipWatermark.tsx) and
-  [StatsWheel](src/components/ui/StatsWheel.tsx) rendering their final value instead of counting to it.
+  [StatsWheel](src/components/reusable-components/StatsWheel.tsx) rendering their final value instead of counting to it.
 - **Background chatter in lite**: `refetchInterval` 60 s → 300 s in [useVenue.ts](src/hooks/useVenue.ts#L65),
   presence heartbeat 30 s → 120 s in [useVenuePresence.ts](src/hooks/useVenuePresence.ts#L122). Leave
   [useMessages.ts](src/hooks/useMessages.ts) and [useNotifications.ts](src/hooks/useNotifications.ts) realtime alone — that is the product.

@@ -1,3 +1,5 @@
+import { Trans } from '@lingui/react/macro'
+
 /**
  * Full-page loading state shared by the route guards. Extracted so a guard that
  * has to wait on more than one thing (session, then profile) does not carry two
@@ -7,11 +9,11 @@ export const RouteSplash = () => (
   <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
     <div className="text-center">
       <img
-        src="/ktip-logo.webp"
-        alt="KTIP Logo"
+        src="/ktip-logo-128.webp"
+        alt="KTiP"
         className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
       />
-      <p className="mt-4 text-ktip-sand-600">Loading...</p>
+      <p className="mt-4 text-ktip-sand-600"><Trans>Loading...</Trans></p>
     </div>
   </div>
 )

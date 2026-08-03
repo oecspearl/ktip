@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react'
+import { useLingui } from '@lingui/react/macro'
 import { PASSWORD_REQUIREMENTS } from '../../lib/validation'
 
 interface PasswordChecklistProps {
@@ -8,6 +9,7 @@ interface PasswordChecklistProps {
 // Live password requirement feedback, driven by the same
 // PASSWORD_REQUIREMENTS array as the signup schema.
 export function PasswordChecklist({ password }: PasswordChecklistProps) {
+  const { i18n } = useLingui()
   return (
     <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
       {PASSWORD_REQUIREMENTS.map((req) => {
@@ -20,7 +22,7 @@ export function PasswordChecklist({ password }: PasswordChecklistProps) {
             }`}
           >
             {met ? <Check size={14} /> : <X size={14} />}
-            {req.label}
+            {i18n._(req.label)}
           </li>
         )
       })}

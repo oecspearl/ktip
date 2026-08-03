@@ -4,6 +4,9 @@ import { venueRoomIcon } from '../../../lib/category-icons'
 import { VENUE_ROLE_LABELS, VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { VenueOccupant, VenueRoom } from '../../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 interface VenueRoomBriefProps {
   room: VenueRoom
@@ -22,10 +25,10 @@ interface VenueRoomBriefProps {
   onEnter: () => void
 }
 
-const AUDIO_COPY: Record<string, { label: string; icon: typeof Mic }> = {
-  open: { label: 'Anyone can speak', icon: Mic },
-  moderated: { label: 'Hosts grant the mic', icon: Radio },
-  listen_only: { label: 'Listen only — no mics', icon: MicOff },
+const AUDIO_COPY: Record<string, { label: MessageDescriptor; icon: typeof Mic }> = {
+  open: { label: msg`Anyone can speak`, icon: Mic },
+  moderated: { label: msg`Hosts grant the mic`, icon: Radio },
+  listen_only: { label: msg`Listen only — no mics`, icon: MicOff },
 }
 
 /**
@@ -46,6 +49,7 @@ export function VenueRoomBrief({
   onDismiss,
   onEnter,
 }: VenueRoomBriefProps) {
+  const { t, i18n } = useLingui()
   const color = colorForRoom(room)
   const KindIcon = venueRoomIcon(room.kind)
   const audio = AUDIO_COPY[room.audio_mode] || AUDIO_COPY.open
@@ -61,7 +65,7 @@ export function VenueRoomBrief({
       >
         <KindIcon size={14} aria-hidden="true" />
         <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
-          {mode === 'preview' ? 'A look inside' : 'You are at'}
+          {mode === 'preview' ? t`A look inside` : t`You are at`}
         </span>
         <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider opacity-80">
           {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
@@ -73,7 +77,9 @@ export function VenueRoomBrief({
             className="-mr-1 rounded p-0.5 opacity-70 transition-opacity hover:opacity-100"
           >
             <X size={13} aria-hidden="true" />
-            <span className="sr-only">Stop looking at {room.name}</span>
+            <span className="sr-only">
+              <Trans>Stop looking at {room.name}</Trans>
+            </span>
           </button>
         )}
       </div>
@@ -87,34 +93,39 @@ export function VenueRoomBrief({
         <dl className="mt-3 space-y-1.5 text-xs">
           <div className="flex items-center gap-2 text-ktip-sand-700">
             <Users size={13} className="shrink-0 text-ktip-sand-400" aria-hidden="true" />
-            <dt className="sr-only">People here</dt>
+            <dt className="sr-only"><Trans>People here</Trans></dt>
             <dd>
-              {here} {here === 1 ? 'person' : 'people'} inside
+              <Plural value={here} one="# person inside" other="# people inside" />
               {room.capacity != null && (
-                <span className="text-ktip-sand-500"> · room for {room.capacity}</span>
+                <span className="text-ktip-sand-500">
+                  {' '}
+                  · <Trans>room for {room.capacity}</Trans>
+                </span>
               )}
             </dd>
           </div>
 
           <div className="flex items-center gap-2 text-ktip-sand-700">
             <AudioIcon size={13} className="shrink-0 text-ktip-sand-400" aria-hidden="true" />
-            <dt className="sr-only">Audio</dt>
-            <dd>{audio.label}</dd>
+            <dt className="sr-only"><Trans>Audio</Trans></dt>
+            <dd>{i18n._(audio.label)}</dd>
           </div>
 
           {roles.length > 0 && (
             <div className="flex items-center gap-2 text-ktip-sand-700">
               <Lock size={13} className="shrink-0 text-ktip-sand-400" aria-hidden="true" />
-              <dt className="sr-only">Who can enter</dt>
-              <dd>{roles.map((r) => VENUE_ROLE_LABELS[r] || r).join(', ')} only</dd>
+              <dt className="sr-only"><Trans>Who can enter</Trans></dt>
+              <dd>
+                <Trans>{roles.map((r) => VENUE_ROLE_LABELS[r] || r).join(', ')} only</Trans>
+              </dd>
             </div>
           )}
 
           {room.recording_enabled && (
             <div className="flex items-center gap-2 font-medium text-ktip-sun-800">
               <Radio size={13} className="shrink-0" aria-hidden="true" />
-              <dt className="sr-only">Recording</dt>
-              <dd>This room is recorded</dd>
+              <dt className="sr-only"><Trans>Recording</Trans></dt>
+              <dd><Trans>This room is recorded</Trans></dd>
             </div>
           )}
         </dl>
@@ -125,9 +136,9 @@ export function VenueRoomBrief({
               <DiamondAvatar
                 key={o.user_id}
                 src={o.avatar_url}
-                name={o.display_name || 'Member'}
+                name={o.display_name || t`Member`}
                 size={26}
-                title={o.display_name || 'Member'}
+                title={o.display_name || t`Member`}
               />
             ))}
             {occupants.length > 6 && (
@@ -147,12 +158,12 @@ export function VenueRoomBrief({
         >
           <DoorOpen size={15} aria-hidden="true" />
           {!room.is_open
-            ? 'Closed right now'
+            ? t`Closed right now`
             : !canEnter
-              ? 'Not open to your role'
+              ? t`Not open to your role`
               : full
-                ? 'Full'
-                : `Enter ${room.name}`}
+                ? t`Full`
+                : t`Enter ${room.name}`}
         </button>
       </div>
     </div>

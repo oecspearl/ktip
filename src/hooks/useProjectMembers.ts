@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
 import type { ProjectMember, ProjectMemberRole } from '../types'
+import { useLingui } from '@lingui/react/macro'
 
 // Team roster for a project (pending + accepted; declined rows are hidden)
 export function useProjectMembers(projectId: string | undefined) {
@@ -51,6 +52,7 @@ export function useMyProjectInvites(userId: string | undefined) {
 }
 
 export function useProjectMemberMutations() {
+    const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const invalidate = () => {
@@ -82,8 +84,8 @@ export function useProjectMemberMutations() {
       sendNotification({
         userId: params.userId,
         type: 'project_invite',
-        title: 'Project team invitation',
-        body: `You've been invited to join "${params.projectTitle}"`,
+        title: t`Project team invitation`,
+        body: t`You've been invited to join "${params.projectTitle}"`,
         link: `/projects/${params.projectId}`,
       })
       return data

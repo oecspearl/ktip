@@ -4,6 +4,7 @@ import { Button } from '../ui/Button'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyStudentRecord, useRequestStudentVerification } from '../../hooks/useInstitutions'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * School verification for students.
@@ -14,6 +15,7 @@ import { useMyStudentRecord, useRequestStudentVerification } from '../../hooks/u
  * the student role.
  */
 export function StudentVerificationCard() {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
 
@@ -25,10 +27,10 @@ export function StudentVerificationCard() {
   const handleRequest = async () => {
     try {
       await requestVerification()
-      toast.success('Request sent to your institution for approval')
+      toast.success(t`Request sent to your institution for approval`)
       refetch()
     } catch (err: any) {
-      toast.error(err.message || 'Could not request verification')
+      toast.error(err.message || t`Could not request verification`)
     }
   }
 
@@ -40,14 +42,13 @@ export function StudentVerificationCard() {
       <Card className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <GraduationCap size={18} className="text-ktip-ocean-600" />
-          <h2 className="text-lg font-display font-bold text-ktip-sand-900">Student verification</h2>
+          <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Student verification</Trans></h2>
         </div>
         <p className="text-sm text-ktip-sand-600 mb-4">
-          If you are studying at a partner school or university, verify with your institutional email
-          address to unlock student features. Your school approves the request.
+          <Trans>If you are studying at a partner school or university, verify with your institutional email address to unlock student features. Your school approves the request.</Trans>
         </p>
         <Button size="sm" loading={requesting} onClick={handleRequest}>
-          Verify with my school email
+          <Trans>Verify with my school email</Trans>
         </Button>
       </Card>
     )
@@ -57,7 +58,7 @@ export function StudentVerificationCard() {
     <Card className="mb-6">
       <div className="flex items-center gap-2 mb-1">
         <GraduationCap size={18} className="text-ktip-ocean-600" />
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900">Student verification</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Student verification</Trans></h2>
       </div>
 
       <div
@@ -74,12 +75,12 @@ export function StudentVerificationCard() {
         )}
         <div>
           <p className="font-medium">
-            {isStudent ? 'Verified student' : 'Awaiting approval from your institution'}
+            {isStudent ? t`Verified student` : t`Awaiting approval from your institution`}
           </p>
           <p className="text-sm mt-1">
             {record?.institution?.name
               ? `${record.institution.name}${record.verified_domain ? ` · @${record.verified_domain}` : ''}`
-              : 'Your request is with the institution that owns your email domain.'}
+              : t`Your request is with the institution that owns your email domain.`}
           </p>
         </div>
       </div>
@@ -88,9 +89,7 @@ export function StudentVerificationCard() {
         <div className="mt-4 flex items-start gap-2.5 p-3 rounded-xl bg-ktip-sand-50 border border-ktip-sand-200">
           <ShieldCheck size={16} className="text-ktip-tropical-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-ktip-sand-700">
-            Student accounts have safeguards that cannot be turned off: direct messages are limited to
-            supervised group channels with a designated educator, and grant applications must be
-            sponsored by a faculty member.
+            <Trans>Student accounts have safeguards that cannot be turned off: direct messages are limited to supervised group channels with a designated educator, and grant applications must be sponsored by a faculty member.</Trans>
           </p>
         </div>
       )}
@@ -103,9 +102,7 @@ export function StudentVerificationCard() {
       {record?.birth_year != null && (
         <div className="mt-4 pt-4 border-t border-ktip-sand-100">
           <p className="text-xs text-ktip-sand-600">
-            Your institution's designated staff can see the year you were born, taken from the date
-            of birth on your account. They see the year only — never the full date. To correct it,
-            contact support.
+            <Trans>Your institution's designated staff can see the year you were born, taken from the date of birth on your account. They see the year only — never the full date. To correct it, contact support.</Trans>
           </p>
         </div>
       )}

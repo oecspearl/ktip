@@ -2,6 +2,7 @@ import { useEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode 
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { useLingui } from '@lingui/react/macro'
 
 interface ModalProps {
   open: boolean
@@ -17,6 +18,7 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export function Modal({ open, onClose, title, description, children, size, className, ...others }: ModalProps) {
+    const { t } = useLingui()
   const dialogRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
 
@@ -120,7 +122,7 @@ export function Modal({ open, onClose, title, description, children, size, class
           <button
             onClick={onClose}
             className="ml-4 p-1 rounded-control hover:bg-ktip-sand-100 transition-colors"
-            aria-label="Close modal"
+            aria-label={t`Close modal`}
           >
             <X size={24} className="text-ktip-sand-400" />
           </button>

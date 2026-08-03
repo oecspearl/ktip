@@ -13,6 +13,7 @@ import { Stepper } from '../../components/ui/Stepper'
 import { setupSteps } from '../../lib/event-blueprints'
 import { eventSetupPath, venuePath } from '../../lib/event-slug'
 import { entityPath } from '../../lib/slug'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Step two of creating a hackathon: build the place it happens in.
@@ -27,6 +28,7 @@ import { entityPath } from '../../lib/slug'
  * control.
  */
 export default function EventVenueSetupPage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const toast = useToast()
@@ -36,7 +38,7 @@ export default function EventVenueSetupPage() {
   const { saveMap, saving } = useSaveVenueMap()
   const { updateEvent } = useUpdateEvent()
 
-  usePageTitle(event ? `Set up the venue — ${event.title}` : 'Set up the venue')
+  usePageTitle(event ? t`Set up the venue — ${event.title}` : t`Set up the venue`)
 
   const isHost = useIsEventHost(event)
 
@@ -54,9 +56,9 @@ export default function EventVenueSetupPage() {
   if (!event) {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Event not found</h1>
+        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Event not found</Trans></h1>
         <Link to="/events" className="mt-3 inline-block text-ktip-ocean-600 hover:underline">
-          Browse events
+          <Trans>Browse events</Trans>
         </Link>
       </div>
     )
@@ -66,10 +68,10 @@ export default function EventVenueSetupPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
-          Only the organizer can set up this venue
+          <Trans>Only the organizer can set up this venue</Trans>
         </h1>
         <Link to={venuePath(event)} className="mt-4 inline-block">
-          <Button variant="secondary">Go to the venue</Button>
+          <Button variant="secondary"><Trans>Go to the venue</Trans></Button>
         </Link>
       </div>
     )
@@ -81,15 +83,15 @@ export default function EventVenueSetupPage() {
           three screens of one flow do not each look like a different product. */}
       <PageHero
         compact
-        eyebrow="Set up your event"
-        title="Set up the rooms"
-        subtitle="Drop the rooms your hackathon needs onto the floor, set who is allowed in each one, and add another level if you want the building to have one. Attendees walk this exact map."
+        eyebrow={t`Set up your event`}
+        title={t`Set up the rooms`}
+        subtitle={t`Drop the rooms your hackathon needs onto the floor, set who is allowed in each one, and add another level if you want the building to have one. Attendees walk this exact map.`}
         imageSeed="events"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Events', href: '/events' },
+          { label: t`Home`, href: '/' },
+          { label: t`Events`, href: '/events' },
           { label: event.title, href: entityPath('event', event) },
-          { label: 'The venue' },
+          { label: t`The venue` },
         ]}
       />
 
@@ -107,7 +109,7 @@ export default function EventVenueSetupPage() {
             className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-ocean-600"
           >
             <ArrowLeft size={15} aria-hidden="true" />
-            Back to event details
+            <Trans>Back to event details</Trans>
           </Link>
 
           <div className="flex gap-2">
@@ -118,13 +120,13 @@ export default function EventVenueSetupPage() {
                   try {
                     await updateEvent(event.id, { has_venue: true } as any)
                     refetch()
-                    toast.success('Venue turned on')
+                    toast.success(t`Venue turned on`)
                   } catch (err: any) {
-                    toast.error(err?.message || 'Could not turn the venue on')
+                    toast.error(err?.message || t`Could not turn the venue on`)
                   }
                 }}
               >
-                Turn the venue on
+                <Trans>Turn the venue on</Trans>
               </Button>
             )}
             <Button
@@ -133,7 +135,7 @@ export default function EventVenueSetupPage() {
               icon={<ExternalLink size={14} />}
               onClick={() => navigate(venuePath(event))}
             >
-              Open the venue
+              <Trans>Open the venue</Trans>
             </Button>
             {/* The rooms are half the job. The brief teams build against is
                 the other half, and it lives on the shared setup page. */}
@@ -142,7 +144,7 @@ export default function EventVenueSetupPage() {
               variant="secondary"
               onClick={() => navigate(eventSetupPath(event))}
             >
-              The brief
+              <Trans>The brief</Trans>
             </Button>
           </div>
         </div>
@@ -150,8 +152,10 @@ export default function EventVenueSetupPage() {
         {!event.has_venue && (
           <p className="mb-4 flex items-start gap-2 rounded-xl border border-ktip-sun-200 bg-ktip-sun-50 px-3 py-2 text-sm text-ktip-sun-800">
             <Info size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
-            The venue is off, so nobody can enter yet. You can still draw it — turn it on when you
-            are ready.
+            <Trans>
+              The venue is off, so nobody can enter yet. You can still draw it — turn it on when you
+              are ready.
+            </Trans>
           </p>
         )}
 
@@ -168,19 +172,18 @@ export default function EventVenueSetupPage() {
               try {
                 await updateEvent(event.id, { spectators_enabled: next } as any)
                 refetch()
-                toast.success(next ? 'Viewers can now register' : 'Viewers turned off')
+                toast.success(next ? t`Viewers can now register` : t`Viewers turned off`)
               } catch (err: any) {
-                toast.error(err?.message || 'Could not change who may watch')
+                toast.error(err?.message || t`Could not change who may watch`)
               }
             }}
           />
           <span className="min-w-0">
             <span className="block text-sm font-medium text-ktip-sand-800">
-              Let people register as viewers
+              <Trans>Let people register as viewers</Trans>
             </span>
             <span className="block text-xs text-ktip-sand-500">
-              Viewers watch the rooms without joining a team or submitting, and do not take up a
-              participant place. Off means everyone who registers is competing.
+              <Trans>Viewers watch the rooms without joining a team or submitting, and do not take up a participant place. Off means everyone who registers is competing.</Trans>
             </span>
           </span>
         </label>
@@ -196,9 +199,9 @@ export default function EventVenueSetupPage() {
                 try {
                   await saveMap({ eventId: event.id, map: nextConfig, rooms: payload })
                   refetch()
-                  toast.success('Venue saved')
+                  toast.success(t`Venue saved`)
                 } catch (err: any) {
-                  toast.error(err?.message || 'Could not save the venue')
+                  toast.error(err?.message || t`Could not save the venue`)
                   throw err
                 }
               }}
@@ -214,13 +217,13 @@ export default function EventVenueSetupPage() {
               icon={<Check size={20} />}
               onClick={() => navigate(entityPath('event', event))}
             >
-              Finish
+              <Trans>Finish</Trans>
             </Button>
             <Link
               to={venuePath(event)}
               className="whitespace-nowrap text-sm text-ktip-sand-500 transition-colors hover:text-ktip-sand-700"
             >
-              Open the venue
+              <Trans>Open the venue</Trans>
             </Link>
           </div>
         </div>

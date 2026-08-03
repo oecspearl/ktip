@@ -41,14 +41,17 @@ import {
   Save,
   Share2,
 } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
-const languages: { value: Language; label: string }[] = [
-  { value: 'javascript', label: 'JavaScript / TypeScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'html', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
-  { value: 'json', label: 'JSON' },
-  { value: 'markdown', label: 'Markdown' },
+const languages: { value: Language; label: MessageDescriptor }[] = [
+  { value: 'javascript', label: msg`JavaScript / TypeScript` },
+  { value: 'python', label: msg`Python` },
+  { value: 'html', label: msg`HTML` },
+  { value: 'css', label: msg`CSS` },
+  { value: 'json', label: msg`JSON` },
+  { value: 'markdown', label: msg`Markdown` },
 ]
 
 const LANGUAGE_LABELS: Record<Language, string> = {
@@ -64,6 +67,7 @@ const fontSizes = ['small', 'medium', 'large'] as const
 const fontSizeLabels: Record<string, string> = { small: 'S', medium: 'M', large: 'L' }
 
 export default function CodeEditorPage() {
+    const { t, i18n } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -73,7 +77,7 @@ export default function CodeEditorPage() {
 
   // Core state
   const [snippetId, setSnippetId] = useState<string | undefined>(params.id)
-  const [title, setTitle] = useState('Untitled Snippet')
+  const [title, setTitle] = useState(t`Untitled Snippet`)
   const [language, setLanguage] = useState<Language>('javascript')
   const [code, setCode] = useState(defaultCode.javascript)
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium')
@@ -108,7 +112,7 @@ export default function CodeEditorPage() {
       : dbSnippet.owner_id === auth.user.id
   const canEdit = isOwner || sharePermission === 'edit'
 
-  usePageTitle(title || 'Code Sandbox')
+  usePageTitle(title || t`Code Sandbox`)
 
   useEffect(() => {
     if (dbSnippet && !contentLoaded) {
@@ -222,13 +226,13 @@ export default function CodeEditorPage() {
             onChange={setTitle}
             onCommit={handleTitleCommit}
             readOnly={!canEdit}
-            placeholder="Untitled Snippet"
+            placeholder={t`Untitled Snippet`}
           />
         }
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Code', href: '/collaborate/snippets' },
+          { label: t`Home`, href: '/' },
+          { label: t`Collaborate`, href: '/collaborate' },
+          { label: t`Code`, href: '/collaborate/snippets' },
           { label: truncate(title, 20) },
         ]}
         heroBadge={
@@ -240,16 +244,16 @@ export default function CodeEditorPage() {
                   : 'bg-ktip-sun-500/20 text-ktip-sun-300 border-ktip-sun-500/30'
               }`}
             >
-              {canEdit ? 'Editor — Shared with you' : 'View Only — Shared with you'}
+              {canEdit ? t`Editor — Shared with you` : t`View Only — Shared with you`}
             </span>
           )
         }
         fallback={
           notFound ? (
             <ToolNotFound
-              what="Snippet"
+              what={t`Snippet`}
               backHref="/collaborate/snippets"
-              backLabel="Back to My Snippets"
+              backLabel={t`Back to My Snippets`}
             />
           ) : undefined
         }
@@ -259,11 +263,11 @@ export default function CodeEditorPage() {
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value as Language)}
               disabled={!canEdit}
-              aria-label="Language"
+              aria-label={t`Language`}
             >
               {languages.map((lang) => (
                 <option key={lang.value} value={lang.value}>
-                  {lang.label}
+                  {i18n._(lang.label)}
                 </option>
               ))}
             </ToolbarSelect>
@@ -273,21 +277,21 @@ export default function CodeEditorPage() {
             {language === 'javascript' && (
               <ToolbarButton
                 icon={<Play size={14} className={running ? 'animate-pulse' : ''} />}
-                label={running ? 'Running…' : 'Run'}
+                label={running ? t`Running…` : t`Run`}
                 variant="accent"
                 onClick={handleRun}
                 disabled={running}
-                title="Run code (JavaScript only)"
+                title={t`Run code (JavaScript only)`}
               />
             )}
 
             {(language === 'html' || language === 'css') && (
               <ToolbarButton
                 icon={<Eye size={14} />}
-                label="Preview"
+                label={t`Preview`}
                 active={previewVisible}
                 onClick={() => setPreviewVisible(!previewVisible)}
-                title="Toggle live preview"
+                title={t`Toggle live preview`}
               />
             )}
 
@@ -300,22 +304,22 @@ export default function CodeEditorPage() {
                 )
               }
               onClick={handleCopy}
-              title="Copy code"
-              aria-label="Copy code"
+              title={t`Copy code`}
+              aria-label={t`Copy code`}
             />
             <ToolbarButton
               icon={<Download size={16} />}
               onClick={() => downloadCodeAsFile(code, language)}
-              title="Download file"
-              aria-label="Download file"
+              title={t`Download file`}
+              aria-label={t`Download file`}
             />
             <ToolbarButton
               icon={<RotateCcw size={16} />}
               variant="danger"
               onClick={handleReset}
               disabled={!canEdit}
-              title="Reset to the language template"
-              aria-label="Reset code"
+              title={t`Reset to the language template`}
+              aria-label={t`Reset code`}
             />
 
             <ToolbarSeparator />
@@ -324,34 +328,34 @@ export default function CodeEditorPage() {
               icon={<Type size={14} />}
               label={<span className="text-xs">{fontSizeLabels[fontSize]}</span>}
               onClick={cycleFontSize}
-              title={`Font size: ${fontSize}`}
+              title={t`Font size: ${fontSize}`}
             />
             <ToolbarButton
               icon={darkMode ? <Sun size={16} /> : <Moon size={16} />}
               onClick={() => setDarkMode(!darkMode)}
-              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label="Toggle theme"
+              title={darkMode ? t`Switch to light mode` : t`Switch to dark mode`}
+              aria-label={t`Toggle theme`}
             />
 
             <ToolbarSpacer />
 
             <ToolbarButton
               icon={<Save size={14} />}
-              label="Save"
+              label={t`Save`}
               onClick={() => void saveNow()}
               disabled={!canEdit}
-              title="Save now (Ctrl+S)"
+              title={t`Save now (Ctrl+S)`}
             />
             {isOwner && (
               <ToolbarButton
                 icon={<Share2 size={14} />}
-                label="Invite"
+                label={t`Invite`}
                 variant="primary"
                 onClick={async () => {
                   if (!snippetId) await saveNow()
                   setShareOpen(true)
                 }}
-                title="Invite collaborators"
+                title={t`Invite collaborators`}
               />
             )}
           </Toolbar>
@@ -360,9 +364,12 @@ export default function CodeEditorPage() {
           <ToolStatusBar
             left={
               <>
-                <StatusMetric label="Ln" value={`${metrics.cursorLine}, Col ${metrics.cursorCol}`} />
-                <StatusMetric label="Lines" value={metrics.lineCount} />
-                <StatusMetric label="Chars" value={metrics.charCount} />
+                <StatusMetric
+                  label={t`Ln`}
+                  value={<Trans>{metrics.cursorLine}, Col {metrics.cursorCol}</Trans>}
+                />
+                <StatusMetric label={t`Lines`} value={metrics.lineCount} />
+                <StatusMetric label={t`Chars`} value={metrics.charCount} />
               </>
             }
             right={

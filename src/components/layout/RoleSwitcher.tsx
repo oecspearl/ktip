@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { ROLE_BY_SLUG } from '../../lib/permissions'
 import type { RoleSlug } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface RoleSwitcherProps {
   onSwitch?: () => void
@@ -18,6 +19,9 @@ interface RoleSwitcherProps {
  * trigger and by has_permission_as).
  */
 export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
+  // Above the `held.length < 2` early return below — a hook after it would run
+  // on some renders and not others.
+  const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
 
@@ -29,12 +33,14 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
   const handleSelect = async (role: RoleSlug | null) => {
     try {
       await auth.setActiveRole(role)
-      toast.success(
-        role ? `Now acting as ${ROLE_BY_SLUG[role]?.label ?? role}` : 'Showing all your roles'
-      )
+      // The role label is harvested out of lib/permissions into the catalog, so
+      // it resolves through i18n._() rather than being sent to the machine.
+      const roleName = role ? i18n._(ROLE_BY_SLUG[role]?.label ?? role) : ''
+      toast.success(role ? t`Now acting as ${roleName}` : t`Showing all your roles`)
       onSwitch?.()
     } catch (err: any) {
-      toast.error(err.message || 'Could not switch role')
+      // Only the fallback is ours; err.message comes back from Postgres.
+      toast.error(err.message || t`Could not switch role`)
     }
   }
 
@@ -42,7 +48,7 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
     <div className="px-2 py-1">
       <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-ktip-sand-400 flex items-center gap-1.5">
         <Repeat size={12} />
-        Acting as
+        <Trans>Acting as</Trans>
       </p>
 
       <button
@@ -50,7 +56,7 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
         onClick={() => handleSelect(null)}
         className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
       >
-        <span>All roles</span>
+        <span><Trans>All roles</Trans></span>
         {!auth.activeRole && <Check size={15} className="text-ktip-ocean-600" />}
       </button>
 
@@ -61,7 +67,10 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
           onClick={() => handleSelect(slug)}
           className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
         >
-          <span className="truncate">{ROLE_BY_SLUG[slug]?.label ?? slug}</span>
+          {/* The role label is a descriptor now, so it has to be resolved.
+              Falling back to the raw slug when a role is unknown is deliberate:
+              a slug on screen is a visible bug, and silently blank is not. */}
+          <span className="truncate">{i18n._(ROLE_BY_SLUG[slug]?.label ?? slug)}</span>
           {auth.activeRole === slug && <Check size={15} className="text-ktip-ocean-600 flex-shrink-0" />}
         </button>
       ))}

@@ -17,10 +17,13 @@ import {
   Moon,
   Users,
 } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 type NotifPrefs = typeof DEFAULT_NOTIFICATION_PREFERENCES
 
 export function PreferencesTab() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { preferences, loading } = useMyPreferences(auth.user?.id)
@@ -127,9 +130,9 @@ export function PreferencesTab() {
         'ktip_preferences',
         JSON.stringify({ privacy: { showEmail, showCountry } })
       )
-      toast.success('Preferences saved!')
+      toast.success(t`Preferences saved!`)
     } catch {
-      toast.error('Failed to save preferences')
+      toast.error(t`Failed to save preferences`)
     }
   }
 
@@ -142,8 +145,8 @@ export function PreferencesTab() {
             <Bell size={20} className="text-ktip-tropical-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Notifications</h2>
-            <p className="text-sm text-ktip-sand-600">Choose what you want to be notified about</p>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Notifications</Trans></h2>
+            <p className="text-sm text-ktip-sand-600"><Trans>Choose what you want to be notified about</Trans></p>
           </div>
         </div>
 
@@ -151,50 +154,50 @@ export function PreferencesTab() {
           <Toggle
             checked={notif.email}
             onChange={setNotifField('email')}
-            label="Email Notifications"
-            description="Receive email updates about your account activity (coming soon)"
+            label={t`Email Notifications`}
+            description={t`Receive email updates about your account activity (coming soon)`}
           />
           <Toggle
             checked={notif.messages}
             onChange={setNotifField('messages')}
-            label="New Messages"
-            description="Get notified when someone sends you a message"
+            label={t`New Messages`}
+            description={t`Get notified when someone sends you a message`}
           />
           <Toggle
             checked={notif.events}
             onChange={setNotifField('events')}
-            label="Event Reminders"
-            description="Receive reminders about upcoming events you've joined"
+            label={t`Event Reminders`}
+            description={t`Receive reminders about upcoming events you've joined`}
           />
           <Toggle
             checked={notif.projects}
             onChange={setNotifField('projects')}
-            label="Project Updates"
-            description="Team invitations, follows, and updates on your projects"
+            label={t`Project Updates`}
+            description={t`Team invitations, follows, and updates on your projects`}
           />
           <Toggle
             checked={notif.forums}
             onChange={setNotifField('forums')}
-            label="Forum Replies"
-            description="Get notified when someone replies to your forum posts"
+            label={t`Forum Replies`}
+            description={t`Get notified when someone replies to your forum posts`}
           />
           <Toggle
             checked={notif.collaboration}
             onChange={setNotifField('collaboration')}
-            label="Collaboration"
-            description="Shared documents, whiteboards, and video invites"
+            label={t`Collaboration`}
+            description={t`Shared documents, whiteboards, and video invites`}
           />
           <Toggle
             checked={notif.connections}
             onChange={setNotifField('connections')}
-            label="Connections"
-            description="Connection requests and acceptances"
+            label={t`Connections`}
+            description={t`Connection requests and acceptances`}
           />
           <Toggle
             checked={notif.achievements}
             onChange={setNotifField('achievements')}
-            label="Achievements"
-            description="Badges you unlock and milestones you reach"
+            label={t`Achievements`}
+            description={t`Badges you unlock and milestones you reach`}
           />
         </div>
       </Card>
@@ -206,8 +209,8 @@ export function PreferencesTab() {
             <Eye size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Privacy</h2>
-            <p className="text-sm text-ktip-sand-600">Control what others can see about you</p>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Privacy</Trans></h2>
+            <p className="text-sm text-ktip-sand-600"><Trans>Control what others can see about you</Trans></p>
           </div>
         </div>
 
@@ -215,43 +218,42 @@ export function PreferencesTab() {
           <Toggle
             checked={profilePublic}
             onChange={setProfilePublic}
-            label="Public Profile"
-            description="On, any signed-in member can see your full profile and message you. Off, only your connections can — everyone still sees your name, role and country in the directory, so they can send you a connection request."
+            label={t`Public Profile`}
+            description={t`On, any signed-in member can see your full profile and message you. Off, only your connections can — everyone still sees your name, role and country in the directory, so they can send you a connection request.`}
           />
           <Toggle
             checked={showEmail}
             onChange={setShowEmail}
-            label="Show Email"
-            description="Display your email address on your profile"
+            label={t`Show Email`}
+            description={t`Display your email address on your profile`}
           />
           <Toggle
             checked={showCountry}
             onChange={setShowCountry}
-            label="Show Country"
-            description="Display your country on your profile"
+            label={t`Show Country`}
+            description={t`Display your country on your profile`}
           />
 
           <Toggle
             checked={onLeaderboard}
             onChange={setOnLeaderboard}
-            label="Show me on the leaderboard"
-            description="Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can."
+            label={t`Show me on the leaderboard`}
+            description={t`Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can.`}
           />
 
           {/* Connection count audience */}
           <div className="py-3">
             <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
               <Users size={16} className="text-ktip-sand-500" />
-              Who can see my connection count
+              <Trans>Who can see my connection count</Trans>
             </div>
             <p className="text-xs text-ktip-sand-500 mt-0.5 mb-3">
-              Controls the number shown on your profile and in the member directory. You can always
-              see your own count.
+              <Trans>Controls the number shown on your profile and in the member directory. You can always see your own count.</Trans>
             </p>
             <div
               className="flex flex-col sm:flex-row gap-2"
               role="radiogroup"
-              aria-label="Who can see my connection count"
+              aria-label={t`Who can see my connection count`}
             >
               {CONNECTION_VISIBILITY_OPTIONS.map((option) => {
                 const selected = connVisibility === option.value
@@ -268,9 +270,9 @@ export function PreferencesTab() {
                         : 'border-ktip-sand-200 hover:border-ktip-sand-300 text-ktip-sand-700'
                     }`}
                   >
-                    <span className="block text-sm font-medium">{option.label}</span>
+                    <span className="block text-sm font-medium">{resolveCopy(i18n, option.label)}</span>
                     <span className="block text-xs text-ktip-sand-500 mt-0.5">
-                      {option.description}
+                      {resolveCopy(i18n, option.description)}
                     </span>
                   </button>
                 )
@@ -287,8 +289,8 @@ export function PreferencesTab() {
             <Type size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Accessibility</h2>
-            <p className="text-sm text-ktip-sand-600">Make the site easier to read</p>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Accessibility</Trans></h2>
+            <p className="text-sm text-ktip-sand-600"><Trans>Make the site easier to read</Trans></p>
           </div>
         </div>
 
@@ -296,8 +298,8 @@ export function PreferencesTab() {
           <Toggle
             checked={readable}
             onChange={setReadable}
-            label="Readable font mode"
-            description="Use Atkinson Hyperlegible across the site for easier reading. Applies immediately."
+            label={t`Readable font mode`}
+            description={t`Use Atkinson Hyperlegible across the site for easier reading. Applies immediately.`}
           />
         </div>
       </Card>
@@ -309,8 +311,8 @@ export function PreferencesTab() {
             <Moon size={20} className="text-ktip-sun-700" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Appearance</h2>
-            <p className="text-sm text-ktip-sand-600">Switch between light and dark mode</p>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Appearance</Trans></h2>
+            <p className="text-sm text-ktip-sand-600"><Trans>Switch between light and dark mode</Trans></p>
           </div>
         </div>
 
@@ -318,8 +320,8 @@ export function PreferencesTab() {
           <Toggle
             checked={darkMode}
             onChange={setDarkMode}
-            label="Dark mode"
-            description="Use a dark color theme across the site. Applies immediately."
+            label={t`Dark mode`}
+            description={t`Use a dark color theme across the site. Applies immediately.`}
           />
         </div>
       </Card>
@@ -327,7 +329,7 @@ export function PreferencesTab() {
       {/* Save Button */}
       <div className="flex justify-end">
         <Button onClick={handleSave} loading={saving} icon={<Save size={18} />}>
-          Save Preferences
+          <Trans>Save Preferences</Trans>
         </Button>
       </div>
     </div>

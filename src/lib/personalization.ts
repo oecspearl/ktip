@@ -1,6 +1,8 @@
 import { supabase } from './supabase'
 import { ROUTES } from './constants'
 import type { MatchReason, Ranked } from '../types'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 export type { MatchReason, Ranked }
 
@@ -22,33 +24,33 @@ export interface RankRow {
  */
 export const SORT_OPTIONS: Record<
   RankableEntity,
-  { options: { value: ContentSort; label: string }[]; fallback: ContentSort }
+  { options: { value: ContentSort; label: MessageDescriptor }[]; fallback: ContentSort }
 > = {
   project: {
     options: [
-      { value: 'for_you', label: 'Top Picks' },
-      { value: 'newest', label: 'Newest' },
+      { value: 'for_you', label: msg`Top Picks` },
+      { value: 'newest', label: msg`Newest` },
     ],
     fallback: 'newest',
   },
   resource: {
     options: [
-      { value: 'for_you', label: 'For You' },
-      { value: 'newest', label: 'Newest' },
+      { value: 'for_you', label: msg`For You` },
+      { value: 'newest', label: msg`Newest` },
     ],
     fallback: 'newest',
   },
   event: {
     options: [
-      { value: 'for_you', label: 'For You' },
-      { value: 'upcoming', label: 'Soonest' },
+      { value: 'for_you', label: msg`For You` },
+      { value: 'upcoming', label: msg`Soonest` },
     ],
     fallback: 'upcoming',
   },
   grant: {
     options: [
-      { value: 'for_you', label: 'For You' },
-      { value: 'deadline', label: 'Deadline' },
+      { value: 'for_you', label: msg`For You` },
+      { value: 'deadline', label: msg`Deadline` },
     ],
     fallback: 'deadline',
   },

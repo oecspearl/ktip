@@ -7,6 +7,10 @@ import { useUpdateProject } from '../../hooks/useProjects'
 import { useClearExtractedFields, useReextractFields } from '../../hooks/useEntityDocuments'
 import { fieldLabel } from '../../lib/extracted-fields'
 import type { DocumentEntityType, ExtractedFields } from '../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg, plural } from '@lingui/core/macro'
+import type { I18n } from '@lingui/core'
+import { resolveCopy } from '../../i18n/copy'
 
 interface ExtractionReviewPanelProps {
   documentId: string
@@ -19,10 +23,10 @@ interface ExtractionReviewPanelProps {
   onApplied?: () => void
 }
 
-function display(value: unknown): string {
+function display(value: unknown, i18n: I18n): string {
   if (value === null || value === undefined || value === '') return '—'
   if (Array.isArray(value)) return value.join(', ')
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  if (typeof value === 'boolean') return i18n._(value ? msg`Yes` : msg`No`)
   return String(value)
 }
 
@@ -48,6 +52,7 @@ export function ExtractionReviewPanel({
   markdown,
   onApplied,
 }: ExtractionReviewPanelProps) {
+  const { t, i18n } = useLingui()
   const toast = useToast()
   const { updateGrant, loading: savingGrant } = useUpdateGrant()
   const { updateProject, loading: savingProject } = useUpdateProject()
@@ -66,6 +71,13 @@ export function ExtractionReviewPanel({
 
   const saving = savingGrant || savingProject
   const checkedKeys = entries.filter(([key]) => selected[key]).map(([key]) => key)
+  const entityLabel: Record<DocumentEntityType, string> = {
+    grant: t`grant`,
+    project: t`project`,
+    grant_application: t`application`,
+    event: t`event`,
+    event_solution: t`solution`,
+  }
 
   const handleApply = async () => {
     if (checkedKeys.length === 0) return
@@ -82,10 +94,10 @@ export function ExtractionReviewPanel({
         await updateProject(entityId, patch as any)
       }
       await clearFields(documentId)
-      toast.success(`Applied ${checkedKeys.length} field${checkedKeys.length === 1 ? '' : 's'}`)
+      toast.success(plural(checkedKeys.length, { one: 'Applied # field', other: 'Applied # fields' }))
       onApplied?.()
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to apply the fields')
+      toast.error(err?.message || t`Failed to apply the fields`)
     }
   }
 
@@ -96,9 +108,9 @@ export function ExtractionReviewPanel({
       const initial: Record<string, boolean> = {}
       for (const key of Object.keys(next)) initial[key] = isEmpty(entity?.[key])
       setSelected(initial)
-      toast.success('Re-read the document')
+      toast.success(t`Re-read the document`)
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to re-read the document')
+      toast.error(err?.message || t`Failed to re-read the document`)
     }
   }
 
@@ -106,7 +118,7 @@ export function ExtractionReviewPanel({
     return (
       <div className="p-4 border border-ktip-sand-200 rounded-xl bg-ktip-sand-50 space-y-3">
         <p className="text-sm text-ktip-sand-600">
-          Nothing was pulled out of this document yet.
+          <Trans>Nothing was pulled out of this document yet.</Trans>
         </p>
         {markdown && (
           <Button
@@ -116,7 +128,7 @@ export function ExtractionReviewPanel({
             onClick={handleReextract}
             loading={reextracting}
           >
-            Read it again
+            <Trans>Read it again</Trans>
           </Button>
         )}
       </div>
@@ -129,7 +141,7 @@ export function ExtractionReviewPanel({
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles size={16} className="text-ktip-ocean-600 shrink-0" />
           <p className="text-sm font-medium text-ktip-ocean-800 truncate">
-            {entries.length} field{entries.length === 1 ? '' : 's'} found in this document
+            <Plural value={entries.length} one="# field found in this document" other="# fields found in this document" />
           </p>
         </div>
         {markdown && (
@@ -139,7 +151,7 @@ export function ExtractionReviewPanel({
             disabled={reextracting}
             className="text-xs text-ktip-ocean-700 hover:underline disabled:opacity-50 shrink-0"
           >
-            {reextracting ? 'Re-reading…' : 'Read again'}
+            {reextracting ? t`Re-reading…` : t`Read again`}
           </button>
         )}
       </div>
@@ -148,6 +160,7 @@ export function ExtractionReviewPanel({
         {entries.map(([key, proposal]) => {
           const current = entity?.[key]
           const willOverwrite = !isEmpty(current)
+          const confidencePct = Math.round((proposal.confidence ?? 0) * 100)
           return (
             <label
               key={key}
@@ -162,25 +175,25 @@ export function ExtractionReviewPanel({
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-medium text-ktip-sand-900">
-                    {fieldLabel(entityType, key)}
+                    {resolveCopy(i18n, fieldLabel(entityType, key))}
                   </span>
                   <span className="text-[11px] px-1.5 py-0.5 rounded bg-ktip-sand-100 text-ktip-sand-600">
-                    {Math.round((proposal.confidence ?? 0) * 100)}% sure
+                    <Trans>{confidencePct}% sure</Trans>
                   </span>
                   {willOverwrite && (
                     <span className="text-[11px] px-1.5 py-0.5 rounded bg-ktip-sun-100 text-ktip-sun-800">
-                      overwrites current value
+                      <Trans>overwrites current value</Trans>
                     </span>
                   )}
                 </div>
 
                 <p className="text-sm text-ktip-sand-800 break-words">
-                  {display(proposal.value)}
+                  {display(proposal.value, i18n)}
                 </p>
 
                 {willOverwrite && (
                   <p className="text-xs text-ktip-sand-500 break-words">
-                    Now: {display(current)}
+                    <Trans>Now: {display(current, i18n)}</Trans>
                   </p>
                 )}
 
@@ -197,7 +210,7 @@ export function ExtractionReviewPanel({
 
       <div className="flex items-center justify-between gap-3 px-4 py-3 bg-ktip-sand-50 border-t border-ktip-sand-100">
         <p className="text-xs text-ktip-sand-500">
-          {checkedKeys.length} selected
+          <Plural value={checkedKeys.length} one="# selected" other="# selected" />
         </p>
         <Button
           size="sm"
@@ -206,7 +219,7 @@ export function ExtractionReviewPanel({
           loading={saving}
           disabled={checkedKeys.length === 0}
         >
-          Apply to this {entityType}
+          <Trans>Apply to this {entityLabel[entityType]}</Trans>
         </Button>
       </div>
     </div>

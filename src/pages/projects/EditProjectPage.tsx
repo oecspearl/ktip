@@ -18,8 +18,10 @@ import { PROJECT_CATEGORIES, CONTENT_TAG_SUGGESTIONS } from '../../lib/constants
 import { Save } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function EditProjectPage() {
+    const { t } = useLingui()
   const params = useParams()
   const auth = useAuth()
   const navigate = useNavigate()
@@ -103,10 +105,10 @@ export default function EditProjectPage() {
         details: cleanDetails(details),
       } as any)
 
-      toast.success('Project updated successfully!')
+      toast.success(t`Project updated successfully!`)
       navigate(`/projects/${params.id}`)
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update project')
+      toast.error(error.message || t`Failed to update project`)
       setErrorMessage(error.message || 'Failed to update project')
     }
   }
@@ -115,7 +117,7 @@ export default function EditProjectPage() {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
-        <p className="mt-4 text-ktip-sand-600">Loading project...</p>
+        <p className="mt-4 text-ktip-sand-600"><Trans>Loading project...</Trans></p>
       </div>
     )
   }
@@ -124,11 +126,11 @@ export default function EditProjectPage() {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-          Not authorized
+          <Trans>Not authorized</Trans>
         </h2>
-        <p className="text-ktip-sand-600 mb-6">Only the owner or team editors can edit this project.</p>
+        <p className="text-ktip-sand-600 mb-6"><Trans>Only the owner or team editors can edit this project.</Trans></p>
         <Button onClick={() => navigate(`/projects/${params.id}`)}>
-          Back to Project
+          <Trans>Back to Project</Trans>
         </Button>
       </div>
     )
@@ -137,13 +139,13 @@ export default function EditProjectPage() {
   return (
     <>
       <PageHero
-        eyebrow="Project Workspace"
-        title="Edit Project"
+        eyebrow={t`Project Workspace`}
+        title={t`Edit Project`}
         imageSeed="projects"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Projects', href: '/projects' },
-          { label: 'Edit' },
+          { label: t`Home`, href: '/' },
+          { label: t`Projects`, href: '/projects' },
+          { label: t`Edit` },
         ]}
       />
 
@@ -158,8 +160,8 @@ export default function EditProjectPage() {
             )}
 
             <Input
-              label="Project Title"
-              placeholder="Enter a catchy title for your project"
+              label={t`Project Title`}
+              placeholder={t`Enter a catchy title for your project`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
@@ -168,8 +170,8 @@ export default function EditProjectPage() {
             />
 
             <Input
-              label="Summary"
-              placeholder="One short sentence shown on the homepage hero (optional)"
+              label={t`Summary`}
+              placeholder={t`One short sentence shown on the homepage hero (optional)`}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={180}
@@ -177,8 +179,8 @@ export default function EditProjectPage() {
             />
 
             <Textarea
-              label="Description"
-              placeholder="Describe your project, its goals, and potential impact..."
+              label={t`Description`}
+              placeholder={t`Describe your project, its goals, and potential impact...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
@@ -189,17 +191,17 @@ export default function EditProjectPage() {
             {/* Additional Details */}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Additional Details
+                <Trans>Additional Details</Trans>
               </label>
               <p className="text-xs text-ktip-sand-500 mb-2">
-                Optional extra metadata shown under the description — add standalone fields or groups of items
+                <Trans>Optional extra metadata shown under the description — add standalone fields or groups of items</Trans>
               </p>
               <DetailsEditor value={details} onChange={setDetails} />
             </div>
 
             <div data-tutorial="project-form-category">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Category <span className="text-red-500">*</span>
+                <Trans>Category</Trans> <span className="text-red-500">*</span>
               </label>
               <select
                 value={category}
@@ -207,7 +209,7 @@ export default function EditProjectPage() {
                 className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                 required
               >
-                <option value="">Select a category</option>
+                <option value=""><Trans>Select a category</Trans></option>
                 {PROJECT_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
@@ -221,25 +223,25 @@ export default function EditProjectPage() {
 
             <div data-tutorial="project-form-phase">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Current Phase <span className="text-red-500">*</span>
+                <Trans>Current Phase</Trans> <span className="text-red-500">*</span>
               </label>
               <select
                 value={phase}
                 onChange={(e) => setPhase(e.target.value)}
                 className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               >
-                <option value="concept">Concept - Just an idea</option>
-                <option value="prototype">Prototype - Building MVP</option>
-                <option value="funding">Funding - Seeking investment</option>
-                <option value="launch">Launch - Ready to go!</option>
+                <option value="concept"><Trans>Concept - Just an idea</Trans></option>
+                <option value="prototype"><Trans>Prototype - Building MVP</Trans></option>
+                <option value="funding"><Trans>Funding - Seeking investment</Trans></option>
+                <option value="launch"><Trans>Launch - Ready to go!</Trans></option>
               </select>
             </div>
 
             <div data-tutorial="project-form-tags">
               <TagInput
-                label="Hashtags (Max 10)"
-                description="Topics people can filter and search projects by."
-                placeholder="Add a hashtag"
+                label={t`Hashtags (Max 10)`}
+                description={t`Topics people can filter and search projects by.`}
+                placeholder={t`Add a hashtag`}
                 values={hashtags}
                 onChange={(next) => setHashtags(normalizeHashtags(next))}
                 suggestions={CONTENT_TAG_SUGGESTIONS}
@@ -260,7 +262,7 @@ export default function EditProjectPage() {
                   className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
                 />
                 <span className="text-sm text-ktip-sand-700">
-                  This project addresses climate change solutions
+                  <Trans>This project addresses climate change solutions</Trans>
                 </span>
               </label>
             </div>
@@ -274,14 +276,14 @@ export default function EditProjectPage() {
                   className="w-5 h-5 text-ktip-ocean-600 border-ktip-sand-300 rounded focus:ring-ktip-ocean-500"
                 />
                 <span className="text-sm text-ktip-sand-700">
-                  Make this project public (visible to everyone)
+                  <Trans>Make this project public (visible to everyone)</Trans>
                 </span>
               </label>
             </div>
 
             <div className="flex items-center gap-4">
               <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>
-                Save Changes
+                <Trans>Save Changes</Trans>
               </Button>
               <button
                 type="button"
@@ -289,7 +291,7 @@ export default function EditProjectPage() {
                 disabled={updating}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >
-                Cancel
+                <Trans>Cancel</Trans>
               </button>
             </div>
           </form>

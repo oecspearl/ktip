@@ -10,6 +10,7 @@ import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
 import { floorTag } from './RoomWayfindingPanels'
 import type { VenueMapFloor } from '../../../lib/venue-map'
 import type { Event, VenueOccupant, VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Skill chips offered before the panel becomes a tag cloud. */
 const TOP_SKILLS = 10
@@ -31,6 +32,7 @@ export function SkillFinderPanel({
   occupants: VenueOccupant[]
   fill?: boolean
 }) {
+  const { t } = useLingui()
   const { openMember } = useMemberPanel()
   const { roster, loading } = useVenueRoster(eventId)
   const [query, setQuery] = useState('')
@@ -51,7 +53,8 @@ export function SkillFinderPanel({
       .map(([skill]) => skill)
   }, [roster])
 
-  const needle = query.trim().toLowerCase()
+  const term = query.trim()
+  const needle = term.toLowerCase()
   const matches = (roster || []).filter((member) => {
     if (!needle) return false
     const name = (live.get(member.user_id)?.display_name || member.user?.display_name || '').toLowerCase()
@@ -62,7 +65,7 @@ export function SkillFinderPanel({
   })
 
   return (
-    <RoomPanel title="Find someone" className={panelShell(fill)}>
+    <RoomPanel title={t`Find someone`} className={panelShell(fill)}>
       <div className="p-3">
         <label className="relative block">
           <Search
@@ -73,8 +76,8 @@ export function SkillFinderPanel({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="A skill, or a name"
-            aria-label="Search people at this event by skill or name"
+            placeholder={t`A skill, or a name`}
+            aria-label={t`Search people at this event by skill or name`}
             className="w-full rounded-xl border border-ktip-sand-200 py-1.5 pl-8 pr-2 text-sm"
           />
         </label>
@@ -101,17 +104,19 @@ export function SkillFinderPanel({
         </div>
       ) : !needle ? (
         <RoomPanelEmpty>
-          {skills.length ? 'Pick a skill, or type a name.' : 'Nobody here has listed a skill yet.'}
+          {skills.length ? t`Pick a skill, or type a name.` : t`Nobody here has listed a skill yet.`}
         </RoomPanelEmpty>
       ) : matches.length === 0 ? (
-        <RoomPanelEmpty>Nobody matches “{query.trim()}”.</RoomPanelEmpty>
+        <RoomPanelEmpty>
+          <Trans>Nobody matches “{term}”.</Trans>
+        </RoomPanelEmpty>
       ) : (
         <ul
           className={`divide-y divide-ktip-sand-100 border-t border-ktip-sand-100 ${panelScroll(fill, 'max-h-[20rem]')}`}
         >
           {matches.slice(0, 20).map((member) => {
             const presence = live.get(member.user_id)
-            const name = presence?.display_name || member.user?.display_name || 'Member'
+            const name = presence?.display_name || member.user?.display_name || t`Member`
             return (
               <li key={member.user_id} className="flex items-center gap-3 px-4 py-2">
                 <DiamondAvatar
@@ -162,18 +167,19 @@ export function HelpNudgePanel({
   floors?: VenueMapFloor[]
   fill?: boolean
 }) {
+  const { t } = useLingui()
   const { openMember } = useMemberPanel()
   const roomsById = useMemo(() => new Map((rooms || []).map((r) => [r.id, r])), [rooms])
   const stuck = occupants.filter((o) => o.availability === 'help_wanted')
 
   return (
-    <RoomPanel title="Needs help" meta={stuck.length || undefined} className={panelShell(fill)}>
+    <RoomPanel title={t`Needs help`} meta={stuck.length || undefined} className={panelShell(fill)}>
       {stuck.length === 0 ? (
-        <RoomPanelEmpty>Nobody has asked for help.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>Nobody has asked for help.</Trans></RoomPanelEmpty>
       ) : (
         <ul className={`divide-y divide-ktip-sand-100 ${panelScroll(fill, 'max-h-[24rem]')}`}>
           {stuck.map((person) => {
-            const name = person.display_name || 'Member'
+            const name = person.display_name || t`Member`
             const room = person.room_id ? roomsById.get(person.room_id) : undefined
             return (
               <li key={person.user_id} className="flex items-center gap-3 px-4 py-2.5">
@@ -205,7 +211,7 @@ export function HelpNudgePanel({
                     to={venueRoomPath(event, room.key)}
                     className="shrink-0 rounded-lg border border-ktip-sun-200 bg-ktip-sun-50 px-2 py-1 text-[10px] font-semibold text-ktip-sun-800 hover:border-ktip-sun-400"
                   >
-                    Go
+                    <Trans>Go</Trans>
                   </Link>
                 )}
               </li>

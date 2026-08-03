@@ -9,6 +9,7 @@ import { Button } from '../../ui/Button'
 import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
 import type { useRoomSignals } from '../../../hooks/useRoomSignals'
 import type { VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The three host actions that belong in the room rather than in the editor.
@@ -31,6 +32,7 @@ export function HostControlsPanel({
   room: VenueRoom
   signals: ReturnType<typeof useRoomSignals>
 }) {
+  const { t } = useLingui()
   const toast = useToast()
   const { updateRoom, loading: saving } = useVenueRoomMutations()
   const { broadcast, loading: sending } = useRoomBroadcast()
@@ -43,9 +45,9 @@ export function HostControlsPanel({
         eventId: room.event_id,
         updates: { is_open: !room.is_open },
       })
-      toast.success(room.is_open ? 'Room closed' : 'Room open')
+      toast.success(room.is_open ? t`Room closed` : t`Room open`)
     } catch (err: any) {
-      toast.error(err?.message || 'Could not change the room')
+      toast.error(err?.message || t`Could not change the room`)
     }
   }
 
@@ -55,9 +57,9 @@ export function HostControlsPanel({
     try {
       await broadcast({ roomId: room.id, body: text })
       setBody('')
-      toast.success('Announced in this room')
+      toast.success(t`Announced in this room`)
     } catch (err: any) {
-      toast.error(err?.message || 'Could not post the announcement')
+      toast.error(err?.message || t`Could not post the announcement`)
     }
   }
 
@@ -65,7 +67,7 @@ export function HostControlsPanel({
     <div className="rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50/60 p-4">
       <p className="mb-2 flex items-center gap-1.5 font-display text-sm font-bold uppercase tracking-wider text-ktip-ocean-700">
         <Megaphone size={14} aria-hidden="true" />
-        Host controls
+        <Trans>Host controls</Trans>
       </p>
 
       <div className="flex flex-wrap items-start gap-2">
@@ -74,16 +76,16 @@ export function HostControlsPanel({
           value={body}
           maxLength={4000}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Say something to everyone in this room…"
-          aria-label="Announcement for this room"
+          placeholder={t`Say something to everyone in this room…`}
+          aria-label={t`Announcement for this room`}
           className="min-w-0 flex-1 rounded-xl border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm"
         />
         <Button size="sm" onClick={send} loading={sending} disabled={!body.trim()}>
-          Announce
+          <Trans>Announce</Trans>
         </Button>
       </div>
       <p className="mt-1 text-[11px] text-ktip-sand-500">
-        Posts as the venue, not as you — it renders as a system line in the chat.
+        <Trans>Posts as the venue, not as you — it renders as a system line in the chat.</Trans>
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -98,7 +100,7 @@ export function HostControlsPanel({
           ) : (
             <Unlock size={13} aria-hidden="true" />
           )}
-          {room.is_open ? 'Close this room' : 'Reopen this room'}
+          {room.is_open ? t`Close this room` : t`Reopen this room`}
         </button>
 
         {/*
@@ -114,8 +116,8 @@ export function HostControlsPanel({
           aria-pressed={signals.iAmPresenting}
           title={
             signals.connected
-              ? 'Puts the call in the big panel for everyone in this room'
-              : 'Not connected to this room’s live channel'
+              ? t`Puts the call in the big panel for everyone in this room`
+              : t`Not connected to this room’s live channel`
           }
           className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold disabled:opacity-50 ${
             signals.iAmPresenting
@@ -128,12 +130,12 @@ export function HostControlsPanel({
           ) : (
             <ScreenShare size={13} aria-hidden="true" />
           )}
-          {signals.iAmPresenting ? 'Stop presenting' : 'Present'}
+          {signals.iAmPresenting ? t`Stop presenting` : t`Present`}
         </button>
 
         {signals.presenter && !signals.iAmPresenting && (
           <span className="text-[11px] text-ktip-sand-500">
-            {signals.presenter.name} is presenting.
+            <Trans>{signals.presenter.name} is presenting.</Trans>
           </span>
         )}
       </div>
@@ -149,17 +151,18 @@ export function HostControlsPanel({
  * scrolling back through the conversation they are buried in.
  */
 export function ActivityLogPanel({ roomId }: { roomId: string }) {
+  const { t } = useLingui()
   const { messages, loading } = useVenueRoomMessages(roomId)
   const log = (messages || []).filter((m) => m.kind === 'system').slice(-20).reverse()
 
   return (
-    <RoomPanel title="Room log" meta={log.length || undefined}>
+    <RoomPanel title={t`Room log`} meta={log.length || undefined}>
       {loading ? (
         <div className="p-4">
           <div className="h-3 w-2/3 rounded bg-ktip-sand-100 animate-pulse-soft" />
         </div>
       ) : log.length === 0 ? (
-        <RoomPanelEmpty>Nothing has been announced in this room.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>Nothing has been announced in this room.</Trans></RoomPanelEmpty>
       ) : (
         <ul className="max-h-[18rem] divide-y divide-ktip-sand-100 overflow-y-auto">
           {log.map((entry) => (

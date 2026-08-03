@@ -87,7 +87,23 @@ WITH m(num, mfile, kind, t1, t2) AS (
   ('082', '082_profile_contact_fields.sql',           'column',   'profiles', 'phone'),
   ('083', '083_profile_visibility.sql',               'function', 'can_view_profile', NULL),
   ('084', '084_challenge_events_and_documents.sql',   'funcsrc',  'parent_upload_paths', '%event%'),
-  ('085', '085_event_solutions.sql',                  'table',    'event_solutions', NULL)
+  ('085', '085_event_solutions.sql',                  'table',    'event_solutions', NULL),
+  ('086', '086_message_read_state.sql',               'function', 'mark_conversation_read', NULL),
+  ('087', '087_readable_slugs.sql',                   'function', 'slugify', NULL),
+  ('088', '088_more_achievements.sql',                'funcsrc',  '__seed_only__', NULL),
+  ('089', '089_venue_map.sql',                        'column',   'events', 'venue_map'),
+  ('090', '090_admin_capability_and_event_permission.sql', 'function', 'is_oecs_admin', NULL),
+  -- 091 was used twice. Both files are real and independent (one touches
+  -- profiles, the other venue_rooms) — run BOTH, in either order.
+  ('091', '091_account_age.sql',                      'table',    'account_age', NULL),
+  ('091', '091_venue_room_sections.sql',              'column',   'venue_rooms', 'sections'),
+  ('092', '092_event_type_fields.sql',                'column',   'events', 'registration_closes_at'),
+  ('093', '093_sticky_notes_and_feedback_capture.sql','table',    'sticky_notes', NULL),
+  ('094', '094_sticky_notes_rich.sql',                'table',    'sticky_note_groups', NULL),
+  ('095', '095_message_attachments.sql',              'column',   'messages', 'attachments'),
+  ('096', '096_event_registration_approval.sql',      'column',   'event_rsvps', 'attendance_type'),
+  ('097', '097_translations.sql',                     'table',    'translations', NULL),
+  ('098', '098_decision_notifications.sql',           'function', 'notify_grant_application_decision', NULL)
 ),
 checked AS (
   SELECT
@@ -115,7 +131,7 @@ checked AS (
                   AND c.column_name = split_part(t1, '|', 2)
                   AND c.column_default LIKE '%' || t2 || '%')
       WHEN 'funcsrc' THEN
-        CASE WHEN t1 = '__seed_only__' THEN NULL  -- 067: pure data seed, cannot detect from catalogs
+        CASE WHEN t1 = '__seed_only__' THEN NULL  -- 067, 088: pure data seeds, cannot detect from catalogs
              ELSE EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
                           WHERE n.nspname = 'public' AND p.proname = t1 AND p.prosrc LIKE t2)
         END
@@ -126,10 +142,10 @@ SELECT
   num  AS "#",
   mfile AS migration_file,
   CASE
-    WHEN applied IS NULL THEN 'SEED - re-run after 066 (idempotent)'
+    WHEN applied IS NULL THEN 'SEED - data only, re-run is idempotent'
     WHEN applied         THEN 'applied'
     ELSE                      'MISSING - RUN'
   END AS status,
   kind || ': ' || t1 || COALESCE('.' || t2, '') AS probe
 FROM checked
-ORDER BY num;
+ORDER BY num, mfile;

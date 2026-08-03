@@ -31,6 +31,7 @@ import {
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { cn } from '../../lib/utils'
 import { useDisclosureAnimation } from './useDisclosureAnimation'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 // The feedback modal is a canvas annotator behind a button almost nobody
 // presses on any given page — it has no business in the entry chunk.
@@ -110,6 +111,7 @@ function NumberStepper({
   atMax,
   iconSize,
 }: NumberStepperProps) {
+  const { t } = useLingui()
   const button =
     'w-[1.75em] h-[1.75em] rounded-[0.375em] flex items-center justify-center border border-ktip-sand-200 text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-600 disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-ktip-sand-700 transition-colors'
 
@@ -120,14 +122,14 @@ function NumberStepper({
         {label}
       </div>
       <div className="flex items-center gap-[0.5em]">
-        <button onClick={onDecrease} disabled={atMin} aria-label={`Decrease ${label}`} className={button}>
+        <button onClick={onDecrease} disabled={atMin} aria-label={t`Decrease ${label}`} className={button}>
           <Minus size={iconSize} />
         </button>
         {/* tabular-nums so the row does not reflow as the number changes */}
         <span className="flex-1 text-center text-[0.8125em] font-medium tabular-nums text-ktip-sand-900">
           {value}
         </span>
-        <button onClick={onIncrease} disabled={atMax} aria-label={`Increase ${label}`} className={button}>
+        <button onClick={onIncrease} disabled={atMax} aria-label={t`Increase ${label}`} className={button}>
           <Plus size={iconSize} />
         </button>
       </div>
@@ -147,6 +149,7 @@ function NumberStepper({
  * is now the single entry point for both, so neither should be mounted.
  */
 export function FloatingActionButton() {
+  const { t } = useLingui()
   const auth = useAuth()
   const { togglePanel } = useMessagingPanel()
   const { notes, fabPanelOpen, setFabPanelOpen } = useStickyNotesPanel()
@@ -203,7 +206,7 @@ export function FloatingActionButton() {
   const actions: FabAction[] = [
     {
       id: 'note',
-      label: 'Sticky notes',
+      label: t`Sticky notes`,
       icon: <StickyNote size={px(23)} />,
       tone: 'yellow',
       // Opens the panel rather than dropping a note straight onto the page:
@@ -217,7 +220,7 @@ export function FloatingActionButton() {
     },
     {
       id: 'accessibility',
-      label: 'Accessibility',
+      label: t`Accessibility`,
       icon: <Accessibility size={px(23)} />,
       tone: 'blue',
       // Opens a panel rather than acting directly, so the cluster stays open
@@ -225,7 +228,7 @@ export function FloatingActionButton() {
     },
     {
       id: 'feedback',
-      label: 'Feedback',
+      label: t`Feedback`,
       icon: <Megaphone size={px(23)} />,
       tone: 'red',
       onClick: () => {
@@ -235,7 +238,7 @@ export function FloatingActionButton() {
     },
     {
       id: 'tutorial',
-      label: 'Page tour',
+      label: t`Page tour`,
       icon: <GraduationCap size={px(23)} />,
       tone: 'green',
       onClick: () => {
@@ -247,7 +250,7 @@ export function FloatingActionButton() {
     },
     {
       id: 'messages',
-      label: 'Messages',
+      label: t`Messages`,
       icon: <MessageSquare size={px(23)} />,
       tone: 'violet',
       onClick: () => {
@@ -260,7 +263,7 @@ export function FloatingActionButton() {
     },
     {
       id: 'theme',
-      label: dark ? 'Light mode' : 'Dark mode',
+      label: dark ? t`Light mode` : t`Dark mode`,
       icon: dark ? <Sun size={px(23)} /> : <Moon size={px(23)} />,
       tone: 'amber',
       // Stays open so the flip is visible
@@ -316,25 +319,25 @@ export function FloatingActionButton() {
       {a11yPanel.mounted && (
         <div
           role="group"
-          aria-label="Accessibility settings"
+          aria-label={t`Accessibility settings`}
           data-state={a11yPanel.state}
           className="fab-panel origin-bottom-right absolute bottom-full right-0 mb-[0.75em] w-[15em] rounded-[0.75em] border border-ktip-sand-200 bg-ktip-cream p-[1em] shadow-fab-hover"
         >
           <div className="flex items-center justify-between mb-[0.75em]">
-            <p className="text-[0.8125em] font-semibold text-ktip-sand-900">Accessibility</p>
+            <p className="text-[0.8125em] font-semibold text-ktip-sand-900"><Trans>Accessibility</Trans></p>
             <button
               onClick={() => setA11y(A11Y_DEFAULTS)}
               disabled={atDefaults}
               className="flex items-center gap-[0.25em] text-[0.6875em] text-ktip-sand-500 hover:text-ktip-ocean-600 disabled:opacity-40 disabled:hover:text-ktip-sand-500 transition-colors"
             >
               <RotateCcw size={px(11)} />
-              Reset
+              <Trans>Reset</Trans>
             </button>
           </div>
 
           <NumberStepper
             icon={<Type size={px(14)} />}
-            label="Text size"
+            label={t`Text size`}
             value={`${Math.round(a11y.fontScale * 100)}%`}
             onDecrease={() => setA11y({ fontScale: a11y.fontScale - A11Y_RANGE.fontScale.step })}
             onIncrease={() => setA11y({ fontScale: a11y.fontScale + A11Y_RANGE.fontScale.step })}
@@ -345,7 +348,7 @@ export function FloatingActionButton() {
 
           <NumberStepper
             icon={<SunMedium size={px(14)} />}
-            label="Photo brightness"
+            label={t`Photo brightness`}
             value={`${Math.round(a11y.brightness * 100)}%`}
             onDecrease={() => setA11y({ brightness: a11y.brightness - A11Y_RANGE.brightness.step })}
             onIncrease={() => setA11y({ brightness: a11y.brightness + A11Y_RANGE.brightness.step })}
@@ -407,10 +410,12 @@ export function FloatingActionButton() {
                 {action.count > 99 ? '99+' : action.count}
               </span>
             ) : (
-              // Exactly the count badge's box, minus the number: same corner,
-              // same diameter, same ring. A dot that sat somewhere else and
-              // then moved once a count arrived read as two different signals.
-              <span className="absolute -top-[0.375em] -right-[0.375em] w-[1.6em] h-[1.6em] rounded-full bg-red-500 shadow-sm ring-2 ring-white/90 animate-pulse-soft" />
+              // Concentric with the count badge, not the same size as it: a dot
+              // carries no digits, so at the badge's diameter it read as a blob
+              // sitting on the icon. Half the width, offset so the centre stays
+              // put — a dot that moved once a count arrived would read as two
+              // different signals.
+              <span className="absolute top-0 right-0 w-[0.85em] h-[0.85em] rounded-full bg-red-500 shadow-sm ring-2 ring-white/90 animate-pulse-soft" />
             ))}
           {/* text-[0.75em] resets the em basis for this element, so its own
               padding is divided by 0.75 to land back on the authored 10px/6px */}
@@ -423,7 +428,7 @@ export function FloatingActionButton() {
       <button
         ref={triggerRef}
         onClick={() => setOpen(!open)}
-        aria-label="Quick actions"
+        aria-label={t`Quick actions`}
         aria-expanded={open}
         className={cn(
           // No overflow-hidden here: the unread badge overhangs the corner.
@@ -492,7 +497,7 @@ export function FloatingActionButton() {
             showClose ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'
           )}
         >
-          <img src="/ktip-logo.webp" alt="" className="w-[3.4em] h-[3.4em] object-contain" />
+          <img src="/ktip-logo-128.webp" alt="" className="w-[3.4em] h-[3.4em] object-contain" />
         </span>
         {hasUnread && !showClose && (
           // Same box as the sub-buttons' badge, scaled to this larger tile —

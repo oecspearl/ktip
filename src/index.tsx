@@ -29,6 +29,10 @@ const reportRecoverableReactError = Sentry.reactErrorHandler()
 
 createRoot(root!, {
   onUncaughtError: (error, errorInfo) => {
+    // Passing onUncaughtError REPLACES React's default console logging, so
+    // without this line a render crash in dev (where Sentry has no DSN) is
+    // swallowed whole: blank page, clean console, nothing to debug from.
+    console.error('Uncaught React render error:', error, errorInfo)
     Sentry.withScope((scope) => {
       scope.setTags({
         area: 'react-render',
@@ -39,6 +43,7 @@ createRoot(root!, {
     })
   },
   onRecoverableError: (error, errorInfo) => {
+    console.error('Recoverable React render error:', error, errorInfo)
     Sentry.withScope((scope) => {
       scope.setTags({
         area: 'react-render',

@@ -1,4 +1,5 @@
 import type { ResumeData } from '../../types/resume'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The CV as plain text.
@@ -13,6 +14,7 @@ import type { ResumeData } from '../../types/resume'
  * sheet never adds a second thing to keep in step here.
  */
 export function ResumeOutline({ data }: { data: ResumeData }) {
+    const { t } = useLingui()
   const { profile } = data
 
   return (
@@ -51,7 +53,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       </header>
 
       {profile.about.length > 0 && (
-        <Block title="Profile">
+        <Block title={t`Profile`}>
           <div className="space-y-2">
             {profile.about.map((paragraph) => (
               <p key={paragraph.slice(0, 32)}>{paragraph}</p>
@@ -61,7 +63,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.roles.length > 0 && (
-        <Block title="Experience">
+        <Block title={t`Experience`}>
           <ul className="space-y-4">
             {data.roles.map((role) => (
               <li key={`${role.org}-${role.period}`}>
@@ -83,7 +85,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.education.length > 0 && (
-        <Block title="Education">
+        <Block title={t`Education`}>
           <ul className="space-y-2">
             {data.education.map((item) => (
               <li key={`${item.credential}-${item.year}`}>
@@ -98,7 +100,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.courses.length > 0 && (
-        <Block title="Courses">
+        <Block title={t`Courses`}>
           <ul className="space-y-1">
             {data.courses.map((course) => (
               <li key={course.courseId}>
@@ -106,8 +108,8 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
                 <span className="text-ktip-sand-500">
                   {' — '}
                   {course.status === 'completed'
-                    ? 'completed'
-                    : `${course.progressPercentage}% complete`}
+                    ? t`completed`
+                    : t`${course.progressPercentage}% complete`}
                 </span>
               </li>
             ))}
@@ -116,14 +118,14 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.credentials.length > 0 && (
-        <Block title="Certificates">
+        <Block title={t`Certificates`}>
           <ul className="space-y-2">
             {data.credentials.map((credential) => {
               const year = credential.date ? new Date(credential.date).getUTCFullYear() : null
               const meta = [
                 credential.issuer,
                 year && !Number.isNaN(year) ? String(year) : null,
-                credential.verified ? 'verified' : null,
+                credential.verified ? t`verified` : null,
               ]
                 .filter(Boolean)
                 .join(' · ')
@@ -131,7 +133,11 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
                 <li key={`${credential.title}-${credential.code}`}>
                   <p className="font-semibold text-ktip-sand-900">{credential.title}</p>
                   {meta && <p className="text-ktip-sand-600">{meta}</p>}
-                  {credential.code && <p>Code {credential.code}</p>}
+                  {credential.code && (
+                    <p>
+                      <Trans>Code {credential.code}</Trans>
+                    </p>
+                  )}
                 </li>
               )
             })}
@@ -140,7 +146,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.projects.length > 0 && (
-        <Block title="Projects">
+        <Block title={t`Projects`}>
           <ul className="space-y-3">
             {data.projects.map((project) => (
               <li key={project.title}>
@@ -158,7 +164,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.awards.length > 0 && (
-        <Block title="Awards and recognition">
+        <Block title={t`Awards and recognition`}>
           <ul className="space-y-2">
             {data.awards.map((award) => {
               const year = award.date ? new Date(award.date).getUTCFullYear() : null
@@ -178,7 +184,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.skills.length > 0 && (
-        <Block title="Skills">
+        <Block title={t`Skills`}>
           <dl className="space-y-2">
             {data.skills.map((group) => (
               <div key={group.area}>
@@ -191,7 +197,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.academic.length > 0 && (
-        <Block title="Academic competencies">
+        <Block title={t`Academic competencies`}>
           <dl className="space-y-2">
             {data.academic.map((entry) => (
               <div key={entry.subject}>
@@ -204,13 +210,13 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.languages.length > 0 && (
-        <Block title="Languages">
+        <Block title={t`Languages`}>
           <p>{data.languages.join(', ')}</p>
         </Block>
       )}
 
       {data.professionalSkills.length > 0 && (
-        <Block title="Professional skills">
+        <Block title={t`Professional skills`}>
           <ul className="list-disc space-y-0.5 pl-5">
             {data.professionalSkills.map((skill) => (
               <li key={skill}>{skill}</li>
@@ -220,7 +226,7 @@ export function ResumeOutline({ data }: { data: ResumeData }) {
       )}
 
       {data.interests.trim() !== '' && (
-        <Block title="Interests">
+        <Block title={t`Interests`}>
           <p>{data.interests}</p>
         </Block>
       )}

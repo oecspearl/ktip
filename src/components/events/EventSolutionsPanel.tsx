@@ -31,6 +31,7 @@ import {
   Lock,
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface EventSolutionsPanelProps {
   eventId: string
@@ -54,6 +55,7 @@ export function EventSolutionsPanel({
   submissionDeadline,
   isOrganizer,
 }: EventSolutionsPanelProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
 
@@ -142,16 +144,17 @@ export function EventSolutionsPanel({
       }
 
       if (failed.length > 0) {
+        const failedNames = failed.join(', ')
         toast.error(
-          `Solution submitted, but these files failed: ${failed.join(', ')}. Add them again from your entry.`
+          t`Solution submitted, but these files failed: ${failedNames}. Add them again from your entry.`
         )
       } else {
-        toast.success('Solution submitted')
+        toast.success(t`Solution submitted`)
       }
       resetForm()
       refetch()
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to submit the solution')
+      toast.error(err?.message || t`Failed to submit the solution`)
     } finally {
       setUploading(false)
     }
@@ -161,11 +164,11 @@ export function EventSolutionsPanel({
     if (!deleteTarget) return
     try {
       await deleteSolution(deleteTarget.id)
-      toast.success('Solution withdrawn')
+      toast.success(t`Solution withdrawn`)
       setDeleteTarget(null)
       refetch()
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to withdraw the solution')
+      toast.error(err?.message || t`Failed to withdraw the solution`)
     }
   }
 
@@ -179,18 +182,18 @@ export function EventSolutionsPanel({
             <Lightbulb size={20} className="text-ktip-sun-700" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Solutions</h2>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Solutions</Trans></h2>
             <p className="text-sm text-ktip-sand-600">
               {isOrganizer
-                ? 'What participants have submitted to your challenge'
-                : 'Answer the challenge and attach your supporting files'}
+                ? t`What participants have submitted to your challenge`
+                : t`Answer the challenge and attach your supporting files`}
             </p>
           </div>
         </div>
 
         {canSubmit && !showForm && (
           <Button size="sm" icon={<Plus size={14} />} onClick={() => setShowForm(true)}>
-            Submit a solution
+            <Trans>Submit a solution</Trans>
           </Button>
         )}
       </div>
@@ -199,19 +202,24 @@ export function EventSolutionsPanel({
       {!isOrganizer && !entriesClosed && (
         <p className="mt-3 flex items-start gap-2 text-xs text-ktip-sand-500">
           <Lock size={14} className="mt-0.5 shrink-0" />
-          While entries are open you only see your own. Everyone's solutions become visible once
-          submissions close
-          {submissionDeadline ? ` on ${format(new Date(submissionDeadline), 'MMM d, yyyy')}` : ''}.
+          <Trans>
+            While entries are open you only see your own. Everyone's solutions become visible once
+            submissions close
+          </Trans>
+          {submissionDeadline && (
+            <Trans> on {format(new Date(submissionDeadline), 'MMM d, yyyy')}</Trans>
+          )}
+          .
         </p>
       )}
 
       {!auth.user && !entriesClosed && (
-        <p className="mt-3 text-sm text-ktip-sand-500">Sign in to submit a solution.</p>
+        <p className="mt-3 text-sm text-ktip-sand-500"><Trans>Sign in to submit a solution.</Trans></p>
       )}
 
       {entriesClosed && (
         <p className="mt-3 text-sm text-ktip-sand-500">
-          Submissions closed {format(new Date(submissionDeadline as string), 'MMM d, yyyy · h:mm a')}.
+          <Trans>Submissions closed {format(new Date(submissionDeadline as string), 'MMM d, yyyy · h:mm a')}.</Trans>
         </p>
       )}
 
@@ -222,54 +230,53 @@ export function EventSolutionsPanel({
           className="mt-5 border border-ktip-sand-200 rounded-xl p-4 space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-ktip-sand-900">Your solution</h3>
+            <h3 className="font-medium text-ktip-sand-900"><Trans>Your solution</Trans></h3>
             <button
               type="button"
               onClick={resetForm}
               disabled={busy}
               className="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
-              aria-label="Cancel"
+              aria-label={t`Cancel`}
             >
               <X size={18} />
             </button>
           </div>
 
           <Input
-            label="Title"
+            label={t`Title`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Flood early-warning alerts over SMS"
+            placeholder={t`e.g. Flood early-warning alerts over SMS`}
             fullWidth
             required
             disabled={busy}
           />
 
           <Textarea
-            label="Description"
+            label={t`Description`}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What you built, how it answers the challenge, and what is left to do..."
+            placeholder={t`What you built, how it answers the challenge, and what is left to do...`}
             rows={5}
             fullWidth
             disabled={busy}
           />
 
           <Input
-            label="Link (Optional)"
+            label={t`Link (Optional)`}
             type="url"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder="https://… a demo, repo or write-up"
+            placeholder={t`https://… a demo, repo or write-up`}
             fullWidth
             disabled={busy}
           />
 
           {/* Files */}
           <div>
-            <p className="text-sm font-medium text-ktip-sand-700">Supporting files (Optional)</p>
+            <p className="text-sm font-medium text-ktip-sand-700"><Trans>Supporting files (Optional)</Trans></p>
             <p className="text-xs text-ktip-sand-500 mt-0.5 mb-2">
-              Slides, a report, a dataset — PDF, Word, Excel, CSV, Markdown, text or image, up to
-              25MB each. The organizer can always open what you attach here.
+              <Trans>Slides, a report, a dataset — PDF, Word, Excel, CSV, Markdown, text or image, up to 25MB each. The organizer can always open what you attach here.</Trans>
             </p>
 
             {files.length > 0 && (
@@ -291,7 +298,7 @@ export function EventSolutionsPanel({
                       onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
                       disabled={busy}
                       className="p-1 text-ktip-sand-400 hover:text-red-600 transition-colors"
-                      aria-label={`Remove ${file.name}`}
+                      aria-label={t`Remove ${file.name}`}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -302,7 +309,7 @@ export function EventSolutionsPanel({
 
             <label className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-ktip-sand-300 rounded-xl text-sm text-ktip-sand-600 hover:border-ktip-ocean-400 hover:text-ktip-ocean-600 transition-colors cursor-pointer">
               <Upload size={16} />
-              Add files
+              <Trans>Add files</Trans>
               <input
                 type="file"
                 multiple
@@ -319,10 +326,10 @@ export function EventSolutionsPanel({
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" size="sm" onClick={resetForm} disabled={busy}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button type="submit" size="sm" loading={busy} disabled={!title.trim()}>
-              {uploading ? 'Uploading files…' : 'Submit solution'}
+              {uploading ? t`Uploading files…` : t`Submit solution`}
             </Button>
           </div>
         </form>
@@ -330,15 +337,15 @@ export function EventSolutionsPanel({
 
       {/* Entries */}
       {loading ? (
-        <p className="py-8 text-center text-sm text-ktip-sand-500">Loading solutions…</p>
+        <p className="py-8 text-center text-sm text-ktip-sand-500"><Trans>Loading solutions…</Trans></p>
       ) : !solutions || solutions.length === 0 ? (
         !showForm && (
           <p className="py-8 text-center text-sm text-ktip-sand-500">
             {isOrganizer
-              ? 'No solutions submitted yet.'
+              ? t`No solutions submitted yet.`
               : entriesClosed
-                ? 'No solutions were submitted.'
-                : 'No solution from you yet.'}
+                ? t`No solutions were submitted.`
+                : t`No solution from you yet.`}
           </p>
         )
       ) : (
@@ -358,9 +365,9 @@ export function EventSolutionsPanel({
 
       <ConfirmModal
         open={!!deleteTarget}
-        title="Withdraw solution"
-        message="This removes the entry and every file attached to it. This cannot be undone."
-        confirmLabel="Withdraw"
+        title={t`Withdraw solution`}
+        message={t`This removes the entry and every file attached to it. This cannot be undone.`}
+        confirmLabel={t`Withdraw`}
         confirmVariant="danger"
         loading={deleting}
         onConfirm={handleDelete}
@@ -379,17 +386,18 @@ interface SolutionCardProps {
 }
 
 function SolutionCard({ solution, isAuthor, canAttach, canWithdraw, onWithdraw }: SolutionCardProps) {
+    const { t } = useLingui()
   const toast = useToast()
   const [showUpload, setShowUpload] = useState(false)
   const { documents } = useEntityDocuments('event_solution', solution.id)
 
   const handleDownload = async (path: string | null, fileName: string) => {
     if (!path) {
-      toast.error('You do not have access to this file')
+      toast.error(t`You do not have access to this file`)
       return
     }
     const ok = await openDocument(path, fileName)
-    if (!ok) toast.error('Could not open the file')
+    if (!ok) toast.error(t`Could not open the file`)
   }
 
   return (
@@ -399,11 +407,11 @@ function SolutionCard({ solution, isAuthor, canAttach, canWithdraw, onWithdraw }
           <h3 className="font-medium text-ktip-sand-900">
             {solution.title}
             {isAuthor && (
-              <span className="ml-2 text-xs font-normal text-ktip-ocean-600">Your entry</span>
+              <span className="ml-2 text-xs font-normal text-ktip-ocean-600"><Trans>Your entry</Trans></span>
             )}
           </h3>
           <p className="text-xs text-ktip-sand-500 mt-0.5">
-            {solution.author?.display_name || 'A participant'} ·{' '}
+            {solution.author?.display_name || t`A participant`} ·{' '}
             {format(new Date(solution.created_at), 'MMM d, yyyy')}
           </p>
         </div>
@@ -413,7 +421,7 @@ function SolutionCard({ solution, isAuthor, canAttach, canWithdraw, onWithdraw }
             type="button"
             onClick={onWithdraw}
             className="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
-            title="Withdraw solution"
+            title={t`Withdraw solution`}
           >
             <Trash2 size={16} />
           </button>
@@ -454,7 +462,7 @@ function SolutionCard({ solution, isAuthor, canAttach, canWithdraw, onWithdraw }
                 type="button"
                 onClick={() => handleDownload(doc.storage_path, doc.file_name)}
                 className="p-1 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
-                title="Open file"
+                title={t`Open file`}
               >
                 <Download size={16} />
               </button>
@@ -471,7 +479,7 @@ function SolutionCard({ solution, isAuthor, canAttach, canWithdraw, onWithdraw }
             className="mt-3 inline-flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
           >
             <Upload size={14} />
-            Add a file
+            <Trans>Add a file</Trans>
           </button>
 
           {/* canEditEntity={false}: the AI pass proposes column values for a
@@ -482,7 +490,7 @@ function SolutionCard({ solution, isAuthor, canAttach, canWithdraw, onWithdraw }
             entityType="event_solution"
             entityId={solution.id}
             canEditEntity={false}
-            descriptionCopy="Attach a file to your solution. The organizer can always open what you attach."
+            descriptionCopy={t`Attach a file to your solution. The organizer can always open what you attach.`}
           />
         </>
       )}

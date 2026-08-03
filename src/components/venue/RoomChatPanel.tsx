@@ -14,6 +14,7 @@ import type { VenueRoom } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { EmojiPickerButton, insertAtCaret } from '../ui/EmojiPicker'
 import { LinkedText } from '../ui/LinkedText'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface RoomChatPanelProps {
   room: VenueRoom
@@ -37,6 +38,7 @@ export function RoomChatPanel({
   canModerate = false,
   className,
 }: RoomChatPanelProps) {
+  const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { openMember } = useMemberPanel()
@@ -64,7 +66,7 @@ export function RoomChatPanel({
       await sendMessage(room.id, body)
     } catch (err: any) {
       setDraft(body)
-      toast.error(err?.message || 'Could not send that message')
+      toast.error(err?.message || t`Could not send that message`)
     }
   }
 
@@ -77,7 +79,7 @@ export function RoomChatPanel({
     >
       <div className="border-b border-ktip-sand-100 px-4 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
-          {room.name} chat
+          <Trans>{room.name} chat</Trans>
         </h2>
       </div>
 
@@ -89,11 +91,11 @@ export function RoomChatPanel({
           </>
         ) : !messages || messages.length === 0 ? (
           <p className="py-6 text-center text-sm text-ktip-sand-500">
-            No messages yet. Say hello.
+            <Trans>No messages yet. Say hello.</Trans>
           </p>
         ) : (
           messages.map((m) => {
-            const name = m.author?.display_name || 'Member'
+            const name = m.author?.display_name || t`Member`
             const mine = m.author_id === auth.user?.id
 
             if (m.kind === 'system') {
@@ -130,8 +132,8 @@ export function RoomChatPanel({
                   <button
                     type="button"
                     onClick={() => removeMessage({ messageId: m.id, roomId: room.id })}
-                    aria-label="Remove message"
-                    title="Remove"
+                    aria-label={t`Remove message`}
+                    title={t`Remove`}
                     className="shrink-0 rounded-lg p-1 text-ktip-sand-400 opacity-0 transition-opacity hover:bg-ktip-sand-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
                   >
                     <Trash2 size={13} aria-hidden="true" />
@@ -152,7 +154,7 @@ export function RoomChatPanel({
           className="flex items-center gap-2 border-t border-ktip-sand-100 px-3 py-2.5"
         >
           <label htmlFor={`room-chat-${room.id}`} className="sr-only">
-            Message {room.name}
+            <Trans>Message {room.name}</Trans>
           </label>
           <EmojiPickerButton
             className="shrink-0"
@@ -163,14 +165,14 @@ export function RoomChatPanel({
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={`Message ${room.name}…`}
+            placeholder={t`Message ${room.name}…`}
             maxLength={4000}
             className="flex-1 rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
           />
           <button
             type="submit"
             disabled={sending || !draft.trim()}
-            aria-label="Send"
+            aria-label={t`Send`}
             className="rounded-lg bg-brand-navy p-2 text-white transition-colors hover:bg-brand-green hover:text-brand-navy disabled:opacity-50 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green"
           >
             <Send size={16} aria-hidden="true" />
@@ -178,7 +180,7 @@ export function RoomChatPanel({
         </form>
       ) : (
         <p className="border-t border-ktip-sand-100 px-4 py-3 text-xs text-ktip-sand-500">
-          You are watching this room. Spectators can read chat but not post.
+          <Trans>You are watching this room. Spectators can read chat but not post.</Trans>
         </p>
       )}
     </div>

@@ -5,6 +5,8 @@ import { buildWeekLayout, formatHourLabel, timeToPct } from '../../lib/calendar-
 import { CalendarEventCard } from './CalendarEventCard'
 import type { CalendarItem } from '../../lib/calendar'
 import type { WeekColumn, WeekLayout } from '../../lib/calendar-week'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 interface WeekViewProps {
   gridStart: Date
@@ -99,6 +101,7 @@ export function WeekView({
   itemNoun = 'event',
   className,
 }: WeekViewProps) {
+  const { t } = useLingui()
   const days = useMemo(
     () => eachDayOfInterval({ start: gridStart, end: gridEnd }),
     [gridStart, gridEnd]
@@ -122,12 +125,19 @@ export function WeekView({
     const selected = isSameDay(day, selectedDate)
     const today = isToday(day)
     const count = itemsByDay.get(format(day, 'yyyy-MM-dd'))?.length ?? 0
+    const dayLabel = format(day, 'EEEE, MMMM d')
+    // itemNoun only ever arrives as "item" or "event" today — a third caller
+    // would need its own branch here, the same way CalendarGrid/CalendarDayPanel do.
+    const countLabel =
+      itemNoun === 'event'
+        ? plural(count, { one: '# event', other: '# events' })
+        : plural(count, { one: '# item', other: '# items' })
     return (
       <button
         type="button"
         onClick={() => onSelectDate(day)}
         aria-pressed={selected}
-        aria-label={`${format(day, 'EEEE, MMMM d')}, ${count} ${itemNoun}${count !== 1 ? 's' : ''}`}
+        aria-label={t`${dayLabel}, ${countLabel}`}
         className={cn(
           'flex flex-col items-center gap-0.5 border-b-2 py-2 transition-all focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none',
           compact ? 'min-w-14 rounded-cal-sm px-3' : 'w-full',
@@ -162,7 +172,7 @@ export function WeekView({
           'py-1.5 pr-2 text-right text-[10px] font-bold uppercase tracking-wider text-ktip-sand-500'
         )}
       >
-        All day
+        <Trans>All day</Trans>
       </div>
       <div
         className="grid flex-1"

@@ -1,5 +1,7 @@
 import { X, Plus } from 'lucide-react'
 import { COLLABORATION_OPTIONS, COLLAB_EXCLUSIVE_VALUE } from '../../lib/constants'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 interface CollabSelectProps {
   values: string[]
@@ -9,6 +11,7 @@ interface CollabSelectProps {
 // Multi-select for "Openness to Collaborate". Picking "Not Currently
 // Seeking" is exclusive: it clears every other option (and vice versa).
 export function CollabSelect({ values, onChange }: CollabSelectProps) {
+  const { i18n } = useLingui()
   const toggle = (value: string) => {
     if (values.includes(value)) {
       onChange(values.filter((v) => v !== value))
@@ -35,7 +38,7 @@ export function CollabSelect({ values, onChange }: CollabSelectProps) {
             }`}
           >
             {isSelected ? <X size={14} /> : <Plus size={14} />}
-            {option.label}
+            {resolveCopy(i18n, option.label)}
           </button>
         )
       })}

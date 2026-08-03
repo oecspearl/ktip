@@ -84,20 +84,21 @@ The key and secret live only on the server (step 5).
 
 ---
 
-## 4. Add `venue_room_grant()` — migration 092
+## 4. Add `venue_room_grant()` — migration 099
 
 This is the function that answers, in the database, "what is this person allowed
 to do in this room's call". It already has a name — 070 and 089 both refer to it
 in comments — it just was never written.
 
-> Number it **092**. Both `091_account_age.sql` and `091_venue_room_sections.sql`
-> already exist; do not add a third 091.
+> Number it **099** — 098 is the highest that exists. Check
+> `supabase/check_migrations.sql` for the current list before picking a number;
+> 091 is already used twice and that is one collision too many.
 
-`supabase/migrations/092_venue_room_grant.sql`:
+`supabase/migrations/099_venue_room_grant.sql`:
 
 ```sql
 -- ============================================================
--- 092: what a member may do in a room's call
+-- 099: what a member may do in a room's call
 -- ============================================================
 --
 -- The video provider's token is minted outside the database, so this is where
@@ -419,7 +420,7 @@ the first or second:
 ## The order to do it in
 
 1. LiveKit Cloud account, copy the three values. *(10 min)*
-2. Migration 092, and call it in the SQL editor until the answers look right. *(30 min)*
+2. Migration 099, and call it in the SQL editor until the answers look right. *(30 min)*
 3. Edge function, and `curl` it until it returns a token. *(1 hour)*
 4. `AvStage` for one mode only — `spotlight`, in one test room. *(2 hours)*
 5. The other three modes, which are layout only. *(1 hour)*

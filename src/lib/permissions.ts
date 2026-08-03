@@ -8,6 +8,8 @@
 // Authorization decisions are made in SQL by has_permission(user, key). Nothing
 // here is a security boundary — client checks only decide what to render.
 
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import type { PermissionKey, RoleSlug, RoleTier } from '../types'
 
 // ============================================================
@@ -26,9 +28,9 @@ export const ROLE_ALIASES: Partial<Record<RoleSlug, RoleSlug>> = {
 
 export interface RoleDefinition {
   slug: RoleSlug
-  label: string
+  label: MessageDescriptor
   tier: RoleTier
-  description: string
+  description: MessageDescriptor
   /** Users may add this role to themselves during onboarding. */
   selfAssignable: boolean
   /** Granted only after institution / chamber / admin review. */
@@ -42,27 +44,27 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   // Tier 1 — Admin
   {
     slug: 'super_admin',
-    label: 'Super Admin',
+    label: msg`Super Admin`,
     tier: 'admin',
-    description: 'OECS Secretariat. System-wide management, global policy, audit logs, suspensions.',
+    description: msg`OECS Secretariat. System-wide management, global policy, audit logs, suspensions.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 10,
   },
   {
     slug: 'safety_admin',
-    label: 'Safety Admin',
+    label: msg`Safety Admin`,
     tier: 'admin',
-    description: 'Content moderator. Owns flagged-content queues, automated moderation logs and escalations.',
+    description: msg`Content moderator. Owns flagged-content queues, automated moderation logs and escalations.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 20,
   },
   {
     slug: 'oecs',
-    label: 'OECS Admin (legacy)',
+    label: msg`OECS Admin (legacy)`,
     tier: 'admin',
-    description: 'Legacy admin slug. Resolves to Super Admin.',
+    description: msg`Legacy admin slug. Resolves to Super Admin.`,
     selfAssignable: false,
     requiresVerification: true,
     aliasOf: 'super_admin',
@@ -72,45 +74,45 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   // Tier 2 — Organization
   {
     slug: 'investor',
-    label: 'Investor / Funding Agency',
+    label: msg`Investor / Funding Agency`,
     tier: 'organization',
-    description: 'Posts grant opportunities, views vetted projects, connects with regional innovators.',
+    description: msg`Posts grant opportunities, views vetted projects, connects with regional innovators.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 30,
   },
   {
     slug: 'sme',
-    label: 'Verified SME',
+    label: msg`Verified SME`,
     tier: 'organization',
-    description: 'Business account vetted by its National Chamber of Commerce.',
+    description: msg`Business account vetted by its National Chamber of Commerce.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 40,
   },
   {
     slug: 'private_sector',
-    label: 'Private Sector',
+    label: msg`Private Sector`,
     tier: 'organization',
-    description: 'Unverified business account. Gains SME capabilities once a Chamber verifies it.',
+    description: msg`Unverified business account. Gains SME capabilities once a Chamber verifies it.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 50,
   },
   {
     slug: 'educational_partner',
-    label: 'Educational Partner',
+    label: msg`Educational Partner`,
     tier: 'organization',
-    description: 'School or university. Manages domain verification, approves student accounts, oversees submissions.',
+    description: msg`School or university. Manages domain verification, approves student accounts, oversees submissions.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 60,
   },
   {
     slug: 'chamber_admin',
-    label: 'Chamber of Commerce',
+    label: msg`Chamber of Commerce`,
     tier: 'organization',
-    description: 'Country-level vetting authority that verifies and onboards local SMEs.',
+    description: msg`Country-level vetting authority that verifies and onboards local SMEs.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 70,
@@ -119,46 +121,46 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   // Tier 3 — Individual
   {
     slug: 'entrepreneur',
-    label: 'Entrepreneur',
+    label: msg`Entrepreneur`,
     tier: 'individual',
-    description: 'Builds and launches innovations, applies for grants.',
+    description: msg`Builds and launches innovations, applies for grants.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 80,
   },
   {
     slug: 'faculty',
-    label: 'Faculty',
+    label: msg`Faculty`,
     tier: 'individual',
-    description: 'Academic staff. May sponsor student grant applications and supervise student channels.',
+    description: msg`Academic staff. May sponsor student grant applications and supervise student channels.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 90,
   },
   {
     slug: 'researcher',
-    label: 'Researcher',
+    label: msg`Researcher`,
     tier: 'individual',
-    description: 'Conducts and publishes research, collaborates on projects.',
+    description: msg`Conducts and publishes research, collaborates on projects.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 100,
   },
   {
     slug: 'mentor',
-    label: 'Mentor',
+    label: msg`Mentor`,
     tier: 'individual',
-    description: 'Guides and supports innovators.',
+    description: msg`Guides and supports innovators.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 110,
   },
   {
     slug: 'student',
-    label: 'Student (school-verified)',
+    label: msg`Student (school-verified)`,
     tier: 'individual',
     description:
-      'Verified via an approved institutional email domain. Read-only on grants, no unmonitored direct messaging.',
+      msg`Verified via an approved institutional email domain. Read-only on grants, no unmonitored direct messaging.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 120,
@@ -209,10 +211,10 @@ export function isOrganizationAccount(roles: RoleSlug[] | undefined): boolean {
  * not part of role_permissions.
  */
 export const SCOPED_ROLES = [
-  { slug: 'project_editor', label: 'Project Editor', scope: 'PROJECT', source: 'project_members.role' },
-  { slug: 'project_viewer', label: 'Project Viewer', scope: 'PROJECT', source: 'project_members.role' },
-  { slug: 'institution_educator', label: 'Educator', scope: 'INSTITUTION', source: 'institution_members.role' },
-  { slug: 'employer_recruiter', label: 'Recruiter', scope: 'EMPLOYER', source: 'employer_members.role' },
+  { slug: 'project_editor', label: msg`Project Editor`, scope: 'PROJECT', source: 'project_members.role' },
+  { slug: 'project_viewer', label: msg`Project Viewer`, scope: 'PROJECT', source: 'project_members.role' },
+  { slug: 'institution_educator', label: msg`Educator`, scope: 'INSTITUTION', source: 'institution_members.role' },
+  { slug: 'employer_recruiter', label: msg`Recruiter`, scope: 'EMPLOYER', source: 'employer_members.role' },
 ] as const
 
 // ============================================================
@@ -230,8 +232,8 @@ export type PermissionCategory =
 
 export interface PermissionDefinition {
   key: PermissionKey
-  label: string
-  description: string
+  label: MessageDescriptor
+  description: MessageDescriptor
   category: PermissionCategory
   /**
    * Child-safety permission. has_permission() denies these to students before
@@ -254,42 +256,42 @@ export const PERMISSION_CATEGORY_LABELS: Record<PermissionCategory, string> = {
 
 export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   // Platform
-  { key: 'org:manage', label: 'Manage platform', description: 'Global settings, policy and system configuration.', category: 'platform', safeguard: false, sortOrder: 10 },
-  { key: 'members:manage', label: 'Manage members', description: 'Create, edit, suspend and delete user accounts.', category: 'platform', safeguard: false, sortOrder: 20 },
-  { key: 'role:manage', label: 'Manage roles & permissions', description: 'Assign roles and edit this permission matrix.', category: 'platform', safeguard: false, sortOrder: 30 },
-  { key: 'audit:view', label: 'View audit logs', description: 'Read permission-change and moderation audit trails.', category: 'platform', safeguard: false, sortOrder: 40 },
+  { key: 'org:manage', label: msg`Manage platform`, description: msg`Global settings, policy and system configuration.`, category: 'platform', safeguard: false, sortOrder: 10 },
+  { key: 'members:manage', label: msg`Manage members`, description: msg`Create, edit, suspend and delete user accounts.`, category: 'platform', safeguard: false, sortOrder: 20 },
+  { key: 'role:manage', label: msg`Manage roles & permissions`, description: msg`Assign roles and edit this permission matrix.`, category: 'platform', safeguard: false, sortOrder: 30 },
+  { key: 'audit:view', label: msg`View audit logs`, description: msg`Read permission-change and moderation audit trails.`, category: 'platform', safeguard: false, sortOrder: 40 },
 
   // Moderation
-  { key: 'moderation:view', label: 'View moderation queue', description: 'See reported and auto-flagged content, including quarantined items.', category: 'moderation', safeguard: true, sortOrder: 50 },
-  { key: 'moderation:action', label: 'Action moderation items', description: 'Quarantine, restore or remove content and issue warnings.', category: 'moderation', safeguard: true, sortOrder: 60 },
-  { key: 'moderation:escalate', label: 'Escalate & suspend', description: 'Suspend accounts and escalate to safety admins and school administrators.', category: 'moderation', safeguard: true, sortOrder: 70 },
+  { key: 'moderation:view', label: msg`View moderation queue`, description: msg`See reported and auto-flagged content, including quarantined items.`, category: 'moderation', safeguard: true, sortOrder: 50 },
+  { key: 'moderation:action', label: msg`Action moderation items`, description: msg`Quarantine, restore or remove content and issue warnings.`, category: 'moderation', safeguard: true, sortOrder: 60 },
+  { key: 'moderation:escalate', label: msg`Escalate & suspend`, description: msg`Suspend accounts and escalate to safety admins and school administrators.`, category: 'moderation', safeguard: true, sortOrder: 70 },
 
   // Grants
-  { key: 'grant:view', label: 'View grants', description: 'Browse public grant opportunities.', category: 'grants', safeguard: false, sortOrder: 80 },
-  { key: 'grant:apply', label: 'Apply for grants', description: 'Submit grant applications. Students are denied — they must be sponsored.', category: 'grants', safeguard: true, sortOrder: 90 },
-  { key: 'grant:sponsor', label: 'Sponsor student applications', description: 'Act as the faculty or school sponsor on a student application.', category: 'grants', safeguard: true, sortOrder: 100 },
-  { key: 'grant:post', label: 'Post grant opportunities', description: 'Publish funding calls to the platform.', category: 'grants', safeguard: false, sortOrder: 110 },
-  { key: 'grant:manage_funds', label: 'Manage funds', description: 'Administer disbursement and award records. Never available to students.', category: 'grants', safeguard: true, sortOrder: 120 },
+  { key: 'grant:view', label: msg`View grants`, description: msg`Browse public grant opportunities.`, category: 'grants', safeguard: false, sortOrder: 80 },
+  { key: 'grant:apply', label: msg`Apply for grants`, description: msg`Submit grant applications. Students are denied — they must be sponsored.`, category: 'grants', safeguard: true, sortOrder: 90 },
+  { key: 'grant:sponsor', label: msg`Sponsor student applications`, description: msg`Act as the faculty or school sponsor on a student application.`, category: 'grants', safeguard: true, sortOrder: 100 },
+  { key: 'grant:post', label: msg`Post grant opportunities`, description: msg`Publish funding calls to the platform.`, category: 'grants', safeguard: false, sortOrder: 110 },
+  { key: 'grant:manage_funds', label: msg`Manage funds`, description: msg`Administer disbursement and award records. Never available to students.`, category: 'grants', safeguard: true, sortOrder: 120 },
 
   // Projects
-  { key: 'project:create', label: 'Create projects', description: 'Publish a new project.', category: 'projects', safeguard: false, sortOrder: 130 },
-  { key: 'project:manage', label: 'Manage own projects', description: 'Edit, archive and manage collaborators on owned projects.', category: 'projects', safeguard: false, sortOrder: 140 },
-  { key: 'event:create', label: 'Create events', description: 'Publish an event, including hackathons and challenges, and open registrations.', category: 'projects', safeguard: false, sortOrder: 145 },
+  { key: 'project:create', label: msg`Create projects`, description: msg`Publish a new project.`, category: 'projects', safeguard: false, sortOrder: 130 },
+  { key: 'project:manage', label: msg`Manage own projects`, description: msg`Edit, archive and manage collaborators on owned projects.`, category: 'projects', safeguard: false, sortOrder: 140 },
+  { key: 'event:create', label: msg`Create events`, description: msg`Publish an event, including hackathons and challenges, and open registrations.`, category: 'projects', safeguard: false, sortOrder: 145 },
 
   // Community
-  { key: 'forum:post', label: 'Create forum posts', description: 'Start discussions on forum boards.', category: 'community', safeguard: false, sortOrder: 150 },
-  { key: 'forum:comment', label: 'Reply & comment', description: 'Reply to forum posts and comment on projects.', category: 'community', safeguard: false, sortOrder: 160 },
-  { key: 'mentorship:offer', label: 'Offer mentorship', description: 'Appear in mentor discovery and accept mentorship requests.', category: 'community', safeguard: false, sortOrder: 170 },
+  { key: 'forum:post', label: msg`Create forum posts`, description: msg`Start discussions on forum boards.`, category: 'community', safeguard: false, sortOrder: 150 },
+  { key: 'forum:comment', label: msg`Reply & comment`, description: msg`Reply to forum posts and comment on projects.`, category: 'community', safeguard: false, sortOrder: 160 },
+  { key: 'mentorship:offer', label: msg`Offer mentorship`, description: msg`Appear in mentor discovery and accept mentorship requests.`, category: 'community', safeguard: false, sortOrder: 170 },
 
   // Messaging
-  { key: 'dm:initiate', label: 'Start direct messages', description: 'Open a 1-to-1 conversation. Denied to students — they use supervised channels only.', category: 'messaging', safeguard: true, sortOrder: 180 },
-  { key: 'dm:receive', label: 'Receive messages', description: 'Participate in conversations they have been added to.', category: 'messaging', safeguard: false, sortOrder: 190 },
-  { key: 'dm:supervise', label: 'Supervise student channels', description: 'Counts as the designated educator that makes a student channel monitored.', category: 'messaging', safeguard: true, sortOrder: 200 },
+  { key: 'dm:initiate', label: msg`Start direct messages`, description: msg`Open a 1-to-1 conversation. Denied to students — they use supervised channels only.`, category: 'messaging', safeguard: true, sortOrder: 180 },
+  { key: 'dm:receive', label: msg`Receive messages`, description: msg`Participate in conversations they have been added to.`, category: 'messaging', safeguard: false, sortOrder: 190 },
+  { key: 'dm:supervise', label: msg`Supervise student channels`, description: msg`Counts as the designated educator that makes a student channel monitored.`, category: 'messaging', safeguard: true, sortOrder: 200 },
 
   // Verification
-  { key: 'sme:verify', label: 'Verify SMEs', description: 'Chamber of Commerce review of corporate registry data; issues Verified SME status.', category: 'verification', safeguard: false, sortOrder: 210 },
-  { key: 'institution:verify', label: 'Verify institutions', description: 'Approve schools and chambers, and the email domains they own.', category: 'verification', safeguard: false, sortOrder: 220 },
-  { key: 'institution:approve_students', label: 'Approve student accounts', description: 'Approve students registering on the institution’s verified email domain.', category: 'verification', safeguard: true, sortOrder: 230 },
+  { key: 'sme:verify', label: msg`Verify SMEs`, description: msg`Chamber of Commerce review of corporate registry data; issues Verified SME status.`, category: 'verification', safeguard: false, sortOrder: 210 },
+  { key: 'institution:verify', label: msg`Verify institutions`, description: msg`Approve schools and chambers, and the email domains they own.`, category: 'verification', safeguard: false, sortOrder: 220 },
+  { key: 'institution:approve_students', label: msg`Approve student accounts`, description: msg`Approve students registering on the institution’s verified email domain.`, category: 'verification', safeguard: true, sortOrder: 230 },
 ]
 
 export const PERMISSION_BY_KEY: Record<string, PermissionDefinition> = Object.fromEntries(

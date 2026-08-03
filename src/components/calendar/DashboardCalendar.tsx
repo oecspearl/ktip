@@ -14,6 +14,7 @@ import { CalendarDayPanel } from './CalendarDayPanel'
 import { WeekView } from './WeekView'
 import { useCalendarRange } from './useCalendarRange'
 import type { CalendarItemKind } from '../../lib/calendar'
+import { useLingui } from '@lingui/react/macro'
 
 interface DashboardCalendarProps {
   /** 'platform' = everything on the platform (admin); 'personal' = the user's own items */
@@ -33,6 +34,7 @@ const SOURCE_KINDS: CalendarItemKind[] = ['event', 'grant_deadline', 'grant_appl
  * user's registrations and grant-application activity in one month grid.
  */
 export function DashboardCalendar({ scope, className }: DashboardCalendarProps) {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const availableKinds = SOURCE_KINDS
   const [activeKinds, setActiveKinds] = useState<CalendarItemKind[]>(availableKinds)
@@ -102,12 +104,12 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
   const mineLens = (
     <div
       role="group"
-      aria-label="Whose items to show"
+      aria-label={t`Whose items to show`}
       className="flex items-center gap-0.5 rounded-full border border-ktip-line bg-ktip-canvas/70 p-0.5"
     >
       {[
-        { value: false, label: 'All' },
-        { value: true, label: 'Only mine' },
+        { value: false, label: t`All` },
+        { value: true, label: t`Only mine` },
       ].map((option) => (
         <button
           key={option.label}
@@ -151,7 +153,7 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
                   !on && 'opacity-40'
                 )}
               />
-              {CALENDAR_KIND_LABELS[kind]}
+              {i18n._(CALENDAR_KIND_LABELS[kind])}
           </button>
         )
       })}
@@ -213,7 +215,7 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
         items={selectedDayItems}
         loading={loading}
         itemNoun="item"
-        emptyLabel="Nothing scheduled on this day"
+        emptyLabel={t`Nothing scheduled on this day`}
         onJumpToNext={jumpToNextItem}
       />
     </div>

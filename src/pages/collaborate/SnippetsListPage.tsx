@@ -9,6 +9,7 @@ import { defaultCode } from '../../components/collaboration/CodeMirrorEditor'
 import { Plus, Search, Code2, Trash2, Users, HardDriveDownload, X } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import type { SnippetLanguage } from '../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 const LANGUAGES: Language[] = ['javascript', 'python', 'html', 'css', 'json', 'markdown']
 const IMPORT_DISMISSED_KEY = 'ktip_sandbox_import_dismissed'
@@ -21,7 +22,8 @@ function findLocalDrafts(): { language: Language; content: string }[] {
 }
 
 export default function SnippetsListPage() {
-  usePageTitle('My Snippets')
+    const { t } = useLingui()
+  usePageTitle(t`My Snippets`)
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -58,7 +60,7 @@ export default function SnippetsListPage() {
     try {
       for (const draft of drafts) {
         await createSnippet({
-          title: `${draft.language} draft`,
+          title: t`${draft.language} draft`,
           language: draft.language as SnippetLanguage,
           content: draft.content,
         })
@@ -76,7 +78,7 @@ export default function SnippetsListPage() {
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!confirm('Delete this snippet? This cannot be undone.')) return
+    if (!confirm(t`Delete this snippet? This cannot be undone.`)) return
     try {
       await deleteSnippet(id)
       snippets.refetch()
@@ -88,14 +90,14 @@ export default function SnippetsListPage() {
   return (
     <>
       <PageHero
-        eyebrow="Collaboration Tools"
-        title="My Snippets"
+        eyebrow={t`Collaboration Tools`}
+        title={t`My Snippets`}
         imageSeed="code"
         compact
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Code' },
+          { label: t`Home`, href: '/' },
+          { label: t`Collaborate`, href: '/collaborate' },
+          { label: t`Code` },
         ]}
       />
 
@@ -107,11 +109,18 @@ export default function SnippetsListPage() {
               <HardDriveDownload size={18} className="text-ktip-sun-600 mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-ktip-sand-900">
-                  {drafts.length} unsaved draft{drafts.length > 1 ? 's' : ''} found in this browser
+                  <Plural
+                    value={drafts.length}
+                    one="# unsaved draft found in this browser"
+                    other="# unsaved drafts found in this browser"
+                  />
                 </p>
                 <p className="text-sm text-ktip-sand-600 mt-0.5">
-                  Import {drafts.length > 1 ? 'them' : 'it'} as snippets to keep, share and open{' '}
-                  {drafts.length > 1 ? 'them' : 'it'} from any device.
+                  {drafts.length > 1 ? (
+                    <Trans>Import them as snippets to keep, share and open them from any device.</Trans>
+                  ) : (
+                    <Trans>Import it as snippets to keep, share and open it from any device.</Trans>
+                  )}
                 </p>
                 <div className="flex items-center gap-2 mt-3">
                   <button
@@ -120,14 +129,14 @@ export default function SnippetsListPage() {
                     disabled={importing}
                     className="px-3 py-1.5 rounded-lg btn-brand text-sm font-medium disabled:opacity-50"
                   >
-                    {importing ? 'Importing…' : 'Import drafts'}
+                    {importing ? t`Importing…` : t`Import drafts`}
                   </button>
                   <button
                     type="button"
                     onClick={dismissDrafts}
                     className="px-3 py-1.5 rounded-lg text-ktip-sand-600 hover:bg-ktip-sand-100 text-sm transition-colors"
                   >
-                    Not now
+                    <Trans>Not now</Trans>
                   </button>
                 </div>
               </div>
@@ -135,7 +144,7 @@ export default function SnippetsListPage() {
                 type="button"
                 onClick={dismissDrafts}
                 className="text-ktip-sand-400 hover:text-ktip-sand-700 transition-colors"
-                aria-label="Dismiss"
+                aria-label={t`Dismiss`}
               >
                 <X size={16} />
               </button>
@@ -148,7 +157,7 @@ export default function SnippetsListPage() {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400" />
               <input
                 type="text"
-                placeholder="Search snippets..."
+                placeholder={t`Search snippets...`}
                 onChange={(e) => debouncedSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
               />
@@ -159,7 +168,7 @@ export default function SnippetsListPage() {
               className="inline-flex items-center gap-2 px-4 py-2.5 btn-brand rounded-lg font-medium text-sm"
             >
               <Plus size={16} />
-              New Snippet
+              <Trans>New Snippet</Trans>
             </button>
           </div>
 
@@ -185,14 +194,14 @@ export default function SnippetsListPage() {
                       {snippet.title}
                     </h3>
                     <p className="text-sm text-ktip-sand-500 mt-0.5">
-                      {snippet.language} · Edited {formatRelativeTime(snippet.updated_at)}
+                      {snippet.language} · <Trans>Edited {formatRelativeTime(snippet.updated_at)}</Trans>
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, snippet.id)}
                     className="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                    title="Delete snippet"
+                    title={t`Delete snippet`}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -204,9 +213,9 @@ export default function SnippetsListPage() {
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Code2 size={32} className="text-ktip-sand-400" />
               </div>
-              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1">No snippets yet</h3>
+              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1"><Trans>No snippets yet</Trans></h3>
               <p className="text-sm text-ktip-sand-500 mb-4">
-                Create a snippet to write, run and share code with your collaborators.
+                <Trans>Create a snippet to write, run and share code with your collaborators.</Trans>
               </p>
               <button
                 type="button"
@@ -214,7 +223,7 @@ export default function SnippetsListPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 btn-brand rounded-lg text-sm font-medium"
               >
                 <Plus size={16} />
-                Create Snippet
+                <Trans>Create Snippet</Trans>
               </button>
             </div>
           )}
@@ -224,7 +233,7 @@ export default function SnippetsListPage() {
             <div className="mt-10">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-ktip-sand-800 mb-4">
                 <Users size={20} className="text-ktip-sand-400" />
-                Shared with me
+                <Trans>Shared with me</Trans>
               </h2>
               <div className="space-y-2">
                 {shared.snippets.map((snippet) => (
@@ -238,7 +247,7 @@ export default function SnippetsListPage() {
                         {snippet.title}
                       </h3>
                       <p className="text-sm text-ktip-sand-500 mt-0.5">
-                        {snippet.language} · Edited {formatRelativeTime(snippet.updated_at)}
+                        {snippet.language} · <Trans>Edited {formatRelativeTime(snippet.updated_at)}</Trans>
                       </p>
                     </div>
                   </Link>

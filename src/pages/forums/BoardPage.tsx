@@ -6,13 +6,15 @@ import { Plus, Search, MessageCircle } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { debounce } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function BoardPage() {
+  const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
 
   const { board, loading: boardLoading } = useForumBoard(params.slug)
-  usePageTitle(board?.name ? `${board.name} — Forums` : 'Forums')
+  usePageTitle(board?.name ? t`${board.name} — Forums` : t`Forums`)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -46,14 +48,14 @@ export default function BoardPage() {
           <MessageCircle size={32} className="text-ktip-sand-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          Board Not Found
+          <Trans>Board Not Found</Trans>
         </h2>
-        <p className="text-gray-500 mb-6">This forum board doesn't exist.</p>
+        <p className="text-gray-500 mb-6"><Trans>This forum board doesn't exist.</Trans></p>
         <button
           onClick={() => navigate('/forums')}
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
-          Back to Forums
+          <Trans>Back to Forums</Trans>
         </button>
       </div>
     )
@@ -62,13 +64,13 @@ export default function BoardPage() {
   return (
     <>
       <PageHero
-        eyebrow="Forum Board"
+        eyebrow={t`Forum Board`}
         title={board.name}
         subtitle={board.description || undefined}
         imageSeed={board.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Forums', href: '/forums' },
+          { label: t`Home`, href: '/' },
+          { label: t`Forums`, href: '/forums' },
           { label: board.name },
         ]}
       />
@@ -90,14 +92,14 @@ export default function BoardPage() {
                   setSearchQuery(e.target.value)
                   debouncedSetSearch(e.target.value)
                 }}
-                placeholder="Search posts..."
+                placeholder={t`Search posts...`}
                 className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               />
             </div>
             <Link to={`/forums/${params.slug}/new`} className="shrink-0">
               <button className="inline-flex items-center gap-2 px-4 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
                 <Plus size={16} />
-                New Post
+                <Trans>New Post</Trans>
               </button>
             </Link>
           </div>
@@ -116,8 +118,8 @@ export default function BoardPage() {
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle size={32} className="text-gray-400" />
               </div>
-              <p className="text-lg font-medium text-ktip-sand-700 mb-2">No posts yet</p>
-              <p className="text-sm text-gray-500">Start the discussion!</p>
+              <p className="text-lg font-medium text-ktip-sand-700 mb-2"><Trans>No posts yet</Trans></p>
+              <p className="text-sm text-gray-500"><Trans>Start the discussion!</Trans></p>
             </div>
           )}
         </div>

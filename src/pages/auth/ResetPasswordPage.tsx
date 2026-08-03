@@ -7,6 +7,7 @@ import { Lock, CheckCircle, MailWarning } from 'lucide-react'
 import { changePasswordSchema } from '../../lib/validation'
 import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 import { RouteSplash } from '../../components/RouteSplash'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface ResetPasswordActionState {
   errors: Record<string, string>
@@ -21,6 +22,7 @@ const initialState: ResetPasswordActionState = {
 }
 
 export default function ResetPasswordPage() {
+    const { t } = useLingui()
   const auth = useAuth()
   const navigate = useNavigate()
 
@@ -51,7 +53,7 @@ export default function ResetPasswordPage() {
     } catch (err: any) {
       return {
         errors: {},
-        errorMessage: err.message || 'Failed to reset password. Please try again.',
+        errorMessage: err.message || t`Failed to reset password. Please try again.`,
         success: false,
       }
     }
@@ -81,19 +83,17 @@ export default function ResetPasswordPage() {
             <MailWarning size={32} className="text-ktip-sand-600" />
           </div>
           <h1 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-            This reset link can't be used here
+            <Trans>This reset link can't be used here</Trans>
           </h1>
           <p className="text-ktip-sand-600 mb-6 text-sm">
-            Reset links work once, expire after an hour, and only open in the browser that
-            requested them — a link opened inside a mail app, or on a different device, lands
-            here. Request a fresh one and open it in this browser.
+            <Trans>Reset links work once, expire after an hour, and only open in the browser that requested them — a link opened inside a mail app, or on a different device, lands here. Request a fresh one and open it in this browser.</Trans>
           </p>
           <Link to="/forgot-password">
-            <Button fullWidth>Request a new link</Button>
+            <Button fullWidth><Trans>Request a new link</Trans></Button>
           </Link>
           <p className="mt-6 text-sm text-ktip-sand-600">
             <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
-              Back to Sign In
+              <Trans>Back to Sign In</Trans>
             </Link>
           </p>
         </div>
@@ -110,23 +110,23 @@ export default function ResetPasswordPage() {
               <CheckCircle size={32} className="text-ktip-tropical-600" />
             </div>
             <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-              Password Reset!
+              <Trans>Password Reset!</Trans>
             </h2>
             <p className="text-ktip-sand-600 mb-6">
-              Your password has been updated. You'll be redirected shortly.
+              <Trans>Your password has been updated. You'll be redirected shortly.</Trans>
             </p>
             <Link to="/">
-              <Button variant="secondary">Go to Home</Button>
+              <Button variant="secondary"><Trans>Go to Home</Trans></Button>
             </Link>
           </div>
         ) : (
           <>
             <div className="text-center mb-8">
               <h1 className="text-3xl font-display font-bold text-ktip-ocean-600 mb-2">
-                Set New Password
+                <Trans>Set New Password</Trans>
               </h1>
               <p className="text-ktip-sand-600">
-                Enter your new password below
+                <Trans>Enter your new password below</Trans>
               </p>
             </div>
 
@@ -139,8 +139,8 @@ export default function ResetPasswordPage() {
 
               <Input
                 type="password"
-                label="New Password"
-                placeholder="Enter new password"
+                label={t`New Password`}
+                placeholder={t`Enter new password`}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 error={state.errors.new_password}
@@ -151,8 +151,8 @@ export default function ResetPasswordPage() {
 
               <Input
                 type="password"
-                label="Confirm Password"
-                placeholder="Confirm new password"
+                label={t`Confirm Password`}
+                placeholder={t`Confirm new password`}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 error={state.errors.confirm_password}
@@ -162,13 +162,13 @@ export default function ResetPasswordPage() {
               />
 
               <Button type="submit" fullWidth loading={pending} icon={<Lock size={20} />}>
-                Reset Password
+                <Trans>Reset Password</Trans>
               </Button>
             </form>
 
             <p className="mt-8 text-center text-sm text-ktip-sand-600">
               <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
-                Back to Sign In
+                <Trans>Back to Sign In</Trans>
               </Link>
             </p>
           </>

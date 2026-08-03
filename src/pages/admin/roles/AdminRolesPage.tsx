@@ -29,6 +29,8 @@ import { formatDate } from '../../../lib/utils'
 import type { PermissionCategory } from '../../../lib/permissions'
 import type { PermissionKey, Profile, RoleSlug } from '../../../types'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../../i18n/copy'
 
 const TIER_ACCENT: Record<string, string> = {
   admin: 'text-ktip-ocean-700',
@@ -86,6 +88,7 @@ function MatrixCell({
 }
 
 export default function AdminRolesPage() {
+    const { i18n } = useLingui()
   const toast = useToast()
   const auth = useAuth()
 
@@ -257,7 +260,7 @@ export default function AdminRolesPage() {
                           key={slug}
                           className="px-2 py-0.5 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200"
                         >
-                          {ROLE_BY_SLUG[slug]?.label ?? slug}
+                          {resolveCopy(i18n, ROLE_BY_SLUG[slug]?.label ?? slug)}
                         </span>
                       ))}
                     </div>
@@ -304,7 +307,7 @@ export default function AdminRolesPage() {
                 {MATRIX_ROLES.map((role) => (
                   <th key={role.slug} className="px-3 py-3 text-center">
                     <span className={`block text-xs font-semibold ${TIER_ACCENT[role.tier]}`}>
-                      {role.label}
+                      {i18n._(role.label)}
                     </span>
                     <span className="block text-[10px] uppercase tracking-wider text-ktip-sand-400">
                       {TIER_LABELS[role.tier]}
@@ -313,7 +316,7 @@ export default function AdminRolesPage() {
                 ))}
                 {SCOPED_ROLES.map((role) => (
                   <th key={role.slug} className="px-3 py-3 text-center">
-                    <span className="block text-xs font-semibold text-ktip-sun-700">{role.label}</span>
+                    <span className="block text-xs font-semibold text-ktip-sun-700">{i18n._(role.label)}</span>
                     <span className="block text-[10px] uppercase tracking-wider text-ktip-sun-600">
                       {role.scope}
                     </span>
@@ -351,7 +354,7 @@ export default function AdminRolesPage() {
                               <ShieldCheck size={13} className="text-ktip-tropical-600 flex-shrink-0" />
                             )}
                           </div>
-                          <p className="text-xs text-ktip-sand-500 mt-0.5">{permission.description}</p>
+                          <p className="text-xs text-ktip-sand-500 mt-0.5">{i18n._(permission.description)}</p>
                         </td>
 
                         {MATRIX_ROLES.map((role) => {
@@ -428,7 +431,7 @@ export default function AdminRolesPage() {
                       : 'bg-ktip-cream border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-sand-300'
                   }`}
                 >
-                  {role.label}
+                  {i18n._(role.label)}
                   {role.requiresVerification && <span className="ml-1 text-ktip-sun-600">•</span>}
                 </button>
               )
@@ -456,7 +459,7 @@ export default function AdminRolesPage() {
               <li key={event.id} className="py-2.5 flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm text-ktip-sand-900">
-                    <span className="font-medium">{ROLE_BY_SLUG[event.role_slug]?.label ?? event.role_slug}</span>
+                    <span className="font-medium">{resolveCopy(i18n, ROLE_BY_SLUG[event.role_slug]?.label ?? event.role_slug)}</span>
                     {event.to_allowed ? ' granted ' : ' revoked '}
                     <code className="text-xs font-mono">{event.permission_key}</code>
                   </p>

@@ -6,12 +6,14 @@ import { useMyTimeline } from '../../hooks/useMyTimeline'
 import { TimelineGantt } from './TimelineGantt'
 import { TimelineItemDetail } from './TimelineItemDetail'
 import { Button } from '../ui/Button'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface TimelineSectionProps {
   userId: string
 }
 
 export default function TimelineSection({ userId }: TimelineSectionProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const { items, loading, error, refetch } = useMyTimeline(userId)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -19,9 +21,9 @@ export default function TimelineSection({ userId }: TimelineSectionProps) {
   const selected = items?.find((i) => i.id === selectedId) ?? null
 
   return (
-    <section className="mb-8" aria-label="Your progress">
+    <section className="mb-8" aria-label={t`Your progress`}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="text-2xl font-display font-bold text-ktip-sand-900">Your Progress</h2>
+        <h2 className="text-2xl font-display font-bold text-ktip-sand-900"><Trans>Your Progress</Trans></h2>
         <div className="flex items-center gap-4 text-xs text-ktip-sand-500">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-ktip-ocean-500" />
@@ -45,9 +47,9 @@ export default function TimelineSection({ userId }: TimelineSectionProps) {
         </div>
       ) : error ? (
         <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-6 flex items-center justify-between gap-3">
-          <p className="text-sm text-ktip-sand-500">Couldn't load your progress timeline.</p>
+          <p className="text-sm text-ktip-sand-500"><Trans>Couldn't load your progress timeline.</Trans></p>
           <Button variant="outline" size="sm" icon={<RefreshCw size={14} />} onClick={() => refetch()}>
-            Retry
+            <Trans>Retry</Trans>
           </Button>
         </div>
       ) : !items || items.length === 0 ? (
@@ -56,18 +58,18 @@ export default function TimelineSection({ userId }: TimelineSectionProps) {
             <Route className="text-ktip-sand-400" size={28} />
           </div>
           <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-            Nothing in motion yet
+            <Trans>Nothing in motion yet</Trans>
           </h3>
           <p className="text-ktip-sand-500 mb-6">
-            Apply for a grant or start a project to track its journey here.
+            <Trans>Apply for a grant or start a project to track its journey here.</Trans>
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link to="/grants">
-              <Button variant="primary">Browse Grants</Button>
+              <Button variant="primary"><Trans>Browse Grants</Trans></Button>
             </Link>
             {auth.can('project:create') && (
               <Link to="/projects/new">
-                <Button variant="outline">Start a Project</Button>
+                <Button variant="outline"><Trans>Start a Project</Trans></Button>
               </Link>
             )}
           </div>

@@ -3,6 +3,7 @@ import { RESUME_DESIGNS, type ResumeDesign } from '../../lib/resume-designs'
 import { sheetFor } from './sheets'
 import type { ResumeData } from '../../types/resume'
 import { cn } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Design chooser.
@@ -35,19 +36,22 @@ export function DesignPicker({
   onPick: (id: string) => void
   busy?: boolean
 }) {
+  const { t, i18n } = useLingui()
   return (
     <div className="resume-picker print:hidden">
       <h2 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-ktip-sand-500">
-        Design
+        <Trans>Design</Trans>
       </h2>
       <p className="mt-1 text-xs text-ktip-sand-500">
-        Changes how your CV is drawn and printed. Your content never changes.
+        <Trans>Changes how your CV is drawn and printed. Your content never changes.</Trans>
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {Object.values(RESUME_DESIGNS).map((design) => {
           const Sheet = sheetFor(design.id)
           const selected = design.id === current.id
+          const label = design.label
+          const description = design.description
           return (
             <button
               key={design.id}
@@ -55,7 +59,7 @@ export function DesignPicker({
               onClick={() => onPick(design.id)}
               disabled={busy || selected}
               aria-pressed={selected}
-              aria-label={`${design.label} design — ${design.description}`}
+              aria-label={t`${label} design — ${description}`}
               className={cn(
                 'group relative overflow-hidden rounded-xl border-2 p-2 text-left transition-colors',
                 'disabled:cursor-default',
@@ -91,10 +95,10 @@ export function DesignPicker({
               <div className="mt-2 flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ktip-sand-900">
-                    {design.label}
+                    {i18n._(design.label)}
                   </p>
                   <p className="mt-0.5 text-[11px] leading-snug text-ktip-sand-500">
-                    {design.description}
+                    {i18n._(design.description)}
                   </p>
                 </div>
                 {selected && (

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { ChevronDown, ChevronRight, Folder, Plus, Trash2, X } from 'lucide-react'
 import { useStickyNotesPanel } from '../../contexts/StickyNotesContext'
 import { cn } from '../../lib/utils'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 function preview(html: string, max = 48): string {
   const el = document.createElement('div')
@@ -19,6 +20,7 @@ function preview(html: string, max = 48): string {
  * so the list matches what the folder graphic implies.
  */
 export function StickyNoteFabPanel() {
+  const { t } = useLingui()
   const {
     notes,
     groups,
@@ -45,10 +47,10 @@ export function StickyNoteFabPanel() {
   return createPortal(
     <div className="fixed bottom-24 right-4 z-fab w-72 max-h-[60vh] flex flex-col rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-fab-hover animate-slide-up">
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-ktip-sand-100">
-        <p className="text-sm font-semibold text-ktip-sand-900">Sticky notes</p>
+        <p className="text-sm font-semibold text-ktip-sand-900"><Trans>Sticky notes</Trans></p>
         <button
           type="button"
-          aria-label="Close panel"
+          aria-label={t`Close panel`}
           onClick={() => setFabPanelOpen(false)}
           className="p-1 rounded-lg text-ktip-sand-400 hover:bg-ktip-sand-100 hover:text-ktip-sand-700 transition-colors"
         >
@@ -66,19 +68,21 @@ export function StickyNoteFabPanel() {
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-ktip-tropical-500 px-3 py-2 text-sm font-semibold text-ktip-ocean-700 shadow-medium transition-transform hover:-translate-y-0.5 hover:shadow-hard"
         >
           <Plus size={16} />
-          New note
+          <Trans>New note</Trans>
         </button>
         <p className="mt-2 text-xs text-ktip-sand-500">
-          {openNoteIds.length === 0
-            ? 'Nothing on screen right now'
-            : `${openNoteIds.length} note${openNoteIds.length === 1 ? '' : 's'} on screen`}
+          {openNoteIds.length === 0 ? (
+            t`Nothing on screen right now`
+          ) : (
+            <Plural value={openNoteIds.length} one="# note on screen" other="# notes on screen" />
+          )}
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
         {saved.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs text-ktip-sand-500">
-            No saved notes. Closing a note keeps it here instead of deleting it.
+            <Trans>No saved notes. Closing a note keeps it here instead of deleting it.</Trans>
           </p>
         ) : (
           <>
@@ -120,7 +124,7 @@ export function StickyNoteFabPanel() {
                                 {note.title}
                               </span>
                               <span className="block truncate text-[11px] text-ktip-sand-500">
-                                {preview(note.content) || 'Empty note'}
+                                {preview(note.content) || t`Empty note`}
                               </span>
                             </span>
                           </button>
@@ -155,13 +159,13 @@ export function StickyNoteFabPanel() {
                       {note.title}
                     </span>
                     <span className="block truncate text-[11px] text-ktip-sand-500">
-                      {preview(note.content) || 'Empty note'}
+                      {preview(note.content) || t`Empty note`}
                     </span>
                   </span>
                 </button>
                 <button
                   type="button"
-                  aria-label={`Delete ${note.title}`}
+                  aria-label={t`Delete ${note.title}`}
                   onClick={() => deleteNote(note.id)}
                   className="rounded p-1 text-ktip-sand-400 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100 focus:opacity-100"
                 >
@@ -177,14 +181,16 @@ export function StickyNoteFabPanel() {
         <div className="border-t border-ktip-sand-100 px-3 py-2">
           {confirmClear ? (
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-ktip-sand-600">Delete {saved.length} saved?</span>
+              <span className="text-xs text-ktip-sand-600">
+                <Plural value={saved.length} one="Delete # saved?" other="Delete # saved?" />
+              </span>
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={() => setConfirmClear(false)}
                   className="rounded px-2 py-1 text-xs text-ktip-sand-600 hover:bg-ktip-sand-100"
                 >
-                  No
+                  <Trans>No</Trans>
                 </button>
                 <button
                   type="button"
@@ -197,7 +203,7 @@ export function StickyNoteFabPanel() {
                   }}
                   className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700"
                 >
-                  Yes
+                  <Trans>Yes</Trans>
                 </button>
               </div>
             </div>
@@ -210,7 +216,7 @@ export function StickyNoteFabPanel() {
                 'hover:bg-red-50 hover:text-red-600 transition-colors'
               )}
             >
-              Clear all saved
+              <Trans>Clear all saved</Trans>
             </button>
           )}
         </div>

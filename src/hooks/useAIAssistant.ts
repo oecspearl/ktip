@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { resolveDestinations, type AssistantDestination } from '../lib/assistant'
 import type { UserRole } from '../types'
 
@@ -79,12 +82,15 @@ Rules:
 }
 
 function buildWelcomeMessage(userRole?: UserRole | null, userName?: string | null): string {
-  const greeting = userName ? `Hi ${userName}!` : 'Hi there!'
-  const roleHint = userRole
-    ? ` As a ${ROLE_LABELS[userRole]}, I can help you get the most out of KTIP's features.`
-    : ' Whether you are just exploring or already have an account, I am here to help.'
+  const greeting = userName ? i18n._(msg`Hi ${userName}!`) : i18n._(msg`Hi there!`)
+  const role = userRole ? ROLE_LABELS[userRole] : undefined
+  const roleHint = role
+    ? i18n._(msg` As a ${role}, I can help you get the most out of KTIP's features.`)
+    : i18n._(msg` Whether you are just exploring or already have an account, I am here to help.`)
 
-  return `${greeting} I am the KTIP Assistant.${roleHint}\n\nAsk me anything about projects, events, grants, grant applications, collaboration tools, or how to use the platform — or tell me where you want to go and I will take you there. What can I help you with?`
+  return i18n._(
+    msg`${greeting} I am the KTIP Assistant.${roleHint}\n\nAsk me anything about projects, events, grants, grant applications, collaboration tools, or how to use the platform — or tell me where you want to go and I will take you there. What can I help you with?`
+  )
 }
 
 // --- Persistence ------------------------------------------------------------
@@ -156,7 +162,7 @@ async function callChat(
   }
 
   const data = await res.json()
-  return data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.'
+  return data.choices?.[0]?.message?.content || i18n._(msg`Sorry, I could not generate a response.`)
 }
 
 /**
@@ -202,6 +208,7 @@ export interface UseAIAssistantOptions {
  * reply alone, and no error is surfaced.
  */
 export function useAIAssistant(options?: UseAIAssistantOptions) {
+  const { t } = useLingui()
   const userId = options?.userId ?? undefined
   const role = options?.userRole
   const name = options?.userName
@@ -273,7 +280,7 @@ export function useAIAssistant(options?: UseAIAssistantOptions) {
       } else if (navResult?.answer) {
         content = navResult.answer
       } else {
-        throw chat.reason instanceof Error ? chat.reason : new Error('AI request failed')
+        throw chat.reason instanceof Error ? chat.reason : new Error(t`AI request failed`)
       }
 
       return {
@@ -289,13 +296,13 @@ export function useAIAssistant(options?: UseAIAssistantOptions) {
       setMessages((prev) => [...prev, assistantMsg])
     },
     onError: (err: any) => {
-      setError(err?.message || 'Something went wrong. Please try again.')
+      setError(err?.message || t`Something went wrong. Please try again.`)
       setMessages((prev) => [
         ...prev,
         {
           id: `error-${Date.now()}`,
           role: 'assistant',
-          content: 'Sorry, I ran into an issue. Please try asking again in a moment.',
+          content: t`Sorry, I ran into an issue. Please try asking again in a moment.`,
           timestamp: new Date(),
         },
       ])

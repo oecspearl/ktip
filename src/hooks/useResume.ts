@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { DEFAULT_DESIGN } from '../lib/resume-designs'
@@ -34,7 +37,7 @@ export interface SyncResult {
 async function postAuthed<T>(path: string): Promise<T> {
   const { data: session } = await supabase.auth.getSession()
   const token = session.session?.access_token
-  if (!token) throw new Error('Not signed in')
+  if (!token) throw new Error(i18n._(msg`Not signed in`))
 
   const res = await fetch(path, {
     method: 'POST',
@@ -43,7 +46,7 @@ async function postAuthed<T>(path: string): Promise<T> {
   })
 
   const body = (await res.json().catch(() => ({}))) as T & { error?: string }
-  if (!res.ok) throw new Error(body.error ?? 'Request failed')
+  if (!res.ok) throw new Error(body.error ?? i18n._(msg`Request failed`))
   return body
 }
 
@@ -57,6 +60,7 @@ async function postAuthed<T>(path: string): Promise<T> {
  * /api/cv/generate, from their KTIP profile, projects and badges.
  */
 export function useResume(template: string = RESUME_TEMPLATE_KEY) {
+  const { t } = useLingui()
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const key = ['resume', user?.id, template]
@@ -110,7 +114,7 @@ export function useResume(template: string = RESUME_TEMPLATE_KEY) {
       touched?: ResumePath[]
       isPublic?: boolean
     }) => {
-      if (!user?.id) throw new Error('Not signed in')
+      if (!user?.id) throw new Error(t`Not signed in`)
 
       const sources: ResumeSources = { ...(query.data?.sources ?? {}) }
       for (const path of touched) sources[path] = 'manual'
@@ -186,7 +190,7 @@ export function useResume(template: string = RESUME_TEMPLATE_KEY) {
 
   const setPublic = useMutation({
     mutationFn: async (isPublic: boolean) => {
-      if (!user?.id) throw new Error('Not signed in')
+      if (!user?.id) throw new Error(t`Not signed in`)
       const { data: saved, error } = await supabase
         .from('resumes')
         .update({ is_public: isPublic })
@@ -216,7 +220,7 @@ export function useResume(template: string = RESUME_TEMPLATE_KEY) {
    */
   const setDesign = useMutation({
     mutationFn: async (design: string) => {
-      if (!user?.id) throw new Error('Not signed in')
+      if (!user?.id) throw new Error(t`Not signed in`)
 
       const { data: saved, error } = await supabase
         .from('resumes')

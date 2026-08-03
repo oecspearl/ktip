@@ -4,6 +4,7 @@ import { Trash2 } from 'lucide-react'
 import { useToast } from '../../contexts/ToastContext'
 import { DeleteEntityDialog } from './DeleteEntityDialog'
 import type { DeleteImpact } from '../../lib/delete-guard'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface DeleteEntityControlProps {
   /** Lower-case singular: "event", "project". */
@@ -44,6 +45,7 @@ export function DeleteEntityControl({
   variant,
   zoneDescription,
 }: DeleteEntityControlProps) {
+  const { t } = useLingui()
   const navigate = useNavigate()
   const toast = useToast()
 
@@ -56,14 +58,15 @@ export function DeleteEntityControl({
     setError(null)
     try {
       await onDelete()
-      toast.success(`${noun.charAt(0).toUpperCase()}${noun.slice(1)} deleted`)
+      const nounCap = noun.charAt(0).toUpperCase() + noun.slice(1)
+      toast.success(t`${nounCap} deleted`)
       setOpen(false)
       onDeleted?.()
       if (redirectTo) navigate(redirectTo, { replace: true })
     } catch (err: any) {
       // Almost always an RLS refusal: the delete policy checks ownership, so a
       // stale page or a revoked role lands here rather than silently no-opping.
-      setError(err?.message || `Could not delete this ${noun}. You may no longer own it.`)
+      setError(err?.message || t`Could not delete this ${noun}. You may no longer own it.`)
     } finally {
       setDeleting(false)
     }
@@ -90,11 +93,15 @@ export function DeleteEntityControl({
       <>
         <div className="rounded-2xl border border-red-200 bg-red-50/60 p-5">
           <h3 className="font-display text-sm font-bold uppercase tracking-wider text-red-800">
-            Danger zone
+            <Trans>Danger zone</Trans>
           </h3>
           <p className="mt-2 text-sm text-red-700">
-            {zoneDescription ||
-              `Deleting this ${noun} is permanent. Everything attached to it is removed with it and cannot be restored.`}
+            {zoneDescription || (
+              <Trans>
+                Deleting this {noun} is permanent. Everything attached to it is removed with it
+                and cannot be restored.
+              </Trans>
+            )}
           </p>
           <button
             type="button"
@@ -102,7 +109,7 @@ export function DeleteEntityControl({
             className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-ktip-cream px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-600 hover:text-white"
           >
             <Trash2 size={14} />
-            Delete this {noun}
+            <Trans>Delete this {noun}</Trans>
           </button>
         </div>
         {dialog}
@@ -118,7 +125,7 @@ export function DeleteEntityControl({
           onClick={() => setOpen(true)}
           disabled={deleting}
           className="p-1.5 text-gray-400 transition-colors hover:text-red-600 disabled:opacity-50"
-          title={`Delete ${noun}`}
+          title={t`Delete ${noun}`}
         >
           <Trash2 size={16} />
         </button>
@@ -135,7 +142,7 @@ export function DeleteEntityControl({
         className="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
       >
         <Trash2 size={14} />
-        Delete
+        <Trans>Delete</Trans>
       </button>
       {dialog}
     </>

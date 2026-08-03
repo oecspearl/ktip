@@ -1,6 +1,8 @@
 import { ExternalLink, Puzzle } from 'lucide-react'
 import { INTEGRATION_CATEGORY_LABELS } from '../../lib/constants'
 import type { Integration } from '../../types'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 /** Kept short — the card sits in a 3-up grid with no detail page to spill into. */
 const MAX_TAGS = 4
@@ -10,6 +12,8 @@ interface IntegrationCardProps {
 }
 
 export function IntegrationCard({ integration }: IntegrationCardProps) {
+  const { i18n } = useLingui()
+  const categoryLabel = INTEGRATION_CATEGORY_LABELS[integration.category]
   return (
     <div className="bg-ktip-cream border border-ktip-sand-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3 mb-3">
@@ -30,7 +34,7 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
             {integration.name}
           </h3>
           <span className="text-xs text-ktip-ocean-600 font-medium">
-            {INTEGRATION_CATEGORY_LABELS[integration.category] || integration.category}
+            {categoryLabel ? resolveCopy(i18n, categoryLabel) : integration.category}
           </span>
         </div>
       </div>

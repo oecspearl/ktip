@@ -15,6 +15,14 @@ import { keys } from '../../../queries/keys'
 import { formatDate } from '../../../lib/utils'
 import type { Employer } from '../../../types'
 
+const STATUS_LABELS: Record<string, string> = {
+  unverified: 'Unverified',
+  pending: 'Pending review',
+  verified: 'Verified',
+  rejected: 'Not accepted',
+  revoked: 'Revoked',
+}
+
 const STATUS_COLORS: Record<string, string> = {
   unverified: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
   pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
@@ -74,7 +82,9 @@ export default function AdminChamberPage() {
         note: note.trim() || undefined,
       })
       toast.success(
-        status === 'verified' ? 'Business verified as an SME' : `Business ${status}`
+        status === 'verified'
+          ? 'Business verified as an SME'
+          : `Business ${(STATUS_LABELS[status] ?? status).toLowerCase()}`
       )
       setSelected(null)
       refetch()
@@ -131,7 +141,7 @@ export default function AdminChamberPage() {
             <option value="">All statuses</option>
             <option value="pending">Pending review</option>
             <option value="verified">Verified</option>
-            <option value="rejected">Rejected</option>
+            <option value="rejected">Not accepted</option>
             <option value="revoked">Revoked</option>
           </select>
         </div>
@@ -150,7 +160,7 @@ export default function AdminChamberPage() {
                   <Building2 size={15} className="text-ktip-ocean-600" />
                   <span className="font-medium text-ktip-sand-900">{employer.legal_name}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${STATUS_COLORS[employer.verification_status]}`}>
-                    {employer.verification_status}
+                    {STATUS_LABELS[employer.verification_status] ?? employer.verification_status}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200">
                     {employer.country_code}
@@ -239,7 +249,7 @@ export default function AdminChamberPage() {
                     loading={verifying}
                     onClick={() => handleDecision('rejected')}
                   >
-                    Reject
+                    Do not accept
                   </Button>
                   <Button size="sm" loading={verifying} onClick={() => handleDecision('verified')}>
                     Verify SME

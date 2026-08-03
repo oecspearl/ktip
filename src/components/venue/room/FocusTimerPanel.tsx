@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 const LENGTHS = [
-  { label: '25 min', ms: 25 * 60 * 1000 },
-  { label: '50 min', ms: 50 * 60 * 1000 },
-  { label: '90 min', ms: 90 * 60 * 1000 },
+  { label: msg`25 min`, ms: 25 * 60 * 1000 },
+  { label: msg`50 min`, ms: 50 * 60 * 1000 },
+  { label: msg`90 min`, ms: 90 * 60 * 1000 },
 ]
 
 /**
@@ -17,6 +19,7 @@ const LENGTHS = [
  * survive a refresh, and does not need to.
  */
 export function FocusTimerPanel() {
+  const { t, i18n } = useLingui()
   const [length, setLength] = useState(LENGTHS[0].ms)
   const [endsAt, setEndsAt] = useState<number | null>(null)
   const [paused, setPaused] = useState<number | null>(null)
@@ -50,7 +53,7 @@ export function FocusTimerPanel() {
   return (
     <div className="rounded-2xl border border-ktip-sand-100 bg-ktip-cream p-6 text-center shadow-card">
       <p className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
-        Focus
+        <Trans>Focus</Trans>
       </p>
 
       <p
@@ -62,7 +65,7 @@ export function FocusTimerPanel() {
         {clock(left)}
       </p>
       <p className="mt-1 text-sm text-ktip-sand-500">
-        {finished ? 'Done. Take a break.' : running ? 'Heads down.' : 'Nobody is speaking in here.'}
+        {finished ? t`Done. Take a break.` : running ? t`Heads down.` : t`Nobody is speaking in here.`}
       </p>
 
       {endsAt === null && (
@@ -79,7 +82,7 @@ export function FocusTimerPanel() {
                   : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-sand-300'
               }`}
             >
-              {option.label}
+              {i18n._(option.label)}
             </button>
           ))}
         </div>
@@ -93,7 +96,7 @@ export function FocusTimerPanel() {
             className="flex items-center gap-1.5 rounded-xl border border-ktip-sand-200 px-3 py-1.5 text-sm font-semibold text-ktip-sand-700 hover:border-ktip-ocean-300"
           >
             <Pause size={14} aria-hidden="true" />
-            Pause
+            <Trans>Pause</Trans>
           </button>
         ) : (
           <button
@@ -102,7 +105,7 @@ export function FocusTimerPanel() {
             className="flex items-center gap-1.5 rounded-xl border border-ktip-ocean-300 bg-ktip-ocean-50 px-3 py-1.5 text-sm font-semibold text-ktip-ocean-700 hover:border-ktip-ocean-500"
           >
             <Play size={14} aria-hidden="true" />
-            {paused !== null ? 'Resume' : 'Start'}
+            {paused !== null ? t`Resume` : t`Start`}
           </button>
         )}
         {endsAt !== null && (
@@ -112,7 +115,7 @@ export function FocusTimerPanel() {
             className="flex items-center gap-1.5 rounded-xl border border-ktip-sand-200 px-3 py-1.5 text-sm font-semibold text-ktip-sand-600 hover:border-ktip-sand-300"
           >
             <RotateCcw size={14} aria-hidden="true" />
-            Reset
+            <Trans>Reset</Trans>
           </button>
         )}
       </div>

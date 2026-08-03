@@ -1,4 +1,5 @@
 import { ShieldAlert } from 'lucide-react'
+import { useLingui } from '@lingui/react/macro'
 
 interface QuarantineNoticeProps {
   /** Shown to the author; reviewers get the moderator wording instead. */
@@ -13,6 +14,7 @@ interface QuarantineNoticeProps {
  * out of everyone else's result set entirely, so there is nothing to replace.
  */
 export function QuarantineNotice({ isAuthor, isModerator, className = '' }: QuarantineNoticeProps) {
+    const { t } = useLingui()
   return (
     <div
       className={`flex items-start gap-2.5 p-3 rounded-xl bg-ktip-sun-50 border border-ktip-sun-200 ${className}`}
@@ -20,10 +22,10 @@ export function QuarantineNotice({ isAuthor, isModerator, className = '' }: Quar
       <ShieldAlert size={16} className="text-ktip-sun-700 mt-0.5 flex-shrink-0" />
       <p className="text-xs text-ktip-sun-800">
         {isModerator
-          ? 'Quarantined pending review. Only you and the author can see it.'
+          ? t`Quarantined pending review. Only you and the author can see it.`
           : isAuthor
-            ? 'This is held for review by our safety team and is not visible to others yet.'
-            : 'This content is unavailable.'}
+            ? t`This is held for review by our safety team and is not visible to others yet.`
+            : t`This content is unavailable.`}
       </p>
     </div>
   )

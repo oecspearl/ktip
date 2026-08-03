@@ -10,6 +10,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useApplyForGrant } from '../../hooks/useGrants'
 import type { Profile } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface SponsorNominationCardProps {
   applicationId: string | undefined
@@ -35,6 +36,7 @@ export function SponsorNominationCard({
   sponsorApprovedAt,
   onChanged,
 }: SponsorNominationCardProps) {
+    const { t } = useLingui()
   const toast = useToast()
   const { nominateSponsor, loading } = useApplyForGrant()
 
@@ -75,16 +77,17 @@ export function SponsorNominationCard({
 
   const handleNominate = async (candidate: Profile) => {
     if (!applicationId) {
-      toast.error('Save a draft before nominating a sponsor')
+      toast.error(t`Save a draft before nominating a sponsor`)
       return
     }
     try {
       await nominateSponsor({ id: applicationId, user_id: applicantId, sponsor_id: candidate.id })
-      toast.success(`${candidate.display_name || 'Sponsor'} has been asked to sponsor this application`)
+      const name = candidate.display_name || t`Sponsor`
+      toast.success(t`${name} has been asked to sponsor this application`)
       setSearch('')
       onChanged?.()
     } catch (err: any) {
-      toast.error(err.message || 'Could not nominate sponsor')
+      toast.error(err.message || t`Could not nominate sponsor`)
     }
   }
 
@@ -92,10 +95,10 @@ export function SponsorNominationCard({
     if (!applicationId) return
     try {
       await nominateSponsor({ id: applicationId, user_id: applicantId, sponsor_id: null })
-      toast.success('Sponsor removed')
+      toast.success(t`Sponsor removed`)
       onChanged?.()
     } catch (err: any) {
-      toast.error(err.message || 'Could not remove sponsor')
+      toast.error(err.message || t`Could not remove sponsor`)
     }
   }
 
@@ -103,11 +106,10 @@ export function SponsorNominationCard({
     <Card className="mb-6">
       <div className="flex items-center gap-2 mb-1">
         <GraduationCap size={18} className="text-ktip-ocean-600" />
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900">Faculty sponsor</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Faculty sponsor</Trans></h2>
       </div>
       <p className="text-sm text-ktip-sand-600 mb-4">
-        Student applications are submitted under a faculty or school sponsor. Nominate someone from
-        your institution — they will be asked to accept before this can be submitted.
+        <Trans>Student applications are submitted under a faculty or school sponsor. Nominate someone from your institution — they will be asked to accept before this can be submitted.</Trans>
       </p>
 
       {sponsorId && sponsor ? (
@@ -122,16 +124,16 @@ export function SponsorNominationCard({
             <DiamondAvatar name={sponsor.display_name || 'User'} size={36} />
             <div className="min-w-0">
               <p className="text-sm font-medium text-ktip-sand-900 truncate">
-                {sponsor.display_name || 'Unnamed'}
+                {sponsor.display_name || t`Unnamed`}
               </p>
               <p className="text-xs flex items-center gap-1 text-ktip-sand-600">
                 {sponsorApprovedAt ? (
                   <>
-                    <BadgeCheck size={12} className="text-ktip-tropical-600" /> Accepted
+                    <BadgeCheck size={12} className="text-ktip-tropical-600" /> <Trans>Accepted</Trans>
                   </>
                 ) : (
                   <>
-                    <Clock size={12} className="text-ktip-sun-600" /> Awaiting their acceptance
+                    <Clock size={12} className="text-ktip-sun-600" /> <Trans>Awaiting their acceptance</Trans>
                   </>
                 )}
               </p>
@@ -140,7 +142,7 @@ export function SponsorNominationCard({
 
           {!sponsorApprovedAt && (
             <Button variant="ghost" size="sm" icon={<X size={14} />} loading={loading} onClick={handleClear}>
-              Change
+              <Trans>Change</Trans>
             </Button>
           )}
         </div>
@@ -149,13 +151,13 @@ export function SponsorNominationCard({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search faculty by name"
+            placeholder={t`Search faculty by name`}
             icon={<Search size={15} />}
             fullWidth
           />
 
           {search.length > 1 && (candidates?.length ?? 0) === 0 && (
-            <p className="text-sm text-ktip-sand-500">No matching faculty found.</p>
+            <p className="text-sm text-ktip-sand-500"><Trans>No matching faculty found.</Trans></p>
           )}
 
           <ul className="divide-y divide-ktip-sand-100">
@@ -164,11 +166,11 @@ export function SponsorNominationCard({
                 <div className="flex items-center gap-3 min-w-0">
                   <DiamondAvatar name={candidate.display_name || 'User'} size={32} />
                   <p className="text-sm text-ktip-sand-900 truncate">
-                    {candidate.display_name || 'Unnamed'}
+                    {candidate.display_name || t`Unnamed`}
                   </p>
                 </div>
                 <Button size="sm" variant="outline" loading={loading} onClick={() => handleNominate(candidate)}>
-                  Nominate
+                  <Trans>Nominate</Trans>
                 </Button>
               </li>
             ))}

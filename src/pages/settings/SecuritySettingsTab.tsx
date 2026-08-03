@@ -16,8 +16,14 @@ import {
   AlertTriangle,
   CheckCircle,
 } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+
+// The word the user must type to confirm deletion. It is compared literally
+// against input, so it must never be translated.
+const DELETE_CONFIRMATION_TEXT = 'DELETE'
 
 export function SecuritySettingsTab() {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
@@ -72,9 +78,9 @@ export function SecuritySettingsTab() {
       setPasswordSuccess(true)
       setNewPassword('')
       setConfirmPassword('')
-      toast.success('Password updated successfully!')
+      toast.success(t`Password updated successfully!`)
     } catch (err: any) {
-      setPasswordErrors({ _form: err.message || 'Failed to update password' })
+      setPasswordErrors({ _form: err.message || t`Failed to update password` })
     } finally {
       setPasswordLoading(false)
     }
@@ -100,9 +106,9 @@ export function SecuritySettingsTab() {
     try {
       await auth.updateEmail(newEmail)
       setEmailSuccess(true)
-      toast.success('Confirmation email sent to your new address!')
+      toast.success(t`Confirmation email sent to your new address!`)
     } catch (err: any) {
-      setEmailErrors({ _form: err.message || 'Failed to update email' })
+      setEmailErrors({ _form: err.message || t`Failed to update email` })
     } finally {
       setEmailLoading(false)
     }
@@ -127,7 +133,7 @@ export function SecuritySettingsTab() {
     try {
       const res = await addAlias(value.trim().toLowerCase())
       if (res.already_verified) {
-        toast.success('That address is already verified.')
+        toast.success(t`That address is already verified.`)
         return
       }
       setAliasSent(true)
@@ -135,12 +141,12 @@ export function SecuritySettingsTab() {
       // Without Resend configured, dev builds hand the link back instead.
       if (res.dev_link) {
         console.log('[dev] verification link:', res.dev_link)
-        toast.success('Verification link logged to the console (dev mode).')
+        toast.success(t`Verification link logged to the console (dev mode).`)
       } else {
-        toast.success('Verification email sent.')
+        toast.success(t`Verification email sent.`)
       }
     } catch (err: any) {
-      setAliasErrors({ _form: err.message || 'Failed to save the address' })
+      setAliasErrors({ _form: err.message || t`Failed to save the address` })
     }
   }
 
@@ -149,22 +155,22 @@ export function SecuritySettingsTab() {
     setAliasSent(false)
     try {
       await removeAlias(auth.user!.id)
-      toast.success('Secondary email removed')
+      toast.success(t`Secondary email removed`)
     } catch (err: any) {
-      setAliasErrors({ _form: err.message || 'Failed to remove the address' })
+      setAliasErrors({ _form: err.message || t`Failed to remove the address` })
     }
   }
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'DELETE') return
+    if (deleteConfirmText !== DELETE_CONFIRMATION_TEXT) return
 
     setDeleteLoading(true)
     try {
       await auth.deleteAccount()
-      toast.success('Account deleted successfully')
+      toast.success(t`Account deleted successfully`)
       navigate('/login')
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete account')
+      toast.error(err.message || t`Failed to delete account`)
     } finally {
       setDeleteLoading(false)
       setShowDeleteModal(false)
@@ -180,8 +186,8 @@ export function SecuritySettingsTab() {
             <Lock size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Change Password</h2>
-            <p className="text-sm text-ktip-sand-600">Update your account password</p>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Change Password</Trans></h2>
+            <p className="text-sm text-ktip-sand-600"><Trans>Update your account password</Trans></p>
           </div>
         </div>
 
@@ -189,7 +195,7 @@ export function SecuritySettingsTab() {
           {passwordSuccess && (
             <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
               <CheckCircle size={18} />
-              Password updated successfully!
+              <Trans>Password updated successfully!</Trans>
             </div>
           )}
 
@@ -201,8 +207,8 @@ export function SecuritySettingsTab() {
 
           <Input
             type="password"
-            label="New Password"
-            placeholder="Enter new password"
+            label={t`New Password`}
+            placeholder={t`Enter new password`}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             error={passwordErrors.new_password}
@@ -212,8 +218,8 @@ export function SecuritySettingsTab() {
 
           <Input
             type="password"
-            label="Confirm Password"
-            placeholder="Confirm new password"
+            label={t`Confirm Password`}
+            placeholder={t`Confirm new password`}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             error={passwordErrors.confirm_password}
@@ -222,7 +228,7 @@ export function SecuritySettingsTab() {
           />
 
           <Button onClick={handleChangePassword} loading={passwordLoading}>
-            Update Password
+            <Trans>Update Password</Trans>
           </Button>
         </div>
       </Card>
@@ -234,9 +240,9 @@ export function SecuritySettingsTab() {
             <Mail size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Change Email</h2>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Change Email</Trans></h2>
             <p className="text-sm text-ktip-sand-600">
-              Current: <strong>{auth.user?.email}</strong>
+              <Trans>Current: <strong>{auth.user?.email}</strong></Trans>
             </p>
           </div>
         </div>
@@ -245,7 +251,7 @@ export function SecuritySettingsTab() {
           {emailSuccess && (
             <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
               <CheckCircle size={18} />
-              Confirmation sent! Check your new email to verify the change.
+              <Trans>Confirmation sent! Check your new email to verify the change.</Trans>
             </div>
           )}
 
@@ -257,8 +263,8 @@ export function SecuritySettingsTab() {
 
           <Input
             type="email"
-            label="New Email"
-            placeholder="Enter new email address"
+            label={t`New Email`}
+            placeholder={t`Enter new email address`}
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             error={emailErrors.email}
@@ -267,7 +273,7 @@ export function SecuritySettingsTab() {
           />
 
           <Button onClick={handleChangeEmail} loading={emailLoading}>
-            Update Email
+            <Trans>Update Email</Trans>
           </Button>
         </div>
       </Card>
@@ -279,9 +285,9 @@ export function SecuritySettingsTab() {
             <MailPlus size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Secondary Email</h2>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Secondary Email</Trans></h2>
             <p className="text-sm text-ktip-sand-600">
-              A backup address that signs in to this account with the same password
+              <Trans>A backup address that signs in to this account with the same password</Trans>
             </p>
           </div>
         </div>
@@ -300,13 +306,13 @@ export function SecuritySettingsTab() {
               {aliasSent && (
                 <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
                   <CheckCircle size={18} />
-                  Check that inbox for a confirmation link.
+                  <Trans>Check that inbox for a confirmation link.</Trans>
                 </div>
               )}
               <Input
                 type="email"
-                label="Secondary Email"
-                placeholder="Enter a backup email address"
+                label={t`Secondary Email`}
+                placeholder={t`Enter a backup email address`}
                 value={secondaryEmail}
                 onChange={(e) => setSecondaryEmail(e.target.value)}
                 error={aliasErrors.email}
@@ -314,57 +320,58 @@ export function SecuritySettingsTab() {
                 fullWidth
               />
               <p className="text-xs text-ktip-sand-500">
-                You'll need to confirm the address before it can be used. It cannot already
-                belong to another KTIP account.
+                <Trans>You'll need to confirm the address before it can be used. It cannot already belong to another KTIP account.</Trans>
               </p>
               <Button
                 onClick={() => submitSecondaryEmail(secondaryEmail)}
                 loading={aliasSaving}
               >
-                Add Secondary Email
+                <Trans>Add Secondary Email</Trans>
               </Button>
             </>
           ) : alias.verified_at ? (
             <>
               {alias.email === auth.user?.email?.toLowerCase() ? (
                 <div className="bg-ktip-ocean-50 border border-ktip-ocean-200 text-ktip-ocean-700 px-4 py-3 rounded-xl text-sm">
-                  <strong>{alias.email}</strong> is now your primary email address, so it no
-                  longer works as a secondary one. You can remove it and add a different
-                  backup address.
+                  <Trans>
+                    <strong>{alias.email}</strong> is now your primary email address, so it no
+                    longer works as a secondary one. You can remove it and add a different
+                    backup address.
+                  </Trans>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
                   <CheckCircle size={18} />
                   <span>
-                    <strong>{alias.email}</strong> is verified — you can sign in with it.
+                    <Trans><strong>{alias.email}</strong> is verified — you can sign in with it.</Trans>
                   </span>
                 </div>
               )}
               <Button variant="secondary" onClick={handleRemoveSecondaryEmail} loading={aliasSaving}>
-                Remove
+                <Trans>Remove</Trans>
               </Button>
             </>
           ) : (
             <>
               <div className="bg-ktip-sun-50 border border-ktip-sun-200 text-ktip-sun-800 px-4 py-3 rounded-xl text-sm">
                 {alias.token_expires_at && new Date(alias.token_expires_at) > new Date() ? (
-                  <>
+                  <Trans>
                     Waiting for confirmation of <strong>{alias.email}</strong>. Check that
                     inbox — the link expires 24 hours after it was sent.
-                  </>
+                  </Trans>
                 ) : (
-                  <>
+                  <Trans>
                     The confirmation link for <strong>{alias.email}</strong> expired. Send a
                     fresh one, or remove the address.
-                  </>
+                  </Trans>
                 )}
               </div>
               <div className="flex flex-wrap gap-3">
                 <Button onClick={() => submitSecondaryEmail(alias.email)} loading={aliasSaving}>
-                  Resend Link
+                  <Trans>Resend Link</Trans>
                 </Button>
                 <Button variant="secondary" onClick={handleRemoveSecondaryEmail} loading={aliasSaving}>
-                  Remove
+                  <Trans>Remove</Trans>
                 </Button>
               </div>
             </>
@@ -373,8 +380,7 @@ export function SecuritySettingsTab() {
           {/* OAuth-only accounts have no password, so there is nothing to sign in with yet. */}
           {!auth.user?.identities?.some((i) => i.provider === 'email') && (
             <p className="text-xs text-ktip-sand-500">
-              You sign in with Google or Microsoft, so this address can't sign in until you set
-              a password — use "Forgot password" with it once it's verified.
+              <Trans>You sign in with Google or Microsoft, so this address can't sign in until you set a password — use "Forgot password" with it once it's verified.</Trans>
             </p>
           )}
         </div>
@@ -387,13 +393,13 @@ export function SecuritySettingsTab() {
             <Trash2 size={20} className="text-red-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-red-700">Delete Account</h2>
-            <p className="text-sm text-ktip-sand-600">Permanently delete your account and all associated data</p>
+            <h2 className="text-lg font-display font-bold text-red-700"><Trans>Delete Account</Trans></h2>
+            <p className="text-sm text-ktip-sand-600"><Trans>Permanently delete your account and all associated data</Trans></p>
           </div>
         </div>
 
         <p className="text-sm text-ktip-sand-600 mb-4">
-          Once deleted, your account cannot be recovered. All your projects, events, messages, and profile data will be permanently removed.
+          <Trans>Once deleted, your account cannot be recovered. All your projects, events, messages, and profile data will be permanently removed.</Trans>
         </p>
 
         <Button
@@ -402,7 +408,7 @@ export function SecuritySettingsTab() {
           className="border-red-300 text-red-600 hover:bg-red-50"
           icon={<Trash2 size={18} />}
         >
-          Delete My Account
+          <Trans>Delete My Account</Trans>
         </Button>
       </Card>
 
@@ -410,48 +416,48 @@ export function SecuritySettingsTab() {
       <Modal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        title="Delete Account"
-        description="This action is permanent and cannot be undone."
+        title={t`Delete Account`}
+        description={t`This action is permanent and cannot be undone.`}
         size="md"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
             <AlertTriangle size={20} className="text-red-600 shrink-0 mt-0.5" />
             <div className="text-sm text-red-700">
-              <p className="font-medium mb-1">Warning: This will permanently delete:</p>
+              <p className="font-medium mb-1"><Trans>Warning: This will permanently delete:</Trans></p>
               <ul className="list-disc ml-4 space-y-1">
-                <li>Your profile and personal data</li>
-                <li>All projects you created</li>
-                <li>All messages and conversations</li>
-                <li>Event registrations and forum posts</li>
+                <li><Trans>Your profile and personal data</Trans></li>
+                <li><Trans>All projects you created</Trans></li>
+                <li><Trans>All messages and conversations</Trans></li>
+                <li><Trans>Event registrations and forum posts</Trans></li>
               </ul>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-              Type <strong>DELETE</strong> to confirm
+              <Trans>Type <strong>{DELETE_CONFIRMATION_TEXT}</strong> to confirm</Trans>
             </label>
             <input
               type="text"
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="DELETE"
+              placeholder={DELETE_CONFIRMATION_TEXT}
               className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-red-500 focus:ring-red-500/20 focus:bg-ktip-cream"
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button
               onClick={handleDeleteAccount}
               loading={deleteLoading}
-              disabled={deleteConfirmText !== 'DELETE'}
+              disabled={deleteConfirmText !== DELETE_CONFIRMATION_TEXT}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Delete Forever
+              <Trans>Delete Forever</Trans>
             </Button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
@@ -102,6 +103,7 @@ export async function getVerificationDocumentUrl(path: string): Promise<string |
 // Admin: approve/reject. Approval also flips profiles.is_verified,
 // which fires the verified_member badge trigger.
 export function useReviewVerification() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -135,10 +137,10 @@ export function useReviewVerification() {
       sendNotification({
         userId: params.userId,
         type: 'verification_result',
-        title: params.approve ? 'Verification approved' : 'Verification rejected',
+        title: params.approve ? t`Verification approved` : t`Verification not accepted`,
         body: params.approve
-          ? 'Your identity verification was approved. Your profile now shows a verified badge.'
-          : params.adminNote || 'Your verification request was not approved.',
+          ? t`Your identity verification was approved. Your profile now shows a verified badge.`
+          : params.adminNote || t`Your verification request was not accepted.`,
         link: '/settings',
       })
     },

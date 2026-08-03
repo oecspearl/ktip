@@ -22,8 +22,10 @@ import { formatCurrency, formatDate, truncate } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { Trans, Plural, useLingui } from '@lingui/react/macro'
 
 export default function GrantDetailPage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -76,9 +78,10 @@ export default function GrantDetailPage() {
     } else if (grant.amount_min) {
       return `${formatCurrency(grant.amount_min, grant.currency)}+`
     } else if (grant.amount_max) {
-      return `Up to ${formatCurrency(grant.amount_max, grant.currency)}`
+      const amount = formatCurrency(grant.amount_max, grant.currency)
+      return t`Up to ${amount}`
     }
-    return 'Amount varies'
+    return t`Amount varies`
   }
 
   if (grantLoading || !grant) {
@@ -86,7 +89,7 @@ export default function GrantDetailPage() {
       return (
         <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-          <p className="mt-4 text-ktip-sand-600">Loading grant...</p>
+          <p className="mt-4 text-ktip-sand-600"><Trans>Loading grant...</Trans></p>
         </div>
       )
     }
@@ -96,16 +99,16 @@ export default function GrantDetailPage() {
           <Wallet size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          Grant Not Found
+          <Trans>Grant Not Found</Trans>
         </h2>
         <p className="text-gray-500 mb-6">
-          This grant doesn't exist or has been removed.
+          <Trans>This grant doesn't exist or has been removed.</Trans>
         </p>
         <button
           onClick={() => navigate('/grants')}
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
-          Back to Grants
+          <Trans>Back to Grants</Trans>
         </button>
       </div>
     )
@@ -114,13 +117,13 @@ export default function GrantDetailPage() {
   return (
     <>
       <PageHero
-        eyebrow="Grant Detail"
+        eyebrow={t`Grant Detail`}
         title={grant.title}
         image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
         imageSeed={grant.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Grants', href: '/grants' },
+          { label: t`Home`, href: '/' },
+          { label: t`Grants`, href: '/grants' },
           { label: truncate(grant.title, 30) },
         ]}
       >
@@ -131,10 +134,10 @@ export default function GrantDetailPage() {
             </Badge>
           )}
           {!grant.is_active && (
-            <Badge variant="default">Inactive</Badge>
+            <Badge variant="default"><Trans>Inactive</Trans></Badge>
           )}
           {isExpired && (
-            <Badge variant="danger">Expired</Badge>
+            <Badge variant="danger"><Trans>Expired</Trans></Badge>
           )}
         </div>
       </PageHero>
@@ -150,7 +153,7 @@ export default function GrantDetailPage() {
               <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 text-red-700">
                   <AlertCircle size={20} />
-                  <p className="font-medium">This grant has expired</p>
+                  <p className="font-medium"><Trans>This grant has expired</Trans></p>
                 </div>
               </div>
             )}
@@ -171,7 +174,7 @@ export default function GrantDetailPage() {
                 <div className="flex items-start gap-3">
                   <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
                   <div>
-                    <p className="text-sm text-ktip-sand-600">Deadline</p>
+                    <p className="text-sm text-ktip-sand-600"><Trans>Deadline</Trans></p>
                     <p
                       className={`font-medium ${
                         isExpired ? 'text-red-600' : 'text-ktip-sand-900'
@@ -186,9 +189,9 @@ export default function GrantDetailPage() {
               <div className="flex items-start gap-3">
                 <FileText size={20} className="text-ktip-ocean-600 mt-1" />
                 <div>
-                  <p className="text-sm text-ktip-sand-600">Applications</p>
+                  <p className="text-sm text-ktip-sand-600"><Trans>Applications</Trans></p>
                   <p className="font-medium text-ktip-sand-900">
-                    {applicationCount} submitted
+                    <Trans>{applicationCount} submitted</Trans>
                   </p>
                 </div>
               </div>
@@ -198,9 +201,9 @@ export default function GrantDetailPage() {
             {grant.description && (
               <div id="about" data-spy="About" className="scroll-mt-24 mb-8">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  About this Grant
+                  <Trans>About this Grant</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Grant overview and details</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Grant overview and details</Trans></p>
                 <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                   {grant.description}
                 </div>
@@ -211,9 +214,9 @@ export default function GrantDetailPage() {
             {grant.details && grant.details.length > 0 && (
               <div id="details" data-spy="Details" className="scroll-mt-24 mb-8">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  Additional Details
+                  <Trans>Additional Details</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Key facts at a glance</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key facts at a glance</Trans></p>
                 <DetailsList details={grant.details} />
               </div>
             )}
@@ -223,9 +226,9 @@ export default function GrantDetailPage() {
               <div id="eligibility" data-spy="Eligibility" className="scroll-mt-24 mb-8">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1 flex items-center gap-2">
                   <Users size={18} />
-                  Eligibility Requirements
+                  <Trans>Eligibility Requirements</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Who can apply</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Who can apply</Trans></p>
                 <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                   {grant.eligibility}
                 </div>
@@ -248,9 +251,9 @@ export default function GrantDetailPage() {
             {/* Widget 1: Apply for Grant */}
             <div data-tutorial="grant-apply" className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Apply for Grant
+                <Trans>Apply for Grant</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Submit your application</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Submit your application</Trans></p>
 
               {checking && (
                 <div className="text-center py-4">
@@ -264,10 +267,10 @@ export default function GrantDetailPage() {
                     <div className="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl p-4 mb-4">
                       <div className="flex items-center gap-2 text-ktip-tropical-700 mb-2">
                         <CheckCircle size={20} />
-                        <span className="font-medium">Application Submitted!</span>
+                        <span className="font-medium"><Trans>Application Submitted!</Trans></span>
                       </div>
                       <p className="text-sm text-ktip-tropical-600">
-                        Your application is under review.
+                        <Trans>Your application is under review.</Trans>
                       </p>
                     </div>
                   )}
@@ -275,7 +278,7 @@ export default function GrantDetailPage() {
                   {isExpired && !hasApplied && (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
                       <p className="text-sm text-red-700">
-                        This grant has expired and is no longer accepting applications.
+                        <Trans>This grant has expired and is no longer accepting applications.</Trans>
                       </p>
                     </div>
                   )}
@@ -283,7 +286,7 @@ export default function GrantDetailPage() {
                   {!grant.is_active && !hasApplied && (
                     <div className="bg-ktip-sand-50 border border-ktip-sand-200 rounded-xl p-4 mb-4">
                       <p className="text-sm text-gray-700">
-                        This grant is currently inactive.
+                        <Trans>This grant is currently inactive.</Trans>
                       </p>
                     </div>
                   )}
@@ -294,7 +297,7 @@ export default function GrantDetailPage() {
                       icon={<ExternalLink size={20} />}
                       onClick={() => window.open(grant.application_url!, '_blank')}
                     >
-                      Apply on External Site
+                      <Trans>Apply on External Site</Trans>
                     </Button>
                   )}
 
@@ -305,12 +308,11 @@ export default function GrantDetailPage() {
                         onClick={() => navigate(`/grants/${grant.id}/apply`)}
                         icon={<FileText size={20} />}
                       >
-                        {hasDraft ? 'Continue Application' : isStudent ? 'Start Application' : 'Apply Now'}
+                        {hasDraft ? t`Continue Application` : isStudent ? t`Start Application` : t`Apply Now`}
                       </Button>
                       {isStudent && (
                         <p className="mt-2 text-xs text-ktip-sand-600">
-                          Student applications must be sponsored. Nominate a faculty member in the
-                          application — they accept it, and then it can be submitted.
+                          <Trans>Student applications must be sponsored. Nominate a faculty member in the application — they accept it, and then it can be submitted.</Trans>
                         </p>
                       )}
                     </>
@@ -318,7 +320,7 @@ export default function GrantDetailPage() {
 
                   {!grant.application_url && !canApply && !hasApplied && !isExpired && auth.user && (
                     <p className="text-sm text-ktip-sand-600">
-                      Your account does not have permission to apply for grants.
+                      <Trans>Your account does not have permission to apply for grants.</Trans>
                     </p>
                   )}
                 </>
@@ -326,8 +328,11 @@ export default function GrantDetailPage() {
 
               <div className="mt-4 pt-4 border-t border-ktip-sand-100">
                 <p className="text-sm text-ktip-sand-600">
-                  {applicationCount} {applicationCount === 1 ? 'application' : 'applications'}{' '}
-                  submitted
+                  <Plural
+                    value={applicationCount}
+                    one="# application submitted"
+                    other="# applications submitted"
+                  />
                 </p>
               </div>
             </div>
@@ -335,24 +340,24 @@ export default function GrantDetailPage() {
             {/* Widget 2: Grant Information */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Grant Information
+                <Trans>Grant Information</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Key details</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key details</Trans></p>
               <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Currency</span>
+                  <span className="text-gray-500"><Trans>Currency</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {grant.currency}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Status</span>
+                  <span className="text-gray-500"><Trans>Status</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
-                    {grant.is_active ? 'Active' : 'Inactive'}
+                    {grant.is_active ? t`Active` : t`Inactive`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Posted</span>
+                  <span className="text-gray-500"><Trans>Posted</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {formatDate(grant.created_at)}
                   </span>

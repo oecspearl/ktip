@@ -4,6 +4,8 @@ import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { ROLE_LABELS } from '../../lib/constants'
 import type { UserRole } from '../../types'
 import { cn } from '../../lib/utils'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 /** Height of the collapsed band. Mirrored by --dash-bar-h in DashboardLayout. */
 export const DASH_BAR_H = '3.5rem'
@@ -34,6 +36,7 @@ export function DashboardTopBar({
   connectionCount,
   shown,
 }: DashboardTopBarProps) {
+    const { t , i18n } = useLingui()
   return (
     <div
       aria-hidden={!shown}
@@ -47,12 +50,12 @@ export function DashboardTopBar({
       style={{ height: DASH_BAR_H }}
     >
       <div className="w-full max-w-page mx-auto h-full px-4 md:px-12 flex items-center justify-between gap-4">
-        <nav className="flex items-center text-base text-white/70 min-w-0" aria-label="Breadcrumb">
+        <nav className="flex items-center text-base text-white/70 min-w-0" aria-label={t`Breadcrumb`}>
           <Link to="/" className="hover:text-white transition-colors">
-            Home
+            <Trans>Home</Trans>
           </Link>
           <ChevronRight size={15} className="mx-1.5 shrink-0" aria-hidden="true" />
-          <span className="font-semibold text-white truncate">Dashboard</span>
+          <span className="font-semibold text-white truncate"><Trans>Dashboard</Trans></span>
         </nav>
 
         <div className="flex items-center gap-2 min-w-0">
@@ -60,7 +63,7 @@ export function DashboardTopBar({
             <DiamondAvatar src={avatarUrl} name={displayName} size={26} frameClassName="ring-1 ring-white/40" />
             <span className="font-semibold text-white truncate max-w-[12rem]">{displayName}</span>
             {isVerified && (
-              <span className="text-white/90 shrink-0" title="Verified">
+              <span className="text-white/90 shrink-0" title={t`Verified`}>
                 <CheckCircle size={14} />
               </span>
             )}
@@ -72,7 +75,7 @@ export function DashboardTopBar({
                 key={role}
                 className="px-2 py-0.5 rounded-md bg-white/15 border border-white/25 text-white text-xs font-medium"
               >
-                {ROLE_LABELS[role] || role}
+                {resolveCopy(i18n, ROLE_LABELS[role] || role)}
               </span>
             ))}
           </span>
@@ -84,7 +87,7 @@ export function DashboardTopBar({
             <Users size={14} />
             <span className="font-semibold text-white">{connectionCount}</span>
             <span className="hidden sm:inline">
-              {connectionCount === 1 ? 'connection' : 'connections'}
+              <Plural value={connectionCount} one="connection" other="connections" />
             </span>
           </Link>
         </div>

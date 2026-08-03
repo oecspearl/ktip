@@ -10,6 +10,7 @@ import { RouterProvider } from 'react-router/dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AchievementProvider } from './contexts/AchievementContext'
+import { LanguageProvider } from './i18n/LanguageProvider'
 import { AchievementUnlockModal } from './components/achievements/AchievementUnlockModal'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -171,6 +172,8 @@ const router = createBrowserRouter([
                   { path: '/dashboard/events', lazy: lazyPage(() => import('./pages/dashboard/tabs/EventsTab')) },
                   { path: '/dashboard/connections', lazy: lazyPage(() => import('./pages/dashboard/tabs/ConnectionsTab')) },
                   { path: '/dashboard/submissions', lazy: lazyPage(() => import('./pages/dashboard/tabs/SubmissionsTab')) },
+                  // Organisation-tier counterpart to the profile (CV) tab.
+                  { path: '/dashboard/business', lazy: lazyPage(() => import('./pages/dashboard/tabs/BusinessTab')) },
                   // Role-gated; each stub bounces to /dashboard without the role.
                   { path: '/dashboard/funding', lazy: lazyPage(() => import('./pages/dashboard/tabs/FundingTab')) },
                   { path: '/dashboard/mentees', lazy: lazyPage(() => import('./pages/dashboard/tabs/MenteesTab')) },
@@ -246,9 +249,9 @@ const router = createBrowserRouter([
               // Your own gallery. Signed-in only — it is built from
               // check_my_achievements(), which has no anonymous meaning.
               { path: '/achievements', lazy: lazyPage(() => import('./pages/achievements/AchievementsPage')) },
-              // The CV. Auto-populated for members who arrive from the OECS
-              // Virtual Campus, hand-written by everyone else.
-              { path: '/cv', lazy: lazyPage(() => import('./pages/cv/CvPage')) },
+              // The CV lives in the dashboard now (ProfileTab); the old page
+              // address keeps resolving for bookmarks and stored links.
+              { path: '/cv', element: <Navigate to="/dashboard/profile" replace /> },
               { path: '/cv/edit', lazy: lazyPage(() => import('./pages/cv/CvEditPage')) },
               // Member pages came back at /user/:id (066). The drawer over
               // /directory is still the in-app default; the page exists so a
@@ -282,8 +285,9 @@ const router = createBrowserRouter([
               { path: '/collaborate/video', lazy: lazyPage(() => import('./pages/collaborate/VideoConferencePage')) },
               { path: '/invitations', lazy: lazyPage(() => import('./pages/InvitationsPage')) },
               { path: '/sme/verification', lazy: lazyPage(() => import('./pages/sme/ChamberOnboardingPage')) },
-              // Organisation-tier counterpart to /cv/edit.
-              { path: '/org/edit', lazy: lazyPage(() => import('./pages/sme/OrgProfileEditPage')) },
+              // The business profile lives in the dashboard now (BusinessTab);
+              // the old page address keeps resolving for bookmarks.
+              { path: '/org/edit', element: <Navigate to="/dashboard/business" replace /> },
             ],
           },
 
@@ -366,18 +370,29 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AppErrorBoundary>
-      {/* Outside the router: the choice gates analytics and performance tracing
-          for the whole app, including the auth pages, and it needs no route
-          context of its own. */}
-      <AnalyticsConsentBanner />
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <AuthProvider>
-            <AchievementProvider>
-              <RouterProvider router={router} />
-            </AchievementProvider>
-          </AuthProvider>
-        </ToastProvider>
+        {/* Inside QueryClientProvider so the client survives a language switch —
+            LanguageProvider remounts everything beneath it, and refetching the
+            whole app on a switch would be both slow and pointless, since rows
+            are cached in one language and translated at render time.
+            Above ToastProvider and AuthProvider because both raise text that
+            has to be translated. */}
+        <LanguageProvider>
+          {/* Outside the router: the choice gates analytics and performance
+              tracing for the whole app, including the auth pages, and it needs
+              no route context of its own. It must sit INSIDE LanguageProvider:
+              its copy is wrapped in <Trans>, and a <Trans> above I18nProvider
+              throws — which, caught by a boundary whose fallback also used
+              <Trans>, once blanked the entire app. */}
+          <AnalyticsConsentBanner />
+          <ToastProvider>
+            <AuthProvider>
+              <AchievementProvider>
+                <RouterProvider router={router} />
+              </AchievementProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </LanguageProvider>
       </QueryClientProvider>
     </AppErrorBoundary>
   )

@@ -1,5 +1,6 @@
 import { Check, X } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { Trans } from '@lingui/react/macro'
 
 /**
  * A flat bar pointed at the right end and notched by the same amount at the
@@ -160,6 +161,9 @@ function StepCircle({
 }) {
   const base =
     'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full transition-colors'
+  // Hoisted so the catalog entry reads `Step {stepNumber} not started` rather
+  // than `Step {0} not started`, which a translator cannot interpret.
+  const stepNumber = index + 1
 
   if (state === 'rejected') {
     return (
@@ -197,7 +201,9 @@ function StepCircle({
 
   return (
     <span className={cn(base, 'border-2 border-ktip-sand-300')}>
-      <span className="sr-only">Step {index + 1} not started</span>
+      <span className="sr-only">
+        <Trans>Step {stepNumber} not started</Trans>
+      </span>
     </span>
   )
 }

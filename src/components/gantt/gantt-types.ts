@@ -1,4 +1,7 @@
 import type { ReactNode, RefObject } from 'react'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+import type { Copy } from '../../i18n/copy'
 
 /**
  * Shared vocabulary for the gantt. Kept free of React rendering so the scale
@@ -12,7 +15,8 @@ export type GanttDirection = 'prev' | 'next'
 export interface GanttEventMarker {
   id: string
   date: Date
-  label: string
+  /** `Copy`: stage names arrive as msg descriptors, resolved where drawn. */
+  label: Copy
   /** Renders hollow rather than filled — for dates that are expected, not reached. */
   muted?: boolean
 }
@@ -123,10 +127,10 @@ export const SCALE_SPECS: Record<GanttScale, ScaleSpec> = {
 
 export const SCALE_ORDER: readonly GanttScale[] = ['week', 'month', 'quarter']
 
-export const SCALE_LABELS: Record<GanttScale, string> = {
-  week: 'Week',
-  month: 'Month',
-  quarter: 'Quarter',
+export const SCALE_LABELS: Record<GanttScale, MessageDescriptor> = {
+  week: msg`Week`,
+  month: msg`Month`,
+  quarter: msg`Quarter`,
 }
 
 /** Sunday + Saturday. */

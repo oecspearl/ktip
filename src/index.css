@@ -377,6 +377,15 @@
     0% { transform: translateX(-50%); }
     100% { transform: translateX(0); }
   }
+
+  /* Same two-copy track, run the other way — the stats row under the partner
+     wall travels right-to-left so the two bands read as a counter-flow pair */
+  --animate-marquee-left: marqueeLeft 35s linear infinite;
+
+  @keyframes marqueeLeft {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 }
 
 /* Accessibility "readable" mode — Atkinson Hyperlegible everywhere.
@@ -1016,6 +1025,17 @@ html.dark {
   pointer-events: none;
   /* Exits read better slightly quicker than entrances */
   transition-duration: 150ms;
+}
+
+/* A panel that opens UPWARD — the footer's language picker. The base closed
+   transform nudges up by 4px, which is correct for a panel hanging below its
+   trigger and backwards for one hanging above it: it would drift away from the
+   button rather than collapse into it. Same idea as .fab-panel, kept as a
+   modifier so it composes with .dropdown-panel instead of duplicating it.
+   Declared immediately after the base rule so equal specificity resolves the
+   right way regardless of class order in the markup. */
+.dropdown-panel--up[data-state='closed'] {
+  transform: scale(0.96) translateY(4px);
 }
 
 /* Ghost mode: a pinned surface fades almost out and stops taking pointer

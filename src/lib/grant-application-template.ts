@@ -1,6 +1,9 @@
 // Grant application wizard step definitions.
 // Condensed from the former proposal wizard's funding template.
 
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+
 /**
  * `documents` is not a value the applicant types — it renders the upload
  * checklist for the call and stores nothing in application_data. It is a field
@@ -11,18 +14,18 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'do
 
 export interface FieldConfig {
   name: string
-  label: string
+  label: MessageDescriptor
   type: FieldType
-  placeholder?: string
+  placeholder?: MessageDescriptor
   required?: boolean
   options?: { value: string; label: string }[]
   rows?: number
-  helpText?: string
+  helpText?: MessageDescriptor
 }
 
 export interface StepConfig {
-  title: string
-  description: string
+  title: MessageDescriptor
+  description: MessageDescriptor
   fields: FieldConfig[]
 }
 
@@ -31,71 +34,75 @@ export interface StepConfig {
 // review + submit controls.
 export const GRANT_APPLICATION_STEPS: StepConfig[] = [
   {
-    title: 'Basics',
-    description: 'Provide the foundational details of your application.',
+    title: msg`Basics`,
+    description: msg`Provide the foundational details of your application.`,
     fields: [
-      { name: 'title', label: 'Project Title', type: 'text', placeholder: 'e.g., Caribbean Youth Digital Skills Initiative', required: true },
-      { name: 'organization', label: 'Organization / Team', type: 'text', placeholder: 'e.g., KTIP Innovation Lab' },
-      { name: 'funding_amount', label: 'Funding Amount Requested', type: 'text', placeholder: 'e.g., $50,000 USD' },
-      { name: 'start_date', label: 'Proposed Start Date', type: 'date' },
-      { name: 'end_date', label: 'Proposed End Date', type: 'date' },
+      { name: 'title', label: msg`Project Title`, type: 'text', placeholder: msg`e.g., Caribbean Youth Digital Skills Initiative`, required: true },
+      { name: 'organization', label: msg`Organization / Team`, type: 'text', placeholder: msg`e.g., KTIP Innovation Lab` },
+      { name: 'funding_amount', label: msg`Funding Amount Requested`, type: 'text', placeholder: msg`e.g., $50,000 USD` },
+      { name: 'start_date', label: msg`Proposed Start Date`, type: 'date' },
+      { name: 'end_date', label: msg`Proposed End Date`, type: 'date' },
     ],
   },
   {
-    title: 'Summary & Problem',
-    description: 'Summarize your application and the problem it addresses.',
+    title: msg`Summary & Problem`,
+    description: msg`Summarize your application and the problem it addresses.`,
     fields: [
-      { name: 'executive_summary', label: 'Executive Summary', type: 'textarea', rows: 8, required: true,
-        placeholder: 'Summarize the purpose of the application, the problem being addressed, your approach, and the expected impact.',
-        helpText: 'Aim for 200-400 words. This is often the first section reviewers read.' },
-      { name: 'problem_statement', label: 'Problem Statement', type: 'textarea', rows: 6, required: true,
-        placeholder: 'What specific problem or need exists? Who is affected and how?',
-        helpText: 'Use data and evidence to support the urgency of the problem.' },
-      { name: 'target_beneficiaries', label: 'Target Beneficiaries', type: 'textarea', rows: 3,
-        placeholder: 'Who will directly benefit from this project? Describe the target population.' },
+      { name: 'executive_summary', label: msg`Executive Summary`, type: 'textarea', rows: 8, required: true,
+        placeholder: msg`Summarize the purpose of the application, the problem being addressed, your approach, and the expected impact.`,
+        helpText: msg`Aim for 200-400 words. This is often the first section reviewers read.` },
+      { name: 'problem_statement', label: msg`Problem Statement`, type: 'textarea', rows: 6, required: true,
+        placeholder: msg`What specific problem or need exists? Who is affected and how?`,
+        helpText: msg`Use data and evidence to support the urgency of the problem.` },
+      { name: 'target_beneficiaries', label: msg`Target Beneficiaries`, type: 'textarea', rows: 3,
+        placeholder: msg`Who will directly benefit from this project? Describe the target population.` },
     ],
   },
   {
-    title: 'Solution & Plan',
-    description: 'Describe your approach and how you will implement it.',
+    title: msg`Solution & Plan`,
+    description: msg`Describe your approach and how you will implement it.`,
     fields: [
-      { name: 'proposed_solution', label: 'Proposed Solution', type: 'textarea', rows: 6, required: true,
-        placeholder: 'Describe your approach in detail. How will it address the stated problem?' },
-      { name: 'implementation_plan', label: 'Implementation Plan', type: 'textarea', rows: 4,
-        placeholder: 'Outline key phases, activities, and timeline milestones.' },
+      { name: 'proposed_solution', label: msg`Proposed Solution`, type: 'textarea', rows: 6, required: true,
+        placeholder: msg`Describe your approach in detail. How will it address the stated problem?` },
+      { name: 'implementation_plan', label: msg`Implementation Plan`, type: 'textarea', rows: 4,
+        placeholder: msg`Outline key phases, activities, and timeline milestones.` },
     ],
   },
   {
-    title: 'Budget & Team',
-    description: 'Detail the financial requirements and the team behind the project.',
+    title: msg`Budget & Team`,
+    description: msg`Detail the financial requirements and the team behind the project.`,
     fields: [
-      { name: 'budget_breakdown', label: 'Budget Breakdown', type: 'textarea', rows: 6, required: true,
-        placeholder: 'List major budget categories and amounts:\n- Personnel: $XX,XXX\n- Equipment: $XX,XXX\n- Travel: $XX,XXX\n- Other: $XX,XXX',
-        helpText: 'Be as specific as possible. Reviewers look for realistic and justified budgets.' },
-      { name: 'team_description', label: 'Team / Personnel', type: 'textarea', rows: 4,
-        placeholder: 'Describe key team members, their roles, and relevant qualifications.' },
+      { name: 'budget_breakdown', label: msg`Budget Breakdown`, type: 'textarea', rows: 6, required: true,
+        placeholder: msg`List major budget categories and amounts:
+- Personnel: $XX,XXX
+- Equipment: $XX,XXX
+- Travel: $XX,XXX
+- Other: $XX,XXX`,
+        helpText: msg`Be as specific as possible. Reviewers look for realistic and justified budgets.` },
+      { name: 'team_description', label: msg`Team / Personnel`, type: 'textarea', rows: 4,
+        placeholder: msg`Describe key team members, their roles, and relevant qualifications.` },
     ],
   },
   {
-    title: 'Supporting documents',
+    title: msg`Supporting documents`,
     description:
-      'Attach the evidence behind the narrative. Everything you upload here is private to you and the grant assessors — it is never listed on the public grant page.',
+      msg`Attach the evidence behind the narrative. Everything you upload here is private to you and the grant assessors — it is never listed on the public grant page.`,
     fields: [
       {
         name: 'documents',
-        label: 'Documents for this application',
+        label: msg`Documents for this application`,
         type: 'documents',
         helpText:
-          'PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them.',
+          msg`PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them.`,
       },
     ],
   },
   {
-    title: 'Impact & Review',
-    description: 'Define the expected outcomes, then review and submit your application.',
+    title: msg`Impact & Review`,
+    description: msg`Define the expected outcomes, then review and submit your application.`,
     fields: [
-      { name: 'expected_outcomes', label: 'Expected Outcomes', type: 'textarea', rows: 4, required: true,
-        placeholder: 'What specific, measurable outcomes do you expect to achieve?' },
+      { name: 'expected_outcomes', label: msg`Expected Outcomes`, type: 'textarea', rows: 4, required: true,
+        placeholder: msg`What specific, measurable outcomes do you expect to achieve?` },
     ],
   },
 ]

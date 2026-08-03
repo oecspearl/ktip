@@ -9,6 +9,9 @@ import { useToast } from '../../contexts/ToastContext'
 import { useUploadDocument, type UploadStage } from '../../hooks/useEntityDocuments'
 import { ACCEPT_ATTRIBUTE, formatFileSize, validateFile } from '../../lib/document-extract'
 import type { DocumentEntityType, DocumentVisibility } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 interface DocumentUploadModalProps {
   open: boolean
@@ -31,27 +34,27 @@ interface DocumentUploadModalProps {
 
 export const VISIBILITY_OPTIONS: {
   value: DocumentVisibility
-  label: string
-  hint: string
+  label: MessageDescriptor
+  hint: MessageDescriptor
   icon: typeof Lock
 }[] = [
-  { value: 'private', label: 'Private', hint: 'Only you. Nobody else sees it listed.', icon: Lock },
+  { value: 'private', label: msg`Private`, hint: msg`Only you. Nobody else sees it listed.`, icon: Lock },
   {
     value: 'restricted',
-    label: 'Restricted',
-    hint: 'Listed to everyone; people ask you for access.',
+    label: msg`Restricted`,
+    hint: msg`Listed to everyone; people ask you for access.`,
     icon: KeyRound,
   },
-  { value: 'members', label: 'All members', hint: 'Any signed-in KTIP member can open it.', icon: Users },
-  { value: 'public', label: 'Public', hint: 'Anyone, including signed-out visitors.', icon: Globe },
+  { value: 'members', label: msg`All members`, hint: msg`Any signed-in KTIP member can open it.`, icon: Users },
+  { value: 'public', label: msg`Public`, hint: msg`Anyone, including signed-out visitors.`, icon: Globe },
 ]
 
-const STAGE_COPY: Record<UploadStage, string> = {
-  idle: '',
-  uploading: 'Uploading the file…',
-  scraping: 'Reading the document…',
-  analyzing: 'Pulling out field values…',
-  done: 'Done',
+const STAGE_COPY: Record<UploadStage, MessageDescriptor | null> = {
+  idle: null,
+  uploading: msg`Uploading the file…`,
+  scraping: msg`Reading the document…`,
+  analyzing: msg`Pulling out field values…`,
+  done: msg`Done`,
 }
 
 export function DocumentUploadModal({
@@ -64,6 +67,7 @@ export function DocumentUploadModal({
   defaultTitle,
   descriptionCopy,
 }: DocumentUploadModalProps) {
+  const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { uploadDocument, loading, stage, resetStage } = useUploadDocument()
@@ -132,11 +136,11 @@ export function DocumentUploadModal({
         visibility,
         skipExtraction: !canEditEntity,
       })
-      toast.success('Document uploaded')
+      toast.success(t`Document uploaded`)
       reset()
       onClose()
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to upload the document')
+      toast.error(err?.message || t`Failed to upload the document`)
     }
   }
 
@@ -144,10 +148,10 @@ export function DocumentUploadModal({
     <Modal
       open={open}
       onClose={handleClose}
-      title="Upload a document"
+      title={t`Upload a document`}
       description={
         descriptionCopy ??
-        'Word, PDF, Excel, CSV, Markdown or an image. Text documents are read into an editable copy.'
+        t`Word, PDF, Excel, CSV, Markdown or an image. Text documents are read into an editable copy.`
       }
       size="xl"
       className="max-w-2xl"
@@ -166,7 +170,7 @@ export function DocumentUploadModal({
                 type="button"
                 onClick={() => setFile(null)}
                 className="p-1 rounded-lg hover:bg-ktip-sand-200 transition-colors"
-                aria-label="Remove file"
+                aria-label={t`Remove file`}
               >
                 <X size={16} className="text-ktip-sand-500" />
               </button>
@@ -180,12 +184,12 @@ export function DocumentUploadModal({
               }`}
             >
               <Upload size={24} className="text-ktip-sand-400" />
-              <span className="text-sm font-medium text-ktip-sand-700">Choose a file</span>
+              <span className="text-sm font-medium text-ktip-sand-700"><Trans>Choose a file</Trans></span>
               {/* Spreadsheets and .doc are accepted by both the bucket and
                   validateFile(); the old hint left them out, so people
                   reasonably assumed an .xlsx budget would be rejected. */}
               <span className="text-xs text-ktip-sand-500">
-                PDF, Word, Excel, CSV, Markdown, text or image — up to 25MB
+                <Trans>PDF, Word, Excel, CSV, Markdown, text or image — up to 25MB</Trans>
               </span>
               <input type="file" accept={ACCEPT_ATTRIBUTE} onChange={handleFile} className="hidden" />
             </label>
@@ -194,19 +198,19 @@ export function DocumentUploadModal({
         )}
 
         <Input
-          label="Title"
+          label={t`Title`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Call for Proposals 2026"
+          placeholder={t`e.g. Call for Proposals 2026`}
           fullWidth
           disabled={loading}
         />
 
         <Textarea
-          label="Description"
+          label={t`Description`}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="What is this document and why does it matter?"
+          placeholder={t`What is this document and why does it matter?`}
           rows={3}
           fullWidth
           disabled={loading}
@@ -218,12 +222,15 @@ export function DocumentUploadModal({
           <div className="flex items-start gap-2 rounded-xl border border-ktip-sand-200 bg-ktip-sand-50 p-3">
             <Lock size={16} className="mt-0.5 shrink-0 text-ktip-sand-500" />
             <p className="text-xs text-ktip-sand-600">
-              {VISIBILITY_OPTIONS.find((o) => o.value === lockedVisibility)?.hint}
+              {(() => {
+                const hint = VISIBILITY_OPTIONS.find((o) => o.value === lockedVisibility)?.hint
+                return hint ? i18n._(hint) : null
+              })()}
             </p>
           </div>
         ) : (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-ktip-sand-700">Who can open it</p>
+          <p className="text-sm font-medium text-ktip-sand-700"><Trans>Who can open it</Trans></p>
           <div className="grid gap-2 sm:grid-cols-2">
             {VISIBILITY_OPTIONS.map((option) => {
               const Icon = option.icon
@@ -242,8 +249,8 @@ export function DocumentUploadModal({
                 >
                   <Icon size={16} className={selected ? 'text-ktip-ocean-600 mt-0.5' : 'text-ktip-sand-400 mt-0.5'} />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-ktip-sand-900">{option.label}</span>
-                    <span className="block text-xs text-ktip-sand-500">{option.hint}</span>
+                    <span className="block text-sm font-medium text-ktip-sand-900">{i18n._(option.label)}</span>
+                    <span className="block text-xs text-ktip-sand-500">{i18n._(option.hint)}</span>
                   </span>
                 </button>
               )
@@ -255,16 +262,21 @@ export function DocumentUploadModal({
         {loading && stage !== 'idle' && (
           <div className="flex items-center gap-3 p-3 bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-xl">
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-ktip-ocean-600 border-t-transparent" />
-            <p className="text-sm text-ktip-ocean-700">{STAGE_COPY[stage]}</p>
+            <p className="text-sm text-ktip-ocean-700">
+              {(() => {
+                const stageCopy = STAGE_COPY[stage]
+                return stageCopy ? i18n._(stageCopy) : ''
+              })()}
+            </p>
           </div>
         )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button onClick={handleSubmit} loading={loading} disabled={!file || !title.trim()}>
-            Upload
+            <Trans>Upload</Trans>
           </Button>
         </div>
       </div>

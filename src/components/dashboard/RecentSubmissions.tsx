@@ -4,6 +4,7 @@ import { SubmissionKindBadge } from '../shared/SubmissionKindBadge'
 import { useSubmissionReceipts } from '../../hooks/useSubmissionReceipts'
 import { useAuth } from '../../contexts/AuthContext'
 import { formatDate } from '../../lib/utils'
+import { Trans } from '@lingui/react/macro'
 
 /** The applicant's most recent submitted copies, surfaced on the dashboard. */
 export function RecentSubmissions({ limit = 5 }: { limit?: number }) {
@@ -13,7 +14,7 @@ export function RecentSubmissions({ limit = 5 }: { limit?: number }) {
   if (loading) {
     return (
       <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg px-6 py-8 text-center text-sm text-ktip-sand-500">
-        Loading submissions...
+        <Trans>Loading submissions...</Trans>
       </div>
     )
   }
@@ -23,8 +24,7 @@ export function RecentSubmissions({ limit = 5 }: { limit?: number }) {
       <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg px-6 py-8 text-center">
         <Inbox size={24} className="text-ktip-sand-400 mx-auto mb-2" />
         <p className="text-sm text-ktip-sand-600">
-          Nothing submitted yet. Applications and registrations you send will appear
-          here with a full copy of your answers.
+          <Trans>Nothing submitted yet. Applications and registrations you send will appear here with a full copy of your answers.</Trans>
         </p>
       </div>
     )

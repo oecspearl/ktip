@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, Plus } from 'lucide-react'
 import { Button } from './Button'
+import { useLingui } from '@lingui/react/macro'
 
 interface TagInputProps {
   values: string[]
@@ -17,11 +18,16 @@ export function TagInput({
   onChange,
   suggestions = [],
   max = 20,
-  placeholder = 'Type and press Enter...',
+  placeholder,
   label,
   description,
 }: TagInputProps) {
+  const { t } = useLingui()
   const [input, setInput] = useState('')
+
+  // Not a destructuring default: those are evaluated before the body runs, so
+  // `t` does not exist yet there.
+  const placeholderText = placeholder ?? t`Type and press Enter...`
 
   const addTag = (raw: string) => {
     const val = raw.trim()
@@ -50,7 +56,7 @@ export function TagInput({
                 type="button"
                 onClick={() => onChange(values.filter((t) => t !== tag))}
                 className="ml-0.5 hover:text-red-600 transition-colors"
-                aria-label={`Remove ${tag}`}
+                aria-label={t`Remove ${tag}`}
               >
                 <X size={14} />
               </button>
@@ -70,7 +76,7 @@ export function TagInput({
               addTag(input)
             }
           }}
-          placeholder={placeholder}
+          placeholder={placeholderText}
           className="flex-1 border border-ktip-sand-200 rounded-control px-4 py-2.5 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream text-body"
         />
         <Button

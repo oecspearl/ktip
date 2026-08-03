@@ -20,30 +20,34 @@ import {
 } from '../../lib/achievement-style'
 import { cn } from '../../lib/utils'
 import type { BadgeDefinition } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+import { resolveCopy } from '../../i18n/copy'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  projects: 'Projects',
-  grants: 'Grants',
-  events: 'Events',
-  community: 'Community',
-  network: 'Network',
-  collaboration: 'Collaboration',
-  knowledge: 'Knowledge',
-  profile: 'Profile',
-  dedication: 'Dedication',
-  meta: 'Milestones',
-  hidden: 'Secrets',
+const CATEGORY_LABELS: Record<string, MessageDescriptor> = {
+  projects: msg`Projects`,
+  grants: msg`Grants`,
+  events: msg`Events`,
+  community: msg`Community`,
+  network: msg`Network`,
+  collaboration: msg`Collaboration`,
+  knowledge: msg`Knowledge`,
+  profile: msg`Profile`,
+  dedication: msg`Dedication`,
+  meta: msg`Milestones`,
+  hidden: msg`Secrets`,
 }
 
 const MAX_SHOWCASE = 5
 
 type StatusFilter = 'all' | 'progress' | 'earned' | 'locked'
 
-const STATUS_TABS: { key: StatusFilter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'progress', label: 'In progress' },
-  { key: 'earned', label: 'Earned' },
-  { key: 'locked', label: 'Locked' },
+const STATUS_TABS: { key: StatusFilter; label: MessageDescriptor }[] = [
+  { key: 'all', label: msg`All` },
+  { key: 'progress', label: msg`In progress` },
+  { key: 'earned', label: msg`Earned` },
+  { key: 'locked', label: msg`Locked` },
 ]
 
 /**
@@ -54,7 +58,8 @@ const STATUS_TABS: { key: StatusFilter; label: string }[] = [
  * component rather than a tab-sized copy of it.
  */
 export default function AchievementsPage({ embedded = false }: { embedded?: boolean }) {
-  usePageTitle('Achievements')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Achievements`)
   const auth = useAuth()
   const toast = useToast()
   const { achievements, loading, assetMap } = useAchievementContext()
@@ -173,6 +178,10 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
 
   const stats = achievements?.stats
   const rank = stats?.rank
+  const level = rank?.level ?? 1
+  const earnedCount = stats?.earned ?? 0
+  const totalAvailable = stats?.total_available ?? 0
+  const pinnedCount = pinned.length
 
   const rankPct =
     rank && rank.next_required
@@ -191,7 +200,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
     setPinned((prev) => {
       if (prev.includes(badgeId)) return prev.filter((id) => id !== badgeId)
       if (prev.length >= MAX_SHOWCASE) {
-        toast.error(`You can pin up to ${MAX_SHOWCASE} trophies`)
+        toast.error(t`You can pin up to ${MAX_SHOWCASE} trophies`)
         return prev
       }
       return [...prev, badgeId]
@@ -201,10 +210,10 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
   const savePins = async () => {
     try {
       await showcaseMutation.mutateAsync(pinned)
-      toast.success('Showcase updated')
+      toast.success(t`Showcase updated`)
       setPinning(false)
     } catch {
-      toast.error('Could not update your showcase')
+      toast.error(t`Could not update your showcase`)
     }
   }
 
@@ -235,39 +244,39 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
         <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-              Level {rank?.level ?? 1}
+              <Trans>Level {level}</Trans>
             </p>
             {/* h2 inside the dashboard, whose PageHero already owns the h1 */}
             {embedded ? (
               <h2 className="font-display text-3xl font-bold text-ktip-sand-900">
-                {rank?.name ?? 'Newcomer'}
+                {rank?.name ?? t`Newcomer`}
               </h2>
             ) : (
               <h1 className="font-display text-3xl font-bold text-ktip-sand-900">
-                {rank?.name ?? 'Newcomer'}
+                {rank?.name ?? t`Newcomer`}
               </h1>
             )}
             <p className="mt-1 text-sm text-ktip-sand-600">
-              {stats?.earned ?? 0} of {stats?.total_available ?? 0} achievements
-              {statusCounts.progress > 0 && ` · ${statusCounts.progress} in progress`}
-              {unearnedSecrets > 0 && ` · ${unearnedSecrets} still secret`}
+              <Trans>{earnedCount} of {totalAvailable} achievements</Trans>
+              {statusCounts.progress > 0 && <Trans> · {statusCounts.progress} in progress</Trans>}
+              {unearnedSecrets > 0 && <Trans> · {unearnedSecrets} still secret</Trans>}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={pinning ? savePins : startPinning}>
               <Pin size={14} aria-hidden="true" />
-              {pinning ? `Save showcase (${pinned.length}/${MAX_SHOWCASE})` : 'Edit showcase'}
+              {pinning ? t`Save showcase (${pinned.length}/${MAX_SHOWCASE})` : t`Edit showcase`}
             </Button>
             {pinning && (
               <Button size="sm" variant="ghost" onClick={() => setPinning(false)}>
-                Cancel
+                <Trans>Cancel</Trans>
               </Button>
             )}
             <Link to="/leaderboard">
               <Button size="sm" variant="ghost">
                 <Trophy size={14} aria-hidden="true" />
-                Leaderboard
+                <Trans>Leaderboard</Trans>
               </Button>
             </Link>
           </div>
@@ -280,7 +289,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
             aria-valuemin={0}
             aria-valuemax={rank?.next_required ?? rank?.earned ?? 0}
             aria-valuenow={rank?.earned ?? 0}
-            aria-label="Progress to next level"
+            aria-label={t`Progress to next level`}
           >
             <div
               className="h-full rounded-full bg-ktip-tropical-500 transition-[width]"
@@ -288,18 +297,22 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
             />
           </div>
           <p className="mt-1.5 text-xs text-ktip-sand-500">
-            {rank?.next_required
-              ? `${rank.earned} / ${rank.next_required} toward ${rank.next_name}`
-              : 'Highest rank reached'}
+            {rank?.next_required ? (
+              <Trans>
+                {rank.earned} / {rank.next_required} toward {rank.next_name}
+              </Trans>
+            ) : (
+              t`Highest rank reached`
+            )}
           </p>
         </div>
       </section>
 
       {/* ---------- Stat strip ---------- */}
       <dl className="grid grid-cols-3 gap-3">
-        <StatTile label="Points" value={stats?.points ?? 0} />
-        <StatTile label="Streak" value={stats?.streak_days ?? 0} icon={<Flame size={12} />} />
-        <StatTile label="Active days" value={stats?.total_active_days ?? 0} />
+        <StatTile label={t`Points`} value={stats?.points ?? 0} />
+        <StatTile label={t`Streak`} value={stats?.streak_days ?? 0} icon={<Flame size={12} />} />
+        <StatTile label={t`Active days`} value={stats?.total_active_days ?? 0} />
       </dl>
 
       {/* ---------- Showcase mode banner ----------
@@ -308,16 +321,18 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
       {pinning && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50/60 px-4 py-3">
           <p className="text-sm text-ktip-ocean-800">
-            <strong className="font-semibold">Choosing your showcase.</strong> Click up to{' '}
-            {MAX_SHOWCASE} earned trophies — {pinned.length} picked so far. Locked trophies cannot
-            be pinned.
+            <strong className="font-semibold"><Trans>Choosing your showcase.</Trans></strong>{' '}
+            <Trans>
+              Click up to {MAX_SHOWCASE} earned trophies — {pinnedCount} picked so far. Locked
+              trophies cannot be pinned.
+            </Trans>
           </p>
           <div className="flex gap-2">
             <Button size="sm" onClick={savePins} loading={showcaseMutation.isPending}>
-              Save showcase
+              <Trans>Save showcase</Trans>
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setPinning(false)}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
           </div>
         </div>
@@ -326,7 +341,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
       {/* ---------- Collections ---------- */}
       {!!achievements?.collections?.length && (
         <section>
-          <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900">Collections</h2>
+          <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900"><Trans>Collections</Trans></h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {achievements.collections.map((collection) => {
               const pct =
@@ -357,7 +372,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
                   </div>
                   <p className="mt-1.5 text-xs tabular-nums text-ktip-sand-500">
                     {collection.earned} / {collection.total}
-                    {complete && ' · complete'}
+                    {complete && <Trans> · complete</Trans>}
                   </p>
                 </div>
               )
@@ -376,7 +391,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
           <div
             className="inline-flex rounded-full border border-ktip-sand-200 p-0.5"
             role="tablist"
-            aria-label="Achievement status"
+            aria-label={t`Achievement status`}
           >
             {STATUS_TABS.map((tab) => (
               <button
@@ -392,7 +407,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
                     : 'text-ktip-sand-600 hover:text-ktip-ocean-700'
                 )}
               >
-                {tab.label}
+                {i18n._(tab.label)}
                 <span className="ml-1.5 tabular-nums text-xs opacity-75">
                   {statusCounts[tab.key]}
                 </span>
@@ -401,7 +416,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
           </div>
 
           <label className="sr-only" htmlFor="achievement-category">
-            Category
+            <Trans>Category</Trans>
           </label>
           <select
             id="achievement-category"
@@ -409,13 +424,13 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
             onChange={(e) => setCategory(e.target.value)}
             className="rounded-full border border-ktip-sand-200 bg-ktip-cream px-3 py-1.5 text-sm font-medium text-ktip-sand-700"
           >
-            <option value="all">All categories ({visible.length})</option>
+            <option value="all">{t`All categories (${visible.length})`}</option>
             {categories.map((cat) => {
               const inCat = visible.filter((b) => (b.category || 'community') === cat)
               const earned = inCat.filter((b) => earnedById.has(b.id)).length
               return (
                 <option key={cat} value={cat}>
-                  {CATEGORY_LABELS[cat] || cat} ({earned}/{inCat.length})
+                  {resolveCopy(i18n, CATEGORY_LABELS[cat] ?? cat)} ({earned}/{inCat.length})
                 </option>
               )
             })}
@@ -431,15 +446,15 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search achievements"
-              aria-label="Search achievements"
+              placeholder={t`Search achievements`}
+              aria-label={t`Search achievements`}
               className="w-full rounded-full border border-ktip-sand-200 bg-ktip-cream py-1.5 pl-9 pr-3 text-sm text-ktip-sand-800 placeholder:text-ktip-sand-400"
             />
           </div>
         </div>
 
         <TagFilterChips
-          label="Rarity"
+          label={t`Rarity`}
           options={RARITY_ORDER.map((r) => RARITY_LABEL[r])}
           selected={rarities}
           onChange={setRarities}
@@ -501,14 +516,14 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
 
         {filtered.length === 0 && (
           <p className="py-12 text-center text-sm text-ktip-sand-500">
-            No achievements match these filters.
+            <Trans>No achievements match these filters.</Trans>
           </p>
         )}
       </section>
 
       <p className="flex items-center justify-center gap-1.5 pt-2 text-xs text-ktip-sand-400">
         <Users size={12} aria-hidden="true" />
-        Achievements are awarded automatically from what you do on KTIP.
+        <Trans>Achievements are awarded automatically from what you do on KTIP.</Trans>
       </p>
 
       {/* ---------- Detail ---------- */}
@@ -536,11 +551,11 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
               size="lg"
             />
             <p className="text-center text-xs text-ktip-sand-500">
-              {CATEGORY_LABELS[detail.category || 'community'] || detail.category}
+              {resolveCopy(i18n, CATEGORY_LABELS[detail.category || 'community'] ?? detail.category)}
             </p>
             <Button variant="ghost" size="sm" fullWidth onClick={() => setDetail(null)}>
               <X size={14} aria-hidden="true" />
-              Close
+              <Trans>Close</Trans>
             </Button>
           </div>
         )}

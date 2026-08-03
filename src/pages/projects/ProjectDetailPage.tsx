@@ -37,8 +37,10 @@ import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { entityPath, memberPath } from '../../lib/slug'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 export default function ProjectDetailPage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -97,7 +99,7 @@ export default function ProjectDetailPage() {
       toast.success(p.is_featured ? 'Removed from featured' : 'Added to featured')
       window.location.reload()
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update')
+      toast.error(err.message || t`Failed to update`)
     } finally {
       setTogglingFeatured(false)
     }
@@ -120,31 +122,39 @@ export default function ProjectDetailPage() {
           <Inbox size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          Project Not Found
+          <Trans>Project Not Found</Trans>
         </h2>
         <p className="text-gray-500 mb-6">
-          This project doesn't exist or you don't have access to it.
+          <Trans>This project doesn't exist or you don't have access to it.</Trans>
         </p>
         <button
           onClick={() => navigate('/projects')}
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
-          Back to Projects
+          <Trans>Back to Projects</Trans>
         </button>
       </div>
     )
   }
 
+  // Named, so the catalog entry reads `Date: {createdAt}` rather than
+  // `Date: {0}`, which a translator cannot place. Declared after the
+  // `!project` guard above, so it is safe to read.
+  //
+  // The date itself is still formatted en-US; threading the active locale
+  // through formatDate is a separate pass across the whole app.
+  const createdAt = formatDate(project.created_at, 'MMMM dd, yyyy')
+
   return (
     <>
       <PageHero
-        eyebrow="Project Detail"
+        eyebrow={t`Project Detail`}
         title={project.title}
         image={project.image_url}
         imageSeed={project.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Projects', href: '/projects' },
+          { label: t`Home`, href: '/' },
+          { label: t`Projects`, href: '/projects' },
           { label: truncate(project.title, 30) },
         ]}
         actions={
@@ -162,14 +172,14 @@ export default function ProjectDetailPage() {
                 } ${togglingFeatured ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Star size={14} className={project.is_featured ? 'fill-current' : ''} />
-                {project.is_featured ? 'Featured' : 'Feature'}
+                {project.is_featured ? t`Featured` : t`Feature`}
               </button>
             )}
             {canEdit && (
               <Link to={`/projects/${params.id}/edit`}>
                 <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
                   <Edit size={14} />
-                  Edit
+                  <Trans>Edit</Trans>
                 </button>
               </Link>
             )}
@@ -217,7 +227,7 @@ export default function ProjectDetailPage() {
 
             {/* Date line */}
             <p className="text-sm text-gray-400 text-center mb-6">
-              Date: {formatDate(project.created_at, 'MMMM dd, yyyy')}
+              <Trans>Date: {createdAt}</Trans>
             </p>
 
             {/* Project image */}
@@ -265,9 +275,9 @@ export default function ProjectDetailPage() {
             {project.details && project.details.length > 0 && (
               <div id="details" data-spy="Details" className="scroll-mt-24 mb-6">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  Additional Details
+                  <Trans>Additional Details</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-3">Key facts at a glance</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-3"><Trans>Key facts at a glance</Trans></p>
                 <DetailsList details={project.details} />
               </div>
             )}
@@ -281,21 +291,23 @@ export default function ProjectDetailPage() {
               <FollowButton projectId={params.id!} />
               <span className="flex items-center gap-1.5 text-sm text-gray-500">
                 <Eye size={16} />
-                {project.view_count ?? 0} views
+                <Plural value={project.view_count ?? 0} one="# view" other="# views" />
               </span>
               <span className="flex items-center gap-1.5 text-sm text-gray-500">
                 <Users size={16} />
-                {teamCount} {teamCount === 1 ? 'team member' : 'team members'}
+                <Plural value={teamCount} one="# team member" other="# team members" />
               </span>
               <button
                 className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
                 onClick={async () => {
                   const ok = await copyToClipboard(window.location.href)
-                  toast[ok ? 'success' : 'error'](ok ? 'Link copied to clipboard!' : 'Failed to copy link')
+                  toast[ok ? 'success' : 'error'](
+                    ok ? t`Link copied to clipboard!` : t`Failed to copy link`
+                  )
                 }}
               >
                 <Share2 size={16} />
-                Share
+                <Trans>Share</Trans>
               </button>
 
               {/* Until 079 there was no way to ask — membership was owner-push
@@ -304,7 +316,7 @@ export default function ProjectDetailPage() {
                 (myJoinRequest ? (
                   <span className="ml-auto flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-3 py-1.5 text-sm text-ktip-sand-600">
                     <Clock size={16} />
-                    Request pending
+                    <Trans>Request pending</Trans>
                   </span>
                 ) : (
                   <button
@@ -312,7 +324,7 @@ export default function ProjectDetailPage() {
                     className="ml-auto flex items-center gap-1.5 rounded-lg border border-ktip-ocean-600 px-3 py-1.5 text-sm font-bold text-ktip-ocean-600 transition-colors hover:bg-ktip-ocean-50"
                   >
                     <UserPlus size={16} />
-                    Request to collaborate
+                    <Trans>Request to collaborate</Trans>
                   </button>
                 ))}
             </div>
@@ -341,9 +353,9 @@ export default function ProjectDetailPage() {
             {/* Comments Section */}
             <div id="discussion" data-spy="Discussion" className="scroll-mt-24 mt-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Discussion
+                <Trans>Discussion</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Join the conversation</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Join the conversation</Trans></p>
               <CommentSection projectId={params.id!} />
             </div>
           </div>
@@ -352,14 +364,14 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-1">
             {/* Widget 1: Search */}
             <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Search</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Find projects across the platform</p>
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Search</Trans></h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Find projects across the platform</Trans></p>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search projects..."
+                    placeholder={t`Search projects...`}
                     value={sidebarSearch}
                     onChange={(e) => setSidebarSearch(e.target.value)}
                     onKeyDown={(e) => {
@@ -378,7 +390,7 @@ export default function ProjectDetailPage() {
                   }}
                   className="px-4 py-2 btn-brand text-xs font-bold uppercase tracking-wider rounded-lg shrink-0"
                 >
-                  Search
+                  <Trans>Search</Trans>
                 </button>
               </div>
             </div>
@@ -386,8 +398,8 @@ export default function ProjectDetailPage() {
             {/* Widget 2: Recent Projects */}
             {recentProjects && recentProjects.length > 0 && (
               <div className="mb-10">
-                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Recent Projects</h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Explore the latest work</p>
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Recent Projects</Trans></h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Explore the latest work</Trans></p>
                 <div className="space-y-4">
                   {recentProjects.slice(0, 3).map((p) => (
                     <Link key={p.id} to={entityPath('project', p)} className="flex gap-3 group">
@@ -422,8 +434,8 @@ export default function ProjectDetailPage() {
 
             {/* Widget 3: Project Owner */}
             <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Project Owner</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Created by</p>
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Project Owner</Trans></h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Created by</Trans></p>
               <div className="flex items-center gap-3 mb-4">
                 <DiamondAvatar
                   src={project.owner?.avatar_url}
@@ -437,7 +449,7 @@ export default function ProjectDetailPage() {
                     to={memberPath(project.owner ?? { id: project.owner_id })}
                     className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                   >
-                    {project.owner?.display_name || 'Unknown User'}
+                    {project.owner?.display_name || t`Unknown User`}
                   </Link>
                   {project.owner?.country && (
                     <p className="text-sm text-gray-500">
@@ -451,7 +463,7 @@ export default function ProjectDetailPage() {
                 className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
               >
                 <User size={16} />
-                View Profile
+                <Trans>View Profile</Trans>
               </button>
             </div>
 
@@ -460,29 +472,29 @@ export default function ProjectDetailPage() {
 
             {/* Widget 4: Project Details */}
             <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Project Details</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Project Details</Trans></h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
               <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Created</span>
+                  <span className="text-gray-500"><Trans>Created</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {formatDate(project.created_at, 'MMM dd, yyyy')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Last Updated</span>
+                  <span className="text-gray-500"><Trans>Last Updated</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {formatRelativeTime(project.updated_at)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Visibility</span>
+                  <span className="text-gray-500"><Trans>Visibility</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
-                    {project.is_public ? 'Public' : 'Private'}
+                    {project.is_public ? t`Public` : t`Private`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Views</span>
+                  <span className="text-gray-500"><Trans>Views</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {project.view_count ?? 0}
                   </span>

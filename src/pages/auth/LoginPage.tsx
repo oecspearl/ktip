@@ -13,6 +13,9 @@ import { OAuthButtons } from '../../components/auth/OAuthButtons'
 import { VirtualCampusButton } from '../../components/auth/VirtualCampusButton'
 import { analytics } from '../../hooks/useAnalytics'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * Why the Virtual Campus handoff fails, in words a learner can act on.
@@ -23,21 +26,19 @@ import { usePageTitle } from '../../hooks/usePageTitle'
  * a wrong audience for its logs, but telling that apart in the UI helps only an
  * attacker.
  */
-const VC_ERRORS: Record<string, string> = {
-  not_configured: 'Virtual Campus sign-in is not switched on yet. Please use another method.',
-  rate_limited: 'Too many sign-in attempts. Please wait a few minutes and try again.',
-  email_unverified:
-    'Your Virtual Campus email address has not been verified yet. Verify it there, then try again.',
-  token_replayed: 'That sign-in link has already been used. Please start again from the Virtual Campus.',
-  account_suspended: 'This account is suspended. Contact support if you think that is a mistake.',
-  subject_bound_elsewhere:
-    'That Virtual Campus account is already linked to a different KTIP account.',
+const VC_ERRORS: Record<string, MessageDescriptor> = {
+  not_configured: msg`Virtual Campus sign-in is not switched on yet. Please use another method.`,
+  rate_limited: msg`Too many sign-in attempts. Please wait a few minutes and try again.`,
+  email_unverified: msg`Your Virtual Campus email address has not been verified yet. Verify it there, then try again.`,
+  token_replayed: msg`That sign-in link has already been used. Please start again from the Virtual Campus.`,
+  account_suspended: msg`This account is suspended. Contact support if you think that is a mistake.`,
+  subject_bound_elsewhere: msg`That Virtual Campus account is already linked to a different KTIP account.`,
 }
 
-function vcErrorMessage(code: string): string {
+function vcErrorDescriptor(code: string): MessageDescriptor {
   return (
     VC_ERRORS[code] ??
-    'We could not complete sign-in from the Virtual Campus. Please try again from there.'
+    msg`We could not complete sign-in from the Virtual Campus. Please try again from there.`
   )
 }
 
@@ -52,7 +53,8 @@ const initialState: LoginActionState = {
 }
 
 export default function LoginPage() {
-  usePageTitle('Log In')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Log In`)
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
@@ -93,7 +95,7 @@ export default function LoginPage() {
       )
       await Promise.race([auth.signIn(emailValue, passwordValue), timeout])
       analytics.conversion('login_success')
-      toast.success('Welcome back!')
+      toast.success(t`Welcome back!`)
       navigate('/')
       return { errors: {}, errorMessage: '' }
     } catch (error: any) {
@@ -102,22 +104,22 @@ export default function LoginPage() {
         setShowRecovery(true)
         return {
           errors: {},
-          errorMessage: 'Sign in is taking too long. Your session may be stuck.',
+          errorMessage: t`Sign in is taking too long. Your session may be stuck.`,
         }
       } else if (msg.includes('Email not confirmed')) {
         return {
           errors: {},
-          errorMessage: 'Please confirm your email address first. Check your inbox for a confirmation link.',
+          errorMessage: t`Please confirm your email address first. Check your inbox for a confirmation link.`,
         }
       } else if (msg.includes('Invalid login credentials')) {
         return {
           errors: {},
-          errorMessage: 'Invalid email or password. Please try again.',
+          errorMessage: t`Invalid email or password. Please try again.`,
         }
       } else {
         return {
           errors: {},
-          errorMessage: msg || 'Failed to sign in. Please try again.',
+          errorMessage: msg || t`Failed to sign in. Please try again.`,
         }
       }
     }
@@ -133,18 +135,18 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('vc_error')
     if (!code) return
-    setVcError(vcErrorMessage(code))
+    setVcError(i18n._(vcErrorDescriptor(code)))
     params.delete('vc_error')
     const query = params.toString()
     window.history.replaceState(null, '', `/login${query ? `?${query}` : ''}`)
-  }, [])
+  }, [i18n])
 
   const displayedError = state.errorMessage || oauthError || vcError
 
   const handleClearSession = () => {
     clearSupabaseSession()
     setShowRecovery(false)
-    toast.success('Session cleared. Please try signing in again.')
+    toast.success(t`Session cleared. Please try signing in again.`)
   }
 
   return (
@@ -152,7 +154,7 @@ export default function LoginPage() {
       <div className="bg-ktip-cream rounded-lg p-8 w-full max-w-md mx-auto shadow-lg">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-display font-bold text-ktip-ocean-600 mb-2">
-            Welcome to KTIP
+            <Trans>Welcome to KTIP</Trans>
           </h1>
           <p className="text-ktip-sand-600">{APP_FULL_NAME}</p>
         </div>
@@ -166,14 +168,14 @@ export default function LoginPage() {
 
           {showRecovery && (
             <div className="bg-ktip-sun-50 border border-ktip-sun-200 text-ktip-sun-800 px-4 py-3 rounded-xl text-sm">
-              <p className="mb-2">A stale session may be blocking sign-in. Clear it and try again.</p>
+              <p className="mb-2"><Trans>A stale session may be blocking sign-in. Clear it and try again.</Trans></p>
               <button
                 type="button"
                 onClick={handleClearSession}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-ktip-sun-100 hover:bg-ktip-sun-200 rounded-lg transition-colors"
               >
                 <Trash2 size={14} />
-                Clear Session
+                <Trans>Clear Session</Trans>
               </button>
             </div>
           )}
@@ -181,8 +183,8 @@ export default function LoginPage() {
           <Input
             type="email"
             name="email"
-            label="Email"
-            placeholder="Enter your email"
+            label={t`Email`}
+            placeholder={t`Enter your email`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={state.errors.email}
@@ -194,8 +196,8 @@ export default function LoginPage() {
           <Input
             type="password"
             name="password"
-            label="Password"
-            placeholder="Enter your password"
+            label={t`Password`}
+            placeholder={t`Enter your password`}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             error={state.errors.password}
@@ -206,24 +208,26 @@ export default function LoginPage() {
 
           <div className="flex justify-end">
             <Link to="/forgot-password" className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium">
-              Forgot password?
+              <Trans>Forgot password?</Trans>
             </Link>
           </div>
 
           <Button type="submit" fullWidth loading={pending} icon={<LogIn size={20} />}>
-            Sign In
+            <Trans>Sign In</Trans>
           </Button>
         </form>
 
-        <OAuthButtons label="Or continue with" onError={setOauthError} />
+        <OAuthButtons label={t`Or continue with`} onError={setOauthError} />
 
         <VirtualCampusButton />
 
         <p className="mt-8 text-center text-sm text-ktip-sand-600">
-          Don't have an account?{' '}
-          <Link to="/signup" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
-            Sign up
-          </Link>
+          <Trans>
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
+              Sign up
+            </Link>
+          </Trans>
         </p>
       </div>
     </AuthBackdrop>

@@ -6,6 +6,7 @@ import {
 } from '../../lib/constants'
 import { Target, Ban, Package, Scale, Clock } from 'lucide-react'
 import { format } from 'date-fns'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface EventChallengeBriefProps {
   criteria: EventCriterion[]
@@ -20,6 +21,7 @@ const GROUP_ICONS = {
 } as const
 
 export function EventChallengeBrief({ criteria, submissionDeadline }: EventChallengeBriefProps) {
+  const { t } = useLingui()
   const groups = groupCriteria(criteria)
   if (!groups.length) return null
 
@@ -37,10 +39,10 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
     <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6 mt-10">
       <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-1 flex items-center gap-2">
         <Target className="text-ktip-ocean-600" size={20} />
-        The Challenge
+        <Trans>The Challenge</Trans>
       </h2>
       <p className="text-ktip-ocean-600 text-xs italic mb-4">
-        What participants are asked to accomplish
+        <Trans>What participants are asked to accomplish</Trans>
       </p>
 
       {submissionDeadline && (
@@ -54,7 +56,7 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
         >
           <Clock size={16} className="flex-shrink-0" />
           <span>
-            {deadlinePassed ? 'Submissions closed ' : 'Submissions close '}
+            {deadlinePassed ? t`Submissions closed ` : t`Submissions close `}
             {format(new Date(submissionDeadline), 'MMM d, yyyy · h:mm a')}
           </span>
         </div>
@@ -87,11 +89,11 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
                               <span className="text-xs text-ktip-sand-500">
                                 {showPercent
                                   ? `${Math.round((item.weight / weightTotal) * 100)}%`
-                                  : `weight ${item.weight}`}
+                                  : t`weight ${item.weight}`}
                               </span>
                             )
                           : !item.is_required && (
-                              <span className="text-xs text-ktip-sand-500">optional</span>
+                              <span className="text-xs text-ktip-sand-500"><Trans>optional</Trans></span>
                             )}
                       </div>
                       {item.description && (

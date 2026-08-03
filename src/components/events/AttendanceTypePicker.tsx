@@ -1,6 +1,7 @@
 import { Users, Eye } from 'lucide-react'
 import { ATTENDANCE_TYPE_BLURBS, ATTENDANCE_TYPE_LABELS } from '../../lib/constants'
 import type { AttendanceType } from '../../types'
+import { Trans } from '@lingui/react/macro'
 
 interface AttendanceTypePickerProps {
   value: AttendanceType
@@ -30,7 +31,7 @@ export function AttendanceTypePicker({ value, onChange, disabled }: AttendanceTy
   return (
     <fieldset className="mb-4" disabled={disabled}>
       <legend className="block text-sm font-medium text-ktip-sand-700 mb-2">
-        How are you attending?
+        <Trans>How are you attending?</Trans>
       </legend>
 
       <div className="space-y-2">

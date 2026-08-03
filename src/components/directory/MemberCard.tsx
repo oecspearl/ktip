@@ -9,12 +9,15 @@ import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { canDmAcrossAges } from '../../lib/minor-safety'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 interface MemberCardProps {
   member: Profile
 }
 
 export function MemberCard({ member }: MemberCardProps) {
+    const { t, i18n } = useLingui()
   const { openMember } = useMemberPanel()
   const { openPanel } = useMessagingPanel()
   const auth = useAuth()
@@ -41,7 +44,7 @@ export function MemberCard({ member }: MemberCardProps) {
         />
         <div className="min-w-0">
           <h3 className="text-lg font-display font-bold text-ktip-sand-900 truncate">
-            {member.display_name || 'Anonymous'}
+            {member.display_name || t`Anonymous`}
           </h3>
           {member.country && (
             <div className="flex items-center gap-1 text-sm text-ktip-sand-500">
@@ -57,7 +60,7 @@ export function MemberCard({ member }: MemberCardProps) {
         <div className="flex flex-wrap gap-1.5 mb-3">
           {member.roles.slice(0, 3).map((role) => (
             <Badge key={role} className={ROLE_COLORS[role]} size="sm">
-              {ROLE_LABELS[role] || role}
+              {resolveCopy(i18n, ROLE_LABELS[role] || role)}
             </Badge>
           ))}
         </div>
@@ -93,7 +96,7 @@ export function MemberCard({ member }: MemberCardProps) {
           onClick={() => openMember(member.username || member.id)}
           className="flex-1 text-center text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 py-1.5 rounded-lg hover:bg-ktip-ocean-50 transition-colors"
         >
-          View Profile
+          <Trans>View Profile</Trans>
         </button>
         {canMessage && (
           <button

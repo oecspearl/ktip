@@ -13,6 +13,8 @@ import { cn } from '../../lib/utils'
 import { CALENDAR_FALLBACK_GRADIENT } from '../../lib/constants'
 import { CalendarAccentBar, calendarItemLabel } from './CalendarAccentBar'
 import type { CalendarItem } from '../../lib/calendar'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 interface CalendarGridProps {
   monthDate: Date
@@ -45,17 +47,25 @@ function CalendarDayCell({
   itemNoun,
   onSelect,
 }: CalendarDayCellProps) {
+  const { t } = useLingui()
   const inMonth = isSameMonth(day, monthDate)
   const selected = isSameDay(day, selectedDate)
   const today = isToday(day)
   const overflow = items.length - MAX_CHIPS
+  const dayLabel = format(day, 'EEEE, MMMM d')
+  // itemNoun only ever arrives as "item" or "event" today — a third caller
+  // would need its own branch here, the same way the other two do.
+  const countLabel =
+    itemNoun === 'event'
+      ? plural(items.length, { one: '# event', other: '# events' })
+      : plural(items.length, { one: '# item', other: '# items' })
 
   return (
     <button
       type="button"
       onClick={() => onSelect(day)}
       aria-pressed={selected}
-      aria-label={`${format(day, 'EEEE, MMMM d')}, ${items.length} ${itemNoun}${items.length !== 1 ? 's' : ''}`}
+      aria-label={t`${dayLabel}, ${countLabel}`}
       className={cn(
         'min-h-14 md:min-h-28 rounded-cal-sm p-1 md:p-1.5 text-left flex flex-col gap-1 border transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none',
         selected
@@ -98,7 +108,7 @@ function CalendarDayCell({
           ))}
           {overflow > 0 && (
             <span className="text-[10px] font-semibold text-ktip-sand-500 pl-1">
-              +{overflow} more
+              <Trans>+{overflow} more</Trans>
             </span>
           )}
         </span>

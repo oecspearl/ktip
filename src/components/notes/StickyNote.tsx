@@ -35,6 +35,9 @@ import type { StickyNotePatch } from '../../hooks/useStickyNotes'
 import { ghostGlowColor, useGhostMode } from '../../hooks/useGhostMode'
 import { GhostOpacityControl } from '../ui/GhostOpacityControl'
 import { cn } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /** `document.execCommand` is formally deprecated and formally irreplaceable:
  *  every shipping engine still implements it, and the alternative is either a
@@ -61,14 +64,14 @@ function clean(html: string): string {
   return DOMPurify.sanitize(html, SANITIZE)
 }
 
-const TOOLBAR: { label: string; icon: typeof Bold; command: string; value?: string }[] = [
-  { label: 'Bold', icon: Bold, command: 'bold' },
-  { label: 'Italic', icon: Italic, command: 'italic' },
-  { label: 'Underline', icon: Underline, command: 'underline' },
-  { label: 'Strikethrough', icon: Strikethrough, command: 'strikeThrough' },
-  { label: 'Bulleted list', icon: List, command: 'insertUnorderedList' },
-  { label: 'Numbered list', icon: ListOrdered, command: 'insertOrderedList' },
-  { label: 'Quote', icon: Quote, command: 'formatBlock', value: 'blockquote' },
+const TOOLBAR: { label: MessageDescriptor; icon: typeof Bold; command: string; value?: string }[] = [
+  { label: msg`Bold`, icon: Bold, command: 'bold' },
+  { label: msg`Italic`, icon: Italic, command: 'italic' },
+  { label: msg`Underline`, icon: Underline, command: 'underline' },
+  { label: msg`Strikethrough`, icon: Strikethrough, command: 'strikeThrough' },
+  { label: msg`Bulleted list`, icon: List, command: 'insertUnorderedList' },
+  { label: msg`Numbered list`, icon: ListOrdered, command: 'insertOrderedList' },
+  { label: msg`Quote`, icon: Quote, command: 'formatBlock', value: 'blockquote' },
 ]
 
 interface StickyNoteProps {
@@ -115,6 +118,7 @@ export function StickyNote({
   onDragMove,
   onDragEnd,
 }: StickyNoteProps) {
+  const { t, i18n } = useLingui()
   const bodyRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const [dragPx, setDragPx] = useState<{ left: number; top: number } | null>(null)
@@ -250,7 +254,7 @@ export function StickyNote({
   )
 
   const insertLink = () => {
-    const url = window.prompt('Link address')
+    const url = window.prompt(t`Link address`)
     if (!url) return
     bodyRef.current?.focus()
     exec('createLink', url)
@@ -344,8 +348,8 @@ export function StickyNote({
           {ghost.ghosted && (
             <button
               type="button"
-              aria-label="Wake note"
-              title="Wake — brings the note back without unpinning it"
+              aria-label={t`Wake note`}
+              title={t`Wake — brings the note back without unpinning it`}
               onClick={ghost.wake}
               className="ghost-live no-drag rounded bg-ktip-ocean-600 p-1 text-white shadow-fab"
             >
@@ -354,7 +358,7 @@ export function StickyNote({
           )}
           <button
             type="button"
-            aria-label="Expand note"
+            aria-label={t`Expand note`}
             onClick={() => onCommit({ minimized: false })}
             className="no-drag p-1 rounded hover:bg-black/10"
           >
@@ -362,7 +366,7 @@ export function StickyNote({
           </button>
           <button
             type="button"
-            aria-label="Close note"
+            aria-label={t`Close note`}
             onClick={handleClose}
             className="no-drag p-1 rounded hover:bg-black/10"
           >
@@ -448,7 +452,7 @@ export function StickyNote({
                 setEditingTitle(false)
               }
             }}
-            aria-label="Note title"
+            aria-label={t`Note title`}
             className="no-drag min-w-0 flex-1 rounded bg-black/5 px-1 text-sm font-bold outline-none"
           />
         ) : (
@@ -458,8 +462,8 @@ export function StickyNote({
             </span>
             <button
               type="button"
-              aria-label="Rename note"
-              title="Rename"
+              aria-label={t`Rename note`}
+              title={t`Rename`}
               onClick={startTitleEdit}
               className="no-drag rounded p-1 opacity-0 transition-opacity hover:bg-black/10 focus-visible:opacity-100 group-hover/head:opacity-100"
             >
@@ -471,7 +475,7 @@ export function StickyNote({
         <div className="relative">
           <button
             type="button"
-            aria-label="Note options"
+            aria-label={t`Note options`}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
             className="no-drag p-1 rounded hover:bg-black/10"
@@ -484,7 +488,7 @@ export function StickyNote({
               style={{ color: NOTE_TEXT_COLOR }}
             >
               <p className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide opacity-60">
-                Colour
+                <Trans>Colour</Trans>
               </p>
               <div className="flex flex-wrap gap-1.5 px-1">
                 {NOTE_COLORS.map((c) => (
@@ -520,7 +524,7 @@ export function StickyNote({
                 className="mt-2 flex w-full items-center gap-2 rounded px-1 py-1.5 text-xs text-red-600 hover:bg-red-50"
               >
                 <Trash2 size={13} />
-                Delete permanently
+                <Trans>Delete permanently</Trans>
               </button>
             </div>
           )}
@@ -532,15 +536,15 @@ export function StickyNote({
         <button
           type="button"
           aria-label={
-            ghost.ghosted ? 'Wake note' : note.pinned ? 'Unpin from other pages' : 'Pin to every page'
+            ghost.ghosted ? t`Wake note` : note.pinned ? t`Unpin from other pages` : t`Pin to every page`
           }
           aria-pressed={note.pinned}
           title={
             ghost.ghosted
-              ? 'Wake — brings the note back without unpinning it'
+              ? t`Wake — brings the note back without unpinning it`
               : note.pinned
-                ? 'Pinned everywhere — unpin to stop it fading'
-                : 'Only on this page'
+                ? t`Pinned everywhere — unpin to stop it fading`
+                : t`Only on this page`
           }
           onClick={() => (ghost.ghosted ? ghost.wake() : note.pinned ? unpin() : pin())}
           className={cn(
@@ -565,7 +569,7 @@ export function StickyNote({
         </button>
         <button
           type="button"
-          aria-label="Minimize note"
+          aria-label={t`Minimize note`}
           onClick={() => onCommit({ minimized: true })}
           className="no-drag p-1 rounded hover:bg-black/10"
         >
@@ -573,8 +577,8 @@ export function StickyNote({
         </button>
         <button
           type="button"
-          aria-label="Close note"
-          title="Closing keeps the note in your saved list"
+          aria-label={t`Close note`}
+          title={t`Closing keeps the note in your saved list`}
           onClick={handleClose}
           className="no-drag p-1 rounded hover:bg-black/10"
         >
@@ -586,11 +590,11 @@ export function StickyNote({
           is the same move for people who never touch a mouse. */}
       <button
         type="button"
-        aria-label="Move note with the arrow keys"
+        aria-label={t`Move note with the arrow keys`}
         onKeyDown={onHandleKeyDown}
         className="sr-only focus:not-sr-only focus:m-1 focus:rounded focus:bg-black/10 focus:px-2 focus:py-1 focus:text-xs"
       >
-        Move note
+        <Trans>Move note</Trans>
       </button>
 
       <div
@@ -599,8 +603,8 @@ export function StickyNote({
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
-        aria-label={`${note.title} contents`}
-        data-placeholder="Write anything…"
+        aria-label={t`${note.title} contents`}
+        data-placeholder={t`Write anything…`}
         onInput={(e) => onChange({ content: clean(e.currentTarget.innerHTML) })}
         onBlur={(e) => onCommit({ content: clean(e.currentTarget.innerHTML) })}
         className="sn-body no-drag flex-1 overflow-y-auto px-3 py-2 text-sm leading-relaxed outline-none"
@@ -614,10 +618,10 @@ export function StickyNote({
       >
         {TOOLBAR.map(({ label, icon: Icon, command, value }) => (
           <button
-            key={label}
+            key={command}
             type="button"
-            aria-label={label}
-            title={label}
+            aria-label={i18n._(label)}
+            title={i18n._(label)}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => applyCommand(command, value)}
             className="shrink-0 p-1.5 rounded hover:bg-black/10"
@@ -627,8 +631,8 @@ export function StickyNote({
         ))}
         <button
           type="button"
-          aria-label="Insert link"
-          title="Insert link"
+          aria-label={t`Insert link`}
+          title={t`Insert link`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={insertLink}
           className="shrink-0 p-1.5 rounded hover:bg-black/10"
@@ -637,8 +641,8 @@ export function StickyNote({
         </button>
         <button
           type="button"
-          aria-label="Divider"
-          title="Divider"
+          aria-label={t`Divider`}
+          title={t`Divider`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => applyCommand('insertHorizontalRule')}
           className="shrink-0 p-1.5 rounded hover:bg-black/10"
@@ -653,7 +657,7 @@ export function StickyNote({
         onPointerUp={endResize}
         onPointerCancel={endResize}
         role="separator"
-        aria-label="Resize note"
+        aria-label={t`Resize note`}
         className="no-drag absolute bottom-0 right-0 h-4 w-4 cursor-nwse-resize touch-none"
         style={{
           background:

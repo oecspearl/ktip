@@ -5,9 +5,11 @@ import { FAQS, FAQ_CATEGORIES, searchFAQs } from '../../lib/faq-content'
 import { PageHero } from '../../components/layout/PageHero'
 import { FeedbackModal } from '../../components/feedback/FeedbackModal'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 export default function FAQPage() {
-  usePageTitle('FAQ')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`FAQ`)
 
   const [query, setQuery] = useState('')
   const [openId, setOpenId] = useState<string | null>(null)
@@ -25,15 +27,15 @@ export default function FAQPage() {
   return (
     <>
       <PageHero
-        eyebrow="Help Center"
-        title="Frequently Asked Questions"
-        subtitle="Quick answers about projects, teams, connections, messaging, grants, and your account."
+        eyebrow={t`Help Center`}
+        title={t`Frequently Asked Questions`}
+        subtitle={t`Quick answers about projects, teams, connections, messaging, grants, and your account.`}
         imageSeed="help"
         compact
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Help Center', href: '/help' },
-          { label: 'FAQ' },
+          { label: t`Home`, href: '/' },
+          { label: t`Help Center`, href: '/help' },
+          { label: t`FAQ` },
         ]}
       />
 
@@ -43,7 +45,7 @@ export default function FAQPage() {
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search questions..."
+            placeholder={t`Search questions...`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-11 pr-4 py-3 border border-ktip-sand-300 bg-ktip-cream rounded-xl text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
@@ -55,7 +57,7 @@ export default function FAQPage() {
             {grouped.map(({ category, items }) => (
               <div key={category} data-spy={category} className="scroll-mt-24">
                 <h2 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-3">
-                  {category}
+                  {i18n._(category)}
                 </h2>
                 <div className="border border-ktip-sand-200 rounded-xl divide-y divide-ktip-sand-100 bg-ktip-cream overflow-hidden">
                   {items.map((faq) => {
@@ -68,7 +70,7 @@ export default function FAQPage() {
                           className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-ktip-sand-50/50 transition-colors"
                         >
                           <span className="text-sm font-semibold text-ktip-sand-900">
-                            {faq.question}
+                            {i18n._(faq.question)}
                           </span>
                           <ChevronDown
                             size={18}
@@ -77,7 +79,7 @@ export default function FAQPage() {
                         </button>
                         {isOpen && (
                           <p className="px-5 pb-4 text-sm text-ktip-sand-600 leading-relaxed">
-                            {faq.answer}
+                            {i18n._(faq.answer)}
                           </p>
                         )}
                       </div>
@@ -92,10 +94,12 @@ export default function FAQPage() {
             <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <HelpCircle size={32} className="text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">No matching questions</h3>
+            <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1"><Trans>No matching questions</Trans></h3>
             <p className="text-gray-500 text-sm">
-              Try different keywords, or browse the{' '}
-              <Link to="/help" className="text-ktip-ocean-600 hover:underline">Help Center</Link>.
+              <Trans>
+                Try different keywords, or browse the{' '}
+                <Link to="/help" className="text-ktip-ocean-600 hover:underline">Help Center</Link>.
+              </Trans>
             </p>
           </div>
         )}
@@ -107,17 +111,21 @@ export default function FAQPage() {
           className="scroll-mt-24 mt-12 p-6 bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-2xl text-center"
         >
           <p className="text-sm font-semibold text-ktip-sand-900 mb-1">
-            Didn't find what you were looking for?
+            <Trans>Didn't find what you were looking for?</Trans>
           </p>
           <p className="text-sm text-ktip-sand-600 mb-4">
-            {FAQS.length} questions answered here — for anything else, send us feedback.
+            <Plural
+              value={FAQS.length}
+              one="# question answered here — for anything else, send us feedback."
+              other="# questions answered here — for anything else, send us feedback."
+            />
           </p>
           <button
             onClick={() => setShowFeedback(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 btn-brand text-sm font-bold rounded-lg"
           >
             <MessageCircle size={16} />
-            Send Feedback
+            <Trans>Send Feedback</Trans>
           </button>
         </div>
       </div>

@@ -49,6 +49,7 @@ import type {
   VenueRole,
   VenueRoom,
 } from '../../../types'
+import { useLingui } from '@lingui/react/macro'
 
 /**
  * Everything one section needs, gathered once by the page.
@@ -108,6 +109,7 @@ export function RoomSections({
   context: RoomSectionContext
   className?: string
 }) {
+  const { t } = useLingui()
   const { room, viewerRole, signals } = context
 
   const resolved = useMemo(() => sectionsForRoom(room, viewerRole), [room, viewerRole])
@@ -161,8 +163,8 @@ export function RoomSections({
               <button
                 type="button"
                 onClick={() => hero.promote(id)}
-                aria-label={isHero ? 'Stop keeping this panel large' : 'Make this the big panel'}
-                title={isHero ? 'Stop keeping this large' : 'Make this the big panel'}
+                aria-label={isHero ? t`Stop keeping this panel large` : t`Make this the big panel`}
+                title={isHero ? t`Stop keeping this large` : t`Make this the big panel`}
                 className="absolute right-2 top-2 z-20 hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 p-1.5 text-ktip-sand-500 opacity-0 shadow-card transition-opacity hover:text-ktip-ocean-700 focus-visible:opacity-100 group-focus-within/cell:opacity-100 group-hover/cell:opacity-100 lg:block"
               >
                 {isHero ? (
@@ -268,6 +270,7 @@ function RoomSection({
   /** True when the layout gave this a tall cell to fill. */
   fill: boolean
 }) {
+  const { t } = useLingui()
   const {
     event,
     room,
@@ -367,8 +370,8 @@ function RoomSection({
         <div data-tutorial="room-presence" className="h-full">
           <RoomOccupantList
             occupants={inRoom}
-            title="In this room"
-            emptyLabel="You are the first one here."
+            title={t`In this room`}
+            emptyLabel={t`You are the first one here.`}
             fill={fill}
           />
         </div>
@@ -399,8 +402,8 @@ function RoomSection({
         <RoleRosterPanel
           occupants={occupants}
           role="mentor"
-          title="Mentors on duty"
-          emptyLabel="No mentors in the venue yet."
+          title={t`Mentors on duty`}
+          emptyLabel={t`No mentors in the venue yet.`}
           event={event}
           rooms={rooms}
           floors={floors}
@@ -413,8 +416,8 @@ function RoomSection({
         <RoleRosterPanel
           occupants={occupants}
           role="judge"
-          title="Judges"
-          emptyLabel="No judges in the venue yet."
+          title={t`Judges`}
+          emptyLabel={t`No judges in the venue yet.`}
           event={event}
           rooms={rooms}
           floors={floors}

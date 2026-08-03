@@ -3,6 +3,7 @@ import { ROOM_REACTIONS, type useRoomSignals } from '../../../hooks/useRoomSigna
 import { REACTION_ART, reactionArt } from '../../../lib/reaction-emoji'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 type Signals = ReturnType<typeof useRoomSignals>
 
@@ -22,6 +23,7 @@ type Signals = ReturnType<typeof useRoomSignals>
  * channel usually comes back within a second.
  */
 export function ReactionsBar({ signals }: { signals: Signals }) {
+  const { t, i18n } = useLingui()
   return (
     <div className="relative flex items-center gap-1.5 overflow-hidden rounded-2xl border border-ktip-sand-100 bg-ktip-cream px-3 py-2">
       {ROOM_REACTIONS.map((emoji) => {
@@ -31,8 +33,8 @@ export function ReactionsBar({ signals }: { signals: Signals }) {
             key={emoji}
             type="button"
             onClick={() => signals.react(emoji)}
-            aria-label={art.label}
-            title={art.label}
+            aria-label={i18n._(art.label)}
+            title={i18n._(art.label)}
             className="rounded-lg px-1.5 py-1 leading-none transition-transform duration-150 ease-out hover:scale-125 hover:bg-ktip-sand-50 active:scale-95"
           >
             <img
@@ -48,7 +50,7 @@ export function ReactionsBar({ signals }: { signals: Signals }) {
       })}
 
       <span className="ml-auto text-[11px] text-ktip-sand-400">
-        {signals.connected ? 'Everyone here sees these' : 'Reconnecting…'}
+        {signals.connected ? t`Everyone here sees these` : t`Reconnecting…`}
       </span>
 
       {/* The drift. pointer-events-none so a burst of applause never eats a
@@ -87,8 +89,9 @@ export function ReactionsBar({ signals }: { signals: Signals }) {
  * not hold the top of the queue for ever.
  */
 export function HandQueuePanel({ signals }: { signals: Signals }) {
+  const { t } = useLingui()
   return (
-    <RoomPanel title="Hands up" meta={signals.hands.length || undefined}>
+    <RoomPanel title={t`Hands up`} meta={signals.hands.length || undefined}>
       <div className="p-3">
         <button
           type="button"
@@ -101,12 +104,12 @@ export function HandQueuePanel({ signals }: { signals: Signals }) {
           }`}
         >
           <Hand size={15} aria-hidden="true" />
-          {signals.myHandUp ? 'Lower my hand' : 'Raise my hand'}
+          {signals.myHandUp ? t`Lower my hand` : t`Raise my hand`}
         </button>
       </div>
 
       {signals.hands.length === 0 ? (
-        <RoomPanelEmpty>Nobody is waiting to speak.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>Nobody is waiting to speak.</Trans></RoomPanelEmpty>
       ) : (
         <ol className="divide-y divide-ktip-sand-100 border-t border-ktip-sand-100">
           {signals.hands.map((hand, i) => (

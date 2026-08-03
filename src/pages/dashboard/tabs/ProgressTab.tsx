@@ -1,11 +1,13 @@
 import { lazy, Suspense } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { useLingui } from '@lingui/react/macro'
 
 const TimelineSection = lazy(() => import('../../../components/dashboard/TimelineSection'))
 
 export default function ProgressTab() {
-  usePageTitle('My Progress')
+    const { t } = useLingui()
+  usePageTitle(t`My Progress`)
   const auth = useAuth()
 
   if (!auth.user) return null

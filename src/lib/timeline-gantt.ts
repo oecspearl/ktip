@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import type { GanttEvent, GanttResource } from '../components/gantt/gantt-types'
 import type { TimelineItem } from './timeline'
 
@@ -14,9 +17,9 @@ export const GROUP_ID = {
   project: 'group:project',
 } as const
 
-const GROUP_TITLE: Record<TimelineItem['kind'], string> = {
-  grant_application: 'Grant Applications',
-  project: 'Projects',
+const GROUP_TITLE: Record<TimelineItem['kind'], MessageDescriptor> = {
+  grant_application: msg`Grant Applications`,
+  project: msg`Projects`,
 }
 
 export interface TimelineGanttModel {
@@ -105,7 +108,7 @@ export function timelineToGantt(
 
     resources.push({
       id: GROUP_ID[kind],
-      title: GROUP_TITLE[kind],
+      title: i18n._(GROUP_TITLE[kind]),
       children: own.map((item) => ({ id: item.id, title: item.title })),
     })
 

@@ -6,6 +6,7 @@ import { forumPostPath } from '../../lib/slug'
 import { MessageCircle, Pin } from 'lucide-react'
 import { formatRelativeTime, truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans } from '@lingui/react/macro'
 
 interface PostCardProps {
   post: ForumPost
@@ -32,7 +33,7 @@ export function PostCard({ post, boardSlug }: PostCardProps) {
                 {post.title}
               </h3>
               {post.is_pinned && (
-                <Badge variant="warning" size="sm">Pinned</Badge>
+                <Badge variant="warning" size="sm"><Trans>Pinned</Trans></Badge>
               )}
             </div>
 

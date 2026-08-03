@@ -24,9 +24,12 @@ import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { debounce } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 export default function DirectoryPage() {
-  usePageTitle('Member Directory')
+  const { t , i18n } = useLingui()
+  usePageTitle(t`Member Directory`)
   // `?member=<username>` is the shareable form of a member preview — it's what
   // old /profile/<id> links and notification rows redirect to. The segment is
   // a username where there is one and a uuid otherwise; the drawer resolves
@@ -139,10 +142,10 @@ export default function DirectoryPage() {
   return (
     <>
       <PageHero
-        eyebrow="Network"
-        title="Member Directory"
+        eyebrow={t`Network`}
+        title={t`Member Directory`}
         imageSeed="directory"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Member Directory' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Member Directory` }]}
       />
 
       {/* === Search and Filter Section === */}
@@ -159,18 +162,18 @@ export default function DirectoryPage() {
           <div className="mb-6">
             <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-1">
               {tab === 'businesses'
-                ? 'Find an organisation to work with'
-                : 'Search for a member to connect with'}
+                ? t`Find an organisation to work with`
+                : t`Search for a member to connect with`}
             </h2>
             <p className="text-ktip-ocean-600 italic">
-              The most powerful way to grow your Caribbean network.
+              <Trans>The most powerful way to grow your Caribbean network.</Trans>
             </p>
           </div>
 
           <div
             className="mb-6 inline-flex rounded-full border border-ktip-sand-200 bg-ktip-cream p-0.5"
             role="tablist"
-            aria-label="Directory type"
+            aria-label={t`Directory type`}
           >
             {(['people', 'businesses'] as const).map((key) => (
               <button
@@ -185,7 +188,7 @@ export default function DirectoryPage() {
                     : 'text-ktip-sand-600 hover:text-ktip-ocean-700'
                 }`}
               >
-                {key}
+                {key === 'businesses' ? t`Businesses` : t`People`}
               </button>
             ))}
           </div>
@@ -203,8 +206,8 @@ export default function DirectoryPage() {
               />
               <input
                 type="text"
-                placeholder={tab === 'businesses' ? 'Search businesses…' : 'Search members...'}
-                aria-label={tab === 'businesses' ? 'Search businesses' : 'Search members'}
+                placeholder={tab === 'businesses' ? t`Search businesses…` : t`Search members...`}
+                aria-label={tab === 'businesses' ? t`Search businesses` : t`Search members`}
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
                 className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
@@ -221,10 +224,10 @@ export default function DirectoryPage() {
               onChange={(e) => setSelectedRole(e.currentTarget.value)}
               className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
-              <option value="">All Roles</option>
+              <option value=""><Trans>All Roles</Trans></option>
               {/* Non-admin roles only — see DIRECTORY_ROLE_LABELS. */}
               {Object.entries(DIRECTORY_ROLE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>{resolveCopy(i18n, label)}</option>
               ))}
             </select>
 
@@ -234,7 +237,7 @@ export default function DirectoryPage() {
               onChange={(e) => setSelectedCountry(e.currentTarget.value)}
               className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
-              <option value="">All Countries</option>
+              <option value=""><Trans>All Countries</Trans></option>
               {CARIBBEAN_COUNTRIES.map((country) => (
                 <option key={country} value={country}>{country}</option>
               ))}
@@ -246,7 +249,7 @@ export default function DirectoryPage() {
               onChange={(e) => setSelectedSkill(e.currentTarget.value)}
               className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
-              <option value="">All Skills</option>
+              <option value=""><Trans>All Skills</Trans></option>
               {SKILL_SUGGESTIONS.map((skill) => (
                 <option key={skill} value={skill}>{skill}</option>
               ))}
@@ -256,10 +259,10 @@ export default function DirectoryPage() {
             <select
               value={selectedBadge}
               onChange={(e) => setSelectedBadge(e.currentTarget.value)}
-              aria-label="Filter by badge"
+              aria-label={t`Filter by badge`}
               className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
             >
-              <option value="">All Badges</option>
+              <option value=""><Trans>All Badges</Trans></option>
               {(allBadges || []).map((badge) => (
                 <option key={badge.slug} value={badge.slug}>{badge.name}</option>
               ))}
@@ -273,7 +276,7 @@ export default function DirectoryPage() {
               onClick={clearFilters}
               className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
             >
-              Clear all filters
+              <Trans>Clear all filters</Trans>
             </button>
           )}
         </div>
@@ -291,7 +294,7 @@ export default function DirectoryPage() {
             ) : employers.length > 0 ? (
               <div>
                 <p className="text-sm text-gray-500 mb-6">
-                  Found {employers.length} business{employers.length !== 1 ? 'es' : ''}
+                  <Plural value={employers.length} one="Found # business" other="Found # businesses" />
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
                   {employers.map((employer) => (
@@ -300,7 +303,7 @@ export default function DirectoryPage() {
                       to={`/org/${employer.slug}`}
                       image={employer.logo_url}
                       imageSeed={employer.slug}
-                      eyebrow={employer.industry || 'Organisation'}
+                      eyebrow={employer.industry || t`Organisation`}
                       title={employer.trading_name || employer.legal_name}
                       description={employer.description}
                       meta={
@@ -309,12 +312,12 @@ export default function DirectoryPage() {
                           {employer.portfolio_count > 0 && (
                             <span className="flex items-center gap-1.5 mt-1">
                               <Briefcase size={13} className="shrink-0" />
-                              {employer.portfolio_count} in portfolio
+                              <Trans>{employer.portfolio_count} in portfolio</Trans>
                             </span>
                           )}
                         </>
                       }
-                      cta="View business"
+                      cta={t`View business`}
                     />
                   ))}
                 </div>
@@ -325,10 +328,10 @@ export default function DirectoryPage() {
                   <Building2 size={32} className="text-gray-400" />
                 </div>
                 <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                  No businesses found
+                  <Trans>No businesses found</Trans>
                 </h3>
                 <p className="text-gray-500">
-                  Only Chamber-verified organisations are listed here.
+                  <Trans>Only Chamber-verified organisations are listed here.</Trans>
                 </p>
               </div>
             )}
@@ -345,7 +348,7 @@ export default function DirectoryPage() {
           ) : members.length > 0 ? (
             <div>
               <p className="text-sm text-gray-500 mb-6">
-                Found {members.length} member{members.length !== 1 ? 's' : ''}
+                <Plural value={members.length} one="Found # member" other="Found # members" />
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
@@ -356,19 +359,19 @@ export default function DirectoryPage() {
                     imageSeed={member.id}
                     eyebrow={
                       member.roles?.length > 0
-                        ? member.roles.slice(0, 2).map((r: string) => ROLE_LABELS[r] || r).join(', ')
-                        : 'Member'
+                        ? member.roles.slice(0, 2).map((r: string) => resolveCopy(i18n, ROLE_LABELS[r] || r)).join(', ')
+                        : t`Member`
                     }
                     title={
                       <span className="flex items-center gap-3">
                         <DiamondAvatar
                           src={member.avatar_url}
-                          name={member.display_name || 'Member'}
+                          name={member.display_name || t`Member`}
                           size={40}
                           colorClass="bg-white/20 backdrop-blur-sm"
                           frameClassName="ring-2 ring-white/60"
                         />
-                        <span className="truncate">{member.display_name || 'Anonymous'}</span>
+                        <span className="truncate">{member.display_name || t`Anonymous`}</span>
                       </span>
                     }
                     meta={
@@ -381,14 +384,14 @@ export default function DirectoryPage() {
                         {member.profile_visibility === 'private' && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Lock size={13} className="shrink-0" />
-                            Private profile
+                            <Trans>Private profile</Trans>
                           </span>
                         )}
                         {connectionCounts?.[member.id] !== undefined && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Users size={13} className="shrink-0" />
                             {connectionCounts[member.id]}{' '}
-                            {connectionCounts[member.id] === 1 ? 'connection' : 'connections'}
+                            {connectionCounts[member.id] === 1 ? t`connection` : t`connections`}
                           </span>
                         )}
                         {/* Only once there is something to show — "Newcomer,
@@ -397,7 +400,7 @@ export default function DirectoryPage() {
                         {statsById[member.id]?.badge_count > 0 && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Trophy size={13} className="shrink-0" />
-                            {statsById[member.id].rank_name} · {statsById[member.id].points} pts
+                            <Trans>{statsById[member.id].rank_name} · {statsById[member.id].points} pts</Trans>
                           </span>
                         )}
                         {(member.user_badges?.length ?? 0) > 0 && (
@@ -414,7 +417,7 @@ export default function DirectoryPage() {
                         )}
                       </>
                     }
-                    cta="View Profile"
+                    cta={t`View Profile`}
                   >
                     <ConnectButton
                       otherUserId={member.id}
@@ -432,7 +435,7 @@ export default function DirectoryPage() {
                     onClick={() => setPageLimit((l) => l + PAGE_SIZE)}
                     className="px-6 py-2.5 text-sm font-bold rounded-lg btn-brand"
                   >
-                    Load more members
+                    <Trans>Load more members</Trans>
                   </button>
                 </div>
               )}
@@ -443,12 +446,12 @@ export default function DirectoryPage() {
                 <UserX size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                No members found
+                <Trans>No members found</Trans>
               </h3>
               <p className="text-gray-500">
                 {hasActiveFilters
-                  ? 'Try adjusting your filters or search query'
-                  : 'No members have joined yet'}
+                  ? t`Try adjusting your filters or search query`
+                  : t`No members have joined yet`}
               </p>
             </div>
           )}

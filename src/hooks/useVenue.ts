@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type { EventVenueMember } from '../types'
@@ -85,6 +86,7 @@ export function useVenueDiscoverable(eventId: string | undefined) {
  * would look like it worked and then not have.
  */
 export function useUpdateVenueProfile() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -102,7 +104,7 @@ export function useUpdateVenueProfile() {
     }) => {
       const { data: auth } = await supabase.auth.getUser()
       const uid = auth?.user?.id
-      if (!uid) throw new Error('Not signed in')
+      if (!uid) throw new Error(t`Not signed in`)
 
       const { data, error } = await (supabase as any)
         .from('event_venue_members')

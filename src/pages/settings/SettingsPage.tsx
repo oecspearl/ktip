@@ -9,15 +9,17 @@ import { PreferencesTab } from './PreferencesTab'
 import { PersonalizationTab } from './PersonalizationTab'
 import { VerificationTab } from './VerificationTab'
 import { cn } from '../../lib/utils'
+import { useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 type SettingsTab = 'profile' | 'security' | 'preferences' | 'personalization' | 'verification'
 
 const tabs = [
-  { id: 'profile' as const, label: 'Profile', icon: User, description: 'Manage your profile info' },
-  { id: 'security' as const, label: 'Security', icon: Shield, description: 'Password & account' },
-  { id: 'preferences' as const, label: 'Preferences', icon: Bell, description: 'Notifications & display' },
-  { id: 'personalization' as const, label: 'Personalization', icon: Sparkles, description: 'Tune what you see' },
-  { id: 'verification' as const, label: 'Verification', icon: BadgeCheck, description: 'Verify your identity' },
+  { id: 'profile' as const, label: msg`Profile`, icon: User, description: msg`Manage your profile info` },
+  { id: 'security' as const, label: msg`Security`, icon: Shield, description: msg`Password & account` },
+  { id: 'preferences' as const, label: msg`Preferences`, icon: Bell, description: msg`Notifications & display` },
+  { id: 'personalization' as const, label: msg`Personalization`, icon: Sparkles, description: msg`Tune what you see` },
+  { id: 'verification' as const, label: msg`Verification`, icon: BadgeCheck, description: msg`Verify your identity` },
 ]
 
 function isSettingsTab(value: string | null): value is SettingsTab {
@@ -25,7 +27,8 @@ function isSettingsTab(value: string | null): value is SettingsTab {
 }
 
 export default function SettingsPage() {
-  usePageTitle('Settings')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Settings`)
   // `?tab=security` lets the global search panel deep-link straight to a tab
   const [searchParams] = useSearchParams()
   const requestedTab = searchParams.get('tab')
@@ -41,11 +44,11 @@ export default function SettingsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Account"
-        title="Settings"
-        subtitle="Manage your account and preferences"
+        eyebrow={t`Account`}
+        title={t`Settings`}
+        subtitle={t`Manage your account and preferences`}
         imageSeed="settings"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Settings' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Settings` }]}
       />
 
       {/* Content */}
@@ -68,8 +71,8 @@ export default function SettingsPage() {
                   >
                     <tab.icon size={20} />
                     <div>
-                      <div className="font-medium text-sm">{tab.label}</div>
-                      <div className="text-xs opacity-70">{tab.description}</div>
+                      <div className="font-medium text-sm">{i18n._(tab.label)}</div>
+                      <div className="text-xs opacity-70">{i18n._(tab.description)}</div>
                     </div>
                   </button>
                 ))}

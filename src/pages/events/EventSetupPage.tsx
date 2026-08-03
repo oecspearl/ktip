@@ -11,6 +11,9 @@ import { venueSetupPath } from '../../lib/event-slug'
 import AdminEventChallengeTab from '../admin/events/AdminEventChallengeTab'
 import AdminEventScheduleTab from '../admin/events/AdminEventScheduleTab'
 import AdminEventSpeakersTab from '../admin/events/AdminEventSpeakersTab'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * Step two for every event type that has one, except the hackathon — its step
@@ -28,13 +31,14 @@ import AdminEventSpeakersTab from '../admin/events/AdminEventSpeakersTab'
  * the control itself.
  */
 export default function EventSetupPage() {
+    const { t, i18n } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
 
   const { event, loading, refetch } = useEvent(params.slug)
   const isHost = useIsEventHost(event)
 
-  usePageTitle(event ? `Set up — ${event.title}` : 'Set up the event')
+  usePageTitle(event ? t`Set up — ${event.title}` : t`Set up the event`)
 
   if (loading) {
     return (
@@ -48,9 +52,9 @@ export default function EventSetupPage() {
   if (!event) {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Event not found</h1>
+        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Event not found</Trans></h1>
         <Link to="/events" className="mt-3 inline-block text-ktip-ocean-600 hover:underline">
-          Browse events
+          <Trans>Browse events</Trans>
         </Link>
       </div>
     )
@@ -60,10 +64,10 @@ export default function EventSetupPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
-          Only the organizer can set this event up
+          <Trans>Only the organizer can set this event up</Trans>
         </h1>
         <Link to={entityPath('event', event)} className="mt-4 inline-block">
-          <Button variant="secondary">Go to the event</Button>
+          <Button variant="secondary"><Trans>Go to the event</Trans></Button>
         </Link>
       </div>
     )
@@ -78,13 +82,13 @@ export default function EventSetupPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
-          Nothing to set up here
+          <Trans>Nothing to set up here</Trans>
         </h1>
         <p className="mt-2 text-sm text-ktip-sand-600">
-          A {event.event_type.replace('_', ' ')} is finished the moment it is created.
+          <Trans>A {event.event_type.replace('_', ' ')} is finished the moment it is created.</Trans>
         </p>
         <Link to={entityPath('event', event)} className="mt-4 inline-block">
-          <Button variant="secondary">Go to the event</Button>
+          <Button variant="secondary"><Trans>Go to the event</Trans></Button>
         </Link>
       </div>
     )
@@ -97,15 +101,15 @@ export default function EventSetupPage() {
           product from step one. */}
       <PageHero
         compact
-        eyebrow="Set up your event"
+        eyebrow={t`Set up your event`}
         title={capitalize(blueprint.setup.label)}
         subtitle={blueprint.setup.blurb}
         imageSeed="events"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Events', href: '/events' },
+          { label: t`Home`, href: '/' },
+          { label: t`Events`, href: '/events' },
           { label: event.title, href: entityPath('event', event) },
-          { label: 'Set up' },
+          { label: t`Set up` },
         ]}
       />
 
@@ -123,7 +127,7 @@ export default function EventSetupPage() {
               className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-ocean-600"
             >
               <ArrowLeft size={15} aria-hidden="true" />
-              Back to event details
+              <Trans>Back to event details</Trans>
             </Link>
 
             {/* A hackathon lands on the venue page first, but its brief lives
@@ -135,7 +139,7 @@ export default function EventSetupPage() {
                 icon={<ExternalLink size={14} />}
                 onClick={() => navigate(venueSetupPath(event))}
               >
-                The venue
+                <Trans>The venue</Trans>
               </Button>
             )}
           </div>
@@ -143,8 +147,10 @@ export default function EventSetupPage() {
           {event.status === 'draft' && (
             <p className="mb-8 flex items-start gap-2 rounded-xl border border-ktip-sun-200 bg-ktip-sun-50 px-3 py-2 text-sm text-ktip-sun-800">
               <Info size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
-              This event is still a draft, so nobody can see it yet. Everything you add here is
-              saved and waiting for you to publish it.
+              <Trans>
+                This event is still a draft, so nobody can see it yet. Everything you add here is
+                saved and waiting for you to publish it.
+              </Trans>
             </p>
           )}
 
@@ -154,7 +160,7 @@ export default function EventSetupPage() {
               .map((section) => (
                 <section key={section}>
                   <h2 className="mb-3 font-display text-lg font-semibold text-ktip-sand-900">
-                    {SECTION_TITLES[section]}
+                    {i18n._(SECTION_TITLES[section])}
                   </h2>
                   {renderSection(section, event, refetch)}
                 </section>
@@ -170,13 +176,13 @@ export default function EventSetupPage() {
               icon={<Check size={20} />}
               onClick={() => navigate(entityPath('event', event))}
             >
-              Finish
+              <Trans>Finish</Trans>
             </Button>
             <Link
               to={entityPath('event', event)}
               className="whitespace-nowrap text-sm text-ktip-sand-500 transition-colors hover:text-ktip-sand-700"
             >
-              View the event
+              <Trans>View the event</Trans>
             </Link>
           </div>
         </div>
@@ -185,13 +191,13 @@ export default function EventSetupPage() {
   )
 }
 
-const SECTION_TITLES: Record<SetupSection, string> = {
-  speakers: 'Who is speaking',
-  schedule: 'The programme',
-  challenge: 'The brief',
-  judging: 'How pitches are scored',
-  pages: 'Pages on the event',
-  venue: 'The venue',
+const SECTION_TITLES: Record<SetupSection, MessageDescriptor> = {
+  speakers: msg`Who is speaking`,
+  schedule: msg`The programme`,
+  challenge: msg`The brief`,
+  judging: msg`How pitches are scored`,
+  pages: msg`Pages on the event`,
+  venue: msg`The venue`,
 }
 
 function renderSection(
@@ -222,12 +228,11 @@ function renderSection(
       return (
         <div className="rounded-xl border border-ktip-sand-200 bg-ktip-cream p-6">
           <p className="text-sm text-ktip-sand-600">
-            Sponsors, an FAQ and any other standalone pages are built from the event's admin
-            console, where they can be reordered and hidden.
+            <Trans>Sponsors, an FAQ and any other standalone pages are built from the event's admin console, where they can be reordered and hidden.</Trans>
           </p>
           <Link to={`/admin/events/${event.id}`} className="mt-3 inline-block">
             <Button size="sm" variant="secondary" icon={<ExternalLink size={14} />}>
-              Open the page builder
+              <Trans>Open the page builder</Trans>
             </Button>
           </Link>
         </div>

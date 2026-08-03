@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Video, VideoOff, ExternalLink } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface JitsiVideoCallProps {
   roomName: string
@@ -26,7 +27,9 @@ interface JitsiVideoCallProps {
  */
 
 const DEFAULT_JITSI_DOMAIN = 'meet.jit.si'
-const KTIP_LOGO_PATH = '/ktip-logo-nobg.webp'
+// ktip-logo.webp carries its own alpha, so the separate "nobg" variant was
+// redundant — and it 404'd, having never survived the move to WebP.
+const KTIP_LOGO_PATH = '/ktip-logo-128.webp'
 
 const configuredDomain = (import.meta.env.VITE_JITSI_DOMAIN as string | undefined)?.trim()
 const jaasAppId = (import.meta.env.VITE_JITSI_APP_ID as string | undefined)?.trim()
@@ -73,10 +76,11 @@ function buildJitsiUrl(domain: string, roomName: string, displayName: string): s
 }
 
 export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCallProps) {
+  const { t } = useLingui()
   const [status, setStatus] = useState<'idle' | 'joined'>('idle')
 
   const jitsiDomain = domain || configuredDomain || DEFAULT_JITSI_DOMAIN
-  const jitsiDisplayName = displayName || 'KTIP User'
+  const jitsiDisplayName = displayName || t`KTIP User`
 
   const joinCall = () => {
     if (!roomName.trim()) return
@@ -96,8 +100,8 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
           <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mb-4">
             <VideoOff size={28} className="text-ktip-sand-400" />
           </div>
-          <p className="text-ktip-sand-600 font-medium mb-1">No active call</p>
-          <p className="text-sm text-ktip-sand-400 mb-6">Enter a room name or create one, then click Join</p>
+          <p className="text-ktip-sand-600 font-medium mb-1"><Trans>No active call</Trans></p>
+          <p className="text-sm text-ktip-sand-400 mb-6"><Trans>Enter a room name or create one, then click Join</Trans></p>
           <button
             type="button"
             onClick={joinCall}
@@ -105,7 +109,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
             className="inline-flex items-center gap-2 px-6 py-2.5 btn-brand rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Video size={18} />
-            Join Video Call
+            <Trans>Join Video Call</Trans>
           </button>
         </div>
       )}
@@ -123,7 +127,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
               />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-ktip-sand-900 leading-tight">
-                  KTIP Video
+                  <Trans>KTIP Video</Trans>
                 </p>
                 <p className="text-xs text-ktip-sand-500 truncate">{roomName}</p>
               </div>
@@ -136,7 +140,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium text-ktip-sand-600 hover:bg-ktip-sand-100 hover:text-ktip-sand-900 transition-colors"
               >
                 <ExternalLink size={14} />
-                <span className="hidden sm:inline">Open in new tab</span>
+                <span className="hidden sm:inline"><Trans>Open in new tab</Trans></span>
               </a>
               <button
                 type="button"
@@ -144,7 +148,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm font-medium transition-colors"
               >
                 <VideoOff size={14} />
-                Leave Call
+                <Trans>Leave Call</Trans>
               </button>
             </div>
           </div>
@@ -159,7 +163,7 @@ export function JitsiVideoCall({ roomName, displayName, domain }: JitsiVideoCall
             allow="camera; microphone; display-capture; screen-wake-lock; autoplay; clipboard-write"
             className="w-full block"
             style={{ height: 'calc(100svh - 22rem)', border: 'none' }}
-            title={`Video call: ${roomName}`}
+            title={t`Video call: ${roomName}`}
           />
         </div>
       )}

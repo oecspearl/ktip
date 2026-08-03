@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
+import { I18nTestProvider } from '../test/i18n'
 import {
   useAIAssistant,
   loadThread,
@@ -15,7 +16,11 @@ const STORAGE_KEY = `ktip_assistant_thread_${USER_ID}`
 
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  return (
+    <I18nTestProvider>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </I18nTestProvider>
+  )
 }
 
 function chatResponse(content: string) {

@@ -12,6 +12,7 @@ import { cn } from '../../lib/utils'
 import { DropdownPanel } from '../ui/DropdownPanel'
 import { resolveIcon } from '../../lib/icon-map'
 import type { SearchGroup, SearchRow } from '../../lib/site-search'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The results panel that drops below the navbar search box.
@@ -75,14 +76,18 @@ export function NavbarSearchPanel({
   variant = 'desktop',
   open,
 }: NavbarSearchPanelProps) {
-  const hasQuery = query.trim().length > 0
+    const { t, i18n } = useLingui()
+  // Named once: Lingui labels an interpolated expression it cannot read
+  // `{0}`, and "Nothing matched {0}" is not placeable by a translator.
+  const term = query.trim()
+  const hasQuery = term.length > 0
   const showEmptyState = !hasQuery
 
   return (
     <DropdownPanel
       open={open}
       role="listbox"
-      aria-label="Search results"
+      aria-label={t`Search results`}
       className={cn(
         'bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 overflow-hidden',
         variant === 'desktop'
@@ -100,11 +105,11 @@ export function NavbarSearchPanel({
         <p className="text-xs text-ktip-sand-500 truncate flex-1">
           {aiMode
             ? aiLoading
-              ? 'Thinking about where to send you…'
-              : 'AI navigation is on — ask in your own words'
+              ? t`Thinking about where to send you…`
+              : t`AI navigation is on — ask in your own words`
             : hasQuery
-              ? `Results for “${query.trim()}”`
-              : 'Search pages, features and content'}
+              ? t`Results for “${term}”`
+              : t`Search pages, features and content`}
         </p>
         {contentLoading && !aiLoading && (
           <Loader2 size={14} className="animate-spin text-ktip-sand-400 shrink-0" />
@@ -112,9 +117,9 @@ export function NavbarSearchPanel({
         <button
           type="button"
           onClick={onToggleAiMode}
-          aria-label="Toggle AI-guided navigation"
+          aria-label={t`Toggle AI-guided navigation`}
           aria-pressed={aiMode}
-          title="AI-guided navigation"
+          title={t`AI-guided navigation`}
           className={cn(
             'p-1.5 rounded-lg transition-colors shrink-0',
             aiMode
@@ -149,7 +154,7 @@ export function NavbarSearchPanel({
 
       {aiMode && aiError && (
         <p className="px-4 py-2 text-xs text-ktip-sand-500 border-b border-ktip-sand-100">
-          AI navigation is unavailable right now — showing local matches.
+          <Trans>AI navigation is unavailable right now — showing local matches.</Trans>
         </p>
       )}
 
@@ -161,14 +166,14 @@ export function NavbarSearchPanel({
               <section>
                 <div className="flex items-center justify-between px-4 pt-3 pb-1">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-                    Recent
+                    <Trans>Recent</Trans>
                   </p>
                   <button
                     type="button"
                     onClick={onClearRecent}
                     className="text-[11px] text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
                   >
-                    Clear
+                    <Trans>Clear</Trans>
                   </button>
                 </div>
                 {recent.map((term) => (
@@ -186,7 +191,7 @@ export function NavbarSearchPanel({
             )}
             <section>
               <p className="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-                Jump to
+                <Trans>Jump to</Trans>
               </p>
               {suggestions.map((row) => (
                 <button
@@ -204,8 +209,10 @@ export function NavbarSearchPanel({
               ))}
             </section>
             <p className="px-4 py-3 text-[11px] text-ktip-sand-400 border-t border-ktip-sand-50">
-              Tip: press <kbd className="font-sans font-semibold">Ctrl</kbd>+
-              <kbd className="font-sans font-semibold">K</kbd> from anywhere to search.
+              <Trans>
+                Tip: press <kbd className="font-sans font-semibold">Ctrl</kbd>+
+                <kbd className="font-sans font-semibold">K</kbd> from anywhere to search.
+              </Trans>
             </p>
           </>
         )}
@@ -213,8 +220,13 @@ export function NavbarSearchPanel({
         {/* Results */}
         {hasQuery && rows.length === 0 && !contentLoading && (
           <p className="px-4 py-8 text-sm text-center text-ktip-sand-500">
-            Nothing matched “{query.trim()}”.
-            {!aiMode && ' Try the brain icon to ask in your own words.'}
+            <Trans>Nothing matched “{term}”.</Trans>
+            {!aiMode && (
+              <>
+                {' '}
+                <Trans>Try the brain icon to ask in your own words.</Trans>
+              </>
+            )}
           </p>
         )}
 
@@ -222,7 +234,7 @@ export function NavbarSearchPanel({
           groups.map((group) => (
             <section key={group.kind}>
               <p className="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-                {group.label}
+                {i18n._(group.label)}
               </p>
               {group.rows.map((row) => {
                 const index = rows.indexOf(row)
@@ -288,7 +300,7 @@ export function NavbarSearchPanel({
                           </ol>
                         ) : (
                           <p className="text-xs text-ktip-sand-600 leading-relaxed">
-                            {row.description || 'No extra details for this result.'}
+                            {row.description || t`No extra details for this result.`}
                           </p>
                         )}
                         {row.href && (
@@ -297,7 +309,7 @@ export function NavbarSearchPanel({
                             onClick={() => onSelect(row)}
                             className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-ktip-ocean-600 hover:text-ktip-ocean-700"
                           >
-                            Open
+                            <Trans>Open</Trans>
                             <ArrowUpRight size={12} />
                           </button>
                         )}
@@ -322,7 +334,7 @@ export function NavbarSearchPanel({
           >
             <Search size={16} className="text-ktip-sand-400 shrink-0" />
             <span className="text-sm text-ktip-sand-700 truncate flex-1">
-              See all results for “{query.trim()}” in Projects
+              <Trans>See all results for “{term}” in Projects</Trans>
             </span>
             {activeIndex === rows.length && (
               <CornerDownLeft size={13} className="text-ktip-ocean-600 shrink-0" />
@@ -334,10 +346,10 @@ export function NavbarSearchPanel({
       {/* Footer hints */}
       {hasQuery && (
         <div className="flex items-center gap-3 px-4 py-2 text-[11px] text-ktip-sand-400 border-t border-ktip-sand-100">
-          <span>↑↓ navigate</span>
-          <span>↵ open</span>
-          <span>→ details</span>
-          <span className="ml-auto">esc close</span>
+          <span><Trans>↑↓ navigate</Trans></span>
+          <span><Trans>↵ open</Trans></span>
+          <span><Trans>→ details</Trans></span>
+          <span className="ml-auto"><Trans>esc close</Trans></span>
         </div>
       )}
     </DropdownPanel>

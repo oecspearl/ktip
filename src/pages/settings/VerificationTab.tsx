@@ -9,12 +9,14 @@ import { useFileDrop } from '../../hooks/useFileDrop'
 import { BadgeCheck, Clock, XCircle, Upload, FileText, X } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
 import { StudentVerificationCard } from '../../components/safeguarding/StudentVerificationCard'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 const MAX_FILES = 3
 const MAX_SIZE = 10 * 1024 * 1024 // matches the bucket limit
 const ACCEPTED = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
 
 export function VerificationTab() {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { request, loading } = useMyVerificationRequest(auth.user?.id)
@@ -29,11 +31,11 @@ export function VerificationTab() {
     (picked: File[]) => {
       const valid = picked.filter((f) => {
         if (!ACCEPTED.includes(f.type)) {
-          toast.error(`${f.name}: only PDF, JPG, PNG, or WebP files are allowed`)
+          toast.error(t`${f.name}: only PDF, JPG, PNG, or WebP files are allowed`)
           return false
         }
         if (f.size > MAX_SIZE) {
-          toast.error(`${f.name}: file exceeds the 10MB limit`)
+          toast.error(t`${f.name}: file exceeds the 10MB limit`)
           return false
         }
         return true
@@ -63,14 +65,14 @@ export function VerificationTab() {
       await submitRequest({ userId: auth.user.id, files, note: note.trim() || undefined })
       setFiles([])
       setNote('')
-      toast.success('Verification request submitted')
+      toast.success(t`Verification request submitted`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit request')
+      toast.error(err.message || t`Failed to submit request`)
     }
   }
 
   if (loading) {
-    return <Card><p className="text-sm text-ktip-sand-500 py-8 text-center">Loading…</p></Card>
+    return <Card><p className="text-sm text-ktip-sand-500 py-8 text-center"><Trans>Loading…</Trans></p></Card>
   }
 
   return (
@@ -89,9 +91,9 @@ export function VerificationTab() {
             <BadgeCheck size={20} className="text-ktip-ocean-600" />
           </div>
           <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Identity Verification</h2>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Identity Verification</Trans></h2>
             <p className="text-sm text-ktip-sand-600">
-              Verified members get a badge on their profile
+              <Trans>Verified members get a badge on their profile</Trans>
             </p>
           </div>
         </div>
@@ -99,14 +101,14 @@ export function VerificationTab() {
         {isVerified ? (
           <div className="flex items-center gap-2 p-4 bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-lg text-ktip-tropical-700">
             <BadgeCheck size={20} />
-            <p className="text-sm font-medium">Your account is verified.</p>
+            <p className="text-sm font-medium"><Trans>Your account is verified.</Trans></p>
           </div>
         ) : request?.status === 'pending' ? (
           <div className="flex items-start gap-2 p-4 bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg text-ktip-sun-800">
             <Clock size={20} className="shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium">Your verification request is under review.</p>
-              <p className="text-xs mt-1">Submitted {formatDate(request.created_at)}</p>
+              <p className="text-sm font-medium"><Trans>Your verification request is under review.</Trans></p>
+              <p className="text-xs mt-1"><Trans>Submitted {formatDate(request.created_at)}</Trans></p>
             </div>
           </div>
         ) : (
@@ -115,16 +117,15 @@ export function VerificationTab() {
               <div className="flex items-start gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-4">
                 <XCircle size={20} className="shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Your previous request was not approved.</p>
+                  <p className="text-sm font-medium"><Trans>Your previous request was not accepted.</Trans></p>
                   {request.admin_note && <p className="text-xs mt-1">{request.admin_note}</p>}
-                  <p className="text-xs mt-1">You can submit a new request below.</p>
+                  <p className="text-xs mt-1"><Trans>You can submit a new request below.</Trans></p>
                 </div>
               </div>
             )}
 
             <p className="text-sm text-ktip-sand-600 mb-4">
-              Upload an identity document (national ID, passport, or business registration) as PDF
-              or image. Documents are stored privately and only visible to OECS administrators.
+              <Trans>Upload an identity document (national ID, passport, or business registration) as PDF or image. Documents are stored privately and only visible to OECS administrators.</Trans>
             </p>
 
             {/* File picker */}
@@ -139,8 +140,8 @@ export function VerificationTab() {
               <Upload size={22} className="text-ktip-sand-400" />
               <span className="text-sm text-ktip-sand-600">
                 {isDragging
-                  ? 'Drop files to add'
-                  : `Click or drag files here (PDF, JPG, PNG, WebP — max ${MAX_FILES} files, 10MB each)`}
+                  ? t`Drop files to add`
+                  : t`Click or drag files here (PDF, JPG, PNG, WebP — max ${MAX_FILES} files, 10MB each)`}
               </span>
               <input
                 type="file"
@@ -162,7 +163,7 @@ export function VerificationTab() {
                     <button
                       onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
                       className="p-1 text-ktip-sand-400 hover:text-red-500"
-                      aria-label={`Remove ${file.name}`}
+                      aria-label={t`Remove ${file.name}`}
                     >
                       <X size={16} />
                     </button>
@@ -172,17 +173,17 @@ export function VerificationTab() {
             )}
 
             <Textarea
-              label="Note (optional)"
+              label={t`Note (optional)`}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
-              placeholder="Anything the reviewers should know..."
+              placeholder={t`Anything the reviewers should know...`}
               fullWidth
             />
 
             <div className="flex justify-end mt-4">
               <Button onClick={handleSubmit} disabled={files.length === 0} loading={submitting}>
-                Submit for Verification
+                <Trans>Submit for Verification</Trans>
               </Button>
             </div>
           </>

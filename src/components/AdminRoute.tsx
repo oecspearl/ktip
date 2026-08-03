@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { ShieldX } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { Trans } from '@lingui/react/macro'
 
 export const AdminRoute = () => {
   const auth = useAuth()
@@ -18,11 +19,11 @@ export const AdminRoute = () => {
       <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
         <div className="text-center">
           <img
-            src="/ktip-logo.webp"
-            alt="KTIP Logo"
+            src="/ktip-logo-128.webp"
+            alt="KTiP"
             className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
           />
-          <p className="mt-4 text-ktip-sand-600">Loading...</p>
+          <p className="mt-4 text-ktip-sand-600"><Trans>Loading...</Trans></p>
         </div>
       </div>
     )
@@ -39,10 +40,9 @@ export const AdminRoute = () => {
           <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ShieldX size={32} className="text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold font-display text-ktip-sand-900 mb-2">Access Denied</h1>
+          <h1 className="text-2xl font-bold font-display text-ktip-sand-900 mb-2"><Trans>Access Denied</Trans></h1>
           <p className="text-ktip-sand-600">
-            This area is restricted to OECS administrators. If you believe you should have access,
-            please contact your organization.
+            <Trans>This area is restricted to OECS administrators. If you believe you should have access, please contact your organization.</Trans>
           </p>
         </div>
       </div>

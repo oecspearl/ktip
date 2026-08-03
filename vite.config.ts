@@ -6,6 +6,8 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
+// @ts-expect-error -- plain .mjs plugin, shared verbatim with vitest.config.ts
+import { imageManifestPlugin } from './vite/image-manifest-plugin.mjs'
 
 /**
  * Read OPENAI_API_KEY directly from .env file as a fallback,
@@ -123,6 +125,99 @@ function edgeApiPlugin(apiKey: string | undefined): Plugin {
   }
 }
 
+/**
+ * Warm the TCP+TLS handshake to the two image origins the app fetches from.
+ *
+ * These belong in the HTML rather than a component: the whole value of a
+ * preconnect is that the browser's preload scanner sees it before any script
+ * runs, and this is a client-rendered SPA, so anything React emits arrives too
+ * late to help. Supabase's origin is injected rather than hardcoded so a
+ * staging project doesn't warm production's host.
+ */
+function preconnectPlugin(supabaseUrl: string | undefined) {
+  const origins = ['https://images.unsplash.com']
+  try {
+    if (supabaseUrl) origins.push(new URL(supabaseUrl).origin)
+  } catch {
+    // A malformed VITE_SUPABASE_URL is the app's problem to report, not the
+    // build's — a missing preconnect is a lost handshake, not a broken page.
+  }
+  return {
+    name: 'ktip-preconnect',
+    transformIndexHtml() {
+      return origins.map((href) => ({
+        tag: 'link',
+        attrs: { rel: 'preconnect', href, crossorigin: '' },
+        injectTo: 'head' as const,
+      }))
+    },
+  }
+}
+
+/**
+ * Start the landing route's chunk downloading in parallel with the entry bundle
+ * instead of one round trip after it.
+ *
+ * Every route is lazy (see lazyPage in App.tsx), so the browser cannot discover
+ * a route chunk until the ~300 KB-gzip entry bundle has downloaded AND parsed
+ * AND the router has matched. On the two routes that open with a full-bleed
+ * hero photo that costs a serial round trip before the image request can even
+ * begin — and the chunks themselves are tiny (Discover 8.5 KB gzip, Login 2.2),
+ * so the hop is nearly all latency and almost no bytes.
+ *
+ * Route-aware rather than a plain <link> in the head, because vercel.json
+ * rewrites every path to this one index.html: an unconditional modulepreload
+ * would pull DiscoverPage's chunk on /login, /projects and everywhere else.
+ * An inline classic script runs during head parsing, well before the deferred
+ * entry module executes, so the preload still lands early enough to overlap.
+ *
+ * Deliberately only the chunks themselves, not their dependency graphs — those
+ * are shared with the entry and are already in flight.
+ */
+const PRELOAD_ROUTES: Record<string, string> = {
+  '/': 'src/pages/discover/DiscoverPage.tsx',
+  '/login': 'src/pages/auth/LoginPage.tsx',
+}
+
+function routeChunkPreloadPlugin() {
+  return {
+    name: 'ktip-route-chunk-preload',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler(_html: string, ctx: { bundle?: Record<string, unknown> }) {
+        // Absent under `vite dev`, where there is no bundle and no hashing.
+        if (!ctx.bundle) return
+        const map: Record<string, string> = {}
+        for (const [fileName, output] of Object.entries(ctx.bundle)) {
+          const chunk = output as { type?: string; facadeModuleId?: string | null }
+          if (chunk.type !== 'chunk' || !chunk.facadeModuleId) continue
+          const id = chunk.facadeModuleId.replace(/\\/g, '/')
+          for (const [pathname, source] of Object.entries(PRELOAD_ROUTES)) {
+            if (id.endsWith(source)) map[pathname] = `/${fileName}`
+          }
+        }
+        // A renamed or moved page silently drops out of the map rather than
+        // emitting a preload for a chunk that no longer exists.
+        if (Object.keys(map).length === 0) return
+        return [
+          {
+            tag: 'script',
+            children:
+              `(function(){try{var m=${JSON.stringify(map)},h=m[location.pathname];` +
+              `if(!h)return;var l=document.createElement("link");` +
+              `l.rel="modulepreload";l.href=h;document.head.appendChild(l)}catch(e){}})()`,
+            // head-prepend, not head: this has to run before the parser reaches
+            // the entry <script>, or the route chunk queues behind it instead
+            // of alongside it.
+            injectTo: 'head-prepend' as const,
+          },
+        ]
+      },
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const openaiKey = getOpenAIKey(env)
@@ -168,6 +263,18 @@ export default defineConfig(({ mode }) => {
     'INVITE_FROM_EMAIL',
     // The origin baked into links inside those emails.
     'SITE_URL',
+    // Machine translation. Without AZURE_TRANSLATOR_KEY, /api/translate answers
+    // 200 with `degraded: 'no_key'` and user-generated content stays in the
+    // language it was written in — the static UI catalogs still switch, so the
+    // app is usable either way. That graceful path is exactly why these have to
+    // be promoted: a missing entry here breaks translation in DEV ONLY, while
+    // production works, which is the hardest kind of bug to place.
+    'TRANSLATION_PROVIDER',
+    'AZURE_TRANSLATOR_KEY',
+    'AZURE_TRANSLATOR_REGION',
+    'AZURE_TRANSLATOR_ENDPOINT',
+    'TRANSLATION_MONTHLY_CHAR_CAP',
+    'TRANSLATION_IP_SALT',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }
@@ -189,8 +296,27 @@ export default defineConfig(({ mode }) => {
       sourcemap: uploadSentrySourceMaps ? ('hidden' as const) : false,
     },
     plugins: [
-      react(),
+      react({
+        babel: {
+          // Lingui's macros are compile-time only. `t\`Save\`` and <Trans> are
+          // rewritten here into plain runtime calls carrying the English source
+          // as the message id, and nothing of @lingui/*/macro survives into the
+          // bundle.
+          //
+          // Deliberately NOT @lingui/vite-plugin: that package pulls
+          // @rolldown/plugin-babel, which peer-depends on Babel 8, while
+          // vite-plugin-pwa's workbox-build pins Babel 7 — the install does not
+          // resolve. Its only job is importing .po files directly, and the
+          // `lingui compile` step in `npm run build` already produces the
+          // compiled ES-module catalogs, which is the shape the service worker
+          // needs anyway.
+          plugins: ['@lingui/babel-plugin-lingui-macro'],
+        },
+      }),
       edgeApiPlugin(openaiKey),
+      preconnectPlugin(env.VITE_SUPABASE_URL),
+      routeChunkPreloadPlugin(),
+      imageManifestPlugin(resolve(process.cwd(), 'public/_img/manifest.json')),
       // ANALYZE=1 npm run build -> dist/stats.html treemap of the bundle.
       Boolean(process.env.ANALYZE) &&
         visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: false }),
@@ -210,7 +336,12 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 2 * 1024 * 1024, // 2 MB
           // png deliberately absent: photos/logos are served as webp over the
           // network with HTTP caching; only the two PWA icons are precached.
-          globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'pwa-192x192.png', 'pwa-512x512.png'],
+          globPatterns: [
+            '**/*.{js,css,html,ico,svg,woff2}',
+            'pwa-192x192.png',
+            'pwa-512x512.png',
+            'favicon-*.png', // 5.7 KB total, and the tab icon is the one asset an offline load still shows
+          ],
           // Any .html sitting in public/ gets precached by the pattern above,
           // and Workbox's precache route defaults to cleanURLs: true — so a
           // file at public/auth/callback.html silently answers /auth/callback

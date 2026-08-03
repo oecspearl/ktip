@@ -9,12 +9,15 @@ import {
   PHASE_COLORS,
   PHASE_LABELS,
 } from '../../lib/constants'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 interface TimelineItemDetailProps {
   item: TimelineItem
 }
 
 export function TimelineItemDetail({ item }: TimelineItemDetailProps) {
+    const { t, i18n } = useLingui()
   const isGrant = item.kind === 'grant_application'
   const statusLabel = isGrant
     ? (GRANT_APPLICATION_STATUS_LABELS[item.currentKey] ?? item.currentKey)
@@ -29,7 +32,7 @@ export function TimelineItemDetail({ item }: TimelineItemDetailProps) {
       <div className="flex items-start justify-between gap-3 mb-6">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide text-ktip-sand-500 mb-1">
-            {isGrant ? 'Grant Application' : 'Project'}
+            {isGrant ? t`Grant Application` : t`Project`}
           </p>
           <Link
             to={item.href}
@@ -48,7 +51,7 @@ export function TimelineItemDetail({ item }: TimelineItemDetailProps) {
       <Stepper
         className="mb-2"
         steps={item.stages.map((stage) => ({
-          label: stage.label,
+          label: resolveCopy(i18n, stage.label),
           sublabel: stage.reachedAt ? formatDate(stage.reachedAt, 'PP') : '—',
         }))}
         currentStep={item.currentIndex}
@@ -59,10 +62,16 @@ export function TimelineItemDetail({ item }: TimelineItemDetailProps) {
 
       {/* Footer */}
       <div className="flex items-center justify-between gap-3 pt-4 mt-2 border-t border-ktip-sand-100 text-sm text-ktip-sand-500">
-        <span>Started {formatDate(item.startAt, 'PP')}</span>
+        <span>
+          <Trans>Started {formatDate(item.startAt, 'PP')}</Trans>
+        </span>
         {item.isTerminal && item.endAt && (
           <span>
-            {isGrant ? 'Decided' : 'Launched'} {formatDate(item.endAt, 'PP')}
+            {isGrant ? (
+              <Trans>Decided {formatDate(item.endAt, 'PP')}</Trans>
+            ) : (
+              <Trans>Launched {formatDate(item.endAt, 'PP')}</Trans>
+            )}
           </span>
         )}
       </div>

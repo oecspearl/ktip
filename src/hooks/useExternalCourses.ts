@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { keys } from '../queries/keys'
 import type { ExternalCourse } from '../types'
 
@@ -21,7 +23,7 @@ export function useExternalCourses(filters?: {
   const fetchCourses = async (): Promise<ExternalCourse[]> => {
     const res = await fetch('/api/ktip/catalog')
     const body = await res.json().catch(() => ({}))
-    if (!res.ok) throw new Error(body.error || 'Could not load courses')
+    if (!res.ok) throw new Error(body.error || i18n._(msg`Could not load courses`))
     const items = (body.items as ExternalCourse[]) || []
     return [...items].sort((a, b) => a.title.localeCompare(b.title))
   }

@@ -21,19 +21,33 @@ import { analytics } from '../../hooks/useAnalytics'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
 import { OAuthButtons } from '../../components/auth/OAuthButtons'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 const STEPS = [
-  { title: 'Account', caption: 'Join the Caribbean’s knowledge and innovation network.' },
-  { title: 'About You', caption: 'Tell your story — connect across the OECS.' },
-  { title: 'Skills & Collaboration', caption: 'Find collaborators. Build what’s next.' },
+  { title: msg`Account`, caption: msg`Join the Caribbean’s knowledge and innovation network.` },
+  { title: msg`About You`, caption: msg`Tell your story — connect across the OECS.` },
+  { title: msg`Skills & Collaboration`, caption: msg`Find collaborators. Build what’s next.` },
 ]
 
-const HEADINGS = ['Create an account', 'About you', 'Skills & collaboration']
+const HEADINGS = [msg`Create an account`, msg`About you`, msg`Skills & collaboration`]
 
 // Stops the picker offering a future date. The schema rejects one anyway.
 const TODAY_ISO = todayIso()
 
+// Every required step-1 field, marked touched at once when the user tries to
+// advance with errors still outstanding.
+const ALL_STEP1_TOUCHED: Record<string, boolean> = {
+  display_name: true,
+  email: true,
+  password: true,
+  confirm_password: true,
+  date_of_birth: true,
+  role: true,
+}
+
 export default function SignupPage() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
 
   const [step, setStep] = useState(1)
@@ -42,6 +56,7 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
 
@@ -68,6 +83,7 @@ export default function SignupPage() {
     display_name: displayName,
     email,
     password,
+    confirm_password: confirmPassword,
     role: selectedRole,
     date_of_birth: dateOfBirth,
   }
@@ -84,6 +100,10 @@ export default function SignupPage() {
     return fieldErrors
   }
 
+  // Derived rather than read off `errors`, so the message clears the moment
+  // either password field changes instead of waiting for the next blur.
+  const mismatch = confirmPassword.length > 0 && confirmPassword !== password
+
   // Live per-field error shown only once the field is touched
   const visibleError = (field: string): string | undefined =>
     touched[field] ? errors[field] : undefined
@@ -98,7 +118,7 @@ export default function SignupPage() {
       const fieldErrors = validateStep1()
       setErrors(fieldErrors)
       if (Object.keys(fieldErrors).length > 0) {
-        setTouched({ display_name: true, email: true, password: true, date_of_birth: true, role: true })
+        setTouched(ALL_STEP1_TOUCHED)
         return
       }
       analytics.funnel('signup', 'step_1_complete', { role: selectedRole })
@@ -130,14 +150,8 @@ export default function SignupPage() {
       })
       setErrors(fieldErrors)
       // Required-field errors live on step 1 — jump back so user sees them
-      if (
-        fieldErrors.display_name ||
-        fieldErrors.email ||
-        fieldErrors.password ||
-        fieldErrors.date_of_birth ||
-        fieldErrors.role
-      ) {
-        setTouched({ display_name: true, email: true, password: true, date_of_birth: true, role: true })
+      if (Object.keys(ALL_STEP1_TOUCHED).some((field) => fieldErrors[field])) {
+        setTouched(ALL_STEP1_TOUCHED)
         setStep(1)
       }
       return
@@ -162,26 +176,28 @@ export default function SignupPage() {
       analytics.conversion('signup_success', { role: selectedRole })
       setEmailSent(true)
     } catch (error: any) {
-      setErrorMessage(error.message || 'Failed to create account. Please try again.')
+      setErrorMessage(error.message || t`Failed to create account. Please try again.`)
     } finally {
       setPending(false)
     }
   }
 
+  const steps = STEPS.map((s) => ({ title: i18n._(s.title), caption: i18n._(s.caption) }))
+
   return (
     <AuthSplitShell
         step={step}
-        steps={STEPS}
-        heading={emailSent ? 'Check your email' : HEADINGS[step - 1]}
+        steps={steps}
+        heading={emailSent ? t`Check your email` : i18n._(HEADINGS[step - 1])}
         subheading={!emailSent && step === 1 ? APP_FULL_NAME : undefined}
         topLink={
           emailSent ? undefined : (
-            <>
+            <Trans>
               Already have an account?{' '}
               <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
                 Log in
               </Link>
-            </>
+            </Trans>
           )
         }
       >
@@ -191,10 +207,12 @@ export default function SignupPage() {
               <CheckCircle size={32} className="text-ktip-tropical-600" />
             </div>
             <p className="text-ktip-sand-600 mb-6 max-w-md mx-auto">
-              We've sent a confirmation link to <strong className="text-ktip-sand-800">{email}</strong>. Click the link to verify your account and get started.
+              <Trans>
+                We've sent a confirmation link to <strong className="text-ktip-sand-800">{email}</strong>. Click the link to verify your account and get started.
+              </Trans>
             </p>
             <Link to="/login">
-              <Button variant="secondary">Go to Sign In</Button>
+              <Button variant="secondary"><Trans>Go to Sign In</Trans></Button>
             </Link>
           </div>
         ) : (
@@ -209,8 +227,8 @@ export default function SignupPage() {
               <div className="space-y-3">
                 <Input
                   type="text"
-                  label="Display Name"
-                  placeholder="Enter your full name"
+                  label={t`Display Name`}
+                  placeholder={t`Enter your full name`}
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   onBlur={() => handleBlur('display_name')}
@@ -222,8 +240,8 @@ export default function SignupPage() {
 
                 <Input
                   type="email"
-                  label="Email"
-                  placeholder="Enter your email"
+                  label={t`Email`}
+                  placeholder={t`Enter your email`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => handleBlur('email')}
@@ -236,8 +254,8 @@ export default function SignupPage() {
                 <div>
                   <Input
                     type="password"
-                    label="Password"
-                    placeholder="Create a password"
+                    label={t`Password`}
+                    placeholder={t`Create a password`}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onBlur={() => handleBlur('password')}
@@ -252,13 +270,30 @@ export default function SignupPage() {
                 </div>
 
                 <Input
+                  type="password"
+                  label={t`Confirm Password`}
+                  placeholder={t`Re-enter your password`}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => handleBlur('confirm_password')}
+                  error={
+                    touched.confirm_password && mismatch
+                      ? t`Passwords do not match`
+                      : visibleError('confirm_password')
+                  }
+                  icon={<Lock size={20} />}
+                  fullWidth
+                  required
+                />
+
+                <Input
                   type="date"
-                  label="Date of Birth"
+                  label={t`Date of Birth`}
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
                   onBlur={() => handleBlur('date_of_birth')}
                   error={visibleError('date_of_birth')}
-                  helperText="Members under 18 get extra protections on their account."
+                  helperText={t`Members under 18 get extra protections on their account.`}
                   icon={<Cake size={20} />}
                   max={TODAY_ISO}
                   fullWidth
@@ -280,23 +315,23 @@ export default function SignupPage() {
                 />
 
                 <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>
-                  Next
+                  <Trans>Next</Trans>
                 </Button>
 
-                <OAuthButtons label="Or sign up with" onError={setErrorMessage} />
+                <OAuthButtons label={t`Or sign up with`} onError={setErrorMessage} />
               </div>
             )}
 
             {step === 2 && (
               <div className="space-y-4">
                 <p className="text-sm text-ktip-sand-600 -mt-1">
-                  Tell us a bit about yourself. These details are optional — you can add or change them later in Settings.
+                  <Trans>Tell us a bit about yourself. These details are optional — you can add or change them later in Settings.</Trans>
                 </p>
 
                 <Input
                   type="text"
-                  label="Organisation"
-                  placeholder="Company, university, or institution"
+                  label={t`Organisation`}
+                  placeholder={t`Company, university, or institution`}
                   value={organization}
                   onChange={(e) => setOrganization(e.target.value)}
                   error={errors.organization}
@@ -307,13 +342,13 @@ export default function SignupPage() {
                 <IndustrySelect value={industry} onChange={setIndustry} />
 
                 <div className="flex flex-col gap-1.5 w-full">
-                  <label className="text-sm font-medium text-ktip-sand-700">Country</label>
+                  <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
                   >
-                    <option value="">Select a country</option>
+                    <option value=""><Trans>Select a country</Trans></option>
                     {[...CARIBBEAN_COUNTRIES].map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
@@ -321,23 +356,23 @@ export default function SignupPage() {
                 </div>
 
                 <Textarea
-                  label="Bio"
+                  label={t`Bio`}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   error={errors.bio}
-                  helperText={`${bio.length}/${LIMITS.MAX_BIO_LENGTH} characters`}
+                  helperText={t`${bio.length}/${LIMITS.MAX_BIO_LENGTH} characters`}
                   rows={4}
                   maxLength={LIMITS.MAX_BIO_LENGTH}
-                  placeholder="Tell us about yourself..."
+                  placeholder={t`Tell us about yourself...`}
                   fullWidth
                 />
 
                 <div className="flex gap-3">
                   <Button type="button" variant="secondary" onClick={() => setStep(1)} icon={<ArrowLeft size={18} />}>
-                    Back
+                    <Trans>Back</Trans>
                   </Button>
                   <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>
-                    Next
+                    <Trans>Next</Trans>
                   </Button>
                 </div>
                 <button
@@ -345,7 +380,7 @@ export default function SignupPage() {
                   onClick={() => setStep(3)}
                   className="w-full text-center text-sm text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors"
                 >
-                  Skip for now
+                  <Trans>Skip for now</Trans>
                 </button>
               </div>
             )}
@@ -353,37 +388,37 @@ export default function SignupPage() {
             {step === 3 && (
               <div className="space-y-4">
                 <p className="text-sm text-ktip-sand-600 -mt-1">
-                  Help others find and collaborate with you. Optional — editable later in Settings.
+                  <Trans>Help others find and collaborate with you. Optional — editable later in Settings.</Trans>
                 </p>
 
                 <TagInput
-                  label="Skills"
+                  label={t`Skills`}
                   values={skills}
                   onChange={setSkills}
                   suggestions={SKILL_SUGGESTIONS}
                   max={LIMITS.MAX_SKILLS}
-                  placeholder="Type a skill and press Enter..."
+                  placeholder={t`Type a skill and press Enter...`}
                 />
 
                 <TagInput
-                  label="Interests"
+                  label={t`Interests`}
                   values={interests}
                   onChange={setInterests}
                   suggestions={INTEREST_SUGGESTIONS}
                   max={LIMITS.MAX_INTERESTS}
-                  placeholder="Type an interest and press Enter..."
+                  placeholder={t`Type an interest and press Enter...`}
                 />
 
                 <div>
                   <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                    Openness to Collaborate
+                    <Trans>Openness to Collaborate</Trans>
                   </label>
                   <CollabSelect values={openTo} onChange={setOpenTo} />
                 </div>
 
                 <div className="flex gap-3">
                   <Button type="button" variant="secondary" onClick={() => setStep(2)} icon={<ArrowLeft size={18} />}>
-                    Back
+                    <Trans>Back</Trans>
                   </Button>
                   <Button
                     type="button"
@@ -392,7 +427,7 @@ export default function SignupPage() {
                     onClick={handleSubmit}
                     icon={<UserPlus size={20} />}
                   >
-                    Create Account
+                    <Trans>Create Account</Trans>
                   </Button>
                 </div>
               </div>

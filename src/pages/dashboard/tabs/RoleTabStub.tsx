@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { expandRoles } from '../../../lib/permissions'
 import type { UserRole } from '../../../types'
+import { Trans } from '@lingui/react/macro'
 
 /**
  * Placeholder for a role-gated dashboard tab. The gating is real — typing the
@@ -44,7 +45,7 @@ export function RoleTabStub({
         </div>
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">{title}</h2>
         <p className="text-ktip-sand-600 max-w-md mx-auto">{blurb}</p>
-        <p className="text-xs text-ktip-sand-400 mt-4">Coming soon</p>
+        <p className="text-xs text-ktip-sand-400 mt-4"><Trans>Coming soon</Trans></p>
       </div>
     </div>
   )

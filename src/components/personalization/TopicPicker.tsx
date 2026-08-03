@@ -3,6 +3,7 @@ import { TagInput } from '../ui/TagInput'
 import { useMergedTagVocabulary } from '../../hooks/useTagVocabulary'
 import { sanitizeTag } from '../../lib/utils'
 import { CONTENT_TAG_SUGGESTIONS, LIMITS } from '../../lib/constants'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface TopicPickerProps {
   values: string[]
@@ -24,6 +25,7 @@ const VISIBLE_CHIPS = 40
  * a topic with one item behind it.
  */
 export function TopicPicker({ values, onChange, max = LIMITS.MAX_INTERESTS * 2 }: TopicPickerProps) {
+    const { t } = useLingui()
   const { tags, loading } = useMergedTagVocabulary()
 
   const toggle = (tag: string) => {
@@ -48,8 +50,7 @@ export function TopicPicker({ values, onChange, max = LIMITS.MAX_INTERESTS * 2 }
         </div>
       ) : visible.length === 0 ? (
         <p className="text-sm text-ktip-sand-500 py-2">
-          No tagged content yet. Add your own topics below — they will start matching as
-          content is tagged.
+          <Trans>No tagged content yet. Add your own topics below — they will start matching as content is tagged.</Trans>
         </p>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -112,9 +113,9 @@ export function TopicPicker({ values, onChange, max = LIMITS.MAX_INTERESTS * 2 }
           }}
           suggestions={CONTENT_TAG_SUGGESTIONS.filter((s) => !values.includes(s))}
           max={max}
-          label="Add your own"
-          description="Anything not listed above. Matches content tagged with the same word."
-          placeholder="e.g. blue economy"
+          label={t`Add your own`}
+          description={t`Anything not listed above. Matches content tagged with the same word.`}
+          placeholder={t`e.g. blue economy`}
         />
       </div>
     </div>

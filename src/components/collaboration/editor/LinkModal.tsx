@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Editor } from '@tiptap/core'
 import { Modal } from '../../ui/Modal'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface LinkModalProps {
   open: boolean
@@ -9,6 +10,7 @@ interface LinkModalProps {
 }
 
 export function LinkModal({ open, onClose, editor }: LinkModalProps) {
+    const { t } = useLingui()
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
 
@@ -67,10 +69,10 @@ export function LinkModal({ open, onClose, editor }: LinkModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Insert Link" size="sm">
+    <Modal open={open} onClose={onClose} title={t`Insert Link`} size="sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-ktip-sand-700 mb-1">URL</label>
+          <label className="block text-sm font-medium text-ktip-sand-700 mb-1"><Trans>URL</Trans></label>
           <input
             type="url"
             value={url}
@@ -81,13 +83,13 @@ export function LinkModal({ open, onClose, editor }: LinkModalProps) {
         </div>
         <div>
           <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-            Display Text <span className="text-ktip-sand-400">(optional)</span>
+            <Trans>Display Text</Trans> <span className="text-ktip-sand-400"><Trans>(optional)</Trans></span>
           </label>
           <input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Link text"
+            placeholder={t`Link text`}
             className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
           />
         </div>
@@ -96,21 +98,21 @@ export function LinkModal({ open, onClose, editor }: LinkModalProps) {
             type="submit"
             className="px-4 py-2 btn-brand text-sm font-medium rounded-lg"
           >
-            Insert Link
+            <Trans>Insert Link</Trans>
           </button>
           <button
             type="button"
             onClick={handleRemove}
             className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
-            Remove Link
+            <Trans>Remove Link</Trans>
           </button>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm text-ktip-sand-600 hover:bg-ktip-sand-100 rounded-lg transition-colors"
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
         </div>
       </form>

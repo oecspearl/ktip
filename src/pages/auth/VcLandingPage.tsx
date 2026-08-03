@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useToast } from '../../contexts/ToastContext'
 import { analytics } from '../../hooks/useAnalytics'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useLingui } from '@lingui/react/macro'
 
 /**
  * Virtual Campus handoff landing page.
@@ -21,11 +22,12 @@ import { usePageTitle } from '../../hooks/usePageTitle'
  * request goes out, so a shared machine's history never holds a live credential.
  */
 export default function VcLandingPage() {
-  usePageTitle('Signing in…')
+    const { t } = useLingui()
+  usePageTitle(t`Signing in…`)
   const navigate = useNavigate()
   const toast = useToast()
   const done = useRef(false)
-  const [message, setMessage] = useState('Signing you in…')
+  const [message, setMessage] = useState(t`Signing you in…`)
 
   useEffect(() => {
     if (done.current) return
@@ -40,7 +42,7 @@ export default function VcLandingPage() {
     window.history.replaceState(null, '', '/auth/vc/land')
 
     if (!ticket) {
-      toast.error('That sign-in link is incomplete. Please try again from the Virtual Campus.')
+      toast.error(t`That sign-in link is incomplete. Please try again from the Virtual Campus.`)
       navigate('/login', { replace: true })
       return
     }
@@ -74,21 +76,21 @@ export default function VcLandingPage() {
           provider: 'oecs_virtual_campus',
         })
 
-        setMessage('Building your CV…')
+        setMessage(t`Building your CV…`)
 
         // First-timers land on the CV, because that is the thing that was just
         // created for them and the whole reason the handoff exists. Returning
         // users go where they would normally go.
         if (body.is_new_user) {
-          toast.success('Welcome to KTIP — your CV has been started from your Virtual Campus record.')
+          toast.success(t`Welcome to KTIP — your CV has been started from your Virtual Campus record.`)
           navigate('/cv?welcome=vc', { replace: true })
         } else {
-          toast.success('Welcome back!')
+          toast.success(t`Welcome back!`)
           navigate('/dashboard', { replace: true })
         }
       } catch {
         if (cancelled) return
-        toast.error('That sign-in link has expired. Please try again from the Virtual Campus.')
+        toast.error(t`That sign-in link has expired. Please try again from the Virtual Campus.`)
         navigate('/login', { replace: true })
       }
     }
@@ -103,8 +105,8 @@ export default function VcLandingPage() {
     <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
       <div className="text-center">
         <img
-          src="/ktip-logo.webp"
-          alt="KTIP Logo"
+          src="/ktip-logo-128.webp"
+          alt="KTiP"
           className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
         />
         <p className="mt-4 text-ktip-sand-600">{message}</p>

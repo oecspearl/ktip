@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
+import { useLingui } from '@lingui/react/macro'
 
 export interface DistributionItem {
   label: string
@@ -24,12 +25,13 @@ export interface AnalyticsData {
 }
 
 export function useAdminAnalytics() {
+    const { t } = useLingui()
   const fetchAnalytics = async (): Promise<AnalyticsData> => {
     // Use `as any` to call RPC functions not yet in generated Supabase types
     const rpc = (name: string, params?: any) =>
       (supabase.rpc as any)(name, params).then(
         (r: any) => r,
-        () => ({ data: null, error: { message: 'RPC not available' } })
+        () => ({ data: null, error: { message: t`RPC not available` } })
       )
 
     const [

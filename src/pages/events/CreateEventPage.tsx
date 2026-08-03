@@ -41,6 +41,7 @@ import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
 import { entityPath } from '../../lib/slug'
 import { eventSetupPath, venueSetupPath } from '../../lib/event-slug'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Formats accepted by the document scraper (plus plain text). */
 const DOCUMENT_ACCEPT =
@@ -76,6 +77,7 @@ type EventDraft = {
 
 
 export default function CreateEventPage() {
+    const { t } = useLingui()
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
@@ -223,17 +225,17 @@ export default function CreateEventPage() {
 
   /** Schema field name → the label the user actually sees on the input. */
   const FIELD_LABELS: Record<string, string> = {
-    title: 'Event Title',
-    summary: 'Summary',
-    description: 'Description',
-    tags: 'Tags',
-    event_type: 'Event Type',
-    location: 'Location',
-    start_date: 'Start Date',
-    end_date: 'End Date',
-    capacity: blueprint.capacityLabel || 'Capacity',
-    registration_closes_at: 'Registration closes',
-    team_size: 'Team size',
+    title: t`Event Title`,
+    summary: t`Summary`,
+    description: t`Description`,
+    tags: t`Tags`,
+    event_type: t`Event Type`,
+    location: t`Location`,
+    start_date: t`Start Date`,
+    end_date: t`End Date`,
+    capacity: blueprint.capacityLabel || t`Capacity`,
+    registration_closes_at: t`Registration closes`,
+    team_size: t`Team size`,
   }
 
   /**
@@ -265,21 +267,21 @@ export default function CreateEventPage() {
     const found: Record<string, string> = {}
 
     if (!typeChosen) {
-      found.event_type = 'Pick what kind of event this is'
+      found.event_type = t`Pick what kind of event this is`
       return found
     }
     if (blueprint.endDate === 'required' && !endDate) {
-      found.end_date = 'This event type runs to a finish — say when'
+      found.end_date = t`This event type runs to a finish — say when`
     }
     if (blueprint.capacity === 'required' && !capacity) {
-      found.capacity = `${blueprint.capacityLabel} is required for a ${EVENT_TYPE_LABELS[eventType]}`
+      found.capacity = t`${blueprint.capacityLabel} is required for a ${EVENT_TYPE_LABELS[eventType]}`
     }
     if (blueprint.teamSize && teamSizeMin && teamSizeMax && teamSizeMax < teamSizeMin) {
-      found.team_size = 'The largest team cannot be smaller than the smallest'
+      found.team_size = t`The largest team cannot be smaller than the smallest`
     }
     // A deadline the event has already started past is a deadline nobody can meet
     if (regCloseDate && startDate && regCloseDate > startDate) {
-      found.registration_closes_at = 'Registration cannot close after the event starts'
+      found.registration_closes_at = t`Registration cannot close after the event starts`
     }
     return found
   }
@@ -319,10 +321,13 @@ export default function CreateEventPage() {
       setErrors(fieldErrors)
 
       const named = Object.keys(fieldErrors).map((key) => FIELD_LABELS[key] || key)
+      const fieldCount = named.length
+      const fieldMessage = fieldErrors[Object.keys(fieldErrors)[0]]
+      const fieldList = named.join(', ')
       surfaceError(
-        named.length === 1
-          ? `${named[0]}: ${fieldErrors[Object.keys(fieldErrors)[0]]}`
-          : `Please fix ${named.length} fields before creating this event: ${named.join(', ')}.`
+        fieldCount === 1
+          ? t`${named[0]}: ${fieldMessage}`
+          : t`Please fix ${fieldCount} fields before creating this event: ${fieldList}.`
       )
       return
     }
@@ -386,11 +391,12 @@ export default function CreateEventPage() {
 
       analytics.feature('event', 'created')
       if (attachmentErrors.length > 0) {
+        const failedNames = attachmentErrors.join(', ')
         toast.error(
-          `Event created, but some attachments failed: ${attachmentErrors.join(', ')}. You can add them from the event page.`
+          t`Event created, but some attachments failed: ${failedNames}. You can add them from the event page.`
         )
       } else {
-        toast.success('Event created successfully!')
+        toast.success(t`Event created successfully!`)
       }
       // Most types are a two-step job: the listing, then the thing that makes
       // the listing worth reading. A hackathon's step two is the venue, which
@@ -405,8 +411,8 @@ export default function CreateEventPage() {
     } catch (error: any) {
       // A row-level-security refusal or a missing column arrives here. The toast
       // dismisses itself after 4s, so the banner is the durable copy.
-      toast.error(error.message || 'Failed to create event')
-      surfaceError(error.message || 'Failed to create event')
+      toast.error(error.message || t`Failed to create event`)
+      surfaceError(error.message || t`Failed to create event`)
     } finally {
       setFinishing(false)
     }
@@ -418,13 +424,13 @@ export default function CreateEventPage() {
   return (
     <>
       <PageHero
-        eyebrow="Create New Event"
-        title="New Event"
+        eyebrow={t`Create New Event`}
+        title={t`New Event`}
         imageSeed="events"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Events', href: '/events' },
-          { label: 'Create' },
+          { label: t`Home`, href: '/' },
+          { label: t`Events`, href: '/events' },
+          { label: t`Create` },
         ]}
       />
 
@@ -451,10 +457,10 @@ export default function CreateEventPage() {
                 below are even asked. */}
             <div data-tutorial="event-form-type">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                What kind of event is this? <span className="text-red-500">*</span>
+                <Trans>What kind of event is this?</Trans> <span className="text-red-500">*</span>
               </label>
               <p className="text-xs text-ktip-sand-500 mb-3">
-                This decides what else we ask you for, and what you set up next.
+                <Trans>This decides what else we ask you for, and what you set up next.</Trans>
               </p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {EVENT_TYPE_ORDER.map((type) => {
@@ -503,7 +509,7 @@ export default function CreateEventPage() {
               )}
               {blueprint.setup && typeChosen && (
                 <p className="mt-2 text-xs text-ktip-sand-500">
-                  After you create it, the next screen is where you {blueprint.setup.label}.{' '}
+                  <Trans>After you create it, the next screen is where you {blueprint.setup.label}.</Trans>{' '}
                   {blueprint.setup.blurb}
                 </p>
               )}
@@ -511,8 +517,8 @@ export default function CreateEventPage() {
 
             {/* Title */}
             <Input
-              label="Event Title"
-              placeholder="e.g., Caribbean Tech Summit 2025"
+              label={t`Event Title`}
+              placeholder={t`e.g., Caribbean Tech Summit 2025`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
@@ -522,8 +528,8 @@ export default function CreateEventPage() {
 
             {/* Summary */}
             <Input
-              label="Summary"
-              placeholder="One short sentence shown on the homepage hero (optional)"
+              label={t`Summary`}
+              placeholder={t`One short sentence shown on the homepage hero (optional)`}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={180}
@@ -532,8 +538,8 @@ export default function CreateEventPage() {
 
             {/* Description */}
             <Textarea
-              label="Description"
-              placeholder="Describe your event, agenda, and what participants can expect..."
+              label={t`Description`}
+              placeholder={t`Describe your event, agenda, and what participants can expect...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
@@ -543,8 +549,8 @@ export default function CreateEventPage() {
 
             {/* Tags */}
             <TagInput
-              label="Tags"
-              description="Topics attendees can filter and search by."
+              label={t`Tags`}
+              description={t`Topics attendees can filter and search by.`}
               values={tags}
               onChange={setTags}
               suggestions={CONTENT_TAG_SUGGESTIONS}
@@ -554,10 +560,10 @@ export default function CreateEventPage() {
             {/* Additional Details */}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Additional Details
+                <Trans>Additional Details</Trans>
               </label>
               <p className="text-xs text-ktip-sand-500 mb-2">
-                Optional extra metadata shown under the description — add standalone fields or groups of items
+                <Trans>Optional extra metadata shown under the description — add standalone fields or groups of items</Trans>
               </p>
               <DetailsEditor value={details} onChange={setDetails} />
             </div>
@@ -566,18 +572,18 @@ export default function CreateEventPage() {
             {isAdmin && (
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                  Event Status
+                  <Trans>Event Status</Trans>
                 </label>
                 <select
                   value={eventStatus}
                   onChange={(e) => setEventStatus(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
                 >
-                  <option value="draft">Draft - Not visible to public</option>
-                  <option value="published">Published - Visible to everyone</option>
+                  <option value="draft"><Trans>Draft - Not visible to public</Trans></option>
+                  <option value="published"><Trans>Published - Visible to everyone</Trans></option>
                 </select>
                 <p className="mt-1 text-xs text-ktip-sand-500">
-                  Draft events are only visible to administrators
+                  <Trans>Draft events are only visible to administrators</Trans>
                 </p>
               </div>
             )}
@@ -595,7 +601,7 @@ export default function CreateEventPage() {
                   <div className="flex items-center gap-2">
                     <Video size={18} className="text-ktip-sand-600" />
                     <span className="text-sm text-ktip-sand-700">
-                      This is a virtual event
+                      <Trans>This is a virtual event</Trans>
                     </span>
                   </div>
                 </label>
@@ -605,8 +611,8 @@ export default function CreateEventPage() {
             {/* Location (if not virtual) */}
             {showLocation && (
               <Input
-                label="Location"
-                placeholder="e.g., Innovation Hub, Kingston, Jamaica"
+                label={t`Location`}
+                placeholder={t`e.g., Innovation Hub, Kingston, Jamaica`}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 error={errors.location}
@@ -621,7 +627,7 @@ export default function CreateEventPage() {
               {/* Start Date */}
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                  Start Date <span className="text-red-500">*</span>
+                  <Trans>Start Date</Trans> <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Calendar
@@ -644,7 +650,7 @@ export default function CreateEventPage() {
 
               {/* Start Time */}
               <Input
-                label="Start Time"
+                label={t`Start Time`}
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
@@ -658,11 +664,11 @@ export default function CreateEventPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                    End Date{' '}
+                    <Trans>End Date</Trans>{' '}
                     {blueprint.endDate === 'required' ? (
                       <span className="text-red-500">*</span>
                     ) : (
-                      '(Optional)'
+                      t`(Optional)`
                     )}
                   </label>
                   <div className="relative">
@@ -684,7 +690,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <Input
-                  label="End Time (Optional)"
+                  label={t`End Time (Optional)`}
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
@@ -698,7 +704,7 @@ export default function CreateEventPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                    Registration Closes (Optional)
+                    <Trans>Registration Closes (Optional)</Trans>
                   </label>
                   <div className="relative">
                     <Timer
@@ -718,12 +724,12 @@ export default function CreateEventPage() {
                     <p className="mt-1 text-sm text-red-600">{errors.registration_closes_at}</p>
                   )}
                   <p className="mt-1 text-xs text-ktip-sand-500">
-                    Sign-ups are refused after this. Leave empty to stay open until it starts.
+                    <Trans>Sign-ups are refused after this. Leave empty to stay open until it starts.</Trans>
                   </p>
                 </div>
 
                 <Input
-                  label="Closing Time (Optional)"
+                  label={t`Closing Time (Optional)`}
                   type="time"
                   value={regCloseTime}
                   onChange={(e) => setRegCloseTime(e.target.value)}
@@ -738,7 +744,7 @@ export default function CreateEventPage() {
                 label={blueprint.capacityLabel}
                 type="number"
                 min={1}
-                placeholder="Maximum number of attendees"
+                placeholder={t`Maximum number of attendees`}
                 value={capacity?.toString() || ''}
                 onChange={(e) =>
                   setCapacity(
@@ -757,17 +763,17 @@ export default function CreateEventPage() {
             {blueprint.teamSize && (
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                  Team Size (Optional)
+                  <Trans>Team Size (Optional)</Trans>
                 </label>
                 <p className="text-xs text-ktip-sand-500 mb-2">
-                  Leave both empty if people can enter on their own.
+                  <Trans>Leave both empty if people can enter on their own.</Trans>
                 </p>
                 <div className="grid md:grid-cols-2 gap-4">
                   <Input
-                    label="Smallest team"
+                    label={t`Smallest team`}
                     type="number"
                     min={1}
-                    placeholder="e.g. 2"
+                    placeholder={t`e.g. 2`}
                     value={teamSizeMin?.toString() || ''}
                     onChange={(e) =>
                       setTeamSizeMin(e.target.value ? parseInt(e.target.value) : undefined)
@@ -776,10 +782,10 @@ export default function CreateEventPage() {
                     fullWidth
                   />
                   <Input
-                    label="Largest team"
+                    label={t`Largest team`}
                     type="number"
                     min={1}
-                    placeholder="e.g. 5"
+                    placeholder={t`e.g. 5`}
                     value={teamSizeMax?.toString() || ''}
                     onChange={(e) =>
                       setTeamSizeMax(e.target.value ? parseInt(e.target.value) : undefined)
@@ -802,13 +808,13 @@ export default function CreateEventPage() {
               >
                 <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
                   <Target size={18} className="text-ktip-sand-600" />
-                  Submissions
+                  <Trans>Submissions</Trans>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                      Submission Deadline (Optional)
+                      <Trans>Submission Deadline (Optional)</Trans>
                     </label>
                     <div className="relative">
                       <Calendar
@@ -826,7 +832,7 @@ export default function CreateEventPage() {
                   </div>
 
                   <Input
-                    label="Deadline Time (Optional)"
+                    label={t`Deadline Time (Optional)`}
                     type="time"
                     value={submissionTime}
                     onChange={(e) => setSubmissionTime(e.target.value)}
@@ -835,8 +841,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <p className="text-xs text-ktip-sand-500">
-                  Participants submit their work — with their own supporting files — from the event
-                  page, up until the deadline above.
+                  <Trans>Participants submit their work — with their own supporting files — from the event page, up until the deadline above.</Trans>
                 </p>
               </div>
             )}
@@ -844,11 +849,10 @@ export default function CreateEventPage() {
             {/* Documents */}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Documents (Optional)
+                <Trans>Documents (Optional)</Trans>
               </label>
               <p className="text-xs text-ktip-sand-500 mb-2">
-                Briefs, rules, datasets or any other files attendees should have. Uploaded once the
-                event is created.
+                <Trans>Briefs, rules, datasets or any other files attendees should have. Uploaded once the event is created.</Trans>
               </p>
 
               <input
@@ -865,7 +869,9 @@ export default function CreateEventPage() {
 
               {documents.length > 0 && (
                 <div className="space-y-2 mb-3">
-                  {documents.map((file, index) => (
+                  {documents.map((file, index) => {
+                    const sizeMb = (file.size / 1024 / 1024).toFixed(1)
+                    return (
                     <div
                       key={`${file.name}-${file.size}`}
                       className="flex items-center gap-3 border border-ktip-sand-200 rounded-xl px-3 py-2"
@@ -875,18 +881,19 @@ export default function CreateEventPage() {
                         {file.name}
                       </span>
                       <span className="flex-shrink-0 text-xs text-ktip-sand-500">
-                        {(file.size / 1024 / 1024).toFixed(1)} MB
+                        {t`${sizeMb} MB`}
                       </span>
                       <button
                         type="button"
                         onClick={() => setDocuments((prev) => prev.filter((_, i) => i !== index))}
                         className="p-1 text-ktip-sand-400 hover:text-red-600 transition-colors"
-                        title="Remove file"
+                        title={t`Remove file`}
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
 
@@ -896,7 +903,7 @@ export default function CreateEventPage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-ktip-sand-300 rounded-xl text-sm text-ktip-sand-600 hover:border-ktip-ocean-400 hover:text-ktip-ocean-600 transition-colors"
               >
                 <Upload size={16} />
-                Add document files
+                <Trans>Add document files</Trans>
               </button>
             </div>
 
@@ -924,10 +931,10 @@ export default function CreateEventPage() {
                 fullWidth
               >
                 {finishing
-                  ? 'Uploading attachments…'
+                  ? t`Uploading attachments…`
                   : blueprint.setup && typeChosen
-                    ? `Next: ${blueprint.setup.label}`
-                    : 'Create Event'}
+                    ? t`Next: ${blueprint.setup.label}`
+                    : t`Create Event`}
               </Button>
               {/* Cancel is the one exit that means "I am not making this",
                   so it is also the one that throws the draft away. Navigating
@@ -941,7 +948,7 @@ export default function CreateEventPage() {
                 disabled={loading || finishing}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >
-                Cancel
+                <Trans>Cancel</Trans>
               </button>
             </div>
           </form>

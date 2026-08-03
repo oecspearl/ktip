@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import { Clock, MapPin } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans } from '@lingui/react/macro'
 
 interface EventScheduleTimelineProps {
   items: EventScheduleItem[]
@@ -43,7 +44,7 @@ export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
     <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="w-5 h-5 text-ktip-ocean-600" />
-        <h2 className="text-xl font-display font-bold text-ktip-sand-900">Schedule</h2>
+        <h2 className="text-xl font-display font-bold text-ktip-sand-900"><Trans>Schedule</Trans></h2>
       </div>
 
       {items.length > 0 ? (
@@ -128,7 +129,7 @@ export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
       ) : (
         <div className="text-center py-8">
           <Clock className="w-10 h-10 text-ktip-sand-300 mx-auto mb-3" />
-          <p className="text-ktip-sand-500">Schedule will be announced soon.</p>
+          <p className="text-ktip-sand-500"><Trans>Schedule will be announced soon.</Trans></p>
         </div>
       )}
     </div>

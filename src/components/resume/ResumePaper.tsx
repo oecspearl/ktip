@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Maximize2, Minimize2 } from 'lucide-react'
+import { useLingui } from '@lingui/react/macro'
 
 /**
  * The desk the A4 sheet sits on.
@@ -33,6 +34,7 @@ const A4_WIDTH_PX = (210 * 96) / 25.4
 const DESK_PADDING = 48
 
 export function ResumePaper({ children }: { children: ReactNode }) {
+    const { t } = useLingui()
   const deskRef = useRef<HTMLDivElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'fit' | 'full'>(() =>
@@ -75,7 +77,7 @@ export function ResumePaper({ children }: { children: ReactNode }) {
           className="inline-flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-3 py-1.5 text-xs font-semibold text-ktip-sand-600 transition-colors hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
         >
           {mode === 'fit' ? <Maximize2 size={13} /> : <Minimize2 size={13} />}
-          {mode === 'fit' ? 'Actual size' : 'Fit to width'}
+          {mode === 'fit' ? t`Actual size` : t`Fit to width`}
         </button>
       </div>
 

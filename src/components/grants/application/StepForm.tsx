@@ -5,6 +5,7 @@ import { ApplicationDocumentsField } from './ApplicationDocumentsField'
 import { HelpCircle } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import type { RequiredDocument } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface StepFormProps {
   step: StepConfig
@@ -30,29 +31,33 @@ export function StepForm({
   requiredDocuments,
   onSaveDraft,
 }: StepFormProps) {
+  const { i18n } = useLingui()
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-ktip-sand-900">{step.title}</h3>
-        <p className="text-sm text-ktip-sand-500 mt-1">{step.description}</p>
+        <h3 className="text-lg font-semibold text-ktip-sand-900">{i18n._(step.title)}</h3>
+        <p className="text-sm text-ktip-sand-500 mt-1">{i18n._(step.description)}</p>
       </div>
 
       <div className="space-y-5">
         {step.fields.map((field) => {
           const value = data[field.name] || ''
           const error = errors?.[field.name]
+          const label = i18n._(field.label)
+          const helpText = field.helpText ? i18n._(field.helpText) : undefined
+          const placeholder = field.placeholder ? i18n._(field.placeholder) : undefined
 
           return (
             <div key={field.name}>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1.5">
-                {field.label}
+                {label}
                 {field.required && <span className="text-red-500 ml-0.5">*</span>}
               </label>
 
-              {field.helpText && (
+              {helpText && (
                 <p className="text-xs text-ktip-sand-400 mb-1.5 flex items-start gap-1">
                   <HelpCircle size={12} className="shrink-0 mt-0.5" />
-                  {field.helpText}
+                  {helpText}
                 </p>
               )}
 
@@ -67,17 +72,17 @@ export function StepForm({
                   <RichTextField
                     value={value}
                     onChange={(html) => onChange(field.name, html)}
-                    placeholder={field.placeholder}
+                    placeholder={placeholder}
                     minHeight={`${(field.rows || 4) * 28}px`}
                     error={!!error}
                   />
                   {grantTitle && (
                     <AIFieldActions
                       grantTitle={grantTitle}
-                      fieldLabel={field.label}
+                      fieldLabel={label}
                       fieldValue={value}
-                      helpText={field.helpText}
-                      placeholder={field.placeholder}
+                      helpText={helpText}
+                      placeholder={placeholder}
                       applicationTitle={applicationTitle}
                       existingData={data}
                       onReplace={(html) => onChange(field.name, html)}
@@ -93,7 +98,7 @@ export function StepForm({
                     error ? 'border-red-300' : 'border-ktip-sand-200'
                   )}
                 >
-                  <option value="">Select...</option>
+                  <option value=""><Trans>Select...</Trans></option>
                   {(field.options || []).map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -103,7 +108,7 @@ export function StepForm({
                   type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
                   value={value}
                   onChange={(e) => onChange(field.name, e.target.value)}
-                  placeholder={field.placeholder}
+                  placeholder={placeholder}
                   className={cn(
                     'w-full px-3 py-2.5 border rounded-xl text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500',
                     error ? 'border-red-300' : 'border-ktip-sand-200'

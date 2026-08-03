@@ -38,6 +38,7 @@ import {
 } from 'lucide-react'
 import type { CollabInvite, CollabResourceType, Profile } from '../types'
 import { DiamondAvatar } from '../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 const RESOURCE_ICON: Record<CollabResourceType, typeof Pen> = {
   whiteboard: Pen,
@@ -127,7 +128,8 @@ function AcceptDecline({
  * collaboration shares were only ever announced by a notification.
  */
 export default function InvitationsPage() {
-  usePageTitle('Invitations')
+    const { t } = useLingui()
+  usePageTitle(t`Invitations`)
   const auth = useAuth()
   const navigate = useNavigate()
   const myId = auth.user?.id
@@ -179,12 +181,12 @@ export default function InvitationsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Your Network"
-        title="Invitations"
-        subtitle="Collaboration, project, event and connection requests waiting on you."
+        eyebrow={t`Your Network`}
+        title={t`Invitations`}
+        subtitle={t`Collaboration, project, event and connection requests waiting on you.`}
         imageSeed="invitations"
         compact
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Invitations' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Invitations` }]}
       />
 
       <div className="bg-ktip-sand-50 py-8 min-h-[50vh]">
@@ -200,14 +202,14 @@ export default function InvitationsPage() {
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Inbox size={32} className="text-ktip-sand-400" />
               </div>
-              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1">No invitations</h3>
+              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1"><Trans>No invitations</Trans></h3>
               <p className="text-sm text-ktip-sand-500">
-                When someone invites you to collaborate, it will show up here.
+                <Trans>When someone invites you to collaborate, it will show up here.</Trans>
               </p>
             </div>
           ) : (
             <div data-tutorial="invitations-list">
-              <Section icon={Inbox} title="Collaboration invitations" count={collabCount}>
+              <Section icon={Inbox} title={t`Collaboration invitations`} count={collabCount}>
                 {collab.invites?.map((invite) => {
                   const Icon = RESOURCE_ICON[invite.resource_type]
                   return (
@@ -216,7 +218,7 @@ export default function InvitationsPage() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-ktip-sand-900">
                           <span className="font-semibold">
-                            {invite.inviter?.display_name || 'Someone'}
+                            {invite.inviter?.display_name || t`Someone`}
                           </span>{' '}
                           invited you to the {invite.resource_type}{' '}
                           <span className="font-semibold">{invite.resource_title}</span>
@@ -225,7 +227,7 @@ export default function InvitationsPage() {
                           <Icon size={12} />
                           <span className="inline-flex items-center gap-1">
                             {invite.permission === 'edit' ? <Pencil size={11} /> : <Eye size={11} />}
-                            {invite.permission === 'edit' ? 'Can edit' : 'View only'}
+                            {invite.permission === 'edit' ? t`Can edit` : t`View only`}
                           </span>
                           · {formatRelativeTime(invite.created_at)}
                         </p>
@@ -240,7 +242,7 @@ export default function InvitationsPage() {
                 })}
               </Section>
 
-              <Section icon={FolderKanban} title="Project team invitations" count={projectCount}>
+              <Section icon={FolderKanban} title={t`Project team invitations`} count={projectCount}>
                 {projectInvites.invites?.map((member: any) => (
                   <Row key={member.id}>
                     <div className="w-9 h-9 rounded-full bg-ktip-tropical-100 text-ktip-tropical-700 flex items-center justify-center shrink-0">
@@ -250,7 +252,7 @@ export default function InvitationsPage() {
                       <p className="text-sm text-ktip-sand-900">
                         You've been invited to join{' '}
                         <span className="font-semibold">
-                          {member.project?.title || 'a project'}
+                          {member.project?.title || t`a project`}
                         </span>{' '}
                         as {member.role}
                       </p>
@@ -279,7 +281,7 @@ export default function InvitationsPage() {
 
               <Section
                 icon={FolderKanban}
-                title="Requests to collaborate on your projects"
+                title={t`Requests to collaborate on your projects`}
                 count={joinRequestCount}
               >
                 {joinRequests.requests?.map((req) => (
@@ -288,10 +290,10 @@ export default function InvitationsPage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-ktip-sand-900">
                         <span className="font-semibold">
-                          {req.requester?.display_name || 'Someone'}
+                          {req.requester?.display_name || t`Someone`}
                         </span>{' '}
                         wants to join{' '}
-                        <span className="font-semibold">{req.project?.title || 'your project'}</span>
+                        <span className="font-semibold">{req.project?.title || t`your project`}</span>
                       </p>
                       {req.message && (
                         <p className="mt-1 text-xs italic text-ktip-sand-600">"{req.message}"</p>
@@ -331,7 +333,7 @@ export default function InvitationsPage() {
 
               <Section
                 icon={CalendarCheck}
-                title="Registrations waiting on you"
+                title={t`Registrations waiting on you`}
                 count={eventRegistrationCount}
               >
                 {eventRegistrations.registrations?.map((reg) => (
@@ -340,10 +342,10 @@ export default function InvitationsPage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-ktip-sand-900">
                         <span className="font-semibold">
-                          {reg.user?.display_name || 'Someone'}
+                          {reg.user?.display_name || t`Someone`}
                         </span>{' '}
                         wants to attend{' '}
-                        <span className="font-semibold">{reg.event?.title || 'your event'}</span> as a{' '}
+                        <span className="font-semibold">{reg.event?.title || t`your event`}</span> as a{' '}
                         {(ATTENDANCE_TYPE_LABELS[reg.attendance_type] || 'participant').toLowerCase()}
                       </p>
                       <p className="text-xs text-ktip-sand-500 mt-1">
@@ -379,14 +381,14 @@ export default function InvitationsPage() {
                 ))}
               </Section>
 
-              <Section icon={UserPlus} title="Connection requests" count={connectionCount}>
+              <Section icon={UserPlus} title={t`Connection requests`} count={connectionCount}>
                 {connectionRequests.requests?.map((request) => (
                   <Row key={request.id}>
                     <Avatar profile={request.requester} />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-ktip-sand-900">
                         <span className="font-semibold">
-                          {request.requester?.display_name || 'Someone'}
+                          {request.requester?.display_name || t`Someone`}
                         </span>{' '}
                         wants to connect with you
                       </p>
@@ -427,7 +429,7 @@ export default function InvitationsPage() {
                 ))}
               </Section>
 
-              <Section icon={Send} title="Sent — awaiting a response" count={sentCount}>
+              <Section icon={Send} title={t`Sent — awaiting a response`} count={sentCount}>
                 {sent.invites?.map((invite) => {
                   const Icon = RESOURCE_ICON[invite.resource_type]
                   return (
@@ -436,7 +438,7 @@ export default function InvitationsPage() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-ktip-sand-900">
                           <span className="font-semibold">
-                            {invite.recipient?.display_name || 'Someone'}
+                            {invite.recipient?.display_name || t`Someone`}
                           </span>{' '}
                           hasn't answered yet
                         </p>
@@ -470,7 +472,7 @@ export default function InvitationsPage() {
                         Emailed <span className="font-semibold">{invite.email}</span>
                       </p>
                       <p className="text-xs text-ktip-sand-500 mt-1">
-                        {invite.resource_title || 'KTIP invitation'} · expires{' '}
+                        {invite.resource_title || t`KTIP invitation`} · expires{' '}
                         {formatRelativeTime(invite.expires_at)}
                       </p>
                     </div>

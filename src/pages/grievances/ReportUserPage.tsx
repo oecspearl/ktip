@@ -14,8 +14,10 @@ import { Flag, AlertTriangle, User, ShieldAlert, CheckCircle2 } from 'lucide-rea
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function ReportUserPage() {
+    const { t, i18n } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -24,7 +26,7 @@ export default function ReportUserPage() {
   const { profile: reportedUser, loading: reportedUserLoading } = useProfile(params.userId)
   const { createGrievance, loading } = useCreateGrievance()
 
-  usePageTitle('Report User')
+  usePageTitle(t`Report User`)
 
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
@@ -39,21 +41,21 @@ export default function ReportUserPage() {
     const fieldErrors: Record<string, string> = {}
 
     if (!category) {
-      fieldErrors.category = 'Please select a category'
+      fieldErrors.category = t`Please select a category`
     }
 
     if (!description || description.length < 20) {
-      fieldErrors.description = 'Description must be at least 20 characters'
+      fieldErrors.description = t`Description must be at least 20 characters`
     } else if (description.length > 5000) {
-      fieldErrors.description = 'Description too long'
+      fieldErrors.description = t`Description too long`
     }
 
     if (evidenceUrl && !/^https?:\/\/.+/.test(evidenceUrl)) {
-      fieldErrors.evidence_url = 'Please enter a valid URL'
+      fieldErrors.evidence_url = t`Please enter a valid URL`
     }
 
     if (context && context.length > 1000) {
-      fieldErrors.context = 'Context too long (max 1000 characters)'
+      fieldErrors.context = t`Context too long (max 1000 characters)`
     }
 
     setErrors(fieldErrors)
@@ -79,25 +81,29 @@ export default function ReportUserPage() {
         evidence_url: evidenceUrl || undefined,
         context: context || undefined,
       })
-      toast.success('Report submitted successfully. Our team will review it shortly.')
+      toast.success(t`Report submitted successfully. Our team will review it shortly.`)
       setSubmitted(true)
       navigate('/grievances/my-reports')
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit report')
+      toast.error(err.message || t`Failed to submit report`)
     }
   }
 
-  const displayName = reportedUser?.display_name || 'Unknown User'
+  const displayName = reportedUser?.display_name || t`Unknown User`
+  const descriptionLength = description.length
+  const categoryLabel = category in GRIEVANCE_CATEGORY_LABELS
+    ? i18n._(GRIEVANCE_CATEGORY_LABELS[category])
+    : category
 
   return (
     <>
       <PageHero
-        eyebrow="Community Safety"
-        title="Report a User"
-        subtitle="Submit a report about inappropriate behavior or policy violations"
+        eyebrow={t`Community Safety`}
+        title={t`Report a User`}
+        subtitle={t`Submit a report about inappropriate behavior or policy violations`}
         imageSeed="grievances"
         compact
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Report User' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Report User` }]}
       />
 
       <div className="w-full max-w-page mx-auto px-4 py-8">
@@ -106,13 +112,15 @@ export default function ReportUserPage() {
           <div className="flex items-start gap-3 p-4 bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl mb-6">
             <CheckCircle2 size={20} className="text-ktip-tropical-700 shrink-0 mt-0.5" />
             <div className="text-sm text-ktip-tropical-900">
-              <p className="font-medium mb-1">Report submitted</p>
+              <p className="font-medium mb-1"><Trans>Report submitted</Trans></p>
               <p>
-                Redirecting you to{' '}
-                <Link to="/grievances/my-reports" className="underline font-medium">
-                  My Reports
-                </Link>
-                . Click the link if you are not redirected automatically.
+                <Trans>
+                  Redirecting you to{' '}
+                  <Link to="/grievances/my-reports" className="underline font-medium">
+                    My Reports
+                  </Link>
+                  . Click the link if you are not redirected automatically.
+                </Trans>
               </p>
             </div>
           </div>
@@ -122,8 +130,8 @@ export default function ReportUserPage() {
         <div className="flex items-start gap-3 p-4 bg-ktip-sun-50 border border-ktip-sun-200 rounded-xl mb-6">
           <AlertTriangle size={20} className="text-ktip-sun-600 shrink-0 mt-0.5" />
           <div className="text-sm text-ktip-sun-800">
-            <p className="font-medium mb-1">Please use this feature responsibly</p>
-            <p>False or malicious reports may result in action against your account. All reports are reviewed by our administration team.</p>
+            <p className="font-medium mb-1"><Trans>Please use this feature responsibly</Trans></p>
+            <p><Trans>False or malicious reports may result in action against your account. All reports are reviewed by our administration team.</Trans></p>
           </div>
         </div>
 
@@ -132,7 +140,7 @@ export default function ReportUserPage() {
           <div className="flex items-center gap-4 p-4 bg-ktip-sand-50 border border-ktip-sand-200 rounded-xl mb-6">
             <DiamondAvatar name={displayName} size={48} />
             <div>
-              <p className="text-sm text-ktip-sand-500">Reporting user</p>
+              <p className="text-sm text-ktip-sand-500"><Trans>Reporting user</Trans></p>
               <p className="font-semibold text-ktip-sand-900">{displayName}</p>
             </div>
           </div>
@@ -143,9 +151,9 @@ export default function ReportUserPage() {
             <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <User size={32} className="text-ktip-sand-400" />
             </div>
-            <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-2">User not found</h2>
-            <p className="text-ktip-sand-600 mb-6">This user doesn't exist or their profile is unavailable.</p>
-            <Button onClick={() => navigate('/')}>Back to Home</Button>
+            <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-2"><Trans>User not found</Trans></h2>
+            <p className="text-ktip-sand-600 mb-6"><Trans>This user doesn't exist or their profile is unavailable.</Trans></p>
+            <Button onClick={() => navigate('/')}><Trans>Back to Home</Trans></Button>
           </div>
         )}
 
@@ -156,16 +164,16 @@ export default function ReportUserPage() {
               {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                  Category of Infringement <span className="text-red-500">*</span>
+                  <Trans>Category of Infringement</Trans> <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 transition-all text-ktip-sand-900"
                 >
-                  <option value="">Select a category...</option>
+                  <option value=""><Trans>Select a category...</Trans></option>
                   {Object.entries(GRIEVANCE_CATEGORY_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                    <option key={value} value={value}>{i18n._(label)}</option>
                   ))}
                 </select>
                 {errors.category && (
@@ -175,35 +183,35 @@ export default function ReportUserPage() {
 
               {/* Description */}
               <Textarea
-                label="Description *"
-                placeholder="Please describe the incident in detail. Include what happened, when it occurred, and any relevant context that can help our team investigate..."
+                label={t`Description *`}
+                placeholder={t`Please describe the incident in detail. Include what happened, when it occurred, and any relevant context that can help our team investigate...`}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 error={errors.description}
-                helperText={`${description.length}/5000 characters (minimum 20)`}
+                helperText={t`${descriptionLength}/5000 characters (minimum 20)`}
                 rows={6}
                 fullWidth
               />
 
               {/* Evidence URL */}
               <Input
-                label="Evidence URL (optional)"
+                label={t`Evidence URL (optional)`}
                 placeholder="https://example.com/screenshot-or-link"
                 value={evidenceUrl}
                 onChange={(e) => setEvidenceUrl(e.target.value)}
                 error={errors.evidence_url}
-                helperText="Link to a screenshot, post, or other evidence supporting your report"
+                helperText={t`Link to a screenshot, post, or other evidence supporting your report`}
                 fullWidth
               />
 
               {/* Context */}
               <Input
-                label="Where did this happen? (optional)"
-                placeholder="e.g., In a forum post, during a message exchange, on a project page..."
+                label={t`Where did this happen? (optional)`}
+                placeholder={t`e.g., In a forum post, during a message exchange, on a project page...`}
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
                 error={errors.context}
-                helperText="Help us locate the incident by describing where it occurred on the platform"
+                helperText={t`Help us locate the incident by describing where it occurred on the platform`}
                 fullWidth
               />
 
@@ -214,7 +222,7 @@ export default function ReportUserPage() {
                   type="button"
                   onClick={() => navigate(-1)}
                 >
-                  Cancel
+                  <Trans>Cancel</Trans>
                 </Button>
                 <Button
                   variant="danger"
@@ -222,7 +230,7 @@ export default function ReportUserPage() {
                   loading={loading}
                   icon={<Flag size={18} />}
                 >
-                  Submit Report
+                  <Trans>Submit Report</Trans>
                 </Button>
               </div>
             </form>
@@ -234,7 +242,7 @@ export default function ReportUserPage() {
       <Modal
         open={showConfirmModal}
         onClose={() => { setShowConfirmModal(false); setConfirmed(false) }}
-        title="Confirm Your Report"
+        title={t`Confirm Your Report`}
         size="md"
       >
         <div className="space-y-5">
@@ -246,11 +254,13 @@ export default function ReportUserPage() {
 
           <div className="text-center">
             <h3 className="text-lg font-semibold text-ktip-sand-900 mb-2">
-              Are you sure you want to submit this report?
+              <Trans>Are you sure you want to submit this report?</Trans>
             </h3>
             <p className="text-sm text-ktip-sand-600">
-              You are reporting <span className="font-semibold text-ktip-sand-900">{displayName}</span> for{' '}
-              <span className="font-semibold text-ktip-sand-900">{GRIEVANCE_CATEGORY_LABELS[category] || category}</span>.
+              <Trans>
+                You are reporting <span className="font-semibold text-ktip-sand-900">{displayName}</span> for{' '}
+                <span className="font-semibold text-ktip-sand-900">{categoryLabel}</span>.
+              </Trans>
             </p>
           </div>
 
@@ -258,12 +268,12 @@ export default function ReportUserPage() {
             <div className="flex items-start gap-3">
               <AlertTriangle size={18} className="text-ktip-sun-600 shrink-0 mt-0.5" />
               <div className="text-sm text-ktip-sun-800 space-y-2">
-                <p className="font-semibold">By submitting this report, you confirm that:</p>
+                <p className="font-semibold"><Trans>By submitting this report, you confirm that:</Trans></p>
                 <ul className="list-disc pl-4 space-y-1">
-                  <li>The information provided is truthful and accurate to the best of your knowledge.</li>
-                  <li>You understand that filing false or misleading reports is a violation of platform policy.</li>
-                  <li>Submitting false reports may result in disciplinary action against your own account, including suspension or termination.</li>
-                  <li>This report will be reviewed by the KTIP administration team and may be used in any resulting investigation.</li>
+                  <li><Trans>The information provided is truthful and accurate to the best of your knowledge.</Trans></li>
+                  <li><Trans>You understand that filing false or misleading reports is a violation of platform policy.</Trans></li>
+                  <li><Trans>Submitting false reports may result in disciplinary action against your own account, including suspension or termination.</Trans></li>
+                  <li><Trans>This report will be reviewed by the KTIP administration team and may be used in any resulting investigation.</Trans></li>
                 </ul>
               </div>
             </div>
@@ -277,7 +287,7 @@ export default function ReportUserPage() {
               className="mt-0.5 w-4 h-4 rounded border-ktip-sand-300 text-ktip-ocean-600 focus:ring-ktip-ocean-500"
             />
             <span className="text-sm text-ktip-sand-700">
-              I confirm that this report is made in good faith and the information provided is accurate.
+              <Trans>I confirm that this report is made in good faith and the information provided is accurate.</Trans>
             </span>
           </label>
 
@@ -286,7 +296,7 @@ export default function ReportUserPage() {
               variant="secondary"
               onClick={() => { setShowConfirmModal(false); setConfirmed(false) }}
             >
-              Go Back
+              <Trans>Go Back</Trans>
             </Button>
             <Button
               variant="danger"
@@ -295,7 +305,7 @@ export default function ReportUserPage() {
               disabled={!confirmed}
               icon={<Flag size={18} />}
             >
-              Confirm & Submit
+              <Trans>Confirm & Submit</Trans>
             </Button>
           </div>
         </div>

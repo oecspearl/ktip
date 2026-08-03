@@ -5,9 +5,11 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useMemberPanel } from '../../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function ConnectionsTab() {
-  usePageTitle('My Connections')
+    const { t } = useLingui()
+  usePageTitle(t`My Connections`)
   const auth = useAuth()
   const { connections } = useMyConnections(auth.user?.id)
   const { removeConnection } = useConnectionMutations()
@@ -19,9 +21,9 @@ export default function ConnectionsTab() {
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Users size={32} className="text-ktip-sand-400" />
         </div>
-        <p className="text-ktip-sand-600 mb-2">No connections yet.</p>
+        <p className="text-ktip-sand-600 mb-2"><Trans>No connections yet.</Trans></p>
         <Link to="/directory" className="text-sm text-ktip-ocean-600 hover:underline">
-          Browse the member directory
+          <Trans>Browse the member directory</Trans>
         </Link>
       </div>
     )
@@ -36,7 +38,7 @@ export default function ConnectionsTab() {
           connection.requester_id === auth.user?.id
             ? connection.addressee_id
             : connection.requester_id
-        const otherName = other?.display_name || 'Unknown User'
+        const otherName = other?.display_name || t`Unknown User`
         return (
           <div
             key={connection.id}
@@ -60,8 +62,8 @@ export default function ConnectionsTab() {
             <button
               onClick={() => removeConnection(connection.id)}
               className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-              aria-label={`Remove connection with ${otherName}`}
-              title="Remove connection"
+              aria-label={t`Remove connection with ${otherName}`}
+              title={t`Remove connection`}
             >
               <UserX size={16} />
             </button>

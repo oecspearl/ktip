@@ -1,14 +1,16 @@
 import { BarChart3, ShieldCheck } from 'lucide-react'
 import { setAnalyticsConsent, useAnalyticsConsent } from '../lib/analytics-consent'
 import { Button } from './ui/Button'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export function AnalyticsConsentBanner() {
+    const { t } = useLingui()
   const consent = useAnalyticsConsent()
   if (consent !== 'pending') return null
 
   return (
     <section
-      aria-label="Analytics preferences"
+      aria-label={t`Analytics preferences`}
       // Below lg the banner is effectively full width, so at bottom-4 it sat
       // squarely on top of the floating dock and hid it completely on phones
       // and tablets. It clears the dock until there is room beside it — from
@@ -21,10 +23,9 @@ export function AnalyticsConsentBanner() {
             <BarChart3 size={20} />
           </div>
           <div>
-            <h2 className="font-display font-bold text-ktip-sand-900">Help us improve KTIP</h2>
+            <h2 className="font-display font-bold text-ktip-sand-900"><Trans>Help us improve KTIP</Trans></h2>
             <p className="mt-1 text-sm leading-relaxed text-ktip-sand-600">
-              Optional usage analytics help us understand which pages and features are useful. We do not
-              record message or proposal content, and you can change this choice in Settings.
+              <Trans>Optional usage analytics help us understand which pages and features are useful. We do not record message or proposal content, and you can change this choice in Settings.</Trans>
             </p>
           </div>
         </div>
@@ -35,10 +36,10 @@ export function AnalyticsConsentBanner() {
             icon={<ShieldCheck size={17} />}
             onClick={() => setAnalyticsConsent('denied')}
           >
-            Necessary only
+            <Trans>Necessary only</Trans>
           </Button>
           <Button size="sm" onClick={() => setAnalyticsConsent('granted')}>
-            Allow analytics
+            <Trans>Allow analytics</Trans>
           </Button>
         </div>
       </div>

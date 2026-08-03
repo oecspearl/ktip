@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useDisclosureAnimation } from '../ui/useDisclosureAnimation'
 import type { HelpArticle } from '../../lib/help-content'
+import { useLingui } from '@lingui/react/macro'
 
 /** Marks a card root so the outside-click handler can tell cards from the page. */
 const CARD_MARKER = 'data-help-card'
@@ -36,7 +37,8 @@ export function HelpArticleCard({
   onToggle,
   onCollapse,
 }: HelpArticleCardProps) {
-  const paragraphs = article.content.split('\n\n')
+  const { i18n } = useLingui()
+  const paragraphs = i18n._(article.content).split('\n\n')
 
   const answer = useDisclosureAnimation(expanded, { keepMounted: true })
   const preview = useDisclosureAnimation(!expanded, { keepMounted: true })
@@ -91,7 +93,7 @@ export function HelpArticleCard({
         aria-expanded={expanded}
         className="w-full flex items-start justify-between gap-3 px-5 pt-4 pb-3 text-left"
       >
-        <h3 className="font-medium text-ktip-sand-900">{article.title}</h3>
+        <h3 className="font-medium text-ktip-sand-900">{i18n._(article.title)}</h3>
         <ChevronDown
           size={18}
           className={`shrink-0 mt-0.5 text-ktip-sand-400 transition-transform duration-200 ${

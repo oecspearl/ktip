@@ -4,6 +4,8 @@ import { cn, formatDate } from '../../lib/utils'
 import { resolveBadgeIcon } from '../../lib/badge-icons'
 import { RARITY_PILL, TIER_LABEL } from '../../lib/achievement-style'
 import type { BadgeDefinition, UserBadge } from '../../types'
+import { useLingui } from '@lingui/react/macro'
+import { useTranslated } from '../../hooks/useTranslated'
 
 // badges.color -> pill styling. All four are OECS brand primitives.
 // Sun uses shade 700 for text: index.css warns that yellow and green
@@ -29,7 +31,12 @@ interface AchievementBadgeProps {
  * Artwork-bearing surfaces use TrophyImage / TrophyCard instead.
  */
 export function AchievementBadge({ userBadge, size, byRarity, className }: AchievementBadgeProps) {
+  const { t } = useLingui()
   const badge = userBadge.badge
+  // Both hooks run before the early return — a conditional hook is a crash on
+  // the render after a badge loads in.
+  const description = useTranslated(badge?.description)
+  const awardedAt = formatDate(userBadge.awarded_at)
   if (!badge) return null
 
   const Icon = resolveBadgeIcon(badge.icon)
@@ -45,7 +52,7 @@ export function AchievementBadge({ userBadge, size, byRarity, className }: Achie
     <Badge
       className={cn(colorClass, className)}
       size={size || 'sm'}
-      title={`${badge.description} — earned ${formatDate(userBadge.awarded_at)}`}
+      title={t`${description} — earned ${awardedAt}`}
     >
       <Icon size={size === 'md' ? 14 : 12} aria-hidden="true" />
       {badge.name}
@@ -64,11 +71,13 @@ interface LockedBadgeProps {
  * member is visible — that visibility is the point of the whole system.
  */
 export function LockedAchievementBadge({ badge, size }: LockedBadgeProps) {
+  const { t } = useLingui()
+  const description = useTranslated(badge.description)
   return (
     <Badge
       className="bg-ktip-sand-50 text-ktip-sand-400 border-ktip-sand-200 border-dashed"
       size={size || 'sm'}
-      title={`${badge.description} — not yet earned`}
+      title={t`${description} — not yet earned`}
     >
       <Lock size={size === 'md' ? 14 : 12} aria-hidden="true" />
       {badge.name}

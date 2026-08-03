@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Trophy } from 'lucide-react'
 import { useAchievementContext } from '../../contexts/AchievementContext'
 import { useAllBadges } from '../../hooks/useBadges'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The three achievements the member is closest to unlocking.
@@ -15,6 +16,7 @@ import { useAllBadges } from '../../hooks/useBadges'
  * card on a brand-new account is noise.
  */
 export function NextUpStrip() {
+  const { t } = useLingui()
   const { achievements } = useAchievementContext()
   const { badges: allBadges } = useAllBadges()
 
@@ -36,13 +38,13 @@ export function NextUpStrip() {
       <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Trophy size={18} className="text-ktip-ocean-600" />
-          <h2 className="font-display text-xl font-bold text-ktip-sand-900">Closest to unlocking</h2>
+          <h2 className="font-display text-xl font-bold text-ktip-sand-900"><Trans>Closest to unlocking</Trans></h2>
         </div>
         <Link
           to="/dashboard/achievements"
           className="text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
         >
-          View all
+          <Trans>View all</Trans>
         </Link>
       </div>
 
@@ -62,7 +64,7 @@ export function NextUpStrip() {
               aria-valuemin={0}
               aria-valuemax={item.target}
               aria-valuenow={item.current}
-              aria-label={`${item.badge!.name} progress`}
+              aria-label={t`${item.badge!.name} progress`}
             >
               <div
                 className="h-full rounded-full bg-ktip-ocean-500"

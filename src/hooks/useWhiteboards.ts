@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -123,17 +124,18 @@ export function useWhiteboard(id: string | undefined) {
 }
 
 export function useCreateWhiteboard() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async (wbData: { title?: string; snapshot?: Record<string, any> }) => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) throw new Error(t`Not authenticated`)
 
       const { data, error } = await (supabase
         .from('whiteboards') as any)
         .insert({
-          title: wbData.title || 'Untitled Whiteboard',
+          title: wbData.title || t`Untitled Whiteboard`,
           snapshot: wbData.snapshot || null,
           owner_id: user.id,
         })

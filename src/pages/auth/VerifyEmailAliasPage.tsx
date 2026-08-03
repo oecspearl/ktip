@@ -7,31 +7,34 @@ import { keys } from '../../queries/keys'
 import { Button } from '../../components/ui/Button'
 import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 import { CheckCircle, MailWarning, ShieldCheck } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
-const FAILURE_COPY: Record<string, { title: string; body: string }> = {
+const FAILURE_COPY: Record<string, { title: MessageDescriptor; body: MessageDescriptor }> = {
   not_found: {
-    title: 'Link already used, or not valid',
-    body: 'Confirmation links work once. If you have already confirmed this address, you are all set — otherwise request a fresh link from Settings.',
+    title: msg`Link already used, or not valid`,
+    body: msg`Confirmation links work once. If you have already confirmed this address, you are all set — otherwise request a fresh link from Settings.`,
   },
   expired: {
-    title: 'Confirmation link expired',
-    body: 'These links are valid for 24 hours. Open Settings and send yourself a new one.',
+    title: msg`Confirmation link expired`,
+    body: msg`These links are valid for 24 hours. Open Settings and send yourself a new one.`,
   },
   email_taken: {
-    title: 'Address no longer available',
-    body: 'Someone registered a KTIP account with this address after the link was sent, so it can no longer be used as a secondary email.',
+    title: msg`Address no longer available`,
+    body: msg`Someone registered a KTIP account with this address after the link was sent, so it can no longer be used as a secondary email.`,
   },
   invalid_token: {
-    title: 'Link is malformed',
-    body: 'Copy the full address from the email — some mail clients break long links across lines.',
+    title: msg`Link is malformed`,
+    body: msg`Copy the full address from the email — some mail clients break long links across lines.`,
   },
   rate_limited: {
-    title: 'Too many attempts',
-    body: 'Wait an hour and try the link again.',
+    title: msg`Too many attempts`,
+    body: msg`Wait an hour and try the link again.`,
   },
   server_error: {
-    title: 'Something went wrong',
-    body: 'Try the link again in a moment.',
+    title: msg`Something went wrong`,
+    body: msg`Try the link again in a moment.`,
   },
 }
 
@@ -44,7 +47,8 @@ const FAILURE_COPY: Record<string, { title: string; body: string }> = {
  * involved, which defeats the point of verifying.
  */
 export default function VerifyEmailAliasPage() {
-  usePageTitle('Confirm email address')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Confirm email address`)
   const { token } = useParams()
   const auth = useAuth()
   const queryClient = useQueryClient()
@@ -86,6 +90,7 @@ export default function VerifyEmailAliasPage() {
   }
 
   const failure = FAILURE_COPY[reason] ?? FAILURE_COPY.not_found
+  const addressLabel = confirmedEmail ? <strong>{confirmedEmail}</strong> : t`This address`
 
   return (
     <AuthBackdrop>
@@ -96,14 +101,16 @@ export default function VerifyEmailAliasPage() {
               <CheckCircle size={28} className="text-ktip-tropical-700" />
             </div>
             <h1 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-              Address confirmed
+              <Trans>Address confirmed</Trans>
             </h1>
             <p className="text-ktip-sand-600 mb-6">
-              {confirmedEmail ? <strong>{confirmedEmail}</strong> : 'This address'} can now sign
-              in to your KTIP account with the same password, and can be used to recover it.
+              <Trans>
+                {addressLabel} can now sign in to your KTIP account with the same password, and can
+                be used to recover it.
+              </Trans>
             </p>
             <Link to={auth.user ? '/settings?tab=security' : '/login'}>
-              <Button fullWidth>{auth.user ? 'Back to Settings' : 'Sign in'}</Button>
+              <Button fullWidth>{auth.user ? t`Back to Settings` : t`Sign in`}</Button>
             </Link>
           </>
         ) : state === 'failed' ? (
@@ -112,12 +119,12 @@ export default function VerifyEmailAliasPage() {
               <MailWarning size={28} className="text-ktip-sun-700" />
             </div>
             <h1 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-              {failure.title}
+              {i18n._(failure.title)}
             </h1>
-            <p className="text-ktip-sand-600 mb-6">{failure.body}</p>
+            <p className="text-ktip-sand-600 mb-6">{i18n._(failure.body)}</p>
             <Link to={auth.user ? '/settings?tab=security' : '/login'}>
               <Button variant="secondary" fullWidth>
-                {auth.user ? 'Open Settings' : 'Sign in'}
+                {auth.user ? t`Open Settings` : t`Sign in`}
               </Button>
             </Link>
           </>
@@ -127,17 +134,16 @@ export default function VerifyEmailAliasPage() {
               <ShieldCheck size={28} className="text-ktip-ocean-600" />
             </div>
             <h1 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-              Confirm this email address
+              <Trans>Confirm this email address</Trans>
             </h1>
             <p className="text-ktip-sand-600 mb-6">
-              Confirming links this address to a KTIP account as a secondary email. It will then
-              be able to sign in with that account's password.
+              <Trans>Confirming links this address to a KTIP account as a secondary email. It will then be able to sign in with that account's password.</Trans>
             </p>
             <Button onClick={confirm} loading={state === 'working'} disabled={!token} fullWidth>
-              Confirm
+              <Trans>Confirm</Trans>
             </Button>
             <p className="mt-4 text-xs text-ktip-sand-500">
-              If you weren't expecting this email, close this page — nothing will be linked.
+              <Trans>If you weren't expecting this email, close this page — nothing will be linked.</Trans>
             </p>
           </>
         )}

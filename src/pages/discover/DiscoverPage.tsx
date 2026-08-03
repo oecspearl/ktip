@@ -9,6 +9,9 @@ import {
 } from 'react'
 import { Link } from 'react-router'
 import { format } from 'date-fns'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAccessibilityPrefs } from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
@@ -19,7 +22,6 @@ import { useProjects } from '../../hooks/useProjects'
 import { useEvents } from '../../hooks/useEvents'
 import { useGrants } from '../../hooks/useGrants'
 import { usePlatformStats, type PlatformStats } from '../../hooks/usePlatformStats'
-import { StatsWheel } from '../../components/ui/StatsWheel'
 import type { DetailEntry, Grant } from '../../types'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { entityPath } from '../../lib/slug'
@@ -35,10 +37,10 @@ import {
 
 type Mode = 'grants' | 'projects' | 'events'
 
-const MODES: { id: Mode; label: string; icon: LucideIcon; href: string }[] = [
-  { id: 'grants', label: 'Grants', icon: DollarSign, href: '/grants' },
-  { id: 'projects', label: 'Projects', icon: FolderKanban, href: '/projects' },
-  { id: 'events', label: 'Events', icon: Calendar, href: '/events' },
+const MODES: { id: Mode; label: MessageDescriptor; icon: LucideIcon; href: string }[] = [
+  { id: 'grants', label: msg`Grants`, icon: DollarSign, href: '/grants' },
+  { id: 'projects', label: msg`Projects`, icon: FolderKanban, href: '/projects' },
+  { id: 'events', label: msg`Events`, icon: Calendar, href: '/events' },
 ]
 
 interface HeroItem {
@@ -196,9 +198,9 @@ const MOTION = {
 } as const
 
 interface Feature {
-  title: string
-  category: string
-  description: string
+  title: MessageDescriptor
+  category: MessageDescriptor
+  description: MessageDescriptor
   href: string
   image: string
   gradient: string
@@ -207,63 +209,63 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    title: 'Projects',
-    category: 'Collaboration',
-    description: 'Launch and collaborate on innovative projects with creators across the Caribbean.',
+    title: msg`Projects`,
+    category: msg`Collaboration`,
+    description: msg`Launch and collaborate on innovative projects with creators across the Caribbean.`,
     href: '/projects',
     image: '/hero/hero-1.webp',
     gradient: 'from-[#041E42] via-[#163A63]/70 to-[#2A5788]/10',
     span: 'md:col-span-2 md:row-span-2',
   },
   {
-    title: 'Events',
-    category: 'Community',
-    description: 'Discover workshops, hackathons, and networking events happening near you.',
+    title: msg`Events`,
+    category: msg`Community`,
+    description: msg`Discover workshops, hackathons, and networking events happening near you.`,
     href: '/events',
     image: '/hero/hero-2.webp',
     gradient: 'from-[#2C4100] via-[#5E8A00]/70 to-[#97D700]/10',
     span: 'md:col-span-2',
   },
   {
-    title: 'Grants',
-    category: 'Funding',
-    description: 'Find funding opportunities and grants to turn your ideas into reality.',
+    title: msg`Grants`,
+    category: msg`Funding`,
+    description: msg`Find funding opportunities and grants to turn your ideas into reality.`,
     href: '/grants',
     image: '/hero/hero-3.webp',
     gradient: 'from-[#020F21] via-[#041E42]/70 to-[#4F7AAE]/10',
     span: '',
   },
   {
-    title: 'Forums',
-    category: 'Discussion',
-    description: 'Join discussions, share knowledge, and engage with the community.',
+    title: msg`Forums`,
+    category: msg`Discussion`,
+    description: msg`Join discussions, share knowledge, and engage with the community.`,
     href: '/forums',
     image: '/hero/hero-4.webp',
     gradient: 'from-[#806000] via-[#B38500]/70 to-[#FFC72C]/10',
     span: '',
   },
   {
-    title: 'Messages',
-    category: 'Communication',
-    description: 'Connect directly with mentors, investors, and fellow innovators.',
+    title: msg`Messages`,
+    category: msg`Communication`,
+    description: msg`Connect directly with mentors, investors, and fellow innovators.`,
     href: '/messages',
     image: '/hero/hero-5.webp',
     gradient: 'from-[#163A63] via-[#2A5788]/70 to-[#7AB000]/10',
     span: '',
   },
   {
-    title: 'Resources',
-    category: 'Knowledge',
-    description: 'Access articles, guides, case studies, and tools for Caribbean innovation.',
+    title: msg`Resources`,
+    category: msg`Knowledge`,
+    description: msg`Access articles, guides, case studies, and tools for Caribbean innovation.`,
     href: '/resources',
     image: '/hero/hero-6.webp',
     gradient: 'from-[#4D3900] via-[#E6AC09]/70 to-[#FFD75C]/10',
     span: 'md:col-span-2',
   },
   {
-    title: 'Directory',
-    category: 'Network',
-    description: 'Browse the member directory and connect with innovators across the Caribbean.',
+    title: msg`Directory`,
+    category: msg`Network`,
+    description: msg`Browse the member directory and connect with innovators across the Caribbean.`,
     href: '/directory',
     image: '/ktiphero.webp',
     gradient: 'from-[#446400] via-[#7AB000]/70 to-[#AEE12B]/10',
@@ -282,11 +284,11 @@ const PARTNERS: { name: string; logo?: string }[] = [
   { name: 'ECCB' },
 ]
 
-const STAT_TILES: { key: keyof PlatformStats; label: string }[] = [
-  { key: 'memberCount', label: 'Members' },
-  { key: 'projectCount', label: 'Projects' },
-  { key: 'grantCount', label: 'Active Grants' },
-  { key: 'eventCount', label: 'Events' },
+const STAT_TILES: { key: keyof PlatformStats; label: MessageDescriptor }[] = [
+  { key: 'memberCount', label: msg`Members` },
+  { key: 'projectCount', label: msg`Projects` },
+  { key: 'grantCount', label: msg`Active Grants` },
+  { key: 'eventCount', label: msg`Events` },
 ]
 
 /**
@@ -314,14 +316,22 @@ function HeroOverlays() {
   )
 }
 
-function grantAmount(g: Grant): string {
-  if (g.amount_max) return `Up to ${g.currency || 'USD'} ${g.amount_max.toLocaleString()}`
-  if (g.amount_min) return `From ${g.currency || 'USD'} ${g.amount_min.toLocaleString()}`
-  return g.grant_type || 'Funding'
-}
-
 export default function DiscoverPage() {
-  usePageTitle('Discover')
+  const { t, i18n } = useLingui()
+  usePageTitle(t`Discover`)
+
+  function grantAmount(g: Grant): string {
+    const currency = g.currency || 'USD'
+    if (g.amount_max) {
+      const amount = g.amount_max.toLocaleString()
+      return t`Up to ${currency} ${amount}`
+    }
+    if (g.amount_min) {
+      const amount = g.amount_min.toLocaleString()
+      return t`From ${currency} ${amount}`
+    }
+    return g.grant_type || t`Funding`
+  }
 
   // --- Mode toggle + live data ---
   const [mode, setMode] = useState<Mode>('grants')
@@ -336,7 +346,7 @@ export default function DiscoverPage() {
         id: g.id,
         title: g.title,
         meta: grantAmount(g),
-        description: g.summary || g.description || 'Funding opportunity for Caribbean innovators.',
+        description: g.summary || g.description || t`Funding opportunity for Caribbean innovators.`,
         // Hand-authored details win; otherwise synthesise a block from the
         // columns the record already has, so no hero item reads bare
         details: g.details?.length ? g.details : grantHeroDetails(g),
@@ -348,8 +358,8 @@ export default function DiscoverPage() {
       return (projects || []).slice(0, MAX_ITEMS).map((p) => ({
         id: p.id,
         title: p.title,
-        meta: (p.category as string) || 'Project',
-        description: p.summary || p.description || 'An innovation project from the OECS community.',
+        meta: (p.category as string) || t`Project`,
+        description: p.summary || p.description || t`An innovation project from the OECS community.`,
         details: p.details?.length ? p.details : projectHeroDetails(p),
         href: entityPath('project', p),
         image: p.image_url || heroImageFor(p.id),
@@ -359,14 +369,16 @@ export default function DiscoverPage() {
       id: e.id,
       title: e.title,
       meta: `${format(new Date(e.start_date), 'MMM d, yyyy')}${e.location ? ` · ${e.location}` : ''}`,
-      description: e.summary || e.description || 'An upcoming event for the OECS community.',
+      description: e.summary || e.description || t`An upcoming event for the OECS community.`,
       details: e.details?.length ? e.details : eventHeroDetails(e),
       href: entityPath('event', e),
       image: e.image_url || heroImageFor(e.id),
     }))
-  }, [mode, grants, projects, events])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, grants, projects, events, t])
 
   const activeMode = MODES.find((m) => m.id === mode)!
+  const modeLabel = i18n._(activeMode.label)
   const modeIndex = MODES.indexOf(activeMode)
 
   // --- Selection + auto-rotate ---
@@ -903,7 +915,7 @@ export default function DiscoverPage() {
                 className="max-w-[42em] animate-reveal-up text-right text-shadow-hero"
               >
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
-                  {activeMode.label} &middot; {active.meta}
+                  {i18n._(activeMode.label)} &middot; {active.meta}
                 </p>
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   {active.title}
@@ -941,10 +953,10 @@ export default function DiscoverPage() {
             ) : (
               <div className="max-w-[42em] animate-fade-in text-right text-shadow-hero">
                 <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
-                  {activeMode.label}
+                  {i18n._(activeMode.label)}
                 </p>
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
-                  Innovate. Collaborate.
+                  <Trans>Innovate. Collaborate.</Trans>
                 </h1>
                 {/* Same pinning as the active-item description above */}
                 <div className="mt-[1.25em] max-w-[40em] md:ml-auto">
@@ -952,8 +964,10 @@ export default function DiscoverPage() {
                     className="text-white/80 leading-relaxed"
                     style={{ fontSize: `calc(1em / ${fit})` }}
                   >
-                    Nothing to show here yet — explore the platform to see what&apos;s happening
-                    across the Caribbean.
+                    <Trans>
+                      Nothing to show here yet — explore the platform to see what&apos;s happening
+                      across the Caribbean.
+                    </Trans>
                   </p>
                 </div>
               </div>
@@ -969,7 +983,7 @@ export default function DiscoverPage() {
                 // size: 2em × 0.875 × 16 = the 28px of the original px-7
                 className="group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.571em] bg-brand-navy text-white text-[0.875em] font-medium tracking-wide shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
               >
-                {active ? 'View Details' : `Browse ${activeMode.label}`}
+                {active ? t`View Details` : t`Browse ${modeLabel}`}
                 {/* Icons take numeric px, so the fit multiplier that the `em`
                     lengths get for free has to be applied by hand here */}
                 <ArrowRight
@@ -999,7 +1013,7 @@ export default function DiscoverPage() {
                     }`}
                   >
                     <m.icon size={px(15)} />
-                    {m.label}
+                    {i18n._(m.label)}
                   </button>
                 ))}
               </div>
@@ -1136,14 +1150,14 @@ export default function DiscoverPage() {
                   <>
                     <button
                       onClick={prev}
-                      aria-label="Previous"
+                      aria-label={t`Previous`}
                       className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-[2.25em] h-[2.25em] rounded-full bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 hover:bg-brand-green hover:text-brand-navy hover:scale-110 dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
                     >
                       <ChevronLeft size={px(16)} />
                     </button>
                     <button
                       onClick={next}
-                      aria-label="Next"
+                      aria-label={t`Next`}
                       className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[2.25em] h-[2.25em] rounded-full bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy shadow-hard flex items-center justify-center opacity-0 group-hover/cards:opacity-100 hover:bg-brand-green hover:text-brand-navy hover:scale-110 dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
                     >
                       <ChevronRight size={px(16)} />
@@ -1173,20 +1187,20 @@ export default function DiscoverPage() {
         <div className="relative container mx-auto px-6 md:px-12">
           <div className="mb-12">
             <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-ktip-sand-500 mb-3">
-              The Platform
+              <Trans>The Platform</Trans>
             </p>
             <h2 className="text-3xl md:text-5xl font-display font-extrabold text-ktip-sand-900 tracking-tight">
-              Everything you need to innovate
+              <Trans>Everything you need to innovate</Trans>
             </h2>
             <p className="mt-3 text-ktip-sand-600 max-w-xl">
-              Discover tools and resources designed to empower Caribbean innovation.
+              <Trans>Discover tools and resources designed to empower Caribbean innovation.</Trans>
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:auto-rows-[minmax(10.5rem,auto)] stagger-children">
             {FEATURES.map((f) => (
               <Link
-                key={f.title}
+                key={f.href}
                 to={f.href}
                 className={`group relative rounded-2xl p-6 flex flex-col justify-between gap-6 overflow-hidden shadow-medium hover:shadow-hard hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 ${f.span}`}
               >
@@ -1201,18 +1215,18 @@ export default function DiscoverPage() {
 
                 <div className="relative">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-white/75 mb-2">
-                    {f.category}
+                    {i18n._(f.category)}
                   </p>
                   <h3 className="text-xl md:text-2xl font-display font-bold text-white leading-snug [text-shadow:0_1px_8px_rgba(0,0,0,0.25)]">
-                    {f.title}
+                    {i18n._(f.title)}
                   </h3>
                   <p className="mt-1.5 text-sm text-white/85 leading-relaxed line-clamp-2 max-w-xs [text-shadow:0_1px_6px_rgba(0,0,0,0.3)]">
-                    {f.description}
+                    {i18n._(f.description)}
                   </p>
                 </div>
 
                 <span className="relative self-start inline-flex items-center gap-1.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-lg px-4 py-2 text-xs font-semibold shadow-soft group-hover:shadow-medium group-hover:bg-brand-green group-hover:text-brand-navy group-hover:-translate-y-0.5 group-hover:scale-[1.03] dark:group-hover:bg-brand-navy dark:group-hover:text-brand-green group-hover:gap-2.5 transition-all">
-                  Explore <ArrowRight size={13} />
+                  <Trans>Explore</Trans> <ArrowRight size={13} />
                 </span>
               </Link>
             ))}
@@ -1220,65 +1234,78 @@ export default function DiscoverPage() {
         </div>
       </section>
 
-      {/* Partners (65%) + platform stats (35%) */}
+      {/* Two 75%-wide bands: partners hugging the left, platform stats
+          mirrored under them on the right and scrolling the opposite way */}
       <section
         id="partners"
         data-spy="Partners"
         className="scroll-mt-24 relative z-10 bg-ktip-cream pt-8 md:pt-10 pb-20 md:pb-28"
       >
         <div className="container mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-10 lg:gap-14 items-stretch">
-            {/* Partners — min-w-0 so the w-max marquee track can't blow the
-                grid column out to its min-content width */}
-            <div className="flex flex-col min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-ktip-sand-500 mb-3">
-                Our Partners
-              </p>
-              <h2 className="text-2xl md:text-4xl font-display font-extrabold text-ktip-sand-900 tracking-tight">
-                Backed by regional and global institutions
-              </h2>
-              <p className="mt-3 text-ktip-sand-600 max-w-xl">
+          {/* min-w-0 so the w-max marquee track can't blow the band out to its
+              min-content width */}
+          <div className="flex flex-col min-w-0 w-full lg:w-[75%] mr-auto">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-ktip-sand-500 mb-3">
+              <Trans>Our Partners</Trans>
+            </p>
+            <h2 className="text-2xl md:text-4xl font-display font-extrabold text-ktip-sand-900 tracking-tight">
+              <Trans>Backed by regional and global institutions</Trans>
+            </h2>
+            <p className="mt-3 text-ktip-sand-600 max-w-xl">
+              <Trans>
                 KTIP is delivered with the support of organizations committed to
                 advancing knowledge, technology, and innovation across the OECS.
-              </p>
+              </Trans>
+            </p>
 
-              {/* Single-row marquee, scrolling right; pauses on hover. The
-                  track holds two copies of the row for a seamless loop. */}
-              <div className="mt-10 relative max-w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-                <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-right hover:[animation-play-state:paused]">
-                  {[...PARTNERS, ...PARTNERS].map((p, i) => (
-                    <div
-                      key={`${p.name}-${i}`}
-                      className="group/logo flex items-center justify-center h-20 shrink-0 rounded-xl px-4 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-ktip-cream hover:shadow-medium"
-                      aria-hidden={i >= PARTNERS.length}
-                    >
-                      {p.logo ? (
-                        <img
-                          src={p.logo}
-                          alt={p.name}
-                          className="max-h-16 w-auto object-contain transition-transform duration-300 group-hover/logo:scale-105"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <span className="text-lg font-display font-semibold text-ktip-sand-500 whitespace-nowrap transition-colors duration-300 group-hover/logo:text-ktip-sand-900">
-                          {p.name}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
+            {/* Single-row marquee, scrolling right; pauses on hover. The
+                track holds two copies of the row for a seamless loop. */}
+            <div className="mt-10 relative max-w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+              <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-right hover:[animation-play-state:paused]">
+                {[...PARTNERS, ...PARTNERS].map((p, i) => (
+                  <div
+                    key={`${p.name}-${i}`}
+                    className="group/logo flex items-center justify-center h-20 shrink-0 rounded-xl px-4 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-ktip-cream hover:shadow-medium"
+                    aria-hidden={i >= PARTNERS.length}
+                  >
+                    {p.logo ? (
+                      <img
+                        src={p.logo}
+                        alt={p.name}
+                        className="max-h-16 w-auto object-contain transition-transform duration-300 group-hover/logo:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="text-lg font-display font-semibold text-ktip-sand-500 whitespace-nowrap transition-colors duration-300 group-hover/logo:text-ktip-sand-900">
+                        {p.name}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
 
-            {/* Platform stats — auto-rotating option wheel, no card chrome */}
-            <div className="flex flex-col justify-center text-ktip-sand-900">
-              <StatsWheel
-                className="h-[26rem]"
-                items={STAT_TILES.map((t) => ({
-                  value: statsLoading || !stats ? '—' : stats[t.key].toLocaleString(),
-                  label: t.label,
-                }))}
-              />
+          {/* Platform stats — same band, mirrored right and running leftward.
+              Track holds two copies of the row; the second is aria-hidden. */}
+          <div className="mt-12 md:mt-16 flex flex-col min-w-0 w-full lg:w-[75%] ml-auto text-ktip-sand-900">
+            <div className="relative max-w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+              <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-left hover:[animation-play-state:paused]">
+                {[...STAT_TILES, ...STAT_TILES].map((tile, i) => (
+                  <div
+                    key={`${tile.key}-${i}`}
+                    className="flex items-baseline gap-4 shrink-0 h-20 whitespace-nowrap"
+                    aria-hidden={i >= STAT_TILES.length}
+                  >
+                    <span className="text-5xl md:text-6xl font-display font-extrabold tabular-nums">
+                      {statsLoading || !stats ? '—' : stats[tile.key].toLocaleString()}
+                    </span>
+                    <span className="text-sm md:text-base uppercase tracking-[0.2em] text-ktip-sand-500">
+                      {i18n._(tile.label)}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

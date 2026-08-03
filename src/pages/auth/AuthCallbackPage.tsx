@@ -4,6 +4,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { analytics } from '../../hooks/useAnalytics'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * Last resort, not the normal path. Routing waits on `profileLoading`, which
@@ -32,26 +35,29 @@ const NO_SESSION_GRACE_MS = 5000
  * These are the failures Microsoft and Google actually produce in the wild;
  * anything unrecognised is passed through rather than swallowed.
  */
-const ERROR_COPY: Array<[RegExp, string]> = [
+const ERROR_COPY: Array<[RegExp, MessageDescriptor]> = [
   [
     /email.*(external provider|not (?:provided|available|found))|no email/i,
-    'Your Microsoft account did not share an email address with KTIP. Ask whoever administers it to add one, or sign in with Google or an email address instead.',
+    msg`Your Microsoft account did not share an email address with KTIP. Ask whoever administers it to add one, or sign in with Google or an email address instead.`,
   ],
   [
     /already (?:registered|exists)|identity is already linked|user already/i,
-    'An account already exists for that email address. Sign in the way you did originally, or use “Forgot Password?” to set a password for it.',
+    msg`An account already exists for that email address. Sign in the way you did originally, or use “Forgot Password?” to set a password for it.`,
   ],
   [
     /access.?denied|consent.?required|cancell?ed/i,
-    'Sign-in was cancelled before your provider confirmed it. Nothing has changed — try again whenever you are ready.',
+    msg`Sign-in was cancelled before your provider confirmed it. Nothing has changed — try again whenever you are ready.`,
   ],
   [
     /server_error|temporarily unavailable|timeout/i,
-    'Your sign-in provider could not complete the request. Try again in a moment.',
+    msg`Your sign-in provider could not complete the request. Try again in a moment.`,
   ],
 ]
 
-function friendlyOAuthError(raw: string): string {
+// Only the matched cases are our own copy — an unrecognised message is passed
+// through exactly as the provider sent it, and stays in whatever language
+// that arrived in.
+function friendlyOAuthError(raw: string): string | MessageDescriptor {
   for (const [pattern, copy] of ERROR_COPY) {
     if (pattern.test(raw)) return copy
   }
@@ -90,7 +96,8 @@ function readProviderError(): string | null {
  *  - provider error / no session -> /login
  */
 export default function AuthCallbackPage() {
-  usePageTitle('Signing in…')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Signing in…`)
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
@@ -110,7 +117,7 @@ export default function AuthCallbackPage() {
       done.current = true
 
       if (!signedIn) {
-        toast.error('We could not complete that sign-in. Please try again.')
+        toast.error(t`We could not complete that sign-in. Please try again.`)
         navigate('/login', { replace: true })
         return
       }
@@ -130,7 +137,7 @@ export default function AuthCallbackPage() {
       }
 
       analytics.conversion('login_success')
-      toast.success('Welcome back!')
+      toast.success(t`Welcome back!`)
       navigate('/', { replace: true })
     },
     [navigate, toast]
@@ -142,9 +149,10 @@ export default function AuthCallbackPage() {
     const providerError = readProviderError()
     if (!providerError) return
     done.current = true
-    toast.error(friendlyOAuthError(providerError))
+    const message = friendlyOAuthError(providerError)
+    toast.error(typeof message === 'string' ? message : i18n._(message))
     navigate('/login', { replace: true })
-  }, [navigate, toast])
+  }, [navigate, toast, i18n])
 
   useEffect(() => {
     // profileLoading covers the profile query and its retries, so there is no
@@ -178,11 +186,11 @@ export default function AuthCallbackPage() {
     <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
       <div className="text-center">
         <img
-          src="/ktip-logo.webp"
-          alt="KTIP Logo"
+          src="/ktip-logo-128.webp"
+          alt="KTiP"
           className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
         />
-        <p className="mt-4 text-ktip-sand-600">Signing you in…</p>
+        <p className="mt-4 text-ktip-sand-600"><Trans>Signing you in…</Trans></p>
       </div>
     </div>
   )

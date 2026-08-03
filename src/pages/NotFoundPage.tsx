@@ -2,16 +2,18 @@ import { Link } from 'react-router'
 import { Button } from '../components/ui/Button'
 import { Home, ArrowLeft, MapPinOff } from 'lucide-react'
 import { PageHero } from '../components/layout/PageHero'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function NotFoundPage() {
+    const { t } = useLingui()
   return (
     <>
       <PageHero
-        eyebrow="Error 404"
-        title="Page Not Found"
+        eyebrow={t`Error 404`}
+        title={t`Page Not Found`}
         imageSeed="404"
         compact
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: '404' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: '404' }]}
       />
       <div className="min-h-[40vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
@@ -20,17 +22,17 @@ export default function NotFoundPage() {
         </div>
         <h1 className="text-6xl font-display font-bold text-ktip-ocean-600 mb-2">404</h1>
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-3">
-          Page not found
+          <Trans>Page not found</Trans>
         </h2>
         <p className="text-ktip-sand-600 mb-8">
-          The page you're looking for doesn't exist or has been moved.
+          <Trans>The page you're looking for doesn't exist or has been moved.</Trans>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/">
-            <Button icon={<Home size={18} />}>Go Home</Button>
+            <Button icon={<Home size={18} />}><Trans>Go Home</Trans></Button>
           </Link>
           <Button variant="outline" icon={<ArrowLeft size={18} />} onClick={() => window.history.back()}>
-            Go Back
+            <Trans>Go Back</Trans>
           </Button>
         </div>
       </div>

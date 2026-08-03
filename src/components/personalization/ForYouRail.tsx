@@ -8,6 +8,7 @@ import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { usePersonalizedFeed, type FeedItem } from '../../hooks/usePersonalizedFeed'
 import { hasSignals, personalizedHref } from '../../lib/personalization'
 import { formatDate } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 const ENTITY_LABELS: Record<FeedItem['entity'], string> = {
   project: 'Project',
@@ -71,6 +72,7 @@ function FeedCard({ item }: { item: FeedItem }) {
  *   * otherwise                           -> the ranked rail
  */
 export function ForYouRail({ title = 'For You', limit = 6 }: ForYouRailProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const { active, personalization } = usePersonalizationActive()
   const { items, loading } = usePersonalizedFeed({ limit })
@@ -89,11 +91,10 @@ export function ForYouRail({ title = 'For You', limit = 6 }: ForYouRailProps) {
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-display font-bold text-ktip-sand-900">
-            Tell us what you are interested in
+            <Trans>Tell us what you are interested in</Trans>
           </h3>
           <p className="text-sm text-ktip-sand-600 mt-0.5">
-            Pick a few topics and we will put the projects, resources, events and grants that
-            suit you at the top of every list. Nothing gets hidden.
+            <Trans>Pick a few topics and we will put the projects, resources, events and grants that suit you at the top of every list. Nothing gets hidden.</Trans>
           </p>
           <Link
             to="/settings?tab=personalization"
@@ -105,7 +106,7 @@ export function ForYouRail({ title = 'For You', limit = 6 }: ForYouRailProps) {
         </div>
         <button
           type="button"
-          aria-label="Dismiss"
+          aria-label={t`Dismiss`}
           onClick={() => {
             localStorage.setItem(PROMPT_DISMISSED_KEY, '1')
             setDismissed(true)
@@ -148,7 +149,7 @@ export function ForYouRail({ title = 'For You', limit = 6 }: ForYouRailProps) {
           to="/settings?tab=personalization"
           className="text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
         >
-          Tune this
+          <Trans>Tune this</Trans>
         </Link>
       </div>
 

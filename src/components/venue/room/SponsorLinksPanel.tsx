@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import { parseSponsorLinks } from '../../../lib/venue-room-sections'
 import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The booth's call to action.
@@ -17,12 +18,13 @@ export function SponsorLinksPanel({
   config: Record<string, unknown>
   sponsorName: string | null
 }) {
+  const { t } = useLingui()
   const links = parseSponsorLinks(config)
 
   return (
-    <RoomPanel title={sponsorName ? `${sponsorName} links` : 'Sponsor links'}>
+    <RoomPanel title={sponsorName ? t`${sponsorName} links` : t`Sponsor links`}>
       {links.length === 0 ? (
-        <RoomPanelEmpty>The host has not added any links yet.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>The host has not added any links yet.</Trans></RoomPanelEmpty>
       ) : (
         <ul className="space-y-1.5 p-3">
           {links.map((link) => (

@@ -29,8 +29,11 @@ import {
   EVENT_TYPE_LABELS,
   GRANT_APPLICATION_STATUS_LABELS,
 } from '../../lib/constants'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 export default function AdminDashboardPage() {
+    const { i18n } = useLingui()
   const { stats, loading: statsLoading } = useAdminStats()
   const { analytics, loading: analyticsLoading } = useAdminAnalytics()
 
@@ -197,7 +200,15 @@ export default function AdminDashboardPage() {
                 <Users size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Users by Role</h2>
               </div>
-              <BarChart data={analytics.usersByRole} colorClass="bg-ktip-ocean-500" labelMap={ROLE_LABELS} />
+              {/* BarChart wants plain strings, so the descriptors are resolved
+                  here rather than inside the chart. */}
+              <BarChart
+                data={analytics.usersByRole}
+                colorClass="bg-ktip-ocean-500"
+                labelMap={Object.fromEntries(
+                  Object.entries(ROLE_LABELS).map(([slug, label]) => [slug, resolveCopy(i18n, label)])
+                )}
+              />
             </div>
 
             {/* Users by Country */}

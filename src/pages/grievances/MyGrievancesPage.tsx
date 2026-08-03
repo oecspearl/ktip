@@ -14,8 +14,10 @@ import { ShieldAlert, Clock, HelpCircle, ArrowLeft, Receipt } from 'lucide-react
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function MyGrievancesPage() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const { grievances, loading } = useMyGrievances(auth.user?.id)
   const { receipts } = useSubmissionReceipts(auth.user?.id)
@@ -27,17 +29,17 @@ export default function MyGrievancesPage() {
       .map((r) => [r.source_id, r.id])
   )
 
-  usePageTitle('My Reports')
+  usePageTitle(t`My Reports`)
 
   return (
     <>
       <PageHero
-        eyebrow="Community Safety"
-        title="My Reports"
-        subtitle="Track the status of your submitted reports"
+        eyebrow={t`Community Safety`}
+        title={t`My Reports`}
+        subtitle={t`Track the status of your submitted reports`}
         imageSeed="grievances"
         compact
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'My Reports' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`My Reports` }]}
       />
 
       <div className="w-full max-w-page mx-auto px-4 py-8">
@@ -48,14 +50,14 @@ export default function MyGrievancesPage() {
             className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-sand-900 font-medium transition-colors"
           >
             <ArrowLeft size={16} />
-            Back to Home
+            <Trans>Back to Home</Trans>
           </Link>
           <Link
             to="/help"
             className="inline-flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium transition-colors"
           >
             <HelpCircle size={16} />
-            Visit Help Center
+            <Trans>Visit Help Center</Trans>
           </Link>
         </div>
 
@@ -67,7 +69,7 @@ export default function MyGrievancesPage() {
         ) : grievances && grievances.length > 0 ? (
           <div data-tutorial="grievances-list" className="space-y-4">
             {grievances.map((grievance) => {
-              const reportedName = grievance.reported_user?.display_name || 'Unknown User'
+              const reportedName = grievance.reported_user?.display_name || t`Unknown User`
 
               return (
                 <Card key={grievance.id}>
@@ -82,7 +84,9 @@ export default function MyGrievancesPage() {
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${GRIEVANCE_CATEGORY_COLORS[grievance.category] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                         >
-                          {GRIEVANCE_CATEGORY_LABELS[grievance.category] || grievance.category}
+                          {grievance.category in GRIEVANCE_CATEGORY_LABELS
+                            ? i18n._(GRIEVANCE_CATEGORY_LABELS[grievance.category])
+                            : grievance.category}
                         </span>
                       </div>
 
@@ -94,7 +98,9 @@ export default function MyGrievancesPage() {
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium border ${GRIEVANCE_STATUS_COLORS[grievance.status] || 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200'}`}
                         >
-                          {GRIEVANCE_STATUS_LABELS[grievance.status] || grievance.status}
+                          {grievance.status in GRIEVANCE_STATUS_LABELS
+                            ? i18n._(GRIEVANCE_STATUS_LABELS[grievance.status])
+                            : grievance.status}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock size={12} />
@@ -106,7 +112,7 @@ export default function MyGrievancesPage() {
                             className="inline-flex items-center gap-1 font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
                           >
                             <Receipt size={12} />
-                            View submitted copy
+                            <Trans>View submitted copy</Trans>
                           </Link>
                         )}
                       </div>
@@ -121,8 +127,8 @@ export default function MyGrievancesPage() {
             <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldAlert size={32} className="text-ktip-sand-400" />
             </div>
-            <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-2">No reports submitted</h2>
-            <p className="text-ktip-sand-600">You haven't submitted any reports yet. If you encounter inappropriate behavior, you can report a user from their profile page.</p>
+            <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-2"><Trans>No reports submitted</Trans></h2>
+            <p className="text-ktip-sand-600"><Trans>You haven't submitted any reports yet. If you encounter inappropriate behavior, you can report a user from their profile page.</Trans></p>
           </div>
         )}
       </div>

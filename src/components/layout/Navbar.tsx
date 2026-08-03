@@ -5,6 +5,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { LanguageSwitcher } from '../ui/LanguageSwitcher'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
+import { resolveCopy } from '../../i18n/copy'
 import type { MessageDescriptor } from '@lingui/core'
 import {
   Menu,
@@ -641,7 +642,7 @@ export function Navbar() {
                 <button
                   onClick={() => setSearchOpen(true)}
                   aria-label={t`Open search`}
-                  title={`Search (${SHORTCUT_HINT})`}
+                  title={t`Search (${SHORTCUT_HINT})`}
                   className="p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
                   <Search size={20} />
@@ -805,14 +806,22 @@ export function Navbar() {
                 >
                   <div className="hidden md:block text-right">
                     <p className="text-sm font-medium text-white transition-colors group-hover:text-ktip-nav-accent">
-                      {auth.profile?.display_name || 'User'}
+                      {auth.profile?.display_name || t`User`}
                     </p>
                     {/* The context being acted in, not whichever role happens to
                         sit first in the array — on a multi-role account those
                         are different answers, and the first one is arbitrary. */}
                     {effectiveRoles[0] && (
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/60 mt-0.5">
-                        {ROLE_LABELS[effectiveRoles[0]]}
+                      /* max-w + truncate: French and Spanish role names run
+                         ~2× the English width ("Inversionista/Agencia de
+                         financiamiento"), and without a cap the whole block
+                         widens and shoves the avatar off the viewport edge.
+                         The full label is in the title and in the menu. */
+                      <p
+                        className="max-w-[11rem] truncate text-[10px] font-semibold uppercase tracking-[0.25em] text-white/60 mt-0.5"
+                        title={resolveCopy(i18n, ROLE_LABELS[effectiveRoles[0]])}
+                      >
+                        {resolveCopy(i18n, ROLE_LABELS[effectiveRoles[0]])}
                       </p>
                     )}
                   </div>
@@ -846,7 +855,7 @@ export function Navbar() {
                         business profile here instead. */}
                     {isOrgAccount ? (
                       <Link
-                        to="/org/edit"
+                        to="/dashboard/business"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
@@ -855,7 +864,7 @@ export function Navbar() {
                       </Link>
                     ) : (
                       <Link
-                        to="/cv"
+                        to="/dashboard/profile"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
@@ -1128,12 +1137,12 @@ export function Navbar() {
                     <span><Trans>My Dashboard</Trans></span>
                   </Link>
                   <Link
-                    to={isOrgAccount ? '/org/edit' : '/cv'}
+                    to={isOrgAccount ? '/dashboard/business' : '/dashboard/profile'}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
                   >
                     {isOrgAccount ? <Building2 size={20} /> : <FileText size={20} />}
-                    <span>{isOrgAccount ? 'Business profile' : 'My CV'}</span>
+                    <span>{isOrgAccount ? t`Business profile` : t`My CV`}</span>
                   </Link>
                   <Link
                     to="/settings"

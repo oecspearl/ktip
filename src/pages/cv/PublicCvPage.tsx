@@ -11,6 +11,7 @@ import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { bleedVars, resolveDesign } from '../../lib/resume-designs'
 import type { ResumeTheme } from '../../types/resume'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * A shared CV at /user/:id/cv.
@@ -25,6 +26,7 @@ import type { ResumeTheme } from '../../types/resume'
  * following a shared link sees the document the way it was composed.
  */
 export default function PublicCvPage() {
+    const { t } = useLingui()
   // /u/<username>/cv and /u/<uuid>/cv both land here; public_resume() takes a
   // uuid, so a username is traded for one first.
   const { id: routeParam } = useParams<{ id: string }>()
@@ -37,8 +39,8 @@ export default function PublicCvPage() {
     () => typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches
   )
 
-  const name = published?.data?.profile?.name || published?.display_name || 'CV'
-  usePageTitle(published ? `${name} — CV` : 'CV')
+  const name = published?.data?.profile?.name || published?.display_name || t`CV`
+  usePageTitle(published ? t`${name} — CV` : t`CV`)
 
   const design = resolveDesign(published?.design ?? published?.template)
   const Sheet = sheetFor(design.id)
@@ -67,20 +69,20 @@ export default function PublicCvPage() {
   // `id` stays undefined for an unknown username, and a disabled query reports
   // isLoading forever — so an unknown name has to fall through to "not found".
   if (resolvingId || (id && isLoading)) {
-    return <div className="mx-auto max-w-7xl px-4 py-16 text-center text-ktip-sand-500">Loading…</div>
+    return <div className="mx-auto max-w-7xl px-4 py-16 text-center text-ktip-sand-500"><Trans>Loading…</Trans></div>
   }
 
   if (!published) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-ocean-700">
-          This CV is not public
+          <Trans>This CV is not public</Trans>
         </h1>
         <p className="mt-3 text-ktip-sand-600">
-          The member may have unpublished it, or the link may be wrong.
+          <Trans>The member may have unpublished it, or the link may be wrong.</Trans>
         </p>
         <Link to={`/user/${routeParam}`} className="mt-6 inline-block text-ktip-ocean-600 hover:underline">
-          View their profile instead
+          <Trans>View their profile instead</Trans>
         </Link>
       </div>
     )
@@ -90,20 +92,20 @@ export default function PublicCvPage() {
     <div id="cv-root" className="mx-auto max-w-7xl px-4 py-10">
       <div data-tutorial="public-cv-actions" className="mb-8 flex flex-wrap items-center gap-3 print:hidden">
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('mono')}>
-          Download B&amp;W (A4)
+          <Trans>Download B&amp;W (A4)</Trans>
         </Button>
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('color')}>
-          Download Color (A4)
+          <Trans>Download Color (A4)</Trans>
         </Button>
         <Button
           variant="ghost"
           icon={asText ? <LayoutTemplate size={16} /> : <FileText size={16} />}
           onClick={() => setAsText(!asText)}
         >
-          {asText ? 'Show the page' : 'Read as text'}
+          {asText ? t`Show the page` : t`Read as text`}
         </Button>
         <Link to={`/user/${routeParam}`} className="text-sm text-ktip-ocean-600 hover:underline">
-          View profile
+          <Trans>View profile</Trans>
         </Link>
       </div>
 

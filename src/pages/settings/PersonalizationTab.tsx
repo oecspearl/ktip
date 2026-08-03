@@ -22,6 +22,9 @@ import {
   EVENT_TYPE_LABELS,
   GRANT_TYPE_LABELS,
 } from '../../lib/constants'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * Projects and resources share the category enum, but resources carry two
@@ -40,10 +43,10 @@ const CATEGORY_OPTIONS = [
  * Type keys are namespaced on the way in: `education` is both a resource
  * category and a grant type, so a bare value would match the wrong entity.
  */
-const TYPE_GROUPS: { entity: string; heading: string; labels: Record<string, string> }[] = [
-  { entity: 'resource', heading: 'Resources', labels: RESOURCE_TYPE_LABELS },
-  { entity: 'event', heading: 'Events', labels: EVENT_TYPE_LABELS },
-  { entity: 'grant', heading: 'Grants', labels: GRANT_TYPE_LABELS },
+const TYPE_GROUPS: { entity: string; heading: MessageDescriptor; labels: Record<string, string> }[] = [
+  { entity: 'resource', heading: msg`Resources`, labels: RESOURCE_TYPE_LABELS },
+  { entity: 'event', heading: msg`Events`, labels: EVENT_TYPE_LABELS },
+  { entity: 'grant', heading: msg`Grants`, labels: GRANT_TYPE_LABELS },
 ]
 
 interface ChipProps {
@@ -97,6 +100,7 @@ function Section({ icon, iconClass, title, subtitle, children }: SectionProps) {
 }
 
 export function PersonalizationTab() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { personalization, loading } = useMyPersonalization(auth.user?.id)
@@ -135,9 +139,9 @@ export function PersonalizationTab() {
         categories: form.categories.length,
         content_types: form.content_types.length,
       })
-      toast.success('Personalization saved!')
+      toast.success(t`Personalization saved!`)
     } catch {
-      toast.error('Failed to save personalization')
+      toast.error(t`Failed to save personalization`)
     }
   }
 
@@ -147,9 +151,9 @@ export function PersonalizationTab() {
       await resetPersonalization(auth.user.id)
       setForm({ ...DEFAULT_PERSONALIZATION })
       analytics.feature('personalization', 'reset')
-      toast.success('Personalization reset to defaults')
+      toast.success(t`Personalization reset to defaults`)
     } catch {
-      toast.error('Failed to reset personalization')
+      toast.error(t`Failed to reset personalization`)
     }
   }
 
@@ -160,15 +164,15 @@ export function PersonalizationTab() {
       <Section
         icon={<Sparkles size={20} className="text-ktip-ocean-600" />}
         iconClass="bg-ktip-ocean-100"
-        title="Personalize my platform"
-        subtitle="Put the projects, resources, events and grants that suit you first"
+        title={t`Personalize my platform`}
+        subtitle={t`Put the projects, resources, events and grants that suit you first`}
       >
         <div className="divide-y divide-ktip-sand-100">
           <Toggle
             checked={form.enabled}
             onChange={(v) => set('enabled', v)}
-            label="Personalize what I see"
-            description="Adds a “For You” sort to every list page and makes it your default. Nothing is ever hidden — matching items simply move to the top, and every other sort stays one click away."
+            label={t`Personalize what I see`}
+            description={t`Adds a “For You” sort to every list page and makes it your default. Nothing is ever hidden — matching items simply move to the top, and every other sort stays one click away.`}
           />
         </div>
       </Section>
@@ -176,8 +180,8 @@ export function PersonalizationTab() {
       <Section
         icon={<Sparkles size={20} className="text-ktip-tropical-600" />}
         iconClass="bg-ktip-tropical-100"
-        title="Topics"
-        subtitle="The single biggest lever — pick what you want to see more of"
+        title={t`Topics`}
+        subtitle={t`The single biggest lever — pick what you want to see more of`}
       >
         <TopicPicker values={form.topics} onChange={(v) => set('topics', v)} />
       </Section>
@@ -185,8 +189,8 @@ export function PersonalizationTab() {
       <Section
         icon={<Layers size={20} className="text-ktip-ocean-600" />}
         iconClass="bg-ktip-ocean-100"
-        title="Categories"
-        subtitle="Applies to projects and resources — events and grants are sorted by type instead"
+        title={t`Categories`}
+        subtitle={t`Applies to projects and resources — events and grants are sorted by type instead`}
       >
         <div className="flex flex-wrap gap-2">
           {CATEGORY_OPTIONS.map(({ value, label }) => (
@@ -204,14 +208,14 @@ export function PersonalizationTab() {
       <Section
         icon={<FileType size={20} className="text-ktip-sun-700" />}
         iconClass="bg-ktip-sun-100"
-        title="Content types"
-        subtitle="The formats you find most useful"
+        title={t`Content types`}
+        subtitle={t`The formats you find most useful`}
       >
         <div className="space-y-4">
           {TYPE_GROUPS.map(({ entity, heading, labels }) => (
             <div key={entity}>
               <div className="text-xs font-semibold uppercase tracking-wide text-ktip-sand-500 mb-2">
-                {heading}
+                {i18n._(heading)}
               </div>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(labels).map(([value, label]) => {
@@ -235,15 +239,15 @@ export function PersonalizationTab() {
       <Section
         icon={<Leaf size={20} className="text-ktip-tropical-600" />}
         iconClass="bg-ktip-tropical-100"
-        title="Climate focus"
-        subtitle="Boost climate action work across every list"
+        title={t`Climate focus`}
+        subtitle={t`Boost climate action work across every list`}
       >
         <div className="divide-y divide-ktip-sand-100">
           <Toggle
             checked={form.climate_focus}
             onChange={(v) => set('climate_focus', v)}
-            label="Prioritise climate action content"
-            description="Anything flagged as climate action ranks higher for you."
+            label={t`Prioritise climate action content`}
+            description={t`Anything flagged as climate action ranks higher for you.`}
           />
         </div>
       </Section>
@@ -251,30 +255,30 @@ export function PersonalizationTab() {
       <Section
         icon={<SlidersHorizontal size={20} className="text-ktip-sand-600" />}
         iconClass="bg-ktip-sand-100"
-        title="Signals we use"
-        subtitle="Switch off anything you would rather we ignored"
+        title={t`Signals we use`}
+        subtitle={t`Switch off anything you would rather we ignored`}
       >
         <div className="divide-y divide-ktip-sand-100 mb-4">
           <Toggle
             checked={form.use_profile_signals}
             onChange={(v) => set('use_profile_signals', v)}
             disabled={off}
-            label="My profile"
-            description="Interests, skills, industry, country and roles."
+            label={t`My profile`}
+            description={t`Interests, skills, industry, country and roles.`}
           />
           <Toggle
             checked={form.use_behavior_signals}
             onChange={(v) => set('use_behavior_signals', v)}
             disabled={off}
-            label="My activity"
-            description="Projects you like or follow, events you RSVP to, grants you apply for. Things you have already engaged with are pushed down, not hidden."
+            label={t`My activity`}
+            description={t`Projects you like or follow, events you RSVP to, grants you apply for. Things you have already engaged with are pushed down, not hidden.`}
           />
           <Toggle
             checked={form.use_badge_signals}
             onChange={(v) => set('use_badge_signals', v)}
             disabled={off}
-            label="My badges"
-            description="Suggests the next useful step — starter guides before your first project, grants once you are verified."
+            label={t`My badges`}
+            description={t`Suggests the next useful step — starter guides before your first project, grants once you are verified.`}
           />
         </div>
 
@@ -288,10 +292,10 @@ export function PersonalizationTab() {
           loading={resetting}
           icon={<RotateCcw size={16} />}
         >
-          Reset to defaults
+          <Trans>Reset to defaults</Trans>
         </Button>
         <Button onClick={handleSave} loading={saving} icon={<Save size={18} />}>
-          Save Personalization
+          <Trans>Save Personalization</Trans>
         </Button>
       </div>
     </div>

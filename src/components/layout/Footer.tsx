@@ -1,44 +1,54 @@
 import { Link } from 'react-router'
 import { Instagram, Linkedin, Facebook, Youtube } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import { APP_NAME, APP_FULL_NAME } from '../../lib/constants'
 import { FlipWatermark } from '../ui/FlipWatermark'
+import { LanguageSwitcher } from '../ui/LanguageSwitcher'
 
 interface FooterLink {
-  label: string
+  label: MessageDescriptor
   href: string
   external?: boolean
 }
 
 interface FooterColumn {
-  title: string
+  title: MessageDescriptor
   links: FooterLink[]
 }
 
+/**
+ * `msg` rather than `t`: these live at module scope, evaluated once at import,
+ * long before anyone has chosen a language. The macro compiles each one to an
+ * inert descriptor that `i18n._()` resolves at render — which is also what makes
+ * the whole table re-read correctly when the language changes.
+ */
 const footerColumns: FooterColumn[] = [
   {
-    title: 'Explore',
+    title: msg`Explore`,
     links: [
-      { label: 'Discover', href: '/' },
-      { label: 'Projects', href: '/projects' },
-      { label: 'Events', href: '/events' },
-      { label: 'Grants', href: '/grants' },
+      { label: msg`Discover`, href: '/' },
+      { label: msg`Projects`, href: '/projects' },
+      { label: msg`Events`, href: '/events' },
+      { label: msg`Grants`, href: '/grants' },
     ],
   },
   {
-    title: 'Community',
+    title: msg`Community`,
     links: [
-      { label: 'Forums', href: '/forums' },
-      { label: 'Directory', href: '/directory' },
-      { label: 'Collaborate', href: '/collaborate' },
-      { label: 'Resources & Integrations', href: '/resources' },
+      { label: msg`Forums`, href: '/forums' },
+      { label: msg`Directory`, href: '/directory' },
+      { label: msg`Collaborate`, href: '/collaborate' },
+      { label: msg`Resources & Integrations`, href: '/resources' },
     ],
   },
   {
-    title: 'Support',
+    title: msg`Support`,
     links: [
-      { label: 'Help Center', href: '/help' },
-      { label: 'My Reports', href: '/grievances/my-reports' },
-      { label: 'Contact', href: 'mailto:support@ktip.org', external: true },
+      { label: msg`Help Center`, href: '/help' },
+      { label: msg`My Reports`, href: '/grievances/my-reports' },
+      { label: msg`Contact`, href: 'mailto:support@ktip.org', external: true },
     ],
   },
 ]
@@ -52,6 +62,9 @@ const socialLinks = [
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
+  // `i18n._()` resolves the module-scope descriptors above. Reading it here is
+  // also what subscribes this component to the active catalog.
+  const { i18n } = useLingui()
 
   return (
     <footer className="relative bg-ktip-ink text-white mt-auto overflow-hidden border-t border-ktip-line/40">
@@ -66,44 +79,52 @@ export function Footer() {
           {/* Logo & Mission */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <img src="/ktip-logo.webp" alt="KTIP Logo" loading="lazy" decoding="async" width={48} height={48} className="w-12 h-12 object-contain" />
+              <img src="/ktip-logo-128.webp" alt="KTiP" loading="lazy" decoding="async" width={48} height={48} className="w-12 h-12 object-contain" />
               <div>
                 <h3 className="text-xl font-display font-extrabold tracking-tight text-white">
                   {APP_NAME}
                 </h3>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">
-                  Innovation Platform
+                  <Trans>Innovation Platform</Trans>
                 </p>
               </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed max-w-sm">
-              {APP_FULL_NAME} - Empowering Caribbean innovators, mentors, and investors
-              to collaborate and drive transformative change across the region.
+              {/* One message, not a fragment plus a variable. A translator has to
+                  be able to move {name} — French and Spanish both want it in a
+                  different position from English here. */}
+              <Trans>
+                {APP_FULL_NAME} - Empowering Caribbean innovators, mentors, and investors to
+                collaborate and drive transformative change across the region.
+              </Trans>
             </p>
           </div>
 
           {/* Nav columns */}
           {footerColumns.map((column) => (
-            <div key={column.title}>
+            // Keyed by href, not by label: the label is now a descriptor, and a
+            // key that changes with the language would remount the whole column
+            // on every switch.
+            <div key={column.links[0].href}>
               <h4 className="text-[11px] font-semibold uppercase tracking-[0.35em] text-white/50 mb-4">
-                {column.title}
+                {i18n._(column.title)}
               </h4>
               <ul className="space-y-2.5">
                 {column.links.map((link) => (
-                  <li key={link.label}>
+                  <li key={link.href}>
                     {link.external ? (
                       <a
                         href={link.href}
                         className="text-sm text-white/70 hover:text-white transition-colors"
                       >
-                        {link.label}
+                        {i18n._(link.label)}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
                         className="text-sm text-white/70 hover:text-white transition-colors"
                       >
-                        {link.label}
+                        {i18n._(link.label)}
                       </Link>
                     )}
                   </li>
@@ -119,9 +140,13 @@ export function Footer() {
         <div className="container mx-auto px-6 md:px-12 py-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-white/40">
-              &copy; {currentYear} OECS. All rights reserved.
+              <Trans>&copy; {currentYear} OECS. All rights reserved.</Trans>
             </p>
             <div className="flex items-center gap-3">
+              {/* In the footer because that is where a logged-out visitor looks
+                  for it, and because it is on every page including the ones
+                  outside MainLayout. */}
+              <LanguageSwitcher className="mr-1" />
               {socialLinks.map((link) => (
                 <a
                   key={link.name}

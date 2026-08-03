@@ -2,12 +2,14 @@ import { Bell } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useProjectFollow } from '../../hooks/useProjects'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLingui } from '@lingui/react/macro'
 
 interface FollowButtonProps {
   projectId: string
 }
 
 export function FollowButton({ projectId }: FollowButtonProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const userId = auth.user?.id
   const { followed, followCount, followProject, unfollowProject, loading } = useProjectFollow(
@@ -41,7 +43,7 @@ export function FollowButton({ projectId }: FollowButtonProps) {
         />
       }
     >
-      {followed ? 'Following' : 'Follow'} ({followCount ?? 0})
+      {followed ? t`Following` : t`Follow`} ({followCount ?? 0})
     </Button>
   )
 }

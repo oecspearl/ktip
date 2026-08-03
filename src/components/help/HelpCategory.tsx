@@ -1,6 +1,7 @@
 import { HelpArticleCard } from './HelpArticleCard'
 import { helpIcon } from './help-icons'
 import type { HelpCategory as HelpCategoryType } from '../../lib/help-content'
+import { useLingui } from '@lingui/react/macro'
 
 interface HelpCategoryProps {
   category: HelpCategoryType
@@ -15,6 +16,7 @@ export function HelpCategorySection({
   onToggleArticle,
   onCollapseArticle,
 }: HelpCategoryProps) {
+  const { i18n } = useLingui()
   if (category.articles.length === 0) return null
 
   const Icon = helpIcon(category.icon)
@@ -26,8 +28,8 @@ export function HelpCategorySection({
           <Icon size={20} />
         </div>
         <div className="min-w-0">
-          <h2 className="text-lg font-display font-bold text-ktip-sand-900">{category.title}</h2>
-          <p className="text-sm text-ktip-sand-500">{category.description}</p>
+          <h2 className="text-lg font-display font-bold text-ktip-sand-900">{i18n._(category.title)}</h2>
+          <p className="text-sm text-ktip-sand-500">{i18n._(category.description)}</p>
         </div>
       </div>
 

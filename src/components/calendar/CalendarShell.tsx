@@ -2,6 +2,9 @@ import { format, isSameMonth, isSameYear } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { CalendarView } from './useCalendarRange'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 interface CalendarShellProps {
   view: CalendarView
@@ -20,9 +23,9 @@ interface CalendarShellProps {
   className?: string
 }
 
-const VIEWS: { value: CalendarView; label: string }[] = [
-  { value: 'month', label: 'Month' },
-  { value: 'week', label: 'Week' },
+const VIEWS: { value: CalendarView; label: MessageDescriptor }[] = [
+  { value: 'month', label: msg`Month` },
+  { value: 'week', label: msg`Week` },
 ]
 
 /** `Jul 13 – 19, 2026`, or `Jun 29 – Jul 5, 2026` across a month boundary. */
@@ -53,6 +56,7 @@ export function CalendarShell({
   children,
   className,
 }: CalendarShellProps) {
+    const { t , i18n } = useLingui()
   const title = view === 'week' ? weekRangeLabel(gridStart, gridEnd) : format(monthDate, 'MMMM yyyy')
 
   return (
@@ -74,7 +78,7 @@ export function CalendarShell({
           {/* Month / Week switch */}
           <div
             role="group"
-            aria-label="Calendar view"
+            aria-label={t`Calendar view`}
             className="flex items-center gap-0.5 rounded-full border border-ktip-line bg-ktip-canvas/70 p-0.5"
           >
             {VIEWS.map((option) => {
@@ -92,7 +96,7 @@ export function CalendarShell({
                       : 'text-ktip-sand-600 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50'
                   )}
                 >
-                  {option.label}
+                  {i18n._(option.label)}
                 </button>
               )
             })}
@@ -103,14 +107,14 @@ export function CalendarShell({
             onClick={onToday}
             className="text-xs font-bold uppercase tracking-wider text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-full px-3 py-1.5 transition-colors"
           >
-            Today
+            <Trans>Today</Trans>
           </button>
 
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={onPrev}
-              aria-label={view === 'week' ? 'Previous week' : 'Previous month'}
+              aria-label={view === 'week' ? t`Previous week` : t`Previous month`}
               className="h-9 w-9 flex items-center justify-center rounded-full border border-ktip-line text-ktip-sand-700 transition-all hover:bg-ktip-sand-100 hover:text-ktip-ocean-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none"
             >
               <ChevronLeft size={18} />
@@ -118,7 +122,7 @@ export function CalendarShell({
             <button
               type="button"
               onClick={onNext}
-              aria-label={view === 'week' ? 'Next week' : 'Next month'}
+              aria-label={view === 'week' ? t`Next week` : t`Next month`}
               className="h-9 w-9 flex items-center justify-center rounded-full border border-ktip-line text-ktip-sand-700 transition-all hover:bg-ktip-sand-100 hover:text-ktip-ocean-700 active:scale-95 focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none"
             >
               <ChevronRight size={18} />

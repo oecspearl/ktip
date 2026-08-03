@@ -1,6 +1,7 @@
 import { type EventSpeaker } from '../../types'
 import { Mic, Globe } from 'lucide-react'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans } from '@lingui/react/macro'
 
 interface EventSpeakerGridProps {
   speakers: EventSpeaker[]
@@ -11,7 +12,7 @@ export function EventSpeakerGrid({ speakers }: EventSpeakerGridProps) {
     <div className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-card p-6">
       <h2 className="text-xl font-display font-bold text-ktip-sand-900 mb-4 flex items-center gap-2">
         <Mic className="text-ktip-ocean-600" size={20} />
-        Speakers
+        <Trans>Speakers</Trans>
       </h2>
 
       {speakers.length > 0 ? (
@@ -49,7 +50,7 @@ export function EventSpeakerGrid({ speakers }: EventSpeakerGridProps) {
                   className="inline-flex items-center gap-1 text-xs text-ktip-ocean-600 hover:text-ktip-ocean-700 mt-2"
                 >
                   <Globe size={12} />
-                  Website
+                  <Trans>Website</Trans>
                 </a>
               )}
             </div>
@@ -57,7 +58,7 @@ export function EventSpeakerGrid({ speakers }: EventSpeakerGridProps) {
         </div>
       ) : (
         <p className="text-sm text-ktip-sand-500">
-          Speakers will be announced soon.
+          <Trans>Speakers will be announced soon.</Trans>
         </p>
       )}
     </div>

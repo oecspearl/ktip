@@ -9,6 +9,7 @@ import {
   SheetFrame,
   type SheetProps,
 } from './SheetFrame'
+import { Trans } from '@lingui/react/macro'
 
 /**
  * "Classic" — one column, centred header, hairline rules.
@@ -71,7 +72,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {profile.about.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Profile
+            <Trans>Profile</Trans>
           </PlainHeading>
           <div className="space-y-2 text-[8.5pt] leading-relaxed text-neutral-700">
             {profile.about.map((paragraph) => (
@@ -84,7 +85,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.education.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Education
+            <Trans>Education</Trans>
           </PlainHeading>
           {data.education.map((item) => (
             <div key={`${item.credential}-${item.year}`}>
@@ -97,7 +98,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.roles.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Experience
+            <Trans>Experience</Trans>
           </PlainHeading>
           {data.roles.map((role) => (
             <div key={`${role.org}-${role.period}`}>
@@ -115,7 +116,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.courses.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Courses
+            <Trans>Courses</Trans>
           </PlainHeading>
           <CourseTable data={data} />
         </section>
@@ -124,7 +125,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.credentials.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Certificates
+            <Trans>Certificates</Trans>
           </PlainHeading>
           <CredentialList data={data} />
         </section>
@@ -133,7 +134,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.projects.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Projects
+            <Trans>Projects</Trans>
           </PlainHeading>
           <ProjectList data={data} />
         </section>
@@ -142,7 +143,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.awards.length > 0 && (
         <section className="mt-6">
           <PlainHeading color={color} design={design}>
-            Awards &amp; Recognition
+            <Trans>Awards &amp; Recognition</Trans>
           </PlainHeading>
           <AwardList data={data} />
         </section>
@@ -151,7 +152,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.skills.length > 0 && (
         <section className="resume-avoid-break mt-6">
           <PlainHeading color={color} design={design}>
-            Skills
+            <Trans>Skills</Trans>
           </PlainHeading>
           <dl className="space-y-1.5">
             {data.skills.map((group) => (
@@ -167,7 +168,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.academic.length > 0 && (
         <section className="resume-avoid-break mt-6">
           <PlainHeading color={color} design={design}>
-            Academic Competencies
+            <Trans>Academic Competencies</Trans>
           </PlainHeading>
           <AcademicTable data={data} color={color} design={design} />
         </section>
@@ -178,7 +179,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.languages.length > 0 && (
             <div>
               <PlainHeading color={color} design={design} size="10pt">
-                Languages
+                <Trans>Languages</Trans>
               </PlainHeading>
               <p className="text-[8pt] text-neutral-700">{data.languages.join(' · ')}</p>
             </div>
@@ -186,7 +187,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.professionalSkills.length > 0 && (
             <div>
               <PlainHeading color={color} design={design} size="10pt">
-                Professional Skills
+                <Trans>Professional Skills</Trans>
               </PlainHeading>
               <ul className="list-disc space-y-0.5 pl-4 text-[8pt] text-neutral-700">
                 {data.professionalSkills.map((skill) => (
@@ -201,7 +202,7 @@ export function ClassicSheet({ data, theme = 'mono', design, thumbnail }: SheetP
       {data.interests.trim() !== '' && (
         <section className="resume-avoid-break mt-6">
           <PlainHeading color={color} design={design}>
-            Interests
+            <Trans>Interests</Trans>
           </PlainHeading>
           <p className="text-[8pt] leading-relaxed text-neutral-700">{data.interests}</p>
         </section>

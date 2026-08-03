@@ -21,19 +21,43 @@ import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { cn, debounce } from '../../lib/utils'
+import { Trans, useLingui, Plural } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import { resolveCopy, type Copy } from '../../i18n/copy'
 
-const CATEGORY_OPTIONS = [
-  { value: '', label: 'All Categories' },
+// Two different translation mechanisms end up in one list, and the type has to
+// admit both: "All Categories" is ours (a msg descriptor), while the category
+// labels come from lib/constants and are harvested into the catalog as plain
+// source strings. i18n._() resolves either, so the difference disappears at the
+// render site below — but only there, never at module scope, where no language
+// has been chosen yet.
+type FilterOption = { value: string; label: Copy }
+
+const CATEGORY_OPTIONS: FilterOption[] = [
+  { value: '', label: msg`All Categories` },
   ...PROJECT_CATEGORIES.map((c) => ({ value: c.value as string, label: c.label })),
 ]
 
-const PHASE_OPTIONS = [
-  { value: '', label: 'All Phases' },
+const PHASE_OPTIONS: FilterOption[] = [
+  { value: '', label: msg`All Phases` },
   ...Object.entries(PHASE_LABELS).map(([value, label]) => ({ value, label })),
 ]
 
 export default function ProjectsPage() {
-  usePageTitle('Projects')
+  const { t, i18n } = useLingui()
+
+  // Resolved here rather than at module scope, and memoised on `i18n` so the
+  // labels re-resolve when the language changes.
+  const categoryOptions = useMemo(
+    () => CATEGORY_OPTIONS.map((o) => ({ value: o.value, label: resolveCopy(i18n, o.label) })),
+    [i18n]
+  )
+  const phaseOptions = useMemo(
+    () => PHASE_OPTIONS.map((o) => ({ value: o.value, label: resolveCopy(i18n, o.label) })),
+    [i18n]
+  )
+
+  usePageTitle(t`Projects`)
   const auth = useAuth()
   // This page is public. Signed-out visitors keep every Create Project CTA —
   // it sends them to login, which is the funnel. Members whose role lacks
@@ -103,18 +127,18 @@ export default function ProjectsPage() {
     return order.flatMap((value) => {
       const items = buckets.get(value)
       if (!items?.length) return []
-      const label = PROJECT_CATEGORIES.find((c) => c.value === value)?.label ?? 'Other'
-      return [{ value, label, items }]
+      const rawLabel = PROJECT_CATEGORIES.find((c) => c.value === value)?.label ?? 'Other'
+      return [{ value, label: resolveCopy(i18n, rawLabel), items }]
     })
-  }, [projects, selectedCategory, sort])
+  }, [projects, selectedCategory, sort, i18n])
 
   return (
     <>
       <PageHero
-        eyebrow="Project Archives"
-        title="Projects"
+        eyebrow={t`Project Archives`}
+        title={t`Projects`}
         imageSeed="projects"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Projects' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Projects` }]}
       />
 
       {/* === Content Area — full width, no sidebar ===
@@ -131,23 +155,36 @@ export default function ProjectsPage() {
                 <Select
                   value={selectedCategory}
                   onChange={setSelectedCategory}
-                  options={CATEGORY_OPTIONS}
-                  ariaLabel="Filter by category"
+                  options={categoryOptions}
+                  ariaLabel={t`Filter by category`}
                 />
 
                 <Select
                   value={selectedPhase}
                   onChange={setSelectedPhase}
-                  options={PHASE_OPTIONS}
-                  ariaLabel="Filter by phase"
+                  options={phaseOptions}
+                  ariaLabel={t`Filter by phase`}
                 />
 
                 {/* Result count rides the filter row rather than sitting above
                     the grid */}
                 {!projectsLoading && projects && (
                   <p className="text-sm text-gray-500">
-                    Found {projects.length} project{projects.length !== 1 ? 's' : ''}
-                    {categoryGroups.length > 1 && ` in ${categoryGroups.length} categories`}
+                    <Plural
+                      value={projects.length}
+                      one="Found # project"
+                      other="Found # projects"
+                    />
+                    {categoryGroups.length > 1 && (
+                      <>
+                        {' '}
+                        <Plural
+                          value={categoryGroups.length}
+                          one="in # category"
+                          other="in # categories"
+                        />
+                      </>
+                    )}
                   </p>
                 )}
 
@@ -161,8 +198,8 @@ export default function ProjectsPage() {
                   <CollapsibleSearch
                     value={searchQuery}
                     onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                    placeholder="Search projects..."
-                    ariaLabel="Search projects"
+                    placeholder={t`Search projects...`}
+                    ariaLabel={t`Search projects`}
                   />
 
                   <ColumnToggle value={columns} onChange={setColumns} />
@@ -171,7 +208,7 @@ export default function ProjectsPage() {
                     <Link to="/projects/new" data-tutorial="projects-create">
                       <button className="flex items-center gap-1.5 px-4 py-2 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
                         <Plus size={16} />
-                        Create Project
+                        <Trans>Create Project</Trans>
                       </button>
                     </Link>
                   )}
@@ -183,7 +220,7 @@ export default function ProjectsPage() {
                   onClick={clearFilters}
                   className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
                 >
-                  Clear all filters
+                  <Trans>Clear all filters</Trans>
                 </button>
               )}
             </div>
@@ -229,16 +266,16 @@ export default function ProjectsPage() {
                   <Inbox size={32} className="text-gray-400" />
                 </div>
                 <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                  No projects found
+                  <Trans>No projects found</Trans>
                 </h3>
                 <p className="text-gray-500 mb-6">
                   {hasActiveFilters
-                    ? 'Try adjusting your filters or search query'
-                    : 'Be the first to create a project!'}
+                    ? t`Try adjusting your filters or search query`
+                    : t`Be the first to create a project!`}
                 </p>
                 {!hasActiveFilters && canCreateProject && (
                   <Link to="/projects/new">
-                    <Button icon={<Plus size={20} />}>Create First Project</Button>
+                    <Button icon={<Plus size={20} />}><Trans>Create First Project</Trans></Button>
                   </Link>
                 )}
               </div>

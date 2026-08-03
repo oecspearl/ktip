@@ -4,6 +4,7 @@ import { Modal } from '../ui/Modal'
 import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
 import { isDeleteConfirmed, type DeleteImpact } from '../../lib/delete-guard'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface DeleteEntityDialogProps {
   open: boolean
@@ -39,6 +40,7 @@ export function DeleteEntityDialog({
   onCancel,
   onConfirm,
 }: DeleteEntityDialogProps) {
+    const { t } = useLingui()
   const [typed, setTyped] = useState('')
 
   // Reopening after a cancel must not inherit a half-typed confirmation.
@@ -53,7 +55,7 @@ export function DeleteEntityDialog({
       open={open}
       onClose={loading ? () => {} : onCancel}
       title={`Delete this ${noun}?`}
-      description="This cannot be undone."
+      description={t`This cannot be undone.`}
       size="lg"
     >
       <div className="space-y-5">
@@ -108,7 +110,7 @@ export function DeleteEntityDialog({
             disabled={loading}
             className="text-sm text-ktip-sand-500 transition-colors hover:text-ktip-sand-700 disabled:opacity-50"
           >
-            Keep it
+            <Trans>Keep it</Trans>
           </button>
           <Button
             variant="danger"

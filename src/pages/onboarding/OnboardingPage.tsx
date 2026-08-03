@@ -26,13 +26,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useRequestStudentVerification } from '../../hooks/useInstitutions'
 import type { UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
-
-const STEPS = [
-  { title: 'About You', caption: 'Almost there — set up your KTIP profile.' },
-  { title: 'Skills & Collaboration', caption: 'Find collaborators. Build what’s next.' },
-]
-
-const HEADINGS = ['Complete your profile', 'Skills & collaboration']
+import { Trans, useLingui } from '@lingui/react/macro'
 
 const TODAY_ISO = todayIso()
 
@@ -42,7 +36,13 @@ const TODAY_ISO = todayIso()
  * the same optional fields as the email signup wizard.
  */
 export default function OnboardingPage() {
-  usePageTitle('Complete Your Profile')
+  const { t } = useLingui()
+  usePageTitle(t`Complete Your Profile`)
+  const steps = [
+    { title: t`About You`, caption: t`Almost there — set up your KTIP profile.` },
+    { title: t`Skills & Collaboration`, caption: t`Find collaborators. Build what’s next.` },
+  ]
+  const headings = [t`Complete your profile`, t`Skills & collaboration`]
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
@@ -107,12 +107,12 @@ export default function OnboardingPage() {
 
   const validateStep1 = (): boolean => {
     const fieldErrors: Record<string, string> = {}
-    if (!displayName.trim()) fieldErrors.display_name = 'Display name is required'
+    if (!displayName.trim()) fieldErrors.display_name = t`Display name is required`
     if (needsDob) {
       const dob = dateOfBirthSchema.safeParse(dateOfBirth)
-      if (!dob.success) fieldErrors.date_of_birth = dob.error.issues[0]?.message ?? 'Enter a valid date of birth'
+      if (!dob.success) fieldErrors.date_of_birth = dob.error.issues[0]?.message ?? t`Enter a valid date of birth`
     }
-    if (!selectedRole) fieldErrors.role = 'Please select a role'
+    if (!selectedRole) fieldErrors.role = t`Please select a role`
     setErrors(fieldErrors)
     return Object.keys(fieldErrors).length === 0
   }
@@ -152,8 +152,8 @@ export default function OnboardingPage() {
         if (data?.ok !== true && data?.reason !== 'already_declared') {
           throw new Error(
             data?.reason === 'under_minimum_age'
-              ? 'You must be at least 13 to use KTIP.'
-              : 'We could not save your date of birth. Please check it and try again.'
+              ? t`You must be at least 13 to use KTIP.`
+              : t`We could not save your date of birth. Please check it and try again.`
           )
         }
       }
@@ -186,11 +186,11 @@ export default function OnboardingPage() {
       }
 
       analytics.conversion('onboarding_complete', { role: selectedRole })
-      toast.success('Welcome to KTIP!')
+      toast.success(t`Welcome to KTIP!`)
       navigate('/', { replace: true })
     } catch (error: any) {
       submitted.current = false
-      setErrorMessage(error.message || 'Failed to save your profile. Please try again.')
+      setErrorMessage(error.message || t`Failed to save your profile. Please try again.`)
     } finally {
       setPending(false)
     }
@@ -213,8 +213,8 @@ export default function OnboardingPage() {
     return (
       <AuthSplitShell
         step={1}
-        steps={STEPS}
-        heading={isStudent ? 'Waiting on your school' : 'Your institution adds you'}
+        steps={steps}
+        heading={isStudent ? t`Waiting on your school` : t`Your institution adds you`}
         subheading={APP_FULL_NAME}
         heroOffset={3}
       >
@@ -228,22 +228,26 @@ export default function OnboardingPage() {
             <div className="text-sm text-ktip-sand-700">
               {isStudent ? (
                 <>
-                  <p className="font-medium text-ktip-sand-900">Your request has been sent.</p>
+                  <p className="font-medium text-ktip-sand-900"><Trans>Your request has been sent.</Trans></p>
                   <p className="mt-1">
-                    We matched <strong>{auth.user?.email}</strong> to your institution. An educator
-                    there approves it, and that approval is what turns on your student account.
-                    You will get an email when it happens.
+                    <Trans>
+                      We matched <strong>{auth.user?.email}</strong> to your institution. An educator
+                      there approves it, and that approval is what turns on your student account.
+                      You will get an email when it happens.
+                    </Trans>
                   </p>
                 </>
               ) : (
                 <>
                   <p className="font-medium text-ktip-sand-900">
-                    Faculty accounts are set up by your institution.
+                    <Trans>Faculty accounts are set up by your institution.</Trans>
                   </p>
                   <p className="mt-1">
-                    Ask the KTIP administrator at your school or university to add{' '}
-                    <strong>{auth.user?.email}</strong> as an educator. Once they do, your faculty
-                    account is ready.
+                    <Trans>
+                      Ask the KTIP administrator at your school or university to add{' '}
+                      <strong>{auth.user?.email}</strong> as an educator. Once they do, your faculty
+                      account is ready.
+                    </Trans>
                   </p>
                 </>
               )}
@@ -251,12 +255,11 @@ export default function OnboardingPage() {
           </div>
 
           <p className="text-sm text-ktip-sand-600">
-            Your profile is saved either way. If you would rather start using KTIP now, pick a role
-            that needs no approval — you can still verify with your school later from Settings.
+            <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — you can still verify with your school later from Settings.</Trans>
           </p>
 
           <Button type="button" variant="secondary" fullWidth onClick={chooseDifferentRole}>
-            Choose a different role
+            <Trans>Choose a different role</Trans>
           </Button>
         </div>
       </AuthSplitShell>
@@ -266,8 +269,8 @@ export default function OnboardingPage() {
   return (
     <AuthSplitShell
       step={step}
-      steps={STEPS}
-      heading={HEADINGS[step - 1]}
+      steps={steps}
+      heading={headings[step - 1]}
       subheading={step === 1 ? APP_FULL_NAME : undefined}
       heroOffset={3}
     >
@@ -282,7 +285,7 @@ export default function OnboardingPage() {
             <div className="flex items-center gap-4">
               <DiamondAvatar
                 src={auth.profile?.avatar_url}
-                name={auth.profile?.display_name || auth.user?.email || 'You'}
+                name={auth.profile?.display_name || auth.user?.email || t`You`}
                 size={56}
                 colorClass="bg-ktip-ocean-100"
                 frameClassName="border-2 border-ktip-ocean-200"
@@ -293,15 +296,17 @@ export default function OnboardingPage() {
                 }
               />
               <p className="text-sm text-ktip-sand-600">
-                Signed in as <strong className="text-ktip-sand-800">{auth.user?.email}</strong>.
-                We pre-filled your details from your account — review and finish up below.
+                <Trans>
+                  Signed in as <strong className="text-ktip-sand-800">{auth.user?.email}</strong>.
+                  We pre-filled your details from your account — review and finish up below.
+                </Trans>
               </p>
             </div>
 
             <Input
               type="text"
-              label="Display Name"
-              placeholder="Enter your full name"
+              label={t`Display Name`}
+              placeholder={t`Enter your full name`}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               error={errors.display_name}
@@ -313,7 +318,7 @@ export default function OnboardingPage() {
             {needsDob && (
               <Input
                 type="date"
-                label="Date of Birth"
+                label={t`Date of Birth`}
                 value={dateOfBirth}
                 onChange={(e) => {
                   setDateOfBirth(e.target.value)
@@ -324,7 +329,7 @@ export default function OnboardingPage() {
                   })
                 }}
                 error={errors.date_of_birth}
-                helperText="Your provider does not share this with us. Members under 18 get extra protections on their account."
+                helperText={t`Your provider does not share this with us. Members under 18 get extra protections on their account.`}
                 icon={<Cake size={20} />}
                 max={TODAY_ISO}
                 fullWidth
@@ -347,8 +352,8 @@ export default function OnboardingPage() {
 
             <Input
               type="text"
-              label="Organisation"
-              placeholder="Company, university, or institution"
+              label={t`Organisation`}
+              placeholder={t`Company, university, or institution`}
               value={organization}
               onChange={(e) => setOrganization(e.target.value)}
               icon={<Building2 size={20} />}
@@ -358,13 +363,13 @@ export default function OnboardingPage() {
             <IndustrySelect value={industry} onChange={setIndustry} />
 
             <div className="flex flex-col gap-1.5 w-full">
-              <label className="text-sm font-medium text-ktip-sand-700">Country</label>
+              <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
               >
-                <option value="">Select a country</option>
+                <option value=""><Trans>Select a country</Trans></option>
                 {[...CARIBBEAN_COUNTRIES].map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -372,18 +377,18 @@ export default function OnboardingPage() {
             </div>
 
             <Textarea
-              label="Bio"
+              label={t`Bio`}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              helperText={`${bio.length}/${LIMITS.MAX_BIO_LENGTH} characters`}
+              helperText={t`${bio.length}/${LIMITS.MAX_BIO_LENGTH} characters`}
               rows={3}
               maxLength={LIMITS.MAX_BIO_LENGTH}
-              placeholder="Tell us about yourself..."
+              placeholder={t`Tell us about yourself...`}
               fullWidth
             />
 
             <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>
-              Next
+              <Trans>Next</Trans>
             </Button>
           </div>
         )}
@@ -391,37 +396,37 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-4">
             <p className="text-sm text-ktip-sand-600 -mt-1">
-              Help others find and collaborate with you. Optional — editable later in Settings.
+              <Trans>Help others find and collaborate with you. Optional — editable later in Settings.</Trans>
             </p>
 
             <TagInput
-              label="Skills"
+              label={t`Skills`}
               values={skills}
               onChange={setSkills}
               suggestions={SKILL_SUGGESTIONS}
               max={LIMITS.MAX_SKILLS}
-              placeholder="Type a skill and press Enter..."
+              placeholder={t`Type a skill and press Enter...`}
             />
 
             <TagInput
-              label="Interests"
+              label={t`Interests`}
               values={interests}
               onChange={setInterests}
               suggestions={INTEREST_SUGGESTIONS}
               max={LIMITS.MAX_INTERESTS}
-              placeholder="Type an interest and press Enter..."
+              placeholder={t`Type an interest and press Enter...`}
             />
 
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Openness to Collaborate
+                <Trans>Openness to Collaborate</Trans>
               </label>
               <CollabSelect values={openTo} onChange={setOpenTo} />
             </div>
 
             <div className="flex gap-3">
               <Button type="button" variant="secondary" onClick={() => setStep(1)} icon={<ArrowLeft size={18} />}>
-                Back
+                <Trans>Back</Trans>
               </Button>
               <Button
                 type="button"
@@ -430,7 +435,7 @@ export default function OnboardingPage() {
                 onClick={() => saveProfile(true)}
                 icon={<CheckCircle size={20} />}
               >
-                Finish
+                <Trans>Finish</Trans>
               </Button>
             </div>
             <button
@@ -439,7 +444,7 @@ export default function OnboardingPage() {
               disabled={pending}
               className="w-full text-center text-sm text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors"
             >
-              Skip for now
+              <Trans>Skip for now</Trans>
             </button>
           </div>
         )}

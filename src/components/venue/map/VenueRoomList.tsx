@@ -4,6 +4,7 @@ import { colorForRoom, floorBadge, type VenueMapConfig } from '../../../lib/venu
 import { venueRoomIcon } from '../../../lib/category-icons'
 import { VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
 import type { VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface VenueRoomListProps {
   config: VenueMapConfig
@@ -40,6 +41,7 @@ export function VenueRoomList({
   onPick,
   onHover,
 }: VenueRoomListProps) {
+  const { t } = useLingui()
   // Floors other than the ground one start collapsed: a six-room venue should
   // not push the presence list off the screen.
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({})
@@ -56,7 +58,7 @@ export function VenueRoomList({
     <div className={bare ? '' : 'rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-3 shadow-card'}>
       {!bare && (
         <div className="mb-2 flex items-center gap-2 px-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">Rooms</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500"><Trans>Rooms</Trans></h2>
           <span className="ml-auto font-mono text-[10px] text-ktip-sand-400">{rooms.length}</span>
         </div>
       )}
@@ -89,7 +91,7 @@ export function VenueRoomList({
               {open && (
                 <ul className="mt-1 space-y-1">
                   {floorRooms.length === 0 && (
-                    <li className="px-2 py-1 text-[11px] text-ktip-sand-400">Nothing on this floor</li>
+                    <li className="px-2 py-1 text-[11px] text-ktip-sand-400"><Trans>Nothing on this floor</Trans></li>
                   )}
                   {floorRooms.map((room) => {
                     const color = colorForRoom(room)
@@ -139,8 +141,8 @@ export function VenueRoomList({
 
                           <span className="col-start-2 col-end-4 mt-0.5 truncate text-[10px] text-ktip-sand-500">
                             {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
-                            {room.capacity != null ? ` · cap ${room.capacity}` : ''}
-                            {!room.is_open ? ' · closed' : ''}
+                            {room.capacity != null ? t` · cap ${room.capacity}` : ''}
+                            {!room.is_open ? t` · closed` : ''}
                           </span>
                         </button>
                       </li>

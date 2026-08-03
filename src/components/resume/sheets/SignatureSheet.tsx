@@ -13,6 +13,7 @@ import {
   type SheetProps,
 } from './SheetFrame'
 import { sheetSidebar } from '../../../lib/resume-designs'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * "Signature" — the branded two-column sheet: navy sidebar, pop-out portrait,
@@ -28,6 +29,7 @@ import { sheetSidebar } from '../../../lib/resume-designs'
  *  • color — brand accents and a full-colour portrait.
  */
 export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbnail }: SheetProps) {
+  const { t } = useLingui()
   const color = theme === 'color'
   const { accent } = design
   const { profile } = data
@@ -83,7 +85,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         >
           {profile.about.length > 0 && (
             <>
-              {sideHeading('About Me', 'mb-6', true)}
+              {sideHeading(t`About Me`, 'mb-6', true)}
               <div className="space-y-3 text-[8pt] leading-relaxed">
                 {profile.about.map((paragraph) => (
                   <p key={paragraph.slice(0, 32)}>{paragraph}</p>
@@ -92,19 +94,19 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
             </>
           )}
 
-          {sideHeading('Contact', 'mb-5', profile.about.length === 0)}
+          {sideHeading(t`Contact`, 'mb-5', profile.about.length === 0)}
           <ContactList data={data} />
 
           {data.languages.length > 0 && (
             <>
-              {sideHeading('Languages', 'mb-4')}
+              {sideHeading(t`Languages`, 'mb-4')}
               <p className="text-[8pt]">{data.languages.join(' · ')}</p>
             </>
           )}
 
           {data.professionalSkills.length > 0 && (
             <>
-              {sideHeading('Professional Skills', 'mb-4')}
+              {sideHeading(t`Professional Skills`, 'mb-4')}
               <ul className="space-y-1.5 text-[8pt]">
                 {data.professionalSkills.map((skill) => (
                   <li key={skill}>{skill}</li>
@@ -120,7 +122,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.education.length > 0 && (
           <section>
             <RuleHeading color={color} design={design}>
-              Education
+              <Trans>Education</Trans>
             </RuleHeading>
             <Timeline
               color={color}
@@ -142,7 +144,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.roles.length > 0 && (
           <section className="mt-8">
             <RuleHeading color={color} design={design}>
-              Experience
+              <Trans>Experience</Trans>
             </RuleHeading>
             <Timeline
               color={color}
@@ -171,7 +173,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.courses.length > 0 && (
           <section className="mt-8">
             <RuleHeading color={color} design={design}>
-              Courses
+              <Trans>Courses</Trans>
             </RuleHeading>
             <CourseTable data={data} />
           </section>
@@ -180,7 +182,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.credentials.length > 0 && (
           <section className="mt-8">
             <RuleHeading color={color} design={design}>
-              Certificates
+              <Trans>Certificates</Trans>
             </RuleHeading>
             <CredentialList data={data} />
           </section>
@@ -189,7 +191,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.projects.length > 0 && (
           <section className="mt-8">
             <RuleHeading color={color} design={design}>
-              Projects
+              <Trans>Projects</Trans>
             </RuleHeading>
             <ProjectList data={data} />
           </section>
@@ -198,7 +200,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.awards.length > 0 && (
           <section className="mt-8">
             <RuleHeading color={color} design={design}>
-              Awards &amp; Recognition
+              <Trans>Awards &amp; Recognition</Trans>
             </RuleHeading>
             <AwardList data={data} />
           </section>
@@ -207,7 +209,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.skills.length > 0 && (
           <section className="resume-avoid-break mt-8">
             <RuleHeading color={color} design={design}>
-              Skills
+              <Trans>Skills</Trans>
             </RuleHeading>
             <SkillCircles data={data} color={color} design={design} />
           </section>
@@ -216,7 +218,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.academic.length > 0 && (
           <section className="resume-avoid-break mt-8">
             <RuleHeading color={color} design={design}>
-              Academic Competencies
+              <Trans>Academic Competencies</Trans>
             </RuleHeading>
             <AcademicTable data={data} color={color} design={design} />
           </section>
@@ -225,7 +227,7 @@ export function SignatureSheet({ data, avatarUrl, theme = 'mono', design, thumbn
         {data.interests.trim() !== '' && (
           <section className="resume-avoid-break mt-8">
             <RuleHeading color={color} design={design}>
-              Interests
+              <Trans>Interests</Trans>
             </RuleHeading>
             <p className="text-[8pt] leading-relaxed text-neutral-700">{data.interests}</p>
           </section>

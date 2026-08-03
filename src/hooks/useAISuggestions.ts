@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 
 export type AIAction = 'improve_field' | 'suggest_section' | 'review_application' | 'adjust_tone'
 
@@ -104,6 +105,7 @@ ${context.fieldValue}`
 }
 
 export function useAISuggestions() {
+  const { t } = useLingui()
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
@@ -131,7 +133,7 @@ export function useAISuggestions() {
           ;[systemPrompt, userPrompt] = buildAdjustTonePrompt(context)
           break
         default:
-          throw new Error(`Unknown action: ${action}`)
+          throw new Error(t`Unknown action: ${action}`)
       }
 
       const result = await callOpenAI(systemPrompt, userPrompt)
@@ -153,7 +155,7 @@ export function useAISuggestions() {
     try {
       return await mutation.mutateAsync({ action, context })
     } catch (err: any) {
-      setError(err.message || 'AI suggestion failed')
+      setError(err.message || t`AI suggestion failed`)
       return null
     }
   }

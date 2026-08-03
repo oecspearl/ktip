@@ -1,5 +1,6 @@
 import { Component, Suspense, lazy, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 // Lazily load tldraw (and its stylesheet) — this is a large dependency and
 // mirrors the original's dynamic-import-on-mount strategy.
@@ -16,7 +17,7 @@ interface TldrawWrapperProps {
 // Catches failures to load the tldraw chunk itself (network errors etc.),
 // equivalent to the try/catch around the original's dynamic import.
 class TldrawLoadBoundary extends Component<
-  { children: ReactNode; onError: (message: string) => void },
+  { children: ReactNode; onError: (message: string) => void; fallbackMessage: string },
   { hasError: boolean }
 > {
   state = { hasError: false }
@@ -27,7 +28,7 @@ class TldrawLoadBoundary extends Component<
 
   componentDidCatch(error: unknown) {
     console.error('Failed to load tldraw:', error)
-    this.props.onError(error instanceof Error ? error.message : 'Failed to load whiteboard')
+    this.props.onError(error instanceof Error ? error.message : this.props.fallbackMessage)
   }
 
   render() {
@@ -37,6 +38,7 @@ class TldrawLoadBoundary extends Component<
 }
 
 export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapperProps) {
+  const { t } = useLingui()
   const [error, setError] = useState<string | null>(null)
   const [darkMode] = useThemeMode()
   const editorRef = useRef<any>(null)
@@ -74,19 +76,19 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-ktip-cream z-10">
           <div className="text-center">
-            <p className="text-red-500 mb-2">Failed to load whiteboard</p>
+            <p className="text-red-500 mb-2"><Trans>Failed to load whiteboard</Trans></p>
             <p className="text-ktip-sand-400 text-sm">{error}</p>
           </div>
         </div>
       )}
       {!error && (
-        <TldrawLoadBoundary onError={setError}>
+        <TldrawLoadBoundary onError={setError} fallbackMessage={t`Failed to load whiteboard`}>
           <Suspense
             fallback={
               <div className="absolute inset-0 flex items-center justify-center bg-ktip-cream z-10">
                 <div className="text-center">
                   <div className="w-10 h-10 border-4 border-ktip-ocean-200 border-t-ktip-ocean-600 rounded-full animate-spin mx-auto mb-3" />
-                  <p className="text-ktip-sand-500">Loading whiteboard...</p>
+                  <p className="text-ktip-sand-500"><Trans>Loading whiteboard...</Trans></p>
                 </div>
               </div>
             }

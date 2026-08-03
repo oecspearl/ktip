@@ -17,8 +17,10 @@ import { eventSchema } from '../../lib/validation'
 import { Save, Calendar, MapPin, Video, Users, Target } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function EditEventPage() {
+    const { t } = useLingui()
   const params = useParams()
   const auth = useAuth()
   const navigate = useNavigate()
@@ -27,7 +29,7 @@ export default function EditEventPage() {
   const { updateEvent, loading: updating } = useUpdateEvent()
   const { deleteEvent } = useDeleteEvent()
 
-  usePageTitle(event?.title ? `Edit: ${event.title}` : 'Edit Event')
+  usePageTitle(event?.title ? t`Edit: ${event.title}` : t`Edit Event`)
 
   const [initialized, setInitialized] = useState(false)
   const [title, setTitle] = useState('')
@@ -58,13 +60,13 @@ export default function EditEventPage() {
 
   /** Schema field name -> the label the user actually sees on the input. */
   const FIELD_LABELS: Record<string, string> = {
-    title: 'Event Title',
-    description: 'Description',
-    event_type: 'Event Type',
-    location: 'Location',
-    start_date: 'Start Date',
-    end_date: 'End Date',
-    capacity: 'Capacity',
+    title: t`Event Title`,
+    description: t`Description`,
+    event_type: t`Event Type`,
+    location: t`Location`,
+    start_date: t`Start Date`,
+    end_date: t`End Date`,
+    capacity: t`Capacity`,
   }
 
   /**
@@ -154,10 +156,13 @@ export default function EditEventPage() {
       setErrors(fieldErrors)
 
       const named = Object.keys(fieldErrors).map((key) => FIELD_LABELS[key] || key)
+      const fieldCount = named.length
+      const fieldMessage = fieldErrors[Object.keys(fieldErrors)[0]]
+      const fieldList = named.join(', ')
       surfaceError(
-        named.length === 1
-          ? `${named[0]}: ${fieldErrors[Object.keys(fieldErrors)[0]]}`
-          : `Please fix ${named.length} fields before saving: ${named.join(', ')}.`
+        fieldCount === 1
+          ? t`${named[0]}: ${fieldMessage}`
+          : t`Please fix ${fieldCount} fields before saving: ${fieldList}.`
       )
       return
     }
@@ -182,13 +187,13 @@ export default function EditEventPage() {
         details: cleanDetails(details),
       } as any)
 
-      toast.success('Event updated successfully!')
+      toast.success(t`Event updated successfully!`)
       navigate(`/events/${params.id}`)
     } catch (error: any) {
       // A row-level-security refusal arrives here. The toast dismisses itself
       // after 4s, so the banner is the durable copy.
-      toast.error(error.message || 'Failed to update event')
-      surfaceError(error.message || 'Failed to update event')
+      toast.error(error.message || t`Failed to update event`)
+      surfaceError(error.message || t`Failed to update event`)
     }
   }
 
@@ -196,7 +201,7 @@ export default function EditEventPage() {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
-        <p className="mt-4 text-ktip-sand-600">Loading event...</p>
+        <p className="mt-4 text-ktip-sand-600"><Trans>Loading event...</Trans></p>
       </div>
     )
   }
@@ -205,11 +210,11 @@ export default function EditEventPage() {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-          Not authorized
+          <Trans>Not authorized</Trans>
         </h2>
-        <p className="text-ktip-sand-600 mb-6">You can only edit your own events.</p>
+        <p className="text-ktip-sand-600 mb-6"><Trans>You can only edit your own events.</Trans></p>
         <Button onClick={() => navigate(`/events/${params.id}`)}>
-          Back to Event
+          <Trans>Back to Event</Trans>
         </Button>
       </div>
     )
@@ -218,13 +223,13 @@ export default function EditEventPage() {
   return (
     <>
       <PageHero
-        eyebrow="Event Workspace"
-        title="Edit Event"
+        eyebrow={t`Event Workspace`}
+        title={t`Edit Event`}
         imageSeed="events"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Events', href: '/events' },
-          { label: 'Edit' },
+          { label: t`Home`, href: '/' },
+          { label: t`Events`, href: '/events' },
+          { label: t`Edit` },
         ]}
       />
 
@@ -243,8 +248,8 @@ export default function EditEventPage() {
 
             {/* Title */}
             <Input
-              label="Event Title"
-              placeholder="e.g., Caribbean Tech Summit 2025"
+              label={t`Event Title`}
+              placeholder={t`e.g., Caribbean Tech Summit 2025`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
@@ -254,8 +259,8 @@ export default function EditEventPage() {
 
             {/* Description */}
             <Input
-              label="Summary"
-              placeholder="One short sentence shown on the homepage hero (optional)"
+              label={t`Summary`}
+              placeholder={t`One short sentence shown on the homepage hero (optional)`}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={180}
@@ -263,8 +268,8 @@ export default function EditEventPage() {
             />
 
             <Textarea
-              label="Description"
-              placeholder="Describe your event, agenda, and what participants can expect..."
+              label={t`Description`}
+              placeholder={t`Describe your event, agenda, and what participants can expect...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
@@ -274,8 +279,8 @@ export default function EditEventPage() {
 
             {/* Tags */}
             <TagInput
-              label="Tags"
-              description="Topics attendees can filter and search by."
+              label={t`Tags`}
+              description={t`Topics attendees can filter and search by.`}
               values={tags}
               onChange={setTags}
               suggestions={CONTENT_TAG_SUGGESTIONS}
@@ -285,10 +290,10 @@ export default function EditEventPage() {
             {/* Additional Details */}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Additional Details
+                <Trans>Additional Details</Trans>
               </label>
               <p className="text-xs text-ktip-sand-500 mb-2">
-                Optional extra metadata shown under the description — add standalone fields or groups of items
+                <Trans>Optional extra metadata shown under the description — add standalone fields or groups of items</Trans>
               </p>
               <DetailsEditor value={details} onChange={setDetails} />
             </div>
@@ -296,19 +301,19 @@ export default function EditEventPage() {
             {/* Event Type */}
             <div data-tutorial="event-form-type">
               <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                Event Type <span className="text-red-500">*</span>
+                <Trans>Event Type</Trans> <span className="text-red-500">*</span>
               </label>
               <select
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
                 className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               >
-                <option value="hackathon">Hackathon</option>
-                <option value="workshop">Workshop</option>
-                <option value="meetup">Meetup</option>
-                <option value="conference">Conference</option>
-                <option value="demo_day">Demo Day</option>
-                <option value="challenge">Challenge</option>
+                <option value="hackathon"><Trans>Hackathon</Trans></option>
+                <option value="workshop"><Trans>Workshop</Trans></option>
+                <option value="meetup"><Trans>Meetup</Trans></option>
+                <option value="conference"><Trans>Conference</Trans></option>
+                <option value="demo_day"><Trans>Demo Day</Trans></option>
+                <option value="challenge"><Trans>Challenge</Trans></option>
               </select>
             </div>
 
@@ -324,7 +329,7 @@ export default function EditEventPage() {
                 <div className="flex items-center gap-2">
                   <Video size={18} className="text-ktip-sand-600" />
                   <span className="text-sm text-ktip-sand-700">
-                    This is a virtual event
+                    <Trans>This is a virtual event</Trans>
                   </span>
                 </div>
               </label>
@@ -333,8 +338,8 @@ export default function EditEventPage() {
             {/* Location (if not virtual) */}
             {!isVirtual && (
               <Input
-                label="Location"
-                placeholder="e.g., Innovation Hub, Kingston, Jamaica"
+                label={t`Location`}
+                placeholder={t`e.g., Innovation Hub, Kingston, Jamaica`}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 error={errors.location}
@@ -349,7 +354,7 @@ export default function EditEventPage() {
               {/* Start Date */}
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                  Start Date <span className="text-red-500">*</span>
+                  <Trans>Start Date</Trans> <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Calendar
@@ -371,7 +376,7 @@ export default function EditEventPage() {
 
               {/* Start Time */}
               <Input
-                label="Start Time"
+                label={t`Start Time`}
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
@@ -384,7 +389,7 @@ export default function EditEventPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                  End Date (Optional)
+                  <Trans>End Date (Optional)</Trans>
                 </label>
                 <div className="relative">
                   <Calendar
@@ -402,7 +407,7 @@ export default function EditEventPage() {
               </div>
 
               <Input
-                label="End Time (Optional)"
+                label={t`End Time (Optional)`}
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
@@ -412,9 +417,9 @@ export default function EditEventPage() {
 
             {/* Capacity */}
             <Input
-              label="Capacity (Optional)"
+              label={t`Capacity (Optional)`}
               type="number"
-              placeholder="Maximum number of attendees"
+              placeholder={t`Maximum number of attendees`}
               value={capacity?.toString() || ''}
               onChange={(e) =>
                 setCapacity(
@@ -423,7 +428,7 @@ export default function EditEventPage() {
               }
               error={errors.capacity}
               icon={<Users size={20} />}
-              helperText="Leave empty for unlimited capacity"
+              helperText={t`Leave empty for unlimited capacity`}
               fullWidth
             />
 
@@ -433,12 +438,10 @@ export default function EditEventPage() {
                 <div>
                   <span className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
                     <Target size={18} className="text-ktip-sand-600" />
-                    Challenge Details
+                    <Trans>Challenge Details</Trans>
                   </span>
                   <span className="block text-xs text-ktip-sand-500 mt-0.5">
-                    Challenge events always set a goal for attendees. Solutions, objectives,
-                    constraints, deliverables and judging criteria are managed from the event's
-                    Challenge tab.
+                    <Trans>Challenge events always set a goal for attendees. Solutions, objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab.</Trans>
                   </span>
                 </div>
               ) : (
@@ -452,11 +455,10 @@ export default function EditEventPage() {
                   <span>
                     <span className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
                       <Target size={18} className="text-ktip-sand-600" />
-                      This event sets a challenge
+                      <Trans>This event sets a challenge</Trans>
                     </span>
                     <span className="block text-xs text-ktip-sand-500 mt-0.5">
-                      Attendees are given a goal to accomplish. Objectives, constraints, deliverables
-                      and judging criteria are managed from the event's Challenge tab.
+                      <Trans>Attendees are given a goal to accomplish. Objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab.</Trans>
                     </span>
                   </span>
                 </label>
@@ -466,7 +468,7 @@ export default function EditEventPage() {
                 <div className="grid md:grid-cols-2 gap-4 pl-8">
                   <div>
                     <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-                      Submission Deadline (Optional)
+                      <Trans>Submission Deadline (Optional)</Trans>
                     </label>
                     <div className="relative">
                       <Calendar
@@ -483,7 +485,7 @@ export default function EditEventPage() {
                   </div>
 
                   <Input
-                    label="Deadline Time (Optional)"
+                    label={t`Deadline Time (Optional)`}
                     type="time"
                     value={submissionTime}
                     onChange={(e) => setSubmissionTime(e.target.value)}
@@ -506,7 +508,7 @@ export default function EditEventPage() {
             {/* Submit Button */}
             <div className="flex items-center gap-4">
               <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>
-                Save Changes
+                <Trans>Save Changes</Trans>
               </Button>
               <button
                 type="button"
@@ -514,7 +516,7 @@ export default function EditEventPage() {
                 disabled={updating}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >
-                Cancel
+                <Trans>Cancel</Trans>
               </button>
             </div>
           </form>

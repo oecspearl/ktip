@@ -13,42 +13,45 @@ import { supabase } from '../../lib/supabase'
 import { CaptureCancelledError, captureScreen, isScreenCaptureSupported } from '../../lib/screen-capture'
 import { cn } from '../../lib/utils'
 import type { FeedbackCategory } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /** What the person is doing, not what a triage queue calls it. The stored
  *  category is the same vocabulary 037 already uses, so the admin filters and
  *  every existing row keep working. */
 const KINDS: {
   value: FeedbackCategory
-  label: string
-  hint: string
+  label: MessageDescriptor
+  hint: MessageDescriptor
   icon: typeof Bug
   tone: string
 }[] = [
   {
     value: 'bug',
-    label: 'Problem',
-    hint: "Something is broken or doesn't work the way it should",
+    label: msg`Problem`,
+    hint: msg`Something is broken or doesn't work the way it should`,
     icon: Bug,
     tone: 'border-red-400 bg-red-50 text-red-700',
   },
   {
     value: 'feature_request',
-    label: 'Idea',
-    hint: "Something you'd like changed or added",
+    label: msg`Idea`,
+    hint: msg`Something you'd like changed or added`,
     icon: Lightbulb,
     tone: 'border-ktip-sun-400 bg-ktip-sun-50 text-ktip-sun-800',
   },
   {
     value: 'praise',
-    label: 'Praise',
-    hint: 'Something that works well — leave a review',
+    label: msg`Praise`,
+    hint: msg`Something that works well — leave a review`,
     icon: Heart,
     tone: 'border-ktip-tropical-400 bg-ktip-tropical-50 text-ktip-tropical-800',
   },
   {
     value: 'general',
-    label: 'Anything else',
-    hint: 'A question, a comment, a note about the content',
+    label: msg`Anything else`,
+    hint: msg`A question, a comment, a note about the content`,
     icon: MessageCircle,
     tone: 'border-ktip-ocean-400 bg-ktip-ocean-50 text-ktip-ocean-700',
   },
@@ -70,6 +73,7 @@ async function uploadScreenshot(blob: Blob, userId: string): Promise<string> {
 }
 
 export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { pathname } = useLocation()
@@ -125,7 +129,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
     } catch (err) {
       // Dismissing the browser's share picker is a decision, not a failure
       if (!(err instanceof CaptureCancelledError)) {
-        toast.error(err instanceof Error ? err.message : 'Could not capture the screen')
+        toast.error(err instanceof Error ? err.message : t`Could not capture the screen`)
       }
     } finally {
       setCapturing(false)
@@ -156,11 +160,11 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
         screenshot_path: screenshotPath,
       })
 
-      toast.success(category === 'praise' ? 'Thank you — that made our day' : 'Thanks for your feedback!')
+      toast.success(category === 'praise' ? t`Thank you — that made our day` : t`Thanks for your feedback!`)
       reset()
       onClose()
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send feedback')
+      toast.error(err.message || t`Failed to send feedback`)
     }
   }
 
@@ -170,13 +174,13 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title="Send feedback"
-      description="Tell us what's broken, what you'd change, or what you like"
+      title={t`Send feedback`}
+      description={t`Tell us what's broken, what you'd change, or what you like`}
       size="xl"
       className="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div role="radiogroup" aria-label="What kind of feedback" className="grid grid-cols-2 gap-2">
+        <div role="radiogroup" aria-label={t`What kind of feedback`} className="grid grid-cols-2 gap-2">
           {KINDS.map(({ value, label, icon: Icon, tone }) => (
             <button
               key={value}
@@ -192,26 +196,26 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               )}
             >
               <Icon size={16} />
-              {label}
+              {i18n._(label)}
             </button>
           ))}
         </div>
-        <p className="text-xs text-ktip-sand-500 -mt-2">{active.hint}</p>
+        <p className="text-xs text-ktip-sand-500 -mt-2">{i18n._(active.hint)}</p>
 
         <Input
-          label="Subject"
+          label={t`Subject`}
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          placeholder={category === 'praise' ? 'What worked well…' : 'Short summary…'}
+          placeholder={category === 'praise' ? t`What worked well…` : t`Short summary…`}
           fullWidth
         />
 
         <Textarea
-          label="Details"
+          label={t`Details`}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
-          placeholder="The more detail, the better…"
+          placeholder={t`The more detail, the better…`}
           fullWidth
         />
 
@@ -219,16 +223,16 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
             is the difference between an annoyance and a blocker. */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-ktip-sand-700">
-            Rating <span className="font-normal text-ktip-sand-500">(optional)</span>
+            <Trans>Rating</Trans> <span className="font-normal text-ktip-sand-500"><Trans>(optional)</Trans></span>
           </label>
-          <div role="radiogroup" aria-label="Rating out of five" className="flex items-center gap-1">
+          <div role="radiogroup" aria-label={t`Rating out of five`} className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
                 type="button"
                 role="radio"
                 aria-checked={rating === n}
-                aria-label={`${n} out of 5`}
+                aria-label={t`${n} out of 5`}
                 onClick={() => setRating(rating === n ? 0 : n)}
                 className="p-0.5 rounded transition-transform hover:scale-110"
               >
@@ -246,7 +250,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                 onClick={() => setRating(0)}
                 className="ml-2 text-xs text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors"
               >
-                Clear
+                <Trans>Clear</Trans>
               </button>
             )}
           </div>
@@ -270,12 +274,12 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           <div className="flex items-center gap-3 p-3 rounded-xl border border-ktip-sand-200 bg-ktip-sand-50">
             <img
               src={shotUrl}
-              alt="Attached screenshot"
+              alt={t`Attached screenshot`}
               className="w-24 h-16 object-cover rounded-lg border border-ktip-sand-200"
             />
-            <div className="flex-1 text-sm text-ktip-sand-600">Screenshot attached</div>
+            <div className="flex-1 text-sm text-ktip-sand-600"><Trans>Screenshot attached</Trans></div>
             <Button variant="ghost" size="sm" type="button" onClick={() => setShot(null)} icon={<X size={14} />}>
-              Remove
+              <Trans>Remove</Trans>
             </Button>
           </div>
         ) : canScreenshot ? (
@@ -288,21 +292,19 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               onClick={handleCapture}
               icon={<Camera size={16} />}
             >
-              Capture screen
+              <Trans>Capture screen</Trans>
             </Button>
             <p className="mt-1.5 text-xs text-ktip-sand-500">
-              Your browser will ask which window to share — pick this tab. This form disappears for
-              the shot, so you get the page, not the form. You can circle the problem before it is
-              sent.
+              <Trans>Your browser will ask which window to share — pick this tab. This form disappears for the shot, so you get the page, not the form. You can circle the problem before it is sent.</Trans>
             </p>
           </div>
         ) : (
           <p className="text-xs text-ktip-sand-500">
             {!auth.user
-              ? 'Sign in to attach a screenshot.'
+              ? t`Sign in to attach a screenshot.`
               : anonymous
-                ? 'Screenshots are stored under your account, so they cannot be attached to an anonymous report.'
-                : 'This browser cannot capture the screen — describe what you saw instead.'}
+                ? t`Screenshots are stored under your account, so they cannot be attached to an anonymous report.`
+                : t`This browser cannot capture the screen — describe what you saw instead.`}
           </p>
         )}
 
@@ -314,23 +316,25 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               onChange={(e) => setAnonymous(e.target.checked)}
               className="rounded border-ktip-sand-300"
             />
-            Submit anonymously
+            <Trans>Submit anonymously</Trans>
           </label>
         )}
 
         <p className="text-xs text-ktip-sand-500">
-          Looking for answers instead?{' '}
-          <Link to="/help/faq" onClick={onClose} className="text-ktip-ocean-600 hover:underline">
-            Check the FAQ
-          </Link>
+          <Trans>
+            Looking for answers instead?{' '}
+            <Link to="/help/faq" onClick={onClose} className="text-ktip-ocean-600 hover:underline">
+              Check the FAQ
+            </Link>
+          </Trans>
         </p>
 
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" type="button" onClick={onClose}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button type="submit" loading={loading} disabled={!subject.trim() || !message.trim()}>
-            Send feedback
+            <Trans>Send feedback</Trans>
           </Button>
         </div>
       </form>

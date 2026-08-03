@@ -8,6 +8,7 @@ import { RoomPanel, RoomPanelEmpty, panelScroll, panelShell } from './RoomPanel'
 import { floorTag } from './RoomWayfindingPanels'
 import type { VenueMapFloor } from '../../../lib/venue-map'
 import type { Event, VenueOccupant, VenueRole, VenueRoom } from '../../../types'
+import { useLingui } from '@lingui/react/macro'
 
 interface RoleRosterPanelProps {
   occupants: VenueOccupant[]
@@ -41,6 +42,7 @@ export function RoleRosterPanel({
   floors,
   fill,
 }: RoleRosterPanelProps) {
+  const { t } = useLingui()
   const { openMember } = useMemberPanel()
 
   const people = sortOccupants(occupants.filter((o) => o.role === role))
@@ -58,7 +60,7 @@ export function RoleRosterPanel({
       ) : (
         <ul className={`divide-y divide-ktip-sand-100 ${panelScroll(fill, 'max-h-[24rem]')}`}>
           {people.map((person) => {
-            const name = person.display_name || 'Member'
+            const name = person.display_name || t`Member`
             const room = person.room_id ? roomsById.get(person.room_id) : undefined
 
             return (
@@ -85,7 +87,7 @@ export function RoleRosterPanel({
                   <Link
                     to={venueRoomPath(event, room.key)}
                     className="flex shrink-0 items-center gap-1 truncate rounded-lg border border-ktip-sand-200 px-2 py-1 text-[10px] font-medium text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
-                    title={`Go to ${room.name}`}
+                    title={t`Go to ${room.name}`}
                   >
                     <span className="truncate">{room.name}</span>
                     {/* Which level, when there is more than one — "the mentor is

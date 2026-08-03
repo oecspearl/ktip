@@ -1,3 +1,6 @@
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+
 /**
  * The emoji a message may carry.
  *
@@ -30,7 +33,7 @@ export interface EmojiEntry {
 
 export interface EmojiGroup {
   id: string
-  label: string
+  label: MessageDescriptor
   /** Shown on the group's tab. A character, so the tabs need no artwork. */
   tab: string
   emoji: EmojiEntry[]
@@ -39,7 +42,7 @@ export interface EmojiGroup {
 export const EMOJI_GROUPS: EmojiGroup[] = [
   {
     id: 'faces',
-    label: 'Smileys',
+    label: msg`Smileys`,
     tab: '😀',
     emoji: [
       { e: '😀', k: 'grin happy smile' },
@@ -78,7 +81,7 @@ export const EMOJI_GROUPS: EmojiGroup[] = [
   },
   {
     id: 'gestures',
-    label: 'Gestures',
+    label: msg`Gestures`,
     tab: '👍',
     emoji: [
       { e: '👍', k: 'thumbs up yes agree lgtm' },
@@ -101,7 +104,7 @@ export const EMOJI_GROUPS: EmojiGroup[] = [
   },
   {
     id: 'hearts',
-    label: 'Hearts',
+    label: msg`Hearts`,
     tab: '❤️',
     emoji: [
       { e: '❤️', k: 'love red heart' },
@@ -120,7 +123,7 @@ export const EMOJI_GROUPS: EmojiGroup[] = [
   },
   {
     id: 'celebrate',
-    label: 'Celebration',
+    label: msg`Celebration`,
     tab: '🎉',
     emoji: [
       { e: '🎉', k: 'party popper celebrate congrats' },
@@ -141,7 +144,7 @@ export const EMOJI_GROUPS: EmojiGroup[] = [
   },
   {
     id: 'work',
-    label: 'Work',
+    label: msg`Work`,
     tab: '💻',
     emoji: [
       { e: '💻', k: 'laptop code work' },
@@ -176,7 +179,7 @@ export const EMOJI_GROUPS: EmojiGroup[] = [
   },
   {
     id: 'symbols',
-    label: 'Symbols',
+    label: msg`Symbols`,
     tab: '✅',
     emoji: [
       { e: '✅', k: 'check done yes tick complete' },
@@ -199,7 +202,7 @@ export const EMOJI_GROUPS: EmojiGroup[] = [
   },
   {
     id: 'places',
-    label: 'World',
+    label: msg`World`,
     tab: '🌴',
     emoji: [
       { e: '🌴', k: 'palm tree caribbean island' },
@@ -239,7 +242,16 @@ export function searchEmoji(query: string, limit = 48): EmojiEntry[] {
   const contains: EmojiEntry[] = []
 
   for (const group of EMOJI_GROUPS) {
-    const groupMatch = group.label.toLowerCase().startsWith(q)
+    // `.message`, not `.id`. Lingui generates a short HASH for the id
+    // ("bRItvn"); the English source lives in `.message`. Reading `.id` here
+    // made every group-name search silently match nothing — typing "purple"
+    // stopped finding 💜 — with no error and no type complaint.
+    //
+    // Matching English while the reader sees French is a known limitation, not
+    // an oversight: the keyword index `entry.k` is English too. Searching in
+    // the reader's own language needs the whole index translated, which is its
+    // own piece of work.
+    const groupMatch = (group.label.message ?? '').toLowerCase().startsWith(q)
     for (const entry of group.emoji) {
       const words = entry.k.split(' ')
       if (words.some((w) => w.startsWith(q))) starts.push(entry)

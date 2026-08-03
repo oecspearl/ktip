@@ -10,6 +10,7 @@ import {
 } from '../../lib/assistant'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 interface ChatSidebarProps {
   conversations: Conversation[] | undefined
@@ -30,6 +31,7 @@ export function ChatSidebar({
   onNewGroup,
   onStartDm,
 }: ChatSidebarProps) {
+  const { t } = useLingui()
   const [tab, setTab] = useState<'chats' | 'contacts'>('chats')
   const [search, setSearch] = useState('')
   const { connections } = useMyConnections(currentUserId)
@@ -37,9 +39,9 @@ export function ChatSidebar({
   const query = search.trim().toLowerCase()
 
   const conversationName = (conversation: Conversation) => {
-    if (conversation.is_group) return conversation.name || 'Group'
+    if (conversation.is_group) return conversation.name || t`Group`
     const other = conversation.participants?.find((p) => p.user_id !== currentUserId)
-    return other?.user?.display_name || 'Unknown User'
+    return other?.user?.display_name || t`Unknown User`
   }
 
   const filtered = (conversations || []).filter(
@@ -84,7 +86,7 @@ export function ChatSidebar({
             </div>
             {conversation.is_group && (
               <p className="text-xs text-ktip-sand-400">
-                {conversation.participants?.length || 0} members
+                <Plural value={conversation.participants?.length || 0} one="# member" other="# members" />
               </p>
             )}
           </div>
@@ -116,7 +118,7 @@ export function ChatSidebar({
               {ASSISTANT_NAME}
             </span>
             <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-ktip-ocean-100 text-ktip-ocean-700 shrink-0">
-              AI
+              <Trans>AI</Trans>
             </span>
           </div>
           <p className="text-xs text-ktip-sand-400 truncate">{ASSISTANT_TAGLINE}</p>
@@ -148,14 +150,14 @@ export function ChatSidebar({
             aria-pressed={tab === 'chats'}
             onClick={() => setTab('chats')}
           >
-            Chats
+            <Trans>Chats</Trans>
           </button>
           <button
             className={cn('relative z-10 py-1.5 rounded-full transition-colors', tab === 'contacts' ? 'text-ktip-sand-900' : 'text-ktip-sand-500')}
             aria-pressed={tab === 'contacts'}
             onClick={() => setTab('contacts')}
           >
-            Contacts
+            <Trans>Contacts</Trans>
           </button>
         </div>
       </div>
@@ -168,8 +170,8 @@ export function ChatSidebar({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            placeholder={tab === 'chats' ? 'Search chats...' : 'Search contacts...'}
-            aria-label={tab === 'chats' ? 'Search chats' : 'Search contacts'}
+            placeholder={tab === 'chats' ? t`Search chats...` : t`Search contacts...`}
+            aria-label={tab === 'chats' ? t`Search chats` : t`Search contacts`}
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-ktip-sand-200 bg-ktip-sand-50 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
           />
         </div>
@@ -182,27 +184,27 @@ export function ChatSidebar({
             {assistantMatchesSearch && renderAssistantRow()}
             {groups.length > 0 && (
               <div>
-                {sectionHeader('Groups')}
+                {sectionHeader(t`Groups`)}
                 {groups.map(renderConversationRow)}
               </div>
             )}
             {direct.length > 0 && (
               <div>
-                {sectionHeader('Direct')}
+                {sectionHeader(t`Direct`)}
                 {direct.map(renderConversationRow)}
               </div>
             )}
             {!groups.length && !direct.length && (
               <div className="text-center py-12 px-4 text-ktip-sand-500">
                 <MessageSquare size={32} className="mx-auto mb-3 opacity-50" />
-                <p className="text-sm">{query ? 'No chats match.' : 'No conversations yet.'}</p>
-                {!query && <p className="text-xs mt-1">Start a new conversation!</p>}
+                <p className="text-sm">{query ? t`No chats match.` : t`No conversations yet.`}</p>
+                {!query && <p className="text-xs mt-1"><Trans>Start a new conversation!</Trans></p>}
               </div>
             )}
           </>
         ) : contacts.length ? (
           contacts.map((contact) => {
-            const name = contact.display_name || 'Unknown User'
+            const name = contact.display_name || t`Unknown User`
             return (
               <button
                 key={contact.id}
@@ -219,8 +221,8 @@ export function ChatSidebar({
         ) : (
           <div className="text-center py-12 px-4 text-ktip-sand-500">
             <Users size={32} className="mx-auto mb-3 opacity-50" />
-            <p className="text-sm">{query ? 'No contacts match.' : 'No connections yet.'}</p>
-            {!query && <p className="text-xs mt-1">Connect with members in the Directory.</p>}
+            <p className="text-sm">{query ? t`No contacts match.` : t`No connections yet.`}</p>
+            {!query && <p className="text-xs mt-1"><Trans>Connect with members in the Directory.</Trans></p>}
           </div>
         )}
       </div>
@@ -228,10 +230,10 @@ export function ChatSidebar({
       {/* New chat / New group */}
       <div className="p-2 border-t border-ktip-sand-200 grid grid-cols-2 gap-2 shrink-0">
         <Button size="sm" variant="outline" icon={<Plus size={14} />} onClick={onNewChat} className="text-xs">
-          New chat
+          <Trans>New chat</Trans>
         </Button>
         <Button size="sm" variant="outline" icon={<Users size={14} />} onClick={onNewGroup} className="text-xs">
-          New group
+          <Trans>New group</Trans>
         </Button>
       </div>
     </div>

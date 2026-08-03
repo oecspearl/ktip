@@ -14,6 +14,8 @@
  * mode the feature had before the column existed.
  */
 
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { Profile } from '../types'
 
 type AgeAware = Pick<Profile, 'is_minor'> | null | undefined
@@ -42,6 +44,8 @@ export function canDmAcrossAges(viewer: AgeAware, target: AgeAware): boolean {
 export function dmBlockedReason(viewer: AgeAware, target: AgeAware): string | null {
   if (canDmAcrossAges(viewer, target)) return null
   return isMinor(viewer)
-    ? 'Direct messages with adult members are turned off on accounts under 18. Group and event channels are open as usual.'
-    : 'This member is under 18. Direct messages are limited to supervised group and event channels.'
+    ? i18n._(
+        msg`Direct messages with adult members are turned off on accounts under 18. Group and event channels are open as usual.`
+      )
+    : i18n._(msg`This member is under 18. Direct messages are limited to supervised group and event channels.`)
 }

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Search } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { useLingui } from '@lingui/react/macro'
 
 interface CollapsibleSearchProps {
   value: string
@@ -21,12 +22,16 @@ interface CollapsibleSearchProps {
 export function CollapsibleSearch({
   value,
   onChange,
-  placeholder = 'Search...',
-  ariaLabel = 'Search',
+  placeholder,
+  ariaLabel,
   open: openProp,
   onOpenChange,
   className,
 }: CollapsibleSearchProps) {
+  const { t } = useLingui()
+  // Destructuring defaults run before the body, where `t` does not exist yet.
+  const placeholderText = placeholder ?? t`Search...`
+  const label = ariaLabel ?? t`Search`
   const [openState, setOpenState] = useState(false)
   const open = openProp ?? openState
   const setOpen = (next: boolean) => {
@@ -77,8 +82,8 @@ export function CollapsibleSearch({
             <input
               ref={inputRef}
               type="text"
-              placeholder={placeholder}
-              aria-label={ariaLabel}
+              placeholder={placeholderText}
+              aria-label={label}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
@@ -88,7 +93,7 @@ export function CollapsibleSearch({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            aria-label={`Open ${ariaLabel.toLowerCase()}`}
+            aria-label={t`Open ${label}`}
             className={cn(
               'p-2 rounded-lg transition-all duration-200 hover:bg-ktip-sand-100 hover:scale-110',
               value ? 'text-ktip-ocean-600' : 'text-ktip-sand-700'

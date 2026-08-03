@@ -4,6 +4,7 @@ import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { Connection } from '../types'
+import { useLingui } from '@lingui/react/macro'
 
 export type ConnectionState =
   | 'none'
@@ -213,6 +214,7 @@ export function usePendingRequests(userId: string | undefined) {
 }
 
 export function useConnectionMutations() {
+    const { t } = useLingui()
   const queryClient = useQueryClient()
   const triggerCheck = useAchievementTrigger()
 
@@ -233,8 +235,8 @@ export function useConnectionMutations() {
       sendNotification({
         userId: params.addresseeId,
         type: 'connection_request',
-        title: 'New connection request',
-        body: `${params.requesterName} wants to connect with you`,
+        title: t`New connection request`,
+        body: t`${params.requesterName} wants to connect with you`,
         link: `/directory?member=${params.requesterId}`,
       })
       return data
@@ -263,8 +265,8 @@ export function useConnectionMutations() {
         sendNotification({
           userId: params.requesterId,
           type: 'connection_accepted',
-          title: 'Connection accepted',
-          body: `${params.myName} accepted your connection request`,
+          title: t`Connection accepted`,
+          body: t`${params.myName} accepted your connection request`,
           link: `/directory?member=${params.myId}`,
         })
       }

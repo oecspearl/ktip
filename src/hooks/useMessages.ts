@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { attachmentUrl } from '../lib/chat-attachments'
 import { escapeIlike } from '../lib/utils'
@@ -257,6 +258,7 @@ export function useAttachmentUrl(path: string | undefined) {
 }
 
 export function useCreateConversation() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -286,7 +288,7 @@ export function useCreateConversation() {
       const studentInvolved = (parties || []).some((p: any) => (p.roles || []).includes('student'))
       if (studentInvolved) {
         throw new Error(
-          'Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.'
+          t`Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.`
         )
       }
 
@@ -308,7 +310,7 @@ export function useCreateConversation() {
 
         if (!accepted?.length) {
           throw new Error(
-            'This member only accepts messages from their connections. Send them a connection request first.'
+            t`This member only accepts messages from their connections. Send them a connection request first.`
           )
         }
       }

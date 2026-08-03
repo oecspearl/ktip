@@ -69,6 +69,9 @@ import {
 import { VENUE_ROLE_LABELS, VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
 import type { VenueMapRoomInput } from '../../../hooks/useVenueMap'
 import type { VenueAudioMode, VenueRole, VenueRoom, VenueRoomKind } from '../../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * A room while it is being drawn.
@@ -121,10 +124,10 @@ interface VenueMapEditorProps {
   onSave: (config: VenueMapConfig, rooms: VenueMapRoomInput[]) => Promise<unknown>
 }
 
-const AUDIO_MODES: { value: VenueAudioMode; label: string }[] = [
-  { value: 'open', label: 'Open — everyone can speak' },
-  { value: 'moderated', label: 'Moderated — hosts grant the mic' },
-  { value: 'listen_only', label: 'Listen only' },
+const AUDIO_MODES: { value: VenueAudioMode; label: MessageDescriptor }[] = [
+  { value: 'open', label: msg`Open — everyone can speak` },
+  { value: 'moderated', label: msg`Moderated — hosts grant the mic` },
+  { value: 'listen_only', label: msg`Listen only` },
 ]
 
 const ROOM_KINDS: VenueRoomKind[] = [
@@ -152,6 +155,7 @@ const RESTRICTABLE_ROLES: VenueRole[] = ['participant', 'mentor', 'judge', 'orga
  * wall move mid-drag.
  */
 export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditorProps) {
+  const { t, i18n } = useLingui()
   const wrapRef = useRef<HTMLDivElement>(null)
   const size = useElementSize(wrapRef)
 
@@ -313,7 +317,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
       key,
       name: preset.name,
       kind: preset.kind,
-      description: preset.description,
+      description: i18n._(preset.description),
       color: preset.color,
       wall_height: preset.wall_height,
       capacity: preset.capacity,
@@ -357,7 +361,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
         key,
         name: preset.name,
         kind: preset.kind,
-        description: preset.description,
+        description: i18n._(preset.description),
         color: preset.color,
         wall_height: preset.wall_height,
         capacity: preset.capacity,
@@ -434,12 +438,12 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
     const h = state.config.stairs?.h ?? 2
     for (let dy = 0; dy < h; dy++)
       for (let dx = 0; dx < w; dx++) {
-        if (!inGrid(x + dx, y + dy)) return 'The stairs would hang off the edge of the floor.'
+        if (!inGrid(x + dx, y + dy)) return t`The stairs would hang off the edge of the floor.`
       }
     for (const room of state.rooms) {
       for (const [cx, cy] of room.cells) {
         if (cx >= x && cx < x + w && cy >= y && cy < y + h) {
-          return `${room.name} on ${floorBadge(room.floor)} is in the way.`
+          return t`${room.name} on ${floorBadge(room.floor)} is in the way.`
         }
       }
     }
@@ -493,7 +497,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
     if (tool === 'door') {
       const door = doorAtCell(x, y)
       if (!door) {
-        setToolError('An entrance has to sit on one of the four edges of the floor.')
+        setToolError(t`An entrance has to sit on one of the four edges of the floor.`)
         return
       }
       setDoor(door)
@@ -860,12 +864,12 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
       <div className="flex flex-wrap items-center gap-2 border-b border-ktip-sand-200 px-3 py-2">
         <span className="flex items-center gap-1.5 text-sm font-semibold text-ktip-sand-900">
           <Building2 size={15} className="text-ktip-ocean-600" aria-hidden="true" />
-          Venue builder
+          <Trans>Venue builder</Trans>
         </span>
 
         <div className="mx-1 h-5 w-px bg-ktip-sand-200" aria-hidden="true" />
 
-        <div className="flex flex-wrap items-center gap-1" role="tablist" aria-label="Floors">
+        <div className="flex flex-wrap items-center gap-1" role="tablist" aria-label={t`Floors`}>
           {state.config.floors.map((f, i) => (
             <button
               key={f.key}
@@ -893,14 +897,14 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
             className="rounded-lg border border-dashed border-ktip-sand-300 px-2.5 py-1 text-xs font-semibold text-ktip-sand-500 hover:border-ktip-ocean-300 hover:text-ktip-ocean-600 disabled:opacity-40"
           >
             <Plus size={12} className="mr-1 inline" aria-hidden="true" />
-            Floor
+            <Trans>Floor</Trans>
           </button>
         </div>
 
         <div className="ml-auto flex items-center gap-1.5">
           {/* Plan draws, 2.5D looks. Stack pulls the levels apart. Both eased. */}
           <div className="flex overflow-hidden rounded-lg border border-ktip-sand-200">
-            {([['Plan', false], ['2.5D', true]] as Array<[string, boolean]>).map(([label, on]) => (
+            {([[t`Plan`, false], ['2.5D', true]] as Array<[string, boolean]>).map(([label, on]) => (
               <button
                 key={label}
                 type="button"
@@ -922,7 +926,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
 
           {preview && state.config.floors.length > 1 && (
             <div className="flex overflow-hidden rounded-lg border border-ktip-sand-200">
-              {([['Floor', false], ['Stack', true]] as Array<[string, boolean]>).map(
+              {([[t`Floor`, false], [t`Stack`, true]] as Array<[string, boolean]>).map(
                 ([label, on]) => (
                   <button
                     key={label}
@@ -945,7 +949,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
           <button
             type="button"
             onClick={undo}
-            aria-label="Undo"
+            aria-label={t`Undo`}
             className="rounded-lg border border-ktip-sand-200 p-1.5 text-ktip-sand-600 hover:border-ktip-sand-300 hover:text-ktip-ocean-600"
           >
             <Undo2 size={14} aria-hidden="true" />
@@ -953,13 +957,13 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
           <button
             type="button"
             onClick={redo}
-            aria-label="Redo"
+            aria-label={t`Redo`}
             className="rounded-lg border border-ktip-sand-200 p-1.5 text-ktip-sand-600 hover:border-ktip-sand-300 hover:text-ktip-ocean-600"
           >
             <Redo2 size={14} aria-hidden="true" />
           </button>
           <Button size="sm" icon={<Save size={14} />} loading={saving} disabled={!dirty} onClick={save}>
-            {dirty ? 'Save map' : 'Saved'}
+            {dirty ? t`Save map` : t`Saved`}
           </Button>
         </div>
       </div>
@@ -972,7 +976,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               are not rooms, so they get their own pair of tools rather than
               hiding inside the room inspector. */}
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-            Doors &amp; stairs
+            <Trans>Doors &amp; stairs</Trans>
           </p>
           <div className="mb-2 grid grid-cols-2 gap-1.5">
             <button
@@ -991,7 +995,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               }`}
             >
               <DoorOpen size={13} aria-hidden="true" />
-              Entrance
+              <Trans>Entrance</Trans>
             </button>
             <button
               type="button"
@@ -1009,19 +1013,20 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               }`}
             >
               <ArrowUpDown size={13} aria-hidden="true" />
-              Stairs
+              <Trans>Stairs</Trans>
             </button>
           </div>
           <p className="mb-3 text-[11px] leading-snug text-ktip-sand-500">
             {tool === 'door'
-              ? 'Click any cell on the edge of the floor. Each floor has its own entrance.'
+              ? t`Click any cell on the edge of the floor. Each floor has its own entrance.`
               : tool === 'stairs'
-                ? 'Click where the stairs go. They sit in the same place on every floor, so the spot has to be clear on all of them.'
-                : `Entrance: ${sideLabel(state.config.floors[floor]?.door?.side)}${
-                    state.config.stairs
-                      ? ` · Stairs at ${state.config.stairs.x},${state.config.stairs.y}`
-                      : ' · No stairs yet'
-                  }`}
+                ? t`Click where the stairs go. They sit in the same place on every floor, so the spot has to be clear on all of them.`
+                : (() => {
+                    const doorSide = i18n._(sideLabel(state.config.floors[floor]?.door?.side))
+                    return state.config.stairs
+                      ? t`Entrance: ${doorSide} · Stairs at ${state.config.stairs.x},${state.config.stairs.y}`
+                      : t`Entrance: ${doorSide} · No stairs yet`
+                  })()}
           </p>
           {toolError && (
             <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-[11px] text-red-700">
@@ -1030,7 +1035,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
           )}
 
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-            Ready-made rooms
+            <Trans>Ready-made rooms</Trans>
           </p>
           <div className="space-y-1.5">
             {VENUE_ROOM_PRESETS.map((preset) => {
@@ -1063,7 +1068,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                     </span>
                   </span>
                   <span className="mt-0.5 block pl-5 text-[11px] leading-snug text-ktip-sand-500">
-                    {preset.hint}
+                    {i18n._(preset.hint)}
                   </span>
                 </button>
               )
@@ -1077,14 +1082,16 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-ktip-tropical-300 bg-ktip-tropical-50 px-3 py-2 text-xs font-semibold text-ktip-tropical-800 hover:border-ktip-tropical-500"
             >
               <Sparkles size={13} aria-hidden="true" />
-              Use the starter layout
+              <Trans>Use the starter layout</Trans>
             </button>
           )}
 
           <p className="mt-3 flex gap-1.5 text-[11px] leading-relaxed text-ktip-sand-500">
             <Eraser size={12} className="mt-0.5 shrink-0" aria-hidden="true" />
-            Pick a room then click the grid to drop it, or drag to size it. Drag a placed room to
-            move it, drag its handles or corners to resize, hold Alt and drag to carve cells away.
+            <Trans>
+              Pick a room then click the grid to drop it, or drag to size it. Drag a placed room to
+              move it, drag its handles or corners to resize, hold Alt and drag to carve cells away.
+            </Trans>
           </p>
 
           {/* ---- what has been placed ----
@@ -1094,7 +1101,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
           {state.rooms.length > 0 && (
             <div className="mt-4 border-t border-ktip-sand-200 pt-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-                In this venue
+                <Trans>In this venue</Trans>
               </p>
               <div className="space-y-2">
                 {state.config.floors.map((f, level) => {
@@ -1111,7 +1118,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                         </span>
                       </div>
                       {onLevel.length === 0 ? (
-                        <p className="px-2 text-[10px] text-ktip-sand-400">Empty</p>
+                        <p className="px-2 text-[10px] text-ktip-sand-400"><Trans>Empty</Trans></p>
                       ) : (
                         <ul className="mt-0.5 space-y-1">
                           {onLevel.map((room) => (
@@ -1230,8 +1237,10 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
             </div>
 
             <div className="pointer-events-none absolute bottom-2 left-3 font-mono text-[10px] text-ktip-sand-400">
-              {state.config.cols}×{state.config.rows} · {roomsOnFloor.length} rooms on this floor ·
-              scroll to zoom
+              <Trans>
+                {state.config.cols}×{state.config.rows} · {roomsOnFloor.length} rooms on this floor
+                · scroll to zoom
+              </Trans>
             </div>
           </div>
 
@@ -1245,12 +1254,12 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   aria-hidden="true"
                 />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-ktip-sand-500">
-                  Room
+                  <Trans>Room</Trans>
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}
-                  aria-label="Close room settings"
+                  aria-label={t`Close room settings`}
                   className="ml-auto rounded p-0.5 text-ktip-sand-400 hover:text-ktip-sand-700"
                 >
                   <X size={14} aria-hidden="true" />
@@ -1258,7 +1267,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               </div>
 
               <label className="block text-xs">
-                <span className="mb-1 block font-medium text-ktip-sand-700">Name</span>
+                <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Name</Trans></span>
                 <input
                   value={selected.name}
                   onChange={(e) => {
@@ -1280,7 +1289,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               </label>
 
               <label className="mt-2 block text-xs">
-                <span className="mb-1 block font-medium text-ktip-sand-700">Purpose</span>
+                <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Purpose</Trans></span>
                 <select
                   value={selected.kind}
                   onChange={(e) => patchRoom(selected.id, { kind: e.target.value as VenueRoomKind })}
@@ -1295,7 +1304,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               </label>
 
               <label className="mt-2 block text-xs">
-                <span className="mb-1 block font-medium text-ktip-sand-700">Description</span>
+                <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Description</Trans></span>
                 <textarea
                   rows={2}
                   value={selected.description}
@@ -1305,14 +1314,14 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               </label>
 
               <fieldset className="mt-2">
-                <legend className="mb-1 text-xs font-medium text-ktip-sand-700">Colour</legend>
+                <legend className="mb-1 text-xs font-medium text-ktip-sand-700"><Trans>Colour</Trans></legend>
                 <div className="flex flex-wrap gap-1.5">
                   {VENUE_PALETTE.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => patchRoom(selected.id, { color: c })}
-                      aria-label={`Use colour ${c}`}
+                      aria-label={t`Use colour ${c}`}
                       aria-pressed={selected.color === c}
                       className={`h-5 w-5 rounded ${
                         selected.color === c ? 'ring-2 ring-ktip-ocean-500 ring-offset-1' : ''
@@ -1325,10 +1334,12 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
 
               <label className="mt-2 block text-xs">
                 <span className="mb-1 block font-medium text-ktip-sand-700">
-                  Wall height ·{' '}
-                  <span className="font-mono text-ktip-sand-500">
-                    {selected.wall_height.toFixed(1)}
-                  </span>
+                  <Trans>
+                    Wall height ·{' '}
+                    <span className="font-mono text-ktip-sand-500">
+                      {selected.wall_height.toFixed(1)}
+                    </span>
+                  </Trans>
                 </span>
                 <input
                   type="range"
@@ -1344,7 +1355,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               </label>
 
               <label className="mt-2 block text-xs">
-                <span className="mb-1 block font-medium text-ktip-sand-700">Audio</span>
+                <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Audio</Trans></span>
                 <select
                   value={selected.audio_mode}
                   onChange={(e) =>
@@ -1354,19 +1365,19 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                 >
                   {AUDIO_MODES.map((m) => (
                     <option key={m.value} value={m.value}>
-                      {m.label}
+                      {i18n._(m.label)}
                     </option>
                   ))}
                 </select>
               </label>
 
               <label className="mt-2 block text-xs">
-                <span className="mb-1 block font-medium text-ktip-sand-700">Capacity</span>
+                <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Capacity</Trans></span>
                 <input
                   type="number"
                   min={1}
                   value={selected.capacity ?? ''}
-                  placeholder="No limit"
+                  placeholder={t`No limit`}
                   onChange={(e) =>
                     patchRoom(selected.id, {
                       capacity: e.target.value ? Math.max(1, Number(e.target.value)) : null,
@@ -1377,9 +1388,9 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
               </label>
 
               <fieldset className="mt-2">
-                <legend className="mb-1 text-xs font-medium text-ktip-sand-700">Who can enter</legend>
+                <legend className="mb-1 text-xs font-medium text-ktip-sand-700"><Trans>Who can enter</Trans></legend>
                 <p className="mb-1 text-[10px] text-ktip-sand-500">
-                  Nothing ticked means everyone in the venue. Organizers always get in.
+                  <Trans>Nothing ticked means everyone in the venue. Organizers always get in.</Trans>
                 </p>
                 <div className="space-y-1">
                   {RESTRICTABLE_ROLES.map((role) => {
@@ -1410,7 +1421,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   checked={selected.is_open}
                   onChange={(e) => patchRoom(selected.id, { is_open: e.target.checked })}
                 />
-                Open to enter
+                <Trans>Open to enter</Trans>
               </label>
 
               <label className="mt-1 flex items-center gap-2 text-xs text-ktip-sand-700">
@@ -1419,13 +1430,13 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   checked={selected.recording_enabled}
                   onChange={(e) => patchRoom(selected.id, { recording_enabled: e.target.checked })}
                 />
-                Record this room
+                <Trans>Record this room</Trans>
               </label>
 
               {selected.kind === 'sponsor_booth' && (
                 <>
                   <label className="mt-2 block text-xs">
-                    <span className="mb-1 block font-medium text-ktip-sand-700">Sponsor</span>
+                    <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Sponsor</Trans></span>
                     <input
                       value={selected.sponsor_name ?? ''}
                       onChange={(e) =>
@@ -1435,7 +1446,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                     />
                   </label>
                   <label className="mt-2 block text-xs">
-                    <span className="mb-1 block font-medium text-ktip-sand-700">Sponsor link</span>
+                    <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Sponsor link</Trans></span>
                     <input
                       value={selected.sponsor_url ?? ''}
                       onChange={(e) =>
@@ -1454,12 +1465,12 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   set is written down for that room. */}
               <fieldset className="mt-3 border-t border-ktip-sand-200 pt-2">
                 <legend className="mb-1 text-xs font-medium text-ktip-sand-700">
-                  Panels in this room
+                  <Trans>Panels in this room</Trans>
                 </legend>
                 <p className="mb-1.5 text-[10px] leading-snug text-ktip-sand-500">
                   {selected.sections.length
-                    ? 'Set by hand for this room.'
-                    : `Following the defaults for ${VENUE_ROOM_KIND_LABELS[selected.kind] || selected.kind}.`}
+                    ? t`Set by hand for this room.`
+                    : t`Following the defaults for ${VENUE_ROOM_KIND_LABELS[selected.kind] || selected.kind}.`}
                 </p>
 
                 {(['main', 'aside'] as const).map((slot) => {
@@ -1468,13 +1479,13 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   return (
                     <div key={slot} className="mb-1.5">
                       <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-                        {slot === 'main' ? 'Main column' : 'Beside it'}
+                        {slot === 'main' ? t`Main column` : t`Beside it`}
                       </p>
                       <div className="space-y-1">
                         {choices.map(({ def, enabled }) => (
                           <label
                             key={def.id}
-                            title={def.blurb}
+                            title={i18n._(def.blurb)}
                             className="flex items-start gap-2 text-xs text-ktip-sand-700"
                           >
                             <input
@@ -1487,7 +1498,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                                 })
                               }
                             />
-                            {def.label}
+                            {i18n._(def.label)}
                           </label>
                         ))}
                       </div>
@@ -1501,7 +1512,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                     onClick={() => patchRoom(selected.id, { sections: [] })}
                     className="text-[10px] font-semibold text-ktip-ocean-600 hover:underline"
                   >
-                    Follow the defaults again
+                    <Trans>Follow the defaults again</Trans>
                   </button>
                 )}
 
@@ -1512,7 +1523,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                 {heroOptions(selected).length > 1 && (
                   <div className="mt-2.5 border-t border-ktip-sand-100 pt-2">
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-                      Big panel
+                      <Trans>Big panel</Trans>
                     </p>
                     <div className="space-y-1">
                       {heroOptions(selected).map(({ def, active, isDefault }) => (
@@ -1530,9 +1541,9 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                               })
                             }
                           />
-                          {def.label}
+                          {i18n._(def.label)}
                           {isDefault && (
-                            <span className="text-[10px] text-ktip-sand-400">default</span>
+                            <span className="text-[10px] text-ktip-sand-400"><Trans>default</Trans></span>
                           )}
                         </label>
                       ))}
@@ -1546,7 +1557,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                     See docs/VIDEO-SETUP.md for what each becomes in phase 2. */}
                 {sectionIsOn(selected, 'av_placeholder') && (
                   <label className="mt-2.5 block border-t border-ktip-sand-100 pt-2 text-xs">
-                    <span className="mb-1 block font-medium text-ktip-sand-700">Cameras</span>
+                    <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Cameras</Trans></span>
                     <select
                       value={cameraModeFor(selected)}
                       onChange={(e) =>
@@ -1559,7 +1570,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                       {ROOM_CAMERA_MODES.map((mode) => (
                         <option key={mode} value={mode}>
                           {ROOM_CAMERA_LABELS[mode]}
-                          {mode === layoutFor(selected.kind).camera ? ' (default)' : ''}
+                          {mode === layoutFor(selected.kind).camera ? t` (default)` : ''}
                         </option>
                       ))}
                     </select>
@@ -1572,15 +1583,15 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   sectionIsOn(selected, id) ? (
                     <label key={id} className="mt-2 block text-xs">
                       <span className="mb-1 block font-medium text-ktip-sand-700">
-                        {id === 'objectives' ? 'What this room is for' : 'House rules'}
+                        {id === 'objectives' ? t`What this room is for` : t`House rules`}
                       </span>
                       <textarea
                         rows={3}
                         value={sectionBody(selected, id)}
                         placeholder={
                           id === 'objectives'
-                            ? 'Left blank, the room description is used.'
-                            : 'Ground rules for this room.'
+                            ? t`Left blank, the room description is used.`
+                            : t`Ground rules for this room.`
                         }
                         onChange={(e) =>
                           patchRoom(selected.id, {
@@ -1607,7 +1618,9 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
 
               <div className="mt-3 flex items-center justify-between gap-2 border-t border-ktip-sand-200 pt-2">
                 <span className="font-mono text-[10px] text-ktip-sand-400">
-                  {selected.cells.length} cells · {floorBadge(selected.floor)}
+                  <Trans>
+                    {selected.cells.length} cells · {floorBadge(selected.floor)}
+                  </Trans>
                 </span>
                 <button
                   type="button"
@@ -1615,7 +1628,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                   className="flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-50"
                 >
                   <Trash2 size={12} aria-hidden="true" />
-                  Delete
+                  <Trans>Delete</Trans>
                 </button>
               </div>
             </div>
@@ -1627,7 +1640,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
       <div className="flex flex-wrap items-center gap-2 border-t border-ktip-sand-200 px-3 py-2">
         <Boxes size={14} className="text-ktip-sand-400" aria-hidden="true" />
         <label className="text-xs text-ktip-sand-600">
-          <span className="mr-1.5">Floor name</span>
+          <span className="mr-1.5"><Trans>Floor name</Trans></span>
           <input
             value={state.config.floors[floor]?.name ?? ''}
             onChange={(e) => renameFloor(floor, e.target.value)}
@@ -1641,7 +1654,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
             className="ml-auto flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-50"
           >
             <Trash2 size={12} aria-hidden="true" />
-            Delete this floor and its rooms
+            <Trans>Delete this floor and its rooms</Trans>
           </button>
         )}
       </div>
@@ -1744,6 +1757,7 @@ function SponsorLinkEditor({
   links: SponsorLink[]
   onChange: (links: SponsorLink[]) => void
 }) {
+  const { t } = useLingui()
   const patch = (index: number, field: keyof SponsorLink, value: string) =>
     onChange(links.map((link, i) => (i === index ? { ...link, [field]: value } : link)))
 
@@ -1754,14 +1768,14 @@ function SponsorLinkEditor({
   return (
     <div className="mt-2 rounded-lg border border-ktip-sand-200 p-2">
       <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-        Sponsor links
+        <Trans>Sponsor links</Trans>
       </p>
       {links.map((link, i) => (
         <div key={i} className="mb-1.5 space-y-1">
           <input
             value={link.label}
             onChange={(e) => patch(i, 'label', e.target.value)}
-            placeholder="We are hiring"
+            placeholder={t`We are hiring`}
             className="w-full rounded-lg border border-ktip-sand-200 px-2 py-1 text-[11px]"
           />
           <div className="flex gap-1">
@@ -1774,7 +1788,7 @@ function SponsorLinkEditor({
             <button
               type="button"
               onClick={() => onChange(links.filter((_, j) => j !== i))}
-              aria-label="Remove this link"
+              aria-label={t`Remove this link`}
               className="rounded-lg border border-ktip-sand-200 px-1.5 text-ktip-sand-500 hover:border-red-200 hover:text-red-600"
             >
               <X size={12} aria-hidden="true" />
@@ -1789,24 +1803,27 @@ function SponsorLinkEditor({
           onClick={() => onChange([...links, { label: '', url: '' }])}
           className="text-[10px] font-semibold text-ktip-ocean-600 hover:underline"
         >
-          + Add a link
+          <Trans>+ Add a link</Trans>
         </button>
       )}
       {links.length > valid && (
         <p className="mt-1 text-[10px] text-ktip-sun-700">
-          {links.length - valid} of these {links.length === 1 ? 'is' : 'are'} not a full http(s)
-          address and will not be shown.
+          <Plural
+            value={links.length - valid}
+            one="# of these is not a full http(s) address and will not be shown."
+            other="# of these are not a full http(s) address and will not be shown."
+          />
         </p>
       )}
     </div>
   )
 }
 
-function sideLabel(side: FloorDoor['side'] | undefined): string {
-  if (side === 'n') return 'north edge'
-  if (side === 'e') return 'east edge'
-  if (side === 'w') return 'west edge'
-  return 'south edge'
+function sideLabel(side: FloorDoor['side'] | undefined): MessageDescriptor {
+  if (side === 'n') return msg`north edge`
+  if (side === 'e') return msg`east edge`
+  if (side === 'w') return msg`west edge`
+  return msg`south edge`
 }
 
 function roomIdAt(rooms: DraftRoom[], floor: number, x: number, y: number): string | null {

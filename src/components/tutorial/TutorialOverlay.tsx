@@ -5,6 +5,7 @@ import { Button } from '../ui/Button'
 import { cn } from '../../lib/utils'
 import { useTTS } from '../../hooks/useTTS'
 import type { TutorialPosition, TutorialStep } from './types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface TutorialOverlayProps {
   steps: TutorialStep[]
@@ -198,6 +199,7 @@ function computePlacement(
 }
 
 export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayProps) {
+    const { t, i18n } = useLingui()
   const [index, setIndex] = useState(0)
   const [targetBox, setTargetBox] = useState<Box | null>(null)
   const [secondaryBox, setSecondaryBox] = useState<Box | null>(null)
@@ -388,7 +390,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
   // Read-aloud. `auto` chains into the next step when the utterance ends.
   useEffect(() => {
     if (!step || ttsMode === 'off') return
-    const text = `${step.title}. ${step.description}`
+    const text = `${i18n._(step.title)}. ${i18n._(step.description)}`
     speak(text, ttsMode === 'auto' && !step.interactive ? advance : undefined)
     // `advance` changes with the index, which is exactly when we want to respeak
   }, [step, ttsMode, speak, advance])
@@ -443,7 +445,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
       className="fixed inset-0 z-tutorial isolation-isolate pointer-events-none animate-fade-in"
       role="dialog"
       aria-modal="false"
-      aria-label="Guided tour"
+      aria-label={t`Guided tour`}
     >
       {/* Scrim with a rounded cutout around the target */}
       <svg className="absolute inset-0 w-full h-full" aria-hidden="true">
@@ -513,7 +515,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
           style={{ top: hintBox.top - PAD - 40, left: hintBox.left + hintBox.width / 2 }}
         >
           <span className="inline-block whitespace-nowrap rounded-full bg-ktip-ocean-600 dark:bg-ktip-ocean-200 px-3 py-1.5 text-xs font-bold text-white shadow-hard">
-            {step.actionHint}
+            {i18n._(step.actionHint)}
           </span>
         </div>
       )}
@@ -526,7 +528,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
       >
         <div className="flex items-start justify-between gap-3">
           <h2 className="font-display font-bold text-lg text-ktip-sand-900 leading-snug">
-            {step.title}
+            {i18n._(step.title)}
           </h2>
           <div className="flex items-center gap-1 shrink-0">
             {ttsSupported && (
@@ -535,17 +537,17 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
                 onClick={cycleTts}
                 aria-label={
                   ttsMode === 'off'
-                    ? 'Read this step aloud'
+                    ? t`Read this step aloud`
                     : ttsMode === 'single'
-                      ? 'Read the whole tour aloud'
-                      : 'Turn off read aloud'
+                      ? t`Read the whole tour aloud`
+                      : t`Turn off read aloud`
                 }
                 title={
                   ttsMode === 'off'
-                    ? 'Read aloud'
+                    ? t`Read aloud`
                     : ttsMode === 'single'
-                      ? 'Read aloud: this step'
-                      : 'Read aloud: whole tour'
+                      ? t`Read aloud: this step`
+                      : t`Read aloud: whole tour`
                 }
                 className={cn(
                   'p-1.5 rounded-lg transition-colors',
@@ -566,7 +568,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
             <button
               type="button"
               onClick={exit}
-              aria-label="Close tour"
+              aria-label={t`Close tour`}
               className="p-1.5 rounded-lg text-ktip-sand-500 hover:bg-ktip-sand-100 transition-colors"
             >
               <X size={16} />
@@ -575,7 +577,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
         </div>
 
         <p className="mt-2 text-sm text-ktip-sand-600 leading-relaxed whitespace-pre-line">
-          {step.description}
+          {i18n._(step.description)}
         </p>
 
         {/* Progress dots — backward only: later steps rely on DOM state that
@@ -587,7 +589,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
               type="button"
               disabled={i >= index}
               onClick={() => goTo(i)}
-              aria-label={`Go to step ${i + 1}`}
+              aria-label={t`Go to step ${i + 1}`}
               aria-current={i === index}
               className={cn(
                 'h-1.5 rounded-full transition-all duration-200',
@@ -611,11 +613,11 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
                 icon={<ChevronLeft size={14} />}
                 onClick={() => goTo(index - 1)}
               >
-                Back
+                <Trans>Back</Trans>
               </Button>
             )}
             <Button size="sm" disabled={awaitingAction} onClick={handleNext}>
-              {awaitingAction ? 'Waiting…' : isLast ? 'Finish' : 'Next'}
+              {awaitingAction ? t`Waiting…` : isLast ? t`Finish` : t`Next`}
               {!awaitingAction && !isLast && <ChevronRight size={14} />}
             </Button>
           </div>
@@ -628,7 +630,7 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
         onClick={exit}
         className="fixed z-40 top-4 left-1/2 -translate-x-1/2 pointer-events-auto rounded-full bg-red-600 text-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider shadow-hard hover:bg-red-700 transition-colors"
       >
-        Exit tour
+        <Trans>Exit tour</Trans>
       </button>
     </div>,
     document.body

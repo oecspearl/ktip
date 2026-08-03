@@ -6,6 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { forgotPasswordSchema } from '../../lib/validation'
 import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface ForgotPasswordActionState {
   errors: Record<string, string>
@@ -20,6 +21,7 @@ const initialState: ForgotPasswordActionState = {
 }
 
 export default function ForgotPasswordPage() {
+    const { t } = useLingui()
   const auth = useAuth()
 
   const [email, setEmail] = useState('')
@@ -45,7 +47,7 @@ export default function ForgotPasswordPage() {
     } catch (err: any) {
       return {
         errors: {},
-        errorMessage: err.message || 'Failed to send reset email. Please try again.',
+        errorMessage: err.message || t`Failed to send reset email. Please try again.`,
         emailSent: false,
       }
     }
@@ -62,23 +64,25 @@ export default function ForgotPasswordPage() {
               <CheckCircle size={32} className="text-ktip-tropical-600" />
             </div>
             <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-              Check your email
+              <Trans>Check your email</Trans>
             </h2>
             <p className="text-ktip-sand-600 mb-6 max-w-sm mx-auto">
-              We've sent a password reset link to <strong className="text-ktip-sand-800">{email}</strong>. Click the link to set a new password.
+              <Trans>
+                We've sent a password reset link to <strong className="text-ktip-sand-800">{email}</strong>. Click the link to set a new password.
+              </Trans>
             </p>
             <Link to="/login">
-              <Button variant="secondary">Back to Sign In</Button>
+              <Button variant="secondary"><Trans>Back to Sign In</Trans></Button>
             </Link>
           </div>
         ) : (
           <>
             <div className="text-center mb-8">
               <h1 className="text-3xl font-display font-bold text-ktip-ocean-600 mb-2">
-                Forgot Password?
+                <Trans>Forgot Password?</Trans>
               </h1>
               <p className="text-ktip-sand-600">
-                Enter your email and we'll send you a reset link
+                <Trans>Enter your email and we'll send you a reset link</Trans>
               </p>
             </div>
 
@@ -91,8 +95,8 @@ export default function ForgotPasswordPage() {
 
               <Input
                 type="email"
-                label="Email"
-                placeholder="Enter your email"
+                label={t`Email`}
+                placeholder={t`Enter your email`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 error={state.errors.email}
@@ -102,14 +106,14 @@ export default function ForgotPasswordPage() {
               />
 
               <Button type="submit" fullWidth loading={pending} icon={<Mail size={20} />}>
-                Send Reset Link
+                <Trans>Send Reset Link</Trans>
               </Button>
             </form>
 
             <p className="mt-8 text-center text-sm text-ktip-sand-600">
               <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 inline-flex items-center gap-1">
                 <ArrowLeft size={14} />
-                Back to Sign In
+                <Trans>Back to Sign In</Trans>
               </Link>
             </p>
           </>

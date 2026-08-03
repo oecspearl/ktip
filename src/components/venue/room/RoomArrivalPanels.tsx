@@ -6,6 +6,7 @@ import { entityPath } from '../../../lib/slug'
 import { Button } from '../../ui/Button'
 import { RoomPanel } from './RoomPanel'
 import type { Event, EventVenueMember } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Check in, from the room you walked into.
@@ -17,6 +18,7 @@ import type { Event, EventVenueMember } from '../../../types'
  * self-update policy — see the note on that function.
  */
 export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
+  const { t } = useLingui()
   const toast = useToast()
   const { rsvp, loading } = useMyEventRsvp(event.id)
   const { checkIn, loading: saving } = useVenueCheckIn()
@@ -29,7 +31,7 @@ export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-ktip-tropical-200 bg-ktip-tropical-50 px-4 py-3 text-sm text-ktip-tropical-800">
         <TicketCheck size={16} aria-hidden="true" />
-        You are checked in.
+        <Trans>You are checked in.</Trans>
       </div>
     )
   }
@@ -37,7 +39,7 @@ export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
   if (rsvp.status !== 'confirmed') {
     return (
       <div className="rounded-2xl border border-ktip-sand-200 bg-ktip-sand-50 px-4 py-3 text-sm text-ktip-sand-600">
-        Your registration is {rsvp.status}. An organizer has to confirm it before you can check in.
+        <Trans>Your registration is {rsvp.status}. An organizer has to confirm it before you can check in.</Trans>
       </div>
     )
   }
@@ -45,7 +47,9 @@ export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-ktip-sun-200 bg-ktip-sun-50 px-4 py-3">
       <p className="min-w-0 flex-1 text-sm text-ktip-sun-800">
-        You are registered for <strong>{event.title}</strong> but not checked in yet.
+        <Trans>
+          You are registered for <strong>{event.title}</strong> but not checked in yet.
+        </Trans>
       </p>
       <Button
         size="sm"
@@ -53,13 +57,13 @@ export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
         onClick={async () => {
           try {
             await checkIn(event.id)
-            toast.success('Checked in')
+            toast.success(t`Checked in`)
           } catch (err: any) {
-            toast.error(err?.message || 'Could not check you in')
+            toast.error(err?.message || t`Could not check you in`)
           }
         }}
       >
-        Check in
+        <Trans>Check in</Trans>
       </Button>
     </div>
   )
@@ -79,32 +83,33 @@ export function OnboardingChecklist({
   event: Pick<Event, 'id' | 'slug' | 'title'>
   membership: EventVenueMember
 }) {
+  const { t } = useLingui()
   const steps = [
     {
       key: 'entered',
-      label: 'Walk into a room',
+      label: t`Walk into a room`,
       done: !!membership.current_room_id,
       hint: null as string | null,
     },
     {
       key: 'status',
-      label: 'Set your status',
+      label: t`Set your status`,
       done: !!membership.status_note,
-      hint: 'Use the pill in the top bar — it tells people whether to interrupt you.',
+      hint: t`Use the pill in the top bar — it tells people whether to interrupt you.`,
     },
     {
       key: 'skills',
-      label: 'List a skill or two',
+      label: t`List a skill or two`,
       done: (membership.skills || []).length > 0,
-      hint: 'It is how anyone looking for a teammate finds you.',
+      hint: t`It is how anyone looking for a teammate finds you.`,
     },
     {
       key: 'team',
-      label: 'Say whether you need a team',
+      label: t`Say whether you need a team`,
       // Either answer counts as answered: is_discoverable starts true, so
       // turning it off is as much a decision as ticking "looking for a team".
       done: membership.looking_for_team || !membership.is_discoverable,
-      hint: 'Tick “looking for a team” to appear on the discovery panel.',
+      hint: t`Tick “looking for a team” to appear on the discovery panel.`,
     },
   ].filter((step) => step.key !== 'team' || membership.role === 'participant')
 
@@ -112,7 +117,7 @@ export function OnboardingChecklist({
   if (!outstanding.length) return null
 
   return (
-    <RoomPanel title="Getting started" meta={`${steps.length - outstanding.length}/${steps.length}`}>
+    <RoomPanel title={t`Getting started`} meta={`${steps.length - outstanding.length}/${steps.length}`}>
       <ul className="divide-y divide-ktip-sand-100">
         {steps.map((step) => (
           <li key={step.key} className="flex items-start gap-2.5 px-4 py-2.5">
@@ -140,7 +145,7 @@ export function OnboardingChecklist({
         to={entityPath('event', event)}
         className="block border-t border-ktip-sand-100 px-4 py-2 text-xs font-semibold text-ktip-ocean-600 hover:bg-ktip-sand-50"
       >
-        Read the event brief →
+        <Trans>Read the event brief →</Trans>
       </Link>
     </RoomPanel>
   )

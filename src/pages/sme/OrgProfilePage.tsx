@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useEmployerPortfolio, usePublicEmployer } from '../../hooks/useEmployerProfile'
 import { formatDate } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * A business's public page — the organisation's answer to /user/:id.
@@ -14,6 +15,7 @@ import { formatDate } from '../../lib/utils'
  * with a name and a logo reads as a credential whether or not it is one.
  */
 export default function OrgProfilePage() {
+    const { t } = useLingui()
   const params = useParams()
   const { employer, loading } = usePublicEmployer(params.slug)
   const { items } = useEmployerPortfolio(employer?.id)
@@ -32,12 +34,12 @@ export default function OrgProfilePage() {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <Building2 size={32} className="mx-auto mb-3 text-ktip-sand-400" aria-hidden="true" />
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Business not found</h1>
+        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Business not found</Trans></h1>
         <p className="mt-2 text-ktip-sand-600">
-          This organisation does not exist, or has not been verified by its Chamber of Commerce yet.
+          <Trans>This organisation does not exist, or has not been verified by its Chamber of Commerce yet.</Trans>
         </p>
         <Link to="/directory" className="mt-4 inline-block text-ktip-ocean-600 hover:underline">
-          Browse the directory
+          <Trans>Browse the directory</Trans>
         </Link>
       </div>
     )
@@ -49,15 +51,15 @@ export default function OrgProfilePage() {
   return (
     <>
       <PageHero
-        eyebrow="Organisation"
+        eyebrow={t`Organisation`}
         title={name}
         subtitle={employer.industry || undefined}
         image={employer.logo_url}
         imageSeed={employer.slug}
         compact
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Directory', href: '/directory' },
+          { label: t`Home`, href: '/' },
+          { label: t`Directory`, href: '/directory' },
           { label: name },
         ]}
       />
@@ -88,18 +90,20 @@ export default function OrgProfilePage() {
                     className="inline-flex items-center gap-1 rounded-full bg-ktip-tropical-100 px-2 py-0.5 text-xs font-medium text-ktip-tropical-800"
                     title={
                       employer.verified_at
-                        ? `Verified ${formatDate(employer.verified_at, 'MMM dd, yyyy')}`
-                        : 'Chamber verified'
+                        ? t`Verified ${formatDate(employer.verified_at, 'MMM dd, yyyy')}`
+                        : t`Chamber verified`
                     }
                   >
                     <BadgeCheck size={13} aria-hidden="true" />
-                    Chamber verified
+                    <Trans>Chamber verified</Trans>
                   </span>
                 )}
               </h1>
 
               {employer.legal_name !== name && (
-                <p className="text-sm text-ktip-sand-500">Registered as {employer.legal_name}</p>
+                <p className="text-sm text-ktip-sand-500">
+                  <Trans>Registered as {employer.legal_name}</Trans>
+                </p>
               )}
 
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ktip-sand-600">
@@ -115,7 +119,7 @@ export default function OrgProfilePage() {
                     className="flex items-center gap-1.5 text-ktip-ocean-600 hover:underline"
                   >
                     <Globe size={14} aria-hidden="true" />
-                    Website
+                    <Trans>Website</Trans>
                     <ExternalLink size={12} aria-hidden="true" />
                   </a>
                 )}
@@ -131,12 +135,12 @@ export default function OrgProfilePage() {
         </Card>
 
         <section id="portfolio" data-spy="Portfolio" className="scroll-mt-24">
-          <h2 className="mb-1 font-display text-xl font-bold text-ktip-sand-900">Portfolio</h2>
-          <p className="mb-4 text-sm text-ktip-sand-600">Work this organisation has delivered</p>
+          <h2 className="mb-1 font-display text-xl font-bold text-ktip-sand-900"><Trans>Portfolio</Trans></h2>
+          <p className="mb-4 text-sm text-ktip-sand-600"><Trans>Work this organisation has delivered</Trans></p>
 
           {!items || items.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-ktip-sand-300 py-10 text-center text-sm text-ktip-sand-500">
-              No work published yet.
+              <Trans>No work published yet.</Trans>
             </p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -157,7 +161,7 @@ export default function OrgProfilePage() {
                     <h3 className="font-display font-bold text-ktip-sand-900">{item.title}</h3>
                     <p className="mt-0.5 text-xs text-ktip-sand-500">
                       {[
-                        item.client_name && `for ${item.client_name}`,
+                        item.client_name && t`for ${item.client_name}`,
                         item.completed_on && formatDate(item.completed_on, 'MMM yyyy'),
                       ]
                         .filter(Boolean)
@@ -190,7 +194,7 @@ export default function OrgProfilePage() {
                         rel="noopener noreferrer"
                         className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"
                       >
-                        Read more
+                        <Trans>Read more</Trans>
                         <ExternalLink size={12} aria-hidden="true" />
                       </a>
                     )}

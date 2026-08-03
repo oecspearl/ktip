@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useAISuggestions } from '../../../hooks/useAISuggestions'
 import { Sparkles, Wand2, MessageSquare, Loader2 } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 interface AIFieldActionsProps {
   grantTitle: string
@@ -14,13 +16,14 @@ interface AIFieldActionsProps {
 }
 
 const TONES = [
-  { value: 'professional', label: 'Professional' },
-  { value: 'persuasive', label: 'Persuasive' },
-  { value: 'academic', label: 'Academic' },
-  { value: 'concise', label: 'Concise' },
+  { value: 'professional', label: msg`Professional` },
+  { value: 'persuasive', label: msg`Persuasive` },
+  { value: 'academic', label: msg`Academic` },
+  { value: 'concise', label: msg`Concise` },
 ]
 
 export function AIFieldActions(props: AIFieldActionsProps) {
+    const { t, i18n } = useLingui()
   const { grantTitle, fieldLabel, fieldValue, helpText, placeholder, applicationTitle, existingData, onReplace } = props
   const ai = useAISuggestions()
   const [showTones, setShowTones] = useState(false)
@@ -63,7 +66,7 @@ export function AIFieldActions(props: AIFieldActionsProps) {
       {ai.loading ? (
         <span className="inline-flex items-center gap-1.5 text-xs text-ktip-ocean-600">
           <Loader2 size={12} className="animate-spin" />
-          AI working...
+          <Trans>AI working...</Trans>
         </span>
       ) : (
         <>
@@ -73,10 +76,10 @@ export function AIFieldActions(props: AIFieldActionsProps) {
               type="button"
               onClick={handleImprove}
               className="inline-flex items-center gap-1 px-2 py-1 text-xs text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-md transition-colors"
-              title="Improve this content with AI"
+              title={t`Improve this content with AI`}
             >
               <Sparkles size={11} />
-              Improve
+              <Trans>Improve</Trans>
             </button>
           )}
 
@@ -85,10 +88,10 @@ export function AIFieldActions(props: AIFieldActionsProps) {
             type="button"
             onClick={handleSuggest}
             className="inline-flex items-center gap-1 px-2 py-1 text-xs text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-md transition-colors"
-            title="Generate AI suggestion for this section"
+            title={t`Generate AI suggestion for this section`}
           >
             <Wand2 size={11} />
-            Suggest
+            <Trans>Suggest</Trans>
           </button>
 
           {/* Tone adjustment */}
@@ -98,10 +101,10 @@ export function AIFieldActions(props: AIFieldActionsProps) {
                 type="button"
                 onClick={() => setShowTones(!showTones)}
                 className="inline-flex items-center gap-1 px-2 py-1 text-xs text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-md transition-colors"
-                title="Adjust tone"
+                title={t`Adjust tone`}
               >
                 <MessageSquare size={11} />
-                Tone
+                <Trans>Tone</Trans>
               </button>
 
               {showTones && (
@@ -113,7 +116,7 @@ export function AIFieldActions(props: AIFieldActionsProps) {
                       onClick={() => handleTone(tone.value)}
                       className="w-full text-left px-3 py-1.5 text-xs text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                     >
-                      {tone.label}
+                      {i18n._(tone.label)}
                     </button>
                   ))}
                 </div>

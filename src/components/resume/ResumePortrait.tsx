@@ -18,6 +18,7 @@
  */
 
 import { useState } from 'react'
+import { useLingui } from '@lingui/react/macro'
 
 export type PortraitTheme = 'mono' | 'color'
 
@@ -45,6 +46,7 @@ export function ResumePortrait({
   // the object is gone, and `crossOrigin` makes a bucket without CORS headers
   // fail too. Untreated, the browser paints the alt text across the panel, which
   // is what a CV must never do. Fall back to initials the moment it fails.
+  const { t } = useLingui()
   const [broken, setBroken] = useState(false)
   const showPhoto = !!avatarUrl && !broken
 
@@ -61,7 +63,7 @@ export function ResumePortrait({
         {showPhoto ? (
           <img
             src={avatarUrl!}
-            alt={`${name} — portrait`}
+            alt={t`${name} — portrait`}
             onError={() => setBroken(true)}
             // eager + high priority: on the printed sheet a lazily-loaded image
             // is an image the print engine may capture before it arrives.

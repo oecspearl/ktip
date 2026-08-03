@@ -19,6 +19,7 @@ import Color from '@tiptap/extension-color'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import Placeholder from '@tiptap/extension-placeholder'
+import { useLingui } from '@lingui/react/macro'
 
 interface TiptapEditorProps {
   onEditorReady?: (editor: Editor) => void
@@ -31,6 +32,7 @@ function imageFilesFrom(transfer: DataTransfer | null): File[] {
 }
 
 export function TiptapEditor({ onEditorReady, placeholder, initialContent }: TiptapEditorProps) {
+  const { t } = useLingui()
   const toast = useToast()
 
   /**
@@ -50,7 +52,7 @@ export function TiptapEditor({ onEditorReady, placeholder, initialContent }: Tip
           view.dispatch(view.state.tr.insert(insertAt, node))
           pos = insertAt + node.nodeSize
         } catch (err: any) {
-          toast.error(err?.message || 'Failed to upload image')
+          toast.error(err?.message || t`Failed to upload image`)
         }
       }
     })()
@@ -83,7 +85,7 @@ export function TiptapEditor({ onEditorReady, placeholder, initialContent }: Tip
       Subscript,
       Superscript,
       Placeholder.configure({
-        placeholder: placeholder || 'Start writing your document...',
+        placeholder: placeholder || t`Start writing your document...`,
       }),
     ],
     content: initialContent || '',

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -134,17 +135,18 @@ export function useDocumentPermission(id: string | undefined) {
 }
 
 export function useCreateDocument() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async (docData: { title?: string; content?: string }) => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) throw new Error(t`Not authenticated`)
 
       const { data, error } = await supabase
         .from('documents')
         .insert({
-          title: docData.title || 'Untitled Document',
+          title: docData.title || t`Untitled Document`,
           content: docData.content || '',
           owner_id: user.id,
         } as any)

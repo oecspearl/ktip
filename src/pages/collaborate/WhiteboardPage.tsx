@@ -12,8 +12,10 @@ import { ToolTitleInput } from '../../components/ui/ToolTitleInput'
 import { ToolStatusBar, StatusMetric, SaveIndicator } from '../../components/ui/ToolStatusBar'
 import { Toolbar, ToolbarButton, ToolbarSeparator, ToolbarSpacer } from '../../components/ui/Toolbar'
 import { truncate } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function WhiteboardPage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -21,7 +23,7 @@ export default function WhiteboardPage() {
 
   const [editor, setEditor] = useState<any>(null)
   const [wbId, setWbId] = useState<string | undefined>(params.id)
-  const [wbTitle, setWbTitle] = useState('Untitled Whiteboard')
+  const [wbTitle, setWbTitle] = useState(t`Untitled Whiteboard`)
   const [shareOpen, setShareOpen] = useState(false)
   const [snapshotLoaded, setSnapshotLoaded] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -43,7 +45,7 @@ export default function WhiteboardPage() {
   // Can edit = owner OR shared with edit permission
   const canEdit = isOwner || sharePermission === 'edit'
 
-  usePageTitle(wbTitle || 'Whiteboard')
+  usePageTitle(wbTitle || t`Whiteboard`)
 
   // Load title from DB when whiteboard resolves
   useEffect(() => {
@@ -152,13 +154,13 @@ export default function WhiteboardPage() {
             onChange={setWbTitle}
             onCommit={handleTitleCommit}
             readOnly={!canEdit}
-            placeholder="Untitled Whiteboard"
+            placeholder={t`Untitled Whiteboard`}
           />
         }
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Whiteboards', href: '/collaborate/whiteboards' },
+          { label: t`Home`, href: '/' },
+          { label: t`Collaborate`, href: '/collaborate' },
+          { label: t`Whiteboards`, href: '/collaborate/whiteboards' },
           { label: truncate(wbTitle, 20) },
         ]}
         heroBadge={
@@ -170,16 +172,16 @@ export default function WhiteboardPage() {
                   : 'bg-ktip-sun-500/20 text-ktip-sun-300 border-ktip-sun-500/30'
               }`}
             >
-              {canEdit ? 'Editor — Shared with you' : 'View Only — Shared with you'}
+              {canEdit ? t`Editor — Shared with you` : t`View Only — Shared with you`}
             </span>
           )
         }
         fallback={
           notFound ? (
             <ToolNotFound
-              what="Whiteboard"
+              what={t`Whiteboard`}
               backHref="/collaborate/whiteboards"
-              backLabel="Back to My Whiteboards"
+              backLabel={t`Back to My Whiteboards`}
             />
           ) : undefined
         }
@@ -187,25 +189,25 @@ export default function WhiteboardPage() {
           <Toolbar>
             <ToolbarButton
               icon={<Save size={14} />}
-              label="Save"
+              label={t`Save`}
               onClick={() => void saveNow()}
               disabled={!canEdit}
-              title="Save now (Ctrl+S)"
+              title={t`Save now (Ctrl+S)`}
             />
             <ToolbarSeparator />
             <div className="relative">
               <ToolbarButton
                 icon={<Download size={14} />}
-                label="Export"
+                label={t`Export`}
                 active={exportOpen}
                 onClick={() => setExportOpen(!exportOpen)}
-                title="Export whiteboard"
+                title={t`Export whiteboard`}
               />
               {exportOpen && (
                 <div className="absolute left-0 top-full mt-1 w-44 bg-ktip-cream border border-ktip-sand-200 rounded-lg shadow-medium z-30 py-1">
-                  <button type="button" onClick={() => void exportImage('png')} className="w-full text-left px-3 py-2 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100">Export as PNG</button>
-                  <button type="button" onClick={() => void exportImage('svg')} className="w-full text-left px-3 py-2 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100">Export as SVG</button>
-                  <button type="button" onClick={handleExportJSON} className="w-full text-left px-3 py-2 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100">Export as JSON</button>
+                  <button type="button" onClick={() => void exportImage('png')} className="w-full text-left px-3 py-2 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100"><Trans>Export as PNG</Trans></button>
+                  <button type="button" onClick={() => void exportImage('svg')} className="w-full text-left px-3 py-2 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100"><Trans>Export as SVG</Trans></button>
+                  <button type="button" onClick={handleExportJSON} className="w-full text-left px-3 py-2 text-sm text-ktip-sand-700 hover:bg-ktip-sand-100"><Trans>Export as JSON</Trans></button>
                 </div>
               )}
             </div>
@@ -213,25 +215,25 @@ export default function WhiteboardPage() {
             {isOwner && (
               <ToolbarButton
                 icon={<Share2 size={14} />}
-                label="Invite"
+                label={t`Invite`}
                 variant="primary"
                 onClick={async () => {
                   if (!wbId) await saveNow()
                   setShareOpen(true)
                 }}
-                title="Invite collaborators"
+                title={t`Invite collaborators`}
               />
             )}
           </Toolbar>
         }
         statusBar={
           <ToolStatusBar
-            left={<StatusMetric label="Shapes" value={shapeCount} />}
+            left={<StatusMetric label={t`Shapes`} value={shapeCount} />}
             right={
               <>
                 <SaveIndicator status={status} lastSavedAt={lastSavedAt} />
                 <span className="text-ktip-sand-300" aria-hidden>|</span>
-                <span className="truncate max-w-[200px]">{wbTitle || 'Whiteboard'}</span>
+                <span className="truncate max-w-[200px]">{wbTitle || t`Whiteboard`}</span>
               </>
             }
           />

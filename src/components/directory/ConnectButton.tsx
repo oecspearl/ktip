@@ -6,6 +6,7 @@ import {
 } from '../../hooks/useConnections'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
+import { useLingui } from '@lingui/react/macro'
 
 interface ConnectButtonProps {
   otherUserId: string
@@ -21,6 +22,7 @@ interface ConnectButtonProps {
  * Accept/Decline -> Connected.
  */
 export function ConnectButton({ otherUserId, size = 'md', status, statusPending }: ConnectButtonProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const myId = auth.user?.id
@@ -47,7 +49,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
         requesterName: auth.profile?.display_name || 'Someone',
         addresseeId: otherUserId,
       })
-      toast.success('Connection request sent')
+      toast.success(t`Connection request sent`)
     } catch (err: any) {
       toast.error(err.message || 'Failed to send request')
     }
@@ -73,7 +75,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
     if (!connection) return
     try {
       await removeConnection(connection.id)
-      toast.success('Request cancelled')
+      toast.success(t`Request cancelled`)
     } catch (err: any) {
       toast.error(err.message || 'Failed to cancel')
     }
@@ -90,7 +92,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
 
   if (state === 'pending_sent') {
     return (
-      <button onClick={handleCancel} disabled={busy} className={`${base} bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200`} title="Cancel request">
+      <button onClick={handleCancel} disabled={busy} className={`${base} bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200`} title={t`Cancel request`}>
         <Clock size={iconSize} />
         Pending
       </button>

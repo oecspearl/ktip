@@ -1,5 +1,7 @@
 import { ShieldCheck } from 'lucide-react'
 import { SELECTABLE_ROLES } from '../../lib/constants'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 /**
  * Shared "I am a..." role grid used by the signup and onboarding wizards.
@@ -18,10 +20,11 @@ export function RolePicker({
   onChange: (value: string) => void
   error?: string
 }) {
+    const { t, i18n } = useLingui()
   return (
     <div>
       <label className="block text-sm font-medium text-ktip-sand-700 mb-2">
-        I am a... <span className="text-red-500">*</span>
+        <Trans>I am a...</Trans> <span className="text-red-500">*</span>
       </label>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {SELECTABLE_ROLES.map((role) => (
@@ -36,16 +39,18 @@ export function RolePicker({
             }`}
           >
             <div className="flex items-center gap-1.5">
-              <span className="font-medium text-sm text-ktip-sand-900">{role.label}</span>
+              <span className="font-medium text-sm text-ktip-sand-900">
+                {resolveCopy(i18n, role.label)}
+              </span>
               {role.requiresVerification && (
                 <ShieldCheck
                   size={13}
                   className="text-ktip-ocean-500 flex-shrink-0"
-                  aria-label="Approved by your school"
+                  aria-label={t`Approved by your school`}
                 />
               )}
             </div>
-            <div className="text-xs text-ktip-sand-600 mt-0.5">{role.description}</div>
+            <div className="text-xs text-ktip-sand-600 mt-0.5">{resolveCopy(i18n, role.description)}</div>
           </button>
         ))}
       </div>
@@ -53,8 +58,7 @@ export function RolePicker({
       <p className="mt-2 flex items-start gap-1.5 text-xs text-ktip-sand-500">
         <ShieldCheck size={13} className="mt-0.5 flex-shrink-0 text-ktip-ocean-500" aria-hidden="true" />
         <span>
-          Marked roles are confirmed by your school or university. You can still choose one — we
-          will take you through verification.
+          <Trans>Marked roles are confirmed by your school or university. You can still choose one — we will take you through verification.</Trans>
         </span>
       </p>
 

@@ -29,6 +29,7 @@ import {
   AlignJustify,
   ChevronDown,
 } from 'lucide-react'
+import { useLingui } from '@lingui/react/macro'
 
 interface MenuItem {
   label: string
@@ -53,6 +54,7 @@ interface EditorMenuBarProps {
 }
 
 export function EditorMenuBar(props: EditorMenuBarProps) {
+    const { t } = useLingui()
   const [openMenu, setOpenMenu] = useState<string | null>(null)
 
   const toggle = (menu: string) => {
@@ -69,59 +71,59 @@ export function EditorMenuBar(props: EditorMenuBarProps) {
   const ed = props.editor
 
   const fileItems: MenuItem[] = [
-    { label: 'New Document', icon: FilePlus, action: props.onNewDocument },
-    { label: 'Open...', icon: FolderOpen, action: props.onOpenDocuments },
-    { label: 'Save', icon: Save, shortcut: 'Ctrl+S', action: props.onSave },
+    { label: t`New Document`, icon: FilePlus, action: props.onNewDocument },
+    { label: t`Open...`, icon: FolderOpen, action: props.onOpenDocuments },
+    { label: t`Save`, icon: Save, shortcut: 'Ctrl+S', action: props.onSave },
     { label: '', separator: true },
-    { label: 'Download as PDF', icon: FileDown, action: props.onDownloadPDF },
-    { label: 'Download as HTML', icon: FileText, action: props.onDownloadHTML },
-    { label: 'Download as Markdown', icon: FileCode, action: props.onDownloadMarkdown },
+    { label: t`Download as PDF`, icon: FileDown, action: props.onDownloadPDF },
+    { label: t`Download as HTML`, icon: FileText, action: props.onDownloadHTML },
+    { label: t`Download as Markdown`, icon: FileCode, action: props.onDownloadMarkdown },
     // Share also has a primary button above the panel — this stays as the
     // keyboard/menu route to the same modal, and disappears for non-owners.
     ...(props.onShare
       ? ([
           { label: '', separator: true },
-          { label: 'Share Document', icon: Share2, action: props.onShare },
+          { label: t`Share Document`, icon: Share2, action: props.onShare },
         ] as MenuItem[])
       : []),
   ]
 
   const editItems: MenuItem[] = [
-    { label: 'Undo', icon: Undo, shortcut: 'Ctrl+Z', action: () => ed?.chain().focus().undo().run() },
-    { label: 'Redo', icon: Redo, shortcut: 'Ctrl+Shift+Z', action: () => ed?.chain().focus().redo().run() },
+    { label: t`Undo`, icon: Undo, shortcut: 'Ctrl+Z', action: () => ed?.chain().focus().undo().run() },
+    { label: t`Redo`, icon: Redo, shortcut: 'Ctrl+Shift+Z', action: () => ed?.chain().focus().redo().run() },
     { label: '', separator: true },
-    { label: 'Select All', shortcut: 'Ctrl+A', action: () => ed?.chain().focus().selectAll().run() },
-    { label: 'Clear Formatting', icon: Eraser, action: () => ed?.chain().focus().unsetAllMarks().clearNodes().run() },
+    { label: t`Select All`, shortcut: 'Ctrl+A', action: () => ed?.chain().focus().selectAll().run() },
+    { label: t`Clear Formatting`, icon: Eraser, action: () => ed?.chain().focus().unsetAllMarks().clearNodes().run() },
   ]
 
   const insertItems: MenuItem[] = [
-    { label: 'Link...', icon: Link, action: props.onInsertLink },
-    { label: 'Image...', icon: ImageIcon, action: props.onInsertImage },
-    { label: 'Horizontal Rule', icon: Minus, action: () => ed?.chain().focus().setHorizontalRule().run() },
-    { label: 'Table (3x3)', icon: Table, action: () => ed?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
-    { label: 'Code Block', icon: Code2, action: () => ed?.chain().focus().toggleCodeBlock().run() },
+    { label: t`Link...`, icon: Link, action: props.onInsertLink },
+    { label: t`Image...`, icon: ImageIcon, action: props.onInsertImage },
+    { label: t`Horizontal Rule`, icon: Minus, action: () => ed?.chain().focus().setHorizontalRule().run() },
+    { label: t`Table (3x3)`, icon: Table, action: () => ed?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
+    { label: t`Code Block`, icon: Code2, action: () => ed?.chain().focus().toggleCodeBlock().run() },
   ]
 
   const formatItems: MenuItem[] = [
-    { label: 'Bold', icon: Bold, shortcut: 'Ctrl+B', action: () => ed?.chain().focus().toggleBold().run() },
-    { label: 'Italic', icon: Italic, shortcut: 'Ctrl+I', action: () => ed?.chain().focus().toggleItalic().run() },
-    { label: 'Underline', icon: Underline, shortcut: 'Ctrl+U', action: () => ed?.chain().focus().toggleUnderline().run() },
-    { label: 'Strikethrough', icon: Strikethrough, action: () => ed?.chain().focus().toggleStrike().run() },
-    { label: 'Highlight', icon: Highlighter, action: () => ed?.chain().focus().toggleHighlight().run() },
-    { label: 'Subscript', icon: Subscript, action: () => ed?.chain().focus().toggleSubscript().run() },
-    { label: 'Superscript', icon: Superscript, action: () => ed?.chain().focus().toggleSuperscript().run() },
+    { label: t`Bold`, icon: Bold, shortcut: 'Ctrl+B', action: () => ed?.chain().focus().toggleBold().run() },
+    { label: t`Italic`, icon: Italic, shortcut: 'Ctrl+I', action: () => ed?.chain().focus().toggleItalic().run() },
+    { label: t`Underline`, icon: Underline, shortcut: 'Ctrl+U', action: () => ed?.chain().focus().toggleUnderline().run() },
+    { label: t`Strikethrough`, icon: Strikethrough, action: () => ed?.chain().focus().toggleStrike().run() },
+    { label: t`Highlight`, icon: Highlighter, action: () => ed?.chain().focus().toggleHighlight().run() },
+    { label: t`Subscript`, icon: Subscript, action: () => ed?.chain().focus().toggleSubscript().run() },
+    { label: t`Superscript`, icon: Superscript, action: () => ed?.chain().focus().toggleSuperscript().run() },
     { label: '', separator: true },
-    { label: 'Align Left', icon: AlignLeft, action: () => ed?.chain().focus().setTextAlign('left').run() },
-    { label: 'Align Center', icon: AlignCenter, action: () => ed?.chain().focus().setTextAlign('center').run() },
-    { label: 'Align Right', icon: AlignRight, action: () => ed?.chain().focus().setTextAlign('right').run() },
-    { label: 'Justify', icon: AlignJustify, action: () => ed?.chain().focus().setTextAlign('justify').run() },
+    { label: t`Align Left`, icon: AlignLeft, action: () => ed?.chain().focus().setTextAlign('left').run() },
+    { label: t`Align Center`, icon: AlignCenter, action: () => ed?.chain().focus().setTextAlign('center').run() },
+    { label: t`Align Right`, icon: AlignRight, action: () => ed?.chain().focus().setTextAlign('right').run() },
+    { label: t`Justify`, icon: AlignJustify, action: () => ed?.chain().focus().setTextAlign('justify').run() },
   ]
 
   const menus: { label: string; items: MenuItem[] }[] = [
-    { label: 'File', items: fileItems },
-    { label: 'Edit', items: editItems },
-    { label: 'Insert', items: insertItems },
-    { label: 'Format', items: formatItems },
+    { label: t`File`, items: fileItems },
+    { label: t`Edit`, items: editItems },
+    { label: t`Insert`, items: insertItems },
+    { label: t`Format`, items: formatItems },
   ]
 
   return (

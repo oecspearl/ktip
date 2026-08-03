@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { i18n, type MessageDescriptor } from '@lingui/core'
+import { msg, t } from '@lingui/core/macro'
 
 // User Authentication Schemas
 export const loginSchema = z.object({
@@ -8,17 +10,24 @@ export const loginSchema = z.object({
 
 // Password requirements drive both the signup schema and the live
 // checklist UI, so they can never drift apart.
-export const PASSWORD_REQUIREMENTS: { id: string; label: string; test: (pw: string) => boolean }[] = [
-  { id: 'length', label: 'At least 8 characters', test: (pw) => pw.length >= 8 },
-  { id: 'number', label: 'At least one number', test: (pw) => /\d/.test(pw) },
-  { id: 'symbol', label: 'At least one symbol (e.g. !@#$%)', test: (pw) => /[^a-zA-Z0-9\s]/.test(pw) },
-  { id: 'case', label: 'Upper and lowercase letters', test: (pw) => /[a-z]/.test(pw) && /[A-Z]/.test(pw) },
+//
+// msg descriptors, not strings, and the message is composed INSIDE the
+// superRefine callback: zod messages written at module scope are frozen in
+// whatever language was active at import time, which is always English.
+// Resolving through the i18n singleton at validation time gives the message
+// the language the reader is actually in.
+export const PASSWORD_REQUIREMENTS: { id: string; label: MessageDescriptor; test: (pw: string) => boolean }[] = [
+  { id: 'length', label: msg`At least 8 characters`, test: (pw) => pw.length >= 8 },
+  { id: 'number', label: msg`At least one number`, test: (pw) => /\d/.test(pw) },
+  { id: 'symbol', label: msg`At least one symbol (e.g. !@#$%)`, test: (pw) => /[^a-zA-Z0-9\s]/.test(pw) },
+  { id: 'case', label: msg`Upper and lowercase letters`, test: (pw) => /[a-z]/.test(pw) && /[A-Z]/.test(pw) },
 ]
 
 const passwordSchema = z.string().superRefine((pw, ctx) => {
   for (const req of PASSWORD_REQUIREMENTS) {
     if (!req.test(pw)) {
-      ctx.addIssue({ code: 'custom', message: `Password needs: ${req.label.toLowerCase()}` })
+      const requirement = i18n._(req.label).toLocaleLowerCase()
+      ctx.addIssue({ code: 'custom', message: t`Password needs: ${requirement}` })
       return
     }
   }
@@ -119,9 +128,10 @@ export const COLLABORATION_VALUES = [
   'not_seeking',
 ] as const
 
-export const signupSchema = z.object({
+const signupFields = z.object({
   email: z.string().email('Invalid email address'),
   password: passwordSchema,
+  confirm_password: z.string().min(1, 'Please confirm your password'),
   display_name: z.string().min(2, 'Name must be at least 2 characters'),
   role: z.enum(SIGNUP_ROLES, { error: 'Please select a role' }),
   date_of_birth: dateOfBirthSchema,
@@ -134,14 +144,37 @@ export const signupSchema = z.object({
   open_to: z.array(z.enum(COLLABORATION_VALUES)).optional(),
 })
 
+/**
+ * Confirmation must match. The issue is attached to `confirm_password` so the
+ * message renders under the field the user can actually fix, and it stays quiet
+ * while that field is still empty — the min(1) check owns that case.
+ */
+const passwordsMatch = (
+  value: { password: string; confirm_password: string },
+  ctx: z.RefinementCtx,
+) => {
+  if (value.confirm_password && value.confirm_password !== value.password) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['confirm_password'],
+      message: 'Passwords do not match',
+    })
+  }
+}
+
+export const signupSchema = signupFields.superRefine(passwordsMatch)
+
 // Step 1 of the signup wizard (required account fields)
-export const signupStep1Schema = signupSchema.pick({
-  email: true,
-  password: true,
-  display_name: true,
-  role: true,
-  date_of_birth: true,
-})
+export const signupStep1Schema = signupFields
+  .pick({
+    email: true,
+    password: true,
+    confirm_password: true,
+    display_name: true,
+    role: true,
+    date_of_birth: true,
+  })
+  .superRefine(passwordsMatch)
 
 // Project Schemas
 export const projectSchema = z.object({

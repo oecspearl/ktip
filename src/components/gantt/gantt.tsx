@@ -25,6 +25,7 @@ import {
   type GanttWindow,
   type RenderResourceLabel,
 } from './gantt-types'
+import { useLingui } from '@lingui/react/macro'
 
 interface GanttContextValue {
   events: GanttEvent[]
@@ -126,6 +127,7 @@ export function Gantt({
   className,
   children,
 }: GanttProps) {
+    const { t } = useLingui()
   const today = useMemo(() => todayProp ?? new Date(), [todayProp])
 
   // ── events: controlled by `events`, else seeded once from `defaultEvents` ──
@@ -328,7 +330,7 @@ export function Gantt({
     <GanttContext.Provider value={value}>
       <div
         role="group"
-        aria-label="Timeline"
+        aria-label={t`Timeline`}
         className={cn(
           'flex flex-col bg-ktip-cream border border-ktip-sand-100 rounded-2xl shadow-card overflow-hidden',
           className

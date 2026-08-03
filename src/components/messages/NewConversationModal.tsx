@@ -12,6 +12,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import type { Profile } from '../../types'
 import { ROLE_LABELS } from '../../lib/constants'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface NewConversationModalProps {
   open: boolean
@@ -22,6 +23,7 @@ interface NewConversationModalProps {
 }
 
 export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }: NewConversationModalProps) {
+  const { t } = useLingui()
   const auth = useAuth()
   const { searchUsers, loading: searchLoading } = useSearchUsers()
   const { createConversation, loading: createLoading } = useCreateConversation()
@@ -81,7 +83,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
   const handleCreate = async () => {
     if (!auth.user || selected.length === 0) return
     if (mode === 'group' && selected.length < 2) {
-      setError('Pick at least two people for a group')
+      setError(t`Pick at least two people for a group`)
       return
     }
     // Students never hold dm:initiate — 064 denies it inside has_permission()
@@ -89,7 +91,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
     // beats letting RLS answer with a bare policy violation.
     if (!auth.can('dm:initiate')) {
       setError(
-        'Your account cannot start new conversations. Student accounts use supervised group channels instead.'
+        t`Your account cannot start new conversations. Student accounts use supervised group channels instead.`
       )
       return
     }
@@ -99,7 +101,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
       let conversationId: string
       if (isGroup) {
         if (!groupName.trim()) {
-          setError('Give your group a name')
+          setError(t`Give your group a name`)
           return
         }
         conversationId = await createGroupConversation(
@@ -116,7 +118,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
       setResults([])
       onCreated(conversationId)
     } catch (err: any) {
-      setError(err.message || 'Failed to create conversation')
+      setError(err.message || t`Failed to create conversation`)
     }
   }
 
@@ -124,13 +126,13 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
     <Modal
       open={open}
       onClose={onClose}
-      title={mode === 'group' ? 'New Group' : mode === 'dm' ? 'New Message' : 'New Conversation'}
+      title={mode === 'group' ? t`New Group` : mode === 'dm' ? t`New Message` : t`New Conversation`}
       description={
         mode === 'group'
-          ? 'Pick at least two people and name your group'
+          ? t`Pick at least two people and name your group`
           : mode === 'dm'
-            ? 'Pick a person to message'
-            : 'Pick one person for a direct message, or several to start a group'
+            ? t`Pick a person to message`
+            : t`Pick one person for a direct message, or several to start a group`
       }
       size="lg"
     >
@@ -138,21 +140,24 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
         {/* Selected chips */}
         {selected.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {selected.map((user) => (
-              <span
-                key={user.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200 rounded-full text-sm"
-              >
-                {user.display_name || 'Unknown User'}
-                <button
-                  onClick={() => toggleUser(user)}
-                  aria-label={`Remove ${user.display_name || 'user'}`}
-                  className="hover:text-ktip-ocean-900"
+            {selected.map((user) => {
+              const chipName = user.display_name || t`Unknown User`
+              return (
+                <span
+                  key={user.id}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-ktip-ocean-50 text-ktip-ocean-700 border border-ktip-ocean-200 rounded-full text-sm"
                 >
-                  <X size={14} />
-                </button>
-              </span>
-            ))}
+                  {chipName}
+                  <button
+                    onClick={() => toggleUser(user)}
+                    aria-label={t`Remove ${chipName}`}
+                    className="hover:text-ktip-ocean-900"
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              )
+            })}
           </div>
         )}
 
@@ -161,7 +166,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
           <Input
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
-            placeholder="Group name..."
+            placeholder={t`Group name...`}
             icon={<Users size={18} />}
             fullWidth
           />
@@ -170,7 +175,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
         <Input
           value={searchQuery}
           onChange={(e) => handleInput(e.target.value)}
-          placeholder="Search by name..."
+          placeholder={t`Search by name...`}
           icon={<Search size={18} />}
           fullWidth
         />
@@ -188,7 +193,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
         {results.length > 0 && (
           <div className="max-h-64 overflow-y-auto space-y-1">
             {results.map((user) => {
-              const name = user.display_name || 'Unknown User'
+              const name = user.display_name || t`Unknown User`
               const isSelected = selected.some((u) => u.id === user.id)
               return (
                 <button
@@ -209,7 +214,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
                       </p>
                     ) : null}
                   </div>
-                  {isSelected && <span className="text-xs font-bold text-ktip-ocean-600">Selected</span>}
+                  {isSelected && <span className="text-xs font-bold text-ktip-ocean-600"><Trans>Selected</Trans></span>}
                 </button>
               )
             })}
@@ -217,7 +222,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
         )}
 
         {searchQuery.trim() && !searchLoading && !results.length && (
-          <p className="text-sm text-ktip-sand-500 text-center py-4">No users found</p>
+          <p className="text-sm text-ktip-sand-500 text-center py-4"><Trans>No users found</Trans></p>
         )}
 
         <div className="flex justify-end pt-2">
@@ -230,7 +235,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
             }
             loading={creating}
           >
-            {isGroup ? `Create Group (${selected.length + 1})` : 'Start Conversation'}
+            {isGroup ? t`Create Group (${selected.length + 1})` : t`Start Conversation`}
           </Button>
         </div>
       </div>

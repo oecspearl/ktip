@@ -21,12 +21,15 @@ import {
   Receipt,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
+import { GRANT_APPLICATION_STATUS_LABELS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 import { entityPath } from '../../lib/slug'
+import { Trans, Plural, useLingui } from '@lingui/react/macro'
 
 export default function MyApplicationsPage() {
-  usePageTitle('My Grant Applications')
+    const { t } = useLingui()
+  usePageTitle(t`My Grant Applications`)
   const auth = useAuth()
   const { applications, loading } = useGrantApplications(auth.user?.id)
   const { receipts } = useSubmissionReceipts(auth.user?.id)
@@ -37,10 +40,10 @@ export default function MyApplicationsPage() {
   const handleSponsorship = async (applicationId: string, accept: boolean) => {
     try {
       await reviewSponsorship({ applicationId, accept })
-      toast.success(accept ? 'Sponsorship accepted' : 'Sponsorship declined')
+      toast.success(accept ? t`Sponsorship accepted` : t`Sponsorship declined`)
       refetchSponsorships()
     } catch (err: any) {
-      toast.error(err.message || 'Could not record your decision')
+      toast.error(err.message || t`Could not record your decision`)
     }
   }
 
@@ -69,15 +72,15 @@ export default function MyApplicationsPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
-        return <CheckCircle size={20} />
+        return <CheckCircle size={16} />
       case 'rejected':
-        return <XCircle size={20} />
+        return <XCircle size={16} />
       case 'under_review':
-        return <Clock size={20} />
+        return <Clock size={16} />
       case 'draft':
-        return <PencilLine size={20} />
+        return <PencilLine size={16} />
       default:
-        return <AlertCircle size={20} />
+        return <AlertCircle size={16} />
     }
   }
 
@@ -93,24 +96,27 @@ export default function MyApplicationsPage() {
   }
 
   const getStatusLabel = (status: string) => {
-    return status
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+    return (
+      GRANT_APPLICATION_STATUS_LABELS[status] ??
+      status
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    )
   }
 
   return (
     <>
       <PageHero
-        eyebrow="My Applications"
-        title="Grant Applications"
-        subtitle="Track the status of your funding applications"
+        eyebrow={t`My Applications`}
+        title={t`Grant Applications`}
+        subtitle={t`Track the status of your funding applications`}
         image="/grants/grant-pitch.webp"
         imageSeed="grants"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Grants', href: '/grants' },
-          { label: 'My Applications' },
+          { label: t`Home`, href: '/' },
+          { label: t`Grants`, href: '/grants' },
+          { label: t`My Applications` },
         ]}
       />
 
@@ -127,22 +133,26 @@ export default function MyApplicationsPage() {
             className="scroll-mt-24 bg-ktip-cream border border-ktip-sand-200 rounded-2xl shadow-card mb-6 overflow-hidden"
           >
             <div className="px-4 py-3 border-b border-ktip-sand-100">
-              <h2 className="font-display font-bold text-ktip-sand-900">Sponsorship requests</h2>
+              <h2 className="font-display font-bold text-ktip-sand-900"><Trans>Sponsorship requests</Trans></h2>
               <p className="text-sm text-ktip-sand-600 mt-0.5">
-                Students who have nominated you as their faculty sponsor.
+                <Trans>Students who have nominated you as their faculty sponsor.</Trans>
               </p>
             </div>
             <ul className="divide-y divide-ktip-sand-100">
-              {sponsorships?.map((request: any) => (
+              {sponsorships?.map((request: any) => {
+                const approvedDate = request.sponsor_approved_at
+                  ? formatDate(request.sponsor_approved_at)
+                  : null
+                return (
                 <li key={request.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ktip-sand-900 truncate">
-                      {request.applicant?.display_name || 'Student'} · {request.grant?.title || 'Grant'}
+                      {request.applicant?.display_name || t`Student`} · {request.grant?.title || t`Grant`}
                     </p>
                     <p className="text-xs text-ktip-sand-500">
-                      {request.sponsor_approved_at
-                        ? `Accepted ${formatDate(request.sponsor_approved_at)}`
-                        : 'Awaiting your decision'}
+                      {approvedDate
+                        ? t`Accepted ${approvedDate}`
+                        : t`Awaiting your decision`}
                     </p>
                   </div>
                   {!request.sponsor_approved_at && (
@@ -152,15 +162,16 @@ export default function MyApplicationsPage() {
                         size="sm"
                         onClick={() => handleSponsorship(request.id, false)}
                       >
-                        Decline
+                        <Trans>Decline</Trans>
                       </Button>
                       <Button size="sm" onClick={() => handleSponsorship(request.id, true)}>
-                        Accept
+                        <Trans>Accept</Trans>
                       </Button>
                     </div>
                   )}
                 </li>
-              ))}
+                )
+              })}
             </ul>
           </div>
         )}
@@ -168,7 +179,7 @@ export default function MyApplicationsPage() {
         {loading || !applications ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-            <p className="mt-4 text-ktip-sand-600">Loading applications...</p>
+            <p className="mt-4 text-ktip-sand-600"><Trans>Loading applications...</Trans></p>
           </div>
         ) : applications.length > 0 ? (
           <div
@@ -178,8 +189,7 @@ export default function MyApplicationsPage() {
           >
             <div className="px-6 py-4 border-b border-ktip-sand-200">
               <p className="text-sm text-ktip-sand-600">
-                {applications.length} application
-                {applications.length !== 1 ? 's' : ''}
+                <Plural value={applications.length} one="# application" other="# applications" />
               </p>
             </div>
 
@@ -195,7 +205,7 @@ export default function MyApplicationsPage() {
                       <div className="flex-1">
                         <Link
                           to={entityPath('grant', application.grant)}
-                          className="text-2xl font-display font-bold text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
+                          className="text-title-sm font-display font-bold text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
                         >
                           {application.grant.title}
                         </Link>
@@ -214,9 +224,9 @@ export default function MyApplicationsPage() {
                       {getProjectTitle(application.application_data) && (
                         <div>
                           <span className="text-sm text-ktip-sand-600">
-                            Project:{' '}
+                            <Trans>Project:</Trans>{' '}
                           </span>
-                          <span className="font-medium text-ktip-sand-900">
+                          <span className="text-sm font-medium text-ktip-sand-900">
                             {getProjectTitle(application.application_data)}
                           </span>
                         </div>
@@ -225,9 +235,9 @@ export default function MyApplicationsPage() {
                         <div className="flex items-center gap-2">
                           <DollarSign size={16} className="text-ktip-sand-400" />
                           <span className="text-sm text-ktip-sand-600">
-                            Requested:{' '}
+                            <Trans>Requested:</Trans>{' '}
                           </span>
-                          <span className="font-medium text-ktip-sand-900">
+                          <span className="text-sm font-medium text-ktip-sand-900">
                             {Number.isFinite(
                               parseFloat(getFundingAmount(application.application_data))
                             ) && /^\d/.test(String(getFundingAmount(application.application_data)).trim())
@@ -246,7 +256,7 @@ export default function MyApplicationsPage() {
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
                         <span>
-                          {application.status === 'draft' ? 'Started' : 'Applied'}{' '}
+                          {application.status === 'draft' ? t`Started` : t`Applied`}{' '}
                           {formatDate(application.created_at)}
                         </span>
                       </div>
@@ -256,19 +266,19 @@ export default function MyApplicationsPage() {
                   {/* Status Badge */}
                   <div className="flex flex-col items-end gap-2">
                     <div
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${getStatusColor(
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(
                         application.status
                       )}`}
                     >
                       {getStatusIcon(application.status)}
-                      <span className="font-medium">
+                      <span className="text-sm font-medium">
                         {getStatusLabel(application.status)}
                       </span>
                     </div>
                     {application.status === 'draft' ? (
                       <Link to={`/grants/${application.grant.id}/apply`}>
                         <Button size="sm" icon={<PencilLine size={16} />}>
-                          Continue
+                          <Trans>Continue</Trans>
                         </Button>
                       </Link>
                     ) : (
@@ -276,13 +286,13 @@ export default function MyApplicationsPage() {
                         {receiptByApplication.has(application.id) && (
                           <Link to={`/dashboard/submissions/${receiptByApplication.get(application.id)}`}>
                             <Button variant="outline" size="sm" icon={<Receipt size={16} />}>
-                              View submitted copy
+                              <Trans>View submitted copy</Trans>
                             </Button>
                           </Link>
                         )}
                         <Link to={entityPath('grant', application.grant)}>
                           <Button variant="outline" size="sm">
-                            View Grant
+                            <Trans>View Grant</Trans>
                           </Button>
                         </Link>
                       </div>
@@ -294,9 +304,9 @@ export default function MyApplicationsPage() {
                 {getSummary(application.application_data) && (
                   <div className="mt-4 pt-4 border-t border-ktip-sand-100">
                     <p className="text-sm text-ktip-sand-600 mb-1">
-                      Executive Summary
+                      <Trans>Executive Summary</Trans>
                     </p>
-                    <p className="text-ktip-sand-700 line-clamp-3">
+                    <p className="text-sm text-ktip-sand-700 line-clamp-3">
                       {getSummary(application.application_data)}
                     </p>
                   </div>
@@ -311,14 +321,13 @@ export default function MyApplicationsPage() {
                 <FileText size={32} className="text-ktip-sand-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                No applications yet
+                <Trans>No applications yet</Trans>
               </h3>
               <p className="text-ktip-sand-600 mb-6">
-                You haven't applied for any grants yet. Browse available
-                opportunities and submit your first application.
+                <Trans>You haven't applied for any grants yet. Browse available opportunities and submit your first application.</Trans>
               </p>
               <Link to="/grants">
-                <Button icon={<FileText size={20} />}>Browse Grants</Button>
+                <Button icon={<FileText size={20} />}><Trans>Browse Grants</Trans></Button>
               </Link>
             </div>
           </div>

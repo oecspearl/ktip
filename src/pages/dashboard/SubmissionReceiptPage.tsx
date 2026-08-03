@@ -10,24 +10,29 @@ import {
 import { useSubmissionReceipt } from '../../hooks/useSubmissionReceipts'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { truncate } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
-const SOURCE_LINK_LABELS: Record<string, string> = {
-  grant_application: 'View grant',
-  event_registration: 'View event',
-  grievance: 'View report status',
+const SOURCE_LINK_LABELS: Record<string, MessageDescriptor> = {
+  grant_application: msg`View grant`,
+  event_registration: msg`View event`,
+  grievance: msg`View report status`,
 }
 
 export default function SubmissionReceiptPage() {
+    const { t, i18n } = useLingui()
   const params = useParams()
   const { receipt, loading } = useSubmissionReceipt(params.id)
 
-  usePageTitle(receipt ? `Copy — ${receipt.title}` : 'Submission Copy')
+  const receiptTitle = receipt?.title
+  usePageTitle(receipt ? t`Copy — ${receiptTitle}` : t`Submission Copy`)
 
   if (loading) {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-        <p className="mt-4 text-ktip-sand-600">Loading your copy...</p>
+        <p className="mt-4 text-ktip-sand-600"><Trans>Loading your copy...</Trans></p>
       </div>
     )
   }
@@ -40,13 +45,13 @@ export default function SubmissionReceiptPage() {
           <FileQuestion size={32} className="text-ktip-sand-400" />
         </div>
         <h1 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-          Submission not found
+          <Trans>Submission not found</Trans>
         </h1>
         <p className="text-ktip-sand-600 mb-6">
-          This copy doesn't exist, or it belongs to another account.
+          <Trans>This copy doesn't exist, or it belongs to another account.</Trans>
         </p>
         <Link to="/dashboard/submissions">
-          <Button icon={<ArrowLeft size={16} />}>Back to My Submissions</Button>
+          <Button icon={<ArrowLeft size={16} />}><Trans>Back to My Submissions</Trans></Button>
         </Link>
       </div>
     )
@@ -58,14 +63,14 @@ export default function SubmissionReceiptPage() {
         <PageHero
           eyebrow={SUBMISSION_KIND_LABELS[receipt.kind]}
           title={truncate(receipt.title, 60)}
-          subtitle="Your copy of this submission"
+          subtitle={t`Your copy of this submission`}
           imageSeed="dashboard"
           compact
           breadcrumb={[
-            { label: 'Home', href: '/' },
-            { label: 'Dashboard', href: '/dashboard' },
-            { label: 'My Submissions', href: '/dashboard/submissions' },
-            { label: 'Copy' },
+            { label: t`Home`, href: '/' },
+            { label: t`Dashboard`, href: '/dashboard' },
+            { label: t`My Submissions`, href: '/dashboard/submissions' },
+            { label: t`Copy` },
           ]}
         />
       </div>
@@ -78,17 +83,17 @@ export default function SubmissionReceiptPage() {
             className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-sand-900 font-medium transition-colors"
           >
             <ArrowLeft size={16} />
-            All submissions
+            <Trans>All submissions</Trans>
           </Link>
 
           <div data-tutorial="receipt-actions" className="flex items-center gap-3">
             <Link to={receipt.link}>
               <Button variant="outline" size="sm" icon={<ExternalLink size={16} />}>
-                {SOURCE_LINK_LABELS[receipt.kind] || 'View source'}
+                {SOURCE_LINK_LABELS[receipt.kind] ? i18n._(SOURCE_LINK_LABELS[receipt.kind]) : t`View source`}
               </Button>
             </Link>
             <Button size="sm" icon={<Printer size={16} />} onClick={() => window.print()}>
-              Print / Save as PDF
+              <Trans>Print / Save as PDF</Trans>
             </Button>
           </div>
         </div>
@@ -106,7 +111,7 @@ export default function SubmissionReceiptPage() {
             subtitle={receipt.subtitle}
             submittedAt={receipt.submitted_at}
             sections={receiptToSections(receipt)}
-            footer={`KTIP submission copy · Reference ${receipt.id}`}
+            footer={t`KTIP submission copy · Reference ${receipt.id}`}
           />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type { UserEmailAlias } from '../types'
@@ -32,6 +33,7 @@ export function useMyEmailAlias(userId: string | undefined) {
 }
 
 export function useEmailAliasMutations() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: keys.all('email-alias') })
@@ -41,7 +43,7 @@ export function useEmailAliasMutations() {
   const addMutation = useMutation({
     mutationFn: async (email: string) => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('No active session')
+      if (!session) throw new Error(t`No active session`)
 
       const res = await fetch('/api/auth/add-alias', {
         method: 'POST',
@@ -52,8 +54,9 @@ export function useEmailAliasMutations() {
         body: JSON.stringify({ email }),
       })
 
-      const body = await res.json().catch(() => ({ error: 'Failed to save the address' }))
-      if (!res.ok) throw new Error(body.error || 'Failed to save the address')
+      const failedToSave = t`Failed to save the address`
+      const body = await res.json().catch(() => ({ error: failedToSave }))
+      if (!res.ok) throw new Error(body.error || failedToSave)
       return body as { success: true; dev_link?: string; already_verified?: boolean }
     },
     onSuccess: invalidate,

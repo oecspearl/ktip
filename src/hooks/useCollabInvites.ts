@@ -1,4 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
@@ -43,6 +47,12 @@ export const RESOURCE_SPECS: Record<CollabResourceType, ResourceSpec> = {
 
 const ALL_SPECS = Object.values(RESOURCE_SPECS)
 
+const UNTITLED_LABELS: Record<CollabResourceType, MessageDescriptor> = {
+  whiteboard: msg`Untitled whiteboard`,
+  document: msg`Untitled document`,
+  snippet: msg`Untitled snippet`,
+}
+
 /**
  * Titles come from a second query rather than an embed: while an invite is
  * still pending, RLS deliberately hides the entity row, so a join would
@@ -82,7 +92,7 @@ async function fetchInvitesFor(
     created_at: row.created_at,
     resource_type: spec.type,
     resource_id: row[spec.fkColumn],
-    resource_title: titles[row[spec.fkColumn]] || `Untitled ${spec.type}`,
+    resource_title: titles[row[spec.fkColumn]] || i18n._(UNTITLED_LABELS[spec.type]),
     inviter: column === 'shared_with' ? row.party : undefined,
     recipient: column === 'shared_by' ? row.party : undefined,
   }))
@@ -142,6 +152,7 @@ export function useSentEmailInvites(userId: string | undefined) {
 }
 
 export function useCollabInviteMutations() {
+    const { t } = useLingui()
   const queryClient = useQueryClient()
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: keys.all('collab-invites') })
@@ -167,8 +178,8 @@ export function useCollabInviteMutations() {
         sendNotification({
           userId: params.invite.shared_by,
           type: 'invite_accepted',
-          title: 'Invitation accepted',
-          body: `${params.responderName} accepted your invitation to "${params.invite.resource_title}"`,
+          title: t`Invitation accepted`,
+          body: t`${params.responderName} accepted your invitation to "${params.invite.resource_title}"`,
           link: spec.href(params.invite.resource_id),
         })
       }

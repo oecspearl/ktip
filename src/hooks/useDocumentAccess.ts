@@ -8,6 +8,7 @@ import type {
   DocumentEntityType,
   DocumentVisibility,
 } from '../types'
+import { useLingui } from '@lingui/react/macro'
 
 const DOMAIN = 'document-access'
 const DOCUMENTS_DOMAIN = 'entity-documents'
@@ -87,6 +88,7 @@ export function useMyAccessRequests(userId: string | undefined) {
 }
 
 export function useDocumentAccessMutations() {
+    const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const invalidate = () => {
@@ -118,7 +120,7 @@ export function useDocumentAccessMutations() {
       if (error) {
         // Partial unique index on (document_id, requester_id) WHERE pending
         if (error.code === '23505') {
-          throw new Error('You already have a pending request for this document.')
+          throw new Error(t`You already have a pending request for this document.`)
         }
         throw error
       }
@@ -126,8 +128,8 @@ export function useDocumentAccessMutations() {
       sendNotification({
         userId: params.ownerId,
         type: 'document_access_request',
-        title: 'Document access requested',
-        body: `${params.requesterName} is requesting access to "${params.documentTitle}"`,
+        title: t`Document access requested`,
+        body: t`${params.requesterName} is requesting access to "${params.documentTitle}"`,
         link: documentLink(params.entityType, params.entityId),
       })
 
@@ -157,13 +159,14 @@ export function useDocumentAccessMutations() {
       })
       if (error) throw error
 
+      const roleLabel = params.role === 'editor' ? t`an editor` : t`a viewer`
       sendNotification({
         userId: params.requesterId,
         type: 'document_access_result',
-        title: params.approve ? 'Document access granted' : 'Document access declined',
+        title: params.approve ? t`Document access granted` : t`Document access declined`,
         body: params.approve
-          ? `You can now open "${params.documentTitle}" as ${params.role === 'editor' ? 'an editor' : 'a viewer'}.`
-          : `Your request to access "${params.documentTitle}" was declined.`,
+          ? t`You can now open "${params.documentTitle}" as ${roleLabel}.`
+          : t`Your request to access "${params.documentTitle}" was declined.`,
         link: documentLink(params.entityType, params.entityId),
       })
     },
@@ -207,8 +210,8 @@ export function useDocumentAccessMutations() {
       sendNotification({
         userId: params.userId,
         type: 'document_access_result',
-        title: 'A document was shared with you',
-        body: `You can now open "${params.documentTitle}".`,
+        title: t`A document was shared with you`,
+        body: t`You can now open "${params.documentTitle}".`,
         link: documentLink(params.entityType, params.entityId),
       })
     },

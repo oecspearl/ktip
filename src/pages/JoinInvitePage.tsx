@@ -7,33 +7,36 @@ import { RESOURCE_SPECS } from '../hooks/useCollabInvites'
 import { PageHero } from '../components/layout/PageHero'
 import { Check, Loader2, MailWarning } from 'lucide-react'
 import type { CollabResourceType } from '../types'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 export const PENDING_INVITE_KEY = 'ktip_pending_invite_token'
 
-const FAILURE_COPY: Record<string, { title: string; body: string }> = {
+const FAILURE_COPY: Record<string, { title: MessageDescriptor; body: MessageDescriptor }> = {
   not_found: {
-    title: 'Invitation not found',
-    body: 'This link is not valid. Ask whoever invited you to send a new one.',
+    title: msg`Invitation not found`,
+    body: msg`This link is not valid. Ask whoever invited you to send a new one.`,
   },
   expired: {
-    title: 'Invitation expired',
-    body: 'Invitations are valid for 14 days. Ask for a fresh one.',
+    title: msg`Invitation expired`,
+    body: msg`Invitations are valid for 14 days. Ask for a fresh one.`,
   },
   revoked: {
-    title: 'Invitation withdrawn',
-    body: 'Whoever sent this invitation has since revoked it.',
+    title: msg`Invitation withdrawn`,
+    body: msg`Whoever sent this invitation has since revoked it.`,
   },
   already_used: {
-    title: 'Invitation already used',
-    body: 'This invitation has already been redeemed by another account.',
+    title: msg`Invitation already used`,
+    body: msg`This invitation has already been redeemed by another account.`,
   },
   wrong_account: {
-    title: 'Signed in as the wrong account',
-    body: 'This invitation was sent to a different email address.',
+    title: msg`Signed in as the wrong account`,
+    body: msg`This invitation was sent to a different email address.`,
   },
   not_authenticated: {
-    title: 'Sign in to continue',
-    body: 'Sign in or create your account, and we will bring you straight back here.',
+    title: msg`Sign in to continue`,
+    body: msg`Sign in or create your account, and we will bring you straight back here.`,
   },
 }
 
@@ -43,7 +46,8 @@ const FAILURE_COPY: Record<string, { title: string; body: string }> = {
  * it against the signed-in account's email before creating the share.
  */
 export default function JoinInvitePage() {
-  usePageTitle('Join invitation')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Join invitation`)
   const { token } = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -106,11 +110,11 @@ export default function JoinInvitePage() {
   return (
     <>
       <PageHero
-        eyebrow="Invitation"
-        title="Join a collaboration"
+        eyebrow={t`Invitation`}
+        title={t`Join a collaboration`}
         imageSeed="invitations"
         compact
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Invitation' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Invitation` }]}
       />
 
       <div className="bg-ktip-sand-50 py-16">
@@ -118,26 +122,28 @@ export default function JoinInvitePage() {
           {state === 'working' && (
             <>
               <Loader2 size={32} className="mx-auto mb-4 animate-spin text-ktip-ocean-500" />
-              <p className="text-ktip-sand-600">Checking your invitation…</p>
+              <p className="text-ktip-sand-600"><Trans>Checking your invitation…</Trans></p>
             </>
           )}
 
           {state === 'ok' && (
             <>
               <Check size={32} className="mx-auto mb-4 text-ktip-tropical-600" />
-              <p className="text-ktip-sand-600">Invitation accepted — taking you there…</p>
+              <p className="text-ktip-sand-600"><Trans>Invitation accepted — taking you there…</Trans></p>
             </>
           )}
 
           {state === 'failed' && (
             <>
               <MailWarning size={32} className="mx-auto mb-4 text-ktip-sun-600" />
-              <h2 className="text-xl font-semibold text-ktip-sand-900 mb-2">{copy.title}</h2>
-              <p className="text-ktip-sand-600 mb-2">{copy.body}</p>
+              <h2 className="text-xl font-semibold text-ktip-sand-900 mb-2">{i18n._(copy.title)}</h2>
+              <p className="text-ktip-sand-600 mb-2">{i18n._(copy.body)}</p>
               {invitedEmail && (
                 <p className="text-sm text-ktip-sand-500 mb-6">
-                  It was addressed to <span className="font-medium">{invitedEmail}</span>. Sign in
-                  with that account to accept it.
+                  <Trans>
+                    It was addressed to <span className="font-medium">{invitedEmail}</span>. Sign in
+                    with that account to accept it.
+                  </Trans>
                 </p>
               )}
 
@@ -148,13 +154,13 @@ export default function JoinInvitePage() {
                       to="/login"
                       className="px-4 py-2 rounded-lg btn-brand text-sm font-medium"
                     >
-                      Sign in
+                      <Trans>Sign in</Trans>
                     </Link>
                     <Link
                       to="/signup"
                       className="px-4 py-2 rounded-lg border border-ktip-sand-200 text-ktip-sand-700 hover:bg-ktip-sand-100 text-sm font-medium transition-colors"
                     >
-                      Create an account
+                      <Trans>Create an account</Trans>
                     </Link>
                   </>
                 ) : (
@@ -162,7 +168,7 @@ export default function JoinInvitePage() {
                     to="/collaborate"
                     className="px-4 py-2 rounded-lg btn-brand text-sm font-medium"
                   >
-                    Go to Collaborate
+                    <Trans>Go to Collaborate</Trans>
                   </Link>
                 )}
               </div>

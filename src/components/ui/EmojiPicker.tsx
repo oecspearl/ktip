@@ -8,6 +8,7 @@ import {
   searchEmoji,
   type EmojiEntry,
 } from '../../lib/emoji-catalog'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The emoji button that sits in a message box.
@@ -96,13 +97,17 @@ function EmojiPanel({
   onPick: (emoji: string) => void
   align: 'left' | 'right'
 }) {
+  const { t, i18n } = useLingui()
   const [query, setQuery] = useState('')
   const [groupId, setGroupId] = useState(EMOJI_GROUPS[0].id)
   const [recent, setRecent] = useState<string[]>(() => readRecentEmoji())
 
   const results = useMemo(() => searchEmoji(query), [query])
   const group = EMOJI_GROUPS.find((g) => g.id === groupId) ?? EMOJI_GROUPS[0]
-  const searching = query.trim().length > 0
+  // Named, not inline: Lingui names an interpolated expression it cannot read
+  // `{0}`, and "Nothing matches {0}" is not something a translator can place.
+  const term = query.trim()
+  const searching = term.length > 0
 
   const pick = (emoji: string) => {
     onPick(emoji)
@@ -112,7 +117,7 @@ function EmojiPanel({
   return (
     <div
       role="dialog"
-      aria-label="Emoji"
+      aria-label={t`Emoji`}
       className={cn(
         'absolute bottom-full z-dropdown mb-2 w-[19rem] overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-hard animate-scale-in',
         align === 'right' ? 'right-0' : 'left-0'
@@ -129,8 +134,8 @@ function EmojiPanel({
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search emoji"
-            aria-label="Search emoji"
+            placeholder={t`Search emoji`}
+            aria-label={t`Search emoji`}
             className="w-full rounded-lg border border-ktip-sand-200 bg-ktip-cream py-1.5 pl-8 pr-2 text-sm focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
           />
         </label>
@@ -139,7 +144,7 @@ function EmojiPanel({
       {!searching && recent.length > 0 && (
         <div className="border-b border-ktip-sand-100 px-2 py-1.5">
           <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-400">
-            Recent
+            <Trans>Recent</Trans>
           </p>
           <Grid emoji={recent.map((e) => ({ e, k: '' }))} onPick={pick} />
         </div>
@@ -151,7 +156,7 @@ function EmojiPanel({
             <Grid emoji={results} onPick={pick} />
           ) : (
             <p className="px-1 py-6 text-center text-xs text-ktip-sand-500">
-              Nothing matches “{query.trim()}”.
+              <Trans>Nothing matches “{term}”.</Trans>
             </p>
           )
         ) : (
@@ -166,9 +171,9 @@ function EmojiPanel({
               key={g.id}
               type="button"
               onClick={() => setGroupId(g.id)}
-              aria-label={g.label}
+              aria-label={i18n._(g.label)}
               aria-pressed={g.id === group.id}
-              title={g.label}
+              title={i18n._(g.label)}
               className={cn(
                 'emoji-font flex-1 rounded-lg py-1.5 text-base leading-none transition-colors hover:bg-ktip-sand-100',
                 g.id === group.id && 'bg-ktip-sand-100'

@@ -21,6 +21,7 @@ import { mapConfigOf } from '../../hooks/useVenueMap'
 import { autoLayout, isPlaced } from '../../lib/venue-map'
 import type { VenueRoom } from '../../types'
 import { entityPath } from '../../lib/slug'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The venue floorplan — the front door of a virtual hackathon.
@@ -30,6 +31,7 @@ import { entityPath } from '../../lib/slug'
  * subscription per room, which is why nine rooms cost one socket.
  */
 export default function EventVenuePage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -39,7 +41,7 @@ export default function EventVenuePage() {
   // exists once the event has resolved. useEvent takes either shape.
   const { event, loading: eventLoading } = useEvent(params.slug)
   const eventId = event?.id
-  usePageTitle(event ? `Venue — ${event.title}` : 'Venue')
+  usePageTitle(event ? t`Venue — ${event.title}` : t`Venue`)
 
   // A disabled query reports isPending forever, so an unresolvable slug would
   // sit on the skeleton instead of reaching the "not found" branch below.
@@ -140,7 +142,7 @@ export default function EventVenuePage() {
       await enterRoom(eventId, room.id)
       navigate(venueRoomPath(event, room.key))
     } catch (err: any) {
-      toast.error(err?.message || 'Could not enter that room')
+      toast.error(err?.message || t`Could not enter that room`)
     }
   }
 
@@ -156,9 +158,9 @@ export default function EventVenuePage() {
   if (!event) {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Event not found</h1>
+        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Event not found</Trans></h1>
         <Link to="/events" className="mt-3 inline-block text-ktip-ocean-600 hover:underline">
-          Browse events
+          <Trans>Browse events</Trans>
         </Link>
       </div>
     )
@@ -169,16 +171,16 @@ export default function EventVenuePage() {
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <MapIcon size={32} className="mx-auto mb-3 text-ktip-sand-400" aria-hidden="true" />
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
-          This event has no virtual venue
+          <Trans>This event has no virtual venue</Trans>
         </h1>
         <p className="mt-2 text-ktip-sand-600">
-          The organizer has not turned one on. Everything about the event is on its main page.
+          <Trans>The organizer has not turned one on. Everything about the event is on its main page.</Trans>
         </p>
         <Link
           to={entityPath('event', event)}
           className="mt-4 inline-block text-ktip-ocean-600 hover:underline"
         >
-          Go to {event.title}
+          <Trans>Go to {event.title}</Trans>
         </Link>
       </div>
     )
@@ -190,13 +192,13 @@ export default function EventVenuePage() {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
-          You are not in this venue yet
+          <Trans>You are not in this venue yet</Trans>
         </h1>
         <p className="mt-2 text-ktip-sand-600">
-          {(joinError as any)?.message || 'Register for this event to enter the venue.'}
+          {(joinError as any)?.message || t`Register for this event to enter the venue.`}
         </p>
         <Link to={entityPath('event', event)} className="mt-5 inline-block">
-          <Button>Go to the event page</Button>
+          <Button><Trans>Go to the event page</Trans></Button>
         </Link>
       </div>
     )
@@ -236,21 +238,20 @@ export default function EventVenuePage() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
-            Virtual venue
+            <Trans>Virtual venue</Trans>
           </p>
           <h1 className="font-display text-2xl font-bold text-ktip-sand-900 md:text-3xl">
             {event.title}
           </h1>
           <p className="mt-1 text-sm text-ktip-sand-600">
-            Walk the floor with the arrow keys, or click a room to go in. Everyone in a room can
-            see who else is there.
+            <Trans>Walk the floor with the arrow keys, or click a room to go in. Everyone in a room can see who else is there.</Trans>
           </p>
           </div>
 
           {membership.role === 'organizer' && (
             <Link to={venueSetupPath(event)}>
               <Button size="sm" variant="secondary" icon={<PencilRuler size={14} />}>
-                Edit the map
+                <Trans>Edit the map</Trans>
               </Button>
             </Link>
           )}
@@ -268,17 +269,17 @@ export default function EventVenuePage() {
               <div className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-8 text-center">
                 <MapIcon size={28} className="mx-auto mb-3 text-ktip-sand-400" aria-hidden="true" />
                 <h2 className="font-display text-lg font-bold text-ktip-sand-900">
-                  The venue has no rooms yet
+                  <Trans>The venue has no rooms yet</Trans>
                 </h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-ktip-sand-600">
                   {membership.role === 'organizer'
-                    ? 'Open the Venue tab on the admin page for this event and create the rooms — there is a one-click starter set.'
-                    : 'The organizer is still setting up. Check back shortly.'}
+                    ? t`Open the Venue tab on the admin page for this event and create the rooms — there is a one-click starter set.`
+                    : t`The organizer is still setting up. Check back shortly.`}
                 </p>
                 {membership.role === 'organizer' && (
                   <Link to={`/admin/events/${event.id}`} className="mt-4 inline-block">
                     <Button size="sm" icon={<Sparkles size={15} />}>
-                      Set up the venue
+                      <Trans>Set up the venue</Trans>
                     </Button>
                   </Link>
                 )}
@@ -291,7 +292,7 @@ export default function EventVenuePage() {
                   occupants={presence.occupants}
                   occupancy={presence.occupancy}
                   meId={auth.user?.id || ''}
-                  myName={auth.profile?.display_name || 'You'}
+                  myName={auth.profile?.display_name || t`You`}
                   myAvatarUrl={auth.profile?.avatar_url ?? null}
                   myRole={membership.role}
                   peers={presence.positions.peers}
@@ -309,7 +310,7 @@ export default function EventVenuePage() {
                 {unmappedIds.length > 0 && (
                   <div className="mt-4">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-                      Not on the map
+                      <Trans>Not on the map</Trans>
                     </p>
                     <VenueFloorplan
                       rooms={unmappedIds}
@@ -335,8 +336,8 @@ export default function EventVenuePage() {
           <aside data-tutorial="venue-presence" className="space-y-4">
             <RoomOccupantList
               occupants={lobby}
-              title="In the venue"
-              emptyLabel="Everyone is inside a room."
+              title={t`In the venue`}
+              emptyLabel={t`Everyone is inside a room.`}
             />
 
             {/* Standing in a doorway — or pointing at a room from the map or

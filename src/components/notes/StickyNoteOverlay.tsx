@@ -6,6 +6,7 @@ import { isGroupOnPage, isNoteOnPage } from '../../lib/sticky-notes'
 import { StickyNote } from './StickyNote'
 import { StickyNoteGroup } from './StickyNoteGroup'
 import { StickyNoteGroupExpanded } from './StickyNoteGroupExpanded'
+import { useLingui } from '@lingui/react/macro'
 
 /** Base for a note's stacking. Above the site (navbar 40, modals 50, toasts
  *  100) and below the FAB that creates them (9999). */
@@ -25,6 +26,7 @@ const Z_BASE = 901
  * about the other notes.
  */
 export function StickyNoteOverlay() {
+  const { t } = useLingui()
   const { pathname } = useLocation()
   const {
     notes,
@@ -117,7 +119,7 @@ export function StickyNoteOverlay() {
     <>
       <div
         data-sticky-notes
-        aria-label="Pinned notes"
+        aria-label={t`Pinned notes`}
         className="fixed inset-0 z-fab pointer-events-none"
       >
         {visibleGroups.map((group) => (

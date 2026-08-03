@@ -4,6 +4,7 @@ import { Map as MapIcon } from 'lucide-react'
 import { RoomZone } from './RoomZone'
 import { clusterForRoom } from '../../lib/venue-presence'
 import type { VenueOccupant, VenueRoom } from '../../types'
+import { Trans } from '@lingui/react/macro'
 
 interface VenueFloorplanProps {
   rooms: VenueRoom[]
@@ -122,7 +123,7 @@ export function VenueFloorplan({
         {svgFailed && (
           <p className="mb-3 flex items-center gap-2 rounded-xl border border-ktip-sun-200 bg-ktip-sun-50 px-3 py-2 text-sm text-ktip-sun-800">
             <MapIcon size={15} aria-hidden="true" />
-            The floorplan image could not be loaded. Showing the room list instead.
+            <Trans>The floorplan image could not be loaded. Showing the room list instead.</Trans>
           </p>
         )}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -189,7 +190,7 @@ export function VenueFloorplan({
       {unpinned.length > 0 && (
         <div className="mt-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-            Not on the map
+            <Trans>Not on the map</Trans>
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {unpinned.map((room) => {

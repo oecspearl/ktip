@@ -7,15 +7,19 @@ import { useProjectComments, useCreateProjectComment } from '../../hooks/useProj
 import { useAuth } from '../../contexts/AuthContext'
 import { formatRelativeTime } from '../../lib/utils'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface CommentSectionProps {
   projectId: string
 }
 
 export function CommentSection({ projectId }: CommentSectionProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const { comments, refetch } = useProjectComments(projectId)
   const { createComment, deleteComment, loading } = useCreateProjectComment()
+
+  const commentCount = comments?.length || 0
 
   const [newComment, setNewComment] = useState('')
   const [error, setError] = useState('')
@@ -51,7 +55,7 @@ export function CommentSection({ projectId }: CommentSectionProps) {
   return (
     <Card>
       <h2 className="text-2xl font-display font-bold text-ktip-sand-900 mb-4">
-        Comments ({comments?.length || 0})
+        <Trans>Comments ({commentCount})</Trans>
       </h2>
 
       {/* Comment List */}
@@ -81,7 +85,7 @@ export function CommentSection({ projectId }: CommentSectionProps) {
                     <button
                       onClick={() => handleDelete(comment.id)}
                       className="p-1 text-ktip-sand-400 hover:text-red-500 transition-colors shrink-0"
-                      title="Delete comment"
+                      title={t`Delete comment`}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -94,7 +98,7 @@ export function CommentSection({ projectId }: CommentSectionProps) {
       ) : (
         <div className="text-center py-8 text-ktip-sand-500">
           <MessageCircle size={48} className="mx-auto mb-3 opacity-50" />
-          <p>No comments yet. Be the first to comment!</p>
+          <p><Trans>No comments yet. Be the first to comment!</Trans></p>
         </div>
       )}
 
@@ -103,7 +107,7 @@ export function CommentSection({ projectId }: CommentSectionProps) {
         <Textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
+          placeholder={t`Write a comment...`}
           rows={3}
           fullWidth
         />
@@ -116,7 +120,7 @@ export function CommentSection({ projectId }: CommentSectionProps) {
             disabled={!newComment.trim()}
             icon={<Send size={16} />}
           >
-            Post Comment
+            <Trans>Post Comment</Trans>
           </Button>
         </div>
       </form>

@@ -1,3 +1,6 @@
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+
 /**
  * The contract between the document scraper and the entities it can fill in.
  *
@@ -15,7 +18,7 @@ export interface FieldSpec {
   values?: string[]
   maxLength?: number
   /** Shown to the user in the review panel. */
-  label: string
+  label: MessageDescriptor
 }
 
 // grant_type values come from the CHECK constraint in migration 003
@@ -25,79 +28,79 @@ export const FIELD_SPECS: Record<string, Record<string, FieldSpec>> = {
   grant: {
     title: {
       kind: 'string',
-      label: 'Title',
+      label: msg`Title`,
       describe: 'Official name of the grant or funding call',
       maxLength: 200,
     },
     summary: {
       kind: 'string',
-      label: 'Summary',
+      label: msg`Summary`,
       describe: 'One-sentence summary, max 200 characters',
       maxLength: 300,
     },
     description: {
       kind: 'string',
-      label: 'Description',
+      label: msg`Description`,
       describe: 'Two to four paragraphs describing the grant',
       maxLength: 4000,
     },
     amount_min: {
       kind: 'number',
-      label: 'Minimum award',
+      label: msg`Minimum award`,
       describe: 'Smallest award amount as a plain number',
     },
     amount_max: {
       kind: 'number',
-      label: 'Maximum award',
+      label: msg`Maximum award`,
       describe: 'Largest award amount as a plain number',
     },
     currency: {
       kind: 'string',
-      label: 'Currency',
+      label: msg`Currency`,
       describe: 'ISO currency code, e.g. USD, XCD, EUR',
       maxLength: 8,
     },
-    deadline: { kind: 'date', label: 'Deadline', describe: 'Application deadline as YYYY-MM-DD' },
+    deadline: { kind: 'date', label: msg`Deadline`, describe: 'Application deadline as YYYY-MM-DD' },
     eligibility: {
       kind: 'string',
-      label: 'Eligibility',
+      label: msg`Eligibility`,
       describe: 'Who may apply',
       maxLength: 2000,
     },
     application_url: {
       kind: 'url',
-      label: 'Application link',
+      label: msg`Application link`,
       describe: 'Link to apply, only if one appears in the text',
     },
     grant_type: {
       kind: 'enum',
-      label: 'Grant type',
+      label: msg`Grant type`,
       describe: 'Closest category',
       values: GRANT_TYPES,
     },
     is_climate_action: {
       kind: 'boolean',
-      label: 'Climate action',
+      label: msg`Climate action`,
       describe: 'True only if climate, resilience or environment is a stated focus',
     },
   },
   project: {
-    title: { kind: 'string', label: 'Title', describe: 'Name of the project', maxLength: 200 },
+    title: { kind: 'string', label: msg`Title`, describe: 'Name of the project', maxLength: 200 },
     summary: {
       kind: 'string',
-      label: 'Summary',
+      label: msg`Summary`,
       describe: 'One-sentence summary, max 200 characters',
       maxLength: 300,
     },
     description: {
       kind: 'string',
-      label: 'Description',
+      label: msg`Description`,
       describe: 'Two to four paragraphs describing the project',
       maxLength: 4000,
     },
     tags: {
       kind: 'string[]',
-      label: 'Tags',
+      label: msg`Tags`,
       describe: 'Up to 6 short topic tags, lowercase',
     },
   },
@@ -205,6 +208,6 @@ export function describeFields(spec: Record<string, FieldSpec>): string {
 }
 
 /** Field labels for the review panel. */
-export function fieldLabel(entityType: string, key: string): string {
+export function fieldLabel(entityType: string, key: string): MessageDescriptor | string {
   return FIELD_SPECS[entityType]?.[key]?.label || key
 }

@@ -3,6 +3,7 @@ import { Flag } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ReportModal } from './ReportModal'
 import type { ModerationTargetType } from '../../types'
+import { useLingui } from '@lingui/react/macro'
 
 interface ReportButtonProps {
   targetType: ModerationTargetType
@@ -26,6 +27,7 @@ export function ReportButton({
   targetLabel,
   className = '',
 }: ReportButtonProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const [open, setOpen] = useState(false)
 
@@ -36,8 +38,8 @@ export function ReportButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        title="Report"
-        aria-label="Report this content"
+        title={t`Report`}
+        aria-label={t`Report this content`}
         className={`p-1 text-ktip-sand-400 hover:text-red-500 transition-colors shrink-0 ${className}`}
       >
         <Flag size={16} />

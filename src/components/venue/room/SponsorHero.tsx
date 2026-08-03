@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import { isSafeHref } from '../../../lib/venue-room-sections'
 import type { VenueRoom } from '../../../types'
+import { Trans } from '@lingui/react/macro'
 
 /**
  * Who is hosting this room.
@@ -19,7 +20,9 @@ export function SponsorHero({ room }: { room: VenueRoom }) {
         <img src={room.sponsor_logo_url} alt="" className="h-9 w-9 rounded-lg object-contain" />
       )}
       <p className="text-sm text-ktip-sun-800">
-        Hosted by <strong>{room.sponsor_name}</strong>
+        <Trans>
+          Hosted by <strong>{room.sponsor_name}</strong>
+        </Trans>
         {link && (
           <>
             {' — '}
@@ -29,7 +32,7 @@ export function SponsorHero({ room }: { room: VenueRoom }) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 underline"
             >
-              visit
+              <Trans>visit</Trans>
               <ExternalLink size={12} aria-hidden="true" />
             </a>
           </>

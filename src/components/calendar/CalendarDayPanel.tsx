@@ -5,6 +5,8 @@ import { cn } from '../../lib/utils'
 import { CALENDAR_BADGE_CLASS } from '../../lib/constants'
 import { CalendarAccentBar } from './CalendarAccentBar'
 import type { CalendarItem } from '../../lib/calendar'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 interface CalendarDayPanelProps {
   date: Date
@@ -18,6 +20,7 @@ interface CalendarDayPanelProps {
 }
 
 function CalendarItemRow({ item, day }: { item: CalendarItem; day: Date }) {
+  const { t } = useLingui()
   const Icon = item.icon
   const start = new Date(item.start)
   const end = item.end ? new Date(item.end) : start
@@ -27,7 +30,8 @@ function CalendarItemRow({ item, day }: { item: CalendarItem; day: Date }) {
   if (isMultiDay) {
     const dayIndex = differenceInCalendarDays(startOfDay(day), startOfDay(start)) + 1
     const totalDays = differenceInCalendarDays(startOfDay(end), startOfDay(start)) + 1
-    timeLabel = `Day ${Math.min(Math.max(dayIndex, 1), totalDays)} of ${totalDays}`
+    const dayNumber = Math.min(Math.max(dayIndex, 1), totalDays)
+    timeLabel = t`Day ${dayNumber} of ${totalDays}`
   } else {
     timeLabel = format(start, 'h:mm a')
   }
@@ -114,6 +118,14 @@ export function CalendarDayPanel({
   onJumpToNext,
   dataTutorial,
 }: CalendarDayPanelProps) {
+    const { t } = useLingui()
+  // itemNoun only ever arrives as "item" or "event" today — a third caller
+  // would need its own branch here, the same way the other two do.
+  const countLabel =
+    itemNoun === 'event'
+      ? plural(items.length, { one: '# event', other: '# events' })
+      : plural(items.length, { one: '# item', other: '# items' })
+  const nextLabel = itemNoun === 'event' ? t`Jump to next event` : t`Jump to next item`
   return (
     <div
       data-tutorial={dataTutorial}
@@ -125,9 +137,7 @@ export function CalendarDayPanel({
       <h2 className="font-display font-bold text-xl text-ktip-sand-900 animate-none">
         {format(date, 'MMMM d, yyyy')}
       </h2>
-      <p className="text-sm text-gray-500 mb-4">
-        {loading ? 'Loading…' : `${items.length} ${itemNoun}${items.length !== 1 ? 's' : ''}`}
-      </p>
+      <p className="text-sm text-gray-500 mb-4">{loading ? t`Loading…` : countLabel}</p>
 
       {loading ? (
         <div className="flex flex-col gap-3">
@@ -150,16 +160,16 @@ export function CalendarDayPanel({
             <CalendarX size={22} className="text-gray-400" />
           </div>
           <p className="text-sm font-semibold text-ktip-sand-800 mb-1">
-            {emptyLabel ?? `Nothing on this day`}
+            {emptyLabel ?? t`Nothing on this day`}
           </p>
-          <p className="text-xs text-gray-500 mb-3">Pick another date on the calendar.</p>
+          <p className="text-xs text-gray-500 mb-3"><Trans>Pick another date on the calendar.</Trans></p>
           {onJumpToNext && (
             <button
               type="button"
               onClick={onJumpToNext}
               className="text-sm font-semibold text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
             >
-              Jump to next {itemNoun} →
+              {nextLabel} →
             </button>
           )}
         </div>

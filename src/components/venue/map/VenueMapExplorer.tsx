@@ -32,6 +32,7 @@ import { VENUE } from '../../../lib/constants'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { PeerPosition } from '../../../hooks/useVenuePresence'
 import type { VenueOccupant, VenuePosition, VenueRole, VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface VenueMapExplorerProps {
   config: VenueMapConfig
@@ -117,6 +118,8 @@ export function VenueMapExplorer({
   onPreviewRoomChange,
   onEnter,
 }: VenueMapExplorerProps) {
+  const { t } = useLingui()
+  const myDisplayName = myName || t`You`
   const wrapRef = useRef<HTMLDivElement>(null)
   const size = useElementSize(wrapRef)
 
@@ -605,7 +608,9 @@ export function VenueMapExplorer({
                   is an affordance, the whole bar is still the button. */}
               <PanelLeftClose size={14} className="shrink-0 opacity-0" aria-hidden="true" />
               <span className="flex-1 text-center">
-                Rooms <span className="font-mono text-[10px] text-ktip-sand-400">{rooms.length}</span>
+                <Trans>
+                  Rooms <span className="font-mono text-[10px] text-ktip-sand-400">{rooms.length}</span>
+                </Trans>
               </span>
               <PanelLeftClose size={14} className="shrink-0" aria-hidden="true" />
             </>
@@ -616,11 +621,11 @@ export function VenueMapExplorer({
                 className="font-mono text-[10px] tracking-widest"
                 style={{ writingMode: 'vertical-rl' }}
               >
-                Rooms
+                <Trans>Rooms</Trans>
               </span>
             </span>
           )}
-          <span className="sr-only">{railOpen ? 'Collapse the room list' : 'Show the room list'}</span>
+          <span className="sr-only">{railOpen ? t`Collapse the room list` : t`Show the room list`}</span>
         </button>
 
         {railOpen && (
@@ -726,9 +731,9 @@ export function VenueMapExplorer({
             >
               <DiamondAvatar
                 src={occupant.avatar_url}
-                name={occupant.display_name || 'Member'}
+                name={occupant.display_name || t`Member`}
                 size={26}
-                title={occupant.display_name || 'Member'}
+                title={occupant.display_name || t`Member`}
                 frameClassName="ring-1 ring-ktip-sand-200"
               />
             </div>
@@ -748,9 +753,9 @@ export function VenueMapExplorer({
           >
             <DiamondAvatar
               src={myAvatarUrl}
-              name={myName || 'You'}
+              name={myDisplayName}
               size={34}
-              title={`${myName || 'You'} (you)`}
+              title={t`${myDisplayName} (you)`}
               frameClassName="ring-2 ring-ktip-tropical-500 shadow-card"
             />
           </div>
@@ -782,13 +787,13 @@ export function VenueMapExplorer({
             </p>
           )}
           <p className="mt-1 font-mono text-[10px] text-ktip-sand-500">
-            {occupancy[hoveredRoom.id] || 0} here
-            {hoveredRoom.capacity ? ` · cap ${hoveredRoom.capacity}` : ''} ·{' '}
+            <Trans>{occupancy[hoveredRoom.id] || 0} here</Trans>
+            {hoveredRoom.capacity ? t` · cap ${hoveredRoom.capacity}` : ''} ·{' '}
             {hoveredRoom.audio_mode.replace('_', ' ')}
           </p>
           {!canEnterRoom(hoveredRoom, myRole) && (
             <p className="mt-1 text-[10px] font-semibold text-ktip-sand-500">
-              {hoveredRoom.is_open ? 'Restricted to other roles' : 'Closed right now'}
+              {hoveredRoom.is_open ? t`Restricted to other roles` : t`Closed right now`}
             </p>
           )}
         </div>
@@ -909,7 +914,7 @@ export function VenueMapExplorer({
             className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold shadow-card transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
             <DoorOpen size={15} aria-hidden="true" />
-            Enter {standingRoom.name}
+            <Trans>Enter {standingRoom.name}</Trans>
           </button>
         </div>
       )}
@@ -917,7 +922,7 @@ export function VenueMapExplorer({
       {/* ---- controls hint ---- */}
       <p className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 font-mono text-[10px] text-ktip-sand-400">
         <Move size={11} aria-hidden="true" />
-        arrows / WASD to walk · click a room to go in
+        <Trans>arrows / WASD to walk · click a room to go in</Trans>
       </p>
 
       {/* ---- entry veil ---- */}
@@ -928,7 +933,7 @@ export function VenueMapExplorer({
       >
         {veil > 0.35 && enteringRoomId && phase === 'zooming' && (
           <p className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center font-display text-lg font-bold text-white">
-            Entering {roomsById.get(enteringRoomId)?.name}…
+            <Trans>Entering {roomsById.get(enteringRoomId)?.name}…</Trans>
           </p>
         )}
       </div>

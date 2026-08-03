@@ -1,6 +1,7 @@
 // Application Constants
 
 import { ROLE_DEFINITIONS } from './permissions'
+import type { Copy } from '../i18n/copy'
 
 export const APP_NAME = 'KTIP'
 export const APP_FULL_NAME = 'Knowledge, Technology and Innovation Platform'
@@ -32,7 +33,15 @@ const LEGACY_ROLE_LABELS: Record<string, string> = {
   oecs: 'OECS Admin',
 }
 
-export const ROLE_LABELS: Record<string, string> = {
+// `Copy`, not `string`: the labels spread in from ROLE_DEFINITIONS are msg
+// descriptors, while LEGACY_ROLE_LABELS below are still plain source strings.
+// Both resolve through resolveCopy(i18n, …) at the render site.
+export const ROLE_LABELS: Record<string, Copy> = {
+  // The legacy spread deliberately WINS for slugs present in both: the
+  // definitions carry admin-console wording — "Student (school-verified)",
+  // "OECS Admin (legacy)" — while these are the public-facing names. The
+  // legacy values are plain strings, which translate through the harvested
+  // source-text aliases the compile step writes into the catalogs.
   ...Object.fromEntries(ROLE_DEFINITIONS.map((r) => [r.slug, r.label])),
   ...LEGACY_ROLE_LABELS,
 }
@@ -44,7 +53,7 @@ export const ROLE_LABELS: Record<string, string> = {
  * platform's administrators is a reconnaissance affordance, not a browsing one,
  * and nobody looking for a collaborator filters by "Safety Admin".
  */
-export const DIRECTORY_ROLE_LABELS: Record<string, string> = Object.fromEntries(
+export const DIRECTORY_ROLE_LABELS: Record<string, Copy> = Object.fromEntries(
   ROLE_DEFINITIONS.filter((r) => r.tier !== 'admin').map((r) => [
     r.slug,
     ROLE_LABELS[r.slug] ?? r.label,
@@ -361,7 +370,7 @@ export const GRANT_APPLICATION_STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
   under_review: 'Under Review',
   approved: 'Approved',
-  rejected: 'Rejected',
+  rejected: 'Not accepted',
 }
 
 export const GRANT_APPLICATION_STATUS_COLORS: Record<string, string> = {

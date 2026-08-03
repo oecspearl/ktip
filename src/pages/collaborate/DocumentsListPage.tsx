@@ -5,9 +5,11 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { formatRelativeTime, debounce } from '../../lib/utils'
 import { Plus, Search, FileText, Trash2, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function DocumentsListPage() {
-  usePageTitle('My Documents')
+    const { t } = useLingui()
+  usePageTitle(t`My Documents`)
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -20,7 +22,7 @@ export default function DocumentsListPage() {
   const handleDelete = async (e: React.MouseEvent, docId: string) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!confirm('Delete this document? This cannot be undone.')) return
+    if (!confirm(t`Delete this document? This cannot be undone.`)) return
     try {
       await deleteDocument(docId)
       documents.refetch()
@@ -32,14 +34,14 @@ export default function DocumentsListPage() {
   return (
     <>
       <PageHero
-        eyebrow="Collaboration Tools"
-        title="My Documents"
+        eyebrow={t`Collaboration Tools`}
+        title={t`My Documents`}
         imageSeed="documents"
         compact
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Documents' },
+          { label: t`Home`, href: '/' },
+          { label: t`Collaborate`, href: '/collaborate' },
+          { label: t`Documents` },
         ]}
       />
 
@@ -52,7 +54,7 @@ export default function DocumentsListPage() {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400" />
               <input
                 type="text"
-                placeholder="Search documents..."
+                placeholder={t`Search documents...`}
                 onChange={(e) => debouncedSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
               />
@@ -63,7 +65,7 @@ export default function DocumentsListPage() {
               className="inline-flex items-center gap-2 px-4 py-2.5 btn-brand rounded-lg font-medium text-sm"
             >
               <Plus size={16} />
-              New Document
+              <Trans>New Document</Trans>
             </button>
           </div>
 
@@ -90,14 +92,14 @@ export default function DocumentsListPage() {
                       {doc.title}
                     </h3>
                     <p className="text-sm text-ktip-sand-500 mt-0.5">
-                      Edited {formatRelativeTime(doc.updated_at)}
+                      <Trans>Edited {formatRelativeTime(doc.updated_at)}</Trans>
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, doc.id)}
                     className="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                    title="Delete document"
+                    title={t`Delete document`}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -109,9 +111,9 @@ export default function DocumentsListPage() {
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText size={32} className="text-ktip-sand-400" />
               </div>
-              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1">No documents yet</h3>
+              <h3 className="text-lg font-semibold text-ktip-sand-800 mb-1"><Trans>No documents yet</Trans></h3>
               <p className="text-sm text-ktip-sand-500 mb-4">
-                Create your first document to get started.
+                <Trans>Create your first document to get started.</Trans>
               </p>
               <button
                 type="button"
@@ -119,7 +121,7 @@ export default function DocumentsListPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 btn-brand rounded-lg text-sm font-medium"
               >
                 <Plus size={16} />
-                Create Document
+                <Trans>Create Document</Trans>
               </button>
             </div>
           )}
@@ -129,7 +131,7 @@ export default function DocumentsListPage() {
             <div className="mt-10">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-ktip-sand-800 mb-4">
                 <Users size={20} className="text-ktip-sand-400" />
-                Shared with me
+                <Trans>Shared with me</Trans>
               </h2>
               <div className="space-y-2">
                 {shared.documents.map((doc) => (
@@ -143,16 +145,16 @@ export default function DocumentsListPage() {
                         {doc.title}
                       </h3>
                       <p className="text-sm text-ktip-sand-500 mt-0.5">
-                        Edited {formatRelativeTime(doc.updated_at)}
+                        <Trans>Edited {formatRelativeTime(doc.updated_at)}</Trans>
                       </p>
                     </div>
                     {doc.share_permission === 'edit' ? (
                       <span className="text-xs text-ktip-ocean-700 px-2 py-1 bg-ktip-ocean-50 rounded">
-                        Can edit
+                        <Trans>Can edit</Trans>
                       </span>
                     ) : (
                       <span className="text-xs text-ktip-sand-400 px-2 py-1 bg-ktip-sand-50 rounded">
-                        View only
+                        <Trans>View only</Trans>
                       </span>
                     )}
                   </Link>

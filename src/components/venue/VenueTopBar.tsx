@@ -5,6 +5,7 @@ import { VENUE_ROLE_LABELS } from '../../lib/constants'
 import { venuePath } from '../../lib/event-slug'
 import { AvailabilityPicker } from './AvailabilityPicker'
 import type { VenueAvailability, VenueRole } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface VenueTopBarProps {
   eventId: string
@@ -44,6 +45,7 @@ export function VenueTopBar({
   backToMap,
   className,
 }: VenueTopBarProps) {
+  const { t } = useLingui()
   return (
     <div
       className={cn(
@@ -66,7 +68,7 @@ export function VenueTopBar({
         className="inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"
       >
         <ArrowLeft size={15} aria-hidden="true" />
-        {backToMap ? 'Back to the map' : 'Event page'}
+        {backToMap ? t`Back to the map` : t`Event page`}
       </Link>
 
       <span className="hidden h-4 w-px bg-ktip-sand-200 sm:block" aria-hidden="true" />
@@ -77,7 +79,7 @@ export function VenueTopBar({
 
       <span className="flex items-center gap-1.5 rounded-full border border-ktip-sand-200 px-2.5 py-1 text-xs font-medium text-ktip-sand-600">
         <Users size={13} aria-hidden="true" />
-        {headcount} here
+        <Trans>{headcount} here</Trans>
       </span>
 
       <span
@@ -87,14 +89,14 @@ export function VenueTopBar({
             ? 'border-ktip-tropical-200 bg-ktip-tropical-100 text-ktip-tropical-800'
             : 'border-ktip-sand-200 bg-ktip-sand-100 text-ktip-sand-600'
         )}
-        title={connected ? 'Live presence connected' : 'Reconnecting — headcounts may be stale'}
+        title={connected ? t`Live presence connected` : t`Reconnecting — headcounts may be stale`}
       >
         {connected ? (
           <Radio size={13} aria-hidden="true" />
         ) : (
           <WifiOff size={13} aria-hidden="true" />
         )}
-        {connected ? 'Live' : 'Reconnecting'}
+        {connected ? t`Live` : t`Reconnecting`}
       </span>
 
       {role !== 'participant' && (

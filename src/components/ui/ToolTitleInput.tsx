@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro'
+
 /**
  * The editable document title that sits inside a PageHero. Rendered inside an
  * <h1>, so it inherits the hero's display font and size rather than setting
@@ -19,6 +21,7 @@ export function ToolTitleInput({
   readOnly = false,
   placeholder = 'Untitled',
 }: ToolTitleInputProps) {
+  const { t } = useLingui()
   return (
     <input
       type="text"
@@ -32,7 +35,7 @@ export function ToolTitleInput({
         }
       }}
       readOnly={readOnly}
-      aria-label="Title"
+      aria-label={t`Title`}
       placeholder={placeholder}
       className="font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-white/40 read-only:cursor-default"
     />

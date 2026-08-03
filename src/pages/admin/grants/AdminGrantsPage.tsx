@@ -102,7 +102,7 @@ export default function AdminGrantsPage() {
     try {
       await updateApplicationStatus(action.applicationId, action.status)
       toast.success(
-        `Application ${GRANT_APPLICATION_STATUS_LABELS[action.status].toLowerCase()} successfully`
+        `Application marked ${GRANT_APPLICATION_STATUS_LABELS[action.status].toLowerCase()} — the applicant has been notified`
       )
       setConfirmAction(null)
       refetchApplications()
@@ -326,7 +326,7 @@ export default function AdminGrantsPage() {
                 <option value="pending">Pending</option>
                 <option value="under_review">Under Review</option>
                 <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="rejected">Not accepted</option>
               </select>
               {statusFilter && (
                 <button
@@ -431,7 +431,7 @@ export default function AdminGrantsPage() {
                                   })
                                 }
                                 className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
-                                title="Reject"
+                                title="Do not accept"
                               >
                                 <XCircle size={16} />
                               </button>
@@ -515,15 +515,15 @@ export default function AdminGrantsPage() {
         title={
           confirmAction?.status === 'approved'
             ? 'Approve Application'
-            : 'Reject Application'
+            : 'Do not accept application'
         }
         message={
           confirmAction?.status === 'approved'
             ? `Are you sure you want to approve the application from "${confirmAction?.applicantName}"?`
-            : `Are you sure you want to reject the application from "${confirmAction?.applicantName}"? This action cannot be easily undone.`
+            : `Are you sure you do not want to accept the application from "${confirmAction?.applicantName}"? This action cannot be easily undone.`
         }
         confirmLabel={
-          confirmAction?.status === 'approved' ? 'Approve' : 'Reject'
+          confirmAction?.status === 'approved' ? 'Approve' : 'Do not accept'
         }
         confirmVariant={confirmAction?.status === 'rejected' ? 'danger' : 'primary'}
         loading={actionLoading}

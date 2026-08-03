@@ -7,45 +7,48 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useReportContent } from '../../hooks/useModeration'
 import type { ModerationTargetType, ReportCategory } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 interface ReportOption {
   value: ReportCategory
-  label: string
-  description: string
+  label: MessageDescriptor
+  description: MessageDescriptor
   urgent?: boolean
 }
 
 export const REPORT_CATEGORIES: ReportOption[] = [
   {
     value: 'hate_harassment',
-    label: 'Hate speech or harassment',
-    description: 'Attacks based on identity, or targeted abuse of a person.',
+    label: msg`Hate speech or harassment`,
+    description: msg`Attacks based on identity, or targeted abuse of a person.`,
   },
   {
     value: 'bullying',
-    label: 'Bullying or cyberbullying',
-    description: 'Repeated intimidation, humiliation or threats.',
+    label: msg`Bullying or cyberbullying`,
+    description: msg`Repeated intimidation, humiliation or threats.`,
   },
   {
     value: 'nsfw',
-    label: 'Inappropriate or explicit content',
-    description: 'Sexual, graphic or otherwise unsuitable material.',
+    label: msg`Inappropriate or explicit content`,
+    description: msg`Sexual, graphic or otherwise unsuitable material.`,
   },
   {
     value: 'spam_scam',
-    label: 'Spam or scam',
-    description: 'Unsolicited promotion, fraud, or a deceptive funding offer.',
+    label: msg`Spam or scam`,
+    description: msg`Unsolicited promotion, fraud, or a deceptive funding offer.`,
   },
   {
     value: 'grooming_risk',
-    label: 'Unsolicited contact or grooming risk',
-    description: 'An adult contacting a student inappropriately, or requests for secrecy.',
+    label: msg`Unsolicited contact or grooming risk`,
+    description: msg`An adult contacting a student inappropriately, or requests for secrecy.`,
     urgent: true,
   },
   {
     value: 'pii_leak',
-    label: 'Personal information exposed',
-    description: 'A phone number, address or personal account shared publicly.',
+    label: msg`Personal information exposed`,
+    description: msg`A phone number, address or personal account shared publicly.`,
   },
 ]
 
@@ -71,8 +74,10 @@ export function ReportModal({
   targetId,
   targetAuthorId,
   contentSnapshot,
-  targetLabel = 'this content',
+  targetLabel: targetLabelProp,
 }: ReportModalProps) {
+    const { t, i18n } = useLingui()
+  const targetLabel = targetLabelProp ?? t`this content`
   const auth = useAuth()
   const toast = useToast()
   const { reportContent, loading } = useReportContent()
@@ -102,10 +107,10 @@ export function ReportModal({
         detail: detail.trim() || undefined,
         contentSnapshot,
       })
-      toast.success('Report submitted. Our safety team will review it.')
+      toast.success(t`Report submitted. Our safety team will review it.`)
       handleClose()
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit report')
+      toast.error(err.message || t`Failed to submit report`)
     }
   }
 
@@ -115,8 +120,8 @@ export function ReportModal({
     <Modal
       open={open}
       onClose={handleClose}
-      title={`Report ${targetLabel}`}
-      description="Reports are confidential. The person you report is not told who filed it."
+      title={t`Report ${targetLabel}`}
+      description={t`Reports are confidential. The person you report is not told who filed it.`}
       size="md"
     >
       <div className="space-y-4">
@@ -141,8 +146,8 @@ export function ReportModal({
                     <Flag size={16} className="text-ktip-sand-400 mt-0.5 flex-shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-ktip-sand-900">{option.label}</p>
-                    <p className="text-xs text-ktip-sand-600 mt-0.5">{option.description}</p>
+                    <p className="text-sm font-medium text-ktip-sand-900">{i18n._(option.label)}</p>
+                    <p className="text-xs text-ktip-sand-600 mt-0.5">{i18n._(option.description)}</p>
                   </div>
                 </div>
               </button>
@@ -154,28 +159,27 @@ export function ReportModal({
           <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 border border-red-200">
             <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
             <p className="text-xs text-red-700">
-              This report is treated as high priority. It is sent to our safety administrators and,
-              if a school-verified student is involved, to their institution.
+              <Trans>This report is treated as high priority. It is sent to our safety administrators and, if a school-verified student is involved, to their institution.</Trans>
             </p>
           </div>
         )}
 
         <Textarea
-          label="Anything else we should know? (optional)"
+          label={t`Anything else we should know? (optional)`}
           value={detail}
           onChange={(e) => setDetail(e.target.value)}
           rows={3}
           maxLength={2000}
-          placeholder="Add context that would help a reviewer."
+          placeholder={t`Add context that would help a reviewer.`}
           fullWidth
         />
 
         <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
           <Button variant="outline" size="sm" onClick={handleClose}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button size="sm" loading={loading} disabled={!category} onClick={handleSubmit}>
-            Submit report
+            <Trans>Submit report</Trans>
           </Button>
         </div>
       </div>

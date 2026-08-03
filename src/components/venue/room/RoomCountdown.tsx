@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { Clock } from 'lucide-react'
 import { RoomPanel } from './RoomPanel'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Time left to submit.
@@ -12,6 +13,7 @@ import { RoomPanel } from './RoomPanel'
  * on every open room page is a re-render nobody asked for.
  */
 export function RoomCountdown({ deadline }: { deadline: string | null | undefined }) {
+  const { t } = useLingui()
   const target = deadline ? new Date(deadline).getTime() : NaN
   const [now, setNow] = useState(() => Date.now())
 
@@ -27,19 +29,22 @@ export function RoomCountdown({ deadline }: { deadline: string | null | undefine
   const passed = left <= 0
 
   return (
-    <RoomPanel title="Submissions">
+    <RoomPanel title={t`Submissions`}>
       <div className="px-4 py-4">
         <p
           className={`font-display text-2xl font-bold ${
             passed ? 'text-ktip-sand-500' : 'text-ktip-sand-900'
           }`}
         >
-          {passed ? 'Closed' : remaining(left)}
+          {passed ? t`Closed` : remaining(left)}
         </p>
         <p className="mt-1 flex items-center gap-1.5 text-xs text-ktip-sand-500">
           <Clock size={12} aria-hidden="true" />
-          {passed ? 'Closed ' : 'Closes '}
-          {format(target, 'MMM d · h:mm a')}
+          {passed ? (
+            <Trans>Closed {format(target, 'MMM d · h:mm a')}</Trans>
+          ) : (
+            <Trans>Closes {format(target, 'MMM d · h:mm a')}</Trans>
+          )}
         </p>
       </div>
     </RoomPanel>

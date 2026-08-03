@@ -5,9 +5,11 @@ import { ProjectCard } from '../../../components/projects/ProjectCard'
 import { useUserProjects } from '../../../hooks/useProfile'
 import { useAuth } from '../../../contexts/AuthContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function ProjectsTab() {
-  usePageTitle('My Projects')
+    const { t } = useLingui()
+  usePageTitle(t`My Projects`)
   const auth = useAuth()
   const { projects } = useUserProjects(auth.user?.id)
 
@@ -17,10 +19,10 @@ export default function ProjectsTab() {
         <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <FolderKanban size={32} className="text-ktip-sand-400" />
         </div>
-        <p className="text-ktip-sand-600 mb-4">No projects yet.</p>
+        <p className="text-ktip-sand-600 mb-4"><Trans>No projects yet.</Trans></p>
         {auth.can('project:create') && (
           <Link to="/projects/new">
-            <Button icon={<Plus size={18} />}>Create a project</Button>
+            <Button icon={<Plus size={18} />}><Trans>Create a project</Trans></Button>
           </Link>
         )}
       </div>

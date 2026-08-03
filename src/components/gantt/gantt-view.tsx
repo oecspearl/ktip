@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, RefObject } from 'react'
 import { format } from 'date-fns'
 import { ChevronRight } from 'lucide-react'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { cn } from '../../lib/utils'
+import { resolveCopy } from '../../i18n/copy'
 import { useGantt } from './gantt'
 import { GanttBar, GanttGroupBar, type PositionedMarker } from './gantt-bar'
 import { barRect, pxForDate } from './gantt-scale'
@@ -19,6 +22,7 @@ import {
   type GanttRow,
   type GanttWindow,
 } from './gantt-types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Vertical offset of lane `index` inside a row of `height`. */
 function laneTop(index: number, laneCount: number, height: number): number {
@@ -32,9 +36,11 @@ function markersFor(event: GanttEvent, win: GanttWindow): PositionedMarker[] {
   for (const marker of event.markers) {
     const left = pxForDate(marker.date, win)
     if (left < 0 || left > win.totalWidth) continue
+    const markerLabel = resolveCopy(i18n, marker.label)
+    const markerDate = format(marker.date, 'PP')
     positioned.push({
       id: marker.id,
-      label: `${marker.label} — ${format(marker.date, 'PP')}`,
+      label: i18n._(msg`${markerLabel} — ${markerDate}`),
       left,
       muted: marker.muted,
     })
@@ -116,7 +122,7 @@ function GanttGridOverlay({ todayLeft }: { todayLeft: number | null }) {
       {todayLeft !== null && (
         <div className="absolute inset-y-0 w-px bg-ktip-ocean-400/60" style={{ left: todayLeft }}>
           <span className="absolute -top-0.5 start-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-ktip-ocean-500 dark:bg-ktip-ocean-200 text-white text-[10px] font-medium leading-none whitespace-nowrap">
-            Today
+            <Trans>Today</Trans>
           </span>
         </div>
       )}
@@ -255,6 +261,7 @@ function LeafRow({ row }: { row: GanttRow }) {
 }
 
 export function GanttView({ className }: { className?: string }) {
+    const { t } = useLingui()
   const {
     rows,
     window: win,
@@ -323,7 +330,7 @@ export function GanttView({ className }: { className?: string }) {
       <div
         ref={scrollRef}
         role="region"
-        aria-label="Timeline grid"
+        aria-label={t`Timeline grid`}
         tabIndex={0}
         onScroll={syncEdges}
         onKeyDown={onKeyDown}

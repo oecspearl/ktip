@@ -95,7 +95,9 @@ describe('the venue reaction set', () => {
     // reaction with no picture is one that would float as a bare character.
     for (const emoji of ROOM_REACTIONS) {
       expect(REACTION_ART[emoji], emoji).toBeTruthy()
-      expect(REACTION_ART[emoji].label.length, emoji).toBeGreaterThan(0)
+      // The label is a msg descriptor now. Assert on `.message` — the English
+      // source — rather than resolving it, so this test needs no active locale.
+      expect(REACTION_ART[emoji].label.message?.length ?? 0, emoji).toBeGreaterThan(0)
     }
     expect(Object.keys(REACTION_ART).length).toBe(ROOM_REACTIONS.length)
   })

@@ -20,15 +20,17 @@ import {
 } from '../../lib/constants'
 import { formatDate, truncate } from '../../lib/utils'
 import { PageHero } from '../../components/layout/PageHero'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function ResourceDetailPage() {
+  const { t } = useLingui()
   const params = useParams()
   const { openMember } = useMemberPanel()
 
   const { resource, loading } = useResource(params.id)
   useCanonicalSlug(params.id, resource)
 
-  usePageTitle(resource?.title ? `${resource.title} — Resources` : 'Resource')
+  usePageTitle(resource?.title ? t`${resource.title} — Resources` : t`Resource`)
 
   if (loading || !resource) {
     if (loading) {
@@ -54,16 +56,16 @@ export default function ResourceDetailPage() {
           <BookOpen size={32} className="text-ktip-sand-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          Resource Not Found
+          <Trans>Resource Not Found</Trans>
         </h2>
         <p className="text-gray-500 mb-6">
-          This resource doesn't exist or hasn't been published yet.
+          <Trans>This resource doesn't exist or hasn't been published yet.</Trans>
         </p>
         <Link
           to="/resources"
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg inline-flex items-center gap-2"
         >
-          Back to Resources
+          <Trans>Back to Resources</Trans>
         </Link>
       </div>
     )
@@ -72,13 +74,13 @@ export default function ResourceDetailPage() {
   return (
     <>
       <PageHero
-        eyebrow="Resource Detail"
+        eyebrow={t`Resource Detail`}
         title={resource.title}
         image={resource.thumbnail_url}
         imageSeed={resource.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Resources', href: '/resources' },
+          { label: t`Home`, href: '/' },
+          { label: t`Resources`, href: '/resources' },
           { label: truncate(resource.title, 30) },
         ]}
       >
@@ -122,7 +124,7 @@ export default function ResourceDetailPage() {
 
             {/* Date line */}
             <p className="text-sm text-gray-400 text-center mb-6">
-              Published {formatDate(resource.created_at)}
+              <Trans>Published {formatDate(resource.created_at)}</Trans>
             </p>
 
             {/* Summary lede */}
@@ -157,8 +159,8 @@ export default function ResourceDetailPage() {
                   <div className="flex items-center gap-3">
                     <Download size={20} className="text-ktip-ocean-600" />
                     <div>
-                      <p className="font-medium text-ktip-sand-900">Download Resource</p>
-                      <p className="text-sm text-gray-500">Access the full resource file</p>
+                      <p className="font-medium text-ktip-sand-900"><Trans>Download Resource</Trans></p>
+                      <p className="text-sm text-gray-500"><Trans>Access the full resource file</Trans></p>
                     </div>
                   </div>
                   <a
@@ -167,7 +169,7 @@ export default function ResourceDetailPage() {
                     rel="noopener noreferrer"
                   >
                     <Button size="sm" icon={<ExternalLink size={14} />}>
-                      Download
+                      <Trans>Download</Trans>
                     </Button>
                   </a>
                 </div>
@@ -179,21 +181,23 @@ export default function ResourceDetailPage() {
           <div className="lg:col-span-1">
             {/* Widget 1: Details */}
             <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Details</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Resource information</p>
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Details</Trans></h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Resource information</Trans></p>
               <div className="text-sm divide-y divide-ktip-sand-100">
                 {resource.author && (
                   <div className="flex items-center gap-2 py-2.5">
                     <User size={16} className="text-gray-400 shrink-0" />
                     <span className="text-gray-500">
-                      By{' '}
-                      <button
-                        type="button"
-                        onClick={() => openMember(resource.author!.id)}
-                        className="text-ktip-ocean-600 hover:underline"
-                      >
-                        {resource.author!.display_name}
-                      </button>
+                      <Trans>
+                        By{' '}
+                        <button
+                          type="button"
+                          onClick={() => openMember(resource.author!.id)}
+                          className="text-ktip-ocean-600 hover:underline"
+                        >
+                          {resource.author!.display_name}
+                        </button>
+                      </Trans>
                     </span>
                   </div>
                 )}
@@ -201,7 +205,7 @@ export default function ResourceDetailPage() {
                 <div className="flex items-center gap-2 py-2.5">
                   <Calendar size={16} className="text-gray-400 shrink-0" />
                   <span className="text-gray-500">
-                    Published {formatDate(resource.created_at)}
+                    <Trans>Published {formatDate(resource.created_at)}</Trans>
                   </span>
                 </div>
               </div>
@@ -211,9 +215,9 @@ export default function ResourceDetailPage() {
             {resource.tags?.length > 0 && (
               <div className="mb-10">
                 <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                  Tags
+                  <Trans>Tags</Trans>
                 </h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4">Related topics</p>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Related topics</Trans></p>
                 <div className="flex flex-wrap gap-1.5">
                   {resource.tags.map((tag) => (
                     <span key={tag} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700">
@@ -226,12 +230,12 @@ export default function ResourceDetailPage() {
 
             {/* Widget 3: Browse more */}
             <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">Explore</h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Discover more resources</p>
+              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Explore</Trans></h3>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Discover more resources</Trans></p>
               <Link to="/resources">
                 <button className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5">
                   <BookOpen size={16} />
-                  Browse All Resources
+                  <Trans>Browse All Resources</Trans>
                 </button>
               </Link>
             </div>

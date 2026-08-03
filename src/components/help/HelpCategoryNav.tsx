@@ -1,6 +1,7 @@
 import { LayoutGrid } from 'lucide-react'
 import type { HelpCategory } from '../../lib/help-content'
 import { helpIcon } from './help-icons'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface HelpCategoryNavProps {
   categories: HelpCategory[]
@@ -19,6 +20,7 @@ export function HelpCategoryNav({
   onSelect,
   matchCounts,
 }: HelpCategoryNavProps) {
+    const { t, i18n } = useLingui()
   const countFor = (cat: HelpCategory) =>
     matchCounts ? matchCounts[cat.id] ?? 0 : cat.articles.length
 
@@ -37,12 +39,12 @@ export function HelpCategoryNav({
     <div className="w-full lg:w-64 shrink-0">
       <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 lg:sticky lg:top-[calc(var(--nav-h)+1.5rem)] lg:max-h-[calc(100svh-var(--nav-h)-3.5rem)] lg:overflow-y-auto">
         <p className="hidden lg:block px-3 pt-2 pb-1 font-display font-bold text-ktip-sand-900 uppercase text-xs tracking-wider">
-          Categories
+          <Trans>Categories</Trans>
         </p>
 
         <nav
           className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible"
-          aria-label="Help categories"
+          aria-label={t`Help categories`}
         >
           <button
             type="button"
@@ -51,7 +53,7 @@ export function HelpCategoryNav({
             className={rowClass(selectedCategory === '', false)}
           >
             <LayoutGrid size={18} className="shrink-0" />
-            <span className="font-medium text-sm whitespace-nowrap flex-1">All topics</span>
+            <span className="font-medium text-sm whitespace-nowrap flex-1"><Trans>All topics</Trans></span>
             <span className="text-xs opacity-70 tabular-nums">{total}</span>
           </button>
 
@@ -72,7 +74,7 @@ export function HelpCategoryNav({
               >
                 <Icon size={18} className="shrink-0" />
                 <span className="font-medium text-sm whitespace-nowrap flex-1 lg:truncate">
-                  {cat.title}
+                  {i18n._(cat.title)}
                 </span>
                 <span className="text-xs opacity-70 tabular-nums">{count}</span>
               </button>

@@ -7,6 +7,8 @@ import {
   type GanttEvent,
   type GanttSummary,
 } from './gantt-types'
+import { useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 /** A marker already resolved to a pixel offset within the lane. */
 export interface PositionedMarker {
@@ -25,17 +27,14 @@ interface GanttBarProps {
   onSelect: (event: GanttEvent) => void
 }
 
-function describe(event: GanttEvent): string {
-  const start = format(event.start, 'PP')
-  const end = event.openEnded ? 'ongoing' : format(event.end, 'PP')
-  const pct = Math.round((event.progress ?? 0) * 100)
-  return `${event.title}, ${start} to ${end}, ${pct}% complete`
-}
-
 export function GanttBar({ event, rect, top, selected, markers, onSelect }: GanttBarProps) {
+  const { t } = useLingui()
   const color = event.color ?? 'var(--color-ktip-ocean-500)'
   const progress = Math.min(1, Math.max(0, event.progress ?? 0))
-  const label = describe(event)
+  const start = format(event.start, 'PP')
+  const end = event.openEnded ? t`ongoing` : format(event.end, 'PP')
+  const pct = Math.round((event.progress ?? 0) * 100)
+  const label = t`${event.title}, ${start} to ${end}, ${pct}% complete`
 
   return (
     <>
@@ -106,11 +105,13 @@ interface GanttGroupBarProps {
 
 /** Neutral roll-up envelope with end brackets — never competes with its children. */
 export function GanttGroupBar({ summary, rect, top, title }: GanttGroupBarProps) {
+  const { t } = useLingui()
   const progress = Math.min(1, Math.max(0, summary.progress))
-  const label = `${title}: ${summary.count} item${summary.count === 1 ? '' : 's'}, ${format(
-    summary.start,
-    'PP'
-  )} to ${format(summary.end, 'PP')}, ${Math.round(progress * 100)}% complete`
+  const itemsLabel = plural(summary.count, { one: '# item', other: '# items' })
+  const start = format(summary.start, 'PP')
+  const end = format(summary.end, 'PP')
+  const pct = Math.round(progress * 100)
+  const label = t`${title}: ${itemsLabel}, ${start} to ${end}, ${pct}% complete`
 
   return (
     <div

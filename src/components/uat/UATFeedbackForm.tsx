@@ -5,6 +5,9 @@ import { Textarea } from '../ui/Textarea'
 import { useToast } from '../../contexts/ToastContext'
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 interface UATFeedbackFormProps {
   open: boolean
@@ -14,57 +17,58 @@ interface UATFeedbackFormProps {
 type Step = 'usefulness' | 'experience' | 'open_feedback'
 
 const USEFULNESS_OPTIONS = [
-  { value: 'very_useful', label: 'Very useful' },
-  { value: 'somewhat', label: 'Somewhat useful' },
-  { value: 'not_very', label: 'Not very useful' },
-  { value: 'not_at_all', label: 'Not at all useful' },
+  { value: 'very_useful', label: msg`Very useful` },
+  { value: 'somewhat', label: msg`Somewhat useful` },
+  { value: 'not_very', label: msg`Not very useful` },
+  { value: 'not_at_all', label: msg`Not at all useful` },
 ] as const
 
 const FEATURE_OPTIONS = [
-  { value: 'projects', label: 'Projects' },
-  { value: 'events', label: 'Events' },
-  { value: 'grants', label: 'Grants' },
-  { value: 'forums', label: 'Forums' },
-  { value: 'collaboration', label: 'Collaboration Tools' },
-  { value: 'directory', label: 'Member Directory' },
-  { value: 'resources', label: 'Resources' },
+  { value: 'projects', label: msg`Projects` },
+  { value: 'events', label: msg`Events` },
+  { value: 'grants', label: msg`Grants` },
+  { value: 'forums', label: msg`Forums` },
+  { value: 'collaboration', label: msg`Collaboration Tools` },
+  { value: 'directory', label: msg`Member Directory` },
+  { value: 'resources', label: msg`Resources` },
 ] as const
 
 const YES_SOMEWHAT_NO = [
-  { value: 'yes', label: 'Yes' },
-  { value: 'somewhat', label: 'Somewhat' },
-  { value: 'no', label: 'No' },
+  { value: 'yes', label: msg`Yes` },
+  { value: 'somewhat', label: msg`Somewhat` },
+  { value: 'no', label: msg`No` },
 ] as const
 
 const NAVIGATION_OPTIONS = [
-  { value: 'very_easy', label: 'Very easy' },
-  { value: 'easy', label: 'Easy' },
-  { value: 'neutral', label: 'Neutral' },
-  { value: 'difficult', label: 'Difficult' },
-  { value: 'very_difficult', label: 'Very difficult' },
+  { value: 'very_easy', label: msg`Very easy` },
+  { value: 'easy', label: msg`Easy` },
+  { value: 'neutral', label: msg`Neutral` },
+  { value: 'difficult', label: msg`Difficult` },
+  { value: 'very_difficult', label: msg`Very difficult` },
 ] as const
 
 const EXPERIENCE_OPTIONS = [
-  { value: 'excellent', label: 'Excellent' },
-  { value: 'good', label: 'Good' },
-  { value: 'average', label: 'Average' },
-  { value: 'poor', label: 'Poor' },
-  { value: 'very_poor', label: 'Very poor' },
+  { value: 'excellent', label: msg`Excellent` },
+  { value: 'good', label: msg`Good` },
+  { value: 'average', label: msg`Average` },
+  { value: 'poor', label: msg`Poor` },
+  { value: 'very_poor', label: msg`Very poor` },
 ] as const
 
 const PERFORMANCE_OPTIONS = [
-  { value: 'fast', label: 'Fast' },
-  { value: 'acceptable', label: 'Acceptable' },
-  { value: 'slow', label: 'Slow' },
+  { value: 'fast', label: msg`Fast` },
+  { value: 'acceptable', label: msg`Acceptable` },
+  { value: 'slow', label: msg`Slow` },
 ] as const
 
 function RadioGroup(groupProps: {
   name: string
-  options: readonly { value: string; label: string }[]
+  options: readonly { value: string; label: MessageDescriptor }[]
   value: string
   onChange: (v: string) => void
   error?: string
 }) {
+  const { i18n } = useLingui()
   return (
     <div className="space-y-2">
       {groupProps.options.map((opt) => (
@@ -85,7 +89,7 @@ function RadioGroup(groupProps: {
             onChange={() => groupProps.onChange(opt.value)}
             className="w-4 h-4 text-ktip-ocean-600 focus:ring-ktip-ocean-500"
           />
-          <span className="text-sm font-medium">{opt.label}</span>
+          <span className="text-sm font-medium">{i18n._(opt.label)}</span>
         </label>
       ))}
       {groupProps.error && <p className="text-sm text-red-500">{groupProps.error}</p>}
@@ -117,7 +121,7 @@ function BooleanChoice(boolProps: {
             onChange={() => boolProps.onChange(true)}
             className="w-4 h-4 text-ktip-ocean-600"
           />
-          <span className="text-sm font-medium">Yes</span>
+          <span className="text-sm font-medium"><Trans>Yes</Trans></span>
         </label>
         <label
           className={cn(
@@ -134,7 +138,7 @@ function BooleanChoice(boolProps: {
             onChange={() => boolProps.onChange(false)}
             className="w-4 h-4 text-ktip-ocean-600"
           />
-          <span className="text-sm font-medium">No</span>
+          <span className="text-sm font-medium"><Trans>No</Trans></span>
         </label>
       </div>
       {boolProps.error && <p className="text-sm text-red-500">{boolProps.error}</p>}
@@ -167,8 +171,8 @@ function RatingScale(ratingProps: {
         ))}
       </div>
       <div className="flex justify-between text-xs text-ktip-sand-500 px-1">
-        <span>Not likely</span>
-        <span>Very likely</span>
+        <span><Trans>Not likely</Trans></span>
+        <span><Trans>Very likely</Trans></span>
       </div>
       {ratingProps.error && <p className="text-sm text-red-500">{ratingProps.error}</p>}
     </div>
@@ -176,6 +180,7 @@ function RatingScale(ratingProps: {
 }
 
 export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
+    const { t, i18n } = useLingui()
   const toast = useToast()
 
   const [step, setStep] = useState<Step>('usefulness')
@@ -209,22 +214,22 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
 
   const validateUsefulness = () => {
     const errs: Record<string, string> = {}
-    if (!q1) errs.q1 = 'Required'
-    if (q2.length === 0) errs.q2 = 'Select at least one feature'
-    if (!q3) errs.q3 = 'Required'
-    if (!q4) errs.q4 = 'Required'
-    if (q5 === null) errs.q5 = 'Required'
+    if (!q1) errs.q1 = t`Required`
+    if (q2.length === 0) errs.q2 = t`Select at least one feature`
+    if (!q3) errs.q3 = t`Required`
+    if (!q4) errs.q4 = t`Required`
+    if (q5 === null) errs.q5 = t`Required`
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
 
   const validateExperience = () => {
     const errs: Record<string, string> = {}
-    if (!q6) errs.q6 = 'Required'
-    if (!q7) errs.q7 = 'Required'
-    if (!q8) errs.q8 = 'Required'
-    if (q9 === null) errs.q9 = 'Required'
-    if (!q10) errs.q10 = 'Required'
+    if (!q6) errs.q6 = t`Required`
+    if (!q7) errs.q7 = t`Required`
+    if (!q8) errs.q8 = t`Required`
+    if (q9 === null) errs.q9 = t`Required`
+    if (!q10) errs.q10 = t`Required`
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -269,21 +274,21 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
 
       if (error) throw error
 
-      toast.success('Thank you for your feedback!')
+      toast.success(t`Thank you for your feedback!`)
       localStorage.setItem('ktip_uat_submitted', 'true')
       localStorage.setItem('ktip_uat_submitted_at', new Date().toISOString())
       onClose()
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit feedback')
+      toast.error(err.message || t`Failed to submit feedback`)
     } finally {
       setSubmitting(false)
     }
   }
 
   const steps: { key: Step; label: string }[] = [
-    { key: 'usefulness', label: 'Usefulness' },
-    { key: 'experience', label: 'Experience' },
-    { key: 'open_feedback', label: 'Feedback' },
+    { key: 'usefulness', label: t`Usefulness` },
+    { key: 'experience', label: t`Experience` },
+    { key: 'open_feedback', label: t`Feedback` },
   ]
   const currentIdx = steps.findIndex((s) => s.key === step)
 
@@ -315,16 +320,16 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title="Platform Feedback"
-      description="Help us improve KTIP. Your responses are anonymous and only take a few minutes."
+      title={t`Platform Feedback`}
+      description={t`Help us improve KTIP. Your responses are anonymous and only take a few minutes.`}
       size="xl"
     >
       <div className="space-y-6">
         {/* Logo */}
         <div className="flex justify-center">
           <img
-            src="/pwa-512x512.png"
-            alt="KTIP Logo"
+            src="/ktip-logo-128.webp"
+            alt=""
             loading="lazy" decoding="async" width={64} height={64} className="w-16 h-16 rounded-full object-cover"
           />
         </div>
@@ -335,16 +340,16 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
         {step === 'usefulness' && (
           <div className="space-y-6">
             <div className="bg-ktip-ocean-50 rounded-xl px-4 py-3">
-              <h3 className="font-display font-semibold text-ktip-ocean-700">Usefulness & Value</h3>
+              <h3 className="font-display font-semibold text-ktip-ocean-700"><Trans>Usefulness & Value</Trans></h3>
               <p className="text-xs text-ktip-ocean-600 mt-0.5">
-                Help us understand how valuable the platform is for your work.
+                <Trans>Help us understand how valuable the platform is for your work.</Trans>
               </p>
             </div>
 
             {/* Q1 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                1. How useful is this platform for your work or interests? <span className="text-red-500">*</span>
+                <Trans>1. How useful is this platform for your work or interests?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q1" options={USEFULNESS_OPTIONS} value={q1} onChange={setQ1} error={errors.q1} />
             </div>
@@ -352,7 +357,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q2 - Multi-select */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                2. Which features have you found most valuable? <span className="text-red-500">*</span>
+                <Trans>2. Which features have you found most valuable?</Trans> <span className="text-red-500">*</span>
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {FEATURE_OPTIONS.map((opt) => (
@@ -371,7 +376,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
                       onChange={() => toggleFeature(opt.value)}
                       className="w-4 h-4 rounded text-ktip-ocean-600 focus:ring-ktip-ocean-500"
                     />
-                    <span className="text-sm font-medium">{opt.label}</span>
+                    <span className="text-sm font-medium">{i18n._(opt.label)}</span>
                   </label>
                 ))}
               </div>
@@ -381,7 +386,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q3 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                3. Does the platform help you connect with other innovators across the OECS? <span className="text-red-500">*</span>
+                <Trans>3. Does the platform help you connect with other innovators across the OECS?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q3" options={YES_SOMEWHAT_NO} value={q3} onChange={setQ3} error={errors.q3} />
             </div>
@@ -389,7 +394,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q4 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                4. Does the platform help you discover funding or collaboration opportunities? <span className="text-red-500">*</span>
+                <Trans>4. Does the platform help you discover funding or collaboration opportunities?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q4" options={YES_SOMEWHAT_NO} value={q4} onChange={setQ4} error={errors.q4} />
             </div>
@@ -397,7 +402,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q5 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                5. How likely are you to recommend this platform to a colleague? <span className="text-red-500">*</span>
+                <Trans>5. How likely are you to recommend this platform to a colleague?</Trans> <span className="text-red-500">*</span>
               </p>
               <RatingScale value={q5} onChange={setQ5} error={errors.q5} />
             </div>
@@ -408,16 +413,16 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
         {step === 'experience' && (
           <div className="space-y-6">
             <div className="bg-ktip-tropical-50 rounded-xl px-4 py-3">
-              <h3 className="font-display font-semibold text-ktip-tropical-700">User Experience</h3>
+              <h3 className="font-display font-semibold text-ktip-tropical-700"><Trans>User Experience</Trans></h3>
               <p className="text-xs text-ktip-tropical-600 mt-0.5">
-                Help us understand how easy and pleasant the platform is to use.
+                <Trans>Help us understand how easy and pleasant the platform is to use.</Trans>
               </p>
             </div>
 
             {/* Q6 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                6. How easy is the platform to navigate? <span className="text-red-500">*</span>
+                <Trans>6. How easy is the platform to navigate?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q6" options={NAVIGATION_OPTIONS} value={q6} onChange={setQ6} error={errors.q6} />
             </div>
@@ -425,7 +430,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q7 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                7. Does the platform look professional and visually appealing? <span className="text-red-500">*</span>
+                <Trans>7. Does the platform look professional and visually appealing?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q7" options={YES_SOMEWHAT_NO} value={q7} onChange={setQ7} error={errors.q7} />
             </div>
@@ -433,7 +438,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q8 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                8. How would you rate your overall experience? <span className="text-red-500">*</span>
+                <Trans>8. How would you rate your overall experience?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q8" options={EXPERIENCE_OPTIONS} value={q8} onChange={setQ8} error={errors.q8} />
             </div>
@@ -441,16 +446,16 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q9 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                9. Did you encounter any issues or confusing areas? <span className="text-red-500">*</span>
+                <Trans>9. Did you encounter any issues or confusing areas?</Trans> <span className="text-red-500">*</span>
               </p>
               <BooleanChoice name="q9" value={q9} onChange={setQ9} error={errors.q9} />
               {q9 === true && (
                 <Textarea
-                  label="Please describe the issue"
+                  label={t`Please describe the issue`}
                   value={q9Detail}
                   onChange={(e) => setQ9Detail(e.currentTarget.value)}
                   rows={3}
-                  placeholder="What happened and where..."
+                  placeholder={t`What happened and where...`}
                 />
               )}
             </div>
@@ -458,7 +463,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
             {/* Q10 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-ktip-sand-800">
-                10. How well does the platform perform (speed, loading times)? <span className="text-red-500">*</span>
+                <Trans>10. How well does the platform perform (speed, loading times)?</Trans> <span className="text-red-500">*</span>
               </p>
               <RadioGroup name="q10" options={PERFORMANCE_OPTIONS} value={q10} onChange={setQ10} error={errors.q10} />
             </div>
@@ -469,28 +474,28 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
         {step === 'open_feedback' && (
           <div className="space-y-6">
             <div className="bg-ktip-ocean-50 rounded-xl px-4 py-3">
-              <h3 className="font-display font-semibold text-ktip-ocean-700">Open Feedback</h3>
+              <h3 className="font-display font-semibold text-ktip-ocean-700"><Trans>Open Feedback</Trans></h3>
               <p className="text-xs text-ktip-ocean-600 mt-0.5">
-                Share any additional thoughts to help us improve.
+                <Trans>Share any additional thoughts to help us improve.</Trans>
               </p>
             </div>
 
             {/* Q11 */}
             <Textarea
-              label="11. What features or improvements would you like to see?"
+              label={t`11. What features or improvements would you like to see?`}
               value={q11}
               onChange={(e) => setQ11(e.currentTarget.value)}
               rows={4}
-              placeholder="Describe any features, changes, or improvements you'd find valuable..."
+              placeholder={t`Describe any features, changes, or improvements you'd find valuable...`}
             />
 
             {/* Q12 */}
             <Textarea
-              label="12. Any other comments?"
+              label={t`12. Any other comments?`}
               value={q12}
               onChange={(e) => setQ12(e.currentTarget.value)}
               rows={4}
-              placeholder="Share anything else on your mind..."
+              placeholder={t`Share anything else on your mind...`}
             />
           </div>
         )}
@@ -499,7 +504,7 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
         <div className="flex items-center justify-between pt-4 border-t border-ktip-sand-100">
           {step !== 'usefulness' ? (
             <Button variant="ghost" size="sm" onClick={handleBack}>
-              Back
+              <Trans>Back</Trans>
             </Button>
           ) : (
             <div />
@@ -507,11 +512,11 @@ export function UATFeedbackForm({ open, onClose }: UATFeedbackFormProps) {
 
           {step !== 'open_feedback' ? (
             <Button size="sm" onClick={handleNext}>
-              Next
+              <Trans>Next</Trans>
             </Button>
           ) : (
             <Button size="sm" onClick={handleSubmit} loading={submitting}>
-              Submit Feedback
+              <Trans>Submit Feedback</Trans>
             </Button>
           )}
         </div>

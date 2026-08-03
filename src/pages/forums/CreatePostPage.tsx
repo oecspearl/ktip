@@ -8,9 +8,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import { forumPostSchema } from '../../lib/validation'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function CreatePostPage() {
-  usePageTitle('New Post')
+  const { t } = useLingui()
+  usePageTitle(t`New Post`)
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -54,7 +56,7 @@ export default function CreatePostPage() {
         navigate(`/forums/${params.slug}/${(post as any).id}`)
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to create post')
+      setErrorMessage(err.message || t`Failed to create post`)
     }
   }
 
@@ -69,7 +71,7 @@ export default function CreatePostPage() {
   if (!board) {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
-        <p className="text-ktip-sand-600">Board not found.</p>
+        <p className="text-ktip-sand-600"><Trans>Board not found.</Trans></p>
       </div>
     )
   }
@@ -77,19 +79,19 @@ export default function CreatePostPage() {
   return (
     <>
       <PageHero
-        eyebrow="New Forum Post"
-        title="New Post"
+        eyebrow={t`New Forum Post`}
+        title={t`New Post`}
         subtitle={
-          <>
+          <Trans>
             Posting in <span className="text-white font-medium">{board.name}</span>
-          </>
+          </Trans>
         }
         imageSeed="forums"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Forums', href: '/forums' },
+          { label: t`Home`, href: '/' },
+          { label: t`Forums`, href: '/forums' },
           { label: board.name, href: `/forums/${params.slug}` },
-          { label: 'New Post' },
+          { label: t`New Post` },
         ]}
       />
 
@@ -98,19 +100,19 @@ export default function CreatePostPage() {
         <div className="max-w-page-tight mx-auto px-4">
           <form data-tutorial="post-form" onSubmit={handleSubmit} className="space-y-6">
             <Input
-              label="Title"
+              label={t`Title`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="What's on your mind?"
+              placeholder={t`What's on your mind?`}
               error={errors.title}
               fullWidth
             />
 
             <Textarea
-              label="Content"
+              label={t`Content`}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your thoughts, questions, or ideas..."
+              placeholder={t`Share your thoughts, questions, or ideas...`}
               rows={10}
               error={errors.content}
               fullWidth
@@ -122,14 +124,14 @@ export default function CreatePostPage() {
 
             <div className="flex items-center gap-4">
               <Button type="submit" loading={loading} fullWidth>
-                Publish Post
+                <Trans>Publish Post</Trans>
               </Button>
               <button
                 type="button"
                 onClick={() => navigate(`/forums/${params.slug}`)}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >
-                Cancel
+                <Trans>Cancel</Trans>
               </button>
             </div>
           </form>

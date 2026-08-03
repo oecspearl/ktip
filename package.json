@@ -7,10 +7,19 @@
     "node": ">=22.22.0"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "npm run i18n:compile && vite",
+    "prebuild": "node scripts/optimize-images.mjs",
+    "build": "npm run i18n:compile && tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "i18n:scan": "node scripts/i18n/scan.mjs",
+    "i18n:harvest": "node scripts/i18n/harvest.mjs",
+    "i18n:apply": "node scripts/i18n/apply.mjs",
+    "i18n:check": "node scripts/i18n/check.mjs",
+    "i18n:extract": "npm run i18n:harvest && lingui extract --clean",
+    "i18n:translate": "node scripts/i18n/translate-catalogs.mjs",
+    "i18n:compile": "lingui compile && node scripts/i18n/alias-compiled.mjs",
+    "i18n": "npm run i18n:extract && npm run i18n:translate && npm run i18n:compile"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -30,6 +39,8 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@lingui/core": "^6.6.0",
+    "@lingui/react": "^6.6.0",
     "@sentry/react": "^10.68.0",
     "@sentry/vercel-edge": "^10.68.0",
     "@supabase/supabase-js": "^2.95.3",
@@ -70,6 +81,9 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@lingui/babel-plugin-lingui-macro": "^6.6.0",
+    "@lingui/cli": "^6.6.0",
+    "@lingui/format-po": "^6.6.0",
     "@sentry/vite-plugin": "^5.4.0",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.1.18",
@@ -89,6 +103,7 @@
     "shadcn": "^4.16.0",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.1.18",
+    "ts-morph": "^28.0.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",

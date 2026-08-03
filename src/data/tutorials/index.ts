@@ -39,7 +39,6 @@ import {
   dashboardAchievementsTutorialSteps,
   dashboardConnectionsTutorialSteps,
   dashboardEventsTutorialSteps,
-  dashboardProfileTutorialSteps,
   dashboardProgressTutorialSteps,
   dashboardProjectsTutorialSteps,
   dashboardSubmissionsTutorialSteps,
@@ -115,7 +114,6 @@ export const TUTORIAL_IDS = {
   VENUE_ROOM: 'venue-room',
   DASHBOARD: 'dashboard',
   SUBMISSION_RECEIPT: 'submission-receipt',
-  DASHBOARD_PROFILE: 'dashboard-profile',
   DASHBOARD_PROGRESS: 'dashboard-progress',
   DASHBOARD_ACHIEVEMENTS: 'dashboard-achievements',
   DASHBOARD_PROJECTS: 'dashboard-projects',
@@ -490,13 +488,6 @@ const REGISTRY: RegisteredTutorial[] = [
     steps: submissionReceiptTutorialSteps,
   },
   {
-    id: TUTORIAL_IDS.DASHBOARD_PROFILE,
-    route: '/dashboard/profile',
-    name: 'My CV tab',
-    description: 'Your résumé as an employer would see it.',
-    steps: dashboardProfileTutorialSteps,
-  },
-  {
     id: TUTORIAL_IDS.DASHBOARD_PROGRESS,
     route: '/dashboard/progress',
     name: 'Progress tab',
@@ -560,9 +551,12 @@ const REGISTRY: RegisteredTutorial[] = [
     description: 'Sections, prefill, and what saving marks as yours.',
     steps: cvEditTutorialSteps,
   },
+  // Lives in the dashboard now (the My CV tab); the old /cv address redirects
+  // there. This tour replaced the separate 'dashboard-profile' tab tour when
+  // the tab became the full CV page.
   {
     id: TUTORIAL_IDS.CV,
-    route: '/cv',
+    route: '/dashboard/profile',
     name: 'My CV',
     description: 'Your résumé, ready to download or publish.',
     steps: cvTutorialSteps,

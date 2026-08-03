@@ -3,9 +3,17 @@ import { Link } from 'react-router'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { HERO_WASH, pageHeroFor } from '../../lib/hero-images'
 import { Reveal } from '../ui/Reveal'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy, type Copy } from '../../i18n/copy'
 
 export interface BreadcrumbItem {
-  label: string
+  /**
+   * `Copy`, not `string`: most callers already resolve with `t\`…\`` before
+   * this ever sees the prop, but site-map-sourced crumbs arrive as harvested
+   * source strings. Resolved here rather than at every call site, same as
+   * SortSelect.
+   */
+  label: Copy
   href?: string
 }
 
@@ -43,6 +51,7 @@ export function PageHero({
   inset = false,
   spyLabel = 'Top',
 }: PageHeroProps) {
+    const { t, i18n } = useLingui()
   const src =
     image ||
     pageHeroFor(
@@ -98,7 +107,7 @@ export function PageHero({
             className="md:hidden mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
           >
             <ArrowLeft size={15} aria-hidden="true" />
-            {backCrumb.label}
+            {resolveCopy(i18n, backCrumb.label)}
           </Link>
         )}
 
@@ -139,7 +148,7 @@ export function PageHero({
             {/* The nav is hidden below md, so the old `text-base md:text-lg`
                 pair only ever rendered at its md: step — one token, same size. */}
             {breadcrumb && breadcrumb.length > 0 && (
-              <nav className="text-body-lg text-white/70 hidden md:block" aria-label="Breadcrumb">
+              <nav className="text-body-lg text-white/70 hidden md:block" aria-label={t`Breadcrumb`}>
                 {breadcrumb.map((item, i) => (
                   <span key={i}>
                     {i > 0 && (
@@ -149,10 +158,10 @@ export function PageHero({
                     )}
                     {item.href ? (
                       <Link to={item.href} className="hover:text-white transition-colors">
-                        {item.label}
+                        {resolveCopy(i18n, item.label)}
                       </Link>
                     ) : (
-                      <span className="text-white">{item.label}</span>
+                      <span className="text-white">{resolveCopy(i18n, item.label)}</span>
                     )}
                   </span>
                 ))}

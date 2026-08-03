@@ -1,5 +1,6 @@
 import { GraduationCap } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { Trans } from '@lingui/react/macro'
 
 /**
  * "Sign in with OECS Virtual Campus".
@@ -27,7 +28,7 @@ export function VirtualCampusButton({ label = 'Sign in with OECS Virtual Campus'
         </Button>
       </a>
       <p className="mt-2 text-center text-xs text-ktip-sand-500">
-        Brings your course history across and starts your CV.
+        <Trans>Brings your course history across and starts your CV.</Trans>
       </p>
     </div>
   )

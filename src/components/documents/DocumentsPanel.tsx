@@ -15,6 +15,7 @@ import {
   useEntityDocuments,
 } from '../../hooks/useEntityDocuments'
 import type { DocumentEntityType, EntityDocumentSummary } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface DocumentsPanelProps {
   entityType: DocumentEntityType
@@ -36,6 +37,7 @@ type ActiveModal = 'upload' | 'content' | 'access' | 'request' | null
  * editable copy scraped out of it.
  */
 export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: DocumentsPanelProps) {
+  const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { documents, loading } = useEntityDocuments(entityType, entityId)
@@ -57,16 +59,16 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
   const handleDownload = async (document: EntityDocumentSummary) => {
     if (!document.storage_path) return
     const ok = await openDocument(document.storage_path, document.file_name)
-    if (!ok) toast.error('Could not open the file')
+    if (!ok) toast.error(t`Could not open the file`)
   }
 
   const handleDelete = async (document: EntityDocumentSummary) => {
-    if (!window.confirm(`Delete "${document.title}"? This cannot be undone.`)) return
+    if (!window.confirm(t`Delete "${document.title}"? This cannot be undone.`)) return
     try {
       await deleteDocument({ documentId: document.id, storagePath: document.storage_path })
-      toast.success('Document deleted')
+      toast.success(t`Document deleted`)
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to delete the document')
+      toast.error(err?.message || t`Failed to delete the document`)
     }
   }
 
@@ -78,15 +80,15 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
             <FolderOpen size={20} className="text-ktip-ocean-600" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Documents</h2>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Documents</Trans></h2>
             <p className="text-sm text-ktip-sand-600">
               {canEditEntity
-                ? 'Uploaded files, with an editable copy of their contents'
+                ? t`Uploaded files, with an editable copy of their contents`
                 : entityType === 'grant'
-                  ? 'Published by the funder — the call, annexes and any templates'
+                  ? t`Published by the funder — the call, annexes and any templates`
                   : entityType === 'event'
-                    ? 'Published by the organizer — briefs, rules and any datasets'
-                    : 'Files attached to this project'}
+                    ? t`Published by the organizer — briefs, rules and any datasets`
+                    : t`Files attached to this project`}
             </p>
           </div>
         </div>
@@ -97,24 +99,24 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
             private files on a public grant page. */}
         {auth.user && canEditEntity && (
           <Button size="sm" icon={<Upload size={14} />} onClick={() => open('upload')}>
-            Upload
+            <Trans>Upload</Trans>
           </Button>
         )}
       </div>
 
       {loading ? (
-        <p className="py-8 text-center text-sm text-ktip-sand-500">Loading documents…</p>
+        <p className="py-8 text-center text-sm text-ktip-sand-500"><Trans>Loading documents…</Trans></p>
       ) : !documents || documents.length === 0 ? (
         <p className="py-8 text-center text-sm text-ktip-sand-500">
-          No documents yet.{' '}
+          <Trans>No documents yet.</Trans>{' '}
           {canEditEntity
             ? entityType === 'event'
-              ? 'Upload the challenge brief, rules or any datasets participants need.'
-              : 'Upload the call for proposals, annexes or budget templates.'
+              ? t`Upload the challenge brief, rules or any datasets participants need.`
+              : t`Upload the call for proposals, annexes or budget templates.`
             : entityType === 'grant'
-              ? 'Your own supporting documents belong on your application, not here.'
+              ? t`Your own supporting documents belong on your application, not here.`
               : entityType === 'event'
-                ? 'Your solution and its files go in the Solutions section below.'
+                ? t`Your solution and its files go in the Solutions section below.`
                 : ''}
         </p>
       ) : (

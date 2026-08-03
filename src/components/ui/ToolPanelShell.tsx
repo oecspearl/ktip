@@ -3,6 +3,9 @@ import { Link } from 'react-router'
 import { ArrowLeft, Pen, FileText, Code2, Video } from 'lucide-react'
 import { PageHero, type BreadcrumbItem } from '../layout/PageHero'
 import { cn } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /**
  * The frame every collaboration tool sits in: hero, cross-tool nav, and a
@@ -15,11 +18,13 @@ import { cn } from '../../lib/utils'
 
 export type CollabTool = 'whiteboard' | 'document' | 'code' | 'video'
 
-const TOOL_LINKS: { key: CollabTool; label: string; href: string; icon: typeof Pen }[] = [
-  { key: 'whiteboard', label: 'Whiteboards', href: '/collaborate/whiteboards', icon: Pen },
-  { key: 'document', label: 'Documents', href: '/collaborate/documents', icon: FileText },
-  { key: 'code', label: 'Code', href: '/collaborate/snippets', icon: Code2 },
-  { key: 'video', label: 'Video', href: '/collaborate/video', icon: Video },
+// Module scope, so the labels are `msg` descriptors rather than `t` — see the
+// note in ToolStatusBar. `i18n._()` resolves them at the render site below.
+const TOOL_LINKS: { key: CollabTool; label: MessageDescriptor; href: string; icon: typeof Pen }[] = [
+  { key: 'whiteboard', label: msg`Whiteboards`, href: '/collaborate/whiteboards', icon: Pen },
+  { key: 'document', label: msg`Documents`, href: '/collaborate/documents', icon: FileText },
+  { key: 'code', label: msg`Code`, href: '/collaborate/snippets', icon: Code2 },
+  { key: 'video', label: msg`Video`, href: '/collaborate/video', icon: Video },
 ]
 
 interface ToolPanelShellProps {
@@ -53,10 +58,11 @@ export function ToolPanelShell({
   fallback,
   children,
 }: ToolPanelShellProps) {
+  const { t, i18n } = useLingui()
   return (
     <>
       <PageHero
-        eyebrow="Collaboration Tools"
+        eyebrow={t`Collaboration Tools`}
         title={title}
         imageSeed={imageSeed ?? tool}
         compact
@@ -76,7 +82,7 @@ export function ToolPanelShell({
                 className="inline-flex items-center gap-1.5 font-medium text-ktip-sand-600 hover:text-ktip-ocean-600 transition-colors"
               >
                 <ArrowLeft size={14} />
-                Collaborate Hub
+                <Trans>Collaborate Hub</Trans>
               </Link>
               <span className="text-ktip-sand-300" aria-hidden>
                 |
@@ -94,7 +100,7 @@ export function ToolPanelShell({
                   )}
                 >
                   <Icon size={14} />
-                  {label}
+                  {i18n._(label)}
                 </Link>
               ))}
             </nav>
@@ -134,9 +140,15 @@ export function ToolNotFound({
 }) {
   return (
     <div className="rounded-xl border border-ktip-sand-200 bg-ktip-cream shadow-card py-16 text-center">
-      <h2 className="text-xl font-semibold text-ktip-sand-800 mb-2">{what} not found</h2>
+      <h2 className="text-xl font-semibold text-ktip-sand-800 mb-2">
+        <Trans>{what} not found</Trans>
+      </h2>
       <p className="text-ktip-sand-500 mb-4">
-        This {what.toLowerCase()} may have been deleted, or you don't have access to it.
+        {/* `what` is a noun supplied by the caller ("Whiteboard", "Document").
+            Lower-casing it mid-sentence is an English habit; both target
+            languages keep the noun as given, and the sentence reads correctly
+            with it capitalised. */}
+        <Trans>This {what} may have been deleted, or you don't have access to it.</Trans>
       </p>
       <Link to={backHref} className="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium">
         {backLabel}

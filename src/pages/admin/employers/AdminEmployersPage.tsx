@@ -21,7 +21,7 @@ const STATUS_LABELS: Record<EmployerVerificationStatus, string> = {
   unverified: 'Unverified',
   pending: 'Pending review',
   verified: 'Verified',
-  rejected: 'Rejected',
+  rejected: 'Not accepted',
   revoked: 'Revoked',
 }
 
@@ -594,7 +594,7 @@ export default function AdminEmployersPage() {
                 loading={mutating}
                 icon={<ShieldX size={16} />}
               >
-                Reject
+                Do not accept
               </Button>
               {reviewing.verification_status === 'verified' && (
                 <Button variant="secondary" onClick={() => submitVerification('revoked')} loading={mutating}>

@@ -9,6 +9,7 @@ import {
   HelpCircle,
 } from 'lucide-react'
 import type { ComponentType } from 'react'
+import { useLingui } from '@lingui/react/macro'
 
 const iconMap: Record<string, ComponentType<{ size?: number; className?: string }>> = {
   MessageSquare,
@@ -26,6 +27,7 @@ interface BoardCardProps {
 }
 
 export function BoardCard({ board, className }: BoardCardProps) {
+    const { t } = useLingui()
   const Icon = iconMap[board.icon || 'MessageSquare'] || MessageSquare
 
   return (
@@ -40,7 +42,7 @@ export function BoardCard({ board, className }: BoardCardProps) {
       }
       title={board.name}
       description={board.description}
-      cta="Open Board"
+      cta={t`Open Board`}
       className={className}
     />
   )

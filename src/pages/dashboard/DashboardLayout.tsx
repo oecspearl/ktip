@@ -11,6 +11,8 @@ import { DASH_BAR_H, DashboardTopBar } from './DashboardTopBar'
 import { ROLE_LABELS } from '../../lib/constants'
 import { cn } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Plural, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 /**
  * The single personal page. Everything that used to live on /profile/me now
@@ -18,13 +20,14 @@ import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
  * Tabs are role-aware — see dashboard-tabs.ts.
  */
 export default function DashboardLayout() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const { pathname } = useLocation()
   // Own count is always visible to the owner, so this is never null here
   const { count: connectionCount } = useConnectionCount(auth.user?.id)
 
   const profile = auth.profile
-  const displayName = profile?.display_name || 'Your dashboard'
+  const displayName = profile?.display_name || t`Your dashboard`
   const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role)
 
   // The rail is role-aware, so the tour has to wait for the profile — otherwise
@@ -74,15 +77,15 @@ export default function DashboardLayout() {
             />
             <span className="font-semibold truncate">{displayName}</span>
             {profile?.is_verified && (
-              <span className="text-white/90 shrink-0" title="Verified">
+              <span className="text-white/90 shrink-0" title={t`Verified`}>
                 <CheckCircle size={15} />
               </span>
             )}
           </span>
         }
-        title="Dashboard"
+        title={t`Dashboard`}
         imageSeed="dashboard"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Dashboard` }]}
       >
         <div className="flex flex-wrap items-center gap-2 md:justify-end">
           {profile?.roles?.map((role) => (
@@ -90,7 +93,7 @@ export default function DashboardLayout() {
               key={role}
               className="px-2.5 py-1 rounded-md bg-white/15 border border-white/25 text-white text-sm font-medium backdrop-blur-sm"
             >
-              {ROLE_LABELS[role] || role}
+              {resolveCopy(i18n, ROLE_LABELS[role] || role)}
             </span>
           ))}
           <Link
@@ -99,7 +102,7 @@ export default function DashboardLayout() {
           >
             <Users size={15} />
             <span className="font-semibold text-white">{connectionCount ?? 0}</span>
-            {connectionCount === 1 ? 'connection' : 'connections'}
+            <Plural value={connectionCount ?? 0} one="connection" other="connections" />
           </Link>
         </div>
       </PageHero>
@@ -129,7 +132,7 @@ export default function DashboardLayout() {
               <nav
                 data-tutorial="dashboard-tabs"
                 className="flex flex-row lg:flex-col gap-1 overflow-x-auto"
-                aria-label="Dashboard sections"
+                aria-label={t`Dashboard sections`}
               >
                 {tabs.map((tab) => {
                   const to = tab.external ? tab.to : `/dashboard${tab.to ? `/${tab.to}` : ''}`
@@ -154,8 +157,8 @@ export default function DashboardLayout() {
                     >
                       <tab.icon size={20} className="shrink-0" />
                       <div className="min-w-0">
-                        <div className="font-medium text-sm whitespace-nowrap">{tab.label}</div>
-                        <div className="text-xs opacity-70 hidden lg:block">{tab.description}</div>
+                        <div className="font-medium text-sm whitespace-nowrap">{i18n._(tab.label)}</div>
+                        <div className="text-xs opacity-70 hidden lg:block">{i18n._(tab.description)}</div>
                       </div>
                     </NavLink>
                   )

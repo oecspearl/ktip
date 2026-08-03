@@ -16,6 +16,8 @@ import { DropdownPanel } from '../ui/DropdownPanel'
 import { GhostOpacityControl } from '../ui/GhostOpacityControl'
 import { ghostGlowColor, useGhostMode } from '../../hooks/useGhostMode'
 import { cn } from '../../lib/utils'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 /**
  * Docked messaging panel, anchored above the FAB (bottom-right). Non-modal:
@@ -46,6 +48,7 @@ const PANEL_ENTER_MS = 260
 const PANEL_EXIT_MS = 200
 
 function MessagingPanelContent({ state }: { state: DisclosureState }) {
+  const { t } = useLingui()
   const auth = useAuth()
   const { isOpen, activeConversationId, closePanel, setActiveConversation, openPanel } =
     useMessagingPanel()
@@ -119,9 +122,9 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
   const getOtherUserName = () => {
     const conv = activeConversation
     if (!conv?.participants) return undefined
-    if (conv.is_group) return conv.name || 'Group'
+    if (conv.is_group) return conv.name || t`Group`
     const other = conv.participants.find((p) => p.user_id !== auth.user?.id)
-    return other?.user?.display_name || 'Unknown User'
+    return other?.user?.display_name || t`Unknown User`
   }
 
   const handleLeftGroup = () => {
@@ -139,7 +142,7 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
     <section
       ref={panelRef}
       role="complementary"
-      aria-label="Messages panel"
+      aria-label={t`Messages panel`}
       data-state={state}
       data-ghost={ghost.ghosted ? 'true' : undefined}
       style={
@@ -171,21 +174,21 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
           ghosted — everything else in here fades with the rest. */}
       <div className="ghost-live-row flex items-center justify-between px-4 py-2 border-b border-ktip-sand-200 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <h2 className="font-display font-bold text-ktip-sand-900 text-sm">Messages</h2>
+          <h2 className="font-display font-bold text-ktip-sand-900 text-sm"><Trans>Messages</Trans></h2>
           {/* Same number the FAB carries, kept on the panel itself: the badge
               on the trigger is hidden behind the panel once it is open, and
               "how many am I behind on" is the reason the panel was opened. */}
           {unreadCount > 0 && (
             <span
               className="min-w-[1.25rem] rounded-full bg-red-500 px-1.5 py-0.5 text-[0.6875rem] font-bold leading-none text-white tabular-nums"
-              aria-label={`${unreadCount} unread ${unreadCount === 1 ? 'message' : 'messages'}`}
+              aria-label={plural(unreadCount, { one: '# unread message', other: '# unread messages' })}
             >
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
           {threadCount > 0 && (
             <span className="text-xs text-ktip-sand-500 tabular-nums">
-              {threadCount} {threadCount === 1 ? 'conversation' : 'conversations'}
+              <Plural value={threadCount} one="# conversation" other="# conversations" />
             </span>
           )}
         </div>
@@ -196,15 +199,15 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
           <button
             onClick={ghost.ghosted ? ghost.wake : () => setPinned(!pinned)}
             aria-label={
-              ghost.ghosted ? 'Wake panel' : pinned ? 'Unpin panel' : 'Pin panel open'
+              ghost.ghosted ? t`Wake panel` : pinned ? t`Unpin panel` : t`Pin panel open`
             }
             aria-pressed={pinned}
             title={
               ghost.ghosted
-                ? 'Wake — brings the panel back without unpinning it'
+                ? t`Wake — brings the panel back without unpinning it`
                 : pinned
-                  ? 'Unpin — the panel stops fading and closes on an outside click'
-                  : 'Pin — stays open, and fades out of the way until you need it'
+                  ? t`Unpin — the panel stops fading and closes on an outside click`
+                  : t`Pin — stays open, and fades out of the way until you need it`
             }
             className={cn(
               'ghost-live p-1.5 rounded-lg transition-colors',
@@ -229,9 +232,9 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
           <div className="relative">
             <button
               onClick={() => setGhostMenuOpen((v) => !v)}
-              aria-label="Fade settings"
+              aria-label={t`Fade settings`}
               aria-expanded={ghostMenuOpen}
-              title="How a pinned panel fades"
+              title={t`How a pinned panel fades`}
               className="p-1.5 rounded-lg transition-colors hover:bg-ktip-sand-100 text-ktip-sand-500"
             >
               <ChevronDown
@@ -249,7 +252,7 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
           </div>
           <button
             onClick={closePanel}
-            aria-label="Close messages"
+            aria-label={t`Close messages`}
             className="p-1.5 rounded-lg hover:bg-ktip-sand-100 text-ktip-sand-500 transition-colors"
           >
             <X size={18} />
@@ -289,7 +292,7 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
                   className="flex items-center gap-2 text-ktip-sand-600 hover:text-ktip-sand-900 text-sm"
                 >
                   <ArrowLeft size={18} />
-                  Back
+                  <Trans>Back</Trans>
                 </button>
               </div>
               {isAssistantConversation(activeConversationId) ? (
@@ -307,8 +310,8 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
             <div className="flex items-center justify-center h-full text-ktip-sand-500">
               <div className="text-center">
                 <MessageSquare size={48} className="mx-auto mb-3 opacity-50" />
-                <p className="text-lg font-medium">Select a conversation</p>
-                <p className="text-sm mt-1">Or start a new one!</p>
+                <p className="text-lg font-medium"><Trans>Select a conversation</Trans></p>
+                <p className="text-sm mt-1"><Trans>Or start a new one!</Trans></p>
               </div>
             </div>
           )}

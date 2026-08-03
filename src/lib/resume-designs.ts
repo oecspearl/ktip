@@ -1,3 +1,6 @@
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
+
 /**
  * CV design registry — pure data, no React.
  *
@@ -27,8 +30,8 @@ export type BleedSide = 'none' | 'left' | 'right'
 
 export interface ResumeDesign {
   id: string
-  label: string
-  description: string
+  label: MessageDescriptor
+  description: MessageDescriptor
   /** Rules, circles, timeline dots — decoration, no contrast requirement. */
   accent: string
   /** Headings and links on white. Must clear 4.5:1. */
@@ -51,9 +54,9 @@ export interface ResumeDesign {
 export const RESUME_DESIGNS: Record<string, ResumeDesign> = {
   signature: {
     id: 'signature',
-    label: 'Signature',
+    label: msg`Signature`,
     description:
-      'Two-column A4 with a navy sidebar, your photo, date-left timelines and skill circles.',
+      msg`Two-column A4 with a navy sidebar, your photo, date-left timelines and skill circles.`,
     accent: '#97D700', // brand green, Pantone 375 — fills only
     accentText: '#5E8A00', // tropical-700, the minimum green that reads on white
     sidebar: '#041E42', // brand navy, Pantone 282
@@ -62,9 +65,9 @@ export const RESUME_DESIGNS: Record<string, ResumeDesign> = {
   },
   classic: {
     id: 'classic',
-    label: 'Classic',
+    label: msg`Classic`,
     description:
-      'Single column, centred header, hairline rules. No photo, no filled panels — the safest thing to email an employer.',
+      msg`Single column, centred header, hairline rules. No photo, no filled panels — the safest thing to email an employer.`,
     accent: '#041E42', // navy: rules and dots, drawn as borders
     accentText: '#041E42', // ocean-700 on white, 14:1
     sidebar: '#041E42', // unused for paint; kept so sheetSidebar never returns undefined
@@ -73,9 +76,9 @@ export const RESUME_DESIGNS: Record<string, ResumeDesign> = {
   },
   compact: {
     id: 'compact',
-    label: 'Compact',
+    label: msg`Compact`,
     description:
-      'Dense two-column at 9pt with a narrow facts column. Fits a long history onto one page.',
+      msg`Dense two-column at 9pt with a narrow facts column. Fits a long history onto one page.`,
     accent: '#97D700',
     accentText: '#163A63', // ocean-600, 8.6:1 — compact sets headings smaller
     sidebar: '#041E42',

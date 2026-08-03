@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import type { SiteEntry } from './site-map'
 
 /**
@@ -40,16 +43,16 @@ export interface SearchGroup {
   rows: SearchRow[]
 }
 
-export const GROUP_LABELS: Record<SearchKind, string> = {
-  place: 'Places & Actions',
-  help: 'Help',
-  project: 'Projects',
-  event: 'Events',
-  grant: 'Grants',
-  post: 'Forum Posts',
-  resource: 'Resources',
-  integration: 'Integrations',
-  member: 'Members',
+const GROUP_LABELS: Record<SearchKind, MessageDescriptor> = {
+  place: msg`Places & Actions`,
+  help: msg`Help`,
+  project: msg`Projects`,
+  event: msg`Events`,
+  grant: msg`Grants`,
+  post: msg`Forum Posts`,
+  resource: msg`Resources`,
+  integration: msg`Integrations`,
+  member: msg`Members`,
 }
 
 /** Panel section order. */
@@ -191,7 +194,7 @@ export function applyAiRanking(rows: SearchRow[], ids: string[]): SearchRow[] {
 export function groupRows(rows: SearchRow[]): SearchGroup[] {
   return GROUP_ORDER.map((kind) => ({
     kind,
-    label: GROUP_LABELS[kind],
+    label: i18n._(GROUP_LABELS[kind]),
     rows: rows.filter((row) => row.kind === kind),
   })).filter((group) => group.rows.length > 0)
 }

@@ -27,7 +27,7 @@ export const GRANTS_CATEGORY: HelpCategory = {
     {
       id: 'track-applications',
       title: 'How do I track my grant applications?',
-      content: `Go to "My Applications" from the Grants section.\n\nEvery application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Rejected.\n\nDrafts show a Continue action that drops you back at the step where you stopped.\n\nApplications you submitted on a funder's external site will not appear here — KTIP never sees those.`,
+      content: `Go to "My Applications" from the Grants section.\n\nEvery application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted.\n\nDrafts show a Continue action that drops you back at the step where you stopped.\n\nApplications you submitted on a funder's external site will not appear here — KTIP never sees those.`,
       tags: ['track', 'applications', 'status', 'my applications', 'grants'],
     },
     {
@@ -90,7 +90,7 @@ export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
     {
       id: 'application-status',
       title: 'What do the application statuses mean?',
-      content: `Draft — not submitted. Continue to finish it. Student drafts also need a sponsor to accept before they can be submitted.\n\nPending — submitted, waiting to be picked up.\n\nUnder Review — a reviewer is actively assessing it.\n\nApproved — successful.\n\nRejected — unsuccessful. Where the funder gave feedback, it appears with the decision.\n\nStatus changes reach you through notifications, so you do not have to keep checking the page.`,
+      content: `Draft — not submitted. Continue to finish it. Student drafts also need a sponsor to accept before they can be submitted.\n\nPending — submitted, waiting to be picked up.\n\nUnder Review — a reviewer is actively assessing it.\n\nApproved — successful.\n\nNot accepted — unsuccessful. Where the funder gave feedback, it appears with the decision.\n\nStatus changes reach you through notifications, so you do not have to keep checking the page.`,
       tags: ['status', 'track', 'pending', 'under review', 'approved', 'rejected'],
     },
     {

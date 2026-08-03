@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { type EventPageSection } from '../../types'
 import { ChevronDown, ChevronUp, MapPin, ExternalLink } from 'lucide-react'
+import { Trans } from '@lingui/react/macro'
 
 interface EventPageSectionRendererProps {
   section: EventPageSection
@@ -82,7 +83,7 @@ export function EventPageSectionRenderer({ section }: EventPageSectionRendererPr
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium text-sm mt-2 transition-colors"
               >
-                <span>View on Map</span>
+                <span><Trans>View on Map</Trans></span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             )}

@@ -4,6 +4,7 @@ import { usePublicEventSections } from '../../../hooks/useEventPageSections'
 import { presetByKey } from '../../../lib/venue-room-presets'
 import { DocumentsPanel } from '../../documents/DocumentsPanel'
 import type { Event, VenueRoom } from '../../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Host-written text: what this room is for, and the rules of the place.
@@ -23,12 +24,13 @@ export function RoomTextSection({
   config: Record<string, unknown>
   room: VenueRoom
 }) {
+  const { t } = useLingui()
   const written = typeof config.body === 'string' ? config.body.trim() : ''
   const body = written || (variant === 'objectives' ? fallbackObjectives(room) : '')
   if (!body) return null
 
   const Icon = variant === 'objectives' ? Target : ScrollText
-  const title = variant === 'objectives' ? 'What this room is for' : 'House rules'
+  const title = variant === 'objectives' ? t`What this room is for` : t`House rules`
 
   return (
     <div className="rounded-2xl border border-ktip-sand-100 bg-ktip-cream p-4 shadow-card">
@@ -99,7 +101,7 @@ export function RoomFaqPanel({ eventId }: { eventId: string }) {
   return (
     <div className="rounded-2xl border border-ktip-sand-100 bg-ktip-cream shadow-card">
       <p className="border-b border-ktip-sand-100 px-4 py-3 font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
-        Common questions
+        <Trans>Common questions</Trans>
       </p>
       <ul className="divide-y divide-ktip-sand-100">
         {items.map((item, i) => (

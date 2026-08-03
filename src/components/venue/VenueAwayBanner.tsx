@@ -1,6 +1,7 @@
 import { Moon, X } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { VENUE } from '../../lib/constants'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface VenueAwayBannerProps {
   /** True while the idle timer, not the member, is what set "Away". */
@@ -27,6 +28,7 @@ export function VenueAwayBanner({
   onDismiss,
   className,
 }: VenueAwayBannerProps) {
+  const { t } = useLingui()
   const minutes = Math.round(VENUE.IDLE_AFTER_MS / 60_000)
 
   return (
@@ -48,22 +50,24 @@ export function VenueAwayBanner({
 
         <p className="min-w-0 flex-1 text-sm text-ktip-sand-800">
           <span className="font-semibold">
-            {stillAway ? 'You are showing as Away.' : 'You were showing as Away.'}
+            {stillAway ? t`You are showing as Away.` : t`You were showing as Away.`}
           </span>{' '}
-          This tab sat in the background for {minutes} minutes, so your dot went grey
-          automatically. <span className="font-semibold underline">Click here</span> to go back to
-          Working — or pick a status in the bar above. “Do not disturb” never gets downgraded.
+          <Trans>
+            This tab sat in the background for {minutes} minutes, so your dot went grey
+            automatically. <span className="font-semibold underline">Click here</span> to go back to
+            Working — or pick a status in the bar above. “Do not disturb” never gets downgraded.
+          </Trans>
         </p>
 
         <span className="hidden shrink-0 rounded-full border border-ktip-sun-300 bg-ktip-cream px-3 py-1 text-xs font-semibold text-ktip-sand-800 sm:block">
-          I’m back
+          <Trans>I’m back</Trans>
         </span>
 
         {/* Dismissing keeps the status as it is — some people really are away. */}
         <span
           role="button"
           tabIndex={0}
-          aria-label="Dismiss"
+          aria-label={t`Dismiss`}
           onClick={(e) => {
             e.stopPropagation()
             onDismiss()

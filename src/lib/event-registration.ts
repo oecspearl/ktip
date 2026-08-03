@@ -2,6 +2,11 @@ import { supabase } from './supabase'
 import { sendNotification } from './notify'
 import { ATTENDANCE_TYPE_LABELS } from './constants'
 import type { AttendanceType } from '../types'
+import { msg } from '@lingui/core/macro'
+// The runtime singleton (not the macro), so a title can be resolved right
+// here — this is plain business logic, not a component render, so there is
+// no `t` from useLingui() to close over.
+import { i18n } from '@lingui/core'
 
 /**
  * Telling the organizer someone registered.
@@ -28,8 +33,8 @@ export function announceRegistration(params: {
   sendNotification({
     userId: params.organizerId,
     type: 'event_registration_request',
-    title: 'New registration to approve',
-    body: `${params.registrantName} wants to attend "${params.eventTitle}" as a ${how}.`,
+    title: i18n._(msg`New registration to approve`),
+    body: i18n._(msg`${params.registrantName} wants to attend "${params.eventTitle}" as a ${how}.`),
     link: '/invitations',
   })
 
@@ -66,7 +71,9 @@ export function announceRegistrationDecision(params: {
   sendNotification({
     userId: params.registrantId,
     type: 'event_registration_result',
-    title: params.approve ? 'Registration approved' : 'Registration declined',
+    title: params.approve
+      ? i18n._(msg`Registration approved`)
+      : i18n._(msg`Registration declined`),
     body: params.approve
       ? `You are registered for "${params.eventTitle}".`
       : `Your registration for "${params.eventTitle}" was not approved.`,

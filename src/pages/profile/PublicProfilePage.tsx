@@ -45,6 +45,8 @@ import { useEmployerForUser, useEmployerPortfolio } from '../../hooks/useEmploye
 import { formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 /**
  * The shareable member page, back after being folded into a drawer.
@@ -61,6 +63,7 @@ import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
  * suspended account and hides the streak from everyone but its owner.
  */
 export default function PublicProfilePage() {
+    const { t , i18n } = useLingui()
   // The route segment is a username or a uuid; everything downstream wants the
   // uuid, but links keep whichever form the visitor arrived on.
   const { id: routeParam } = useParams()
@@ -96,8 +99,8 @@ export default function PublicProfilePage() {
   // to say than "send a request", and the button already knows which it is.
   const { state: connectionState } = useConnectionStatus(auth.user?.id, id)
 
-  const displayName = profile?.display_name || 'Member'
-  usePageTitle(profile ? displayName : 'Member')
+  const displayName = profile?.display_name || t`Member`
+  usePageTitle(profile ? displayName : t`Member`)
 
   // Powers the 'explorer' hidden achievement. Viewing your own page does not
   // count — that would be a free badge for reloading. Neither does bouncing
@@ -118,12 +121,12 @@ export default function PublicProfilePage() {
   if (!profile) {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Member not found</h1>
+        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Member not found</Trans></h1>
         <p className="mt-2 text-sm text-ktip-sand-600">
-          This profile does not exist, or is no longer available.
+          <Trans>This profile does not exist, or is no longer available.</Trans>
         </p>
         <Link to="/directory" className="mt-4 inline-block">
-          <Button variant="outline" size="sm">Browse the directory</Button>
+          <Button variant="outline" size="sm"><Trans>Browse the directory</Trans></Button>
         </Link>
       </div>
     )
@@ -134,6 +137,15 @@ export default function PublicProfilePage() {
   // An organisation account's page leads with the business, not a CV it will
   // never have. Individual accounts are untouched.
   const isOrgAccount = isOrganizationAccount(profile.roles)
+  const joinedDate = formatDate(profile.created_at)
+  // Chrome around the connection-privacy notice — displayName is the member's
+  // own name and is never translated, but the sentence around it is.
+  const privateProfileMessage =
+    connectionState === 'pending_sent'
+      ? t`${displayName} has your connection request. Once they accept it you will see their full profile and be able to message them.`
+      : connectionState === 'pending_received'
+        ? t`${displayName} has asked to connect with you. Accept and you will both see each other's full profile.`
+        : t`Only ${displayName}'s connections can see their full profile or send them a message. Send a connection request to ask.`
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -150,7 +162,7 @@ export default function PublicProfilePage() {
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-3xl font-bold text-ktip-sand-900">{displayName}</h1>
               {profile.is_verified && (
-                <span className="text-ktip-ocean-500" title="Verified member">
+                <span className="text-ktip-ocean-500" title={t`Verified member`}>
                   <CheckCircle size={20} />
                 </span>
               )}
@@ -173,12 +185,12 @@ export default function PublicProfilePage() {
                 <span className="flex items-center gap-1.5">
                   <Users size={14} aria-hidden="true" />
                   <span className="font-semibold text-ktip-sand-900">{connectionCount}</span>
-                  {connectionCount === 1 ? 'connection' : 'connections'}
+                  {connectionCount === 1 ? t`connection` : t`connections`}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
                 <Calendar size={14} aria-hidden="true" />
-                Joined {formatDate(profile.created_at)}
+                <Trans>Joined {joinedDate}</Trans>
               </span>
             </div>
 
@@ -186,7 +198,7 @@ export default function PublicProfilePage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {profile.roles.map((role) => (
                   <Badge key={role} className={ROLE_COLORS[role]}>
-                    {ROLE_LABELS[role] || role}
+                    {resolveCopy(i18n, ROLE_LABELS[role] || role)}
                   </Badge>
                 ))}
               </div>
@@ -199,7 +211,7 @@ export default function PublicProfilePage() {
           <div className="mt-5">
             <Link to={`/user/${routeParam}/cv`}>
               <Button variant="outline" size="sm" icon={<FileText size={16} />}>
-                View CV
+                <Trans>View CV</Trans>
               </Button>
             </Link>
           </div>
@@ -219,7 +231,7 @@ export default function PublicProfilePage() {
                 icon={<MessageSquare size={16} />}
                 onClick={() => openPanel({ userId: profile.id })}
               >
-                Message
+                <Trans>Message</Trans>
               </Button>
             )}
             <Link to={`/grievances/report/${profile.id}`}>
@@ -229,7 +241,7 @@ export default function PublicProfilePage() {
                 icon={<Flag size={16} />}
                 className="text-ktip-sand-500 hover:bg-red-50 hover:text-red-600"
               >
-                Report
+                <Trans>Report</Trans>
               </Button>
             </Link>
           </div>
@@ -246,14 +258,10 @@ export default function PublicProfilePage() {
             <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
           </div>
           <h2 className="mt-4 font-display text-xl font-bold text-ktip-sand-900">
-            This profile is private
+            <Trans>This profile is private</Trans>
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-ktip-sand-600">
-            {connectionState === 'pending_sent'
-              ? `${displayName} has your connection request. Once they accept it you will see their full profile and be able to message them.`
-              : connectionState === 'pending_received'
-                ? `${displayName} has asked to connect with you. Accept and you will both see each other's full profile.`
-                : `Only ${displayName}'s connections can see their full profile or send them a message. Send a connection request to ask.`}
+            {privateProfileMessage}
           </p>
           {!isSelf && auth.user && (
             <div className="mt-5 flex justify-center">
@@ -308,7 +316,7 @@ export default function PublicProfilePage() {
           {portfolio && portfolio.length > 0 && (
             <div className="mt-5 border-t border-ktip-sand-100 pt-4">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ktip-sand-500">
-                Portfolio
+                <Trans>Portfolio</Trans>
               </p>
               <ul className="space-y-1.5">
                 {portfolio.slice(0, 4).map((item) => (
@@ -325,7 +333,7 @@ export default function PublicProfilePage() {
                   to={`/org/${employer.slug}`}
                   className="mt-2 inline-block text-sm font-medium text-ktip-ocean-600 hover:underline"
                 >
-                  All {portfolio.length} pieces of work
+                  <Trans>All {portfolio.length} pieces of work</Trans>
                 </Link>
               )}
             </div>
@@ -345,7 +353,7 @@ export default function PublicProfilePage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
-                Level {stats.rank.level}
+                <Trans>Level {stats.rank.level}</Trans>
               </p>
               <h2 className="font-display text-2xl font-bold text-ktip-sand-900">
                 {stats.rank.name}
@@ -354,13 +362,13 @@ export default function PublicProfilePage() {
 
             <dl className="flex gap-6">
               <div className="text-center">
-                <dt className="text-xs uppercase tracking-wider text-ktip-sand-500">Points</dt>
+                <dt className="text-xs uppercase tracking-wider text-ktip-sand-500"><Trans>Points</Trans></dt>
                 <dd className="font-display text-2xl font-bold tabular-nums text-ktip-ocean-700">
                   {stats.points}
                 </dd>
               </div>
               <div className="text-center">
-                <dt className="text-xs uppercase tracking-wider text-ktip-sand-500">Achievements</dt>
+                <dt className="text-xs uppercase tracking-wider text-ktip-sand-500"><Trans>Achievements</Trans></dt>
                 <dd className="font-display text-2xl font-bold tabular-nums text-ktip-ocean-700">
                   {stats.badge_count}
                 </dd>
@@ -371,7 +379,7 @@ export default function PublicProfilePage() {
                 <div className="text-center">
                   <dt className="flex items-center gap-1 text-xs uppercase tracking-wider text-ktip-sand-500">
                     <Flame size={12} aria-hidden="true" />
-                    Streak
+                    <Trans>Streak</Trans>
                   </dt>
                   <dd className="font-display text-2xl font-bold tabular-nums text-ktip-ocean-700">
                     {stats.streak_days}
@@ -384,7 +392,7 @@ export default function PublicProfilePage() {
           {showcase.length > 0 && (
             <div className="mt-5 border-t border-ktip-sand-100 pt-5">
               <p className="mb-3 text-xs font-medium uppercase tracking-wide text-ktip-sand-500">
-                Showcase
+                <Trans>Showcase</Trans>
               </p>
               <ul className="flex flex-wrap gap-4">
                 {showcase.map((pin) => (
@@ -402,7 +410,7 @@ export default function PublicProfilePage() {
           {isSelf && (
             <Link to="/achievements" className="mt-4 inline-block">
               <Button variant="ghost" size="sm" icon={<Trophy size={14} />}>
-                Manage your achievements
+                <Trans>Manage your achievements</Trans>
               </Button>
             </Link>
           )}
@@ -421,16 +429,16 @@ export default function PublicProfilePage() {
           )}
 
           {profile.skills?.length ? (
-            <TagRow label="Skills" values={profile.skills} tone="ocean" />
+            <TagRow label={t`Skills`} values={profile.skills} tone="ocean" />
           ) : null}
           {profile.interests?.length ? (
-            <TagRow label="Interests" values={profile.interests} tone="tropical" />
+            <TagRow label={t`Interests`} values={profile.interests} tone="tropical" />
           ) : null}
 
           {profile.open_to?.length ? (
             <div>
               <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-ktip-sand-500">
-                Open to
+                <Trans>Open to</Trans>
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {profile.open_to.map((value) => (
@@ -459,7 +467,7 @@ export default function PublicProfilePage() {
           data-spy="Achievements"
           className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
         >
-          <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900">Achievements</h2>
+          <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900"><Trans>Achievements</Trans></h2>
           <div className="flex flex-wrap gap-2">
             {badges.map((userBadge) => (
               <AchievementBadge key={userBadge.id} userBadge={userBadge} size="md" byRarity />
@@ -471,7 +479,9 @@ export default function PublicProfilePage() {
       {/* ---------- Work ---------- */}
       {projects?.length ? (
         <LinkSection
-          title="Projects"
+          id="projects"
+          spy="Projects"
+          title={t`Projects`}
           icon={<FolderKanban size={14} aria-hidden="true" />}
           items={projects.map((p) => ({ id: p.id, label: p.title, to: entityPath('project', p) }))}
         />
@@ -479,7 +489,9 @@ export default function PublicProfilePage() {
 
       {events?.length ? (
         <LinkSection
-          title="Events"
+          id="events"
+          spy="Events"
+          title={t`Events`}
           icon={<Calendar size={14} aria-hidden="true" />}
           items={events.map((e) => ({ id: e.id, label: e.title, to: entityPath('event', e) }))}
         />
@@ -522,18 +534,29 @@ function TagRow({
 }
 
 function LinkSection({
+  id,
+  spy,
   title,
   icon,
   items,
 }: {
+  /** URL fragment. Stable and English — a translated #anchor breaks every
+      shared link the moment the reader's language differs from the sharer's. */
+  id: string
+  /** Scroll-spy marker. Also English, and for a harder reason: the tutorials in
+      src/data/tutorials target these by literal string
+      (`[data-spy="Members"]`), so translating one silently breaks a page tour
+      with no error anywhere. DENY_ATTRS keeps the codemod off it; this keeps a
+      person off it too. */
+  spy: string
   title: string
   icon: React.ReactNode
   items: { id: string; label: string; to: string }[]
 }) {
   return (
     <section
-      id={title.toLowerCase()}
-      data-spy={title}
+      id={id}
+      data-spy={spy}
       className="scroll-mt-24 rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6"
     >
       <h2 className="mb-3 flex items-center gap-1.5 font-display text-lg font-bold text-ktip-sand-900">

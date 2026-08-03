@@ -27,8 +27,10 @@ import {
 } from 'lucide-react'
 import { formatDate, formatRelativeTime } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function PostDetailPage() {
+  const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -45,7 +47,7 @@ export default function PostDetailPage() {
   const [replyError, setReplyError] = useState('')
 
   const isAuthor = post?.author_id === auth.user?.id
-  const authorName = post?.author?.display_name || 'Unknown User'
+  const authorName = post?.author?.display_name || t`Unknown User`
 
   const handleSubmitReply = async (e: FormEvent) => {
     e.preventDefault()
@@ -53,7 +55,7 @@ export default function PostDetailPage() {
 
     const result = forumReplySchema.safeParse({ content: replyContent })
     if (!result.success) {
-      setReplyError(result.error.issues[0]?.message || 'Invalid reply')
+      setReplyError(result.error.issues[0]?.message || t`Invalid reply`)
       return
     }
 
@@ -68,13 +70,13 @@ export default function PostDetailPage() {
       setReplyContent('')
       refetchReplies()
     } catch (err: any) {
-      setReplyError(err.message || 'Failed to post reply')
+      setReplyError(err.message || t`Failed to post reply`)
     }
   }
 
   const handleDeletePost = async () => {
     if (!post) return
-    if (!confirm('Are you sure you want to delete this post?')) return
+    if (!confirm(t`Are you sure you want to delete this post?`)) return
 
     try {
       await deletePost(post.id)
@@ -97,7 +99,7 @@ export default function PostDetailPage() {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
-        <p className="mt-4 text-ktip-sand-600">Loading post...</p>
+        <p className="mt-4 text-ktip-sand-600"><Trans>Loading post...</Trans></p>
       </div>
     )
   }
@@ -109,14 +111,14 @@ export default function PostDetailPage() {
           <FileText size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          Post Not Found
+          <Trans>Post Not Found</Trans>
         </h2>
-        <p className="text-gray-500 mb-6">This post doesn't exist or was deleted.</p>
+        <p className="text-gray-500 mb-6"><Trans>This post doesn't exist or was deleted.</Trans></p>
         <button
           onClick={() => navigate('/forums')}
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
         >
-          Back to Forums
+          <Trans>Back to Forums</Trans>
         </button>
       </div>
     )
@@ -125,12 +127,12 @@ export default function PostDetailPage() {
   return (
     <>
       <PageHero
-        eyebrow="Forum Post"
+        eyebrow={t`Forum Post`}
         title={post.title}
         imageSeed={post.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Forums', href: '/forums' },
+          { label: t`Home`, href: '/' },
+          { label: t`Forums`, href: '/forums' },
           ...(post.board ? [{ label: post.board.name, href: `/forums/${params.slug}` }] : []),
           { label: truncate(post.title, 30) },
         ]}
@@ -139,10 +141,10 @@ export default function PostDetailPage() {
             <button
               onClick={handleDeletePost}
               className="inline-flex items-center gap-2 px-4 py-2 border border-red-400 text-red-300 text-sm font-medium rounded-lg hover:bg-red-500/20 transition-colors"
-              title="Delete post"
+              title={t`Delete post`}
             >
               <Trash2 size={14} />
-              Delete
+              <Trans>Delete</Trans>
             </button>
           ) : (
             <ReportButton
@@ -150,7 +152,7 @@ export default function PostDetailPage() {
               targetId={post.id}
               targetAuthorId={post.author_id}
               contentSnapshot={post.content}
-              targetLabel="this post"
+              targetLabel={t`this post`}
               className="text-white/70 hover:text-red-300"
             />
           )
@@ -160,7 +162,7 @@ export default function PostDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="warning" size="sm">
               <Pin size={12} className="mr-1" />
-              Pinned
+              <Trans>Pinned</Trans>
             </Badge>
           </div>
         )}
@@ -201,9 +203,9 @@ export default function PostDetailPage() {
             {/* Replies Section */}
             <div id="replies" data-spy="Replies" className="scroll-mt-24 border-t border-ktip-sand-200 pt-8">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Replies ({replies?.length || 0})
+                {t`Replies (${replies?.length || 0})`}
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-6">Join the discussion</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-6"><Trans>Join the discussion</Trans></p>
 
               {replies?.length ? (
                 <div className="mb-6">
@@ -219,7 +221,7 @@ export default function PostDetailPage() {
               ) : (
                 <div className="text-center py-6 text-gray-400">
                   <MessageCircle size={36} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No replies yet. Be the first to reply!</p>
+                  <p className="text-sm"><Trans>No replies yet. Be the first to reply!</Trans></p>
                 </div>
               )}
 
@@ -228,7 +230,7 @@ export default function PostDetailPage() {
                 <Textarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="Write a reply..."
+                  placeholder={t`Write a reply...`}
                   rows={4}
                   fullWidth
                 />
@@ -243,7 +245,7 @@ export default function PostDetailPage() {
                     disabled={!replyContent.trim()}
                     icon={<Send size={16} />}
                   >
-                    Post Reply
+                    <Trans>Post Reply</Trans>
                   </Button>
                 </div>
               </form>
@@ -263,7 +265,7 @@ export default function PostDetailPage() {
                 </p>
                 <Link to={`/forums/${params.slug}`}>
                   <button className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5">
-                    View All Posts
+                    <Trans>View All Posts</Trans>
                   </button>
                 </Link>
               </div>
@@ -272,18 +274,18 @@ export default function PostDetailPage() {
             {/* Widget 2: Post Details */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                Post Details
+                <Trans>Post Details</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4">Key information</p>
+              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
               <div className="text-sm divide-y divide-ktip-sand-100">
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Posted</span>
+                  <span className="text-gray-500"><Trans>Posted</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {formatDate(post.created_at)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500">Replies</span>
+                  <span className="text-gray-500"><Trans>Replies</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
                     {replies?.length || 0}
                   </span>

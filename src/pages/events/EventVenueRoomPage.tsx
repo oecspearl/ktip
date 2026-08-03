@@ -24,6 +24,7 @@ import {
 } from '../../lib/constants'
 import { resolveIcon } from '../../lib/icon-map'
 import { entityPath } from '../../lib/slug'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * Inside one room.
@@ -38,6 +39,7 @@ import { entityPath } from '../../lib/slug'
  * no longer differ only by their icon.
  */
 export default function EventVenueRoomPage() {
+    const { t } = useLingui()
   const params = useParams()
   const auth = useAuth()
 
@@ -62,7 +64,8 @@ export default function EventVenueRoomPage() {
   const joining = !!eventId && joinPending
   const { roster } = useVenueRoster(eventId)
 
-  usePageTitle(room ? `${room.name} — ${event?.title ?? 'Venue'}` : 'Venue room')
+  const venueFallbackTitle = t`Venue`
+  usePageTitle(room ? t`${room.name} — ${event?.title ?? venueFallbackTitle}` : t`Venue room`)
 
   const me = useMemo(
     () =>
@@ -97,7 +100,7 @@ export default function EventVenueRoomPage() {
   const signals = useRoomSignals({
     roomId,
     me: me
-      ? { userId: me.user_id, name: me.display_name || 'Member', avatarUrl: me.avatar_url }
+      ? { userId: me.user_id, name: me.display_name || t`Member`, avatarUrl: me.avatar_url }
       : null,
     // Only when a panel on this room actually uses it: reactions, a hand queue,
     // or a call somebody could present in. A room with none of the three opens
@@ -132,12 +135,12 @@ export default function EventVenueRoomPage() {
   if (!event || !room || room.event_id !== event.id) {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900">Room not found</h1>
+        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Room not found</Trans></h1>
         <Link
           to={event ? venuePath(event) : '/events'}
           className="mt-3 inline-block text-ktip-ocean-600 hover:underline"
         >
-          Back to the map
+          <Trans>Back to the map</Trans>
         </Link>
       </div>
     )
@@ -147,13 +150,13 @@ export default function EventVenueRoomPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900">
-          You are not in this venue
+          <Trans>You are not in this venue</Trans>
         </h1>
         <p className="mt-2 text-ktip-sand-600">
-          {(joinError as any)?.message || 'Register for this event to enter the venue.'}
+          {(joinError as any)?.message || t`Register for this event to enter the venue.`}
         </p>
         <Link to={entityPath('event', event)} className="mt-5 inline-block">
-          <Button>Go to the event page</Button>
+          <Button><Trans>Go to the event page</Trans></Button>
         </Link>
       </div>
     )
@@ -214,7 +217,7 @@ export default function EventVenueRoomPage() {
           </div>
           {!room.is_open && (
             <span className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-ktip-sand-200 bg-ktip-sand-100 px-3 py-1 text-xs font-medium text-ktip-sand-600">
-              <Lock size={12} aria-hidden="true" /> Closed
+              <Lock size={12} aria-hidden="true" /> <Trans>Closed</Trans>
             </span>
           )}
         </div>

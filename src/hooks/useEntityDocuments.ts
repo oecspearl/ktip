@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import {
@@ -125,7 +127,10 @@ async function requestFieldExtraction(
     headers: { 'Content-Type': 'application/json', Authorization: authorization },
     body: JSON.stringify({ entityType, markdown: markdown.slice(0, EXTRACTION_INPUT_CHARS) }),
   })
-  if (!res.ok) throw new Error(`Field extraction failed (${res.status})`)
+  if (!res.ok) {
+    const status = res.status
+    throw new Error(i18n._(msg`Field extraction failed (${status})`))
+  }
 
   const body = await res.json()
   return (body.fields as ExtractedFields) || {}
@@ -208,7 +213,7 @@ export function useUploadDocument() {
           extractedFields = await requestFieldExtraction(params.entityType, scraped.markdown)
         } catch (err: any) {
           // The scrape succeeded; only the AI pass did not. Keep the content.
-          error = err?.message || 'Field extraction failed'
+          error = err?.message || i18n._(msg`Field extraction failed`)
         }
       }
 

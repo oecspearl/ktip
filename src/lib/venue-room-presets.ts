@@ -15,15 +15,17 @@
 import type { VenueAudioMode, VenueRole, VenueRoomKind } from '../types'
 import { VENUE_PALETTE } from './venue-map'
 import type { RoomSectionId } from './venue-room-sections'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 export interface VenueRoomPreset {
   /** Slug seed. The editor appends -2, -3 … if the key is taken. */
   key: string
   name: string
   kind: VenueRoomKind
-  description: string
+  description: MessageDescriptor
   /** Why a host would place this one — shown under the name in the picker. */
-  hint: string
+  hint: MessageDescriptor
   color: string
   audio_mode: VenueAudioMode
   capacity: number | null
@@ -52,8 +54,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'main-hall',
     name: 'Main Hall',
     kind: 'main_hall',
-    description: 'Opening remarks, announcements and the closing ceremony.',
-    hint: 'Everyone at once. Hosts hold the mic.',
+    description: msg`Opening remarks, announcements and the closing ceremony.`,
+    hint: msg`Everyone at once. Hosts hold the mic.`,
     color: VENUE_PALETTE[0],
     audio_mode: 'moderated',
     capacity: null,
@@ -67,8 +69,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'networking',
     name: 'Networking Area',
     kind: 'networking',
-    description: 'Open mics. See who is here and talk freely.',
-    hint: 'The room people idle in between sessions.',
+    description: msg`Open mics. See who is here and talk freely.`,
+    hint: msg`The room people idle in between sessions.`,
     color: VENUE_PALETTE[1],
     audio_mode: 'open',
     capacity: 40,
@@ -82,8 +84,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'workshop',
     name: 'Workshop Room',
     kind: 'workshop',
-    description: 'Scheduled sessions from mentors and sponsors.',
-    hint: 'A speaker up front, hands raised to talk.',
+    description: msg`Scheduled sessions from mentors and sponsors.`,
+    hint: msg`A speaker up front, hands raised to talk.`,
     color: VENUE_PALETTE[2],
     audio_mode: 'moderated',
     capacity: 60,
@@ -97,8 +99,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'help-desk',
     name: 'Help Desk',
     kind: 'help_desk',
-    description: 'Stuck? A mentor is here.',
-    hint: 'Small and always open. Put it near the entrance.',
+    description: msg`Stuck? A mentor is here.`,
+    hint: msg`Small and always open. Put it near the entrance.`,
     color: VENUE_PALETTE[3],
     audio_mode: 'open',
     capacity: 12,
@@ -112,8 +114,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'showcase',
     name: 'Showcase Stage',
     kind: 'stage',
-    description: 'Demos and pitches.',
-    hint: 'Audience listens; presenters are granted the mic.',
+    description: msg`Demos and pitches.`,
+    hint: msg`Audience listens; presenters are granted the mic.`,
     color: VENUE_PALETTE[4],
     audio_mode: 'listen_only',
     capacity: null,
@@ -140,8 +142,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'judging',
     name: 'Judging Room',
     kind: 'judging',
-    description: 'Scoring and deliberation.',
-    hint: 'Judges and organizers only — participants cannot enter.',
+    description: msg`Scoring and deliberation.`,
+    hint: msg`Judges and organizers only — participants cannot enter.`,
     color: VENUE_PALETTE[4],
     audio_mode: 'moderated',
     capacity: 15,
@@ -155,8 +157,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'mentor-lounge',
     name: 'Mentor Lounge',
     kind: 'help_desk',
-    description: 'Where mentors regroup between sessions.',
-    hint: 'Mentors, judges and organizers only.',
+    description: msg`Where mentors regroup between sessions.`,
+    hint: msg`Mentors, judges and organizers only.`,
     color: VENUE_PALETTE[5],
     audio_mode: 'open',
     capacity: 20,
@@ -180,8 +182,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'sponsor-booth',
     name: 'Sponsor Booth',
     kind: 'sponsor_booth',
-    description: 'Meet the sponsor. Roles, prizes and questions.',
-    hint: 'Add the sponsor name and link after placing it.',
+    description: msg`Meet the sponsor. Roles, prizes and questions.`,
+    hint: msg`Add the sponsor name and link after placing it.`,
     color: VENUE_PALETTE[6],
     audio_mode: 'open',
     capacity: 25,
@@ -195,8 +197,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'team-pod',
     name: 'Team Pod',
     kind: 'breakout',
-    description: 'A small space for one team to work in.',
-    hint: 'Drop several. Rename them per team.',
+    description: msg`A small space for one team to work in.`,
+    hint: msg`Drop several. Rename them per team.`,
     color: VENUE_PALETTE[5],
     audio_mode: 'open',
     capacity: 8,
@@ -218,8 +220,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'quiet-room',
     name: 'Quiet Room',
     kind: 'breakout',
-    description: 'Heads-down focus. No audio.',
-    hint: 'Nobody can speak here, on purpose.',
+    description: msg`Heads-down focus. No audio.`,
+    hint: msg`Nobody can speak here, on purpose.`,
     color: VENUE_PALETTE[7],
     audio_mode: 'listen_only',
     capacity: null,
@@ -236,8 +238,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'registration',
     name: 'Registration Desk',
     kind: 'help_desk',
-    description: 'First stop. Check in and find your way around.',
-    hint: 'Place it beside the entrance corner.',
+    description: msg`First stop. Check in and find your way around.`,
+    hint: msg`Place it beside the entrance corner.`,
     color: VENUE_PALETTE[3],
     audio_mode: 'open',
     capacity: 10,
@@ -262,8 +264,8 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'green-room',
     name: 'Green Room',
     kind: 'breakout',
-    description: 'Speakers prepare here before going on stage.',
-    hint: 'Organizers, mentors and judges only.',
+    description: msg`Speakers prepare here before going on stage.`,
+    hint: msg`Organizers, mentors and judges only.`,
     color: VENUE_PALETTE[1],
     audio_mode: 'open',
     capacity: 10,

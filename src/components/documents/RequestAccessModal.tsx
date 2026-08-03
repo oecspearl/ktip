@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useDocumentAccessMutations } from '../../hooks/useDocumentAccess'
 import type { DocumentEntityType, EntityDocumentSummary } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface RequestAccessModalProps {
   open: boolean
@@ -22,10 +23,12 @@ export function RequestAccessModal({
   entityType,
   entityId,
 }: RequestAccessModalProps) {
+  const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { requestAccess, requestingAccess } = useDocumentAccessMutations()
   const [message, setMessage] = useState('')
+  const ownerName = document.owner_name || t`The owner`
 
   const handleSubmit = async () => {
     if (!auth.user) return
@@ -37,14 +40,14 @@ export function RequestAccessModal({
         documentTitle: document.title,
         entityType,
         entityId,
-        requesterName: auth.profile?.display_name || 'A member',
+        requesterName: auth.profile?.display_name || t`A member`,
         message: message.trim() || undefined,
       })
-      toast.success('Request sent to the document owner')
+      toast.success(t`Request sent to the document owner`)
       setMessage('')
       onClose()
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to send the request')
+      toast.error(err?.message || t`Failed to send the request`)
     }
   }
 
@@ -52,31 +55,30 @@ export function RequestAccessModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Request access"
+      title={t`Request access`}
       description={document.title}
       size="md"
     >
       <div className="space-y-4">
         <p className="text-sm text-ktip-sand-600">
-          {document.owner_name || 'The owner'} will be notified and can grant you view or edit
-          access.
+          <Trans>{ownerName} will be notified and can grant you view or edit access.</Trans>
         </p>
 
         <Textarea
-          label="Message (optional)"
+          label={t`Message (optional)`}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Say why you need it — it helps the owner decide."
+          placeholder={t`Say why you need it — it helps the owner decide.`}
           rows={3}
           fullWidth
         />
 
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={onClose} disabled={requestingAccess}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button onClick={handleSubmit} loading={requestingAccess}>
-            Send request
+            <Trans>Send request</Trans>
           </Button>
         </div>
       </div>

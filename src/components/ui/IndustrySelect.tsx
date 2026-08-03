@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Input } from './Input'
 import { INDUSTRIES, INDUSTRY_OTHER } from '../../lib/constants'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface IndustrySelectProps {
   value: string
@@ -12,6 +13,7 @@ interface IndustrySelectProps {
 // A stored value outside the curated list selects "Other" and fills
 // the text input.
 export function IndustrySelect({ value, onChange, label = 'Industry' }: IndustrySelectProps) {
+    const { t } = useLingui()
   const isCurated = value === '' || (INDUSTRIES as readonly string[]).includes(value)
   const [otherMode, setOtherMode] = useState(!isCurated)
 
@@ -33,7 +35,7 @@ export function IndustrySelect({ value, onChange, label = 'Industry' }: Industry
         onChange={(e) => handleSelect(e.target.value)}
         className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
       >
-        <option value="">Select an industry</option>
+        <option value=""><Trans>Select an industry</Trans></option>
         {[...INDUSTRIES].map((industry) => (
           <option key={industry} value={industry}>{industry}</option>
         ))}
@@ -42,7 +44,7 @@ export function IndustrySelect({ value, onChange, label = 'Industry' }: Industry
       {otherMode && (
         <Input
           type="text"
-          placeholder="Enter your industry"
+          placeholder={t`Enter your industry`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           fullWidth

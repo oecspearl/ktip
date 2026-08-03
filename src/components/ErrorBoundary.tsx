@@ -1,8 +1,17 @@
 import { Component, type ErrorInfo, type PropsWithChildren } from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { Button } from './ui/Button'
 import { AppError } from '../lib/app-error'
 import { captureException } from '../lib/monitoring'
+
+// The i18n SINGLETON, not <Trans>. This boundary sits above I18nProvider —
+// deliberately, so a crash in the provider itself is still caught — and a
+// <Trans> rendered without a provider does not fall back, it THROWS. A fallback
+// that throws unmounts the whole tree: white page, and (with Sentry-only error
+// callbacks) an empty console. i18n._() reads the module singleton directly:
+// before a catalog loads it returns the English source; after, the translation.
 
 interface State {
   hasError: boolean
@@ -45,24 +54,24 @@ export class AppErrorBoundary extends Component<PropsWithChildren, State> {
               <AlertTriangle size={40} className="text-red-500" />
             </div>
             <h1 className="text-3xl font-display font-bold text-ktip-sand-900 mb-3">
-              Something went wrong
+              {i18n._(msg`Something went wrong`)}
             </h1>
             <p className="text-ktip-sand-600 mb-8">
-              An unexpected error occurred. Please try refreshing the page or go back to the home page.
+              {i18n._(msg`An unexpected error occurred. Please try refreshing the page or go back to the home page.`)}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button onClick={this.reset} icon={<RefreshCw size={18} />}>
-                Try Again
+                {i18n._(msg`Try Again`)}
               </Button>
               <a href="/">
                 <Button variant="outline" icon={<Home size={18} />}>
-                  Go Home
+                  {i18n._(msg`Go Home`)}
                 </Button>
               </a>
             </div>
             <details className="mt-8 text-left">
               <summary className="text-sm text-ktip-sand-500 cursor-pointer hover:text-ktip-sand-700">
-                Error details
+                {i18n._(msg`Error details`)}
               </summary>
               <pre className="mt-2 p-4 bg-ktip-sand-100 rounded-xl text-xs text-ktip-sand-700 overflow-auto max-h-40">
                 {err?.message || String(err)}

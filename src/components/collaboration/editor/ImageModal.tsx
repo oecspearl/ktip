@@ -4,6 +4,7 @@ import { Modal } from '../../ui/Modal'
 import { useFileDrop } from '../../../hooks/useFileDrop'
 import { uploadDocumentImage } from '../../../lib/storage-upload'
 import { Upload, Link, Loader2 } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface ImageModalProps {
   open: boolean
@@ -14,6 +15,7 @@ interface ImageModalProps {
 const IMAGE_ACCEPT = ['image/*'] as const
 
 export function ImageModal({ open, onClose, editor }: ImageModalProps) {
+    const { t } = useLingui()
   const [mode, setMode] = useState<'upload' | 'url'>('upload')
   const [url, setUrl] = useState('')
   const [alt, setAlt] = useState('')
@@ -37,13 +39,13 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file.')
+      setError(t`Please select an image file.`)
       return
     }
 
     // Checked before optimization so a huge file is never handed to the decoder.
     if (file.size > 10 * 1024 * 1024) {
-      setError('Image must be less than 10MB.')
+      setError(t`Image must be less than 10MB.`)
       return
     }
 
@@ -55,11 +57,11 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
       setPreview(publicUrl)
       setUrl(publicUrl)
     } catch (err: any) {
-      setError(err.message || 'Failed to upload image. The storage bucket may not exist yet.')
+      setError(err.message || t`Failed to upload image. The storage bucket may not exist yet.`)
     } finally {
       setUploading(false)
     }
-  }, [])
+  }, [t])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target
@@ -96,17 +98,17 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
     }`
 
   return (
-    <Modal open={open} onClose={handleClose} title="Insert Image" size="md">
+    <Modal open={open} onClose={handleClose} title={t`Insert Image`} size="md">
       <div className="space-y-4">
         {/* Tabs */}
         <div className="flex border-b border-ktip-sand-200">
           <button type="button" className={tabClass(mode === 'upload')} onClick={() => setMode('upload')}>
             <Upload size={16} />
-            Upload from Computer
+            <Trans>Upload from Computer</Trans>
           </button>
           <button type="button" className={tabClass(mode === 'url')} onClick={() => setMode('url')}>
             <Link size={16} />
-            From URL
+            <Trans>From URL</Trans>
           </button>
         </div>
 
@@ -124,14 +126,14 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
             {preview ? (
               <div className="space-y-3">
                 <div className="relative rounded-lg overflow-hidden border border-ktip-sand-200">
-                  <img src={preview} alt="Preview" className="w-full max-h-48 object-contain bg-ktip-sand-50" />
+                  <img src={preview} alt={t`Preview`} className="w-full max-h-48 object-contain bg-ktip-sand-50" />
                 </div>
                 <button
                   type="button"
                   onClick={() => { setPreview(null); setUrl(''); fileInputRef.current?.click() }}
                   className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700"
                 >
-                  Choose a different image
+                  <Trans>Choose a different image</Trans>
                 </button>
               </div>
             ) : (
@@ -153,13 +155,13 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
                 <div className="text-center">
                   <p className="text-sm font-medium text-ktip-sand-700">
                     {uploading
-                      ? 'Uploading...'
+                      ? t`Uploading...`
                       : isDragging
-                        ? 'Drop image to upload'
-                        : 'Click or drag an image here'}
+                        ? t`Drop image to upload`
+                        : t`Click or drag an image here`}
                   </p>
                   <p className="text-xs text-ktip-sand-400 mt-1">
-                    JPG, PNG, GIF, WebP up to 10MB — resized and optimized automatically
+                    <Trans>JPG, PNG, GIF, WebP up to 10MB — resized and optimized automatically</Trans>
                   </p>
                 </div>
               </button>
@@ -167,13 +169,13 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
 
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Alt Text <span className="text-ktip-sand-400">(optional)</span>
+                <Trans>Alt Text</Trans> <span className="text-ktip-sand-400"><Trans>(optional)</Trans></span>
               </label>
               <input
                 type="text"
                 value={alt}
                 onChange={(e) => setAlt(e.target.value)}
-                placeholder="Describe the image"
+                placeholder={t`Describe the image`}
                 className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
               />
             </div>
@@ -184,7 +186,7 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
         {mode === 'url' && (
           <form onSubmit={handleUrlSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Image URL</label>
+              <label className="block text-sm font-medium text-ktip-sand-700 mb-1"><Trans>Image URL</Trans></label>
               <input
                 type="url"
                 value={url}
@@ -196,13 +198,13 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
             </div>
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                Alt Text <span className="text-ktip-sand-400">(optional)</span>
+                <Trans>Alt Text</Trans> <span className="text-ktip-sand-400"><Trans>(optional)</Trans></span>
               </label>
               <input
                 type="text"
                 value={alt}
                 onChange={(e) => setAlt(e.target.value)}
-                placeholder="Describe the image"
+                placeholder={t`Describe the image`}
                 className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
               />
             </div>
@@ -220,14 +222,14 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
             disabled={!url.trim() || uploading}
             className="px-4 py-2 btn-brand text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Insert Image
+            <Trans>Insert Image</Trans>
           </button>
           <button
             type="button"
             onClick={handleClose}
             className="px-4 py-2 text-sm text-ktip-sand-600 hover:bg-ktip-sand-100 rounded-lg transition-colors"
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
         </div>
       </div>

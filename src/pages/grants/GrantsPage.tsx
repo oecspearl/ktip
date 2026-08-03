@@ -23,19 +23,27 @@ import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personali
 import { cn, debounce } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import type { Grant } from '../../types'
+import { Trans, Plural, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 const GRANT_TYPES = [
-  { value: 'startup', label: 'Startup Funding' },
-  { value: 'research', label: 'Research Grants' },
-  { value: 'innovation', label: 'Innovation Awards' },
-  { value: 'development', label: 'Development Funds' },
-  { value: 'education', label: 'Education Grants' },
+  { value: 'startup', label: msg`Startup Funding` },
+  { value: 'research', label: msg`Research Grants` },
+  { value: 'innovation', label: msg`Innovation Awards` },
+  { value: 'development', label: msg`Development Funds` },
+  { value: 'education', label: msg`Education Grants` },
 ]
 
-const TYPE_OPTIONS = [{ value: '', label: 'All Grant Types' }, ...GRANT_TYPES]
+const TYPE_OPTIONS = [{ value: '', label: msg`All Grant Types` }, ...GRANT_TYPES]
+const OTHER_FUNDING = msg`Other Funding`
 
 export default function GrantsPage() {
-  usePageTitle('Grants')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Grants`)
+  const typeSelectOptions = useMemo(
+    () => TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: i18n._(opt.label) })),
+    [i18n]
+  )
   const [selectedType, setSelectedType] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -98,10 +106,10 @@ export default function GrantsPage() {
     return ordered.flatMap((value) => {
       const items = buckets.get(value)
       if (!items?.length) return []
-      const label = GRANT_TYPES.find((t) => t.value === value)?.label ?? 'Other Funding'
+      const label = i18n._(GRANT_TYPES.find((t) => t.value === value)?.label ?? OTHER_FUNDING)
       return [{ value, label, items }]
     })
-  }, [openGrants, selectedType, sort])
+  }, [openGrants, selectedType, sort, i18n])
 
   useTutorialAutoStart(TUTORIAL_IDS.GRANTS, !loading)
 
@@ -117,15 +125,15 @@ export default function GrantsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Grant Archives"
-        title="Grants & Funding"
+        eyebrow={t`Grant Archives`}
+        title={t`Grants & Funding`}
         image="/grants/grant-startup.webp"
         imageSeed="grants"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Grants' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Grants` }]}
         actions={
           <Link to="/grants/my-applications" data-tutorial="grants-applications">
             <Button icon={<FileText size={16} />} size="sm" className="text-sm">
-              My Applications
+              <Trans>My Applications</Trans>
             </Button>
           </Link>
         }
@@ -145,8 +153,8 @@ export default function GrantsPage() {
             <Select
               value={selectedType}
               onChange={setSelectedType}
-              options={TYPE_OPTIONS}
-              ariaLabel="Filter by grant type"
+              options={typeSelectOptions}
+              ariaLabel={t`Filter by grant type`}
             />
 
             <TagFilterSelect
@@ -157,8 +165,14 @@ export default function GrantsPage() {
 
             {!loading && grants && (
               <p className="text-sm text-gray-500">
-                Found {openGrants.length} open grant{openGrants.length !== 1 ? 's' : ''}
-                {closedGrants.length > 0 && ` · ${closedGrants.length} closed`}
+                <Plural
+                  value={openGrants.length}
+                  one="Found # open grant"
+                  other="Found # open grants"
+                />
+                {closedGrants.length > 0 && (
+                  <Trans> · {closedGrants.length} closed</Trans>
+                )}
               </p>
             )}
 
@@ -172,8 +186,8 @@ export default function GrantsPage() {
               <CollapsibleSearch
                 value={searchQuery}
                 onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                placeholder="Search grants..."
-                ariaLabel="Search grants"
+                placeholder={t`Search grants...`}
+                ariaLabel={t`Search grants`}
               />
               <ColumnToggle value={columns} onChange={setColumns} />
             </div>
@@ -184,7 +198,7 @@ export default function GrantsPage() {
               onClick={clearFilters}
               className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
             >
-              Clear all filters
+              <Trans>Clear all filters</Trans>
             </button>
           )}
         </div>
@@ -199,7 +213,7 @@ export default function GrantsPage() {
             <div>
               {openGrants.length === 0 ? (
                 <p className="text-sm text-gray-500 mb-8">
-                  No open grants match these filters — the closed ones are below.
+                  <Trans>No open grants match these filters — the closed ones are below.</Trans>
                 </p>
               ) : typeGroups.length > 1 ? (
                 <div className="space-y-2">
@@ -228,9 +242,9 @@ export default function GrantsPage() {
 
               {closedGrants.length > 0 && (
                 <CollapsibleSection
-                  title="Closed grants"
+                  title={t`Closed grants`}
                   count={closedGrants.length}
-                  subtitle="Expired or no longer accepting applications"
+                  subtitle={t`Expired or no longer accepting applications`}
                   defaultOpen={false}
                   className="mt-10"
                 >
@@ -246,12 +260,12 @@ export default function GrantsPage() {
                 <Wallet size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                No grants found
+                <Trans>No grants found</Trans>
               </h3>
               <p className="text-gray-500 mb-6">
                 {hasActiveFilters
-                  ? 'Try adjusting your filters or search query'
-                  : 'No grants are currently available'}
+                  ? t`Try adjusting your filters or search query`
+                  : t`No grants are currently available`}
               </p>
             </div>
           )}

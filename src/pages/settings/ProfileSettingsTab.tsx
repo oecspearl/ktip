@@ -29,6 +29,8 @@ import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 const IMAGE_ACCEPT = ['image/*'] as const
 
@@ -38,6 +40,7 @@ const SELF_ASSIGNABLE_SLUGS = new Set<string>(
 )
 
 export function ProfileSettingsTab() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
 
@@ -79,7 +82,7 @@ export function ProfileSettingsTab() {
     }
   }, [auth.profile, initialized])
 
-  const displayNameValue = displayName || 'User'
+  const displayNameValue = displayName || t`User`
 
   const verifiedRoles = (auth.profile?.roles || []).filter((r) => !SELF_ASSIGNABLE_SLUGS.has(r))
 
@@ -95,12 +98,12 @@ export function ProfileSettingsTab() {
     async (file: File) => {
       // Validate file
       if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file')
+        toast.error(t`Please select an image file`)
         return
       }
       // Checked before optimization so a huge file is never handed to the decoder.
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image must be less than 5MB')
+        toast.error(t`Image must be less than 5MB`)
         return
       }
 
@@ -114,9 +117,9 @@ export function ProfileSettingsTab() {
         })
 
         await auth.updateProfile({ avatar_url: publicUrl } as any)
-        toast.success('Avatar updated!')
+        toast.success(t`Avatar updated!`)
       } catch (err: any) {
-        toast.error(err.message || 'Failed to upload avatar')
+        toast.error(err.message || t`Failed to upload avatar`)
       } finally {
         setAvatarUploading(false)
       }
@@ -188,9 +191,9 @@ export function ProfileSettingsTab() {
         website: website || null,
         languages,
       })
-      toast.success('Profile updated!')
+      toast.success(t`Profile updated!`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update profile')
+      toast.error(err.message || t`Failed to update profile`)
     } finally {
       setSaving(false)
     }
@@ -200,7 +203,7 @@ export function ProfileSettingsTab() {
     <div className="space-y-6">
       {/* Avatar Section */}
       <Card id="photo" data-spy="Photo" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Photo</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4"><Trans>Profile Photo</Trans></h2>
         <div className="flex items-center gap-6" {...avatarDropProps}>
           {/* The camera lives in the hover scrim rather than a corner chip: a
               diamond has no corner to pin a chip to without it floating off the
@@ -208,7 +211,7 @@ export function ProfileSettingsTab() {
           <label className="cursor-pointer">
             <DiamondAvatar
               src={auth.profile?.avatar_url}
-              name={displayNameValue || 'You'}
+              name={displayNameValue || t`You`}
               size={80}
               frameClassName={
                 avatarDragging ? 'ring-2 ring-ktip-ocean-400 ring-offset-2' : undefined
@@ -225,14 +228,13 @@ export function ProfileSettingsTab() {
           </label>
           <div>
             <p className="text-sm text-ktip-sand-700 font-medium">
-              {avatarDragging ? 'Drop photo to upload' : 'Upload a photo'}
+              {avatarDragging ? t`Drop photo to upload` : t`Upload a photo`}
             </p>
             <p className="text-xs text-ktip-sand-500 mt-1">
-              JPG, PNG, GIF or WebP. Max 5MB. Click or drag &amp; drop — large images are resized
-              and optimized automatically.
+              <Trans>JPG, PNG, GIF or WebP. Max 5MB. Click or drag &amp; drop — large images are resized and optimized automatically.</Trans>
             </p>
             {avatarUploading && (
-              <p className="text-xs text-ktip-ocean-600 mt-1">Uploading...</p>
+              <p className="text-xs text-ktip-ocean-600 mt-1"><Trans>Uploading...</Trans></p>
             )}
           </div>
         </div>
@@ -240,10 +242,10 @@ export function ProfileSettingsTab() {
 
       {/* Profile Info */}
       <Card id="profile-info" data-spy="Profile" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4">Profile Information</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4"><Trans>Profile Information</Trans></h2>
         <div className="space-y-4">
           <Input
-            label="Display Name"
+            label={t`Display Name`}
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             error={errors.display_name}
@@ -251,21 +253,21 @@ export function ProfileSettingsTab() {
           />
 
           <Textarea
-            label="Bio"
+            label={t`Bio`}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             error={errors.bio}
             rows={4}
-            placeholder="Tell us about yourself..."
+            placeholder={t`Tell us about yourself...`}
             fullWidth
           />
 
           <Input
-            label="Organisation"
+            label={t`Organisation`}
             value={organization}
             onChange={(e) => setOrganization(e.target.value)}
             error={errors.organization}
-            placeholder="Company, university, or institution"
+            placeholder={t`Company, university, or institution`}
             fullWidth
           />
 
@@ -276,17 +278,17 @@ export function ProfileSettingsTab() {
               directory and a public profile can read the same value. */}
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
-              label="Phone"
+              label={t`Phone`}
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               error={errors.phone}
               placeholder="+1 758 000 0000"
-              helperText="Shown on your CV. Never shown in the member directory."
+              helperText={t`Shown on your CV. Never shown in the member directory.`}
               fullWidth
             />
             <Input
-              label="Website"
+              label={t`Website`}
               type="url"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
@@ -297,13 +299,13 @@ export function ProfileSettingsTab() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-medium text-ktip-sand-700">Country</label>
+            <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
             >
-              <option value="">Select a country</option>
+              <option value=""><Trans>Select a country</Trans></option>
               {[...CARIBBEAN_COUNTRIES].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -314,8 +316,8 @@ export function ProfileSettingsTab() {
 
       {/* Roles */}
       <Card id="roles" data-spy="Roles" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Roles</h2>
-        <p className="text-sm text-ktip-sand-600 mb-4">Select the roles that describe you. You can choose multiple.</p>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Roles</Trans></h2>
+        <p className="text-sm text-ktip-sand-600 mb-4"><Trans>Select the roles that describe you. You can choose multiple.</Trans></p>
         <div className="flex flex-wrap gap-2">
           {SELECTABLE_ROLES.filter((role) => SELF_ASSIGNABLE_SLUGS.has(role.value)).map((role) => {
             const isSelected = roles.includes(role.value)
@@ -331,7 +333,7 @@ export function ProfileSettingsTab() {
                 }`}
               >
                 {isSelected ? <X size={14} /> : <Plus size={14} />}
-                {role.label}
+                {resolveCopy(i18n, role.label)}
               </button>
             )
           })}
@@ -340,8 +342,7 @@ export function ProfileSettingsTab() {
         {verifiedRoles.length > 0 && (
           <div className="mt-4 pt-4 border-t border-ktip-sand-100">
             <p className="text-sm text-ktip-sand-600 mb-2">
-              Granted by verification. These can only be changed by your institution, your Chamber
-              of Commerce, or an OECS administrator.
+              <Trans>Granted by verification. These can only be changed by your institution, your Chamber of Commerce, or an OECS administrator.</Trans>
             </p>
             <div className="flex flex-wrap gap-2">
               {verifiedRoles.map((slug) => (
@@ -350,7 +351,7 @@ export function ProfileSettingsTab() {
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-ktip-tropical-200 bg-ktip-tropical-50 text-sm font-medium text-ktip-tropical-800"
                 >
                   <ShieldCheck size={14} />
-                  {ROLE_BY_SLUG[slug]?.label ?? slug}
+                  {ROLE_BY_SLUG[slug]?.label ? resolveCopy(i18n, ROLE_BY_SLUG[slug].label) : slug}
                 </span>
               ))}
             </div>
@@ -360,53 +361,53 @@ export function ProfileSettingsTab() {
 
       {/* Skills */}
       <Card id="skills" data-spy="Skills" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Skills</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Skills</Trans></h2>
         <TagInput
-          description="Add skills to help others find you in the directory."
+          description={t`Add skills to help others find you in the directory.`}
           values={skills}
           onChange={setSkills}
           suggestions={SKILL_SUGGESTIONS}
           max={LIMITS.MAX_SKILLS}
-          placeholder="Type a skill and press Enter..."
+          placeholder={t`Type a skill and press Enter...`}
         />
       </Card>
 
       {/* Interests */}
       <Card id="interests" data-spy="Interests" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Interests</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Interests</Trans></h2>
         <TagInput
-          description="Topics you care about — used to surface relevant people and opportunities."
+          description={t`Topics you care about — used to surface relevant people and opportunities.`}
           values={interests}
           onChange={setInterests}
           suggestions={INTEREST_SUGGESTIONS}
           max={LIMITS.MAX_INTERESTS}
-          placeholder="Type an interest and press Enter..."
+          placeholder={t`Type an interest and press Enter...`}
         />
       </Card>
 
       {/* Languages */}
       <Card id="languages" data-spy="Languages" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Languages</h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Languages</Trans></h2>
         <TagInput
-          description="Languages you speak. These appear on your CV — without them it can only guess one from your Virtual Campus locale."
+          description={t`Languages you speak. These appear on your CV — without them it can only guess one from your Virtual Campus locale.`}
           values={languages}
           onChange={setLanguages}
           max={12}
-          placeholder="Type a language and press Enter..."
+          placeholder={t`Type a language and press Enter...`}
         />
       </Card>
 
       {/* Openness to Collaborate */}
       <Card id="collaborate" data-spy="Collaborate" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2">Openness to Collaborate</h2>
-        <p className="text-sm text-ktip-sand-600 mb-4">Let others know what kinds of collaboration you're open to.</p>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Openness to Collaborate</Trans></h2>
+        <p className="text-sm text-ktip-sand-600 mb-4"><Trans>Let others know what kinds of collaboration you're open to.</Trans></p>
         <CollabSelect values={openTo} onChange={setOpenTo} />
       </Card>
 
       {/* Save Button */}
       <div className="flex justify-end">
         <Button onClick={handleSave} loading={saving} icon={<Save size={18} />}>
-          Save Changes
+          <Trans>Save Changes</Trans>
         </Button>
       </div>
     </div>

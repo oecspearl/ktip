@@ -1,3 +1,5 @@
+import { msg } from '@lingui/core/macro'
+
 /**
  * Screenshot annotation: the shape model and the maths, kept out of the
  * component so both are testable without a canvas. The component owns pointer
@@ -28,10 +30,10 @@ export interface Shape {
  *  app, where a CSS variable means nothing — and they must not invert in dark
  *  mode, or an annotation would change colour after it was drawn. */
 export const ANNOTATION_COLORS = [
-  { id: 'red', label: 'Red', value: '#E23D28' },
-  { id: 'sun', label: 'Yellow', value: '#FFC72C' },
-  { id: 'tropical', label: 'Green', value: '#97D700' },
-  { id: 'ocean', label: 'Navy', value: '#041E42' },
+  { id: 'red', label: msg`Red`, value: '#E23D28' },
+  { id: 'sun', label: msg`Yellow`, value: '#FFC72C' },
+  { id: 'tropical', label: msg`Green`, value: '#97D700' },
+  { id: 'ocean', label: msg`Navy`, value: '#041E42' },
 ] as const
 
 export const DEFAULT_STROKE_WIDTH = 4

@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
@@ -21,7 +23,7 @@ export function useMyKtipEnrollments() {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
       const body = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(body.error || 'Could not load enrollments')
+      if (!res.ok) throw new Error(body.error || i18n._(msg`Could not load enrollments`))
       return (body.enrollments as KtipEnrollment[]) ?? []
     },
     enabled: !!user,

@@ -3,6 +3,7 @@ import { ReportButton } from '../moderation/ReportButton'
 import type { ForumReply } from '../../types'
 import { formatRelativeTime } from '../../lib/utils'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { useLingui } from '@lingui/react/macro'
 
 interface ReplyItemProps {
   reply: ForumReply
@@ -11,6 +12,7 @@ interface ReplyItemProps {
 }
 
 export function ReplyItem({ reply, isAuthor, onDelete }: ReplyItemProps) {
+    const { t } = useLingui()
   const authorName = reply.author?.display_name || 'Unknown User'
 
   return (
@@ -42,7 +44,7 @@ export function ReplyItem({ reply, isAuthor, onDelete }: ReplyItemProps) {
             <button
               onClick={onDelete}
               className="p-1 text-ktip-sand-400 hover:text-red-500 transition-colors shrink-0"
-              title="Delete reply"
+              title={t`Delete reply`}
             >
               <Trash2 size={16} />
             </button>

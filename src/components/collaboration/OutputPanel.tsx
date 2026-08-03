@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ComponentType } from 'react'
 import { Terminal, Trash2, AlertTriangle, XCircle, Info, Clock } from 'lucide-react'
 import type { ConsoleMessage, ExecutionResult } from '../../lib/code-sandbox-utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface OutputPanelProps {
   messages: ConsoleMessage[]
@@ -25,6 +26,7 @@ const typeIcons: Record<string, ComponentType<{ size?: number; className?: strin
 }
 
 export function OutputPanel({ messages, result, running, onClear }: OutputPanelProps) {
+    const { t } = useLingui()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom on new messages
@@ -40,7 +42,7 @@ export function OutputPanel({ messages, result, running, onClear }: OutputPanelP
       <div className="flex items-center justify-between px-3 py-2 border-b border-ktip-sand-200">
         <div className="flex items-center gap-2">
           <Terminal size={14} className="text-ktip-sand-500" />
-          <span className="text-xs font-medium text-ktip-sand-600">Console Output</span>
+          <span className="text-xs font-medium text-ktip-sand-600"><Trans>Console Output</Trans></span>
           {running && <div className="w-2 h-2 rounded-full bg-ktip-sun-500 animate-pulse" />}
           {result && (
             <span className="text-xs flex items-center gap-1 text-ktip-sand-400">
@@ -53,7 +55,7 @@ export function OutputPanel({ messages, result, running, onClear }: OutputPanelP
           type="button"
           onClick={onClear}
           className="p-1 rounded hover:bg-ktip-sand-100 text-ktip-sand-400 transition-colors"
-          title="Clear output"
+          title={t`Clear output`}
         >
           <Trash2 size={12} />
         </button>
@@ -95,7 +97,7 @@ export function OutputPanel({ messages, result, running, onClear }: OutputPanelP
           </>
         ) : (
           <div className="flex items-center justify-center h-full py-8 text-ktip-sand-400">
-            <span>Run your code to see output here</span>
+            <span><Trans>Run your code to see output here</Trans></span>
           </div>
         )}
       </div>

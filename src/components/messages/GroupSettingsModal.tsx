@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import type { Conversation, Profile } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface GroupSettingsModalProps {
   open: boolean
@@ -17,6 +18,7 @@ interface GroupSettingsModalProps {
 }
 
 export function GroupSettingsModal({ open, onClose, conversation, onLeft }: GroupSettingsModalProps) {
+  const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { renameGroup, addMember, removeMember, loading } = useGroupConversationMutations()
@@ -34,9 +36,9 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
     if (!name.trim()) return
     try {
       await renameGroup(conversation.id, name)
-      toast.success('Group renamed')
+      toast.success(t`Group renamed`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to rename group')
+      toast.error(err.message || t`Failed to rename group`)
     }
   }
 
@@ -47,7 +49,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
       const memberIds = new Set(participants.map((p) => p.user_id))
       setResults(users.filter((u) => !memberIds.has(u.id)))
     } catch {
-      toast.error('Search failed')
+      toast.error(t`Search failed`)
     }
   }
 
@@ -55,18 +57,18 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
     try {
       await addMember(conversation.id, userId)
       setResults((prev) => prev.filter((u) => u.id !== userId))
-      toast.success('Member added')
+      toast.success(t`Member added`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to add member')
+      toast.error(err.message || t`Failed to add member`)
     }
   }
 
   const handleRemove = async (participantId: string) => {
     try {
       await removeMember(participantId)
-      toast.success('Member removed')
+      toast.success(t`Member removed`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to remove member')
+      toast.error(err.message || t`Failed to remove member`)
     }
   }
 
@@ -74,24 +76,24 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
     if (!myParticipant) return
     try {
       await removeMember(myParticipant.id)
-      toast.success('You left the group')
+      toast.success(t`You left the group`)
       onClose()
       onLeft?.()
     } catch (err: any) {
-      toast.error(err.message || 'Failed to leave group')
+      toast.error(err.message || t`Failed to leave group`)
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Group Settings" size="lg">
+    <Modal open={open} onClose={onClose} title={t`Group Settings`} size="lg">
       {/* Rename (admin) */}
       {isAdmin && (
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-ktip-sand-900 mb-2">Group name</label>
+          <label className="block text-sm font-semibold text-ktip-sand-900 mb-2"><Trans>Group name</Trans></label>
           <div className="flex gap-2">
             <Input value={name} onChange={(e) => setName(e.target.value)} fullWidth />
             <Button onClick={handleRename} disabled={loading || !name.trim()} size="sm">
-              Save
+              <Trans>Save</Trans>
             </Button>
           </div>
         </div>
@@ -100,13 +102,13 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
       {/* Add members (admin) */}
       {isAdmin && (
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-ktip-sand-900 mb-2">Add members</label>
+          <label className="block text-sm font-semibold text-ktip-sand-900 mb-2"><Trans>Add members</Trans></label>
           <div className="flex gap-2 mb-2">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search users by name..."
+                placeholder={t`Search users by name...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -118,7 +120,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
               disabled={searching}
               className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg disabled:opacity-50"
             >
-              Search
+              <Trans>Search</Trans>
             </button>
           </div>
           {results.length > 0 && (
@@ -126,7 +128,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
               {results.map((user) => (
                 <div key={user.id} className="flex items-center justify-between px-3 py-2">
                   <span className="text-sm font-medium text-ktip-sand-900 truncate">
-                    {user.display_name || 'Unknown User'}
+                    {user.display_name || t`Unknown User`}
                   </span>
                   <button
                     onClick={() => handleAdd(user.id)}
@@ -134,7 +136,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-lg transition-colors disabled:opacity-50"
                   >
                     <UserPlus size={14} />
-                    Add
+                    <Trans>Add</Trans>
                   </button>
                 </div>
               ))}
@@ -146,11 +148,11 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
       {/* Member list */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-ktip-sand-900 mb-2">
-          Members ({participants.length})
+          <Trans>Members ({participants.length})</Trans>
         </label>
         <div className="border border-ktip-sand-200 rounded-lg divide-y divide-ktip-sand-100 max-h-56 overflow-y-auto">
           {participants.map((participant) => {
-            const pname = participant.user?.display_name || 'Unknown User'
+            const pname = participant.user?.display_name || t`Unknown User`
             return (
               <div key={participant.id} className="flex items-center justify-between px-3 py-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -165,7 +167,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
                     onClick={() => handleRemove(participant.id)}
                     disabled={loading}
                     className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                    aria-label={`Remove ${pname}`}
+                    aria-label={t`Remove ${pname}`}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -183,7 +185,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
         className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
       >
         <LogOut size={16} />
-        Leave group
+        <Trans>Leave group</Trans>
       </button>
     </Modal>
   )

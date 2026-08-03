@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { clearSupabaseSession } from '../lib/auth-utils'
 import { RefreshCw, LogOut, AlertTriangle } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { Trans } from '@lingui/react/macro'
 
 export function SessionRecoveryBanner() {
   const auth = useAuth()
@@ -26,7 +27,7 @@ export function SessionRecoveryBanner() {
       <div className="container mx-auto flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 text-ktip-sun-800 text-sm">
           <AlertTriangle size={16} className="shrink-0" />
-          <span>Your session may have expired. Profile data couldn't be loaded.</span>
+          <span><Trans>Your session may have expired. Profile data couldn't be loaded.</Trans></span>
         </div>
         <div className="flex items-center gap-2">
           <button

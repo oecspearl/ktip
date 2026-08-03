@@ -15,36 +15,40 @@ import { keys } from '../../queries/keys'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Employer } from '../../types'
 import { slugify } from '../../lib/slug'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
-const STATUS_COPY: Record<string, { title: string; body: string; tone: string }> = {
+const STATUS_COPY: Record<string, { title: MessageDescriptor; body: MessageDescriptor; tone: string }> = {
   pending: {
-    title: 'Awaiting Chamber review',
-    body: 'Your National Chamber of Commerce is checking your submission against the corporate registry. You will be notified when a decision is made.',
+    title: msg`Awaiting Chamber review`,
+    body: msg`Your National Chamber of Commerce is checking your submission against the corporate registry. You will be notified when a decision is made.`,
     tone: 'bg-ktip-sun-50 border-ktip-sun-200 text-ktip-sun-800',
   },
   verified: {
-    title: 'Verified SME',
-    body: 'Your business is verified. You can post industry projects, offer mentorship, and access private-sector grants.',
+    title: msg`Verified SME`,
+    body: msg`Your business is verified. You can post industry projects, offer mentorship, and access private-sector grants.`,
     tone: 'bg-ktip-tropical-50 border-ktip-tropical-200 text-ktip-tropical-800',
   },
   rejected: {
-    title: 'Not approved',
-    body: 'Your Chamber did not approve this submission. Contact them directly to resolve it before resubmitting.',
+    title: msg`Not accepted`,
+    body: msg`Your Chamber did not accept this submission. Contact them directly to resolve it before resubmitting.`,
     tone: 'bg-red-50 border-red-200 text-red-700',
   },
   revoked: {
-    title: 'Verification withdrawn',
-    body: 'Your verified status has been withdrawn. Contact your Chamber of Commerce for details.',
+    title: msg`Verification withdrawn`,
+    body: msg`Your verified status has been withdrawn. Contact your Chamber of Commerce for details.`,
     tone: 'bg-red-50 border-red-200 text-red-700',
   },
 }
 
 export default function ChamberOnboardingPage() {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const queryClient = useQueryClient()
 
-  usePageTitle('Chamber verification')
+  usePageTitle(t`Chamber verification`)
 
   const { countries } = useCountries(true)
 
@@ -86,7 +90,7 @@ export default function ChamberOnboardingPage() {
   const handleSubmit = async () => {
     if (!auth.user) return
     if (!form.legal_name.trim() || !form.country_code || !form.contact_email.trim()) {
-      toast.error('Legal name, member state and contact email are required')
+      toast.error(t`Legal name, member state and contact email are required`)
       return
     }
 
@@ -112,10 +116,10 @@ export default function ChamberOnboardingPage() {
 
       if (error) throw error
 
-      toast.success('Submitted to your Chamber of Commerce')
+      toast.success(t`Submitted to your Chamber of Commerce`)
       await queryClient.invalidateQueries({ queryKey: keys.all('employers') })
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit')
+      toast.error(err.message || t`Failed to submit`)
     } finally {
       setSaving(false)
     }
@@ -125,16 +129,25 @@ export default function ChamberOnboardingPage() {
   const statusCopy = status ? STATUS_COPY[status] : null
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(var(--nav-h)+1.5rem)] pb-12">
+    <>
+      {/* Full-bleed, like every other page: the hero used to render inside the
+          form column, which left the fixed navbar floating white-on-white over
+          the page canvas. Full width puts the navy band behind the bar. */}
       <PageHero
         compact
-        eyebrow="Private sector"
-        title="Chamber of Commerce verification"
-        subtitle="Get your business vetted by your National Chamber to unlock SME features"
+        eyebrow={t`Private sector`}
+        title={t`Chamber of Commerce verification`}
+        subtitle={t`Get your business vetted by your National Chamber to unlock SME features`}
         imageSeed="chamber-onboarding"
+        breadcrumb={[
+          { label: t`Home`, href: '/' },
+          { label: t`Dashboard`, href: '/dashboard' },
+          { label: t`Chamber verification` },
+        ]}
       />
 
-      {isPending && <p className="text-ktip-sand-500">Loading…</p>}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {isPending && <p className="text-ktip-sand-500"><Trans>Loading…</Trans></p>}
 
       {!isPending && submission && statusCopy && (
         <Card className="mb-6">
@@ -147,31 +160,30 @@ export default function ChamberOnboardingPage() {
               <ShieldX size={20} className="mt-0.5 flex-shrink-0" />
             )}
             <div>
-              <p className="font-medium">{statusCopy.title}</p>
-              <p className="text-sm mt-1">{statusCopy.body}</p>
+              <p className="font-medium">{i18n._(statusCopy.title)}</p>
+              <p className="text-sm mt-1">{i18n._(statusCopy.body)}</p>
             </div>
           </div>
 
           <dl className="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-ktip-sand-500">Legal name</dt>
+              <dt className="text-ktip-sand-500"><Trans>Legal name</Trans></dt>
               <dd className="text-ktip-sand-900">{submission.legal_name}</dd>
             </div>
             <div>
-              <dt className="text-ktip-sand-500">Member state</dt>
+              <dt className="text-ktip-sand-500"><Trans>Member state</Trans></dt>
               <dd className="text-ktip-sand-900">{submission.country_code}</dd>
             </div>
             {submission.registration_number && (
               <div>
-                <dt className="text-ktip-sand-500">Registration number</dt>
+                <dt className="text-ktip-sand-500"><Trans>Registration number</Trans></dt>
                 <dd className="text-ktip-sand-900">{submission.registration_number}</dd>
               </div>
             )}
           </dl>
 
           <p className="text-xs text-ktip-sand-500 mt-4">
-            Details cannot be edited after submission — a record that could change after review would
-            carry a verified badge over unchecked data. Contact your Chamber to make corrections.
+            <Trans>Details cannot be edited after submission — a record that could change after review would carry a verified badge over unchecked data. Contact your Chamber to make corrections.</Trans>
           </p>
         </Card>
       )}
@@ -180,23 +192,22 @@ export default function ChamberOnboardingPage() {
         <Card>
           <div className="flex items-center gap-2 mb-1">
             <Building2 size={18} className="text-ktip-ocean-600" />
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900">Register your business</h2>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Register your business</Trans></h2>
           </div>
           <p className="text-sm text-ktip-sand-600 mb-5">
-            Your submission is routed to the Chamber of Commerce for the member state you select.
-            They check it against the national corporate registry.
+            <Trans>Your submission is routed to the Chamber of Commerce for the member state you select. They check it against the national corporate registry.</Trans>
           </p>
 
           <div data-tutorial="chamber-form" className="space-y-4">
             <Input
-              label="Registered legal name"
+              label={t`Registered legal name`}
               value={form.legal_name}
               onChange={(e) => setForm({ ...form, legal_name: e.target.value })}
               fullWidth
             />
 
             <Input
-              label="Trading name (optional)"
+              label={t`Trading name (optional)`}
               value={form.trading_name}
               onChange={(e) => setForm({ ...form, trading_name: e.target.value })}
               fullWidth
@@ -204,14 +215,14 @@ export default function ChamberOnboardingPage() {
 
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-                OECS member state
+                <Trans>OECS member state</Trans>
               </label>
               <select
                 value={form.country_code}
                 onChange={(e) => setForm({ ...form, country_code: e.target.value })}
                 className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
-                <option value="">Select a member state</option>
+                <option value=""><Trans>Select a member state</Trans></option>
                 {countries?.map((country) => (
                   <option key={country.code} value={country.code}>
                     {country.name}
@@ -219,19 +230,19 @@ export default function ChamberOnboardingPage() {
                 ))}
               </select>
               <p className="text-xs text-ktip-sand-500 mt-1">
-                This determines which Chamber reviews you. It cannot be changed later.
+                <Trans>This determines which Chamber reviews you. It cannot be changed later.</Trans>
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Input
-                label="Company registration number"
+                label={t`Company registration number`}
                 value={form.registration_number}
                 onChange={(e) => setForm({ ...form, registration_number: e.target.value })}
                 fullWidth
               />
               <Input
-                label="Industry"
+                label={t`Industry`}
                 value={form.industry}
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}
                 fullWidth
@@ -240,14 +251,14 @@ export default function ChamberOnboardingPage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Input
-                label="Contact email"
+                label={t`Contact email`}
                 type="email"
                 value={form.contact_email}
                 onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
                 fullWidth
               />
               <Input
-                label="Contact phone"
+                label={t`Contact phone`}
                 value={form.contact_phone}
                 onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
                 fullWidth
@@ -255,14 +266,14 @@ export default function ChamberOnboardingPage() {
             </div>
 
             <Input
-              label="Website"
+              label={t`Website`}
               value={form.website_url}
               onChange={(e) => setForm({ ...form, website_url: e.target.value })}
               fullWidth
             />
 
             <Textarea
-              label="What does the business do?"
+              label={t`What does the business do?`}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={4}
@@ -271,12 +282,13 @@ export default function ChamberOnboardingPage() {
 
             <div className="flex justify-end pt-4 border-t border-ktip-sand-100">
               <Button loading={saving} onClick={handleSubmit}>
-                Submit to Chamber
+                <Trans>Submit to Chamber</Trans>
               </Button>
             </div>
           </div>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   )
 }

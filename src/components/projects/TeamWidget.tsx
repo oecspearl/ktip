@@ -13,6 +13,8 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 // The public roster comes from a SECURITY DEFINER function with fixed columns
 // and no username, so those rows still link by uuid and the profile page
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+
 // rewrites the URL on arrival. Join requests embed the whole profile.
 import { memberPath } from '../../lib/slug'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
@@ -24,6 +26,7 @@ interface TeamWidgetProps {
 }
 
 export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps) {
+    const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { members } = useProjectMembers(projectId)
@@ -50,7 +53,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
       await respondToInvite({ membershipId: myPendingInvite.id, accept })
       toast.success(accept ? 'You joined the team!' : 'Invitation declined')
     } catch (err: any) {
-      toast.error(err.message || 'Failed to respond')
+      toast.error(err.message || t`Failed to respond`)
     }
   }
 
@@ -65,7 +68,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
       })
       toast.success(approve ? 'Added to the team' : 'Request declined')
     } catch (err: any) {
-      toast.error(err.message || 'Failed to decide the request')
+      toast.error(err.message || t`Failed to decide the request`)
     }
   }
 
@@ -74,16 +77,16 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
   return (
     <div className="mb-10">
       <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-        Team
+        <Trans>Team</Trans>
       </h3>
       <p className="text-ktip-ocean-600 text-xs italic mb-4">
-        {roster.length} {roster.length === 1 ? 'collaborator' : 'collaborators'}
+        <Plural value={roster.length} one="# collaborator" other="# collaborators" />
       </p>
 
       {myPendingInvite && (
         <div className="mb-4 p-3 bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg">
           <p className="text-sm text-ktip-sun-800 mb-2">
-            You've been invited to join this project as {myPendingInvite.role}.
+            <Trans>You've been invited to join this project as {myPendingInvite.role}.</Trans>
           </p>
           <div className="flex gap-2">
             <button
@@ -92,7 +95,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
               className="flex items-center gap-1 px-3 py-1.5 btn-brand text-xs font-bold rounded-lg disabled:opacity-50"
             >
               <Check size={14} />
-              Accept
+              <Trans>Accept</Trans>
             </button>
             <button
               onClick={() => handleRespond(false)}
@@ -100,7 +103,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
               className="flex items-center gap-1 px-3 py-1.5 bg-ktip-sand-100 text-gray-700 text-xs font-bold rounded-lg hover:bg-ktip-sand-200 transition-colors disabled:opacity-50"
             >
               <X size={14} />
-              Decline
+              <Trans>Decline</Trans>
             </button>
           </div>
         </div>
@@ -110,7 +113,11 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
       {isOwner && pendingRequests.length > 0 && (
         <div className="mb-4 space-y-2 rounded-lg border border-ktip-ocean-200 bg-ktip-ocean-50/60 p-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-700">
-            {pendingRequests.length} request{pendingRequests.length === 1 ? '' : 's'} to collaborate
+            <Plural
+              value={pendingRequests.length}
+              one="# request to collaborate"
+              other="# requests to collaborate"
+            />
           </p>
           {pendingRequests.map((req) => (
             <div key={req.id} className="text-sm">
@@ -118,7 +125,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
                 to={memberPath(req.requester ?? { id: req.requester_id })}
                 className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600"
               >
-                {req.requester?.display_name || 'A member'}
+                {req.requester?.display_name || t`A member`}
               </Link>
               {req.message && (
                 <p className="mt-0.5 text-xs text-ktip-sand-600 italic">"{req.message}"</p>
@@ -130,7 +137,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
                   className="flex items-center gap-1 px-2.5 py-1 btn-brand text-xs font-bold rounded-lg disabled:opacity-50"
                 >
                   <UserCheck size={13} />
-                  Accept
+                  <Trans>Accept</Trans>
                 </button>
                 <button
                   onClick={() => handleDecide(req.id, req.requester_id, false)}
@@ -138,7 +145,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
                   className="flex items-center gap-1 px-2.5 py-1 bg-ktip-sand-100 text-gray-700 text-xs font-bold rounded-lg hover:bg-ktip-sand-200 transition-colors disabled:opacity-50"
                 >
                   <UserX size={13} />
-                  Decline
+                  <Trans>Decline</Trans>
                 </button>
               </div>
             </div>
@@ -148,32 +155,37 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
 
       {roster.length > 0 ? (
         <div className="space-y-3 mb-4">
-          {roster.map((member) => (
-            <div key={member.user_id} className="flex items-center gap-3">
+          {roster.map((member) => {
+            // A person's name is never translated. The placeholder shown when
+            // there isn't one is ours, and is.
+            const memberName = member.display_name || t`Member`
+            return (
+              <div key={member.user_id} className="flex items-center gap-3">
               {/* The avatar opens the quick-look drawer; the name is a real
                   link, so a team member's profile can be shared or opened in a
                   new tab the same way the owner's can. */}
               <DiamondAvatar
                 src={member.avatar_url}
-                name={member.display_name || 'Member'}
+                name={memberName}
                 size={40}
                 onClick={() => openMember(member.user_id)}
-                title={`Preview ${member.display_name || 'member'}`}
+                title={t`Preview ${memberName}`}
               />
               <div className="min-w-0">
                 <Link
                   to={`/user/${member.user_id}`}
                   className="block text-sm font-medium text-ktip-sand-900 truncate hover:text-ktip-ocean-600 transition-colors"
                 >
-                  {member.display_name || 'Unknown User'}
+                  {member.display_name || t`Unknown User`}
                 </Link>
-                <p className="text-xs text-gray-500 capitalize">{member.role}</p>
+                  <p className="text-xs text-gray-500 capitalize">{member.role}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 mb-4">No collaborators yet.</p>
+        <p className="text-sm text-gray-500 mb-4"><Trans>No collaborators yet.</Trans></p>
       )}
 
       {isOwner && (
@@ -183,7 +195,7 @@ export function TeamWidget({ projectId, projectTitle, isOwner }: TeamWidgetProps
             className="w-full px-4 py-2.5 border border-ktip-ocean-600 text-ktip-ocean-600 text-sm font-bold rounded-lg hover:bg-ktip-ocean-50 transition-colors flex items-center justify-center gap-1.5"
           >
             <Settings size={16} />
-            Manage Team
+            <Trans>Manage Team</Trans>
           </button>
           <ManageTeamModal
             open={modalOpen}

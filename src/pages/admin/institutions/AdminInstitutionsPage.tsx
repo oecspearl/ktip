@@ -24,6 +24,12 @@ const KIND_LABELS: Record<InstitutionKind, string> = {
   chamber: 'Chamber of Commerce',
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  verified: 'Verified',
+  rejected: 'Not accepted',
+}
+
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   verified: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
@@ -74,7 +80,7 @@ export default function AdminInstitutionsPage() {
           .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
           .filter(Boolean),
       })
-      toast.success(approve ? 'Institution verified' : 'Institution rejected')
+      toast.success(approve ? 'Institution verified' : 'Institution not accepted')
       setSelected(null)
       refetch()
     } catch (err: any) {
@@ -85,7 +91,7 @@ export default function AdminInstitutionsPage() {
   const handleMemberReview = async (memberId: string, approve: boolean) => {
     try {
       await reviewMember({ memberId, approve })
-      toast.success(approve ? 'Member approved' : 'Member rejected')
+      toast.success(approve ? 'Member approved' : 'Member not accepted')
       refetchMembers()
     } catch (err: any) {
       toast.error(err.message || 'Failed to review member')
@@ -126,7 +132,7 @@ export default function AdminInstitutionsPage() {
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
             <option value="verified">Verified</option>
-            <option value="rejected">Rejected</option>
+            <option value="rejected">Not accepted</option>
           </select>
           {(kindFilter || statusFilter) && (
             <button
@@ -161,7 +167,7 @@ export default function AdminInstitutionsPage() {
                     )}
                     <span className="font-medium text-ktip-sand-900">{institution.name}</span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${STATUS_COLORS[institution.status]}`}>
-                      {institution.status}
+                      {STATUS_LABELS[institution.status] ?? institution.status}
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200">
                       {KIND_LABELS[institution.kind]}
@@ -241,7 +247,7 @@ export default function AdminInstitutionsPage() {
                 loading={reviewing}
                 onClick={() => handleReview(false)}
               >
-                Reject
+                Do not accept
               </Button>
               <Button size="sm" loading={reviewing} onClick={() => handleReview(true)}>
                 Verify institution
@@ -274,7 +280,7 @@ export default function AdminInstitutionsPage() {
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   <Button variant="outline" size="sm" onClick={() => handleMemberReview(member.id, false)}>
-                    Reject
+                    Do not accept
                   </Button>
                   <Button size="sm" onClick={() => handleMemberReview(member.id, true)}>
                     Approve

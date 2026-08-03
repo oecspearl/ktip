@@ -6,6 +6,7 @@ import { AssistantBubble } from './AssistantBubble'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
 import { useAuth } from '../../contexts/AuthContext'
 import { ASSISTANT_NAME, ASSISTANT_TAGLINE } from '../../lib/assistant'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The KTIP Assistant thread. Same shape as ChatWindow — header, scrollable
@@ -13,6 +14,7 @@ import { ASSISTANT_NAME, ASSISTANT_TAGLINE } from '../../lib/assistant'
  * no useMessages, no realtime, nothing to persist server-side.
  */
 export function AssistantChatWindow() {
+  const { t } = useLingui()
   const auth = useAuth()
   const navigate = useNavigate()
 
@@ -72,8 +74,8 @@ export function AssistantChatWindow() {
         <button
           onClick={assistant.clearHistory}
           className="p-2 text-ktip-sand-500 hover:text-ktip-sand-900 hover:bg-ktip-sand-50 rounded-lg transition-colors shrink-0"
-          aria-label="Clear conversation"
-          title="Clear conversation"
+          aria-label={t`Clear conversation`}
+          title={t`Clear conversation`}
         >
           <Trash2 size={18} />
         </button>
@@ -114,8 +116,8 @@ export function AssistantChatWindow() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask a question, or say where you want to go..."
-            aria-label={`Message ${ASSISTANT_NAME}`}
+            placeholder={t`Ask a question, or say where you want to go...`}
+            aria-label={t`Message ${ASSISTANT_NAME}`}
             rows={1}
             className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
           />
@@ -125,7 +127,7 @@ export function AssistantChatWindow() {
             disabled={!input.trim() || assistant.loading}
             icon={<Send size={18} />}
           >
-            Send
+            <Trans>Send</Trans>
           </Button>
         </div>
       </form>

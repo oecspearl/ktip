@@ -6,6 +6,7 @@ import { useAttachmentUrl } from '../../hooks/useMessages'
 import { ReportButton } from '../moderation/ReportButton'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { LinkedText } from '../ui/LinkedText'
+import { useLingui } from '@lingui/react/macro'
 
 interface MessageBubbleProps {
   message: Message
@@ -81,7 +82,8 @@ function AttachmentCard({ attachment, isOwn }: { attachment: MessageAttachment; 
 }
 
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
-  const senderName = message.sender?.display_name || 'Unknown'
+  const { t } = useLingui()
+  const senderName = message.sender?.display_name || t`Unknown`
   const attachments = message.attachments ?? []
   const hasText = message.content.trim().length > 0
 

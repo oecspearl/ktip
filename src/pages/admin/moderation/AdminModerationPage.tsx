@@ -34,6 +34,8 @@ import { REPORT_CATEGORIES } from '../../../components/moderation/ReportModal'
 import { formatDate } from '../../../lib/utils'
 import { cn } from '../../../lib/utils'
 import type { ContentReport, ModerationSeverity, ModerationTerm } from '../../../types'
+import { useLingui } from '@lingui/react/macro'
+import { resolveCopy, type Copy } from '../../../i18n/copy'
 
 type TabId = 'reports' | 'automated' | 'terms' | 'settings'
 
@@ -50,7 +52,7 @@ const STATUS_COLORS: Record<string, string> = {
   dismissed: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
 }
 
-const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+const CATEGORY_LABELS: Record<string, Copy> = Object.fromEntries(
   REPORT_CATEGORIES.map((c) => [c.value, c.label])
 )
 
@@ -65,6 +67,7 @@ const TARGET_LABELS: Record<string, string> = {
 }
 
 export default function AdminModerationPage() {
+    const { i18n } = useLingui()
   const toast = useToast()
   const auth = useAuth()
 
@@ -279,7 +282,7 @@ export default function AdminModerationPage() {
                           </span>
                         )}
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200">
-                          {CATEGORY_LABELS[report.category] ?? report.category}
+                          {resolveCopy(i18n, CATEGORY_LABELS[report.category] ?? report.category)}
                         </span>
                       </div>
                       {report.content_snapshot && (
@@ -468,7 +471,7 @@ export default function AdminModerationPage() {
                 </span>
               )}
               <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-ktip-sand-100 text-ktip-sand-700 border border-ktip-sand-200">
-                {CATEGORY_LABELS[selected.category] ?? selected.category}
+                {resolveCopy(i18n, CATEGORY_LABELS[selected.category] ?? selected.category)}
               </span>
             </div>
 
@@ -606,7 +609,7 @@ export default function AdminModerationPage() {
               <option value="">Unspecified</option>
               {REPORT_CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>
-                  {c.label}
+                  {resolveCopy(i18n, c.label)}
                 </option>
               ))}
             </select>

@@ -23,15 +23,17 @@ import {
   CheckCircle,
   Loader2,
 } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function GrantApplicationPage() {
+    const { t, i18n } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
   const toast = useToast()
 
   const { grant, loading: grantLoading } = useGrant(params.id)
-  usePageTitle(grant ? `Apply — ${grant.title}` : 'Apply for Grant')
+  usePageTitle(grant ? t`Apply — ${grant.title}` : t`Apply for Grant`)
 
   const { application: existingApplication, loading: applicationLoading } = useDraftApplication(
     params.id,
@@ -48,19 +50,19 @@ export default function GrantApplicationPage() {
   const isStudent = !!auth.profile?.roles?.includes('student')
 
   const steps = GRANT_APPLICATION_STEPS
-  const stepNames = steps.map((s) => s.title)
+  const stepNames = steps.map((s) => i18n._(s.title))
   const totalSteps = steps.length
   const isReviewStep = currentStep === totalSteps - 1
   const currentStepConfig = steps[currentStep]
 
-  const getTitle = () => applicationData.title || 'Untitled Application'
+  const getTitle = () => applicationData.title || t`Untitled Application`
 
   // Hydrate from existing draft once; redirect if already submitted
   const hasLoadedDraftRef = useRef(false)
   useEffect(() => {
     if (!existingApplication || hasLoadedDraftRef.current) return
     if (existingApplication.status !== 'draft') {
-      toast.info('You have already applied for this grant.')
+      toast.info(t`You have already applied for this grant.`)
       navigate(`/grants/${params.id}`, { replace: true })
       return
     }
@@ -113,7 +115,8 @@ export default function GrantApplicationPage() {
       if (field.required) {
         const val = data[field.name]
         if (!val || !String(val).trim()) {
-          stepErrors[field.name] = `${field.label} is required`
+          const label = i18n._(field.label)
+          stepErrors[field.name] = t`${label} is required`
         }
       }
     }
@@ -130,9 +133,9 @@ export default function GrantApplicationPage() {
     try {
       autoSave.cancel()
       await persistDraft()
-      toast.success('Draft saved')
+      toast.success(t`Draft saved`)
     } catch {
-      toast.error('Failed to save draft')
+      toast.error(t`Failed to save draft`)
     }
   }
 
@@ -167,7 +170,8 @@ export default function GrantApplicationPage() {
       if (Object.keys(stepErrors).length > 0) {
         setErrors(stepErrors)
         setCurrentStep(i)
-        toast.error(`Please complete the "${steps[i].title}" step`)
+        const stepTitle = i18n._(steps[i].title)
+        toast.error(t`Please complete the "${stepTitle}" step`)
         window.scrollTo({ top: 0, behavior: 'smooth' })
         return
       }
@@ -192,7 +196,7 @@ export default function GrantApplicationPage() {
         application_data: applicationData,
         current_step: currentStep,
       })
-      toast.success('Application submitted! A copy is saved in your dashboard.')
+      toast.success(t`Application submitted! A copy is saved in your dashboard.`)
 
       // The submit trigger writes the receipt, so it exists by now. Fall back to
       // the applications list if it can't be read for any reason.
@@ -205,7 +209,7 @@ export default function GrantApplicationPage() {
       navigate(receipt ? `/dashboard/submissions/${receipt.id}` : '/grants/my-applications')
     } catch (error: any) {
       console.error('Submit error:', error)
-      toast.error('Failed to submit application')
+      toast.error(t`Failed to submit application`)
     }
   }
 
@@ -213,7 +217,7 @@ export default function GrantApplicationPage() {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-        <p className="mt-4 text-ktip-sand-600">Loading application...</p>
+        <p className="mt-4 text-ktip-sand-600"><Trans>Loading application...</Trans></p>
       </div>
     )
   }
@@ -221,19 +225,19 @@ export default function GrantApplicationPage() {
   return (
     <>
       <PageHero
-        eyebrow="Grant Application"
+        eyebrow={t`Grant Application`}
         title={grant.title}
         image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
         imageSeed={grant.id}
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Grants', href: '/grants' },
+          { label: t`Home`, href: '/' },
+          { label: t`Grants`, href: '/grants' },
           { label: truncate(grant.title, 30), href: `/grants/${grant.id}` },
-          { label: 'Apply' },
+          { label: t`Apply` },
         ]}
       >
         <p className="text-sm text-white/70 mt-1 flex items-center">
-          Step {currentStep + 1} of {totalSteps}
+          <Trans>Step {currentStep + 1} of {totalSteps}</Trans>
           <SaveStatusBadge status={autoSave.status} />
         </p>
       </PageHero>
@@ -284,9 +288,9 @@ export default function GrantApplicationPage() {
             {isReviewStep && (
               <div id="review" data-spy="Review" className="scroll-mt-24 mt-8">
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-ktip-sand-900">Review & Submit</h3>
+                  <h3 className="text-lg font-semibold text-ktip-sand-900"><Trans>Review & Submit</Trans></h3>
                   <p className="text-sm text-ktip-sand-500 mt-1">
-                    Review your application before submitting. You can go back to edit any section.
+                    <Trans>Review your application before submitting. You can go back to edit any section.</Trans>
                   </p>
                 </div>
                 <div className="border border-ktip-sand-200 rounded-xl p-6 bg-ktip-sand-50/30">
@@ -315,7 +319,7 @@ export default function GrantApplicationPage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
               >
                 <ArrowLeft size={16} />
-                Back
+                <Trans>Back</Trans>
               </button>
             ) : (
               <button
@@ -324,7 +328,7 @@ export default function GrantApplicationPage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
               >
                 <ArrowLeft size={16} />
-                Back to Grant
+                <Trans>Back to Grant</Trans>
               </button>
             )}
 
@@ -337,7 +341,7 @@ export default function GrantApplicationPage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-200 rounded-xl text-sm font-medium text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors disabled:opacity-50"
               >
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                Save Draft
+                <Trans>Save Draft</Trans>
               </button>
 
               {/* Next / Submit */}
@@ -348,7 +352,7 @@ export default function GrantApplicationPage() {
                   disabled={saving}
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-xl text-sm font-medium hover:bg-brand-green hover:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-colors disabled:opacity-50"
                 >
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : 'Next'}
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : t`Next`}
                   {!saving && <ArrowRight size={16} />}
                 </button>
               ) : (
@@ -359,7 +363,7 @@ export default function GrantApplicationPage() {
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-brand-navy rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
                 >
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                  Submit Application
+                  <Trans>Submit Application</Trans>
                 </button>
               )}
             </div>

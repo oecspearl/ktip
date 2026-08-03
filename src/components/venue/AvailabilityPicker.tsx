@@ -8,15 +8,18 @@ import {
 import { AvailabilityDot } from './AvailabilityDot'
 import { DropdownPanel } from '../ui/DropdownPanel'
 import type { VenueAvailability } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 type Choice = Exclude<VenueAvailability, 'offline'>
 
 /** 'offline' is never selectable — it is derived, not declared. */
-const CHOICES: { value: Choice; hint: string }[] = [
-  { value: 'working', hint: 'Heads down, but reachable' },
-  { value: 'help_wanted', hint: 'Ask a mentor to come find you' },
-  { value: 'busy', hint: 'Please do not interrupt' },
-  { value: 'away', hint: 'Stepped out' },
+const CHOICES: { value: Choice; hint: MessageDescriptor }[] = [
+  { value: 'working', hint: msg`Heads down, but reachable` },
+  { value: 'help_wanted', hint: msg`Ask a mentor to come find you` },
+  { value: 'busy', hint: msg`Please do not interrupt` },
+  { value: 'away', hint: msg`Stepped out` },
 ]
 
 interface AvailabilityPickerProps {
@@ -41,6 +44,7 @@ export function AvailabilityPicker({
   isAuto,
   className,
 }: AvailabilityPickerProps) {
+  const { i18n } = useLingui()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -75,7 +79,7 @@ export function AvailabilityPicker({
       >
         <AvailabilityDot availability={value} size="sm" />
         <span>{VENUE_AVAILABILITY_LABELS[value] || value}</span>
-        {isAuto && <span className="text-xs opacity-70">(auto)</span>}
+        {isAuto && <span className="text-xs opacity-70"><Trans>(auto)</Trans></span>}
         <ChevronDown size={14} className={cn('transition-transform', open && 'rotate-180')} />
       </button>
 
@@ -103,7 +107,7 @@ export function AvailabilityPicker({
                 <span className="block text-sm font-medium text-ktip-sand-900">
                   {VENUE_AVAILABILITY_LABELS[choice.value]}
                 </span>
-                <span className="block text-xs text-ktip-sand-500">{choice.hint}</span>
+                <span className="block text-xs text-ktip-sand-500">{i18n._(choice.hint)}</span>
               </span>
             </button>
           ))}

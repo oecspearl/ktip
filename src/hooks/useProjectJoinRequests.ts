@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
 import type { ProjectJoinRequest, ProjectTeamMember } from '../types'
+import { useLingui } from '@lingui/react/macro'
 
 /**
  * "Request to collaborate" — the requester-initiated half of project
@@ -105,6 +106,7 @@ export function useProjectTeam(projectId: string | undefined) {
 }
 
 export function useProjectJoinRequestMutations() {
+    const { t } = useLingui()
   const queryClient = useQueryClient()
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: keys.all(DOMAIN) })
@@ -132,7 +134,7 @@ export function useProjectJoinRequestMutations() {
       if (error) {
         // Partial unique index on (project_id, requester_id) WHERE pending
         if (error.code === '23505') {
-          throw new Error('You already have a pending request for this project.')
+          throw new Error(t`You already have a pending request for this project.`)
         }
         throw error
       }
@@ -140,8 +142,8 @@ export function useProjectJoinRequestMutations() {
       sendNotification({
         userId: params.ownerId,
         type: 'project_join_request',
-        title: 'Request to collaborate',
-        body: `${params.requesterName} wants to join "${params.projectTitle}"`,
+        title: t`Request to collaborate`,
+        body: t`${params.requesterName} wants to join "${params.projectTitle}"`,
         link: `/invitations`,
       })
 
@@ -167,10 +169,10 @@ export function useProjectJoinRequestMutations() {
       sendNotification({
         userId: params.requesterId,
         type: 'project_join_result',
-        title: params.approve ? 'You joined a project team' : 'Collaboration request declined',
+        title: params.approve ? t`You joined a project team` : t`Collaboration request declined`,
         body: params.approve
-          ? `You are now on the team for "${params.projectTitle}".`
-          : `Your request to collaborate on "${params.projectTitle}" was declined.`,
+          ? t`You are now on the team for "${params.projectTitle}".`
+          : t`Your request to collaborate on "${params.projectTitle}" was declined.`,
         link: `/projects/${params.projectId}`,
       })
     },

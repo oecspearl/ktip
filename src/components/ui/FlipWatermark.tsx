@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
-const WATERMARK_WORDS = ['Innovate', 'Connect', 'Collaborate']
+// Single words on purpose — the animation flips one character at a time, so
+// each translation should stay one word (Innover / Innovar, not a phrase).
+const WATERMARK_WORDS = [msg`Innovate`, msg`Connect`, msg`Collaborate`]
 
 /** Giant background word that flips character-by-character between words. */
 export function FlipWatermark({
@@ -10,6 +14,7 @@ export function FlipWatermark({
   className: string
   charClassName?: string
 }) {
+  const { i18n } = useLingui()
   const [wordIndex, setWordIndex] = useState(0)
 
   useEffect(() => {
@@ -20,7 +25,7 @@ export function FlipWatermark({
     return () => clearInterval(interval)
   }, [])
 
-  const word = WATERMARK_WORDS[wordIndex]
+  const word = i18n._(WATERMARK_WORDS[wordIndex])
 
   return (
     <p

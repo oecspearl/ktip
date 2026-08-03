@@ -1,4 +1,7 @@
 import type { Language } from '../components/collaboration/CodeMirrorEditor'
+import { msg } from '@lingui/core/macro'
+// Not a component — the singleton is the same instance LanguageProvider activates.
+import { i18n } from '@lingui/core'
 
 // --- Types ---
 
@@ -105,7 +108,7 @@ export function executeJavaScript(code: string): Promise<ExecutionResult> {
     // 5-second timeout for infinite loops
     setTimeout(() => {
       if (!resolved) {
-        error = { message: 'Execution timeout (5s limit)' }
+        error = { message: i18n._(msg`Execution timeout (5s limit)`) }
         finish()
       }
     }, 5000)

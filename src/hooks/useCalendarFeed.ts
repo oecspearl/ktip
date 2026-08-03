@@ -18,6 +18,7 @@ import { foldRsvpsIntoEvents } from '../lib/calendar'
 import type { CalendarItem, CalendarItemKind } from '../lib/calendar'
 import { entityPath } from '../lib/slug'
 import type { Event, Grant } from '../types'
+import { useLingui } from '@lingui/react/macro'
 
 export type CalendarScope = 'platform' | 'personal'
 
@@ -34,33 +35,6 @@ interface CalendarFeedOptions {
   enabled?: boolean
 }
 
-function eventItem(event: Event, dimmed: boolean): CalendarItem {
-  return {
-    id: `event:${event.id}`,
-    kind: 'event',
-    title: event.title,
-    start: event.start_date,
-    end: event.end_date,
-    href: entityPath('event', event),
-    chipClass: EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event,
-    dotClass: EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event,
-    gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event,
-    badgeLabel: EVENT_TYPE_LABELS[event.event_type] ?? 'Event',
-    subtitle:
-      event.status === 'draft'
-        ? 'Draft'
-        : event.is_virtual
-          ? 'Virtual'
-          : event.location || 'Location TBA',
-    icon: event.is_virtual ? Video : MapPin,
-    avatarUrl: event.organizer?.avatar_url,
-    avatarName: event.organizer?.display_name,
-    statusLabel:
-      event.status === 'cancelled' ? 'Cancelled' : event.status === 'draft' ? 'Draft' : undefined,
-    dimmed,
-  }
-}
-
 /**
  * Aggregates every dated record relevant to a dashboard into `CalendarItem`s for
  * the visible month window. Each kind is fetched only when it is toggled on.
@@ -73,7 +47,33 @@ export function useCalendarFeed({
   userId,
   enabled = true,
 }: CalendarFeedOptions) {
+    const { t } = useLingui()
   const wants = (kind: CalendarItemKind) => kinds.includes(kind)
+
+  const eventItem = (event: Event, dimmed: boolean): CalendarItem => ({
+    id: `event:${event.id}`,
+    kind: 'event',
+    title: event.title,
+    start: event.start_date,
+    end: event.end_date,
+    href: entityPath('event', event),
+    chipClass: EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event,
+    dotClass: EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event,
+    gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event,
+    badgeLabel: EVENT_TYPE_LABELS[event.event_type] ?? t`Event`,
+    subtitle:
+      event.status === 'draft'
+        ? t`Draft`
+        : event.is_virtual
+          ? t`Virtual`
+          : event.location || t`Location TBA`,
+    icon: event.is_virtual ? Video : MapPin,
+    avatarUrl: event.organizer?.avatar_url,
+    avatarName: event.organizer?.display_name,
+    statusLabel:
+      event.status === 'cancelled' ? t`Cancelled` : event.status === 'draft' ? t`Draft` : undefined,
+    dimmed,
+  })
 
   const fetchFeed = async (): Promise<CalendarItem[]> => {
     // Multi-day spans can start before the window — reach back a month for them
@@ -157,14 +157,14 @@ export function useCalendarFeed({
       items.push({
         id: `grant_deadline:${grant.id}`,
         kind: 'grant_deadline',
-        title: `Deadline: ${grant.title}`,
+        title: t`Deadline: ${grant.title}`,
         start: grant.deadline,
         href: entityPath('grant', grant),
         chipClass: CALENDAR_KIND_COLORS.grant_deadline,
         dotClass: CALENDAR_KIND_DOT_COLORS.grant_deadline,
         gradientClass: CALENDAR_KIND_GRADIENTS.grant_deadline,
-        badgeLabel: 'Grant Deadline',
-        subtitle: 'Applications close',
+        badgeLabel: t`Grant Deadline`,
+        subtitle: t`Applications close`,
         icon: Timer,
       })
     }
@@ -192,7 +192,7 @@ export function useCalendarFeed({
         chipClass: CALENDAR_KIND_COLORS.rsvp,
         dotClass: CALENDAR_KIND_DOT_COLORS.rsvp,
         gradientClass: CALENDAR_KIND_GRADIENTS.rsvp,
-        badgeLabel: 'Registered',
+        badgeLabel: t`Registered`,
         subtitle: RSVP_STATUS_LABELS[rsvp.status] ?? undefined,
         icon: event.is_virtual ? Video : MapPin,
         statusLabel:
@@ -203,17 +203,17 @@ export function useCalendarFeed({
     }
 
     for (const application of applications) {
-      const title = application.grant?.title ?? 'Grant application'
+      const title = application.grant?.title ?? t`Grant application`
       items.push({
         id: `grant_application:${application.id}`,
         kind: 'grant_application',
-        title: `Application: ${title}`,
+        title: t`Application: ${title}`,
         start: application.updated_at,
         href: scope === 'platform' ? '/admin/grants' : '/grants/my-applications',
         chipClass: CALENDAR_KIND_COLORS.grant_application,
         dotClass: CALENDAR_KIND_DOT_COLORS.grant_application,
         gradientClass: CALENDAR_KIND_GRADIENTS.grant_application,
-        badgeLabel: 'Application',
+        badgeLabel: t`Application`,
         subtitle: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
         icon: FileText,
         statusLabel: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,

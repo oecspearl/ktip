@@ -10,6 +10,7 @@ import { formatDate } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
 import type { Event } from '../../types'
 import { entityPath } from '../../lib/slug'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 /**
  * The Virtual Hackathon index — and the only static route in this feature.
@@ -20,7 +21,8 @@ import { entityPath } from '../../lib/slug'
  * `howTo`-only site-map entries instead.
  */
 export default function HackathonsPage() {
-  usePageTitle('Virtual Hackathon')
+    const { t } = useLingui()
+  usePageTitle(t`Virtual Hackathon`)
 
   const { events, loading } = useEvents({ type: 'hackathon' })
 
@@ -49,14 +51,14 @@ export default function HackathonsPage() {
     // The markers stay — the tour in data/tutorials/listings.ts anchors to them.
     <div data-spy-off className="min-h-screen bg-ktip-canvas">
       <PageHero
-        eyebrow="Virtual Hackathon"
-        title="Build something in a weekend"
-        subtitle="A live venue with rooms, teams, mentors and judging — all in the browser."
+        eyebrow={t`Virtual Hackathon`}
+        title={t`Build something in a weekend`}
+        subtitle={t`A live venue with rooms, teams, mentors and judging — all in the browser.`}
         imageSeed="hackathon"
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Events', href: '/events' },
-          { label: 'Virtual Hackathon' },
+          { label: t`Home`, href: '/' },
+          { label: t`Events`, href: '/events' },
+          { label: t`Virtual Hackathon` },
         ]}
       />
 
@@ -75,7 +77,7 @@ export default function HackathonsPage() {
               <section id="live" data-spy="Live" className="scroll-mt-24 mb-12">
                 <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold text-ktip-sand-900">
                   <Radio size={18} className="text-ktip-tropical-700" aria-hidden="true" />
-                  Happening now
+                  <Trans>Happening now</Trans>
                 </h2>
                 <div className="space-y-4">
                   {live.map((event) => (
@@ -87,7 +89,7 @@ export default function HackathonsPage() {
 
             {upcoming.length > 0 && (
               <section id="upcoming" data-spy="Coming up" className="scroll-mt-24 mb-12">
-                <h2 className="mb-4 font-display text-xl font-bold text-ktip-sand-900">Coming up</h2>
+                <h2 className="mb-4 font-display text-xl font-bold text-ktip-sand-900"><Trans>Coming up</Trans></h2>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {upcoming.map((event) => (
                     <EventCard key={event.id} event={event} />
@@ -98,7 +100,7 @@ export default function HackathonsPage() {
 
             {past.length > 0 && (
               <section id="past" data-spy="Past" className="scroll-mt-24">
-                <h2 className="mb-4 font-display text-xl font-bold text-ktip-sand-900">Past</h2>
+                <h2 className="mb-4 font-display text-xl font-bold text-ktip-sand-900"><Trans>Past</Trans></h2>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {past.slice(0, 6).map((event) => (
                     <EventCard key={event.id} event={event} />
@@ -111,13 +113,13 @@ export default function HackathonsPage() {
               <div className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-12 text-center">
                 <Trophy size={30} className="mx-auto mb-3 text-ktip-sand-400" aria-hidden="true" />
                 <h2 className="font-display text-lg font-bold text-ktip-sand-900">
-                  No hackathons scheduled yet
+                  <Trans>No hackathons scheduled yet</Trans>
                 </h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-ktip-sand-600">
-                  When one is announced it will show up here, along with a way into the live venue.
+                  <Trans>When one is announced it will show up here, along with a way into the live venue.</Trans>
                 </p>
                 <Link to="/events" className="mt-5 inline-block">
-                  <Button variant="secondary">Browse all events</Button>
+                  <Button variant="secondary"><Trans>Browse all events</Trans></Button>
                 </Link>
               </div>
             )}
@@ -129,11 +131,12 @@ export default function HackathonsPage() {
 }
 
 function LiveHackathonRow({ event }: { event: Event }) {
+    const { t } = useLingui()
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-ktip-tropical-200 bg-ktip-cream p-5 shadow-card sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">
         <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-ktip-tropical-200 bg-ktip-tropical-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-ktip-tropical-800">
-          <Radio size={11} aria-hidden="true" /> Live
+          <Radio size={11} aria-hidden="true" /> <Trans>Live</Trans>
         </span>
         <h3 className="font-display text-lg font-bold text-ktip-sand-900">
           <Link to={entityPath('event', event)} className="hover:text-ktip-ocean-600 hover:underline">
@@ -150,12 +153,12 @@ function LiveHackathonRow({ event }: { event: Event }) {
           </span>
           <span className="flex items-center gap-1">
             <MapPin size={12} aria-hidden="true" />
-            {event.is_virtual ? 'Virtual' : event.location || 'Location TBA'}
+            {event.is_virtual ? t`Virtual` : event.location || t`Location TBA`}
           </span>
           {event.capacity != null && (
             <span className="flex items-center gap-1">
               <Users size={12} aria-hidden="true" />
-              {event.capacity} places
+              <Plural value={event.capacity} one="# place" other="# places" />
             </span>
           )}
         </div>
@@ -164,12 +167,12 @@ function LiveHackathonRow({ event }: { event: Event }) {
       <div className="flex shrink-0 flex-wrap gap-2">
         {event.has_venue && (
           <Link to={venuePath(event)}>
-            <Button size="sm">Enter the venue</Button>
+            <Button size="sm"><Trans>Enter the venue</Trans></Button>
           </Link>
         )}
         <Link to={entityPath('event', event)}>
           <Button size="sm" variant="secondary">
-            Details
+            <Trans>Details</Trans>
           </Button>
         </Link>
       </div>

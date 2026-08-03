@@ -1,4 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import {
   CALENDAR_KIND_COLORS,
   CALENDAR_KIND_DOT_COLORS,
@@ -90,13 +92,13 @@ export interface RsvpLike {
 export function rsvpRelation(status: string): CalendarItemRelation {
   const relation: CalendarItemRelation = {
     kind: 'rsvp',
-    label: RSVP_RELATION_LABELS[status] ?? 'Registered',
+    label: RSVP_RELATION_LABELS[status] ?? i18n._(msg`Registered`),
     dotClass: RSVP_STATUS_DOT_COLORS[status] ?? CALENDAR_KIND_DOT_COLORS.rsvp,
     chipClass: RSVP_STATUS_COLORS[status] ?? CALENDAR_KIND_COLORS.rsvp,
   }
   if (status === 'cancelled') {
     relation.negative = true
-    relation.detail = 'You are no longer attending'
+    relation.detail = i18n._(msg`You are no longer attending`)
   }
   return relation
 }

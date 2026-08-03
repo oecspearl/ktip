@@ -10,6 +10,7 @@ import {
   StackedList,
   type SheetProps,
 } from './SheetFrame'
+import { Trans } from '@lingui/react/macro'
 
 /**
  * "Compact" — dense two-column at 7.5–8pt with a narrow facts column.
@@ -55,7 +56,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {profile.about.length > 0 && (
             <section>
               <PlainHeading color={color} design={design} size="9.5pt">
-                Profile
+                <Trans>Profile</Trans>
               </PlainHeading>
               <div className="space-y-1.5 text-[8pt] leading-snug text-neutral-700">
                 {profile.about.map((paragraph) => (
@@ -68,7 +69,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.roles.length > 0 && (
             <section className="mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Experience
+                <Trans>Experience</Trans>
               </PlainHeading>
               <StackedList
                 items={data.roles.map((role) => ({
@@ -95,7 +96,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.education.length > 0 && (
             <section className="mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Education
+                <Trans>Education</Trans>
               </PlainHeading>
               <StackedList
                 items={data.education.map((item) => ({
@@ -115,7 +116,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.courses.length > 0 && (
             <section className="mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Courses
+                <Trans>Courses</Trans>
               </PlainHeading>
               <CourseTable data={data} dense />
             </section>
@@ -124,7 +125,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.credentials.length > 0 && (
             <section className="mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Certificates
+                <Trans>Certificates</Trans>
               </PlainHeading>
               <CredentialList data={data} dense />
             </section>
@@ -133,7 +134,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.projects.length > 0 && (
             <section className="mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Projects
+                <Trans>Projects</Trans>
               </PlainHeading>
               {/* Dense, like everything else in this design's main column. */}
               <ProjectList data={data} dense />
@@ -143,7 +144,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.awards.length > 0 && (
             <section className="mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Awards &amp; Recognition
+                <Trans>Awards &amp; Recognition</Trans>
               </PlainHeading>
               <AwardList data={data} dense />
             </section>
@@ -152,7 +153,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.academic.length > 0 && (
             <section className="resume-avoid-break mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Academic Competencies
+                <Trans>Academic Competencies</Trans>
               </PlainHeading>
               <AcademicTable data={data} color={color} design={design} />
             </section>
@@ -161,7 +162,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.interests.trim() !== '' && (
             <section className="resume-avoid-break mt-5">
               <PlainHeading color={color} design={design} size="9.5pt">
-                Interests
+                <Trans>Interests</Trans>
               </PlainHeading>
               <p className="text-[7.5pt] leading-snug text-neutral-700">{data.interests}</p>
             </section>
@@ -171,14 +172,14 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
         {/* ── Facts column ── */}
         <aside className="border-l border-neutral-300 pl-4">
           <PlainHeading color={color} design={design} size="9pt">
-            Contact
+            <Trans>Contact</Trans>
           </PlainHeading>
           <ContactList data={data} iconClass="text-neutral-500" className="text-neutral-700" />
 
           {data.languages.length > 0 && (
             <>
               <PlainHeading color={color} design={design} size="9pt" className="mt-5">
-                Languages
+                <Trans>Languages</Trans>
               </PlainHeading>
               <ul className="space-y-1 text-[7.5pt] text-neutral-700">
                 {data.languages.map((language) => (
@@ -191,7 +192,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.skills.length > 0 && (
             <section className="resume-avoid-break">
               <PlainHeading color={color} design={design} size="9pt" className="mt-5">
-                Skills
+                <Trans>Skills</Trans>
               </PlainHeading>
               <div className="space-y-2">
                 {data.skills.map((group) => (
@@ -209,7 +210,7 @@ export function CompactSheet({ data, theme = 'mono', design, thumbnail }: SheetP
           {data.professionalSkills.length > 0 && (
             <section className="resume-avoid-break">
               <PlainHeading color={color} design={design} size="9pt" className="mt-5">
-                Strengths
+                <Trans>Strengths</Trans>
               </PlainHeading>
               <ul className="list-disc space-y-0.5 pl-3.5 text-[7.5pt] text-neutral-700">
                 {data.professionalSkills.map((skill) => (

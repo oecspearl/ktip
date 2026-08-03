@@ -14,15 +14,18 @@ import {
 import { canvasToBlob } from '../../lib/screen-capture'
 import { Button } from '../ui/Button'
 import { cn } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 /** A 4K screen grab is ~8MB of PNG and nothing in triage needs that; capping
  *  the long edge keeps text legible while staying inside the bucket's 5MB. */
 const MAX_EDGE = 1600
 
-const TOOLS: { id: AnnotationTool; label: string; icon: typeof Pencil }[] = [
-  { id: 'ellipse', label: 'Circle', icon: Circle },
-  { id: 'arrow', label: 'Arrow', icon: MoveUpRight },
-  { id: 'pen', label: 'Draw', icon: Pencil },
+const TOOLS: { id: AnnotationTool; label: MessageDescriptor; icon: typeof Pencil }[] = [
+  { id: 'ellipse', label: msg`Circle`, icon: Circle },
+  { id: 'arrow', label: msg`Arrow`, icon: MoveUpRight },
+  { id: 'pen', label: msg`Draw`, icon: Pencil },
 ]
 
 interface ScreenshotAnnotatorProps {
@@ -39,6 +42,7 @@ interface ScreenshotAnnotatorProps {
  * to be understood — no viewer, no shape data, no replay.
  */
 export function ScreenshotAnnotator({ image, onDone, onRetake, onCancel }: ScreenshotAnnotatorProps) {
+    const { t, i18n } = useLingui()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const baseRef = useRef<HTMLImageElement | null>(null)
   const [ready, setReady] = useState(false)
@@ -127,15 +131,15 @@ export function ScreenshotAnnotator({ image, onDone, onRetake, onCancel }: Scree
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <div role="group" aria-label="Annotation tool" className="flex items-center gap-1">
+        <div role="group" aria-label={t`Annotation tool`} className="flex items-center gap-1">
           {TOOLS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setTool(id)}
               aria-pressed={tool === id}
-              aria-label={label}
-              title={label}
+              aria-label={i18n._(label)}
+              title={i18n._(label)}
               className={cn(
                 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors',
                 tool === id
@@ -144,20 +148,20 @@ export function ScreenshotAnnotator({ image, onDone, onRetake, onCancel }: Scree
               )}
             >
               <Icon size={14} />
-              {label}
+              {i18n._(label)}
             </button>
           ))}
         </div>
 
-        <div role="group" aria-label="Marker colour" className="flex items-center gap-1.5 ml-1">
+        <div role="group" aria-label={t`Marker colour`} className="flex items-center gap-1.5 ml-1">
           {ANNOTATION_COLORS.map((c) => (
             <button
               key={c.id}
               type="button"
               onClick={() => setColor(c.value)}
-              aria-label={c.label}
+              aria-label={i18n._(c.label)}
               aria-pressed={color === c.value}
-              title={c.label}
+              title={i18n._(c.label)}
               style={{ backgroundColor: c.value }}
               className={cn(
                 'w-5 h-5 rounded-full border border-black/10 transition-transform hover:scale-110',
@@ -172,8 +176,8 @@ export function ScreenshotAnnotator({ image, onDone, onRetake, onCancel }: Scree
             type="button"
             onClick={() => setShapes(undo)}
             disabled={shapes.length === 0}
-            aria-label="Undo last mark"
-            title="Undo"
+            aria-label={t`Undo last mark`}
+            title={t`Undo`}
             className="p-1.5 rounded-lg text-ktip-sand-600 hover:bg-ktip-sand-50 disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
           >
             <Undo2 size={16} />
@@ -181,8 +185,8 @@ export function ScreenshotAnnotator({ image, onDone, onRetake, onCancel }: Scree
           <button
             type="button"
             onClick={onRetake}
-            aria-label="Take the screenshot again"
-            title="Retake"
+            aria-label={t`Take the screenshot again`}
+            title={t`Retake`}
             className="p-1.5 rounded-lg text-ktip-sand-600 hover:bg-ktip-sand-50 transition-colors"
           >
             <RotateCcw size={16} />
@@ -197,21 +201,21 @@ export function ScreenshotAnnotator({ image, onDone, onRetake, onCancel }: Scree
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          aria-label="Screenshot — drag to mark it up"
+          aria-label={t`Screenshot — drag to mark it up`}
           className="block w-full h-auto touch-none cursor-crosshair"
         />
       </div>
 
       <p className="text-xs text-ktip-sand-500">
-        Drag on the image to mark what you are talking about. Only the marked-up copy is sent.
+        <Trans>Drag on the image to mark what you are talking about. Only the marked-up copy is sent.</Trans>
       </p>
 
       <div className="flex justify-end gap-2">
         <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
-          Discard
+          <Trans>Discard</Trans>
         </Button>
         <Button size="sm" type="button" loading={saving} onClick={handleDone}>
-          Attach screenshot
+          <Trans>Attach screenshot</Trans>
         </Button>
       </div>
     </div>

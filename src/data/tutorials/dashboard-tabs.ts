@@ -28,16 +28,8 @@ const panelStep = (title: string, description: string): TutorialStep => ({
   scrollMode: 'top',
 })
 
-export const dashboardProfileTutorialSteps: TutorialStep[] = [
-  panelStep(
-    'Your CV, in the dashboard',
-    'The same document as the full CV page, rendered here so you can see what an employer would.\n\nThe line under the heading is the important bit: it tells you which design is in use and whether the CV is published or private.\n\nEdit opens the editor. Design & download goes to the full page, where the designs and the PDF export live.'
-  ),
-  railStep(
-    'Progress, Achievements and Connections sit beside this tab. Anything you have published — projects and events — has its own tab too.'
-  ),
-  replayStep,
-]
+// The profile (My CV) tab has no tour here: it hosts the full CV page, whose
+// own tour (see ./cv) runs on /dashboard/profile.
 
 export const dashboardProgressTutorialSteps: TutorialStep[] = [
   panelStep(

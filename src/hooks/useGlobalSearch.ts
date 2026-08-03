@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, truncate } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -167,7 +169,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       kind: 'project',
       title: p.title,
       description: truncate(plainText(p.summary || p.description), 100),
-      category: 'Projects',
+      category: i18n._(msg`Projects`),
       href: entityPath('project', p),
       icon: 'FolderKanban',
     })
@@ -179,7 +181,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       kind: 'event',
       title: e.title,
       description: truncate(plainText(e.summary || e.description), 100),
-      category: 'Events',
+      category: i18n._(msg`Events`),
       href: entityPath('event', e),
       icon: 'Calendar',
     })
@@ -191,7 +193,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       kind: 'grant',
       title: g.title,
       description: truncate(plainText(g.summary || g.description), 100),
-      category: 'Funding',
+      category: i18n._(msg`Funding`),
       href: entityPath('grant', g),
       icon: 'DollarSign',
     })
@@ -205,7 +207,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       kind: 'post',
       title: post.title,
       description: truncate(plainText(post.content), 100),
-      category: post.board?.name || 'Forums',
+      category: post.board?.name || i18n._(msg`Forums`),
       href: forumPostPath(slug, post),
       icon: 'MessageSquare',
     })
@@ -217,7 +219,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       kind: 'resource',
       title: r.title,
       description: truncate(plainText(r.summary || r.description), 100),
-      category: 'Resources',
+      category: i18n._(msg`Resources`),
       href: entityPath('resource', r),
       icon: 'BookOpen',
     })
@@ -229,7 +231,7 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       kind: 'integration',
       title: i.name,
       description: truncate(plainText(i.summary || i.description), 100),
-      category: 'Integrations',
+      category: i18n._(msg`Integrations`),
       // No integration detail route — land on the directory tab, pre-filtered.
       href: `/resources?tab=integrations&search=${encodeURIComponent(i.name)}`,
       icon: 'Plug',
@@ -240,9 +242,9 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
     rows.push({
       id: `member:${m.id}`,
       kind: 'member',
-      title: m.display_name || 'Member',
+      title: m.display_name || i18n._(msg`Member`),
       description: truncate(plainText(m.bio) || m.country || '', 100),
-      category: 'Directory',
+      category: i18n._(msg`Directory`),
       href: `/directory?member=${m.id}`,
       icon: 'User',
     })

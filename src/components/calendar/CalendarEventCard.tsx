@@ -5,6 +5,7 @@ import { CALENDAR_FALLBACK_GRADIENT, CALENDAR_PILL_CLASS } from '../../lib/const
 import { CalendarAccentBar, calendarItemLabel } from './CalendarAccentBar'
 import type { CalendarItem } from '../../lib/calendar'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { useLingui } from '@lingui/react/macro'
 
 interface CalendarEventCardProps {
   item: CalendarItem
@@ -28,10 +29,11 @@ function timeRangeLabel(item: CalendarItem): string {
 }
 
 function Avatar({ url, name }: { url?: string | null; name?: string | null }) {
+  const { t } = useLingui()
   return (
     <DiamondAvatar
       src={url}
-      name={name || 'Organizer'}
+      name={name || t`Organizer`}
       size={20}
       frameClassName="ring-1 ring-white/70"
     />
@@ -49,13 +51,14 @@ export function CalendarEventCard({
   style,
   className,
 }: CalendarEventCardProps) {
+  const { t } = useLingui()
   const allDay = variant === 'all-day'
-  const timeLabel = allDay ? 'All day' : timeRangeLabel(item)
+  const timeLabel = allDay ? t`All day` : timeRangeLabel(item)
   // Roughly: under ~7% of a 12-hour window is well under an hour of screen
   const showMeta = allDay || heightPct >= 7
   const showFooter = !allDay && heightPct >= 11
 
-  const ariaLabel = [calendarItemLabel(item), allDay ? 'all day' : timeLabel]
+  const ariaLabel = [calendarItemLabel(item), allDay ? t`all day` : timeLabel]
     .filter(Boolean)
     .join(', ')
 

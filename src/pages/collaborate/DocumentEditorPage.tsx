@@ -23,8 +23,10 @@ import { ToolPanelShell, ToolNotFound } from '../../components/ui/ToolPanelShell
 import { ToolTitleInput } from '../../components/ui/ToolTitleInput'
 import { ToolStatusBar, StatusMetric, SaveIndicator } from '../../components/ui/ToolStatusBar'
 import { truncate } from '../../lib/utils'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function DocumentEditorPage() {
+    const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -32,7 +34,7 @@ export default function DocumentEditorPage() {
 
   const [editor, setEditor] = useState<Editor | null>(null)
   const [docId, setDocId] = useState<string | undefined>(params.id)
-  const [docTitle, setDocTitle] = useState('Untitled Document')
+  const [docTitle, setDocTitle] = useState(t`Untitled Document`)
   const [contentLoaded, setContentLoaded] = useState(false)
 
   // Modal states
@@ -56,7 +58,7 @@ export default function DocumentEditorPage() {
   // Can edit = owner OR shared with edit permission (migration 053)
   const canEdit = isOwner || sharePermission === 'edit'
 
-  usePageTitle(docTitle || 'Document Editor')
+  usePageTitle(docTitle || t`Document Editor`)
 
   // Load content from DB when document resolves
   useEffect(() => {
@@ -149,13 +151,13 @@ export default function DocumentEditorPage() {
             onChange={setDocTitle}
             onCommit={handleTitleCommit}
             readOnly={!canEdit}
-            placeholder="Untitled Document"
+            placeholder={t`Untitled Document`}
           />
         }
         breadcrumb={[
-          { label: 'Home', href: '/' },
-          { label: 'Collaborate', href: '/collaborate' },
-          { label: 'Documents', href: '/collaborate/documents' },
+          { label: t`Home`, href: '/' },
+          { label: t`Collaborate`, href: '/collaborate' },
+          { label: t`Documents`, href: '/collaborate/documents' },
           { label: truncate(docTitle, 20) },
         ]}
         heroBadge={
@@ -167,23 +169,23 @@ export default function DocumentEditorPage() {
                   : 'bg-ktip-sun-500/20 text-ktip-sun-300 border-ktip-sun-500/30'
               }`}
             >
-              {canEdit ? 'Editor — Shared with you' : 'View Only — Shared with you'}
+              {canEdit ? t`Editor — Shared with you` : t`View Only — Shared with you`}
             </span>
           )
         }
         actions={
           isOwner && !notFound ? (
             <Button size="sm" icon={<Share2 size={14} />} onClick={() => void handleShare()}>
-              Invite
+              <Trans>Invite</Trans>
             </Button>
           ) : undefined
         }
         fallback={
           notFound ? (
             <ToolNotFound
-              what="Document"
+              what={t`Document`}
               backHref="/collaborate/documents"
-              backLabel="Back to My Documents"
+              backLabel={t`Back to My Documents`}
             />
           ) : undefined
         }
@@ -212,15 +214,15 @@ export default function DocumentEditorPage() {
           <ToolStatusBar
             left={
               <>
-                <StatusMetric label="Words" value={stats.words.toLocaleString()} />
-                <StatusMetric label="Characters" value={stats.chars.toLocaleString()} />
+                <StatusMetric label={t`Words`} value={stats.words.toLocaleString()} />
+                <StatusMetric label={t`Characters`} value={stats.chars.toLocaleString()} />
               </>
             }
             right={
               <>
                 <SaveIndicator status={status} lastSavedAt={lastSavedAt} />
                 <span className="text-ktip-sand-300" aria-hidden>|</span>
-                <span className="truncate max-w-[200px]">{docTitle || 'Document'}</span>
+                <span className="truncate max-w-[200px]">{docTitle || t`Document`}</span>
               </>
             }
           />
@@ -234,7 +236,7 @@ export default function DocumentEditorPage() {
           >
             <TiptapEditor
               onEditorReady={(e) => setEditor(e)}
-              placeholder="Start writing your document..."
+              placeholder={t`Start writing your document...`}
             />
           </div>
         </div>

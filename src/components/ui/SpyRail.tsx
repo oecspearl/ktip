@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { cn } from '../../lib/utils'
 import { useSpySteps } from '../../hooks/useSpySteps'
+import { useLingui } from '@lingui/react/macro'
 
 /**
  * Scrollspy rail — the page-scroll affordance that replaced the old
@@ -47,6 +48,7 @@ export function SpyRail({
 }: {
   accent?: string
 } = {}) {
+  const { t } = useLingui()
   const steps = useSpySteps()
   const [active, setActive] = useState('')
 
@@ -102,7 +104,7 @@ export function SpyRail({
 
   return (
     <nav
-      aria-label="Page sections"
+      aria-label={t`Page sections`}
       data-spy-rail
       style={{ '--rail-accent': accent ?? 'var(--color-ktip-tropical-600)' } as CSSProperties}
       className={cn(

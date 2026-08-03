@@ -19,7 +19,7 @@ import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
   approved: 'Approved',
-  rejected: 'Rejected',
+  rejected: 'Not accepted',
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -63,7 +63,7 @@ export default function AdminVerificationPage() {
         reviewerId: auth.user.id,
         adminNote: adminNote.trim() || undefined,
       })
-      toast.success(approve ? 'Request approved — user is now verified' : 'Request rejected')
+      toast.success(approve ? 'Request approved — user is now verified' : 'Request not accepted')
       setSelected(null)
       refetch()
     } catch (err: any) {
@@ -203,7 +203,7 @@ export default function AdminVerificationPage() {
 
             <Textarea
               label="Admin note"
-              placeholder="Reason for approval/rejection (shared with the user on rejection)..."
+              placeholder="Reason for the decision (shared with the user when not accepted)..."
               value={adminNote}
               onChange={(e) => setAdminNote(e.currentTarget.value)}
               rows={3}
@@ -218,7 +218,7 @@ export default function AdminVerificationPage() {
                   loading={reviewing}
                   icon={<XCircle size={16} />}
                 >
-                  Reject
+                  Do not accept
                 </Button>
                 <Button
                   variant="primary"

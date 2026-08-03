@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -109,6 +110,7 @@ export function useGrant(id: string | undefined) {
 }
 
 export function useCreateGrant() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -130,7 +132,7 @@ export function useCreateGrant() {
       // filed under someone else's name is one its author cannot then manage.
       const { data: session } = await supabase.auth.getUser()
       const createdBy = session?.user?.id
-      if (!createdBy) throw new Error('You must be signed in to post a grant')
+      if (!createdBy) throw new Error(t`You must be signed in to post a grant`)
 
       const { data, error } = await supabase
         .from('grants')
@@ -282,6 +284,7 @@ export function useSponsorshipRequests(userId: string | undefined) {
 
 /** The sponsor's half of the handshake. Only the named sponsor may call it. */
 export function useReviewSponsorship() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -296,8 +299,8 @@ export function useReviewSponsorship() {
       if (data && data.ok === false) {
         throw new Error(
           data.reason === 'forbidden'
-            ? 'You are not permitted to sponsor this application.'
-            : 'Application not found.'
+            ? t`You are not permitted to sponsor this application.`
+            : t`Application not found.`
         )
       }
       return data

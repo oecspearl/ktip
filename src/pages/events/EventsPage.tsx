@@ -35,6 +35,9 @@ import { cn, debounce } from '../../lib/utils'
 import { groupByDay } from '../../lib/calendar'
 import { EVENT_TYPE_LABELS } from '../../lib/constants'
 import type { Event } from '../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import { resolveCopy } from '../../i18n/copy'
 
 type EventsView = 'calendar' | 'grid'
 
@@ -42,12 +45,17 @@ const VIEW_STORAGE_KEY = 'events:view'
 const CALENDAR_VIEW_STORAGE_KEY = 'events:calendar-view'
 
 const TYPE_OPTIONS = [
-  { value: '', label: 'All Event Types' },
+  { value: '', label: msg`All Event Types` },
   ...Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => ({ value, label })),
 ]
 
 export default function EventsPage() {
-  usePageTitle('Events')
+    const { t, i18n } = useLingui()
+  usePageTitle(t`Events`)
+  const typeOptions = useMemo(
+    () => TYPE_OPTIONS.map((option) => ({ value: option.value, label: resolveCopy(i18n, option.label) })),
+    [i18n]
+  )
   const [selectedType, setSelectedType] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -219,10 +227,10 @@ export default function EventsPage() {
     return ordered.flatMap((type) => {
       const items = buckets.get(type)
       return items?.length
-        ? [{ value: type, label: EVENT_TYPE_LABELS[type] ?? 'Other', items }]
+        ? [{ value: type, label: resolveCopy(i18n, EVENT_TYPE_LABELS[type] ?? 'Other'), items }]
         : []
     })
-  }, [events, view, selectedType, sort])
+  }, [events, view, selectedType, sort, i18n])
 
   const selectedDayItems = useMemo(
     () => (eventsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []).map(eventToCalendarItem),
@@ -236,10 +244,10 @@ export default function EventsPage() {
     <>
       <div data-tutorial="events-hero">
         <PageHero
-          eyebrow="Event Archives"
-          title="Events"
+          eyebrow={t`Event Archives`}
+          title={t`Events`}
           imageSeed="events"
-          breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Events List' }]}
+          breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Events List` }]}
         />
       </div>
 
@@ -259,8 +267,8 @@ export default function EventsPage() {
               <Select
                 value={selectedType}
                 onChange={setSelectedType}
-                options={TYPE_OPTIONS}
-                ariaLabel="Filter by event type"
+                options={typeOptions}
+                ariaLabel={t`Filter by event type`}
               />
             </div>
 
@@ -272,8 +280,8 @@ export default function EventsPage() {
 
             {view === 'grid' && !eventsLoading && events && (
               <p className="text-sm text-gray-500">
-                Found {events.length} upcoming event{events.length !== 1 ? 's' : ''}
-                {(pastEvents?.length ?? 0) > 0 && ` · ${pastEvents!.length} past`}
+                <Plural value={events.length} one="Found # upcoming event" other="Found # upcoming events" />
+                {(pastEvents?.length ?? 0) > 0 && <Trans> · {pastEvents!.length} past</Trans>}
               </p>
             )}
 
@@ -298,8 +306,8 @@ export default function EventsPage() {
                   onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
                   open={searchOpen}
                   onOpenChange={setSearchOpen}
-                  placeholder="Search events..."
-                  ariaLabel="Search events"
+                  placeholder={t`Search events...`}
+                  ariaLabel={t`Search events`}
                 />
               </div>
 
@@ -314,7 +322,7 @@ export default function EventsPage() {
                 data-tutorial="events-view-calendar"
                 onClick={() => changeView('calendar')}
                 aria-pressed={view === 'calendar'}
-                aria-label="Calendar view"
+                aria-label={t`Calendar view`}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
                   view === 'calendar'
@@ -323,14 +331,14 @@ export default function EventsPage() {
                 )}
               >
                 <CalendarDays size={16} />
-                <span className="hidden sm:inline">Calendar</span>
+                <span className="hidden sm:inline"><Trans>Calendar</Trans></span>
               </button>
               <button
                 type="button"
                 data-tutorial="events-view-grid"
                 onClick={() => changeView('grid')}
                 aria-pressed={view === 'grid'}
-                aria-label="Grid view"
+                aria-label={t`Grid view`}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
                   view === 'grid'
@@ -339,7 +347,7 @@ export default function EventsPage() {
                 )}
               >
                 <LayoutGrid size={16} />
-                <span className="hidden sm:inline">Grid</span>
+                <span className="hidden sm:inline"><Trans>Grid</Trans></span>
               </button>
               </div>
 
@@ -350,7 +358,7 @@ export default function EventsPage() {
                   size="sm"
                   className="text-sm"
                 >
-                  Create Event
+                  <Trans>Create Event</Trans>
                 </Button>
               </Link>
             </div>
@@ -361,7 +369,7 @@ export default function EventsPage() {
               onClick={clearFilters}
               className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
             >
-              Clear all filters
+              <Trans>Clear all filters</Trans>
             </button>
           )}
         </div>
@@ -398,7 +406,7 @@ export default function EventsPage() {
                 items={selectedDayItems}
                 loading={eventsLoading}
                 itemNoun="event"
-                emptyLabel="No events on this day"
+                emptyLabel={t`No events on this day`}
                 onJumpToNext={jumpToNextEvent}
                 dataTutorial="events-day-panel"
               />
@@ -409,7 +417,7 @@ export default function EventsPage() {
             <div data-tutorial="events-results">
               {events.length === 0 ? (
                 <p className="text-sm text-gray-500 mb-8">
-                  Nothing coming up under these filters — past events are below.
+                  <Trans>Nothing coming up under these filters — past events are below.</Trans>
                 </p>
               ) : typeGroups.length > 1 ? (
                 <div data-tutorial="events-grid" className="space-y-2">
@@ -441,9 +449,9 @@ export default function EventsPage() {
 
               {!pastLoading && pastEvents && pastEvents.length > 0 && (
                 <CollapsibleSection
-                  title="Past events"
+                  title={t`Past events`}
                   count={pastEvents.length}
-                  subtitle="Already happened, most recent first"
+                  subtitle={t`Already happened, most recent first`}
                   defaultOpen={false}
                   className="mt-10"
                 >
@@ -461,16 +469,16 @@ export default function EventsPage() {
                 <CalendarX size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                No events found
+                <Trans>No events found</Trans>
               </h3>
               <p className="text-gray-500 mb-6">
                 {hasActiveFilters
-                  ? 'Try adjusting your filters or search query'
-                  : 'Be the first to create an event!'}
+                  ? t`Try adjusting your filters or search query`
+                  : t`Be the first to create an event!`}
               </p>
               {!hasActiveFilters && (
                 <Link to="/events/new">
-                  <Button icon={<Plus size={20} />}>Create First Event</Button>
+                  <Button icon={<Plus size={20} />}><Trans>Create First Event</Trans></Button>
                 </Link>
               )}
             </div>

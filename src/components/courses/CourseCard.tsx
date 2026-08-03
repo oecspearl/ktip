@@ -2,6 +2,7 @@ import { ExternalLink, GraduationCap } from 'lucide-react'
 import { useEnrollInCourse } from '../../hooks/useEnrollInCourse'
 import { useToast } from '../../contexts/ToastContext'
 import type { ExternalCourse, KtipEnrollment } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface CourseCardProps {
   course: ExternalCourse
@@ -10,6 +11,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) {
+    const { t } = useLingui()
   const { enroll, enrolling } = useEnrollInCourse()
   const toast = useToast()
 
@@ -21,11 +23,11 @@ export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) 
       onEnrolled?.()
       toast.success(
         res.is_new_user
-          ? 'Enrolled! Check your email to set up your Virtual Campus sign-in.'
-          : 'Enrolled! You can access the course now.'
+          ? t`Enrolled! Check your email to set up your Virtual Campus sign-in.`
+          : t`Enrolled! You can access the course now.`
       )
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Could not enroll in this course.')
+      toast.error(err instanceof Error ? err.message : t`Could not enroll in this course.`)
     }
   }
 
@@ -80,12 +82,12 @@ export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) 
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ktip-tropical-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-tropical-700 transition-colors"
         >
-          Go to course
+          <Trans>Go to course</Trans>
           <ExternalLink size={14} />
         </a>
       ) : course.enrollable === false ? (
         <span className="inline-flex items-center justify-center px-4 py-2 bg-ktip-sand-100 text-ktip-sand-500 text-sm font-bold rounded-lg cursor-not-allowed">
-          Not open for enrollment
+          <Trans>Not open for enrollment</Trans>
         </span>
       ) : (
         <button
@@ -94,7 +96,7 @@ export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) 
           disabled={enrolling}
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
-          {enrolling ? 'Enrolling…' : 'Enroll'}
+          {enrolling ? t`Enrolling…` : t`Enroll`}
         </button>
       )}
     </div>

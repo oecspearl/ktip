@@ -8,6 +8,7 @@ import {
 import { resolveIcon } from '../../lib/icon-map'
 import { AvatarCluster } from './AvatarCluster'
 import type { VenueOccupant, VenueRoom } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface RoomZoneProps {
   room: VenueRoom
@@ -36,6 +37,7 @@ export function RoomZone({
   className,
   variant = 'card',
 }: RoomZoneProps) {
+  const { t } = useLingui()
   const Icon = resolveIcon(VENUE_ROOM_KIND_ICONS[room.kind])
   const kindLabel = VENUE_ROOM_KIND_LABELS[room.kind] || room.kind
   const closed = !room.is_open
@@ -47,7 +49,7 @@ export function RoomZone({
         type="button"
         onClick={() => onEnter(room)}
         disabled={closed}
-        aria-label={`${room.name} — ${total} here${closed ? ', closed' : ''}`}
+        aria-label={closed ? t`${room.name} — ${total} here, closed` : t`${room.name} — ${total} here`}
         className={cn(
           'group flex max-w-[14rem] flex-col gap-1 rounded-xl border bg-ktip-cream/95 px-2.5 py-1.5 text-left shadow-medium backdrop-blur-sm transition-all',
           closed ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-0.5 hover:shadow-hard',
@@ -64,7 +66,7 @@ export function RoomZone({
           {total > 0 ? (
             <AvatarCluster occupants={occupants} overflow={overflow} size="sm" />
           ) : (
-            <span className="text-[10px] text-ktip-sand-500">Empty</span>
+            <span className="text-[10px] text-ktip-sand-500"><Trans>Empty</Trans></span>
           )}
         </span>
       </button>
@@ -121,18 +123,18 @@ export function RoomZone({
         {total > 0 ? (
           <AvatarCluster occupants={occupants} overflow={overflow} size="md" />
         ) : (
-          <span className="text-xs text-ktip-sand-500">Nobody here yet</span>
+          <span className="text-xs text-ktip-sand-500"><Trans>Nobody here yet</Trans></span>
         )}
 
         {closed ? (
           <span className="flex items-center gap-1 text-xs font-medium text-ktip-sand-500">
-            <Lock size={12} aria-hidden="true" /> Closed
+            <Lock size={12} aria-hidden="true" /> <Trans>Closed</Trans>
           </span>
         ) : full ? (
-          <span className="text-xs font-medium text-ktip-sun-800">At capacity</span>
+          <span className="text-xs font-medium text-ktip-sun-800"><Trans>At capacity</Trans></span>
         ) : (
           <span className="text-xs font-semibold text-ktip-ocean-600 group-hover:underline">
-            Enter →
+            <Trans>Enter →</Trans>
           </span>
         )}
       </div>

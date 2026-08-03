@@ -7,10 +7,15 @@ import type {
 } from '../types'
 import { PHASE_LABELS } from './constants'
 import { entityPath } from './slug'
+import { msg } from '@lingui/core/macro'
+import type { Copy } from '../i18n/copy'
 
 export interface TimelineStage {
   key: string
-  label: string
+  /** A mix: our own stages arrive as `msg` descriptors, PHASE_LABELS (from
+   *  lib/constants, harvested) arrives as plain source strings. Both resolve
+   *  through resolveCopy(i18n, …) at the render site. */
+  label: Copy
   reachedAt: string | null
 }
 
@@ -55,25 +60,25 @@ export function buildGrantAppItem(app: AppWithEvents): TimelineItem {
   if (hasDraft) {
     stages.push({
       key: 'draft',
-      label: 'Draft',
+      label: msg`Draft`,
       reachedAt: firstEventAt(events, (e) => e.status === 'draft') ?? app.created_at,
     })
   }
   stages.push({
     key: 'pending',
-    label: 'Applied',
+    label: msg`Applied`,
     reachedAt:
       firstEventAt(events, (e) => e.status === 'pending') ??
       (hasDraft ? null : app.created_at),
   })
   stages.push({
     key: 'under_review',
-    label: 'Under Review',
+    label: msg`Under Review`,
     reachedAt: firstEventAt(events, (e) => e.status === 'under_review'),
   })
   stages.push({
     key: 'decision',
-    label: decided ? (isRejected ? 'Rejected' : 'Approved') : 'Decision',
+    label: decided ? (isRejected ? msg`Not accepted` : msg`Approved`) : msg`Decision`,
     reachedAt: decided
       ? (firstEventAt(events, (e) => e.status === app.status) ?? app.updated_at)
       : null,

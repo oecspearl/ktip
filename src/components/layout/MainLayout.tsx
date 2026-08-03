@@ -13,6 +13,9 @@ import { MemberPanelProvider } from '../../contexts/MemberPanelContext'
 const MessagingPanel = lazy(() =>
   import('../messages/MessagingPanel').then((m) => ({ default: m.MessagingPanel }))
 )
+
+import { Trans } from '@lingui/react/macro'
+
 const MemberPanel = lazy(() =>
   import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel }))
 )
@@ -48,7 +51,7 @@ export function MainLayout() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-max focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 dark:focus:bg-ktip-ocean-200 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
       >
-        Skip to main content
+        <Trans>Skip to main content</Trans>
       </a>
       <Navbar />
       {auth.user && !auth.profile && !auth.loading && <SessionRecoveryBanner />}

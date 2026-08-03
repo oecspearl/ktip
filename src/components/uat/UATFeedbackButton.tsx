@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { MessageSquarePlus } from 'lucide-react'
 import { UATFeedbackForm } from './UATFeedbackForm'
 import { UATReminderPopup } from './UATReminderPopup'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export function UATFeedbackButton() {
+    const { t } = useLingui()
   const [formOpen, setFormOpen] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [showReminder, setShowReminder] = useState(false)
@@ -94,10 +96,10 @@ export function UATFeedbackButton() {
         <button
           onClick={() => setFormOpen(true)}
           className="fixed bottom-6 right-6 z-fab flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-ktip-ocean-500 to-ktip-ocean-600 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-          aria-label="Provide UAT Feedback"
+          aria-label={t`Provide UAT Feedback`}
         >
           <MessageSquarePlus size={20} className="group-hover:scale-110 transition-transform" />
-          <span className="text-sm font-semibold hidden sm:inline">Give Feedback</span>
+          <span className="text-sm font-semibold hidden sm:inline"><Trans>Give Feedback</Trans></span>
           {/* Pulse indicator */}
           <span className="absolute -top-1 -right-1 flex h-4 w-4">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ktip-tropical-400 opacity-75" />
@@ -111,10 +113,10 @@ export function UATFeedbackButton() {
         <button
           onClick={() => setFormOpen(true)}
           className="fixed bottom-6 right-6 z-fab flex items-center gap-2 px-4 py-2.5 bg-ktip-cream border border-ktip-sand-200 text-ktip-sand-600 rounded-full shadow-soft hover:shadow-medium hover:border-ktip-ocean-300 transition-all duration-300"
-          aria-label="Submit additional feedback"
+          aria-label={t`Submit additional feedback`}
         >
           <MessageSquarePlus size={18} />
-          <span className="text-xs font-medium hidden sm:inline">More Feedback</span>
+          <span className="text-xs font-medium hidden sm:inline"><Trans>More Feedback</Trans></span>
         </button>
       )}
 

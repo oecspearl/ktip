@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 
 /**
@@ -75,6 +76,7 @@ interface UseRoomSignalsArgs {
 }
 
 export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArgs) {
+  const { t } = useLingui()
   const [reactions, setReactions] = useState<FloatingReaction[]>([])
   const [hands, setHands] = useState<RaisedHand[]>([])
   const [presenter, setPresenter] = useState<RoomPresenter | null>(null)
@@ -145,7 +147,7 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
               ...without,
               {
                 userId,
-                name: typeof payload?.name === 'string' ? payload.name : 'Member',
+                name: typeof payload?.name === 'string' ? payload.name : t`Member`,
                 avatarUrl: typeof payload?.avatar_url === 'string' ? payload.avatar_url : null,
                 // The sender's clock is not trusted for ordering — a device an
                 // hour fast would jump the queue for ever.
@@ -171,7 +173,7 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
             if (prev && prev.userId === userId) return { ...prev, beat: now }
             return {
               userId,
-              name: typeof payload?.name === 'string' ? payload.name : 'The host',
+              name: typeof payload?.name === 'string' ? payload.name : t`The host`,
               since: now,
               beat: now,
             }

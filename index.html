@@ -2,7 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/pwa-192x192.png" />
+    <!-- Tab icons are pre-trimmed to the mark's own bounding box (see
+         scripts/optimize-brand-assets.mjs) so the gear fills the tile instead
+         of the browser downscaling the padded 192 PWA icon into a smudge.
+         apple-touch-icon stays the padded one — iOS adds its own mask and
+         crops a full-bleed mark. -->
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" href="/pwa-192x192.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,6 +40,23 @@
         var t = localStorage.getItem('ktip_theme');
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches))
           document.documentElement.classList.add('dark')
+      } catch (e) {}
+      // Language, resolved before first paint for the same reason the theme is:
+      // React setting it later means a screen reader and the browser's own
+      // translation prompt both spend the first frame believing the page is
+      // English. ?lang= wins so a shared link lands in the right language on a
+      // device that has never chosen one.
+      //
+      // `dir` is written unconditionally, not only for RTL. Adding Arabic later
+      // then means one entry in RTL_LANGS rather than hunting the DOM for the
+      // place this was assumed.
+      try {
+        var q = new URLSearchParams(location.search).get('lang');
+        var l = q || localStorage.getItem('ktip_lang');
+        if (l !== 'fr' && l !== 'es' && l !== 'pseudo') l = 'en';
+        document.documentElement.lang = l === 'pseudo' ? 'en' : l;
+        document.documentElement.dir = 'ltr';
+        if (q) localStorage.setItem('ktip_lang', l);
       } catch (e) {}
     </script>
     <title>KTiP</title>

@@ -3,6 +3,7 @@ import { formatRelativeTime } from '../../../lib/utils'
 import { usePublishedEventUpdates } from '../../../hooks/useEventUpdates'
 import { EVENT_UPDATE_TYPE_LABELS } from '../../../lib/constants'
 import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** How many updates before the panel stops growing and offers a "show all". */
 const COLLAPSED = 3
@@ -15,6 +16,7 @@ const COLLAPSED = 3
  * an announcement half of them miss.
  */
 export function RoomAnnouncements({ eventId }: { eventId: string }) {
+  const { t } = useLingui()
   const { updates, loading } = usePublishedEventUpdates(eventId)
   const [expanded, setExpanded] = useState(false)
 
@@ -22,14 +24,14 @@ export function RoomAnnouncements({ eventId }: { eventId: string }) {
   const shown = expanded ? all : all.slice(0, COLLAPSED)
 
   return (
-    <RoomPanel title="Announcements" meta={all.length || undefined}>
+    <RoomPanel title={t`Announcements`} meta={all.length || undefined}>
       {loading ? (
         <div className="space-y-2 p-4">
           <div className="h-3 w-2/3 rounded bg-ktip-sand-100 animate-pulse-soft" />
           <div className="h-3 w-1/2 rounded bg-ktip-sand-100 animate-pulse-soft" />
         </div>
       ) : all.length === 0 ? (
-        <RoomPanelEmpty>Nothing announced yet.</RoomPanelEmpty>
+        <RoomPanelEmpty><Trans>Nothing announced yet.</Trans></RoomPanelEmpty>
       ) : (
         <>
           <ul className="divide-y divide-ktip-sand-100">
@@ -54,7 +56,7 @@ export function RoomAnnouncements({ eventId }: { eventId: string }) {
               onClick={() => setExpanded((v) => !v)}
               className="w-full border-t border-ktip-sand-100 px-4 py-2 text-xs font-semibold text-ktip-ocean-600 hover:bg-ktip-sand-50"
             >
-              {expanded ? 'Show fewer' : `Show all ${all.length}`}
+              {expanded ? t`Show fewer` : t`Show all ${all.length}`}
             </button>
           )}
         </>

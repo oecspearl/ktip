@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -113,16 +114,17 @@ export function useSnippetPermission(id: string | undefined) {
 }
 
 export function useCreateSnippet() {
+  const { t } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async (input: { title?: string; language: SnippetLanguage; content?: string }) => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) throw new Error(t`Not authenticated`)
 
       const { data, error } = await (supabase.from('snippets') as any)
         .insert({
-          title: input.title || 'Untitled Snippet',
+          title: input.title || t`Untitled Snippet`,
           language: input.language,
           content: input.content || '',
           owner_id: user.id,

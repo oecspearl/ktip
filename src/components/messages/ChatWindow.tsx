@@ -27,6 +27,7 @@ import {
   uploadAttachment,
 } from '../../lib/chat-attachments'
 import type { Conversation, MessageAttachment } from '../../types'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 interface ChatWindowProps {
   conversationId: string
@@ -36,6 +37,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ conversationId, otherUserName, conversation, onLeftGroup }: ChatWindowProps) {
+  const { t } = useLingui()
   const auth = useAuth()
   const [showGroupSettings, setShowGroupSettings] = useState(false)
   const isGroup = conversation?.is_group ?? false
@@ -108,7 +110,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
     setStaged((current) => {
       const room = MAX_ATTACHMENTS_PER_MESSAGE - current.length
       if (accepted.length > room) {
-        problems.push(`A message can carry ${MAX_ATTACHMENTS_PER_MESSAGE} files at most.`)
+        problems.push(t`A message can carry ${MAX_ATTACHMENTS_PER_MESSAGE} files at most.`)
       }
       return [...current, ...accepted.slice(0, Math.max(room, 0))]
     })
@@ -189,7 +191,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
       // and re-finding files they already chose.
       setInput((current) => current || content)
       setStaged(files)
-      setAttachError(err instanceof Error ? err.message : 'That message could not be sent.')
+      setAttachError(err instanceof Error ? err.message : t`That message could not be sent.`)
       // Blobs whose message never landed are invisible to everyone; drop them.
       await discardAttachments(uploaded.map((a) => a.path))
     } finally {
@@ -220,11 +222,11 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
         <div className="min-w-0">
           <h3 className="font-display font-bold text-ktip-sand-900 truncate flex items-center gap-2">
             {isGroup && <Users size={16} className="text-ktip-ocean-600 shrink-0" />}
-            {(isGroup ? conversation?.name || 'Group' : otherUserName) || 'Conversation'}
+            {(isGroup ? conversation?.name || t`Group` : otherUserName) || t`Conversation`}
           </h3>
           {isGroup && (
             <p className="text-xs text-ktip-sand-500">
-              {conversation?.participants?.length || 0} members
+              <Plural value={conversation?.participants?.length || 0} one="# member" other="# members" />
             </p>
           )}
         </div>
@@ -233,7 +235,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
             <button
               onClick={() => setShowGroupSettings(true)}
               className="p-2 text-ktip-sand-500 hover:text-ktip-sand-900 hover:bg-ktip-sand-50 rounded-lg transition-colors shrink-0"
-              aria-label="Group settings"
+              aria-label={t`Group settings`}
             >
               <Settings size={18} />
             </button>
@@ -259,7 +261,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
           ))
         ) : (
           <div className="flex items-center justify-center h-full text-ktip-sand-500">
-            <p className="text-sm">Start the conversation!</p>
+            <p className="text-sm"><Trans>Start the conversation!</Trans></p>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -281,7 +283,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
                   type="button"
                   onClick={() => unstage(index)}
                   disabled={busy}
-                  aria-label={`Remove ${file.name}`}
+                  aria-label={t`Remove ${file.name}`}
                   className="rounded-md p-0.5 text-ktip-sand-400 transition-colors hover:bg-ktip-sand-100 hover:text-red-600 disabled:opacity-40"
                 >
                   <X size={13} aria-hidden="true" />
@@ -317,8 +319,8 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={busy || staged.length >= MAX_ATTACHMENTS_PER_MESSAGE}
-            aria-label="Attach a file"
-            title="Attach a file"
+            aria-label={t`Attach a file`}
+            title={t`Attach a file`}
             className="shrink-0 rounded-lg p-2 pb-1 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600 disabled:opacity-40"
           >
             <Paperclip size={18} aria-hidden="true" />
@@ -329,7 +331,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            placeholder={staged.length > 0 ? 'Add a note to these files…' : 'Type a message...'}
+            placeholder={staged.length > 0 ? t`Add a note to these files…` : t`Type a message...`}
             rows={1}
             className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
           />
@@ -339,7 +341,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
             disabled={!canSend}
             icon={<Send size={18} />}
           >
-            {uploading ? 'Sending…' : 'Send'}
+            {uploading ? t`Sending…` : t`Send`}
           </Button>
         </div>
       </form>
@@ -348,9 +350,9 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-ktip-ocean-500 bg-ktip-ocean-500/10 backdrop-blur-[1px]">
           <div className="rounded-2xl bg-white/95 px-5 py-3 text-center shadow-lg">
             <Upload size={20} className="mx-auto mb-1 text-ktip-ocean-600" aria-hidden="true" />
-            <p className="text-sm font-semibold text-ktip-sand-900">Drop to attach</p>
+            <p className="text-sm font-semibold text-ktip-sand-900"><Trans>Drop to attach</Trans></p>
             <p className="text-xs text-ktip-sand-500">
-              Up to {MAX_ATTACHMENTS_PER_MESSAGE} files, with a note if you like
+              <Trans>Up to {MAX_ATTACHMENTS_PER_MESSAGE} files, with a note if you like</Trans>
             </p>
           </div>
         </div>

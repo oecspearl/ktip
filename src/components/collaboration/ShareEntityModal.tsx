@@ -12,6 +12,9 @@ import { debounce, isValidEmail } from '../../lib/utils'
 import { Search, X, Send, Check, Eye, Pencil, Users, Mail, Loader2 } from 'lucide-react'
 import type { CollabResourceType, Profile, SharePermission } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { msg, plural } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
 type Tab = 'connections' | 'search' | 'email'
 
@@ -21,10 +24,25 @@ const NOTIFICATION_TYPE: Record<CollabResourceType, string> = {
   snippet: 'snippet_share',
 }
 
-const LABEL: Record<CollabResourceType, string> = {
-  whiteboard: 'whiteboard',
-  document: 'document',
-  snippet: 'snippet',
+// The bare noun ("whiteboard") and the same noun with its indefinite
+// article ("a whiteboard") are kept separate — concatenating "a" + label
+// in code would break in languages where the article inflects for gender.
+const LABEL: Record<CollabResourceType, MessageDescriptor> = {
+  whiteboard: msg`whiteboard`,
+  document: msg`document`,
+  snippet: msg`snippet`,
+}
+
+const A_LABEL: Record<CollabResourceType, MessageDescriptor> = {
+  whiteboard: msg`a whiteboard`,
+  document: msg`a document`,
+  snippet: msg`a snippet`,
+}
+
+const UNTITLED_LABEL: Record<CollabResourceType, MessageDescriptor> = {
+  whiteboard: msg`Untitled whiteboard`,
+  document: msg`Untitled document`,
+  snippet: msg`Untitled snippet`,
 }
 
 interface ShareEntityModalProps {
@@ -51,6 +69,7 @@ export function ShareEntityModal({
   resourceId,
   resourceTitle,
 }: ShareEntityModalProps) {
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const queryClient = useQueryClient()
   const { searchUsers, loading: searchLoading } = useSearchUsers()
@@ -71,14 +90,14 @@ export function ShareEntityModal({
   const [error, setError] = useState<string | null>(null)
 
   const spec = RESOURCE_SPECS[resourceType]
-  const label = LABEL[resourceType]
+  const label = i18n._(LABEL[resourceType])
 
   const displayName = () => {
     const profile = auth.profile
     if (profile?.display_name) return profile.display_name
     const emailAddr = auth.user?.email
     if (emailAddr) return emailAddr.split('@')[0]
-    return 'Someone'
+    return t`Someone`
   }
 
   // The other party of each accepted connection, minus anyone already picked.
@@ -160,7 +179,7 @@ export function ShareEntityModal({
     const currentUserId = auth.user?.id
     if (!currentUserId || selected.length === 0) return
     if (!resourceId) {
-      setError(`Save this ${label} before inviting anyone.`)
+      setError(t`Save this ${label} before inviting anyone.`)
       return
     }
 
@@ -169,10 +188,12 @@ export function ShareEntityModal({
 
     try {
       const link = `${window.location.origin}${spec.href(resourceId)}`
-      const titleText = resourceTitle || `a ${label}`
+      const titleText = resourceTitle || i18n._(A_LABEL[resourceType])
+      const inviterName = displayName()
 
       for (const user of selected) {
         const perm = permissions[user.id] || 'view'
+        const permissionLabel = perm === 'edit' ? t`can edit` : t`view only`
 
         // Re-inviting someone who already accepted must not knock them back to
         // pending — that would revoke live access — so an accepted row only
@@ -196,10 +217,7 @@ export function ShareEntityModal({
         )
         if (shareError) throw shareError
 
-        const message =
-          `${displayName()} invited you to collaborate on the ${label} "${titleText}" ` +
-          `(${perm === 'edit' ? 'can edit' : 'view only'}).\n\n` +
-          `Accept the invitation: ${window.location.origin}/invitations\n${link}`
+        const message = t`${inviterName} invited you to collaborate on the ${label} "${titleText}" (${permissionLabel}).\n\nAccept the invitation: ${window.location.origin}/invitations\n${link}`
 
         const conversationId = await createConversation(currentUserId, user.id)
         await sendMessage({
@@ -211,18 +229,23 @@ export function ShareEntityModal({
         sendNotification({
           userId: user.id,
           type: NOTIFICATION_TYPE[resourceType],
-          title: 'Collaboration invitation',
-          body: `${displayName()} invited you to "${titleText}"`,
+          title: t`Collaboration invitation`,
+          body: t`${inviterName} invited you to "${titleText}"`,
           link: '/invitations',
         })
       }
 
       queryClient.invalidateQueries({ queryKey: keys.all('collab-invites') })
-      setSuccess(`Invitation sent to ${selected.length} ${selected.length > 1 ? 'people' : 'person'}.`)
+      setSuccess(
+        plural(selected.length, {
+          one: 'Invitation sent to # person.',
+          other: 'Invitation sent to # people.',
+        })
+      )
       setSelected([])
       setPermissions({})
     } catch (err: any) {
-      setError(err?.message || `Failed to invite collaborators.`)
+      setError(err?.message || t`Failed to invite collaborators.`)
     } finally {
       setSending(false)
     }
@@ -231,11 +254,11 @@ export function ShareEntityModal({
   const handleEmailInvite = async () => {
     const trimmed = email.trim()
     if (!isValidEmail(trimmed)) {
-      setError('Enter a valid email address.')
+      setError(t`Enter a valid email address.`)
       return
     }
     if (!resourceId) {
-      setError(`Save this ${label} before inviting anyone.`)
+      setError(t`Save this ${label} before inviting anyone.`)
       return
     }
 
@@ -244,7 +267,7 @@ export function ShareEntityModal({
 
     try {
       const token = auth.session?.access_token
-      if (!token) throw new Error('Your session expired — sign in again.')
+      if (!token) throw new Error(t`Your session expired — sign in again.`)
 
       const res = await fetch('/api/invite/send', {
         method: 'POST',
@@ -253,23 +276,23 @@ export function ShareEntityModal({
           email: trimmed,
           resource_type: resourceType,
           resource_id: resourceId,
-          resource_title: resourceTitle || `Untitled ${label}`,
+          resource_title: resourceTitle || i18n._(UNTITLED_LABEL[resourceType]),
           permission: emailPermission,
         }),
       })
 
       const payload = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(payload?.error || 'Failed to send the invitation.')
+      if (!res.ok) throw new Error(payload?.error || t`Failed to send the invitation.`)
 
       queryClient.invalidateQueries({ queryKey: keys.all('collab-invites') })
       setSuccess(
         payload.existing_user
-          ? `${trimmed} already has a KTIP account — we sent them an in-app invitation instead.`
-          : `Invitation emailed to ${trimmed}. It expires in 14 days.`
+          ? t`${trimmed} already has a KTIP account — we sent them an in-app invitation instead.`
+          : t`Invitation emailed to ${trimmed}. It expires in 14 days.`
       )
       setEmail('')
     } catch (err: any) {
-      setError(err?.message || 'Failed to send the invitation.')
+      setError(err?.message || t`Failed to send the invitation.`)
     } finally {
       setSending(false)
     }
@@ -291,23 +314,23 @@ export function ShareEntityModal({
     >
       <DiamondAvatar name={user.display_name || 'U'} size={28} />
       <span className="text-sm text-ktip-sand-800 truncate flex-1">
-        {user.display_name || 'Unnamed User'}
+        {user.display_name || t`Unnamed User`}
       </span>
     </button>
   )
 
   return (
-    <Modal open={open} onClose={closeAndReset} title={`Invite to this ${label}`} size="md">
+    <Modal open={open} onClose={closeAndReset} title={t`Invite to this ${label}`} size="md">
       <div className="space-y-4">
         <div className="flex items-center gap-1 border-b border-ktip-sand-200">
           <button type="button" className={tabClass('connections')} onClick={() => setTab('connections')}>
-            <Users size={14} /> My connections
+            <Users size={14} /> <Trans>My connections</Trans>
           </button>
           <button type="button" className={tabClass('search')} onClick={() => setTab('search')}>
-            <Search size={14} /> All members
+            <Search size={14} /> <Trans>All members</Trans>
           </button>
           <button type="button" className={tabClass('email')} onClick={() => setTab('email')}>
-            <Mail size={14} /> By email
+            <Mail size={14} /> <Trans>By email</Trans>
           </button>
         </div>
 
@@ -315,11 +338,11 @@ export function ShareEntityModal({
           <div className="border border-ktip-sand-200 rounded-lg bg-ktip-cream max-h-52 overflow-y-auto">
             {connectionsLoading ? (
               <div className="flex items-center justify-center gap-2 py-6 text-sm text-ktip-sand-500">
-                <Loader2 size={14} className="animate-spin" /> Loading connections…
+                <Loader2 size={14} className="animate-spin" /> <Trans>Loading connections…</Trans>
               </div>
             ) : connectionProfiles.length === 0 ? (
               <p className="px-3 py-6 text-sm text-ktip-sand-500 text-center">
-                No connections available. Try the All members tab, or invite someone by email.
+                <Trans>No connections available. Try the All members tab, or invite someone by email.</Trans>
               </p>
             ) : (
               connectionProfiles.map((user) => personRow(user, () => selectUser(user)))
@@ -332,7 +355,7 @@ export function ShareEntityModal({
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ktip-sand-400" />
             <input
               type="text"
-              placeholder="Search members by name..."
+              placeholder={t`Search members by name...`}
               value={query}
               onChange={(e) => handleInput(e.target.value)}
               onFocus={() => { if (results.length > 0) setShowDropdown(true) }}
@@ -355,8 +378,10 @@ export function ShareEntityModal({
         {tab === 'email' && (
           <div className="space-y-3">
             <p className="text-sm text-ktip-sand-600">
-              Invite someone who isn't on KTIP yet. They'll get an email with a link that grants
-              access to this {label} once they sign up.
+              <Trans>
+                Invite someone who isn't on KTIP yet. They'll get an email with a link that grants
+                access to this {label} once they sign up.
+              </Trans>
             </p>
             <div className="flex items-center gap-2">
               <input
@@ -375,7 +400,7 @@ export function ShareEntityModal({
                     : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
                 }`}
               >
-                {emailPermission === 'edit' ? <><Pencil size={12} /> Edit</> : <><Eye size={12} /> View</>}
+                {emailPermission === 'edit' ? <><Pencil size={12} /> <Trans>Edit</Trans></> : <><Eye size={12} /> <Trans>View</Trans></>}
               </button>
             </div>
             <button
@@ -385,7 +410,7 @@ export function ShareEntityModal({
               className="inline-flex items-center gap-2 px-5 py-2.5 btn-brand rounded-lg font-medium text-sm disabled:opacity-50"
             >
               {sending ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
-              {sending ? 'Sending…' : 'Send email invitation'}
+              {sending ? t`Sending…` : t`Send email invitation`}
             </button>
           </div>
         )}
@@ -395,6 +420,7 @@ export function ShareEntityModal({
           <div className="space-y-2">
             {selected.map((user) => {
               const perm = permissions[user.id] || 'view'
+              const removeLabel = user.display_name || t`user`
               return (
                 <div
                   key={user.id}
@@ -402,7 +428,7 @@ export function ShareEntityModal({
                 >
                   <DiamondAvatar name={user.display_name || 'U'} size={28} />
                   <span className="text-sm text-ktip-sand-800 flex-1 truncate">
-                    {user.display_name || 'User'}
+                    {user.display_name || t`User`}
                   </span>
                   <button
                     type="button"
@@ -412,15 +438,15 @@ export function ShareEntityModal({
                         ? 'bg-ktip-ocean-100 text-ktip-ocean-700 hover:bg-ktip-ocean-200'
                         : 'bg-ktip-sand-100 text-ktip-sand-600 hover:bg-ktip-sand-200'
                     }`}
-                    title={perm === 'edit' ? 'Can edit — click for view only' : 'View only — click to allow editing'}
+                    title={perm === 'edit' ? t`Can edit — click for view only` : t`View only — click to allow editing`}
                   >
-                    {perm === 'edit' ? <><Pencil size={12} /> Edit</> : <><Eye size={12} /> View</>}
+                    {perm === 'edit' ? <><Pencil size={12} /> <Trans>Edit</Trans></> : <><Eye size={12} /> <Trans>View</Trans></>}
                   </button>
                   <button
                     type="button"
                     onClick={() => removeUser(user.id)}
                     className="text-ktip-sand-400 hover:text-red-500 transition-colors p-0.5"
-                    aria-label={`Remove ${user.display_name || 'user'}`}
+                    aria-label={t`Remove ${removeLabel}`}
                   >
                     <X size={14} />
                   </button>
@@ -435,9 +461,11 @@ export function ShareEntityModal({
               className="inline-flex items-center gap-2 px-5 py-2.5 btn-brand rounded-lg font-medium text-sm disabled:opacity-50"
             >
               {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-              {sending
-                ? 'Sending…'
-                : `Invite ${selected.length} ${selected.length > 1 ? 'people' : 'person'}`}
+              {sending ? (
+                t`Sending…`
+              ) : (
+                <Plural value={selected.length} one="Invite # person" other="Invite # people" />
+              )}
             </button>
           </div>
         )}
@@ -457,7 +485,7 @@ export function ShareEntityModal({
         )}
 
         <p className="text-xs text-ktip-sand-400">
-          Invitations stay pending until the recipient accepts them from their invitations page.
+          <Trans>Invitations stay pending until the recipient accepts them from their invitations page.</Trans>
         </p>
       </div>
     </Modal>

@@ -8,6 +8,7 @@ import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { AvailabilityDot } from './AvailabilityDot'
 import type { VenueOccupant } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface RoomOccupantListProps {
   occupants: VenueOccupant[]
@@ -29,11 +30,14 @@ interface RoomOccupantListProps {
  */
 export function RoomOccupantList({
   occupants,
-  title = 'In this room',
-  emptyLabel = 'Nobody here yet.',
+  title,
+  emptyLabel,
   className,
   fill,
 }: RoomOccupantListProps) {
+  const { t } = useLingui()
+  const heading = title ?? t`In this room`
+  const empty = emptyLabel ?? t`Nobody here yet.`
   const auth = useAuth()
   const { openMember } = useMemberPanel()
   const { openPanel } = useMessagingPanel()
@@ -50,13 +54,13 @@ export function RoomOccupantList({
     >
       <div className="flex items-center justify-between border-b border-ktip-sand-100 px-4 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
-          {title}
+          {heading}
         </h2>
         <span className="text-xs font-medium text-ktip-sand-500">{occupants.length}</span>
       </div>
 
       {occupants.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-ktip-sand-500">{emptyLabel}</p>
+        <p className="px-4 py-6 text-sm text-ktip-sand-500">{empty}</p>
       ) : (
         <ul
           className={cn(
@@ -65,7 +69,7 @@ export function RoomOccupantList({
           )}
         >
           {occupants.map((o) => {
-            const name = o.display_name || 'Member'
+            const name = o.display_name || t`Member`
             const isSelf = o.user_id === auth.user?.id
             const showDm = canDirectMessage({
               canInitiateDm,
@@ -89,7 +93,7 @@ export function RoomOccupantList({
                     >
                       {name}
                     </button>
-                    {isSelf && <span className="text-[10px] text-ktip-sand-400">(you)</span>}
+                    {isSelf && <span className="text-[10px] text-ktip-sand-400"><Trans>(you)</Trans></span>}
                   </span>
                   <span className="flex items-center gap-2">
                     <AvailabilityDot availability={o.availability} size="sm" withLabel />
@@ -110,8 +114,8 @@ export function RoomOccupantList({
                   <button
                     type="button"
                     onClick={() => openMember(o.user_id)}
-                    aria-label={`View ${name}'s profile`}
-                    title="View profile"
+                    aria-label={t`View ${name}'s profile`}
+                    title={t`View profile`}
                     className="rounded-lg p-1.5 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600"
                   >
                     <UserRound size={16} aria-hidden="true" />
@@ -120,8 +124,8 @@ export function RoomOccupantList({
                     <button
                       type="button"
                       onClick={() => openPanel({ userId: o.user_id })}
-                      aria-label={`Message ${name}`}
-                      title="Message"
+                      aria-label={t`Message ${name}`}
+                      title={t`Message`}
                       className="rounded-lg p-1.5 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600"
                     >
                       <MessageSquare size={16} aria-hidden="true" />

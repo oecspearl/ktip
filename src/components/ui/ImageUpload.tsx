@@ -6,6 +6,7 @@ import { uploadOptimizedImage } from '../../lib/storage-upload'
 import type { OptimizeOptions } from '../../lib/image-optimize'
 import { cn } from '../../lib/utils'
 import { Camera, X, Loader2 } from 'lucide-react'
+import { useLingui } from '@lingui/react/macro'
 
 interface ImageUploadProps {
   bucket: string
@@ -33,6 +34,7 @@ export function ImageUpload({
   maxSizeMB,
   preset = IMAGE_PRESETS.SPEAKER,
 }: ImageUploadProps) {
+    const { t } = useLingui()
   const toast = useToast()
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
@@ -44,13 +46,15 @@ export function ImageUpload({
   const handleFile = useCallback(
     async (file: File) => {
       if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file')
+        toast.error(t`Please select an image file`)
         return
       }
 
       // Checked before optimization so a huge file is never handed to the decoder.
       if (file.size > maxSize) {
-        toast.error(`Image must be less than ${maxSizeMB ?? 5}MB`)
+        // Hoisted so the catalog entry reads `{limitMb}` rather than `{0}`.
+        const limitMb = maxSizeMB ?? 5
+        toast.error(t`Image must be less than ${limitMb}MB`)
         return
       }
 
@@ -65,9 +69,12 @@ export function ImageUpload({
 
         setPreview(publicUrl)
         onUpload(publicUrl)
-        toast.success('Image uploaded')
+        toast.success(t`Image uploaded`)
       } catch (err: any) {
-        toast.error(err.message || 'Failed to upload image')
+        // Only the fallback is ours to translate. `err.message` comes from
+        // Supabase storage or the browser and stays in whatever language it
+        // arrived in — documented, not fixable from here.
+        toast.error(err.message || t`Failed to upload image`)
       } finally {
         setUploading(false)
       }
@@ -107,7 +114,7 @@ export function ImageUpload({
         <div className="relative group">
           <img
             src={displayUrl}
-            alt="Uploaded"
+            alt={t`Uploaded`}
             className={cn(
               'w-full h-32 object-cover rounded-xl border transition-colors',
               isDragging ? 'border-ktip-ocean-400 ring-2 ring-ktip-ocean-300' : 'border-ktip-sand-200'
@@ -119,7 +126,7 @@ export function ImageUpload({
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
               className="p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-ktip-ocean-600 transition-colors"
-              title="Change image"
+              title={t`Change image`}
             >
               <Camera size={16} />
             </button>
@@ -128,7 +135,7 @@ export function ImageUpload({
                 type="button"
                 onClick={handleRemove}
                 className="p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-red-500 transition-colors"
-                title="Remove image"
+                title={t`Remove image`}
               >
                 <X size={16} />
               </button>
@@ -159,10 +166,10 @@ export function ImageUpload({
           )}
           <span className="text-sm text-ktip-sand-500">
             {uploading
-              ? 'Uploading...'
+              ? t`Uploading...`
               : isDragging
-                ? 'Drop image to upload'
-                : placeholder || 'Click or drag an image here'}
+                ? t`Drop image to upload`
+                : placeholder || t`Click or drag an image here`}
           </span>
         </button>
       )}

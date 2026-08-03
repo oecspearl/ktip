@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '../ui/Button'
 import { Send, X } from 'lucide-react'
 import type { RegistrationFieldConfig } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface EventRegistrationFormProps {
   fields: RegistrationFieldConfig[]
@@ -30,6 +31,7 @@ function initializeDefaults(fields: RegistrationFieldConfig[]) {
 }
 
 export function EventRegistrationForm({ fields, onSubmit, onCancel, loading }: EventRegistrationFormProps) {
+    const { t } = useLingui()
   const [formData, setFormData] = useState<Record<string, any>>(() => initializeDefaults(fields))
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -53,16 +55,16 @@ export function EventRegistrationForm({ fields, onSubmit, onCancel, loading }: E
         if (field.type === 'checkbox') {
           // Checkbox required means it must be checked
           if (!value) {
-            newErrors[field.id] = `${field.label} is required`
+            newErrors[field.id] = t`${field.label} is required`
           }
         } else if (!value || (typeof value === 'string' && value.trim() === '')) {
-          newErrors[field.id] = `${field.label} is required`
+          newErrors[field.id] = t`${field.label} is required`
         }
       }
 
       if (field.type === 'email' && value && typeof value === 'string' && value.trim() !== '') {
         if (!EMAIL_REGEX.test(value)) {
-          newErrors[field.id] = 'Please enter a valid email address'
+          newErrors[field.id] = t`Please enter a valid email address`
         }
       }
     }
@@ -79,7 +81,7 @@ export function EventRegistrationForm({ fields, onSubmit, onCancel, loading }: E
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <h3 className="text-lg font-semibold text-ktip-sand-800">Registration Form</h3>
+      <h3 className="text-lg font-semibold text-ktip-sand-800"><Trans>Registration Form</Trans></h3>
 
       {fields.map((field) => (
         <div key={field.id}>
@@ -145,7 +147,7 @@ export function EventRegistrationForm({ fields, onSubmit, onCancel, loading }: E
               value={(formData[field.id] as string) || ''}
               onChange={(e) => updateField(field.id, e.target.value)}
             >
-              <option value="">{field.placeholder || 'Select an option'}</option>
+              <option value="">{field.placeholder || t`Select an option`}</option>
               {field.options?.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
@@ -194,7 +196,7 @@ export function EventRegistrationForm({ fields, onSubmit, onCancel, loading }: E
           disabled={loading}
           icon={<Send size={16} />}
         >
-          Submit Registration
+          <Trans>Submit Registration</Trans>
         </Button>
         <Button
           type="button"
@@ -203,7 +205,7 @@ export function EventRegistrationForm({ fields, onSubmit, onCancel, loading }: E
           disabled={loading}
           icon={<X size={16} />}
         >
-          Cancel
+          <Trans>Cancel</Trans>
         </Button>
       </div>
     </form>

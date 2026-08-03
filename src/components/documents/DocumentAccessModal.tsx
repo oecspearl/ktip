@@ -11,6 +11,7 @@ import {
 import { formatRelativeTime } from '../../lib/utils'
 import type { DocumentEntityType, DocumentVisibility, EntityDocumentSummary } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface DocumentAccessModalProps {
   open: boolean
@@ -35,6 +36,7 @@ export function DocumentAccessModal({
   entityType,
   entityId,
 }: DocumentAccessModalProps) {
+  const { t, i18n } = useLingui()
   const toast = useToast()
   const { pendingRequests, loading: loadingRequests } = useDocumentAccessRequests(document.id, open)
   const { grants, loading: loadingGrants } = useDocumentGrants(document.id, open)
@@ -50,9 +52,9 @@ export function DocumentAccessModal({
   const handleVisibility = async (visibility: DocumentVisibility) => {
     try {
       await setVisibility({ documentId: document.id, visibility })
-      toast.success('Visibility updated')
+      toast.success(t`Visibility updated`)
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to update visibility')
+      toast.error(err?.message || t`Failed to update visibility`)
     }
   }
 
@@ -72,9 +74,9 @@ export function DocumentAccessModal({
         entityType,
         entityId,
       })
-      toast.success(approve ? 'Access granted' : 'Request declined')
+      toast.success(approve ? t`Access granted` : t`Request declined`)
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to decide the request')
+      toast.error(err?.message || t`Failed to decide the request`)
     }
   }
 
@@ -82,7 +84,7 @@ export function DocumentAccessModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Manage access"
+      title={t`Manage access`}
       description={document.title}
       size="xl"
       className="max-w-2xl"
@@ -90,7 +92,7 @@ export function DocumentAccessModal({
       <div className="space-y-6">
         {/* Visibility */}
         <section className="space-y-2">
-          <h3 className="text-sm font-medium text-ktip-sand-700">General access</h3>
+          <h3 className="text-sm font-medium text-ktip-sand-700"><Trans>General access</Trans></h3>
           <div className="grid gap-2 sm:grid-cols-2">
             {VISIBILITY_OPTIONS.map((option) => {
               const Icon = option.icon
@@ -112,8 +114,8 @@ export function DocumentAccessModal({
                     className={selected ? 'text-ktip-ocean-600 mt-0.5' : 'text-ktip-sand-400 mt-0.5'}
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-ktip-sand-900">{option.label}</span>
-                    <span className="block text-xs text-ktip-sand-500">{option.hint}</span>
+                    <span className="block text-sm font-medium text-ktip-sand-900">{i18n._(option.label)}</span>
+                    <span className="block text-xs text-ktip-sand-500">{i18n._(option.hint)}</span>
                   </span>
                 </button>
               )
@@ -124,17 +126,17 @@ export function DocumentAccessModal({
         {/* Pending requests */}
         <section className="space-y-2">
           <h3 className="text-sm font-medium text-ktip-sand-700">
-            Requests {pendingRequests.length > 0 && `(${pendingRequests.length})`}
+            <Trans>Requests {pendingRequests.length > 0 && `(${pendingRequests.length})`}</Trans>
           </h3>
 
           {loadingRequests ? (
-            <p className="text-sm text-ktip-sand-500 py-2">Loading…</p>
+            <p className="text-sm text-ktip-sand-500 py-2"><Trans>Loading…</Trans></p>
           ) : pendingRequests.length === 0 ? (
-            <p className="text-sm text-ktip-sand-500 py-2">No one is waiting on access.</p>
+            <p className="text-sm text-ktip-sand-500 py-2"><Trans>No one is waiting on access.</Trans></p>
           ) : (
             <ul className="space-y-2">
               {pendingRequests.map((request) => {
-                const name = request.requester?.display_name || 'A member'
+                const name = request.requester?.display_name || t`A member`
                 return (
                   <li
                     key={request.id}
@@ -163,7 +165,7 @@ export function DocumentAccessModal({
                         disabled={decidingRequest}
                         onClick={() => handleDecision(request.id, request.requester_id, true, 'viewer')}
                       >
-                        Grant view
+                        <Trans>Grant view</Trans>
                       </Button>
                       <Button
                         size="sm"
@@ -171,7 +173,7 @@ export function DocumentAccessModal({
                         disabled={decidingRequest}
                         onClick={() => handleDecision(request.id, request.requester_id, true, 'editor')}
                       >
-                        Grant edit
+                        <Trans>Grant edit</Trans>
                       </Button>
                       <Button
                         size="sm"
@@ -180,7 +182,7 @@ export function DocumentAccessModal({
                         disabled={decidingRequest}
                         onClick={() => handleDecision(request.id, request.requester_id, false)}
                       >
-                        Decline
+                        <Trans>Decline</Trans>
                       </Button>
                     </div>
                   </li>
@@ -192,18 +194,18 @@ export function DocumentAccessModal({
 
         {/* People with access */}
         <section className="space-y-2">
-          <h3 className="text-sm font-medium text-ktip-sand-700">People with access</h3>
+          <h3 className="text-sm font-medium text-ktip-sand-700"><Trans>People with access</Trans></h3>
 
           {loadingGrants ? (
-            <p className="text-sm text-ktip-sand-500 py-2">Loading…</p>
+            <p className="text-sm text-ktip-sand-500 py-2"><Trans>Loading…</Trans></p>
           ) : !grants || grants.length === 0 ? (
             <p className="text-sm text-ktip-sand-500 py-2">
-              Only you, unless the general access setting says otherwise.
+              <Trans>Only you, unless the general access setting says otherwise.</Trans>
             </p>
           ) : (
             <ul className="space-y-2">
               {grants.map((grant) => {
-                const name = grant.user?.display_name || 'Member'
+                const name = grant.user?.display_name || t`Member`
                 return (
                   <li key={grant.id} className="flex items-center gap-3 p-3 border border-ktip-sand-200 rounded-xl">
                     <Avatar name={name} url={grant.user?.avatar_url} />
@@ -217,23 +219,23 @@ export function DocumentAccessModal({
                         updateGrantRole({
                           grantId: grant.id,
                           role: e.target.value as 'viewer' | 'editor',
-                        }).catch((err: any) => toast.error(err?.message || 'Failed to update the role'))
+                        }).catch((err: any) => toast.error(err?.message || t`Failed to update the role`))
                       }
                       className="text-sm border border-ktip-sand-200 rounded-lg px-2 py-1 bg-ktip-cream"
                     >
-                      <option value="viewer">Viewer</option>
-                      <option value="editor">Editor</option>
+                      <option value="viewer"><Trans>Viewer</Trans></option>
+                      <option value="editor"><Trans>Editor</Trans></option>
                     </select>
 
                     <button
                       type="button"
                       onClick={() =>
                         revokeAccess(grant.id).catch((err: any) =>
-                          toast.error(err?.message || 'Failed to revoke access')
+                          toast.error(err?.message || t`Failed to revoke access`)
                         )
                       }
                       className="p-1.5 rounded-lg text-ktip-sand-500 hover:bg-red-50 hover:text-red-600 transition-colors"
-                      aria-label={`Remove ${name}`}
+                      aria-label={t`Remove ${name}`}
                     >
                       <Trash2 size={16} />
                     </button>

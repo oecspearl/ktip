@@ -1,4 +1,7 @@
 import DOMPurify from 'dompurify'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
 import { GRIEVANCE_CATEGORY_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
@@ -44,9 +47,11 @@ export function ReceiptDocument({
   subtitle,
   submittedAt,
   sections,
-  footer = 'Generated with KTIP Grant Application',
+  footer,
 }: ReceiptDocumentProps) {
+  const { t } = useLingui()
   const populated = sections.filter((s) => s.fields.length > 0)
+  const footerText = footer ?? t`Generated with KTIP Grant Application`
 
   return (
     <div className="proposal-preview prose prose-sm max-w-none">
@@ -61,7 +66,7 @@ export function ReceiptDocument({
           )}
           <span>
             {submittedAt
-              ? `Submitted ${formatDate(submittedAt)}`
+              ? t`Submitted ${formatDate(submittedAt)}`
               : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </span>
         </div>
@@ -103,13 +108,13 @@ export function ReceiptDocument({
 
       {populated.length === 0 && (
         <p className="text-sm text-ktip-sand-500 italic">
-          No additional information was requested for this submission.
+          <Trans>No additional information was requested for this submission.</Trans>
         </p>
       )}
 
       {/* Footer */}
       <div className="mt-8 pt-4 border-t border-ktip-sand-200 text-xs text-ktip-sand-400 print:mt-4">
-        {footer}
+        {footerText}
       </div>
     </div>
   )
@@ -122,7 +127,7 @@ function toDisplayValue(raw: any): string | null {
     const joined = raw.filter((v) => v !== null && v !== undefined && String(v).trim()).join(', ')
     return joined || null
   }
-  if (typeof raw === 'boolean') return raw ? 'Yes' : 'No'
+  if (typeof raw === 'boolean') return raw ? i18n._(msg`Yes`) : i18n._(msg`No`)
   const str = String(raw).trim()
   return str || null
 }
@@ -151,8 +156,8 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
     case 'grant_application_v1':
       sections = GRANT_APPLICATION_STEPS.map((step) =>
         build(
-          step.title,
-          step.fields.map((f) => ({ key: f.name, label: f.label }))
+          i18n._(step.title),
+          step.fields.map((f) => ({ key: f.name, label: i18n._(f.label) }))
         )
       )
       break
@@ -160,7 +165,7 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
     case 'event_registration':
       sections = [
         build(
-          'Registration Details',
+          i18n._(msg`Registration Details`),
           (receipt.field_config || []).map((f) => ({ key: f.id, label: f.label }))
         ),
       ]
@@ -171,15 +176,15 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
       used.add('category')
       sections = [
         {
-          title: 'Report Details',
+          title: i18n._(msg`Report Details`),
           fields: [
             ...(category
-              ? [{ label: 'Category', value: GRIEVANCE_CATEGORY_LABELS[category] || category }]
+              ? [{ label: i18n._(msg`Category`), value: GRIEVANCE_CATEGORY_LABELS[category] || category }]
               : []),
             ...build('', [
-              { key: 'description', label: 'What happened' },
-              { key: 'context', label: 'Additional context' },
-              { key: 'evidence_url', label: 'Evidence' },
+              { key: 'description', label: i18n._(msg`What happened`) },
+              { key: 'context', label: i18n._(msg`Additional context`) },
+              { key: 'evidence_url', label: i18n._(msg`Evidence`) },
             ]).fields,
           ],
         },
@@ -200,7 +205,7 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
     })
 
   if (leftovers.length > 0) {
-    sections = [...sections, { title: 'Other Responses', fields: leftovers }]
+    sections = [...sections, { title: i18n._(msg`Other Responses`), fields: leftovers }]
   }
 
   return sections

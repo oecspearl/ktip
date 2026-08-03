@@ -1,5 +1,6 @@
 import { Plus, FolderPlus, X, ChevronUp, ChevronDown } from 'lucide-react'
 import type { DetailEntry, DetailItem } from '../../types'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface DetailsEditorProps {
   value: DetailEntry[]
@@ -38,6 +39,7 @@ function move<T>(arr: T[], from: number, to: number): T[] {
 }
 
 export function DetailsEditor({ value, onChange }: DetailsEditorProps) {
+    const { t } = useLingui()
   const updateEntry = (id: string, patch: Partial<DetailEntry>) =>
     onChange(value.map((e) => (e.id === id ? { ...e, ...patch } : e)))
 
@@ -88,16 +90,16 @@ export function DetailsEditor({ value, onChange }: DetailsEditorProps) {
                   type="text"
                   value={entry.label}
                   onChange={(e) => updateEntry(entry.id, { label: e.currentTarget.value })}
-                  placeholder="Group name (e.g. Funding)"
+                  placeholder={t`Group name (e.g. Funding)`}
                   className={`${inputClass} font-medium`}
                 />
-                <button type="button" onClick={() => moveEntry(index, -1)} disabled={index === 0} className={iconButtonClass} title="Move up">
+                <button type="button" onClick={() => moveEntry(index, -1)} disabled={index === 0} className={iconButtonClass} title={t`Move up`}>
                   <ChevronUp size={16} />
                 </button>
-                <button type="button" onClick={() => moveEntry(index, 1)} disabled={index === value.length - 1} className={iconButtonClass} title="Move down">
+                <button type="button" onClick={() => moveEntry(index, 1)} disabled={index === value.length - 1} className={iconButtonClass} title={t`Move down`}>
                   <ChevronDown size={16} />
                 </button>
-                <button type="button" onClick={() => removeEntry(entry.id)} className={iconButtonClass} title="Remove group">
+                <button type="button" onClick={() => removeEntry(entry.id)} className={iconButtonClass} title={t`Remove group`}>
                   <X size={16} />
                 </button>
               </div>
@@ -108,30 +110,30 @@ export function DetailsEditor({ value, onChange }: DetailsEditorProps) {
                       type="text"
                       value={item.label}
                       onChange={(e) => updateItem(entry, item.id, { label: e.currentTarget.value })}
-                      placeholder="Label"
+                      placeholder={t`Label`}
                       className={inputClass}
                     />
                     <input
                       type="text"
                       value={item.value}
                       onChange={(e) => updateItem(entry, item.id, { value: e.currentTarget.value })}
-                      placeholder="Value"
+                      placeholder={t`Value`}
                       className={inputClass}
                     />
-                    <button type="button" onClick={() => moveItem(entry, itemIndex, -1)} disabled={itemIndex === 0} className={iconButtonClass} title="Move up">
+                    <button type="button" onClick={() => moveItem(entry, itemIndex, -1)} disabled={itemIndex === 0} className={iconButtonClass} title={t`Move up`}>
                       <ChevronUp size={16} />
                     </button>
-                    <button type="button" onClick={() => moveItem(entry, itemIndex, 1)} disabled={itemIndex === (entry.items?.length || 0) - 1} className={iconButtonClass} title="Move down">
+                    <button type="button" onClick={() => moveItem(entry, itemIndex, 1)} disabled={itemIndex === (entry.items?.length || 0) - 1} className={iconButtonClass} title={t`Move down`}>
                       <ChevronDown size={16} />
                     </button>
-                    <button type="button" onClick={() => removeItem(entry, item.id)} className={iconButtonClass} title="Remove item">
+                    <button type="button" onClick={() => removeItem(entry, item.id)} className={iconButtonClass} title={t`Remove item`}>
                       <X size={16} />
                     </button>
                   </div>
                 ))}
                 <button type="button" onClick={() => addItem(entry)} className={addButtonClass}>
                   <Plus size={14} />
-                  Add item
+                  <Trans>Add item</Trans>
                 </button>
               </div>
             </>
@@ -141,23 +143,23 @@ export function DetailsEditor({ value, onChange }: DetailsEditorProps) {
                 type="text"
                 value={entry.label}
                 onChange={(e) => updateEntry(entry.id, { label: e.currentTarget.value })}
-                placeholder="Label"
+                placeholder={t`Label`}
                 className={inputClass}
               />
               <input
                 type="text"
                 value={entry.value || ''}
                 onChange={(e) => updateEntry(entry.id, { value: e.currentTarget.value })}
-                placeholder="Value"
+                placeholder={t`Value`}
                 className={inputClass}
               />
-              <button type="button" onClick={() => moveEntry(index, -1)} disabled={index === 0} className={iconButtonClass} title="Move up">
+              <button type="button" onClick={() => moveEntry(index, -1)} disabled={index === 0} className={iconButtonClass} title={t`Move up`}>
                 <ChevronUp size={16} />
               </button>
-              <button type="button" onClick={() => moveEntry(index, 1)} disabled={index === value.length - 1} className={iconButtonClass} title="Move down">
+              <button type="button" onClick={() => moveEntry(index, 1)} disabled={index === value.length - 1} className={iconButtonClass} title={t`Move down`}>
                 <ChevronDown size={16} />
               </button>
-              <button type="button" onClick={() => removeEntry(entry.id)} className={iconButtonClass} title="Remove field">
+              <button type="button" onClick={() => removeEntry(entry.id)} className={iconButtonClass} title={t`Remove field`}>
                 <X size={16} />
               </button>
             </>
@@ -168,11 +170,11 @@ export function DetailsEditor({ value, onChange }: DetailsEditorProps) {
       <div className="flex gap-2">
         <button type="button" onClick={addField} className={addButtonClass}>
           <Plus size={14} />
-          Add field
+          <Trans>Add field</Trans>
         </button>
         <button type="button" onClick={addGroup} className={addButtonClass}>
           <FolderPlus size={14} />
-          Add group
+          <Trans>Add group</Trans>
         </button>
       </div>
     </div>

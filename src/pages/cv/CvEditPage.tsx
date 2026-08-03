@@ -13,6 +13,8 @@ import type {
   ResumePath,
   ResumeRole,
 } from '../../types/resume'
+import { Trans, useLingui, Plural } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 /**
  * CV editor.
@@ -34,7 +36,8 @@ import type {
 type ListPath = Extract<ResumePath, 'roles' | 'education'>
 
 export default function CvEditPage() {
-  usePageTitle('Edit CV')
+    const { t } = useLingui()
+  usePageTitle(t`Edit CV`)
   const navigate = useNavigate()
   const toast = useToast()
   const { data, save, generate, isLoading } = useResume()
@@ -94,7 +97,7 @@ export default function CvEditPage() {
    */
   const fillFromProfile = async () => {
     if (touched.size > 0) {
-      toast.info('Save your changes first — filling from your profile reloads the document.')
+      toast.info(t`Save your changes first — filling from your profile reloads the document.`)
       return
     }
 
@@ -106,10 +109,15 @@ export default function CvEditPage() {
 
       const filled = result.filled?.length ?? 0
       if (filled === 0) {
-        toast.info('Nothing to copy — your profile has nothing these blanks can use.')
+        toast.info(t`Nothing to copy — your profile has nothing these blanks can use.`)
         return
       }
-      toast.success(`Filled ${filled} ${filled === 1 ? 'section' : 'sections'} from your KTIP record.`)
+      toast.success(
+        plural(filled, {
+          one: 'Filled # section from your KTIP record.',
+          other: 'Filled # sections from your KTIP record.',
+        })
+      )
     } catch (err) {
       toast.error((err as Error).message)
     }
@@ -118,8 +126,8 @@ export default function CvEditPage() {
   const onSave = async () => {
     try {
       await save.mutateAsync({ data: draft, touched: Array.from(touched) })
-      toast.success('CV saved.')
-      navigate('/cv')
+      toast.success(t`CV saved.`)
+      navigate('/dashboard/profile')
     } catch (err) {
       toast.error((err as Error).message)
     }
@@ -131,10 +139,10 @@ export default function CvEditPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700">
-        Edit CV
+        <Trans>Edit CV</Trans>
       </h1>
       <p className="mt-2 text-sm text-ktip-sand-600">
-        Anything you change here is yours — syncing from the Virtual Campus will leave it alone.
+        <Trans>Anything you change here is yours — syncing from the Virtual Campus will leave it alone.</Trans>
       </p>
 
       <div data-tutorial="cv-edit-prefill" className="mt-4">
@@ -145,53 +153,51 @@ export default function CvEditPage() {
           loading={generate.isPending}
           onClick={fillFromProfile}
         >
-          Fill blanks from my profile
+          <Trans>Fill blanks from my profile</Trans>
         </Button>
         <p className="mt-1.5 text-xs text-ktip-sand-500">
-          Copies your name, location, organisation, bio, skills, interests, public projects and
-          badges into any section that is still empty. Never overwrites something you have written or
-          anything synced from the Virtual Campus.
+          <Trans>Copies your name, location, organisation, bio, skills, interests, public projects and badges into any section that is still empty. Never overwrites something you have written or anything synced from the Virtual Campus.</Trans>
         </p>
       </div>
 
       {/* ── Identity ── */}
       <section className="mt-10 space-y-4">
         <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-          Details
+          <Trans>Details</Trans>
         </h2>
         <Input
-          label="Full name"
+          label={t`Full name`}
           value={draft.profile.name}
           onChange={(e) => setProfileField('name', e.target.value)}
         />
         <Input
-          label="Headline"
-          placeholder="Student · OECS Virtual Campus"
+          label={t`Headline`}
+          placeholder={t`Student · OECS Virtual Campus`}
           value={draft.profile.role}
           onChange={(e) => setProfileField('role', e.target.value)}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
-            label="Location"
+            label={t`Location`}
             value={draft.profile.location}
             onChange={(e) => setProfileField('location', e.target.value)}
           />
           <Input
-            label="Phone"
+            label={t`Phone`}
             value={draft.profile.phone}
             onChange={(e) => setProfileField('phone', e.target.value)}
           />
         </div>
         <Input
-          label="Email"
+          label={t`Email`}
           type="email"
           value={draft.profile.email}
           onChange={(e) => setProfileField('email', e.target.value)}
         />
         <Textarea
-          label="About"
+          label={t`About`}
           rows={6}
-          helperText="Leave a blank line between paragraphs."
+          helperText={t`Leave a blank line between paragraphs.`}
           value={draft.profile.about.join('\n\n')}
           onChange={(e) => setAbout(e.target.value)}
         />
@@ -201,7 +207,7 @@ export default function CvEditPage() {
       <section data-tutorial="cv-edit-sections" className="mt-12">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-            Experience
+            <Trans>Experience</Trans>
           </h2>
           <Button
             variant="ghost"
@@ -209,13 +215,13 @@ export default function CvEditPage() {
             icon={<Plus size={15} />}
             onClick={() => setList('roles', [...draft.roles, { ...emptyRole }])}
           >
-            Add
+            <Trans>Add</Trans>
           </Button>
         </div>
 
         {draft.roles.length === 0 && (
           <p className="mt-3 text-sm text-ktip-sand-500">
-            The Virtual Campus holds no employment record, so this section starts empty.
+            <Trans>The Virtual Campus holds no employment record, so this section starts empty.</Trans>
           </p>
         )}
 
@@ -227,7 +233,7 @@ export default function CvEditPage() {
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 <Input
-                  label="Job title"
+                  label={t`Job title`}
                   value={role.title}
                   onChange={(e) =>
                     setList(
@@ -237,7 +243,7 @@ export default function CvEditPage() {
                   }
                 />
                 <Input
-                  label="Organisation"
+                  label={t`Organisation`}
                   value={role.org}
                   onChange={(e) =>
                     setList(
@@ -247,8 +253,8 @@ export default function CvEditPage() {
                   }
                 />
                 <Input
-                  label="Period"
-                  placeholder="Jan 2024 – Present"
+                  label={t`Period`}
+                  placeholder={t`Jan 2024 – Present`}
                   value={role.period}
                   onChange={(e) =>
                     setList(
@@ -258,7 +264,7 @@ export default function CvEditPage() {
                   }
                 />
                 <Input
-                  label="Location"
+                  label={t`Location`}
                   value={role.location}
                   onChange={(e) =>
                     setList(
@@ -271,9 +277,9 @@ export default function CvEditPage() {
                 />
               </div>
               <Textarea
-                label="What you did"
+                label={t`What you did`}
                 rows={4}
-                helperText="One bullet per line."
+                helperText={t`One bullet per line.`}
                 value={role.points.join('\n')}
                 onChange={(e) =>
                   setList(
@@ -292,7 +298,7 @@ export default function CvEditPage() {
                 icon={<Trash2 size={15} />}
                 onClick={() => setList('roles', draft.roles.filter((_, i) => i !== index))}
               >
-                Remove
+                <Trans>Remove</Trans>
               </Button>
             </div>
           ))}
@@ -303,7 +309,7 @@ export default function CvEditPage() {
       <section className="mt-12">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-            Education
+            <Trans>Education</Trans>
           </h2>
           <Button
             variant="ghost"
@@ -311,7 +317,7 @@ export default function CvEditPage() {
             icon={<Plus size={15} />}
             onClick={() => setList('education', [...draft.education, { ...emptyEducation }])}
           >
-            Add
+            <Trans>Add</Trans>
           </Button>
         </div>
 
@@ -322,7 +328,7 @@ export default function CvEditPage() {
               className="grid gap-3 rounded-lg border border-ktip-sand-200 p-4 sm:grid-cols-[1fr_1fr_100px]"
             >
               <Input
-                label="Credential"
+                label={t`Credential`}
                 value={entry.credential}
                 onChange={(e) =>
                   setList(
@@ -334,7 +340,7 @@ export default function CvEditPage() {
                 }
               />
               <Input
-                label="School"
+                label={t`School`}
                 value={entry.school}
                 onChange={(e) =>
                   setList(
@@ -344,7 +350,7 @@ export default function CvEditPage() {
                 }
               />
               <Input
-                label="Year"
+                label={t`Year`}
                 value={entry.year}
                 onChange={(e) =>
                   setList(
@@ -362,7 +368,7 @@ export default function CvEditPage() {
                     setList('education', draft.education.filter((_, i) => i !== index))
                   }
                 >
-                  Remove
+                  <Trans>Remove</Trans>
                 </Button>
               </div>
             </div>
@@ -374,10 +380,10 @@ export default function CvEditPage() {
       {draft.courses.length > 0 && (
         <section className="mt-12">
           <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-            Courses
+            <Trans>Courses</Trans>
           </h2>
           <p className="mt-2 text-sm text-ktip-sand-500">
-            Pulled from the OECS Virtual Campus. Remove one and it stays removed on future syncs.
+            <Trans>Pulled from the OECS Virtual Campus. Remove one and it stays removed on future syncs.</Trans>
           </p>
           <ul className="mt-4 divide-y divide-ktip-sand-200 rounded-lg border border-ktip-sand-200">
             {draft.courses.map((course, index) => (
@@ -388,8 +394,8 @@ export default function CvEditPage() {
                   </p>
                   <p className="text-xs text-ktip-sand-500">
                     {course.status === 'completed'
-                      ? 'Completed'
-                      : `${course.progressPercentage}% complete`}
+                      ? t`Completed`
+                      : t`${course.progressPercentage}% complete`}
                     {course.subjectArea ? ` · ${course.subjectArea}` : ''}
                   </p>
                 </div>
@@ -397,7 +403,7 @@ export default function CvEditPage() {
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 size={15} />}
-                  aria-label={`Remove ${course.title}`}
+                  aria-label={t`Remove ${course.title}`}
                   onClick={() => {
                     setDraft((prev) => ({
                       ...prev,
@@ -406,7 +412,7 @@ export default function CvEditPage() {
                     mark('courses')
                   }}
                 >
-                  Remove
+                  <Trans>Remove</Trans>
                 </Button>
               </li>
             ))}
@@ -418,11 +424,10 @@ export default function CvEditPage() {
       {draft.projects.length > 0 && (
         <section className="mt-12">
           <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-            Projects
+            <Trans>Projects</Trans>
           </h2>
           <p className="mt-2 text-sm text-ktip-sand-500">
-            Your public KTIP projects. Edit a project itself on its own page; remove it here and it
-            stays off your CV.
+            <Trans>Your public KTIP projects. Edit a project itself on its own page; remove it here and it stays off your CV.</Trans>
           </p>
           <ul className="mt-4 divide-y divide-ktip-sand-200 rounded-lg border border-ktip-sand-200">
             {draft.projects.map((project, index) => (
@@ -430,14 +435,14 @@ export default function CvEditPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-ktip-ocean-700">{project.title}</p>
                   <p className="text-xs text-ktip-sand-500">
-                    {[project.category, project.phase].filter(Boolean).join(' · ') || 'Project'}
+                    {[project.category, project.phase].filter(Boolean).join(' · ') || t`Project`}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 size={15} />}
-                  aria-label={`Remove ${project.title}`}
+                  aria-label={t`Remove ${project.title}`}
                   onClick={() => {
                     setDraft((prev) => ({
                       ...prev,
@@ -446,7 +451,7 @@ export default function CvEditPage() {
                     mark('projects')
                   }}
                 >
-                  Remove
+                  <Trans>Remove</Trans>
                 </Button>
               </li>
             ))}
@@ -458,11 +463,10 @@ export default function CvEditPage() {
       {draft.credentials.length > 0 && (
         <section className="mt-12">
           <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-            Certificates
+            <Trans>Certificates</Trans>
           </h2>
           <p className="mt-2 text-sm text-ktip-sand-500">
-            Shared from your Virtual Campus account. Remove one and it stays off your CV — the
-            next sign-in will not put it back.
+            <Trans>Shared from your Virtual Campus account. Remove one and it stays off your CV — the next sign-in will not put it back.</Trans>
           </p>
           <ul className="mt-4 divide-y divide-ktip-sand-200 rounded-lg border border-ktip-sand-200">
             {draft.credentials.map((credential, index) => (
@@ -477,8 +481,8 @@ export default function CvEditPage() {
                   <p className="truncate text-xs text-ktip-sand-500">
                     {[
                       credential.issuer,
-                      credential.code ? `Code ${credential.code}` : null,
-                      credential.verified ? 'Verified' : null,
+                      credential.code ? t`Code ${credential.code}` : null,
+                      credential.verified ? t`Verified` : null,
                     ]
                       .filter(Boolean)
                       .join(' · ')}
@@ -488,7 +492,7 @@ export default function CvEditPage() {
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 size={15} />}
-                  aria-label={`Remove ${credential.title}`}
+                  aria-label={t`Remove ${credential.title}`}
                   onClick={() => {
                     setDraft((prev) => ({
                       ...prev,
@@ -497,7 +501,7 @@ export default function CvEditPage() {
                     mark('credentials')
                   }}
                 >
-                  Remove
+                  <Trans>Remove</Trans>
                 </Button>
               </li>
             ))}
@@ -509,10 +513,10 @@ export default function CvEditPage() {
       {draft.awards.length > 0 && (
         <section className="mt-12">
           <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-            Awards &amp; recognition
+            <Trans>Awards &amp; recognition</Trans>
           </h2>
           <p className="mt-2 text-sm text-ktip-sand-500">
-            Badges you have earned on KTIP. Remove one and it stays off your CV.
+            <Trans>Badges you have earned on KTIP. Remove one and it stays off your CV.</Trans>
           </p>
           <ul className="mt-4 divide-y divide-ktip-sand-200 rounded-lg border border-ktip-sand-200">
             {draft.awards.map((award, index) => (
@@ -527,7 +531,7 @@ export default function CvEditPage() {
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 size={15} />}
-                  aria-label={`Remove ${award.name}`}
+                  aria-label={t`Remove ${award.name}`}
                   onClick={() => {
                     setDraft((prev) => ({
                       ...prev,
@@ -536,7 +540,7 @@ export default function CvEditPage() {
                     mark('awards')
                   }}
                 >
-                  Remove
+                  <Trans>Remove</Trans>
                 </Button>
               </li>
             ))}
@@ -547,24 +551,24 @@ export default function CvEditPage() {
       {/* ── Lists ── */}
       <section className="mt-12 space-y-4">
         <h2 className="font-display text-lg font-bold uppercase tracking-wider text-ktip-ocean-700">
-          More
+          <Trans>More</Trans>
         </h2>
         <Textarea
-          label="Languages"
+          label={t`Languages`}
           rows={3}
-          helperText="One per line."
+          helperText={t`One per line.`}
           value={draft.languages.join('\n')}
           onChange={(e) => setLines('languages', e.target.value)}
         />
         <Textarea
-          label="Professional skills"
+          label={t`Professional skills`}
           rows={5}
-          helperText="One per line."
+          helperText={t`One per line.`}
           value={draft.professionalSkills.join('\n')}
           onChange={(e) => setLines('professionalSkills', e.target.value)}
         />
         <Textarea
-          label="Interests"
+          label={t`Interests`}
           rows={3}
           value={draft.interests}
           onChange={(e) => {
@@ -577,14 +581,18 @@ export default function CvEditPage() {
 
       <div data-tutorial="cv-edit-save" className="mt-10 flex items-center gap-3">
         <Button onClick={onSave} loading={save.isPending}>
-          Save CV
+          <Trans>Save CV</Trans>
         </Button>
-        <Button variant="ghost" onClick={() => navigate('/cv')}>
-          Cancel
+        <Button variant="ghost" onClick={() => navigate('/dashboard/profile')}>
+          <Trans>Cancel</Trans>
         </Button>
         {touched.size > 0 && (
           <span className="text-xs text-ktip-sand-500">
-            {touched.size} section{touched.size === 1 ? '' : 's'} will be marked as yours
+            <Plural
+              value={touched.size}
+              one="# section will be marked as yours"
+              other="# sections will be marked as yours"
+            />
           </span>
         )}
       </div>

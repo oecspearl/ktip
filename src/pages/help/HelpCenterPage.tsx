@@ -9,9 +9,11 @@ import { HelpCircle, MessageSquare, Users, Sparkles } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { ASSISTANT_CONVERSATION_ID, ASSISTANT_NAME } from '../../lib/assistant'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function HelpCenterPage() {
-  usePageTitle('Help Center')
+    const { t } = useLingui()
+  usePageTitle(t`Help Center`)
   const { openPanel } = useMessagingPanel()
 
   // /help?article=<id> and /help?q=<text> let the global search panel land on
@@ -78,16 +80,16 @@ export default function HelpCenterPage() {
   return (
     <>
       <PageHero
-        eyebrow="Help Center"
-        title="How Can We Help?"
+        eyebrow={t`Help Center`}
+        title={t`How Can We Help?`}
         imageSeed="help"
-        breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Help Center' }]}
+        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Help Center` }]}
       >
         <Link
           to="/help/faq"
           className="inline-block text-sm text-ktip-nav-accent hover:text-white transition-colors"
         >
-          Browse the FAQ →
+          <Trans>Browse the FAQ →</Trans>
         </Link>
         {/* Search embedded in hero; category filtering lives in the sidebar */}
         <div className="max-w-2xl mt-4">
@@ -121,14 +123,14 @@ export default function HelpCenterPage() {
                 {isFiltered && (
                   <div className="flex items-center justify-between gap-4 mb-6">
                     <h2 className="text-2xl font-display font-bold text-ktip-sand-900">
-                      {hasQuery ? 'Search Results' : 'Browsing by category'}
+                      {hasQuery ? t`Search Results` : t`Browsing by category`}
                     </h2>
                     <button
                       type="button"
                       onClick={clearFilters}
                       className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium shrink-0"
                     >
-                      Clear all
+                      <Trans>Clear all</Trans>
                     </button>
                   </div>
                 )}
@@ -149,18 +151,20 @@ export default function HelpCenterPage() {
                       <HelpCircle size={28} className="text-gray-400" />
                     </div>
                     <h3 className="text-xl font-display font-bold text-ktip-sand-900 mb-2">
-                      No articles found
+                      <Trans>No articles found</Trans>
                     </h3>
                     <p className="text-gray-500 mb-4 max-w-md mx-auto">
-                      We could not find any articles matching your search. Try different keywords, or
-                      ask the {ASSISTANT_NAME} in Messages.
+                      <Trans>
+                        We could not find any articles matching your search. Try different keywords, or
+                        ask the {ASSISTANT_NAME} in Messages.
+                      </Trans>
                     </p>
                     <button
                       type="button"
                       onClick={clearFilters}
                       className="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
                     >
-                      Clear search
+                      <Trans>Clear search</Trans>
                     </button>
                   </div>
                 )}
@@ -172,9 +176,9 @@ export default function HelpCenterPage() {
           {!isFiltered && (
             <section id="contact" data-spy="Contact" className="scroll-mt-24 mt-12">
               <div className="bg-ktip-ocean-700 dark:bg-ktip-ocean-200 rounded-2xl text-center py-10 px-6">
-                <h3 className="text-xl font-display font-bold text-white mb-2">Still need help?</h3>
+                <h3 className="text-xl font-display font-bold text-white mb-2"><Trans>Still need help?</Trans></h3>
                 <p className="text-white/80 mb-6 max-w-lg mx-auto">
-                  If you could not find what you are looking for, reach out to the community or chat with our AI assistant.
+                  <Trans>If you could not find what you are looking for, reach out to the community or chat with our AI assistant.</Trans>
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
@@ -183,21 +187,21 @@ export default function HelpCenterPage() {
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-cream text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
                   >
                     <Sparkles size={18} />
-                    Ask the {ASSISTANT_NAME}
+                    <Trans>Ask the {ASSISTANT_NAME}</Trans>
                   </button>
                   <Link
                     to="/messages"
                     className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
                   >
                     <MessageSquare size={18} />
-                    Send a Message
+                    <Trans>Send a Message</Trans>
                   </Link>
                   <Link
                     to="/forums"
                     className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
                   >
                     <Users size={18} />
-                    Visit Forums
+                    <Trans>Visit Forums</Trans>
                   </Link>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAISuggestions } from '../../../hooks/useAISuggestions'
 import type { AIReviewResult } from '../../../hooks/useAISuggestions'
 import { Sparkles, Loader2, CheckCircle, AlertTriangle, Lightbulb } from 'lucide-react'
+import { Trans } from '@lingui/react/macro'
 
 interface AIReviewPanelProps {
   grantTitle: string
@@ -31,9 +32,9 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
       {!review ? (
         <div className="text-center py-6 border border-dashed border-ktip-sand-300 rounded-xl">
           <Sparkles size={24} className="mx-auto text-ktip-ocean-400 mb-2" />
-          <h4 className="text-sm font-semibold text-ktip-sand-800 mb-1">AI Application Review</h4>
+          <h4 className="text-sm font-semibold text-ktip-sand-800 mb-1"><Trans>AI Application Review</Trans></h4>
           <p className="text-xs text-ktip-sand-500 mb-4 max-w-md mx-auto">
-            Get an AI-powered analysis of your application with scoring, strengths, weaknesses, and actionable suggestions.
+            <Trans>Get an AI-powered analysis of your application with scoring, strengths, weaknesses, and actionable suggestions.</Trans>
           </p>
           <button
             type="button"
@@ -44,12 +45,12 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
             {ai.loading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Analyzing...
+                <Trans>Analyzing...</Trans>
               </>
             ) : (
               <>
                 <Sparkles size={16} />
-                Analyze Application
+                <Trans>Analyze Application</Trans>
               </>
             )}
           </button>
@@ -61,7 +62,7 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
           <div className={`flex items-center gap-4 p-4 border rounded-xl ${scoreBg}`}>
             <div className={`text-3xl font-bold ${scoreColor}`}>{review.score}</div>
             <div className="flex-1">
-              <div className="text-sm font-semibold text-ktip-sand-800">Overall Score</div>
+              <div className="text-sm font-semibold text-ktip-sand-800"><Trans>Overall Score</Trans></div>
               <p className="text-xs text-ktip-sand-600 mt-0.5">{review.summary}</p>
             </div>
           </div>
@@ -71,7 +72,7 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
             <div className="p-4 bg-ktip-tropical-50/50 border border-ktip-tropical-100 rounded-xl">
               <h4 className="text-sm font-semibold text-ktip-tropical-800 mb-2 flex items-center gap-1.5">
                 <CheckCircle size={14} />
-                Strengths
+                <Trans>Strengths</Trans>
               </h4>
               <ul className="space-y-1.5">
                 {review.strengths.map((s, i) => (
@@ -89,7 +90,7 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
             <div className="p-4 bg-ktip-sun-50/50 border border-ktip-sun-100 rounded-xl">
               <h4 className="text-sm font-semibold text-ktip-sun-800 mb-2 flex items-center gap-1.5">
                 <AlertTriangle size={14} />
-                Areas for Improvement
+                <Trans>Areas for Improvement</Trans>
               </h4>
               <ul className="space-y-1.5">
                 {review.weaknesses.map((w, i) => (
@@ -107,7 +108,7 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
             <div className="p-4 bg-ktip-ocean-50/50 border border-ktip-ocean-100 rounded-xl">
               <h4 className="text-sm font-semibold text-ktip-ocean-800 mb-2 flex items-center gap-1.5">
                 <Lightbulb size={14} />
-                Suggestions
+                <Trans>Suggestions</Trans>
               </h4>
               <ul className="space-y-1.5">
                 {review.suggestions.map((s, i) => (
@@ -129,7 +130,7 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
               className="inline-flex items-center gap-2 px-4 py-2 text-sm text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-lg transition-colors disabled:opacity-50"
             >
               {ai.loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-              Re-analyze
+              <Trans>Re-analyze</Trans>
             </button>
           </div>
         </div>

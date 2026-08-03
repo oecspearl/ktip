@@ -1,6 +1,7 @@
 import { ReceiptDocument } from '../../shared/ReceiptDocument'
 import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
 import type { StepConfig } from '../../../lib/grant-application-template'
+import { useLingui } from '@lingui/react/macro'
 
 interface ApplicationPreviewProps {
   title: string
@@ -19,12 +20,13 @@ export function ApplicationPreview({
   data,
   steps = GRANT_APPLICATION_STEPS,
 }: ApplicationPreviewProps) {
+  const { i18n } = useLingui()
   const sections = steps.map((step) => ({
-    title: step.title,
+    title: i18n._(step.title),
     fields: step.fields.flatMap((field) => {
       const raw = data[field.name]
       const value = raw && String(raw).trim() ? String(raw) : null
-      return value ? [{ label: field.label, value }] : []
+      return value ? [{ label: i18n._(field.label), value }] : []
     }),
   }))
 

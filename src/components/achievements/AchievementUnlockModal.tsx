@@ -6,6 +6,8 @@ import { TrophyCard } from './TrophyCard'
 import { FireworksOverlay } from './FireworksOverlay'
 import { resolveTrophy } from './TrophyImage'
 import { useAchievementContext } from '../../contexts/AchievementContext'
+import { Trans, useLingui } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
 
 /** How long to wait for trophy art before falling back to the icon card. */
 const IMAGE_TIMEOUT_MS = 2000
@@ -17,6 +19,7 @@ const IMAGE_TIMEOUT_MS = 2000
  * without every page wiring up its own modal.
  */
 export function AchievementUnlockModal() {
+    const { t } = useLingui()
   const { pendingUnlocks, dismissUnlock, assetMap } = useAchievementContext()
   const navigate = useNavigate()
   const unlock = pendingUnlocks[0]
@@ -66,10 +69,10 @@ export function AchievementUnlockModal() {
     <Modal
       open
       onClose={dismissUnlock}
-      title="Achievement unlocked"
+      title={t`Achievement unlocked`}
       description={
         pendingUnlocks.length > 1
-          ? `${pendingUnlocks.length - 1} more to reveal`
+          ? plural(pendingUnlocks.length - 1, { one: '# more to reveal', other: '# more to reveal' })
           : undefined
       }
       size="sm"
@@ -96,7 +99,7 @@ export function AchievementUnlockModal() {
 
         <div className="relative z-10 flex w-full gap-2">
           <Button variant="secondary" className="flex-1" onClick={dismissUnlock}>
-            {pendingUnlocks.length > 1 ? 'Next' : 'Nice'}
+            {pendingUnlocks.length > 1 ? t`Next` : t`Nice`}
           </Button>
           <Button
             className="flex-1"
@@ -105,7 +108,7 @@ export function AchievementUnlockModal() {
               navigate('/achievements')
             }}
           >
-            View all
+            <Trans>View all</Trans>
           </Button>
         </div>
       </div>
