@@ -23,7 +23,6 @@
       ]
     },
     {
-      "comment": "Generated responsive variants. Safe to freeze forever because the filename carries a hash of the source bytes, so a changed photo becomes a new URL instead of a stale hit. Must stay AFTER the rule above, which also matches _img/*.webp — later rules win.",
       "source": "/_img/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
