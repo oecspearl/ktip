@@ -51,7 +51,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   },
   { to: 'progress', label: msg`Progress`, icon: TrendingUp, description: msg`Your activity timeline` },
   // A real panel, not a link out. The gallery renders in embedded mode (see
-  // AchievementsTab); /achievements stays reachable for direct links.
+  // AchievementsTab); the old /achievements address redirects here.
   { to: 'achievements', label: msg`Achievements`, icon: Trophy, description: msg`Badges, points and rank` },
   { to: 'projects', label: msg`Projects`, icon: FolderKanban, description: msg`Projects you own` },
   { to: 'events', label: msg`Events`, icon: Calendar, description: msg`Events you organize` },

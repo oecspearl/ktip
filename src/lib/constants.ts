@@ -483,7 +483,7 @@ export const ROUTES = {
   PROFILE: (id: string) => `/directory?member=${id}`,
   MEMBER_PAGE: (id: string) => `/user/${id}`,
   MY_PROFILE: '/dashboard/profile',
-  ACHIEVEMENTS: '/achievements',
+  ACHIEVEMENTS: '/dashboard/achievements',
   LEADERBOARD: '/leaderboard',
   SETTINGS: '/settings',
   FORGOT_PASSWORD: '/forgot-password',

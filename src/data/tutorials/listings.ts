@@ -101,18 +101,6 @@ export const faqTutorialSteps: TutorialStep[] = [
   replayStep,
 ]
 
-export const achievementsTutorialSteps: TutorialStep[] = [
-  {
-    target: '[data-tutorial="achievements-gallery"]',
-    title: 'Badges and points',
-    description:
-      'Every achievement KTIP awards, with the ones you have earned filled in and the rest showing what it takes.\n\nPoints from these feed your leaderboard rank, and earned badges show on your public profile — so a locked badge here is a to-do list rather than decoration.',
-    position: 'top',
-    scrollMode: 'top',
-  },
-  replayStep,
-]
-
 export const invitationsTutorialSteps: TutorialStep[] = [
   {
     target: '[data-tutorial="invitations-list"]',

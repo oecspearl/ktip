@@ -80,7 +80,7 @@ export default function LeaderboardPage() {
         <h1 className="font-display text-3xl font-bold text-ktip-sand-900"><Trans>Leaderboard</Trans></h1>
         <p className="mt-1 text-sm text-ktip-sand-600">
           <Trans>Points come from achievements earned across projects, grants, events and the community.</Trans>{' '}
-          <Link to="/achievements" className="text-ktip-ocean-600 hover:underline">
+          <Link to="/dashboard/achievements" className="text-ktip-ocean-600 hover:underline">
             <Trans>See how they are earned</Trans>
           </Link>
           .

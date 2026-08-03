@@ -253,9 +253,10 @@ const router = createBrowserRouter([
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
-              // Your own gallery. Signed-in only — it is built from
-              // check_my_achievements(), which has no anonymous meaning.
-              { path: '/achievements', lazy: lazyPage(() => import('./pages/achievements/AchievementsPage')) },
+              // The gallery lives in the dashboard now (AchievementsTab); the
+              // old page address keeps resolving for bookmarks and the
+              // notification links stored by 066_achievements_engine.sql.
+              { path: '/achievements', element: <Navigate to="/dashboard/achievements" replace /> },
               // The CV lives in the dashboard now (ProfileTab); the old page
               // address keeps resolving for bookmarks and stored links.
               { path: '/cv', element: <Navigate to="/dashboard/profile" replace /> },

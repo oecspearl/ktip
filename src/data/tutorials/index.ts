@@ -55,7 +55,6 @@ import { grantApplicationTutorialSteps } from './grant-application'
 import { grantDetailTutorialSteps } from './grant-detail'
 import { grantsTutorialSteps } from './grants'
 import {
-  achievementsTutorialSteps,
   faqTutorialSteps,
   hackathonsTutorialSteps,
   helpTutorialSteps,
@@ -100,7 +99,6 @@ export const TUTORIAL_IDS = {
   HACKATHONS: 'hackathons',
   HELP: 'help',
   FAQ: 'faq',
-  ACHIEVEMENTS: 'achievements',
   INVITATIONS: 'invitations',
   MY_APPLICATIONS: 'my-applications',
   MY_GRIEVANCES: 'my-grievances',
@@ -378,13 +376,6 @@ const REGISTRY: RegisteredTutorial[] = [
     name: 'Help Center',
     description: 'Articles by topic, and how to reach a person.',
     steps: helpTutorialSteps,
-  },
-  {
-    id: TUTORIAL_IDS.ACHIEVEMENTS,
-    route: '/achievements',
-    name: 'Achievements',
-    description: 'Badges, points and what unlocks them.',
-    steps: achievementsTutorialSteps,
   },
   {
     id: TUTORIAL_IDS.INVITATIONS,

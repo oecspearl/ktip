@@ -294,7 +294,7 @@
 
 ---
 
-## 8. Achievements — `/achievements`
+## 8. Achievements — `/dashboard/achievements` (old `/achievements` redirects here)
 - Rank header: level, rank name, earned/total, points, streak, active days
 - Progress bar toward the next rank, fireworks overlay once past level 1
 - **Collections** grid with per-collection progress and completion state
@@ -344,7 +344,7 @@
 | **Overview** (index) | **For You** rail, **Recent submissions**, personal **calendar** |
 | **Profile** | Read-only view of what other members see; badges, bio, skills, interests, open-to, join date; Edit → settings |
 | **Progress** | Lazy-loaded activity timeline |
-| **Achievements** | Links out to the full gallery (`/achievements`) |
+| **Achievements** | The full gallery, embedded (its only home; `/achievements` redirects here) |
 | **Projects** | Projects you own, with create CTA gated on `project:create` |
 | **Events** | Events you organize, create CTA |
 | **Connections** | Connection cards, open member drawer, remove connection |

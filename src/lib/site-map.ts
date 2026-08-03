@@ -335,7 +335,7 @@ export const SITE_MAP: SiteEntry[] = [
       'badges', 'trophies', 'points', 'score', 'level', 'rank', 'xp', 'streak',
       'gamification', 'rewards', 'milestones', 'collections', 'showcase',
     ],
-    href: '/achievements',
+    href: '/dashboard/achievements',
     access: 'auth',
     icon: 'Award',
   },

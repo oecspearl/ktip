@@ -105,7 +105,7 @@ export function AchievementUnlockModal() {
             className="flex-1"
             onClick={() => {
               dismissUnlock()
-              navigate('/achievements')
+              navigate('/dashboard/achievements')
             }}
           >
             <Trans>View all</Trans>

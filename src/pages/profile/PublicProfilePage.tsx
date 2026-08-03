@@ -408,7 +408,7 @@ export default function PublicProfilePage() {
           )}
 
           {isSelf && (
-            <Link to="/achievements" className="mt-4 inline-block">
+            <Link to="/dashboard/achievements" className="mt-4 inline-block">
               <Button variant="ghost" size="sm" icon={<Trophy size={14} />}>
                 <Trans>Manage your achievements</Trans>
               </Button>

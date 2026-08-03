@@ -51,11 +51,10 @@ const STATUS_TABS: { key: StatusFilter; label: MessageDescriptor }[] = [
 ]
 
 /**
- * `embedded` renders the same gallery inside the dashboard tab shell: the tab
- * panel already supplies the width, padding and page heading, so the standalone
- * page's own container and h1 would nest a page inside a page. Everything else —
- * showcase pinning, filters, fireworks — is identical, deliberately one
- * component rather than a tab-sized copy of it.
+ * The gallery's only live home is the dashboard tab (AchievementsTab renders it
+ * with `embedded`; /achievements redirects there). `embedded` drops the
+ * standalone container and h1 because the tab panel already supplies the width,
+ * padding and page heading — without it a page would nest inside a page.
  */
 export default function AchievementsPage({ embedded = false }: { embedded?: boolean }) {
     const { t, i18n } = useLingui()
