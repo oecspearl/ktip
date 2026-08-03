@@ -40,6 +40,9 @@ build
 .info
 STALE_CACHING_RESEARCH.md
 
+# Internal documentation stays on this machine only — never push to GitHub
+docs/
+
 # Playwright MCP screenshots and snapshots
 .playwright-mcp
 
