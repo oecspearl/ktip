@@ -1,0 +1,160 @@
+/* venue-kit — neutral defaults. Theme by overriding the variables. */
+:root {
+  --vk-bg: #fff;
+  --vk-fg: #1c1917;
+  --vk-muted: #78716c;
+  --vk-border: #e7e5e4;
+  --vk-accent: #0369a1;
+  --vk-working: #10b981;
+  --vk-away: #a8a29e;
+  --vk-busy: #ef4444;
+  --vk-help: #f59e0b;
+  --vk-offline: #d6d3d1;
+  --vk-radius: 12px;
+}
+
+.vk-panel {
+  background: var(--vk-bg);
+  border: 1px solid var(--vk-border);
+  border-radius: var(--vk-radius);
+  overflow: hidden;
+}
+.vk-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--vk-border);
+}
+.vk-panel-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vk-muted);
+}
+.vk-panel-count { font-size: 12px; color: var(--vk-muted); }
+.vk-empty { padding: 18px 14px; font-size: 14px; color: var(--vk-muted); }
+
+.vk-list { list-style: none; margin: 0; padding: 0; max-height: 28rem; overflow-y: auto; }
+.vk-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--vk-border);
+}
+.vk-row:first-child { border-top: 0; }
+.vk-row-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.vk-row-name { font-size: 14px; font-weight: 500; color: var(--vk-fg); }
+.vk-role {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vk-accent);
+}
+.vk-note {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--vk-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vk-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.vk-avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vk-border);
+  color: var(--vk-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vk-dot-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.vk-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.vk-dot--working { background: var(--vk-working); }
+.vk-dot--away { background: var(--vk-away); }
+.vk-dot--busy { background: var(--vk-busy); }
+.vk-dot--help_wanted { background: var(--vk-help); }
+.vk-dot--offline { background: var(--vk-offline); }
+.vk-dot-label { font-size: 12px; color: var(--vk-muted); }
+
+.vk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--vk-border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--vk-muted);
+}
+.vk-chip--live .vk-chip-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--vk-working);
+}
+.vk-chip--stale { background: color-mix(in srgb, var(--vk-border) 50%, transparent); }
+.vk-chip--stale .vk-chip-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--vk-away);
+}
+
+.vk-picker { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.vk-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--vk-border);
+  border-radius: 999px;
+  background: var(--vk-bg);
+  color: var(--vk-fg);
+  font-size: 12px;
+  cursor: pointer;
+}
+.vk-picker-btn--active {
+  border-color: var(--vk-accent);
+  box-shadow: 0 0 0 1px var(--vk-accent);
+}
+
+.vk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.vk-room {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  text-align: left;
+  background: var(--vk-bg);
+  border: 1px solid var(--vk-border);
+  border-radius: var(--vk-radius);
+  cursor: pointer;
+}
+.vk-room:hover:not(:disabled) { border-color: var(--vk-accent); }
+.vk-room:disabled { opacity: 0.6; cursor: not-allowed; }
+.vk-room-kind {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vk-accent);
+}
+.vk-room-name { font-size: 15px; font-weight: 700; color: var(--vk-fg); }
+.vk-room-desc { font-size: 13px; color: var(--vk-muted); }
+.vk-room-meta { margin-top: 6px; font-size: 12px; color: var(--vk-muted); }

@@ -1,0 +1,14 @@
+{
+  "name": "venue-kit",
+  "version": "1.0.0",
+  "description": "Drop-in virtual event venue for React + Supabase: rooms, live presence, per-room speaking rules.",
+  "type": "module",
+  "main": "src/index.ts",
+  "peerDependencies": {
+    "@supabase/supabase-js": ">=2.95.0",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "vitest": ">=1"
+  }
+}
