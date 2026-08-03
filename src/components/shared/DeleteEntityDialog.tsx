@@ -49,19 +49,23 @@ export function DeleteEntityDialog({
   }, [open])
 
   const confirmed = isDeleteConfirmed(impact, typed, title)
+  const untitled = t`Untitled ${noun}`
+  const titleDisplay = title || untitled
 
   return (
     <Modal
       open={open}
       onClose={loading ? () => {} : onCancel}
-      title={`Delete this ${noun}?`}
+      title={t`Delete this ${noun}?`}
       description={t`This cannot be undone.`}
       size="lg"
     >
       <div className="space-y-5">
         <p className="text-sm text-ktip-sand-700">
-          <span className="font-semibold text-ktip-sand-900">{title || `Untitled ${noun}`}</span> will
-          be permanently deleted, along with:
+          <Trans>
+            <span className="font-semibold text-ktip-sand-900">{titleDisplay}</span> will be
+            permanently deleted, along with:
+          </Trans>
         </p>
 
         <ul className="space-y-1.5">
@@ -84,7 +88,7 @@ export function DeleteEntityDialog({
 
         {impact.requiresTitleConfirmation && (
           <Input
-            label={`Type the ${noun} title to confirm`}
+            label={t`Type the ${noun} title to confirm`}
             placeholder={title}
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
@@ -120,7 +124,7 @@ export function DeleteEntityDialog({
             disabled={!confirmed}
             onClick={onConfirm}
           >
-            Delete {noun}
+            <Trans>Delete {noun}</Trans>
           </Button>
         </div>
       </div>

@@ -47,8 +47,12 @@ export function useCalendarFeed({
   userId,
   enabled = true,
 }: CalendarFeedOptions) {
-    const { t } = useLingui()
+    const { t, i18n } = useLingui()
   const wants = (kind: CalendarItemKind) => kinds.includes(kind)
+  // These records are harvested from lib/constants — their English text is the
+  // catalog id, so a lookup has to go through i18n._() to actually translate.
+  const harvestedLabel = (rec: Record<string, string>, key: string): string | undefined =>
+    rec[key] ? i18n._(rec[key]) : undefined
 
   const eventItem = (event: Event, dimmed: boolean): CalendarItem => ({
     id: `event:${event.id}`,
@@ -60,7 +64,7 @@ export function useCalendarFeed({
     chipClass: EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event,
     dotClass: EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event,
     gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event,
-    badgeLabel: EVENT_TYPE_LABELS[event.event_type] ?? t`Event`,
+    badgeLabel: harvestedLabel(EVENT_TYPE_LABELS, event.event_type) ?? t`Event`,
     subtitle:
       event.status === 'draft'
         ? t`Draft`
@@ -193,10 +197,10 @@ export function useCalendarFeed({
         dotClass: CALENDAR_KIND_DOT_COLORS.rsvp,
         gradientClass: CALENDAR_KIND_GRADIENTS.rsvp,
         badgeLabel: t`Registered`,
-        subtitle: RSVP_STATUS_LABELS[rsvp.status] ?? undefined,
+        subtitle: harvestedLabel(RSVP_STATUS_LABELS, rsvp.status),
         icon: event.is_virtual ? Video : MapPin,
         statusLabel:
-          rsvp.status === 'confirmed' ? undefined : RSVP_STATUS_LABELS[rsvp.status] ?? undefined,
+          rsvp.status === 'confirmed' ? undefined : harvestedLabel(RSVP_STATUS_LABELS, rsvp.status),
         dimmed: rsvp.status === 'cancelled',
         mine: true,
       })
@@ -214,9 +218,9 @@ export function useCalendarFeed({
         dotClass: CALENDAR_KIND_DOT_COLORS.grant_application,
         gradientClass: CALENDAR_KIND_GRADIENTS.grant_application,
         badgeLabel: t`Application`,
-        subtitle: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
+        subtitle: harvestedLabel(GRANT_APPLICATION_STATUS_LABELS, application.status),
         icon: FileText,
-        statusLabel: GRANT_APPLICATION_STATUS_LABELS[application.status] ?? undefined,
+        statusLabel: harvestedLabel(GRANT_APPLICATION_STATUS_LABELS, application.status),
         mine: scope === 'personal',
       })
     }

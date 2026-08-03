@@ -147,16 +147,17 @@ export const MIGRATED_PATHS = [
   'src/pages/onboarding/',
   'src/pages/profile/',
 
-  // DELIBERATELY ABSENT — these slices were interrupted partway and are only
-  // half migrated. Guarding them now would fail the build on work that is
-  // genuinely still outstanding rather than on a regression, and a ratchet that
-  // cries wolf gets switched off within a week:
-  //
-  //   src/components/directory, src/components/personalization,
-  //   src/components/shared, src/components/calendar, src/components/gantt,
-  //   src/hooks
-  //
-  // Add each one here as its sweep finishes.
+  // Final slice — everything the interrupted agents left. The scanner reported
+  // these directories clean before they were added; the last hand-swept
+  // stragglers were the directory drawer/connect controls, the
+  // personalization rail and topic picker, and the runtime-resolved zod
+  // messages in validation.ts.
+  'src/components/directory/',
+  'src/components/personalization/',
+  'src/components/shared/',
+  'src/components/calendar/',
+  'src/components/gantt/',
+  'src/hooks/',
 ]
 
 // ---------------------------------------------------------------------------

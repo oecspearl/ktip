@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { i18n } from '@lingui/core'
 import { msg } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import { resolveDestinations, type AssistantDestination } from '../lib/assistant'
 import type { UserRole } from '../types'
 
@@ -23,27 +24,33 @@ const MAX_PERSISTED = 50
 const STORAGE_PREFIX = 'ktip_assistant_thread_'
 
 // Partial: the prompt only needs a friendly name for roles it recognises, and
-// falls back to the raw slug for the rest.
-const ROLE_LABELS: Partial<Record<UserRole, string>> = {
-  student: 'Student/Youth Innovator',
-  mentor: 'Mentor',
-  investor: 'Investor/Funding Agency',
-  entrepreneur: 'Entrepreneur',
-  private_sector: 'Private Sector/SME Partner',
-  faculty: 'Faculty/Researcher',
-  oecs: 'OECS Administrator',
-  super_admin: 'OECS Administrator',
-  safety_admin: 'Safety Administrator',
-  sme: 'Verified SME',
-  educational_partner: 'Educational Partner',
-  chamber_admin: 'Chamber of Commerce Administrator',
-  researcher: 'Researcher',
+// falls back to the raw slug for the rest. `MessageDescriptor`: the welcome
+// message shows this to the member, so it resolves through i18n._() at the
+// two call sites below rather than shipping English into every locale.
+const ROLE_LABELS: Partial<Record<UserRole, MessageDescriptor>> = {
+  student: msg`Student/Youth Innovator`,
+  mentor: msg`Mentor`,
+  investor: msg`Investor/Funding Agency`,
+  entrepreneur: msg`Entrepreneur`,
+  private_sector: msg`Private Sector/SME Partner`,
+  faculty: msg`Faculty/Researcher`,
+  oecs: msg`OECS Administrator`,
+  super_admin: msg`OECS Administrator`,
+  safety_admin: msg`Safety Administrator`,
+  sme: msg`Verified SME`,
+  educational_partner: msg`Educational Partner`,
+  chamber_admin: msg`Chamber of Commerce Administrator`,
+  researcher: msg`Researcher`,
 }
 
+// The AI system prompt itself is developer/API-facing context, never shown to
+// the member, and stays in English on purpose — mixed-language instructions
+// are still an English-language spec sent to the model, not a UI string.
 function buildSystemPrompt(userRole?: UserRole | null, userName?: string | null): string {
+  const roleLabel = userRole && ROLE_LABELS[userRole] ? i18n._(ROLE_LABELS[userRole]) : undefined
   const nameCtx = userName ? `The user's name is ${userName}. ` : ''
-  const roleCtx = userRole
-    ? `The user is logged in as a "${ROLE_LABELS[userRole]}". Tailor your answers to be especially relevant to their role.`
+  const roleCtx = roleLabel
+    ? `The user is logged in as a "${roleLabel}". Tailor your answers to be especially relevant to their role.`
     : 'The user is not logged in. They may be exploring the platform or considering signing up.'
 
   return `You are KTIP Assistant, a friendly and helpful support assistant for the Knowledge, Technology and Innovation Platform (KTIP). KTIP is a Caribbean innovation and collaboration platform that connects students, mentors, entrepreneurs, investors, private sector partners, and OECS administrators.
@@ -83,7 +90,7 @@ Rules:
 
 function buildWelcomeMessage(userRole?: UserRole | null, userName?: string | null): string {
   const greeting = userName ? i18n._(msg`Hi ${userName}!`) : i18n._(msg`Hi there!`)
-  const role = userRole ? ROLE_LABELS[userRole] : undefined
+  const role = userRole && ROLE_LABELS[userRole] ? i18n._(ROLE_LABELS[userRole]) : undefined
   const roleHint = role
     ? i18n._(msg` As a ${role}, I can help you get the most out of KTIP's features.`)
     : i18n._(msg` Whether you are just exploring or already have an account, I am here to help.`)

@@ -105,7 +105,7 @@ export function MemberCard({ member }: MemberCardProps) {
             className="flex items-center justify-center gap-1.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-700 py-1.5 px-3 rounded-lg hover:bg-ktip-sand-50 transition-colors"
           >
             <MessageSquare size={14} />
-            Message
+            <Trans>Message</Trans>
           </button>
         )}
       </div>

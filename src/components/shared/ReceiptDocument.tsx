@@ -179,7 +179,14 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
           title: i18n._(msg`Report Details`),
           fields: [
             ...(category
-              ? [{ label: i18n._(msg`Category`), value: GRIEVANCE_CATEGORY_LABELS[category] || category }]
+              ? [
+                  {
+                    label: i18n._(msg`Category`),
+                    value: GRIEVANCE_CATEGORY_LABELS[category]
+                      ? i18n._(GRIEVANCE_CATEGORY_LABELS[category])
+                      : category,
+                  },
+                ]
               : []),
             ...build('', [
               { key: 'description', label: i18n._(msg`What happened`) },

@@ -9,12 +9,14 @@ import { usePersonalizedFeed, type FeedItem } from '../../hooks/usePersonalizedF
 import { hasSignals, personalizedHref } from '../../lib/personalization'
 import { formatDate } from '../../lib/utils'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 
-const ENTITY_LABELS: Record<FeedItem['entity'], string> = {
-  project: 'Project',
-  resource: 'Resource',
-  event: 'Event',
-  grant: 'Grant',
+const ENTITY_LABELS: Record<FeedItem['entity'], MessageDescriptor> = {
+  project: msg`Project`,
+  resource: msg`Resource`,
+  event: msg`Event`,
+  grant: msg`Grant`,
 }
 
 const PROMPT_DISMISSED_KEY = 'ktip_personalization_prompt_dismissed'
@@ -25,8 +27,10 @@ interface ForYouRailProps {
 }
 
 function FeedCard({ item }: { item: FeedItem }) {
+  const { i18n, t } = useLingui()
+  const closesDate = item.deadline_at ? formatDate(item.deadline_at) : ''
   const when = item.deadline_at
-    ? { icon: <Clock size={12} />, text: `Closes ${formatDate(item.deadline_at)}` }
+    ? { icon: <Clock size={12} />, text: t`Closes ${closesDate}` }
     : item.occurs_at
       ? { icon: <CalendarDays size={12} />, text: formatDate(item.occurs_at) }
       : null
@@ -37,7 +41,7 @@ function FeedCard({ item }: { item: FeedItem }) {
       className="group flex flex-col gap-2 bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-4 hover:border-ktip-ocean-300 transition-colors"
     >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
-        {ENTITY_LABELS[item.entity]}
+        {i18n._(ENTITY_LABELS[item.entity])}
       </div>
 
       <h3 className="font-display font-bold text-ktip-sand-900 leading-snug line-clamp-2 group-hover:text-ktip-ocean-700">
@@ -100,7 +104,7 @@ export function ForYouRail({ title = 'For You', limit = 6 }: ForYouRailProps) {
             to="/settings?tab=personalization"
             className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
           >
-            Choose my topics
+            <Trans>Choose my topics</Trans>
             <ChevronRight size={14} />
           </Link>
         </div>

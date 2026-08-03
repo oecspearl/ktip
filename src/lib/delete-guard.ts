@@ -22,6 +22,8 @@
  * would refuse, and nothing here should be relied on to prevent one.
  */
 
+import { i18n } from '@lingui/core'
+import { msg, plural } from '@lingui/core/macro'
 import type { EventStatus } from '../types'
 
 export interface DeleteImpact {
@@ -75,31 +77,38 @@ function isEventPubliclyVisible(status: EventStatus): boolean {
 export function describeEventDeletion(facts: EventDeleteFacts): DeleteImpact {
   const { status, rsvpCount, hasVenue, hasChallenge } = facts
 
-  const cascades = ['The event listing, schedule, speakers and page sections']
+  const cascades = [i18n._(msg`The event listing, schedule, speakers and page sections`)]
 
   if (rsvpCount === null || rsvpCount > 0) {
-    cascades.push('Every RSVP and registration response')
+    cascades.push(i18n._(msg`Every RSVP and registration response`))
   }
   if (hasChallenge) {
     cascades.push(
-      'The challenge brief, its criteria, every solution participants submitted and the files attached to them'
+      i18n._(
+        msg`The challenge brief, its criteria, every solution participants submitted and the files attached to them`
+      )
     )
   }
-  cascades.push('Documents attached to the event')
+  cascades.push(i18n._(msg`Documents attached to the event`))
   if (hasVenue) {
-    cascades.push('The virtual venue: rooms, room chat history and member records')
+    cascades.push(i18n._(msg`The virtual venue: rooms, room chat history and member records`))
   }
-  cascades.push('Event updates, articles and calendar entries')
+  cascades.push(i18n._(msg`Event updates, articles and calendar entries`))
 
   const attendeesAffected = rsvpCount === null ? isEventPubliclyVisible(status) : rsvpCount > 0
 
   let warning: string | null = null
   if (rsvpCount !== null && rsvpCount > 0) {
-    warning = `${rsvpCount} ${rsvpCount === 1 ? 'person has' : 'people have'} registered. Their registration data will be destroyed and they will not be notified.`
+    warning = plural(rsvpCount, {
+      one: '# person has registered. Their registration data will be destroyed and they will not be notified.',
+      other: '# people have registered. Their registration data will be destroyed and they will not be notified.',
+    })
   } else if (rsvpCount === null && isEventPubliclyVisible(status)) {
-    warning = 'This event is public. Anyone who registered will lose their registration and will not be notified.'
+    warning = i18n._(
+      msg`This event is public. Anyone who registered will lose their registration and will not be notified.`
+    )
   } else if (isEventPubliclyVisible(status)) {
-    warning = 'This event is public. Existing links to it will break.'
+    warning = i18n._(msg`This event is public. Existing links to it will break.`)
   }
 
   return {
@@ -113,18 +122,21 @@ export function describeEventDeletion(facts: EventDeleteFacts): DeleteImpact {
 export function describeProjectDeletion(facts: ProjectDeleteFacts): DeleteImpact {
   const { isPublic, memberCount } = facts
 
-  const cascades = ['The project page and everything on it']
+  const cascades = [i18n._(msg`The project page and everything on it`)]
   if (memberCount > 0) {
-    cascades.push('All team memberships and pending invitations')
+    cascades.push(i18n._(msg`All team memberships and pending invitations`))
   }
-  cascades.push('Comments, likes, follows and view history')
-  cascades.push('Documents and files attached to the project')
+  cascades.push(i18n._(msg`Comments, likes, follows and view history`))
+  cascades.push(i18n._(msg`Documents and files attached to the project`))
 
   let warning: string | null = null
   if (memberCount > 0) {
-    warning = `${memberCount} ${memberCount === 1 ? 'collaborator' : 'collaborators'} will lose access to this project and their comments. They will not be notified.`
+    warning = plural(memberCount, {
+      one: '# collaborator will lose access to this project and their comments. They will not be notified.',
+      other: '# collaborators will lose access to this project and their comments. They will not be notified.',
+    })
   } else if (isPublic) {
-    warning = 'This project is public. Existing links to it will break.'
+    warning = i18n._(msg`This project is public. Existing links to it will break.`)
   }
 
   return {
@@ -138,11 +150,11 @@ export function describeProjectDeletion(facts: ProjectDeleteFacts): DeleteImpact
 export function describeGrantDeletion(facts: GrantDeleteFacts): DeleteImpact {
   const { isActive, applicationCount } = facts
 
-  const cascades = ['The grant listing and everything attached to it']
+  const cascades = [i18n._(msg`The grant listing and everything attached to it`)]
   if (applicationCount === null || applicationCount > 0) {
-    cascades.push('Every application to this grant, including saved drafts')
+    cascades.push(i18n._(msg`Every application to this grant, including saved drafts`))
   }
-  cascades.push('Uploaded documents and their extracted fields')
+  cascades.push(i18n._(msg`Uploaded documents and their extracted fields`))
 
   // An active grant is one people can still apply to, so an uncounted total is
   // more likely to be non-zero than zero. Deactivating first is the safe path
@@ -151,12 +163,16 @@ export function describeGrantDeletion(facts: GrantDeleteFacts): DeleteImpact {
 
   let warning: string | null = null
   if (applicationCount !== null && applicationCount > 0) {
-    warning = `${applicationCount} ${applicationCount === 1 ? 'application' : 'applications'} will be destroyed along with any drafts. Applicants will not be notified.`
+    warning = plural(applicationCount, {
+      one: '# application will be destroyed along with any drafts. Applicants will not be notified.',
+      other: '# applications will be destroyed along with any drafts. Applicants will not be notified.',
+    })
   } else if (applicationCount === null && isActive) {
-    warning =
-      'This grant is still accepting applications. Any application or saved draft against it will be destroyed, and applicants will not be notified. Deactivating it instead keeps the record.'
+    warning = i18n._(
+      msg`This grant is still accepting applications. Any application or saved draft against it will be destroyed, and applicants will not be notified. Deactivating it instead keeps the record.`
+    )
   } else if (isActive) {
-    warning = 'This grant is live. Existing links to it will break.'
+    warning = i18n._(msg`This grant is live. Existing links to it will break.`)
   }
 
   return {

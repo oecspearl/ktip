@@ -99,25 +99,29 @@ export const dateOfBirthSchema = z
   .string()
   .min(1, 'Date of birth is required')
   .superRefine((value, ctx) => {
+    // t`` here is fine — superRefine callbacks run at PARSE time, so the
+    // message resolves in the reader's language. Only the schema-builder
+    // arguments (.min(1, '…')) are frozen at module scope.
     const parsed = parseDobInput(value)
     if (!parsed) {
-      ctx.addIssue({ code: 'custom', message: 'Enter a valid date of birth' })
+      ctx.addIssue({ code: 'custom', message: t`Enter a valid date of birth` })
       return
     }
     if (parsed.getTime() > Date.now()) {
-      ctx.addIssue({ code: 'custom', message: 'Date of birth cannot be in the future' })
+      ctx.addIssue({ code: 'custom', message: t`Date of birth cannot be in the future` })
       return
     }
     const age = ageOn(parsed)
     if (age < MINIMUM_SIGNUP_AGE) {
+      const minimumAge = MINIMUM_SIGNUP_AGE
       ctx.addIssue({
         code: 'custom',
-        message: `You must be at least ${MINIMUM_SIGNUP_AGE} to use KTIP`,
+        message: t`You must be at least ${minimumAge} to use KTIP`,
       })
       return
     }
     if (age > 120) {
-      ctx.addIssue({ code: 'custom', message: 'Enter a valid date of birth' })
+      ctx.addIssue({ code: 'custom', message: t`Enter a valid date of birth` })
     }
   })
 export const COLLABORATION_VALUES = [
@@ -157,7 +161,7 @@ const passwordsMatch = (
     ctx.addIssue({
       code: 'custom',
       path: ['confirm_password'],
-      message: 'Passwords do not match',
+      message: t`Passwords do not match`,
     })
   }
 }
@@ -266,9 +270,12 @@ export const profileUpdateSchema = z.object({
 export const changePasswordSchema = z.object({
   new_password: z.string().min(6, 'Password must be at least 6 characters'),
   confirm_password: z.string().min(6, 'Password must be at least 6 characters'),
-}).refine((data) => data.new_password === data.confirm_password, {
-  message: 'Passwords do not match',
-  path: ['confirm_password'],
+}).superRefine((data, ctx) => {
+  // superRefine rather than refine: refine's options object is evaluated once
+  // at module scope, freezing the message in English; this resolves per parse.
+  if (data.new_password !== data.confirm_password) {
+    ctx.addIssue({ code: 'custom', path: ['confirm_password'], message: t`Passwords do not match` })
+  }
 })
 
 // Change Email Schema

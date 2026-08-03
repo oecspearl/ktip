@@ -383,7 +383,7 @@ export function MemberPanel() {
                       to={memberPath(profile)}
                       className="inline-flex items-center gap-1 text-xs font-semibold text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:gap-1.5 transition-all"
                     >
-                      View full profile
+                      <Trans>View full profile</Trans>
                       <ChevronRight size={13} />
                     </Link>
                     {!isSelf && (
@@ -392,7 +392,7 @@ export function MemberPanel() {
                         className="inline-flex items-center gap-1 text-xs font-medium text-ktip-sand-400 hover:text-red-600 transition-colors ml-auto"
                       >
                         <Flag size={12} />
-                        Report
+                        <Trans>Report</Trans>
                       </Link>
                     )}
                   </div>
@@ -418,8 +418,15 @@ export function MemberPanel() {
                     <Trans>This profile is private</Trans>
                   </h3>
                   <p className="mx-auto mt-2 max-w-sm text-sm text-ktip-sand-600">
-                    Only {displayName.split(' ')[0]}'s connections can see their full profile or
-                    send them a message. Send a connection request to ask.
+                    {(() => {
+                      const firstName = displayName.split(' ')[0]
+                      return (
+                        <Trans>
+                          Only {firstName}'s connections can see their full profile or send them a
+                          message. Send a connection request to ask.
+                        </Trans>
+                      )
+                    })()}
                   </p>
                   <Link to={memberPath(profile)} onClick={closeMember} className="mt-4 inline-block">
                     <Button variant="ghost" size="sm">
@@ -541,7 +548,10 @@ export function MemberPanel() {
                     <div className="px-6 py-10 text-center">
                       <Calendar size={20} className="mx-auto text-ktip-sand-300 mb-2" />
                       <p className="text-sm text-ktip-sand-500">
-                        {displayName.split(' ')[0]} hasn't filled out a profile yet.
+                        {(() => {
+                          const firstName = displayName.split(' ')[0]
+                          return <Trans>{firstName} hasn't filled out a profile yet.</Trans>
+                        })()}
                       </p>
                     </div>
                   )}

@@ -894,7 +894,6 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How does student verification work?`,
   msg`How does the leaderboard work?`,
   msg`How entries are scored`,
-  msg`How other members see you — bio, skills and badges`,
   msg`How points and ranks work.`,
   msg`How the ranking works`,
   msg`I am not getting notifications`,
@@ -1082,7 +1081,6 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My Dashboard`,
   msg`My Events`,
   msg`My Invitations`,
-  msg`My Profile`,
   msg`My Progress`,
   msg`My Projects`,
   msg`My Registrations`,
@@ -1379,7 +1377,6 @@ It also offers a Gantt view, which is more useful when you are looking at how pr
 
 It is a record for you. Other members do not see your progress timeline.`,
   msg`Progress next door is the same story as a timeline. Points from here decide where you sit on the public leaderboard.`,
-  msg`Progress, Achievements and Connections sit beside this tab. Anything you have published — projects and events — has its own tab too.`,
   msg`Project creation is behind a permission, not just a login. Roles built around funding and oversight — Investor, for example — do not hold it by default.
 
 If your role does not have it, opening the create page tells you so rather than failing after you have filled the form in.
@@ -1908,11 +1905,6 @@ For anything account-specific, the Help Center’s contact block is the better r
   msg`The rest of the page`,
   msg`The rest of the profile`,
   msg`The rest of your dashboard`,
-  msg`The same document as the full CV page, rendered here so you can see what an employer would.
-
-The line under the heading is the important bit: it tells you which design is in use and whether the CV is published or private.
-
-Edit opens the editor. Design & download goes to the full page, where the designs and the PDF export live.`,
   msg`The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.
 
 Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.
@@ -2219,7 +2211,6 @@ Every report you have made is listed under My Reports, with its status as the te
 The editor holds the usual sections — education, experience, projects, skills, achievements — and pulls in what KTIP already knows about you so you are not retyping it.
 
 The screen offers two views. Curated shows a shortened selection, useful for a quick read. Full CV shows everything. This affects only how the page displays; it does not delete anything.`,
-  msg`Your CV, in the dashboard`,
   msg`Your activity on KTIP, in order.`,
   msg`Your activity timeline`,
   msg`Your activity timeline across the platform`,
@@ -2244,7 +2235,6 @@ This is the same gallery as the standalone Achievements page, embedded so you ke
   msg`Your roles are what unlock the role-specific parts of KTIP — an investor gets the Funding tab on the dashboard, a mentor gets Mentees, faculty get Research.
 
 Some roles are self-selected and some are granted after verification, which is why a role you expect may not be here yet.`,
-  msg`Your résumé as an employer would see it.`,
   msg`Your résumé, built from your KTIP record and ready to send`,
   msg`Your résumé, ready to download or publish.`,
   msg`Your shareable member page`,

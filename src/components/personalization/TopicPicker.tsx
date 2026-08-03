@@ -39,14 +39,16 @@ export function TopicPicker({ values, onChange, max = LIMITS.MAX_INTERESTS * 2 }
   const visible = tags.slice(0, VISIBLE_CHIPS)
   // Anything already picked that has since dropped out of the corpus still
   // needs a way to be un-picked.
-  const orphans = values.filter((v) => !visible.some((t) => t.tag === v))
+  // `topic`, not `t` — a parameter named `t` shadows the Lingui macro and
+  // turns every t`…` below it into a runtime crash with no type error.
+  const orphans = values.filter((v) => !visible.some((topic) => topic.tag === v))
 
   return (
     <div className="space-y-4">
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-ktip-sand-500 py-3">
           <Loader2 size={16} className="animate-spin" />
-          Loading topics from across the platform…
+          <Trans>Loading topics from across the platform…</Trans>
         </div>
       ) : visible.length === 0 ? (
         <p className="text-sm text-ktip-sand-500 py-2">

@@ -190,6 +190,10 @@ msgstr "Draft - Not visible to public"
 msgid "Template"
 msgstr "Template"
 
+#: src/pages/discover/DiscoverPage.tsx
+msgid "Nothing to show here yet — explore the platform to see what's happening across the Caribbean."
+msgstr "Nothing to show here yet — explore the platform to see what's happening across the Caribbean."
+
 #: src/components/documents/DocumentContentModal.tsx
 msgid "Discard your unsaved changes to this document?"
 msgstr "Discard your unsaved changes to this document?"
@@ -336,6 +340,7 @@ msgstr "Virtual Campus records and manual edits"
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
 #: src/lib/site-search.ts
+#: src/lib/timeline-gantt.ts
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
@@ -516,6 +521,10 @@ msgstr "{points} pts"
 #: src/i18n/harvested.ts
 msgid "Verification and vetting queues"
 msgstr "Verification and vetting queues"
+
+#: src/lib/delete-guard.ts
+msgid "{rsvpCount, plural, one {# person has registered. Their registration data will be destroyed and they will not be notified.} other {# people have registered. Their registration data will be destroyed and they will not be notified.}}"
+msgstr "{rsvpCount, plural, one {# person has registered. Their registration data will be destroyed and they will not be notified.} other {# people have registered. Their registration data will be destroyed and they will not be notified.}}"
 
 #: src/components/layout/Navbar.tsx
 msgid "Become a Contributor"
@@ -802,6 +811,7 @@ msgid "Excellent"
 msgstr "Excellent"
 
 #: src/components/events/EventCard.tsx
+#: src/components/personalization/ForYouRail.tsx
 #: src/hooks/useCalendarFeed.ts
 msgid "Event"
 msgstr "Event"
@@ -850,6 +860,7 @@ msgstr "Password & account"
 msgid "Full name"
 msgstr "Full name"
 
+#: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
 msgid "Faculty/Researcher"
 msgstr "Faculty/Researcher"
@@ -930,6 +941,10 @@ msgstr "Nothing published yet. A portfolio is what turns a verified listing into
 msgid "Admin Dashboard"
 msgstr "Admin Dashboard"
 
+#: src/hooks/useAIAssistant.ts
+msgid "Chamber of Commerce Administrator"
+msgstr "Chamber of Commerce Administrator"
+
 #: src/lib/grant-application-template.ts
 msgid "Summarize your application and the problem it addresses."
 msgstr "Summarize your application and the problem it addresses."
@@ -938,6 +953,10 @@ msgstr "Summarize your application and the problem it addresses."
 #: src/components/notes/StickyNoteFabPanel.tsx
 msgid "{0, plural, one {Delete # saved?} other {Delete # saved?}}"
 msgstr "{0, plural, one {Delete # saved?} other {Delete # saved?}}"
+
+#: src/lib/validation.ts
+msgid "You must be at least {minimumAge} to use KTIP"
+msgstr "You must be at least {minimumAge} to use KTIP"
 
 #: src/pages/events/EventSetupPage.tsx
 msgid "View the event"
@@ -960,6 +979,10 @@ msgstr "• Whiteboard — visual brainstorming on an infinite canvas, several p
 "• Video Conference — face-to-face calls, no external account needed\n"
 "\n"
 "Each tile opens that tool’s list, where you pick up something you already started or begin a new one. Sharing is per item: you choose who can view and who can edit."
+
+#: src/lib/delete-guard.ts
+msgid "This grant is live. Existing links to it will break."
+msgstr "This grant is live. Existing links to it will break."
 
 #: src/i18n/harvested.ts
 msgid "design the rooms"
@@ -1230,10 +1253,19 @@ msgstr "Anyone viewing your profile or the directory"
 msgid "Resize note"
 msgstr "Resize note"
 
+#: src/components/calendar/CalendarShell.tsx
+#: src/components/gantt/gantt-nav.tsx
+msgid "Previous month"
+msgstr "Previous month"
+
 #. placeholder {0}: event.title
 #: src/components/gantt/gantt-bar.tsx
 msgid "{0}, {start} to {end}, {pct}% complete"
 msgstr "{0}, {start} to {end}, {pct}% complete"
+
+#: src/hooks/useAIAssistant.ts
+msgid "Private Sector/SME Partner"
+msgstr "Private Sector/SME Partner"
 
 #: src/lib/venue-room-presets.ts
 msgid "Small and always open. Put it near the entrance."
@@ -1319,6 +1351,10 @@ msgstr "Back to Projects"
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "11. What features or improvements would you like to see?"
 msgstr "11. What features or improvements would you like to see?"
+
+#: src/components/directory/MemberPanel.tsx
+msgid "Only {firstName}'s connections can see their full profile or send them a message. Send a connection request to ask."
+msgstr "Only {firstName}'s connections can see their full profile or send them a message. Send a connection request to ask."
 
 #: src/i18n/harvested.ts
 msgid "Public or not"
@@ -1530,6 +1566,10 @@ msgstr "Contact phone"
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Draw"
 msgstr "Draw"
+
+#: src/components/gantt/gantt-types.ts
+msgid "Quarter"
+msgstr "Quarter"
 
 #: src/lib/grant-application-template.ts
 msgid "Expected Outcomes"
@@ -2067,6 +2107,10 @@ msgstr "Budget Breakdown"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Project Details"
 msgstr "Project Details"
+
+#: src/lib/delete-guard.ts
+msgid "This grant is still accepting applications. Any application or saved draft against it will be destroyed, and applicants will not be notified. Deactivating it instead keeps the record."
+msgstr "This grant is still accepting applications. Any application or saved draft against it will be destroyed, and applicants will not be notified. Deactivating it instead keeps the record."
 
 #: src/components/venue/room/RoomPeoplePanels.tsx
 msgid "Go"
@@ -2634,6 +2678,10 @@ msgstr "Community Forums"
 msgid "Partner tools and services connected to KTIP"
 msgstr "Partner tools and services connected to KTIP"
 
+#: src/components/directory/ConnectButton.tsx
+msgid "Failed to cancel"
+msgstr "Failed to cancel"
+
 #: src/pages/grants/GrantApplicationPage.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Apply for Grant"
@@ -2751,6 +2799,10 @@ msgstr "Real-time working surfaces you can open on their own or share with a tea
 msgid "Work added to your portfolio"
 msgstr "Work added to your portfolio"
 
+#: src/components/directory/MemberPanel.tsx
+msgid "View full profile"
+msgstr "View full profile"
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "You are the organizer of this event"
 msgstr "You are the organizer of this event"
@@ -2765,7 +2817,6 @@ msgstr "Delete this floor and its rooms"
 
 #: src/pages/cv/CvPage.tsx
 #: src/pages/cv/PublicCvPage.tsx
-#: src/pages/dashboard/tabs/ProfileTab.tsx
 msgid "Show the page"
 msgstr "Show the page"
 
@@ -2981,6 +3032,7 @@ msgstr "Snippets autosave to your account and appear in your snippet list next t
 #: src/pages/dashboard/DashboardTopBar.tsx
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 #: src/pages/dashboard/tabs/OverviewTab.tsx
+#: src/pages/sme/ChamberOnboardingPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Dashboard"
 msgstr "Dashboard"
@@ -3251,6 +3303,10 @@ msgstr "In this venue"
 msgid "Align center"
 msgstr "Align center"
 
+#: src/lib/delete-guard.ts
+msgid "The virtual venue: rooms, room chat history and member records"
+msgstr "The virtual venue: rooms, room chat history and member records"
+
 #: src/components/notes/StickyNote.tsx
 msgid "Link address"
 msgstr "Link address"
@@ -3284,6 +3340,10 @@ msgstr "Turn the venue on"
 #: src/pages/collaborate/WhiteboardPage.tsx
 msgid "Editor — Shared with you"
 msgstr "Editor — Shared with you"
+
+#: src/components/personalization/TopicPicker.tsx
+msgid "Loading topics from across the platform…"
+msgstr "Loading topics from across the platform…"
 
 #: src/components/layout/Footer.tsx
 #: src/pages/discover/DiscoverPage.tsx
@@ -3487,10 +3547,6 @@ msgstr "Who can see my connection count"
 #: src/i18n/harvested.ts
 msgid "Turn on the brain icon for AI-guided navigation when you are not sure what something is called."
 msgstr "Turn on the brain icon for AI-guided navigation when you are not sure what something is called."
-
-#: src/i18n/harvested.ts
-msgid "Your CV, in the dashboard"
-msgstr "Your CV, in the dashboard"
 
 #: src/i18n/harvested.ts
 msgid "Startup funding, research grants, innovation awards, development funds and education grants — everything currently open to OECS innovators, plus the ones that have already closed.\n"
@@ -4774,11 +4830,6 @@ msgstr "What specific problem or need exists? Who is affected and how?"
 msgid "Enrolling…"
 msgstr "Enrolling…"
 
-#. placeholder {0}: design.label
-#: src/pages/dashboard/tabs/ProfileTab.tsx
-msgid "{0} design · private to you"
-msgstr "{0} design · private to you"
-
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Take the screenshot again"
 msgstr "Take the screenshot again"
@@ -5130,6 +5181,7 @@ msgid "Search whiteboards..."
 msgstr "Search whiteboards..."
 
 #: src/components/collaboration/ShareEntityModal.tsx
+#: src/components/directory/ConnectButton.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/InvitationsPage.tsx
 msgid "Someone"
@@ -5252,6 +5304,10 @@ msgstr "Go to the Projects page and click \"Create Project\".\n"
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Lines"
 msgstr "Lines"
+
+#: src/components/personalization/ForYouRail.tsx
+msgid "Choose my topics"
+msgstr "Choose my topics"
 
 #: src/i18n/harvested.ts
 msgid "The panel"
@@ -5378,6 +5434,7 @@ msgid "50 min"
 msgstr "50 min"
 
 #: src/components/documents/DocumentCard.tsx
+#: src/components/shared/DeleteEntityControl.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Delete"
@@ -5549,6 +5606,7 @@ msgstr "I got an invitation by email — how do I use it?"
 msgid "{0, plural, one {# unsaved draft found in this browser} other {# unsaved drafts found in this browser}}"
 msgstr "{0, plural, one {# unsaved draft found in this browser} other {# unsaved drafts found in this browser}}"
 
+#: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
 #: src/lib/permissions.ts
 msgid "Entrepreneur"
@@ -5631,6 +5689,10 @@ msgstr "Help article — Events"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Created"
 msgstr "Created"
+
+#: src/components/shared/DeleteEntityDialog.tsx
+msgid "Delete this {noun}?"
+msgstr "Delete this {noun}?"
 
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Accepted {approvedDate}"
@@ -5963,6 +6025,10 @@ msgstr "Who is here right now, with their status."
 msgid "This action is permanent and cannot be undone."
 msgstr "This action is permanent and cannot be undone."
 
+#: src/components/gantt/gantt-nav.tsx
+msgid "Previous quarter"
+msgstr "Previous quarter"
+
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "Remove {removeLabel}"
 msgstr "Remove {removeLabel}"
@@ -6128,6 +6194,10 @@ msgstr "Everyone at the event who ticked it, with their skills. Not just this ro
 #: src/i18n/harvested.ts
 msgid "How do I set up a venue for my event? (organisers)"
 msgstr "How do I set up a venue for my event? (organisers)"
+
+#: src/lib/delete-guard.ts
+msgid "Event updates, articles and calendar entries"
+msgstr "Event updates, articles and calendar entries"
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Please try again shortly."
@@ -6307,6 +6377,7 @@ msgid "Please select a category"
 msgstr "Please select a category"
 
 #: src/components/dashboard/TimelineItemDetail.tsx
+#: src/components/personalization/ForYouRail.tsx
 #: src/components/projects/ProjectCard.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/discover/DiscoverPage.tsx
@@ -6648,6 +6719,7 @@ msgstr "Generate a random room name"
 msgid "Waiting on the organizer"
 msgstr "Waiting on the organizer"
 
+#: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Researcher"
 msgstr "Researcher"
@@ -6667,7 +6739,6 @@ msgstr "Session cleared. Please try signing in again."
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/pages/cv/CvPage.tsx
-#: src/pages/dashboard/tabs/ProfileTab.tsx
 #: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
@@ -6842,6 +6913,10 @@ msgstr "Harassment"
 msgid "Present"
 msgstr "Present"
 
+#: src/lib/delete-guard.ts
+msgid "This event is public. Anyone who registered will lose their registration and will not be notified."
+msgstr "This event is public. Anyone who registered will lose their registration and will not be notified."
+
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/projects/TeamWidget.tsx
 msgid "Failed to decide the request"
@@ -6875,6 +6950,7 @@ msgstr "Verified via an approved institutional email domain. Read-only on grants
 msgid "→ details"
 msgstr "→ details"
 
+#: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Educational Partner"
 msgstr "Educational Partner"
@@ -6936,10 +7012,6 @@ msgstr "View only"
 #: src/components/resume/DesignPicker.tsx
 msgid "Design"
 msgstr "Design"
-
-#: src/components/calendar/CalendarGrid.tsx
-msgid "more"
-msgstr "more"
 
 #: src/pages/collaborate/WhiteboardsListPage.tsx
 msgid "New Whiteboard"
@@ -7224,6 +7296,10 @@ msgstr "Create Project opens a short form — title, summary, category, phase an
 #: src/components/grants/application/AIReviewPanel.tsx
 msgid "Areas for Improvement"
 msgstr "Areas for Improvement"
+
+#: src/components/personalization/ForYouRail.tsx
+msgid "Closes {closesDate}"
+msgstr "Closes {closesDate}"
 
 #: src/hooks/useCalendarFeed.ts
 #: src/i18n/harvested.ts
@@ -7532,6 +7608,7 @@ msgstr "Full"
 msgid "Your deal flow — projects seeking investment, applications you're reviewing and the grants you've backed."
 msgstr "Your deal flow — projects seeking investment, applications you're reviewing and the grants you've backed."
 
+#: src/components/directory/ConnectButton.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Accept"
@@ -7562,6 +7639,11 @@ msgstr "Confirmation links work once. If you have already confirmed this address
 #: src/pages/grants/GrantsPage.tsx
 msgid "Development Funds"
 msgstr "Development Funds"
+
+#: src/components/calendar/CalendarShell.tsx
+#: src/components/gantt/gantt-nav.tsx
+msgid "Next month"
+msgstr "Next month"
 
 #: src/pages/cv/CvPage.tsx
 msgid "What you see below is empty. Sign in from the OECS Virtual Campus to pull in your course history, or write it yourself from <0>Edit</0>."
@@ -7702,6 +7784,7 @@ msgstr "Could not save the profile"
 msgid "Resource information"
 msgstr "Resource information"
 
+#: src/components/directory/MemberPanel.tsx
 #: src/components/moderation/ReportButton.tsx
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "Report"
@@ -8005,9 +8088,14 @@ msgstr "Your progress"
 msgid "Room log"
 msgstr "Room log"
 
+#: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
 msgid "Student/Youth Innovator"
 msgstr "Student/Youth Innovator"
+
+#: src/components/shared/DeleteEntityControl.tsx
+msgid "Deleting this {noun} is permanent. Everything attached to it is removed with it and cannot be restored."
+msgstr "Deleting this {noun} is permanent. Everything attached to it is removed with it and cannot be restored."
 
 #: src/i18n/harvested.ts
 msgid "How do I pin trophies to my profile?"
@@ -8018,6 +8106,7 @@ msgid "Resources will appear here once they are published."
 msgstr "Resources will appear here once they are published."
 
 #: src/components/calendar/CalendarShell.tsx
+#: src/components/gantt/gantt-types.ts
 msgid "Month"
 msgstr "Month"
 
@@ -8239,10 +8328,6 @@ msgstr "Display name is required"
 #: src/lib/permissions.ts
 msgid "Educator"
 msgstr "Educator"
-
-#: src/i18n/harvested.ts
-msgid "My Profile"
-msgstr "My Profile"
 
 #: src/pages/dashboard/tabs/OverviewTab.tsx
 msgid "My Calendar"
@@ -8640,6 +8725,7 @@ msgstr "Necessary only"
 #: src/pages/resources/ResourceDetailPage.tsx
 #: src/pages/resources/ResourcesPage.tsx
 #: src/pages/settings/SettingsPage.tsx
+#: src/pages/sme/ChamberOnboardingPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 #: src/pages/sme/OrgProfilePage.tsx
 msgid "Home"
@@ -8931,6 +9017,10 @@ msgstr "Bullet list"
 msgid "Save a draft before nominating a sponsor"
 msgstr "Save a draft before nominating a sponsor"
 
+#: src/components/shared/DeleteEntityControl.tsx
+msgid "Delete this {noun}"
+msgstr "Delete this {noun}"
+
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Search pages, features and content"
 msgstr "Search pages, features and content"
@@ -9046,6 +9136,10 @@ msgstr "Click a notification to open what it refers to."
 msgid "Align left"
 msgstr "Align left"
 
+#: src/components/calendar/WeekView.tsx
+msgid "{count, plural, one {# event} other {# events}}"
+msgstr "{count, plural, one {# event} other {# events}}"
+
 #: src/i18n/harvested.ts
 msgid "Privacy and notifications"
 msgstr "Privacy and notifications"
@@ -9086,6 +9180,7 @@ msgstr "Address confirmed"
 msgid "Upload an image"
 msgstr "Upload an image"
 
+#: src/components/directory/ConnectButton.tsx
 #: src/components/ui/FlipWatermark.tsx
 msgid "Connect"
 msgstr "Connect"
@@ -9142,6 +9237,11 @@ msgstr "Every KTIP account declares a date of birth when it is created — on th
 #: src/i18n/harvested.ts
 msgid "Challenges and climate action"
 msgstr "Challenges and climate action"
+
+#: src/components/calendar/CalendarShell.tsx
+#: src/components/gantt/gantt-nav.tsx
+msgid "Next week"
+msgstr "Next week"
 
 #: src/i18n/harvested.ts
 msgid "Keynote"
@@ -9335,6 +9435,7 @@ msgstr "Announced in this room"
 msgid "Schedule, speakers, updates and recap articles"
 msgstr "Schedule, speakers, updates and recap articles"
 
+#: src/components/directory/ConnectButton.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
@@ -9640,6 +9741,10 @@ msgstr "Role updated"
 msgid "Who is in the room"
 msgstr "Who is in the room"
 
+#: src/lib/delete-guard.ts
+msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
+msgstr "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
+
 #: src/pages/grants/GrantsPage.tsx
 msgid "Expired or no longer accepting applications"
 msgstr "Expired or no longer accepting applications"
@@ -9793,6 +9898,10 @@ msgstr "All Roles"
 #: src/components/tutorial/TutorialOverlay.tsx
 msgid "Read aloud: this step"
 msgstr "Read aloud: this step"
+
+#: src/components/calendar/CalendarGrid.tsx
+msgid "+{overflow} more"
+msgstr "+{overflow} more"
 
 #. placeholder {0}: article.author.display_name
 #: src/pages/events/EventDetailPage.tsx
@@ -10085,7 +10194,6 @@ msgstr "Look for the questions where the spread is wide rather than the average 
 #: src/i18n/harvested.ts
 #: src/pages/cv/CvPage.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
-#: src/pages/dashboard/tabs/ProfileTab.tsx
 msgid "My CV"
 msgstr "My CV"
 
@@ -10153,9 +10261,10 @@ msgstr "Click \"Create Project\" (you must be logged in)."
 msgid "Report User"
 msgstr "Report User"
 
-#: src/i18n/harvested.ts
-msgid "How other members see you — bio, skills and badges"
-msgstr "How other members see you — bio, skills and badges"
+#: src/components/shared/DeleteEntityControl.tsx
+#: src/components/shared/DeleteEntityDialog.tsx
+msgid "Delete {noun}"
+msgstr "Delete {noun}"
 
 #: src/components/ErrorBoundary.tsx
 msgid "An unexpected error occurred. Please try refreshing the page or go back to the home page."
@@ -10204,6 +10313,10 @@ msgstr "Guide"
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Category of Infringement"
 msgstr "Category of Infringement"
+
+#: src/lib/delete-guard.ts
+msgid "Every application to this grant, including saved drafts"
+msgstr "Every application to this grant, including saved drafts"
 
 #: src/components/dashboard/TimelineSection.tsx
 msgid "Your Progress"
@@ -10343,10 +10456,6 @@ msgstr "KTIP - Knowledge, Technology and Innovation Platform for Caribbean innov
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Write a reply..."
 msgstr "Write a reply..."
-
-#: src/i18n/harvested.ts
-msgid "Your résumé as an employer would see it."
-msgstr "Your résumé as an employer would see it."
 
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Back to Resources"
@@ -10698,6 +10807,10 @@ msgstr "{0} is requesting access to \"{1}\""
 msgid "{applicationCount} submitted"
 msgstr "{applicationCount} submitted"
 
+#: src/components/shared/DeleteEntityDialog.tsx
+msgid "Untitled {noun}"
+msgstr "Untitled {noun}"
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "e.g. Renewable energy"
 msgstr "e.g. Renewable energy"
@@ -10784,6 +10897,10 @@ msgstr "More Feedback"
 msgid "Judging"
 msgstr "Judging"
 
+#: src/components/gantt/gantt-nav.tsx
+msgid "Showing {label}"
+msgstr "Showing {label}"
+
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "Re-reading…"
 msgstr "Re-reading…"
@@ -10848,6 +10965,7 @@ msgstr "In the venue"
 msgid "Nothing on this floor"
 msgstr "Nothing on this floor"
 
+#: src/lib/validation.ts
 #: src/pages/auth/SignupPage.tsx
 msgid "Passwords do not match"
 msgstr "Passwords do not match"
@@ -10904,10 +11022,6 @@ msgstr "Help article — Troubleshooting"
 #: src/i18n/harvested.ts
 msgid "Privacy Violations"
 msgstr "Privacy Violations"
-
-#: src/pages/dashboard/tabs/ProfileTab.tsx
-msgid "Your CV couldn’t be started automatically. Sign in from the OECS Virtual Campus to pull in your course history, or write it yourself from <0>Edit</0>."
-msgstr "Your CV couldn’t be started automatically. Sign in from the OECS Virtual Campus to pull in your course history, or write it yourself from <0>Edit</0>."
 
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Upload a document"
@@ -11118,6 +11232,7 @@ msgstr "Event Workspace"
 msgid "What participants must achieve"
 msgstr "What participants must achieve"
 
+#: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
 #: src/lib/permissions.ts
 msgid "Mentor"
@@ -11180,6 +11295,7 @@ msgstr "{0} is required"
 msgid "Launch projects, apply for grants, and find investors."
 msgstr "Launch projects, apply for grants, and find investors."
 
+#: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Verified SME"
@@ -11209,6 +11325,10 @@ msgstr "Hide yourself from the leaderboard"
 #: src/components/achievements/TrophyCard.tsx
 msgid "Awarded automatically"
 msgstr "Awarded automatically"
+
+#: src/components/calendar/WeekView.tsx
+msgid "{count, plural, one {# item} other {# items}}"
+msgstr "{count, plural, one {# item} other {# items}}"
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Find an organisation to work with"
@@ -11402,6 +11522,11 @@ msgstr "Changes how your CV is drawn and printed. Your content never changes."
 msgid "Organization / Team"
 msgstr "Organization / Team"
 
+#: src/components/calendar/CalendarShell.tsx
+#: src/components/gantt/gantt-nav.tsx
+msgid "Previous week"
+msgstr "Previous week"
+
 #: src/i18n/harvested.ts
 msgid "Every section"
 msgstr "Every section"
@@ -11480,6 +11605,7 @@ msgstr "No hackathons scheduled yet"
 msgid "Read aloud: whole tour"
 msgstr "Read aloud: whole tour"
 
+#: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
 msgid "Investor/Funding Agency"
 msgstr "Investor/Funding Agency"
@@ -11658,6 +11784,10 @@ msgstr "Make this the big panel"
 msgid "Help article — For Administrators"
 msgstr "Help article — For Administrators"
 
+#: src/lib/delete-guard.ts
+msgid "Every RSVP and registration response"
+msgstr "Every RSVP and registration response"
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Main column"
 msgstr "Main column"
@@ -11671,10 +11801,6 @@ msgstr "Code Block"
 #: src/components/venue/RoomZone.tsx
 msgid "Empty"
 msgstr "Empty"
-
-#: src/i18n/harvested.ts
-msgid "Progress, Achievements and Connections sit beside this tab. Anything you have published — projects and events — has its own tab too."
-msgstr "Progress, Achievements and Connections sit beside this tab. Anything you have published — projects and events — has its own tab too."
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Your National Chamber of Commerce is checking your submission against the corporate registry. You will be notified when a decision is made."
@@ -11778,10 +11904,6 @@ msgstr "Everything attached to the event. Who may open what is unchanged."
 msgid "Profile, security, preferences, personalization, verification."
 msgstr "Profile, security, preferences, personalization, verification."
 
-#: src/pages/dashboard/tabs/ProfileTab.tsx
-msgid "Design & download"
-msgstr "Design & download"
-
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Apply on External Site"
 msgstr "Apply on External Site"
@@ -11839,6 +11961,7 @@ msgstr "Video Conference"
 msgid "Your overview, calendar, progress and submissions."
 msgstr "Your overview, calendar, progress and submissions."
 
+#: src/components/personalization/ForYouRail.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Grant"
 msgstr "Grant"
@@ -11852,7 +11975,6 @@ msgid "Smallest team"
 msgstr "Smallest team"
 
 #: src/i18n/harvested.ts
-#: src/pages/dashboard/tabs/ProfileTab.tsx
 msgid "Your CV"
 msgstr "Your CV"
 
@@ -11912,6 +12034,10 @@ msgstr "Thank you for your feedback!"
 #: src/i18n/harvested.ts
 msgid "Click Save. You keep earning points and can still see your own rank — nobody else can."
 msgstr "Click Save. You keep earning points and can still see your own rank — nobody else can."
+
+#: src/lib/delete-guard.ts
+msgid "The project page and everything on it"
+msgstr "The project page and everything on it"
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Link (Optional)"
@@ -12079,6 +12205,10 @@ msgstr "Venue"
 msgid "Raise a grievance about someone's conduct"
 msgstr "Raise a grievance about someone's conduct"
 
+#: src/lib/delete-guard.ts
+msgid "The grant listing and everything attached to it"
+msgstr "The grant listing and everything attached to it"
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Period"
 msgstr "Period"
@@ -12119,6 +12249,7 @@ msgstr "Happening now"
 msgid "Remove \"{title}\" from your portfolio?"
 msgstr "Remove \"{title}\" from your portfolio?"
 
+#: src/components/personalization/ForYouRail.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Resource"
 msgstr "Resource"
@@ -12126,6 +12257,10 @@ msgstr "Resource"
 #: src/pages/InvitationsPage.tsx
 msgid "Requests to collaborate on your projects"
 msgstr "Requests to collaborate on your projects"
+
+#: src/components/directory/ConnectButton.tsx
+msgid "Failed to send request"
+msgstr "Failed to send request"
 
 #. placeholder {0}: pendingRequests.length
 #: src/components/projects/TeamWidget.tsx
@@ -12197,6 +12332,10 @@ msgstr "Moderating"
 #: src/components/grants/SponsorNominationCard.tsx
 msgid "Change"
 msgstr "Change"
+
+#: src/hooks/useAIAssistant.ts
+msgid "OECS Administrator"
+msgstr "OECS Administrator"
 
 #: src/components/ui/GhostOpacityControl.tsx
 msgid "Faded opacity"
@@ -12310,6 +12449,10 @@ msgstr "A short checklist for a new arrival. Disappears once they finish it."
 #: src/pages/auth/VerifyEmailAliasPage.tsx
 msgid "Confirmation link expired"
 msgstr "Confirmation link expired"
+
+#: src/lib/delete-guard.ts
+msgid "The event listing, schedule, speakers and page sections"
+msgstr "The event listing, schedule, speakers and page sections"
 
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "Restricted to other roles"
@@ -12981,6 +13124,10 @@ msgstr "• Profile — your name, photo, bio, skills and what you are open to\n
 "\n"
 "The tab is in the URL, so a link to a particular tab opens on it."
 
+#: src/components/shared/DeleteEntityDialog.tsx
+msgid "<0>{titleDisplay}</0> will be permanently deleted, along with:"
+msgstr "<0>{titleDisplay}</0> will be permanently deleted, along with:"
+
 #. placeholder {0}: VENUE_ROOM_KIND_LABELS[selected.kind] || selected.kind
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Following the defaults for {0}."
@@ -12993,6 +13140,10 @@ msgstr "My Snippets"
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Document uploaded"
 msgstr "Document uploaded"
+
+#: src/components/directory/MemberPanel.tsx
+msgid "{firstName} hasn't filled out a profile yet."
+msgstr "{firstName} hasn't filled out a profile yet."
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Rating out of five"
@@ -13545,6 +13696,10 @@ msgstr "Who the funder will accept — country, sector, stage, sometimes an age 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 msgid "Insert Table"
 msgstr "Insert Table"
+
+#: src/components/directory/ConnectButton.tsx
+msgid "Connected"
+msgstr "Connected"
 
 #: src/pages/settings/SettingsPage.tsx
 msgid "Tune what you see"
@@ -14528,18 +14683,6 @@ msgstr "Track the status of your submitted reports"
 msgid "Please use this feature responsibly"
 msgstr "Please use this feature responsibly"
 
-#: src/i18n/harvested.ts
-msgid "The same document as the full CV page, rendered here so you can see what an employer would.\n"
-"\n"
-"The line under the heading is the important bit: it tells you which design is in use and whether the CV is published or private.\n"
-"\n"
-"Edit opens the editor. Design & download goes to the full page, where the designs and the PDF export live."
-msgstr "The same document as the full CV page, rendered here so you can see what an employer would.\n"
-"\n"
-"The line under the heading is the important bit: it tells you which design is in use and whether the CV is published or private.\n"
-"\n"
-"Edit opens the editor. Design & download goes to the full page, where the designs and the PDF export live."
-
 #: src/hooks/useMessages.ts
 msgid "Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead."
 msgstr "Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead."
@@ -14871,6 +15014,10 @@ msgstr "Every application you have made"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Search achievements"
 msgstr "Search achievements"
+
+#: src/lib/delete-guard.ts
+msgid "Uploaded documents and their extracted fields"
+msgstr "Uploaded documents and their extracted fields"
 
 #: src/components/layout/Navbar.tsx
 msgid "Your copy of everything you submitted"
@@ -15286,6 +15433,10 @@ msgstr "Yes. In Settings under Preferences, switch off \"Show me on the leaderbo
 msgid "Supervise student channels"
 msgstr "Supervise student channels"
 
+#: src/components/shared/DeleteEntityControl.tsx
+msgid "Could not delete this {noun}. You may no longer own it."
+msgstr "Could not delete this {noun}. You may no longer own it."
+
 #: src/i18n/harvested.ts
 msgid "Go to Forums and open the board that fits your topic."
 msgstr "Go to Forums and open the board that fits your topic."
@@ -15346,10 +15497,6 @@ msgstr "Wake — brings the note back without unpinning it"
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Enter {0}"
 msgstr "Enter {0}"
-
-#: src/pages/dashboard/tabs/ProfileTab.tsx
-msgid "Nothing saved yet."
-msgstr "Nothing saved yet."
 
 #: src/lib/permissions.ts
 msgid "Guides and supports innovators."
@@ -15537,6 +15684,10 @@ msgstr "The same events as cards — type, title, summary, date and location at 
 "Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n"
 "\n"
 "Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile."
+
+#: src/hooks/useAIAssistant.ts
+msgid "Safety Administrator"
+msgstr "Safety Administrator"
 
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Start"
@@ -15771,6 +15922,7 @@ msgstr "Project team invitation"
 msgid "Editor"
 msgstr "Editor"
 
+#: src/components/directory/ConnectButton.tsx
 #: src/i18n/harvested.ts
 msgid "Pending"
 msgstr "Pending"
@@ -16138,6 +16290,10 @@ msgstr "Workshop"
 msgid "Manage employers"
 msgstr "Manage employers"
 
+#: src/lib/delete-guard.ts
+msgid "All team memberships and pending invitations"
+msgstr "All team memberships and pending invitations"
+
 #: src/i18n/harvested.ts
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Personalize my platform"
@@ -16458,6 +16614,7 @@ msgstr "Away"
 msgid "Change Password"
 msgstr "Change Password"
 
+#: src/components/directory/ConnectButton.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Request declined"
 msgstr "Request declined"
@@ -16680,6 +16837,7 @@ msgstr "People you are connected to"
 msgid "Direct messages with adult members are turned off on accounts under 18. Group and event channels are open as usual."
 msgstr "Direct messages with adult members are turned off on accounts under 18. Group and event channels are open as usual."
 
+#: src/lib/validation.ts
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Enter a valid date of birth"
 msgstr "Enter a valid date of birth"
@@ -16881,6 +17039,10 @@ msgstr "Request access"
 #: src/components/layout/MainLayout.tsx
 msgid "Skip to main content"
 msgstr "Skip to main content"
+
+#: src/lib/delete-guard.ts
+msgid "Documents and files attached to the project"
+msgstr "Documents and files attached to the project"
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Something is broken or doesn't work the way it should"
@@ -17296,7 +17458,6 @@ msgstr "What happens after I report something?"
 
 #: src/pages/cv/CvPage.tsx
 #: src/pages/cv/PublicCvPage.tsx
-#: src/pages/dashboard/tabs/ProfileTab.tsx
 msgid "Read as text"
 msgstr "Read as text"
 
@@ -17490,6 +17651,7 @@ msgstr "Clear"
 msgid "This is a paragraph of text to demonstrate your CSS styles."
 msgstr "This is a paragraph of text to demonstrate your CSS styles."
 
+#: src/components/directory/MemberCard.tsx
 #: src/components/directory/MemberPanel.tsx
 #: src/components/venue/room/LookingForTeamPanel.tsx
 #: src/components/venue/RoomOccupantList.tsx
@@ -17501,10 +17663,6 @@ msgstr "Message"
 #: src/components/tutorial/TutorialOverlay.tsx
 msgid "Go to step {0}"
 msgstr "Go to step {0}"
-
-#: src/pages/discover/DiscoverPage.tsx
-msgid "Nothing to show here yet — explore the platform to see what's happening across the Caribbean."
-msgstr "Nothing to show here yet — explore the platform to see what's happening across the Caribbean."
 
 #: src/pages/events/EventVenueRoomPage.tsx
 msgid "Venue room"
@@ -17549,6 +17707,10 @@ msgstr "document"
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "An entrance has to sit on one of the four edges of the floor."
 msgstr "An entrance has to sit on one of the four edges of the floor."
+
+#: src/lib/validation.ts
+msgid "Date of birth cannot be in the future"
+msgstr "Date of birth cannot be in the future"
 
 #: src/pages/auth/ForgotPasswordPage.tsx
 msgid "We've sent a password reset link to <0>{email}</0>. Click the link to set a new password."
@@ -17626,6 +17788,7 @@ msgid "Recording"
 msgstr "Recording"
 
 #: src/components/calendar/CalendarGrid.tsx
+#: src/components/calendar/WeekView.tsx
 msgid "{dayLabel}, {countLabel}"
 msgstr "{dayLabel}, {countLabel}"
 
@@ -17785,11 +17948,6 @@ msgstr "You can pin up to {MAX_SHOWCASE} trophies"
 msgid "General access"
 msgstr "General access"
 
-#. placeholder {0}: design.label
-#: src/pages/dashboard/tabs/ProfileTab.tsx
-msgid "{0} design · published — anyone with your link can read it"
-msgstr "{0} design · published — anyone with your link can read it"
-
 #: src/components/help/HelpCategoryNav.tsx
 msgid "All topics"
 msgstr "All topics"
@@ -17826,6 +17984,10 @@ msgstr "How do I add team members to my project?"
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "Nothing was pulled out of this document yet."
 msgstr "Nothing was pulled out of this document yet."
+
+#: src/components/gantt/gantt-nav.tsx
+msgid "Next quarter"
+msgstr "Next quarter"
 
 #: src/i18n/harvested.ts
 msgid "Abusive Interactions"
@@ -17928,6 +18090,10 @@ msgstr "The contact block at the bottom reaches a person. The FAQ page is worth 
 msgid "First stop. Check in and find your way around."
 msgstr "First stop. Check in and find your way around."
 
+#: src/lib/delete-guard.ts
+msgid "This event is public. Existing links to it will break."
+msgstr "This event is public. Existing links to it will break."
+
 #: src/i18n/harvested.ts
 msgid "Next, and previously"
 msgstr "Next, and previously"
@@ -17975,6 +18141,7 @@ msgid "Help article — Getting Started"
 msgstr "Help article — Getting Started"
 
 #: src/i18n/harvested.ts
+#: src/lib/timeline-gantt.ts
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Grant Applications"
 msgstr "Grant Applications"
@@ -18006,6 +18173,10 @@ msgstr "Messaging is a panel that docks on the side of whatever page you are on,
 #: src/components/moderation/ReportModal.tsx
 msgid "Add context that would help a reviewer."
 msgstr "Add context that would help a reviewer."
+
+#: src/components/shared/DeleteEntityControl.tsx
+msgid "{nounCap} deleted"
+msgstr "{nounCap} deleted"
 
 #: src/pages/dashboard/tabs/ProjectsTab.tsx
 msgid "No projects yet."
@@ -18492,6 +18663,10 @@ msgstr "Every registered member, filterable by role and verification status. The
 "\n"
 "Create User makes an account directly — used for staff and for members who cannot self-register."
 
+#: src/lib/delete-guard.ts
+msgid "This project is public. Existing links to it will break."
+msgstr "This project is public. Existing links to it will break."
+
 #: src/i18n/harvested.ts
 msgid "Every achievement is worth points depending on how rare it is, from 10 for a common one up to 200 for a legendary. Your level comes from how many achievements you have earned rather than how many points — someone who has done a bit of everything ranks higher than someone with one big win. Levels run from Newcomer to KTIP Champion."
 msgstr "Every achievement is worth points depending on how rare it is, from 10 for a common one up to 200 for a legendary. Your level comes from how many achievements you have earned rather than how many points — someone who has done a bit of everything ranks higher than someone with one big win. Levels run from Newcomer to KTIP Champion."
@@ -18499,6 +18674,10 @@ msgstr "Every achievement is worth points depending on how rare it is, from 10 f
 #: src/pages/JoinInvitePage.tsx
 msgid "Sign in to continue"
 msgstr "Sign in to continue"
+
+#: src/lib/delete-guard.ts
+msgid "Documents attached to the event"
+msgstr "Documents attached to the event"
 
 #: src/i18n/harvested.ts
 msgid "What is on offer"
@@ -18516,6 +18695,7 @@ msgstr "Sponsorships"
 msgid "No reports submitted"
 msgstr "No reports submitted"
 
+#: src/components/directory/ConnectButton.tsx
 #: src/components/projects/TeamWidget.tsx
 msgid "Failed to respond"
 msgstr "Failed to respond"
@@ -18580,6 +18760,10 @@ msgstr "Events you organize"
 #: src/components/messages/MessagingPanel.tsx
 msgid "Select a conversation"
 msgstr "Select a conversation"
+
+#: src/components/shared/DeleteEntityDialog.tsx
+msgid "Type the {noun} title to confirm"
+msgstr "Type the {noun} title to confirm"
 
 #: src/i18n/harvested.ts
 msgid "Scroll to the Comments section on any project to leave a comment or ask a question.\n"
@@ -18717,6 +18901,10 @@ msgstr "Invitations are valid for 14 days. Ask for a fresh one."
 msgid "Phone"
 msgstr "Phone"
 
+#: src/lib/delete-guard.ts
+msgid "{memberCount, plural, one {# collaborator will lose access to this project and their comments. They will not be notified.} other {# collaborators will lose access to this project and their comments. They will not be notified.}}"
+msgstr "{memberCount, plural, one {# collaborator will lose access to this project and their comments. They will not be notified.} other {# collaborators will lose access to this project and their comments. They will not be notified.}}"
+
 #: src/lib/grant-application-template.ts
 msgid "PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them."
 msgstr "PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them."
@@ -18737,6 +18925,10 @@ msgstr "Image URL..."
 #: src/i18n/harvested.ts
 msgid "Help article — Safety & Reporting"
 msgstr "Help article — Safety & Reporting"
+
+#: src/lib/delete-guard.ts
+msgid "The challenge brief, its criteria, every solution participants submitted and the files attached to them"
+msgstr "The challenge brief, its criteria, every solution participants submitted and the files attached to them"
 
 #: src/i18n/harvested.ts
 msgid "Open your event in the admin console and go to the Venue tab.\n"
@@ -18920,15 +19112,21 @@ msgstr "Document access granted"
 msgid "Rooms, invitations and who can join."
 msgstr "Rooms, invitations and who can join."
 
+#: src/lib/delete-guard.ts
+msgid "Comments, likes, follows and view history"
+msgstr "Comments, likes, follows and view history"
+
 #: src/pages/InvitationsPage.tsx
 msgid "Sent — awaiting a response"
 msgstr "Sent — awaiting a response"
 
+#: src/components/directory/ConnectButton.tsx
 #: src/hooks/useConnections.ts
 msgid "Connection accepted"
 msgstr "Connection accepted"
 
 #: src/components/calendar/CalendarShell.tsx
+#: src/components/gantt/gantt-types.ts
 msgid "Week"
 msgstr "Week"
 

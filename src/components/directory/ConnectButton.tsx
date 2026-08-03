@@ -46,12 +46,12 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
     try {
       await sendRequest({
         requesterId: myId,
-        requesterName: auth.profile?.display_name || 'Someone',
+        requesterName: auth.profile?.display_name || t`Someone`,
         addresseeId: otherUserId,
       })
       toast.success(t`Connection request sent`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send request')
+      toast.error(err.message || t`Failed to send request`)
     }
   }
 
@@ -62,12 +62,12 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
         connectionId: connection.id,
         accept,
         myId,
-        myName: auth.profile?.display_name || 'Someone',
+        myName: auth.profile?.display_name || t`Someone`,
         requesterId: connection.requester_id,
       })
-      toast.success(accept ? 'Connection accepted' : 'Request declined')
+      toast.success(accept ? t`Connection accepted` : t`Request declined`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to respond')
+      toast.error(err.message || t`Failed to respond`)
     }
   }
 
@@ -77,7 +77,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
       await removeConnection(connection.id)
       toast.success(t`Request cancelled`)
     } catch (err: any) {
-      toast.error(err.message || 'Failed to cancel')
+      toast.error(err.message || t`Failed to cancel`)
     }
   }
 
@@ -85,7 +85,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
     return (
       <span className={`${base} bg-ktip-tropical-100 text-ktip-tropical-700 cursor-default`}>
         <UserCheck size={iconSize} />
-        Connected
+        {t`Connected`}
       </span>
     )
   }
@@ -94,7 +94,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
     return (
       <button onClick={handleCancel} disabled={busy} className={`${base} bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200`} title={t`Cancel request`}>
         <Clock size={iconSize} />
-        Pending
+        {t`Pending`}
       </button>
     )
   }
@@ -104,11 +104,11 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
       <span className="flex items-center gap-1.5">
         <button onClick={() => handleRespond(true)} disabled={busy} className={`${base} btn-brand`}>
           <Check size={iconSize} />
-          Accept
+          {t`Accept`}
         </button>
         <button onClick={() => handleRespond(false)} disabled={busy} className={`${base} bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200`}>
           <X size={iconSize} />
-          Decline
+          {t`Decline`}
         </button>
       </span>
     )
@@ -117,7 +117,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
   return (
     <button onClick={handleConnect} disabled={busy} className={`${base} btn-brand`}>
       <UserPlus size={iconSize} />
-      Connect
+      {t`Connect`}
     </button>
   )
 }
