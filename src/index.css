@@ -1005,6 +1005,20 @@ html.dark {
   animation: venuePortalPulse 2.8s ease-in-out infinite;
 }
 
+/* Palm crowns on the venue map. The origin sits low in the crown's own box so
+   the fronds pivot around the trunk top, not around the middle of the leaves.
+   Duration and (negative) delay are set per tree inline, so the grove never
+   sways in unison. */
+@keyframes venuePalmSway {
+  0%, 100% { transform: rotate(-1.7deg); }
+  50% { transform: rotate(1.9deg); }
+}
+.venue-palm-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 85%;
+  animation: venuePalmSway 5s ease-in-out infinite;
+}
+
 /* Dropdowns / popovers: enter AND exit. Transition-driven rather than a
    @keyframes — a keyframe cannot run backwards, which is why the old
    animate-scale-in panels vanished with a hard cut. Pair with an origin-*
@@ -1314,7 +1328,9 @@ html[data-capturing] [data-fab] {
      glow, not motion carrying the meaning. */
   .venue-portal-spin,
   .venue-portal-spin-rev,
-  .venue-portal-pulse {
+  .venue-portal-pulse,
+  /* A still palm is still a palm. */
+  .venue-palm-sway {
     animation: none;
   }
 

@@ -91,6 +91,13 @@ const ARRIVE_ZOOM = 2.6
  */
 const VIEW_PAD = 52
 
+/**
+ * Extra height the fit reserves above the tallest wall, in wall units — the
+ * palm crowns stand past the slab edge, and without this the back row loses
+ * its fronds to the viewport edge.
+ */
+const DECOR_HEADROOM = 1.4
+
 /** A member may enter unless the room is shut or its role list excludes them. */
 export function canEnterRoom(room: VenueRoom, role: VenueRole): boolean {
   if (role === 'organizer') return true
@@ -192,9 +199,21 @@ export function VenueMapExplorer({
   const stack = useAnimatedValue(stacked && iso && config.floors.length > 1 ? 1 : 0)
 
   const tallest = Math.max(1, ...rooms.map((r) => Number(r.wall_height) || 1))
-  const topZ = stack * (config.floors.length - 1) * VENUE_MAP.LEVEL_H + tallest
-  /** Height of the floor being stood on, once the stack is pulled apart. */
-  const zBase = stack > 0.02 ? floor * VENUE_MAP.LEVEL_H * stack : 0
+  const topZ =
+    Math.max(stack * (config.floors.length - 1), floor) * VENUE_MAP.LEVEL_H +
+    tallest +
+    DECOR_HEADROOM
+  /**
+   * Height a level's slab is drawn at. The floor being stood on always sits at
+   * its true storey height (the stage's `elevate`), so Level 1 floats over the
+   * lawn even in the flat view; the others only rise as the stack pulls apart.
+   */
+  const levelZOf = useCallback(
+    (level: number) => level * VENUE_MAP.LEVEL_H * (level === floor ? 1 : stack),
+    [floor, stack]
+  )
+  /** Height of the floor being stood on — where the avatars walk. */
+  const zBase = levelZOf(floor)
   const projection = useMemo(
     () =>
       makeProjection({
@@ -265,7 +284,11 @@ export function VenueMapExplorer({
         topZ,
         padding: VIEW_PAD,
       })
-      const [sx, sy] = zoomed.project(from.centroid[0], from.centroid[1], 0)
+      const [sx, sy] = zoomed.project(
+        from.centroid[0],
+        from.centroid[1],
+        from.floor * VENUE_MAP.LEVEL_H
+      )
       zoomRef.current = { k: ARRIVE_ZOOM, px: size.width / 2 - sx, py: size.height / 2 - sy }
       setZoom(zoomRef.current)
       veilRef.current = 1
@@ -389,7 +412,13 @@ export function VenueMapExplorer({
             topZ,
             padding: VIEW_PAD,
           })
-          const [sx, sy] = stepProj.project(geo.centroid[0], geo.centroid[1], 0)
+          // The room being entered is on the active floor, which the stage
+          // draws at its true storey height — aim the camera at that height.
+          const [sx, sy] = stepProj.project(
+            geo.centroid[0],
+            geo.centroid[1],
+            floor * VENUE_MAP.LEVEL_H
+          )
           const cx = size.width / 2
           const cy = size.height / 2
           zoomRef.current = {
@@ -508,7 +537,7 @@ export function VenueMapExplorer({
       stack > 0.5 ? config.floors.map((_, i) => i) : [floor]
     for (let i = levels.length - 1; i >= 0; i--) {
       const level = levels[i]
-      const [x, y] = pointerToGrid(e, level * VENUE_MAP.LEVEL_H * stack)
+      const [x, y] = pointerToGrid(e, levelZOf(level))
       const geo = roomAt(geometry, level, x, y)
       if (geo) return { floor: level, geo }
     }
@@ -562,7 +591,10 @@ export function VenueMapExplorer({
    * comes up, in the same place.
    */
   const alphaFor = useCallback(
-    (level: number) => floorAlphaAt(level, fade.from, fade.to, fade.mix, stack > 0.02 ? 0.12 : 0),
+    // Ghost floors sit at 0.07: present enough to read as the rest of the
+    // building, faint enough that the active floor is unmistakably the one
+    // being stood on.
+    (level: number) => floorAlphaAt(level, fade.from, fade.to, fade.mix, stack > 0.02 ? 0.07 : 0),
     [fade, stack]
   )
 
@@ -737,6 +769,8 @@ export function VenueMapExplorer({
           selectedId={enteringRoomId}
           mutedIds={mutedIds}
           showGrid
+          decor
+          elevate
         />
       </svg>
 
@@ -749,7 +783,7 @@ export function VenueMapExplorer({
           .filter((g: RoomGeometry<VenueRoom>) => alphaFor(g.floor) > 0.35)
           .map((g: RoomGeometry<VenueRoom>) => {
             const room = g.room
-            const levelZ = g.floor * VENUE_MAP.LEVEL_H * stack
+            const levelZ = levelZOf(g.floor)
             const [sx, sy] = projection.project(g.centroid[0], g.centroid[1], levelZ + g.height)
             const here = occupancy[room.id] || 0
             const locked = !canEnterRoom(room, myRole)
@@ -839,13 +873,13 @@ export function VenueMapExplorer({
             left: projection.project(
               hoveredGeo.centroid[0],
               hoveredGeo.centroid[1],
-              hoveredGeo.floor * VENUE_MAP.LEVEL_H * stack + hoveredGeo.height
+              levelZOf(hoveredGeo.floor) + hoveredGeo.height
             )[0],
             top:
               projection.project(
                 hoveredGeo.centroid[0],
                 hoveredGeo.centroid[1],
-                hoveredGeo.floor * VENUE_MAP.LEVEL_H * stack + hoveredGeo.height
+                levelZOf(hoveredGeo.floor) + hoveredGeo.height
               )[1] + 14,
           }}
         >

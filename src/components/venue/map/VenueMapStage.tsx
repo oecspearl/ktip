@@ -9,6 +9,7 @@ import {
   type RoomGeometry,
   type VenueMapConfig,
 } from '../../../lib/venue-map'
+import { buildDecor, type DecorTree } from '../../../lib/venue-decor'
 
 interface VenueMapStageProps {
   config: VenueMapConfig
@@ -32,6 +33,18 @@ interface VenueMapStageProps {
   mutedIds?: Set<string>
   /** Draws the cell grid. The editor wants it; the attendee map does not. */
   showGrid?: boolean
+  /**
+   * Draws the scenery — grass apron, pavement, palms, ghost skyline. The
+   * attendee venue wants a place; the editor wants a drawing board.
+   */
+  decor?: boolean
+  /**
+   * Draws every floor at its true height even outside the stack view, so
+   * standing on Level 2 shows a slab floating two storeys over the lawn
+   * rather than sitting on it. The editor leaves this off: its selection
+   * overlays are drawn against a ground-level slab.
+   */
+  elevate?: boolean
 }
 
 /**
@@ -58,8 +71,15 @@ export function VenueMapStage({
   hoveredId,
   mutedIds,
   showGrid = false,
+  decor = false,
+  elevate = false,
 }: VenueMapStageProps) {
   const floorCount = config.floors.length
+
+  const decorData = useMemo(
+    () => (decor ? buildDecor(config, geometry) : null),
+    [decor, config, geometry]
+  )
 
   const elements = useMemo(() => {
     const out: React.ReactNode[] = []
@@ -84,8 +104,118 @@ export function VenueMapStage({
       .sort((a, b) => presenceOf(a) - presenceOf(b) || a - b)
     if (!levels.length) levels.push(floor)
 
+    // ---- scenery ----
+    // The world the building stands in: grass past the slab edge, a paved way
+    // up to the door, ghost neighbours on the horizon. All of it under every
+    // level, none of it interactive, all of it deterministic (venue-decor.ts).
+    if (decorData) {
+      const M = decorData.margin
+
+      // One grass sheet. Its edge is feathered by a wide stroke of its own
+      // colour rather than by a second sheet — two nested greens read as two
+      // floors, which is exactly what a lawn must not do.
+      out.push(
+        <path
+          key="decor-lawn"
+          d={path([
+            [-M, -M],
+            [config.cols + M, -M],
+            [config.cols + M, config.rows + M],
+            [-M, config.rows + M],
+          ])}
+          fill="rgba(122,176,0,0.12)"
+          stroke="rgba(122,176,0,0.05)"
+          strokeWidth={14}
+          strokeLinejoin="round"
+        />
+      )
+
+      // Forecourt: a paved way widening from the ground-floor door out across
+      // the lawn — the walk up to the building, drawn under its gateway.
+      const d0 = config.floors[0]?.door
+      if (d0) {
+        const u: [number, number] = d0.side === 'n' || d0.side === 's' ? [1, 0] : [0, 1]
+        const o: [number, number] =
+          d0.side === 'n' ? [0, -1] : d0.side === 's' ? [0, 1] : d0.side === 'w' ? [-1, 0] : [1, 0]
+        const org: [number, number] =
+          d0.side === 'n'
+            ? [d0.at, 0]
+            : d0.side === 's'
+              ? [d0.at, config.rows]
+              : d0.side === 'w'
+                ? [0, d0.at]
+                : [config.cols, d0.at]
+        const at = (alongU: number, alongO: number): [number, number] => [
+          org[0] + u[0] * alongU + o[0] * alongO,
+          org[1] + u[1] * alongU + o[1] * alongO,
+        ]
+        out.push(
+          <path
+            key="decor-forecourt"
+            d={path([at(-0.3, 0), at(DOOR_WIDTH + 0.3, 0), at(DOOR_WIDTH + 1.2, M), at(-1.2, M)])}
+            fill="rgba(87,83,78,0.24)"
+            stroke="rgba(87,83,78,0.36)"
+            strokeWidth={0.75}
+          />
+        )
+      }
+    }
+
+    // How high off the ground a level's slab sits. The active floor, elevated,
+    // is pinned at its full height — it must not bob when the stack toggles —
+    // while the others ride the stack (or, mid-fade in the flat view, hold
+    // their own height so a floor change dissolves in place, not in freefall).
+    const liftOf = (level: number) =>
+      level === floor && elevate ? 1 : stacked ? stack : elevate ? 1 : 0
+    const zOf = (level: number) => level * VENUE_MAP.LEVEL_H * liftOf(level)
+
+    // ---- stack guides ----
+    // A floating slab is four loose sheets of paper; a vertical dashed line at
+    // each corner ties it back to the ground it belongs to. Drawn first, so
+    // they read as scaffolding behind the floors rather than walls in front.
+    {
+      let guideTop = 0
+      let guideA = 0
+      if (stacked) {
+        guideTop = (floorCount - 1) * VENUE_MAP.LEVEL_H * stack
+        guideA = stack
+      }
+      if (elevate) {
+        for (const level of levels) {
+          if (level === 0) continue
+          guideTop = Math.max(guideTop, zOf(level))
+          guideA = Math.max(guideA, presenceOf(level))
+        }
+      }
+      if (guideTop > 0.05 && guideA > 0.02) {
+        const corners: [number, number][] = [
+          [0, 0],
+          [config.cols, 0],
+          [config.cols, config.rows],
+          [0, config.rows],
+        ]
+        for (const [i, [cx, cy]] of corners.entries()) {
+          const [x1, y1] = P(cx, cy, 0)
+          const [x2, y2] = P(cx, cy, guideTop)
+          out.push(
+            <line
+              key={`stack-guide-${i}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="var(--color-ktip-sand-400)"
+              strokeWidth={1}
+              strokeDasharray="4 4"
+              opacity={0.65 * guideA}
+            />
+          )
+        }
+      }
+    }
+
     for (const level of levels) {
-      const zBase = stacked ? level * VENUE_MAP.LEVEL_H * stack : 0
+      const zBase = zOf(level)
       const presence = presenceOf(level)
       const ghost = presence < 0.85
       const dim = stacked ? presence * (ghost ? stack : 1) : presence
@@ -144,6 +274,32 @@ export function VenueMapStage({
               stroke="var(--color-ktip-sand-200)"
               strokeWidth={y % 4 === 0 ? 1 : 0.5}
               opacity={presence}
+            />
+          )
+        }
+      }
+
+      // ---- pavement ----
+      // This level's plaza and walkways, as two-tone pavers. Drawn at zBase,
+      // so stacked they ride up with their slab, and dimmed with `dim`, so a
+      // floor change fades a level's paths exactly as it fades its rooms.
+      if (decorData?.paveByFloor[level]?.length) {
+        for (const [cx, cy] of decorData.paveByFloor[level]) {
+          out.push(
+            <path
+              key={`pave-${level}-${cx}-${cy}`}
+              d={path(
+                [
+                  [cx, cy],
+                  [cx + 1, cy],
+                  [cx + 1, cy + 1],
+                  [cx, cy + 1],
+                ],
+                zBase
+              )}
+              fill={`rgba(87,83,78,${(((cx + cy) % 2 === 0 ? 0.3 : 0.22) * dim).toFixed(3)})`}
+              stroke={`rgba(87,83,78,${(0.38 * dim).toFixed(3)})`}
+              strokeWidth={0.5}
             />
           )
         }
@@ -377,13 +533,18 @@ export function VenueMapStage({
       }
 
 
-      // ---- rooms, back to front ----
-      const rooms = Object.values(geometry)
-        .filter((g) => g.floor === level)
-        .sort((a, b) => a.bbox.maxX + a.bbox.maxY - (b.bbox.maxX + b.bbox.maxY))
-
-      for (const g of rooms) {
+      // ---- rooms & trees, back to front ----
+      // One depth-sorted pass for everything standing on this floor: a palm
+      // south of a room stands in front of its wall, one north of it hides
+      // behind — the same painter's algorithm, now with shrubbery.
+      const drawRoom = (g: RoomGeometry<any>) => {
         const id = g.room.id
+        // Doorways the path network carved into this room, as "cell,side"
+        // keys — the wall renderer below drops the wall units they name.
+        const roomOpenings = decorData?.openings[id]
+        const openSet = roomOpenings?.length
+          ? new Set(roomOpenings.map((o) => `${o.x},${o.y},${o.side}`))
+          : null
         const active = !ghost && (id === selectedId || id === hoveredId)
         const muted = !!mutedIds?.has(id)
         const alpha = (muted ? 0.45 : 1) * dim
@@ -433,10 +594,50 @@ export function VenueMapStage({
                 const ny = inner ? dx : -dx
                 // Only faces pointing at the camera are drawn — the far side of
                 // a room would otherwise paint over its own interior.
-                if (nx > 0 || ny > 0) {
-                  const lit = ny > 0 ? (inner ? 0.62 : 0.95) : inner ? 0.5 : 0.74
-                  faces.push({ p1, p2, f: lit, depth: (p1[0] + p1[1] + p2[0] + p2[1]) / 2 })
+                if (!(nx > 0 || ny > 0)) continue
+                const lit = ny > 0 ? (inner ? 0.62 : 0.95) : inner ? 0.5 : 0.74
+                const push = (a: [number, number], b: [number, number]) =>
+                  faces.push({ p1: a, p2: b, f: lit, depth: (a[0] + a[1] + b[0] + b[1]) / 2 })
+
+                if (!openSet) {
+                  push(p1, p2)
+                  continue
                 }
+
+                // A doorway: the wall is split at cell boundaries and the
+                // units named by an opening are simply not drawn. The cap up
+                // top stays whole, which is what turns the gap into a doorway
+                // under a lintel rather than a slot cut down the building.
+                // Works for both loops: each unit's owning cell is recovered
+                // from its midpoint, which lands right for the inner loop's
+                // inset coordinates too.
+                const ax = dx !== 0 ? 0 : 1
+                const dirn = dx !== 0 ? dx : dy
+                const perp = ax === 0 ? p1[1] : p1[0]
+                const at = (v: number): [number, number] => (ax === 0 ? [v, p1[1]] : [p1[0], v])
+                const end = p2[ax]
+                let cursor = p1[ax]
+                let runStart: number | null = null
+                while (Math.abs(cursor - end) > 1e-6) {
+                  const next =
+                    dirn > 0
+                      ? Math.min(Math.floor(cursor + 1e-6) + 1, end)
+                      : Math.max(Math.ceil(cursor - 1e-6) - 1, end)
+                  const mid = (cursor + next) / 2
+                  let unitKey: string
+                  if (ax === 0 && dirn > 0) unitKey = `${Math.floor(mid)},${Math.round(perp)},n`
+                  else if (ax === 1 && dirn > 0) unitKey = `${Math.round(perp) - 1},${Math.floor(mid)},e`
+                  else if (ax === 0) unitKey = `${Math.floor(mid)},${Math.round(perp) - 1},s`
+                  else unitKey = `${Math.round(perp)},${Math.floor(mid)},w`
+                  if (openSet.has(unitKey)) {
+                    if (runStart !== null) push(at(runStart), at(cursor))
+                    runStart = null
+                  } else if (runStart === null) {
+                    runStart = cursor
+                  }
+                  cursor = next
+                }
+                if (runStart !== null) push(at(runStart), at(end))
               }
             }
             collect(lp.outer, false)
@@ -487,6 +688,145 @@ export function VenueMapStage({
           )
         })
       }
+
+      // ---- a tree ----
+      // Trunk and fronds are strokes in screen pixels (scaled by the
+      // projection), with their anchor points projected — which keeps a palm
+      // leaning the right way at every tilt without any of its own iso maths.
+      const S = projection.scale
+      const drawTree = (t: DecorTree, ti: number) => {
+        const o = stacked ? Math.max(0.06, dim) : dim
+        if (o < 0.02) return
+        const [bx, by] = P(t.x, t.y, zBase)
+
+        if (t.kind === 'bush') {
+          out.push(
+            <ellipse
+              key={`bush-sh-${level}-${ti}`}
+              cx={bx + 0.06 * t.s * S}
+              cy={by + 0.03 * t.s * S}
+              rx={0.4 * t.s * S}
+              ry={0.16 * t.s * S}
+              fill="rgba(4,30,66,0.1)"
+              opacity={o}
+            />
+          )
+          // Three overlapping lobes, lit unevenly — one circle is a lollipop.
+          const lobes: Array<[number, number, number, number]> = [
+            [-0.16, 0.04, 0.24, 0.88],
+            [0.15, 0.02, 0.2, 1.12],
+            [0, -0.06, 0.28, 1],
+          ]
+          for (const [li, [ox, oy, lr, lit]] of lobes.entries()) {
+            const [lx, ly] = P(t.x + ox * t.s, t.y + oy * t.s, zBase + 0.12 * t.s)
+            out.push(
+              <ellipse
+                key={`bush-${level}-${ti}-${li}`}
+                cx={lx}
+                cy={ly}
+                rx={lr * t.s * S}
+                ry={lr * t.s * S * 0.85}
+                fill={shade('#7AB000', lit, 0.9)}
+                opacity={o}
+              />
+            )
+          }
+          return
+        }
+
+        const h = 1.55 * t.s
+        const [tx, ty] = P(t.x, t.y, zBase + h)
+        out.push(
+          <ellipse
+            key={`palm-sh-${level}-${ti}`}
+            cx={bx + 0.08 * t.s * S}
+            cy={by + 0.04 * t.s * S}
+            rx={0.5 * t.s * S}
+            ry={0.2 * t.s * S}
+            fill="rgba(4,30,66,0.1)"
+            opacity={o}
+          />,
+          <path
+            key={`palm-trunk-${level}-${ti}`}
+            d={`M${bx.toFixed(1)} ${by.toFixed(1)} Q${((bx + tx) / 2 + 0.16 * t.s * S).toFixed(1)} ${((by + ty) / 2).toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)}`}
+            fill="none"
+            stroke={shade('#78716c', 0.8)}
+            strokeWidth={Math.max(1.2, 0.09 * t.s * S)}
+            strokeLinecap="round"
+            opacity={o}
+          />
+        )
+
+        // Fronds radiate in grid directions and are projected point-by-point,
+        // so the crown spreads flat in plan view and drapes in 2.5D.
+        const fronds: React.ReactNode[] = []
+        const dirs: Array<[number, number]> = [
+          [1, 0],
+          [0.7, 0.7],
+          [0, 1],
+          [-0.7, 0.7],
+          [-1, 0],
+          [-0.7, -0.7],
+          [0, -1],
+          [0.7, -0.7],
+        ]
+        for (const [fi, [dx, dy]] of dirs.entries()) {
+          const r = 0.8 * t.s
+          const [ex, ey] = P(t.x + dx * r, t.y + dy * r, zBase + h - 0.5 * t.s)
+          const [qx, qy] = P(t.x + dx * r * 0.45, t.y + dy * r * 0.45, zBase + h + 0.3 * t.s)
+          fronds.push(
+            <path
+              key={`palm-frond-${level}-${ti}-${fi}`}
+              d={`M${tx.toFixed(1)} ${ty.toFixed(1)} Q${qx.toFixed(1)} ${qy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`}
+              fill="none"
+              stroke={shade(fi % 2 ? '#AEE12B' : '#7AB000', 1, 0.95)}
+              strokeWidth={Math.max(1.2, 0.11 * t.s * S)}
+              strokeLinecap="round"
+            />
+          )
+        }
+        fronds.push(
+          <circle
+            key={`palm-nut-${level}-${ti}-a`}
+            cx={tx - 0.05 * t.s * S}
+            cy={ty + 0.06 * t.s * S}
+            r={Math.max(1, 0.055 * t.s * S)}
+            fill={shade('#B38500', 0.95)}
+          />,
+          <circle
+            key={`palm-nut-${level}-${ti}-b`}
+            cx={tx + 0.06 * t.s * S}
+            cy={ty + 0.05 * t.s * S}
+            r={Math.max(1, 0.05 * t.s * S)}
+            fill={shade('#B38500', 0.8)}
+          />
+        )
+        out.push(
+          <g
+            key={`palm-top-${level}-${ti}`}
+            className="venue-palm-sway"
+            // Period and phase vary per tree so the grove never sways in step.
+            style={{
+              animationDuration: `${t.sway.toFixed(2)}s`,
+              animationDelay: `-${((ti * 1.37) % Math.max(t.sway, 1)).toFixed(2)}s`,
+            }}
+            opacity={o}
+          >
+            {fronds}
+          </g>
+        )
+      }
+
+      const items: Array<{ depth: number; draw: () => void }> = Object.values(geometry)
+        .filter((g) => g.floor === level)
+        .map((g) => ({ depth: g.bbox.maxX + g.bbox.maxY, draw: () => drawRoom(g) }))
+      if (decorData && level === 0) {
+        for (const [ti, t] of decorData.trees.entries()) {
+          items.push({ depth: t.x + t.y, draw: () => drawTree(t, ti) })
+        }
+      }
+      items.sort((a, b) => a.depth - b.depth)
+      for (const item of items) item.draw()
     }
 
     return out
@@ -503,6 +843,8 @@ export function VenueMapStage({
     mutedIds,
     showGrid,
     floorCount,
+    decorData,
+    elevate,
   ])
 
   return <g>{elements}</g>
