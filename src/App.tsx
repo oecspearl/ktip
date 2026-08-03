@@ -11,6 +11,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AchievementProvider } from './contexts/AchievementContext'
 import { LanguageProvider } from './i18n/LanguageProvider'
+import { LanguageProfileSync } from './i18n/LanguageProfileSync'
 import { AchievementUnlockModal } from './components/achievements/AchievementUnlockModal'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -387,6 +388,11 @@ function App() {
           <AnalyticsConsentBanner />
           <ToastProvider>
             <AuthProvider>
+              {/* Renders nothing. Carries the language choice between this
+                  device and profiles.preferred_language — it must sit inside
+                  AuthProvider to see the profile, and it cannot live inside
+                  AuthProvider itself because LanguageProvider is above it. */}
+              <LanguageProfileSync />
               <AchievementProvider>
                 <RouterProvider router={router} />
               </AchievementProvider>

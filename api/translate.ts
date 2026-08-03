@@ -116,7 +116,7 @@ export default async function handler(request: Request): Promise<Response> {
     return json({ error: 'Invalid JSON body' }, 400)
   }
 
-  if (!isTargetLang(body.to)) return json({ error: 'to must be one of: fr, es' }, 400)
+  if (!isTargetLang(body.to)) return json({ error: 'to must be one of: en, fr, es' }, 400)
   const to: TargetLang = body.to
 
   if (!Array.isArray(body.items)) return json({ error: 'items must be an array' }, 400)

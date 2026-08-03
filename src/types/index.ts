@@ -193,6 +193,22 @@ export interface Profile {
   is_minor?: boolean
   requires_age_declaration?: boolean
   age_declared_at?: string | null
+  /**
+   * Language settings (097, 100). All three optional for the same
+   * deploy-ahead-of-migration reason as the fields above.
+   *
+   * `preferred_language` — the UI language, carried between this member's
+   *   devices. NULL means "never chosen", which is materially different from
+   *   "chose English": only the NULL case lets the client guess from the browser.
+   * `content_language` — what other members' writing is translated INTO. NULL
+   *   means follow the UI language, which is what almost everyone wants; it
+   *   exists for the reader whose French is better than their English but who
+   *   navigates a French UI, or the reverse.
+   * `auto_translate` — the off switch. Absent reads as true.
+   */
+  preferred_language?: string | null
+  content_language?: string | null
+  auto_translate?: boolean | null
   created_at: string
   updated_at: string
 }
@@ -564,6 +580,13 @@ export interface VenueRoomMessage {
   kind: 'chat' | 'system'
   reply_to: string | null
   is_removed: boolean
+  /**
+   * What the sender was writing in (migration 100). Optional and nullable: rows
+   * written before that migration have none, and a reader treats a missing value
+   * as English. It is what decides whether this message needs translating for a
+   * given reader, and in which direction.
+   */
+  lang?: string | null
   created_at: string
   author?: Profile
 }

@@ -1,9 +1,25 @@
 # Turning on video in the venue
 
-Plain-English, end to end. Nothing here is switched on yet — this is the recipe.
+Plain-English, end to end.
 
-Read it top to bottom once before doing anything; steps 4 and 5 are the only ones
-where a mistake costs anything.
+> **Status: the code is written. What is left is an account.**
+>
+> Steps 4, 5 and 6 below have been built — as migration `101_venue_room_grant.sql`,
+> `api/venue/room-token.ts`, and `VenueCall.tsx` inside `AvStage.tsx`. What remains
+> is steps 1–3: sign up, and put three values in the environment. Until you do,
+> `/api/venue/room-token` answers 503 and the venue keeps drawing the placeholder
+> tiles it always has. Nothing is broken in the meantime.
+>
+> Two things in this document were wrong by the time it was executed, and are
+> corrected below:
+> - **The migration is 101, not 099.** 099 and 100 were taken in between. The
+>   comments in `070_event_venue.sql` and `src/types/index.ts` still say "in 071",
+>   which was the original plan; ignore them.
+> - **The token endpoint is a Vercel Edge route, not a Supabase Edge Function.**
+>   There is no `supabase/functions/` directory in this repo. All 27 serverless
+>   routes live under `api/`, are reached same-origin through the rewrites in
+>   `vercel.json`, and carry no CORS headers by design. Section 5 has been
+>   rewritten to match what was built.
 
 ---
 
@@ -84,17 +100,25 @@ The key and secret live only on the server (step 5).
 
 ---
 
-## 4. Add `venue_room_grant()` — migration 099
+## 4. `venue_room_grant()` — migration 101 ✅ built
+
+> Written as `supabase/migrations/101_venue_room_grant.sql` — **read that file, not
+> the block below**, which is the original draft kept for context. Apply it the way
+> you apply the others (Supabase SQL editor, or `supabase db push`).
+>
+> One thing changed on the way in. The draft's comment claimed the occupancy query
+> counts "how many people are already on camera". It does not, and cannot —
+> Postgres has no idea who has a camera on, because that state lives in the media
+> server. It counts *people in the room*. That makes `max_publishers` an
+> over-estimate and a soft cap, which is the safe direction to be wrong in since
+> the cap exists to protect the bandwidth bill, but the shipped file says so
+> plainly instead.
 
 This is the function that answers, in the database, "what is this person allowed
-to do in this room's call". It already has a name — 070 and 089 both refer to it
+to do in this room's call". It already had a name — 070 and 089 both refer to it
 in comments — it just was never written.
 
-> Number it **099** — 098 is the highest that exists. Check
-> `supabase/check_migrations.sql` for the current list before picking a number;
-> 091 is already used twice and that is one collision too many.
-
-`supabase/migrations/099_venue_room_grant.sql`:
+`supabase/migrations/101_venue_room_grant.sql`:
 
 ```sql
 -- ============================================================
@@ -190,94 +214,58 @@ Apply it the way you apply the others (Supabase SQL editor, or
 
 ---
 
-## 5. The token endpoint — a Supabase Edge Function
+## 5. The token endpoint — a Vercel Edge route ✅ built
 
 A LiveKit token is a short-lived signed note that says *who you are*, *which room*
-and *what you may do*. It must be signed with the API secret, so it must be made
-on a server. Supabase Edge Functions are already part of this stack.
+and *what you may do*. It must be signed with the API secret, so it has to be made
+on a server.
 
-Create `supabase/functions/venue-room-token/index.ts`:
+**This document originally said to write a Supabase Edge Function. That was wrong
+for this repo** — there is no `supabase/functions/` directory, and all 27 serverless
+routes are Vercel Edge handlers under `api/`, reached same-origin through the
+rewrites in `vercel.json`. That is why none of them set CORS headers: nothing
+cross-origin ever calls them. Following the original recipe would have introduced a
+second serverless runtime and a cross-origin surface for no benefit.
 
-```ts
-import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { AccessToken } from 'npm:livekit-server-sdk@2'
+What was built instead:
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
-}
+| File | What it does |
+|---|---|
+| `api/venue/room-token.ts` | The route. Verifies the caller, calls `venue_room_grant()` **as that caller**, signs whatever comes back. |
+| `api/_lib/livekit-token.ts` | The signing, on its own so it is unit-testable. |
+| `src/lib/__tests__/livekit-token.test.ts` | Asserts the claim shape, the signature, and that a forged secret fails. |
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+Two deliberate departures from the shape `api/admin/*` uses:
 
-  try {
-    const { roomId } = await req.json()
-    const authHeader = req.headers.get('Authorization') ?? ''
+- **No `requirePermission`.** There is no platform permission meaning "may join
+  this call" — venue membership *is* the authorisation, and `venue_room_grant()`
+  checks it while running as the caller.
+- **No service-role client.** The caller’s own JWT answers the question, so minting
+  an RLS-bypassing key would be blast radius for nothing.
 
-    // The caller's own JWT, so auth.uid() inside the function is them and not
-    // the service role. This is what makes the grant trustworthy.
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    )
+**No `livekit-server-sdk` dependency.** A LiveKit token is an ordinary HS256 JWT
+with one custom `video` claim, so it is signed with Web Crypto in about forty
+lines. The SDK targets Node; every route here runs on the edge runtime, and the
+incompatibility would have surfaced at deploy time. Swapping the SDK back in later
+is a drop-in — the claim shape is the documented wire format.
 
-    const { data: user } = await supabase.auth.getUser()
-    if (!user?.user) return json({ error: 'not signed in' }, 401)
-
-    // Every rule lives in Postgres. This function never decides anything.
-    const { data: grant, error } = await supabase.rpc('venue_room_grant', {
-      p_room_id: roomId,
-    })
-    if (error) return json({ error: error.message }, 403)
-
-    const token = new AccessToken(
-      Deno.env.get('LIVEKIT_API_KEY')!,
-      Deno.env.get('LIVEKIT_API_SECRET')!,
-      {
-        identity: user.user.id,
-        name: user.user.user_metadata?.display_name ?? 'Member',
-        // Short, because permissions change: closing a room or muting a
-        // speaker should take effect on the next join, not in six hours.
-        ttl: '30m',
-      }
-    )
-
-    token.addGrant({
-      room: grant.room,
-      roomJoin: true,
-      canSubscribe: grant.can_subscribe,
-      canPublish: grant.can_publish,
-      canPublishData: grant.can_publish_data,
-    })
-
-    return json({ token: await token.toJwt(), grant })
-  } catch (err) {
-    return json({ error: String(err) }, 400)
-  }
-})
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  })
-}
-```
-
-Deploy it and give it the secrets:
+Set the secrets in **Vercel** (not `supabase secrets`):
 
 ```bash
-supabase secrets set LIVEKIT_API_KEY=APIxxxxxxxxxxx
-supabase secrets set LIVEKIT_API_SECRET=your-long-secret
-supabase functions deploy venue-room-token
+# Vercel dashboard -> Settings -> Environment Variables, or:
+vercel env add LIVEKIT_API_KEY
+vercel env add LIVEKIT_API_SECRET
+vercel env add VITE_LIVEKIT_URL
 ```
 
-Test it before touching the frontend — a token endpoint that works is the whole
-battle:
+For local development, `vercel dev` is what makes `/api/*` reachable — the same
+requirement `/api/ai-chat` already has. `.env` values are promoted into
+`process.env` by `vite.config.ts` so dev matches production.
+
+Test it before touching the venue — a token endpoint that works is the whole battle:
 
 ```bash
-curl -X POST https://<project-ref>.supabase.co/functions/v1/venue-room-token \
+curl -X POST http://localhost:3000/api/venue/room-token \
   -H "Authorization: Bearer <a real user access token>" \
   -H "Content-Type: application/json" \
   -d '{"roomId":"<a room uuid>"}'
@@ -287,6 +275,10 @@ You want a long `token` string and a `grant` object back. Paste the token into
 <https://jwt.io> and read it — it should name the room and the permissions you
 expect. If `can_publish` is false when it should be true, the bug is in step 4,
 not here.
+
+A **503** means the environment variables are missing. A **403** means the RPC
+refused, and its message is the room’s real rule — "this room is closed", "not a
+member of this venue".
 
 ---
 
@@ -307,34 +299,26 @@ straight onto LiveKit's own layouts:
 | `huddle` | round avatar bubbles | audio-only: `<RoomAudioRenderer>` plus the bubbles you already have, lit up when someone speaks |
 | `off` | renders nothing | still renders nothing — no connection is made at all |
 
-Sketch of the connection, in a new `useLiveKitRoom` hook so `AvStage` stays a
-presentation component:
+Built as two files, so `AvStage` stays a presentation component:
 
-```tsx
-const { data } = useQuery({
-  queryKey: ['livekit-token', room.id],
-  queryFn: async () => {
-    const { data, error } = await supabase.functions.invoke('venue-room-token', {
-      body: { roomId: room.id },
-    })
-    if (error) throw error
-    return data as { token: string; grant: { can_publish: boolean } }
-  },
-  // The token is 30 minutes; refresh at 25 so nobody is dropped mid-sentence.
-  staleTime: 25 * 60 * 1000,
-})
+| File | What it does |
+|---|---|
+| `src/hooks/useVenueRoomToken.ts` | Fetches and refreshes the token. Also exports `isVenueVideoConfigured()`, the single answer to "is video switched on for this deployment". |
+| `src/components/venue/room/VenueCall.tsx` | The `<LiveKitRoom>` and the four layouts. |
 
-<LiveKitRoom
-  serverUrl={import.meta.env.VITE_LIVEKIT_URL}
-  token={data.token}
-  connect={mode !== 'off'}
-  video={data.grant.can_publish}
-  audio={data.grant.can_publish}
->
-  {/* the layout for `mode` */}
-  <RoomAudioRenderer />
-</LiveKitRoom>
-```
+Note the token is fetched with a plain `fetch` plus the caller’s Supabase access
+token — **not** `supabase.functions.invoke`, which the original sketch used and
+which only works against a Supabase Edge Function. See step 5.
+
+How the two states fit together: `AvStage` renders `<VenueCall>` once it has a
+token, and keeps its original placeholder tiles for every other case — no LiveKit
+project configured, a grant still in flight, or a member the RPC refused. Nothing
+moves between the two, which is what the placeholder was shaped for.
+
+The footer line stopped saying "voice and screen sharing arrive with the next
+release" and now says what is actually true: connecting, on, listen-only, not
+configured, or the RPC’s own refusal message. A camera button that silently does
+nothing is the failure that replaces.
 
 Two things to keep as they are:
 
@@ -359,21 +343,111 @@ token — which is why `venue_room_grant()` is a function rather than a column.
 
 ---
 
-## 8. Recording
+## 8. Recording ✅ built
 
-`recording_enabled` is already stored per room and already drawn as a red dot in
-`AvStage`'s header. To make it real you use LiveKit **Egress**: a server-side API
-call that starts a recording of a room and writes the file to S3 or equivalent.
+Built as `api/venue/room-recording.ts`, driving LiveKit Egress.
 
-Three things to sort out before switching it on for a real event:
+**This route is Node, not edge — the only one in `api/`.** Signing a join token
+is forty lines of Web Crypto, but starting an egress is a protobuf-over-twirp
+call whose wire format is not worth hand-rolling. `livekit-server-sdk` owns that
+and targets Node, so the route moved rather than the format being guessed at.
+The SDK is server-only and does not reach the browser bundle.
 
-1. **Consent.** Everyone must see the notice *before* joining, not after. The red
-   dot is not enough on its own — put the line in the join gate.
-2. **Where the file goes.** Egress needs S3 (or GCS/Azure) credentials. These go
-   in the same secrets store as the API key. Supabase Storage is not an Egress
-   target, so a bucket will be needed either way.
-3. **Who may watch it back.** That is a new table and new RLS, not a video
-   problem. Do not start it until someone asks for it.
+**Two things must both be true** before anything records: the caller is a host
+of this venue, and the room itself has `recording_enabled`. Both come from
+`venue_room_grant()`, checked server-side — hiding the button is a suggestion,
+this is the rule. A host cannot record a room the organiser did not mark.
+
+**No status column.** LiveKit already knows which egresses are running, so
+`listEgress` is the source of truth. A `recording_in_progress` column would
+drift the first time a browser closed mid-recording, and recovering from that
+drift is worse than the round trip it saves.
+
+### Consent
+
+The original draft of this section said "everyone must see the notice *before*
+joining, not after — the red dot is not enough on its own". That is now
+enforced rather than advised: `RecordingConsent.tsx` gates the LiveKit
+**connection**. In a room with `recording_enabled`, no socket opens and no
+track is published until the member has read the notice and accepted. They can
+stay in the room, read chat and take part without ever being recorded.
+
+The acknowledgement is stored per room per device in localStorage, deliberately
+not on the profile — it is a decision about this room on this machine, not a
+standing consent to be recorded anywhere in the venue. Someone on a shared lab
+laptop is asked again.
+
+The header dot also stopped conflating two different claims. A room that MAY be
+recorded now reads "Can be recorded" in grey; only an actually-running egress
+goes red and pulses. Only hosts can see the live state, because only hosts may
+ask LiveKit — everyone else gets the weaker, honest statement they consented to.
+
+### Storage
+
+Egress writes the file **directly to your bucket**; the bytes never pass through
+this app. Supabase Storage is not an Egress target, so a bucket elsewhere is
+required. Any S3-compatible store works — Cloudflare R2 is the cheapest sane
+default because it charges no egress fees, and AWS S3 or Backblaze B2 are
+equally fine.
+
+Set `RECORDING_S3_BUCKET`, `RECORDING_S3_ACCESS_KEY`, `RECORDING_S3_SECRET`,
+and for anything that is not AWS also `RECORDING_S3_ENDPOINT` (which turns on
+path-style addressing). Without them the route answers 503 with "Recording
+storage is not configured" and everything else about video still works.
+
+Files land at `venue/<room-uuid>/<timestamp>.mp4`. The room **id**, not its name,
+so a host renaming a room mid-event does not scatter one recording across two
+folders.
+
+### Still open
+
+**Who may watch it back.** That is a new table and new RLS, not a video problem.
+Right now the files are in your bucket and access is whatever your bucket policy
+says. Do not point a public bucket at this.
+
+---
+
+## 8b. Live translated captions ✅ built
+
+Anyone in the call can switch on "Caption my speech". Everyone else reads them
+in their own language — English, French or Spanish — using the same translation
+pipeline as room chat.
+
+Three files: `src/lib/captions/speech.ts` (the recogniser),
+`src/hooks/useLiveCaptions.ts` (transport and translation),
+`src/components/venue/room/CaptionStrip.tsx` (the strip under the call).
+
+**Each speaker transcribes their own microphone**, in their own browser, with
+the Web Speech API. Not the room mix: local audio is clean and near-field, the
+speaker is known without diarisation, and the cost falls on the person talking
+rather than on every person listening. It is also free and needs no key, so
+captions work on a deployment that has configured nothing beyond LiveKit.
+
+**The speaker also pays for the translation, once**, into the other two
+languages, then broadcasts all of them together. Translating on each listener
+would mean a room of twenty paying twenty times for the same sentence.
+
+**Two messages per utterance.** The original goes out the instant it is final,
+so everyone sees something in about a second; the translations follow when they
+land and swap in place. Waiting for the translation would make every caption
+late for everyone, including the people who did not need it translated.
+
+**Transport is the LiveKit data channel**, not Supabase broadcast — the call is
+already connected and already authorised by the same signed token, so it is one
+fewer moving part, and captions cannot outlive the call they belong to. Sent
+unreliable: a late caption is worse than a missing one, and the audio must not
+stutter for it.
+
+**Nothing is stored.** Captions go through the translation pipeline with
+`store: false`, so they never enter the shared Postgres cache — spoken words in
+a room are exactly what migration 097 says must not outlive the request. The
+on-screen buffer is a ring that forgets after 45 seconds.
+
+**Browser support is the real limitation.** Chrome, Edge and Safari have
+SpeechRecognition; Firefox does not. The button is disabled there with a reason
+rather than silently failing. If that becomes a problem, the recogniser is a
+seam — a Soniox or Deepgram WebSocket source implements the same three methods
+and nothing above it changes.
 
 ---
 
@@ -417,14 +491,25 @@ the first or second:
 
 ---
 
-## The order to do it in
+## What is left to do
 
-1. LiveKit Cloud account, copy the three values. *(10 min)*
-2. Migration 099, and call it in the SQL editor until the answers look right. *(30 min)*
-3. Edge function, and `curl` it until it returns a token. *(1 hour)*
-4. `AvStage` for one mode only — `spotlight`, in one test room. *(2 hours)*
-5. The other three modes, which are layout only. *(1 hour)*
+Steps 2–6 are built. What remains is the account and the wiring:
+
+1. **LiveKit Cloud account**, copy the three values. *(10 min)*
+2. **Apply migration 101** — `supabase db push`, or paste it into the SQL editor.
+   Call `venue_room_grant('<a room uuid>')` there as a real member and check the
+   answers before going near the frontend. *(10 min)*
+3. **Set the three environment variables** in Vercel — `VITE_LIVEKIT_URL`,
+   `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`. *(5 min)*
+4. **`curl` the token endpoint** until it returns a token, then paste it into
+   jwt.io and read the grant. *(10 min)*
+5. **Walk into a room** with two browser profiles and work down the testing list
+   in section 9. *(20 min)*
 6. Recording, if anyone actually needs it. *(later)*
 
-Steps 2 and 3 are the ones worth being careful about. Everything after them is
-swapping one box for another box the same size.
+Step 2 is the one worth being careful about — every rule in the venue is decided
+there, and a wrong answer from that function is a wrong answer everywhere else.
+
+**Nothing above is required for the app to keep working.** With no LiveKit
+project, `/api/venue/room-token` answers 503, `isVenueVideoConfigured()` is false,
+and the venue draws the same placeholder tiles it always has.

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ScrollText, Target } from 'lucide-react'
 import { usePublicEventSections } from '../../../hooks/useEventPageSections'
+import { useTranslated, useTranslatedList } from '../../../hooks/useTranslated'
 import { presetByKey } from '../../../lib/venue-room-presets'
 import { DocumentsPanel } from '../../documents/DocumentsPanel'
 import type { Event, VenueRoom } from '../../../types'
@@ -26,7 +27,10 @@ export function RoomTextSection({
 }) {
   const { t } = useLingui()
   const written = typeof config.body === 'string' ? config.body.trim() : ''
-  const body = written || (variant === 'objectives' ? fallbackObjectives(room) : '')
+  const source = written || (variant === 'objectives' ? fallbackObjectives(room) : '')
+  // Before the early return: a hook cannot sit behind a conditional. An empty
+  // string is a no-op for it anyway — shouldTranslate() rejects it outright.
+  const body = useTranslated(source)
   if (!body) return null
 
   const Icon = variant === 'objectives' ? Target : ScrollText
@@ -80,7 +84,7 @@ export function RoomFaqPanel({ eventId }: { eventId: string }) {
   const { sections } = usePublicEventSections(eventId)
   const [open, setOpen] = useState<number | null>(0)
 
-  const items = (sections || [])
+  const parsed = (sections || [])
     .filter((s) => s.section_type === 'faq')
     .flatMap((s) => {
       const raw = (s.content as { items?: unknown })?.items
@@ -95,6 +99,10 @@ export function RoomFaqPanel({ eventId }: { eventId: string }) {
         })
         .filter((row) => row.question)
     })
+
+  // Both fields in one pass, so the whole FAQ lands in a single batch with the
+  // rest of the room rather than one request per question as they expand.
+  const items = useTranslatedList(parsed, ['question', 'answer'])
 
   if (!items.length) return null
 

@@ -273,8 +273,26 @@ export default defineConfig(({ mode }) => {
     'AZURE_TRANSLATOR_KEY',
     'AZURE_TRANSLATOR_REGION',
     'AZURE_TRANSLATOR_ENDPOINT',
+    'OPENROUTER_API_KEY',
+    'OPENROUTER_TRANSLATE_MODEL',
+    'OPENROUTER_SITE_URL',
+    'OPENROUTER_APP_NAME',
     'TRANSLATION_MONTHLY_CHAR_CAP',
     'TRANSLATION_IP_SALT',
+    // Venue video. /api/venue/room-token signs a LiveKit join token with these;
+    // without them it answers 503 and AvStage keeps drawing placeholder tiles.
+    // The wss:// URL is VITE_-prefixed and reaches the browser on purpose — it
+    // is not a secret. These two must never be, which is why neither is.
+    'LIVEKIT_API_KEY',
+    'LIVEKIT_API_SECRET',
+    // Recording. /api/venue/room-recording hands these to LiveKit Egress, which
+    // writes the file directly to your bucket — the bytes never pass through
+    // this app. Without them recording answers 503 and nothing else changes.
+    'RECORDING_S3_BUCKET',
+    'RECORDING_S3_ACCESS_KEY',
+    'RECORDING_S3_SECRET',
+    'RECORDING_S3_REGION',
+    'RECORDING_S3_ENDPOINT',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }

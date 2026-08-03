@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { formatRelativeTime } from '../../../lib/utils'
 import { usePublishedEventUpdates } from '../../../hooks/useEventUpdates'
+import { useTranslatedList } from '../../../hooks/useTranslated'
 import { EVENT_UPDATE_TYPE_LABELS } from '../../../lib/constants'
 import { RoomPanel, RoomPanelEmpty } from './RoomPanel'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -20,7 +21,11 @@ export function RoomAnnouncements({ eventId }: { eventId: string }) {
   const { updates, loading } = usePublishedEventUpdates(eventId)
   const [expanded, setExpanded] = useState(false)
 
-  const all = updates || []
+  // Organiser-written, and written in English — these come from the admin event
+  // tab, not from the room. So the one-directional path is the right one here:
+  // an English reader costs nothing, and French and Spanish readers get the
+  // whole panel in one batch alongside the rest of the room.
+  const all = useTranslatedList(updates, ['title', 'content'])
   const shown = expanded ? all : all.slice(0, COLLAPSED)
 
   return (

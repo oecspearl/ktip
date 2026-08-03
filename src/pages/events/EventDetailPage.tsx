@@ -61,6 +61,7 @@ import type { AttendanceType, RSVPStatus } from '../../types'
 import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { useTranslatedFields } from '../../hooks/useTranslated'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
@@ -74,7 +75,17 @@ export default function EventDetailPage() {
 
   const { event, loading: eventLoading } = useEvent(params.id)
   useCanonicalSlug(params.id, event)
-  usePageTitle(event?.title)
+  /**
+   * The reader's copy of the same row.
+   *
+   * Deliberately a SECOND value rather than a rename, because two things on this
+   * page must keep the original: `useCanonicalSlug` above derives the URL from
+   * the title, and the delete confirmation asks the organiser to type the title
+   * back. Translating either would produce a canonical redirect loop and an
+   * unpassable confirmation dialog respectively.
+   */
+  const translatedEvent = useTranslatedFields(event, ['title', 'summary', 'description', 'location'])
+  usePageTitle(translatedEvent?.title)
   const toast = useToast()
   const { rsvp, cancelRSVP, checkRSVP, getRSVPCount, loading: rsvpLoading } = useRSVP()
   const { submitRegistration, loading: regLoading } = useSubmitRegistration()
@@ -238,17 +249,22 @@ export default function EventDetailPage() {
     )
   }
 
+  // Resolved after the guard rather than beside the hook, so it inherits the
+  // narrowing that proves `event` is non-null and every render site below stays
+  // free of optional chaining.
+  const display = translatedEvent ?? event
+
   return (
     <>
       <PageHero
         eyebrow={t`Event Detail`}
-        title={event.title}
+        title={display.title}
         image={event.image_url}
         imageSeed={event.id}
         breadcrumb={[
           { label: t`Home`, href: '/' },
           { label: t`Events`, href: '/events' },
-          { label: truncate(event.title, 30) },
+          { label: truncate(display.title, 30) },
         ]}
         actions={
           isOrganizer ? (
@@ -342,7 +358,7 @@ export default function EventDetailPage() {
           <div className="lg:col-span-2">
             {/* Event title repeat */}
             <h2 className="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
-              {event.title}
+              {display.title}
             </h2>
 
             {/* Date line */}
@@ -436,7 +452,7 @@ export default function EventDetailPage() {
             {/* Summary lede */}
             {event.summary && (
               <p className="text-lg text-ktip-sand-800 font-medium leading-relaxed mb-6">
-                {event.summary}
+                {display.summary}
               </p>
             )}
 
@@ -462,7 +478,7 @@ export default function EventDetailPage() {
                 </h3>
                 <p className="text-ktip-ocean-600 text-xs italic mb-3"><Trans>Event description</Trans></p>
                 <div className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
-                  {event.description}
+                  {display.description}
                 </div>
               </div>
             )}

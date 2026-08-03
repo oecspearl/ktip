@@ -3,6 +3,7 @@ import type { Event } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { EVENT_TYPE_LABELS, EVENT_STATUS_COLORS } from '../../lib/constants'
+import { useTranslatedFields } from '../../hooks/useTranslated'
 import { entityPath } from '../../lib/slug'
 import { format, isSameDay, isPast } from 'date-fns'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -11,8 +12,13 @@ interface EventCardProps {
   event: Event
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event: source }: EventCardProps) {
     const { t } = useLingui()
+  // Member-written copy. `location` is in here on purpose and `title` is not a
+  // proper noun: "Rodney Bay Marina" survives (shouldTranslate rejects nothing
+  // here, but the provider leaves place names alone), while "Salle de réunion"
+  // becomes something a Spanish reader can act on.
+  const event = useTranslatedFields(source, ['title', 'summary', 'description', 'location']) ?? source
   const startDate = new Date(event.start_date)
   const endDate = event.end_date ? new Date(event.end_date) : null
   const isPastEvent = isPast(endDate || startDate)

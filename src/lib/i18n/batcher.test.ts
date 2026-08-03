@@ -10,7 +10,13 @@ function mockFetch(
   translate: (text: string) => string = (t) => `[fr] ${t}`,
   extra: Record<string, unknown> = {}
 ) {
-  const bodies: { to: string; items: { i: number; t: string; f: string }[] }[] = []
+  // `store` is optional on the wire — omitted on the shared path, sent as false
+  // on the private one — so the captured shape has to allow both.
+  const bodies: {
+    to: string
+    items: { i: number; t: string; f: string }[]
+    store?: boolean
+  }[] = []
   const fn = vi.fn(async (_url: string, init?: RequestInit) => {
     const body = JSON.parse(String(init?.body)) as (typeof bodies)[number]
     bodies.push(body)
@@ -273,5 +279,91 @@ describe('batcher — prefetch', () => {
     expect(peek('Solar irrigation', 'text', 'fr')).toBe('[fr] Solar irrigation')
     await expect(request('Community workshop', 'text', 'fr')).resolves.toBe('[fr] Community workshop')
     expect(fn).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * English as a TARGET.
+ *
+ * Everything above assumes English in, French or Spanish out — which is what
+ * this file was written against, and what stays true for project and event copy.
+ * A venue room breaks that assumption: a francophone types French and the reader
+ * who needs help is the anglophone.
+ *
+ * The rule being defended is narrow on purpose. Translating into English is
+ * unlocked ONLY by a caller that knows the source language, because "translate
+ * everything into English too" would put a provider bill on every English reader
+ * who currently costs nothing at all.
+ */
+describe('batcher — bidirectional, gated on a known source language', () => {
+  it('still skips an English target when the source is unknown', async () => {
+    const { fn } = mockFetch()
+
+    await expect(request('Solar irrigation', 'text', 'en')).resolves.toBe('Solar irrigation')
+    await flush()
+
+    expect(fn).not.toHaveBeenCalled()
+  })
+
+  it('translates French into English once the source is declared', async () => {
+    const { fn, bodies } = mockFetch((t) => `[en] ${t}`)
+
+    const pending = request('Irrigation solaire', 'text', 'en', { from: 'fr' })
+    await flush()
+
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(bodies[0].to).toBe('en')
+    await expect(pending).resolves.toBe('[en] Irrigation solaire')
+  })
+
+  it('costs nothing when the text is already in the reader language', async () => {
+    const { fn } = mockFetch()
+
+    await expect(request('Irrigation solaire', 'text', 'fr', { from: 'fr' })).resolves.toBe(
+      'Irrigation solaire'
+    )
+    await flush()
+
+    expect(fn).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * The private path.
+ *
+ * `store: false` has been in the wire contract since migration 097 — it is what
+ * keeps direct messages out of a cache table shared by every reader — but the
+ * batcher hardcoded the body and never sent it, so the flag was unreachable from
+ * the browser. These are the two properties that make it real: it reaches the
+ * server, and a batch never mixes the two kinds.
+ */
+describe('batcher — store flag', () => {
+  it('omits store on the normal path and sends false on the private one', async () => {
+    const { bodies } = mockFetch()
+
+    void request('Solar irrigation', 'text', 'fr')
+    await flush()
+    expect(bodies[0]).not.toHaveProperty('store')
+
+    void request('A private note', 'text', 'fr', { store: false })
+    await flush()
+    expect(bodies[1].store).toBe(false)
+  })
+
+  // The failure this prevents is the worst one available here: one private
+  // string riding along on a shared-cache request, written to a table it was
+  // explicitly excluded from.
+  it('never lets one batch straddle both, even inside the same window', async () => {
+    const { fn, bodies } = mockFetch()
+
+    void request('Solar irrigation', 'text', 'fr')
+    void request('A private note', 'text', 'fr', { store: false })
+    await flush()
+
+    expect(fn).toHaveBeenCalledTimes(2)
+    const shared = bodies.find((b) => !('store' in b))
+    const priv = bodies.find((b) => (b as { store?: boolean }).store === false)
+    expect(shared?.items.map((i) => i.t)).toEqual(['Solar irrigation'])
+    expect(priv?.items.map((i) => i.t)).toEqual(['A private note'])
   })
 })

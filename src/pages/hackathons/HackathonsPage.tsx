@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { Calendar, MapPin, Radio, Trophy, Users } from 'lucide-react'
 import { useEvents } from '../../hooks/useEvents'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useTranslatedFields } from '../../hooks/useTranslated'
 import { PageHero } from '../../components/layout/PageHero'
 import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
@@ -130,8 +131,9 @@ export default function HackathonsPage() {
   )
 }
 
-function LiveHackathonRow({ event }: { event: Event }) {
+function LiveHackathonRow({ event: source }: { event: Event }) {
     const { t } = useLingui()
+  const event = useTranslatedFields(source, ['title', 'summary', 'location']) ?? source
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-ktip-tropical-200 bg-ktip-cream p-5 shadow-card sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">

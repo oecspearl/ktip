@@ -104,10 +104,22 @@ export function useSendRoomMessage() {
       roomId,
       body,
       replyTo,
+      lang,
     }: {
       roomId: string
       body: string
       replyTo?: string | null
+      /**
+       * What the sender is writing in (migration 100), taken from their own
+       * content-language setting rather than detected.
+       *
+       * Recorded at write time because detecting it per render is both wasteful
+       * and wrong at the edges — "OK" and "Merci" are ambiguous, and a two-word
+       * message is the common case in a chat room. Knowing it exactly is what
+       * lets a reader skip the round trip when a message is already in their
+       * language, and what makes translating INTO English possible at all.
+       */
+      lang?: string | null
     }) => {
       const { data: auth } = await supabase.auth.getUser()
       const uid = auth?.user?.id
@@ -117,13 +129,32 @@ export function useSendRoomMessage() {
       if (!trimmed) throw new Error(t`Message is empty`)
 
       // event_id is filled by a trigger from the room, so it is not sent here.
-      const { data, error } = await (supabase as any)
-        .from('venue_room_messages')
-        .insert({ room_id: roomId, author_id: uid, body: trimmed, reply_to: replyTo ?? null })
-        .select('*, author:profiles(id, display_name, avatar_url)')
-        .single()
+      const row = { room_id: roomId, author_id: uid, body: trimmed, reply_to: replyTo ?? null }
 
-      if (error) throw error
+      const send = (extra: Record<string, unknown>) =>
+        (supabase as any)
+          .from('venue_room_messages')
+          .insert({ ...row, ...extra })
+          .select('*, author:profiles(id, display_name, avatar_url)')
+          .single()
+
+      const { data, error } = await send({ lang: lang ?? null })
+
+      if (error) {
+        // The deploy is ahead of migration 100 and the column does not exist
+        // yet. PostgREST rejects the whole insert for an unknown column, which
+        // would mean nobody in the venue can say anything until the migration
+        // lands — a far worse outcome than a message whose language is unknown,
+        // which readers already treat as English. Retry without it.
+        const missingColumn =
+          error.code === 'PGRST204' || /\blang\b/.test(String(error.message ?? ''))
+        if (!missingColumn) throw error
+
+        const retry = await send({})
+        if (retry.error) throw retry.error
+        return retry.data as VenueRoomMessage
+      }
+
       return data as VenueRoomMessage
     },
     onSuccess: (msg, variables) => {
@@ -140,8 +171,11 @@ export function useSendRoomMessage() {
     },
   })
 
-  const sendMessage = (roomId: string, body: string, replyTo?: string | null) =>
-    mutation.mutateAsync({ roomId, body, replyTo })
+  const sendMessage = (
+    roomId: string,
+    body: string,
+    opts: { replyTo?: string | null; lang?: string | null } = {}
+  ) => mutation.mutateAsync({ roomId, body, replyTo: opts.replyTo, lang: opts.lang })
 
   return { sendMessage, loading: mutation.isPending, error: mutation.error }
 }

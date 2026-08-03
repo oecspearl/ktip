@@ -89,6 +89,16 @@ let pendingChars = 0
  * In practice this only happens in the frame where a reader switches language.
  */
 let pendingLang: TargetLang | null = null
+/**
+ * Whether the open batch may enter the SHARED Postgres cache. One request
+ * carries one `store` flag, so — exactly like `pendingLang` — a batch cannot
+ * straddle both, and a request for the other kind flushes what is open first.
+ *
+ * Mixing them would be the worst kind of bug this file could have: one private
+ * string riding along on a `store: true` request is a direct message written
+ * into a cache table it was explicitly excluded from.
+ */
+let pendingStore = true
 let timer: ReturnType<typeof setTimeout> | null = null
 let inflight = 0
 const waiting: (() => void)[] = []
@@ -100,20 +110,52 @@ const waiting: (() => void)[] = []
  */
 let backoffUntil = 0
 
+export interface RequestOptions {
+  /**
+   * The language `text` was written in, when the caller knows it — a venue chat
+   * message carries it on the row, a caption carries it in its payload.
+   *
+   * Supplying it does two things. It skips the round trip entirely when the text
+   * is already in the reader's language, and it is the ONLY thing that unlocks
+   * `en` as a target. Omit it and behaviour is exactly what it was before English
+   * became a valid target: content is assumed to be English, and an English
+   * reader costs nothing.
+   */
+  from?: string
+  /**
+   * Whether the result may enter the shared Postgres cache. Defaults to true.
+   *
+   * `false` is the private path — direct messages, live captions, anything whose
+   * text must not outlive the request. It also keeps the result out of
+   * localStorage, so it does not outlive the tab either.
+   */
+  store?: boolean
+}
+
 /**
  * Ask for a translation. Resolves with the translation, or with `text` itself if
  * anything at all goes wrong. Never rejects.
  */
-export function request(text: string, format: TextFormat, lang: UiLang): Promise<string> {
-  if (lang === 'en' || !shouldTranslate(text, format)) return Promise.resolve(text)
+export function request(
+  text: string,
+  format: TextFormat,
+  lang: UiLang,
+  opts: RequestOptions = {}
+): Promise<string> {
+  const from = opts.from
+  // No source language: assume English, which is what every caller predating
+  // this option meant. With one: translate whenever it differs, English included.
+  const alreadyThere = from === undefined ? lang === 'en' : from === lang
+  if (alreadyThere || !shouldTranslate(text, format)) return Promise.resolve(text)
   const target: TargetLang = lang
+  const store = opts.store !== false
 
   const hit = peek(text, format, lang)
   if (hit !== undefined) return Promise.resolve(hit)
 
   if (Date.now() < backoffUntil) return Promise.resolve(text)
 
-  if (pendingLang !== null && pendingLang !== target) flush()
+  if (pendingLang !== null && (pendingLang !== target || pendingStore !== store)) flush()
 
   return new Promise<string>((resolve) => {
     const key = `${format}:${text}`
@@ -126,6 +168,7 @@ export function request(text: string, format: TextFormat, lang: UiLang): Promise
     pending.set(key, { text, format, resolvers: [resolve] })
     pendingChars += text.length
     pendingLang = target
+    pendingStore = store
 
     // Flush early when the batch is already full rather than waiting out the
     // window — a long list should not sit idle behind an arbitrary 50 ms.
@@ -138,8 +181,13 @@ export function request(text: string, format: TextFormat, lang: UiLang): Promise
 }
 
 /** Warm the cache for text that is about to be needed — on hover, or on scroll. */
-export function prefetch(texts: string[], format: TextFormat, lang: UiLang): void {
-  for (const text of texts) void request(text, format, lang)
+export function prefetch(
+  texts: string[],
+  format: TextFormat,
+  lang: UiLang,
+  opts: RequestOptions = {}
+): void {
+  for (const text of texts) void request(text, format, lang, opts)
 }
 
 function flush(): void {
@@ -151,13 +199,15 @@ function flush(): void {
 
   const batch = pending
   const lang = pendingLang
+  const store = pendingStore
   pending = new Map()
   pendingChars = 0
   pendingLang = null
+  pendingStore = true
 
   const run = () => {
     inflight++
-    void send(batch, lang).finally(() => {
+    void send(batch, lang, store).finally(() => {
       inflight--
       const next = waiting.shift()
       if (next) next()
@@ -170,7 +220,11 @@ function flush(): void {
   else waiting.push(run)
 }
 
-async function send(batch: Map<string, Pending>, lang: TargetLang): Promise<void> {
+async function send(
+  batch: Map<string, Pending>,
+  lang: TargetLang,
+  store: boolean
+): Promise<void> {
   const entries = [...batch.values()]
   let results: TranslateResponse['results'] = {}
   // A degraded answer echoes the source. Persisting that would cache English
@@ -184,6 +238,9 @@ async function send(batch: Map<string, Pending>, lang: TargetLang): Promise<void
       body: JSON.stringify({
         to: lang,
         items: entries.map((entry, i) => ({ i, t: entry.text, f: entry.format })),
+        // Only sent when false. The server defaults to true, and an omitted
+        // field keeps the request identical to what it was before this existed.
+        ...(store ? {} : { store: false }),
       }),
     })
 
@@ -209,7 +266,11 @@ async function send(batch: Map<string, Pending>, lang: TargetLang): Promise<void
     // string the server has already declined to translate.
     memory.set(key, translated)
     if (translated !== entry.text) changed = true
-    if (persistable) writeLocal(entry.text, translated, entry.format, lang)
+    // `store: false` text is kept out of localStorage as well as out of Postgres.
+    // The memory tier is fine — it dies with the tab, which is the same lifetime
+    // the message already has on screen — but a private message must not still be
+    // sitting on the device tomorrow.
+    if (persistable && store) writeLocal(entry.text, translated, entry.format, lang)
 
     for (const resolve of entry.resolvers) resolve(translated)
   })
@@ -224,6 +285,7 @@ export function resetBatcher(): void {
   pending = new Map()
   pendingChars = 0
   pendingLang = null
+  pendingStore = true
   if (timer !== null) clearTimeout(timer)
   timer = null
   inflight = 0

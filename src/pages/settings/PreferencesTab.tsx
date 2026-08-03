@@ -8,10 +8,13 @@ import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES 
 import { useReadableMode } from '../../hooks/useReadableMode'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import { CONNECTION_VISIBILITY_OPTIONS } from '../../lib/constants'
+import { LANGUAGE_NAMES, SELECTABLE_LANGS } from '../../i18n/language'
+import { isUiLang, type UiLang } from '../../lib/i18n/protocol'
 import type { ConnectionCountVisibility } from '../../types'
 import {
   Bell,
   Eye,
+  Languages,
   Save,
   Type,
   Moon,
@@ -53,6 +56,23 @@ export function PreferencesTab() {
   // get_leaderboard() (migration 066). Default is visible; students are
   // excluded server-side regardless of this setting.
   const [onLeaderboard, setOnLeaderboard] = useState(true)
+
+  // Language of OTHER members' writing — persisted on the profile row (100) and
+  // consumed by useContentLanguage(). '' means "follow the interface language",
+  // which is the default and what almost everyone keeps; it is stored as NULL.
+  const [contentLang, setContentLang] = useState<'' | UiLang>('')
+  const [autoTranslate, setAutoTranslate] = useState(true)
+
+  useEffect(() => {
+    const value = auth.profile?.content_language
+    setContentLang(isUiLang(value) ? value : '')
+  }, [auth.profile?.content_language])
+
+  // `!== false` rather than `?? true`: absent means a deploy running ahead of
+  // migration 100, and that has to read as on.
+  useEffect(() => {
+    setAutoTranslate(auth.profile?.auto_translate !== false)
+  }, [auth.profile?.auto_translate])
 
   useEffect(() => {
     if (auth.profile?.connection_count_visibility) {
@@ -124,6 +144,15 @@ export function PreferencesTab() {
       const nextProfileVisibility = profilePublic ? 'public' : 'private'
       if (nextProfileVisibility !== (auth.profile?.profile_visibility ?? 'public')) {
         await auth.updateProfile({ profile_visibility: nextProfileVisibility })
+      }
+      // NULL, not '': the column's CHECK only accepts the three codes or NULL,
+      // and NULL is what "follow the interface language" means to the reader.
+      const nextContentLang = contentLang === '' ? null : contentLang
+      if (nextContentLang !== (auth.profile?.content_language ?? null)) {
+        await auth.updateProfile({ content_language: nextContentLang })
+      }
+      if (autoTranslate !== (auth.profile?.auto_translate !== false)) {
+        await auth.updateProfile({ auto_translate: autoTranslate })
       }
       // Remaining privacy toggles stay local until enforced server-side
       localStorage.setItem(
@@ -273,6 +302,73 @@ export function PreferencesTab() {
                     <span className="block text-sm font-medium">{resolveCopy(i18n, option.label)}</span>
                     <span className="block text-xs text-ktip-sand-500 mt-0.5">
                       {resolveCopy(i18n, option.description)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Language — what OTHER members' writing is turned into */}
+      <Card id="language" data-spy="Language" className="scroll-mt-24">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-tropical-100 rounded-xl flex items-center justify-center">
+            <Languages size={20} className="text-ktip-tropical-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Language</Trans></h2>
+            <p className="text-sm text-ktip-sand-600">
+              <Trans>How other members' messages are shown to you</Trans>
+            </p>
+          </div>
+        </div>
+
+        <div className="divide-y divide-ktip-sand-100">
+          <Toggle
+            checked={autoTranslate}
+            onChange={setAutoTranslate}
+            label={t`Translate messages for me`}
+            description={t`Chat, announcements and event descriptions written in another language are translated automatically. You can always see the original.`}
+          />
+
+          <div className="py-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
+              <Languages size={16} className="text-ktip-sand-500" />
+              <Trans>Translate into</Trans>
+            </div>
+            <p className="text-xs text-ktip-sand-500 mt-0.5 mb-3">
+              <Trans>Separate from the language the site itself is in. Change this if you would rather read other people's writing in a different language than the one you navigate in.</Trans>
+            </p>
+            <div
+              className="flex flex-col sm:flex-row gap-2"
+              role="radiogroup"
+              aria-label={t`Translate messages into`}
+            >
+              {/* '' first: the default, and the answer for almost everyone. */}
+              {(['', ...SELECTABLE_LANGS] as const).map((option) => {
+                const selected = contentLang === option
+                return (
+                  <button
+                    key={option || 'follow'}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    disabled={!autoTranslate}
+                    onClick={() => setContentLang(option)}
+                    className={`flex-1 text-left px-3 py-2.5 rounded-xl border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      selected
+                        ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-800'
+                        : 'border-ktip-sand-200 hover:border-ktip-sand-300 text-ktip-sand-700'
+                    }`}
+                  >
+                    {/* The endonym, and lang= on it, for the same reasons as the
+                        language switcher: someone who cannot read the current
+                        interface language can still find their own, and a screen
+                        reader pronounces it with the right voice. */}
+                    <span className="block text-sm font-medium" lang={option || undefined}>
+                      {option ? LANGUAGE_NAMES[option] : t`Same as the site`}
                     </span>
                   </button>
                 )

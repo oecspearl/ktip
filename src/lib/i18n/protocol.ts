@@ -9,8 +9,21 @@ import type { TextFormat } from './hash'
 
 export type { TextFormat }
 
-/** The languages the app translates INTO. English is the source, never a target. */
-export const TARGET_LANGS = ['fr', 'es'] as const
+/**
+ * The languages the app translates INTO. Any of them may also be a source.
+ *
+ * English used to be excluded here, on the assumption that everything members
+ * wrote was written in English. That holds for projects and event copy; it does
+ * not hold in a venue room, where a francophone participant types French and an
+ * anglophone has to read it. English is therefore a valid target.
+ *
+ * The cost of that has to be paid for deliberately, because "translate
+ * everything into English too" would double the bill for readers who previously
+ * cost nothing. The rule is in the batcher: a target of `en` is only ever
+ * requested when the caller supplied a source language AND it differs. Callers
+ * that do not know the source keep the old behaviour exactly — see `request()`.
+ */
+export const TARGET_LANGS = ['en', 'fr', 'es'] as const
 export type TargetLang = (typeof TARGET_LANGS)[number]
 
 /** Every language the UI can be displayed in, including the source. */
