@@ -193,7 +193,11 @@
       "Bash(node scripts/i18n/consumers.mjs src/pages/directory)",
       "Bash(node scripts/i18n/consumers.mjs src/pages/leaderboard)",
       "PowerShell($tmp = \"C:\\\\Users\\\\LG\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\1a78b6cc-6098-44d1-834d-aeb1d83109e2\\\\scratchpad\"; cmd /c \"`\"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe`\" --headless=new --disable-gpu --no-first-run --user-data-dir=`\"$tmp\\\\edgeprofile`\" --virtual-time-budget=20000 --window-size=1600,5200 --screenshot=`\"$tmp\\\\home-es.png`\" `\"http://localhost:5173/?lang=es`\" 2>nul\"; cmd /c \"`\"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe`\" --headless=new --disable-gpu --no-first-run --user-data-dir=`\"$tmp\\\\edgeprofile`\" --virtual-time-budget=20000 --window-size=1600,5200 --screenshot=`\"$tmp\\\\home-en.png`\" `\"http://localhost:5173/?lang=en`\" 2>nul\"; \\(Get-Item \"$tmp\\\\home-es.png\"\\).Length; \\(Get-Item \"$tmp\\\\home-en.png\"\\).Length)",
-      "Bash(git --no-pager diff -- src/hooks/useAIAssistant.ts)"
+      "Bash(git --no-pager diff -- src/hooks/useAIAssistant.ts)",
+      "WebFetch(domain:docs.livekit.io)",
+      "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/58284d71-6119-468d-b63e-6eda4ea7c29c/scratchpad/patch-video-doc-6.mjs\")",
+      "Bash(awk -F: '{print $3}')",
+      "PowerShell(npx vitest run src/lib/site-search.test.ts src/lib/venue-presence.test.ts src/lib/event-slug.test.ts 2>&1)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

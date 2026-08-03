@@ -8,13 +8,13 @@ Code involved, for reference:
 
 | Piece | File |
 |---|---|
-| Callback endpoint (`vc_token` handoff **and** code flow) | [api/auth/vc/callback.ts](api/auth/vc/callback.ts) |
-| Token verification, claim mapping, `vc:credentials` / `vc:skills` parsing | [api/_lib/vc-oidc.ts](api/_lib/vc-oidc.ts) |
-| KTIP-initiated sign-in ("Sign in with OECS Virtual Campus" on /login) | [api/auth/vc/start.ts](api/auth/vc/start.ts) |
-| Session handover (one-time ticket → Supabase session) | [api/auth/vc/session.ts](api/auth/vc/session.ts), [src/pages/auth/VcLandingPage.tsx](src/pages/auth/VcLandingPage.tsx) |
-| CV generation and merge policy | [api/_lib/cv-build.ts](api/_lib/cv-build.ts) |
-| Course history fetch | [api/_lib/vc-catalog.ts](api/_lib/vc-catalog.ts) |
-| URL rewrites (`/auth/vc/callback` → the function) | [vercel.json](vercel.json) |
+| Callback endpoint (`vc_token` handoff **and** code flow) | [api/auth/vc/callback.ts](../api/auth/vc/callback.ts) |
+| Token verification, claim mapping, `vc:credentials` / `vc:skills` parsing | [api/_lib/vc-oidc.ts](../api/_lib/vc-oidc.ts) |
+| KTIP-initiated sign-in ("Sign in with OECS Virtual Campus" on /login) | [api/auth/vc/start.ts](../api/auth/vc/start.ts) |
+| Session handover (one-time ticket → Supabase session) | [api/auth/vc/session.ts](../api/auth/vc/session.ts), [src/pages/auth/VcLandingPage.tsx](../src/pages/auth/VcLandingPage.tsx) |
+| CV generation and merge policy | [api/_lib/cv-build.ts](../api/_lib/cv-build.ts) |
+| Course history fetch | [api/_lib/vc-catalog.ts](../api/_lib/vc-catalog.ts) |
+| URL rewrites (`/auth/vc/callback` → the function) | [vercel.json](../vercel.json) |
 
 ---
 
@@ -23,7 +23,7 @@ Code involved, for reference:
 ### 1.1 Environment variables
 
 Set in Vercel for **Production** and **Preview**. Never prefix any of these with `VITE_`;
-that would ship them to the browser. Template: [.env.example](.env.example) lines 95–130.
+that would ship them to the browser. Template: [.env.example](../.env.example) lines 95–130.
 
 | Variable | Value | Required for |
 |---|---|---|
@@ -55,11 +55,11 @@ Apply these to the Supabase project, in order, if they are not already applied:
 
 | Migration | Provides |
 |---|---|
-| [056_email_aliases.sql](supabase/migrations/056_email_aliases.sql) | `consume_auth_rate_limit()` — the callback calls it before any lookup |
-| [068_vc_sso.sql](supabase/migrations/068_vc_sso.sql) | `vc_identities`, `vc_replay_guard`, `vc_handoff_tickets`, `vc_claim_jti()`, `vc_claim_handoff_ticket()`, `vc_resolve_user_by_email()`, `vc_provision_identity()`, `vc_my_identity()` |
-| [069_resumes.sql](supabase/migrations/069_resumes.sql) | `resumes` table and the `sources` provenance column |
-| [078_resume_design.sql](supabase/migrations/078_resume_design.sql) | `resumes.design` |
-| [082_profile_contact_fields.sql](supabase/migrations/082_profile_contact_fields.sql) | `profiles.phone`, `profiles.website` (optional — the callback probes for these and degrades if absent) |
+| [056_email_aliases.sql](../supabase/migrations/056_email_aliases.sql) | `consume_auth_rate_limit()` — the callback calls it before any lookup |
+| [068_vc_sso.sql](../supabase/migrations/068_vc_sso.sql) | `vc_identities`, `vc_replay_guard`, `vc_handoff_tickets`, `vc_claim_jti()`, `vc_claim_handoff_ticket()`, `vc_resolve_user_by_email()`, `vc_provision_identity()`, `vc_my_identity()` |
+| [069_resumes.sql](../supabase/migrations/069_resumes.sql) | `resumes` table and the `sources` provenance column |
+| [078_resume_design.sql](../supabase/migrations/078_resume_design.sql) | `resumes.design` |
+| [082_profile_contact_fields.sql](../supabase/migrations/082_profile_contact_fields.sql) | `profiles.phone`, `profiles.website` (optional — the callback probes for these and degrades if absent) |
 
 Verify with:
 
@@ -80,7 +80,7 @@ No new migration is needed for the credentials/skills work — `resumes.data` is
 ### 1.3 Deploy
 
 The rewrite `/auth/vc/callback` → `/api/auth/vc/callback` lives in
-[vercel.json](vercel.json) and sits **above** the SPA catch-all. If it moves below it,
+[vercel.json](../vercel.json) and sits **above** the SPA catch-all. If it moves below it,
 `index.html` swallows the callback and every sign-in silently fails. Deploy from this
 repo so the rewrite is live before the campus points learners at the URL.
 
@@ -132,12 +132,12 @@ Server logs record the code only — never the token, claims, or email.
 
 | Requirement | Enforced in |
 |---|---|
-| Signature `ES256` only — no `alg` negotiation, no RSA fallback | [vc-oidc.ts:104](api/_lib/vc-oidc.ts#L104) |
+| Signature `ES256` only — no `alg` negotiation, no RSA fallback | [vc-oidc.ts:104](../api/_lib/vc-oidc.ts#L104) |
 | `iss` exactly `https://oecscampus.org` | same |
 | `aud` exactly `ktip-production` | same |
 | Redeemed within 10 minutes of `iat` (60 s clock tolerance) — the brief's 5-minute lifetime is well inside this | same |
-| Token under 8 KB | [vc-oidc.ts:97](api/_lib/vc-oidc.ts#L97) |
-| `sub` present | [vc-oidc.ts:112](api/_lib/vc-oidc.ts#L112) |
+| Token under 8 KB | [vc-oidc.ts:97](../api/_lib/vc-oidc.ts#L97) |
+| `sub` present | [vc-oidc.ts:112](../api/_lib/vc-oidc.ts#L112) |
 
 Requests: keep serving the JWKS at a stable URL with a `kid` on every key (currently
 `vc-oidc-1`) so rotation is transparent. KTIP caches the key set for 10 minutes and
@@ -156,7 +156,7 @@ token without it fails with `email_unverified`.
 ### 2.4 Claims KTIP reads
 
 Standard claims — each is matched against a list of spellings
-([vc-oidc.ts:160](api/_lib/vc-oidc.ts#L160)), so `full_name`, `given_name`+`family_name`,
+([vc-oidc.ts:160](../api/_lib/vc-oidc.ts#L160)), so `full_name`, `given_name`+`family_name`,
 `avatar_url` etc. all work:
 
 `sub`, `email`, `email_verified`, `name`, `picture`, `phone_number`, `country` (or
@@ -192,7 +192,7 @@ Caps: 50 credentials, 100 skills, 200 characters per field. Bare strings are acc
 ### 2.5 Questions to put to the campus team
 
 1. **Are `vc:credentials` / `vc:skills` gated behind a scope?** The code flow currently
-   requests `openid profile email` ([start.ts:122](api/auth/vc/start.ts#L122)). If the
+   requests `openid profile email` ([start.ts:122](../api/auth/vc/start.ts#L122)). If the
    campus requires something like `vc:credentials vc:skills`, that is a one-line change —
    but we need to know the scope names. The `?vc_token=` handoff is unaffected; the
    campus decides what to put in it.

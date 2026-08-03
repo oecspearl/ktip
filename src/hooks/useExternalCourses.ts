@@ -6,7 +6,7 @@ import { keys } from '../queries/keys'
 import type { ExternalCourse } from '../types'
 
 /**
- * The live OECS Virtual Campus course catalog (see ktip-catalog-api.md),
+ * The live OECS Virtual Campus course catalog (see docs/CATALOG-API.md),
  * proxied through /api/ktip/catalog so the browser never talks to the campus
  * directly.
  *

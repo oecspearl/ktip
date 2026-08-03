@@ -1,7 +1,50 @@
 # TODO — manual steps
 
-Things that cannot be done from the codebase. Each needs someone with Supabase
-dashboard access.
+Things that cannot be done from the codebase — Supabase dashboard access,
+third-party accounts, or a human decision. Detailed instructions stay in their
+own docs; this file is the index of what is still open.
+
+---
+
+## Open items pointed at from other docs
+
+### Venue rooms — accounts and env vars ([FINISH-SETUP.md](FINISH-SETUP.md))
+
+All code shipped; inert until configured. Independent switches, safe to do in
+any order:
+
+- [ ] Apply migrations `100_multilingual_content.sql` and `101_venue_room_grant.sql` (required for the rest)
+- [ ] OpenRouter API key → translation on
+- [ ] LiveKit account + `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` / `VITE_LIVEKIT_URL` → video on ([VIDEO-SETUP.md](VIDEO-SETUP.md) — **nobody has an account yet**)
+- [ ] Recording bucket (optional)
+
+### Safeguarding decision — room-chat translation cache ([FINISH-SETUP.md](FINISH-SETUP.md), last section)
+
+Room chat translations are cached in the shared `translations` table. Migration
+097 lists what must never be written there; member-written chat is a judgement
+call. **Whoever owns the migration 064 safeguarding model must confirm this
+before a real event with minors.** If no: pass `store: false` per surface.
+
+### Virtual Campus SSO ([VC-SSO-SETUP.md](VC-SSO-SETUP.md))
+
+- [ ] Set the `VC_*` / `COMMONS_*` env vars in Vercel (unset = safe off state)
+- [ ] Obtain `VC_CLIENT_SECRET` and `COMMONS_API_KEY` from the campus team, plus client registration — §2 lists the exact asks, including the `email_verified` claim that will bite if skipped
+
+### Sentry (optional — [MONITORING.md](MONITORING.md))
+
+- [ ] Create Sentry project, set DSNs + env vars, configure the two alerts. Use an **internal integration** token, not the `sntrys_` wizard token (read calls all 403)
+
+### Privacy & Terms — before launch ([PRIVACY-AND-TERMS.md](PRIVACY-AND-TERMS.md), implementation checklist)
+
+Draft only. Blocking publication: counsel review per member state, every
+`[BRACKET]` placeholder, data-protection contact, `/privacy` + `/terms` routes
+linked from footer and sign-up, consent checkbox recording acceptance,
+guardian-consent path for minors.
+
+### Automation gaps ([TESTING.md](TESTING.md) §20)
+
+- [ ] No CI — GitHub Actions running `tsc -b`, `vitest run`, `vite build` on every PR
+- [ ] No E2E — Playwright over the critical paths in §21
 
 ---
 
@@ -12,7 +55,7 @@ done**. Step 3 is a security check that has never been run.
 
 ### 1. Apply migration 056
 
-Run [`supabase/migrations/056_email_aliases.sql`](supabase/migrations/056_email_aliases.sql)
+Run [`supabase/migrations/056_email_aliases.sql`](../supabase/migrations/056_email_aliases.sql)
 in the Supabase SQL editor.
 
 Creates `user_email_aliases`, `auth_rate_limits`, and three service-role-only

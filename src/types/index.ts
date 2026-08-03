@@ -1283,7 +1283,7 @@ export interface Integration {
   updated_at: string
 }
 
-// OECS Virtual Campus course catalog (see ktip-catalog-api.md). Sourced live
+// OECS Virtual Campus course catalog (see docs/CATALOG-API.md). Sourced live
 // from the campus, not a KTIP-owned table — no id/timestamps of our own.
 export interface ExternalCourse {
   catalog_type: 'external' | 'native'

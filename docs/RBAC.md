@@ -1,4 +1,166 @@
-# KTiP Roles, Safeguarding & Moderation — Testing Guide
+# KTIP RBAC — Roles, Permissions & Safeguarding
+
+The single RBAC document. Part 1 is the model reference, generated from
+`src/lib/permissions.ts` (the client catalog) and mirrored by migration
+`063_rbac_permissions.sql` (the SQL source of truth). Part 2 is the full
+step-by-step testing guide, formerly `RBAC_TESTING_GUIDE.md`.
+
+Authorization decisions are made in SQL by `has_permission(user, key)`.
+Nothing in the client is a security boundary — client checks only decide
+what to render. The live matrix lives in the `role_permissions` table and
+is editable at `/admin/roles`; the tables below show the **default seed**,
+which "Reset to defaults" restores.
+
+---
+
+# Part 1 — The model
+
+## 1.1 Roles
+
+Thirteen slugs across three tiers. `oecs` is a legacy alias kept alive so
+~68 existing `'oecs' = ANY(roles)` RLS clauses stay correct; it resolves to
+`super_admin` via `ROLE_ALIASES`.
+
+| Slug | Label | Tier | Self-assignable | Requires verification | Notes |
+|---|---|---|---|---|---|
+| `super_admin` | Super Admin | Admin | No | Yes | Holds every permission; matrix column is locked green |
+| `safety_admin` | Safety Admin | Admin | No | Yes | Moderation queues, escalations |
+| `oecs` | OECS Admin (legacy) | Admin | No | Yes | **Alias → `super_admin`**; hidden from the matrix |
+| `investor` | Investor / Funding Agency | Organization | Yes | No | Posts funding calls; does not apply for grants |
+| `sme` | Verified SME | Organization | No | Yes | Granted by Chamber of Commerce review |
+| `private_sector` | Private Sector | Organization | Yes | No | |
+| `educational_partner` | Educational Partner | Organization | No | Yes | Approves its own students; sponsors applications |
+| `chamber_admin` | Chamber of Commerce | Organization | No | Yes | Verifies SMEs in its own country only |
+| `entrepreneur` | Entrepreneur | Individual | Yes | No | |
+| `faculty` | Faculty | Individual | No | Yes | Sponsor + supervisor role |
+| `researcher` | Researcher | Individual | Yes | No | |
+| `mentor` | Mentor | Individual | Yes | No | |
+| `student` | Student (school-verified) | Individual | No | Yes | Safeguard-locked permissions; see 1.4 |
+
+**Scoped roles** (per-record, not part of this matrix): `project_editor` /
+`project_viewer` (`project_members.role`), `institution_educator`
+(`institution_members.role`), `employer_recruiter` (`employer_members.role`).
+Event venues have their own unrelated set (`participant`, `mentor`, `judge`,
+`organizer`, `spectator`).
+
+## 1.2 Permission catalog (24 keys)
+
+🛡 = safeguard permission: `has_permission()` denies it to students **before**
+consulting the matrix. The admin toggle is locked and a direct `UPDATE` on
+`role_permissions` still cannot grant it.
+
+| Key | Label | Category | 🛡 |
+|---|---|---|---|
+| `org:manage` | Manage platform | Platform | |
+| `members:manage` | Manage members | Platform | |
+| `role:manage` | Manage roles & permissions | Platform | |
+| `audit:view` | View audit logs | Platform | |
+| `moderation:view` | View moderation queue | Moderation & Safety | 🛡 |
+| `moderation:action` | Action moderation items | Moderation & Safety | 🛡 |
+| `moderation:escalate` | Escalate & suspend | Moderation & Safety | 🛡 |
+| `grant:view` | View grants | Grants & Funding | |
+| `grant:apply` | Apply for grants | Grants & Funding | 🛡 |
+| `grant:sponsor` | Sponsor student applications | Grants & Funding | 🛡 |
+| `grant:post` | Post grant opportunities | Grants & Funding | |
+| `grant:manage_funds` | Manage funds | Grants & Funding | 🛡 |
+| `project:create` | Create projects | Projects | |
+| `project:manage` | Manage own projects | Projects | |
+| `event:create` | Create events | Projects | |
+| `forum:post` | Create forum posts | Community | |
+| `forum:comment` | Reply & comment | Community | |
+| `mentorship:offer` | Offer mentorship | Community | |
+| `dm:initiate` | Start direct messages | Messaging | 🛡 |
+| `dm:receive` | Receive messages | Messaging | |
+| `dm:supervise` | Supervise student channels | Messaging | 🛡 |
+| `sme:verify` | Verify SMEs | Verification | |
+| `institution:verify` | Verify institutions | Verification | |
+| `institution:approve_students` | Approve student accounts | Verification | 🛡 |
+
+## 1.3 The default matrix — role × permission
+
+Columns: **SUP** super_admin · **SAF** safety_admin · **INV** investor ·
+**SME** sme · **PVT** private_sector · **EDU** educational_partner ·
+**CHM** chamber_admin · **ENT** entrepreneur · **FAC** faculty ·
+**RES** researcher · **MEN** mentor · **STU** student.
+
+✅ granted by default · — denied by default · 🔒 hard safeguard denial
+(cannot be granted by any means).
+
+| Permission | SUP | SAF | INV | SME | PVT | EDU | CHM | ENT | FAC | RES | MEN | STU |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `org:manage` | ✅ | — | — | — | — | — | — | — | — | — | — | — |
+| `members:manage` | ✅ | — | — | — | — | — | — | — | — | — | — | — |
+| `role:manage` | ✅ | — | — | — | — | — | — | — | — | — | — | — |
+| `audit:view` | ✅ | ✅ | — | — | — | — | — | — | — | — | — | — |
+| `moderation:view` | ✅ | ✅ | — | — | — | — | — | — | — | — | — | — |
+| `moderation:action` | ✅ | ✅ | — | — | — | — | — | — | — | — | — | 🔒 |
+| `moderation:escalate` | ✅ | ✅ | — | — | — | — | — | — | — | — | — | 🔒 |
+| `grant:view` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `grant:apply` | ✅ | — | — | ✅ | — | ✅ | — | ✅ | ✅ | ✅ | — | 🔒 |
+| `grant:sponsor` | ✅ | — | — | — | — | ✅ | — | — | ✅ | — | — | — |
+| `grant:post` | ✅ | — | ✅ | — | — | — | — | — | — | — | — | — |
+| `grant:manage_funds` | ✅ | — | ✅ | — | — | — | — | — | — | — | — | 🔒 |
+| `project:create` | ✅ | — | — | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `project:manage` | ✅ | — | — | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `event:create` | ✅ | — | — | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `forum:post` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `forum:comment` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `mentorship:offer` | ✅ | — | ✅ | ✅ | — | — | — | — | ✅ | — | ✅ | — |
+| `dm:initiate` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔒 |
+| `dm:receive` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `dm:supervise` | ✅ | ✅ | — | — | — | ✅ | — | — | ✅ | — | — | — |
+| `sme:verify` | ✅ | — | — | — | — | — | ✅ | — | — | — | — | — |
+| `institution:verify` | ✅ | — | — | — | — | — | — | — | — | — | — | — |
+| `institution:approve_students` | ✅ | — | — | — | — | ✅ | — | — | — | — | — | — |
+
+Source: `DEFAULT_ROLE_PERMISSIONS` in `src/lib/permissions.ts`, mirrored by
+`default_role_permissions()` in migration 063. Seed size: 12 matrix roles ×
+24 permissions = **288 cells**.
+
+## 1.4 Hard safeguard denials
+
+`SAFEGUARD_DENY` — enforced inside `has_permission()` **before** the matrix
+lookup, mirrored verbatim in SQL. A student who also holds an adult role is
+still treated as a student.
+
+| Role | Permanently denied |
+|---|---|
+| `student` | `dm:initiate`, `grant:apply`, `grant:manage_funds`, `moderation:action`, `moderation:escalate` |
+
+Students draft grant applications but a faculty/school sponsor submits them
+(`grant:sponsor`), and they message only inside supervised group channels
+(`dm:supervise` marks the supervising educator).
+
+## 1.5 Evaluation order and the active role
+
+`has_permission(user, key)` in SQL: no user → deny; suspended → deny
+everything; safeguard denial → deny; then matrix lookup over
+`expand_roles(profiles.roles)`.
+
+`profiles.active_role` is the operating context — `NULL` means "all roles".
+It can only narrow: a DB trigger rejects an `active_role` the account does
+not hold, and `has_permission_as()` returns false unless the *held* check
+also passes. Since migration 099 the client capability bootstrap
+(`get_my_permissions()`) is scoped to it, so the role switcher changes what
+renders — **RLS still checks held roles**, so switching never weakens a
+server boundary.
+
+## 1.6 Where things live
+
+| Concern | Location |
+|---|---|
+| Role & permission catalog, default matrix, safeguard denials | `src/lib/permissions.ts` |
+| The whole model in SQL | `supabase/migrations/063_rbac_permissions.sql` |
+| Admin capability + `event:create` | `supabase/migrations/090_admin_capability_and_event_permission.sql` |
+| Active-role scoping of the client bootstrap | `supabase/migrations/099_active_role_permissions.sql` |
+| Auth context (`can()`, `activeRole`, `setActiveRole`) | `src/contexts/AuthContext.tsx` |
+| Matrix editor UI | `/admin/roles` → `src/pages/admin/roles/AdminRolesPage.tsx` |
+| Route guards | `src/components/{ProtectedRoute,AdminRoute,PermissionRoute}.tsx` |
+| Role switcher UI | `src/components/layout/RoleSwitcher.tsx` |
+
+---
+
+# Part 2 — Testing Guide (roles, safeguarding & moderation)
 
 A step-by-step walkthrough to confirm everything works. Written in plain English.
 Work through it top to bottom — later sections depend on accounts created earlier.
@@ -1456,13 +1618,3 @@ SELECT count(*) AS mod_log FROM moderation_log;
 | High-severity content is not suspending | The seeded grooming-risk terms were deleted | Check `SELECT * FROM moderation_terms WHERE severity = 'high'` |
 | "Ask for review" always says unavailable | `OPENAI_API_KEY` is not set on the server | Set it in the deployment environment |
 | A chamber sees no businesses | Their chamber institution is not `verified`, or their membership is not `approved` | Check both, then re-check `chamber_countries()` |
-
----
-
-## Known unrelated failure
-
-`npx vitest run` reports one failing test:
-`src/lib/validation.test.ts > signupSchema > accepts valid signup data`.
-
-This failure exists on the unmodified codebase as well — it is not caused by the
-roles work. Everything else passes (226 of 227).

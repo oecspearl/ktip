@@ -2,13 +2,13 @@
 
 **Generated:** 2026-07-30
 **Stack:** React 19 + react-router (data router, lazy routes) · Supabase (Postgres + RLS + Realtime + Storage) · TanStack Query · Tailwind v4 · Vite · Vercel serverless (`/api/*`)
-**Scope:** every route in [src/App.tsx](src/App.tsx), page by page, section by section, plus global chrome, admin console, and backend surfaces.
+**Scope:** every route in [src/App.tsx](../src/App.tsx), page by page, section by section, plus global chrome, admin console, and backend surfaces.
 
 ---
 
 ## 0. Global Chrome (present on every page)
 
-### 0.1 Navbar — [src/components/layout/Navbar.tsx](src/components/layout/Navbar.tsx)
+### 0.1 Navbar — [src/components/layout/Navbar.tsx](../src/components/layout/Navbar.tsx)
 - Transparent overlay bar; auto-hides on scroll down, reappears on scroll up / near top
 - Leading links: Home, Projects
 - Dropdown groups with per-item icon + description:
@@ -23,7 +23,7 @@
 - Mobile hamburger menu with full nav + search
 - Session recovery banner when a user exists but the profile fails to load
 
-### 0.2 Global Search — [src/hooks/useGlobalSearch.ts](src/hooks/useGlobalSearch.ts), [src/components/layout/NavbarSearchPanel.tsx](src/components/layout/NavbarSearchPanel.tsx)
+### 0.2 Global Search — [src/hooks/useGlobalSearch.ts](../src/hooks/useGlobalSearch.ts), [src/components/layout/NavbarSearchPanel.tsx](../src/components/layout/NavbarSearchPanel.tsx)
 - Three result classes in one panel:
   - **Places & actions** — instant local fuzzy match over a static site map, filtered by what the viewer can actually reach (permissions/roles)
   - **Content** — one debounced round trip across seven Supabase tables (5 hits each)
@@ -33,10 +33,10 @@
 - "See all results" row → `/projects?search=`
 
 ### 0.3 Docked panels & overlays
-- **Messaging panel** — [MessagingPanel.tsx](src/components/messages/MessagingPanel.tsx): non-modal docked chat (conversation sidebar + chat window), pin/unpin, Escape/outside-click close, mobile list↔chat toggle, new DM / new group modals, AI assistant thread
-- **Member panel** — [MemberPanel.tsx](src/components/directory/MemberPanel.tsx): read-only member drawer opened from any member name anywhere; profile, badges, stats, connections, projects, events, Connect / Message / Report actions
-- **Floating action button** — [FloatingActionButton.tsx](src/components/ui/FloatingActionButton.tsx): expandable cluster with page tour (when the page has one), light/dark toggle, messages toggle
-- **Tutorial overlay** — [TutorialOverlay.tsx](src/components/tutorial/TutorialOverlay.tsx): anchored step-by-step walkthroughs (`data-tutorial` targets), auto-start for first-time visitors, completion tracking; Events page tour shipped
+- **Messaging panel** — [MessagingPanel.tsx](../src/components/messages/MessagingPanel.tsx): non-modal docked chat (conversation sidebar + chat window), pin/unpin, Escape/outside-click close, mobile list↔chat toggle, new DM / new group modals, AI assistant thread
+- **Member panel** — [MemberPanel.tsx](../src/components/directory/MemberPanel.tsx): read-only member drawer opened from any member name anywhere; profile, badges, stats, connections, projects, events, Connect / Message / Report actions
+- **Floating action button** — [FloatingActionButton.tsx](../src/components/ui/FloatingActionButton.tsx): expandable cluster with page tour (when the page has one), light/dark toggle, messages toggle
+- **Tutorial overlay** — [TutorialOverlay.tsx](../src/components/tutorial/TutorialOverlay.tsx): anchored step-by-step walkthroughs (`data-tutorial` targets), auto-start for first-time visitors, completion tracking; Events page tour shipped
 - **Achievement unlock modal** — celebratory popup when a badge is awarded, links to the gallery
 - **Toasts**, **spy rail** (page-scroll section jump built from `data-spy` markers; `data-spy-off` mutes it for a page and `data-spy-skip` for one section, both keeping the marker the tutorials anchor to), **skip-to-content** link, **footer**
 
@@ -52,7 +52,7 @@
 
 ## 1. Authentication & Onboarding
 
-### 1.1 Login — `/login` — [LoginPage.tsx](src/pages/auth/LoginPage.tsx)
+### 1.1 Login — `/login` — [LoginPage.tsx](../src/pages/auth/LoginPage.tsx)
 - Email + password sign-in with Zod validation
 - 15s timeout guard; on timeout, offers a "Clear Session" recovery button for a stuck Supabase lock
 - Distinct error copy for unconfirmed email vs bad credentials
@@ -62,7 +62,7 @@
 - Forgot-password and sign-up links
 - `login_success` conversion analytics
 
-### 1.2 Sign-up — `/signup` — [SignupPage.tsx](src/pages/auth/SignupPage.tsx)
+### 1.2 Sign-up — `/signup` — [SignupPage.tsx](../src/pages/auth/SignupPage.tsx)
 - 3-step wizard with progress rail
   - **Step 1 (required):** display name, email, password (live password checklist), role picker
   - **Step 2 (optional):** organisation, industry select, Caribbean country select, bio with character counter — skippable
@@ -83,7 +83,7 @@
 - Reads provider errors from the URL hash
 - 10s safety-net bailout
 
-### 1.6 Virtual Campus landing — `/auth/vc/land` — [VcLandingPage.tsx](src/pages/auth/VcLandingPage.tsx)
+### 1.6 Virtual Campus landing — `/auth/vc/land` — [VcLandingPage.tsx](../src/pages/auth/VcLandingPage.tsx)
 - Trades a one-time ticket over POST for a Supabase session (`/api/auth/vc/session`); ticket stripped from URL before the request
 - First-time users land on `/cv?welcome=vc` with a CV auto-built from their campus record; returning users go to `/dashboard`
 
@@ -98,7 +98,7 @@
 
 ---
 
-## 2. Discover (Home) — `/` — [DiscoverPage.tsx](src/pages/discover/DiscoverPage.tsx)
+## 2. Discover (Home) — `/` — [DiscoverPage.tsx](../src/pages/discover/DiscoverPage.tsx)
 
 ### 2.1 Hero
 - Full-bleed sticky hero with mode toggle: **Grants / Projects / Events** (live data)
@@ -121,7 +121,7 @@
 
 ## 3. Projects
 
-### 3.1 Projects list — `/projects` — [ProjectsPage.tsx](src/pages/projects/ProjectsPage.tsx)
+### 3.1 Projects list — `/projects` — [ProjectsPage.tsx](../src/pages/projects/ProjectsPage.tsx)
 - Page hero with breadcrumb + "Create Project" CTA (hidden for roles without `project:create`; signed-out visitors keep it as a funnel to login)
 - Debounced text search (300ms)
 - Filters: category select, phase select (concept / prototype / funding / launch), Climate Action checkbox, hashtag chips
@@ -129,7 +129,7 @@
 - Result count, skeleton grid while loading, empty state with CTA
 - Sidebar widgets: Start a Project CTA, Recent Projects (or "Top Matches" under For You), Categories with live counts, tag cloud + Climate Action toggle
 
-### 3.2 Project detail — `/projects/:id` — [ProjectDetailPage.tsx](src/pages/projects/ProjectDetailPage.tsx)
+### 3.2 Project detail — `/projects/:id` — [ProjectDetailPage.tsx](../src/pages/projects/ProjectDetailPage.tsx)
 - Hero: image, phase badge, category, breadcrumb
 - Owner/editor actions: Edit; owner-only: Delete with impact summary (public status + collaborator count) via `DeleteEntityControl`
 - Admin action: toggle Featured
@@ -156,7 +156,7 @@
 
 ## 4. Events
 
-### 4.1 Events list — `/events` — [EventsPage.tsx](src/pages/events/EventsPage.tsx)
+### 4.1 Events list — `/events` — [EventsPage.tsx](../src/pages/events/EventsPage.tsx)
 - **Two views** with persisted preference (localStorage): **Calendar** and **Grid**
 - Calendar view: month grid, multi-day event spans, day panel with the selected day's events, prev/next month, Today, jump-to-next-event, auto-selects the nearest upcoming day with an event
 - Grid view: cards, "Upcoming only" toggle, sort select (URL-persisted)
@@ -164,7 +164,7 @@
 - Guided tour auto-starts for first-time visitors (`data-tutorial` anchors across hero, filters, view toggle, results)
 - Create Event CTA, result count, skeletons, empty state
 
-### 4.2 Event detail — `/events/:id` — [EventDetailPage.tsx](src/pages/events/EventDetailPage.tsx)
+### 4.2 Event detail — `/events/:id` — [EventDetailPage.tsx](../src/pages/events/EventDetailPage.tsx)
 - Hero: image, type badge, cancelled/past badges; organizer actions (Edit, Delete with impact: status, RSVP count, venue, challenge)
 - Past-event banner
 - Details grid: date (multi-day aware), time, location/virtual, capacity with "Full" marker
@@ -331,7 +331,7 @@
 
 ---
 
-## 10. Dashboard — `/dashboard` — [DashboardLayout.tsx](src/pages/dashboard/DashboardLayout.tsx)
+## 10. Dashboard — `/dashboard` — [DashboardLayout.tsx](../src/pages/dashboard/DashboardLayout.tsx)
 
 ### 10.1 Shell
 - Identity strip: avatar, name, verified check, role badges, connection count
@@ -406,7 +406,7 @@
 ---
 
 ## 12. Entity Documents & AI Extraction
-- Documents attach to **projects** and **grants** ([DocumentsPanel.tsx](src/components/documents/DocumentsPanel.tsx))
+- Documents attach to **projects** and **grants** ([DocumentsPanel.tsx](../src/components/documents/DocumentsPanel.tsx))
 - Upload modal, document cards, download/open from private storage, delete with confirmation
 - **Content modal** — the editable copy scraped out of the uploaded file
 - **Extraction review panel** — AI-proposed field values shown against current record values, applied only by someone who can edit the parent (`/api/extract-fields`)
@@ -491,7 +491,7 @@
 
 ---
 
-## 17. Admin Console — `/admin/*` ([AdminLayout.tsx](src/components/layout/AdminLayout.tsx))
+## 17. Admin Console — `/admin/*` ([AdminLayout.tsx](../src/components/layout/AdminLayout.tsx))
 
 Sticky sidebar (desktop) / scrollable pill nav (mobile) across 20 sections.
 

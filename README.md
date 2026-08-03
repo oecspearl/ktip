@@ -237,6 +237,27 @@ The foundation is complete! Here's what to build next:
    - Set up Supabase Edge Functions
    - Configure production environment
 
+## 📖 Documentation
+
+All project documentation lives in [docs/](docs/):
+
+- [FEATURES.md](docs/FEATURES.md) — full platform feature inventory, route by route
+- [TESTING.md](docs/TESTING.md) — test & verification plan (companion to FEATURES)
+- [RBAC.md](docs/RBAC.md) — roles, permissions, safeguarding model + testing guide
+- [ROLE-PERSONALIZATION-PLAN.md](docs/ROLE-PERSONALIZATION-PLAN.md) — role-aware UI plan and its revision history
+- [DESIGN-TOKENS.md](docs/DESIGN-TOKENS.md) — design token migration handover (phases 7–11 outstanding)
+- [PERFORMANCE-PLAN.md](docs/PERFORMANCE-PLAN.md) — payload/paint cost findings and fixes
+- [MONITORING.md](docs/MONITORING.md) — Sentry runbook (browser + edge API)
+- [PARTNER-API.md](docs/PARTNER-API.md) — verified-employers feed: partner reference + admin guide
+- [CATALOG-API.md](docs/CATALOG-API.md) — pulling courses from OECS Virtual Campus
+- [VC-SSO-SETUP.md](docs/VC-SSO-SETUP.md) — Virtual Campus SSO remaining configuration
+- [FINISH-SETUP.md](docs/FINISH-SETUP.md) — multilingual hackathon rooms: migrations, translation, video, recording
+- [VIDEO-SETUP.md](docs/VIDEO-SETUP.md) — LiveKit video setup
+- [TRANSLATION-SETUP.md](docs/TRANSLATION-SETUP.md) — OpenRouter translation setup
+- [PRIVACY-AND-TERMS.md](docs/PRIVACY-AND-TERMS.md) — privacy policy and terms source
+- [TESTER-GUIDE.md](docs/TESTER-GUIDE.md) — guide for manual testers
+- [TODO.md](docs/TODO.md) — manual steps needing Supabase dashboard access
+
 ## 📚 Learn More
 
 - [SolidJS Documentation](https://solidjs.com)
@@ -246,7 +267,7 @@ The foundation is complete! Here's what to build next:
 
 ## 🤝 Contributing
 
-This is the foundation of KTIP. Continue building features following the plan in `/Users/roystonemmanuel/.claude/plans/typed-dancing-bunny.md`.
+See [docs/FEATURES.md](docs/FEATURES.md) for what exists and [docs/TESTING.md](docs/TESTING.md) for what must pass before launch.
 
 ## 📄 License
 

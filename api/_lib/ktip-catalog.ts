@@ -1,5 +1,5 @@
 /**
- * OECS Virtual Campus KTIP catalog — see ktip-catalog-api.md.
+ * OECS Virtual Campus KTIP catalog — see docs/CATALOG-API.md.
  *
  * A different API from vc-catalog.ts's `/api/external/catalog`: this is the
  * KTIP-specific `/api/external/ktip/catalog` + `/api/external/ktip/enrollments`
