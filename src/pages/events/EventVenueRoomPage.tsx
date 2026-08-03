@@ -1,11 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { Lock } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
-import { useVenueRoster, useVenueSession } from '../../hooks/useVenue'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { venuePath } from '../../lib/event-slug'
-import { useVenuePresence } from '../../hooks/useVenuePresence'
+import { useVenuePresenceContext } from '../../contexts/VenuePresenceContext'
 import { useRoomSignals } from '../../hooks/useRoomSignals'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -60,9 +59,10 @@ export default function EventVenueRoomPage() {
   // Already on the event row (089) and already fetched — the floors are what
   // let every panel that names another room say which level it is on.
   const mapConfig = useMemo(() => mapConfigOf(event), [event])
-  const { membership, loading: joinPending, error: joinError } = useVenueSession(eventId)
-  const joining = !!eventId && joinPending
-  const { roster } = useVenueRoster(eventId)
+  // Session and presence come from the layout's provider — the channel was
+  // already joined on the floorplan, and it derives this room from the URL,
+  // so entering here is one track() rather than a fresh subscription.
+  const { membership, joining, joinError, presence } = useVenuePresenceContext()
 
   const venueFallbackTitle = t`Venue`
   usePageTitle(room ? t`${room.name} — ${event?.title ?? venueFallbackTitle}` : t`Venue room`)
@@ -80,13 +80,6 @@ export default function EventVenueRoomPage() {
         : null,
     [membership, auth.user, auth.profile]
   )
-
-  const presence = useVenuePresence({
-    eventId,
-    me,
-    roomId: roomId ?? null,
-    roster,
-  })
 
   const inRoom = useMemo(
     () => (roomId ? occupantsInRoom(presence.occupants, roomId) : []),
@@ -113,15 +106,6 @@ export default function EventVenueRoomPage() {
       !!membership &&
       (roomUsesSignals(room, membership.role) || roomUsesStage(room, membership.role)),
   })
-
-  // Leaving the page puts you back on the floorplan rather than leaving a ghost
-  // in the room. The presence payload updates via the roomId prop; this only
-  // has to clear the cold mirror on the way out.
-  useEffect(() => {
-    return () => {
-      // Fire-and-forget: a missed clear ages out of the mirror within 2 minutes.
-    }
-  }, [])
 
   if (eventLoading || roomLoading || joining) {
     return (
@@ -190,7 +174,6 @@ export default function EventVenueRoomPage() {
         eventId={event.id}
         eventSlug={event.slug}
         eventTitle={event.title}
-        role={membership.role}
         headcount={headcount}
         connected={presence.connected}
         availability={presence.availability}

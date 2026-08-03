@@ -62,7 +62,16 @@ interface VenueMapExplorerProps {
    * in — the side panel shows this in place of the room underfoot.
    */
   onPreviewRoomChange?: (roomId: string | null) => void
-  onEnter: (room: VenueRoom) => void
+  /**
+   * Commit to the room. Return (or resolve) `false` when entry was refused —
+   * the camera pulls back out instead of leaving the veil up over the map.
+   */
+  onEnter: (room: VenueRoom) => void | boolean | Promise<void | boolean>
+  /**
+   * Fill the parent instead of self-sizing to the viewport, and drop the card
+   * chrome — for the immersive floorplan page, where the map is the page.
+   */
+  frameless?: boolean
 }
 
 type EnterPhase = 'idle' | 'walking' | 'zooming' | 'arriving'
@@ -117,6 +126,7 @@ export function VenueMapExplorer({
   onStandingRoomChange,
   onPreviewRoomChange,
   onEnter,
+  frameless,
 }: VenueMapExplorerProps) {
   const { t } = useLingui()
   const myDisplayName = myName || t`You`
@@ -152,6 +162,21 @@ export function VenueMapExplorer({
   // Movement state lives in refs: this updates every animation frame and
   // nothing above this component needs to re-render when a dot moves 3px.
   const posRef = useRef<{ x: number; y: number } | null>(null)
+  // The camera too: the zoom easing corrects pan against where the room sits
+  // on screen, and reading that from the render-time projection overshoots
+  // whenever a slow frame lets several steps run against the same stale
+  // render — seen as the camera bouncing on the way into a room. The ref is
+  // the source of truth per step; the state is only the mirror React draws.
+  const zoomRef = useRef({ k: 1, px: 0, py: 0 })
+  // The loop reads the callbacks through refs: the page recreates them on its
+  // own re-renders (presence churn), and as effect deps each new identity tore
+  // the animation loop down mid-walk — a visible hiccup every restart.
+  const onEnterRef = useRef(onEnter)
+  const onPositionChangeRef = useRef(onPositionChange)
+  useEffect(() => {
+    onEnterRef.current = onEnter
+    onPositionChangeRef.current = onPositionChange
+  })
   const targetRef = useRef<{ x: number; y: number } | null>(null)
   const keysRef = useRef<Set<string>>(new Set())
   const pendingRoomRef = useRef<VenueRoom | null>(null)
@@ -241,7 +266,8 @@ export function VenueMapExplorer({
         padding: VIEW_PAD,
       })
       const [sx, sy] = zoomed.project(from.centroid[0], from.centroid[1], 0)
-      setZoom({ k: ARRIVE_ZOOM, px: size.width / 2 - sx, py: size.height / 2 - sy })
+      zoomRef.current = { k: ARRIVE_ZOOM, px: size.width / 2 - sx, py: size.height / 2 - sy }
+      setZoom(zoomRef.current)
       veilRef.current = 1
       setVeil(1)
       phaseRef.current = 'arriving'
@@ -342,21 +368,36 @@ export function VenueMapExplorer({
       }
 
       if (moved && posRef.current) {
-        onPositionChange({ ...posRef.current, f: floor })
+        onPositionChangeRef.current({ ...posRef.current, f: floor })
       }
 
       // Camera: push in on the room being entered, otherwise sit still.
       if (phaseRef.current === 'zooming' && pendingRoomRef.current) {
         const geo = geometry[pendingRoomRef.current.id]
         if (geo && wrapRef.current) {
-          const [sx, sy] = projection.project(geo.centroid[0], geo.centroid[1], 0)
+          // Projected from the ref's zoom, not the render's: the pan
+          // correction must see its own previous step, or a lagging render
+          // makes it re-apply corrections and the camera bounces.
+          const z = zoomRef.current
+          const stepProj = makeProjection({
+            cols: config.cols,
+            rows: config.rows,
+            tilt,
+            width: size.width,
+            height: size.height,
+            zoom: z,
+            topZ,
+            padding: VIEW_PAD,
+          })
+          const [sx, sy] = stepProj.project(geo.centroid[0], geo.centroid[1], 0)
           const cx = size.width / 2
           const cy = size.height / 2
-          setZoom((z) => ({
+          zoomRef.current = {
             k: Math.min(2.6, z.k + (2.6 - z.k) * Math.min(1, dt * 4)),
             px: z.px + (cx - sx) * Math.min(1, dt * 5),
             py: z.py + (cy - sy) * Math.min(1, dt * 5),
-          }))
+          }
+          setZoom(zoomRef.current)
         }
         // The veil is tracked in a ref and mirrored to state: firing the
         // navigation from inside a state updater would run it twice under
@@ -366,7 +407,20 @@ export function VenueMapExplorer({
         if (veilRef.current >= 0.999 && !enteredRef.current) {
           enteredRef.current = true
           const room = pendingRoomRef.current
-          if (room) onEnter(room)
+          if (room) {
+            void (async () => {
+              const ok = await onEnterRef.current(room)
+              if (ok === false) {
+                // Entry refused (closed door, capacity, network): unwind the
+                // same way a room is left, rather than sitting behind the veil.
+                enteredRef.current = false
+                pendingRoomRef.current = null
+                setEnteringRoomId(null)
+                phaseRef.current = 'arriving'
+                setPhase('arriving')
+              }
+            })()
+          }
         }
       }
 
@@ -383,11 +437,14 @@ export function VenueMapExplorer({
       // Coming back out: the entry animation played backwards. Same easing, so
       // leaving a room feels like the same door it was entered through.
       if (phaseRef.current === 'arriving') {
-        setZoom((z) => ({
-          k: z.k + (1 - z.k) * Math.min(1, dt * 3.2),
-          px: z.px * (1 - Math.min(1, dt * 3.2)),
-          py: z.py * (1 - Math.min(1, dt * 3.2)),
-        }))
+        const z = zoomRef.current
+        const ease = Math.min(1, dt * 3.2)
+        zoomRef.current = {
+          k: z.k + (1 - z.k) * ease,
+          px: z.px * (1 - ease),
+          py: z.py * (1 - ease),
+        }
+        setZoom(zoomRef.current)
         veilRef.current = Math.max(0, veilRef.current - dt * 1.6)
         setVeil(veilRef.current)
         if (veilRef.current <= 0.001) {
@@ -406,17 +463,20 @@ export function VenueMapExplorer({
       const peerMoving = [...peers.current.values()].some(
         (p) => wall - p.at < VENUE.POS_BROADCAST_MS * 4
       )
+      // Your own step and the camera render at frame rate — sampling your own
+      // walk at 30fps is what reads as jitter. The 33ms throttle only guards
+      // against other people's dots re-rendering an otherwise idle map.
       if (
         moved ||
         phaseRef.current === 'zooming' ||
         phaseRef.current === 'arriving' ||
-        fadeRef.current.mix < 1 ||
-        peerMoving
+        fadeRef.current.mix < 1
       ) {
-        if (now - lastTick >= 33) {
-          lastTick = now
-          setFrame((f) => (f + 1) % 1_000_000)
-        }
+        lastTick = now
+        setFrame((f) => (f + 1) % 1_000_000)
+      } else if (peerMoving && now - lastTick >= 33) {
+        lastTick = now
+        setFrame((f) => (f + 1) % 1_000_000)
       }
 
       raf = requestAnimationFrame(step)
@@ -424,7 +484,10 @@ export function VenueMapExplorer({
 
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
-  }, [config, floor, geometry, projection, size, onPositionChange, onEnter, beginEntry, peers])
+    // `projection` deliberately absent: the loop builds its own from zoomRef.
+    // Depending on it re-registered this effect on every zooming frame. The
+    // callbacks are read through refs for the same reason.
+  }, [config, floor, geometry, tilt, topZ, size, beginEntry, peers])
 
   // ---- pointer ------------------------------------------------------------
 
@@ -574,7 +637,13 @@ export function VenueMapExplorer({
     // what is left of the viewport under the page chrome — and stops there, so
     // the first scroll reaches the footer rather than more map. Clamped at both
     // ends: never so short it cannot be walked, never taller than the screen.
-    <div className="flex h-[clamp(26rem,calc(100svh-var(--nav-h)-19rem),46rem)] w-full overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-card md:h-[clamp(28rem,calc(100svh-var(--nav-h)-16rem),46rem)]">
+    <div
+      className={`flex w-full overflow-hidden bg-ktip-cream ${
+        frameless
+          ? 'h-full'
+          : 'h-[clamp(26rem,calc(100svh-var(--nav-h)-19rem),46rem)] rounded-2xl border border-ktip-sand-200 shadow-card md:h-[clamp(28rem,calc(100svh-var(--nav-h)-16rem),46rem)]'
+      }`}
+    >
       {/* ---- rooms rail ----
           Attached to the map rather than floating beside it, and collapsible,
           because on a small screen the list and the floor are competing for the
@@ -799,11 +868,35 @@ export function VenueMapExplorer({
         </div>
       )}
 
-      {/* ---- view toggles ----
+      {/* ---- floors + view toggles ----
+          One cluster in the top-left corner: the floor pills, then the view
+          controls beside them, so the map's right edge stays clear for the
+          presence panel.
           Plan view for judging distance, 2.5D for reading the place, and — in a
           building with more than one level — Stack to lift them apart. Both
           transitions are eased, not cut. */}
-      <div className="absolute right-3 top-3 flex items-center gap-1.5">
+      <div className="absolute left-3 top-3 flex items-start gap-2">
+        {config.floors.length > 1 && (
+          <div className="flex flex-col gap-1">
+            {config.floors.map((f, i) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => goToFloor(i)}
+                aria-pressed={i === floor}
+                className={`flex items-center gap-2 rounded-lg border px-2.5 py-1 text-xs font-semibold backdrop-blur transition-colors ${
+                  i === floor
+                    ? 'border-ktip-ocean-300 bg-ktip-ocean-50/90 text-ktip-ocean-700'
+                    : 'border-ktip-sand-200 bg-ktip-cream/80 text-ktip-sand-600 hover:border-ktip-sand-300'
+                }`}
+              >
+                <span className="font-mono text-[10px] opacity-70">{floorBadge(i)}</span>
+                {f.name}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex overflow-hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 backdrop-blur">
           {([['2D', false], ['2.5D', true]] as Array<[string, boolean]>).map(([label, on]) => (
             <button
@@ -842,28 +935,6 @@ export function VenueMapExplorer({
           </div>
         )}
       </div>
-
-      {/* ---- floors ---- */}
-      {config.floors.length > 1 && (
-        <div className="absolute left-3 top-3 flex flex-col gap-1">
-          {config.floors.map((f, i) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => goToFloor(i)}
-              aria-pressed={i === floor}
-              className={`flex items-center gap-2 rounded-lg border px-2.5 py-1 text-xs font-semibold backdrop-blur transition-colors ${
-                i === floor
-                  ? 'border-ktip-ocean-300 bg-ktip-ocean-50/90 text-ktip-ocean-700'
-                  : 'border-ktip-sand-200 bg-ktip-cream/80 text-ktip-sand-600 hover:border-ktip-sand-300'
-              }`}
-            >
-              <span className="font-mono text-[10px] opacity-70">{floorBadge(i)}</span>
-              {f.name}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* ---- standing-in prompt ---- */}
       {/* ---- stairs ----

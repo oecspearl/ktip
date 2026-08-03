@@ -46,6 +46,12 @@ interface UseVenuePresenceArgs {
 /**
  * The venue's single presence channel.
  *
+ * Mounted ONCE per venue visit, by VenuePresenceProvider in the venue layout
+ * route — never by a page. A page-level mount would tear the channel down on
+ * every floorplan↔room navigation and pay setAuth + a private-channel join +
+ * presence sync each time, which is exactly the "Reconnecting" stall this
+ * arrangement removed.
+ *
  * ONE channel per event (`venue:{eventId}`), not one per room. Supabase Presence
  * hands every subscriber the complete state, so a floorplan with nine rooms
  * needs one subscription and a client-side groupBy rather than nine
@@ -137,11 +143,68 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
 
     let cancelled = false
     let channel: ReturnType<typeof supabase.channel> | null = null
+    let retryTimer = 0
+    let attempt = 0
 
     const sync = () => {
       if (!channel || cancelled) return
       setRaw(channel.presenceState() as RawPresenceState)
     }
+
+    // Recovery, and the one rule that keeps it from oscillating: NEVER fight
+    // the library. realtime-js retries CHANNEL_ERROR and TIMED_OUT by itself
+    // (the join push schedules the channel's rejoin timer, with backoff) and
+    // rejoins every channel after a socket drop. A manual retry on those
+    // states puts two reconnect loops on one topic — and because
+    // supabase.channel() hands back the existing instance per topic, and a
+    // half-torn-down instance still holds an armed rejoin timer that
+    // unsubscribes whichever channel owns the topic when it fires
+    // (_leaveOpenTopic), the two loops kill each other's joins forever. On
+    // screen that is presence blinking in and out every second or two.
+    //
+    // Only CLOSED is terminal to the library, so only CLOSED is restarted
+    // here — and only after the dead instance is disposed of COMPLETELY.
+    const dispose = async (ch: ReturnType<typeof supabase.channel>) => {
+      try {
+        await supabase.removeChannel(ch)
+      } catch {
+        // The leave can time out; teardown below still retires the instance.
+      }
+      // removeChannel only delists after a clean leave. teardown() disarms the
+      // rejoin timer and drops the bindings either way, so this instance can
+      // never come back from the dead and unsubscribe its replacement.
+      try {
+        ;(ch as any).teardown?.()
+      } catch {
+        // Internal API; if it ever disappears the removeChannel above is
+        // still the documented path.
+      }
+    }
+
+    const scheduleRestart = () => {
+      if (cancelled || retryTimer) return
+      const delay = Math.min(15_000, 1_000 * 2 ** attempt++)
+      retryTimer = window.setTimeout(() => {
+        retryTimer = 0
+        if (cancelled) return
+        const old = channel
+        channel = null
+        channelRef.current = null
+        void (async () => {
+          // Disposed BEFORE start(), and awaited: creating the successor while
+          // the old instance is still listed would hand back the dying
+          // instance itself (supabase.channel() reuses by topic).
+          if (old) await dispose(old)
+          if (cancelled) return
+          void start()
+        })()
+      }, delay)
+    }
+
+    const makeChannel = () =>
+      supabase.channel(`venue:${eventId}`, {
+        config: { private: true, presence: { key: userId }, broadcast: { self: false } },
+      })
 
     const start = async () => {
       // Private channels are authorized against realtime.messages RLS, which
@@ -153,12 +216,20 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       }
       if (cancelled) return
 
-      channel = supabase.channel(`venue:${eventId}`, {
-        config: { private: true, presence: { key: userId }, broadcast: { self: false } },
-      })
-      channelRef.current = channel
+      let ch = makeChannel()
+      // supabase.channel() returns the existing instance when the topic is
+      // already known. One that has lived before cannot be subscribed again,
+      // and binding presence handlers onto it while joined forces the library
+      // into an unsubscribe/resubscribe cycle. Retire it and take a fresh one.
+      if ((ch as any).joinedOnce) {
+        await dispose(ch)
+        if (cancelled) return
+        ch = makeChannel()
+      }
+      channel = ch
+      channelRef.current = ch
 
-      channel
+      ch
         .on('presence', { event: 'sync' }, sync)
         .on('presence', { event: 'join' }, sync)
         .on('presence', { event: 'leave' }, sync)
@@ -172,12 +243,22 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
           peersRef.current.set(from, { ...pos, at: Date.now() })
         })
         .subscribe((status) => {
-          if (cancelled) return
+          // A superseded channel still reports CLOSED as it is torn down
+          // during a restart; reacting to it would loop the restart forever.
+          if (cancelled || ch !== channel) return
           setConnected(status === 'SUBSCRIBED')
           if (status === 'SUBSCRIBED') {
-            // Force the first track by clearing the dedupe key.
+            attempt = 0
+            // Force a re-track by clearing the dedupe key — both on the first
+            // join and after the library's own rejoin, which lands back here.
             lastSentRef.current = ''
+          } else if (status === 'CLOSED') {
+            scheduleRestart()
           }
+          // CHANNEL_ERROR / TIMED_OUT: deliberately NOT handled. The library's
+          // rejoin timer is already running and re-fires this callback with
+          // SUBSCRIBED when the join lands; a second loop here is what made
+          // presence flap. See the note on dispose() above.
         })
     }
 
@@ -186,6 +267,7 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
     return () => {
       cancelled = true
       setConnected(false)
+      if (retryTimer) window.clearTimeout(retryTimer)
       if (channel) {
         void channel.untrack()
         supabase.removeChannel(channel)
@@ -296,7 +378,14 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       if (!channel || !next || !userId) return
 
       const nowMs = Date.now()
-      if (nowMs - lastBroadcastRef.current >= VENUE.POS_BROADCAST_MS) {
+      // Only over the joined socket. Before the join completes, supabase-js
+      // would ship each broadcast as an HTTP POST (deprecated fallback, one
+      // request per tick); a move dropped during that window costs nothing —
+      // the presence track below carries the position anyway.
+      if (
+        channel.state === 'joined' &&
+        nowMs - lastBroadcastRef.current >= VENUE.POS_BROADCAST_MS
+      ) {
         lastBroadcastRef.current = nowMs
         void channel.send({
           type: 'broadcast',

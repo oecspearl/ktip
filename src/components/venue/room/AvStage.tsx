@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { MicOff, Radio, ScreenShare, Video, VideoOff } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { VENUE_AUDIO_MODE_LABELS } from '../../../lib/constants'
@@ -5,7 +6,17 @@ import { ROOM_CAMERA_LABELS, type RoomCameraMode } from '../../../lib/venue-room
 import { isVenueVideoConfigured, useVenueRoomToken } from '../../../hooks/useVenueRoomToken'
 import { useRoomRecording } from '../../../hooks/useRoomRecording'
 import { RecordingConsent, useRecordingConsent } from './RecordingConsent'
-import { VenueCall } from './VenueCall'
+
+// Lazy on purpose, and it matters more than it looks: VenueCall is the only
+// path to livekit-client and @livekit/components-react, which together are the
+// biggest thing a venue page could pull in. Imported statically they ride the
+// room page's chunk, so *every* room — including one with the call switched
+// off — paid the whole SDK before first paint. Deferred, a room paints its
+// placeholder tiles immediately and the SDK downloads only once this member
+// actually has a token to connect with.
+const VenueCall = lazy(() =>
+  import('./VenueCall').then((m) => ({ default: m.VenueCall }))
+)
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { VenueOccupant, VenueRoom } from '../../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -73,6 +84,23 @@ export function AvStage({
     : occupants[0] || null
   const rest = occupants.filter((o) => o.user_id !== lead?.user_id)
 
+  // The pre-video tiles. Also the Suspense fallback while the LiveKit chunk
+  // downloads: the same frames in both states is what keeps the room from
+  // shifting when the call arrives.
+  const placeholders = (
+    <>
+      {mode === 'spotlight' && (
+        <SpotlightStage lead={lead} rest={rest} presenter={presenter} cap={cap} fill={fill} />
+      )}
+      {mode === 'grid' && (
+        <GridStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} fill={fill} />
+      )}
+      {mode === 'huddle' && (
+        <HuddleStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} />
+      )}
+    </>
+  )
+
   return (
     <div
       className={cn(
@@ -113,7 +141,7 @@ export function AvStage({
         {needsConsent ? (
           <RecordingConsent onAccept={acknowledge} />
         ) : connected && token && grant ? (
-          <>
+          <Suspense fallback={placeholders}>
             <VenueCall
               mode={mode}
               token={token}
@@ -136,15 +164,9 @@ export function AvStage({
             {mode === 'huddle' && (
               <HuddleStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} />
             )}
-          </>
+          </Suspense>
         ) : (
-          <>
-            {mode === 'spotlight' && (
-              <SpotlightStage lead={lead} rest={rest} presenter={presenter} cap={cap} fill={fill} />
-            )}
-            {mode === 'grid' && <GridStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} fill={fill} />}
-            {mode === 'huddle' && <HuddleStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} />}
-          </>
+          placeholders
         )}
       </div>
 

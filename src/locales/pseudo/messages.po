@@ -212,6 +212,10 @@ msgstr ""
 msgid "Business profile updated"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Caption my speech"
+msgstr ""
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Warning: This will permanently delete:"
 msgstr ""
@@ -238,6 +242,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Flip the whole app between light and dark themes"
+msgstr ""
+
+#. placeholder {0}: occupants.length
+#: src/components/venue/VenuePresencePanel.tsx
+msgid "In the venue · {0}"
 msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
@@ -1562,6 +1571,7 @@ msgid "Rank"
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/components/venue/room/AvStage.tsx
 msgid "Record this room"
 msgstr ""
 
@@ -2083,10 +2093,6 @@ msgstr ""
 msgid "This room is full. Nobody else can enter until someone leaves."
 msgstr ""
 
-#: src/pages/events/EventVenuePage.tsx
-msgid "Virtual venue"
-msgstr ""
-
 #: src/lib/venue-room-sections.ts
 msgid "How many people are at the event and what they are doing."
 msgstr ""
@@ -2279,6 +2285,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Help article — Account & Settings"
+msgstr ""
+
+#: src/pages/settings/PreferencesTab.tsx
+msgid "Translate messages for me"
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -3423,6 +3433,10 @@ msgstr ""
 msgid "Whiteboard"
 msgstr ""
 
+#: src/components/venue/RoomChatPanel.tsx
+msgid "Show translation"
+msgstr ""
+
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "Re-read the document"
 msgstr ""
@@ -3463,6 +3477,10 @@ msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Approve student accounts"
+msgstr ""
+
+#: src/pages/events/EventVenuePage.tsx
+msgid "Enter"
 msgstr ""
 
 #: src/pages/events/EventSetupPage.tsx
@@ -3522,6 +3540,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The floor"
+msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Translated"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3982,6 +4004,10 @@ msgstr ""
 
 #: src/components/messages/NewConversationModal.tsx
 msgid "Group name..."
+msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Captioning needs Chrome, Edge or Safari"
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
@@ -4614,6 +4640,10 @@ msgstr ""
 msgid "Check in"
 msgstr ""
 
+#: src/components/venue/room/AvStage.tsx
+msgid "Voice and screen sharing are on"
+msgstr ""
+
 #. placeholder {0}: uploaded.length
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Attached ({0})"
@@ -4773,6 +4803,10 @@ msgstr ""
 
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "My profile"
+msgstr ""
+
+#: src/components/venue/room/AvStage.tsx
+msgid "Video is not switched on for this venue yet"
 msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
@@ -5068,6 +5102,10 @@ msgstr ""
 msgid "You can now open \"{0}\"."
 msgstr ""
 
+#: src/components/venue/room/AvStage.tsx
+msgid "You are listening. A host can give you the floor."
+msgstr ""
+
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "50 min"
 msgstr ""
@@ -5332,6 +5370,10 @@ msgstr ""
 msgid "Your Chamber did not accept this submission. Contact them directly to resolve it before resubmitting."
 msgstr ""
 
+#: src/components/venue/RoomOccupantList.tsx
+msgid "Collapse the list"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Why is the Funding, Mentees or Research tab empty?"
 msgstr ""
@@ -5545,7 +5587,6 @@ msgstr ""
 msgid "Ask a mentor to come find you"
 msgstr ""
 
-#: src/components/venue/VenueTopBar.tsx
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Live"
 msgstr ""
@@ -6306,10 +6347,6 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: src/pages/events/EventVenuePage.tsx
-msgid "Walk the floor with the arrow keys, or click a room to go in. Everyone in a room can see who else is there."
-msgstr ""
-
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Removed"
 msgstr ""
@@ -6382,6 +6419,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Platform administration and analytics."
+msgstr ""
+
+#: src/pages/settings/PreferencesTab.tsx
+msgid "How other members' messages are shown to you"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7749,6 +7790,10 @@ msgstr ""
 msgid "Education Grants"
 msgstr ""
 
+#: src/pages/settings/PreferencesTab.tsx
+msgid "Chat, announcements and event descriptions written in another language are translated automatically. You can always see the original."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The one personal page. Your name, your roles and your connection count sit up here — click the connection chip to jump straight to the people you know.\n"
 "\n"
@@ -8240,7 +8285,9 @@ msgid "All Badges"
 msgstr ""
 
 #. placeholder {0}: occupancy[hoveredRoom.id] || 0
+#. placeholder {0}: presence.occupancy[room.id] || 0
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/pages/events/EventVenuePage.tsx
 msgid "{0} here"
 msgstr ""
 
@@ -8512,6 +8559,10 @@ msgstr ""
 msgid "Research and teach in academia"
 msgstr ""
 
+#: src/components/venue/room/AvStage.tsx
+msgid "Can be recorded"
+msgstr ""
+
 #: src/pages/events/EventVenuePage.tsx
 msgid "The venue has no rooms yet"
 msgstr ""
@@ -8668,6 +8719,10 @@ msgstr ""
 msgid "Breadcrumb"
 msgstr ""
 
+#: src/components/venue/room/RecordingConsent.tsx
+msgid "If you join the call, your camera, microphone and anything you share on screen are recorded and saved by the organisers. You can stay in the room without joining the call — you will still see the chat and can still take part."
+msgstr ""
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Student applications must be sponsored. Nominate a faculty member in the application — they accept it, and then it can be submitted."
 msgstr ""
@@ -8737,6 +8792,7 @@ msgstr ""
 msgid "Mentors, judges and organizers only."
 msgstr ""
 
+#: src/components/venue/VenuePresencePanel.tsx
 #: src/pages/events/EventVenuePage.tsx
 msgid "Everyone is inside a room."
 msgstr ""
@@ -9145,6 +9201,10 @@ msgstr ""
 msgid "Switch from the list view to the calendar view using the toggle at the top."
 msgstr ""
 
+#: src/components/venue/room/AvStage.tsx
+msgid "Connecting…"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Business verification is done by your national Chamber of Commerce, not by OECS directly.\n"
 "\n"
@@ -9330,10 +9390,6 @@ msgstr ""
 
 #: src/components/safeguarding/StudentVerificationCard.tsx
 msgid "Verify with my school email"
-msgstr ""
-
-#: src/components/venue/room/AvStage.tsx
-msgid "Voice and screen sharing arrive with the next release"
 msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
@@ -10261,6 +10317,7 @@ msgid "Focus timer"
 msgstr ""
 
 #: src/components/venue/room/RoomWayfindingPanels.tsx
+#: src/components/venue/VenuePresencePanel.tsx
 #: src/lib/venue-room-sections.ts
 #: src/pages/events/EventVenuePage.tsx
 msgid "In the venue"
@@ -10795,6 +10852,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Drafts, publishing and cancellation."
+msgstr ""
+
+#: src/pages/settings/PreferencesTab.tsx
+msgid "Same as the site"
 msgstr ""
 
 #: src/components/ui/CollapsibleSearch.tsx
@@ -11366,6 +11427,10 @@ msgstr ""
 
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
+msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Captioning my speech"
 msgstr ""
 
 #: src/pages/collaborate/CodeEditorPage.tsx
@@ -12246,6 +12311,10 @@ msgstr ""
 msgid "Receive messages"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Everyone reads you in their own language"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Stack"
 msgstr ""
@@ -12396,6 +12465,10 @@ msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "Your own text — conduct, ground rules, what this room is not for."
+msgstr ""
+
+#: src/components/venue/room/AvStage.tsx
+msgid "Stop recording"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12576,6 +12649,10 @@ msgstr ""
 msgid "Reset to the language template"
 msgstr ""
 
+#: src/pages/settings/PreferencesTab.tsx
+msgid "Translate messages into"
+msgstr ""
+
 #: src/components/notes/StickyNoteGroup.tsx
 msgid "Open folder"
 msgstr ""
@@ -12747,6 +12824,10 @@ msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "AI-guided navigation"
+msgstr ""
+
+#: src/pages/settings/PreferencesTab.tsx
+msgid "Separate from the language the site itself is in. Change this if you would rather read other people's writing in a different language than the one you navigate in."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -13196,6 +13277,11 @@ msgstr ""
 msgid "Capacity"
 msgstr ""
 
+#. placeholder {0}: LANGUAGE_NAMES[from]
+#: src/components/venue/RoomChatPanel.tsx
+msgid "Translated from {0} · Show original"
+msgstr ""
+
 #: src/pages/projects/ProjectsPage.tsx
 #: src/pages/resources/ResourcesPage.tsx
 msgid "All Categories"
@@ -13330,6 +13416,10 @@ msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Briefs, rules, datasets or any other files attendees should have. Uploaded once the event is created."
+msgstr ""
+
+#: src/components/venue/room/RecordingConsent.tsx
+msgid "I understand — join the call"
 msgstr ""
 
 #: src/hooks/useProjectJoinRequests.ts
@@ -15509,6 +15599,10 @@ msgstr ""
 msgid "Image must be less than 10MB."
 msgstr ""
 
+#: src/pages/settings/PreferencesTab.tsx
+msgid "Translate into"
+msgstr ""
+
 #: src/components/shared/DetailsEditor.tsx
 msgid "Add field"
 msgstr ""
@@ -15863,6 +15957,7 @@ msgstr ""
 
 #: src/components/ui/LanguageSwitcher.tsx
 #: src/pages/collaborate/CodeEditorPage.tsx
+#: src/pages/settings/PreferencesTab.tsx
 msgid "Language"
 msgstr ""
 
@@ -16091,6 +16186,7 @@ msgid "Italic (Ctrl+I)"
 msgstr ""
 
 #: src/components/venue/map/VenueRoomBrief.tsx
+#: src/components/venue/room/RecordingConsent.tsx
 msgid "This room is recorded"
 msgstr ""
 
@@ -16764,6 +16860,10 @@ msgstr ""
 msgid "Two queues in one place: content members reported, and content the automated rules flagged on their own.\n"
 "\n"
 "Each entry links to the thing itself, so you can read it in context before deciding."
+msgstr ""
+
+#: src/components/venue/room/AvStage.tsx
+msgid "Working…"
 msgstr ""
 
 #: src/components/documents/DocumentUploadModal.tsx

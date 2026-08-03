@@ -1,4 +1,4 @@
-import { MessageSquare, UserRound } from 'lucide-react'
+import { ChevronUp, MessageSquare, UserRound } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { VENUE_ROLE_LABELS } from '../../lib/constants'
 import { canDirectMessage } from '../../lib/venue-actions'
@@ -17,6 +17,8 @@ interface RoomOccupantListProps {
   className?: string
   /** Grow to the height given rather than to the hand-tuned cap below. */
   fill?: boolean
+  /** Set when the list can fold away (the floorplan overlay); adds the control. */
+  onCollapse?: () => void
 }
 
 /**
@@ -34,6 +36,7 @@ export function RoomOccupantList({
   emptyLabel,
   className,
   fill,
+  onCollapse,
 }: RoomOccupantListProps) {
   const { t } = useLingui()
   const heading = title ?? t`In this room`
@@ -56,7 +59,19 @@ export function RoomOccupantList({
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
           {heading}
         </h2>
-        <span className="text-xs font-medium text-ktip-sand-500">{occupants.length}</span>
+        <span className="flex items-center gap-1">
+          <span className="text-xs font-medium text-ktip-sand-500">{occupants.length}</span>
+          {onCollapse && (
+            <button
+              type="button"
+              onClick={onCollapse}
+              aria-label={t`Collapse the list`}
+              className="rounded-lg p-1 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600"
+            >
+              <ChevronUp size={14} aria-hidden="true" />
+            </button>
+          )}
+        </span>
       </div>
 
       {occupants.length === 0 ? (

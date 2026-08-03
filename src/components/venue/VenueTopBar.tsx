@@ -1,10 +1,10 @@
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowLeft, Radio, Users, WifiOff } from 'lucide-react'
+import { ArrowLeft, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { VENUE_ROLE_LABELS } from '../../lib/constants'
 import { venuePath } from '../../lib/event-slug'
 import { AvailabilityPicker } from './AvailabilityPicker'
-import type { VenueAvailability, VenueRole } from '../../types'
+import type { VenueAvailability } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 interface VenueTopBarProps {
@@ -12,7 +12,6 @@ interface VenueTopBarProps {
   /** events.slug — null on a row that predates migration 087's backfill. */
   eventSlug: string | null
   eventTitle: string
-  role: VenueRole
   headcount: number
   connected: boolean
   availability: VenueAvailability
@@ -21,6 +20,10 @@ interface VenueTopBarProps {
   onAvailabilityChange: (next: Exclude<VenueAvailability, 'offline'>) => void
   /** Set when inside a room, so the bar can offer a way back to the map. */
   backToMap?: boolean
+  /** Extra chrome (e.g. the organizer's "Edit the map" button), before the picker. */
+  trailing?: ReactNode
+  /** The floorplan page has no other h1; the room page keeps the default. */
+  titleAs?: 'p' | 'h1'
   className?: string
 }
 
@@ -36,16 +39,33 @@ export function VenueTopBar({
   eventId,
   eventSlug,
   eventTitle,
-  role,
   headcount,
   connected,
   availability,
   isAuto,
   onAvailabilityChange,
   backToMap,
+  trailing,
+  titleAs,
   className,
 }: VenueTopBarProps) {
   const { t } = useLingui()
+  const TitleTag = titleAs ?? 'p'
+
+  // The presence channel lives in the venue layout and survives page swaps,
+  // so `connected` is only false on first entry and on a genuine socket drop.
+  // The grace window keeps the first join and sub-2s blips quiet; the chip
+  // only alarms when the outage is real.
+  const [outage, setOutage] = useState(false)
+  useEffect(() => {
+    if (connected) {
+      setOutage(false)
+      return
+    }
+    const tid = window.setTimeout(() => setOutage(true), 2_000)
+    return () => window.clearTimeout(tid)
+  }, [connected])
+
   return (
     <div
       className={cn(
@@ -73,37 +93,34 @@ export function VenueTopBar({
 
       <span className="hidden h-4 w-px bg-ktip-sand-200 sm:block" aria-hidden="true" />
 
-      <p className="min-w-0 flex-1 truncate font-display text-sm font-bold text-ktip-sand-900">
+      <TitleTag className="min-w-0 flex-1 truncate font-display text-sm font-bold text-ktip-sand-900">
         {eventTitle}
-      </p>
+      </TitleTag>
 
-      <span className="flex items-center gap-1.5 rounded-full border border-ktip-sand-200 px-2.5 py-1 text-xs font-medium text-ktip-sand-600">
-        <Users size={13} aria-hidden="true" />
-        <Trans>{headcount} here</Trans>
-      </span>
-
-      <span
-        className={cn(
-          'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
-          connected
-            ? 'border-ktip-tropical-200 bg-ktip-tropical-100 text-ktip-tropical-800'
-            : 'border-ktip-sand-200 bg-ktip-sand-100 text-ktip-sand-600'
-        )}
-        title={connected ? t`Live presence connected` : t`Reconnecting — headcounts may be stale`}
-      >
-        {connected ? (
-          <Radio size={13} aria-hidden="true" />
-        ) : (
-          <WifiOff size={13} aria-hidden="true" />
-        )}
-        {connected ? t`Live` : t`Reconnecting`}
-      </span>
-
-      {role !== 'participant' && (
-        <span className="rounded-full border border-ktip-ocean-200 bg-ktip-ocean-50 px-2.5 py-1 text-xs font-medium text-ktip-ocean-700">
-          {VENUE_ROLE_LABELS[role] || role}
+      {/* One chip carries both facts: the count, and whether it can be
+          trusted. Live is the default state, so it earns only a dot — the
+          chip changes voice only when the socket drops for real, which is the
+          news. During the grace window it renders nothing at all. */}
+      {(connected || outage) && (
+        <span
+          className={cn(
+            'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
+            connected
+              ? 'border-ktip-sand-200 text-ktip-sand-600'
+              : 'border-ktip-sand-200 bg-ktip-sand-100 text-ktip-sand-600'
+          )}
+          title={connected ? t`Live presence connected` : t`Reconnecting — headcounts may be stale`}
+        >
+          {connected ? (
+            <span className="h-2 w-2 rounded-full bg-ktip-tropical-500" aria-hidden="true" />
+          ) : (
+            <WifiOff size={13} aria-hidden="true" />
+          )}
+          {connected ? <Trans>{headcount} here</Trans> : t`Reconnecting`}
         </span>
       )}
+
+      {trailing}
 
       <AvailabilityPicker
         value={availability}

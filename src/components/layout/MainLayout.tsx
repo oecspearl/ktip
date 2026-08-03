@@ -32,6 +32,11 @@ export function MainLayout() {
   const auth = useAuth()
   const { pathname } = useLocation()
 
+  // The venue floorplan is a full-viewport map; a footer below it would make
+  // the page scrollable, so wheel-over-map would scroll the page instead of
+  // staying on the floor. Room and setup pages keep the footer.
+  const immersiveVenue = /^\/events\/virtual-hackathon\/[^/]+\/?$/.test(pathname)
+
   // Always land at the top when navigating between pages
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -69,7 +74,7 @@ export function MainLayout() {
         <MemberPanel />
         <StickyNoteOverlay />
       </Suspense>
-      <Footer />
+      {!immersiveVenue && <Footer />}
     </div>
     </StickyNotesProvider>
     </TutorialProvider>

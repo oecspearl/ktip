@@ -213,13 +213,19 @@ const router = createBrowserRouter([
               // Readable venue URLs. The slug is derived from the event title
               // (src/lib/event-slug.ts) and the room segment is venue_rooms.key,
               // so a venue link reads as a place rather than as two uuids.
+              // The layout owns the presence channel (VenuePresenceContext),
+              // so moving between the floorplan and a room re-tracks on a live
+              // socket instead of rebuilding the subscription from zero.
               {
                 path: '/events/virtual-hackathon/:slug',
-                lazy: lazyPage(() => import('./pages/events/EventVenuePage')),
-              },
-              {
-                path: '/events/virtual-hackathon/:slug/room/:roomKey',
-                lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+                lazy: lazyPage(() => import('./pages/events/EventVenueLayout')),
+                children: [
+                  { index: true, lazy: lazyPage(() => import('./pages/events/EventVenuePage')) },
+                  {
+                    path: '/events/virtual-hackathon/:slug/room/:roomKey',
+                    lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+                  },
+                ],
               },
               // Step two of creating a hackathon: draw the rooms (migration 089).
               // Host-gated inside the page, and again by is_venue_host() in the
