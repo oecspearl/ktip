@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <filter id="b60" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="60"/></filter>
+  <filter id="b110" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="110"/></filter>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+
+<rect width="1600" height="640" fill="#030B18"/>
+<circle cx="1280" cy="700" r="120" fill="none" stroke="#2A5788" stroke-opacity="0.89" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="198" fill="none" stroke="#2A5788" stroke-opacity="0.82" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="276" fill="none" stroke="#2A5788" stroke-opacity="0.75" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="354" fill="none" stroke="#2A5788" stroke-opacity="0.68" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="432" fill="none" stroke="#2A5788" stroke-opacity="0.61" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="510" fill="none" stroke="#2A5788" stroke-opacity="0.54" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="588" fill="none" stroke="#2A5788" stroke-opacity="0.47" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="666" fill="none" stroke="#2A5788" stroke-opacity="0.39" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="744" fill="none" stroke="#2A5788" stroke-opacity="0.32" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="822" fill="none" stroke="#2A5788" stroke-opacity="0.25" stroke-width="1.5"/>
+<circle cx="1280" cy="700" r="900" fill="none" stroke="#2A5788" stroke-opacity="0.18" stroke-width="1.5"/>
+
+<circle cx="1280" cy="700" r="86" fill="#97D700"/>
+<g filter="url(#b110)"><ellipse cx="240" cy="180" rx="380" ry="280" fill="#163A63" opacity="0.9" style="mix-blend-mode:screen"/></g>
+
+<rect width="1600" height="640" filter="url(#grain)" opacity="0.09" style="mix-blend-mode:overlay"/>
+</svg>

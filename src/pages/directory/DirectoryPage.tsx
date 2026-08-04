@@ -26,6 +26,8 @@ import { debounce } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { BANNER_WASH, bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
+import { BannerAurora } from '../../components/profile/BannerAurora'
 
 export default function DirectoryPage() {
   const { t , i18n } = useLingui()
@@ -359,11 +361,20 @@ export default function DirectoryPage() {
                   // skills and standing on a card whose profile is closed
                   // would make the lock look decorative.
                   const isLocked = member.profile_visibility === 'private'
+                  // Banner is a teaser like the avatar: locked members keep it.
+                  const banner = parseBanner(member.banner)
                   return (
                   <BentoCard
                     key={member.id}
                     to={`/directory?member=${member.username || member.id}`}
                     imageSeed={member.id}
+                    image={bannerImage(banner)}
+                    imagePosition={bannerPosition(banner, 'card')}
+                    wash={bannerImage(banner) ? BANNER_WASH : undefined}
+                    background={
+                      // Static render on purpose: dozens of cards at once.
+                      isGradientBanner(banner) ? <BannerAurora spec={banner} animated={false} /> : undefined
+                    }
                     eyebrow={
                       member.roles?.length > 0
                         ? member.roles.slice(0, 2).map((r: string) => resolveCopy(i18n, ROLE_LABELS[r] || r)).join(', ')

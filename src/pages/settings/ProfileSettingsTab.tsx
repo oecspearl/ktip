@@ -29,6 +29,7 @@ import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { BannerStudio } from '../../components/profile/BannerStudio'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
@@ -239,6 +240,10 @@ export function ProfileSettingsTab() {
           </div>
         </div>
       </Card>
+
+      {/* Banner — photo, built-in design or aurora gradient, with live
+          previews of every surface that shows it (104). */}
+      <BannerStudio />
 
       {/* Profile Info */}
       <Card id="profile-info" data-spy="Profile" className="scroll-mt-24">

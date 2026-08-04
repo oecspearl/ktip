@@ -22,6 +22,8 @@ import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { dmBlockedReason } from '../../lib/minor-safety'
 import { heroImageFor, gradientFor } from '../../lib/hero-images'
+import { BANNER_WASH, bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
+import { BannerAurora } from '../profile/BannerAurora'
 import {
   ROLE_LABELS,
   ROLE_COLORS,
@@ -224,6 +226,7 @@ export function MemberPanel() {
   // Seeded off the id, not the URL segment: the same member must get the same
   // cover whether they were opened by username or by uuid.
   const coverSeed = resolvedId ?? 'member'
+  const coverBanner = parseBanner(profile?.banner)
   const hasSections = !!(
     profile?.bio ||
     badges?.length ||
@@ -273,14 +276,30 @@ export function MemberPanel() {
         </button>
 
         <div className="@container flex-1 min-h-0 overflow-y-auto">
-          {/* Cover: a texture band, not a subject — the wash keeps type legible */}
-          <div className="relative h-24 shrink-0">
-            <img
-              src={heroImageFor(coverSeed)}
-              alt=""
-              loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradientFor(coverSeed)}`} />
+          {/* Cover: a texture band, not a subject — the wash keeps type legible.
+              The member's own banner (a teaser field, so it survives the
+              privacy lock) replaces the seeded art when they have set one. */}
+          <div className="relative h-24 shrink-0 overflow-hidden">
+            {isGradientBanner(coverBanner) ? (
+              <BannerAurora spec={coverBanner} />
+            ) : (
+              <img
+                src={bannerImage(coverBanner) || heroImageFor(coverSeed)}
+                alt=""
+                loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: bannerPosition(coverBanner, 'panel') }}
+              />
+            )}
+            {/* Same rule as BentoCard: no wash over the aurora, a neutral
+                scrim over chosen banner art, the seeded brand wash only over
+                seeded stock photos. */}
+            {!isGradientBanner(coverBanner) && (
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${
+                  bannerImage(coverBanner) ? BANNER_WASH : gradientFor(coverSeed)
+                }`}
+              />
+            )}
             <p className="absolute left-6 top-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">
               <Trans>Member</Trans>
             </p>

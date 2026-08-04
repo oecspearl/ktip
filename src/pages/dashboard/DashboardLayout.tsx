@@ -13,6 +13,8 @@ import { cn } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { Plural, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
+import { BannerAurora } from '../../components/profile/BannerAurora'
 
 /**
  * The single personal page. Everything that used to live on /profile/me now
@@ -27,6 +29,7 @@ export default function DashboardLayout() {
   const { count: connectionCount } = useConnectionCount(auth.user?.id)
 
   const profile = auth.profile
+  const dashBanner = parseBanner(profile?.banner)
   const displayName = profile?.display_name || t`Your dashboard`
   const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role)
 
@@ -96,6 +99,12 @@ export default function DashboardLayout() {
         }
         title={t`Dashboard`}
         imageSeed="dashboard"
+        // The member's own banner personalises the band; the seeded community
+        // photo stays for everyone who has not set one.
+        image={bannerImage(dashBanner)}
+        neutralWash={!!bannerImage(dashBanner)}
+        imagePosition={bannerPosition(dashBanner, 'dashboard')}
+        background={isGradientBanner(dashBanner) ? <BannerAurora spec={dashBanner} /> : undefined}
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Dashboard` }]}
       >
         <div className="flex flex-wrap items-center gap-2 md:justify-end">

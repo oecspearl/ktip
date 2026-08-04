@@ -1543,6 +1543,36 @@ html[data-capturing] [data-fab] {
 .stagger-children > :nth-child(11),
 .stagger-rows > :nth-child(11) { animation-delay: 800ms; }
 
+/* Aurora banner blobs (BannerAurora): flat colour shapes diffused by heavy
+   blur and added together with plus-lighter — the layered glow technique.
+   Three offset drift tracks so neighbouring blobs never move in sync; each
+   blob's duration/delay is set inline from its seed. */
+.aurora-blob {
+  filter: blur(64px);
+  mix-blend-mode: plus-lighter;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.aurora-drift-0 { animation-name: auroraDriftA; }
+.aurora-drift-1 { animation-name: auroraDriftB; }
+.aurora-drift-2 { animation-name: auroraDriftC; }
+@keyframes auroraDriftA {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(6%, -4%) scale(1.08); }
+  66% { transform: translate(-5%, 3%) scale(0.95); }
+}
+@keyframes auroraDriftB {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-7%, 5%) scale(1.1); }
+  70% { transform: translate(4%, -6%) scale(0.92); }
+}
+@keyframes auroraDriftC {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30% { transform: translate(5%, 6%) scale(0.94); }
+  65% { transform: translate(-6%, -5%) scale(1.06); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-reveal-up,
   .page-reveal :where(h2),
@@ -1559,6 +1589,8 @@ html[data-capturing] [data-fab] {
   .animate-slide-in-right,
   .animate-slide-out-right,
   .animate-fade-out,
+  /* The aurora still glows standing still — the drift is decoration. */
+  .aurora-blob,
   /* The portal still reads as a portal standing still — it is rings and a
      glow, not motion carrying the meaning. */
   .venue-portal-spin,

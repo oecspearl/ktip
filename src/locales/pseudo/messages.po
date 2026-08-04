@@ -252,6 +252,10 @@ msgstr ""
 msgid "Flip the whole app between light and dark themes"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Gradient"
+msgstr ""
+
 #. placeholder {0}: occupants.length
 #: src/components/venue/VenuePresencePanel.tsx
 msgid "In the venue · {0}"
@@ -523,6 +527,10 @@ msgstr ""
 msgid "Become a Contributor"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Directory card"
+msgstr ""
+
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Who can open it"
 msgstr ""
@@ -682,6 +690,10 @@ msgstr ""
 msgid "Find collaborators. Build what’s next."
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Shuffle placement"
+msgstr ""
+
 #: src/components/AdminRoute.tsx
 msgid "This area is restricted to OECS administrators. If you believe you should have access, please contact your organization."
 msgstr ""
@@ -825,6 +837,10 @@ msgstr ""
 
 #: src/pages/settings/SettingsPage.tsx
 msgid "Password & account"
+msgstr ""
+
+#: src/components/directory/MemberPanel.tsx
+msgid "This profile is private. You can see it because you are connected."
 msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
@@ -1513,6 +1529,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Help article — Your CV"
+msgstr ""
+
+#. placeholder {0}: i + 1
+#: src/components/profile/BannerStudio.tsx
+msgid "Gradient colour {0}"
 msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
@@ -2494,6 +2515,10 @@ msgstr ""
 msgid "Superscript"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Member page"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Accounts, roles, verification and deletion."
 msgstr ""
@@ -2891,6 +2916,7 @@ msgid "Snippets autosave to your account and appear in your snippet list next ti
 "Share gives someone else the link and decides whether they can edit. Download takes the file out with the right extension for the language."
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
 #: src/pages/dashboard/DashboardLayout.tsx
 #: src/pages/dashboard/DashboardTopBar.tsx
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
@@ -4801,6 +4827,10 @@ msgstr ""
 msgid "Complete your profile →"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Save banner"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Edit profile details"
 msgstr ""
@@ -5956,6 +5986,10 @@ msgstr ""
 msgid "Newest"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid " — drag inside one to position the image for that surface"
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "No events found"
 msgstr ""
@@ -6603,6 +6637,7 @@ msgstr ""
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/i18n/harvested.ts
 #: src/pages/directory/DirectoryPage.tsx
+#: src/pages/profile/PublicProfilePage.tsx
 msgid "Member Directory"
 msgstr ""
 
@@ -7325,6 +7360,10 @@ msgstr ""
 msgid "Languages"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Uploading…"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Open the document and use its export action.\n"
 "\n"
@@ -7425,6 +7464,10 @@ msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "An upcoming event for the OECS community."
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Failed to update banner"
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -7938,6 +7981,10 @@ msgstr ""
 msgid "Acting, and the rules behind it"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Click or drop to replace your banner photo"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Click your avatar in the top-right corner."
 msgstr ""
@@ -8267,6 +8314,10 @@ msgid "Access the full resource file"
 msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
+msgid "Your profile is locked. Other members see only your name, photo and country until you accept their connection request — you always see everything here."
+msgstr ""
+
+#: src/components/directory/MemberPanel.tsx
 msgid "Open member page"
 msgstr ""
 
@@ -8325,6 +8376,7 @@ msgstr ""
 #: src/pages/InvitationsPage.tsx
 #: src/pages/JoinInvitePage.tsx
 #: src/pages/NotFoundPage.tsx
+#: src/pages/profile/PublicProfilePage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
@@ -8482,6 +8534,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "What are points and levels?"
+msgstr ""
+
+#. placeholder {0}: draggable ? t` — drag inside one to position the image for that surface` : ''
+#: src/components/profile/BannerStudio.tsx
+msgid "Shown on your member page, your directory card, the member preview and your dashboard. The previews below are live{0}."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -8833,6 +8890,7 @@ msgstr ""
 msgid "Student applications must be sponsored. Nominate a faculty member in the application — they accept it, and then it can be submitted."
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
 #: src/components/ui/ImageUpload.tsx
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Please select an image file"
@@ -8896,6 +8954,10 @@ msgstr ""
 
 #: src/lib/venue-room-presets.ts
 msgid "Mentors, judges and organizers only."
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Flat colour shapes are diffused into a slow-moving glow — placement is random per shuffle, then stays the same everywhere your banner appears."
 msgstr ""
 
 #: src/components/venue/VenuePresencePanel.tsx
@@ -9109,6 +9171,10 @@ msgstr ""
 #. placeholder {0}: format(startDate, 'MMMM dd, yyyy')
 #: src/pages/events/EventDetailPage.tsx
 msgid "Date: {0}"
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Banner removed"
 msgstr ""
 
 #: src/components/layout/Footer.tsx
@@ -9915,6 +9981,10 @@ msgstr ""
 msgid "Edit the map"
 msgstr ""
 
+#: src/components/directory/MemberPanel.tsx
+msgid "This profile is private. You can see it because administrators bypass the lock."
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 msgid "Events you organise or registered for"
 msgstr ""
@@ -9933,6 +10003,10 @@ msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Uploading files…"
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Banner"
 msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
@@ -9975,6 +10049,10 @@ msgstr ""
 msgid "Back to Resources"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Click or drop a wide photo — it is resized and optimized automatically"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Go to the Member Directory, or open someone's profile."
 msgstr ""
@@ -9997,6 +10075,7 @@ msgid "This goes to the OECS safety team, not to the person you are reporting. T
 "The two optional fields matter more than “optional” suggests: a link to the post or screenshot, and where on the platform it happened, are what let the team find the evidence themselves."
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/pages/events/EventVenuePage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -11404,6 +11483,10 @@ msgstr ""
 msgid "Integrations"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Failed to upload banner"
+msgstr ""
+
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Back to My Documents"
 msgstr ""
@@ -11728,6 +11811,10 @@ msgstr ""
 msgid "Happening now"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Your photo"
+msgstr ""
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Remove \"{title}\" from your portfolio?"
 msgstr ""
@@ -11793,6 +11880,10 @@ msgstr ""
 msgid "Not Currently Seeking"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Drag to position"
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/editor/LinkModal.tsx
 #: src/components/feedback/FeedbackModal.tsx
@@ -11810,6 +11901,10 @@ msgstr ""
 
 #: src/components/grants/application/StepForm.tsx
 msgid "Select..."
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Image must be less than 8MB"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12243,6 +12338,7 @@ msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
 #: src/components/documents/DocumentAccessModal.tsx
+#: src/components/profile/BannerStudio.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/components/venue/AvatarCluster.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
@@ -13811,6 +13907,7 @@ msgid "Keep it"
 msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
+#: src/components/profile/BannerStudio.tsx
 msgid "Member preview"
 msgstr ""
 
@@ -15302,6 +15399,10 @@ msgstr ""
 msgid "Verification request submitted"
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "+ Colour"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Use colour {c}"
 msgstr ""
@@ -15900,6 +16001,10 @@ msgstr ""
 msgid "Anything not listed above. Matches content tagged with the same word."
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Banner updated!"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The AI suggestions are not working"
 msgstr ""
@@ -16209,6 +16314,10 @@ msgstr ""
 
 #: src/lib/minor-safety.ts
 msgid "Direct messages with adult members are turned off on accounts under 18. Group and event channels are open as usual."
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Designs"
 msgstr ""
 
 #: src/lib/validation.ts
@@ -16880,6 +16989,10 @@ msgstr ""
 msgid "Write your title and message, then publish."
 msgstr ""
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Remove colour"
+msgstr ""
+
 #: src/lib/extracted-fields.ts
 msgid "Application link"
 msgstr ""
@@ -16924,6 +17037,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Manage grants"
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Remove banner"
 msgstr ""
 
 #: src/components/layout/Footer.tsx
@@ -17788,6 +17905,7 @@ msgid "Organisations recorded on the platform, with their verification state and
 msgstr ""
 
 #: src/components/directory/MemberCard.tsx
+#: src/components/profile/BannerStudio.tsx
 #: src/pages/directory/DirectoryPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "View Profile"
@@ -17991,6 +18109,10 @@ msgstr ""
 
 #: src/lib/delete-guard.ts
 msgid "This project is public. Existing links to it will break."
+msgstr ""
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Drop to upload"
 msgstr ""
 
 #: src/i18n/harvested.ts

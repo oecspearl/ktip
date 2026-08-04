@@ -11,6 +11,19 @@ interface BentoCardProps {
   to: string
   /** Entity image; falls back to a seeded stock photo. */
   image?: string | null
+  /** object-position for the image (a banner's drag-set focal point). */
+  imagePosition?: string
+  /**
+   * Replaces the photo layer entirely — for banners that are drawn, not
+   * fetched (the aurora gradient). No wash renders over it.
+   */
+  background?: ReactNode
+  /**
+   * Overlay gradient classes over the image; defaults to the seeded brand
+   * wash. A member's chosen banner passes a neutral dark scrim instead — the
+   * navy wash "stays blue" over art that is red or green.
+   */
+  wash?: string
   imageSeed: string
   eyebrow?: ReactNode
   title: ReactNode
@@ -32,6 +45,9 @@ interface BentoCardProps {
 export function BentoCard({
   to,
   image,
+  imagePosition,
+  background,
+  wash,
   imageSeed,
   eyebrow,
   title,
@@ -57,13 +73,20 @@ export function BentoCard({
         className
       )}
     >
-      <img
-        src={image || heroImageFor(imageSeed)}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
-      />
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradientFor(imageSeed)}`} />
+      {background ?? (
+        <img
+          src={image || heroImageFor(imageSeed)}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          style={imagePosition ? { objectPosition: imagePosition } : undefined}
+          loading="lazy"
+        />
+      )}
+      {/* The brand wash tames a bright photo; a drawn background (aurora) is
+          built on a near-black base and the /90 corner just crushes it. */}
+      {!background && (
+        <div className={`absolute inset-0 bg-gradient-to-br ${wash ?? gradientFor(imageSeed)}`} />
+      )}
 
       <div className="relative flex gap-4">
         <div className="min-w-0 flex-1">

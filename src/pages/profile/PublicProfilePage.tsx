@@ -47,6 +47,9 @@ import { entityPath } from '../../lib/slug'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { PageHero } from '../../components/layout/PageHero'
+import { bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
+import { BannerAurora } from '../../components/profile/BannerAurora'
 
 /**
  * The shareable member page, back after being folded into a drawer.
@@ -111,24 +114,40 @@ export default function PublicProfilePage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-4 px-4 py-8">
-        <div className="h-40 animate-pulse-soft rounded-3xl bg-ktip-sand-100" />
-        <div className="h-64 animate-pulse-soft rounded-3xl bg-ktip-sand-100" />
-      </div>
+      <>
+        {/* Hero-band placeholder so the fixed white-text navbar has a dark
+            band under it while the profile loads (same fix as the hero). */}
+        <div className="bg-hero-base min-h-hero-band-compact" />
+        <div className="max-w-4xl mx-auto space-y-4 px-4 py-8">
+          <div className="h-40 animate-pulse-soft rounded-3xl bg-ktip-sand-100" />
+          <div className="h-64 animate-pulse-soft rounded-3xl bg-ktip-sand-100" />
+        </div>
+      </>
     )
   }
 
   if (!profile) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-24 text-center">
-        <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Member not found</Trans></h1>
-        <p className="mt-2 text-sm text-ktip-sand-600">
-          <Trans>This profile does not exist, or is no longer available.</Trans>
-        </p>
-        <Link to="/directory" className="mt-4 inline-block">
-          <Button variant="outline" size="sm"><Trans>Browse the directory</Trans></Button>
-        </Link>
-      </div>
+      <>
+        <PageHero
+          compact
+          backAlways
+          eyebrow={t`Member`}
+          title={t`Member not found`}
+          breadcrumb={[
+            { label: t`Home`, href: '/' },
+            { label: t`Member Directory`, href: '/directory' },
+          ]}
+        />
+        <div className="mx-auto max-w-lg px-4 py-16 text-center">
+          <p className="text-sm text-ktip-sand-600">
+            <Trans>This profile does not exist, or is no longer available.</Trans>
+          </p>
+          <Link to="/directory" className="mt-4 inline-block">
+            <Button variant="outline" size="sm"><Trans>Browse the directory</Trans></Button>
+          </Link>
+        </div>
+      </>
     )
   }
 
@@ -147,7 +166,35 @@ export default function PublicProfilePage() {
         ? t`${displayName} has asked to connect with you. Accept and you will both see each other's full profile.`
         : t`Only ${displayName}'s connections can see their full profile or send them a message. Send a connection request to ask.`
 
+  const pageBanner = parseBanner(profile.banner)
+
   return (
+    <>
+    <PageHero
+      compact
+      backAlways
+      eyebrow={t`Member`}
+      title={
+        <span className="inline-flex items-center gap-3">
+          <span className="truncate">{displayName}</span>
+          {profile.is_verified && (
+            <span className="text-white/90 shrink-0" title={t`Verified member`}>
+              <CheckCircle size={22} />
+            </span>
+          )}
+        </span>
+      }
+      imageSeed={profile.id}
+      image={bannerImage(pageBanner)}
+      neutralWash={!!bannerImage(pageBanner)}
+      imagePosition={bannerPosition(pageBanner, 'page')}
+      background={isGradientBanner(pageBanner) ? <BannerAurora spec={pageBanner} /> : undefined}
+      breadcrumb={[
+        { label: t`Home`, href: '/' },
+        { label: t`Member Directory`, href: '/directory' },
+        { label: displayName },
+      ]}
+    />
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       {/* ---------- Identity ---------- */}
       <header
@@ -159,16 +206,9 @@ export default function PublicProfilePage() {
           <DiamondAvatar src={profile.avatar_url} name={displayName} size={96} />
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-3xl font-bold text-ktip-sand-900">{displayName}</h1>
-              {profile.is_verified && (
-                <span className="text-ktip-ocean-500" title={t`Verified member`}>
-                  <CheckCircle size={20} />
-                </span>
-              )}
-            </div>
-
-            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ktip-sand-600">
+            {/* The hero band above carries the name (and verified tick) as the
+                page h1; repeating it here read as a stutter. */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ktip-sand-600">
               {profile.country && (
                 <span className="flex items-center gap-1.5">
                   <MapPin size={14} aria-hidden="true" />
@@ -497,6 +537,7 @@ export default function PublicProfilePage() {
         />
       ) : null}
     </div>
+    </>
   )
 }
 

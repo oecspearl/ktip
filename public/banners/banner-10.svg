@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <filter id="b60" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="60"/></filter>
+  <filter id="b110" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="110"/></filter>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+
+<rect width="1600" height="640" fill="#0D0303"/>
+<path d="M0 300 C 300 170, 620 190, 900 290 S 1400 420, 1600 330 L 1600 640 L 0 640 Z" fill="#C1121F"/>
+<path d="M0 430 C 320 330, 650 430, 950 420 S 1420 350, 1600 430 L 1600 640 L 0 640 Z" fill="#FF6B35"/>
+<path d="M0 520 C 300 470, 640 560, 960 530 S 1430 470, 1600 530 L 1600 640 L 0 640 Z" fill="#FFC145"/>
+<path d="M0 590 C 340 560, 660 620, 1000 600 S 1440 570, 1600 595 L 1600 640 L 0 640 Z" fill="#FFF6E8"/>
+
+<rect width="1600" height="640" filter="url(#grain)" opacity="0.09" style="mix-blend-mode:overlay"/>
+</svg>

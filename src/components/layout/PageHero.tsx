@@ -23,9 +23,24 @@ interface PageHeroProps {
   subtitle?: ReactNode
   /** Explicit hero image (e.g. an entity's image_url). Falls back to the stock pool. */
   image?: string | null
+  /** object-position for the photo (a banner's drag-set focal point). */
+  imagePosition?: string
+  /**
+   * Replaces the photo layers entirely — for banners that are drawn, not
+   * fetched (the aurora gradient). The readability overlays still render on
+   * top; the frosted blur copy is skipped because there is no photo to frost.
+   */
+  background?: ReactNode
   /** Stable seed for picking a stock image; defaults to the eyebrow text. */
   imageSeed?: string
   breadcrumb?: BreadcrumbItem[]
+  /** Show the back pill at every width, not just mobile (member pages). */
+  backAlways?: boolean
+  /**
+   * Drop the navy brand wash, keeping only the neutral dark overlays — for a
+   * member's chosen banner, whose colours the navy would fight ("stays blue").
+   */
+  neutralWash?: boolean
   actions?: ReactNode
   /** Extra content under the title (badges, meta rows). */
   children?: ReactNode
@@ -43,12 +58,16 @@ export function PageHero({
   title,
   subtitle,
   image,
+  imagePosition,
+  background,
   imageSeed,
   breadcrumb,
   actions,
   children,
   compact = false,
   inset = false,
+  backAlways = false,
+  neutralWash = false,
   spyLabel = 'Top',
 }: PageHeroProps) {
     const { t, i18n } = useLingui()
@@ -117,12 +136,14 @@ export function PageHero({
         compact ? 'min-h-hero-band-compact' : 'min-h-hero-band'
       } ${inset ? 'rounded-surface shadow-medium mb-8' : ''}`}
     >
+      {background ?? (<>
       <img
         ref={photoRef}
         src={src}
         alt=""
         onLoad={markPhotoReady}
         className={`absolute inset-0 w-full h-full object-cover photo-dimmable ${photoReveal}`}
+        style={imagePosition ? { objectPosition: imagePosition } : undefined}
         loading="eager" fetchPriority="high"
         /* sync, not async. `decoding="async"` is permission to paint a frame
            WITHOUT this image and decode it afterwards — and MainLayout remounts
@@ -168,13 +189,20 @@ export function PageHero({
         // 40px read as over-frosted; the long stop range is what makes it a
         // gradient blur rather than a hard frosted panel with a fading tint.
         className={`absolute inset-0 w-full h-full object-cover ${photoReveal} [filter:blur(24px)_brightness(var(--photo-brightness,1))] [transform:scale(1.08)] [mask-image:linear-gradient(to_left,black_25%,transparent_95%)] md:[mask-image:linear-gradient(to_left,black_20%,transparent_78%)]`}
+        style={imagePosition ? { objectPosition: imagePosition } : undefined}
         loading="eager" decoding="sync"
       />
       <div className="absolute inset-y-0 right-0 w-full md:w-[80%] bg-black/10 [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
-      {/* Neutral dark overlays for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
+      </>)}
+      {/* Neutral dark overlays for text readability — skipped over a drawn
+          background: the aurora is born dark and the washes crush its glow. */}
+      {!background && (
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
+      )}
       {/* Brand wash — navy by day, green by night (OECS palette) */}
-      <div className={`absolute inset-0 bg-gradient-to-r ${HERO_WASH}`} />
+      {!background && !neutralWash && (
+        <div className={`absolute inset-0 bg-gradient-to-r ${HERO_WASH}`} />
+      )}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
 
       <div
@@ -188,7 +216,7 @@ export function PageHero({
         {backCrumb && (
           <Link
             to={backCrumb.href!}
-            className="md:hidden mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+            className={`${backAlways ? '' : 'md:hidden '}mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white`}
           >
             <ArrowLeft size={15} aria-hidden="true" />
             {resolveCopy(i18n, backCrumb.label)}

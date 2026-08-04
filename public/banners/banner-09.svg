@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <filter id="b60" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="60"/></filter>
+  <filter id="b110" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="110"/></filter>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+
+<rect width="1600" height="640" fill="#0B1B33"/>
+<g>
+  <circle cx="0" cy="640" r="900" fill="#163A63"/>
+  <circle cx="0" cy="640" r="740" fill="#2A5788"/>
+  <circle cx="0" cy="640" r="580" fill="#4F7AAE"/>
+  <circle cx="0" cy="640" r="430" fill="#8FB4DC"/>
+  <circle cx="0" cy="640" r="290" fill="#F5E9D4"/>
+  <circle cx="0" cy="640" r="160" fill="#FFFDF7"/>
+</g>
+<g filter="url(#b110)"><ellipse cx="1420" cy="140" rx="360" ry="260" fill="#2BC8C4" opacity="0.5" style="mix-blend-mode:screen"/></g>
+
+<rect width="1600" height="640" filter="url(#grain)" opacity="0.09" style="mix-blend-mode:overlay"/>
+</svg>

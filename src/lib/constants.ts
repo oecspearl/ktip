@@ -774,6 +774,9 @@ export const IMAGE_PRESETS = {
   // Trophies render at 128px at most and there are ~52 of them, so they are
   // kept small: the whole set costs less over the wire than one hero image.
   TROPHY: { maxDim: 512, quality: 0.85, maxBytes: 200 * 1024 },
+  // Profile banners span the full member-page hero, so the longest edge stays
+  // large; quality matches DOCUMENT since gradient-heavy photos band easily.
+  BANNER: { maxDim: 1920, quality: 0.82, maxBytes: 700 * 1024 },
 } as const
 
 // Date Formats

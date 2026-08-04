@@ -206,7 +206,8 @@
       "Bash(echo \"TS:$?\")",
       "Read(//c/Users/LG/Downloads/ktip trophies/no bg/**)",
       "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/462e7237-e5b4-495a-9baa-662aceda7f30/scratchpad/move-trophies.mjs\")",
-      "PowerShell(npx tsc --noEmit 2>$null; echo \"exit: $LASTEXITCODE\")"
+      "PowerShell(npx tsc --noEmit 2>$null; echo \"exit: $LASTEXITCODE\")",
+      "PowerShell(cd \"$env:TEMP\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\ecb7f8aa-8e7b-4f2d-9b16-7e468a44f391\\\\scratchpad\"; node seed-banners.mjs)"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

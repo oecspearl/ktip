@@ -1,5 +1,7 @@
 // Custom types for KTIP application
 
+import type { BannerSpec } from '../lib/banner'
+
 /**
  * Every platform role. The first seven predate the tiered hierarchy and are
  * still stored on live profiles — `oecs` in particular resolves to
@@ -143,6 +145,13 @@ export interface Profile {
   display_name: string | null
   bio: string | null
   avatar_url: string | null
+  /**
+   * Profile banner spec (104) — image, preset design or aurora gradient; see
+   * src/lib/banner.ts. Optional for the deploy-ahead-of-migration reason the
+   * 082 fields are; read it through parseBanner(), which also absorbs any
+   * malformed value the client-owned JSONB might hold.
+   */
+  banner?: BannerSpec | null
   country: string | null
   organization: string | null
   industry: string | null
@@ -222,6 +231,8 @@ export interface ProfileView {
   id: string
   display_name: string | null
   avatar_url: string | null
+  /** Teaser field like the avatar (104): a private member's cover still shows. */
+  banner?: BannerSpec | null
   roles: UserRole[]
   country: string | null
   is_verified: boolean

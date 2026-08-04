@@ -258,6 +258,10 @@ msgstr "Audio"
 msgid "Flip the whole app between light and dark themes"
 msgstr "Cambie toda la aplicación entre los temas claro y oscuro"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Gradient"
+msgstr ""
+
 #. placeholder {0}: occupants.length
 #: src/components/venue/VenuePresencePanel.tsx
 msgid "In the venue · {0}"
@@ -532,6 +536,10 @@ msgstr "{rsvpCount, plural, one {# persona se ha registrado. Sus datos de regist
 msgid "Become a Contributor"
 msgstr "Conviértete en colaborador"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Directory card"
+msgstr ""
+
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Who can open it"
 msgstr "Quién puede abrirlo"
@@ -694,6 +702,10 @@ msgstr "Financiación"
 msgid "Find collaborators. Build what’s next."
 msgstr "Encuentre colaboradores. Construya lo que viene después."
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Shuffle placement"
+msgstr ""
+
 #: src/components/AdminRoute.tsx
 msgid "This area is restricted to OECS administrators. If you believe you should have access, please contact your organization."
 msgstr "Esta área está restringida a los administradores de OECS. Si cree que debería tener acceso, comuníquese con su organización."
@@ -842,6 +854,10 @@ msgstr "Número de registro de la empresa"
 #: src/pages/settings/SettingsPage.tsx
 msgid "Password & account"
 msgstr "Contraseña y cuenta"
+
+#: src/components/directory/MemberPanel.tsx
+msgid "This profile is private. You can see it because you are connected."
+msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
 msgid "Full name"
@@ -1544,6 +1560,11 @@ msgstr "Compartido desde su cuenta de Virtual Campus. Si elimina uno, permanece 
 #: src/i18n/harvested.ts
 msgid "Help article — Your CV"
 msgstr "Artículo de ayuda: Su CV"
+
+#. placeholder {0}: i + 1
+#: src/components/profile/BannerStudio.tsx
+msgid "Gradient colour {0}"
+msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
 msgid "{name} progress"
@@ -2538,6 +2559,10 @@ msgstr "Artículos por tema, y cómo contactar a una persona."
 msgid "Superscript"
 msgstr "Superíndice"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Member page"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Accounts, roles, verification and deletion."
 msgstr "Cuentas, roles, verificación y eliminación."
@@ -2940,6 +2965,7 @@ msgid "Snippets autosave to your account and appear in your snippet list next ti
 msgstr "Los fragmentos se guardan automáticamente en su cuenta y aparecerán en su lista de fragmentos la próxima vez.\n"
 ""
 
+#: src/components/profile/BannerStudio.tsx
 #: src/pages/dashboard/DashboardLayout.tsx
 #: src/pages/dashboard/DashboardTopBar.tsx
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
@@ -4887,6 +4913,10 @@ msgstr "Resumen ejecutivo"
 msgid "Complete your profile →"
 msgstr "Complete su perfil →"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Save banner"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Edit profile details"
 msgstr "Editar los datos del perfil"
@@ -6064,6 +6094,10 @@ msgstr "Documento sin título"
 msgid "Newest"
 msgstr "Más reciente"
 
+#: src/components/profile/BannerStudio.tsx
+msgid " — drag inside one to position the image for that surface"
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "No events found"
 msgstr "No se encontraron eventos"
@@ -6718,6 +6752,7 @@ msgstr "No se pudo decidir la solicitud"
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/i18n/harvested.ts
 #: src/pages/directory/DirectoryPage.tsx
+#: src/pages/profile/PublicProfilePage.tsx
 msgid "Member Directory"
 msgstr "Directorio de miembros"
 
@@ -7450,6 +7485,10 @@ msgstr "<0>{0}</0> es ahora su dirección de correo electrónico principal, por 
 msgid "Languages"
 msgstr "Idiomas"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Uploading…"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Open the document and use its export action.\n"
 "\n"
@@ -7554,6 +7593,10 @@ msgstr "Error al revocar el acceso"
 #: src/pages/discover/DiscoverPage.tsx
 msgid "An upcoming event for the OECS community."
 msgstr "Un próximo evento para la comunidad de la OECS."
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Failed to update banner"
+msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Could not save the profile"
@@ -8074,6 +8117,10 @@ msgstr "Inicie una discusión en el foro"
 msgid "Acting, and the rules behind it"
 msgstr "Actuar, y las reglas detrás de ello"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Click or drop to replace your banner photo"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Click your avatar in the top-right corner."
 msgstr "Haga clic en su avatar en la esquina superior derecha."
@@ -8410,6 +8457,10 @@ msgid "Access the full resource file"
 msgstr "Acceda al archivo completo del recurso"
 
 #: src/components/directory/MemberPanel.tsx
+msgid "Your profile is locked. Other members see only your name, photo and country until you accept their connection request — you always see everything here."
+msgstr ""
+
+#: src/components/directory/MemberPanel.tsx
 msgid "Open member page"
 msgstr "Abrir la página del miembro"
 
@@ -8468,6 +8519,7 @@ msgstr "Solo necesarias"
 #: src/pages/InvitationsPage.tsx
 #: src/pages/JoinInvitePage.tsx
 #: src/pages/NotFoundPage.tsx
+#: src/pages/profile/PublicProfilePage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
@@ -8627,6 +8679,11 @@ msgstr "+{hiddenCount} más"
 #: src/i18n/harvested.ts
 msgid "What are points and levels?"
 msgstr "¿Qué son los puntos y los niveles?"
+
+#. placeholder {0}: draggable ? t` — drag inside one to position the image for that surface` : ''
+#: src/components/profile/BannerStudio.tsx
+msgid "Shown on your member page, your directory card, the member preview and your dashboard. The previews below are live{0}."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Start writing a shared document"
@@ -8984,6 +9041,7 @@ msgstr ""
 msgid "Student applications must be sponsored. Nominate a faculty member in the application — they accept it, and then it can be submitted."
 msgstr "Las solicitudes de estudiantes deben tener un patrocinador. Designe a un miembro del cuerpo docente en la solicitud — este la acepta y entonces podrá enviarse."
 
+#: src/components/profile/BannerStudio.tsx
 #: src/components/ui/ImageUpload.tsx
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Please select an image file"
@@ -9048,6 +9106,10 @@ msgstr "Ya ha presentado una solicitud para esta subvención."
 #: src/lib/venue-room-presets.ts
 msgid "Mentors, judges and organizers only."
 msgstr "Solo para mentores, jueces y organizadores."
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Flat colour shapes are diffused into a slow-moving glow — placement is random per shuffle, then stays the same everywhere your banner appears."
+msgstr ""
 
 #: src/components/venue/VenuePresencePanel.tsx
 #: src/pages/events/EventVenuePage.tsx
@@ -9264,6 +9326,10 @@ msgstr "Introduzca una URL válida"
 #: src/pages/events/EventDetailPage.tsx
 msgid "Date: {0}"
 msgstr "Fecha: {0}"
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Banner removed"
+msgstr ""
 
 #: src/components/layout/Footer.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
@@ -10081,6 +10147,10 @@ msgstr "Coloque en esta planta las salas que necesita su hackathon, defina quié
 msgid "Edit the map"
 msgstr "Editar el mapa"
 
+#: src/components/directory/MemberPanel.tsx
+msgid "This profile is private. You can see it because administrators bypass the lock."
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 msgid "Events you organise or registered for"
 msgstr "Eventos que organizas o en los que te has inscrito"
@@ -10100,6 +10170,10 @@ msgstr "Filtrar {heading}…"
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Uploading files…"
 msgstr "Subiendo archivos…"
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Banner"
+msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Screenshots are stored under your account, so they cannot be attached to an anonymous report."
@@ -10141,6 +10215,10 @@ msgstr "Escribir una respuesta..."
 msgid "Back to Resources"
 msgstr "Volver a Recursos"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Click or drop a wide photo — it is resized and optimized automatically"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Go to the Member Directory, or open someone's profile."
 msgstr "Vaya al Directorio de miembros, o abra el perfil de una persona."
@@ -10165,6 +10243,7 @@ msgid "This goes to the OECS safety team, not to the person you are reporting. T
 msgstr "Esto se envía al equipo de seguridad de la OECS, no a la persona que está denunciando. No se le informa quién presentó la denuncia.\n"
 ""
 
+#: src/components/profile/BannerStudio.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/pages/events/EventVenuePage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -11586,6 +11665,10 @@ msgstr "Verifique empleadores y controle lo que publica la API del socio"
 msgid "Integrations"
 msgstr "Integraciones"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Failed to upload banner"
+msgstr ""
+
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Back to My Documents"
 msgstr "Volver a Mis documentos"
@@ -11912,6 +11995,10 @@ msgstr "Categorías"
 msgid "Happening now"
 msgstr "Sucediendo ahora"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Your photo"
+msgstr ""
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Remove \"{title}\" from your portfolio?"
 msgstr "¿Quitar «{title}» de su portafolio?"
@@ -11977,6 +12064,10 @@ msgstr "Cambiar nombre de la carpeta"
 msgid "Not Currently Seeking"
 msgstr "No busca actualmente"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Drag to position"
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/editor/LinkModal.tsx
 #: src/components/feedback/FeedbackModal.tsx
@@ -11995,6 +12086,10 @@ msgstr ""
 #: src/components/grants/application/StepForm.tsx
 msgid "Select..."
 msgstr "Seleccionar..."
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Image must be less than 8MB"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Moderating"
@@ -12431,6 +12526,7 @@ msgstr "Cierre de inscripciones"
 
 #: src/components/directory/MemberPanel.tsx
 #: src/components/documents/DocumentAccessModal.tsx
+#: src/components/profile/BannerStudio.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/components/venue/AvatarCluster.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
@@ -14020,6 +14116,7 @@ msgid "Keep it"
 msgstr "Conservar"
 
 #: src/components/directory/MemberPanel.tsx
+#: src/components/profile/BannerStudio.tsx
 msgid "Member preview"
 msgstr "Vista previa del miembro"
 
@@ -15531,6 +15628,10 @@ msgstr "Es posible que su sesión haya caducado. No se pudieron cargar los datos
 msgid "Verification request submitted"
 msgstr "Solicitud de verificación enviada"
 
+#: src/components/profile/BannerStudio.tsx
+msgid "+ Colour"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Use colour {c}"
 msgstr "Usar el color {c}"
@@ -16135,6 +16236,10 @@ msgstr "Use la etiqueta en la barra superior: indica a los demás si pueden inte
 msgid "Anything not listed above. Matches content tagged with the same word."
 msgstr "Cualquier cosa no incluida arriba. Coincide con el contenido etiquetado con la misma palabra."
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Banner updated!"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The AI suggestions are not working"
 msgstr "Las sugerencias de la IA no funcionan"
@@ -16450,6 +16555,10 @@ msgstr "Las personas con las que está conectado"
 #: src/lib/minor-safety.ts
 msgid "Direct messages with adult members are turned off on accounts under 18. Group and event channels are open as usual."
 msgstr "Los mensajes directos con miembros adultos están desactivados en las cuentas de menores de 18 años. Los canales de grupo y de eventos permanecen abiertos como de costumbre."
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Designs"
+msgstr ""
 
 #: src/lib/validation.ts
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -17126,6 +17235,10 @@ msgstr "No se pudo invitar a los colaboradores."
 msgid "Write your title and message, then publish."
 msgstr "Escriba su título y mensaje, y luego publique."
 
+#: src/components/profile/BannerStudio.tsx
+msgid "Remove colour"
+msgstr ""
+
 #: src/lib/extracted-fields.ts
 msgid "Application link"
 msgstr "Enlace de solicitud"
@@ -17171,6 +17284,10 @@ msgstr "Calendario de eventos"
 #: src/i18n/harvested.ts
 msgid "Manage grants"
 msgstr "Gestionar subvenciones"
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Remove banner"
+msgstr ""
 
 #: src/components/layout/Footer.tsx
 #: src/components/layout/Navbar.tsx
@@ -18049,6 +18166,7 @@ msgstr "Las organizaciones registradas en la plataforma, con su estado de verifi
 ""
 
 #: src/components/directory/MemberCard.tsx
+#: src/components/profile/BannerStudio.tsx
 #: src/pages/directory/DirectoryPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "View Profile"
@@ -18258,6 +18376,10 @@ msgstr "Todos los miembros registrados, filtrables por rol y estado de verificac
 #: src/lib/delete-guard.ts
 msgid "This project is public. Existing links to it will break."
 msgstr "Este proyecto es público. Los enlaces existentes a él dejarán de funcionar."
+
+#: src/components/profile/BannerStudio.tsx
+msgid "Drop to upload"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Every achievement is worth points depending on how rare it is, from 10 for a common one up to 200 for a legendary. Your level comes from how many achievements you have earned rather than how many points — someone who has done a bit of everything ranks higher than someone with one big win. Levels run from Newcomer to KTIP Champion."

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <filter id="b60" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="60"/></filter>
+  <filter id="b110" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="110"/></filter>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+
+<rect width="1600" height="640" fill="#0A0416"/>
+<g filter="url(#b110)">
+  <ellipse cx="520" cy="420" rx="560" ry="400" fill="#4318E0" style="mix-blend-mode:screen"/>
+  <ellipse cx="1120" cy="560" rx="420" ry="330" fill="#8A5CFF" style="mix-blend-mode:screen"/>
+  <ellipse cx="820" cy="700" rx="300" ry="220" fill="#EBD9FF" style="mix-blend-mode:screen"/>
+</g>
+
+<rect width="1600" height="640" filter="url(#grain)" opacity="0.09" style="mix-blend-mode:overlay"/>
+</svg>
