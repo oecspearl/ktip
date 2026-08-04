@@ -541,6 +541,19 @@ export const SITE_MAP: SiteEntry[] = [
     access: 'auth',
     icon: 'LayoutDashboard',
   },
+  {
+    id: 'dashboard.my-profile',
+    title: 'My Profile',
+    category: 'Account',
+    description: 'Edit what other members see, and lock your profile so only connections can view it',
+    keywords: [
+      'profile', 'edit profile', 'my profile', 'bio', 'skills', 'avatar', 'photo',
+      'privacy', 'private', 'lock', 'locked', 'visibility', 'who can see',
+    ],
+    href: '/dashboard/my-profile',
+    access: 'auth',
+    icon: 'User',
+  },
   // The old 'dashboard.profile' entry ("My Profile") merged into this one when
   // the tab became the CV itself; its keywords live on here.
   {

@@ -352,7 +352,14 @@ export default function DirectoryPage() {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
-                {members.map((member) => (
+                {members.map((member) => {
+                  // Locked profiles get the 083 teaser on the card too — name,
+                  // photo, country — not just behind the click. The columns
+                  // still arrive (the list reads the table), but showing
+                  // skills and standing on a card whose profile is closed
+                  // would make the lock look decorative.
+                  const isLocked = member.profile_visibility === 'private'
+                  return (
                   <BentoCard
                     key={member.id}
                     to={`/directory?member=${member.username || member.id}`}
@@ -377,17 +384,17 @@ export default function DirectoryPage() {
                     meta={
                       <>
                         {member.country && <>{member.country}</>}
-                        {member.country && member.skills?.length > 0 && <> · </>}
-                        {member.skills?.length > 0 && <>{member.skills[0]}</>}
+                        {!isLocked && member.country && member.skills?.length > 0 && <> · </>}
+                        {!isLocked && member.skills?.length > 0 && <>{member.skills[0]}</>}
                         {/* Said on the card, so the closed profile behind it
                             is not a surprise after the click. */}
-                        {member.profile_visibility === 'private' && (
+                        {isLocked && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Lock size={13} className="shrink-0" />
                             <Trans>Private profile</Trans>
                           </span>
                         )}
-                        {connectionCounts?.[member.id] !== undefined && (
+                        {!isLocked && connectionCounts?.[member.id] !== undefined && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Users size={13} className="shrink-0" />
                             {connectionCounts[member.id]}{' '}
@@ -397,13 +404,13 @@ export default function DirectoryPage() {
                         {/* Only once there is something to show — "Newcomer,
                             0 pts" on every new member turns the directory
                             into a scoreboard of who has not started. */}
-                        {statsById[member.id]?.badge_count > 0 && (
+                        {!isLocked && statsById[member.id]?.badge_count > 0 && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Trophy size={13} className="shrink-0" />
                             <Trans>{statsById[member.id].rank_name} · {statsById[member.id].points} pts</Trans>
                           </span>
                         )}
-                        {(member.user_badges?.length ?? 0) > 0 && (
+                        {!isLocked && (member.user_badges?.length ?? 0) > 0 && (
                           <span className="flex flex-wrap gap-1.5 mt-2">
                             {member.user_badges!.slice(0, 3).map((ub) => (
                               <AchievementBadge key={ub.id} userBadge={ub} />
@@ -426,7 +433,8 @@ export default function DirectoryPage() {
                       statusPending={statusesLoading}
                     />
                   </BentoCard>
-                ))}
+                  )
+                })}
               </div>
 
               {members.length >= pageLimit && (

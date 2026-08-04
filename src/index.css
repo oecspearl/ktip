@@ -386,6 +386,12 @@
   --animate-pulse-soft: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   /* Right-edge drawers (member preview) — slide in over the page */
   --animate-slide-in-right: slideInRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Their exit — the entry played backwards: same duration, same curve. The
+     drawer stays mounted for the duration (MemberPanel's closing timeout);
+     `both` holds the final frame so it cannot flash back between animation
+     end and unmount. */
+  --animate-slide-out-right: slideOutRight 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-out: fadeOut 0.32s ease-in-out both;
   --animate-char-flip: charFlip 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-reveal-up: revealUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 
@@ -417,6 +423,16 @@
   @keyframes slideInRight {
     0% { transform: translateX(100%); opacity: 0.4; }
     100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slideOutRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.4; }
+  }
+
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
   }
 
   @keyframes pulse-soft {
@@ -1481,8 +1497,9 @@ html[data-capturing] [data-fab] {
 }
 
 /* Section headings reveal on navigation (routed subtree remounts via
-   key={pathname} in MainLayout/AdminLayout). :where() keeps specificity
-   at 0 so animate-none can opt out. */
+   key={shellKey(pathname)} in MainLayout; inside the dashboard/admin shells
+   only the keyed pane wrapper remounts, so the replay is scoped to the pane).
+   :where() keeps specificity at 0 so animate-none can opt out. */
 .page-reveal :where(h2) {
   animation: revealUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
 }
@@ -1540,6 +1557,8 @@ html[data-capturing] [data-fab] {
   .animate-fade-in,
   .animate-slide-up,
   .animate-slide-in-right,
+  .animate-slide-out-right,
+  .animate-fade-out,
   /* The portal still reads as a portal standing still — it is rings and a
      glow, not motion carrying the meaning. */
   .venue-portal-spin,
@@ -1771,6 +1790,35 @@ html.route-shuffle.route-shuffle-from-home::view-transition-old(root) {
 /* What shows through the fading card is the pair's hero-base background —
    set on html.route-shuffle::view-transition-image-pair(root) further down,
    shared with the navbar pinning. */
+
+/* ---------------------------------------------------------------------------
+   Pane shuffle — intra-shell tab changes (dashboard rail, admin sidebar).
+   These navigations run NO view transition (sameShell opt-out in
+   routeTransitions.ts): a root snapshot would freeze the document on the
+   tab's lazy chunk and slide the static hero and rail too. Instead the
+   shell's content pane remounts via key={pathname} and deals itself in with
+   the same keyframes and easing as the full card shuffle, so the motion
+   matches while the rail, hero and scroll stay live. The keyframes'
+   border-radius sweep is inert on the background-less wrapper. */
+.pane-shuffle {
+  animation: route-card-slide-in 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pane-shuffle {
+    animation: none !important;
+  }
+}
+
+/* Same debug flags as the full shuffle: ?slowmo stretches it, ?noshuffle
+   (route-shuffle-off, set by routeTransitions.ts) kills it. */
+html.route-shuffle-slowmo .pane-shuffle {
+  animation-duration: 4000ms;
+}
+
+html.route-shuffle-off .pane-shuffle {
+  animation: none;
+}
 
 /* ---------------------------------------------------------------------------
    Fixed chrome stands OUTSIDE the shuffle: the FAB cluster, the messaging

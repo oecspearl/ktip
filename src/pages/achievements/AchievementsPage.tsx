@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Flame, Pin, Search, Trophy, Users } from 'lucide-react'
+import { ChevronDown, ChevronUp, Flame, Pin, Search, Trophy, Users } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { TrophyCard, SecretTrophyCard } from '../../components/achievements/TrophyCard'
@@ -15,6 +15,7 @@ import {
   useTrackFlag,
 } from '../../hooks/useAchievements'
 import { useProfileStats } from '../../hooks/useProfileStats'
+import { useDisclosureAnimation } from '../../components/ui/useDisclosureAnimation'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useToast } from '../../contexts/ToastContext'
 import {
@@ -79,6 +80,11 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
   const [status, setStatus] = useState<StatusFilter>('all')
   const [search, setSearch] = useState('')
   const [pinning, setPinning] = useState(false)
+  // One disclosure holds collections AND the filter bar; collapsed by default
+  // so the trophy grid stays the page.
+  const [browseOpen, setBrowseOpen] = useState(false)
+  // Children stay mounted; the shared grid-rows transition does the folding.
+  const browse = useDisclosureAnimation(browseOpen, { keepMounted: true })
   const [pinned, setPinned] = useState<string[]>([])
   // In-grid flip detail — replaced the Modal popup.
   const mesh = useMeshFlip()
@@ -223,6 +229,14 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
   const totalAvailable = stats?.total_available ?? 0
   const pinnedCount = pinned.length
 
+  // Shown on the collapsed Filters button so hidden-but-active filters are
+  // never a mystery ("where did my achievements go?").
+  const activeFilterCount =
+    (status !== 'all' ? 1 : 0) +
+    (category !== 'all' ? 1 : 0) +
+    (search.trim() ? 1 : 0) +
+    rarities.length
+
   const rankPct =
     rank && rank.next_required
       ? Math.min(100, Math.round((rank.earned / rank.next_required) * 100))
@@ -271,9 +285,8 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
   return (
     <div className={shell}>
       {/* ---------- Rank header ----------
-          Rank and the level bar only. The Points / Streak / Active-days figures
-          moved to their own strip below: six numbers, a bar and three buttons
-          in one card was the densest thing on the page. */}
+          Rank, the level bar and the Points / Streak / Active-days tiles in
+          one card — the header is the account's whole scoreboard. */}
       <section className="relative overflow-hidden rounded-3xl border border-ktip-sand-200 bg-ktip-cream p-6">
         {/* Only fires when a rank has actually been reached, so the page does
             not celebrate an empty account on first visit. */}
@@ -311,7 +324,9 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
                 <Trans>Cancel</Trans>
               </Button>
             )}
-            <Link to="/leaderboard">
+            {/* Inside the dashboard the board opens as a pane swap; the
+                public /leaderboard address is for everyone else. */}
+            <Link to={embedded ? '/dashboard/leaderboard' : '/leaderboard'}>
               <Button size="sm" variant="ghost">
                 <Trophy size={14} aria-hidden="true" />
                 <Trans>Leaderboard</Trans>
@@ -344,14 +359,13 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
             )}
           </p>
         </div>
-      </section>
 
-      {/* ---------- Stat strip ---------- */}
-      <dl className="grid grid-cols-3 gap-3">
-        <StatTile label={t`Points`} value={stats?.points ?? 0} />
-        <StatTile label={t`Streak`} value={stats?.streak_days ?? 0} icon={<Flame size={12} />} />
-        <StatTile label={t`Active days`} value={stats?.total_active_days ?? 0} />
-      </dl>
+        <dl className="relative z-10 mt-5 grid grid-cols-3 gap-3">
+          <StatTile label={t`Points`} value={stats?.points ?? 0} />
+          <StatTile label={t`Streak`} value={stats?.streak_days ?? 0} icon={<Flame size={12} />} />
+          <StatTile label={t`Active days`} value={stats?.total_active_days ?? 0} />
+        </dl>
+      </section>
 
       {/* ---------- Showcase mode banner ----------
           Turning on pinning used to change nothing but the button label, so a
@@ -376,11 +390,49 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
         </div>
       )}
 
-      {/* ---------- Collections ---------- */}
-      {!!achievements?.collections?.length && (
-        <section>
-          <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900"><Trans>Collections</Trans></h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* ---------- Collections + filters ----------
+          One disclosure for the whole browse toolkit. Collapsed: a single row
+          with a prominent Show pill on the right (carrying the active-filter
+          count, so hidden filters never silently shrink the grid). Expanded:
+          the collections grid and the filter bar, with the collapse pill
+          sitting bottom-center under the content. */}
+      <section>
+        {!browseOpen ? (
+          <button
+            type="button"
+            onClick={() => setBrowseOpen(true)}
+            aria-expanded={false}
+            className="flex w-full items-center justify-between gap-2 rounded-2xl border border-ktip-sand-200 bg-ktip-cream px-4 py-3 text-left transition-colors hover:border-ktip-ocean-300"
+          >
+            <h2 className="font-display text-lg font-bold text-ktip-sand-900">
+              <Trans>Collections & filters</Trans>
+            </h2>
+            <span className="flex items-center gap-1.5 rounded-full border border-ktip-ocean-200 bg-ktip-ocean-50 px-3 py-1 text-sm font-semibold text-ktip-ocean-700">
+              <Trans>Show</Trans>
+              {activeFilterCount > 0 && (
+                <span className="rounded-full bg-ktip-ocean-600 px-2 py-0.5 text-xs font-bold tabular-nums text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDown size={16} aria-hidden="true" />
+            </span>
+          </button>
+        ) : (
+          <h2 className="mb-3 font-display text-lg font-bold text-ktip-sand-900">
+            <Trans>Collections</Trans>
+          </h2>
+        )}
+
+        {/* Folds on the shared grid-rows transition (disclosure-collapse in
+            index.css); content stays mounted so closing animates too. */}
+        <div
+          className="disclosure-collapse"
+          data-state={browse.state}
+          data-settled={browse.settled}
+        >
+          <div>
+            {!!achievements?.collections?.length && (
+              <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {achievements.collections.map((collection) => {
               const pct =
                 collection.total > 0
@@ -415,16 +467,13 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
                 </div>
               )
             })}
-          </div>
-        </section>
-      )}
+              </div>
+            )}
 
-      {/* ---------- Filters ----------
-          One bar. There used to be two rows of identical-looking pills, the top
-          one single-select and the bottom one multi-select, above a wrapping
-          12-tab category row. Status is the question people actually ask, so it
-          leads; category is a select because there are eleven of them. */}
-      <section className="space-y-3">
+            {/* Filter bar — same disclosure as the collections it narrows.
+                Status is the question people actually ask, so it leads;
+                category is a select because there are eleven of them. */}
+            <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <div
             className="inline-flex rounded-full border border-ktip-sand-200 p-0.5"
@@ -498,6 +547,23 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
           onChange={setRarities}
           collapsedCount={RARITY_ORDER.length}
         />
+            </div>
+
+            {/* Collapse lands bottom-center: after scrolling the expanded
+                content, this is where the eye already is. */}
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setBrowseOpen(false)}
+                aria-expanded={true}
+                className="flex items-center gap-1.5 rounded-full border border-ktip-ocean-200 bg-ktip-ocean-50 px-4 py-2 text-sm font-semibold text-ktip-ocean-700 transition-colors hover:bg-ktip-ocean-100"
+              >
+                <Trans>Hide collections & filters</Trans>
+                <ChevronUp size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ---------- Grid ----------

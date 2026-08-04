@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { CheckCircle, Users } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
@@ -64,6 +64,17 @@ export default function DashboardLayout() {
     }
   }, [])
 
+  // Tab changes keep the page scroll (MainLayout only resets it across
+  // shells). If the hero has been scrolled past, snap the new tab to the top
+  // of the content row — a shorter tab would otherwise strand the viewport
+  // below its content. Layout effect for the same commit-ordering reason
+  // documented in MainLayout; the resulting scroll event re-runs measure(),
+  // keeping `collapsed` truthful.
+  useLayoutEffect(() => {
+    const el = heroEndRef.current
+    if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView()
+  }, [pathname])
+
   return (
     <>
       <PageHero
@@ -106,7 +117,14 @@ export default function DashboardLayout() {
           </Link>
         </div>
       </PageHero>
-      <div ref={heroEndRef} aria-hidden="true" className="h-px" />
+      <div
+        ref={heroEndRef}
+        aria-hidden="true"
+        className="h-px"
+        // Tab-change landing spot: scrollIntoView() has to clear the sticky
+        // navbar plus the collapsed band that replaces the hero.
+        style={{ scrollMarginTop: `calc(var(--nav-offset) + ${DASH_BAR_H})` }}
+      />
 
       <DashboardTopBar
         displayName={displayName}
@@ -137,12 +155,15 @@ export default function DashboardLayout() {
                 {tabs.map((tab) => {
                   const to = tab.external ? tab.to : `/dashboard${tab.to ? `/${tab.to}` : ''}`
                   // NavLink's `end` only fixes the index tab; role links out of
-                  // /dashboard are never "active" here.
+                  // /dashboard are never "active" here. The leaderboard pane
+                  // has no tab of its own — it is reached from Achievements,
+                  // so that tab stays lit while the board is open.
                   const active = tab.external
                     ? false
                     : tab.to === ''
                       ? pathname === '/dashboard'
-                      : pathname.startsWith(to)
+                      : pathname.startsWith(to) ||
+                        (tab.to === 'achievements' && pathname.startsWith('/dashboard/leaderboard'))
                   return (
                     <NavLink
                       key={tab.to}
@@ -167,8 +188,16 @@ export default function DashboardLayout() {
             </div>
           </div>
 
-          <div data-tutorial="dashboard-panel" className="flex-1 min-w-0 w-full">
-            <Outlet />
+          {/* Outer div stays mounted across tab changes so the tour anchor
+              never unmounts mid-spotlight; overflow-x-clip hides the pane's
+              translateX(100%) start frame without creating a scroll container
+              (clip, not hidden: the sticky rail is unaffected). The keyed
+              inner div is a real box (not `contents`) so it can animate, and
+              carries page-reveal so h2s replay only inside the pane. */}
+          <div data-tutorial="dashboard-panel" className="flex-1 min-w-0 w-full overflow-x-clip">
+            <div key={pathname} className="page-reveal pane-shuffle">
+              <Outlet />
+            </div>
           </div>
         </div>
       </div>

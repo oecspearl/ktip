@@ -3,13 +3,15 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '../../lib/utils'
 
 /**
- * Mesh flip: the achievements gallery's in-grid detail view.
+ * Mesh flip: the achievements gallery's detail view.
  *
  * A tile sits flush in the mesh. Clicking it flips the cell through 3D
  * (rotateY) while it flies to the viewport center and expands, with a fixed
@@ -24,8 +26,14 @@ import { cn } from '../../lib/utils'
  * consumed by the .mesh-flip rules in index.css). Body scroll is locked while
  * open so the measurement stays valid for the return flight.
  *
- * The card must stay in-flow (not portalled) or the fly-from-cell illusion
- * breaks, which means the dialog affordances Modal normally provides — focus
+ * The flight is PORTALLED to document.body: inside the dashboard the tab pane
+ * wrapper is overflow-x-clip and keeps a transform after its pane-shuffle
+ * entry animation (fill-mode both), which clips the flying card to the pane
+ * and shrinks the "fixed" veil to the pane's box. A fixed-position portal
+ * stamped at the cell's measured rect starts the flight from the exact same
+ * pixels, so the fly-from-cell illusion survives while the card and veil truly
+ * overlay the whole screen. The in-grid tile turns invisible (layout kept) for
+ * the portal's lifetime; dialog affordances Modal normally provides — focus
  * trap, Escape, scroll lock, focus restore — are replicated here.
  */
 
@@ -82,7 +90,7 @@ export function useMeshFlip(): MeshFlipController {
   }, [activeId, close])
 
   // Scroll lock for the full mounted window, not just the open one: the
-  // measured --dx/--dy stay truthful until the card has flown home.
+  // measured flight rect stays truthful until the card has flown home.
   useEffect(() => {
     if (!mountedId) return
     document.body.style.overflow = 'hidden'
@@ -92,6 +100,18 @@ export function useMeshFlip(): MeshFlipController {
   }, [mountedId])
 
   return { activeId, mountedId, open, close, settle }
+}
+
+/** Everything the portal needs to start the flight from the cell's pixels. */
+interface FlightVars {
+  left: number
+  top: number
+  width: number
+  height: number
+  dx: number
+  dy: number
+  s: number
+  backW: number
 }
 
 interface MeshFlipCellProps {
@@ -135,6 +155,10 @@ export function MeshFlipCell({
   const btnRef = useRef<HTMLButtonElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
   const wasMounted = useRef(false)
+  const [vars, setVars] = useState<FlightVars | null>(null)
+  // The portal mounts in its resting (cell-shaped) state; this flips on a
+  // frame later so the open actually transitions instead of appearing landed.
+  const [flown, setFlown] = useState(false)
 
   const measure = useCallback(() => {
     const el = cellRef.current
@@ -146,10 +170,16 @@ export function MeshFlipCell({
     // 1024px = the max-w-5xl the detail Modal used; 94vw keeps phones inside
     // the viewport with a sliver of veil visible around the card.
     const targetW = Math.min(vw * 0.94, 1024)
-    el.style.setProperty('--dx', `${vw / 2 - (rect.left + rect.width / 2)}px`)
-    el.style.setProperty('--dy', `${vh / 2 - (rect.top + rect.height / 2)}px`)
-    el.style.setProperty('--s', `${targetW / rect.width}`)
-    el.style.setProperty('--back-w', `${targetW}px`)
+    setVars({
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      dx: vw / 2 - (rect.left + rect.width / 2),
+      dy: vh / 2 - (rect.top + rect.height / 2),
+      s: targetW / rect.width,
+      backW: targetW,
+    })
   }, [])
 
   const handleClick = () => {
@@ -157,8 +187,25 @@ export function MeshFlipCell({
     onActivate(id)
   }
 
+  // Double rAF: the portal must paint once at rest before .mesh-open lands,
+  // or there is no start state and the flight is skipped.
+  useEffect(() => {
+    if (!open) {
+      setFlown(false)
+      return
+    }
+    let raf2 = 0
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setFlown(true))
+    })
+    return () => {
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+    }
+  }, [open])
+
   // While open: focus the dialog, and track orientation/resize so the card
-  // stays centered (the wrapper is never transformed, so its rect is honest).
+  // stays centered (the grid cell keeps its layout, so its rect is honest).
   useEffect(() => {
     if (!open) return
     const raf = requestAnimationFrame(() => backRef.current?.focus())
@@ -211,65 +258,92 @@ export function MeshFlipCell({
     }
   }
 
+  const showPortal = mounted && vars !== null
+
   return (
     <div
       ref={cellRef}
-      className={cn(
-        'relative [perspective:1200px]',
-        // Open cell rides above the veil (z-modal) for the whole flight, both
-        // directions — z-fab is the next layer up. Idle cells only need to
-        // cover their neighbours' hairlines while the hover scale plays.
-        mounted ? 'z-fab' : 'hover:z-raised',
-        className
-      )}
+      // Idle cells only need to cover their neighbours' hairlines while the
+      // hover scale plays; the open flight lives in the portal now.
+      className={cn('relative hover:z-raised', className)}
     >
-      <div
-        className={cn('mesh-flip relative h-full', open && 'mesh-open', mounted && 'will-change-transform')}
-        onTransitionEnd={handleTransitionEnd}
-      >
-        <button
-          ref={btnRef}
-          type="button"
-          onClick={handleClick}
-          disabled={disabled}
-          aria-pressed={ariaPressed}
-          aria-expanded={open}
-          aria-haspopup="dialog"
-          // Off the tab order while flipped away; some engines still hit-test
-          // a rotated-away face, so clicks are cut too.
-          tabIndex={mounted ? -1 : 0}
-          className={cn(
-            'mesh-face relative block h-full w-full text-left',
-            'transition-transform motion-safe:hover:scale-[1.02]',
-            // Inset ring: an outset one is swallowed by flush neighbours.
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
-            'disabled:cursor-not-allowed disabled:opacity-60',
-            mounted && 'pointer-events-none'
-          )}
-        >
-          {front}
-        </button>
-
-        {mounted && (
-          <div
-            ref={backRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label={label}
-            tabIndex={-1}
-            // Clicking the card sends it home, same as the veil.
-            onClick={onClose}
-            onKeyDown={trapTab}
-            // sm+ stays overflow-visible on purpose: the showcase artwork
-            // deliberately breaks the panel's edges (the same rule the bare
-            // Modal followed). Phones stack the card in-flow, so a scroll
-            // container is safe there.
-            className="mesh-back absolute left-1/2 top-1/2 w-[var(--back-w,64rem)] max-h-[92svh] overflow-y-auto focus:outline-none sm:max-h-none sm:overflow-visible"
-          >
-            {back()}
-          </div>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={handleClick}
+        disabled={disabled}
+        aria-pressed={ariaPressed}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        // While the portal flies, the grid copy keeps the cell's layout but
+        // neither paints nor takes clicks or tab stops.
+        tabIndex={showPortal ? -1 : 0}
+        className={cn(
+          'relative block h-full w-full text-left',
+          'transition-transform motion-safe:hover:scale-[1.02]',
+          // Inset ring: an outset one is swallowed by flush neighbours.
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
+          'disabled:cursor-not-allowed disabled:opacity-60',
+          showPortal && 'invisible pointer-events-none'
         )}
-      </div>
+      >
+        {front}
+      </button>
+
+      {showPortal &&
+        createPortal(
+          // Fixed at the cell's measured rect: the flight starts from the
+          // exact pixels the tile occupies, above the veil (z-fab > z-modal).
+          <div
+            className="fixed z-fab [perspective:1200px]"
+            style={{
+              left: vars.left,
+              top: vars.top,
+              width: vars.width,
+              height: vars.height,
+            }}
+          >
+            <div
+              className={cn(
+                'mesh-flip relative h-full will-change-transform',
+                flown && 'mesh-open'
+              )}
+              style={
+                {
+                  '--dx': `${vars.dx}px`,
+                  '--dy': `${vars.dy}px`,
+                  '--s': `${vars.s}`,
+                  '--back-w': `${vars.backW}px`,
+                } as CSSProperties
+              }
+              onTransitionEnd={handleTransitionEnd}
+            >
+              {/* Flight stand-in for the tile; rotates away as the card
+                  arrives. Decorative — the real button is back in the grid. */}
+              <div aria-hidden="true" className="mesh-face pointer-events-none relative h-full w-full">
+                {front}
+              </div>
+
+              <div
+                ref={backRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={label}
+                tabIndex={-1}
+                // Clicking the card sends it home, same as the veil.
+                onClick={onClose}
+                onKeyDown={trapTab}
+                // sm+ stays overflow-visible on purpose: the showcase artwork
+                // deliberately breaks the panel's edges (the same rule the bare
+                // Modal followed). Phones scroll inside the card instead.
+                className="mesh-back absolute left-1/2 top-1/2 w-[var(--back-w,64rem)] max-h-[92svh] overflow-y-auto focus:outline-none sm:max-h-none sm:overflow-visible"
+              >
+                {back()}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   )
 }
@@ -277,6 +351,9 @@ export function MeshFlipCell({
 /**
  * The blur veil between the mesh and the flying card. Stays mounted through
  * the close transition so the blur can fade while the card flies home.
+ * Portalled for the same reason as the flight: rendered in-flow inside the
+ * dashboard pane, `fixed` would resolve against the pane's lingering
+ * transform and blur only the pane, leaving the rail and navbar sharp.
  */
 export function MeshVeil({
   shown,
@@ -288,7 +365,7 @@ export function MeshVeil({
   onClose: () => void
 }) {
   if (!mounted) return null
-  return (
+  return createPortal(
     <div
       // Same screenshot-capture contract as the Modal backdrop.
       data-capture-hide
@@ -298,6 +375,7 @@ export function MeshVeil({
         'fixed inset-0 z-modal bg-black/40 backdrop-blur-md transition-opacity duration-300',
         shown ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
-    />
+    />,
+    document.body
   )
 }

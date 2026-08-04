@@ -2105,6 +2105,10 @@ msgid "Everything you have published, including anything still private — this 
 "Open one to edit it, manage its team, or answer collaboration requests. Projects you were added to by someone else are not here; they are on your profile."
 msgstr ""
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile unlocked. Any member can view your full profile."
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "This event has already passed"
 msgstr ""
@@ -3230,6 +3234,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Intellectual Property Infringement"
+msgstr ""
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Show"
 msgstr ""
 
 #: src/lib/achievement-copy.ts
@@ -5607,6 +5615,10 @@ msgstr ""
 msgid "Your activity timeline across the platform"
 msgstr ""
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "View my public profile"
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/editor/LinkModal.tsx
 #: src/components/documents/DocumentUploadModal.tsx
@@ -6679,6 +6691,10 @@ msgstr ""
 
 #: src/components/resume/DesignPicker.tsx
 msgid "Design"
+msgstr ""
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile Privacy"
 msgstr ""
 
 #: src/pages/collaborate/WhiteboardsListPage.tsx
@@ -7936,6 +7952,12 @@ msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Educator"
+msgstr ""
+
+#: src/i18n/harvested.ts
+#: src/pages/dashboard/dashboard-tabs.ts
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "My Profile"
 msgstr ""
 
 #: src/pages/dashboard/tabs/OverviewTab.tsx
@@ -9668,6 +9690,10 @@ msgstr ""
 msgid "Register with your Chamber"
 msgstr ""
 
+#: src/pages/dashboard/dashboard-tabs.ts
+msgid "What others see, and who can see it"
+msgstr ""
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "All messages and conversations"
 msgstr ""
@@ -11355,6 +11381,10 @@ msgstr ""
 msgid "Profile, security, preferences, personalization, verification."
 msgstr ""
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "When locked, other members see only your name, photo and country. To view your full profile or message you, they must send a connection request — accepting it is what grants access."
+msgstr ""
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Apply on External Site"
 msgstr ""
@@ -12734,6 +12764,10 @@ msgstr ""
 msgid "Message {0}"
 msgstr ""
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile locked. Members must connect with you to see your details or message you."
+msgstr ""
+
 #: src/components/personalization/SignalSummary.tsx
 msgid "Badges earned"
 msgstr ""
@@ -13530,6 +13564,10 @@ msgstr ""
 msgid "Sections"
 msgstr ""
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Failed to update profile privacy"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Nothing ticked means everyone in the venue. Organizers always get in."
 msgstr ""
@@ -13716,6 +13754,10 @@ msgstr ""
 msgid "Top Picks"
 msgstr ""
 
+#: src/pages/leaderboard/LeaderboardPage.tsx
+msgid "Back to achievements"
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Save CV"
 msgstr ""
@@ -13884,6 +13926,10 @@ msgstr ""
 #: src/pages/projects/ProjectDetailPage.tsx
 #: src/pages/projects/ProjectsPage.tsx
 msgid "Search projects..."
+msgstr ""
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Hide collections & filters"
 msgstr ""
 
 #: src/pages/grievances/MyGrievancesPage.tsx
@@ -16790,6 +16836,10 @@ msgstr ""
 msgid "Save Draft"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Edit what other members see, and lock your profile so only connections can view it"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "(Optional)"
 msgstr ""
@@ -17364,6 +17414,10 @@ msgid "The bell in the navigation bar carries a count of everything unread.\n"
 "\"Mark all as read\" clears the badge, and \"View all invitations\" jumps to your invitations inbox.\n"
 "\n"
 "Which notifications you receive is up to you: Settings has a switch per category under Preferences."
+msgstr ""
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Lock my profile"
 msgstr ""
 
 #. placeholder {0}: note.title
@@ -18379,6 +18433,10 @@ msgstr ""
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Launch - Ready to go!"
+msgstr ""
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Collections & filters"
 msgstr ""
 
 #: src/components/documents/DocumentAccessModal.tsx

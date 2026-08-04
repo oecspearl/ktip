@@ -78,6 +78,36 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
     setPendingUnlocks((queue) => queue.slice(1))
   }, [])
 
+  // DEV ONLY: `window.__ktipUnlock()` in the console previews the unlock
+  // modal without touching the database. Optionally pass overrides:
+  // `__ktipUnlock({ name: 'Host', rarity: 'rare', trophy_type: 'podium' })`.
+  // Stripped from production builds by the DEV guard.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    ;(window as any).__ktipUnlock = (overrides: Partial<NewlyEarnedAchievement> = {}) => {
+      setPendingUnlocks((queue) => [
+        ...queue,
+        {
+          slug: `dev-preview-${queue.length}`,
+          name: 'Scoreboard Watcher',
+          description: 'Checked the leaderboard 10 times',
+          icon: 'trophy',
+          color: '#FFC72C',
+          rarity: 'common',
+          tier: 'gold',
+          points: 10,
+          category: 'community',
+          trophy_type: 'star',
+          image_url: null,
+          ...overrides,
+        },
+      ])
+    }
+    return () => {
+      delete (window as any).__ktipUnlock
+    }
+  }, [])
+
   const value = useMemo(
     () => ({ achievements, loading, assetMap, pendingUnlocks, dismissUnlock, triggerCheck }),
     [achievements, loading, assetMap, pendingUnlocks, dismissUnlock, triggerCheck]

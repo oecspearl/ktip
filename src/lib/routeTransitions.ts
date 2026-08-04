@@ -16,6 +16,39 @@ function pathOnly(to: string): string {
 }
 
 /**
+ * The pathname a navigation actually lands on. `setSearchParams` and hash
+ * links navigate with a search/hash-only target ("?member=…"), whose pathname
+ * is the empty string — those stay on the page they came from. Without this,
+ * "" compared unequal to the current pathname, so closing the member drawer
+ * (which strips `?member=` via setSearchParams) dealt a full card shuffle.
+ */
+export function resolveTargetPath(from: string, target: string): string {
+  return pathOnly(target) || from
+}
+
+// One-segment dashboard paths only: /dashboard/submissions/:id is deliberately
+// a full-page sibling outside the tab shell (see the route table in App.tsx).
+const DASH_TAB_RE = /^\/dashboard(\/[^/]+)?\/?$/
+
+/**
+ * Collapses tab routes inside a persistent shell (dashboard rail, admin
+ * sidebar) to one identity. MainLayout keys its routed subtree on this, so a
+ * tab change swaps only the shell's own <Outlet/> pane; every other path is
+ * its own key and remounts as before.
+ */
+export function shellKey(pathname: string): string {
+  if (DASH_TAB_RE.test(pathname)) return '/dashboard'
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return '/admin'
+  return pathname
+}
+
+/** Both sides of the navigation live inside the same shell. */
+export function sameShell(from: string, to: string): boolean {
+  const a = shellKey(from)
+  return (a === '/dashboard' || a === '/admin') && a === shellKey(to)
+}
+
+/**
  * Turns every route change into a view-transition "card shuffle" (CSS lives in
  * index.css under html.route-shuffle).
  *
@@ -30,12 +63,18 @@ function pathOnly(to: string): string {
  * before RouterProvider subscribes so the class is on <html> when the old
  * frame is captured. The class keeps the shuffle rules away from the venue
  * bento-grid transitions, whose CSS deliberately disables the root animation.
+ *
+ * Opt-outs: same page (query/hash-only change), same venue (frozen snapshot
+ * over live video reads as a hang), and same shell (dashboard/admin tab
+ * changes — the shell stays mounted and only its pane animates, via the
+ * .pane-shuffle CSS keyed on pathname; a root snapshot would freeze the whole
+ * document on the tab's lazy chunk and slide the static hero and rail too).
  */
 export function enableCardShuffle(router: DataRouter) {
   // Version beacon for stale-tab debugging: an SPA tab keeps navigating on old
   // JS long after the dev server restarts, which makes "the fix didn't work"
   // reports ambiguous. Bump the number when the shuffle behaviour changes.
-  console.info('[route-shuffle] v14 — leaving home fades the old card to navy')
+  console.info('[route-shuffle] v16 — search-only navigations (drawer close) stay still')
 
   // Debug flags, read once from the URL that opened the tab:
   //   ?noshuffle — disable transitions entirely (is an artifact even ours?)
@@ -43,7 +82,12 @@ export function enableCardShuffle(router: DataRouter) {
   const flags = new URLSearchParams(window.location.search)
   const disabled = flags.has('noshuffle')
   const slowmo = flags.has('slowmo')
-  if (disabled) console.info('[route-shuffle] disabled via ?noshuffle')
+  if (disabled) {
+    console.info('[route-shuffle] disabled via ?noshuffle')
+    // Kills the pane animation too — the flag answers "is this artifact ours?",
+    // so it has to silence both mechanisms.
+    document.documentElement.classList.add('route-shuffle-off')
+  }
   if (slowmo) {
     console.info('[route-shuffle] 4s slow motion via ?slowmo')
     document.documentElement.classList.add('route-shuffle-slowmo')
@@ -57,10 +101,12 @@ export function enableCardShuffle(router: DataRouter) {
     const target = to == null ? from : typeof to === 'string' ? to : createPath(to)
     // Dealing a card for a page you are already on reads as a glitch: clicking
     // the active nav link, or changing a filter that only rewrites the query.
-    const samePage = pathOnly(target) === pathOnly(from)
+    const targetPath = resolveTargetPath(from, target)
+    const samePage = targetPath === pathOnly(from)
     const viewTransition = disabled
       ? false
-      : (opts?.viewTransition ?? (!samePage && !sameVenue(from, target)))
+      : (opts?.viewTransition ??
+        (!samePage && !sameVenue(from, targetPath) && !sameShell(from, targetPath)))
     // Fired BEFORE the router starts loading the route chunk, i.e. before the
     // old frame can be captured. The home hero carousel listens: a slide swap
     // caught mid-flight by the capture freezes a half-swapped hero (new slide's

@@ -66,19 +66,37 @@ export function AchievementUnlockModal() {
   if (!unlock || imageState === 'pending') return null
 
   return (
+    // `bare` + max-w-5xl: the showcase is a landscape card whose artwork
+    // deliberately breaks the panel edges — the small cream modal it used to
+    // sit in squeezed it into a one-word-per-line column. Same framing as the
+    // gallery's detail view; the heading is ours to render since bare drops
+    // the Modal header.
     <Modal
       open
       onClose={dismissUnlock}
       title={t`Achievement unlocked`}
-      description={
-        pendingUnlocks.length > 1
-          ? plural(pendingUnlocks.length - 1, { one: '# more to reveal', other: '# more to reveal' })
-          : undefined
-      }
-      size="sm"
+      bare
+      size="xl"
+      className="max-w-5xl"
     >
-      <div className="relative flex flex-col items-center gap-5 py-2">
+      <div className="relative flex flex-col gap-5 py-2">
         <FireworksOverlay runKey={unlock.slug} />
+
+        {/* Kept clear of the artwork, which owns the panel's right half and
+            stands taller than it on sm+. White on the dimmed backdrop. */}
+        <div className="relative z-10 text-center sm:w-[54%] sm:text-left">
+          <h2 className="font-display text-2xl font-bold text-white">
+            <Trans>Achievement unlocked</Trans>
+          </h2>
+          {pendingUnlocks.length > 1 && (
+            <p className="mt-1 text-sm text-white/80">
+              {plural(pendingUnlocks.length - 1, {
+                one: '# more to reveal',
+                other: '# more to reveal',
+              })}
+            </p>
+          )}
+        </div>
 
         <div className="relative z-10 w-full">
           <TrophyCard
@@ -97,7 +115,8 @@ export function AchievementUnlockModal() {
           />
         </div>
 
-        <div className="relative z-10 flex w-full gap-2">
+        {/* Capped: two full-width buttons under a 5xl card read as a banner. */}
+        <div className="relative z-10 flex w-full gap-2 sm:max-w-md">
           <Button variant="secondary" className="flex-1" onClick={dismissUnlock}>
             {pendingUnlocks.length > 1 ? t`Next` : t`Nice`}
           </Button>

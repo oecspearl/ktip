@@ -2250,6 +2250,10 @@ msgstr "Everything you have published, including anything still private — this
 "\n"
 "Open one to edit it, manage its team, or answer collaboration requests. Projects you were added to by someone else are not here; they are on your profile."
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile unlocked. Any member can view your full profile."
+msgstr "Profile unlocked. Any member can view your full profile."
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "This event has already passed"
 msgstr "This event has already passed"
@@ -3420,6 +3424,10 @@ msgstr "Key information"
 #: src/i18n/harvested.ts
 msgid "Intellectual Property Infringement"
 msgstr "Intellectual Property Infringement"
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Show"
+msgstr "Show"
 
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# code snippet created} other {# code snippets created}}"
@@ -5995,6 +6003,10 @@ msgstr "Increase {label}"
 msgid "Your activity timeline across the platform"
 msgstr "Your activity timeline across the platform"
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "View my public profile"
+msgstr "View my public profile"
+
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/editor/LinkModal.tsx
 #: src/components/documents/DocumentUploadModal.tsx
@@ -7130,6 +7142,10 @@ msgstr "View only"
 #: src/components/resume/DesignPicker.tsx
 msgid "Design"
 msgstr "Design"
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile Privacy"
+msgstr "Profile Privacy"
 
 #: src/pages/collaborate/WhiteboardsListPage.tsx
 msgid "New Whiteboard"
@@ -8455,6 +8471,12 @@ msgstr "Display name is required"
 #: src/lib/permissions.ts
 msgid "Educator"
 msgstr "Educator"
+
+#: src/i18n/harvested.ts
+#: src/pages/dashboard/dashboard-tabs.ts
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "My Profile"
+msgstr "My Profile"
 
 #: src/pages/dashboard/tabs/OverviewTab.tsx
 msgid "My Calendar"
@@ -10327,6 +10349,10 @@ msgstr "Fade settings"
 msgid "Register with your Chamber"
 msgstr "Register with your Chamber"
 
+#: src/pages/dashboard/dashboard-tabs.ts
+msgid "What others see, and who can see it"
+msgstr "What others see, and who can see it"
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "All messages and conversations"
 msgstr "All messages and conversations"
@@ -12090,6 +12116,10 @@ msgstr "Everything attached to the event. Who may open what is unchanged."
 msgid "Profile, security, preferences, personalization, verification."
 msgstr "Profile, security, preferences, personalization, verification."
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "When locked, other members see only your name, photo and country. To view your full profile or message you, they must send a connection request — accepting it is what grants access."
+msgstr "When locked, other members see only your name, photo and country. To view your full profile or message you, they must send a connection request — accepting it is what grants access."
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Apply on External Site"
 msgstr "Apply on External Site"
@@ -13513,6 +13543,10 @@ msgstr "My Projects"
 msgid "Message {0}"
 msgstr "Message {0}"
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile locked. Members must connect with you to see your details or message you."
+msgstr "Profile locked. Members must connect with you to see your details or message you."
+
 #: src/components/personalization/SignalSummary.tsx
 msgid "Badges earned"
 msgstr "Badges earned"
@@ -14357,6 +14391,10 @@ msgstr "Welcome to KTIP"
 msgid "Sections"
 msgstr "Sections"
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Failed to update profile privacy"
+msgstr "Failed to update profile privacy"
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Nothing ticked means everyone in the venue. Organizers always get in."
 msgstr "Nothing ticked means everyone in the venue. Organizers always get in."
@@ -14551,6 +14589,10 @@ msgstr "My Documents"
 msgid "Top Picks"
 msgstr "Top Picks"
 
+#: src/pages/leaderboard/LeaderboardPage.tsx
+msgid "Back to achievements"
+msgstr "Back to achievements"
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Save CV"
 msgstr "Save CV"
@@ -14728,6 +14770,10 @@ msgstr "This CV is not public"
 #: src/pages/projects/ProjectsPage.tsx
 msgid "Search projects..."
 msgstr "Search projects..."
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Hide collections & filters"
+msgstr "Hide collections & filters"
 
 #: src/pages/grievances/MyGrievancesPage.tsx
 #: src/pages/grievances/ReportUserPage.tsx
@@ -17776,6 +17822,10 @@ msgstr "Funding - Seeking investment"
 msgid "Save Draft"
 msgstr "Save Draft"
 
+#: src/i18n/harvested.ts
+msgid "Edit what other members see, and lock your profile so only connections can view it"
+msgstr "Edit what other members see, and lock your profile so only connections can view it"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "(Optional)"
 msgstr "(Optional)"
@@ -18381,6 +18431,10 @@ msgstr "The bell in the navigation bar carries a count of everything unread.\n"
 "\"Mark all as read\" clears the badge, and \"View all invitations\" jumps to your invitations inbox.\n"
 "\n"
 "Which notifications you receive is up to you: Settings has a switch per category under Preferences."
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Lock my profile"
+msgstr "Lock my profile"
 
 #. placeholder {0}: note.title
 #: src/components/notes/StickyNoteFabPanel.tsx
@@ -19476,6 +19530,10 @@ msgstr "View audit logs"
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Launch - Ready to go!"
 msgstr "Launch - Ready to go!"
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Collections & filters"
+msgstr "Collections & filters"
 
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/documents/DocumentCard.tsx

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { BadgeCheck, EyeOff, Trophy } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, EyeOff, Trophy } from 'lucide-react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLeaderboard, useMyRank } from '../../hooks/useLeaderboard'
@@ -27,7 +27,7 @@ const WINDOWS: { value: LeaderboardWindow; label: MessageDescriptor }[] = [
   { value: 'month', label: msg`This month` },
 ]
 
-export default function LeaderboardPage() {
+export default function LeaderboardPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t, i18n } = useLingui()
   usePageTitle(t`Leaderboard`)
   const auth = useAuth()
@@ -75,9 +75,26 @@ export default function LeaderboardPage() {
   const activeScopeLabel = scopeOptions.find((o) => o.value === scope)?.label ?? ''
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    // Embedded: the dashboard pane supplies the width, and its PageHero
+    // already owns the h1 — same contract as AchievementsPage.
+    <div className={embedded ? 'space-y-6' : 'max-w-4xl mx-auto px-4 py-8 space-y-6'}>
       <header>
-        <h1 className="font-display text-3xl font-bold text-ktip-sand-900"><Trans>Leaderboard</Trans></h1>
+        {/* The board is reached from the Achievements pane, but the rail has
+            no Leaderboard item — without this there is no way back. */}
+        {embedded && (
+          <Link
+            to="/dashboard/achievements"
+            className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            <Trans>Back to achievements</Trans>
+          </Link>
+        )}
+        {embedded ? (
+          <h2 className="font-display text-3xl font-bold text-ktip-sand-900"><Trans>Leaderboard</Trans></h2>
+        ) : (
+          <h1 className="font-display text-3xl font-bold text-ktip-sand-900"><Trans>Leaderboard</Trans></h1>
+        )}
         <p className="mt-1 text-sm text-ktip-sand-600">
           <Trans>Points come from achievements earned across projects, grants, events and the community.</Trans>{' '}
           <Link to="/dashboard/achievements" className="text-ktip-ocean-600 hover:underline">

@@ -27,6 +27,7 @@ const StickyNoteOverlay = lazy(() =>
 import { StickyNotesProvider } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { shellKey } from '../../lib/routeTransitions'
 
 export function MainLayout() {
   const auth = useAuth()
@@ -36,6 +37,11 @@ export function MainLayout() {
   // the page scrollable, so wheel-over-map would scroll the page instead of
   // staying on the floor. Room and setup pages keep the footer.
   const immersiveVenue = /^\/events\/virtual-hackathon\/[^/]+\/?$/.test(pathname)
+
+  // Tab routes inside a persistent shell (dashboard, admin) share one key, so
+  // a tab change swaps only the shell's <Outlet/> pane — hero and rail stay
+  // mounted, and only the shell's own keyed pane wrapper animates.
+  const shell = shellKey(pathname)
 
   // Always land at the top when navigating between pages.
   //
@@ -47,9 +53,11 @@ export function MainLayout() {
   // re-render on a task, and the snapshot is taken in "run the view
   // transition steps" of that same frame, before the task can run. Scrolling
   // here lets Navbar reset its own scroll state in the same commit instead.
+  // Keyed on the shell, not the pathname: intra-shell tab changes keep their
+  // scroll position (the shell clamps it itself, see DashboardLayout).
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
-  }, [pathname])
+  }, [shell])
 
   return (
     <MessagingPanelProvider>
@@ -70,7 +78,7 @@ export function MainLayout() {
       <Navbar />
       {auth.user && !auth.profile && !auth.loading && <SessionRecoveryBanner />}
       <main id="main-content" className="flex-1">
-        <div key={pathname} className="contents page-reveal">
+        <div key={shell} className="contents page-reveal">
           <Outlet />
         </div>
       </main>

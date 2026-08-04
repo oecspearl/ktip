@@ -2146,6 +2146,10 @@ msgid "Everything you have published, including anything still private — this 
 msgstr "Todo lo que ha publicado, incluido lo que aún es privado — esta pestaña es el único lugar donde un proyecto privado es visible.\n"
 ""
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile unlocked. Any member can view your full profile."
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "This event has already passed"
 msgstr "Este evento ya ha pasado"
@@ -3283,6 +3287,10 @@ msgstr "Información clave"
 #: src/i18n/harvested.ts
 msgid "Intellectual Property Infringement"
 msgstr "Infracción de propiedad intelectual"
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Show"
+msgstr ""
 
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# code snippet created} other {# code snippets created}}"
@@ -5708,6 +5716,10 @@ msgstr "Aumentar {label}"
 msgid "Your activity timeline across the platform"
 msgstr "Su cronología de actividad en toda la plataforma"
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "View my public profile"
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/editor/LinkModal.tsx
 #: src/components/documents/DocumentUploadModal.tsx
@@ -6796,6 +6808,10 @@ msgstr "Solo lectura"
 #: src/components/resume/DesignPicker.tsx
 msgid "Design"
 msgstr "Diseño"
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile Privacy"
+msgstr ""
 
 #: src/pages/collaborate/WhiteboardsListPage.tsx
 msgid "New Whiteboard"
@@ -8073,6 +8089,12 @@ msgstr "El nombre para mostrar es obligatorio"
 #: src/lib/permissions.ts
 msgid "Educator"
 msgstr "Educador"
+
+#: src/i18n/harvested.ts
+#: src/pages/dashboard/dashboard-tabs.ts
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "My Profile"
+msgstr ""
 
 #: src/pages/dashboard/tabs/OverviewTab.tsx
 msgid "My Calendar"
@@ -9832,6 +9854,10 @@ msgstr "Ajustes de desvanecimiento"
 msgid "Register with your Chamber"
 msgstr "Registrarse con su Cámara"
 
+#: src/pages/dashboard/dashboard-tabs.ts
+msgid "What others see, and who can see it"
+msgstr ""
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "All messages and conversations"
 msgstr "Todos los mensajes y conversaciones"
@@ -11537,6 +11563,10 @@ msgstr "Todo lo adjunto al evento. Quién puede abrir qué no cambia."
 msgid "Profile, security, preferences, personalization, verification."
 msgstr "Perfil, seguridad, preferencias, personalización, verificación."
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "When locked, other members see only your name, photo and country. To view your full profile or message you, they must send a connection request — accepting it is what grants access."
+msgstr ""
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Apply on External Site"
 msgstr "Postularse en el sitio externo"
@@ -12927,6 +12957,10 @@ msgstr "Mis proyectos"
 msgid "Message {0}"
 msgstr "Mensaje {0}"
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Profile locked. Members must connect with you to see your details or message you."
+msgstr ""
+
 #: src/components/personalization/SignalSummary.tsx
 msgid "Badges earned"
 msgstr "Insignias obtenidas"
@@ -13737,6 +13771,10 @@ msgstr "Bienvenido a KTIP"
 msgid "Sections"
 msgstr "Secciones"
 
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Failed to update profile privacy"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Nothing ticked means everyone in the venue. Organizers always get in."
 msgstr "Si no se marca nada, se incluye a todos en el recinto. Los organizadores siempre tienen acceso."
@@ -13925,6 +13963,10 @@ msgstr "Mis documentos"
 msgid "Top Picks"
 msgstr "Mejores selecciones"
 
+#: src/pages/leaderboard/LeaderboardPage.tsx
+msgid "Back to achievements"
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Save CV"
 msgstr "Guardar CV"
@@ -14097,6 +14139,10 @@ msgstr "Este CV no es público"
 #: src/pages/projects/ProjectsPage.tsx
 msgid "Search projects..."
 msgstr "Buscar proyectos..."
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Hide collections & filters"
+msgstr ""
 
 #: src/pages/grievances/MyGrievancesPage.tsx
 #: src/pages/grievances/ReportUserPage.tsx
@@ -17036,6 +17082,10 @@ msgstr "Financiamiento - Buscando inversión"
 msgid "Save Draft"
 msgstr "Guardar borrador"
 
+#: src/i18n/harvested.ts
+msgid "Edit what other members see, and lock your profile so only connections can view it"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "(Optional)"
 msgstr "(Opcional)"
@@ -17619,6 +17669,10 @@ msgid "The bell in the navigation bar carries a count of everything unread.\n"
 "Which notifications you receive is up to you: Settings has a switch per category under Preferences."
 msgstr "La campana en la barra de navegación muestra el número de todo lo que no se ha leído.\n"
 ""
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "Lock my profile"
+msgstr ""
 
 #. placeholder {0}: note.title
 #: src/components/notes/StickyNoteFabPanel.tsx
@@ -18653,6 +18707,10 @@ msgstr "Ver registros de auditoría"
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Launch - Ready to go!"
 msgstr "Lanzamiento - ¡Listo para empezar!"
+
+#: src/pages/achievements/AchievementsPage.tsx
+msgid "Collections & filters"
+msgstr ""
 
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/documents/DocumentCard.tsx

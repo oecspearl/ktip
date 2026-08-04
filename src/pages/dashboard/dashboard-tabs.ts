@@ -12,6 +12,7 @@ import {
   Building2,
   Shield,
   Trophy,
+  UserPen,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { INDIVIDUAL_ROLES, ORGANIZATION_ROLES, expandRoles, rolesOfTier } from '../../lib/permissions'
@@ -33,6 +34,15 @@ export interface DashboardTab {
 
 export const DASHBOARD_TABS: DashboardTab[] = [
   { to: '', label: msg`Overview`, icon: LayoutDashboard, description: msg`Network, submissions, calendar` },
+  // The member's public face: the profile editor (shared with Settings) plus
+  // the profile lock (083). 'profile' was already taken by the CV tab below,
+  // hence the longer slug.
+  {
+    to: 'my-profile',
+    label: msg`My Profile`,
+    icon: UserPen,
+    description: msg`What others see, and who can see it`,
+  },
   // Kept at 'profile' so existing /dashboard/profile links and bookmarks still
   // land somewhere; the panel is the full CV page — designs, downloads and
   // publishing included. /cv redirects here.

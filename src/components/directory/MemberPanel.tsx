@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router'
 import {
   Calendar,
@@ -106,12 +106,35 @@ export function MemberPanel() {
   // Nothing is fetched at all for a signed-out visitor — the drawer shows the
   // sign-in gate instead (083).
   const signedIn = !!auth.user
+
+  // Exit animation: closeMember() nulls memberId immediately, but an instant
+  // vanish reads as a glitch next to the slide-in. So the drawer stays mounted
+  // for one animation's worth of time, sliding out, rendered from the LAST
+  // member it showed — the queries below keep that id so the content cannot
+  // flash to a skeleton mid-exit. The timeout (not animationend) unmounts, so
+  // reduced-motion users — whose animations are `none` — are not stuck.
+  const [closing, setClosing] = useState(false)
+  const lastMemberId = useRef<string | null>(null)
+  if (memberId) lastMemberId.current = memberId
+  useEffect(() => {
+    if (isOpen) {
+      setClosing(false)
+      return
+    }
+    if (lastMemberId.current === null) return
+    setClosing(true)
+    const timer = setTimeout(() => setClosing(false), 340)
+    return () => clearTimeout(timer)
+  }, [isOpen])
+  const activeSegment = memberId ?? (closing ? lastMemberId.current : null)
+  const show = isOpen || closing
+
   // `memberId` is whatever is in `?member=` — a username since the URLs were
   // made readable, a uuid on an older link. get_profile_view() takes a uuid.
   const { id: resolvedId, username, loading: resolvingId } = useProfileId(
-    memberId ?? undefined
+    activeSegment ?? undefined
   )
-  const { view: rawProfile, canView, loading: viewLoading } = useProfileView(
+  const { view: rawProfile, canView, isPrivate, loading: viewLoading } = useProfileView(
     resolvedId,
     signedIn
   )
@@ -177,16 +200,18 @@ export function MemberPanel() {
 
   // The drawer scrolls its own content, so freeze the page behind it —
   // otherwise a wheel over the backdrop scrolls the list out from under it.
+  // Held through the exit animation: releasing at close-start brings the page
+  // scrollbar back mid-slide, and that layout shift reads as a glitch.
   useEffect(() => {
-    if (!isOpen) return
+    if (!show) return
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = previous
     }
-  }, [isOpen])
+  }, [show])
 
-  if (!isOpen) return null
+  if (!show) return null
 
   const isSelf = resolvedId === auth.user?.id
   // Explains itself rather than silently dropping the button: the panel is
@@ -216,7 +241,14 @@ export function MemberPanel() {
         aria-hidden
         data-member-scrim
         onClick={closeMember}
-        className="fixed inset-0 z-scrim bg-brand-navy/45 backdrop-blur-[3px] animate-fade-in"
+        className={cn(
+          // Stays clickable while closing on purpose: the mousedown that
+          // closed the drawer is followed by a click at mouseup, and with the
+          // scrim gone (or pointer-inert) that click lands on whatever card
+          // sits under the cursor and re-opens the drawer.
+          'fixed inset-0 z-scrim bg-brand-navy/45 backdrop-blur-[3px]',
+          closing ? 'animate-fade-out' : 'animate-fade-in'
+        )}
       />
       <section
         ref={panelRef}
@@ -226,7 +258,8 @@ export function MemberPanel() {
         className={cn(
           'fixed z-drawer inset-y-0 right-0 w-full sm:w-[45vw] sm:min-w-[420px]',
           'bg-ktip-cream shadow-hard border-l border-ktip-sand-200 sm:rounded-l-2xl',
-          'overflow-hidden flex flex-col animate-slide-in-right'
+          'overflow-hidden flex flex-col',
+          closing ? 'animate-slide-out-right pointer-events-none' : 'animate-slide-in-right'
         )}
       >
         {/* Floats over both the cover photo and the cream below it, so it stays
@@ -438,6 +471,34 @@ export function MemberPanel() {
                 </div>
               ) : (
                 <>
+                  {/* The lock never applies to yourself, an admin, or an
+                      accepted connection (can_view_profile, 083). Say so —
+                      otherwise locking your own profile looks broken when you
+                      test it by opening your own card. */}
+                  {isPrivate && (
+                    <div className="mx-6 mt-6 flex items-start gap-2.5 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 px-4 py-3">
+                      <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
+                      <p className="text-xs leading-relaxed text-ktip-sand-600">
+                        {isSelf ? (
+                          <Trans>
+                            Your profile is locked. Other members see only your name, photo and
+                            country until you accept their connection request — you always see
+                            everything here.
+                          </Trans>
+                        ) : auth.isAdmin ? (
+                          <Trans>
+                            This profile is private. You can see it because administrators
+                            bypass the lock.
+                          </Trans>
+                        ) : (
+                          <Trans>
+                            This profile is private. You can see it because you are connected.
+                          </Trans>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
                   {profile.bio && (
                     <Section label={t`About`}>
                       <p className="text-sm leading-relaxed text-ktip-sand-700 whitespace-pre-wrap">

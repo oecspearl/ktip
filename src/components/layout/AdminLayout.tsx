@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import {
   LayoutDashboard,
@@ -78,6 +79,13 @@ export function AdminLayout() {
   const auth = useAuth()
   const navItems = adminNavItems.filter((item) => !item.requires || auth.can(item.requires))
 
+  // Admin sections behave like separate pages, so keep the land-at-top
+  // contract locally — MainLayout no longer scrolls on intra-shell changes
+  // (its effect is keyed on shellKey, which is constant across /admin/*).
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return location.pathname === href
     return location.pathname.startsWith(href)
@@ -135,9 +143,12 @@ export function AdminLayout() {
           </nav>
         </div>
 
-        {/* Content */}
-        <div data-tutorial="admin-content" className="flex-1 min-w-0">
-          <div key={location.pathname} className="contents page-reveal">
+        {/* Content. Outer div stays mounted (tour anchor); overflow-x-clip
+            hides the pane's translateX(100%) start frame without creating a
+            scroll container. The keyed inner div is a real box so the
+            pane-shuffle animation can run on it. */}
+        <div data-tutorial="admin-content" className="flex-1 min-w-0 overflow-x-clip">
+          <div key={location.pathname} className="page-reveal pane-shuffle">
             <Outlet />
           </div>
         </div>

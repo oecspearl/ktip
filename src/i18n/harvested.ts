@@ -474,6 +474,7 @@ Do this from the same browser and profile you originally wrote them in — that 
 Reset password sends them a reset — it does not show you anything. Verify marks the account as identity-checked, which shows publicly as a badge; unverify removes it.
 
 Delete is permanent and takes their content with it. It asks twice for that reason.`,
+  msg`Edit what other members see, and lock your profile so only connections can view it`,
   msg`Edit your project`,
   msg`Editing points or criteria affects future awards, not the ones already granted — nobody loses a badge because the rule was tightened.
 
@@ -1072,6 +1073,7 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My Dashboard`,
   msg`My Events`,
   msg`My Invitations`,
+  msg`My Profile`,
   msg`My Progress`,
   msg`My Projects`,
   msg`My Registrations`,

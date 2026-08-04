@@ -167,9 +167,13 @@ const router = createBrowserRouter([
                 // and site-search.test.ts matches route paths literally.
                 children: [
                   { index: true, lazy: lazyPage(() => import('./pages/dashboard/tabs/OverviewTab')) },
+                  { path: '/dashboard/my-profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/MyProfileTab')) },
                   { path: '/dashboard/profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProfileTab')) },
                   { path: '/dashboard/progress', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProgressTab')) },
                   { path: '/dashboard/achievements', lazy: lazyPage(() => import('./pages/dashboard/tabs/AchievementsTab')) },
+                  // Reached from the Achievements tab's Leaderboard button;
+                  // stays inside the tab shell so only the pane swaps.
+                  { path: '/dashboard/leaderboard', lazy: lazyPage(() => import('./pages/dashboard/tabs/LeaderboardTab')) },
                   { path: '/dashboard/projects', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProjectsTab')) },
                   { path: '/dashboard/events', lazy: lazyPage(() => import('./pages/dashboard/tabs/EventsTab')) },
                   { path: '/dashboard/connections', lazy: lazyPage(() => import('./pages/dashboard/tabs/ConnectionsTab')) },

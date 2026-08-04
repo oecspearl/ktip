@@ -126,9 +126,10 @@ export function PageHero({
         loading="eager" fetchPriority="high"
         /* sync, not async. `decoding="async"` is permission to paint a frame
            WITHOUT this image and decode it afterwards — and MainLayout remounts
-           the whole routed subtree on every navigation (key={pathname}), so
-           this is a brand-new element needing a fresh decode on every route
-           change, cache or no cache. The route card shuffle then captures that
+           the whole routed subtree on every cross-shell navigation
+           (key={shellKey(pathname)}; dashboard/admin tab changes keep the hero
+           mounted), so this is a brand-new element needing a fresh decode on
+           every page change, cache or no cache. The route card shuffle then captures that
            first paint into ::view-transition-new(root) and holds it for 500ms.
            With the photo absent the band shows what is underneath it: the
            navy `bg-brand-navy`, the bottom fade's upward gradient cut off at
