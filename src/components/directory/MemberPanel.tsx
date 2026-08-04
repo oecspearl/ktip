@@ -214,11 +214,13 @@ export function MemberPanel() {
       {/* Dims the page so the drawer reads as the foreground layer */}
       <div
         aria-hidden
+        data-member-scrim
         onClick={closeMember}
         className="fixed inset-0 z-scrim bg-brand-navy/45 backdrop-blur-[3px] animate-fade-in"
       />
       <section
         ref={panelRef}
+        data-member-panel
         role="complementary"
         aria-label={t`Member preview`}
         className={cn(

@@ -1768,10 +1768,75 @@ html.route-shuffle.route-shuffle-from-home::view-transition-old(root) {
     route-card-fade-out 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-/* What shows through the fading card: the hero base (navy by day, near-black
-   at night), not the canvas backdrop. */
-html.route-shuffle.route-shuffle-from-home::view-transition-image-pair(root) {
-  background-color: var(--color-hero-base);
+/* What shows through the fading card is the pair's hero-base background —
+   set on html.route-shuffle::view-transition-image-pair(root) further down,
+   shared with the navbar pinning. */
+
+/* ---------------------------------------------------------------------------
+   Fixed chrome stands OUTSIDE the shuffle: the FAB cluster, the messaging
+   panel, sticky notes and the member drawer each get their own snapshot
+   group, which paints above the two page cards and does not move — the cards
+   slide behind them. Without this they are baked into both card snapshots:
+   a panel left open ghosts across the whole transition (two translucent
+   copies cross-fading mid-slide).
+
+   Scoped to html.route-shuffle: the class is on <html> before the old frame
+   is captured (see routeTransitions.ts), and the venue bento transitions
+   never see these names.
+
+   The navbar is pinned too (retried after the recede-scale and card shadow —
+   the causes of the original artifacts — were removed). Its hole spans the
+   header, so the glass bar sits over the pair's background rather than hero
+   pixels while the cards slide; the from-home rule below already paints that
+   background hero-base, which reads as the band under the photos. */
+html.route-shuffle [data-app-navbar] {
+  view-transition-name: vt-navbar;
+}
+html.route-shuffle [data-fab] {
+  view-transition-name: vt-fab;
+}
+html.route-shuffle .messaging-panel {
+  view-transition-name: vt-messaging;
+}
+html.route-shuffle [data-sticky-notes] {
+  view-transition-name: vt-sticky-notes;
+}
+html.route-shuffle [data-member-scrim] {
+  view-transition-name: vt-member-scrim;
+}
+html.route-shuffle [data-member-panel] {
+  view-transition-name: vt-member-panel;
+}
+
+/* Dead still: no group motion, no cross-fade. The element persists across the
+   navigation, so the live new image alone is the correct static picture. */
+html.route-shuffle::view-transition-group(vt-navbar),
+html.route-shuffle::view-transition-group(vt-fab),
+html.route-shuffle::view-transition-group(vt-messaging),
+html.route-shuffle::view-transition-group(vt-sticky-notes),
+html.route-shuffle::view-transition-group(vt-member-scrim),
+html.route-shuffle::view-transition-group(vt-member-panel) {
+  animation: none;
+}
+
+html.route-shuffle::view-transition-old(vt-navbar),
+html.route-shuffle::view-transition-old(vt-fab),
+html.route-shuffle::view-transition-old(vt-messaging),
+html.route-shuffle::view-transition-old(vt-sticky-notes),
+html.route-shuffle::view-transition-old(vt-member-scrim),
+html.route-shuffle::view-transition-old(vt-member-panel) {
+  animation: none;
+  opacity: 0;
+}
+
+html.route-shuffle::view-transition-new(vt-navbar),
+html.route-shuffle::view-transition-new(vt-fab),
+html.route-shuffle::view-transition-new(vt-messaging),
+html.route-shuffle::view-transition-new(vt-sticky-notes),
+html.route-shuffle::view-transition-new(vt-member-scrim),
+html.route-shuffle::view-transition-new(vt-member-panel) {
+  animation: none;
+  opacity: 1;
 }
 
 /* Debug affordance: add ?slowmo to any URL to run the shuffle at 4s so a
@@ -1788,9 +1853,13 @@ html.route-shuffle-slowmo.route-shuffle-from-home::view-transition-old(root) {
   animation-duration: 4000ms;
 }
 
-/* New card composites above the receding old card within the pair. */
+/* New card composites above the receding old card within the pair. The
+   hero-base background backs the navbar-shaped hole that pinning the bar
+   (vt-navbar) punches in both card snapshots: through the translucent glass
+   bar the strip reads as the band under the hero photos, not raw canvas. */
 html.route-shuffle::view-transition-image-pair(root) {
   isolation: isolate;
+  background-color: var(--color-hero-base);
 }
 
 /* THE one that caused the flicker.

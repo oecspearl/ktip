@@ -464,13 +464,16 @@ export function Navbar() {
     )}
     <nav
       onMouseEnter={() => setNavHidden(false)}
-      /* Deliberately NOT given a view-transition-name. A separately
-         snapshotted navbar stays pinned during the route card shuffle
-         (routeTransitions.ts), but that punches a navbar-shaped hole in the
-         old page's snapshot — the hole slides out from under the static bar
-         as the card recedes, and the incoming card's edge and shadow sweep
-         visibly through the translucent bar. Letting each card carry its own
-         navbar keeps the header seamless. */
+      /* data-app-navbar: pinned outside the route card shuffle via a
+         view-transition-name in index.css, alongside the FAB and panels. An
+         earlier attempt at this was reverted for artifacts, but both came
+         from mechanics that no longer exist: the old card then receded with
+         a scale() (sliding its navbar-hole out from under the static bar —
+         the card now holds still) and the incoming card carried a drop
+         shadow that swept through the translucent bar (removed since). The
+         remaining trade-off is that during the slide the glass bar sits over
+         the transition backdrop rather than live hero pixels. */
+      data-app-navbar
       className={cn(
         // The bar row is exactly --nav-h (set on the row below, so the mobile
         // menu can still expand past it). Height used to be whatever the logo
