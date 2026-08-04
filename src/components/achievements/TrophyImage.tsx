@@ -19,7 +19,6 @@ import type { BadgeRarity, BadgeTier, TrophyAssetMap } from '../../types'
  *
  * The icon fallback is not a degraded state: the system ships before the
  * artwork does, and a badge added later works immediately with no art at all.
- * Six cells (podium and flame below gold) still rely on it today.
  */
 
 export interface TrophyImageProps {

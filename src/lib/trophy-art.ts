@@ -15,12 +15,11 @@ import type { BadgeTier } from '../types'
  * uploads replacement art through /admin/achievements still wins. This is the
  * default, not the override.
  *
- * SIX CELLS ARE NULL
- * podium and flame have gold only; their bronze, silver and diamond renders do
- * not exist yet. They are written out as explicit nulls rather than omitted so
- * that the gap is a fact recorded in the code, not something you infer from a
- * missing key. Those badges fall through to the lucide icon, which is exactly
- * what the fallback is for.
+ * The ladder is complete: all 12 types have all 4 tiers. ladder()'s `absent`
+ * parameter stays for the next gap — a type added before its art lands should
+ * record the missing tiers as explicit nulls, not omit the key, so the gap is
+ * a fact in the code rather than something inferred. A null falls through to
+ * the lucide icon, which is exactly what the fallback is for.
  *
  * Sources live in public/trophies/ at 512px (the largest any call site renders
  * at DPR 3). The build generates 192/384 AVIF + WebP variants from them; see
@@ -64,8 +63,8 @@ const BUNDLED: Record<TrophyType, TierArt> = {
   handshake: ladder('handshake'),
   seedling: ladder('seedling'),
   megaphone: ladder('megaphone'),
-  podium: ladder('podium', ['bronze', 'silver', 'diamond']),
-  flame: ladder('flame', ['bronze', 'silver', 'diamond']),
+  podium: ladder('podium'),
+  flame: ladder('flame'),
   weave: ladder('weave'),
   crown: ladder('crown'),
   key: ladder('key'),

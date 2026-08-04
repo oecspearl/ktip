@@ -67,9 +67,9 @@ describe('resolveTrophy', () => {
     )
   })
 
-  // flame below gold is one of the six cells with no render yet.
+  // star ships no bundled ladder, so an un-uploaded tier has nothing to show.
   it('returns no url when neither an upload nor a bundled file exists', () => {
-    expect(resolveTrophy(assetMap, 'flame', 'bronze', null).url).toBeNull()
+    expect(resolveTrophy(assetMap, 'star', 'bronze', null).url).toBeNull()
   })
 
   it('returns no url for a type that is not in the map at all', () => {
@@ -95,8 +95,8 @@ describe('TrophyImage', () => {
   })
 
   it('renders an accessible icon when no artwork exists', () => {
-    // flame-bronze has neither an uploaded asset nor a bundled render.
-    render(<TrophyImage icon="flame" trophyType="flame" tier="bronze" assetMap={assetMap} name="Warming Up" />)
+    // star-bronze has neither an uploaded asset nor a bundled render.
+    render(<TrophyImage icon="flame" trophyType="star" tier="bronze" assetMap={assetMap} name="Warming Up" />)
     const fallback = screen.getByRole('img', { name: 'Warming Up' })
     expect(fallback.tagName).not.toBe('IMG')
   })
