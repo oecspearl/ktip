@@ -37,9 +37,10 @@ export default function ResourceDetailPage() {
       return (
         <div className="w-full max-w-page mx-auto px-4 py-8">
           <div className="max-w-page-mid mx-auto">
-            {/* Hero-band stand-in: brand-navy like PageHero, not a gray that
-                inverts to white in dark mode */}
-            <div className="bg-brand-navy min-h-[180px] rounded-none animate-pulse" />
+            {/* Hero-band stand-in: hero-base like PageHero (navy by day,
+                near-black at night), not a gray that inverts to white in
+                dark mode */}
+            <div className="bg-hero-base min-h-[180px] rounded-none animate-pulse" />
             <div className="p-8 animate-pulse">
               <div className="h-4 w-24 bg-ktip-sand-100 rounded mb-4" />
               <div className="h-8 w-3/4 bg-ktip-sand-100 rounded mb-4" />

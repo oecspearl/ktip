@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Flame, Pin, Search, Trophy, Users, X } from 'lucide-react'
+import { Flame, Pin, Search, Trophy, Users } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-import { Modal } from '../../components/ui/Modal'
 import { TagFilterChips } from '../../components/ui/TagFilterChips'
 import { TrophyCard, SecretTrophyCard } from '../../components/achievements/TrophyCard'
+import { MeshFlipCell, MeshVeil, useMeshFlip } from '../../components/achievements/MeshFlip'
 import { FireworksOverlay } from '../../components/achievements/FireworksOverlay'
 import { useAchievementContext } from '../../contexts/AchievementContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAllBadges, useUserBadges } from '../../hooks/useBadges'
-import { useShowcaseMutation, useTrackFlag } from '../../hooks/useAchievements'
+import {
+  useBadgeHolderCounts,
+  useShowcaseMutation,
+  useTrackFlag,
+} from '../../hooks/useAchievements'
 import { useProfileStats } from '../../hooks/useProfileStats'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useToast } from '../../contexts/ToastContext'
@@ -67,6 +71,8 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
   const { stats: myStats } = useProfileStats(auth.user?.id)
   const showcaseMutation = useShowcaseMutation()
   const trackFlag = useTrackFlag()
+  // Detail popup only — the grid stays light.
+  const { holdersById, eligible } = useBadgeHolderCounts()
 
   const [category, setCategory] = useState<string>('all')
   const [rarities, setRarities] = useState<string[]>([])
@@ -74,7 +80,8 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
   const [search, setSearch] = useState('')
   const [pinning, setPinning] = useState(false)
   const [pinned, setPinned] = useState<string[]>([])
-  const [detail, setDetail] = useState<BadgeDefinition | null>(null)
+  // In-grid flip detail — replaced the Modal popup.
+  const mesh = useMeshFlip()
 
   // Powers the 'curious' hidden achievement. Once per mount, not per render.
   useEffect(() => {
@@ -146,11 +153,35 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
     return { all: visible.length, earned, progress, locked: visible.length - earned }
   }, [visible, readBadge])
 
+  /**
+   * Where the member's activity actually lives, per category, weighted so an
+   * earned badge says more than a half-finished one. This is what "relevant"
+   * means for the unearned sort below: a locked Events badge matters more to
+   * someone whose trophies are all from events than to someone who has never
+   * touched one.
+   */
+  const affinityByCategory = useMemo(() => {
+    const counts = new Map<string, number>()
+    let total = 0
+    for (const b of visible) {
+      const read = readBadge(b)
+      const weight = read.earnedAt ? 1 : read.started ? 0.5 : 0
+      if (!weight) continue
+      const cat = b.category || 'community'
+      counts.set(cat, (counts.get(cat) ?? 0) + weight)
+      total += weight
+    }
+    const map = new Map<string, number>()
+    if (total > 0) for (const [cat, n] of counts) map.set(cat, n / total)
+    return map
+  }, [visible, readBadge])
+
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase()
     const rows = visible.filter((b) => {
       if (category !== 'all' && (b.category || 'community') !== category) return false
-      if (rarities.length && !rarities.includes(RARITY_LABEL[rarityOf(b.rarity)])) return false
+      if (rarities.length && !rarities.includes(resolveCopy(i18n, RARITY_LABEL[rarityOf(b.rarity)])))
+        return false
       if (needle && !`${b.name} ${b.description}`.toLowerCase().includes(needle)) return false
 
       const read = readBadge(b)
@@ -160,20 +191,30 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
       return true
     })
 
-    // Closest to unlocking first, then everything else earned-most-recent
-    // first. A flat alphabetical list of 75 buried the three tiles that
-    // actually tell you what to do next.
+    // Trophy case first: earned badges lead, rarest at the front — the shelf
+    // you show off. Everything unearned follows by how relevant it is to THIS
+    // member: mostly how close it is to unlocking, nudged by how much of their
+    // activity lives in its category, so the next badge suggested is one from
+    // a part of the site they actually use.
+    const rarityRank = (b: BadgeDefinition) => RARITY_ORDER.indexOf(rarityOf(b.rarity))
+    const relevance = (b: BadgeDefinition, pct: number) =>
+      pct + 0.5 * (affinityByCategory.get(b.category || 'community') ?? 0)
+
     return rows.sort((a, b) => {
       const ra = readBadge(a)
       const rb = readBadge(b)
-      const rank = (r: typeof ra) => (r.started ? 0 : r.earnedAt ? 1 : 2)
-      const diff = rank(ra) - rank(rb)
+      if (!!ra.earnedAt !== !!rb.earnedAt) return ra.earnedAt ? -1 : 1
+      if (ra.earnedAt && rb.earnedAt) {
+        return (
+          rarityRank(b) - rarityRank(a) ||
+          (rb.earnedAt || '').localeCompare(ra.earnedAt || '')
+        )
+      }
+      const diff = relevance(b, rb.pct) - relevance(a, ra.pct)
       if (diff !== 0) return diff
-      if (rank(ra) === 0) return rb.pct - ra.pct
-      if (rank(ra) === 1) return (rb.earnedAt || '').localeCompare(ra.earnedAt || '')
       return (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name)
     })
-  }, [visible, category, rarities, status, search, readBadge])
+  }, [visible, category, rarities, status, search, readBadge, affinityByCategory])
 
   const stats = achievements?.stats
   const rank = stats?.rank
@@ -226,8 +267,6 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
       </div>
     )
   }
-
-  const detailRead = detail ? readBadge(detail) : null
 
   return (
     <div className={shell}>
@@ -454,7 +493,7 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
 
         <TagFilterChips
           label={t`Rarity`}
-          options={RARITY_ORDER.map((r) => RARITY_LABEL[r])}
+          options={RARITY_ORDER.map((r) => resolveCopy(i18n, RARITY_LABEL[r]))}
           selected={rarities}
           onChange={setRarities}
           collapsedCount={RARITY_ORDER.length}
@@ -465,40 +504,83 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
           Four columns, not five: inside the dashboard the 16rem rail already
           took a quarter of the width, so five columns rendered as slivers. */}
       <section>
-        <div data-tutorial="achievements-gallery" className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        {/* Flush mesh: tiles sit edge-to-edge, separated only by the
+            trophy-line hairline — the container draws the top/left edges and
+            every cell its own right/bottom, so lines stay single-thickness
+            and an incomplete last row leaves no stray filled block. The line
+            token flips with the theme along with the card ground. */}
+        <div
+          data-tutorial="achievements-gallery"
+          className="grid grid-cols-2 border-l border-t border-trophy-line sm:grid-cols-3 lg:grid-cols-4"
+        >
           {filtered.map((badge) => {
             const { earnedAt, progress } = readBadge(badge)
             const isPinned = pinned.includes(badge.id)
             const pinnable = pinning && !!earnedAt
 
             return (
-              <button
+              <MeshFlipCell
                 key={badge.id}
-                type="button"
-                aria-pressed={pinning ? isPinned : undefined}
-                // While pinning, the tile picks; otherwise it opens the detail
-                // popup that carries the description the tile no longer shows.
-                onClick={() => (pinnable ? togglePin(badge.id) : setDetail(badge))}
+                id={badge.id}
+                open={mesh.activeId === badge.id}
+                mounted={mesh.mountedId === badge.id}
+                // While pinning, the tile picks; otherwise it flips open into
+                // the detail card that carries the description the tile no
+                // longer shows.
+                onActivate={(id) => (pinnable ? togglePin(id) : mesh.open(id))}
+                onClose={mesh.close}
+                onSettled={mesh.settle}
+                label={badge.name}
+                className="border-b border-r border-trophy-line"
                 disabled={pinning && !earnedAt}
-                className="text-left rounded-2xl focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <TrophyCard
-                  name={badge.name}
-                  description={badge.description}
-                  icon={badge.icon}
-                  rarity={badge.rarity}
-                  tier={badge.tier}
-                  trophyType={badge.trophy_type}
-                  imageUrl={badge.image_url}
-                  points={badge.points}
-                  assetMap={assetMap}
-                  locked={!earnedAt}
-                  earnedAt={earnedAt}
-                  progress={progress}
-                  compact
-                  className={cn('h-full', isPinned && 'ring-2 ring-ktip-sun-500')}
-                />
-              </button>
+                aria-pressed={pinning ? isPinned : undefined}
+                front={
+                  <TrophyCard
+                    name={badge.name}
+                    description={badge.description}
+                    icon={badge.icon}
+                    rarity={badge.rarity}
+                    tier={badge.tier}
+                    trophyType={badge.trophy_type}
+                    imageUrl={badge.image_url}
+                    points={badge.points}
+                    assetMap={assetMap}
+                    locked={!earnedAt}
+                    earnedAt={earnedAt}
+                    progress={progress}
+                    compact
+                    flush
+                    className={cn('h-full', isPinned && 'ring-2 ring-inset ring-ktip-sun-500')}
+                  />
+                }
+                back={() => (
+                  <TrophyCard
+                    name={badge.name}
+                    description={badge.description}
+                    icon={badge.icon}
+                    rarity={badge.rarity}
+                    tier={badge.tier}
+                    trophyType={badge.trophy_type}
+                    imageUrl={badge.image_url}
+                    points={badge.points}
+                    category={resolveCopy(
+                      i18n,
+                      CATEGORY_LABELS[badge.category || 'community'] ?? badge.category
+                    )}
+                    categoryKey={badge.category}
+                    checkKey={badge.check_key}
+                    checkValue={badge.check_value}
+                    holders={holdersById.get(badge.id)}
+                    eligible={eligible}
+                    assetMap={assetMap}
+                    locked={!earnedAt}
+                    earnedAt={earnedAt}
+                    progress={progress}
+                    size="lg"
+                    onClose={mesh.close}
+                  />
+                )}
+              />
             )
           })}
 
@@ -509,7 +591,9 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
             !search.trim() &&
             rarities.length === 0 &&
             Array.from({ length: Math.min(unearnedSecrets, 5) }, (_, i) => (
-              <SecretTrophyCard key={`secret-${i}`} />
+              <div key={`secret-${i}`} className="border-b border-r border-trophy-line">
+                <SecretTrophyCard className="h-full w-full rounded-none border-0" />
+              </div>
             ))}
         </div>
 
@@ -525,40 +609,9 @@ export default function AchievementsPage({ embedded = false }: { embedded?: bool
         <Trans>Achievements are awarded automatically from what you do on KTIP.</Trans>
       </p>
 
-      {/* ---------- Detail ---------- */}
-      <Modal
-        open={!!detail}
-        onClose={() => setDetail(null)}
-        title={detail?.name}
-        size="sm"
-      >
-        {detail && detailRead && (
-          <div className="space-y-4">
-            <TrophyCard
-              name={detail.name}
-              description={detail.description}
-              icon={detail.icon}
-              rarity={detail.rarity}
-              tier={detail.tier}
-              trophyType={detail.trophy_type}
-              imageUrl={detail.image_url}
-              points={detail.points}
-              assetMap={assetMap}
-              locked={!detailRead.earnedAt}
-              earnedAt={detailRead.earnedAt}
-              progress={detailRead.progress}
-              size="lg"
-            />
-            <p className="text-center text-xs text-ktip-sand-500">
-              {resolveCopy(i18n, CATEGORY_LABELS[detail.category || 'community'] ?? detail.category)}
-            </p>
-            <Button variant="ghost" size="sm" fullWidth onClick={() => setDetail(null)}>
-              <X size={14} aria-hidden="true" />
-              <Trans>Close</Trans>
-            </Button>
-          </div>
-        )}
-      </Modal>
+      {/* The blur between the mesh and the open card. The card itself lives
+          inside its MeshFlipCell — in-flow, so it can fly from its socket. */}
+      <MeshVeil shown={!!mesh.activeId} mounted={!!mesh.mountedId} onClose={mesh.close} />
     </div>
   )
 }

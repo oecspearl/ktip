@@ -28,11 +28,36 @@ DECLARE
   v_key     TEXT;
   v_slug    TEXT;
   v_n       INT;
+  v_before  INT;
 BEGIN
+  -- auth.users first. profiles.id is a foreign key to it (000:11), so a
+  -- profile cannot be conjured from a bare UUID — that fails with
+  -- "violates foreign key constraint profiles_id_fkey". 000 also puts an
+  -- on_auth_user_created trigger on auth.users which inserts the profile
+  -- for us, so the statement below is an UPDATE in practice; it stays an
+  -- INSERT ... ON CONFLICT so the fixture still works if that trigger is
+  -- ever removed.
+  --
+  -- Everything here is inside the transaction this file ROLLBACKs, so no
+  -- auth row survives the run.
+  INSERT INTO auth.users (
+    id, instance_id, aud, role, email, encrypted_password,
+    raw_user_meta_data, created_at, updated_at
+  )
+  VALUES
+    (v_user,  '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+     'fixture-088@example.test',  '', '{"display_name":"Fixture 088"}'::JSONB, now(), now()),
+    (v_other, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+     'follower-088@example.test', '', '{"display_name":"Follower 088"}'::JSONB, now(), now())
+  ON CONFLICT (id) DO NOTHING;
+
   INSERT INTO profiles (id, display_name, roles, country)
   VALUES (v_user,  'Fixture 088',  ARRAY['entrepreneur'], 'Saint Lucia'),
          (v_other, 'Follower 088', ARRAY['mentor'],       'Saint Lucia')
-  ON CONFLICT (id) DO UPDATE SET roles = EXCLUDED.roles;
+  ON CONFLICT (id) DO UPDATE
+    SET roles = EXCLUDED.roles,
+        display_name = EXCLUDED.display_name,
+        country = EXCLUDED.country;
 
   -- ------------------------------------------------------------
   -- 1. Every check_key resolves to a real metric
@@ -206,7 +231,85 @@ BEGIN
   WHERE ub.user_id = v_user AND b.slug = 'followed_work';
   ASSERT v_n = 1, 'followed_work should award once its threshold is met';
 
-  RAISE NOTICE 'All 088 assertions passed.';
+  -- ------------------------------------------------------------
+  -- 9. The 089 remap landed and retired nothing prematurely
+  --
+  -- Section 3 above already proves no badge points at a missing slot,
+  -- which is the assertion that matters. These name the specific
+  -- outcome 089 intended, so a partial apply (089 skipped, or run
+  -- before 088 so its four new badges were not there to remap) is
+  -- caught here rather than noticed as odd artwork weeks later.
+  -- ------------------------------------------------------------
+  SELECT COUNT(*) INTO v_n FROM trophy_assets
+  WHERE type IN ('scroll', 'beaker', 'anchor', 'compass', 'star');
+  ASSERT v_n = 0, v_n || ' retired trophy type slot(s) still present — was 089 applied?';
+
+  SELECT COUNT(DISTINCT type) INTO v_n FROM trophy_assets;
+  ASSERT v_n = 12, 'expected exactly 12 trophy types, found ' || v_n;
+
+  -- The projects split is the point of 089: making vs reach.
+  SELECT COUNT(*) INTO v_n FROM badges WHERE trophy_type = 'rocket';
+  ASSERT v_n = 6, 'rocket should carry 6 badges after the split, found ' || v_n;
+
+  SELECT COUNT(*) INTO v_n FROM badges WHERE trophy_type = 'wave';
+  ASSERT v_n = 8, 'wave should carry 8 badges after the split, found ' || v_n;
+
+  -- No type may be so thinly used that its four renders are wasted;
+  -- 'anchor' served one badge, which is what 089 set out to fix.
+  SELECT COUNT(*) INTO v_n
+  FROM (SELECT trophy_type FROM badges WHERE trophy_type IS NOT NULL
+        GROUP BY trophy_type HAVING COUNT(*) < 3) t;
+  ASSERT v_n = 0, v_n || ' trophy type(s) carry fewer than 3 badges';
+
+  -- ------------------------------------------------------------
+  -- 10. Holder counts (103)
+  --
+  -- The figure this drives — "4 of 27 members" — is stated on a card
+  -- members screenshot and share, so it has to be exactly right. The
+  -- assertion that matters most is the last one: a suspended account
+  -- must leave BOTH sides of the fraction, or a badge can end up held
+  -- by more members than exist.
+  -- ------------------------------------------------------------
+  SELECT COUNT(*) INTO v_n FROM get_badge_holder_counts();
+  ASSERT v_n = (SELECT COUNT(*) FROM badges),
+    'get_badge_holder_counts() should return one row per badge, got ' || v_n;
+
+  SELECT COUNT(DISTINCT eligible) INTO v_n FROM get_badge_holder_counts();
+  ASSERT v_n = 1, 'eligible must be the same on every row, found ' || v_n || ' values';
+
+  SELECT eligible INTO v_n FROM get_badge_holder_counts() LIMIT 1;
+  ASSERT v_n = (SELECT COUNT(*) FROM profiles WHERE COALESCE(is_suspended, FALSE) = FALSE),
+    'eligible should be every non-suspended member, got ' || v_n;
+
+  -- v_user earned followed_work back in section 8. Asserted as a DELTA rather
+  -- than as "= 1": a real member could already hold it on a live database, and
+  -- a test that only passes on an empty one is a test that gets deleted.
+  SELECT holders INTO v_before
+  FROM get_badge_holder_counts() c
+  JOIN badges b ON b.id = c.badge_id
+  WHERE b.slug = 'followed_work';
+  ASSERT v_before >= 1, 'followed_work should count its holder, got ' || v_before;
+
+  UPDATE profiles SET is_suspended = TRUE WHERE id = v_user;
+
+  SELECT holders INTO v_n
+  FROM get_badge_holder_counts() c
+  JOIN badges b ON b.id = c.badge_id
+  WHERE b.slug = 'followed_work';
+  ASSERT v_n = v_before - 1,
+    'suspending a holder should drop the count by exactly 1, went from '
+      || v_before || ' to ' || v_n;
+
+  -- Both sides, not just the numerator. Dropping a suspended member from
+  -- holders but leaving them in eligible is survivable; the reverse produces
+  -- a badge held by more members than exist.
+  SELECT eligible INTO v_n FROM get_badge_holder_counts() LIMIT 1;
+  ASSERT v_n = (SELECT COUNT(*) FROM profiles WHERE COALESCE(is_suspended, FALSE) = FALSE),
+    'a suspended member must leave the denominator too';
+
+  UPDATE profiles SET is_suspended = FALSE WHERE id = v_user;
+
+  RAISE NOTICE 'All 088, 089 and 103 assertions passed.';
 END $$;
 
 ROLLBACK;

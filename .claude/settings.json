@@ -197,7 +197,16 @@
       "WebFetch(domain:docs.livekit.io)",
       "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/58284d71-6119-468d-b63e-6eda4ea7c29c/scratchpad/patch-video-doc-6.mjs\")",
       "Bash(awk -F: '{print $3}')",
-      "PowerShell(npx vitest run src/lib/site-search.test.ts src/lib/venue-presence.test.ts src/lib/event-slug.test.ts 2>&1)"
+      "PowerShell(npx vitest run src/lib/site-search.test.ts src/lib/venue-presence.test.ts src/lib/event-slug.test.ts 2>&1)",
+      "Bash(ls 'c:/Users/LG/Downloads/ktip-main/OECS KTIP/.claude/skills')",
+      "Bash(grep -o '\"dev\": *\"[^\"]*\"' 'c:/Users/LG/Downloads/ktip-main/OECS KTIP/package.json')",
+      "Bash(node hunt.mjs none)",
+      "Bash(node hunt.mjs backdrop)",
+      "Bash(node slowmo.mjs none)",
+      "Bash(echo \"TS:$?\")",
+      "Read(//c/Users/LG/Downloads/ktip trophies/no bg/**)",
+      "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/462e7237-e5b4-495a-9baa-662aceda7f30/scratchpad/move-trophies.mjs\")",
+      "PowerShell(npx tsc --noEmit 2>$null; echo \"exit: $LASTEXITCODE\")"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",

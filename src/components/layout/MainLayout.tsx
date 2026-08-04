@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useLayoutEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
@@ -37,8 +37,17 @@ export function MainLayout() {
   // staying on the floor. Room and setup pages keep the footer.
   const immersiveVenue = /^\/events\/virtual-hackathon\/[^/]+\/?$/.test(pathname)
 
-  // Always land at the top when navigating between pages
-  useEffect(() => {
+  // Always land at the top when navigating between pages.
+  //
+  // Layout effect, not passive: react-router commits a view-transitioned
+  // navigation inside flushSync, and the browser captures the *new* snapshot
+  // in the same frame. A passive effect still runs in time, but anything that
+  // only learns about the jump from the scroll event does not — the scroll
+  // event fires in "run the scroll steps", React schedules the resulting
+  // re-render on a task, and the snapshot is taken in "run the view
+  // transition steps" of that same frame, before the task can run. Scrolling
+  // here lets Navbar reset its own scroll state in the same commit instead.
+  useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
 

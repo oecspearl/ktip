@@ -11,13 +11,25 @@ interface ModalProps {
   description?: string
   children: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl'
+  /**
+   * Drops the cream panel, the header and the content padding, leaving only
+   * the backdrop and the dialog semantics — focus trap, escape, scroll lock,
+   * restore-focus. For content that IS the dialog and brings its own frame and
+   * close control; the trophy detail card is the case this was added for,
+   * because its artwork deliberately overflows the card edge and the panel's
+   * own `overflow-y-auto` would clip it.
+   *
+   * `title` is still used for the accessible name even though nothing renders
+   * it, so a bare modal is not an unlabelled dialog.
+   */
+  bare?: boolean
   className?: string
 }
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-export function Modal({ open, onClose, title, description, children, size, className, ...others }: ModalProps) {
+export function Modal({ open, onClose, title, description, children, size, bare, className, ...others }: ModalProps) {
     const { t } = useLingui()
   const dialogRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
@@ -105,31 +117,40 @@ export function Modal({ open, onClose, title, description, children, size, class
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative bg-ktip-cream rounded-surface-lg shadow-hard w-full mx-4 animate-scale-in max-h-[90vh] overflow-y-auto',
+          'relative w-full mx-4 animate-scale-in max-h-[90vh]',
+          // Bare keeps overflow visible on purpose: its content brings its own
+          // frame and may deliberately extend past it.
+          bare
+            ? 'overflow-visible'
+            : 'bg-ktip-cream rounded-surface-lg shadow-hard overflow-y-auto',
           sizeStyles[size || 'md'],
           className
         )}
         {...others}
       >
-        {/* Header */}
-        <div className="flex items-start justify-between p-card-pad border-b border-ktip-sand-100">
-          <div className="flex-1">
-            {title && (
-              <h2 className="text-title font-display font-bold text-ktip-sand-900">{title}</h2>
-            )}
-            {description && <p className="mt-1 text-caption text-ktip-sand-600">{description}</p>}
-          </div>
-          <button
-            onClick={onClose}
-            className="ml-4 p-1 rounded-control hover:bg-ktip-sand-100 transition-colors"
-            aria-label={t`Close modal`}
-          >
-            <X size={24} className="text-ktip-sand-400" />
-          </button>
-        </div>
+        {!bare && (
+          <>
+            {/* Header */}
+            <div className="flex items-start justify-between p-card-pad border-b border-ktip-sand-100">
+              <div className="flex-1">
+                {title && (
+                  <h2 className="text-title font-display font-bold text-ktip-sand-900">{title}</h2>
+                )}
+                {description && <p className="mt-1 text-caption text-ktip-sand-600">{description}</p>}
+              </div>
+              <button
+                onClick={onClose}
+                className="ml-4 p-1 rounded-control hover:bg-ktip-sand-100 transition-colors"
+                aria-label={t`Close modal`}
+              >
+                <X size={24} className="text-ktip-sand-400" />
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Content */}
-        <div className="p-card-pad">{children}</div>
+        <div className={bare ? undefined : 'p-card-pad'}>{children}</div>
       </div>
     </div>,
     document.body

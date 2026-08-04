@@ -12,7 +12,7 @@
  * callers stops being able to import it.
  */
 
-export type LadderName = 'hero' | 'pages' | 'grants'
+export type LadderName = 'hero' | 'pages' | 'grants' | 'trophies'
 
 /**
  * Widths generated per source, in `w`-descriptor terms.
@@ -30,6 +30,13 @@ export const LADDERS: Record<LadderName, readonly number[]> = {
   hero: [640, 960, 1280, 1920],
   pages: [640, 960, 1600],
   grants: [640, 960, 1600],
+  // Trophies are the odd one out: not photography but fixed-size marks, so the
+  // ladder is sized to the boxes they render in rather than to viewport widths.
+  // Four call sites — 40px admin thumbnail, 56px profile shelf, 72px gallery
+  // tile, 128px detail modal. 192 covers everything up to the tile at DPR 2.6;
+  // 384 covers the detail modal at DPR 3. A third rung would only serve the
+  // 40px thumbnail, which is already the cheapest image on its page.
+  trophies: [192, 384],
 }
 
 /** Public URL prefix for every generated variant. Gitignored, built into dist. */

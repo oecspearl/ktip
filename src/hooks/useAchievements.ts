@@ -139,6 +139,51 @@ export function useTrophyAssets() {
   }
 }
 
+/**
+ * How many members hold each badge, and the membership that is measured
+ * against — the "4 of 27 members" line on the trophy detail card.
+ *
+ * One RPC for every badge rather than one per trophy: the detail popup opens
+ * on any of 68 tiles, and a per-badge call would be a round trip on every
+ * click for a figure that barely moves.
+ *
+ * Five minutes rather than Infinity: unlike trophy artwork this genuinely
+ * drifts as members earn things, and a stale count is a wrong claim about
+ * other people rather than a stale picture.
+ *
+ * Fails soft. If 103_badge_holder_counts.sql has not been applied the RPC is
+ * missing, and the card drops the row instead of showing a zero — see
+ * holderText() in TrophyCard.
+ */
+export function useBadgeHolderCounts() {
+  const query = useQuery({
+    queryKey: keys.list('badge_holder_counts'),
+    queryFn: async (): Promise<{ badge_id: string; holders: number; eligible: number }[]> => {
+      const { data, error } = await (supabase as any).rpc('get_badge_holder_counts')
+      if (error) throw error
+      return (data as { badge_id: string; holders: number; eligible: number }[]) || []
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  const holdersById = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const row of query.data || []) map.set(row.badge_id, Number(row.holders) || 0)
+    return map
+  }, [query.data])
+
+  // Repeated on every row by the function, so any row carries it.
+  const eligible = query.data?.[0]?.eligible
+
+  return {
+    holdersById,
+    eligible: eligible == null ? undefined : Number(eligible),
+    loading: query.isPending,
+    error: query.error,
+  }
+}
+
 /** Up to five trophies pinned to a member's public profile. */
 export function useShowcaseMutation() {
   const queryClient = useQueryClient()

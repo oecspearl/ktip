@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType, type KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type KeyboardEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -196,6 +196,28 @@ export function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  /**
+   * Every navigation lands at the top (MainLayout scrolls there), so the bar is
+   * over a hero again — but this component never remounts, and both flags above
+   * are written *only* by the scroll listener. The scroll event that would
+   * clear them arrives a frame late.
+   *
+   * Normally that costs one frame and nobody sees it. Under the route card
+   * shuffle (routeTransitions.ts) the browser snapshots the incoming page in
+   * exactly that frame, so the stale `bg-ktip-ink/85` + `border-ktip-line/60`
+   * — a pure-black hairline — gets baked across the new page's hero and held
+   * there for the whole 500ms animation, then vanishes when the live DOM is
+   * revealed. That was the black line flickering across the header.
+   *
+   * useLayoutEffect, not useEffect: this has to be in the commit react-router
+   * runs inside flushSync, ahead of the snapshot.
+   */
+  useLayoutEffect(() => {
+    setNavHidden(false)
+    setScrolledPastHero(false)
+    lastScrollY.current = 0
+  }, [location.pathname])
 
   /**
    * The roles this bar renders for.
@@ -442,6 +464,13 @@ export function Navbar() {
     )}
     <nav
       onMouseEnter={() => setNavHidden(false)}
+      /* Deliberately NOT given a view-transition-name. A separately
+         snapshotted navbar stays pinned during the route card shuffle
+         (routeTransitions.ts), but that punches a navbar-shaped hole in the
+         old page's snapshot — the hole slides out from under the static bar
+         as the card recedes, and the incoming card's edge and shadow sweep
+         visibly through the translucent bar. Letting each card carry its own
+         navbar keeps the header seamless. */
       className={cn(
         // The bar row is exactly --nav-h (set on the row below, so the mobile
         // menu can still expand past it). Height used to be whatever the logo

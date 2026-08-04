@@ -149,7 +149,6 @@ Dark mode applies instantly across the whole platform. Readable font mode switch
 Both are stored per device, so your phone and your laptop can be set differently.`,
   msg`Break`,
   msg`Breakout`,
-  msg`Bronze`,
   msg`Browse Grants, open one that fits your project, and click apply. Track the status of your submissions under "My Applications" — statuses move from pending to under review to approved or rejected.`,
   msg`Browse Projects`,
   msg`Browse and filter innovation projects`,
@@ -320,7 +319,6 @@ The brain icon in the panel turns on AI-guided navigation: describe what you are
   msg`Code Editor`,
   msg`Collaborate`,
   msg`Collaboration Tools`,
-  msg`Common`,
   msg`Common questions, and how to ask for more.`,
   msg`Community`,
   msg`Community & Network`,
@@ -395,7 +393,6 @@ Deleting a project cannot be undone. If you only want it out of public view, swi
   msg`Describe what happened and submit — the OECS team sees it in the admin dashboard.`,
   msg`Developer Tools`,
   msg`Development`,
-  msg`Diamond`,
   msg`Direct and group messaging with other members`,
   msg`Direct messages, group chats and the KTIP Assistant.`,
   msg`Directory, connections, invitations and your public page.`,
@@ -499,7 +496,6 @@ Each link works once. If it has already been used, ask whoever invited you to se
   msg`Entrepreneur`,
   msg`Entrepreneurs`,
   msg`Environment`,
-  msg`Epic`,
   msg`Error simulator`,
   msg`Errors`,
   msg`Errors captured from real sessions, grouped into issues so a hundred occurrences of one bug are one row.
@@ -528,9 +524,6 @@ It cannot be edited afterwards. If you entered it wrong, contact support and a m
 You can browse it two ways, filter it half a dozen ways, and add your own event with the Create Event button in this banner.
 
 This tour takes about a minute. Leave any time with Escape or the red button at the top.`,
-  msg`Every achievement KTIP awards, with the ones you have earned filled in and the rest showing what it takes.
-
-Points from these feed your leaderboard rank, and earned badges show on your public profile — so a locked badge here is a to-do list rather than decoration.`,
   msg`Every achievement KTIP can award: its name, artwork, category, points and the rule that unlocks it.
 
 Hidden badges do not appear in members’ galleries until earned — only their count does.`,
@@ -759,7 +752,6 @@ Optional: a description, a short summary used on cards and previews, a Details s
 
 Climate Action projects surface in climate filters and get a boost for members who turned on the climate preference.`,
   msg`Go to the final step, "Impact & Review".`,
-  msg`Gold`,
   msg`Government`,
   msg`Grant Applications`,
   msg`Grant Deadlines`,
@@ -980,7 +972,6 @@ The column on the right carries the owner, the team, and a block of key facts, p
 You do not need a separate KTIP password for this route.
 
 If the handoff fails you are sent back to the login page with an error code in the address bar and a short explanation on screen. Returning to the Campus and clicking through again usually clears it, because the ticket is single use.`,
-  msg`Legendary`,
   msg`Like signals support. Follow puts the project’s updates in front of you without you having to come back and check.
 
 Share copies a link anyone can open. Request to collaborate sends the owner a note asking to join the team — once sent it shows as pending here until they answer, and you cannot send a second one.
@@ -1440,7 +1431,6 @@ The team is notified when you post, so this is a reasonable place to ask before 
 Either way a copy of what you sent is saved under Submissions in your dashboard, and you can cancel from right here if your plans change.`,
   msg`Raise a grievance about someone's conduct`,
   msg`Rank projects, resources, events and grants against your interests`,
-  msg`Rare`,
   msg`Reach it from your avatar menu, "My Dashboard". The rail on the left lists your sections.
 
 Overview — your For You rail, recent submissions and calendar at a glance. Profile — how other members see you, read-only. Progress — your activity timeline. Projects — the projects you own. Events — the events you organise. Connections — the people you know, and your pending invitations. Submissions — permanent copies of everything you have submitted.
@@ -1641,7 +1631,6 @@ Export takes the content out of KTIP when you need it elsewhere.`,
   msg`Sign out`,
   msg`Sign up`,
   msg`Signing in from the OECS Virtual Campus`,
-  msg`Silver`,
   msg`Six languages, picked from the dropdown in the toolbar — changing it re-highlights what you have already written rather than clearing it.
 
 Run executes the snippet and prints to the output panel underneath, including errors. Nothing leaves your browser to do it.`,
@@ -2019,7 +2008,6 @@ The Climate Action strip underneath is the same three content types filtered to 
 Each entry links to the thing itself, so you can read it in context before deciding.`,
   msg`Type what you are looking for — a page, a feature, or the name of a project, event or person.`,
   msg`UAT feedback`,
-  msg`Uncommon`,
   msg`Under Preferences: which emails KTIP sends you, whether your connection count is public, whether you appear in the member directory and on the leaderboard at all.
 
 Under Security: password, a secondary email for recovery, and account deletion. Deletion is permanent and asks you to confirm in writing.`,

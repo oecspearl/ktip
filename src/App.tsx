@@ -23,6 +23,7 @@ import { MainLayout } from './components/layout/MainLayout'
 import { RouteSplash } from './components/RouteSplash'
 import { AppError } from './lib/app-error'
 import { captureException } from './lib/monitoring'
+import { enableCardShuffle } from './lib/routeTransitions'
 
 // Wrapped so Sentry names transactions after the matched route pattern
 // (/projects/:id) instead of the literal URL, which would otherwise create one
@@ -374,6 +375,8 @@ const router = createBrowserRouter([
     ],
   },
 ])
+
+enableCardShuffle(router)
 
 function App() {
   return (

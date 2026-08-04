@@ -28,9 +28,10 @@ export default function BoardPage() {
   if (boardLoading) {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-8">
-        {/* Stands in for the hero band, so it matches PageHero's brand-navy
-            base rather than a gray that inverts to white in dark mode */}
-        <div className="bg-brand-navy min-h-[180px] rounded-none animate-pulse-soft mb-0" />
+        {/* Stands in for the hero band, so it matches PageHero's hero-base
+            (navy by day, near-black at night) rather than a gray that inverts
+            to white in dark mode */}
+        <div className="bg-hero-base min-h-[180px] rounded-none animate-pulse-soft mb-0" />
         <div className="py-8 space-y-4">
           <div className="h-12 w-64 bg-ktip-sand-100 rounded-lg animate-pulse-soft" />
           <div className="h-24 bg-ktip-sand-100 rounded-xl animate-pulse-soft" />

@@ -3,6 +3,7 @@ import { Badge } from './Badge'
 import { cn, formatDate } from '../../lib/utils'
 import { resolveBadgeIcon } from '../../lib/badge-icons'
 import { RARITY_PILL, TIER_LABEL } from '../../lib/achievement-style'
+import { resolveCopy } from '../../i18n/copy'
 import type { BadgeDefinition, UserBadge } from '../../types'
 import { useLingui } from '@lingui/react/macro'
 import { useTranslated } from '../../hooks/useTranslated'
@@ -31,7 +32,7 @@ interface AchievementBadgeProps {
  * Artwork-bearing surfaces use TrophyImage / TrophyCard instead.
  */
 export function AchievementBadge({ userBadge, size, byRarity, className }: AchievementBadgeProps) {
-  const { t } = useLingui()
+  const { t, i18n } = useLingui()
   const badge = userBadge.badge
   // Both hooks run before the early return — a conditional hook is a crash on
   // the render after a badge loads in.
@@ -46,7 +47,7 @@ export function AchievementBadge({ userBadge, size, byRarity, className }: Achie
 
   // Tier is part of the identity of a laddered badge ("Innovator, gold"),
   // so it belongs in the accessible name, not only in the artwork.
-  const tierSuffix = badge.tier ? ` (${TIER_LABEL[badge.tier]})` : ''
+  const tierSuffix = badge.tier ? ` (${resolveCopy(i18n, TIER_LABEL[badge.tier])})` : ''
 
   return (
     <Badge

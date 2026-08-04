@@ -165,6 +165,10 @@ msgstr "Everyone currently in the venue but not yet inside a room — the lobby,
 "\n"
 "Presence is shared: while you are on this page other attendees can see you here too. Closing the tab takes you off the list."
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# separate day active} other {# separate days active}}"
+msgstr "{n, plural, one {# separate day active} other {# separate days active}}"
+
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Failed to remove the document"
 msgstr "Failed to remove the document"
@@ -197,6 +201,10 @@ msgstr "Nothing to show here yet — explore the platform to see what's happenin
 #: src/components/documents/DocumentContentModal.tsx
 msgid "Discard your unsaved changes to this document?"
 msgstr "Discard your unsaved changes to this document?"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# grant application approved} other {# grant applications approved}}"
+msgstr "{n, plural, one {# grant application approved} other {# grant applications approved}}"
 
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "Loading connections…"
@@ -428,6 +436,14 @@ msgstr "Badges you have earned on KTIP. Remove one and it stays off your CV."
 msgid "Organized By"
 msgstr "Organized By"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# project taken to launch} other {# projects taken to launch}}"
+msgstr "{n, plural, one {# project taken to launch} other {# projects taken to launch}}"
+
+#: src/lib/achievement-copy.ts
+msgid "You kept coming back. Consistency is the least glamorous thing on this platform and the one that compounds the most."
+msgstr "You kept coming back. Consistency is the least glamorous thing on this platform and the one that compounds the most."
+
 #: src/components/ui/LanguageSwitcher.tsx
 msgid "Change language"
 msgstr "Change language"
@@ -523,10 +539,6 @@ msgstr "Turn the venue on, create rooms, and upload a floorplan"
 msgid "Attached to this application only. Visible to you and the grant assessors."
 msgstr "Attached to this application only. Visible to you and the grant assessors."
 
-#: src/components/achievements/TrophyCard.tsx
-msgid "{points} pts"
-msgstr "{points} pts"
-
 #: src/i18n/harvested.ts
 msgid "Verification and vetting queues"
 msgstr "Verification and vetting queues"
@@ -612,6 +624,10 @@ msgstr "Delete post"
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Platform administration"
 msgstr "Platform administration"
+
+#: src/lib/achievement-copy.ts
+msgid "No one yet"
+msgstr "No one yet"
 
 #: src/pages/auth/AuthCallbackPage.tsx
 msgid "Your sign-in provider could not complete the request. Try again in a moment."
@@ -1542,6 +1558,10 @@ msgstr "Expand note"
 msgid "Search businesses…"
 msgstr "Search businesses…"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# grant application submitted} other {# grant applications submitted}}"
+msgstr "{n, plural, one {# grant application submitted} other {# grant applications submitted}}"
+
 #: src/pages/auth/AuthCallbackPage.tsx
 msgid "Sign-in was cancelled before your provider confirmed it. Nothing has changed — try again whenever you are ready."
 msgstr "Sign-in was cancelled before your provider confirmed it. Nothing has changed — try again whenever you are ready."
@@ -1787,6 +1807,10 @@ msgstr "Stage"
 #: src/pages/directory/DirectoryPage.tsx
 msgid "All Countries"
 msgstr "All Countries"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# project created} other {# projects created}}"
+msgstr "{n, plural, one {# project created} other {# projects created}}"
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Registration number"
@@ -2956,6 +2980,10 @@ msgstr "Getting started"
 msgid "When someone invites you to collaborate, it will show up here."
 msgstr "When someone invites you to collaborate, it will show up here."
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# message sent} other {# messages sent}}"
+msgstr "{n, plural, one {# message sent} other {# messages sent}}"
+
 #: src/components/notes/StickyNote.tsx
 msgid "Closing keeps the note in your saved list"
 msgstr "Closing keeps the note in your saved list"
@@ -3345,6 +3373,10 @@ msgstr "Chats"
 msgid "Turn the venue on"
 msgstr "Turn the venue on"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# hidden achievement found} other {# hidden achievements found}}"
+msgstr "{n, plural, one {# hidden achievement found} other {# hidden achievements found}}"
+
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/collaborate/DocumentEditorPage.tsx
 #: src/pages/collaborate/WhiteboardPage.tsx
@@ -3388,6 +3420,10 @@ msgstr "Key information"
 #: src/i18n/harvested.ts
 msgid "Intellectual Property Infringement"
 msgstr "Intellectual Property Infringement"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# code snippet created} other {# code snippets created}}"
+msgstr "{n, plural, one {# code snippet created} other {# code snippets created}}"
 
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "About this Grant"
@@ -3663,6 +3699,10 @@ msgstr "What each one is for"
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Failed to update the role"
 msgstr "Failed to update the role"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# forum reply} other {# forum replies}}"
+msgstr "{n, plural, one {# forum reply} other {# forum replies}}"
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
@@ -4264,7 +4304,7 @@ msgstr "Apply for a grant or start a project to track its journey here."
 msgid "Enter →"
 msgstr "Enter →"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Common"
 msgstr "Common"
 
@@ -4449,6 +4489,10 @@ msgstr "Coming soon"
 msgid "Environment"
 msgstr "Environment"
 
+#: src/lib/achievement-copy.ts
+msgid "You went looking. Some of KTIP only rewards curiosity, and this is what that looks like."
+msgstr "You went looking. Some of KTIP only rewards curiosity, and this is what that looks like."
+
 #: src/components/events/EventChallengeBrief.tsx
 msgid "optional"
 msgstr "optional"
@@ -4532,11 +4576,6 @@ msgstr "Loading solutions…"
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Untitled Snippet"
 msgstr "Untitled Snippet"
-
-#. placeholder {0}: new Date(earnedAt).toLocaleDateString()
-#: src/components/achievements/TrophyCard.tsx
-msgid "Earned {0}"
-msgstr "Earned {0}"
 
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "JSON"
@@ -4629,7 +4668,7 @@ msgstr "Send a connection request from someone's profile or the Member Directory
 msgid "My country"
 msgstr "My country"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Silver"
 msgstr "Silver"
 
@@ -4756,6 +4795,10 @@ msgstr "Untitled document"
 #: src/lib/venue-room-sections.ts
 msgid "Common questions"
 msgstr "Common questions"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {The leaderboard checked # time} other {The leaderboard checked # times}}"
+msgstr "{n, plural, one {The leaderboard checked # time} other {The leaderboard checked # times}}"
 
 #: src/components/layout/Navbar.tsx
 msgid "Sign Out"
@@ -4971,6 +5014,10 @@ msgstr "Check in"
 msgid "Voice and screen sharing are on"
 msgstr "Voice and screen sharing are on"
 
+#: src/lib/achievement-copy.ts
+msgid "You turned up. Regional events only work because enough people commit to being in the room, and the ones who host carry everyone else."
+msgstr "You turned up. Regional events only work because enough people commit to being in the room, and the ones who host carry everyone else."
+
 #. placeholder {0}: uploaded.length
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Attached ({0})"
@@ -4979,6 +5026,10 @@ msgstr "Attached ({0})"
 #: src/pages/events/EventVenueSetupPage.tsx
 msgid "Let people register as viewers"
 msgstr "Let people register as viewers"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# event checked in at} other {# events checked in at}}"
+msgstr "{n, plural, one {# event checked in at} other {# events checked in at}}"
 
 #: src/i18n/harvested.ts
 msgid "Choose the sun or moon icon that fans out above it."
@@ -5499,6 +5550,7 @@ msgstr "Sponsor Booth"
 msgid "Guide and support innovators"
 msgstr "Guide and support innovators"
 
+#: src/components/achievements/TrophyCard.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 #: src/pages/profile/PublicProfilePage.tsx
@@ -5516,6 +5568,7 @@ msgstr "Resources & Integrations"
 msgid "your project"
 msgstr "your project"
 
+#: src/components/achievements/TrophyCard.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Progress"
 msgstr "Progress"
@@ -5573,7 +5626,7 @@ msgstr "The search box filters this board’s posts as you type — titles and b
 msgid "You sign in with Google or Microsoft, so this address can't sign in until you set a password — use \"Forgot password\" with it once it's verified."
 msgstr "You sign in with Google or Microsoft, so this address can't sign in until you set a password — use \"Forgot password\" with it once it's verified."
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Bronze"
 msgstr "Bronze"
 
@@ -5650,6 +5703,10 @@ msgstr "{0, plural, one {# unsaved draft found in this browser} other {# unsaved
 msgid "Entrepreneur"
 msgstr "Entrepreneur"
 
+#: src/lib/achievement-copy.ts
+msgid "Every part of your profile filled in"
+msgstr "Every part of your profile filled in"
+
 #: src/i18n/harvested.ts
 msgid "Event type"
 msgstr "Event type"
@@ -5686,6 +5743,10 @@ msgstr "Structured usefulness and experience scores."
 #: src/pages/grants/GrantsPage.tsx
 msgid "No grants found"
 msgstr "No grants found"
+
+#: src/lib/achievement-copy.ts
+msgid "You worked in the open with other people. Shared documents, boards and snippets are how a good idea survives its author moving on."
+msgstr "You worked in the open with other people. Shared documents, boards and snippets are how a good idea survives its author moving on."
 
 #: src/components/notes/StickyNoteGroupExpanded.tsx
 msgid "Ungroup this folder?"
@@ -6006,6 +6067,10 @@ msgstr "A Button"
 #: src/pages/grants/GrantsPage.tsx
 msgid "Startup Funding"
 msgstr "Startup Funding"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# student application sponsored} other {# student applications sponsored}}"
+msgstr "{n, plural, one {# student application sponsored} other {# student applications sponsored}}"
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Previous"
@@ -6646,6 +6711,10 @@ msgstr "Basics"
 msgid "Anything you change here is yours — syncing from the Virtual Campus will leave it alone."
 msgstr "Anything you change here is yours — syncing from the Virtual Campus will leave it alone."
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# whiteboard created} other {# whiteboards created}}"
+msgstr "{n, plural, one {# whiteboard created} other {# whiteboards created}}"
+
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "e.g. Call for Proposals 2026"
 msgstr "e.g. Call for Proposals 2026"
@@ -6690,6 +6759,10 @@ msgstr "All Types"
 #: src/i18n/harvested.ts
 msgid "How do I start a video conference?"
 msgstr "How do I start a video conference?"
+
+#: src/components/achievements/TrophyCard.tsx
+msgid "Held by"
+msgstr "Held by"
 
 #: src/i18n/harvested.ts
 msgid "Open Messages from the chat button at the bottom-right."
@@ -6982,6 +7055,10 @@ msgstr "Partner API, analytics and UAT feedback"
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Your own supporting documents belong on your application, not here."
 msgstr "Your own supporting documents belong on your application, not here."
+
+#: src/lib/achievement-copy.ts
+msgid "You put ideas into the open where other people can see them, use them and build on them. Every project on KTIP started as someone deciding it was worth writing down."
+msgstr "You put ideas into the open where other people can see them, use them and build on them. Every project on KTIP started as someone deciding it was worth writing down."
 
 #: src/lib/permissions.ts
 msgid "Verified via an approved institutional email domain. Read-only on grants, no unmonitored direct messaging."
@@ -7326,6 +7403,10 @@ msgstr "You must be signed in to post a grant"
 msgid "Applications"
 msgstr "Applications"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# role held on the platform} other {# roles held on the platform}}"
+msgstr "{n, plural, one {# role held on the platform} other {# roles held on the platform}}"
+
 #: src/i18n/harvested.ts
 msgid "Create Project opens a short form — title, summary, category, phase and hashtags — and puts your work in this grid.\n"
 "\n"
@@ -7556,7 +7637,7 @@ msgstr "Describe your approach and how you will implement it."
 msgid "Apply for grants"
 msgstr "Apply for grants"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Gold"
 msgstr "Gold"
 
@@ -7720,6 +7801,11 @@ msgstr "Open the document and use its export action.\n"
 "\n"
 "Exporting is a snapshot. Later edits in KTIP do not change a file you already exported, so export again when the content has moved on."
 
+#. placeholder {0}: Math.max(0, progress.target - progress.current)
+#: src/components/achievements/TrophyCard.tsx
+msgid "{0} to go"
+msgstr "{0} to go"
+
 #: src/i18n/harvested.ts
 msgid "Go to the final step, \"Impact & Review\"."
 msgstr "Go to the final step, \"Impact & Review\"."
@@ -7881,6 +7967,10 @@ msgstr "Registered legal name"
 msgid "Review and rosters"
 msgstr "Review and rosters"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# forum post or reply} other {# forum posts or replies}}"
+msgstr "{n, plural, one {# forum post or reply} other {# forum posts or replies}}"
+
 #: src/i18n/harvested.ts
 msgid "Featuring and removing published projects."
 msgstr "Featuring and removing published projects."
@@ -7944,14 +8034,6 @@ msgstr "Could not request verification"
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Results for “{term}”"
 msgstr "Results for “{term}”"
-
-#: src/i18n/harvested.ts
-msgid "Every achievement KTIP awards, with the ones you have earned filled in and the rest showing what it takes.\n"
-"\n"
-"Points from these feed your leaderboard rank, and earned badges show on your public profile — so a locked badge here is a to-do list rather than decoration."
-msgstr "Every achievement KTIP awards, with the ones you have earned filled in and the rest showing what it takes.\n"
-"\n"
-"Points from these feed your leaderboard rank, and earned badges show on your public profile — so a locked badge here is a to-do list rather than decoration."
 
 #: src/pages/dashboard/tabs/MenteesTab.tsx
 msgid "The innovators you're guiding — their projects, milestones and the sessions you have scheduled."
@@ -9405,6 +9487,10 @@ msgstr "Pick a design"
 msgid "Show me on the leaderboard"
 msgstr "Show me on the leaderboard"
 
+#: src/components/achievements/TrophyCard.tsx
+msgid "Not yet earned"
+msgstr "Not yet earned"
+
 #: src/pages/events/EventVenueRoomPage.tsx
 msgid "Room not found"
 msgstr "Room not found"
@@ -9751,6 +9837,12 @@ msgstr "How do I delete my account?"
 msgid "Solutions"
 msgstr "Solutions"
 
+#. placeholder {0}: resolveCopy(i18n, TIER_LABEL[tier])
+#. placeholder {1}: TIER_ORDER.length
+#: src/components/achievements/TrophyCard.tsx
+msgid "{0} — {rung} of {1}"
+msgstr "{0} — {rung} of {1}"
+
 #: src/hooks/useDocumentAccess.ts
 msgid "A document was shared with you"
 msgstr "A document was shared with you"
@@ -10078,6 +10170,7 @@ msgstr "Last Updated"
 msgid "Open the map"
 msgstr "Open the map"
 
+#: src/components/achievements/TrophyCard.tsx
 #: src/components/shared/ReceiptDocument.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
@@ -10325,6 +10418,10 @@ msgstr "Delete {noun}"
 #: src/components/ErrorBoundary.tsx
 msgid "An unexpected error occurred. Please try refreshing the page or go back to the home page."
 msgstr "An unexpected error occurred. Please try refreshing the page or go back to the home page."
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# achievement point earned} other {# achievement points earned}}"
+msgstr "{n, plural, one {# achievement point earned} other {# achievement points earned}}"
 
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Announce"
@@ -10936,6 +11033,10 @@ msgstr "Time"
 msgid "Objective"
 msgstr "Objective"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# piece of work shared} other {# pieces of work shared}}"
+msgstr "{n, plural, one {# piece of work shared} other {# pieces of work shared}}"
+
 #. placeholder {0}: formatDate(grant.deadline!)
 #: src/components/grants/GrantCard.tsx
 msgid " · Deadline {0}"
@@ -11021,6 +11122,10 @@ msgstr "In the venue"
 #: src/components/venue/map/VenueRoomList.tsx
 msgid "Nothing on this floor"
 msgstr "Nothing on this floor"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# connection made} other {# connections made}}"
+msgstr "{n, plural, one {# connection made} other {# connections made}}"
 
 #: src/lib/validation.ts
 #: src/pages/auth/SignupPage.tsx
@@ -11108,6 +11213,10 @@ msgstr "What collaboration tools are available?"
 msgid "The project archive"
 msgstr "The project archive"
 
+#: src/components/achievements/TrophyCard.tsx
+msgid "What it takes"
+msgstr "What it takes"
+
 #: src/components/grants/application/AIFieldActions.tsx
 msgid "Improve this content with AI"
 msgstr "Improve this content with AI"
@@ -11131,6 +11240,10 @@ msgstr "Application not found."
 #: src/pages/forums/ForumsPage.tsx
 msgid "No forum boards available yet"
 msgstr "No forum boards available yet"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# like across all your projects} other {# likes across all your projects}}"
+msgstr "{n, plural, one {# like across all your projects} other {# likes across all your projects}}"
 
 #: src/lib/venue-room-presets.ts
 msgid "Audience listens; presenters are granted the mic."
@@ -11288,6 +11401,10 @@ msgstr "Event Workspace"
 #: src/i18n/harvested.ts
 msgid "What participants must achieve"
 msgstr "What participants must achieve"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# resource published} other {# resources published}}"
+msgstr "{n, plural, one {# resource published} other {# resources published}}"
 
 #: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
@@ -11507,6 +11624,10 @@ msgstr "Insert image"
 msgid "Open mics"
 msgstr "Open mics"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# view of your projects} other {# views of your projects}}"
+msgstr "{n, plural, one {# view of your projects} other {# views of your projects}}"
+
 #: src/components/projects/CommentSection.tsx
 msgid "Comments ({commentCount})"
 msgstr "Comments ({commentCount})"
@@ -11723,6 +11844,10 @@ msgid "The key is shown once, at the moment it is issued. It is not recoverable 
 msgstr "The key is shown once, at the moment it is issued. It is not recoverable afterwards: copy it then, and if it is lost, revoke and issue a new one.\n"
 "\n"
 "Revoking takes effect immediately and breaks whatever is using it. That is the intended behaviour for a leaked key."
+
+#: src/lib/achievement-copy.ts
+msgid "You built reach across the region. The connections you make are how opportunities travel between islands rather than staying on one."
+msgstr "You built reach across the region. The connections you make are how opportunities travel between islands rather than staying on one."
 
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Personalize what I see"
@@ -12180,6 +12305,10 @@ msgstr "Captioning my speech"
 msgid "Copy code"
 msgstr "Copy code"
 
+#: src/components/achievements/TrophyCard.tsx
+msgid "Tier"
+msgstr "Tier"
+
 #: src/i18n/harvested.ts
 msgid "Help article — Messages"
 msgstr "Help article — Messages"
@@ -12386,6 +12515,10 @@ msgstr "(optional)"
 msgid "Skills & collaboration"
 msgstr "Skills & collaboration"
 
+#: src/lib/achievement-copy.ts
+msgid "{holders} of {eligible} members"
+msgstr "{holders} of {eligible} members"
+
 #: src/components/grants/application/StepForm.tsx
 msgid "Select..."
 msgstr "Select..."
@@ -12502,6 +12635,10 @@ msgstr "This cannot be undone."
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "connection"
 msgstr "connection"
+
+#: src/components/achievements/TrophyCard.tsx
+msgid "Date acquired"
+msgstr "Date acquired"
 
 #: src/components/messages/GroupSettingsModal.tsx
 msgid "Failed to rename group"
@@ -12776,6 +12913,7 @@ msgstr "It was addressed to <0>{invitedEmail}</0>. Sign in with that account to 
 msgid "Search members by name..."
 msgstr "Search members by name..."
 
+#: src/components/achievements/TrophyCard.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Earned"
 msgstr "Earned"
@@ -12852,6 +12990,10 @@ msgstr "Submit report"
 #: src/i18n/harvested.ts
 msgid "Talking in a room"
 msgstr "Talking in a room"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# event RSVP} other {# event RSVPs}}"
+msgstr "{n, plural, one {# event RSVP} other {# event RSVPs}}"
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "This month"
@@ -13099,6 +13241,10 @@ msgstr "How the ranking works"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Request pending"
 msgstr "Request pending"
+
+#: src/components/achievements/TrophyCard.tsx
+msgid "What it says about you"
+msgstr "What it says about you"
 
 #: src/i18n/harvested.ts
 msgid "Research Co-Investigation"
@@ -13379,6 +13525,10 @@ msgstr "Neutral"
 #: src/pages/events/EditEventPage.tsx
 msgid "End Time (Optional)"
 msgstr "End Time (Optional)"
+
+#: src/components/achievements/TrophyCard.tsx
+msgid "Worth"
+msgstr "Worth"
 
 #: src/components/messages/NewConversationModal.tsx
 msgid "Give your group a name"
@@ -13697,6 +13847,10 @@ msgstr "Filters sit above the events list.\n"
 msgid "Board"
 msgstr "Board"
 
+#: src/lib/achievement-copy.ts
+msgid "You wrote down what you know. Published resources outlast the conversation they came from and reach people you will never meet."
+msgstr "You wrote down what you know. Published resources outlast the conversation they came from and reach people you will never meet."
+
 #: src/components/directory/MemberPanel.tsx
 #: src/components/resume/sheets/SheetFrame.tsx
 #: src/pages/cv/CvEditPage.tsx
@@ -13838,6 +13992,10 @@ msgstr "An unpublished resource is invisible to members — that is the draft st
 "\n"
 "File-based resources upload here; text resources are read in full on the resource page without any download."
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# event organized} other {# events organized}}"
+msgstr "{n, plural, one {# event organized} other {# events organized}}"
+
 #: src/components/layout/RoleSwitcher.tsx
 msgid "Could not switch role"
 msgstr "Could not switch role"
@@ -13899,6 +14057,10 @@ msgstr "Set up the venue"
 #: src/pages/cv/CvEditPage.tsx
 msgid "Job title"
 msgstr "Job title"
+
+#: src/components/achievements/TrophyCard.tsx
+msgid "What it would say"
+msgstr "What it would say"
 
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -14005,6 +14167,10 @@ msgstr "What is different about an account under 18?"
 msgid "Take this note out of the folder"
 msgstr "Take this note out of the folder"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# comment left on projects} other {# comments left on projects}}"
+msgstr "{n, plural, one {# comment left on projects} other {# comments left on projects}}"
+
 #: src/lib/permissions.ts
 msgid "Student (school-verified)"
 msgstr "Student (school-verified)"
@@ -14032,6 +14198,10 @@ msgstr "Manage your profile info"
 #: src/lib/venue-room-sections.ts
 msgid "The challenge"
 msgstr "The challenge"
+
+#: src/components/achievements/TrophyCard.tsx
+msgid "+{points} pts"
+msgstr "+{points} pts"
 
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Faculty accounts are set up by your institution."
@@ -14290,7 +14460,7 @@ msgstr "Uploaded files, with an editable copy of their contents"
 msgid "All members"
 msgstr "All members"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Legendary"
 msgstr "Legendary"
 
@@ -14307,6 +14477,10 @@ msgstr "Discover workshops, hackathons, and networking events happening near you
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Signed in as <0>{0}</0>. We pre-filled your details from your account — review and finish up below."
 msgstr "Signed in as <0>{0}</0>. We pre-filled your details from your account — review and finish up below."
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# forum discussion started} other {# forum discussions started}}"
+msgstr "{n, plural, one {# forum discussion started} other {# forum discussions started}}"
 
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Confirmation email sent to your new address!"
@@ -14872,6 +15046,10 @@ msgstr "Hackathon"
 msgid "Remove this link"
 msgstr "Remove this link"
 
+#: src/lib/achievement-copy.ts
+msgid "Identity verification completed"
+msgstr "Identity verification completed"
+
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Toggle live preview"
 msgstr "Toggle live preview"
@@ -15018,6 +15196,10 @@ msgstr "The tab column"
 #: src/lib/emoji-catalog.ts
 msgid "Gestures"
 msgstr "Gestures"
+
+#: src/lib/achievement-copy.ts
+msgid "You went after funding rather than waiting for it. Applications take real effort to write, and the ones that get written are the only ones that can be approved."
+msgstr "You went after funding rather than waiting for it. Applications take real effort to write, and the ones that get written are the only ones that can be approved."
 
 #: src/lib/permissions.ts
 msgid "Verify SMEs"
@@ -15230,7 +15412,7 @@ msgstr "Say something to everyone in this room…"
 msgid "Remove"
 msgstr "Remove"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Diamond"
 msgstr "Diamond"
 
@@ -15573,7 +15755,7 @@ msgstr "Can I log in with Google or Microsoft?"
 msgid "Find Grants"
 msgstr "Find Grants"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Epic"
 msgstr "Epic"
 
@@ -15613,6 +15795,10 @@ msgstr "Loading event..."
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "{0, plural, one {# selected} other {# selected}}"
 msgstr "{0, plural, one {# selected} other {# selected}}"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# like on a single project} other {# likes on a single project}}"
+msgstr "{n, plural, one {# like on a single project} other {# likes on a single project}}"
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Search grants..."
@@ -16107,6 +16293,10 @@ msgstr "Repeated intimidation, humiliation or threats."
 msgid "By submitting this report, you confirm that:"
 msgstr "By submitting this report, you confirm that:"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# achievement earned} other {# achievements earned}}"
+msgstr "{n, plural, one {# achievement earned} other {# achievements earned}}"
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Submit a report about inappropriate behavior or policy violations"
 msgstr "Submit a report about inappropriate behavior or policy violations"
@@ -16158,7 +16348,7 @@ msgstr "Copies of everything you have submitted."
 msgid "Enrolled! You can access the course now."
 msgstr "Enrolled! You can access the course now."
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Uncommon"
 msgstr "Uncommon"
 
@@ -16342,6 +16532,10 @@ msgstr "Go to the Events page and click \"Create Event\".\n"
 "Optional: a description, a short summary, an end date and time, tags, a Climate Action flag, a registration deadline, and a capacity.\n"
 "\n"
 "Choose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later."
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# project team joined} other {# project teams joined}}"
+msgstr "{n, plural, one {# project team joined} other {# project teams joined}}"
 
 #: src/pages/projects/CreateProjectPage.tsx
 msgid "Project created successfully!"
@@ -17402,6 +17596,10 @@ msgstr "This event is a draft — only you can see it. Publish it to list it on 
 msgid "At least one symbol (e.g. !@#$%)"
 msgstr "At least one symbol (e.g. !@#$%)"
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# member following your projects} other {# members following your projects}}"
+msgstr "{n, plural, one {# member following your projects} other {# members following your projects}}"
+
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Control what others can see about you"
 msgstr "Control what others can see about you"
@@ -17422,6 +17620,10 @@ msgstr "Characters"
 #: src/lib/venue-room-presets.ts
 msgid "Scoring and deliberation."
 msgstr "Scoring and deliberation."
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# document created} other {# documents created}}"
+msgstr "{n, plural, one {# document created} other {# documents created}}"
 
 #: src/components/messages/ChatSidebar.tsx
 msgid "Search chats..."
@@ -17874,6 +18076,10 @@ msgstr "Listed to everyone; people ask you for access."
 msgid "Speakers"
 msgstr "Speakers"
 
+#: src/lib/achievement-copy.ts
+msgid "You keep the conversation going. Forums are only worth reading because members answer each other's questions instead of leaving them to sit."
+msgstr "You keep the conversation going. Forums are only worth reading because members answer each other's questions instead of leaving them to sit."
+
 #: src/lib/permissions.ts
 msgid "Edit, archive and manage collaborators on owned projects."
 msgstr "Edit, archive and manage collaborators on owned projects."
@@ -17895,6 +18101,10 @@ msgstr "{dayLabel}, {countLabel}"
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "The stairs would hang off the edge of the floor."
 msgstr "The stairs would hang off the edge of the floor."
+
+#: src/lib/achievement-copy.ts
+msgid "{holders} of {eligible} members · {pct}%"
+msgstr "{holders} of {eligible} members · {pct}%"
 
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
@@ -17941,6 +18151,10 @@ msgstr "Try adjusting your search, subject or grade level filters."
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Solution withdrawn"
 msgstr "Solution withdrawn"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# member profile browsed} other {# member profiles browsed}}"
+msgstr "{n, plural, one {# member profile browsed} other {# member profiles browsed}}"
 
 #: src/pages/events/EventVenueSetupPage.tsx
 msgid "Open the venue"
@@ -18182,6 +18396,10 @@ msgstr "What you built, how it answers the challenge, and what is left to do..."
 msgid "Save changes"
 msgstr "Save changes"
 
+#: src/lib/achievement-copy.ts
+msgid "You have engaged with KTIP broadly rather than deeply in one place. Rank is earned across the whole platform, not by grinding a single number."
+msgstr "You have engaged with KTIP broadly rather than deeply in one place. Rank is earned across the whole platform, not by grinding a single number."
+
 #: src/i18n/harvested.ts
 msgid "The contact block at the bottom reaches a person. The FAQ page is worth a look first — it answers the narrower questions that do not warrant a full article."
 msgstr "The contact block at the bottom reaches a person. The FAQ page is worth a look first — it answers the narrower questions that do not warrant a full article."
@@ -18214,6 +18432,10 @@ msgstr "Search everyone at the event by skill or name."
 #: src/i18n/harvested.ts
 msgid "Taking a page tour"
 msgstr "Taking a page tour"
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# different member spoken with} other {# different members spoken with}}"
+msgstr "{n, plural, one {# different member spoken with} other {# different members spoken with}}"
 
 #: src/i18n/harvested.ts
 msgid "Anyone in the OECS innovation ecosystem — students, mentors, entrepreneurs, investors, private-sector partners, and OECS staff. Pick your roles during signup; they shape what you see across the platform."
@@ -18330,6 +18552,10 @@ msgstr "Retake"
 msgid "↵ open"
 msgstr "↵ open"
 
+#: src/lib/achievement-copy.ts
+msgid "You made yourself findable. A complete, verified profile is what lets collaborators, funders and employers reach you at all."
+msgstr "You made yourself findable. A complete, verified profile is what lets collaborators, funders and employers reach you at all."
+
 #: src/i18n/harvested.ts
 #: src/pages/settings/SettingsPage.tsx
 msgid "Verification"
@@ -18425,6 +18651,10 @@ msgstr "Tune this"
 #: src/components/messages/ChatSidebar.tsx
 msgid "No conversations yet."
 msgstr "No conversations yet."
+
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {The achievements gallery opened # time} other {The achievements gallery opened # times}}"
+msgstr "{n, plural, one {The achievements gallery opened # time} other {The achievements gallery opened # times}}"
 
 #: src/components/projects/TeamWidget.tsx
 msgid "Preview {memberName}"
@@ -18601,6 +18831,10 @@ msgstr "Knowledge Base"
 msgid "Use your Chamber-verified status to partner and hire."
 msgstr "Use your Chamber-verified status to partner and hire."
 
+#: src/lib/achievement-copy.ts
+msgid "{n, plural, one {# day active in a row} other {# days active in a row}}"
+msgstr "{n, plural, one {# day active in a row} other {# days active in a row}}"
+
 #: src/i18n/harvested.ts
 msgid "Forum posts, forum replies and chat messages each carry a report control.\n"
 "\n"
@@ -18644,8 +18878,8 @@ msgstr "Clear all"
 msgid "Underline"
 msgstr "Underline"
 
+#: src/components/achievements/TrophyCard.tsx
 #: src/components/documents/DocumentContentModal.tsx
-#: src/pages/achievements/AchievementsPage.tsx
 msgid "Close"
 msgstr "Close"
 
@@ -19009,6 +19243,10 @@ msgstr "{memberCount, plural, one {# collaborator will lose access to this proje
 msgid "PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them."
 msgstr "PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them."
 
+#: src/components/achievements/TrophyCard.tsx
+msgid "Remaining"
+msgstr "Remaining"
+
 #. placeholder {0}: checkedKeys.length
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "{0, plural, one {Applied # field} other {Applied # fields}}"
@@ -19188,7 +19426,7 @@ msgstr "Announcements only"
 msgid "Delete whiteboard"
 msgstr "Delete whiteboard"
 
-#: src/i18n/harvested.ts
+#: src/lib/achievement-style.ts
 msgid "Rare"
 msgstr "Rare"
 

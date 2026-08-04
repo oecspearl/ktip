@@ -28,6 +28,12 @@
   --color-brand-white: #FFFFFF;
   --color-brand-black: #000000;  /* sparing: hairline "design line" accents */
 
+  /* The color under hero photography — what shows while a photo loads, in
+     loading-skeleton hero stand-ins, and through the leaving-home card fade.
+     Brand navy by day; overridden to near-black under html.dark so transitions
+     read as darkness rather than a navy flash on an otherwise black page. */
+  --color-hero-base: var(--color-brand-navy);
+
   /* Colors - Ocean (navy scale; Pantone 282 exact at 700) */
   --color-ktip-ocean-50: #E8EEF6;
   --color-ktip-ocean-100: #D3DEEC;
@@ -81,6 +87,65 @@
   /* Colors - Other */
   --color-ktip-cream: #fffef9;
   --color-ktip-canvas: #fafaf7;
+
+  /* Achievement trophy card palette — THEME-RESPONSIVE.
+     These are the LIGHT-mode values (light card ground, dark accents that
+     hold contrast on it); html.dark re-points every one of them at the dark
+     set the card originally shipped with. Nothing on the card may use a raw
+     white/black literal — text and hairlines go through trophy-ink, which
+     flips with the ground, and the accents below flip in the same block.
+
+     A fifth scale exists because the four brand ramps cannot express a metal
+     ladder: achievement-style.ts used to improvise it and "silver" came out as
+     ktip-sand-400, a warm beige. Ordered so the ladder reads even if you
+     cannot separate the hues: bronze warm-dark, silver cool-mid, gold warm,
+     diamond cool-blue. All hold >= 4.5:1 on the card ground below. */
+  --color-metal-bronze: #7A4F28;
+  --color-metal-silver: #64748B;
+  --color-metal-gold: #8F6B00;
+  --color-metal-diamond: #1D7A9E;
+
+  /* Rarity, likewise theme-responsive and likewise for the trophy card only.
+     RARITY_PILL in achievement-style.ts is the separate, inverting treatment
+     for rarity on ordinary light surfaces. Epic and legendary sit close (both
+     dark golds), mirroring the deliberate ambiguity of the dark set — colour
+     is reinforcement, the chip text carries the difference. */
+  --color-rarity-common: #6B7280;
+  --color-rarity-uncommon: #4E7400;
+  --color-rarity-rare: #2A578C;
+  --color-rarity-epic: #8F6300;
+  --color-rarity-legendary: #9C7000;
+
+  /* The card ground itself. Not ktip-cream: the card must sit a step off the
+     page so the mesh still reads as tiles, not as bare page. Warm paper
+     rather than white — a bright white socket next to cream glared. */
+  --color-trophy-ground: #EFEBE1;
+  --color-trophy-ground-deep: #E2DCCC;
+
+  /* Day-mode card washes: one soft pastel diagonal per rarity, in the manner
+     of per-app product gradients — light enough for the dark ink and accents,
+     tinted enough to carry the rarity at a glance. g1 is the top-left start,
+     g2 the bottom-right end. html.dark collapses every pair to the black
+     ground, where the bloom discs take over the colour work instead. */
+  --color-trophy-g1-common: #EFEDEA;
+  --color-trophy-g2-common: #D9DEE6;
+  --color-trophy-g1-uncommon: #EFF8F0;
+  --color-trophy-g2-uncommon: #C3D8B8;
+  --color-trophy-g1-rare: #ECEFF7;
+  --color-trophy-g2-rare: #B9D0F3;
+  --color-trophy-g1-epic: #F7EAE8;
+  --color-trophy-g2-epic: #F4C8A7;
+  --color-trophy-g1-legendary: #F4EDED;
+  --color-trophy-g2-legendary: #D5BDF9;
+
+  /* Ink on the trophy ground: every text/hairline/wash on the card uses this
+     with an opacity modifier instead of a white literal, so the card can flip
+     from light ground/dark ink to dark ground/white ink in one variable. */
+  --color-trophy-ink: #16150F;
+
+  /* The hairline between mesh cells in the achievements gallery. Darker than
+     the card ground's deep end, or the mesh dissolves. */
+  --color-trophy-line: #C9C3B2;
 
   /* Semantic: surface that stays dark in BOTH modes (navbar/footer) */
   --color-ktip-ink: #041E42; /* navy in light, black-black in dark */
@@ -431,6 +496,8 @@ html.dark {
   /* Surfaces go "black black" */
   --color-ktip-canvas: #0A0A0A;
   --color-ktip-cream: #0F0F0E;
+  /* Under hero photos: black at night, so page transitions don't flash navy */
+  --color-hero-base: #0A0A0A;
 
   /* Neutral inversion: sand-50 → near-black surface … sand-900 → near-white text */
   --color-ktip-sand-50: #131312;
@@ -479,6 +546,34 @@ html.dark {
   --color-ktip-sun-700: #FFE48A;
   --color-ktip-sun-800: #FFF1C4;
   --color-ktip-sun-900: #FFF9E6;
+
+  /* Trophy card flips to its original dark set: near-black ground, bright
+     accents, white ink. This is the surface the gold/silver/bronze artwork
+     was tuned for — the light-mode values in @theme are the adaptation. */
+  --color-metal-bronze: #D9A272;
+  --color-metal-silver: #C3CCD6;
+  --color-metal-gold: #FFD75C;
+  --color-metal-diamond: #8ED4F0;
+  --color-rarity-common: #A1A1AA;
+  --color-rarity-uncommon: #97D700;
+  --color-rarity-rare: #7BA1CB;
+  --color-rarity-epic: #FFC72C;
+  --color-rarity-legendary: #FFD75C;
+  --color-trophy-ground: #14140F;
+  --color-trophy-ground-deep: #0A0A08;
+  --color-trophy-ink: #FFFFFF;
+  --color-trophy-line: #33332C;
+  /* Rarity washes collapse to the plain dark ground at night. */
+  --color-trophy-g1-common: #14140F;
+  --color-trophy-g2-common: #0A0A08;
+  --color-trophy-g1-uncommon: #14140F;
+  --color-trophy-g2-uncommon: #0A0A08;
+  --color-trophy-g1-rare: #14140F;
+  --color-trophy-g2-rare: #0A0A08;
+  --color-trophy-g1-epic: #14140F;
+  --color-trophy-g2-epic: #0A0A08;
+  --color-trophy-g1-legendary: #14140F;
+  --color-trophy-g2-legendary: #0A0A08;
 
   --color-ktip-ink: #050505;  /* navbar/footer go black-black */
   --color-ktip-line: #97D700; /* design line reads green on black */
@@ -1186,6 +1281,127 @@ html.dark {
     opacity: 1;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Trophy glare — a specular highlight on the artwork.
+
+   Masked to the trophy's own alpha channel via mask-image, so the highlight
+   only lands on the metal. Without the mask a white bar would paint across the
+   transparent background too, which reads as a rendering fault rather than a
+   reflection. The mask URL is set inline by TrophyImage; it differs per trophy.
+
+   A slow diagonal sweep on a 9s cycle, of which the sweep itself is under
+   three seconds and the rest is dark. A continuous pass looks like a loading
+   shimmer; a long pause between brief passes looks like light catching a
+   moving object.
+
+   Faintly tinted to the badge's rarity via --glare-tint, set inline by
+   TrophyImage. Mixed heavily toward white, because a saturated highlight stops
+   reading as a reflection and starts reading as a coloured sticker on the
+   metal — the colour belongs in the edges of the band, not its core.
+   ------------------------------------------------------------------------ */
+.trophy-glare {
+  /* Overridden inline per badge; white is the neutral specular default. */
+  --glare-tint: #ffffff;
+  background-repeat: no-repeat;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+
+  /* Plain white first, as the fallback for anything without color-mix — an
+     untinted highlight is a fine degradation, a dropped declaration is not. */
+  background-image: linear-gradient(
+    100deg,
+    transparent 43%,
+    rgba(255, 255, 255, 0.62) 50%,
+    transparent 57%
+  );
+  background-image: linear-gradient(
+    100deg,
+    transparent 43%,
+    color-mix(in srgb, var(--glare-tint) 30%, transparent) 47%,
+    color-mix(in srgb, color-mix(in srgb, var(--glare-tint) 22%, white) 62%, transparent) 50%,
+    color-mix(in srgb, var(--glare-tint) 30%, transparent) 53%,
+    transparent 57%
+  );
+  background-size: 300% 100%;
+  animation: trophyGlare 9s linear infinite;
+}
+
+/* Slow in, fast out — the highlight creeps onto the metal, then whips off it.
+   An even sweep reads mechanical; the acceleration is what makes it look like
+   an object turning under a light rather than a bar sliding across a texture.
+   The curve lives on the keyframe, not on the `animation` shorthand, so it
+   governs the position interpolation specifically.
+
+   No opacity keyframes: the band is a narrow bright stop inside an otherwise
+   transparent gradient three times the width of the element, so at 210% and
+   -110% it is simply off the image. Fading it as well would flatten the
+   leading edge, which is the part that should arrive slowly.
+
+   30% of a 9s cycle is a 2.7s pass followed by 6.3s of nothing. */
+@keyframes trophyGlare {
+  0% {
+    background-position: 210% 0;
+    animation-timing-function: cubic-bezier(0.62, 0.02, 0.86, 0.24);
+  }
+  30%,
+  100% {
+    background-position: -110% 0;
+  }
+}
+
+/* A permanently animating highlight is exactly the kind of thing this setting
+   is for. The static position keeps a faint sheen so the surface still reads
+   as metal rather than flat. */
+@media (prefers-reduced-motion: reduce) {
+  .trophy-glare {
+    animation: none;
+    background-position: 34% 0;
+    opacity: 0.45;
+  }
+}
+/* ------------------------------------------------------------------------
+   Achievements mesh flip. A tile flips through 3D while flying to the
+   viewport center and expanding. The cell wrapper (never transformed, so its
+   rect stays honest) sets four vars inline at click time:
+     --dx/--dy  px from the cell's center to the viewport's center
+     --s        scale that brings the cell to the target card width
+     --back-w   that target width in px, for the back face
+
+   translate3d comes FIRST in the transform list so --dx/--dy operate in
+   plain viewport pixels — after rotateY the x-axis would be mirrored and
+   the card would fly the wrong way.
+
+   The back face is authored at its final size and statically counter-scaled
+   by 1/--s, so the open state lands at net scale 1: text and artwork render
+   at native resolution instead of a rasterized blow-up of the tiny cell.
+   ------------------------------------------------------------------------ */
+.mesh-flip {
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mesh-flip.mesh-open {
+  transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0) rotateY(180deg) scale(var(--s, 2));
+}
+.mesh-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.mesh-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translate(-50%, -50%) rotateY(180deg) scale(calc(1 / var(--s, 2)));
+}
+@media (prefers-reduced-motion: reduce) {
+  .mesh-flip {
+    transition: none;
+  }
+}
+
 /* Only the ghost glows. A woken surface is a normal surface. */
 .ghost-surface:not([data-ghost='true']) .ghost-glow {
   opacity: 0;
@@ -1443,6 +1659,171 @@ html[data-capturing] [data-fab] {
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Route "card shuffle" — html.route-shuffle is set by src/lib/routeTransitions.ts
+   only while a react-router page transition runs, so the bento rules above stay
+   the default for the in-room grid morphs. The incoming page slides in from the
+   right as a card over the old one, which recedes and dims underneath.
+
+   opacity: 1 on old(root) is load-bearing: it undoes the bento default above
+   that hides the old root snapshot entirely. mix-blend-mode: normal opts both
+   snapshots out of the UA's plus-lighter crossfade blending, which would
+   double-brighten the overlap while the cards slide.
+
+   The reduced-motion block above still wins here (animation: none !important),
+   so those users get an instant swap, not a slide. */
+/* No filter here. brightness() forces the snapshot to be re-rasterised, and
+   the hero's bottom fade (PageHero layer 4: `h-24 bg-gradient-to-t
+   from-black/60`) is a very shallow gradient — re-rasterising it posterises
+   the ramp into a visible hard edge partway up the hero, which is the
+   horizontal "black line" that kept getting reported. No dimming is applied
+   at all now — the scale plus the incoming card overlapping it carry the
+   depth, and nothing re-rasterises the snapshot. */
+/* The outgoing card holds still.
+   It used to recede with `scale(0.94) translateY(12px)`, and that scale is
+   almost certainly the artifact: scaling about the viewport centre moves the
+   hero band's bottom edge from y=280 to y~302 on the outgoing card while the
+   incoming card's stays at 280. Mid-slide the two are side by side, so the
+   navy bottom fade (`h-24 bg-gradient-to-t from-black/60` — an upward gradient
+   ending in a hard cut) sits ~22px lower on one side than the other, and the
+   step sweeps across the header as the seam moves. Scaling also resamples the
+   snapshot, which is what made its blur read as changed.
+   No transform can be applied to one card and not the other without pulling
+   their internal geometry out of register, so the depth cue has to come from
+   the incoming card overlapping instead. Only the corner rounds, which is
+   inert on a card that never moves — kept so the shape still reads as a card
+   if the recede is ever reinstated. */
+@keyframes route-card-recede {
+  from {
+    border-radius: 0;
+  }
+  to {
+    border-radius: 22px;
+  }
+}
+
+
+/* No box-shadow on the sliding card: over the dark hero photos most pages
+   open with, a left drop shadow deepens into a black band sweeping across
+   the header — it reads as a rendering glitch, not depth. The recede + dim
+   on the card underneath does the layer separation on its own. */
+@keyframes route-card-slide-in {
+  from {
+    transform: translateX(100%);
+    border-radius: 22px;
+  }
+  85% {
+    border-radius: 22px;
+  }
+  to {
+    transform: translateX(0);
+    border-radius: 0;
+  }
+}
+
+/* The bento rules above set `height: 100%; object-fit: cover` on every
+   old/new pseudo, root included. Cover re-samples the page snapshot to fit
+   the box, and re-sampling is the other thing that turns the hero's shallow
+   bottom-fade gradient into a hard line. A full-page card must be shown 1:1,
+   so the UA defaults are put back for root only. */
+html.route-shuffle::view-transition-old(root),
+html.route-shuffle::view-transition-new(root) {
+  height: 100%;
+  object-fit: fill;
+  object-position: center;
+}
+
+html.route-shuffle::view-transition-old(root) {
+  opacity: 1;
+  mix-blend-mode: normal;
+  overflow: clip; /* so the animated border-radius actually cuts the snapshot */
+  animation: route-card-recede 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+html.route-shuffle::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: route-card-slide-in 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* Leaving the HOME page only (route-shuffle-from-home, set by
+   routeTransitions.ts from the transition's currentLocation): the old card
+   fades to brand navy while the incoming card slides over it — the mirror of
+   the hero photo's navy-to-photo entry fade. Same duration and easing as
+   route-card-slide-in, so the fade and the cover complete together: the last
+   uncovered strip of the old page reaches full navy exactly as the card
+   arrives, never before. opacity, never filter: a filter re-rasterises the
+   snapshot and posterises the hero's shallow bottom-fade ramp into a hard
+   line (the "black line" bug above). */
+@keyframes route-card-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+html.route-shuffle.route-shuffle-from-home::view-transition-old(root) {
+  animation:
+    route-card-recede 500ms cubic-bezier(0.32, 0.72, 0, 1) both,
+    route-card-fade-out 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* What shows through the fading card: the hero base (navy by day, near-black
+   at night), not the canvas backdrop. */
+html.route-shuffle.route-shuffle-from-home::view-transition-image-pair(root) {
+  background-color: var(--color-hero-base);
+}
+
+/* Debug affordance: add ?slowmo to any URL to run the shuffle at 4s so a
+   reported artifact can be pointed at. Paired with the same flag in
+   routeTransitions.ts, which holds the scoping class open long enough. */
+html.route-shuffle-slowmo::view-transition-old(root),
+html.route-shuffle-slowmo::view-transition-new(root) {
+  animation-duration: 4000ms;
+}
+
+/* The from-home rule above outranks the plain slowmo override (two classes vs
+   one), so the leaving-home fade needs its own slowmo pin. */
+html.route-shuffle-slowmo.route-shuffle-from-home::view-transition-old(root) {
+  animation-duration: 4000ms;
+}
+
+/* New card composites above the receding old card within the pair. */
+html.route-shuffle::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+
+/* THE one that caused the flicker.
+   `::view-transition-group(*)` above is a bento rule, but the wildcard also
+   matches `group(root)`, so the root group ran at 320ms while the two cards
+   ran 500ms. Chrome ends the whole transition once the group animation is
+   done: measured across three navigations, `route-card-recede` and
+   `route-card-slide-in` were CANCELLED at 316/362/391ms instead of finishing
+   at 500ms. A cancelled animation drops straight back to its base style, so
+   the old card snapped from `scale(0.94) translateY(12px)` back to identity
+   and the new card from a partial `translateX` to 0, one frame before the
+   pseudo tree was torn down — the hard horizontal edge that read as a black
+   line sweeping across the header.
+   The group has to outlive the cards, so it is pinned to the same duration.
+   Before the shuffle this was invisible: `::view-transition-old(root)` was
+   `animation: none; opacity: 0`, so nothing on the root was animating and
+   the short group had nothing to cut off. */
+html.route-shuffle::view-transition-group(root) {
+  animation-duration: 500ms;
+}
+
+html.route-shuffle-slowmo::view-transition-group(root) {
+  animation-duration: 4000ms;
+}
+
+/* The receding card shrinks away from the viewport edges, exposing the
+   transition overlay behind it. The document itself is not painted while a
+   view transition runs, so without this the exposed strip is the raw canvas —
+   black under color-scheme: dark — which read as a dark line across the
+   header. Painting the overlay in the page background makes the gap look
+   like the page instead. */
+html.route-shuffle::view-transition {
+  background-color: var(--color-ktip-canvas);
 }
 
 /* ProseMirror / TipTap Mini Editor (RichTextField) */
@@ -1743,7 +2124,7 @@ html[data-capturing] [data-fab] {
 
 .ProseMirror pre {
   background: #1c1917;
-  color: #f5f5f4;
+  --boxcolor: #f5f5f4;
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 0.75rem;

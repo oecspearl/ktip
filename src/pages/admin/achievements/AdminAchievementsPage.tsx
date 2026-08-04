@@ -10,6 +10,8 @@ import { usePageTitle } from '../../../hooks/usePageTitle'
 import { useToast } from '../../../contexts/ToastContext'
 import { IMAGE_PRESETS } from '../../../lib/constants'
 import { RARITY_LABEL, RARITY_POINTS, TIER_ORDER } from '../../../lib/achievement-style'
+import { resolveCopy } from '../../../i18n/copy'
+import { useLingui } from '@lingui/react/macro'
 import { cn } from '../../../lib/utils'
 import type { BadgeTier } from '../../../types'
 
@@ -80,6 +82,8 @@ function TabButton({
 // ============================================================
 
 function DefinitionsTab() {
+  // RARITY_LABEL holds message descriptors, so it needs the catalog to render.
+  const { i18n } = useLingui()
   const { badges, loading } = useAllBadges()
   const { assetMap } = useTrophyAssets()
   const { upsertBadge } = useAdminBadgeMutations()
@@ -186,7 +190,7 @@ function DefinitionsTab() {
                     {badge.tier && <span className="block text-xs text-ktip-sand-400">{badge.tier}</span>}
                   </td>
                   <td className="px-4 py-3 text-ktip-sand-600">
-                    {RARITY_LABEL[badge.rarity || 'common']}
+                    {resolveCopy(i18n, RARITY_LABEL[badge.rarity || 'common'])}
                   </td>
                   <td className="px-4 py-3">
                     {badge.check_key ? (

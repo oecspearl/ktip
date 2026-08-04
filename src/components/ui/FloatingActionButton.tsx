@@ -291,15 +291,27 @@ export function FloatingActionButton() {
   useEffect(() => {
     const closing = wasOpen.current && !open
     wasOpen.current = open
-    if (!closing) {
-      if (open) setCollapsing(false)
+    if (open) {
+      setCollapsing(false)
       return
     }
+    if (!closing) return
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
     setCollapsing(true)
+  }, [open])
+
+  // The reset timer lives in its own effect, keyed on `collapsing` itself.
+  // When it shared the effect above, any dependency change mid-collapse —
+  // navigating away changes `visible.length` and with it `collapseMs` — ran
+  // the cleanup, cleared the pending timeout, and the re-run took the
+  // not-closing early return without ever rescheduling: `collapsing` stayed
+  // true and the trigger was stuck showing the X until the next full
+  // open/close cycle.
+  useEffect(() => {
+    if (!collapsing || open) return
     const t = setTimeout(() => setCollapsing(false), collapseMs)
     return () => clearTimeout(t)
-  }, [open, collapseMs])
+  }, [collapsing, open, collapseMs])
 
   const showClose = open || collapsing
 

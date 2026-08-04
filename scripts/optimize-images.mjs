@@ -40,6 +40,10 @@ const SWEPT = [
   ['hero', 'hero'],
   ['pages', 'pages'],
   ['grants', 'grants'],
+  // Achievement trophy artwork. Not photography, but it belongs here rather
+  // than in optimize-brand-assets.mjs because there are 42 of them rendered
+  // across a 3x size range, which is exactly what a ladder is for.
+  ['trophies', 'trophies'],
 ]
 
 /** Individually named sources that sit at the public root. */

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { HERO_WASH, pageHeroFor } from '../../lib/hero-images'
@@ -60,33 +60,116 @@ export function PageHero({
       typeof title === 'string' ? title : null
     )
 
+  /**
+   * Photo reveal, gated on the browser having actually PAINTED the image.
+   *
+   * During the route card shuffle the incoming page renders live inside
+   * ::view-transition-new(root), and Chromium defers the first compositor
+   * raster of a large image even when it is fetched and decoded (measured
+   * 840ms deferred under the transition vs ≤139ms without it). Nothing in CSS
+   * or JS controls the raster moment, so a CSS entrance animation cannot help:
+   * a fade that starts at mount can be over before the raster lands, and the
+   * photo still snaps in mid-slide — the reported navy flash over the hero.
+   *
+   * So the reveal is sequenced instead of timed. The imgs sit at opacity
+   * 0.002 — invisible over the navy band, but NOT opacity 0, which would let
+   * the compositor skip the layer and defer the raster the reveal is waiting
+   * on. On load, two rAFs let a frame containing the painted image commit,
+   * then the opacity transition runs — over pixels that already exist.
+   */
+  const [photoReady, setPhotoReady] = useState(false)
+  const photoRef = useRef<HTMLImageElement>(null)
+  const markPhotoReady = useCallback(() => {
+    // Three rAFs, not one: the raster happens off the main thread, so the
+    // reveal waits for frames that can only exist once the image is in them.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => requestAnimationFrame(() => setPhotoReady(true)))
+    )
+  }, [])
+  useEffect(() => {
+    // Memory-cache hit can complete before React attaches the load handler.
+    if (photoRef.current?.complete) markPhotoReady()
+  }, [markPhotoReady])
+  // ease-in-out, not ease-out: if a straggler raster lands a frame or two into
+  // the reveal, an ease-out curve is already at ~40% opacity and the pop is
+  // visible; ease-in-out is still near-invisible there, so the tail of the
+  // raster race fades in instead of flashing.
+  const photoReveal = `transition-opacity duration-500 ease-in-out ${
+    photoReady ? 'opacity-100' : 'opacity-[0.002]'
+  }`
+
   // The full breadcrumb is desktop-only, which left phones with no way back to
   // the parent listing at all — the browser button was it. The last crumb that
   // still has an href is that parent, so it doubles as a one-tap back chip.
   const linkedCrumbs = breadcrumb?.filter((c) => c.href) ?? []
   const backCrumb = linkedCrumbs[linkedCrumbs.length - 1]
 
-  // The band under the photo is brand-navy, not gray-900: the gray scale
-  // inverts under html.dark, so it flashed white at night while the image
-  // loaded (and stayed white if the image 404'd).
+  // The band under the photo is hero-base (brand navy by day, near-black under
+  // html.dark), never gray-900: the gray scale inverts at night, so it flashed
+  // white while the image loaded (and stayed white if the image 404'd).
   return (
     <div
       id={spyLabel ? 'page-top' : undefined}
       data-spy={spyLabel ?? undefined}
       // The band rides the display ramp, same as the headline inside it — a
       // band on a fixed height would crop the title as the type scaled up.
-      className={`relative bg-brand-navy overflow-hidden flex items-end ${
+      className={`relative bg-hero-base overflow-hidden flex items-end ${
         compact ? 'min-h-hero-band-compact' : 'min-h-hero-band'
       } ${inset ? 'rounded-surface shadow-medium mb-8' : ''}`}
     >
       <img
+        ref={photoRef}
         src={src}
         alt=""
-        className="absolute inset-0 w-full h-full object-cover photo-dimmable"
-        loading="eager" fetchPriority="high" decoding="async"
+        onLoad={markPhotoReady}
+        className={`absolute inset-0 w-full h-full object-cover photo-dimmable ${photoReveal}`}
+        loading="eager" fetchPriority="high"
+        /* sync, not async. `decoding="async"` is permission to paint a frame
+           WITHOUT this image and decode it afterwards — and MainLayout remounts
+           the whole routed subtree on every navigation (key={pathname}), so
+           this is a brand-new element needing a fresh decode on every route
+           change, cache or no cache. The route card shuffle then captures that
+           first paint into ::view-transition-new(root) and holds it for 500ms.
+           With the photo absent the band shows what is underneath it: the
+           navy `bg-brand-navy`, the bottom fade's upward gradient cut off at
+           the band edge, and the frosted panel with no backdrop left to blur.
+           The image is already eager + high priority; there is nothing to gain
+           by letting it miss the frame it was fetched for.
+
+           decoding="sync" is still not enough during the card shuffle — see
+           the photoReady note above for why the reveal is JS-gated. */
+        decoding="sync"
       />
-      {/* Frosted blur over the right side, fading out toward the left */}
-      <div className="absolute inset-y-0 right-0 w-full md:w-[80%] backdrop-blur-2xl bg-black/10 [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
+      {/* Frosted blur over the right side, fading out toward the left.
+          A blurred COPY of the photo, not backdrop-filter. backdrop-filter has
+          to sample whatever is painted beneath it, and that sampling does not
+          survive being captured into a view-transition snapshot — so for the
+          whole 500ms the route card shuffle holds that snapshot on screen the
+          frost is simply gone, the photo shows sharp, and the washes over it
+          (including the bottom fade's upward gradient) sit on an unsoftened
+          image and read as a hard-edged navy band. A filter on the element's
+          own content is part of its paint, so it is captured like everything
+          else.
+          scale-110 overfills the box because blur() samples past the edges and
+          would otherwise feather the band's own borders. The mask is restated
+          in hero coordinates: the old panel was 80% of the width with the fade
+          starting 55% across itself, which is 44%/80% measured across the
+          whole band — and full width below md, where the panel was w-full. */}
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        // One explicit `filter`, not `photo-dimmable blur-2xl`. Both of those
+        // set the `filter` property, so the utility won and the copy computed
+        // to `brightness(1)` — no blur at all. `scale-110` was lost the same
+        // way. Composed by hand here so neither can clobber the other.
+        // Two knobs: blur() is the strength, the mask stops are the ramp.
+        // 40px read as over-frosted; the long stop range is what makes it a
+        // gradient blur rather than a hard frosted panel with a fading tint.
+        className={`absolute inset-0 w-full h-full object-cover ${photoReveal} [filter:blur(24px)_brightness(var(--photo-brightness,1))] [transform:scale(1.08)] [mask-image:linear-gradient(to_left,black_25%,transparent_95%)] md:[mask-image:linear-gradient(to_left,black_20%,transparent_78%)]`}
+        loading="eager" decoding="sync"
+      />
+      <div className="absolute inset-y-0 right-0 w-full md:w-[80%] bg-black/10 [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
       {/* Neutral dark overlays for text readability */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
       {/* Brand wash — navy by day, green by night (OECS palette) */}

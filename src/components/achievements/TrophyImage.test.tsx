@@ -53,8 +53,23 @@ describe('resolveTrophy', () => {
     expect(resolveTrophy(assetMap, null, 'gold', null).url).toBe('https://cdn.test/star-gold.webp')
   })
 
-  it('returns no url when the asset row exists but has no image yet', () => {
-    expect(resolveTrophy(assetMap, 'flame', 'gold', null).url).toBeNull()
+  // The state that used to mean "no artwork" now means "use the bundled
+  // default": trophy_assets ships empty, so an un-uploaded row is the normal
+  // case and falling to an icon there would blank most of the gallery.
+  it('falls back to bundled artwork when the asset row has no image yet', () => {
+    expect(resolveTrophy(assetMap, 'flame', 'gold', null).url).toBe('/trophies/flame-gold.webp')
+  })
+
+  // Ordering matters: an admin upload has to beat the file we shipped.
+  it('prefers an uploaded asset over the bundled default', () => {
+    expect(resolveTrophy(assetMap, 'rocket', 'bronze', null).url).toBe(
+      'https://cdn.test/rocket-bronze.webp'
+    )
+  })
+
+  // flame below gold is one of the six cells with no render yet.
+  it('returns no url when neither an upload nor a bundled file exists', () => {
+    expect(resolveTrophy(assetMap, 'flame', 'bronze', null).url).toBeNull()
   })
 
   it('returns no url for a type that is not in the map at all', () => {
@@ -80,9 +95,17 @@ describe('TrophyImage', () => {
   })
 
   it('renders an accessible icon when no artwork exists', () => {
-    render(<TrophyImage icon="flame" trophyType="flame" tier="gold" assetMap={assetMap} name="On a Roll" />)
-    const fallback = screen.getByRole('img', { name: 'On a Roll' })
+    // flame-bronze has neither an uploaded asset nor a bundled render.
+    render(<TrophyImage icon="flame" trophyType="flame" tier="bronze" assetMap={assetMap} name="Warming Up" />)
+    const fallback = screen.getByRole('img', { name: 'Warming Up' })
     expect(fallback.tagName).not.toBe('IMG')
+  })
+
+  it('renders bundled artwork with the badge name as its alt text', () => {
+    render(<TrophyImage icon="flame" trophyType="flame" tier="gold" assetMap={assetMap} name="On a Roll" />)
+    const img = screen.getByRole('img', { name: 'On a Roll' })
+    expect(img.tagName).toBe('IMG')
+    expect(img.getAttribute('src')).toBe('/trophies/flame-gold.webp')
   })
 
   // A dead Storage URL must degrade to the icon rather than leaving a hole.

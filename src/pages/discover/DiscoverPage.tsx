@@ -302,11 +302,36 @@ const STAT_TILES: { key: keyof PlatformStats; label: MessageDescriptor }[] = [
  * this before it hands over — any drift between the two would show up as a pop
  * at the commit, which is the whole thing this is here to avoid.
  */
-function HeroOverlays() {
+function HeroOverlays({ src }: { src: string }) {
   return (
     <>
-      {/* Frosted blur over the left side, fading out toward the right */}
-      <div className="absolute inset-y-0 left-0 w-full md:w-[80%] backdrop-blur-md bg-black/5 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
+      {/* Frosted blur over the left side, fading out toward the right.
+          A blurred COPY of the photo, not backdrop-filter — same reasoning as
+          PageHero: backdrop-filter samples whatever is painted beneath it, and
+          that sampling does not survive being captured into a view-transition
+          snapshot. The route card shuffle captures this hero on every
+          navigation away from home, and the frost collapsing in that capture —
+          the blurred half snapping sharp, the washes over it re-reading as a
+          pale gradient band — was THE flicker seen when leaving the home page.
+          A filter on the element's own content is part of its paint, so it is
+          captured like everything else.
+          The mask restates the old panel geometry in full-band coordinates:
+          the panel was 80% wide with its fade from 55% across itself, which is
+          44%/80% across the whole band — and unchanged below md, where the
+          panel was w-full. scale(1.08) overfills so blur() sampling past the
+          edges cannot feather the band's own borders. */}
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        // blur(8px), not the panel's old backdrop-blur-md 12px: a blur baked
+        // into the photo copy reads stronger than the same radius sampling a
+        // live backdrop, and 12px came out heavier than the original frost.
+        className="absolute inset-0 w-full h-full object-cover [filter:blur(8px)_brightness(var(--photo-brightness,1))] [transform:scale(1.08)] [mask-image:linear-gradient(to_right,black_55%,transparent_100%)] md:[mask-image:linear-gradient(to_right,black_44%,transparent_80%)]"
+        loading="eager"
+        decoding="sync"
+      />
+      <div className="absolute inset-y-0 left-0 w-full md:w-[80%] bg-black/5 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
       {/* Neutral dark overlay for text readability */}
       <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/18 to-black/12" />
       {/* Brand wash — navy by day, green by night (OECS palette) */}
@@ -419,11 +444,23 @@ export default function DiscoverPage() {
     }
   }, [])
 
+  // A route navigation is starting (routeTransitions.ts fires this before the
+  // view transition can capture the old frame). A slide swap caught mid-flight
+  // by that capture freezes a half-swapped hero on the outgoing card, so
+  // rotation stops for good — this page is about to unmount anyway, and a
+  // remount resets the state.
+  const [leaving, setLeaving] = useState(false)
   useEffect(() => {
-    if (paused || !pageActive || count < 2 || pendingIndex !== null) return
+    const onLeave = () => setLeaving(true)
+    window.addEventListener('ktip:route-shuffle-start', onLeave)
+    return () => window.removeEventListener('ktip:route-shuffle-start', onLeave)
+  }, [])
+
+  useEffect(() => {
+    if (leaving || paused || !pageActive || count < 2 || pendingIndex !== null) return
     const interval = setInterval(next, 6000)
     return () => clearInterval(interval)
-  }, [paused, pageActive, next, count, pendingIndex])
+  }, [leaving, paused, pageActive, next, count, pendingIndex])
 
   // Clamp selection when the list shrinks or mode changes
   useEffect(() => {
@@ -668,6 +705,17 @@ export default function DiscoverPage() {
     sec: { w: number; h: number }
   } | null>(null)
   const [overlaysIn, setOverlaysIn] = useState(false)
+
+  // Navigation starting: a ghost mid-expansion would be frozen half-way by the
+  // view transition's capture of this page. Snap the swap to its end state —
+  // base image committed, ghost gone — so the captured frame is settled.
+  // Layout effect so the snap is painted before the capture can happen.
+  useLayoutEffect(() => {
+    if (!leaving || !anim) return
+    setShownSrc(anim.src)
+    setAnim(null)
+  }, [leaving, anim])
+
   const sectionRef = useRef<HTMLElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const ghostRef = useRef<HTMLDivElement>(null)
@@ -678,7 +726,9 @@ export default function DiscoverPage() {
   useLayoutEffect(() => {
     if (heroSrc === shownSrc || anim?.src === heroSrc) return
     const sec = sectionRef.current
-    if (!sec || reducedMotion) {
+    // `leaving`: no new ghost once a navigation has started — swap outright so
+    // the view transition captures a settled hero, not a mid-expansion ghost.
+    if (!sec || reducedMotion || leaving) {
       setShownSrc(heroSrc)
       return
     }
@@ -805,7 +855,7 @@ export default function DiscoverPage() {
         // brand-navy, not gray-900: the gray scale inverts under html.dark
         // svh, not vh: on mobile Chrome/Safari `100vh` is the *largest* viewport
         // (URL bar collapsed), so the bottom of the hero sits under the bar
-        className="sticky top-0 h-[100svh] bg-brand-navy overflow-hidden"
+        className="sticky top-0 h-[100svh] bg-hero-base overflow-hidden"
       >
         {/* Full-bleed hero image — follows the selected item */}
         <img
@@ -813,8 +863,16 @@ export default function DiscoverPage() {
           alt=""
           className="absolute inset-0 w-full h-full object-cover animate-fade-in photo-dimmable"
           loading="eager" fetchPriority="high"
+          /* sync: a src swap on a mounted <img> paints EMPTY until the new
+             resource decodes, and an async decode is allowed to miss the swap
+             frame — the navy band underneath then blinks through. Normally the
+             decode is instant (the ghost just showed this exact URL), but when
+             the main thread is busy — a route navigation starting, above all —
+             the blank frame lands, which is the 1-in-N flicker seen right
+             before leaving the home page. */
+          decoding="sync"
         />
-        <HeroOverlays />
+        <HeroOverlays src={shownSrc} />
 
         {/* Ghost card: expands from the new hero's card in the strip to fill the
             hero, then fades. Deliberately one <img> and nothing else — every
@@ -835,8 +893,22 @@ export default function DiscoverPage() {
               // same image under this same treatment, so swapping the base and
               // dropping the ghost in one render is a visual no-op. Nothing to
               // cross-fade — the fade already happened, on the overlays.
-              setShownSrc(anim.src)
-              setAnim(null)
+              //
+              // Decode-gated: the swap is only a no-op if the base <img> can
+              // paint the new src on the very next frame. Committing before the
+              // decode is ready drops the ghost while the base is still blank —
+              // a navy blink. The probe resolves from the decode cache
+              // instantly in the common case (the ghost just displayed this
+              // URL), so the ghost normally drops on the same tick as before.
+              const src = anim.src
+              const commit = () => {
+                setShownSrc(src)
+                setAnim(null)
+              }
+              const probe = new Image()
+              probe.src = src
+              if (probe.complete) commit()
+              else probe.decode().then(commit, commit)
             }}
           >
             <img
@@ -847,15 +919,16 @@ export default function DiscoverPage() {
             {/* The hero's frost and washes settle onto the photo while it is
                 still growing, so that by the time the transform lands the ghost
                 already matches the base exactly. Mounted late rather than held
-                at opacity 0: backdrop-filter forces its own render surface even
-                when fully transparent, and this one sits inside the layer that
-                is being scaled every frame. */}
+                at opacity 0 — kept even now that the frost is a blurred img
+                copy rather than a backdrop-filter: the blur layer still
+                rasters, and this sits inside the layer being scaled every
+                frame. */}
             {overlaysIn && (
               <div
                 className="absolute inset-0"
                 style={{ animation: `fadeIn ${MOTION.overlay}ms ease both` }}
               >
-                <HeroOverlays />
+                <HeroOverlays src={anim.src} />
               </div>
             )}
           </div>
