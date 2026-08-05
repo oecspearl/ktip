@@ -54,6 +54,7 @@ msgstr "Un ponente al frente, con las manos levantadas para hablar."
 msgid "Awards & Recognition"
 msgstr "Premios y reconocimientos"
 
+#: src/lib/venue-copy.ts
 #: src/pages/events/EventSetupPage.tsx
 msgid "The programme"
 msgstr "El programa"
@@ -236,6 +237,10 @@ msgstr ""
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Warning: This will permanently delete:"
 msgstr "Advertencia: esto eliminará de forma permanente:"
+
+#: src/lib/venue-templates.ts
+msgid "A floor of sponsor booths around a central hall, with a demo stage and space to network between the aisles."
+msgstr "Una planta de stands de patrocinadores alrededor de un hall central, con un escenario de demostraciones y espacio para hacer contactos entre los pasillos."
 
 #: src/components/documents/DocumentsPanel.tsx
 #: src/components/events/EventSolutionsPanel.tsx
@@ -1629,7 +1634,6 @@ msgid "PDF, Word, Excel, CSV, Markdown, text or image — up to 25MB"
 msgstr "PDF, Word, Excel, CSV, Markdown, texto o imagen — hasta 25 MB"
 
 #: src/components/dashboard/TimelineSection.tsx
-#: src/components/layout/Navbar.tsx
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Browse Grants"
@@ -1744,6 +1748,10 @@ msgstr "El trabajo que desea mostrar a socios y financiadores."
 #: src/i18n/harvested.ts
 msgid "Set the type, dates, location or virtual link, and capacity, then publish."
 msgstr "Defina el tipo, las fechas, el lugar o el enlace virtual, y la capacidad, y luego publique."
+
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "Venue templates"
+msgstr "Plantillas de recinto"
 
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Run"
@@ -2301,6 +2309,10 @@ msgstr "Certificados"
 msgid "Roles"
 msgstr "Roles"
 
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "Save template"
+msgstr "Guardar plantilla"
+
 #: src/i18n/harvested.ts
 msgid "Account & Verification"
 msgstr "Cuenta y verificación"
@@ -2613,6 +2625,10 @@ msgstr "¿Quitar «{title}» de esta solicitud?"
 msgid "Access articles, guides, case studies, and tools for Caribbean innovation."
 msgstr "Acceda a artículos, guías, estudios de caso y herramientas para la innovación en el Caribe."
 
+#: src/i18n/harvested.ts
+msgid "design the venue"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Add document files"
 msgstr "Añadir archivos de documento"
@@ -2797,6 +2813,7 @@ msgid "Create Whiteboard"
 msgstr "Crear pizarra"
 
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/pages/events/EventVenueSetupPage.tsx
 msgid "Name"
 msgstr "Nombre"
 
@@ -3009,6 +3026,10 @@ msgstr "Miembros que han enviado documentos para verificar, con lo que han subid
 msgid "Browse {modeLabel}"
 msgstr "Explorar {modeLabel}"
 
+#: src/lib/venue-room-presets.ts
+msgid "Speakers, organizers, mentors and judges only."
+msgstr "Solo ponentes, organizadores, mentores y jueces."
+
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Enter a catchy title for your project"
@@ -3041,6 +3062,7 @@ msgid "Snippets autosave to your account and appear in your snippet list next ti
 msgstr "Los fragmentos se guardan automáticamente en su cuenta y aparecerán en su lista de fragmentos la próxima vez.\n"
 ""
 
+#: src/components/layout/Navbar.tsx
 #: src/components/profile/BannerStudio.tsx
 #: src/pages/dashboard/DashboardLayout.tsx
 #: src/pages/dashboard/DashboardTopBar.tsx
@@ -3715,6 +3737,10 @@ msgid "Open the item and use its share action.\n"
 msgstr "Abra el elemento y use su acción de compartir.\n"
 ""
 
+#: src/pages/grants/GrantsPage.tsx
+msgid "Filter grants"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Verified SMEs"
 msgstr "Pymes verificadas"
@@ -3791,6 +3817,7 @@ msgid "Your earned badges, the ones still locked with what unlocks them, and the
 msgstr "Sus insignias obtenidas, las que aún están bloqueadas con lo necesario para desbloquearlas, y los puntos correspondientes.\n"
 ""
 
+#: src/components/layout/Navbar.tsx
 #: src/components/messages/GroupSettingsModal.tsx
 #: src/components/projects/ManageTeamModal.tsx
 #: src/components/ui/CollapsibleSearch.tsx
@@ -4827,6 +4854,10 @@ msgstr "Ver en el mapa"
 msgid "What is breaking"
 msgstr "Qué está fallando"
 
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "Save as template"
+msgstr "Guardar como plantilla"
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Big panel"
 msgstr "Panel grande"
@@ -5519,6 +5550,10 @@ msgstr "Inicia sesión con Google o Microsoft, así que esta dirección no podr�
 msgid "Bronze"
 msgstr "Bronce"
 
+#: src/components/ui/FilterBar.tsx
+msgid "Filters"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Five ways to narrow it"
 msgstr "Cinco formas de acotarlo"
@@ -5738,6 +5773,10 @@ msgstr "Restricciones"
 msgid "Start Date"
 msgstr "Fecha de inicio"
 
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "Save this building as a template"
+msgstr "Guardar este edificio como plantilla"
+
 #: src/pages/events/EditEventPage.tsx
 msgid "Challenge events always set a goal for attendees. Solutions, objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 msgstr "Los eventos de tipo desafío siempre establecen un objetivo para los asistentes. Las soluciones, objetivos, restricciones, entregables y criterios de evaluación se gestionan desde la pestaña Desafío del evento."
@@ -5904,6 +5943,7 @@ msgstr ""
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/events/CreateEventPage.tsx
 #: src/pages/events/EditEventPage.tsx
+#: src/pages/events/EventVenueSetupPage.tsx
 #: src/pages/forums/CreatePostPage.tsx
 #: src/pages/grievances/ReportUserPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
@@ -6182,8 +6222,8 @@ msgstr "Vuelva a intentarlo en breve."
 msgid "e.g., In a forum post, during a message exchange, on a project page..."
 msgstr "p. ej., en una publicación del foro, durante un intercambio de mensajes, en una página de proyecto…"
 
+#: src/lib/venue-copy.ts
 #: src/pages/events/EventSetupPage.tsx
-#: src/pages/events/EventVenueSetupPage.tsx
 msgid "The brief"
 msgstr "El resumen"
 
@@ -6669,6 +6709,10 @@ msgstr "Abra la página de su proyecto y utilice el widget Equipo en la barra la
 msgid "Publishing and removing"
 msgstr "Publicación y eliminación"
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "My templates"
+msgstr "Mis plantillas"
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Feature"
 msgstr "Destacar"
@@ -6947,6 +6991,10 @@ msgstr "Socio educativo"
 #: src/components/tutorial/TutorialOverlay.tsx
 msgid "Close tour"
 msgstr "Cerrar el recorrido"
+
+#: src/pages/projects/ProjectsPage.tsx
+msgid "Filter projects"
+msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
 msgid "Open Settings"
@@ -7237,6 +7285,10 @@ msgstr "Cada miembro tiene una página pública accesible para las personas que 
 msgid "Delete reply"
 msgstr "Eliminar respuesta"
 
+#: src/lib/venue-templates.ts
+msgid "One taught room up front, a lounge to mingle in, a help desk, and a quiet room for exercises."
+msgstr "Una sala de formación al frente, un salón para conversar, un mostrador de ayuda y una sala tranquila para los ejercicios."
+
 #: src/pages/directory/DirectoryPage.tsx
 msgid "No members found"
 msgstr "No se encontraron miembros"
@@ -7473,6 +7525,10 @@ msgstr "Ha ocurrido un error. Vuelva a intentarlo."
 msgid "No email address is attached to this account."
 msgstr "No hay ninguna dirección de correo electrónico asociada a esta cuenta."
 
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "Description (optional)"
+msgstr "Descripción (opcional)"
+
 #: src/components/venue/room/LookingForTeamPanel.tsx
 msgid "Nobody is looking right now. Tick “looking for a team” on your own venue profile to appear here."
 msgstr "Nadie está buscando en este momento. Marque «buscando equipo» en su propio perfil del lugar para aparecer aquí."
@@ -7645,6 +7701,10 @@ msgstr "<0>{0}</0> es ahora su dirección de correo electrónico principal, por 
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Languages"
 msgstr "Idiomas"
+
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "Template saved"
+msgstr "Plantilla guardada"
 
 #: src/components/profile/BannerStudio.tsx
 msgid "Uploading…"
@@ -7921,6 +7981,10 @@ msgstr "Creador de lugar"
 #: src/i18n/harvested.ts
 msgid "Platform usage, growth and engagement metrics"
 msgstr "Métricas de uso, crecimiento y participación de la plataforma"
+
+#: src/components/layout/Navbar.tsx
+msgid "Open menu"
+msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Draft events are only visible to administrators"
@@ -8894,6 +8958,10 @@ msgstr "Decisión"
 msgid "Pause"
 msgstr "Pausa"
 
+#: src/lib/venue-templates.ts
+msgid "Conference Center"
+msgstr "Centro de conferencias"
+
 #: src/components/messages/MessagingPanel.tsx
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/uat/UATFeedbackForm.tsx
@@ -9458,10 +9526,6 @@ msgstr "Tablero no encontrado"
 #: src/pages/auth/ForgotPasswordPage.tsx
 msgid "Forgot Password?"
 msgstr "¿Olvidó su contraseña?"
-
-#: src/i18n/harvested.ts
-msgid "build the agenda"
-msgstr "elaborar la agenda"
 
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Coming up"
@@ -10156,10 +10220,6 @@ msgstr "Cerrar la vista previa del miembro"
 msgid "Published {0}"
 msgstr "Publicado {0}"
 
-#: src/components/layout/Navbar.tsx
-msgid "Explore Projects"
-msgstr "Explorar proyectos"
-
 #. placeholder {0}: roles.map((r) => VENUE_ROLE_LABELS[r] || r).join(', ')
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "{0} only"
@@ -10348,7 +10408,7 @@ msgstr "Ya puede redactar su perfil y su portafolio. Ambos se hacen públicos en
 msgid "All Subjects"
 msgstr "Todas las materias"
 
-#: src/pages/events/EventVenueSetupPage.tsx
+#: src/lib/venue-copy.ts
 msgid "Drop the rooms your hackathon needs onto the floor, set who is allowed in each one, and add another level if you want the building to have one. Attendees walk this exact map."
 msgstr "Coloque en esta planta las salas que necesita su hackathon, defina quién puede acceder a cada una y añada otro nivel si desea que el edificio lo tenga. Los participantes recorren exactamente este mapa."
 
@@ -10748,6 +10808,10 @@ msgstr "Cerrar carpeta"
 #: src/i18n/harvested.ts
 msgid "What is KTIP?"
 msgstr "¿Qué es KTIP?"
+
+#: src/lib/venue-templates.ts
+msgid "A main stage the audience listens to, sponsor booths, two breakout rooms, a registration desk and a green room for speakers."
+msgstr "Un escenario principal que el público escucha, stands de patrocinadores, dos salas de trabajo, un mostrador de inscripción y un camerino para los ponentes."
 
 #: src/i18n/harvested.ts
 msgid "Points come from activity that helps the community — publishing projects, running events, answering in forums, earning achievements.\n"
@@ -12018,6 +12082,10 @@ msgid "Edit roles changes what the member can reach; Roles & Permissions is wher
 msgstr "Editar roles cambia a qué puede acceder el miembro; Roles y permisos es donde se definen esos roles.\n"
 ""
 
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "Could not save the template"
+msgstr "No se pudo guardar la plantilla"
+
 #: src/i18n/harvested.ts
 msgid "Your record of something you submitted."
 msgstr "Su registro de algo que envió."
@@ -12164,6 +12232,10 @@ msgstr "Inactivo"
 msgid "Remove connection with {otherName}"
 msgstr "Eliminar la conexión con {otherName}"
 
+#: src/lib/venue-templates.ts
+msgid "Expo Hall"
+msgstr "Pabellón de exposición"
+
 #. placeholder {0}: alias.email
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "<0>{0}</0> is verified — you can sign in with it."
@@ -12224,6 +12296,10 @@ msgstr "Lugar"
 #: src/i18n/harvested.ts
 msgid "Raise a grievance about someone's conduct"
 msgstr "Presente una queja sobre la conducta de alguien"
+
+#: src/lib/venue-copy.ts
+msgid "Drop the stage, sponsor booths and breakout rooms onto the floor, set who is allowed in each one, and add another level if you want the building to have one. Attendees walk this exact map."
+msgstr "Coloque en esta planta el escenario, los stands de patrocinadores y las salas de trabajo, defina quién puede acceder a cada una y añada otro nivel si desea que el edificio lo tenga. Los asistentes recorren exactamente este mapa."
 
 #: src/lib/delete-guard.ts
 msgid "The grant listing and everything attached to it"
@@ -12763,10 +12839,8 @@ msgstr "Obtenido"
 msgid "Withdraw"
 msgstr "Retirar"
 
+#: src/components/ui/FilterBar.tsx
 #: src/pages/directory/DirectoryPage.tsx
-#: src/pages/events/EventsPage.tsx
-#: src/pages/grants/GrantsPage.tsx
-#: src/pages/projects/ProjectsPage.tsx
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Clear all filters"
 msgstr "Borrar todos los filtros"
@@ -13462,6 +13536,10 @@ msgstr "Su dirección de correo de Virtual Campus aún no ha sido verificada. Ve
 msgid "Enter the venue"
 msgstr "Entrar al lugar"
 
+#: src/pages/events/EventsPage.tsx
+msgid "Create event"
+msgstr ""
+
 #: src/components/calendar/CalendarDayPanel.tsx
 msgid "Nothing to open — this item lives outside the platform."
 msgstr ""
@@ -13584,6 +13662,10 @@ msgstr "(Completo)"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "{trimmed} already has a KTIP account — we sent them an in-app invitation instead."
 msgstr "{trimmed} ya tiene una cuenta de KTIP — en su lugar, le enviamos una invitación dentro de la aplicación."
+
+#: src/pages/projects/ProjectsPage.tsx
+msgid "Create project"
+msgstr ""
 
 #. placeholder {0}: state.config.stairs.x
 #. placeholder {1}: state.config.stairs.y
@@ -14011,6 +14093,10 @@ msgstr "Estudiante (verificado por la escuela)"
 #: src/components/layout/Navbar.tsx
 msgid "All Events"
 msgstr "Todos los eventos"
+
+#: src/lib/venue-templates.ts
+msgid "Hackathon HQ"
+msgstr "Cuartel general del hackathon"
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "No limit"
@@ -14525,6 +14611,10 @@ msgid "Each tool has its own list page: Whiteboards, Documents and Snippets unde
 msgstr "Cada herramienta tiene su propia página de lista: Pizarras, Documentos y Fragmentos, en Colaborar.\n"
 ""
 
+#: src/lib/venue-templates.ts
+msgid "The classic build weekend: a main hall for announcements, a stage for demos, a help desk, and somewhere quiet to actually work."
+msgstr "El clásico fin de semana de creación: un hall principal para los anuncios, un escenario para las demos, un mostrador de ayuda y un lugar tranquilo para trabajar de verdad."
+
 #: src/i18n/harvested.ts
 msgid "Who else is here"
 msgstr "Quién más está aquí"
@@ -14543,6 +14633,10 @@ msgid "Rich text with the usual formatting — headings, lists, links, images, t
 "Several people can type in it at once and you will see their changes as they make them. Everything autosaves; the status bar says when it last did."
 msgstr "Texto enriquecido con el formato habitual — encabezados, listas, enlaces, imágenes, tablas — en una barra de herramientas en la parte superior.\n"
 ""
+
+#: src/pages/events/EventsPage.tsx
+msgid "Filter events"
+msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Try adjusting your filters to find more resources."
@@ -16532,6 +16626,10 @@ msgstr ""
 msgid "Registration cannot close after the event starts"
 msgstr "La inscripción no puede cerrarse después de que comience el evento"
 
+#: src/components/layout/Navbar.tsx
+msgid "Close menu"
+msgstr ""
+
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Research and publications"
 msgstr "Investigación y publicaciones"
@@ -16914,6 +17012,10 @@ msgstr "URL de la imagen"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Level {level}"
 msgstr "Nivel {level}"
+
+#: src/lib/venue-templates.ts
+msgid "Workshop Studio"
+msgstr "Estudio de talleres"
 
 #: src/i18n/harvested.ts
 msgid "Grant applications, event registrations, forms — a record of each, as it was at the moment you submitted it.\n"
@@ -17307,6 +17409,11 @@ msgstr "Hasta {MAX_ATTACHMENTS_PER_MESSAGE} archivos, con una nota si lo desea"
 msgid "Track your grant applications"
 msgstr "Haz seguimiento de tus solicitudes de subvención"
 
+#: src/components/venue/map/VenueMapEditor.tsx
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "Start from a template"
+msgstr "Empezar desde una plantilla"
+
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Show Country"
 msgstr "Mostrar país"
@@ -17503,6 +17610,10 @@ msgid "The amount, the funder, the deadline and the grant type, all in one block
 msgstr "El monto, el financiador, la fecha límite y el tipo de subvención, todo en un solo bloque.\n"
 ""
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "A whole building in one click. Every room stays editable afterwards, and nothing is saved until you press Save."
+msgstr "Un edificio entero en un clic. Cada sala sigue siendo editable después, y nada se guarda hasta que pulse Guardar."
+
 #: src/pages/NotFoundPage.tsx
 msgid "Error 404"
 msgstr "Error 404"
@@ -17577,7 +17688,7 @@ msgstr "Escriba un interés y presione Entrar..."
 msgid "Who"
 msgstr ""
 
-#: src/lib/member-kpis.ts
+#: src/components/dashboard/stats/OverviewStats.tsx
 msgid "Resources published"
 msgstr ""
 
@@ -17728,6 +17839,7 @@ msgstr "Explore el directorio de miembros y conéctese con innovadores de todo e
 
 #: src/components/feedback/FeedbackModal.tsx
 #: src/components/layout/NavbarSearchPanel.tsx
+#: src/components/ui/FilterBar.tsx
 #: src/components/ui/TagFilterChips.tsx
 msgid "Clear"
 msgstr "Borrar"
@@ -17803,10 +17915,6 @@ msgstr "Hemos enviado un enlace para restablecer la contraseña a <0>{email}</0>
 #: src/hooks/useVerification.ts
 msgid "Your verification request was not accepted."
 msgstr "Su solicitud de verificación no fue aceptada."
-
-#: src/components/venue/map/VenueMapEditor.tsx
-msgid "Use the starter layout"
-msgstr "Usar el diseño inicial"
 
 #: src/components/directory/ConnectButton.tsx
 msgid "Request cancelled"
@@ -18275,6 +18383,10 @@ msgstr "Usuarios totales incluye todas las cuentas, incluidas las no verificadas
 msgid "Failed to update email"
 msgstr "Error al actualizar el correo electrónico"
 
+#: src/components/layout/Navbar.tsx
+msgid "Log In / Sign Up"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Messaging is a panel that docks on the side of whatever page you are on, not a separate page. There is no Messages link in the navigation bar.\n"
 "\n"
@@ -18310,10 +18422,6 @@ msgstr "Abra el evento y use el botón del panel de detalles.\n"
 #: src/pages/InvitationsPage.tsx
 msgid "Collaboration invitations"
 msgstr "Invitaciones de colaboración"
-
-#: src/lib/venue-room-presets.ts
-msgid "Organizers, mentors and judges only."
-msgstr "Solo organizadores, mentores y jueces."
 
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Network, submissions, calendar"
@@ -18653,6 +18761,8 @@ msgstr "Subrayado"
 
 #: src/components/achievements/TrophyCard.tsx
 #: src/components/documents/DocumentContentModal.tsx
+#: src/components/venue/map/VenueTemplatePicker.tsx
+#: src/pages/events/EventVenueSetupPage.tsx
 msgid "Close"
 msgstr "Cerrar"
 
@@ -18722,7 +18832,6 @@ msgid "Go to Grants and open the opportunity you want."
 msgstr "Vaya a Subvenciones y abra la oportunidad que desea."
 
 #: src/components/directory/MemberPanel.tsx
-#: src/lib/member-kpis.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Connections"
@@ -18796,6 +18905,10 @@ msgstr "Lo que se ofrece"
 #: src/components/help/HelpSearch.tsx
 msgid "{resultCount, plural, one {Found # article} other {Found # articles}}"
 msgstr "{resultCount, plural, one {# artículo encontrado} other {# artículos encontrados}}"
+
+#: src/components/ui/FilterBar.tsx
+msgid "Show results"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Sponsorships"
@@ -19014,6 +19127,10 @@ msgstr ""
 msgid "{0, plural, one {Applied # field} other {Applied # fields}}"
 msgstr "{0, plural, one {Se aplicó # campo} other {Se aplicaron # campos}}"
 
+#: src/pages/events/EventVenueSetupPage.tsx
+msgid "The rooms and floors as last saved, minus sponsors and team pods. It will appear under “My templates” when you build your next venue."
+msgstr "Las salas y plantas tal como se guardaron, sin patrocinadores ni espacios de equipo. Aparecerá en «Mis plantillas» cuando construya su próximo recinto."
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Pulled from the OECS Virtual Campus. Remove one and it stays removed on future syncs."
 msgstr "Importado desde OECS Virtual Campus. Elimine uno y permanecerá eliminado en futuras sincronizaciones."
@@ -19167,6 +19284,10 @@ msgstr "Acción climática"
 msgid "You must be at least 13 to use KTIP."
 msgstr "Debe tener al menos 13 años para usar KTIP."
 
+#: src/components/layout/Navbar.tsx
+msgid "Menu"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Identity requests"
 msgstr "Solicitudes de identidad"
@@ -19178,6 +19299,10 @@ msgstr "Solo anuncios"
 #: src/pages/collaborate/WhiteboardsListPage.tsx
 msgid "Delete whiteboard"
 msgstr "Eliminar pizarra"
+
+#: src/i18n/harvested.ts
+msgid "Speaker"
+msgstr ""
 
 #: src/lib/achievement-style.ts
 msgid "Rare"

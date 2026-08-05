@@ -423,6 +423,10 @@ export function Navbar() {
     const onKeyDown = (e: globalThis.KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
+        // A click on the search button reaches the dropdown's outside-click
+        // handler; the shortcut does not, so it closes the panel itself. The
+        // links are about to collapse out from under it either way.
+        setOpenDropdownId(null)
         setSearchOpen(true)
         searchInputRef.current?.focus()
       }
@@ -508,6 +512,7 @@ export function Navbar() {
     location.pathname.startsWith('/cv') ||
     /^\/user\/[^/]+\/cv$/.test(location.pathname) ||
     location.pathname.startsWith('/events/virtual-hackathon/') ||
+    location.pathname.startsWith('/events/virtual-conference/') ||
     /^\/events\/[^/]+\/venue/.test(location.pathname)
   const needsBackdrop = noHeroBehindBar || scrolledPastHero
 
@@ -729,7 +734,15 @@ export function Navbar() {
             aria-hidden={searchOpen}
             inert={searchOpen ? true : undefined}
             className={cn(
-              'hidden lg:flex items-center gap-1 overflow-hidden transition-all duration-200',
+              'hidden lg:flex items-center gap-1 transition-all duration-200',
+              // The clip serves the search collapse: it keeps the links inside
+              // a box that is animating between 0 and full width, in both
+              // directions. But it also cut off the dropdown panels, which hang
+              // BELOW this row on `absolute` — the trigger opened, the chevron
+              // flipped, and nothing appeared. Released only while a panel is
+              // actually open, which can only happen with the links at full
+              // width and the search closed, so there is nothing left to clip.
+              openDropdownId === null && 'overflow-hidden',
               searchOpen
                 ? 'ml-0 max-w-0 opacity-0 pointer-events-none'
                 : 'ml-4 xl:ml-8 max-w-full opacity-100'
