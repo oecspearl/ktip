@@ -41,9 +41,13 @@ msgstr ""
 msgid "A speaker up front, hands raised to talk."
 msgstr ""
 
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 msgid "Awards & Recognition"
 msgstr ""
 
@@ -320,6 +324,10 @@ msgstr ""
 msgid "Discover"
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Meridian"
+msgstr ""
+
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Failed to save personalization"
 msgstr ""
@@ -331,10 +339,16 @@ msgstr ""
 #: src/components/directory/MemberPanel.tsx
 #: src/components/layout/Footer.tsx
 #: src/components/layout/Navbar.tsx
+#: src/components/personalization/ForYouRail.tsx
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
@@ -470,6 +484,10 @@ msgstr ""
 msgid "Approve students registering on the institution’s verified email domain."
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Forum posts"
+msgstr ""
+
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "Create an event"
@@ -560,6 +578,7 @@ msgstr ""
 msgid "Failed to save"
 msgstr ""
 
+#: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Badges"
 msgstr ""
@@ -571,6 +590,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Open a blank collaborative canvas"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Sand"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -615,6 +638,10 @@ msgstr ""
 
 #: src/lib/calendar.ts
 msgid "You are no longer attending"
+msgstr ""
+
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Publish a project and the engagement it earns shows up here."
 msgstr ""
 
 #: src/hooks/useInstitutions.ts
@@ -791,6 +818,10 @@ msgstr ""
 
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Run code (JavaScript only)"
+msgstr ""
+
+#: src/lib/member-kpis.ts
+msgid "Grants posted"
 msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
@@ -989,6 +1020,10 @@ msgstr ""
 msgid "Password updated successfully!"
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+msgid "Notes"
+msgstr ""
+
 #. placeholder {0}: grant.title
 #: src/hooks/useCalendarFeed.ts
 msgid "Deadline: {0}"
@@ -1016,6 +1051,7 @@ msgstr ""
 msgid "Classic"
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Views"
 msgstr ""
@@ -1038,7 +1074,7 @@ msgstr ""
 msgid "What you have made, and what was shared with you."
 msgstr ""
 
-#: src/components/calendar/CalendarEventCard.tsx
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/calendar/WeekView.tsx
 msgid "All day"
 msgstr ""
@@ -1136,6 +1172,7 @@ msgstr ""
 msgid "Your draft is saved automatically the first time you upload."
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
 #: src/components/layout/NavbarSearchPanel.tsx
 #: src/components/notes/StickyNoteGroup.tsx
 #: src/pages/collaborate/CollaborateHubPage.tsx
@@ -1223,6 +1260,11 @@ msgstr ""
 
 #: src/lib/venue-room-presets.ts
 msgid "Small and always open. Put it near the entrance."
+msgstr ""
+
+#: src/components/calendar/CalendarDayPanel.tsx
+#: src/components/calendar/CalendarNoteComposer.tsx
+msgid "When"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1687,6 +1729,10 @@ msgstr ""
 msgid "{0}: {fieldMessage}"
 msgstr ""
 
+#: src/components/calendar/CalendarShell.tsx
+msgid "Show the day panel"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "School or university. Manages domain verification, approves student accounts, oversees submissions."
 msgstr ""
@@ -1708,6 +1754,7 @@ msgstr ""
 msgid "Set your status from the pill in the top bar — green for working, \"Do not disturb\" to be left alone."
 msgstr ""
 
+#: src/components/calendar/CalendarShell.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "Year"
 msgstr ""
@@ -1936,6 +1983,10 @@ msgstr ""
 msgid "After you submit"
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Application pipeline"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.\n"
 "\n"
@@ -2024,6 +2075,10 @@ msgstr ""
 msgid "Budget Breakdown"
 msgstr ""
 
+#: src/components/dashboard/stats/RankProgress.tsx
+msgid "Day streak"
+msgstr ""
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Project Details"
 msgstr ""
@@ -2061,10 +2116,6 @@ msgid "On the Achievements page click \"Edit showcase\", then pick the badges yo
 "Save the showcase and those five appear on your public member page.\n"
 "\n"
 "Until you choose, your page shows your most recent badges. Pinning is how you put the ones that matter for your goals — a funding badge, a verification badge — in front of people instead."
-msgstr ""
-
-#: src/components/calendar/DashboardCalendar.tsx
-msgid "Only mine"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2174,6 +2225,10 @@ msgstr ""
 msgid "Your CV has been started from your Virtual Campus record. Edit anything you like."
 msgstr ""
 
+#: src/components/personalization/ForYouRail.tsx
+msgid "Filter recommendations by type"
+msgstr ""
+
 #. placeholder {0}: formatRelativeTime(doc.updated_at)
 #. placeholder {0}: formatRelativeTime(snippet.updated_at)
 #. placeholder {0}: formatRelativeTime(wb.updated_at)
@@ -2189,9 +2244,14 @@ msgid "Empty note"
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "Certificates"
 msgstr ""
@@ -2232,6 +2292,7 @@ msgstr ""
 #. placeholder {0}: items.length
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/components/calendar/CalendarGrid.tsx
+#: src/components/calendar/WeekView.tsx
 msgid "{0, plural, one {# event} other {# events}}"
 msgstr ""
 
@@ -2303,6 +2364,10 @@ msgstr ""
 msgid "The moderation queue"
 msgstr ""
 
+#: src/components/calendar/CalendarFilterMenu.tsx
+msgid "All item types"
+msgstr ""
+
 #: src/components/venue/AvailabilityPicker.tsx
 msgid "Stepped out"
 msgstr ""
@@ -2346,6 +2411,10 @@ msgstr ""
 
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Words"
+msgstr ""
+
+#: src/components/calendar/CalendarShell.tsx
+msgid "Next day"
 msgstr ""
 
 #: src/components/layout/Navbar.tsx
@@ -2417,6 +2486,7 @@ msgstr ""
 msgid "Acting as"
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Overview"
 msgstr ""
@@ -2450,9 +2520,14 @@ msgstr ""
 #: src/components/directory/MemberPanel.tsx
 #: src/components/personalization/SignalSummary.tsx
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -2543,6 +2618,10 @@ msgstr ""
 msgid "Your account cannot start new conversations. Student accounts use supervised group channels instead."
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Sponsorships given"
+msgstr ""
+
 #: src/components/venue/room/RoomSections.tsx
 msgid "No judges in the venue yet."
 msgstr ""
@@ -2599,6 +2678,7 @@ msgstr ""
 #. placeholder {0}: summary.count
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/components/calendar/CalendarGrid.tsx
+#: src/components/calendar/WeekView.tsx
 #: src/components/gantt/gantt-bar.tsx
 msgid "{0, plural, one {# item} other {# items}}"
 msgstr ""
@@ -2617,10 +2697,6 @@ msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Suspend accounts and escalate to safety admins and school administrators."
-msgstr ""
-
-#: src/components/achievements/NextUpStrip.tsx
-msgid "Closest to unlocking"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3262,6 +3338,11 @@ msgstr ""
 msgid "Intellectual Property Infringement"
 msgstr ""
 
+#: src/components/calendar/CalendarAccentPicker.tsx
+msgid "Match the event type"
+msgstr ""
+
+#: src/components/calendar/CalendarFilterMenu.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Show"
 msgstr ""
@@ -3781,6 +3862,10 @@ msgstr ""
 msgid "Log In"
 msgstr ""
 
+#: src/components/calendar/CalendarFilterMenu.tsx
+msgid "Only my items"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Project creation is behind a permission, not just a login. Roles built around funding and oversight — Investor, for example — do not hold it by default.\n"
 "\n"
@@ -4000,6 +4085,7 @@ msgstr ""
 msgid "Switch between light and dark mode"
 msgstr ""
 
+#: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Highest rank reached"
 msgstr ""
@@ -4026,6 +4112,10 @@ msgstr ""
 
 #: src/components/venue/room/RoomArrivalPanels.tsx
 msgid "Say whether you need a team"
+msgstr ""
+
+#: src/components/calendar/CalendarShell.tsx
+msgid "{itemCount} events"
 msgstr ""
 
 #: src/components/ui/FloatingActionButton.tsx
@@ -4085,9 +4175,14 @@ msgid "Captioning needs Chrome, Edge or Safari"
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/i18n/harvested.ts
 #: src/pages/cv/CvEditPage.tsx
 msgid "Education"
@@ -4295,6 +4390,10 @@ msgstr ""
 msgid "Loading solutions…"
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Numbered sections under a heavy double rule. Ink only — no fills, prints anywhere."
+msgstr ""
+
 #: src/hooks/useSnippets.ts
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Untitled Snippet"
@@ -4397,6 +4496,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I download my CV as a PDF?"
+msgstr ""
+
+#: src/lib/resume-designs.ts
+msgid "Centred masthead over two equal columns split by a hairline. Symmetrical and formal."
 msgstr ""
 
 #: src/pages/auth/LoginPage.tsx
@@ -4544,9 +4647,14 @@ msgid "Browse public grant opportunities."
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "Experience"
@@ -5138,6 +5246,10 @@ msgstr ""
 msgid "Closing Time (Optional)"
 msgstr ""
 
+#: src/pages/cv/CvPage.tsx
+msgid "Choose “Save as PDF” in the print dialog. Designs with a full-height colour rail — <0>Signature</0> and <1>Atlas</1> — also need “Background graphics” switched on. Every other design prints correctly either way."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Go to \"My Applications\" from the Grants section.\n"
 "\n"
@@ -5215,6 +5327,10 @@ msgstr ""
 msgid "Skills & Collaboration"
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Projects created"
+msgstr ""
+
 #: src/components/ui/ImageUpload.tsx
 msgid "Image must be less than {limitMb}MB"
 msgstr ""
@@ -5228,6 +5344,7 @@ msgid "Guide and support innovators"
 msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
+#: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 #: src/pages/profile/PublicProfilePage.tsx
@@ -5278,7 +5395,10 @@ msgstr ""
 msgid "Chars"
 msgstr ""
 
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
 msgid "Professional Skills"
 msgstr ""
@@ -5323,6 +5443,12 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "No events organized yet."
+msgstr ""
+
+#: src/components/calendar/CalendarAccentPicker.tsx
+#: src/pages/events/CreateEventPage.tsx
+#: src/pages/events/EditEventPage.tsx
+msgid "Calendar colour"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5371,6 +5497,10 @@ msgstr ""
 msgid "Entrepreneur"
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Grant applications"
+msgstr ""
+
 #: src/lib/achievement-copy.ts
 msgid "Every part of your profile filled in"
 msgstr ""
@@ -5398,6 +5528,10 @@ msgstr ""
 
 #: src/pages/cv/PublicCvPage.tsx
 msgid "{name} — CV"
+msgstr ""
+
+#: src/components/resume/sheets/LedgerSheet.tsx
+msgid "End of résumé"
 msgstr ""
 
 #: src/pages/events/EventsPage.tsx
@@ -5553,6 +5687,10 @@ msgstr ""
 msgid "Sign in is taking too long. Your session may be stuck."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Sun"
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 msgid "Open search"
 msgstr ""
@@ -5649,6 +5787,7 @@ msgstr ""
 msgid "View my public profile"
 msgstr ""
 
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/editor/LinkModal.tsx
 #: src/components/documents/DocumentUploadModal.tsx
@@ -5858,6 +5997,7 @@ msgid "No achievements match these filters."
 msgstr ""
 
 #: src/components/documents/DocumentUploadModal.tsx
+#: src/lib/calendar-note-item.ts
 msgid "Done"
 msgstr ""
 
@@ -5990,6 +6130,10 @@ msgstr ""
 msgid " — drag inside one to position the image for that surface"
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Editorial single column with headings set in a left gutter. Wide margins, hairline rules."
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "No events found"
 msgstr ""
@@ -6004,6 +6148,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Assign roles and toggle what each role can do"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Ocean"
 msgstr ""
 
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -6127,6 +6275,7 @@ msgstr ""
 #. placeholder {0}: rank.earned
 #. placeholder {1}: rank.next_required
 #. placeholder {2}: rank.next_name
+#: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "{0} / {1} toward {2}"
 msgstr ""
@@ -6141,6 +6290,10 @@ msgstr ""
 
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Profile Information"
+msgstr ""
+
+#: src/components/dashboard/stats/RankProgress.tsx
+msgid "Your standing appears once you have earned a badge."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6165,6 +6318,10 @@ msgstr ""
 
 #: src/components/venue/AvailabilityPicker.tsx
 msgid "Please do not interrupt"
+msgstr ""
+
+#: src/components/calendar/CalendarShell.tsx
+msgid "{itemCount} items"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6714,6 +6871,10 @@ msgstr ""
 msgid "Frequently Asked Questions"
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Atlas"
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Solution & Plan"
 msgstr ""
@@ -6746,6 +6907,10 @@ msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "You understand that filing false or misleading reports is a violation of platform policy."
+msgstr ""
+
+#: src/components/calendar/CalendarDayPanel.tsx
+msgid "Note, task or reminder"
 msgstr ""
 
 #: src/pages/settings/ProfileSettingsTab.tsx
@@ -6788,6 +6953,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I personalize what I see?"
+msgstr ""
+
+#: src/hooks/useCalendarFeed.ts
+msgid "Virtual event"
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -6900,10 +7069,6 @@ msgstr ""
 
 #: src/components/layout/Navbar.tsx
 msgid "Create an Event"
-msgstr ""
-
-#: src/pages/cv/CvPage.tsx
-msgid "Choose “Save as PDF” in the print dialog. The <0>Signature</0> design also needs “Background graphics” switched on for its navy sidebar; Classic and Compact print correctly either way."
 msgstr ""
 
 #: src/components/collaboration/PreviewPanel.tsx
@@ -7038,10 +7203,6 @@ msgid "Partner API — issue and revoke API keys for partner organisations. Trea
 "One known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead."
 msgstr ""
 
-#: src/components/calendar/DashboardCalendar.tsx
-msgid "Whose items to show"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Employers"
 msgstr ""
@@ -7142,10 +7303,6 @@ msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Description *"
-msgstr ""
-
-#: src/components/dashboard/RecentSubmissions.tsx
-msgid "Nothing submitted yet. Applications and registrations you send will appear here with a full copy of your answers."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7315,7 +7472,7 @@ msgstr ""
 msgid "Click \"Enter the venue\" (you must be registered for the event)."
 msgstr ""
 
-#: src/components/calendar/CalendarEventCard.tsx
+#: src/components/calendar/CalendarDayPanel.tsx
 #: src/i18n/harvested.ts
 #: src/pages/events/EventDetailPage.tsx
 msgid "Organizer"
@@ -7352,8 +7509,12 @@ msgid "<0>{0}</0> is now your primary email address, so it no longer works as a 
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/settings/ProfileSettingsTab.tsx
@@ -7486,6 +7647,10 @@ msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Thank you — that made our day"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Rose"
 msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
@@ -7654,7 +7819,6 @@ msgstr ""
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
-#: src/pages/dashboard/tabs/OverviewTab.tsx
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 msgid "My Submissions"
 msgstr ""
@@ -7775,8 +7939,17 @@ msgstr ""
 msgid "Student/Youth Innovator"
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+#: src/components/calendar/CalendarShell.tsx
+msgid "Day"
+msgstr ""
+
 #: src/components/shared/DeleteEntityControl.tsx
 msgid "Deleting this {noun} is permanent. Everything attached to it is removed with it and cannot be restored."
+msgstr ""
+
+#: src/components/personalization/ForYouRail.tsx
+msgid "Collapse"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -8109,7 +8282,6 @@ msgstr ""
 msgid "Minimize note"
 msgstr ""
 
-#: src/components/dashboard/RecentSubmissions.tsx
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 msgid "Loading submissions..."
 msgstr ""
@@ -8232,6 +8404,7 @@ msgstr ""
 msgid "Badges are awarded automatically for what you do — creating projects, connecting with people, posting in the forums, getting verified, turning up to events, applying for grants, and more. Nothing needs to be claimed: the system checks as you go and awards anything you have already qualified for, including things you did before a badge existed. See everything you have and everything still open under Achievements."
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
 #: src/components/directory/MemberPanel.tsx
 #: src/i18n/harvested.ts
 msgid "Standing"
@@ -8299,6 +8472,10 @@ msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Communication"
+msgstr ""
+
+#: src/components/calendar/CalendarNoteComposer.tsx
+msgid "What kind"
 msgstr ""
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -8469,6 +8646,10 @@ msgstr ""
 msgid "URL"
 msgstr ""
 
+#: src/lib/calendar.ts
+msgid "You declined this invitation"
+msgstr ""
+
 #: src/components/shared/ReceiptDocument.tsx
 msgid "Additional context"
 msgstr ""
@@ -8597,6 +8778,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Writing, running and sharing snippets."
+msgstr ""
+
+#: src/lib/resume-designs.ts
+msgid "Oversized name over a gold bar and a three-up facts strip. Magazine cover, one column."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -8772,10 +8957,6 @@ msgstr ""
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Align left"
-msgstr ""
-
-#: src/components/calendar/WeekView.tsx
-msgid "{count, plural, one {# event} other {# events}}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -9043,6 +9224,10 @@ msgstr ""
 msgid "You can now open \"{0}\" as {roleLabel}."
 msgstr ""
 
+#: src/components/dashboard/stats/ActivityBars.tsx
+msgid "Nothing started in the last six months."
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid " · complete"
 msgstr ""
@@ -9178,7 +9363,11 @@ msgid "Banner removed"
 msgstr ""
 
 #: src/components/layout/Footer.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
 msgid "Contact"
 msgstr ""
@@ -9258,9 +9447,14 @@ msgstr ""
 msgid "Annotation tool"
 msgstr ""
 
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 msgid "Academic Competencies"
 msgstr ""
 
@@ -9530,6 +9724,10 @@ msgstr ""
 msgid "Applications close"
 msgstr ""
 
+#: src/pages/cv/CvPage.tsx
+msgid "Color"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Row actions, and what they mean to the member"
 msgstr ""
@@ -9546,6 +9744,7 @@ msgid "Step five of the wizard lists exactly what this call asks for. Every fund
 "These files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission."
 msgstr ""
 
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/ui/ToolStatusBar.tsx
 msgid "Saving…"
 msgstr ""
@@ -9568,6 +9767,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Select the Security tab."
+msgstr ""
+
+#: src/pages/events/CreateEventPage.tsx
+#: src/pages/events/EditEventPage.tsx
+msgid "How this event is coloured on the calendar. Leave it on Auto to follow the event type."
 msgstr ""
 
 #: src/components/safeguarding/StudentVerificationCard.tsx
@@ -9843,6 +10047,10 @@ msgstr ""
 msgid "Report User"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Note"
+msgstr ""
+
 #: src/components/shared/DeleteEntityControl.tsx
 #: src/components/shared/DeleteEntityDialog.tsx
 msgid "Delete {noun}"
@@ -9947,6 +10155,7 @@ msgstr ""
 msgid "Report a User"
 msgstr ""
 
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/notes/StickyNote.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Colour"
@@ -10095,6 +10304,10 @@ msgstr ""
 msgid "Concept"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "My Notes"
+msgstr ""
+
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Files attached to this project"
 msgstr ""
@@ -10142,6 +10355,10 @@ msgstr ""
 msgid "Help article — Projects"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Tropical"
+msgstr ""
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Fast"
 msgstr ""
@@ -10167,6 +10384,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Report a bug or suggest an improvement"
+msgstr ""
+
+#: src/components/calendar/CalendarFilterMenu.tsx
+msgid "Calendar filters"
 msgstr ""
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
@@ -10621,6 +10842,10 @@ msgstr ""
 msgid "What collaboration tools are available?"
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Applications received"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The project archive"
 msgstr ""
@@ -10663,6 +10888,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Eligibility, deadlines and applying."
+msgstr ""
+
+#: src/components/calendar/CalendarShell.tsx
+msgid "Previous day"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10742,9 +10971,14 @@ msgid "Content first — Projects, Events, Grants, Forums, Resources, Achievemen
 "This rail is on every admin page, so it is always the way back out."
 msgstr ""
 
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/messages/GroupSettingsModal.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "Add"
+msgstr ""
+
+#: src/pages/cv/CvPage.tsx
+msgid "B&W"
 msgstr ""
 
 #: src/components/grants/GrantCard.tsx
@@ -10836,6 +11070,10 @@ msgstr ""
 msgid "By email"
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Events organized"
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Secrets"
 msgstr ""
@@ -10902,10 +11140,6 @@ msgstr ""
 msgid "Awarded automatically"
 msgstr ""
 
-#: src/components/calendar/WeekView.tsx
-msgid "{count, plural, one {# item} other {# items}}"
-msgstr ""
-
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Find an organisation to work with"
 msgstr ""
@@ -10938,6 +11172,10 @@ msgstr ""
 #. placeholder {1}: myRank.board_size
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "You are #{0} of {1}"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Purple"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10998,6 +11236,7 @@ msgstr ""
 msgid "Student applications are submitted under a faculty or school sponsor. Nominate someone from your institution — they will be asked to accept before this can be submitted."
 msgstr ""
 
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/components/events/EventSolutionsPanel.tsx
 #: src/components/ui/ToolTitleInput.tsx
@@ -11149,6 +11388,10 @@ msgstr ""
 msgid "The work you do, who you do it for, and what makes you the right people for it."
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Engagement received"
+msgstr ""
+
 #: src/pages/profile/PublicProfilePage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 #: src/pages/sme/OrgProfilePage.tsx
@@ -11265,6 +11508,10 @@ msgstr ""
 msgid "Opening remarks, announcements and the closing ceremony."
 msgstr ""
 
+#: src/components/calendar/CalendarShell.tsx
+msgid "Hide the day panel"
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Date"
 msgstr ""
@@ -11372,7 +11619,7 @@ msgstr ""
 msgid "This browser cannot capture the screen — describe what you saw instead."
 msgstr ""
 
-#: src/components/calendar/DashboardCalendar.tsx
+#: src/components/personalization/ForYouRail.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "All"
 msgstr ""
@@ -11402,6 +11649,14 @@ msgstr ""
 msgid "Chamber of Commerce verification"
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+msgid "Close details"
+msgstr ""
+
+#: src/components/dashboard/stats/PipelineDonut.tsx
+msgid "No applications yet — the pipeline fills in as you apply."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Activity on the platform earns badges, and badges carry points. Points add up to a level, and consecutive days of activity build a streak.\n"
 "\n"
@@ -11422,8 +11677,7 @@ msgid "Search snippets..."
 msgstr ""
 
 #: src/components/achievements/AchievementUnlockModal.tsx
-#: src/components/achievements/NextUpStrip.tsx
-#: src/pages/dashboard/tabs/OverviewTab.tsx
+#: src/components/personalization/ForYouRail.tsx
 msgid "View all"
 msgstr ""
 
@@ -11446,6 +11700,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Click \"Report\" on their profile."
+msgstr ""
+
+#: src/components/calendar/CalendarShell.tsx
+msgid "Time format"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -11546,6 +11804,10 @@ msgstr ""
 msgid "On, any signed-in member can see your full profile and message you. Off, only your connections can — everyone still sees your name, role and country in the directory, so they can send you a connection request."
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Started in the last 6 months"
+msgstr ""
+
 #: src/pages/collaborate/WhiteboardPage.tsx
 msgid "Export whiteboard"
 msgstr ""
@@ -11633,6 +11895,10 @@ msgstr ""
 msgid "Personal information exposed"
 msgstr ""
 
+#: src/components/resume/sheets/SlateSheet.tsx
+msgid "Languages & Strengths"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Act as the faculty or school sponsor on a student application."
 msgstr ""
@@ -11695,6 +11961,10 @@ msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Acceptable"
+msgstr ""
+
+#: src/components/calendar/CalendarNoteComposer.tsx
+msgid "Add to this day"
 msgstr ""
 
 #: src/components/AnalyticsConsentBanner.tsx
@@ -12088,6 +12358,7 @@ msgstr ""
 msgid "Latest announcements"
 msgstr ""
 
+#: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Level"
 msgstr ""
@@ -12155,6 +12426,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Where it happens"
+msgstr ""
+
+#: src/components/dashboard/stats/RankProgress.tsx
+msgid "Progress toward the next rank"
 msgstr ""
 
 #: src/components/tutorial/TutorialOverlay.tsx
@@ -12242,6 +12517,10 @@ msgstr ""
 
 #: src/components/venue/VenueTopBar.tsx
 msgid "Event page"
+msgstr ""
+
+#: src/components/resume/sheets/LedgerSheet.tsx
+msgid "Awards"
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -12627,9 +12906,14 @@ msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
 #: src/pages/profile/PublicProfilePage.tsx
@@ -12780,9 +13064,14 @@ msgid "Delete \"{0}\"? This cannot be undone."
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
+#: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
+#: src/components/resume/sheets/MeridianSheet.tsx
 #: src/components/resume/sheets/SignatureSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Courses"
@@ -12802,6 +13091,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "An infinite canvas"
+msgstr ""
+
+#: src/components/calendar/CalendarShell.tsx
+msgid "Previous year"
 msgstr ""
 
 #: src/pages/settings/PreferencesTab.tsx
@@ -12862,6 +13155,10 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/MyProfileTab.tsx
 msgid "Profile locked. Members must connect with you to see your details or message you."
+msgstr ""
+
+#: src/components/calendar/CalendarNoteComposer.tsx
+msgid "Give it a title first."
 msgstr ""
 
 #: src/components/personalization/SignalSummary.tsx
@@ -12972,6 +13269,10 @@ msgstr ""
 msgid "Enter the venue"
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+msgid "Nothing to open — this item lives outside the platform."
+msgstr ""
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Wake — brings the panel back without unpinning it"
 msgstr ""
@@ -13033,6 +13334,10 @@ msgid "Failed to upload image. The storage bucket may not exist yet."
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Task"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Reading a project, and joining one."
 msgstr ""
 
@@ -13048,6 +13353,10 @@ msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "Event Not Found"
+msgstr ""
+
+#: src/lib/member-kpis.ts
+msgid "Requests to answer"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -13283,6 +13592,10 @@ msgstr ""
 msgid "Back to Grants"
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Slate"
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Updates"
 msgstr ""
@@ -13369,6 +13682,12 @@ msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
 msgid "Job title"
+msgstr ""
+
+#. placeholder {0}: active.length
+#. placeholder {1}: kinds.length
+#: src/components/calendar/CalendarFilterMenu.tsx
+msgid "{0} of {1} types"
 msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
@@ -13644,10 +13963,6 @@ msgstr ""
 msgid "Triage"
 msgstr ""
 
-#: src/components/calendar/CalendarDayPanel.tsx
-msgid "Day {dayNumber} of {totalDays}"
-msgstr ""
-
 #: src/hooks/useInstitutions.ts
 msgid "You must be signed in."
 msgstr ""
@@ -13694,6 +14009,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Registrations, schedule, venue and the builders."
+msgstr ""
+
+#: src/components/calendar/CalendarAccentPicker.tsx
+msgid "Auto"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -13819,6 +14138,7 @@ msgstr ""
 
 #: src/components/grants/application/AIReviewPanel.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/MarqueeSheet.tsx
 msgid "Strengths"
 msgstr ""
 
@@ -13982,6 +14302,10 @@ msgstr ""
 msgid "Distributions and pipeline"
 msgstr ""
 
+#: src/components/calendar/CalendarShell.tsx
+msgid "12h"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Each tool has its own list page: Whiteboards, Documents and Snippets under Collaborate.\n"
 "\n"
@@ -14044,10 +14368,6 @@ msgstr ""
 
 #: src/components/dashboard/TimelineSection.tsx
 msgid "Couldn't load your progress timeline."
-msgstr ""
-
-#: src/components/calendar/CalendarEventCard.tsx
-msgid "all day"
 msgstr ""
 
 #: src/lib/grant-application-template.ts
@@ -14128,6 +14448,7 @@ msgstr ""
 msgid "Share any additional thoughts to help us improve."
 msgstr ""
 
+#: src/components/personalization/ForYouRail.tsx
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
@@ -14591,11 +14912,6 @@ msgstr ""
 
 #: src/pages/settings/VerificationTab.tsx
 msgid "Upload an identity document (national ID, passport, or business registration) as PDF or image. Documents are stored privately and only visible to OECS administrators."
-msgstr ""
-
-#. placeholder {0}: item.badge!.name
-#: src/components/achievements/NextUpStrip.tsx
-msgid "{0} progress"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
@@ -15089,6 +15405,7 @@ msgstr ""
 #: src/components/directory/MemberPanel.tsx
 #: src/components/layout/Footer.tsx
 #: src/components/layout/Navbar.tsx
+#: src/components/personalization/ForYouRail.tsx
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
@@ -15181,6 +15498,10 @@ msgstr ""
 msgid "Search contacts..."
 msgstr ""
 
+#: src/components/resume/sheets/SlateSheet.tsx
+msgid "Nothing has been added to this CV yet."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I track my grant applications?"
 msgstr ""
@@ -15201,6 +15522,7 @@ msgstr ""
 msgid "Idea"
 msgstr ""
 
+#: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Active days"
 msgstr ""
@@ -15686,6 +16008,10 @@ msgstr ""
 msgid "Join the discussion"
 msgstr ""
 
+#: src/components/calendar/CalendarShell.tsx
+msgid "Next year"
+msgstr ""
+
 #: src/pages/auth/AuthCallbackPage.tsx
 #: src/pages/auth/VcLandingPage.tsx
 msgid "Signing you in…"
@@ -15723,6 +16049,8 @@ msgstr ""
 msgid "Close note"
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+#: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/documents/DocumentCard.tsx
 #: src/components/feedback/FeedbackModal.tsx
 #: src/pages/cv/CvEditPage.tsx
@@ -15962,6 +16290,10 @@ msgstr ""
 msgid "What is this document and why does it matter?"
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Comments"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Registration cannot close after the event starts"
 msgstr ""
@@ -15993,6 +16325,10 @@ msgstr ""
 msgid "Write and run code in the browser"
 msgstr ""
 
+#: src/components/dashboard/stats/RankProgress.tsx
+msgid "See all badges"
+msgstr ""
+
 #: src/components/venue/room/RoomArrivalPanels.tsx
 msgid "Use the pill in the top bar — it tells people whether to interrupt you."
 msgstr ""
@@ -16012,6 +16348,8 @@ msgstr ""
 #: src/components/resume/ResumeOutline.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
+#: src/components/resume/sheets/LedgerSheet.tsx
+#: src/components/resume/sheets/SlateSheet.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/settings/SettingsPage.tsx
 msgid "Profile"
@@ -16380,6 +16718,10 @@ msgstr ""
 msgid "Verification withdrawn"
 msgstr ""
 
+#: src/components/calendar/CalendarShell.tsx
+msgid "24h"
+msgstr ""
+
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Content types"
 msgstr ""
@@ -16545,6 +16887,10 @@ msgstr ""
 msgid "Skills and interests are not only profile decoration — they are what the “Top Picks” and “For You” sorts rank against, on projects, events and grants.\n"
 "\n"
 "A profile with no interests gets the plain newest-first ordering everywhere. Filling this in is the single change that most affects what the platform shows you."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Teal"
 msgstr ""
 
 #: src/components/venue/room/AvStage.tsx
@@ -16795,6 +17141,10 @@ msgstr ""
 msgid "{0, plural, one {# badge} other {# badges}}"
 msgstr ""
 
+#: src/components/calendar/CalendarNoteComposer.tsx
+msgid "What is it?"
+msgstr ""
+
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Characters"
 msgstr ""
@@ -16897,6 +17247,10 @@ msgstr ""
 msgid "Nobody matches “{term}”."
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Mirror of Signature: navy rail down the right, monogram mark, date-left timelines."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The amount, the funder, the deadline and the grant type, all in one block.\n"
 "\n"
@@ -16973,6 +17327,14 @@ msgstr ""
 msgid "Type an interest and press Enter..."
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+msgid "Who"
+msgstr ""
+
+#: src/lib/member-kpis.ts
+msgid "Resources published"
+msgstr ""
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Check that inbox for a confirmation link."
 msgstr ""
@@ -17035,6 +17397,10 @@ msgstr ""
 msgid "Event Calendar"
 msgstr ""
 
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Followers"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Manage grants"
 msgstr ""
@@ -17045,6 +17411,7 @@ msgstr ""
 
 #: src/components/layout/Footer.tsx
 #: src/components/layout/Navbar.tsx
+#: src/components/personalization/ForYouRail.tsx
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/i18n/harvested.ts
 #: src/lib/site-search.ts
@@ -17153,7 +17520,7 @@ msgstr ""
 msgid "How do I track a report I filed?"
 msgstr ""
 
-#: src/pages/events/EventsPage.tsx
+#: src/components/events/EventCalendar.tsx
 msgid "No events on this day"
 msgstr ""
 
@@ -17239,6 +17606,10 @@ msgstr ""
 
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Listed to everyone; people ask you for access."
+msgstr ""
+
+#: src/pages/cv/CvPage.tsx
+msgid "Preview ink"
 msgstr ""
 
 #: src/components/events/EventSpeakerGrid.tsx
@@ -17343,6 +17714,14 @@ msgid "This fills empty fields from your KTIP record — profile, public project
 "It does reload the document, so it asks you to save first if you have unsaved edits. Press it on a blank CV, or straight after saving."
 msgstr ""
 
+#: src/lib/resume-designs.ts
+msgid "Marquee"
+msgstr ""
+
+#: src/lib/member-kpis.ts
+msgid "Events attended"
+msgstr ""
+
 #: src/components/venue/room/RoomSections.tsx
 msgid "No mentors in the venue yet."
 msgstr ""
@@ -17367,6 +17746,10 @@ msgstr ""
 
 #: src/pages/help/FAQPage.tsx
 msgid "Quick answers about projects, teams, connections, messaging, grants, and your account."
+msgstr ""
+
+#: src/components/calendar/CalendarNoteComposer.tsx
+msgid "Anything you need to remember (optional)"
 msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
@@ -17584,6 +17967,10 @@ msgstr ""
 msgid "Search everyone at the event by skill or name."
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Forum replies"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Taking a page tour"
 msgstr ""
@@ -17677,6 +18064,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "What does the Saving / Saved badge mean?"
+msgstr ""
+
+#: src/lib/resume-designs.ts
+msgid "Ledger"
 msgstr ""
 
 #: src/pages/grants/GrantDetailPage.tsx
@@ -17929,6 +18320,10 @@ msgstr ""
 msgid "Not open for enrollment"
 msgstr ""
 
+#: src/components/calendar/CalendarDayPanel.tsx
+msgid "Where"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The Resources page has two tabs: the knowledge base and Integrations.\n"
 "\n"
@@ -18062,6 +18457,7 @@ msgid "Go to Grants and open the opportunity you want."
 msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
+#: src/lib/member-kpis.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Connections"
@@ -18482,6 +18878,10 @@ msgstr ""
 msgid "Reactions"
 msgstr ""
 
+#: src/lib/member-kpis.ts
+msgid "Likes received"
+msgstr ""
+
 #: src/components/personalization/SignalSummary.tsx
 msgid "What we know about you"
 msgstr ""
@@ -18557,6 +18957,10 @@ msgstr ""
 msgid "Launch - Ready to go!"
 msgstr ""
 
+#: src/components/calendar/CalendarYearPicker.tsx
+msgid "Change year"
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Collections & filters"
 msgstr ""
@@ -18594,4 +18998,8 @@ msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Attached screenshot"
+msgstr ""
+
+#: src/components/dashboard/stats/OverviewStats.tsx
+msgid "Likes"
 msgstr ""

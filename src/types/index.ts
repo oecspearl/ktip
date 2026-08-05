@@ -1,6 +1,7 @@
 // Custom types for KTIP application
 
 import type { BannerSpec } from '../lib/banner'
+import type { CalendarAccent, CalendarNoteKind } from '../lib/constants'
 
 /**
  * Every platform role. The first seven predate the tiered hierarchy and are
@@ -324,6 +325,11 @@ export interface Event extends Ranked {
   image_url: string | null
   organizer_id: string
   registration_fields: RegistrationFieldConfig[]
+  /**
+   * Migration 105 — the colour this event takes on the calendar. NULL falls
+   * back to the event_type palette, which is what every event did before.
+   */
+  accent_color: CalendarAccent | null
   is_climate_action: boolean
   /** Migration 062 — event sets a goal attendees must accomplish. */
   has_challenge: boolean
@@ -1906,4 +1912,38 @@ export interface ModerationQueueItem {
   report_count: number
   content_snapshot: string | null
   created_at: string
+}
+
+// Calendar notes (migration 105)
+
+/**
+ * A note, task or reminder the viewer put on their own calendar. Private by
+ * construction — there is no sharing, no assignment and no organiser. Anything
+ * collaborative belongs on an event or a project instead.
+ */
+export interface CalendarNote {
+  id: string
+  user_id: string
+  kind: CalendarNoteKind
+  title: string
+  body: string | null
+  starts_at: string
+  ends_at: string | null
+  all_day: boolean
+  accent_color: CalendarAccent
+  /** Only meaningful for `task`; the other kinds leave it false. */
+  is_done: boolean
+  created_at: string
+  updated_at: string
+}
+
+/** The fields a composer supplies — the rest are defaulted by the database. */
+export interface CalendarNoteDraft {
+  kind: CalendarNoteKind
+  title: string
+  body?: string | null
+  starts_at: string
+  ends_at?: string | null
+  all_day?: boolean
+  accent_color: CalendarAccent
 }

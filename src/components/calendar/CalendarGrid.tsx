@@ -7,11 +7,15 @@ import {
   isSameDay,
   isSameMonth,
   isToday,
+  isWeekend,
   startOfWeek,
 } from 'date-fns'
 import { cn } from '../../lib/utils'
-import { CALENDAR_FALLBACK_GRADIENT } from '../../lib/constants'
-import { CalendarAccentBar, calendarItemLabel } from './CalendarAccentBar'
+import { CALENDAR_CHROME_CLASS, CALENDAR_ROW_TITLE_CLASS } from '../../lib/constants'
+import { CalendarAccentBar, CalendarRelationCheck, calendarItemLabel } from './CalendarAccentBar'
+import { CalendarAccentRail } from './CalendarAccentRail'
+import { accentWash } from '../../lib/calendar-accent'
+import { isPastItem } from '../../lib/calendar-week'
 import type { CalendarItem } from '../../lib/calendar'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { plural } from '@lingui/core/macro'
@@ -22,6 +26,9 @@ interface CalendarGridProps {
   itemsByDay: Map<string, CalendarItem[]>
   direction: 'left' | 'right'
   onSelectDate: (date: Date) => void
+  /** The item open in the detail panel, highlighted in the grid */
+  selectedItemId?: string | null
+  onSelectItem: (item: CalendarItem) => void
   /** Noun used in day-cell aria labels — "event", "item", … */
   itemNoun?: string
   className?: string
@@ -36,7 +43,9 @@ interface CalendarDayCellProps {
   selectedDate: Date
   items: CalendarItem[]
   itemNoun: string
+  selectedItemId?: string | null
   onSelect: (date: Date) => void
+  onSelectItem: (item: CalendarItem) => void
 }
 
 function CalendarDayCell({
@@ -45,7 +54,9 @@ function CalendarDayCell({
   selectedDate,
   items,
   itemNoun,
+  selectedItemId,
   onSelect,
+  onSelectItem,
 }: CalendarDayCellProps) {
   const { t } = useLingui()
   const inMonth = isSameMonth(day, monthDate)
@@ -61,53 +72,117 @@ function CalendarDayCell({
       : plural(items.length, { one: '# item', other: '# items' })
 
   return (
-    <button
-      type="button"
+    // The cell is the day picker; the chips inside it are their own buttons, so
+    // this is a div with a button role rather than a <button> wrapping buttons
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelect(day)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onSelect(day)
+        }
+      }}
       aria-pressed={selected}
       aria-label={t`${dayLabel}, ${countLabel}`}
       className={cn(
-        'min-h-14 md:min-h-28 rounded-cal-sm p-1 md:p-1.5 text-left flex flex-col gap-1 border transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none',
+        'flex min-h-14 cursor-pointer flex-col gap-1 border-b border-l border-cal-line p-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500 md:min-h-28 md:p-1.5',
         selected
-          ? 'bg-ktip-ocean-50 ring-1 ring-ktip-ocean-300 border-transparent'
-          : 'bg-ktip-canvas/60 border-transparent hover:border-ktip-ocean-200 hover:bg-ktip-canvas',
-        !inMonth && 'opacity-40'
+          ? 'bg-ktip-ocean-50/60'
+          : isWeekend(day)
+            ? 'bg-ktip-sand-50/60 hover:bg-ktip-sand-100/70'
+            : 'hover:bg-ktip-sand-50',
+        !inMonth && 'text-ktip-sand-400'
       )}
     >
       <span
         className={cn(
-          'text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full shrink-0 transition-colors',
+          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-micro transition-colors',
           today
-            ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white'
+            ? 'bg-ktip-ocean-600 font-bold text-white dark:bg-ktip-ocean-200'
             : selected
-              ? 'text-ktip-ocean-700'
-              : 'text-ktip-sand-800'
+              ? 'font-bold text-ktip-ocean-700'
+              : inMonth
+                ? 'text-ktip-sand-800'
+                : 'text-ktip-sand-400'
         )}
       >
         {format(day, 'd')}
       </span>
 
-      {/* Item chips — md and up. Same gradient card language as the week view */}
+      {/* One card per day, not one per event — the same cluster idea the week
+          grid uses. A shared rail down the left carries every item's accent in
+          order, so a day reads as a single block with a colour spine. */}
       {items.length > 0 && (
-        <span className="hidden md:flex flex-col gap-1 overflow-hidden w-full">
-          {items.slice(0, MAX_CHIPS).map((item) => (
+        <span className="relative hidden w-full flex-col overflow-hidden rounded-cal-sm border border-ktip-sand-300 bg-ktip-cream pl-[3px] md:flex">
+          <CalendarAccentRail
+            className="absolute inset-y-0 left-0 w-[3px]"
+            bands={items.slice(0, MAX_CHIPS).map((item) => ({
+              item,
+              weight: 1,
+              past: item.dimmed || isPastItem(item),
+            }))}
+          />
+
+          {items.slice(0, MAX_CHIPS).map((item, index) => {
+            const past = item.dimmed || isPastItem(item)
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onSelect(day)
+                  onSelectItem(item)
+                }}
+                title={calendarItemLabel(item)}
+                aria-pressed={item.id === selectedItemId}
+                style={{
+                  // The wash bleeds out of the rail so the bar reads as the
+                  // edge of a tint. Dropped on the selected row — two fight
+                  backgroundImage:
+                    item.id === selectedItemId ? undefined : accentWash(item.dotClass, past),
+                }}
+                className={cn(
+                  'relative w-full overflow-hidden py-0.5 pl-2 pr-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
+                  item.id === selectedItemId
+                    ? 'bg-ktip-ocean-50 ring-1 ring-inset ring-ktip-ocean-500'
+                    : 'hover:bg-ktip-sand-100/80'
+                )}
+              >
+                {/* Inset so the rule never runs into the rail or the card edge */}
+                {index > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-1.5 top-0 h-px bg-ktip-sand-200"
+                  />
+                )}
+                <span className="flex items-center gap-1">
+                  <span
+                    className={cn(
+                      CALENDAR_ROW_TITLE_CLASS,
+                      'min-w-0 flex-1 truncate',
+                      past ? 'font-normal text-ktip-sand-500' : 'text-ktip-sand-900'
+                    )}
+                  >
+                    {item.title}
+                  </span>
+                  <CalendarRelationCheck item={item} />
+                </span>
+                {/* The check must not carry the registration on its own — name it */}
+                {item.relation && <span className="sr-only"> — {item.relation.label}</span>}
+              </button>
+            )
+          })}
+
+          {overflow > 0 && (
             <span
-              key={item.id}
-              title={calendarItemLabel(item)}
               className={cn(
-                'relative flex items-center overflow-hidden rounded-cal-sm border pl-2 pr-1 py-0.5 text-[10px] font-semibold transition-transform hover:translate-x-0.5',
-                item.gradientClass ?? CALENDAR_FALLBACK_GRADIENT,
-                item.dimmed && 'opacity-60 saturate-50'
+                CALENDAR_CHROME_CLASS,
+                'relative border-t border-ktip-sand-200 py-0.5 pl-2 text-ktip-sand-500'
               )}
             >
-              <CalendarAccentBar item={item} className="absolute left-0 top-0 bottom-0 w-1" />
-              <span className="truncate">{item.title}</span>
-              {/* Colour alone must not carry the registration — name it for AT */}
-              {item.relation && <span className="sr-only"> — {item.relation.label}</span>}
-            </span>
-          ))}
-          {overflow > 0 && (
-            <span className="text-[10px] font-semibold text-ktip-sand-500 pl-1">
               <Trans>+{overflow} more</Trans>
             </span>
           )}
@@ -116,18 +191,18 @@ function CalendarDayCell({
 
       {/* Dots — mobile */}
       {items.length > 0 && (
-        <span className="flex md:hidden gap-0.5 mt-auto justify-center w-full">
+        <span className="mt-auto flex w-full justify-center gap-0.5 md:hidden">
           {items.slice(0, MAX_DOTS).map((item) => (
             // Two-tone at 6px still reads as "mine" vs "not mine" at a glance
             <CalendarAccentBar
               key={item.id}
               item={item}
-              className={cn('w-1.5 h-1.5 rounded-full', item.dimmed && 'opacity-50')}
+              className={cn('h-1.5 w-1.5 rounded-full', item.dimmed && 'opacity-50')}
             />
           ))}
         </span>
       )}
-    </button>
+    </div>
   )
 }
 
@@ -135,6 +210,9 @@ function CalendarDayCell({
  * Generic month grid. Rendering is driven entirely by `CalendarItem`s, so both
  * the events page and the dashboard calendars share this one implementation.
  * Header chrome lives in `CalendarShell`, which wraps this and `WeekView`.
+ *
+ * Cells are ruled rather than gapped — the same paper surface the week grid
+ * uses, so switching views changes the density and nothing else.
  */
 export function CalendarGrid({
   monthDate,
@@ -142,6 +220,8 @@ export function CalendarGrid({
   itemsByDay,
   direction,
   onSelectDate,
+  selectedItemId,
+  onSelectItem,
   itemNoun = 'event',
   className,
 }: CalendarGridProps) {
@@ -150,13 +230,16 @@ export function CalendarGrid({
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd })
 
   return (
-    <div className={className}>
+    <div className={cn('border-r border-t border-cal-line', className)}>
       {/* Weekday labels */}
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 border-b border-cal-line">
         {Array.from({ length: 7 }, (_, i) => (
           <div
             key={i}
-            className="text-[11px] font-bold uppercase tracking-[0.12em] text-ktip-sand-500 text-center pb-2"
+            className={cn(
+              CALENDAR_CHROME_CLASS,
+              'border-l border-cal-line px-2 py-2 text-center text-ktip-sand-500'
+            )}
           >
             {format(addDays(gridStart, i), 'EEE')}
           </div>
@@ -167,7 +250,7 @@ export function CalendarGrid({
       <div
         key={format(monthDate, 'yyyy-MM')}
         className={cn(
-          'grid grid-cols-7 gap-1.5',
+          'grid grid-cols-7',
           direction === 'left' ? 'animate-cal-left' : 'animate-cal-right'
         )}
       >
@@ -179,7 +262,9 @@ export function CalendarGrid({
             selectedDate={selectedDate}
             items={itemsByDay.get(format(day, 'yyyy-MM-dd')) ?? []}
             itemNoun={itemNoun}
+            selectedItemId={selectedItemId}
             onSelect={onSelectDate}
+            onSelectItem={onSelectItem}
           />
         ))}
       </div>

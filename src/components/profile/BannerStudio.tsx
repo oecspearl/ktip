@@ -34,7 +34,7 @@ type SourceTab = 'upload' | 'designs' | 'gradient'
  * drag inside each preview to set that surface's own focal point. Nothing
  * writes to the profile until Save — the previews read a local draft.
  */
-export function BannerStudio() {
+export function BannerStudio({ className }: { className?: string } = {}) {
   const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
@@ -143,7 +143,7 @@ export function BannerStudio() {
   const displayName = auth.profile?.display_name || t`You`
 
   return (
-    <Card id="banner" data-spy="Banner" className="scroll-mt-24">
+    <Card id="banner" data-spy="Banner" className={cn('scroll-mt-24', className)}>
       <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-1"><Trans>Banner</Trans></h2>
       <p className="text-sm text-ktip-sand-600 mb-4">
         <Trans>

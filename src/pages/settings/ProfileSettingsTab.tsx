@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, type ChangeEvent } from 'react'
+import { useState, useEffect, useCallback, type ChangeEvent, type ReactNode } from 'react'
 import { Card } from '../../components/ui/Card'
+import { TileHead } from '../../components/ui/TileHead'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -14,6 +15,12 @@ import {
   X,
   Plus,
   ShieldCheck,
+  BadgeCheck,
+  Handshake,
+  Languages as LanguagesIcon,
+  Sparkles,
+  Tags,
+  UserRound,
 } from 'lucide-react'
 import {
   CARIBBEAN_COUNTRIES,
@@ -40,7 +47,17 @@ const SELF_ASSIGNABLE_SLUGS = new Set<string>(
   ROLE_DEFINITIONS.filter((r) => r.selfAssignable).map((r) => r.slug)
 )
 
-export function ProfileSettingsTab() {
+interface ProfileSettingsTabProps {
+  /**
+   * An extra tile dropped into the first bento row, before Photo. The
+   * dashboard passes its profile-lock tile here so privacy shares a row with
+   * Photo and Roles instead of eating a full-width band of its own; Settings
+   * passes nothing and the two remaining tiles widen to fill the row.
+   */
+  leadingTile?: ReactNode
+}
+
+export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}) {
     const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
@@ -200,88 +217,163 @@ export function ProfileSettingsTab() {
     }
   }
 
+  // Row one is a 6-column track shared by Photo, Roles and — on the dashboard —
+  // the profile-lock tile. Without that third tile the other two widen rather
+  // than leaving two dead columns behind.
+  const rowOneSpan = leadingTile ? 'md:col-span-2' : 'md:col-span-3'
+
   return (
-    <div className="space-y-6">
-      {/* Avatar Section */}
-      <Card id="photo" data-spy="Photo" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4"><Trans>Profile Photo</Trans></h2>
-        <div className="flex items-center gap-6" {...avatarDropProps}>
+    <div className="space-y-4">
+      {/* Bento: a 6-column track, tiles sized to their content instead of every
+          section claiming a full-width band. Short controls (photo, roles, the
+          lock) share a row; only the surfaces that genuinely need the width — the
+          banner studio, the field grid — spend all six columns. */}
+      <div className="grid gap-4 md:grid-cols-6">
+        {leadingTile}
+
+        {/* Avatar */}
+        <Card
+          id="photo"
+          data-spy="Photo"
+          padding="sm"
+          className={`scroll-mt-24 ${rowOneSpan}`}
+        >
+          <TileHead icon={<Camera size={16} />} title={<Trans>Profile Photo</Trans>} />
           {/* The camera lives in the hover scrim rather than a corner chip: a
               diamond has no corner to pin a chip to without it floating off the
               silhouette. The whole label is the drop/click target. */}
-          <label className="cursor-pointer">
-            <DiamondAvatar
-              src={auth.profile?.avatar_url}
-              name={displayNameValue || t`You`}
-              size={80}
-              frameClassName={
-                avatarDragging ? 'ring-2 ring-ktip-ocean-400 ring-offset-2' : undefined
-              }
-              overlay={<Camera size={20} className="text-white" />}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-              disabled={avatarUploading}
-            />
-          </label>
-          <div>
-            <p className="text-sm text-ktip-sand-700 font-medium">
-              {avatarDragging ? t`Drop photo to upload` : t`Upload a photo`}
-            </p>
-            <p className="text-xs text-ktip-sand-500 mt-1">
-              <Trans>JPG, PNG, GIF or WebP. Max 5MB. Click or drag &amp; drop — large images are resized and optimized automatically.</Trans>
-            </p>
-            {avatarUploading && (
-              <p className="text-xs text-ktip-ocean-600 mt-1"><Trans>Uploading...</Trans></p>
-            )}
+          <div className="flex items-center gap-4" {...avatarDropProps}>
+            <label className="cursor-pointer shrink-0">
+              <DiamondAvatar
+                src={auth.profile?.avatar_url}
+                name={displayNameValue || t`You`}
+                size={64}
+                frameClassName={
+                  avatarDragging ? 'ring-2 ring-ktip-ocean-400 ring-offset-2' : undefined
+                }
+                overlay={<Camera size={18} className="text-white" />}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+                disabled={avatarUploading}
+              />
+            </label>
+            <div className="min-w-0">
+              <p className="text-sm text-ktip-sand-700 font-medium">
+                {avatarDragging ? t`Drop photo to upload` : t`Upload a photo`}
+              </p>
+              <p className="text-xs text-ktip-sand-500 mt-1 leading-relaxed">
+                <Trans>JPG, PNG, GIF or WebP. Max 5MB. Click or drag &amp; drop — large images are resized and optimized automatically.</Trans>
+              </p>
+              {avatarUploading && (
+                <p className="text-xs text-ktip-ocean-600 mt-1"><Trans>Uploading...</Trans></p>
+              )}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      {/* Banner — photo, built-in design or aurora gradient, with live
-          previews of every surface that shows it (104). */}
-      <BannerStudio />
-
-      {/* Profile Info */}
-      <Card id="profile-info" data-spy="Profile" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-4"><Trans>Profile Information</Trans></h2>
-        <div className="space-y-4">
-          <Input
-            label={t`Display Name`}
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            error={errors.display_name}
-            fullWidth
+        {/* Roles */}
+        <Card
+          id="roles"
+          data-spy="Roles"
+          padding="sm"
+          className={`scroll-mt-24 ${rowOneSpan}`}
+        >
+          <TileHead
+            icon={<BadgeCheck size={16} />}
+            title={<Trans>Roles</Trans>}
+            hint={<Trans>Select the roles that describe you. You can choose multiple.</Trans>}
           />
+          <div className="flex flex-wrap gap-1.5">
+            {SELECTABLE_ROLES.filter((role) => SELF_ASSIGNABLE_SLUGS.has(role.value)).map((role) => {
+              const isSelected = roles.includes(role.value)
+              return (
+                <button
+                  key={role.value}
+                  type="button"
+                  onClick={() => toggleRole(role.value)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 text-xs font-medium transition-all ${
+                    isSelected
+                      ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-700'
+                      : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300'
+                  }`}
+                >
+                  {isSelected ? <X size={13} /> : <Plus size={13} />}
+                  {resolveCopy(i18n, role.label)}
+                </button>
+              )
+            })}
+          </div>
 
-          <Textarea
-            label={t`Bio`}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            error={errors.bio}
-            rows={4}
-            placeholder={t`Tell us about yourself...`}
-            fullWidth
-          />
+          {verifiedRoles.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-ktip-sand-100">
+              <p className="text-xs text-ktip-sand-600 mb-2 leading-relaxed">
+                <Trans>Granted by verification. These can only be changed by your institution, your Chamber of Commerce, or an OECS administrator.</Trans>
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {verifiedRoles.map((slug) => (
+                  <span
+                    key={slug}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-ktip-tropical-200 bg-ktip-tropical-50 text-xs font-medium text-ktip-tropical-800"
+                  >
+                    <ShieldCheck size={13} />
+                    {ROLE_BY_SLUG[slug]?.label ? resolveCopy(i18n, ROLE_BY_SLUG[slug].label) : slug}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
 
-          <Input
-            label={t`Organisation`}
-            value={organization}
-            onChange={(e) => setOrganization(e.target.value)}
-            error={errors.organization}
-            placeholder={t`Company, university, or institution`}
-            fullWidth
-          />
+        {/* Banner — photo, built-in design or aurora gradient, with live
+            previews of every surface that shows it (104). The previews are the
+            one thing here that genuinely earns the full width. */}
+        <BannerStudio className="md:col-span-6" />
 
-          <IndustrySelect value={industry} onChange={setIndustry} />
-
-          {/* Both land on the CV — phone in the contact block, website as the
-              "Website" social. Kept here rather than in the CV editor so the
-              directory and a public profile can read the same value. */}
+        {/* Profile Info — two field columns instead of one, which halves the tile
+            without touching a single input. */}
+        <Card id="profile-info" data-spy="Profile" className="scroll-mt-24 md:col-span-6">
+          <TileHead icon={<UserRound size={16} />} title={<Trans>Profile Information</Trans>} />
           <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label={t`Display Name`}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              error={errors.display_name}
+              fullWidth
+            />
+
+            <Input
+              label={t`Organisation`}
+              value={organization}
+              onChange={(e) => setOrganization(e.target.value)}
+              error={errors.organization}
+              placeholder={t`Company, university, or institution`}
+              fullWidth
+            />
+
+            <IndustrySelect value={industry} onChange={setIndustry} />
+
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
+              >
+                <option value=""><Trans>Select a country</Trans></option>
+                {[...CARIBBEAN_COUNTRIES].map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Both land on the CV — phone in the contact block, website as the
+                "Website" social. Kept here rather than in the CV editor so the
+                directory and a public profile can read the same value. */}
             <Input
               label={t`Phone`}
               type="tel"
@@ -301,117 +393,85 @@ export function ProfileSettingsTab() {
               placeholder="https://example.org"
               fullWidth
             />
-          </div>
 
-          <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
-            <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
-            >
-              <option value=""><Trans>Select a country</Trans></option>
-              {[...CARIBBEAN_COUNTRIES].map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </Card>
-
-      {/* Roles */}
-      <Card id="roles" data-spy="Roles" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Roles</Trans></h2>
-        <p className="text-sm text-ktip-sand-600 mb-4"><Trans>Select the roles that describe you. You can choose multiple.</Trans></p>
-        <div className="flex flex-wrap gap-2">
-          {SELECTABLE_ROLES.filter((role) => SELF_ASSIGNABLE_SLUGS.has(role.value)).map((role) => {
-            const isSelected = roles.includes(role.value)
-            return (
-              <button
-                key={role.value}
-                type="button"
-                onClick={() => toggleRole(role.value)}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
-                  isSelected
-                    ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-700'
-                    : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300'
-                }`}
-              >
-                {isSelected ? <X size={14} /> : <Plus size={14} />}
-                {resolveCopy(i18n, role.label)}
-              </button>
-            )
-          })}
-        </div>
-
-        {verifiedRoles.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-ktip-sand-100">
-            <p className="text-sm text-ktip-sand-600 mb-2">
-              <Trans>Granted by verification. These can only be changed by your institution, your Chamber of Commerce, or an OECS administrator.</Trans>
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {verifiedRoles.map((slug) => (
-                <span
-                  key={slug}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border-2 border-ktip-tropical-200 bg-ktip-tropical-50 text-sm font-medium text-ktip-tropical-800"
-                >
-                  <ShieldCheck size={14} />
-                  {ROLE_BY_SLUG[slug]?.label ? resolveCopy(i18n, ROLE_BY_SLUG[slug].label) : slug}
-                </span>
-              ))}
+            <div className="sm:col-span-2">
+              <Textarea
+                label={t`Bio`}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                error={errors.bio}
+                rows={3}
+                placeholder={t`Tell us about yourself...`}
+                fullWidth
+              />
             </div>
           </div>
-        )}
-      </Card>
+        </Card>
 
-      {/* Skills */}
-      <Card id="skills" data-spy="Skills" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Skills</Trans></h2>
-        <TagInput
-          description={t`Add skills to help others find you in the directory.`}
-          values={skills}
-          onChange={setSkills}
-          suggestions={SKILL_SUGGESTIONS}
-          max={LIMITS.MAX_SKILLS}
-          placeholder={t`Type a skill and press Enter...`}
-        />
-      </Card>
+        {/* Skills */}
+        <Card id="skills" data-spy="Skills" padding="sm" className="scroll-mt-24 md:col-span-3">
+          <TileHead icon={<Sparkles size={16} />} title={<Trans>Skills</Trans>} />
+          <TagInput
+            description={t`Add skills to help others find you in the directory.`}
+            values={skills}
+            onChange={setSkills}
+            suggestions={SKILL_SUGGESTIONS}
+            max={LIMITS.MAX_SKILLS}
+            placeholder={t`Type a skill and press Enter...`}
+          />
+        </Card>
 
-      {/* Interests */}
-      <Card id="interests" data-spy="Interests" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Interests</Trans></h2>
-        <TagInput
-          description={t`Topics you care about — used to surface relevant people and opportunities.`}
-          values={interests}
-          onChange={setInterests}
-          suggestions={INTEREST_SUGGESTIONS}
-          max={LIMITS.MAX_INTERESTS}
-          placeholder={t`Type an interest and press Enter...`}
-        />
-      </Card>
+        {/* Interests */}
+        <Card id="interests" data-spy="Interests" padding="sm" className="scroll-mt-24 md:col-span-3">
+          <TileHead icon={<Tags size={16} />} title={<Trans>Interests</Trans>} />
+          <TagInput
+            description={t`Topics you care about — used to surface relevant people and opportunities.`}
+            values={interests}
+            onChange={setInterests}
+            suggestions={INTEREST_SUGGESTIONS}
+            max={LIMITS.MAX_INTERESTS}
+            placeholder={t`Type an interest and press Enter...`}
+          />
+        </Card>
 
-      {/* Languages */}
-      <Card id="languages" data-spy="Languages" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Languages</Trans></h2>
-        <TagInput
-          description={t`Languages you speak. These appear on your CV — without them it can only guess one from your Virtual Campus locale.`}
-          values={languages}
-          onChange={setLanguages}
-          max={12}
-          placeholder={t`Type a language and press Enter...`}
-        />
-      </Card>
+        {/* Languages */}
+        <Card id="languages" data-spy="Languages" padding="sm" className="scroll-mt-24 md:col-span-3">
+          <TileHead icon={<LanguagesIcon size={16} />} title={<Trans>Languages</Trans>} />
+          <TagInput
+            description={t`Languages you speak. These appear on your CV — without them it can only guess one from your Virtual Campus locale.`}
+            values={languages}
+            onChange={setLanguages}
+            max={12}
+            placeholder={t`Type a language and press Enter...`}
+          />
+        </Card>
 
-      {/* Openness to Collaborate */}
-      <Card id="collaborate" data-spy="Collaborate" className="scroll-mt-24">
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-2"><Trans>Openness to Collaborate</Trans></h2>
-        <p className="text-sm text-ktip-sand-600 mb-4"><Trans>Let others know what kinds of collaboration you're open to.</Trans></p>
-        <CollabSelect values={openTo} onChange={setOpenTo} />
-      </Card>
+        {/* Openness to Collaborate */}
+        <Card id="collaborate" data-spy="Collaborate" padding="sm" className="scroll-mt-24 md:col-span-3">
+          <TileHead
+            icon={<Handshake size={16} />}
+            title={<Trans>Openness to Collaborate</Trans>}
+            hint={<Trans>Let others know what kinds of collaboration you're open to.</Trans>}
+          />
+          <CollabSelect values={openTo} onChange={setOpenTo} />
+        </Card>
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} loading={saving} icon={<Save size={18} />}>
+      </div>
+
+      {/* Save — sticky to the bottom of the viewport so a grid this tall never
+          strands the only button that commits it. Outside the grid on purpose:
+          a grid item's sticky containing block is its own grid area, which is
+          exactly its own height, so it would have nowhere to travel. */}
+      {/* No panel around it: the button already paints --neu-surface, and the
+          page ground is what it has to match for the shadow pair to read as
+          carved rather than as a chip floating on a second surface. */}
+      <div className="sticky bottom-4 z-sticky flex justify-end pointer-events-none">
+        <Button
+          onClick={handleSave}
+          loading={saving}
+          icon={<Save size={18} />}
+          className="pointer-events-auto"
+        >
           <Trans>Save Changes</Trans>
         </Button>
       </div>

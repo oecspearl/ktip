@@ -4,6 +4,11 @@ import type { SheetProps } from './SheetFrame'
 import { SignatureSheet } from './SignatureSheet'
 import { ClassicSheet } from './ClassicSheet'
 import { CompactSheet } from './CompactSheet'
+import { AtlasSheet } from './AtlasSheet'
+import { LedgerSheet } from './LedgerSheet'
+import { MeridianSheet } from './MeridianSheet'
+import { SlateSheet } from './SlateSheet'
+import { MarqueeSheet } from './MarqueeSheet'
 
 /**
  * design id → the component that draws it.
@@ -17,6 +22,11 @@ export const SHEET_COMPONENTS: Record<string, ComponentType<SheetProps>> = {
   signature: SignatureSheet,
   classic: ClassicSheet,
   compact: CompactSheet,
+  atlas: AtlasSheet,
+  ledger: LedgerSheet,
+  meridian: MeridianSheet,
+  slate: SlateSheet,
+  marquee: MarqueeSheet,
 }
 
 export function sheetFor(designId: string): ComponentType<SheetProps> {

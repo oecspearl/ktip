@@ -10,7 +10,8 @@ import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl
 import { describeEventDeletion } from '../../lib/delete-guard'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
-import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
+import { CalendarAccentPicker } from '../../components/calendar/CalendarAccentPicker'
+import { CONTENT_TAG_SUGGESTIONS, type CalendarAccent } from '../../lib/constants'
 import { sanitizeTag } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { eventSchema } from '../../lib/validation'
@@ -37,6 +38,8 @@ export default function EditEventPage() {
   const [description, setDescription] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [eventType, setEventType] = useState('meetup')
+  // null = follow the event type, which is what every event did before 105
+  const [accentColor, setAccentColor] = useState<CalendarAccent | null>(null)
   const [location, setLocation] = useState('')
   const [isVirtual, setIsVirtual] = useState(false)
   const [startDate, setStartDate] = useState('')
@@ -89,6 +92,7 @@ export default function EditEventPage() {
       setDescription(event.description || '')
       setTags(event.tags || [])
       setEventType(event.event_type || 'meetup')
+      setAccentColor(event.accent_color ?? null)
       setLocation(event.location || '')
       setIsVirtual(event.is_virtual ?? false)
       setCapacity(event.capacity ?? undefined)
@@ -174,6 +178,7 @@ export default function EditEventPage() {
         tags: tags.map(sanitizeTag).filter(Boolean),
         description,
         event_type: eventType as any,
+        accent_color: accentColor,
         location: isVirtual ? 'Virtual' : location,
         is_virtual: isVirtual,
         start_date: startDatetime,
@@ -286,6 +291,20 @@ export default function EditEventPage() {
               suggestions={CONTENT_TAG_SUGGESTIONS}
               max={10}
             />
+
+            {/* Calendar colour */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-ktip-sand-700">
+                <Trans>Calendar colour</Trans>
+              </label>
+              <p className="mb-2 text-sm text-ktip-sand-600">
+                <Trans>
+                  How this event is coloured on the calendar. Leave it on Auto to follow the event
+                  type.
+                </Trans>
+              </p>
+              <CalendarAccentPicker value={accentColor} onChange={setAccentColor} allowClear />
+            </div>
 
             {/* Additional Details */}
             <div>

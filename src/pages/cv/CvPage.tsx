@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { Download, Eye, EyeOff, FileText, LayoutTemplate, Pencil, RefreshCw } from 'lucide-react'
+import {
+  Contrast,
+  Download,
+  Eye,
+  EyeOff,
+  FileText,
+  LayoutTemplate,
+  Palette,
+  Pencil,
+  RefreshCw,
+} from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { ResumePaper } from '../../components/resume/ResumePaper'
 import { ResumeOutline } from '../../components/resume/ResumeOutline'
@@ -44,7 +54,11 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
   const [searchParams] = useSearchParams()
   const { resume, data, design: designId, isLoading, exists, sync, setPublic, setDesign } = useResume()
 
-  const [sheetTheme, setSheetTheme] = useState<ResumeTheme>('mono')
+  // Colour by default now that the preview ink is a visible control: a member
+  // picking a design wants to see the design. It was 'mono' when the only way
+  // to change it was to press a download button, and the B&W rendering was
+  // therefore what everyone looked at without meaning to.
+  const [sheetTheme, setSheetTheme] = useState<ResumeTheme>('color')
   const [pendingPrint, setPendingPrint] = useState(false)
   const [asText, setAsText] = useState(
     () => typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches
@@ -190,7 +204,7 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
             <Trans>
               What you see below is empty. Sign in from the OECS Virtual Campus to pull in your
               course history, or write it yourself from{' '}
-              <Link to="/cv/edit" className="font-semibold text-ktip-ocean-600 hover:underline">
+              <Link to="/dashboard/profile/edit" className="font-semibold text-ktip-ocean-600 hover:underline">
                 Edit
               </Link>
               .
@@ -206,6 +220,29 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
         <Button variant="secondary" icon={<Download size={16} />} onClick={() => download('color')}>
           <Trans>Download Color (A4)</Trans>
         </Button>
+
+        {/* Preview ink. The same `sheetTheme` the download buttons set, made
+            visible — WYSIWYG only means something if the thing you are looking
+            at is the thing that prints, and until now the only way to see the
+            B&W rendering was to open the print dialog. */}
+        <div
+          role="group"
+          aria-label={t`Preview ink`}
+          className="inline-flex items-center gap-0.5 rounded-neu-sm bg-ktip-sand-100 p-0.5 shadow-neu-sm-inset"
+        >
+          {(['color', 'mono'] as const).map((ink) => (
+            <button
+              key={ink}
+              type="button"
+              aria-pressed={sheetTheme === ink}
+              onClick={() => setSheetTheme(ink)}
+              className="flex items-center gap-1.5 rounded-neu-sm px-3 py-1.5 text-caption font-semibold text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 aria-pressed:bg-ktip-cream aria-pressed:text-ktip-ocean-700 aria-pressed:shadow-neu-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+            >
+              {ink === 'color' ? <Palette size={14} /> : <Contrast size={14} />}
+              {ink === 'color' ? t`Color` : t`B&W`}
+            </button>
+          ))}
+        </div>
 
         <Button
           variant="ghost"
@@ -224,7 +261,10 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
           <Trans>Sync from Virtual Campus</Trans>
         </Button>
 
-        <Link to="/cv/edit">
+        {/* Stays inside the dashboard shell: the editor is a sibling pane, so
+            the rail and the hero never unmount and Edit reads as a mode of the
+            CV tab rather than as leaving for another page. */}
+        <Link to="/dashboard/profile/edit">
           <Button variant="ghost" icon={<Pencil size={16} />}>
             <Trans>Edit</Trans>
           </Button>
@@ -242,43 +282,55 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
         )}
       </div>
 
-      <p className="mb-8 text-xs text-ktip-sand-500 print:hidden">
+      <p className="mb-6 text-xs text-ktip-sand-500 print:hidden">
         <Trans>
-          Choose &ldquo;Save as PDF&rdquo; in the print dialog. The{' '}
-          <strong className="font-semibold">Signature</strong> design also needs &ldquo;Background
-          graphics&rdquo; switched on for its navy sidebar; Classic and Compact print correctly
-          either way.
+          Choose &ldquo;Save as PDF&rdquo; in the print dialog. Designs with a full-height colour
+          rail &mdash; <strong className="font-semibold">Signature</strong> and{' '}
+          <strong className="font-semibold">Atlas</strong> &mdash; also need &ldquo;Background
+          graphics&rdquo; switched on. Every other design prints correctly either way.
         </Trans>
       </p>
 
-      <div data-tutorial="cv-designs" className="mb-8 print:hidden">
-        <DesignPicker
-          data={data}
-          avatarUrl={profile?.avatar_url ?? null}
-          current={design}
-          onPick={pickDesign}
-          busy={setDesign.isPending}
-        />
-      </div>
+      {/* Page left, designs right. `print:block` unwinds the row at print time
+          — the picker is display:none by then and a flex row with one child
+          would still reserve its gap. */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start print:block">
+        {/* One document. Exactly one of these is mounted, so the CV is never in
+            the accessibility tree twice. The wrapper is the tour's anchor for
+            "the document" — it has to survive the sheet/outline swap. */}
+        <div data-tutorial="cv-sheet" className="min-w-0 flex-1 print:contents">
+          {asText ? (
+            <div className="print:hidden">
+              <ResumeOutline data={data} />
+            </div>
+          ) : (
+            <ResumePaper>
+              <Sheet
+                data={data}
+                avatarUrl={profile?.avatar_url ?? null}
+                theme={sheetTheme}
+                design={design}
+              />
+            </ResumePaper>
+          )}
+        </div>
 
-      {/* One document. Exactly one of these is mounted, so the CV is never in
-          the accessibility tree twice. The wrapper is the tour's anchor for
-          "the document" — it has to survive the sheet/outline swap. */}
-      <div data-tutorial="cv-sheet">
-        {asText ? (
-          <div className="print:hidden">
-            <ResumeOutline data={data} />
-          </div>
-        ) : (
-          <ResumePaper>
-            <Sheet
-              data={data}
-              avatarUrl={profile?.avatar_url ?? null}
-              theme={sheetTheme}
-              design={design}
-            />
-          </ResumePaper>
-        )}
+        {/* Sticky so a design can be swapped while looking at page two, and
+            scrollable in its own right because eight thumbnails are taller
+            than most viewports. */}
+        <aside
+          data-tutorial="cv-designs"
+          className="w-full shrink-0 lg:sticky lg:top-24 lg:max-h-[calc(100svh-8rem)] lg:w-72 lg:overflow-y-auto print:hidden"
+        >
+          <DesignPicker
+            data={data}
+            avatarUrl={profile?.avatar_url ?? null}
+            current={design}
+            onPick={pickDesign}
+            busy={setDesign.isPending}
+            theme={sheetTheme}
+          />
+        </aside>
       </div>
     </div>
   )

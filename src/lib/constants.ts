@@ -151,12 +151,24 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
   challenge: 'Challenge',
 }
 
+/**
+ * ONE HUE PER EVENT TYPE, and the three maps below must agree on it:
+ *
+ *   hackathon ocean · workshop tropical · meetup sun
+ *   conference ocean · demo_day tropical · challenge purple
+ *
+ * A calendar row draws its badge from EVENT_TYPE_COLORS, its accent bar from
+ * EVENT_TYPE_DOT_COLORS and its fill from EVENT_TYPE_GRADIENTS. They had drifted
+ * apart — workshop was ocean here and tropical in the other two, demo_day was
+ * sun here and tropical there — so a single chip showed a green bar against a
+ * navy badge. Changing a type's colour means changing all three.
+ */
 export const EVENT_TYPE_COLORS: Record<string, string> = {
   hackathon: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  workshop: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  meetup: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  workshop: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  meetup: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   conference: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  demo_day: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  demo_day: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   challenge: 'bg-purple-100 text-purple-700 border-purple-200',
 }
 
@@ -172,19 +184,36 @@ export const EVENT_TYPE_DOT_COLORS: Record<string, string> = {
 
 // Soft gradient fills for week-view cards and month chips. Built from brand
 // ramps only, so the dark-mode token flip re-themes them with no extra classes.
+/**
+ * Rich tints for anything that renders as a calendar chip.
+ *
+ * One recipe, applied per hue: `from-100 via-200 to-300`, a `-400` border and
+ * `-900` text. The old 50→100 wash put barely two steps of the ramp on screen,
+ * so every hue collapsed toward the card behind it and a grid of chips read as
+ * grey whatever type the events were. Starting at 100 and travelling to 300
+ * spends real saturation while keeping the label well clear of the fill.
+ *
+ * Written out rather than built from a template because Tailwind generates
+ * classes by scanning source text — an interpolated `from-${hue}-100` produces
+ * no CSS at all.
+ *
+ * Still no `dark:` variants. Every ramp below re-points itself under html.dark
+ * (see index.css), so 100 is already the dark end and 900 the light one there;
+ * adding overrides flips the ramp back.
+ */
 export const EVENT_TYPE_GRADIENTS: Record<string, string> = {
   hackathon:
-    'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
+    'bg-gradient-to-br from-ktip-ocean-100 via-ktip-ocean-200 to-ktip-ocean-300 border-ktip-ocean-400 text-ktip-ocean-900',
   workshop:
-    'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+    'bg-gradient-to-br from-ktip-tropical-100 via-ktip-tropical-200 to-ktip-tropical-300 border-ktip-tropical-400 text-ktip-tropical-900',
   meetup:
-    'bg-gradient-to-br from-ktip-sun-50 to-ktip-sun-100 border-ktip-sun-200 text-ktip-sun-800',
+    'bg-gradient-to-br from-ktip-sun-100 via-ktip-sun-200 to-ktip-sun-300 border-ktip-sun-400 text-ktip-sun-900',
   conference:
-    'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
+    'bg-gradient-to-br from-ktip-ocean-100 via-ktip-ocean-200 to-ktip-ocean-300 border-ktip-ocean-400 text-ktip-ocean-900',
   demo_day:
-    'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+    'bg-gradient-to-br from-ktip-tropical-100 via-ktip-tropical-200 to-ktip-tropical-300 border-ktip-tropical-400 text-ktip-tropical-900',
   challenge:
-    'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 text-purple-800',
+    'bg-gradient-to-br from-purple-100 via-purple-200 to-purple-300 border-purple-400 text-purple-900',
 }
 
 /** Neutral gradient for items with no type-specific color. */
@@ -199,8 +228,104 @@ export const CALENDAR_BADGE_CLASS = 'text-[10px] font-semibold px-1.5 py-0.5 rou
 export const CALENDAR_PILL_CLASS =
   'truncate rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider'
 
+/**
+ * The calendar's micro type, in one place.
+ *
+ * The grid is dense by nature — hour gutters, weekday initials, mini-month
+ * numbers and time ranges all sit below the 13px `--text-micro` floor, and the
+ * token ratchet (src/design/tokens.test.ts) counts every inline `text-[Npx]`.
+ * Naming the three sizes here keeps a dozen literals from spreading back across
+ * six components, and gives the type phase one place to swap when it lands.
+ */
+
+/** Uppercase mono chrome: gutter hours, ALL DAY, weekday initials, eyebrows. */
+export const CALENDAR_CHROME_CLASS = 'font-mono text-micro font-bold uppercase tracking-wider'
+
+/** Mono meta under a title: time ranges, durations, "· Room 2". */
+export const CALENDAR_META_CLASS = 'font-mono text-micro'
+
+/** Title line inside a cluster row or a month chip. */
+export const CALENDAR_ROW_TITLE_CLASS = 'text-micro font-semibold leading-tight'
+
+/**
+ * Colours an organiser can put on their own event, and the palette personal
+ * notes draw from (migration 105).
+ *
+ * A named key rather than a hex, for two reasons: every value below re-points
+ * itself in dark mode, which a stored hex cannot; and a free colour well lets
+ * someone pick a bar nobody can see against the card.
+ */
+export const CALENDAR_ACCENTS = [
+  'ocean',
+  'tropical',
+  'sun',
+  'purple',
+  'rose',
+  'teal',
+  'sand',
+] as const
+
+export type CalendarAccent = (typeof CALENDAR_ACCENTS)[number]
+
+export const CALENDAR_ACCENT_LABELS: Record<CalendarAccent, string> = {
+  ocean: 'Ocean',
+  tropical: 'Tropical',
+  sun: 'Sun',
+  purple: 'Purple',
+  rose: 'Rose',
+  teal: 'Teal',
+  sand: 'Sand',
+}
+
+export const CALENDAR_ACCENT_DOT_COLORS: Record<CalendarAccent, string> = {
+  ocean: 'bg-ktip-ocean-500',
+  tropical: 'bg-ktip-tropical-500',
+  sun: 'bg-ktip-sun-500',
+  purple: 'bg-purple-500',
+  rose: 'bg-rose-500',
+  teal: 'bg-teal-500',
+  sand: 'bg-ktip-sand-500',
+}
+
+export const CALENDAR_ACCENT_COLORS: Record<CalendarAccent, string> = {
+  ocean: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
+  tropical: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  sun: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  purple: 'bg-purple-100 text-purple-700 border-purple-200',
+  rose: 'bg-rose-100 text-rose-700 border-rose-200',
+  teal: 'bg-teal-100 text-teal-700 border-teal-200',
+  sand: 'bg-ktip-sand-100 text-ktip-sand-800 border-ktip-sand-200',
+}
+
+/**
+ * The picked colour, in the same rich recipe as the type tints above — so
+ * choosing "Rose" gives a chip that actually looks rose, not a hint of one.
+ */
+export const CALENDAR_ACCENT_GRADIENTS: Record<CalendarAccent, string> = {
+  ocean:
+    'bg-gradient-to-br from-ktip-ocean-100 via-ktip-ocean-200 to-ktip-ocean-300 border-ktip-ocean-400 text-ktip-ocean-900',
+  tropical:
+    'bg-gradient-to-br from-ktip-tropical-100 via-ktip-tropical-200 to-ktip-tropical-300 border-ktip-tropical-400 text-ktip-tropical-900',
+  sun: 'bg-gradient-to-br from-ktip-sun-100 via-ktip-sun-200 to-ktip-sun-300 border-ktip-sun-400 text-ktip-sun-900',
+  purple:
+    'bg-gradient-to-br from-purple-100 via-purple-200 to-purple-300 border-purple-400 text-purple-900',
+  rose: 'bg-gradient-to-br from-rose-100 via-rose-200 to-rose-300 border-rose-400 text-rose-900',
+  teal: 'bg-gradient-to-br from-teal-100 via-teal-200 to-teal-300 border-teal-400 text-teal-900',
+  sand: 'bg-gradient-to-br from-ktip-sand-100 via-ktip-sand-200 to-ktip-sand-300 border-ktip-sand-400 text-ktip-sand-900',
+}
+
+/** Personal calendar entries the viewer writes for themselves (migration 105). */
+export const CALENDAR_NOTE_KINDS = ['note', 'task', 'reminder'] as const
+export type CalendarNoteKind = (typeof CALENDAR_NOTE_KINDS)[number]
+
+export const CALENDAR_NOTE_KIND_LABELS: Record<CalendarNoteKind, string> = {
+  note: 'Note',
+  task: 'Task',
+  reminder: 'Reminder',
+}
+
 export const CALENDAR_FALLBACK_GRADIENT =
-  'bg-gradient-to-br from-ktip-sand-50 to-ktip-sand-100 border-ktip-sand-200 text-ktip-sand-800'
+  'bg-gradient-to-br from-ktip-sand-100 via-ktip-sand-200 to-ktip-sand-300 border-ktip-sand-400 text-ktip-sand-900'
 
 // Event Statuses
 export const EVENT_STATUSES = {
@@ -387,6 +512,7 @@ export const CALENDAR_KIND_LABELS: Record<string, string> = {
   grant_deadline: 'Grant Deadlines',
   rsvp: 'My Registrations',
   grant_application: 'Applications',
+  calendar_note: 'My Notes',
 }
 
 export const CALENDAR_KIND_COLORS: Record<string, string> = {
@@ -394,6 +520,7 @@ export const CALENDAR_KIND_COLORS: Record<string, string> = {
   grant_deadline: 'bg-red-100 text-red-700 border-red-200',
   rsvp: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   grant_application: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  calendar_note: 'bg-ktip-sand-100 text-ktip-sand-800 border-ktip-sand-200',
 }
 
 export const CALENDAR_KIND_DOT_COLORS: Record<string, string> = {
@@ -401,19 +528,20 @@ export const CALENDAR_KIND_DOT_COLORS: Record<string, string> = {
   grant_deadline: 'bg-red-500',
   rsvp: 'bg-ktip-tropical-500',
   grant_application: 'bg-ktip-sun-500',
+  calendar_note: 'bg-ktip-sand-500',
 }
 
+/** Same rich recipe as EVENT_TYPE_GRADIENTS — see the note there. */
 export const CALENDAR_KIND_GRADIENTS: Record<string, string> = {
   event:
-    'bg-gradient-to-br from-ktip-ocean-50 to-ktip-ocean-100 border-ktip-ocean-200 text-ktip-ocean-800',
-  // No dark: variants on any kind — the red/ocean/tropical/sun scales all
-  // invert under html.dark, so the base classes already produce a dark tint
-  // with light text. Adding dark: overrides here flipped the ramp back.
+    'bg-gradient-to-br from-ktip-ocean-100 via-ktip-ocean-200 to-ktip-ocean-300 border-ktip-ocean-400 text-ktip-ocean-900',
   grant_deadline:
-    'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-800',
-  rsvp: 'bg-gradient-to-br from-ktip-tropical-50 to-ktip-tropical-100 border-ktip-tropical-200 text-ktip-tropical-800',
+    'bg-gradient-to-br from-red-100 via-red-200 to-red-300 border-red-400 text-red-900',
+  rsvp: 'bg-gradient-to-br from-ktip-tropical-100 via-ktip-tropical-200 to-ktip-tropical-300 border-ktip-tropical-400 text-ktip-tropical-900',
   grant_application:
-    'bg-gradient-to-br from-ktip-sun-50 to-ktip-sun-100 border-ktip-sun-200 text-ktip-sun-800',
+    'bg-gradient-to-br from-ktip-sun-100 via-ktip-sun-200 to-ktip-sun-300 border-ktip-sun-400 text-ktip-sun-900',
+  calendar_note:
+    'bg-gradient-to-br from-ktip-sand-100 via-ktip-sand-200 to-ktip-sand-300 border-ktip-sand-400 text-ktip-sand-900',
 }
 
 // Schedule Item Types

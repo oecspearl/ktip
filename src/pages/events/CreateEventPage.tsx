@@ -11,7 +11,12 @@ import { readDraft, useFormDraft } from '../../hooks/useFormDraft'
 import { useUploadDocument } from '../../hooks/useEntityDocuments'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { TagInput } from '../../components/ui/TagInput'
-import { CONTENT_TAG_SUGGESTIONS, EVENT_TYPE_LABELS } from '../../lib/constants'
+import { CalendarAccentPicker } from '../../components/calendar/CalendarAccentPicker'
+import {
+  CONTENT_TAG_SUGGESTIONS,
+  EVENT_TYPE_LABELS,
+  type CalendarAccent,
+} from '../../lib/constants'
 import { EVENT_TYPE_ICONS } from '../../lib/category-icons'
 import {
   EVENT_BLUEPRINTS,
@@ -57,6 +62,7 @@ type EventDraft = {
   description: string
   tags: string[]
   eventType: string
+  accentColor: CalendarAccent | null
   location: string
   isVirtual: boolean
   startDate: string
@@ -95,6 +101,10 @@ export default function CreateEventPage() {
   // asked, so defaulting it to 'meetup' meant most events were created by
   // someone who never made the choice.
   const [eventType, setEventType] = useState(draftSeed.eventType ?? '')
+  // null = follow the event type, which is what every event did before 105
+  const [accentColor, setAccentColor] = useState<CalendarAccent | null>(
+    draftSeed.accentColor ?? null
+  )
   const [location, setLocation] = useState(draftSeed.location ?? '')
   const [isVirtual, setIsVirtual] = useState(draftSeed.isVirtual ?? false)
   const [startDate, setStartDate] = useState(draftSeed.startDate ?? '')
@@ -127,6 +137,7 @@ export default function CreateEventPage() {
     description,
     tags,
     eventType,
+    accentColor,
     location,
     isVirtual,
     startDate,
@@ -339,6 +350,7 @@ export default function CreateEventPage() {
         tags: tags.map(sanitizeTag).filter(Boolean),
         description,
         event_type: eventType,
+        accent_color: accentColor,
         location: virtual ? 'Virtual' : location,
         is_virtual: virtual,
         start_date: startDatetime,
@@ -556,6 +568,20 @@ export default function CreateEventPage() {
               suggestions={CONTENT_TAG_SUGGESTIONS}
               max={10}
             />
+
+            {/* Calendar colour */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-ktip-sand-700">
+                <Trans>Calendar colour</Trans>
+              </label>
+              <p className="mb-2 text-sm text-ktip-sand-600">
+                <Trans>
+                  How this event is coloured on the calendar. Leave it on Auto to follow the event
+                  type.
+                </Trans>
+              </p>
+              <CalendarAccentPicker value={accentColor} onChange={setAccentColor} allowClear />
+            </div>
 
             {/* Additional Details */}
             <div>

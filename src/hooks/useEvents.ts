@@ -10,6 +10,7 @@ import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import { isUuid } from '../lib/slug'
 import { announceRegistration } from '../lib/event-registration'
+import type { CalendarAccent } from '../lib/constants'
 import type { AttendanceType, DetailEntry, Event, RSVPStatus } from '../types'
 
 export function useEvents(
@@ -153,6 +154,8 @@ export function useCreateEvent() {
       tags?: string[]
       description?: string
       event_type: string
+      /** Calendar colour (105). Null follows the event_type palette. */
+      accent_color?: CalendarAccent | null
       location?: string
       is_virtual?: boolean
       start_date: string

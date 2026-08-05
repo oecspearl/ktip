@@ -4,6 +4,9 @@ import { FileText, MapPin, Timer, Video } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import {
+  CALENDAR_ACCENT_COLORS,
+  CALENDAR_ACCENT_DOT_COLORS,
+  CALENDAR_ACCENT_GRADIENTS,
   CALENDAR_KIND_COLORS,
   CALENDAR_KIND_DOT_COLORS,
   CALENDAR_KIND_GRADIENTS,
@@ -61,9 +64,17 @@ export function useCalendarFeed({
     start: event.start_date,
     end: event.end_date,
     href: entityPath('event', event),
-    chipClass: EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event,
-    dotClass: EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event,
-    gradientClass: EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event,
+    // The organiser's own colour wins; the type palette is the fallback it
+    // always was (migration 105)
+    chipClass: event.accent_color
+      ? CALENDAR_ACCENT_COLORS[event.accent_color]
+      : (EVENT_TYPE_COLORS[event.event_type] ?? CALENDAR_KIND_COLORS.event),
+    dotClass: event.accent_color
+      ? CALENDAR_ACCENT_DOT_COLORS[event.accent_color]
+      : (EVENT_TYPE_DOT_COLORS[event.event_type] ?? CALENDAR_KIND_DOT_COLORS.event),
+    gradientClass: event.accent_color
+      ? CALENDAR_ACCENT_GRADIENTS[event.accent_color]
+      : (EVENT_TYPE_GRADIENTS[event.event_type] ?? CALENDAR_KIND_GRADIENTS.event),
     badgeLabel: harvestedLabel(EVENT_TYPE_LABELS, event.event_type) ?? t`Event`,
     subtitle:
       event.status === 'draft'
@@ -71,6 +82,10 @@ export function useCalendarFeed({
         : event.is_virtual
           ? t`Virtual`
           : event.location || t`Location TBA`,
+    // The summary is written to be read on its own; the description is the full
+    // page body and only stands in when there is no summary
+    description: event.summary || event.description,
+    locationLabel: event.is_virtual ? t`Virtual event` : event.location,
     icon: event.is_virtual ? Video : MapPin,
     avatarUrl: event.organizer?.avatar_url,
     avatarName: event.organizer?.display_name,
@@ -169,6 +184,7 @@ export function useCalendarFeed({
         gradientClass: CALENDAR_KIND_GRADIENTS.grant_deadline,
         badgeLabel: t`Grant Deadline`,
         subtitle: t`Applications close`,
+        description: grant.summary || grant.description,
         icon: Timer,
       })
     }

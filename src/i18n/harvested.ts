@@ -1073,6 +1073,7 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My Dashboard`,
   msg`My Events`,
   msg`My Invitations`,
+  msg`My Notes`,
   msg`My Profile`,
   msg`My Progress`,
   msg`My Projects`,
@@ -1098,6 +1099,7 @@ This page is public, so the link works for anyone you send it to — including s
 
 If the page is blank, no CV has been started yet: either sign in from the OECS Virtual Campus to pull in your course history, or write it yourself from Edit.`,
   msg`Not accepted`,
+  msg`Note`,
   msg`Nothing here notifies the sender, so this queue is for you rather than a conversation. If a report needs a reply, reach the member directly.
 
 The UAT section next door is the structured version of the same signal.`,
@@ -1110,6 +1112,7 @@ That count matters: a section you have edited is marked as yours, and syncing fr
   msg`OECS Administrators`,
   msg`Objective`,
   msg`Objectives`,
+  msg`Ocean`,
   msg`Offline`,
   msg`On long pages a thin rail appears at the right edge with a dot per section.
 
@@ -1425,6 +1428,7 @@ Organisers manage all four from the event workspace in the admin console.`,
 Until you publish, that address does not open for anyone else — an unpublished CV is private even if someone guesses the link.
 
 A published CV is also linked from your public member page.`,
+  msg`Purple`,
   msg`Questions and comments, in the open, attached to the project rather than to a forum thread that drifts away from it.
 
 The team is notified when you post, so this is a reasonable place to ask before sending a collaboration request.`,
@@ -1537,6 +1541,7 @@ What each role can do is controlled by a permission matrix that OECS administrat
   msg`Roles decide what you see`,
   msg`Rooms, invitations and who can join.`,
   msg`Rooms, presence and how to move between them.`,
+  msg`Rose`,
   msg`Row actions, and what they mean to the member`,
   msg`Rules and limits entries must respect`,
   msg`Run the platform, publish grants, and organise regional events.`,
@@ -1544,6 +1549,7 @@ What each role can do is controlled by a permission matrix that OECS administrat
 
 You see submissions for your own member state, which is why this list is shorter than the platform’s total.`,
   msg`Safety & Reporting`,
+  msg`Sand`,
   msg`Save forces a save immediately rather than waiting for the autosave. Export takes the board out as an image or as JSON you can re-import.
 
 Share is the one that matters for collaboration: pick who gets access and whether they can edit or only look. Several people can draw on the same board at once.`,
@@ -1726,12 +1732,15 @@ If your institution is not yet registered on KTIP, your account cannot be domain
   msg`Submissions holds your registrations. Projects is the equivalent tab for work you have published.`,
   msg`Success Story`,
   msg`Summary`,
+  msg`Sun`,
   msg`Support`,
   msg`Switch between dark and light mode`,
   msg`Switch from the list view to the calendar view using the toggle at the top.`,
   msg`Switching which role you are acting as`,
   msg`Taking a page tour`,
   msg`Talking in a room`,
+  msg`Task`,
+  msg`Teal`,
   msg`Team Space`,
   msg`Technology`,
   msg`Tell us what is missing`,
@@ -1998,6 +2007,7 @@ The Climate Action strip underneath is the same three content types filtered to 
   msg`Track your grant applications and resume drafts`,
   msg`Tracking what you sent`,
   msg`Triage`,
+  msg`Tropical`,
   msg`Troubleshooting`,
   msg`Tune what it matches on in Settings › Personalization.`,
   msg`Turn on the "Climate Action" filter above the project grid.`,

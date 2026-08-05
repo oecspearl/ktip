@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import {
   addDays,
   eachDayOfInterval,
@@ -11,9 +11,11 @@ import {
 import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
 import { EventCalendar } from '../../components/events/EventCalendar'
-import { eventToCalendarItem } from '../../components/events/event-calendar-item'
-import { CalendarDayPanel } from '../../components/calendar/CalendarDayPanel'
-import { useCalendarRange, type CalendarView } from '../../components/calendar/useCalendarRange'
+import {
+  parseCalendarView,
+  useCalendarRange,
+  type CalendarView,
+} from '../../components/calendar/useCalendarRange'
 import { useEvents } from '../../hooks/useEvents'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { TagFilterSelect } from '../../components/ui/TagFilterSelect'
@@ -76,12 +78,54 @@ export default function EventsPage() {
     setSearchParams(params, { replace: true })
   }
 
+  const navigate = useNavigate()
+  // ?view= wins over the remembered choice: the navbar's "Event Calendar" entry
+  // asks for the calendar by name, and a stale localStorage 'grid' was landing
+  // people on the list instead
+  const requestedView = searchParams.get('view')
   const [view, setView] = useState<EventsView>(() =>
-    localStorage.getItem(VIEW_STORAGE_KEY) === 'grid' ? 'grid' : 'calendar'
+    requestedView === 'calendar' || requestedView === 'grid'
+      ? requestedView
+      : localStorage.getItem(VIEW_STORAGE_KEY) === 'grid'
+        ? 'grid'
+        : 'calendar'
   )
+
+  // Navigating from /events to /events?view=calendar remounts nothing, so the
+  // param has to be watched rather than only read on mount
+  useEffect(() => {
+    if (requestedView !== 'calendar' && requestedView !== 'grid') return
+    setView(requestedView)
+    localStorage.setItem(VIEW_STORAGE_KEY, requestedView)
+  }, [requestedView])
+
+  // Asking for the calendar by name means wanting to look at it, so put it in
+  // the middle of the viewport rather than leaving the hero filling the screen
+  const calendarRef = useRef<HTMLDivElement>(null)
+  const scrolledToCalendarRef = useRef(false)
+  useEffect(() => {
+    if (requestedView !== 'calendar' || scrolledToCalendarRef.current) return
+    const node = calendarRef.current
+    if (!node) return
+    scrolledToCalendarRef.current = true
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // One frame's grace so the grid has laid out and the target is where the
+    // scroll expects it
+    requestAnimationFrame(() => {
+      // Centring a block taller than the window puts its MIDDLE on screen and
+      // scrolls the header off the top. Only centre what actually fits.
+      const fits = node.getBoundingClientRect().height <= window.innerHeight
+      node.scrollIntoView({
+        behavior: reduced ? 'auto' : 'smooth',
+        block: fits ? 'center' : 'start',
+      })
+    })
+  }, [requestedView, view])
   const {
     view: calendarView,
     setView: setCalendarView,
+    openMonth,
+    anchorDate,
     monthDate,
     selectedDate,
     direction: monthDir,
@@ -91,9 +135,8 @@ export default function EventsPage() {
     goPrev,
     goNext,
     goToday,
-  } = useCalendarRange(
-    localStorage.getItem(CALENDAR_VIEW_STORAGE_KEY) === 'week' ? 'week' : 'month'
-  )
+    goToYear,
+  } = useCalendarRange(parseCalendarView(localStorage.getItem(CALENDAR_VIEW_STORAGE_KEY)))
 
   const changeCalendarView = (next: CalendarView) => {
     setCalendarView(next)
@@ -174,6 +217,13 @@ export default function EventsPage() {
   const changeView = (next: EventsView) => {
     setView(next)
     localStorage.setItem(VIEW_STORAGE_KEY, next)
+    // Drop the param the navbar set, or the URL keeps claiming a view the
+    // toggle has just moved away from
+    if (searchParams.has('view')) {
+      const params = new URLSearchParams(searchParams)
+      params.delete('view')
+      setSearchParams(params, { replace: true })
+    }
   }
 
   const jumpToNextEvent = () => {
@@ -231,11 +281,6 @@ export default function EventsPage() {
         : []
     })
   }, [events, view, selectedType, sort, i18n])
-
-  const selectedDayItems = useMemo(
-    () => (eventsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []).map(eventToCalendarItem),
-    [eventsByDay, selectedDate]
-  )
 
   // First-time visitors get the guided tour once the list has actually rendered
   useTutorialAutoStart(TUTORIAL_IDS.EVENTS, !eventsLoading)
@@ -379,37 +424,37 @@ export default function EventsPage() {
       <div id="events" data-spy="Events" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
         <div className={cn('mx-auto px-4', containerWidth)}>
           {view === 'calendar' ? (
+            // scroll-mt clears the fixed navbar — a bare 'start' would tuck the
+            // calendar header underneath it
             <div
+              ref={calendarRef}
               data-tutorial="events-calendar-view"
-              className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 lg:gap-6 items-start"
+              className="scroll-mt-28"
             >
-              {/* Wrapper, not the shared CalendarGrid — the dashboard reuses
+              {/* Wrapper, not the shared CalendarShell — the dashboard reuses
                   that component and should not inherit this page's anchor */}
               <div data-tutorial="events-calendar">
                 <EventCalendar
                   view={calendarView}
                   onViewChange={changeCalendarView}
                   monthDate={monthDate}
+                  anchorDate={anchorDate}
                   gridStart={gridStart}
                   gridEnd={gridEnd}
                   selectedDate={selectedDate}
                   eventsByDay={eventsByDay}
                   direction={monthDir}
                   onSelectDate={setSelectedDate}
+                  onOpenMonth={openMonth}
                   onPrev={goPrev}
                   onNext={goNext}
                   onToday={goToday}
+                  onSelectYear={goToYear}
+                  loading={eventsLoading}
+                  onJumpToNext={jumpToNextEvent}
+                  onNew={() => navigate('/events/new')}
                 />
               </div>
-              <CalendarDayPanel
-                date={selectedDate}
-                items={selectedDayItems}
-                loading={eventsLoading}
-                itemNoun="event"
-                emptyLabel={t`No events on this day`}
-                onJumpToNext={jumpToNextEvent}
-                dataTutorial="events-day-panel"
-              />
             </div>
           ) : eventsLoading || !events ? (
             <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />

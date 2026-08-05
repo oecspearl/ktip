@@ -20,7 +20,13 @@ import {
  * Source of a dated item on a calendar. Events page only ever uses 'event';
  * the dashboard calendars aggregate every kind.
  */
-export type CalendarItemKind = 'event' | 'grant_deadline' | 'rsvp' | 'grant_application'
+export type CalendarItemKind =
+  | 'event'
+  | 'grant_deadline'
+  | 'rsvp'
+  | 'grant_application'
+  /** The viewer's own note, task or reminder (migration 105) */
+  | 'calendar_note'
 
 /**
  * The viewer's own tie to an item that has no date of its own — an RSVP happens
@@ -63,6 +69,15 @@ export interface CalendarItem {
   badgeLabel?: string
   /** Secondary line in the day panel, e.g. "Virtual", "Deadline" */
   subtitle?: string
+  /** Long-form body shown only in the panel's detail state */
+  description?: string | null
+  /** Where it happens, spelled out for the detail state — room, link, address */
+  locationLabel?: string | null
+  /**
+   * Where the row came from. Everything on the platform is 'ktip'; 'external'
+   * is reserved for subscribed calendars, which cannot be opened or edited here.
+   */
+  source?: 'ktip' | 'external'
   dimmed?: boolean
   /** Soft gradient fill (bg + border + text) used by week-view cards and month chips */
   gradientClass?: string
@@ -96,9 +111,15 @@ export function rsvpRelation(status: string): CalendarItemRelation {
     dotClass: RSVP_STATUS_DOT_COLORS[status] ?? CALENDAR_KIND_DOT_COLORS.rsvp,
     chipClass: RSVP_STATUS_COLORS[status] ?? CALENDAR_KIND_COLORS.rsvp,
   }
-  if (status === 'cancelled') {
+  // Neither is attendance, and `negative` is what suppresses the check on the
+  // row — a declined invitation showing the same tick as a confirmed seat is
+  // the one reading the mark must never allow
+  if (status === 'cancelled' || status === 'declined') {
     relation.negative = true
-    relation.detail = i18n._(msg`You are no longer attending`)
+    relation.detail =
+      status === 'declined'
+        ? i18n._(msg`You declined this invitation`)
+        : i18n._(msg`You are no longer attending`)
   }
   return relation
 }

@@ -981,8 +981,13 @@ export function Navbar() {
         </div>
 
         {/* Mobile Navigation */}
+        {/* The bar is position:fixed, so the panel below has no height of its
+            own to scroll — without the cap it just overflows off-screen and
+            the touch goes to the page behind it. Cap at the viewport minus
+            the bar row and scroll there instead; overscroll-contain stops the
+            gesture chaining to the page once the list hits an end. */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-white/10 animate-slide-up">
+          <div className="lg:hidden py-4 border-t border-white/10 animate-slide-up max-h-[calc(100dvh-var(--nav-h))] overflow-y-auto overscroll-contain">
             {/* Mobile Search */}
             <div className="mb-4 px-2">
               <div className="relative">

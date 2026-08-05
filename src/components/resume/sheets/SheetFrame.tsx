@@ -99,6 +99,50 @@ export function SheetFrame({
 }
 
 /**
+ * Two-letter mark from a name — first and last initial.
+ *
+ * ResumePortrait has its own private copy for the photo fallback. This one is
+ * exported because several designs use the mark as the design itself rather
+ * than as a fallback, and a CV whose monogram disagrees with its portrait
+ * placeholder would be a strange thing to print.
+ */
+export function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '—'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+/**
+ * Monogram disc. Drawn as an outlined circle rather than a filled one so it
+ * survives a print run with "Background graphics" off — the ring is a border,
+ * and borders always print.
+ */
+export function Monogram({
+  name,
+  size = '22mm',
+  color,
+  className,
+}: {
+  name: string
+  size?: string
+  color: string
+  className?: string
+}) {
+  return (
+    <div
+      aria-hidden
+      className={cn('grid shrink-0 place-items-center rounded-full border-[3px]', className)}
+      style={{ width: size, height: size, borderColor: color }}
+    >
+      <span className="font-display text-[16pt] font-bold leading-none tracking-[0.06em]" style={{ color }}>
+        {initialsOf(name)}
+      </span>
+    </div>
+  )
+}
+
+/**
  * Section heading with a rule that bleeds past the column before fading.
  *
  * h2, not h3: the sheet's own name is the h1 and there is nothing between them.

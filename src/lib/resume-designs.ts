@@ -85,6 +85,66 @@ export const RESUME_DESIGNS: Record<string, ResumeDesign> = {
     bleed: 'none',
     bleedWidth: '0mm',
   },
+  atlas: {
+    id: 'atlas',
+    label: msg`Atlas`,
+    description:
+      msg`Mirror of Signature: navy rail down the right, monogram mark, date-left timelines.`,
+    accent: '#97D700',
+    accentText: '#5E8A00',
+    sidebar: '#041E42',
+    // The only design that bleeds right. Same Chrome-repeats-fixed-boxes caveat
+    // as Signature (see BleedSide above) — the width here and the rail column in
+    // AtlasSheet are one number in two places and must not drift.
+    bleed: 'right',
+    bleedWidth: '68mm',
+  },
+  ledger: {
+    id: 'ledger',
+    label: msg`Ledger`,
+    description:
+      msg`Editorial single column with headings set in a left gutter. Wide margins, hairline rules.`,
+    accent: '#041E42',
+    accentText: '#163A63',
+    sidebar: '#041E42',
+    bleed: 'none',
+    bleedWidth: '0mm',
+  },
+  meridian: {
+    id: 'meridian',
+    label: msg`Meridian`,
+    description:
+      msg`Centred masthead over two equal columns split by a hairline. Symmetrical and formal.`,
+    accent: '#2A5788', // ocean-500 — rules and dots only
+    accentText: '#163A63', // ocean-600 on white, 8.6:1
+    sidebar: '#041E42',
+    bleed: 'none',
+    bleedWidth: '0mm',
+  },
+  slate: {
+    id: 'slate',
+    label: msg`Slate`,
+    description:
+      msg`Numbered sections under a heavy double rule. Ink only — no fills, prints anywhere.`,
+    accent: '#171717',
+    accentText: '#041E42',
+    sidebar: '#041E42',
+    bleed: 'none',
+    bleedWidth: '0mm',
+  },
+  marquee: {
+    id: 'marquee',
+    label: msg`Marquee`,
+    description:
+      msg`Oversized name over a gold bar and a three-up facts strip. Magazine cover, one column.`,
+    // Brand yellow is 1.7:1 on white. It is a bar and a rule here and never
+    // carries a letter of text — accentText is navy for exactly that reason.
+    accent: '#FFC72C', // Pantone 123
+    accentText: '#041E42',
+    sidebar: '#041E42',
+    bleed: 'none',
+    bleedWidth: '0mm',
+  },
 }
 
 export const DEFAULT_DESIGN = 'signature'

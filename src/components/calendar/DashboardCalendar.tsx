@@ -1,19 +1,19 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { addDays, eachDayOfInterval, format } from 'date-fns'
-import { cn } from '../../lib/utils'
 import { groupItemsByDay } from '../../lib/calendar'
-import {
-  CALENDAR_KIND_DOT_COLORS,
-  CALENDAR_KIND_LABELS,
-} from '../../lib/constants'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCalendarFeed, type CalendarScope } from '../../hooks/useCalendarFeed'
+import { useCalendarNotes } from '../../hooks/useCalendarNotes'
+import { calendarNoteToItem } from '../../lib/calendar-note-item'
+import { CalendarFilterMenu } from './CalendarFilterMenu'
+import { CalendarNoteComposer } from './CalendarNoteComposer'
 import { CalendarGrid } from './CalendarGrid'
 import { CalendarShell } from './CalendarShell'
 import { CalendarDayPanel } from './CalendarDayPanel'
 import { WeekView } from './WeekView'
+import { YearView } from './YearView'
 import { useCalendarRange } from './useCalendarRange'
-import type { CalendarItemKind } from '../../lib/calendar'
+import type { CalendarItem, CalendarItemKind } from '../../lib/calendar'
 import { useLingui } from '@lingui/react/macro'
 
 interface DashboardCalendarProps {
@@ -29,28 +29,35 @@ interface DashboardCalendarProps {
  */
 const SOURCE_KINDS: CalendarItemKind[] = ['event', 'grant_deadline', 'grant_application']
 
+/** Notes are the viewer's own, so the pill only exists on a personal calendar. */
+const PERSONAL_KINDS: CalendarItemKind[] = [...SOURCE_KINDS, 'calendar_note']
+
 /**
  * Aggregate calendar used by both dashboards: events, grant deadlines, the
- * user's registrations and grant-application activity in one month grid.
+ * user's registrations and grant-application activity in one frame.
  */
 export function DashboardCalendar({ scope, className }: DashboardCalendarProps) {
-    const { t, i18n } = useLingui()
+  const { t } = useLingui()
   const auth = useAuth()
-  const availableKinds = SOURCE_KINDS
+  const availableKinds = scope === 'personal' ? PERSONAL_KINDS : SOURCE_KINDS
   const [activeKinds, setActiveKinds] = useState<CalendarItemKind[]>(availableKinds)
   const [onlyMine, setOnlyMine] = useState(false)
-  // Registrations annotate events, so they are only worth fetching alongside them
-  const feedKinds = useMemo(
-    () =>
-      scope === 'personal' && activeKinds.includes('event')
-        ? [...activeKinds, 'rsvp' as CalendarItemKind]
-        : activeKinds,
-    [scope, activeKinds]
-  )
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  const [composing, setComposing] = useState(false)
+  // Registrations annotate events, so they are only worth fetching alongside
+  // them. Notes have their own query, so the aggregate feed never asks for them.
+  const feedKinds = useMemo(() => {
+    const sources = activeKinds.filter((kind) => kind !== 'calendar_note')
+    return scope === 'personal' && sources.includes('event')
+      ? [...sources, 'rsvp' as CalendarItemKind]
+      : sources
+  }, [scope, activeKinds])
 
   const {
     view,
     setView,
+    openMonth,
+    anchorDate,
     monthDate,
     selectedDate,
     direction,
@@ -60,6 +67,7 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
     goPrev,
     goNext,
     goToday,
+    goToYear,
   } = useCalendarRange()
 
   const { items, loading } = useCalendarFeed({
@@ -70,10 +78,20 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
     userId: auth.user?.id,
   })
 
-  const visibleItems = useMemo(
-    () => (onlyMine ? (items ?? []).filter((item) => item.mine) : items),
-    [items, onlyMine]
-  )
+  // Notes are the viewer's own, so they only exist in the personal scope — an
+  // admin looking at the platform calendar has no business seeing them
+  const personal = scope === 'personal'
+  const { notes, createNote, creating } = useCalendarNotes({
+    start: gridStart.toISOString(),
+    end: gridEnd.toISOString(),
+    userId: auth.user?.id,
+    enabled: personal && activeKinds.includes('calendar_note'),
+  })
+
+  const visibleItems = useMemo(() => {
+    const base = [...(items ?? []), ...notes.map(calendarNoteToItem)]
+    return onlyMine ? base.filter((item) => item.mine) : base
+  }, [items, notes, onlyMine])
 
   const itemsByDay = useMemo(
     () => groupItemsByDay(visibleItems, gridStart, gridEnd),
@@ -81,6 +99,24 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
   )
 
   const selectedDayItems = itemsByDay.get(format(selectedDate, 'yyyy-MM-dd')) ?? []
+
+  const selectedItem = useMemo(
+    () => (visibleItems ?? []).find((item) => item.id === selectedItemId) ?? null,
+    [visibleItems, selectedItemId]
+  )
+
+  /** Picking a day drops back to that day's agenda — the old detail is stale. */
+  const selectDate = useCallback(
+    (date: Date) => {
+      setSelectedItemId(null)
+      setSelectedDate(date)
+    },
+    [setSelectedDate]
+  )
+
+  const selectItem = useCallback((item: CalendarItem | null) => {
+    setSelectedItemId(item?.id ?? null)
+  }, [])
 
   const toggleKind = (kind: CalendarItemKind) => {
     setActiveKinds((current) =>
@@ -93,7 +129,7 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
     if (from <= gridEnd) {
       for (const day of eachDayOfInterval({ start: from, end: gridEnd })) {
         if (itemsByDay.has(format(day, 'yyyy-MM-dd'))) {
-          setSelectedDate(day)
+          selectDate(day)
           return
         }
       }
@@ -101,123 +137,101 @@ export function DashboardCalendar({ scope, className }: DashboardCalendarProps) 
     goNext()
   }
 
-  const mineLens = (
-    <div
-      role="group"
-      aria-label={t`Whose items to show`}
-      className="flex items-center gap-0.5 rounded-full border border-ktip-line bg-ktip-canvas/70 p-0.5"
-    >
-      {[
-        { value: false, label: t`All` },
-        { value: true, label: t`Only mine` },
-      ].map((option) => (
-        <button
-          key={option.label}
-          type="button"
-          onClick={() => setOnlyMine(option.value)}
-          aria-pressed={onlyMine === option.value}
-          className={cn(
-            'rounded-full px-3 py-1 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 focus-visible:outline-none',
-            onlyMine === option.value
-              ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
-              : 'text-ktip-sand-600 hover:text-ktip-ocean-700 hover:bg-ktip-ocean-50'
-          )}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  )
-
-  const kindFilters = (
-    <div className="flex flex-wrap items-center gap-2">
-      {availableKinds.map((kind) => {
-          const on = activeKinds.includes(kind)
-          return (
-            <button
-              key={kind}
-              type="button"
-              onClick={() => toggleKind(kind)}
-              aria-pressed={on}
-              className={cn(
-                'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all',
-                on
-                  ? 'border-ktip-ocean-300 bg-ktip-ocean-50 text-ktip-ocean-700'
-                  : 'border-ktip-sand-200 bg-transparent text-gray-500 hover:bg-ktip-sand-50'
-              )}
-            >
-              <span
-                className={cn(
-                  'w-2 h-2 rounded-full',
-                  CALENDAR_KIND_DOT_COLORS[kind],
-                  !on && 'opacity-40'
-                )}
-              />
-              {i18n._(CALENDAR_KIND_LABELS[kind])}
-          </button>
-        )
-      })}
-      {scope === 'personal' && (
-        <>
-          <span aria-hidden="true" className="mx-1 h-5 w-px bg-ktip-line" />
-          {mineLens}
-        </>
-      )}
-    </div>
+  const toolbar = (
+    <CalendarFilterMenu
+      kinds={availableKinds}
+      active={activeKinds}
+      onToggle={toggleKind}
+      onlyMine={scope === 'personal' ? onlyMine : undefined}
+      onOnlyMineChange={scope === 'personal' ? setOnlyMine : undefined}
+    />
   )
 
   return (
-    <div
-      className={cn(
-        'grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 lg:gap-6 items-start',
-        className
-      )}
+    <CalendarShell
+      className={className}
+      view={view}
+      onViewChange={setView}
+      monthDate={monthDate}
+      anchorDate={anchorDate}
+      gridStart={gridStart}
+      gridEnd={gridEnd}
+      onPrev={goPrev}
+      onNext={goNext}
+      onToday={goToday}
+      onSelectYear={goToYear}
+      itemCount={visibleItems?.length}
+      itemNoun="item"
+      focusKey={`${selectedItemId ?? ''}|${format(selectedDate, 'yyyy-MM-dd')}`}
+      onDismiss={() => setSelectedItemId(null)}
+      toolbar={toolbar}
+      panel={
+        <CalendarDayPanel
+          date={selectedDate}
+          items={selectedDayItems}
+          loading={loading}
+          itemNoun="item"
+          emptyLabel={t`Nothing scheduled on this day`}
+          onJumpToNext={jumpToNextItem}
+          selectedItem={selectedItem}
+          onSelectItem={selectItem}
+          onAddNote={personal ? () => setComposing(true) : undefined}
+          composer={
+            composing ? (
+              <CalendarNoteComposer
+                date={selectedDate}
+                saving={creating}
+                onCancel={() => setComposing(false)}
+                onSubmit={async (draft) => {
+                  await createNote(draft)
+                  setComposing(false)
+                  // The note has to exist before its pill can show it
+                  setActiveKinds((current) =>
+                    current.includes('calendar_note') ? current : [...current, 'calendar_note']
+                  )
+                }}
+              />
+            ) : undefined
+          }
+        />
+      }
     >
-      {/* Filters sit above the card — four pills plus the view switch would
-          crowd the header row */}
-      <div className="flex flex-col gap-3">
-        {kindFilters}
-        <CalendarShell
-          view={view}
-          onViewChange={setView}
+      {view === 'year' ? (
+        <YearView
+          anchorDate={anchorDate}
+          selectedDate={selectedDate}
+          itemsByDay={itemsByDay}
+          direction={direction}
+          onSelectDate={selectDate}
+          onSelectMonth={(month: Date) => {
+            setSelectedItemId(null)
+            openMonth(month)
+          }}
+        />
+      ) : view === 'month' ? (
+        <CalendarGrid
           monthDate={monthDate}
+          selectedDate={selectedDate}
+          itemsByDay={itemsByDay}
+          direction={direction}
+          onSelectDate={selectDate}
+          selectedItemId={selectedItemId}
+          onSelectItem={selectItem}
+          itemNoun="item"
+        />
+      ) : (
+        <WeekView
           gridStart={gridStart}
           gridEnd={gridEnd}
-          onPrev={goPrev}
-          onNext={goNext}
-          onToday={goToday}
-        >
-          {view === 'week' ? (
-            <WeekView
-              gridStart={gridStart}
-              gridEnd={gridEnd}
-              selectedDate={selectedDate}
-              itemsByDay={itemsByDay}
-              direction={direction}
-              onSelectDate={setSelectedDate}
-              itemNoun="item"
-            />
-          ) : (
-            <CalendarGrid
-              monthDate={monthDate}
-              selectedDate={selectedDate}
-              itemsByDay={itemsByDay}
-              direction={direction}
-              onSelectDate={setSelectedDate}
-              itemNoun="item"
-            />
-          )}
-        </CalendarShell>
-      </div>
-
-      <CalendarDayPanel
-        date={selectedDate}
-        items={selectedDayItems}
-        loading={loading}
-        itemNoun="item"
-        emptyLabel={t`Nothing scheduled on this day`}
-        onJumpToNext={jumpToNextItem}
-      />
-    </div>
+          selectedDate={selectedDate}
+          itemsByDay={itemsByDay}
+          direction={direction}
+          onSelectDate={selectDate}
+          selectedItemId={selectedItemId}
+          onSelectItem={selectItem}
+          itemNoun="item"
+        />
+      )}
+    </CalendarShell>
   )
 }

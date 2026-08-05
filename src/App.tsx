@@ -169,6 +169,10 @@ const router = createBrowserRouter([
                   { index: true, lazy: lazyPage(() => import('./pages/dashboard/tabs/OverviewTab')) },
                   { path: '/dashboard/my-profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/MyProfileTab')) },
                   { path: '/dashboard/profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProfileTab')) },
+                  // Editing is a mode of the CV tab, not a departure from it:
+                  // same shell, only the pane swaps. /cv/edit still resolves
+                  // and redirects here for old links.
+                  { path: '/dashboard/profile/edit', lazy: lazyPage(() => import('./pages/dashboard/tabs/CvEditTab')) },
                   { path: '/dashboard/progress', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProgressTab')) },
                   { path: '/dashboard/achievements', lazy: lazyPage(() => import('./pages/dashboard/tabs/AchievementsTab')) },
                   // Reached from the Achievements tab's Leaderboard button;
@@ -265,7 +269,7 @@ const router = createBrowserRouter([
               // The CV lives in the dashboard now (ProfileTab); the old page
               // address keeps resolving for bookmarks and stored links.
               { path: '/cv', element: <Navigate to="/dashboard/profile" replace /> },
-              { path: '/cv/edit', lazy: lazyPage(() => import('./pages/cv/CvEditPage')) },
+              { path: '/cv/edit', element: <Navigate to="/dashboard/profile/edit" replace /> },
               // Member pages came back at /user/:id (066). The drawer over
               // /directory is still the in-app default; the page exists so a
               // profile can be shared outside the app. /profile/* stays as a

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { ExternalLink, Lock, LockOpen } from 'lucide-react'
 import { Card } from '../../../components/ui/Card'
-import { Toggle } from '../../../components/ui/Toggle'
+import { Switch } from '../../../components/ui/Toggle'
 import { ProfileSettingsTab } from '../../settings/ProfileSettingsTab'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
@@ -59,38 +59,39 @@ export default function MyProfileTab() {
 
   const profileHref = auth.profile ? memberPath(auth.profile) : null
 
-  return (
-    <div className="space-y-6">
-      {/* Privacy lock — kept above the editor so "who can see this" is
-          answered before "what do they see". */}
-      <Card id="privacy" data-spy="Privacy" className="scroll-mt-24">
-        <div className="flex items-start justify-between gap-4 mb-1">
-          <h2 className="text-lg font-display font-bold text-ktip-sand-900 flex items-center gap-2">
-            {locked ? <Lock size={18} /> : <LockOpen size={18} />}
-            <Trans>Profile Privacy</Trans>
-          </h2>
-          {profileHref && (
-            <Link
-              to={profileHref}
-              className="inline-flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:underline shrink-0"
-            >
-              <ExternalLink size={14} />
-              <Trans>View my public profile</Trans>
-            </Link>
-          )}
-        </div>
-        <Toggle
+  // Privacy lock — handed to the editor as the first bento tile so "who can
+  // see this" still reads before "what do they see", without spending a
+  // full-width band on one switch.
+  const privacyTile = (
+    <Card id="privacy" data-spy="Privacy" padding="sm" className="scroll-mt-24 md:col-span-2">
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-base font-display font-bold text-ktip-sand-900">
+          {locked ? <Lock size={16} /> : <LockOpen size={16} />}
+          <Trans>Profile Privacy</Trans>
+        </h2>
+        <Switch
           checked={locked}
           onChange={handleLockChange}
           disabled={savingLock || auth.profileLoading}
           label={t`Lock my profile`}
-          description={t`When locked, other members see only your name, photo and country. To view your full profile or message you, they must send a connection request — accepting it is what grants access.`}
         />
-      </Card>
-
-      {/* The editor itself. Everything saved here is what an allowed viewer
-          sees on your public profile and in the member directory. */}
-      <ProfileSettingsTab />
-    </div>
+      </div>
+      <p className="text-xs leading-relaxed text-ktip-sand-600">
+        <Trans>When locked, other members see only your name, photo and country. To view your full profile or message you, they must send a connection request — accepting it is what grants access.</Trans>
+      </p>
+      {profileHref && (
+        <Link
+          to={profileHref}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs text-ktip-ocean-600 hover:underline"
+        >
+          <ExternalLink size={13} />
+          <Trans>View my public profile</Trans>
+        </Link>
+      )}
+    </Card>
   )
+
+  // The editor itself. Everything saved there is what an allowed viewer sees
+  // on your public profile and in the member directory.
+  return <ProfileSettingsTab leadingTile={privacyTile} />
 }

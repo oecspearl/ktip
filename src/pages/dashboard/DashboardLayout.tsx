@@ -155,7 +155,18 @@ export default function DashboardLayout() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Tab column */}
           <div className="w-full lg:w-64 shrink-0">
-            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 transition-[top] duration-300 lg:sticky lg:top-[calc(var(--nav-offset)+var(--dash-bar-h,0px)+1rem)] lg:max-h-[calc(100svh-var(--nav-offset)-var(--dash-bar-h,0px)-2.5rem)] lg:overflow-y-auto">
+            {/* Pins under whatever chrome is above it and never taller than the
+                gap beneath it, so the rail scrolls inside itself rather than
+                sliding behind the navbar. overscroll-contain stops that inner
+                scroll from chaining to the page once it bottoms out.
+
+                Only the bottom edge is masked. A fade at the top would eat the
+                pinned Overview tab below, and the tab is the thing that makes
+                the inner scroll safe — clicking a tab focuses it, and the
+                browser scrolls the nearest scroll box to reveal a focused
+                element, which on a rail too tall to fit takes the top of the
+                list with it. */}
+            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 transition-[top] duration-300 lg:sticky lg:top-[calc(var(--nav-offset)+var(--dash-bar-h,0px)+1rem)] lg:max-h-[calc(100svh-var(--nav-offset)-var(--dash-bar-h,0px)-2.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:[mask-image:linear-gradient(to_bottom,black_calc(100%-1.25rem),transparent)]">
               <nav
                 data-tutorial="dashboard-tabs"
                 // The rail scrolls sideways on phones, and an overflow box
@@ -187,6 +198,10 @@ export default function DashboardLayout() {
                         // block, and an idle tab lifts a pixel on hover. Same
                         // language as Button and Switch.
                         'shrink-0 lg:shrink flex items-center gap-3 px-4 py-3 rounded-neu-sm text-left transition-all',
+                        // Overview is the way back, so it never scrolls out of
+                        // the rail. Opaque, because the rest passes under it.
+                        tab.to === '' &&
+                          'lg:sticky lg:top-0 lg:z-raised lg:bg-ktip-cream',
                         active
                           ? 'shadow-neu-sm-inset text-ktip-ocean-700'
                           : 'text-ktip-sand-600 hover:-translate-y-px hover:shadow-neu-sm hover:text-ktip-sand-900'

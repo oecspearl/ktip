@@ -187,10 +187,11 @@
   --radius-xl: 0.375rem;
   --radius-2xl: 0.5rem;
   --radius-3xl: 0.5rem;
-  /* Calendar surfaces only — softer corners than the tight global scale, so
-     the month grid and week time-grid read modern without moving the system */
-  --radius-cal: 0.875rem;
-  --radius-cal-sm: 0.5rem;
+  /* Calendar surfaces only. Tightened when the grid moved to ruled paper: a
+     ruled surface is built from straight lines, and a soft-cornered card
+     floating inside it reads as a sticker rather than as part of the page. */
+  --radius-cal: 0.375rem;
+  --radius-cal-sm: 0.125rem;
 
   /* Semantic radii. The five steps above collapse to three real values
      (rounded-lg and rounded-xl are both 0.375rem; rounded-2xl and
@@ -217,10 +218,15 @@
      turn, and the control reads as a flat rectangle wearing a shadow. These
      three are the one place the brand's 6px corner is deliberately overruled.
      Cards, inputs, chips and panels keep --radius-control / --radius-surface —
-     do not reach for these to soften anything else. */
-  --radius-neu-sm: 0.75rem;
-  --radius-neu: 1.125rem;
-  --radius-neu-lg: 1.5rem;
+     do not reach for these to soften anything else.
+
+     Tightened once from 12/18/24px: at 18px a medium button read as a pill
+     rather than as a key carved out of the surface, and the rail tabs beside
+     it were rounder than the card holding them. 8px is still twice
+     --radius-control, which is the arc the edge gradient needs. */
+  --radius-neu-sm: 0.5rem;
+  --radius-neu: 0.75rem;
+  --radius-neu-lg: 1rem;
 
   /* ── TYPE SCALE ───────────────────────────────────────────────────────
      Sizes are the literal px value at the 1440 anchor, where every ramp
@@ -1726,7 +1732,13 @@ html[data-capturing] [data-fab] {
   .venue-portal-spin-rev,
   .venue-portal-pulse,
   /* A still palm is still a palm. */
-  .venue-palm-sway {
+  .venue-palm-sway,
+  /* Marquee tracks (partner wall, platform stats, the dashboard For You rail).
+     Stopping the loop parks the track at translateX(0), so the first copy of
+     the row is the one left showing — the hosts pair this with overflow-x-auto
+     so the rest stays reachable by scrolling. */
+  .animate-marquee-left,
+  .animate-marquee-right {
     animation: none;
   }
 

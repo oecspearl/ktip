@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import { RESUME_DESIGNS, type ResumeDesign } from '../../lib/resume-designs'
 import { sheetFor } from './sheets'
-import type { ResumeData } from '../../types/resume'
+import type { ResumeData, ResumeTheme } from '../../types/resume'
 import { cn } from '../../lib/utils'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -17,8 +17,12 @@ import { Trans, useLingui } from '@lingui/react/macro'
  * braces.
  */
 
-/** Enough to read the layout, small enough that three fit in a row. */
-const THUMB_SCALE = 0.17
+/**
+ * Enough to read the layout, small enough that two fit side by side in the
+ * rail beside the page. The rail is the primary placement now — it was 0.17
+ * when the picker sat above a full-width preview.
+ */
+const THUMB_SCALE = 0.145
 const A4_WIDTH_PX = (210 * 96) / 25.4
 /** One page only — the thumbnail is about layout, not length. */
 const A4_BODY_PX = (277 * 96) / 25.4
@@ -29,12 +33,18 @@ export function DesignPicker({
   current,
   onPick,
   busy,
+  theme = 'color',
 }: {
   data: ResumeData
   avatarUrl: string | null
   current: ResumeDesign
   onPick: (id: string) => void
   busy?: boolean
+  /**
+   * Follows the preview's ink so a thumbnail never advertises a colour rail
+   * that the page beside it is printing in black.
+   */
+  theme?: ResumeTheme
 }) {
   const { t, i18n } = useLingui()
   return (
@@ -46,7 +56,10 @@ export function DesignPicker({
         <Trans>Changes how your CV is drawn and printed. Your content never changes.</Trans>
       </p>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {/* Two across at every width. In the rail that is the rail's width; below
+          the page on a phone it is the same two, which keeps the thumbnails
+          large enough to tell a layout from a layout. */}
+      <div className="mt-3 grid grid-cols-2 gap-3">
         {Object.values(RESUME_DESIGNS).map((design) => {
           const Sheet = sheetFor(design.id)
           const selected = design.id === current.id
@@ -85,7 +98,7 @@ export function DesignPicker({
                   <Sheet
                     data={data}
                     avatarUrl={avatarUrl}
-                    theme="color"
+                    theme={theme}
                     design={design}
                     thumbnail
                   />
@@ -97,7 +110,10 @@ export function DesignPicker({
                   <p className="truncate text-sm font-semibold text-ktip-sand-900">
                     {i18n._(design.label)}
                   </p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-ktip-sand-500">
+                  {/* Clamped: the rail is 288px wide and a four-line blurb
+                      under every tile turns the list into a wall of text. The
+                      full sentence stays in the aria-label above. */}
+                  <p className="mt-0.5 line-clamp-3 text-[11px] leading-snug text-ktip-sand-500">
                     {i18n._(design.description)}
                   </p>
                 </div>

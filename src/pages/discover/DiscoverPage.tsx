@@ -124,6 +124,20 @@ const HERO = {
   // min floors small laptops (1366×768) — below 0.7 the description and
   // mini-card text drop under ~11px and stop being readable.
   scale: { min: 0.7, max: 1.25 },
+  /**
+   * A SECOND floor, for reading type only.
+   *
+   * `scale.min` governs the whole hero — geometry included — so raising it to
+   * fix small text would blow the 4em headline and the card strip off a phone.
+   * The small copy is the only part that was actually failing: at scale 0.7 the
+   * eyebrow and the card meta land near 8px, which is not text any more.
+   *
+   * 0.83 is the scale a 1440x900 laptop computes (1440/1739 vs 900/1000), so
+   * every screen below that renders the small copy at the size it has on that
+   * laptop, and screens above it still scale up normally. One number to tune:
+   * raise it to pin to a bigger machine, lower it to let type shrink again.
+   */
+  textFloor: 0.83,
 }
 
 /**
@@ -492,6 +506,11 @@ export default function DiscoverPage() {
   // font-size that preference otherwise works through.
   const [a11y] = useAccessibilityPrefs()
   const heroFontSize = `${16 * scale * a11y.fontScale}px`
+  // Same base, floored — see HERO.textFloor. Published as a variable rather
+  // than swapped into heroFontSize because the two have to coexist: geometry
+  // keeps riding `scale` so the layout still fits, and only the elements that
+  // opt in with calc(N * var(--hero-type)) stop shrinking.
+  const heroTypeSize = `${16 * Math.max(scale, HERO.textFloor) * a11y.fontScale}px`
   // Icons take numeric px props, so they scale by hand off the same factor
   const px = (n: number) => Math.round(n * scale)
   const slots = Math.min(visibleCount, Math.max(count, 1))
@@ -946,12 +965,12 @@ export default function DiscoverPage() {
             under it and the counter slides beneath. */}
         <div
           className="relative w-full flex flex-col h-full px-[5%] pt-[max(6rem,8em)] pb-[2.5em]"
-          style={{ fontSize: heroFontSize }}
+          style={{ fontSize: heroFontSize, '--hero-type': heroTypeSize } as CSSProperties}
         >
           {/* Counter */}
           <div className="flex items-center justify-end">
             {count > 0 && (
-              <p className="text-[0.75em] font-mono text-white/60 tabular-nums text-shadow-hero">
+              <p className="text-[calc(0.75*var(--hero-type))] font-mono text-white/60 tabular-nums text-shadow-hero">
                 {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
               </p>
             )}
@@ -987,23 +1006,23 @@ export default function DiscoverPage() {
                 // headline, description and the whole DetailsList subtree
                 className="max-w-[42em] animate-reveal-up text-right text-shadow-hero"
               >
-                <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
+                <p className="text-[calc(0.75*var(--hero-type))] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {i18n._(activeMode.label)} &middot; {active.meta}
                 </p>
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
                   {active.title}
                 </h1>
                 {/* Description — pinned to the mini-card title size so the two
-                    read as one size. The cards live OUTSIDE the fit group, so
-                    they render at a flat 1em of the hero base while everything
-                    in here carries the `fit` multiplier; dividing it back out
-                    lands this on exactly that same size. The wrapper keeps the
-                    margin and measure on the fit-scaled em, so only the type is
-                    pinned — spacing still tightens with the rest of the column. */}
+                    read as one size. Both now read the floored --hero-type, so
+                    the pin holds AND neither drops under laptop size on a small
+                    screen; dividing `fit` back out is no longer needed because
+                    the variable never carried it. The wrapper keeps the margin
+                    and measure on the fit-scaled em, so only the type is pinned
+                    — spacing still tightens with the rest of the column. */}
                 <div className="mt-[1.25em] max-w-[40em] md:ml-auto">
                   <p
                     className="text-white/80 leading-relaxed line-clamp-3"
-                    style={{ fontSize: `calc(1em / ${fit})` }}
+                    style={{ fontSize: 'var(--hero-type)' }}
                   >
                     {active.description}
                   </p>
@@ -1017,7 +1036,7 @@ export default function DiscoverPage() {
                     the list nests, and a fractional em there would compound. */}
                 {active.details && active.details.length > 0 && (
                   <div className="mt-[1.25em] max-w-[36em] ml-auto inline-block text-left">
-                    <div className="text-[0.9375em] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.067em] [&_li+li]:mt-[0.533em]">
+                    <div className="text-[calc(0.9375*var(--hero-type))] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.067em] [&_li+li]:mt-[0.533em]">
                       <DetailsList details={active.details} tone="dark" compact max={3} />
                     </div>
                   </div>
@@ -1025,7 +1044,7 @@ export default function DiscoverPage() {
               </div>
             ) : (
               <div className="max-w-[42em] animate-fade-in text-right text-shadow-hero">
-                <p className="text-[0.75em] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
+                <p className="text-[calc(0.75*var(--hero-type))] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {i18n._(activeMode.label)}
                 </p>
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
@@ -1035,7 +1054,7 @@ export default function DiscoverPage() {
                 <div className="mt-[1.25em] max-w-[40em] md:ml-auto">
                   <p
                     className="text-white/80 leading-relaxed"
-                    style={{ fontSize: `calc(1em / ${fit})` }}
+                    style={{ fontSize: 'var(--hero-type)' }}
                   >
                     <Trans>
                       Nothing to show here yet — explore the platform to see what&apos;s happening
@@ -1057,7 +1076,7 @@ export default function DiscoverPage() {
                 // Soft-UI, in the on-dark materials: this sits on hero
                 // photography. The radius stays `em` so it tracks the hero's
                 // fit scale, at the soft-UI proportion rather than the 6px one.
-                className="neu-on-dark group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.9em] bg-brand-navy text-white text-[0.875em] font-medium tracking-wide shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
+                className="neu-on-dark group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.9em] bg-brand-navy text-white text-[calc(0.875*var(--hero-type))] font-medium tracking-wide shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
               >
                 {active ? t`View Details` : t`Browse ${modeLabel}`}
                 {/* Icons take numeric px, so the fit multiplier that the `em`
@@ -1087,7 +1106,7 @@ export default function DiscoverPage() {
                   <button
                     key={m.id}
                     onClick={() => switchMode(m.id)}
-                    className={`relative z-10 flex items-center gap-[0.571em] px-[1.429em] py-[0.571em] text-[0.875em] font-medium transition-colors duration-300 ${
+                    className={`relative z-10 flex items-center gap-[0.571em] px-[1.429em] py-[0.571em] text-[calc(0.875*var(--hero-type))] font-medium transition-colors duration-300 ${
                       mode === m.id ? 'text-gray-900' : 'text-white/80 hover:text-white'
                     }`}
                   >
@@ -1188,14 +1207,14 @@ export default function DiscoverPage() {
                       </div>
                       <div className="px-[0.75em] py-[0.625em]">
                         <p
-                          className={`text-[1em] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] ${
+                          className={`text-[calc(1*var(--hero-type))] leading-[1.43] font-display font-semibold line-clamp-2 min-h-[2.86em] ${
                             isActive ? 'text-ktip-sand-900' : 'text-white'
                           }`}
                         >
                           {item.title}
                         </p>
                         <p
-                          className={`text-[0.75em] mt-[0.2em] uppercase tracking-wider truncate ${
+                          className={`text-[calc(0.75*var(--hero-type))] mt-[0.2em] uppercase tracking-wider truncate ${
                             isActive ? 'text-ktip-sand-500' : 'text-white/50'
                           }`}
                         >
@@ -1342,7 +1361,7 @@ export default function DiscoverPage() {
 
             {/* Single-row marquee, scrolling right; pauses on hover. The
                 track holds two copies of the row for a seamless loop. */}
-            <div className="mt-10 relative max-w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+            <div className="mt-10 relative max-w-full overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
               <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-right hover:[animation-play-state:paused]">
                 {[...PARTNERS, ...PARTNERS].map((p, i) => (
                   <div
@@ -1371,7 +1390,7 @@ export default function DiscoverPage() {
           {/* Platform stats — same band, mirrored right and running leftward.
               Track holds two copies of the row; the second is aria-hidden. */}
           <div className="mt-12 md:mt-16 flex flex-col min-w-0 w-full lg:w-[75%] ml-auto text-ktip-sand-900">
-            <div className="relative max-w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+            <div className="relative max-w-full overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
               <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-left hover:[animation-play-state:paused]">
                 {[...STAT_TILES, ...STAT_TILES].map((tile, i) => (
                   <div

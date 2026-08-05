@@ -537,7 +537,9 @@ const REGISTRY: RegisteredTutorial[] = [
   },
   {
     id: TUTORIAL_IDS.CV_EDIT,
-    route: '/cv/edit',
+    // The editor is a dashboard pane now; /cv/edit only redirects here, and a
+    // tour keyed to the redirect would never find its anchors.
+    route: '/dashboard/profile/edit',
     name: 'Editing your CV',
     description: 'Sections, prefill, and what saving marks as yours.',
     steps: cvEditTutorialSteps,

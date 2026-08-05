@@ -35,7 +35,15 @@ import { plural } from '@lingui/core/macro'
 /** Sections whose whole array is one provenance path. */
 type ListPath = Extract<ResumePath, 'roles' | 'education'>
 
-export default function CvEditPage() {
+/**
+ * `embedded` renders the editor as a dashboard pane rather than as a page —
+ * card chrome instead of a page shell, and a panel-sized heading, matching what
+ * CvPage does for the same reason. It is how the editor is reached everywhere
+ * now (/dashboard/profile/edit, with /cv/edit redirecting there); the
+ * standalone shell is kept because a full-page editor is one route away and
+ * losing it would be a one-way door.
+ */
+export default function CvEditPage({ embedded = false }: { embedded?: boolean }) {
     const { t } = useLingui()
   usePageTitle(t`Edit CV`)
   const navigate = useNavigate()
@@ -137,10 +145,24 @@ export default function CvEditPage() {
   const emptyEducation: ResumeEducation = { credential: '', school: '', year: '' }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700">
-        <Trans>Edit CV</Trans>
-      </h1>
+    <div
+      className={
+        embedded
+          ? 'rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-6'
+          : 'mx-auto max-w-3xl px-4 py-10'
+      }
+    >
+      {/* Embedded, the dashboard hero already owns the page's h1 — a second
+          one here would put two first-level headings on the same document. */}
+      {embedded ? (
+        <p className="font-display text-xl font-bold text-ktip-sand-900">
+          <Trans>Edit CV</Trans>
+        </p>
+      ) : (
+        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-ktip-ocean-700">
+          <Trans>Edit CV</Trans>
+        </h1>
+      )}
       <p className="mt-2 text-sm text-ktip-sand-600">
         <Trans>Anything you change here is yours — syncing from the Virtual Campus will leave it alone.</Trans>
       </p>
