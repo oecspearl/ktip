@@ -27,6 +27,7 @@ const StickyNoteOverlay = lazy(() =>
 import { StickyNotesProvider } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { useOrientationTransition } from '../../hooks/useOrientationTransition'
 import { shellKey } from '../../lib/routeTransitions'
 
 export function MainLayout() {
@@ -58,6 +59,10 @@ export function MainLayout() {
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [shell])
+
+  // Rotating the device swaps every breakpoint in one frame; this puts a short
+  // fade over the swap so the new layout arrives instead of snapping.
+  useOrientationTransition()
 
   return (
     <MessagingPanelProvider>

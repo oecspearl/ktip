@@ -121,9 +121,16 @@ const HERO = {
   /** Side inset, both edges, every breakpoint */
   gutter: '5%',
   // max sits above `zoom` — otherwise the reference display clamps itself.
-  // min floors small laptops (1366×768) — below 0.7 the description and
-  // mini-card text drop under ~11px and stop being readable.
-  scale: { min: 0.7, max: 1.25 },
+  // min floors NARROW screens, where the width term collapses: a phone divides
+  // 375 by the authored width and lands near 0.2.
+  //
+  // heightMin is deliberately lower and applies to the height term only. A 14"
+  // laptop at Windows' default 150% is a 1280x610 viewport, whose height term
+  // wants 0.61; held at 0.70 by the width floor, every geometric length in the
+  // hero rendered ~15% larger than the space it had, and the text column was
+  // squeezed until its headline and CTA clipped. Reading type does not suffer
+  // for the lower floor — `textFloor` below governs that separately.
+  scale: { min: 0.7, heightMin: 0.58, max: 1.25 },
   /**
    * A SECOND floor, for reading type only.
    *
@@ -153,6 +160,50 @@ const HERO = {
  * evil against 8px type.
  */
 const FIT = { min: 0.6, max: 1 }
+
+/**
+ * The band where the text column scrolls instead of clipping — a phone held
+ * sideways. Same query as the `landscape-short` variant in index.css, which is
+ * what puts `overflow-y: auto` on the box; this is the JS half, because the fit
+ * pass has to know that overflow is now REACHABLE.
+ *
+ * Both floors below exist for the same reason. Shrinking type and shedding
+ * lines are how the column pays for space it does not have — worth it when the
+ * alternative is content clipped away for good, a bad trade when the reader can
+ * simply scroll to it. So in this band the column stops shrinking at a size
+ * that is still readable on the machine that is short of room, sheds at most
+ * one level of copy, and lets the rest run past the fold.
+ */
+const SCROLLS_QUERY = '(orientation: landscape) and (max-height: 32rem)'
+const SCROLLING_FIT_MIN = 0.8
+const SCROLLING_DENSITY_MAX = 1
+
+/**
+ * What the column gives up once shrinking has run out, in order.
+ *
+ * `fit` alone cannot always win, and the reason is structural rather than a
+ * matter of tuning. Every reading string on the right — eyebrow, description,
+ * details, CTA label — is pinned to an absolute floor so it can never render
+ * smaller than the mini-card titles opposite it. Those heights therefore do NOT
+ * respond to `fit`, and on a 610px-tall laptop they are over half the column.
+ * `prev * (avail / needed)` assumes height is proportional to font-size, so it
+ * converges on FIT.min and leaves the rest overflowing, centred, clipped at
+ * both ends: the headline's top slid under the navbar and the CTA fell off the
+ * bottom entirely.
+ *
+ * So past the floor the column sheds LINES instead of points. Dropping the
+ * third line of a description costs a clause; shrinking the type another 15%
+ * costs legibility on the exact machine that is short of room. Each level is
+ * strictly smaller than the last, which is what makes the escalation terminate.
+ *
+ * Written out as whole class strings because Tailwind reads source text — a
+ * computed `line-clamp-${n}` generates nothing.
+ */
+const DENSITY = [
+  { desc: 'line-clamp-3', title: '', details: 3 },
+  { desc: 'line-clamp-2', title: '', details: 2 },
+  { desc: 'line-clamp-1', title: 'line-clamp-3', details: 1 },
+]
 
 /**
  * Motion budget for the card → hero handoff.
@@ -511,6 +562,14 @@ export default function DiscoverPage() {
   // keeps riding `scale` so the layout still fits, and only the elements that
   // opt in with calc(N * var(--hero-type)) stop shrinking.
   const heroTypeSize = `${16 * Math.max(scale, HERO.textFloor) * a11y.fontScale}px`
+  // The size --hero-type bottoms out at, published separately so the smaller
+  // strings on the right (eyebrow, details, CTA label) can floor at it with
+  // max() while keeping their authored ratio above it. Equal to the mini-card
+  // title's size at the floor, which is the pairing being enforced: nothing a
+  // reader has to READ on the right may render smaller than the card titles
+  // opposite. A plain `max(0.75 * --hero-type, --hero-type)` would collapse the
+  // ratio at every size and flatten the hierarchy on a large display too.
+  const heroTypeFloor = `${16 * HERO.textFloor * a11y.fontScale}px`
   // Icons take numeric px props, so they scale by hand off the same factor
   const px = (n: number) => Math.round(n * scale)
   const slots = Math.min(visibleCount, Math.max(count, 1))
@@ -667,7 +726,96 @@ export default function DiscoverPage() {
   // the viewport scale cannot know that.
   const fitBoxRef = useRef<HTMLDivElement>(null)
   const fitContentRef = useRef<HTMLDivElement>(null)
+  const stripRef = useRef<HTMLDivElement>(null)
   const [fit, setFit] = useState(FIT.max)
+  const [density, setDensity] = useState(0)
+  // The strip's height, and whether the column is free to expand over it.
+  const [strip, setStrip] = useState({ height: 0, clear: false })
+  // How far the text group is pushed up off the bottom of its box. See the fit
+  // loop — it is spare room being spent, never room being taken.
+  const [lift, setLift] = useState(0)
+
+  /**
+   * The bottom strip's height, and whether the text column could expand over it.
+   *
+   * The two were siblings in one flex column, so the strip's full height came
+   * off the text's — ~207px of a 610px laptop, a third of the hero. That is the
+   * right DEFAULT: it centres the text in the space above the strip, which is
+   * where the hero is meant to read from. It is the wrong hard limit, because
+   * the strip is bottom-LEFT and five cards wide while the text is right-aligned
+   * and capped at 42em, so on a laptop there is clear air beside it that the
+   * column was forbidden from using even while its headline clipped.
+   *
+   * So the strip is out of flow and its height is applied as a reserve the
+   * column can give back under pressure — see the fit loop, which releases it
+   * before shedding any copy.
+   *
+   * `clear` is computed from the WIDEST the text could ever be — the 42em
+   * measure at fit 1 — rather than where it currently sits. Measuring the real
+   * edge would close a feedback loop: reserving height lowers `fit`, a lower
+   * `fit` shrinks the em that 42em is made of, the text narrows, its left edge
+   * retreats past the strip, the reserve is released, the text grows back and
+   * the whole thing runs backwards forever. Worst-case geometry does not move.
+   */
+  useLayoutEffect(() => {
+    const stripEl = stripRef.current
+    const box = fitBoxRef.current
+    if (!stripEl || !box) return
+    const measureStrip = () => {
+      const stripBox = stripEl.getBoundingClientRect()
+      const colBox = box.getBoundingClientRect()
+      if (!stripBox.height || !colBox.width) return
+      const em = parseFloat(heroFontSize)
+      // 42em is the max-w on the text block; at fit 1 the em is the hero base
+      const widest = Math.min(colBox.width, 42 * em)
+      // One em of daylight, so a descender never sits flush against a card
+      const clear = colBox.right - widest - stripBox.right > em
+      setStrip((prev) =>
+        prev.clear === clear && Math.abs(prev.height - stripBox.height) < 1
+          ? prev
+          : { height: Math.round(stripBox.height), clear },
+      )
+    }
+    measureStrip()
+    const ro = new ResizeObserver(measureStrip)
+    ro.observe(stripEl)
+    ro.observe(box)
+    return () => ro.disconnect()
+  }, [heroFontSize, count])
+
+  // A new item starts from the authored layout: whatever the last one had to
+  // give up says nothing about this one, and starting tight would leave copy
+  // hidden on a short item that had room for all of it. Kept out of the fit
+  // effect below, which lists both of these as dependencies — resetting there
+  // would undo every escalation the moment it happened.
+  useLayoutEffect(() => {
+    setDensity(0)
+  }, [active?.id, mode, heroFontSize])
+
+  // The pass loop below decides whether shrinking has bottomed out, so it needs
+  // the values it is currently looking at. Reading the state directly would give
+  // it whatever was current when the observer was installed, which is stale by
+  // exactly the passes that matter. The strip rides along here rather than in
+  // the dependency list so a card image finishing its load cannot restart the
+  // pass budget mid-convergence.
+  const fitRef = useRef(fit)
+  const stripInfoRef = useRef(strip)
+  useLayoutEffect(() => {
+    fitRef.current = fit
+    stripInfoRef.current = strip
+  })
+
+  // Does the column scroll rather than clip right now? See SCROLLS_QUERY.
+  const [columnScrolls, setColumnScrolls] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(SCROLLS_QUERY).matches
+  )
+  useEffect(() => {
+    const query = window.matchMedia(SCROLLS_QUERY)
+    const sync = () => setColumnScrolls(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
 
   useLayoutEffect(() => {
     const box = fitBoxRef.current
@@ -689,10 +837,52 @@ export default function DiscoverPage() {
         lastAvail = avail
       }
       if (passes > 8) return
+
+      /* Where the group sits inside the box, as opposed to how big it is.
+       *
+       * The box is the full column now, so centring in it would drop the text
+       * to the middle of the hero — lower than the design, which reads from the
+       * space ABOVE the card strip. Pushing it up by the strip's height puts it
+       * back, but only while there is spare room to spend: capped at `avail -
+       * needed`, the lift goes to zero exactly when the content grows to fill
+       * the box, so a tall item uses the whole height instead of being shoved
+       * up and clipped at the top.
+       *
+       * This is a margin on the GROUP, not the box: `needed` is the group's own
+       * scrollHeight and `avail` the box's clientHeight, so neither moves when
+       * the lift changes and the loop cannot chase itself. */
+      const room = stripInfoRef.current.clear ? stripInfoRef.current.height : 0
+      const want = Math.max(0, Math.min(room, avail - needed))
+      setLift((prev) => (Math.abs(prev - want) < 2 ? prev : want))
+
+      // Shrinking has run out and the column still does not fit — every
+      // remaining pass would return FIT.min and leave the overflow to be
+      // clipped at both ends, which is how the headline ended up sliced under
+      // the navbar and the CTA off the bottom. Shed a line instead; the next
+      // observation runs against shorter content and `fit` climbs back on its
+      // own. Monotone within an item, so this escalates at most twice.
+      // In the scrolling band these floors are higher: past them the column is
+      // trading legibility for space it does not need to buy, because whatever
+      // does not fit is one swipe away rather than gone.
+      const fitFloor = columnScrolls ? SCROLLING_FIT_MIN : FIT.min
+      const densityMax = columnScrolls ? SCROLLING_DENSITY_MAX : DENSITY.length - 1
+      // Rotating into the band arrives with whatever `fit` the taller viewport
+      // had settled on, which can be under the floor that now applies. Raise it
+      // first: the branch below returns without touching `fit`, so a column that
+      // came in at 0.6 would otherwise stay there for as long as the phone is
+      // sideways — the one case where the floor would have bought nothing.
+      if (fitRef.current < fitFloor - 0.001) {
+        setFit(fitFloor)
+        return
+      }
+      if (fitRef.current <= fitFloor + 0.001 && needed > avail + 1) {
+        setDensity((d) => Math.min(densityMax, d + 1))
+        return
+      }
       setFit((prev) => {
         // `needed` was measured AT prev, so the size that fits exactly is
         // prev × (avail / needed); 0.995 keeps sub-pixel rounding off the edge
-        const next = Math.min(FIT.max, Math.max(FIT.min, prev * (avail / needed) * 0.995))
+        const next = Math.min(FIT.max, Math.max(fitFloor, prev * (avail / needed) * 0.995))
         // Deadband — without it the 0.995 alone would creep forever
         if (Math.abs(next - prev) < 0.01) return prev
         passes += 1
@@ -706,7 +896,10 @@ export default function DiscoverPage() {
     ro.observe(box)
     ro.observe(content)
     return () => ro.disconnect()
-  }, [active?.id, mode, heroFontSize])
+    // `density` restarts the loop with a fresh pass budget: the copy it just
+    // shed is new information, so the passes spent reaching the floor should not
+    // count against finding the fit that now exists.
+  }, [active?.id, mode, heroFontSize, density, columnScrolls])
 
   // Hero image swap: the moment the selection changes, a ghost mounts exactly
   // on top of the new hero's card in the strip (the rightmost/on-deck card
@@ -959,36 +1152,83 @@ export default function DiscoverPage() {
             full-bleed to a percentage gutter so those proportions hold in
             POSITION too (see HERO above).
 
-            pt is the one length that cannot scale freely: the navbar is a fixed
-            88px (1rem pad + 3.5rem logo + 1rem) and does not scale with the map,
-            so max() floors the gap at 6rem — otherwise a scaled-down 8em drops
-            under it and the counter slides beneath. */}
+            pt is the one length that cannot scale freely: the navbar does not
+            scale with the map, so max() floors the gap at its height plus a
+            little air — otherwise a scaled-down 8em drops under it and the
+            counter slides beneath. --nav-h is read rather than restated because
+            it is not one number: 4.5rem below 1024px and 5.5rem above. */}
         <div
-          className="relative w-full flex flex-col h-full px-[5%] pt-[max(6rem,8em)] pb-[2.5em]"
-          style={{ fontSize: heroFontSize, '--hero-type': heroTypeSize } as CSSProperties}
+          className="relative w-full flex flex-col h-full px-[5%] pt-[max(calc(var(--nav-h)+0.5rem),8em)] pb-[2.5em]"
+          style={
+            {
+              fontSize: heroFontSize,
+              '--hero-type': heroTypeSize,
+              '--hero-type-floor': heroTypeFloor,
+              // The label size, resolved once. The counter, the eyebrow and the
+              // clearance the text column keeps for the counter all have to
+              // agree on it, and three copies of the same max() would not stay
+              // agreed. max() rather than the bare ratio so the label floors at
+              // the mini-card title size instead of dropping under it — see
+              // heroTypeFloor.
+              '--hero-label': 'max(calc(0.75 * var(--hero-type)), var(--hero-type-floor))',
+            } as CSSProperties
+          }
         >
-          {/* Counter */}
-          <div className="flex items-center justify-end">
+          {/* Counter — one short line in the top-right corner that, as a flex
+              row, took its full line-height off the text column below across
+              the whole width of the hero. `h-0` keeps it exactly where it was
+              and gives that height back; the column reserves its own clearance
+              with a matching pt, so the two cannot collide on the right where
+              they share an edge.
+
+              Left in flow rather than positioned absolutely on purpose: `top`
+              would need the same max(--nav-h, 8em) as the column's padding, and
+              `8em` on this element resolves against ITS font-size — the floored
+              label size, not the hero base — so the two would drift apart by
+              exactly the amount the floor is lifting. */}
+          <div className="flex justify-end h-0">
             {count > 0 && (
-              <p className="text-[calc(0.75*var(--hero-type))] font-mono text-white/60 tabular-nums text-shadow-hero">
+              <p className="text-[var(--hero-label)] font-mono text-white/60 tabular-nums text-shadow-hero">
                 {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
               </p>
             )}
           </div>
 
           {/* Active item content — right side.
-              The BOX is whatever vertical space the counter above and the strip
-              below leave. The GROUP inside it is measured against that box and
-              scaled by `fit`, so text and CTA move together and the button sits
-              directly under however much text the active item has, instead of
-              holding one Y while the text overruns it.
+              The BOX is the column minus two clearances, both MARGINS rather
+              than padding: `flex-1` sizes against the outer box and the fit loop
+              reads clientHeight, which counts padding as available space — as
+              padding the loop would place content inside its own clearance and
+              push the text down over the strip and up into the counter.
 
-              overflow-hidden stays as the backstop for content that will not
-              fit even at FIT.min: a centered flex child taller than its box
-              spills BOTH ways, and the top half bled up under the fixed navbar. */}
+              Top clearance is the counter, in a zero-height row above. The
+              bottom keeps the strip's height ONLY where the strip is actually
+              beside the text — a narrow screen. On a laptop it is bottom-left
+              and five cards wide while this text is right-aligned and capped at
+              42em, so the column takes the full height and the strip's ~207px
+              of a 610px laptop stop being deducted from a collision that never
+              happens. Where the text prefers to SIT in that taller box is a
+              separate question, answered by `lift` below.
+
+              The GROUP inside it is measured against that box and scaled by
+              `fit`, so text and CTA move together and the button sits directly
+              under however much text the active item has, instead of holding one
+              Y while the text overruns it.
+
+              overflow-hidden stays as the backstop for content that will not fit
+              even at FIT.min and the last DENSITY level: a centered flex child
+              taller than its box spills BOTH ways, and the top half bled up
+              under the fixed navbar. */}
           <div
             ref={fitBoxRef}
-            className="flex-1 min-h-0 w-full flex flex-col justify-center items-end overflow-hidden"
+            className="flex-1 min-h-0 w-full flex flex-col justify-center items-end overflow-hidden mt-[calc(1.4*var(--hero-label))] landscape-short:mt-1 landscape-short:justify-start landscape-short:overflow-y-auto landscape-short:overscroll-contain"
+            /* The strip's height is deducted from this column so the text sits
+               above the cards — except in the scrolling band, where that leaves
+               a phone ~130px of column and the pinned CTA covers most of it.
+               The strip row is bottom-LEFT (its right half is empty) and this
+               column is right-aligned, so sideways the two can share the band:
+               the text takes the full height and stays clear by width instead. */
+            style={{ marginBottom: columnScrolls ? 0 : strip.clear ? 0 : strip.height }}
           >
             {/* shrink-0 is for the measurement, not the look: as a flex child
                 this would otherwise be squeezed to the box height and report a
@@ -997,19 +1237,21 @@ export default function DiscoverPage() {
             <div
               ref={fitContentRef}
               className="w-full shrink-0 flex flex-col items-end"
-              style={{ fontSize: `${fit}em` }}
+              style={{ fontSize: `${fit}em`, marginBottom: lift }}
             >
             {active ? (
               <div
                 key={`content-${mode}-${active.id}`}
                 // text-shadow inherits, so one class here covers the eyebrow,
                 // headline, description and the whole DetailsList subtree
-                className="max-w-[42em] animate-reveal-up text-right text-shadow-hero"
+                className="max-w-[42em] landscape-short:max-w-[24em] animate-reveal-up text-right text-shadow-hero"
               >
-                <p className="text-[calc(0.75*var(--hero-type))] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
+                <p className="text-[var(--hero-label)] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {i18n._(activeMode.label)} &middot; {active.meta}
                 </p>
-                <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
+                <h1
+                  className={`text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight ${DENSITY[density].title}`}
+                >
                   {active.title}
                 </h1>
                 {/* Description — pinned to the mini-card title size so the two
@@ -1021,7 +1263,7 @@ export default function DiscoverPage() {
                     — spacing still tightens with the rest of the column. */}
                 <div className="mt-[1.25em] max-w-[40em] md:ml-auto">
                   <p
-                    className="text-white/80 leading-relaxed line-clamp-3"
+                    className={`text-white/80 leading-relaxed ${DENSITY[density].desc}`}
                     style={{ fontSize: 'var(--hero-type)' }}
                   >
                     {active.description}
@@ -1036,15 +1278,20 @@ export default function DiscoverPage() {
                     the list nests, and a fractional em there would compound. */}
                 {active.details && active.details.length > 0 && (
                   <div className="mt-[1.25em] max-w-[36em] ml-auto inline-block text-left">
-                    <div className="text-[calc(0.9375*var(--hero-type))] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.067em] [&_li+li]:mt-[0.533em]">
-                      <DetailsList details={active.details} tone="dark" compact max={3} />
+                    <div className="text-[max(calc(0.9375*var(--hero-type)),var(--hero-type-floor))] [&_li]:text-[1em] [&_p]:text-[1em] [&_ul]:pl-[1.067em] [&_li+li]:mt-[0.533em]">
+                      <DetailsList
+                        details={active.details}
+                        tone="dark"
+                        compact
+                        max={DENSITY[density].details}
+                      />
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="max-w-[42em] animate-fade-in text-right text-shadow-hero">
-                <p className="text-[calc(0.75*var(--hero-type))] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
+              <div className="max-w-[42em] landscape-short:max-w-[24em] animate-fade-in text-right text-shadow-hero">
+                <p className="text-[var(--hero-label)] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
                   {i18n._(activeMode.label)}
                 </p>
                 <h1 className="text-[4em] font-display font-extrabold text-white leading-[1.08] tracking-tight">
@@ -1067,7 +1314,13 @@ export default function DiscoverPage() {
 
             {/* CTA — in flow directly under the text, so it rides with the
                 content instead of anchoring to the column's bottom edge */}
-            <div className="shrink-0 mt-[2em] flex items-center">
+            {/* On a sideways phone the column scrolls (see the fit box), so
+                the CTA stops riding under the text and parks at the bottom of
+                the scrollport instead — the one control that must never be the
+                thing below the fold. No scrim behind it: a full-width fade
+                painted a navy band straight across the hero photo, and the
+                button is opaque enough to read over whatever scrolls under. */}
+            <div className="shrink-0 mt-[2em] flex items-center landscape-short:sticky landscape-short:bottom-0 landscape-short:z-raised landscape-short:mt-[1em] landscape-short:self-end landscape-short:pb-[0.5em]">
               <Link
                 to={active ? active.href : activeMode.href}
                 // px/py/gap are divided by 0.875 because an `em` length on an
@@ -1076,7 +1329,7 @@ export default function DiscoverPage() {
                 // Soft-UI, in the on-dark materials: this sits on hero
                 // photography. The radius stays `em` so it tracks the hero's
                 // fit scale, at the soft-UI proportion rather than the 6px one.
-                className="neu-on-dark group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.9em] bg-brand-navy text-white text-[calc(0.875*var(--hero-type))] font-medium tracking-wide shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
+                className="neu-on-dark group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.9em] bg-brand-navy text-white text-[max(calc(0.875*var(--hero-type)),var(--hero-type-floor))] font-medium tracking-wide shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
               >
                 {active ? t`View Details` : t`Browse ${modeLabel}`}
                 {/* Icons take numeric px, so the fit multiplier that the `em`
@@ -1090,9 +1343,20 @@ export default function DiscoverPage() {
             </div>
           </div>
 
-          {/* Bottom-left: mode toggle + mini cards */}
-          <div className="flex items-end justify-between gap-[1.5em]">
-            <div className="min-w-0">
+          {/* Bottom-left: mode toggle + mini cards.
+              Out of flow so its height stops being deducted from the text
+              column above — see the fit box. Pinned left and right rather than
+              shrink-wrapped: the card strip's `max-w-full` resolves against
+              this element, and a shrink-to-fit ancestor would let the strip
+              size itself. */}
+          <div className="absolute inset-x-[5%] bottom-[2.5em] flex items-end justify-between gap-[1.5em]">
+            {/* The ref is on THIS block, not the full-width row above it. The
+                row is stretched edge to edge so the card strip's `max-w-full`
+                has the column to resolve against; its right edge is therefore
+                the column's right edge, and measuring it would report the strip
+                as reaching under the text at every width. What actually takes
+                up space is the tabs and the five cards, which is this. */}
+            <div ref={stripRef} className="min-w-0">
               {/* Slide toggle */}
               {/* Soft-UI segmented control: the track is a well (inset pair,
                   on-dark materials over the photo) and the thumb is lifted out

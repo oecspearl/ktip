@@ -12,6 +12,7 @@ import { Select } from '../../components/ui/Select'
 import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { FilterBar } from '../../components/ui/FilterBar'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
@@ -120,7 +121,14 @@ export default function GrantsPage() {
     setSelectedTags([])
   }
 
-  const hasActiveFilters = !!(selectedType || searchQuery || selectedTags.length)
+  // Counted, not just tested: the phone trigger hides the controls, so the
+  // badge is the only thing telling you the list has been narrowed and by how
+  // much. Tags count as one filter however many are picked — the trigger stands
+  // for the tag control, not for its contents.
+  const activeFilterCount =
+    (selectedType ? 1 : 0) + (searchQuery ? 1 : 0) + (selectedTags.length ? 1 : 0)
+  const hasActiveFilters = activeFilterCount > 0
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
 
   return (
     <>
@@ -149,58 +157,64 @@ export default function GrantsPage() {
         className="scroll-mt-24 bg-ktip-sand-50 py-8"
       >
         <div className="max-w-page-narrow mx-auto px-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <Select
-              value={selectedType}
-              onChange={setSelectedType}
-              options={typeSelectOptions}
-              ariaLabel={t`Filter by grant type`}
-            />
-
-            <TagFilterSelect
-              options={tagOptions}
-              selected={selectedTags}
-              onChange={setSelectedTags}
-            />
-
-            {!loading && grants && (
-              <p className="text-sm text-gray-500">
-                <Plural
-                  value={openGrants.length}
-                  one="Found # open grant"
-                  other="Found # open grants"
+          <FilterBar
+            sheetTitle={t`Filter grants`}
+            open={filterSheetOpen}
+            onOpenChange={setFilterSheetOpen}
+            activeCount={activeFilterCount}
+            onClear={clearFilters}
+            filters={
+              <>
+                <Select
+                  value={selectedType}
+                  onChange={setSelectedType}
+                  options={typeSelectOptions}
+                  ariaLabel={t`Filter by grant type`}
                 />
-                {closedGrants.length > 0 && (
-                  <Trans> · {closedGrants.length} closed</Trans>
-                )}
-              </p>
-            )}
 
-            <div className="ml-auto flex items-center gap-2">
-              <SortSelect
-                value={sort}
-                onChange={setSort}
-                options={SORT_OPTIONS.grant.options}
-                personalizationActive={personalizationActive}
-              />
-              <CollapsibleSearch
-                value={searchQuery}
-                onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                placeholder={t`Search grants...`}
-                ariaLabel={t`Search grants`}
-              />
-              <ColumnToggle value={columns} onChange={setColumns} />
-            </div>
-          </div>
+                <TagFilterSelect
+                  options={tagOptions}
+                  selected={selectedTags}
+                  onChange={setSelectedTags}
+                />
 
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
-            >
-              <Trans>Clear all filters</Trans>
-            </button>
-          )}
+                {/* Sort lives with the filters rather than in the tool cluster:
+                    both shape which results you see and in what order, so they
+                    belong to the same sheet on a phone. */}
+                <SortSelect
+                  value={sort}
+                  onChange={setSort}
+                  options={SORT_OPTIONS.grant.options}
+                  personalizationActive={personalizationActive}
+                />
+              </>
+            }
+            count={
+              !loading && grants ? (
+                <>
+                  <Plural
+                    value={openGrants.length}
+                    one="Found # open grant"
+                    other="Found # open grants"
+                  />
+                  {closedGrants.length > 0 && (
+                    <Trans> · {closedGrants.length} closed</Trans>
+                  )}
+                </>
+              ) : null
+            }
+            actions={
+              <>
+                <CollapsibleSearch
+                  value={searchQuery}
+                  onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                  placeholder={t`Search grants...`}
+                  ariaLabel={t`Search grants`}
+                />
+                <ColumnToggle value={columns} onChange={setColumns} />
+              </>
+            }
+          />
         </div>
       </div>
 

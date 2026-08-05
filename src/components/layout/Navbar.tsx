@@ -8,8 +8,6 @@ import { msg } from '@lingui/core/macro'
 import { resolveCopy } from '../../i18n/copy'
 import type { MessageDescriptor } from '@lingui/core'
 import {
-  Menu,
-  X,
   Home,
   FolderKanban,
   Calendar,
@@ -29,7 +27,6 @@ import {
   CheckCheck,
   Flag,
   Zap,
-  ChevronRight,
   HelpCircle,
   ClipboardList,
   LayoutDashboard,
@@ -43,7 +40,8 @@ import {
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
 import { DropdownPanel } from '../ui/DropdownPanel'
-import { NavbarSearchPanel } from './NavbarSearchPanel'
+import { NavbarSearchPanel, SEARCH_PANEL_WIDTH } from './NavbarSearchPanel'
+import { StaggeredMobileMenu, StaggeredMenuIcon } from './StaggeredMobileMenu'
 import { RoleSwitcher } from './RoleSwitcher'
 import { ROLE_LABELS } from '../../lib/constants'
 import { isOrganizationAccount } from '../../lib/permissions'
@@ -86,10 +84,14 @@ const leadingLinks = [
   { name: msg`Projects`, href: '/projects', icon: FolderKanban },
 ]
 
-// Standalone links rendered after the dropdowns
+/**
+ * Standalone links rendered after the dropdowns. `span` and `iconOnly` are for
+ * the mobile bento only — the desktop bar renders every one of these the same
+ * way, but the mosaic needs a small tile in it or it is just rectangles.
+ */
 const trailingLinks = [
-  { name: msg`Resources & Integrations`, href: '/resources', icon: BookOpen },
-  { name: msg`Help`, href: '/help', icon: HelpCircle },
+  { name: msg`Resources & Integrations`, href: '/resources', icon: BookOpen, span: 'col-span-2' },
+  { name: msg`Help`, href: '/help', icon: HelpCircle, span: 'col-span-1', iconOnly: true },
 ]
 
 /**
@@ -105,6 +107,67 @@ const trailingLinks = [
  */
 const NAV_ITEM_CLASS =
   'flex items-center gap-2 whitespace-nowrap px-2 xl:px-3 2xl:px-4 py-2 text-label 2xl:text-body font-medium transition-all duration-200 hover:scale-110'
+
+/**
+ * The mobile drawer is a bento mosaic, not a list: four columns, tiles that
+ * take two or four of them and come in three heights. Size is what separates a
+ * category from a destination there, which is why the tiles carry almost no
+ * icons — a 16px glyph in front of every row was doing no sorting at all and
+ * made twenty rows look like one machine-made column.
+ *
+ * The column span cannot live here: each child of StaggeredMobileMenu is
+ * wrapped in its own stagger element, so spans travel on a `data-span` prop
+ * that the wrapper picks up. See that component.
+ */
+const BENTO_TILE_CLASS =
+  'relative flex flex-col justify-end overflow-hidden rounded-2xl border p-3 transition-colors'
+const BENTO_TILE_ACTIVE = 'border-ktip-nav-accent/40 bg-ktip-nav-accent/15 text-white'
+/**
+ * The glyph as a watermark rather than a bullet — bled off the bottom-right
+ * corner, in the tile's own text colour, faint enough to read as texture.
+ * Home and Projects had it; every tile carrying an icon now does, so the
+ * mosaic stops mixing two ideas of what an icon is for.
+ */
+const BENTO_WATERMARK =
+  'pointer-events-none absolute -bottom-1 -right-1 h-[68%] max-h-16 min-h-5 w-auto'
+const BENTO_TILE_IDLE = 'border-white/10 bg-white/[0.04] text-white/85 hover:bg-white/[0.08]'
+
+/**
+ * The two auth tiles keep the soft-UI pair they had as buttons in the bar — a
+ * white face and a navy one. Border-transparent is not cosmetic: neumorphism
+ * states depth with the shadow pair, and an outline drawn over it reads as a
+ * ring round the control. The drawer panel carries `neu-on-dark`, so the
+ * highlight/shadow resolve for a dark backdrop (see index.css).
+ *
+ * Both skins are the ones Button.tsx already ships — `secondary` and the
+ * `.btn-brand` pair — so the two controls flip with the theme exactly as their
+ * counterparts in the bar do. Hard-coding white and navy here read fine by day
+ * and left a glaring white slab on the black night-mode panel.
+ */
+const BENTO_TILE_LIGHT =
+  'border-transparent bg-[var(--neu-surface)] text-ktip-sand-700 shadow-neu-sm hover:text-ktip-sand-900 hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset'
+const BENTO_TILE_BRAND =
+  'border-transparent bg-brand-navy text-white shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green'
+
+/**
+ * Row span for an expanded category, keyed on its entry count (a header row
+ * plus one per entry). Fixed at three, a five-entry group outgrew the rows it
+ * had claimed while the tiles beside it ran out — the gap the mosaic could not
+ * close. Written out because a computed `sm:row-span-${n}` generates nothing.
+ */
+const EXPANDED_ROWS: Record<number, string> = {
+  3: 'sm:row-span-3',
+  4: 'sm:row-span-4',
+  5: 'sm:row-span-5',
+}
+
+/**
+ * The width at which the drawer's mosaic pins an expanded category to its right
+ * columns — Tailwind's `sm`, which on a phone means it is being held sideways.
+ * Read in JS as well as CSS because the render ORDER of the categories changes
+ * there, and order is not something a media query can express.
+ */
+const BENTO_PINNED_QUERY = '(min-width: 40rem)'
 
 // Dropdown groups
 const navDropdowns: NavDropdown[] = [
@@ -155,7 +218,12 @@ export function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  // Which drawer accordion is open — one at a time, so the list stays short
+  // enough that the account rows below it are reachable without a long scroll.
+  const [mobileSection, setMobileSection] = useState<string | null>(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  // Signed-out, below sm only. See the trigger for why it exists at all.
+  const [authMenuOpen, setAuthMenuOpen] = useState(false)
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -257,7 +325,8 @@ export function Navbar() {
     .map((dropdown) => ({ ...dropdown, items: visibleItems(dropdown) }))
     .filter((dropdown) => dropdown.items.length > 0)
 
-  const anyMenuOpen = mobileMenuOpen || userMenuOpen || notifOpen || openDropdownId !== null
+  const anyMenuOpen =
+    mobileMenuOpen || userMenuOpen || notifOpen || authMenuOpen || openDropdownId !== null
   const hidden = navHidden && !anyMenuOpen
 
   /**
@@ -282,6 +351,7 @@ export function Navbar() {
   const { markAllRead } = useMarkAllRead()
 
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const authMenuRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const searchRef = useRef<HTMLDivElement>(null)
@@ -385,7 +455,7 @@ export function Navbar() {
   }, [searchOpen])
 
   useEffect(() => {
-    if (!(userMenuOpen || mobileMenuOpen || openDropdownId || notifOpen)) return
+    if (!(userMenuOpen || mobileMenuOpen || openDropdownId || notifOpen || authMenuOpen)) return
 
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -393,6 +463,7 @@ export function Navbar() {
         setMobileMenuOpen(false)
         setOpenDropdownId(null)
         setNotifOpen(false)
+        setAuthMenuOpen(false)
       }
     }
 
@@ -400,6 +471,9 @@ export function Navbar() {
       const target = e.target as Node
       if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setUserMenuOpen(false)
+      }
+      if (authMenuRef.current && !authMenuRef.current.contains(target)) {
+        setAuthMenuOpen(false)
       }
       if (notifRef.current && !notifRef.current.contains(target)) {
         setNotifOpen(false)
@@ -416,7 +490,7 @@ export function Navbar() {
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [userMenuOpen, mobileMenuOpen, openDropdownId, notifOpen])
+  }, [userMenuOpen, mobileMenuOpen, openDropdownId, notifOpen, authMenuOpen])
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/'
@@ -443,6 +517,106 @@ export function Navbar() {
   const toggleDropdown = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id)
   }
+
+  // Signed-out visitors keep the contributor tile — it routes to login, which
+  // is the point. Hidden only for members whose role cannot create a project.
+  const canCreateProject = !auth.user || auth.can('project:create')
+
+  /**
+   * A category is open, so the rest of the mosaic gives up its space for it.
+   * Every tall tile drops to one row and every half-tile to a quarter, which
+   * frees the two right-hand columns for the expanded card and leaves the
+   * shrunken ones packing themselves around it (the grid flows dense).
+   *
+   * Only from sm up. On a portrait phone the columns are ~90px, which is not a
+   * label — there the expanded card takes the full width instead and nothing
+   * else has to move.
+   */
+  const bentoCompact = mobileSection !== null
+
+  /**
+   * Is the drawer wide enough to pin an expanded category to the right columns
+   * (Tailwind `sm` — a phone held sideways)? Tracked in state because the
+   * category render ORDER depends on it, and order is a DOM concern that no
+   * media query can reach.
+   */
+  const [bentoPinned, setBentoPinned] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(BENTO_PINNED_QUERY).matches
+  )
+  useEffect(() => {
+    const query = window.matchMedia(BENTO_PINNED_QUERY)
+    const sync = () => setBentoPinned(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
+
+  /**
+   * Pinned layout renders the open category FIRST.
+   *
+   * The card places itself at column 3, but only in the first row where columns
+   * 3 and 4 are both still free — so with Community open, Events and Funding had
+   * already taken that row and the card started one row lower than it does for
+   * the other two. Same markup, different-looking expansion. Hoisting the open
+   * one to the front of the list gives every category the same top edge, and the
+   * collapsed squares backfill the columns beside it.
+   *
+   * Portrait keeps source order: there the card is full width and hoisting it
+   * would just shuffle the list under the reader.
+   */
+  const orderedDropdowns =
+    bentoPinned && mobileSection
+      ? [...visibleDropdowns].sort(
+          (a, b) => Number(b.id === mobileSection) - Number(a.id === mobileSection)
+        )
+      : visibleDropdowns
+
+  /**
+   * Compact spans, and the rule behind them: exactly two tiles stay two columns
+   * wide, everything else becomes a square.
+   *
+   * A dense grid backfills a hole only with something that FITS it, so a
+   * one-column hole and a two-column tile is a pair that can never resolve —
+   * that is what dropped Sign Up onto a row of its own and left the empty block
+   * beside the expanded card. Squares fit anywhere, so the only wide tiles left
+   * are Home and the contributor CTA, both of which land in the first row where
+   * there is still a full row to take.
+   */
+  const TALL_TILE_SPAN = bentoCompact
+    ? 'col-span-2 row-span-2 sm:row-span-1'
+    : 'col-span-2 row-span-2'
+  const HALF_TILE_SPAN = bentoCompact
+    ? 'col-span-2 row-span-2 sm:col-span-1 sm:row-span-1'
+    : 'col-span-2 row-span-2'
+  const WIDE_TILE_SPAN = bentoCompact ? 'col-span-4 sm:col-span-2' : 'col-span-4'
+  const SQUARE_TILE_SPAN = bentoCompact ? 'col-span-2 sm:col-span-1' : 'col-span-2'
+  // A square has room for one thing; two columns has room for a label and a
+  // glyph. Same tile, told which it is.
+  // A square is ~86px wide on a phone: tile labels come down a step and
+  // truncate there, or 'Community' paints over its own edge.
+  const BENTO_LABEL_CLASS = bentoCompact
+    ? 'min-w-0 truncate text-xs font-semibold'
+    : 'text-base font-semibold'
+  const BENTO_ACCOUNT_TILE = bentoCompact
+    ? 'h-full min-h-13 items-center justify-center text-center'
+    : 'h-full min-h-13 flex-row items-center justify-between gap-2'
+
+  /**
+   * Opening the drawer expands whichever section holds the current route, so
+   * it opens showing where you already are rather than fully collapsed. Keyed
+   * on the open flag alone: reopening on the same page should re-expand that
+   * section even if it was collapsed by hand last time.
+   */
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const current = navDropdowns.find((dropdown) =>
+      dropdown.items.some((item) => isActive(item.href))
+    )
+    setMobileSection(current?.id ?? null)
+    // isActive reads location.pathname, which cannot change while the drawer
+    // is opening — a navigation closes it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileMenuOpen])
 
   const handleSignOut = async () => {
     try {
@@ -489,7 +663,7 @@ export function Navbar() {
           : 'bg-transparent border-b border-transparent'
       )}
     >
-      <div className={cn('w-full px-4', mobileMenuOpen && 'pb-4')}>
+      <div className="w-full px-4">
         <div className="flex items-center h-[var(--nav-h)]">
           {/* Logo */}
           <div className="flex items-center shrink-0">
@@ -509,7 +683,16 @@ export function Navbar() {
                   showing a bare logo where a tablet showed the brand. */}
               <div className="block lg:hidden xl:block">
                 <h1 className="text-title-sm sm:text-title font-display font-bold whitespace-nowrap text-white">
-                  OECS KTIP
+                  {/* "OECS" drops on the narrowest phones. The bar has to fit a
+                      logo, the wordmark, the language globe, the Log In / Sign
+                      Up button and the menu icon; at 320–360px the full
+                      wordmark is what pushes the button past the right edge.
+                      The initialism alone still identifies the product, and it
+                      is the half people say out loud. 400px rather than a
+                      standard breakpoint because that is where it actually
+                      stops fitting — `sm` is 640 and would strip the name off
+                      tablets that have room for it. */}
+                  <span className="hidden min-[400px]:inline">{'OECS '}</span>KTIP
                 </h1>
               </div>
             </Link>
@@ -519,7 +702,39 @@ export function Navbar() {
               to carry ml-auto, which pushed the whole set to the right and
               left a wide empty run after the logo; the free space now
               collects on the search side instead. */}
-          <div className="hidden lg:flex items-center gap-1 ml-4 xl:ml-8">
+          {/* Links yield to the open search box.
+              A 544px input plus seven links does not fit in a 1280px bar, and
+              the alternative — letting the input take what is left — is what
+              made it narrower than its own results panel. The links are not
+              lost while it is open: Escape, an outside click or a result all
+              close the search and bring them straight back, and the same links
+              are in the mobile drawer regardless.
+
+              Collapsed to zero width rather than faded in place: the space has
+              to be GIVEN UP, not just vacated visually. Seven links plus a
+              544px input plus the auth buttons is wider than a 1280px bar, so
+              links that keep their box would push the search off the end —
+              which is the same squeeze that made it narrow in the first place.
+
+              Animated to 0 rather than `display:none` because the search box is
+              growing across this exact space at the same time; cutting one
+              instantly while the other travels for 300ms reads as a jump. The
+              duration is deliberately shorter than the box's, so the room is
+              free before the box arrives to use it.
+
+              aria-hidden + inert so nothing clipped stays reachable by tab or
+              screen reader. Nothing is lost either way — Escape, an outside
+              click or picking a result all bring the links straight back. */}
+          <div
+            aria-hidden={searchOpen}
+            inert={searchOpen ? true : undefined}
+            className={cn(
+              'hidden lg:flex items-center gap-1 overflow-hidden transition-all duration-200',
+              searchOpen
+                ? 'ml-0 max-w-0 opacity-0 pointer-events-none'
+                : 'ml-4 xl:ml-8 max-w-full opacity-100'
+            )}
+          >
             {/* Standalone links */}
             {leadingLinks.map((item) => (
               <Link
@@ -643,7 +858,14 @@ export function Navbar() {
               // up to max-w-md — nearly 450px of the bar reserved for nothing,
               // which is what squeezed the links at 1024 and 1280. It only
               // takes the space once it is actually open.
-              searchOpen ? 'flex-1 max-w-md' : 'shrink-0'
+              //
+              // Open, it is exactly the results panel's width rather than
+              // `flex-1 max-w-md`: at 448px against the panel's 544px the panel
+              // overhung the box that opened it on the left, so the input read
+              // as a separate control sitting on top of a wider surface. Same
+              // constant on both, so they cannot drift. Room for it comes from
+              // the links, which step aside below.
+              searchOpen ? cn('shrink-0', SEARCH_PANEL_WIDTH) : 'shrink-0'
             )}
           >
             <div
@@ -959,280 +1181,437 @@ export function Navbar() {
                     <Button size="sm"><Trans>Sign Up</Trans></Button>
                   </Link>
                 </div>
-                {/* Below sm only one button fits beside the wordmark, so it is
-                    the primary action — the same green Sign Up a tablet shows.
-                    Log In is still one tap away in the mobile menu. */}
-                <Link to="/signup" className="sm:hidden">
-                  <Button size="sm"><Trans>Sign Up</Trans></Button>
-                </Link>
+                {/* Below sm only one control fits beside the wordmark. It used
+                    to be Sign Up alone, which reads as "there is no way in from
+                    here" to anyone who already has an account — Log In was real
+                    but buried behind the hamburger, and a returning member has
+                    no reason to look for it inside a navigation menu. One
+                    trigger naming both, opening a panel that offers each, keeps
+                    the width and stops hiding half the door.
+
+                    Same disclosure machinery as the user menu above: the panel
+                    animates both ways via DropdownPanel, and the shared
+                    Escape/outside-click effect closes it. */}
+                <div className="relative sm:hidden" ref={authMenuRef}>
+                  <Button
+                    size="sm"
+                    onClick={() => setAuthMenuOpen((open) => !open)}
+                    aria-expanded={authMenuOpen}
+                    aria-haspopup="menu"
+                  >
+                    <Trans>Log In / Sign Up</Trans>
+                  </Button>
+
+                  <DropdownPanel
+                    open={authMenuOpen}
+                    role="menu"
+                    className="absolute right-0 mt-2 w-44 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 p-2 flex flex-col gap-2"
+                  >
+                    {/* Full-width so each is a comfortable target on a phone,
+                        and ordered the way the trigger reads. */}
+                    <Link to="/login" onClick={() => setAuthMenuOpen(false)} role="menuitem">
+                      <Button variant="secondary" size="sm" fullWidth icon={<LogIn size={16} />}>
+                        <Trans>Log In</Trans>
+                      </Button>
+                    </Link>
+                    <Link to="/signup" onClick={() => setAuthMenuOpen(false)} role="menuitem">
+                      <Button size="sm" fullWidth icon={<User size={16} />}>
+                        <Trans>Sign Up</Trans>
+                      </Button>
+                    </Link>
+                  </DropdownPanel>
+                </div>
               </>
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button. The drawer paints over this corner once it
+                is open and carries the matching close control in the same
+                spot — see StaggeredMobileMenu. */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={mobileMenuOpen ? t`Close menu` : t`Open menu`}
               aria-expanded={mobileMenuOpen}
               className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10"
             >
-              {!mobileMenuOpen ? <Menu size={24} /> : <X size={24} />}
+              <StaggeredMenuIcon open={mobileMenuOpen} />
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {/* The bar is position:fixed, so the panel below has no height of its
-            own to scroll — without the cap it just overflows off-screen and
-            the touch goes to the page behind it. Cap at the viewport minus
-            the bar row and scroll there instead; overscroll-contain stops the
-            gesture chaining to the page once the list hits an end. */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-white/10 animate-slide-up max-h-[calc(100dvh-var(--nav-h))] overflow-y-auto overscroll-contain">
-            {/* Mobile Search */}
-            <div className="mb-4 px-2">
-              <div className="relative">
-                <Search
-                  size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60"
-                />
-                <input
-                  type="text"
-                  placeholder={t`Search pages, features, people...`}
-                  aria-label={t`Search the whole platform`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                  onKeyDown={handleSearch}
-                  onFocus={() => setMobileSearchFocused(true)}
-                  className="w-full pl-10 pr-4 py-2 border border-white/20 bg-white/10 text-white placeholder-white/60 rounded-lg focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white focus:outline-none"
-                />
-              </div>
-              <NavbarSearchPanel
-                  open={Boolean(mobileSearchFocused || searchQuery.trim())}
-                  variant="mobile"
-                  query={searchQuery}
-                  groups={search.groups}
-                  rows={search.rows}
-                  activeIndex={activeIndex}
-                  onHover={setActiveIndex}
-                  expandedId={expandedRowId}
-                  onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
-                  onSelect={selectRow}
-                  onSeeAll={seeAllResults}
-                  aiMode={aiMode}
-                  onToggleAiMode={() => setAiMode((v) => !v)}
-                  aiAnswer={search.aiAnswer}
-                  aiSteps={search.aiSteps}
-                  aiLoading={search.aiLoading}
-                  aiError={search.aiError}
-                  contentLoading={search.contentLoading}
-                  suggestions={search.suggestions}
-                  recent={search.recent}
-                  onPickRecent={setSearchQuery}
-                  onClearRecent={search.clearRecent}
-                />
-            </div>
-
-            {/* Quick Actions (moved from DiscoverPage action band) */}
-            <div className="space-y-1 px-2 mb-3">
-              {/* Signed-out visitors keep the CTA — it routes them to login,
-                  which is the point. Hidden only for members whose role cannot
-                  create a project, where it would dead-end at a denial. */}
-              {(!auth.user || auth.can('project:create')) && (
-                <Link
-                  to="/projects/new"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-ktip-tropical-50 text-ktip-tropical-700 hover:bg-ktip-tropical-100 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Zap size={18} />
-                    <span className="font-semibold text-sm"><Trans>Become a Contributor</Trans></span>
-                  </div>
-                  <ChevronRight size={16} />
-                </Link>
-              )}
-              <Link
-                to="/grants"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-lg bg-ktip-ocean-50 text-ktip-ocean-700 hover:bg-ktip-ocean-100 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <DollarSign size={18} />
-                  <span className="font-semibold text-sm"><Trans>Browse Grants</Trans></span>
-                </div>
-                <ChevronRight size={16} />
-              </Link>
-              <Link
-                to="/projects"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-lg bg-ktip-sun-50 text-ktip-sun-800 hover:bg-ktip-sun-100 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <FolderKanban size={18} />
-                  <span className="font-semibold text-sm"><Trans>Explore Projects</Trans></span>
-                </div>
-                <ChevronRight size={16} />
-              </Link>
-            </div>
-
-            <hr className="my-2 mx-2 border-white/10" />
-
-            {/* Mobile Nav Links */}
-            <div className="space-y-1 px-2">
-              {/* Standalone links */}
-              {leadingLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
-                    isActive(item.href)
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/80 hover:bg-white/10'
-                  )}
-                >
-                  <item.icon size={20} />
-                  <span>{i18n._(item.name)}</span>
-                </Link>
-              ))}
-
-              {/* Grouped sections */}
-              {visibleDropdowns.map((dropdown) => (
-                <div key={dropdown.id}>
-                  <div className="pt-3 pb-1 px-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                      {i18n._(dropdown.name)}
-                    </p>
-                  </div>
-                  {dropdown.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
-                        isActive(item.href)
-                          ? 'bg-white/15 text-white'
-                          : 'text-white/80 hover:bg-white/10'
-                      )}
-                    >
-                      <item.icon size={20} />
-                      <span>{i18n._(item.name)}</span>
-                    </Link>
-                  ))}
-                </div>
-              ))}
-
-              {/* Trailing standalone links */}
-              {trailingLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
-                    isActive(item.href)
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/80 hover:bg-white/10'
-                  )}
-                >
-                  <item.icon size={20} />
-                  <span>{i18n._(item.name)}</span>
-                </Link>
-              ))}
-
-              {/* Admin link — same capability test as the desktop bar above */}
-              {canSeeAdmin && (
-                <>
-                  <hr className="my-2 border-white/10" />
-                  <p className="px-4 py-1 text-xs font-semibold uppercase tracking-wider text-white/40">
-                    <Trans>Admin</Trans>
-                  </p>
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
-                      isActive('/admin')
-                        ? 'bg-ktip-sun-50 text-ktip-sun-800'
-                        : 'text-white/80 hover:bg-white/10'
-                    )}
-                  >
-                    <ShieldCheck size={18} />
-                    <span><Trans>Admin</Trans></span>
-                  </Link>
-                </>
-              )}
-
-              {/* Mobile Auth Links */}
-              <hr className="my-2 border-white/10" />
-              {auth.user ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
-                  >
-                    <LayoutDashboard size={20} />
-                    <span><Trans>My Dashboard</Trans></span>
-                  </Link>
-                  <Link
-                    to={isOrgAccount ? '/dashboard/business' : '/dashboard/profile'}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
-                  >
-                    {isOrgAccount ? <Building2 size={20} /> : <FileText size={20} />}
-                    <span>{isOrgAccount ? t`Business profile` : t`My CV`}</span>
-                  </Link>
-                  <Link
-                    to="/settings"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
-                  >
-                    <Settings size={20} />
-                    <span><Trans>Settings</Trans></span>
-                  </Link>
-                  <Link
-                    to="/grievances/my-reports"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
-                  >
-                    <Flag size={20} />
-                    <span><Trans>My Reports</Trans></span>
-                  </Link>
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); handleSignOut() }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400 hover:bg-red-500/10"
-                  >
-                    <LogOut size={20} />
-                    <span><Trans>Sign Out</Trans></span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white/80 hover:bg-white/10"
-                  >
-                    <LogIn size={20} />
-                    <span><Trans>Log In</Trans></span>
-                  </Link>
-                  <Link
-                    to="/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-white hover:bg-white/10"
-                  >
-                    <User size={20} />
-                    <span><Trans>Sign Up</Trans></span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </nav>
+
+    {/* Mobile Navigation.
+        This used to be a block expanded inline under the bar: it inherited the
+        bar's translucency (hero photography read straight through the rows),
+        and being inside a position:fixed bar it had no height of its own to
+        scroll against. It is an off-canvas drawer now — opaque, scroll-locked,
+        and staggered in. Each direct child below is one stagger unit. */}
+    <StaggeredMobileMenu
+      open={mobileMenuOpen}
+      onClose={() => setMobileMenuOpen(false)}
+      label={t`Menu`}
+      closeLabel={t`Close menu`}
+      /* Dense flow so a 1×1 square backfills the hole a 2-wide tile leaves,
+         which is what makes the lower half read as a mosaic rather than a
+         column with gaps. Rows are a floor, not a fixed height — a tile that
+         needs more (an expanded category) grows its row. */
+      bodyClassName="grid grid-cols-4 content-start gap-2 px-3 auto-rows-[minmax(3.25rem,auto)] [grid-auto-flow:row_dense] landscape-short:grid-cols-6 landscape-short:auto-rows-[minmax(2.75rem,auto)]"
+      layoutKey={mobileSection}
+      expanded={mobileSection !== null}
+      brand={
+        <Link
+          to="/"
+          onClick={() => setMobileMenuOpen(false)}
+          className="flex items-center gap-2"
+        >
+          <img
+            src="/ktip-logo-128.webp"
+            alt=""
+            width={40}
+            height={40}
+            decoding="async"
+            className="h-9 w-9 object-contain"
+          />
+          <span className="font-display text-title-sm font-bold text-white">OECS KTIP</span>
+        </Link>
+      }
+    >
+    {/* Search — the one full-bleed row; everything under it is bento. */}
+    <div data-span="col-span-4 landscape-short:col-span-6" className="pb-1">
+      <div className="relative">
+        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+        <input
+          type="text"
+          placeholder={t`Search`}
+          aria-label={t`Search the whole platform`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          onKeyDown={handleSearch}
+          onFocus={() => setMobileSearchFocused(true)}
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.05] py-3 pl-11 pr-4 text-sm text-white placeholder-white/40 transition-colors focus:border-ktip-nav-accent/50 focus:bg-white/[0.09] focus:outline-none"
+        />
+      </div>
+      <NavbarSearchPanel
+        open={Boolean(mobileSearchFocused || searchQuery.trim())}
+        variant="mobile"
+        query={searchQuery}
+        groups={search.groups}
+        rows={search.rows}
+        activeIndex={activeIndex}
+        onHover={setActiveIndex}
+        expandedId={expandedRowId}
+        onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
+        onSelect={selectRow}
+        onSeeAll={seeAllResults}
+        aiMode={aiMode}
+        onToggleAiMode={() => setAiMode((v) => !v)}
+        aiAnswer={search.aiAnswer}
+        aiSteps={search.aiSteps}
+        aiLoading={search.aiLoading}
+        aiError={search.aiError}
+        contentLoading={search.contentLoading}
+        suggestions={search.suggestions}
+        recent={search.recent}
+        onPickRecent={setSearchQuery}
+        onClearRecent={search.clearRecent}
+      />
+    </div>
+
+    {/* The two destinations that are not a category — half-tiles, so the eye
+        gets a size difference to read before it gets to any label. */}
+    {leadingLinks.map((item, index) => (
+      <Link
+        key={item.href}
+        to={item.href}
+        data-span={index === 0 ? TALL_TILE_SPAN : HALF_TILE_SPAN}
+        onClick={() => setMobileMenuOpen(false)}
+        className={cn(BENTO_TILE_CLASS, 'h-full', isActive(item.href) ? BENTO_TILE_ACTIVE : BENTO_TILE_IDLE)}
+      >
+        {/* The glyph is a watermark, not a bullet. Every row carrying its own
+            small icon was what made this read as a generated list. */}
+        <item.icon size={44} className={cn(BENTO_WATERMARK, 'opacity-[0.09]')} />
+        <span className={BENTO_LABEL_CLASS}>{i18n._(item.name)}</span>
+      </Link>
+    ))}
+
+    {/* Category cards. Collapsed they are half-tiles in the mosaic; expanded
+        one takes the full row and its entries drop out underneath on an indent
+        rail, so a child never sits at the same level as its parent — which is
+        what the flat run of rows could not say. One open at a time. */}
+    {orderedDropdowns.map((dropdown) => {
+      const expanded = mobileSection === dropdown.id
+      const groupActive = isDropdownActive(dropdown)
+      // A header row plus one per entry, inside the range Tailwind ships
+      const rowSpan = EXPANDED_ROWS[Math.min(Math.max(dropdown.items.length + 1, 3), 5)]
+      return (
+        <div
+          key={dropdown.id}
+          data-span={
+            expanded
+              ? cn(
+                  'col-span-4 sm:col-start-3 sm:col-span-2 landscape-short:col-start-5 landscape-short:col-span-2',
+                  rowSpan
+                )
+              : HALF_TILE_SPAN
+          }
+          className={cn(
+            'h-full min-w-0 overflow-hidden rounded-2xl border transition-colors',
+            expanded || groupActive
+              ? 'border-ktip-nav-accent/30 bg-ktip-nav-accent/[0.07]'
+              : 'border-white/10 bg-white/[0.04]'
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => setMobileSection(expanded ? null : dropdown.id)}
+            aria-expanded={expanded}
+            className={cn(
+              'relative flex w-full items-center gap-2 px-4 text-left',
+              expanded
+                ? 'h-14'
+                : bentoCompact
+                  ? 'h-full items-center pb-0'
+                  : 'h-full items-end pb-3 landscape-short:items-center landscape-short:pb-0'
+            )}
+          >
+            {!expanded && (
+              <dropdown.icon size={44} className={cn(BENTO_WATERMARK, 'opacity-[0.12]')} />
+            )}
+            <span className={cn('flex-1 text-white', expanded ? 'text-base font-semibold' : BENTO_LABEL_CLASS)}>
+              {i18n._(dropdown.name)}
+            </span>
+            <ChevronDown
+              size={16}
+              className={cn(
+                'shrink-0 text-white/45 transition-transform duration-300',
+                expanded && 'rotate-180'
+              )}
+            />
+          </button>
+
+          {/* grid-rows 0fr → 1fr collapses to the content's own height without
+              anyone having to measure it, and animates where max-height would
+              either clip or lag. */}
+          <div
+            className={cn(
+              'grid transition-[grid-template-rows] duration-300 ease-out',
+              expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+            )}
+          >
+            <div className="min-h-0 overflow-hidden">
+              {/* The entries are their own small bento inside the parent card:
+                  the drawer goes full-screen while a category is open, and a
+                  single column of five links across that width is mostly empty
+                  space. The rail on the left is what keeps them reading as
+                  children of the card rather than as tiles of the mosaic. */}
+              <div className="ml-6 grid grid-cols-2 gap-1.5 border-l border-white/15 pb-3 pl-3 pr-3 sm:grid-cols-1 landscape-short:grid-cols-1">
+                {dropdown.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm transition-colors',
+                      isActive(item.href)
+                        ? 'bg-white/10 font-medium text-white'
+                        : 'bg-white/[0.03] text-white/65 hover:bg-white/[0.08] hover:text-white'
+                    )}
+                  >
+                    <span className="truncate">{i18n._(item.name)}</span>
+                    {isActive(item.href) && (
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ktip-nav-accent" aria-hidden="true" />
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    })}
+
+    {/* The contributor CTA gets the one full-width tile and the only saturated
+        surface in the drawer. Signed-out visitors keep it — it routes them to
+        login, which is the point. Hidden only for members whose role cannot
+        create a project, where it would dead-end at a denial. */}
+    {canCreateProject && (
+      <Link
+        to="/projects/new"
+        data-span={WIDE_TILE_SPAN}
+        onClick={() => setMobileMenuOpen(false)}
+        className={cn(
+          BENTO_TILE_CLASS,
+          'h-full min-h-14 landscape-short:h-12 flex-row items-center justify-between gap-2 border-ktip-tropical-500/30 bg-gradient-to-br from-ktip-tropical-500/25 to-ktip-tropical-500/[0.06] text-white'
+        )}
+      >
+        <span className={cn('truncate', BENTO_LABEL_CLASS)}><Trans>Become a Contributor</Trans></span>
+        <Zap size={44} className={cn(BENTO_WATERMARK, 'text-ktip-tropical-500 opacity-[0.35]')} />
+      </Link>
+    )}
+
+    {/* Trailing links and the grants listing, at the mosaic's two smallest
+        sizes. The 1×1 squares are what stop the lower half from being a stack
+        of identical rectangles — they carry the glyph alone, with the label on
+        the accessible name rather than in the tile. */}
+    {trailingLinks.map((item) => (
+      <Link
+        key={item.href}
+        to={item.href}
+        data-span={item.span === 'col-span-1' ? item.span : SQUARE_TILE_SPAN}
+        title={item.iconOnly || bentoCompact ? i18n._(item.name) : undefined}
+        aria-label={item.iconOnly || bentoCompact ? i18n._(item.name) : undefined}
+        onClick={() => setMobileMenuOpen(false)}
+        className={cn(
+          BENTO_TILE_CLASS,
+          'h-full min-h-13',
+          // "Resources & Integrations" has nowhere to go in one column, so the
+          // compact tile is the glyph and the name lives on the accessible name
+          item.iconOnly || bentoCompact
+            ? 'items-center justify-center'
+            : 'flex-row items-center justify-between gap-2',
+          isActive(item.href) ? BENTO_TILE_ACTIVE : BENTO_TILE_IDLE
+        )}
+      >
+        {item.iconOnly || bentoCompact ? (
+          <item.icon size={20} className="text-white/60" />
+        ) : (
+          <>
+            <span className="truncate text-sm font-medium">{i18n._(item.name)}</span>
+            <item.icon size={16} className="shrink-0 text-white/35" />
+          </>
+        )}
+      </Link>
+    ))}
+    <Link
+      to="/grants"
+      data-span="col-span-1"
+      title={t`Grants`}
+      aria-label={t`Grants`}
+      onClick={() => setMobileMenuOpen(false)}
+      className={cn(BENTO_TILE_CLASS, 'h-full items-center justify-center', BENTO_TILE_IDLE)}
+    >
+      <DollarSign size={20} className="text-white/60" />
+    </Link>
+
+    {/* Admin link — same capability test as the desktop bar above */}
+    {canSeeAdmin && (
+      <Link
+        to="/admin"
+        data-span={bentoCompact ? SQUARE_TILE_SPAN : 'col-span-4 landscape-short:col-span-6'}
+        onClick={() => setMobileMenuOpen(false)}
+        className={cn(
+          BENTO_TILE_CLASS,
+          'h-full min-h-13 flex-row items-center justify-between gap-2',
+          isActive('/admin')
+            ? 'border-ktip-sun-500/40 bg-ktip-sun-500/15 text-white'
+            : 'border-ktip-sun-500/20 bg-ktip-sun-500/[0.06] text-white/85'
+        )}
+      >
+        <span className="truncate text-sm font-semibold"><Trans>Admin</Trans></span>
+        <ShieldCheck size={16} className="text-ktip-sun-500" />
+      </Link>
+    )}
+
+    {/* Account, as tiles rather than a panel of its own. The panel was a
+        full-width block that could not sit beside an expanded category — it got
+        pushed under the card and left the hole next to it that nothing could
+        fill. As squares these are what the mosaic backfills with.
+
+        Compact drops the labels on the four navigation tiles: at one column
+        there is no room for "Business profile", and the name still reaches a
+        screen reader through aria-label. */}
+    {auth.user ? (
+      <>
+        <Link
+          to="/dashboard"
+          data-span={SQUARE_TILE_SPAN}
+          title={t`Dashboard`}
+          aria-label={t`Dashboard`}
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, BENTO_ACCOUNT_TILE, BENTO_TILE_IDLE)}
+        >
+          {!bentoCompact && <span className="truncate text-sm font-medium"><Trans>Dashboard</Trans></span>}
+          <LayoutDashboard size={18} className="shrink-0 text-white/45" />
+        </Link>
+        <Link
+          to={isOrgAccount ? '/dashboard/business' : '/dashboard/profile'}
+          data-span={SQUARE_TILE_SPAN}
+          title={isOrgAccount ? t`Business profile` : t`My CV`}
+          aria-label={isOrgAccount ? t`Business profile` : t`My CV`}
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, BENTO_ACCOUNT_TILE, BENTO_TILE_IDLE)}
+        >
+          {!bentoCompact && (
+            <span className="truncate text-sm font-medium">
+              {isOrgAccount ? t`Business profile` : t`My CV`}
+            </span>
+          )}
+          {isOrgAccount ? (
+            <Building2 size={18} className="shrink-0 text-white/45" />
+          ) : (
+            <FileText size={18} className="shrink-0 text-white/45" />
+          )}
+        </Link>
+        <Link
+          to="/settings"
+          data-span="col-span-1"
+          title={t`Settings`}
+          aria-label={t`Settings`}
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, 'h-full min-h-13 items-center justify-center', BENTO_TILE_IDLE)}
+        >
+          <Settings size={18} className="text-white/60" />
+        </Link>
+        <Link
+          to="/grievances/my-reports"
+          data-span="col-span-1"
+          title={t`My Reports`}
+          aria-label={t`My Reports`}
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, 'h-full min-h-13 items-center justify-center', BENTO_TILE_IDLE)}
+        >
+          <Flag size={18} className="text-white/60" />
+        </Link>
+        {/* Last, and the one tile allowed to stay two wide in compact: nothing
+            follows it, so there is no square left for it to strand. */}
+        <button
+          data-span={WIDE_TILE_SPAN}
+          onClick={() => { setMobileMenuOpen(false); handleSignOut() }}
+          className={cn(
+            BENTO_TILE_CLASS,
+            'h-full min-h-13 flex-row items-center justify-between gap-2 border-red-500/20 bg-red-500/[0.08] text-red-400 hover:bg-red-500/15'
+          )}
+        >
+          <span className="truncate text-sm font-medium"><Trans>Sign Out</Trans></span>
+          <LogOut size={16} className="shrink-0" />
+        </button>
+      </>
+    ) : (
+      /* The pair is ONE stagger unit holding a two-up grid, not two tiles.
+         As separate tiles the dense flow was free to backfill Log In into an
+         earlier hole and place Sign Up wherever it landed next; inside one cell
+         Sign Up is always immediately right of Log In. Soft-UI pair, same as
+         the bar: white face, navy face — and no watermark, the labels are the
+         whole point of these two. */
+      <div data-span={WIDE_TILE_SPAN} className="grid grid-cols-2 gap-2">
+        <Link
+          to="/login"
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, BENTO_ACCOUNT_TILE, 'justify-center', BENTO_TILE_LIGHT)}
+        >
+          <span className="truncate text-sm font-semibold"><Trans>Log In</Trans></span>
+        </Link>
+        <Link
+          to="/signup"
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, BENTO_ACCOUNT_TILE, 'justify-center', BENTO_TILE_BRAND)}
+        >
+          <span className="truncate text-sm font-semibold"><Trans>Sign Up</Trans></span>
+        </Link>
+      </div>
+    )}
+    </StaggeredMobileMenu>
     </>
   )
 }

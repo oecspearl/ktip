@@ -122,14 +122,44 @@ export const GRANT_IMAGES = [
   '/grants/grant-marine.webp',
   '/grants/grant-nature.webp',
   '/grants/grant-pitch.webp',
+  '/grants/grant-business.webp',
+  '/grants/grant-team.webp',
 ]
 
+// Four deep per type, not two: a two-image pool puts a pair of same-type grants
+// on the same photo roughly half the time, which is visible the moment two of
+// them sit side by side in a carousel.
 const GRANT_TYPE_IMAGES: Record<string, string[]> = {
-  startup: ['/grants/grant-startup.webp', '/grants/grant-pitch.webp'],
-  research: ['/grants/grant-research.webp', '/grants/grant-marine.webp'],
-  innovation: ['/grants/grant-climate.webp', '/grants/grant-startup.webp'],
-  development: ['/grants/grant-development.webp', '/grants/grant-nature.webp'],
-  education: ['/grants/grant-education.webp', '/grants/grant-pitch.webp'],
+  startup: [
+    '/grants/grant-startup.webp',
+    '/grants/grant-pitch.webp',
+    '/grants/grant-team.webp',
+    '/grants/grant-business.webp',
+  ],
+  research: [
+    '/grants/grant-research.webp',
+    '/grants/grant-marine.webp',
+    '/grants/grant-nature.webp',
+    '/grants/grant-team.webp',
+  ],
+  innovation: [
+    '/grants/grant-climate.webp',
+    '/grants/grant-startup.webp',
+    '/grants/grant-team.webp',
+    '/grants/grant-pitch.webp',
+  ],
+  development: [
+    '/grants/grant-development.webp',
+    '/grants/grant-nature.webp',
+    '/grants/grant-business.webp',
+    '/grants/grant-team.webp',
+  ],
+  education: [
+    '/grants/grant-education.webp',
+    '/grants/grant-pitch.webp',
+    '/grants/grant-business.webp',
+    '/grants/grant-startup.webp',
+  ],
 }
 
 const CLIMATE_GRANT_IMAGES = [

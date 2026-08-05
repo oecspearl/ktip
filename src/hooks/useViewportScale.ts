@@ -11,6 +11,22 @@ interface ViewportScaleOptions {
   height?: number
   /** Floor — below this the UI stops being readable/tappable */
   min?: number
+  /**
+   * A separate, usually lower floor for the HEIGHT term. Defaults to `min`.
+   *
+   * `min` exists for narrow screens, where the width term collapses — a phone
+   * divides 375 by an authored ~1739 and lands near 0.2, which would render the
+   * whole block unusable. Height never collapses like that: a phone is TALL, so
+   * its height term sits comfortably above the floor and the floor is only ever
+   * reached by a short-and-wide window — a laptop whose browser chrome leaves
+   * ~610px. There the floor is not protecting anything, it is forcing the block
+   * to render taller than the space it was given, which is the one thing a
+   * height-fitted block must never do.
+   *
+   * Splitting the two floors lets a short window scale down to fit while a
+   * narrow one still gets the protection the floor was written for.
+   */
+  heightMin?: number
   /** Ceiling — keeps an unscaled 4K panel from rendering everything oversized */
   max?: number
 }
@@ -44,22 +60,29 @@ interface ViewportScaleOptions {
  * Those two are deliberate exceptions. Anything else reaching for this hook
  * almost certainly wants a token instead.
  */
-export function useViewportScale({ width, height, min = 0.6, max = 1 }: ViewportScaleOptions) {
+export function useViewportScale({
+  width,
+  height,
+  min = 0.6,
+  heightMin,
+  max = 1,
+}: ViewportScaleOptions) {
+  const hMin = heightMin ?? min
   const [scale, setScale] = useState(() =>
     typeof window === 'undefined'
       ? Math.min(1, max)
-      : scaleFor(window.innerWidth, window.innerHeight, width, height, min, max),
+      : scaleFor(window.innerWidth, window.innerHeight, width, height, min, hMin, max),
   )
 
   useEffect(() => {
     const update = () =>
-      setScale(scaleFor(window.innerWidth, window.innerHeight, width, height, min, max))
+      setScale(scaleFor(window.innerWidth, window.innerHeight, width, height, min, hMin, max))
     // Run once on mount: SSR/hydration starts from the fallback above, and OS
     // display-scaling changes arrive as a resize with no other signal
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
-  }, [width, height, min, max])
+  }, [width, height, min, hMin, max])
 
   return scale
 }
@@ -70,9 +93,16 @@ function scaleFor(
   width: number,
   height: number | undefined,
   min: number,
+  heightMin: number,
   max: number,
 ) {
-  const byWidth = vw / width
-  const s = height ? Math.min(byWidth, vh / height) : byWidth
-  return Math.min(max, Math.max(min, s))
+  const w = Math.max(vw / width, min)
+  if (!height) return Math.min(max, w)
+  // Each term is floored on its own BEFORE they meet, rather than once after.
+  // Flooring the minimum of the two would let the width floor override a height
+  // term that is legitimately lower, which is exactly the short-laptop case:
+  // 1280x610 wants 0.61 from its height and gets held at 0.70 by a floor
+  // written for phones, so the block renders ~15% taller than the viewport it
+  // must fit in. Nothing re-applies `min` afterwards for the same reason.
+  return Math.min(max, w, Math.max(vh / height, heightMin))
 }

@@ -213,10 +213,35 @@ export function PageHero({
             : 'w-full max-w-page mx-auto px-6 md:px-12 pt-[calc(var(--nav-h)+1.5rem)] pb-6 md:pb-8'
         }`}
       >
-        {backCrumb && (
+        {/* Phones: the back pill and the eyebrow share one line — pill hard
+            left, eyebrow hard right, with the title stacked under it on the
+            same right edge. The pill used to sit on a line of its own above a
+            left-aligned eyebrow, which spent a whole row of a short band on one
+            small control and left the two texts reading against opposite
+            margins. From md the desktop arrangement below takes over. */}
+        <div className="mb-3 flex items-center justify-between gap-3 md:hidden">
+          {backCrumb ? (
+            <Link
+              to={backCrumb.href!}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+            >
+              <ArrowLeft size={15} aria-hidden="true" />
+              {resolveCopy(i18n, backCrumb.label)}
+            </Link>
+          ) : (
+            <span />
+          )}
+          <div className="min-w-0 text-right text-micro font-semibold uppercase tracking-[0.3em] text-white/60">
+            {eyebrow}
+          </div>
+        </div>
+
+        {/* backAlways keeps the pill on desktop too, where the breadcrumb it
+            duplicates is hidden. */}
+        {backCrumb && backAlways && (
           <Link
             to={backCrumb.href!}
-            className={`${backAlways ? '' : 'md:hidden '}mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white`}
+            className="mb-4 hidden items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-label font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white md:inline-flex"
           >
             <ArrowLeft size={15} aria-hidden="true" />
             {resolveCopy(i18n, backCrumb.label)}
@@ -224,9 +249,9 @@ export function PageHero({
         )}
 
         <div className="flex flex-col md:flex-row-reverse md:items-end justify-between gap-4">
-          <div className="min-w-0 md:text-right">
+          <div className="min-w-0 text-right">
             <Reveal order={0}>
-              <div className="text-micro font-semibold uppercase tracking-[0.3em] text-white/60 mb-3">
+              <div className="hidden text-micro font-semibold uppercase tracking-[0.3em] text-white/60 mb-3 md:block">
                 {eyebrow}
               </div>
             </Reveal>
@@ -244,14 +269,14 @@ export function PageHero({
             </Reveal>
             {subtitle && (
               <Reveal order={2}>
-                <p className="mt-3 text-body text-white/80 max-w-xl leading-relaxed md:ml-auto">
+                <p className="mt-3 ml-auto text-body text-white/80 max-w-xl leading-relaxed">
                   {subtitle}
                 </p>
               </Reveal>
             )}
             {children && (
               <Reveal order={3}>
-                <div className="mt-4 md:flex md:justify-end">{children}</div>
+                <div className="mt-4 flex justify-end">{children}</div>
               </Reveal>
             )}
           </div>

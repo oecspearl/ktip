@@ -27,6 +27,7 @@ import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { FilterBar } from '../../components/ui/FilterBar'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
@@ -252,9 +253,13 @@ export default function EventsPage() {
   const containerWidth =
     view === 'calendar' ? 'max-w-[calc(80vw+16rem)]' : 'max-w-page-narrow'
 
-  const hasActiveFilters = Boolean(
-    selectedType || searchQuery || tagFilter.length
-  )
+  // Counted, not just tested: the phone trigger hides the controls, so the
+  // badge is the only thing telling you the list has been narrowed. Tags count
+  // as one however many are picked — the trigger stands for the control.
+  const activeFilterCount =
+    (selectedType ? 1 : 0) + (searchQuery ? 1 : 0) + (tagFilter.length ? 1 : 0)
+  const hasActiveFilters = activeFilterCount > 0
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
 
   // Type sections replace the flat grid whenever the upcoming list spans more
   // than one type. Picking a single type collapses back to one grid.
@@ -305,118 +310,123 @@ export default function EventsPage() {
         data-spy-off
         className="scroll-mt-24 bg-ktip-sand-50 py-8"
       >
-        <div className={cn('mx-auto px-4', containerWidth)}>
-          {/* Filters + collapsible search + view toggle */}
-          <div data-tutorial="events-filters" className="flex flex-wrap items-center gap-3">
-            <div data-tutorial="events-type-filter">
-              <Select
-                value={selectedType}
-                onChange={setSelectedType}
-                options={typeOptions}
-                ariaLabel={t`Filter by event type`}
-              />
-            </div>
+        <div className={cn('mx-auto px-4', containerWidth)} data-tutorial="events-filters">
+          <FilterBar
+            sheetTitle={t`Filter events`}
+            open={filterSheetOpen}
+            onOpenChange={setFilterSheetOpen}
+            activeCount={activeFilterCount}
+            onClear={clearFilters}
+            filters={
+              <>
+                <div data-tutorial="events-type-filter">
+                  <Select
+                    value={selectedType}
+                    onChange={setSelectedType}
+                    options={typeOptions}
+                    ariaLabel={t`Filter by event type`}
+                  />
+                </div>
 
-            <TagFilterSelect
-              options={tagOptions}
-              selected={tagFilter}
-              onChange={setTagFilter}
-            />
-
-            {view === 'grid' && !eventsLoading && events && (
-              <p className="text-sm text-gray-500">
-                <Plural value={events.length} one="Found # upcoming event" other="Found # upcoming events" />
-                {(pastEvents?.length ?? 0) > 0 && <Trans> · {pastEvents!.length} past</Trans>}
-              </p>
-            )}
-
-            {view === 'grid' && (
-              // Wrapper carries the tour anchor: SortSelect renders null when
-              // there is nothing to choose, and a 0×0 span is auto-skipped
-              <span data-tutorial="events-sort" className="inline-flex">
-                <SortSelect
-                  value={sort}
-                  onChange={setSort}
-                  options={SORT_OPTIONS.event.options}
-                  personalizationActive={personalizationActive}
+                <TagFilterSelect
+                  options={tagOptions}
+                  selected={tagFilter}
+                  onChange={setTagFilter}
                 />
-              </span>
-            )}
 
-            <div className="ml-auto flex items-center gap-2">
-              {/* Collapsible search — icon expands to input, like the navbar */}
-              <div data-tutorial="events-search">
-                <CollapsibleSearch
-                  value={searchQuery}
-                  onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                  open={searchOpen}
-                  onOpenChange={setSearchOpen}
-                  placeholder={t`Search events...`}
-                  ariaLabel={t`Search events`}
-                />
-              </div>
-
-              {view === 'grid' && <ColumnToggle value={columns} onChange={setColumns} />}
-
-              <div
-                data-tutorial="events-view-toggle"
-                className="inline-flex rounded-lg border border-ktip-sand-300 bg-ktip-cream p-0.5"
-              >
-              <button
-                type="button"
-                data-tutorial="events-view-calendar"
-                onClick={() => changeView('calendar')}
-                aria-pressed={view === 'calendar'}
-                aria-label={t`Calendar view`}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
-                  view === 'calendar'
-                    ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
-                    : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
+                {view === 'grid' && (
+                  // Wrapper carries the tour anchor: SortSelect renders null
+                  // when there is nothing to choose, and a 0×0 span is skipped
+                  <span data-tutorial="events-sort" className="inline-flex">
+                    <SortSelect
+                      value={sort}
+                      onChange={setSort}
+                      options={SORT_OPTIONS.event.options}
+                      personalizationActive={personalizationActive}
+                    />
+                  </span>
                 )}
-              >
-                <CalendarDays size={16} />
-                <span className="hidden sm:inline"><Trans>Calendar</Trans></span>
-              </button>
-              <button
-                type="button"
-                data-tutorial="events-view-grid"
-                onClick={() => changeView('grid')}
-                aria-pressed={view === 'grid'}
-                aria-label={t`Grid view`}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
-                  view === 'grid'
-                    ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
-                    : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
-                )}
-              >
-                <LayoutGrid size={16} />
-                <span className="hidden sm:inline"><Trans>Grid</Trans></span>
-              </button>
-              </div>
+              </>
+            }
+            count={
+              view === 'grid' && !eventsLoading && events ? (
+                <>
+                  <Plural value={events.length} one="Found # upcoming event" other="Found # upcoming events" />
+                  {(pastEvents?.length ?? 0) > 0 && <Trans> · {pastEvents!.length} past</Trans>}
+                </>
+              ) : null
+            }
+            actions={
+              <>
+                {/* Collapsible search — icon expands to input, like the navbar */}
+                <div data-tutorial="events-search">
+                  <CollapsibleSearch
+                    value={searchQuery}
+                    onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                    open={searchOpen}
+                    onOpenChange={setSearchOpen}
+                    placeholder={t`Search events...`}
+                    ariaLabel={t`Search events`}
+                  />
+                </div>
 
+                {view === 'grid' && <ColumnToggle value={columns} onChange={setColumns} />}
+
+                <div
+                  data-tutorial="events-view-toggle"
+                  className="inline-flex rounded-lg border border-ktip-sand-300 bg-ktip-cream p-0.5"
+                >
+                  <button
+                    type="button"
+                    data-tutorial="events-view-calendar"
+                    onClick={() => changeView('calendar')}
+                    aria-pressed={view === 'calendar'}
+                    aria-label={t`Calendar view`}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
+                      view === 'calendar'
+                        ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
+                        : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
+                    )}
+                  >
+                    <CalendarDays size={16} />
+                    <span className="hidden sm:inline"><Trans>Calendar</Trans></span>
+                  </button>
+                  <button
+                    type="button"
+                    data-tutorial="events-view-grid"
+                    onClick={() => changeView('grid')}
+                    aria-pressed={view === 'grid'}
+                    aria-label={t`Grid view`}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors',
+                      view === 'grid'
+                        ? 'bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white shadow-soft'
+                        : 'text-ktip-sand-700 hover:bg-ktip-sand-100'
+                    )}
+                  >
+                    <LayoutGrid size={16} />
+                    <span className="hidden sm:inline"><Trans>Grid</Trans></span>
+                  </button>
+                </div>
+              </>
+            }
+            cta={
               <Link to="/events/new">
+                {/* Icon-only below sm: the label is the widest thing in the bar,
+                    and dropping it is what keeps the CTA on the row. */}
                 <Button
                   data-tutorial="events-create"
                   icon={<Plus size={16} />}
                   size="sm"
-                  className="text-sm"
+                  aria-label={t`Create event`}
+                  className="text-label"
                 >
-                  <Trans>Create Event</Trans>
+                  <span className="hidden sm:inline"><Trans>Create Event</Trans></span>
                 </Button>
               </Link>
-            </div>
-          </div>
-
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
-            >
-              <Trans>Clear all filters</Trans>
-            </button>
-          )}
+            }
+          />
         </div>
       </div>
 

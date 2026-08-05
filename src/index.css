@@ -585,6 +585,12 @@ html.readable {
       surface but wants the vivid 500 on a dark one. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* A phone held sideways: as wide as a small tablet but only ~360px tall, which
+   no width breakpoint can describe. Anything that reserves vertical room by
+   default — a drawer header, a tile that is two rows tall — has to give some
+   of it back here or the content below the fold becomes unreachable. */
+@custom-variant landscape-short (@media (orientation: landscape) and (max-height: 32rem));
+
 html.dark {
   color-scheme: dark;
 
@@ -1270,6 +1276,44 @@ html.dark {
    animate-scale-in panels vanished with a hard cut. Pair with an origin-*
    utility on the consumer so the panel grows from its trigger corner.
    Driven by data-state from useDisclosureAnimation. */
+/* Filter sheet — the phone-width filter panel in components/ui/FilterBar.
+   Scrim and panel animate on their own curves: the scrim only fades, while the
+   panel travels, and giving a moving element the same linear-ish fade as a
+   static one makes the travel read as lag. Durations match the enterMs/exitMs
+   passed to useDisclosureAnimation there; changing one without the other
+   unmounts the panel mid-slide. */
+.filter-sheet-scrim {
+  transition: opacity 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.filter-sheet-panel {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.filter-sheet-root[data-state='open'] .filter-sheet-scrim {
+  opacity: 1;
+}
+.filter-sheet-root[data-state='open'] .filter-sheet-panel {
+  transform: none;
+}
+.filter-sheet-root[data-state='closed'] .filter-sheet-scrim {
+  opacity: 0;
+  transition-duration: 200ms;
+}
+.filter-sheet-root[data-state='closed'] .filter-sheet-panel {
+  /* 101% clears the shadow along with the panel */
+  transform: translateY(101%);
+  transition-duration: 200ms;
+}
+.filter-sheet-root[data-state='closed'] {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-sheet-scrim,
+  .filter-sheet-panel {
+    transition: none;
+  }
+}
+
 .dropdown-panel {
   transition:
     opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1702,6 +1746,28 @@ html[data-capturing] [data-fab] {
   40% { transform: translate(-7%, 5%) scale(1.1); }
   70% { transform: translate(4%, -6%) scale(0.92); }
 }
+/**
+ * Device rotation (see hooks/useOrientationTransition).
+ *
+ * The layout itself cannot be tweened across the flip — the viewport swaps its
+ * dimensions in one frame and every breakpoint and scale token re-resolves on
+ * the spot. This covers the swap instead: the page comes back up out of a dim
+ * over ~400ms, which reads as the new layout settling rather than snapping.
+ *
+ * Opacity only, deliberately. A transform or filter here would make body a
+ * containing block for `position: fixed`, and the navbar, the FAB, the drawer
+ * and every panel would detach from the viewport for the length of it.
+ */
+:root[data-rotating] body {
+  animation: rotateSettle 420ms ease-out;
+}
+
+@keyframes rotateSettle {
+  0% { opacity: 0.4; }
+  55% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
 @keyframes auroraDriftC {
   0%, 100% { transform: translate(0, 0) scale(1); }
   30% { transform: translate(5%, 6%) scale(0.94); }
@@ -1762,6 +1828,21 @@ html[data-capturing] [data-fab] {
   .ghost-surface[data-ghost='true'][data-ghost-near] .ghost-live {
     animation: none;
     opacity: 1;
+  }
+
+  /* A rotation is already jarring; fading it as well is not an improvement. */
+  :root[data-rotating] body {
+    animation: none;
+  }
+
+  /* The mobile drawer's slabs, panel and rows all stagger on inline
+     transition-delay, so the delays have to be overridden as well — without
+     that the drawer would appear instantly but its rows would still fade in
+     one at a time. */
+  [data-staggered-menu],
+  [data-staggered-menu] * {
+    transition: none !important;
+    transition-delay: 0s !important;
   }
 
   /* The quick-actions cluster fans out and collapses on inline transitions

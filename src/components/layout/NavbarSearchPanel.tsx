@@ -24,6 +24,16 @@ import { Trans, useLingui } from '@lingui/react/macro'
  * expands it in place to explain how to get there or do the thing yourself.
  */
 
+/**
+ * Width of the desktop search surface — the input AND this panel.
+ *
+ * Exported because Navbar sets it on the input container. The input used to be
+ * `max-w-md` (448px) against this panel's 544px, so the panel hung out past the
+ * left edge of the box that opened it and the two read as unrelated objects.
+ * One constant is the only way two elements in different files stay flush.
+ */
+export const SEARCH_PANEL_WIDTH = 'w-[min(34rem,calc(100vw-2rem))]'
+
 export interface NavbarSearchPanelProps {
   query: string
   groups: SearchGroup[]
@@ -91,7 +101,7 @@ export function NavbarSearchPanel({
       className={cn(
         'bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 overflow-hidden',
         variant === 'desktop'
-          ? 'absolute right-0 top-full mt-2 w-[min(34rem,calc(100vw-2rem))] origin-top-right z-dropdown'
+          ? cn('absolute right-0 top-full mt-2 origin-top-right z-dropdown', SEARCH_PANEL_WIDTH)
           : 'mt-2 w-full origin-top'
       )}
     >

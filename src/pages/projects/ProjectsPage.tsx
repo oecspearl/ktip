@@ -10,6 +10,7 @@ import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { Plus, Inbox } from 'lucide-react'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { FilterBar } from '../../components/ui/FilterBar'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
@@ -102,7 +103,12 @@ export default function ProjectsPage() {
     setDebouncedSearch('')
   }
 
-  const hasActiveFilters = Boolean(selectedCategory || selectedPhase || searchQuery)
+  // Counted, not just tested: the phone trigger hides the controls, so the
+  // badge is the only thing telling you the list has been narrowed.
+  const activeFilterCount =
+    (selectedCategory ? 1 : 0) + (selectedPhase ? 1 : 0) + (searchQuery ? 1 : 0)
+  const hasActiveFilters = activeFilterCount > 0
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
 
   // Category sections replace the flat grid whenever the list spans more than
   // one category. Picking a single category collapses back to one grid.
@@ -150,79 +156,87 @@ export default function ProjectsPage() {
           <div>
             {/* Filter Bar */}
             <div id="filters" data-spy="Filters" className="scroll-mt-24 mb-8">
-              {/* Filter row — search collapses into it, same as the events page */}
-              <div className="flex flex-wrap items-center gap-3">
-                <Select
-                  value={selectedCategory}
-                  onChange={setSelectedCategory}
-                  options={categoryOptions}
-                  ariaLabel={t`Filter by category`}
-                />
-
-                <Select
-                  value={selectedPhase}
-                  onChange={setSelectedPhase}
-                  options={phaseOptions}
-                  ariaLabel={t`Filter by phase`}
-                />
-
-                {/* Result count rides the filter row rather than sitting above
-                    the grid */}
-                {!projectsLoading && projects && (
-                  <p className="text-sm text-gray-500">
-                    <Plural
-                      value={projects.length}
-                      one="Found # project"
-                      other="Found # projects"
+              <FilterBar
+                sheetTitle={t`Filter projects`}
+                open={filterSheetOpen}
+                onOpenChange={setFilterSheetOpen}
+                activeCount={activeFilterCount}
+                onClear={clearFilters}
+                filters={
+                  <>
+                    <Select
+                      value={selectedCategory}
+                      onChange={setSelectedCategory}
+                      options={categoryOptions}
+                      ariaLabel={t`Filter by category`}
                     />
-                    {categoryGroups.length > 1 && (
-                      <>
-                        {' '}
-                        <Plural
-                          value={categoryGroups.length}
-                          one="in # category"
-                          other="in # categories"
-                        />
-                      </>
-                    )}
-                  </p>
-                )}
 
-                <div className="ml-auto flex items-center gap-2">
-                  <SortSelect
-                    value={sort}
-                    onChange={setSort}
-                    options={SORT_OPTIONS.project.options}
-                    personalizationActive={personalizationActive}
-                  />
-                  <CollapsibleSearch
-                    value={searchQuery}
-                    onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                    placeholder={t`Search projects...`}
-                    ariaLabel={t`Search projects`}
-                  />
+                    <Select
+                      value={selectedPhase}
+                      onChange={setSelectedPhase}
+                      options={phaseOptions}
+                      ariaLabel={t`Filter by phase`}
+                    />
 
-                  <ColumnToggle value={columns} onChange={setColumns} />
-
-                  {canCreateProject && (
+                    {/* Sort shapes which results you see, same as the two
+                        above, so it shares their sheet on a phone. */}
+                    <SortSelect
+                      value={sort}
+                      onChange={setSort}
+                      options={SORT_OPTIONS.project.options}
+                      personalizationActive={personalizationActive}
+                    />
+                  </>
+                }
+                count={
+                  !projectsLoading && projects ? (
+                    <>
+                      <Plural
+                        value={projects.length}
+                        one="Found # project"
+                        other="Found # projects"
+                      />
+                      {categoryGroups.length > 1 && (
+                        <>
+                          {' '}
+                          <Plural
+                            value={categoryGroups.length}
+                            one="in # category"
+                            other="in # categories"
+                          />
+                        </>
+                      )}
+                    </>
+                  ) : null
+                }
+                actions={
+                  <>
+                    <CollapsibleSearch
+                      value={searchQuery}
+                      onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                      placeholder={t`Search projects...`}
+                      ariaLabel={t`Search projects`}
+                    />
+                    <ColumnToggle value={columns} onChange={setColumns} />
+                  </>
+                }
+                cta={
+                  canCreateProject ? (
                     <Link to="/projects/new" data-tutorial="projects-create">
-                      <button className="flex items-center gap-1.5 px-4 py-2 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
+                      {/* Icon-only below sm. The label is what makes this the
+                          widest thing in the bar, and dropping it is what lets
+                          the CTA stay in the row rather than wrap under it. */}
+                      <button
+                        aria-label={t`Create project`}
+                        className="flex items-center gap-1.5 px-3 py-2 sm:px-4 btn-brand text-label font-bold uppercase tracking-wider rounded-lg"
+                      >
                         <Plus size={16} />
-                        <Trans>Create Project</Trans>
+                        <span className="hidden sm:inline"><Trans>Create Project</Trans></span>
                       </button>
                     </Link>
-                  )}
-                </div>
-              </div>
-
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
-                >
-                  <Trans>Clear all filters</Trans>
-                </button>
-              )}
+                  ) : null
+                }
+              />
             </div>
 
             {/* Project List */}

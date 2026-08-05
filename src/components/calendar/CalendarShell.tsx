@@ -214,7 +214,14 @@ function CalendarShellInner({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Scale — which span you are looking at.
+              `w-full order-last` on a phone: the four view buttons plus Today
+              plus two arrows do not fit beside a month title, and letting them
+              wrap mid-cluster split the group in a different place at every
+              width. Given its own line the group stays whole, and the title
+              keeps the row it shares with the arrows that move it. Above sm the
+              order classes drop out and the two groups are one bar again. */}
+          <div className="order-last flex w-full items-center gap-2 sm:order-none sm:w-auto">
             <Segmented
               value={view}
               onChange={onViewChange}
@@ -227,9 +234,13 @@ function CalendarShellInner({
             />
 
             {/* Scale on the left, position on the right — the rule says the two
-                groups do different jobs */}
-            <span aria-hidden="true" className="mx-1 h-6 w-px bg-ktip-sand-300" />
+                groups do different jobs. Hidden once they are on separate rows,
+                where the line would divide a group from nothing. */}
+            <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-ktip-sand-300 sm:block" />
+          </div>
 
+          {/* Position — where in that span you are. */}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={onToday}

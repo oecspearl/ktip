@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 /**
  * Responsive preview harness — dev only, never routed in a production build.
@@ -15,33 +15,143 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * rather than restating the numbers from index.css, which would let the table
  * agree with itself while disagreeing with the app.
  *
+ * Devices are described the way people describe their machines — `14" laptop`,
+ * not `1280` — because nobody reports a bug as "the layout is wrong at 1280".
+ * The CSS width is derived from the panel and its OS scaling rather than typed
+ * in, since that derivation is the thing people get wrong: a 14" laptop with a
+ * 1920x1080 panel at Windows' default 150% is a 1280px viewport, not a 1920px
+ * one, and roughly 610px tall once the browser's own chrome is subtracted.
+ *
  * Solo mode answers the other question the grid cannot: "is this text too small
  * to read on my actual laptop?" A frame at 32% is the right shape and the wrong
  * size, so judging legibility from it is meaningless. Solo renders one device
  * at 1:1 filling the whole screen — and deliberately CROPS anything wider than
  * the real display rather than scaling it down, because a scaled-down 2560 frame
  * would once again show text at a size nobody will ever look at.
+ *
+ * The pt readout answers it a third way, without leaving the desk. Two screens
+ * showing the same CSS px show text at different PHYSICAL sizes whenever their
+ * pixel densities differ, so `16px` says nothing about whether a reader can see
+ * it. Points are absolute — 1/72", the unit print has used for centuries — so
+ * the same number in two columns means the same size to an eye, and a column
+ * that drops several points below the rest is the machine people complain about.
  */
 
+type Group = 'phone' | 'tablet' | 'laptop' | 'desktop'
+
 interface Device {
+  id: string
+  /** How its owner would describe it. */
   label: string
-  note: string
+  /** Panel and OS scaling, spelled out — the derivation people get wrong. */
+  detail: string
+  group: Group
+  /** CSS px available to the page. */
   width: number
   height: number
+  /** Native px per CSS px: OS display scaling, or a Mac's Retina backing scale. */
+  dpr: number
+  /** Physical panel diagonal, for the pt readout. */
+  diagonalIn: number
+  panelW: number
+  panelH: number
 }
 
-/** Mirrors the ramp steps in index.css, plus the two phone sizes below them. */
+/**
+ * Vertical CSS px the browser's own UI takes off the panel.
+ *
+ * Height is the constraint people actually hit on a small laptop and the one a
+ * width-only device list hides completely: a 14" 1080p panel at 150% is 720 CSS
+ * px tall, and the page gets 610 of them. Chrome's tab strip plus omnibox is
+ * ~88 CSS px with no bookmarks bar, Safari's unified bar ~78, and a phone's
+ * address bar ~85 in its collapsed state.
+ */
+const CHROME: Record<Group, number> = { phone: 85, tablet: 90, laptop: 110, desktop: 110 }
+
+/**
+ * A device from what is printed on the box, not from a viewport size.
+ *
+ * `scale` is OS display scaling (Windows' 100/125/150%) or a Mac's effective
+ * backing scale — 2560/1440 = 1.78 for a 13" Air at its default "looks like
+ * 1440x900", which is why these are not round numbers.
+ */
+function device(
+  id: string,
+  label: string,
+  group: Group,
+  diagonalIn: number,
+  panelW: number,
+  panelH: number,
+  scale: number,
+  detail: string,
+): Device {
+  return {
+    id,
+    label,
+    detail,
+    group,
+    diagonalIn,
+    panelW,
+    panelH,
+    dpr: scale,
+    width: Math.round(panelW / scale),
+    height: Math.round(panelH / scale) - CHROME[group],
+  }
+}
+
+/**
+ * Real machines, described as their owners describe them.
+ *
+ * The laptop block is deliberately the crowded one. It is where the ramp steps
+ * at 1280/1440/1680 land on top of each other, where OS scaling makes the CSS
+ * width unguessable from the spec sheet, and where every complaint comes from.
+ */
 const DEVICES: Device[] = [
-  { label: 'Phone', note: 'iPhone portrait', width: 375, height: 812 },
-  { label: 'Phone L', note: 'large phone', width: 430, height: 932 },
-  { label: 'Tablet', note: 'iPad portrait', width: 768, height: 1024 },
-  { label: 'Tablet L', note: 'iPad landscape', width: 1024, height: 768 },
-  { label: 'Laptop 13"', note: '1280 wide', width: 1280, height: 800 },
-  { label: 'Laptop 14–16"', note: 'ramp anchor — all scales = 1', width: 1440, height: 900 },
-  { label: 'Laptop 16" scaled', note: '1680 wide', width: 1680, height: 1050 },
-  { label: 'Desktop 1080p', note: '1920 wide', width: 1920, height: 1080 },
-  { label: 'Your monitor', note: '2560x1600 — design target', width: 2560, height: 1600 },
+  device('phone', '6.1" phone', 'phone', 6.1, 1170, 2532, 3, 'iPhone, portrait'),
+  device('phone-l', '6.7" phone', 'phone', 6.7, 1290, 2796, 3, 'large phone, portrait'),
+  device('tablet', '10.9" tablet', 'tablet', 10.9, 1640, 2360, 2, 'iPad, portrait'),
+  device('tablet-l', '10.9" tablet ↔', 'tablet', 10.9, 2360, 1640, 2, 'iPad, landscape'),
+
+  device('l116', '11.6" netbook', 'laptop', 11.6, 1366, 768, 1, '1366x768 @ 100%'),
+  device('l133-win', '13.3" laptop', 'laptop', 13.3, 1920, 1080, 1.5, '1920x1080 @ 150%'),
+  device('l133-air', '13.6" MacBook Air', 'laptop', 13.6, 2560, 1664, 1.742, 'Retina, default scaling'),
+  device('l14-150', '14" laptop', 'laptop', 14, 1920, 1080, 1.5, '1920x1080 @ 150% — the common one'),
+  device('l14-1200', '14" laptop 16:10', 'laptop', 14, 1920, 1200, 1.5, '1920x1200 @ 150%'),
+  device('l14-125', '14" laptop @125%', 'laptop', 14, 1920, 1080, 1.25, '1920x1080 @ 125%'),
+  device('l142-mbp', '14.2" MacBook Pro', 'laptop', 14.2, 3024, 1964, 2, 'Retina, default scaling'),
+  device('l156-100', '15.6" laptop', 'laptop', 15.6, 1920, 1080, 1, '1920x1080 @ 100%'),
+  device('l156-125', '15.6" laptop @125%', 'laptop', 15.6, 1920, 1080, 1.25, '1920x1080 @ 125%'),
+  device('l16-mbp', '16" MacBook Pro', 'laptop', 16, 3456, 2234, 2, 'Retina, default scaling'),
+
+  device('d24', '24" monitor', 'desktop', 24, 1920, 1080, 1, '1080p @ 100%'),
+  device('d27', '27" monitor', 'desktop', 27, 2560, 1440, 1, '1440p @ 100% — design target'),
+  device('d27-4k', '27" 4K monitor', 'desktop', 27, 3840, 2160, 1.5, '4K @ 150%'),
+  device('d32-4k', '32" 4K monitor', 'desktop', 32, 3840, 2160, 1.25, '4K @ 125%'),
 ]
+
+const GROUPS: { key: Group; label: string }[] = [
+  { key: 'phone', label: 'Phones' },
+  { key: 'tablet', label: 'Tablets' },
+  { key: 'laptop', label: 'Laptops' },
+  { key: 'desktop', label: 'Desktops' },
+]
+
+/**
+ * CSS px per physical inch, which is what makes a px count mean something.
+ *
+ * A panel's physical width comes from its diagonal and aspect ratio; dividing
+ * the CSS width by it gives the density the reader's eye actually sees. 96 is
+ * the notional baseline every `px` value is authored against.
+ */
+function pxPerInch(d: Device): number {
+  const physicalWidthIn = (d.diagonalIn * d.panelW) / Math.hypot(d.panelW, d.panelH)
+  return d.width / physicalWidthIn
+}
+
+/** CSS px → points (1/72"), so two columns are comparable to an eye. */
+function toPt(px: number, cssPxPerIn: number): number {
+  return (px * 72) / cssPxPerIn
+}
 
 /** Tokens sampled in the readout, in ladder order. */
 const TYPE_TOKENS = [
@@ -59,6 +169,7 @@ const TYPE_TOKENS = [
 
 const BOX_TOKENS = [
   { cls: 'p-card-pad', prop: 'paddingTop', label: 'card padding' },
+  { cls: 'min-h-hero-band', prop: 'minHeight', label: 'hero band' },
   { cls: 'min-h-tile-min', prop: 'minHeight', label: 'tile min-height' },
   { cls: 'min-h-control-md', prop: 'minHeight', label: 'control height' },
   { cls: 'size-icon', prop: 'width', label: 'icon' },
@@ -143,7 +254,7 @@ function DeviceFrame({
   device: Device
   path: string
   zoom: number
-  onMeasure: (label: string, m: Measurement | null) => void
+  onMeasure: (id: string, m: Measurement | null) => void
   onSolo: (device: Device) => void
 }) {
   const ref = useRef<HTMLIFrameElement>(null)
@@ -152,16 +263,16 @@ function DeviceFrame({
     // A frame that has only just fired load may not have applied stylesheets
     // yet; one frame of delay is enough and avoids reading zeros.
     requestAnimationFrame(() => {
-      if (ref.current) onMeasure(device.label, measure(ref.current))
+      if (ref.current) onMeasure(device.id, measure(ref.current))
     })
-  }, [device.label, onMeasure])
+  }, [device.id, onMeasure])
 
   return (
     <div className="shrink-0">
       <div className="mb-2 flex items-baseline gap-2">
         <span className="text-label font-semibold text-ktip-sand-900">{device.label}</span>
         <span className="text-micro text-ktip-sand-500">
-          {device.width}x{device.height} · {device.note}
+          {device.width}x{device.height} css · {device.detail}
         </span>
         <button
           type="button"
@@ -208,6 +319,29 @@ function useViewport() {
     return () => window.removeEventListener('resize', onResize)
   }, [])
   return size
+}
+
+const DIAGONAL_KEY = 'ktip.responsive-preview.diagonal-in'
+
+/**
+ * The physical size of the screen you are sitting at, which no API reports.
+ *
+ * Everything else on this page is measured; this one number has to be typed,
+ * because the browser exposes resolution and density but never inches. Without
+ * it "This screen" can be compared in px but not in pt, and pt is the column
+ * that settles whether someone else's laptop really shows smaller text.
+ */
+function useOwnDiagonal(): [number, (v: number) => void] {
+  const [inches, setInches] = useState(() => {
+    if (typeof window === 'undefined') return 27
+    const stored = Number(window.localStorage.getItem(DIAGONAL_KEY))
+    return stored > 0 ? stored : 27
+  })
+  const set = useCallback((v: number) => {
+    setInches(v)
+    if (v > 0) window.localStorage.setItem(DIAGONAL_KEY, String(v))
+  }, [])
+  return [inches, set]
 }
 
 /**
@@ -297,16 +431,16 @@ function SoloView({
 
             {devices.map((d) => (
               <button
-                key={d.label}
+                key={d.id}
                 type="button"
                 onClick={() => onPickDevice(d)}
                 className={`rounded px-2 py-1 transition-colors ${
-                  d.label === device.label
+                  d.id === device.id
                     ? 'bg-white text-black font-semibold'
                     : 'bg-white/10 text-white/80 hover:bg-white/20'
                 }`}
               >
-                {d.label === 'This screen' ? 'mine' : d.width}
+                {d.label}
               </button>
             ))}
 
@@ -353,25 +487,92 @@ export default function ResponsivePreviewPage() {
   const [measurements, setMeasurements] = useState<Record<string, Measurement | null>>({})
   const [solo, setSolo] = useState<Device | null>(null)
   const [tableOpen, setTableOpen] = useState(true)
+  // Laptops only by default: every frame is a full app boot, and laptops are
+  // the block where the ramp steps crowd together and the bug reports come from.
+  const [groups, setGroups] = useState<Group[]>(['laptop'])
+  const [unit, setUnit] = useState<'px' | 'pt'>('px')
   const viewport = useViewport()
+  const [ownDiagonal, setOwnDiagonal] = useOwnDiagonal()
 
-  /** The machine you are actually sitting at, offered as a device like any other. */
-  const thisScreen: Device = {
-    label: 'This screen',
-    note: 'your browser viewport, 1:1',
-    width: viewport.width,
-    height: viewport.height,
-  }
+  /**
+   * The machine you are actually sitting at, offered as a device like any other.
+   *
+   * Panel and density come from the screen APIs; only the diagonal is typed. The
+   * window may be smaller than the display, so width/height are overridden with
+   * the live viewport while the density stays the panel's.
+   */
+  const thisScreen: Device = useMemo(() => {
+    const dpr = typeof window === 'undefined' ? 1 : window.devicePixelRatio
+    const screenW = typeof window === 'undefined' ? 1440 : window.screen.width
+    const screenH = typeof window === 'undefined' ? 900 : window.screen.height
+    return {
+      id: 'this-screen',
+      label: 'This screen',
+      detail: `${Math.round(screenW * dpr)}x${Math.round(screenH * dpr)} @ ${Math.round(dpr * 100)}%`,
+      group: 'desktop',
+      width: viewport.width,
+      height: viewport.height,
+      dpr,
+      diagonalIn: ownDiagonal,
+      // Density is a property of the panel, not of the window, so pt stays
+      // right even when the browser is not maximised.
+      panelW: Math.round(screenW * dpr),
+      panelH: Math.round(screenH * dpr),
+    }
+  }, [viewport.width, viewport.height, ownDiagonal])
 
-  const onMeasure = useCallback((label: string, m: Measurement | null) => {
-    setMeasurements((prev) => ({ ...prev, [label]: m }))
+  const onMeasure = useCallback((id: string, m: Measurement | null) => {
+    setMeasurements((prev) => ({ ...prev, [id]: m }))
   }, [])
 
   useEffect(() => {
     document.title = 'Responsive preview'
   }, [])
 
-  const shown = DEVICES.filter((d) => measurements[d.label])
+  const visible = useMemo(() => DEVICES.filter((d) => groups.includes(d.group)), [groups])
+  const shown = visible.filter((d) => measurements[d.id])
+
+  /**
+   * Density of `thisScreen`, but corrected for the fact that its width is the
+   * window rather than the panel — otherwise a half-width window would report
+   * half the real density and every pt in its column would be wrong.
+   */
+  const ownPxPerIn = useMemo(() => {
+    const panelAsDevice: Device = { ...thisScreen, width: Math.round(thisScreen.panelW / thisScreen.dpr) }
+    return pxPerInch(panelAsDevice)
+  }, [thisScreen])
+
+  /** px → the unit currently selected, using the right density per column. */
+  const fmt = useCallback(
+    (px: number | undefined, d: Device) => {
+      if (typeof px !== 'number' || Number.isNaN(px)) return '—'
+      if (unit === 'px') return String(px)
+      const ppi = d.id === 'this-screen' ? ownPxPerIn : pxPerInch(d)
+      return toPt(px, ppi).toFixed(1)
+    },
+    [unit, ownPxPerIn],
+  )
+
+  /**
+   * The readability floor, expressed in whichever unit is showing.
+   *
+   * 13px is the floor the migration exists to enforce, and at the notional 96
+   * CSS px per inch that is 9.75pt — so a dense panel can satisfy the px rule
+   * and still render text below the physical floor. Checking in the displayed
+   * unit is what makes that visible.
+   */
+  const belowFloor = useCallback(
+    (px: number | undefined, d: Device) => {
+      if (typeof px !== 'number') return false
+      if (unit === 'px') return px < 13
+      const ppi = d.id === 'this-screen' ? ownPxPerIn : pxPerInch(d)
+      return toPt(px, ppi) < 9.75
+    },
+    [unit, ownPxPerIn],
+  )
+
+  const toggleGroup = (g: Group) =>
+    setGroups((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]))
 
   return (
     <div className="min-h-screen bg-ktip-canvas p-card-pad-lg">
@@ -380,12 +581,13 @@ export default function ResponsivePreviewPage() {
           Responsive preview
         </h1>
         <p className="mt-1 text-body text-ktip-sand-600">
-          Every frame is the real app at that exact CSS width. Sizes below are measured out of the
-          frames, not copied from the stylesheet.
+          Every frame is the real app on that machine — CSS width derived from the panel and its OS
+          scaling, height with the browser's own chrome already subtracted. Sizes below are measured
+          out of the frames, not copied from the stylesheet.
         </p>
       </header>
 
-      <div className="mb-6 flex flex-wrap items-end gap-4">
+      <div className="mb-4 flex flex-wrap items-end gap-4">
         <form
           className="flex items-end gap-2"
           onSubmit={(e) => {
@@ -422,6 +624,24 @@ export default function ResponsivePreviewPage() {
           />
         </label>
 
+        <label className="flex flex-col gap-1.5">
+          <span className="text-label font-medium text-ktip-sand-700">My screen is</span>
+          <span className="flex items-center gap-2">
+            <input
+              type="number"
+              min={5}
+              max={60}
+              step={0.1}
+              value={ownDiagonal}
+              onChange={(e) => setOwnDiagonal(Number(e.target.value))}
+              className="w-20 rounded-control border border-ktip-sand-200 bg-ktip-sand-50/50 px-3 py-3 text-body tabular-nums"
+            />
+            <span className="text-caption text-ktip-sand-600">
+              inches — {Math.round(ownPxPerIn)} css px/in
+            </span>
+          </span>
+        </label>
+
         <button
           type="button"
           onClick={() => setSolo(thisScreen)}
@@ -429,6 +649,28 @@ export default function ResponsivePreviewPage() {
         >
           Full screen — this screen ({viewport.width}×{viewport.height})
         </button>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-label font-medium text-ktip-sand-700">Show</span>
+        {GROUPS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => toggleGroup(key)}
+            aria-pressed={groups.includes(key)}
+            className={`rounded-control border px-3 py-1.5 text-label transition-colors ${
+              groups.includes(key)
+                ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-700'
+                : 'border-ktip-sand-200 bg-ktip-cream text-ktip-sand-600 hover:bg-ktip-sand-50'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+        <span className="ml-2 text-caption text-ktip-sand-500">
+          {visible.length} frame{visible.length === 1 ? '' : 's'} — each one boots the app
+        </span>
       </div>
 
       <div className="mb-8 flex flex-wrap gap-2">
@@ -452,9 +694,9 @@ export default function ResponsivePreviewPage() {
       </div>
 
       <div className="mb-10 flex gap-6 overflow-x-auto pb-4">
-        {DEVICES.map((device) => (
+        {visible.map((device) => (
           <DeviceFrame
-            key={`${device.label}-${path}`}
+            key={`${device.id}-${path}`}
             device={device}
             path={path}
             zoom={zoom}
@@ -466,34 +708,63 @@ export default function ResponsivePreviewPage() {
 
       {shown.length > 0 && (
         <section>
-          <button
-            type="button"
-            onClick={() => setTableOpen((open) => !open)}
-            aria-expanded={tableOpen}
-            className="mb-3 flex items-center gap-2 text-title font-display font-bold text-ktip-sand-900"
-          >
-            <span
-              aria-hidden
-              className={`inline-block text-title-sm transition-transform ${tableOpen ? 'rotate-90' : ''}`}
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setTableOpen((open) => !open)}
+              aria-expanded={tableOpen}
+              className="flex items-center gap-2 text-title font-display font-bold text-ktip-sand-900"
             >
-              ›
-            </span>
-            Measured sizes
-            <span className="text-caption font-sans font-normal text-ktip-sand-500">
-              {tableOpen ? 'hide' : `show — ${shown.length} widths`}
-            </span>
-          </button>
+              <span
+                aria-hidden
+                className={`inline-block text-title-sm transition-transform ${tableOpen ? 'rotate-90' : ''}`}
+              >
+                ›
+              </span>
+              Measured sizes
+              <span className="text-caption font-sans font-normal text-ktip-sand-500">
+                {tableOpen ? 'hide' : `show — ${shown.length} machines`}
+              </span>
+            </button>
+
+            {tableOpen && (
+              <div className="flex items-center gap-1 rounded-control border border-ktip-sand-200 bg-ktip-cream p-1">
+                {(['px', 'pt'] as const).map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => setUnit(u)}
+                    aria-pressed={unit === u}
+                    className={`rounded px-3 py-1 text-label transition-colors ${
+                      unit === u
+                        ? 'bg-ktip-ocean-500 font-semibold text-white'
+                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50'
+                    }`}
+                  >
+                    {u === 'px' ? 'CSS px' : 'pt (physical)'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div
             hidden={!tableOpen}
             className="overflow-x-auto rounded-surface border border-ktip-sand-200 bg-ktip-cream"
           >
             <table className="w-full border-collapse text-label tabular-nums">
               <thead>
-                <tr className="border-b border-ktip-sand-200 text-left">
+                <tr className="border-b border-ktip-sand-200 text-left align-bottom">
                   <th className="px-4 py-3 font-semibold text-ktip-sand-700">Token</th>
                   {shown.map((d) => (
-                    <th key={d.label} className="px-3 py-3 text-right font-semibold text-ktip-sand-700">
-                      {d.width}
+                    <th key={d.id} className="px-3 py-3 text-right font-semibold text-ktip-sand-700">
+                      <div>{d.label}</div>
+                      <div className="text-micro font-normal text-ktip-sand-500">
+                        {d.width}×{d.height} css
+                      </div>
+                      <div className="text-micro font-normal text-ktip-sand-400">
+                        {Math.round(d.id === 'this-screen' ? ownPxPerIn : pxPerInch(d))} px/in
+                      </div>
                     </th>
                   ))}
                 </tr>
@@ -502,10 +773,10 @@ export default function ResponsivePreviewPage() {
                 <tr className="border-b border-ktip-sand-200">
                   <td className="px-4 py-2 font-semibold text-ktip-sand-700">page overflow</td>
                   {shown.map((d) => {
-                    const px = measurements[d.label]?.fit.pageOverflow ?? 0
+                    const px = measurements[d.id]?.fit.pageOverflow ?? 0
                     return (
                       <td
-                        key={d.label}
+                        key={d.id}
                         className={`px-3 py-2 text-right ${px > 0 ? 'font-bold text-red-600' : 'text-ktip-tropical-700'}`}
                       >
                         {px > 0 ? `+${px}` : 'ok'}
@@ -516,14 +787,35 @@ export default function ResponsivePreviewPage() {
                 <tr className="border-b border-ktip-sand-200">
                   <td className="px-4 py-2 font-semibold text-ktip-sand-700">navbar fits</td>
                   {shown.map((d) => {
-                    const fit = measurements[d.label]?.fit
+                    const fit = measurements[d.id]?.fit
                     const bad = (fit?.navOverflow ?? 0) > 0
                     return (
                       <td
-                        key={d.label}
+                        key={d.id}
                         className={`px-3 py-2 text-right ${bad ? 'font-bold text-red-600' : 'text-ktip-tropical-700'}`}
                       >
                         {bad ? `+${fit!.navOverflow}` : 'ok'}
+                      </td>
+                    )
+                  })}
+                </tr>
+                {/* Height is the constraint a width-only table hides: nav plus
+                    hero band is what a reader gets INSTEAD of content on the
+                    first screen, and on a 14" laptop it is most of it. */}
+                <tr className="border-b border-ktip-sand-200">
+                  <td className="px-4 py-2 font-semibold text-ktip-sand-700">nav + hero of fold</td>
+                  {shown.map((d) => {
+                    const m = measurements[d.id]
+                    const above = (m?.fit.navHeight ?? 0) + (m?.box['hero band'] ?? 0)
+                    const pct = Math.round((above / d.height) * 100)
+                    return (
+                      <td
+                        key={d.id}
+                        className={`px-3 py-2 text-right ${
+                          pct >= 60 ? 'font-bold text-red-600' : pct >= 45 ? 'text-amber-600' : 'text-ktip-sand-800'
+                        }`}
+                      >
+                        {m ? `${pct}%` : '—'}
                       </td>
                     )
                   })}
@@ -532,8 +824,8 @@ export default function ResponsivePreviewPage() {
                   <tr key={ramp} className="border-b border-ktip-sand-100 bg-ktip-sand-50/40">
                     <td className="px-4 py-2 font-mono text-micro text-ktip-sand-600">{ramp}</td>
                     {shown.map((d) => (
-                      <td key={d.label} className="px-3 py-2 text-right text-ktip-sand-800">
-                        {measurements[d.label]?.scales[ramp]}
+                      <td key={d.id} className="px-3 py-2 text-right text-ktip-sand-800">
+                        {measurements[d.id]?.scales[ramp]}
                       </td>
                     ))}
                   </tr>
@@ -542,18 +834,15 @@ export default function ResponsivePreviewPage() {
                   <tr key={token} className="border-b border-ktip-sand-100">
                     <td className="px-4 py-2 font-mono text-micro text-ktip-sand-600">{token}</td>
                     {shown.map((d) => {
-                      const px = measurements[d.label]?.type[token]
-                      // 13px is the floor the migration exists to enforce; the
-                      // whole point of the table is being able to see a breach.
-                      const tooSmall = typeof px === 'number' && px < 13
+                      const px = measurements[d.id]?.type[token]
                       return (
                         <td
-                          key={d.label}
+                          key={d.id}
                           className={`px-3 py-2 text-right ${
-                            tooSmall ? 'font-bold text-red-600' : 'text-ktip-sand-800'
+                            belowFloor(px, d) ? 'font-bold text-red-600' : 'text-ktip-sand-800'
                           }`}
                         >
-                          {px}
+                          {fmt(px, d)}
                         </td>
                       )
                     })}
@@ -563,8 +852,8 @@ export default function ResponsivePreviewPage() {
                   <tr key={label} className="border-b border-ktip-sand-100 bg-ktip-sand-50/40">
                     <td className="px-4 py-2 font-mono text-micro text-ktip-sand-600">{label}</td>
                     {shown.map((d) => (
-                      <td key={d.label} className="px-3 py-2 text-right text-ktip-sand-800">
-                        {measurements[d.label]?.box[label]}
+                      <td key={d.id} className="px-3 py-2 text-right text-ktip-sand-800">
+                        {measurements[d.id]?.box[label]}
                       </td>
                     ))}
                   </tr>
@@ -574,9 +863,12 @@ export default function ResponsivePreviewPage() {
           </div>
           {tableOpen && (
             <p className="mt-2 text-caption text-ktip-sand-500">
-              Red marks anything under the 13px readability floor. Stock <code>p-6</code> and{' '}
-              <code>gap-4</code> are included to show the global <code>--spacing</code> override
-              reaching utilities nothing migrated.
+              Red marks anything under the readability floor — 13px, or 9.75pt in the physical view.
+              Type rows follow the unit toggle; box rows stay in CSS px because layout is authored in
+              them. Two columns showing the same pt look the same size to a reader; the same px on
+              two different densities do not. Stock <code>p-6</code> and <code>gap-4</code> are
+              included to show the global <code>--spacing</code> override reaching utilities nothing
+              migrated.
             </p>
           )}
         </section>
@@ -584,8 +876,8 @@ export default function ResponsivePreviewPage() {
 
       {solo && (
         <SoloView
-          device={solo.label === 'This screen' ? thisScreen : solo}
-          devices={[thisScreen, ...DEVICES]}
+          device={solo.id === 'this-screen' ? thisScreen : solo}
+          devices={[thisScreen, ...visible]}
           path={path}
           viewport={viewport}
           onPickDevice={setSolo}
