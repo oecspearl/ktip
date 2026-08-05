@@ -154,7 +154,10 @@ export function VenueRoomBrief({
           onClick={onEnter}
           disabled={!canEnter || full}
           style={canEnter && !full ? { background: color, color: contrastInk(color) } : undefined}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:bg-ktip-sand-100 disabled:text-ktip-sand-500"
+          // Soft-UI to match Button: --radius-neu corner, the shadow pair for
+          // elevation, one pixel of hover and an inset press. The fill is the
+          // room's own colour, so it keeps the inline style.
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-neu-sm px-3 py-2 text-sm font-semibold shadow-neu-sm transition-all hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset disabled:translate-y-0 disabled:shadow-neu-flat disabled:bg-ktip-sand-100 disabled:text-ktip-sand-500"
         >
           <DoorOpen size={15} aria-hidden="true" />
           {!room.is_open

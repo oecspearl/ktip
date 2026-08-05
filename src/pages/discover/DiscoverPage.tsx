@@ -1054,7 +1054,10 @@ export default function DiscoverPage() {
                 // px/py/gap are divided by 0.875 because an `em` length on an
                 // element that also sets font-size resolves against that new
                 // size: 2em × 0.875 × 16 = the 28px of the original px-7
-                className="group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.571em] bg-brand-navy text-white text-[0.875em] font-medium tracking-wide shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
+                // Soft-UI, in the on-dark materials: this sits on hero
+                // photography. The radius stays `em` so it tracks the hero's
+                // fit scale, at the soft-UI proportion rather than the 6px one.
+                className="neu-on-dark group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.9em] bg-brand-navy text-white text-[0.875em] font-medium tracking-wide shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
               >
                 {active ? t`View Details` : t`Browse ${modeLabel}`}
                 {/* Icons take numeric px, so the fit multiplier that the `em`
@@ -1072,9 +1075,12 @@ export default function DiscoverPage() {
           <div className="flex items-end justify-between gap-[1.5em]">
             <div className="min-w-0">
               {/* Slide toggle */}
-              <div className="relative inline-flex bg-white/10 backdrop-blur-sm p-[0.25em] mb-[1em] rounded-[0.5em]">
+              {/* Soft-UI segmented control: the track is a well (inset pair,
+                  on-dark materials over the photo) and the thumb is lifted out
+                  of it — the same two-direction reading as Switch. */}
+              <div className="neu-on-dark relative inline-flex bg-white/10 backdrop-blur-sm p-[0.25em] mb-[1em] rounded-[0.75em] shadow-neu-sm-inset">
                 <div
-                  className="absolute top-[0.25em] bottom-[0.25em] w-[calc((100%-0.5em)/3)] bg-ktip-cream rounded-[0.375em] transition-transform duration-300 ease-out"
+                  className="absolute top-[0.25em] bottom-[0.25em] w-[calc((100%-0.5em)/3)] bg-ktip-cream rounded-[0.6em] shadow-neu-sm transition-transform duration-300 ease-out"
                   style={{ transform: `translateX(${modeIndex * 100}%)` }}
                 />
                 {MODES.map((m) => (
@@ -1298,7 +1304,10 @@ export default function DiscoverPage() {
                   </p>
                 </div>
 
-                <span className="relative self-start inline-flex items-center gap-1.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-lg px-4 py-2 text-xs font-semibold shadow-soft group-hover:shadow-medium group-hover:bg-brand-green group-hover:text-brand-navy group-hover:-translate-y-0.5 group-hover:scale-[1.03] dark:group-hover:bg-brand-navy dark:group-hover:text-brand-green group-hover:gap-2.5 transition-all">
+                {/* Soft-UI pill, on-dark materials — the tile behind it is a
+                    photo. Kept in step with the BentoCard CTA it was copied
+                    from: --radius-neu corner, shadow pair, one-pixel rise. */}
+                <span className="neu-on-dark relative self-start inline-flex items-center gap-1.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-neu-sm px-4 py-2 text-xs font-semibold shadow-neu-sm group-hover:bg-brand-green group-hover:text-brand-navy group-hover:-translate-y-px dark:group-hover:bg-brand-navy dark:group-hover:text-brand-green group-hover:gap-2.5 transition-all">
                   <Trans>Explore</Trans> <ArrowRight size={13} />
                 </span>
               </Link>

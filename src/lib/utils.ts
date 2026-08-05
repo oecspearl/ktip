@@ -41,7 +41,14 @@ const twMergeKtip = extendTailwindMerge({
         'display-sm', 'display', 'display-lg', 'display-xl',
       ],
       spacing: SPACING_TOKENS,
-      radius: ['control', 'surface', 'surface-lg', 'cal', 'cal-sm'],
+      radius: ['control', 'surface', 'surface-lg', 'cal', 'cal-sm', 'neu-sm', 'neu', 'neu-lg'],
+      /* Soft-UI elevation. Without these, cn('shadow-neu', 'shadow-neu-inset')
+         keeps both and source order picks the winner — which is exactly the
+         pressed state failing to override the raised one. */
+      shadow: [
+        'soft', 'medium', 'hard', 'card', 'card-hover', 'nav', 'fab', 'fab-hover',
+        'neu', 'neu-sm', 'neu-lg', 'neu-inset', 'neu-sm-inset', 'neu-lg-inset', 'neu-flat',
+      ],
       container: ['page', 'page-narrow', 'page-mid', 'page-tight', 'page-wide'],
     },
     classGroups: {

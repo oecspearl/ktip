@@ -479,7 +479,10 @@ export function Navbar() {
         // menu can still expand past it). Height used to be whatever the logo
         // plus inline padding happened to add up to, which meant every page
         // guessed its own clearance — see the token's note in index.css.
-        'top-0 z-nav transition-all duration-300 fixed inset-x-0',
+        // neu-on-dark: the bar is navy glass over hero photography, so every
+        // control in it needs the dark-backdrop soft-UI pair — the light one
+        // paints a white ring instead of a highlight. See index.css.
+        'neu-on-dark top-0 z-nav transition-all duration-300 fixed inset-x-0',
         hidden ? '-translate-y-full' : 'translate-y-0',
         mobileMenuOpen || needsBackdrop
           ? 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'

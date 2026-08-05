@@ -16,7 +16,7 @@ import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Textarea } from '../../../components/ui/Textarea'
 import { Modal } from '../../../components/ui/Modal'
-import { Toggle } from '../../../components/ui/Toggle'
+import { Switch, Toggle } from '../../../components/ui/Toggle'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { PageHero } from '../../../components/layout/PageHero'
 import { usePageTitle } from '../../../hooks/usePageTitle'
@@ -341,23 +341,14 @@ export default function AdminModerationPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={term.is_active}
-                          aria-label={`Toggle ${term.pattern}`}
+                        <Switch
+                          checked={term.is_active}
+                          label={`Toggle ${term.pattern}`}
                           disabled={!canAction}
-                          onClick={() => updateTerm(term.id, { is_active: !term.is_active }).then(() => refetchTerms())}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            term.is_active ? 'bg-ktip-ocean-500' : 'bg-ktip-sand-300'
-                          } ${!canAction ? 'cursor-not-allowed opacity-60' : ''}`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
-                              term.is_active ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
+                          onChange={(next) =>
+                            updateTerm(term.id, { is_active: next }).then(() => refetchTerms())
+                          }
+                        />
                       </td>
                       <td className="px-4 py-3 text-right">
                         <Button

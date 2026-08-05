@@ -158,7 +158,11 @@ export default function DashboardLayout() {
             <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 transition-[top] duration-300 lg:sticky lg:top-[calc(var(--nav-offset)+var(--dash-bar-h,0px)+1rem)] lg:max-h-[calc(100svh-var(--nav-offset)-var(--dash-bar-h,0px)-2.5rem)] lg:overflow-y-auto">
               <nav
                 data-tutorial="dashboard-tabs"
-                className="flex flex-row lg:flex-col gap-1 overflow-x-auto"
+                // The rail scrolls sideways on phones, and an overflow box
+                // clips the soft-UI shadow into a straight line at its edge.
+                // Padding gives the shadow room inside the scroll box; from lg
+                // the rail is a column and needs no clipping at all.
+                className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible p-1.5 -m-1.5"
                 aria-label={t`Dashboard sections`}
               >
                 {tabs.map((tab) => {
@@ -178,10 +182,14 @@ export default function DashboardLayout() {
                       key={tab.to}
                       to={to}
                       className={cn(
-                        'shrink-0 lg:shrink flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors',
+                        // Soft-UI selection: the current tab is a well pressed
+                        // into the rail (inset pair) rather than a tinted
+                        // block, and an idle tab lifts a pixel on hover. Same
+                        // language as Button and Switch.
+                        'shrink-0 lg:shrink flex items-center gap-3 px-4 py-3 rounded-neu-sm text-left transition-all',
                         active
-                          ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                          : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                          ? 'shadow-neu-sm-inset text-ktip-ocean-700'
+                          : 'text-ktip-sand-600 hover:-translate-y-px hover:shadow-neu-sm hover:text-ktip-sand-900'
                       )}
                       aria-current={active ? 'page' : undefined}
                     >

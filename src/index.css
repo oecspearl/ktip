@@ -72,21 +72,45 @@
   --color-ktip-sun-800: #806000;
   --color-ktip-sun-900: #4D3900;
 
-  /* Colors - Sand (neutral scale) */
-  --color-ktip-sand-50: #fafaf9;
-  --color-ktip-sand-100: #f5f5f4;
-  --color-ktip-sand-200: #e7e5e4;
-  --color-ktip-sand-300: #d6d3d1;
-  --color-ktip-sand-400: #a8a29e;
-  --color-ktip-sand-500: #78716c;
-  --color-ktip-sand-600: #57534e;
-  --color-ktip-sand-700: #44403c;
-  --color-ktip-sand-800: #292524;
-  --color-ktip-sand-900: #1c1917;
+  /* Colors - Sand (neutral scale).
+     Soft near-neutral greys, a hair warm. The soft-UI skin first took this
+     ramp to a blue slate straight off the spec sheet and the whole app read
+     cold — the surface should be a pastel white with grey in it, not a tinted
+     blue. So: barely-there warmth (hue held around 40–60°, chroma near zero),
+     which keeps the greys reading as paper next to the navy brand rather than
+     competing with it.
+     50–300 are surfaces (485 call sites paint a panel with sand-50/100),
+     400–700 the ink ramp, 800/900 near-black body copy. */
+  --color-ktip-sand-50: #F7F7F5;
+  --color-ktip-sand-100: #EFEFEC;
+  --color-ktip-sand-200: #E3E3DF;
+  --color-ktip-sand-300: #D3D3CE;
+  --color-ktip-sand-400: #A9A9A2;
+  --color-ktip-sand-500: #86867F;
+  --color-ktip-sand-600: #63635D;
+  --color-ktip-sand-700: #4A4A45;
+  --color-ktip-sand-800: #2C2C28;
+  --color-ktip-sand-900: #1B1B18;
 
-  /* Colors - Other */
-  --color-ktip-cream: #fffef9;
-  --color-ktip-canvas: #fafaf7;
+  /* Colors - Other.
+     The soft-UI surface: the colour a neumorphic control paints itself when it
+     sits on a card, so the shadow pair sculpts it out of the card rather than
+     dropping onto it. Soft pastel white with grey mixed in — was #fffef9
+     (warm paper) before the skin, and briefly #EFF2F9 (too blue). */
+  --color-ktip-cream: #F4F4F2;
+
+  /* The page ground every card sits on. Deliberately ~8% darker than the
+     cream card fill rather than a hair off it: at the old #fafaf7 the gap to
+     cream was ~5/255, so a card read as raised only where its shadow landed
+     and flat everywhere else. Widening the gap is what does the lifting —
+     the shadow and the sand-100 hairline then only sharpen an edge the eye
+     has already found.
+
+     Under the soft-UI skin it is the tint one step below the card surface —
+     still warm-neutral, near-zero chroma. The blue #E4EBF1 this briefly held
+     made every page read cold; grey mixed into a pastel white is the target,
+     not a tint. */
+  --color-ktip-canvas: #EAEAE7;
 
   /* Achievement trophy card palette — THEME-RESPONSIVE.
      These are the LIGHT-mode values (light card ground, dark accents that
@@ -186,6 +210,17 @@
   --radius-control: 0.375rem; /* buttons, inputs, chips, small pills */
   --radius-surface: 0.5rem; /* cards, panels, modals, tiles */
   --radius-surface-lg: 0.75rem; /* drawers, inset hero cards */
+
+  /* Soft-UI corners — BUTTONS AND SWITCHES ONLY.
+     A neumorphic control is read from the gradient that runs around its edge;
+     at --radius-control (6px) there is not enough arc for that gradient to
+     turn, and the control reads as a flat rectangle wearing a shadow. These
+     three are the one place the brand's 6px corner is deliberately overruled.
+     Cards, inputs, chips and panels keep --radius-control / --radius-surface —
+     do not reach for these to soften anything else. */
+  --radius-neu-sm: 0.75rem;
+  --radius-neu: 1.125rem;
+  --radius-neu-lg: 1.5rem;
 
   /* ── TYPE SCALE ───────────────────────────────────────────────────────
      Sizes are the literal px value at the 1440 anchor, where every ramp
@@ -351,26 +386,64 @@
   --font-sans: Arial, Helvetica, sans-serif;
   --font-display: Arial, Helvetica, sans-serif;
 
-  /* Box Shadows — layered navy-tinted falloff so elevation reads soft and
-     modern (tight contact shadow + wide ambient), never a hard gray edge */
-  --shadow-soft: 0 1px 3px rgba(4, 30, 66, 0.08), 0 4px 10px -2px rgba(4, 30, 66, 0.12),
-    0 10px 24px -6px rgba(4, 30, 66, 0.16);
-  --shadow-medium: 0 2px 5px rgba(4, 30, 66, 0.1), 0 10px 24px -4px rgba(4, 30, 66, 0.16),
-    0 20px 40px -8px rgba(4, 30, 66, 0.2);
-  --shadow-hard: 0 4px 10px rgba(4, 30, 66, 0.12), 0 16px 36px -6px rgba(4, 30, 66, 0.22),
-    0 32px 64px -12px rgba(4, 30, 66, 0.26);
+  /* Box Shadows — layered falloff so elevation reads soft and modern (tight
+     contact shadow + wide ambient), never a hard gray edge.
+
+     The ink is neutral (28,28,24), not brand navy. The navy tint was chosen
+     against a warm cream card and read as depth; on the soft-UI surfaces every
+     card, dropdown and modal edge turned faintly blue, and with a shadow under
+     nearly everything that cast tinted the whole app. Neutral ink leaves the
+     blue where it belongs — in the brand fills. */
+  --shadow-soft: 0 1px 3px rgba(28, 28, 24, 0.07), 0 4px 10px -2px rgba(28, 28, 24, 0.1),
+    0 10px 24px -6px rgba(28, 28, 24, 0.13);
+  --shadow-medium: 0 2px 5px rgba(28, 28, 24, 0.08), 0 10px 24px -4px rgba(28, 28, 24, 0.13),
+    0 20px 40px -8px rgba(28, 28, 24, 0.16);
+  --shadow-hard: 0 4px 10px rgba(28, 28, 24, 0.1), 0 16px 36px -6px rgba(28, 28, 24, 0.18),
+    0 32px 64px -12px rgba(28, 28, 24, 0.2);
   --shadow-glow-ocean: 0 0 24px rgba(4, 30, 66, 0.3);
   --shadow-glow-tropical: 0 0 24px rgba(151, 215, 0, 0.3);
-  --shadow-card: 0 1px 3px rgba(4, 30, 66, 0.06), 0 4px 10px -2px rgba(4, 30, 66, 0.08),
-    0 12px 28px -8px rgba(4, 30, 66, 0.12);
-  --shadow-card-hover: 0 3px 6px rgba(4, 30, 66, 0.08), 0 14px 30px -5px rgba(4, 30, 66, 0.16),
-    0 28px 56px -10px rgba(4, 30, 66, 0.18);
+  --shadow-card: 0 1px 3px rgba(28, 28, 24, 0.05), 0 4px 10px -2px rgba(28, 28, 24, 0.07),
+    0 12px 28px -8px rgba(28, 28, 24, 0.1);
+  --shadow-card-hover: 0 3px 6px rgba(28, 28, 24, 0.07), 0 14px 30px -5px rgba(28, 28, 24, 0.13),
+    0 28px 56px -10px rgba(28, 28, 24, 0.15);
   --shadow-nav: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   /* Floating action button — layered falloff so the lift reads soft, not hard-edged */
-  --shadow-fab: 0 1px 2px rgba(4, 30, 66, 0.05), 0 4px 8px -2px rgba(4, 30, 66, 0.08),
-    0 12px 24px -6px rgba(4, 30, 66, 0.12), 0 24px 48px -12px rgba(4, 30, 66, 0.14);
-  --shadow-fab-hover: 0 2px 4px rgba(4, 30, 66, 0.06), 0 8px 16px -4px rgba(4, 30, 66, 0.1),
-    0 20px 36px -8px rgba(4, 30, 66, 0.16), 0 36px 64px -16px rgba(4, 30, 66, 0.18);
+  --shadow-fab: 0 1px 2px rgba(28, 28, 24, 0.05), 0 4px 8px -2px rgba(28, 28, 24, 0.07),
+    0 12px 24px -6px rgba(28, 28, 24, 0.1), 0 24px 48px -12px rgba(28, 28, 24, 0.12);
+  --shadow-fab-hover: 0 2px 4px rgba(28, 28, 24, 0.06), 0 8px 16px -4px rgba(28, 28, 24, 0.09),
+    0 20px 36px -8px rgba(28, 28, 24, 0.13), 0 36px 64px -16px rgba(28, 28, 24, 0.15);
+
+  /* Soft-UI (neumorphic) elevation — the button/switch skin.
+     Two shadows from one light source at the top-left: a light one at a
+     NEGATIVE offset and a dark one at the same POSITIVE offset, blur always
+     2 × offset. Offsets step 5 / 10 / 20 with the control size. Nothing here
+     is a drop shadow onto the page — the control is the same colour as its
+     parent (--neu-surface) and the pair sculpts it out of that surface, which
+     is why the two hues live as tokens: html.dark repoints them and every
+     shadow below inverts with no per-shadow edit.
+
+     `inset` is the pressed state: identical numbers, moved inside. `flat` is
+     disabled — 0.4 × the offset and blur, so the control still has a body but
+     stops asking to be clicked.
+
+     Offsets are 3 / 5 / 8, not the sheet's 5 / 10 / 20. The sheet draws one
+     button on an empty page; in an app these sit in scrolling rails, table
+     cells and flex rows with `gap-2`, and a 20px offset with 40px of blur runs
+     past its neighbour or gets clipped by the nearest `overflow-x-auto` — the
+     shadow visibly ends in a straight line. The ratio and the light source are
+     what carry the effect; the absolute size only has to beat the noise. */
+  --color-neu-hi: #FFFFFF;
+  --color-neu-lo: rgba(28, 28, 24, 0.16);
+  --shadow-neu-sm: -3px -3px 6px var(--color-neu-hi), 3px 3px 6px var(--color-neu-lo);
+  --shadow-neu: -5px -5px 10px var(--color-neu-hi), 5px 5px 10px var(--color-neu-lo);
+  --shadow-neu-lg: -8px -8px 16px var(--color-neu-hi), 8px 8px 16px var(--color-neu-lo);
+  --shadow-neu-sm-inset: inset -3px -3px 6px var(--color-neu-hi),
+    inset 3px 3px 6px var(--color-neu-lo);
+  --shadow-neu-inset: inset -5px -5px 10px var(--color-neu-hi),
+    inset 5px 5px 10px var(--color-neu-lo);
+  --shadow-neu-lg-inset: inset -8px -8px 16px var(--color-neu-hi),
+    inset 8px 8px 16px var(--color-neu-lo);
+  --shadow-neu-flat: -2px -2px 4px var(--color-neu-hi), 2px 2px 4px var(--color-neu-lo);
 
   /* Hero text over photography — --shadow-medium's layered navy falloff retuned
      for glyphs: same tight-contact + wide-ambient structure, radii scaled down
@@ -509,17 +582,37 @@ html.readable {
 html.dark {
   color-scheme: dark;
 
-  /* Surfaces go "black black" */
-  --color-ktip-canvas: #0A0A0A;
-  --color-ktip-cream: #0F0F0E;
-  /* Under hero photos: black at night, so page transitions don't flash navy */
-  --color-hero-base: #0A0A0A;
+  /* Surfaces used to go "black black" — canvas at true #000 with the cream
+     fill 10/255 above it, so the ground/card gap carried the card on its own.
+     The soft-UI skin cannot live there: a neumorphic control is lit from the
+     top-left with a HIGHLIGHT, and at #000 there is nothing under the surface
+     for the dark half of the pair to sink into, so every button flattened to a
+     rectangle with a white edge.
 
-  /* Neutral inversion: sand-50 → near-black surface … sand-900 → near-white text */
-  --color-ktip-sand-50: #131312;
-  --color-ktip-sand-100: #1B1B1A;
-  --color-ktip-sand-200: #292928;
-  --color-ktip-sand-300: #3A3A38;
+     So the ground lifts off black and the pair still reads: canvas #141413,
+     card #1F1F1D — the same ~12/255 gap as before, neutral like the light
+     surfaces rather than tinted. The navbar and footer keep --color-ktip-ink
+     at #050505 below, so the chrome that people read as "black black" is
+     unchanged; it is the page ground that moved. */
+  --color-ktip-canvas: #141413;
+  --color-ktip-cream: #1F1F1D;
+  /* Under hero photos: near-black at night, so page transitions don't flash
+     navy. Tracks canvas exactly — a seam here reads as a rendering fault. */
+  --color-hero-base: #141413;
+
+  /* The soft-UI light source at night. Same geometry, inverted materials: the
+     highlight is a thin white wash instead of a near-white paint (a #FAFBFF
+     highlight on a #22262B surface reads as a chalk outline), and the dark
+     half deepens to hold against a ground that is no longer pure black. */
+  --color-neu-hi: rgba(255, 255, 255, 0.055);
+  --color-neu-lo: rgba(0, 0, 0, 0.55);
+
+  /* Neutral inversion: sand-50 → near-black surface … sand-900 → near-white
+     text. Near-neutral at night too, tracking the light ramp. */
+  --color-ktip-sand-50: #161615;
+  --color-ktip-sand-100: #1E1E1C;
+  --color-ktip-sand-200: #2C2C2A;
+  --color-ktip-sand-300: #3D3D3A;
   --color-ktip-sand-400: #8C8C86;
   --color-ktip-sand-500: #A5A59F;
   --color-ktip-sand-600: #C2C2BC;
@@ -901,6 +994,15 @@ html.dark {
     min-height: 100svh;
     background-color: var(--color-ktip-canvas);
     color: var(--color-ktip-sand-900);
+    /* What a soft-UI control paints itself. It has to equal the colour BEHIND
+       the control or the shadow pair stops sculpting and starts haloing, and
+       "behind" is not one colour: the page ground and a card fill are a step
+       apart on purpose. So the surface travels down the tree as a variable —
+       body declares the ground, and every component that paints a fill
+       (.neu-surface, applied by Card / Modal / DropdownPanel / BentoCard)
+       re-declares it to its own. A button reads whatever its nearest painted
+       ancestor set, with no prop and no knowledge of where it sits. */
+    --neu-surface: var(--color-ktip-canvas);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -925,6 +1027,29 @@ html.dark {
 }
 
 @layer components {
+  /* Anything that paints a fill of its own re-declares the soft-UI surface, so
+     the buttons inside it sculpt out of THAT fill rather than out of the page
+     ground two levels up. One line, no geometry — see the note on --neu-surface
+     in the body rule above. A panel painted in something other than the card
+     fill (a sand-50 inset, a tinted callout) sets the variable inline instead. */
+  .neu-surface {
+    --neu-surface: var(--color-ktip-cream);
+  }
+
+  /* Controls that sit on a photo or on the navy chrome — hero action rows,
+     the navbar, card CTAs over an image. There is no surface to sculpt out of
+     there, so the light-mode pair (a near-white highlight, a soft grey shadow)
+     either disappears into the photo or rings the control in white.
+
+     This is the same geometry with materials that survive an unknown backdrop:
+     a translucent white highlight that only reads where the photo is dark, and
+     a genuinely dark shadow that seats the control on anything. Buttons inside
+     keep their own fill, so --neu-surface is not repointed here. */
+  .neu-on-dark {
+    --color-neu-hi: rgba(255, 255, 255, 0.16);
+    --color-neu-lo: rgba(0, 0, 0, 0.42);
+  }
+
   /* Skin only — brand pair, homepage shadow depth, lift on hover — with no
      padding, radius or type of its own, so a call site keeps its own geometry.
      This is what the hand-rolled `bg-ktip-ocean-600 … hover:bg-ktip-ocean-700`
@@ -939,10 +1064,14 @@ html.dark {
      this token migration exists to stop; .btn-brand carries none, which is
      why it stays. */
   .btn-brand {
-    @apply bg-brand-navy text-white shadow-medium hover:bg-brand-green hover:text-brand-navy hover:shadow-hard hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.99] transition-all duration-200 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green dark:hover:shadow-glow-tropical;
-    /* A disabled button must not flip colour or lift — it only dims. Matches
+    @apply bg-brand-navy text-white shadow-neu hover:bg-brand-green hover:text-brand-navy active:shadow-neu-inset active:translate-y-px transition-all duration-200 dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green;
+    /* Soft-UI, matching the Button component: the shadow says the control is
+       part of the surface, so the old hover lift (-translate-y-0.5 + scale)
+       had to go — a thing carved out of the page cannot also float off it.
+       Press moves 1px down and inverts the same shadow numbers inward. */
+    /* A disabled button must not flip colour or press — it only dims. Matches
        the disabled handling in the Button component. */
-    @apply disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:hover:shadow-medium disabled:hover:bg-brand-navy disabled:hover:text-white dark:disabled:hover:bg-brand-green dark:disabled:hover:text-brand-navy;
+    @apply disabled:shadow-neu-flat disabled:active:translate-y-0 disabled:active:shadow-neu-flat disabled:hover:bg-brand-navy disabled:hover:text-white dark:disabled:hover:bg-brand-green dark:disabled:hover:text-brand-navy;
   }
 
   /* ---- Diamond avatar -------------------------------------------------

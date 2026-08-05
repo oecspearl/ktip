@@ -3,6 +3,7 @@ import { Lock, RotateCcw, Search, ShieldCheck, History, Check, Minus } from 'luc
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Switch } from '../../../components/ui/Toggle'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { PageHero } from '../../../components/layout/PageHero'
 import { usePageTitle } from '../../../hooks/usePageTitle'
@@ -66,25 +67,7 @@ function MatrixCell({
     )
   }
 
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={allowed}
-      aria-label={label}
-      disabled={busy}
-      onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-        allowed ? 'bg-ktip-ocean-500' : 'bg-ktip-sand-300'
-      } ${busy ? 'cursor-not-allowed opacity-60' : ''}`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
-          allowed ? 'translate-x-6' : 'translate-x-1'
-        }`}
-      />
-    </button>
-  )
+  return <Switch checked={allowed} onChange={onToggle} label={label} disabled={busy} />
 }
 
 export default function AdminRolesPage() {

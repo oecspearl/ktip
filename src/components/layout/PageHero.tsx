@@ -279,7 +279,12 @@ export function PageHero({
                 ))}
               </nav>
             )}
-            {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+            {/* neu-on-dark: the action row sits on hero photography, where the
+                light-mode soft-UI pair would ring each button in white. See
+                index.css. */}
+            {actions && (
+              <div className="neu-on-dark flex flex-wrap items-center gap-3">{actions}</div>
+            )}
           </div>
         </div>
       </div>

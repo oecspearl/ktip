@@ -141,8 +141,13 @@ export function BentoCard({
 
       <div className="relative flex items-end justify-between gap-3">
         {/* Same CTA pill as the homepage FEATURES tiles: brand pair, flipping
-            navy→green (green→navy at night) and lifting with the card */}
-        <span className="relative self-start inline-flex items-center gap-1.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-control px-4 py-2 text-caption font-semibold shadow-soft group-hover:shadow-medium group-hover:bg-brand-green group-hover:text-brand-navy group-hover:-translate-y-0.5 group-hover:scale-[1.03] dark:group-hover:bg-brand-navy dark:group-hover:text-brand-green group-hover:gap-2.5 transition-all">
+            navy→green (green→navy at night). Soft-UI geometry to match Button
+            — the corner is --radius-neu and the elevation is the shadow pair,
+            in the on-dark materials because the tile behind it is a photo.
+            It rises a pixel with the card rather than scaling, for the reason
+            given on Button: a control carved out of a surface should not also
+            balloon off it. */}
+        <span className="neu-on-dark relative self-start inline-flex items-center gap-1.5 bg-brand-navy text-white dark:bg-brand-green dark:text-brand-navy rounded-neu-sm px-4 py-2 text-caption font-semibold shadow-neu-sm group-hover:bg-brand-green group-hover:text-brand-navy group-hover:-translate-y-px dark:group-hover:bg-brand-navy dark:group-hover:text-brand-green group-hover:gap-2.5 transition-all">
           {cta} <ArrowRight size={13} />
         </span>
         {children && (

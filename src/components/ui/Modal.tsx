@@ -122,7 +122,9 @@ export function Modal({ open, onClose, title, description, children, size, bare,
           // frame and may deliberately extend past it.
           bare
             ? 'overflow-visible'
-            : 'bg-ktip-cream rounded-surface-lg shadow-hard overflow-y-auto',
+            // neu-surface: buttons in the dialog sculpt out of the dialog fill,
+            // not out of the page ground behind the scrim. See index.css.
+            : 'neu-surface bg-ktip-cream rounded-surface-lg shadow-hard overflow-y-auto',
           sizeStyles[size || 'md'],
           className
         )}

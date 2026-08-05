@@ -43,7 +43,11 @@ export function DashboardTopBar({
       className={cn(
         // --nav-offset, not --nav-h: the navbar auto-hides, and holding its full
         // height while it is off screen leaves this band floating mid-page.
-        'fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-white/10 bg-brand-navy/95 backdrop-blur-md',
+        // Same chrome as the navbar above it, via the same two tokens:
+        // ktip-ink is navy by day and black-black at night, ktip-line is the
+        // hairline that turns green in the dark. A literal brand-navy fill
+        // here left a navy band hanging under a black navbar.
+        'fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-ktip-line/60 bg-ktip-ink/95 backdrop-blur-md',
         'transition-[top,opacity,transform] duration-300',
         shown ? 'opacity-100 translate-y-0' : 'pointer-events-none -translate-y-2 opacity-0'
       )}
