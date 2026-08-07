@@ -209,7 +209,10 @@
       "PowerShell(npx tsc --noEmit 2>$null; echo \"exit: $LASTEXITCODE\")",
       "PowerShell(cd \"$env:TEMP\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\ecb7f8aa-8e7b-4f2d-9b16-7e468a44f391\\\\scratchpad\"; node seed-banners.mjs)",
       "PowerShell(node \"C:\\\\Users\\\\LG\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\b2fcf61f-1ae4-412b-915e-0e7431289892\\\\scratchpad\\\\list-missing.mjs\")",
-      "PowerShell(node \"C:\\\\Users\\\\LG\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\b2fcf61f-1ae4-412b-915e-0e7431289892\\\\scratchpad\\\\fill-translations.mjs\")"
+      "PowerShell(node \"C:\\\\Users\\\\LG\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-LG-Downloads-ktip-main-OECS-KTIP\\\\b2fcf61f-1ae4-412b-915e-0e7431289892\\\\scratchpad\\\\fill-translations.mjs\")",
+      "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/2f91a295-d533-4f95-85e8-c8cc2f4fc646/scratchpad/docx.mjs\" *.docx)",
+      "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/2f91a295-d533-4f95-85e8-c8cc2f4fc646/scratchpad/verify-matrix.mjs\")",
+      "Bash(node \"C:/Users/LG/AppData/Local/Temp/claude/c--Users-LG-Downloads-ktip-main-OECS-KTIP/2f91a295-d533-4f95-85e8-c8cc2f4fc646/scratchpad/smoke.mjs\")"
     ],
     "additionalDirectories": [
       "/Users/roystonemmanuel/Desktop/Applications/virtual Campus/app/api/admin/shared-courses",
