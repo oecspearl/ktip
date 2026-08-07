@@ -485,12 +485,16 @@ export interface EventScheduleItem {
   description: string | null
   start_time: string
   end_time: string | null
+  /** Free text, for an event with no drawn venue. Ignored once room_id is set. */
   location: string | null
+  /** A room of this event's venue (108). Null for anything not venued. */
+  room_id: string | null
   speaker_id: string | null
   schedule_type: ScheduleItemType
   sort_order: number
   created_at: string
   speaker?: EventSpeaker
+  room?: Pick<VenueRoom, 'id' | 'key' | 'name' | 'kind'>
 }
 
 // ============================================================
@@ -593,6 +597,21 @@ export interface EventVenueMember {
   created_at: string
   updated_at: string
   user?: Profile
+}
+
+/**
+ * A role scoped to one room (109). No row for a (room, user) pair means the
+ * person's venue-wide `EventVenueMember.role` applies there instead.
+ */
+export interface VenueRoomRole {
+  id: string
+  event_id: string
+  room_id: string
+  user_id: string
+  role: VenueRole
+  created_at: string
+  updated_at: string
+  user?: Pick<Profile, 'id' | 'display_name' | 'avatar_url'>
 }
 
 export interface VenueRoomMessage {

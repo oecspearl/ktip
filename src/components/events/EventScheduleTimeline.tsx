@@ -115,10 +115,14 @@ export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
                     </div>
                   )}
 
-                  {item.location && (
+                  {/* A room of the drawn venue names itself; `location` is the
+                      free-text fallback an event without a venue still uses. */}
+                  {(item.room?.name || item.location) && (
                     <div className="flex items-center gap-1 mt-1">
                       <MapPin className="w-3.5 h-3.5 text-ktip-sand-400" />
-                      <span className="text-sm text-ktip-sand-500">{item.location}</span>
+                      <span className="text-sm text-ktip-sand-500">
+                        {item.room?.name || item.location}
+                      </span>
                     </div>
                   )}
                 </div>

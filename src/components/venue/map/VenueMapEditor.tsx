@@ -3,18 +3,22 @@ import {
   ArrowUpDown,
   Boxes,
   Building2,
+  Check,
+  ChevronRight,
+  Crosshair,
   DoorOpen,
   Eraser,
   Layers,
+  Loader2,
   Plus,
   Redo2,
-  Save,
   Sparkles,
   Trash2,
   Undo2,
   X,
 } from 'lucide-react'
-import { Button } from '../../ui/Button'
+import { cn } from '../../../lib/utils'
+import { useAuth } from '../../../contexts/AuthContext'
 import { VenueMapStage } from './VenueMapStage'
 import { useAnimatedValue, useElementSize } from './useAnimatedValue'
 import {
@@ -162,6 +166,15 @@ const RESTRICTABLE_ROLES: VenueRole[] = [
   'speaker',
 ]
 
+/** How long the canvas has to settle before the map is written back. */
+const AUTOSAVE_DELAY_MS = 1200
+
+/** How long the view takes to glide home when Refocus is pressed. */
+const RECENTRE_MS = 280
+
+/** A complete six-digit hex. Anything shorter is still being typed. */
+const HEX_RE = /^#[0-9a-f]{6}$/i
+
 /**
  * The venue builder.
  *
@@ -169,9 +182,11 @@ const RESTRICTABLE_ROLES: VenueRole[] = [
  * same renderer, same colours. The only differences are the grid and the fact
  * that a room can be dragged.
  *
- * Nothing is written until Save. The whole editing session is local state with
- * an undo stack, because an autosaving floorplan means an attendee watching a
- * wall move mid-drag.
+ * The editing session is local state with an undo stack, written back on a
+ * settle delay after the last change rather than on a button press. A drag
+ * commits once per gesture, so what an attendee in a live venue sees is the
+ * room's resting place — never a wall moving mid-drag — which was the reason
+ * this used to hold everything until an explicit Save.
  */
 export function VenueMapEditor({
   rooms,
@@ -183,6 +198,7 @@ export function VenueMapEditor({
   onSave,
 }: VenueMapEditorProps) {
   const { t, i18n } = useLingui()
+  const auth = useAuth()
   const wrapRef = useRef<HTMLDivElement>(null)
   const size = useElementSize(wrapRef)
 
@@ -223,6 +239,51 @@ export function VenueMapEditor({
   const [hoverCell, setHoverCell] = useState<MapCell | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
   const [zoom, setZoom] = useState({ k: 1, px: 0, py: 0 })
+  // What is in the hex box while it is being typed. Null means "show the
+  // room's colour" — which is also what a blur reverts to, so an abandoned
+  // half-hex leaves no trace.
+  const [hexDraft, setHexDraft] = useState<string | null>(null)
+
+  /**
+   * The host's own palette. Clicking a swatch and then reaching for the wheel
+   * reads as "this one, but my version of it", so the personalised colour
+   * takes that slot and stays there for the next venue this person builds.
+   *
+   * Per browser rather than per account row: it is a preference about a tool,
+   * not data about the event, and nothing else needs to read it.
+   */
+  const paletteKey = `ktip.venue.palette.${auth.user?.id ?? 'anon'}`
+  const [palette, setPalette] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(paletteKey)
+      const saved = raw ? JSON.parse(raw) : null
+      if (Array.isArray(saved) && saved.length === VENUE_PALETTE.length) {
+        // A stored entry that is not a hex is dropped rather than trusted —
+        // this string ends up in a style attribute.
+        return saved.map((c, i) => (typeof c === 'string' && HEX_RE.test(c) ? c : VENUE_PALETTE[i]))
+      }
+    } catch {
+      // Private mode or a malformed entry: the built-in palette is the answer.
+    }
+    return [...VENUE_PALETTE]
+  })
+  // Which swatch a personalised colour overwrites. Null until one is clicked,
+  // so reaching straight for the wheel changes the room and nothing else.
+  const [activeSwatch, setActiveSwatch] = useState<number | null>(null)
+
+  const personalise = (color: string) => {
+    patchRoom(selectedId!, { color })
+    if (activeSwatch === null) return
+    setPalette((prev) => {
+      const next = prev.map((c, i) => (i === activeSwatch ? color : c))
+      try {
+        localStorage.setItem(paletteKey, JSON.stringify(next))
+      } catch {
+        // Not worth telling the host about — the colour still applied.
+      }
+      return next
+    })
+  }
   // Drawing happens in plan view — a wall you are looking at edge-on is a wall
   // you cannot place accurately — so 2.5D doubles as "stop editing, look".
   const [preview, setPreview] = useState(false)
@@ -998,8 +1059,52 @@ export function VenueMapEditor({
 
     await onSave(state.config, payload)
     setDirty(false)
-    history.current = { undo: [], redo: [] }
+    // The undo stack deliberately survives a save. It used to be cleared here,
+    // when saving was a button the host pressed once; autosaving and clearing
+    // would wipe undo every couple of seconds.
   }
+
+  const atHome = zoom.k === 1 && zoom.px === 0 && zoom.py === 0
+
+  /**
+   * Glide the view back to 1× and centred rather than cutting to it. A jump
+   * costs the host the thing panning is for — knowing which part of the floor
+   * they were looking at, and where it went.
+   */
+  const recentre = () => {
+    if (atHome) return
+    const from = zoom
+    const started = performance.now()
+    const step = (now: number) => {
+      const p = Math.min(1, (now - started) / RECENTRE_MS)
+      // Ease-out cubic: most of the distance early, settling rather than
+      // stopping dead.
+      const e = 1 - Math.pow(1 - p, 3)
+      setZoom({
+        k: from.k + (1 - from.k) * e,
+        px: from.px * (1 - e),
+        py: from.py * (1 - e),
+      })
+      if (p < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }
+
+  // Autosave. A settle delay rather than a save per change: dragging a room
+  // across the grid commits once per gesture, and a host renaming a room types
+  // a character at a time. Only fires while nothing is already in flight, and
+  // a failure leaves `dirty` set so the next edit tries again.
+  const saveRef = useRef(save)
+  saveRef.current = save
+  useEffect(() => {
+    if (!dirty || saving) return
+    const timer = setTimeout(() => {
+      // The caller has already surfaced the failure; swallowing here only stops
+      // an unhandled rejection.
+      void saveRef.current().catch(() => {})
+    }, AUTOSAVE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [dirty, saving, state])
 
   return (
     <div className="overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream">
@@ -1089,6 +1194,20 @@ export function VenueMapEditor({
               )}
             </div>
           )}
+          {/* Scrolling to zoom and dragging to pan are easy to get lost in —
+              this puts the whole floor back in frame without touching the map
+              itself. Disabled while the view is already home. */}
+          <button
+            type="button"
+            onClick={recentre}
+            disabled={atHome}
+            aria-label={t`Refocus the floor`}
+            title={t`Refocus the floor`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-2 py-1.5 text-xs font-medium text-ktip-sand-600 hover:border-ktip-sand-300 hover:text-ktip-ocean-600 disabled:opacity-40 disabled:hover:border-ktip-sand-200 disabled:hover:text-ktip-sand-600"
+          >
+            <Crosshair size={14} aria-hidden="true" />
+            <Trans>Refocus</Trans>
+          </button>
           <button
             type="button"
             onClick={undo}
@@ -1105,9 +1224,25 @@ export function VenueMapEditor({
           >
             <Redo2 size={14} aria-hidden="true" />
           </button>
-          <Button size="sm" icon={<Save size={14} />} loading={saving} disabled={!dirty} onClick={save}>
-            {dirty ? t`Save map` : t`Saved`}
-          </Button>
+          {/* A readout, not a button. Nothing here is waiting on the host to
+              press anything — this only says which of the two states the map
+              is in. */}
+          <span
+            aria-live="polite"
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium',
+              dirty || saving
+                ? 'bg-ktip-sand-100 text-ktip-sand-600'
+                : 'bg-ktip-tropical-50 text-ktip-tropical-700'
+            )}
+          >
+            {dirty || saving ? (
+              <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Check size={13} aria-hidden="true" />
+            )}
+            {dirty || saving ? t`Saving…` : t`Saved`}
+          </span>
         </div>
       </div>
 
@@ -1471,46 +1606,62 @@ export function VenueMapEditor({
                 />
               </label>
 
+              {/* The palette is the shortcut, not the limit: a host with a
+                  brand hex should be able to type it. Wall height used to sit
+                  under here as a slider — it follows the purpose now. */}
               <fieldset className="mt-2">
                 <legend className="mb-1 text-xs font-medium text-ktip-sand-700"><Trans>Colour</Trans></legend>
                 <div className="flex flex-wrap gap-1.5">
-                  {VENUE_PALETTE.map((c) => (
+                  {palette.map((c, i) => (
                     <button
-                      key={c}
+                      key={`${c}-${i}`}
                       type="button"
-                      onClick={() => patchRoom(selected.id, { color: c })}
+                      onClick={() => {
+                        setActiveSwatch(i)
+                        patchRoom(selected.id, { color: c })
+                      }}
                       aria-label={t`Use colour ${c}`}
                       aria-pressed={selected.color === c}
                       className={`h-5 w-5 rounded ${
-                        selected.color === c ? 'ring-2 ring-ktip-ocean-500 ring-offset-1' : ''
+                        activeSwatch === i
+                          ? 'ring-2 ring-ktip-ocean-500 ring-offset-1'
+                          : selected.color === c
+                            ? 'ring-2 ring-ktip-sand-400 ring-offset-1'
+                            : ''
                       }`}
                       style={{ background: c }}
                     />
                   ))}
                 </div>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <input
+                    type="color"
+                    value={selected.color}
+                    onChange={(e) => personalise(e.target.value)}
+                    aria-label={t`Pick any colour`}
+                    className="h-7 w-9 cursor-pointer rounded border border-ktip-sand-200 bg-transparent p-0.5"
+                  />
+                  <input
+                    value={hexDraft ?? selected.color}
+                    onChange={(e) => {
+                      const next = e.target.value
+                      setHexDraft(next)
+                      // Only a complete hex reaches the room, so a half-typed
+                      // "#2A5" never repaints the floor mid-keystroke.
+                      if (HEX_RE.test(next)) personalise(next)
+                    }}
+                    onBlur={() => setHexDraft(null)}
+                    spellCheck={false}
+                    aria-label={t`Colour hex`}
+                    className="w-24 rounded-lg border border-ktip-sand-200 px-2 py-1 font-mono text-[11px] uppercase"
+                  />
+                </div>
+                {activeSwatch !== null && (
+                  <p className="mt-1 text-[10px] leading-snug text-ktip-sand-500">
+                    <Trans>Changing the colour now replaces that swatch, and keeps it for your next venue.</Trans>
+                  </p>
+                )}
               </fieldset>
-
-              <label className="mt-2 block text-xs">
-                <span className="mb-1 block font-medium text-ktip-sand-700">
-                  <Trans>
-                    Wall height ·{' '}
-                    <span className="font-mono text-ktip-sand-500">
-                      {selected.wall_height.toFixed(1)}
-                    </span>
-                  </Trans>
-                </span>
-                <input
-                  type="range"
-                  min={VENUE_MAP.MIN_WALL_H}
-                  max={2}
-                  step={0.1}
-                  value={selected.wall_height}
-                  onChange={(e) =>
-                    patchRoom(selected.id, { wall_height: parseFloat(e.target.value) })
-                  }
-                  className="w-full"
-                />
-              </label>
 
               <label className="mt-2 block text-xs">
                 <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Audio</Trans></span>
@@ -1545,51 +1696,70 @@ export function VenueMapEditor({
                 />
               </label>
 
-              <fieldset className="mt-2">
-                <legend className="mb-1 text-xs font-medium text-ktip-sand-700"><Trans>Who can enter</Trans></legend>
-                <p className="mb-1 text-[10px] text-ktip-sand-500">
-                  <Trans>Nothing ticked means everyone in the venue. Organizers always get in.</Trans>
-                </p>
-                <div className="space-y-1">
-                  {RESTRICTABLE_ROLES.map((role) => {
-                    const on = selected.allowed_roles.includes(role)
-                    return (
-                      <label key={role} className="flex items-center gap-2 text-xs text-ktip-sand-700">
-                        <input
-                          type="checkbox"
-                          checked={on}
-                          onChange={() =>
-                            patchRoom(selected.id, {
-                              allowed_roles: on
-                                ? selected.allowed_roles.filter((r) => r !== role)
-                                : [...selected.allowed_roles, role],
-                            })
-                          }
-                        />
-                        {VENUE_ROLE_LABELS[role]}
-                      </label>
-                    )
-                  })}
-                </div>
-              </fieldset>
+              {/* Everything past here has an answer already — the purpose
+                  gives the room its door list and its panels. Folded away so
+                  the panel asks for a name and a purpose and stops; a host who
+                  never opens either group gets exactly the old behaviour. */}
+              <details className="group mt-3 border-t border-ktip-sand-200 pt-2">
+                <summary className="cursor-pointer list-none text-xs font-medium text-ktip-sand-700 marker:content-['']">
+                  <span className="flex items-center gap-1">
+                    <ChevronRight
+                      size={12}
+                      className="transition-transform group-open:rotate-90"
+                      aria-hidden="true"
+                    />
+                    <Trans>Who gets in</Trans>
+                  </span>
+                  <span className="mt-0.5 block pl-4 text-[10px] font-normal text-ktip-sand-500">
+                    {doorSummary(selected)}
+                  </span>
+                </summary>
 
-              <label className="mt-2 flex items-center gap-2 text-xs text-ktip-sand-700">
-                <input
-                  type="checkbox"
-                  checked={selected.is_open}
-                  onChange={(e) => patchRoom(selected.id, { is_open: e.target.checked })}
-                />
-                <Trans>Open to enter</Trans>
-              </label>
+                <fieldset className="mt-2">
+                  <p className="mb-1 text-[10px] text-ktip-sand-500">
+                    <Trans>Nothing ticked means everyone in the venue. Organizers always get in.</Trans>
+                  </p>
+                  <div className="space-y-1">
+                    {RESTRICTABLE_ROLES.map((role) => {
+                      const on = selected.allowed_roles.includes(role)
+                      return (
+                        <label key={role} className="flex items-center gap-2 text-xs text-ktip-sand-700">
+                          <input
+                            type="checkbox"
+                            checked={on}
+                            onChange={() =>
+                              patchRoom(selected.id, {
+                                allowed_roles: on
+                                  ? selected.allowed_roles.filter((r) => r !== role)
+                                  : [...selected.allowed_roles, role],
+                              })
+                            }
+                          />
+                          {VENUE_ROLE_LABELS[role]}
+                        </label>
+                      )
+                    })}
+                  </div>
+                </fieldset>
 
-              <label className="mt-1 flex items-center gap-2 text-xs text-ktip-sand-700">
-                <input
-                  type="checkbox"
-                  checked={selected.recording_enabled}
-                  onChange={(e) => patchRoom(selected.id, { recording_enabled: e.target.checked })}
-                />
-                <Trans>Record this room</Trans>
-              </label>
+                <label className="mt-2 flex items-center gap-2 text-xs text-ktip-sand-700">
+                  <input
+                    type="checkbox"
+                    checked={selected.is_open}
+                    onChange={(e) => patchRoom(selected.id, { is_open: e.target.checked })}
+                  />
+                  <Trans>Open to enter</Trans>
+                </label>
+
+                <label className="mt-1 flex items-center gap-2 text-xs text-ktip-sand-700">
+                  <input
+                    type="checkbox"
+                    checked={selected.recording_enabled}
+                    onChange={(e) => patchRoom(selected.id, { recording_enabled: e.target.checked })}
+                  />
+                  <Trans>Record this room</Trans>
+                </label>
+              </details>
 
               {selected.kind === 'sponsor_booth' && (
                 <>
@@ -1621,15 +1791,22 @@ export function VenueMapEditor({
                   What the room page actually renders. Left alone, a room
                   follows its purpose; the moment one box is ticked the whole
                   set is written down for that room. */}
-              <fieldset className="mt-3 border-t border-ktip-sand-200 pt-2">
-                <legend className="mb-1 text-xs font-medium text-ktip-sand-700">
-                  <Trans>Panels in this room</Trans>
-                </legend>
-                <p className="mb-1.5 text-[10px] leading-snug text-ktip-sand-500">
-                  {selected.sections.length
-                    ? t`Set by hand for this room.`
-                    : t`Following the defaults for ${VENUE_ROOM_KIND_LABELS[selected.kind] || selected.kind}.`}
-                </p>
+              <details className="group mt-2 border-t border-ktip-sand-200 pt-2">
+                <summary className="cursor-pointer list-none text-xs font-medium text-ktip-sand-700 marker:content-['']">
+                  <span className="flex items-center gap-1">
+                    <ChevronRight
+                      size={12}
+                      className="transition-transform group-open:rotate-90"
+                      aria-hidden="true"
+                    />
+                    <Trans>What's in the room</Trans>
+                  </span>
+                  <span className="mt-0.5 block pl-4 text-[10px] font-normal leading-snug text-ktip-sand-500">
+                    {selected.sections.length
+                      ? t`Set by hand for this room.`
+                      : t`Following the defaults for ${VENUE_ROOM_KIND_LABELS[selected.kind] || selected.kind}.`}
+                  </span>
+                </summary>
 
                 {(['main', 'aside'] as const).map((slot) => {
                   const choices = sectionChoices(selected, eventType).filter(
@@ -1774,7 +1951,7 @@ export function VenueMapEditor({
                     }
                   />
                 )}
-              </fieldset>
+              </details>
 
               <div className="mt-3 flex items-center justify-between gap-2 border-t border-ktip-sand-200 pt-2">
                 <span className="font-mono text-[10px] text-ktip-sand-400">
@@ -1823,6 +2000,19 @@ export function VenueMapEditor({
 }
 
 // ---------------------------------------------------------------------------
+
+/**
+ * The one-liner under "Who gets in", so a folded group still says what it is
+ * holding. Deliberately reads the same way the door itself behaves: an empty
+ * allowed_roles is "everyone", not "nobody".
+ */
+function doorSummary(room: DraftRoom): string {
+  const who = room.allowed_roles.length
+    ? room.allowed_roles.map((r) => VENUE_ROLE_LABELS[r]).join(', ')
+    : 'Everyone in the venue'
+  const extras = [!room.is_open && 'closed', room.recording_enabled && 'recording'].filter(Boolean)
+  return extras.length ? `${who} · ${extras.join(' · ')}` : who
+}
 
 /** Cells spoken for per floor, memoised lazily — shared by the template paths. */
 function floorOccupancy(rooms: DraftRoom[]) {

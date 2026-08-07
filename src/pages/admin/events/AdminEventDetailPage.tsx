@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link, useLocation } from 'react-router'
+import { useParams, Link, useLocation, useSearchParams } from 'react-router'
 import { useEvent, useIsEventHost } from '../../../hooks/useEvents'
 import { useEventStatusUpdate } from '../../../hooks/useAdminEvents'
 import { useToast } from '../../../contexts/ToastContext'
@@ -26,6 +26,9 @@ import {
   Mic,
   Target,
   Map,
+  ArrowRight,
+  Check,
+  ExternalLink,
 } from 'lucide-react'
 import {
   EVENT_TYPE_LABELS,
@@ -36,6 +39,10 @@ import {
 import { format } from 'date-fns'
 import { cn } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
+import { Stepper } from '../../../components/ui/Stepper'
+import { blueprintFor, setupSteps } from '../../../lib/event-blueprints'
+import { entityPath } from '../../../lib/slug'
+import { venuePath } from '../../../lib/event-slug'
 import type { EventStatus } from '../../../types'
 
 import AdminEventRegistrationsTab from './AdminEventRegistrationsTab'
@@ -63,13 +70,19 @@ type TabId =
   | 'articles'
 
 /**
- * The event management workspace.
+ * The event management workspace, and the only place an event is set up.
  *
  * Mounted twice: at /admin/events/:id inside the admin console, and at
  * /events/:id/manage for the event's own organizer — running an event is the
  * organizer's job, not an admin privilege. The host gate below (and RLS on
  * every table the tabs write) is the control; the admin route is just one of
  * two doors.
+ *
+ * Setting an event up used to be two standalone pages that mounted these same
+ * tabs a second time, then handed you here. They are gone: `?setup=1` draws a
+ * stepper over the tab strip and walks the host through the tabs their event
+ * type needs. Same page, same editors, no seam between building an event and
+ * running it.
  */
 export default function AdminEventDetailPage() {
   const params = useParams<{ id: string }>()
@@ -77,7 +90,9 @@ export default function AdminEventDetailPage() {
   const toast = useToast()
   const location = useLocation()
   const inAdminConsole = location.pathname.startsWith('/admin')
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  // The tab lives in the URL so a link can open one — which is what setup now
+  // is, and what "Back to the venue" from anywhere else needs.
+  const [searchParams, setSearchParams] = useSearchParams()
   const [confirmAction, setConfirmAction] = useState<{
     status: EventStatus
   } | null>(null)
@@ -95,6 +110,13 @@ export default function AdminEventDetailPage() {
       toast.success(`Event ${EVENT_STATUS_LABELS[action.status].toLowerCase()} successfully`)
       setConfirmAction(null)
       refetch()
+      // Publishing is the last step's save, so a successful one ends the run
+      // rather than leaving the stepper up over a finished event.
+      if (searchParams.get('setup') === '1' && action.status === 'published') {
+        const next = new URLSearchParams(searchParams)
+        next.delete('setup')
+        setSearchParams(next, { replace: true })
+      }
     } catch (err: any) {
       toast.error(err.message || 'Failed to update event status')
     }
@@ -113,6 +135,37 @@ export default function AdminEventDetailPage() {
     { id: 'updates', label: 'Updates', icon: Megaphone },
     { id: 'articles', label: 'Articles', icon: FileText },
   ]
+
+  const tabParam = searchParams.get('tab')
+  const activeTab: TabId = tabs.some((tab) => tab.id === tabParam)
+    ? (tabParam as TabId)
+    : 'overview'
+
+  // replace, not push: a run through the setup steps should leave one entry in
+  // the history, not one per tab the host looked at.
+  const setActiveTab = (tab: TabId, opts: { setup?: boolean } = {}) => {
+    const next = new URLSearchParams(searchParams)
+    next.set('tab', tab)
+    if (opts.setup === false) next.delete('setup')
+    setSearchParams(next, { replace: true })
+  }
+
+  const inSetup = searchParams.get('setup') === '1'
+  const blueprint = blueprintFor(event?.event_type)
+  const steps = setupSteps(event?.event_type)
+  // -1 while the host is on a tab outside the run (registrations, say). The
+  // stepper then shows the whole run as still ahead rather than claiming a
+  // step it is not on.
+  const stepIndex = steps.findIndex((step) => step.tab === activeTab)
+  const nextStep = stepIndex >= 0 ? steps[stepIndex + 1] : undefined
+  const showSetup = inSetup && steps.length > 1
+  // The admin console has its own chrome to sit inside, so the setup band is
+  // only worn on the organizer's door.
+  const setupShell = showSetup && !inAdminConsole
+  // The run's last stop. Overview's summary card is every field the host has
+  // just filled in read back at them, so on this step it gives way to the one
+  // thing they actually want here: the event as everyone else sees it.
+  const onPreviewStep = showSetup && stepIndex === steps.length - 1
 
   if (eventLoading) {
     return (
@@ -155,16 +208,45 @@ export default function AdminEventDetailPage() {
   }
 
   return (
-    <div className={inAdminConsole ? undefined : 'mx-auto max-w-7xl px-4 pb-12 pt-[calc(var(--nav-h)+2rem)]'}>
-      {/* Back link */}
-      <Link
-        to={inAdminConsole ? '/admin/events' : '/events'}
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-ktip-ocean-600 mb-6 transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Back to Events
-      </Link>
+    <>
+      {/* Setting up wears the shell the standalone setup pages had: the
+          full-bleed band, the step's own name as the title and the blueprint's
+          blurb under it. Same page and same tabs as always underneath — only
+          the chrome says "you are being walked through this". */}
+      {setupShell && (
+        <PageHero
+          compact
+          eyebrow="Set up your event"
+          title={steps[stepIndex]?.label ?? event.title}
+          subtitle={blueprint.setup?.blurb}
+          imageSeed="events"
+          breadcrumb={[
+            { label: 'Home', href: '/' },
+            { label: 'Events', href: '/events' },
+            { label: event.title, href: entityPath('event', event) },
+            { label: 'Set up' },
+          ]}
+        />
+      )}
 
+      <div
+        className={cn(
+          !inAdminConsole && 'mx-auto max-w-7xl px-4 pb-12',
+          !inAdminConsole && (setupShell ? 'pt-12' : 'pt-[calc(var(--nav-h)+2rem)]')
+        )}
+      >
+      {/* Back link */}
+      {!setupShell && (
+        <Link
+          to={inAdminConsole ? '/admin/events' : '/events'}
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-ktip-ocean-600 mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back to Events
+        </Link>
+      )}
+
+      {!setupShell && (
       <PageHero
         inset
         compact
@@ -249,33 +331,62 @@ export default function AdminEventDetailPage() {
           </div>
         </div>
       </PageHero>
+      )}
 
-      {/* Flat Tab Navigation */}
-      <div className="relative border-b border-ktip-sand-200 mb-6" role="tablist" aria-label="Event management">
-        <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
-          {tabs.map((tab) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
-                activeTab === tab.id
-                  ? 'border-ktip-ocean-500 text-ktip-ocean-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
-              )}
-              key={tab.id}
-            >
-              <tab.icon size={16} />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* One row of navigation, not two. The run is a step per tab this event
+          type needs, so the stepper replaces the tab strip for its duration
+          rather than sitting on top of it saying a coarser version of the same
+          thing. "Skip setup" below puts the full strip back. */}
+      {showSetup ? (
+        <Stepper
+          steps={steps.map((step) => step.label)}
+          currentStep={stepIndex}
+          onStepClick={(i) => {
+            const tab = steps[i].tab
+            if (tab) setActiveTab(tab as TabId)
+          }}
+          className="mb-8"
+        />
+      ) : (
+        /* Flat Tab Navigation */
+        <div className="relative border-b border-ktip-sand-200 mb-6" role="tablist" aria-label="Event management">
+          <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
+            {tabs.map((tab) => (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
+                  activeTab === tab.id
+                    ? 'border-ktip-ocean-500 text-ktip-ocean-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
+                )}
+                key={tab.id}
+              >
+                <tab.icon size={16} />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {/* Tab Content */}
-      {activeTab === 'overview' && (
+      {activeTab === 'overview' && onPreviewStep && (
+        <div className="animate-tab-enter">
+          {/* ?from=setup so the event page knows to offer the way back — it is
+              the one stop on this run that is not the console. */}
+          <Link to={`${entityPath('event', event)}?from=setup`} className="block">
+            <Button fullWidth variant="secondary" icon={<ExternalLink size={18} />}>
+              View the event
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {activeTab === 'overview' && !onPreviewStep && (
         <div className="animate-tab-enter border border-ktip-sand-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
           {event.description ? (
@@ -331,10 +442,13 @@ export default function AdminEventDetailPage() {
         <div className="animate-tab-enter">
           <AdminEventVenueTab
             eventId={event.id}
+            eventTitle={event.title}
             eventType={event.event_type}
             hasVenue={event.has_venue ?? false}
+            spectatorsEnabled={event.spectators_enabled ?? false}
             venueFloorplanUrl={event.venue_floorplan_url ?? null}
             venueMap={event.venue_map ?? null}
+            venueHref={venuePath(event)}
             onEventChange={refetch}
           />
         </div>
@@ -381,6 +495,41 @@ export default function AdminEventDetailPage() {
         </div>
       )}
 
+      {/* Each tab saves its own editor, so every step but the last is only
+          ever "take me to the next thing". The last one is where the run ends
+          and needs something final to press: publishing is the save a draft is
+          waiting for, and an already-published event just closes the run. */}
+      {showSetup && (
+        <div className="mt-10 flex items-center gap-4">
+          <Button
+            fullWidth
+            icon={nextStep ? <ArrowRight size={20} /> : <Check size={20} />}
+            onClick={() => {
+              if (nextStep) return setActiveTab(nextStep.tab as TabId)
+              if (event.status === 'draft') return setConfirmAction({ status: 'published' })
+              setActiveTab('overview', { setup: false })
+            }}
+          >
+            {nextStep
+              ? `Next: ${nextStep.label}`
+              : event.status === 'draft'
+                ? 'Save & publish'
+                : 'Save & finish'}
+          </Button>
+          {/* No escape offered on the last step: "View the event" sits in the
+              panel above, and the only thing left to do is end the run. */}
+          {nextStep && (
+            <button
+              type="button"
+              onClick={() => setActiveTab(activeTab, { setup: false })}
+              className="whitespace-nowrap text-sm text-ktip-sand-500 transition-colors hover:text-ktip-sand-700"
+            >
+              Skip setup
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Confirm Modal */}
       <ConfirmModal
         open={!!confirmAction}
@@ -410,6 +559,7 @@ export default function AdminEventDetailPage() {
         onConfirm={handleStatusChange}
         onCancel={() => setConfirmAction(null)}
       />
-    </div>
+      </div>
+    </>
   )
 }

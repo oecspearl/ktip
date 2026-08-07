@@ -45,7 +45,7 @@ import { PageHero } from '../../components/layout/PageHero'
 import { analytics } from '../../hooks/useAnalytics'
 import { format } from 'date-fns'
 import { entityPath } from '../../lib/slug'
-import { eventSetupPath, venueSetupPath } from '../../lib/event-slug'
+import { eventManagePath } from '../../lib/event-slug'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Formats accepted by the document scraper (plus plain text). */
@@ -411,14 +411,14 @@ export default function CreateEventPage() {
         toast.success(t`Event created successfully!`)
       }
       // Most types are a two-step job: the listing, then the thing that makes
-      // the listing worth reading. A hackathon's step two is the venue, which
-      // needs a full-width canvas of its own; everything else shares one page.
+      // the listing worth reading. Step two is the management console opened
+      // in setup mode on the first tab this type needs — the same console the
+      // host will run the event from, so there is no second place to learn.
+      const steps = setupSteps(event.event_type)
       navigate(
-        !blueprint.setup
-          ? entityPath('event', event)
-          : blueprint.setup.sections.includes('venue')
-            ? venueSetupPath(event)
-            : eventSetupPath(event)
+        steps[1]?.tab
+          ? eventManagePath(event, { tab: steps[1].tab, setup: true })
+          : entityPath('event', event)
       )
     } catch (error: any) {
       // A row-level-security refusal or a missing column arrives here. The toast
@@ -452,7 +452,11 @@ export default function CreateEventPage() {
           {/* Only drawn once the type is known and that type has a step two —
               a one-step stepper is just a label. */}
           {blueprint.setup && typeChosen && (
-            <Stepper steps={setupSteps(eventType)} currentStep={0} className="mb-8" />
+            <Stepper
+              steps={setupSteps(eventType).map((step) => step.label)}
+              currentStep={0}
+              className="mb-8"
+            />
           )}
 
           <form data-tutorial="event-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">

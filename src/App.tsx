@@ -270,23 +270,21 @@ const router = createBrowserRouter([
                   },
                 ],
               },
-              // Step two of creating a hackathon or conference: draw the rooms
-              // (migration 089). Host-gated inside the page, and again by
-              // is_venue_host() in the save RPC.
+              // Setting an event up happens on the management console now, as a
+              // stepper over its own tabs. These three addresses were the two
+              // standalone setup pages (089, 092); they redirect to the tab
+              // they used to be.
               {
                 path: '/events/virtual-hackathon/:slug/setup',
-                lazy: lazyPage(() => import('./pages/events/EventVenueSetupPage')),
+                lazy: lazyPage(() => import('./pages/events/EventSetupRedirectPage')),
               },
               {
                 path: '/events/virtual-conference/:slug/setup',
-                lazy: lazyPage(() => import('./pages/events/EventVenueSetupPage')),
+                lazy: lazyPage(() => import('./pages/events/EventSetupRedirectPage')),
               },
-              // Step two for every other type that has one (092): the brief,
-              // the agenda, the speakers. Host-gated inside the page, and again
-              // by RLS on each table it writes.
               {
                 path: '/events/:slug/setup',
-                lazy: lazyPage(() => import('./pages/events/EventSetupPage')),
+                lazy: lazyPage(() => import('./pages/events/EventSetupRedirectPage')),
               },
               // The id-shaped originals, kept as redirects for old links.
               {

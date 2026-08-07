@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useEvent, useRSVP, useDeleteEvent } from '../../hooks/useEvents'
@@ -28,7 +28,7 @@ import { EventSolutionsPanel } from '../../components/events/EventSolutionsPanel
 import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeEventDeletion } from '../../lib/delete-guard'
-import { venuePath } from '../../lib/event-slug'
+import { eventManagePath, venuePath } from '../../lib/event-slug'
 import {
   Calendar,
   MapPin,
@@ -44,6 +44,7 @@ import {
   CalendarX,
   Send,
   Map as MapIcon,
+  ArrowLeft,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import {
@@ -72,6 +73,11 @@ export default function EventDetailPage() {
   const navigate = useNavigate()
   const auth = useAuth()
   const { openMember } = useMemberPanel()
+  // The setup run's last step sends the host here to look at what they built,
+  // and this is the only page in the flow that is not the console — so it has
+  // to offer the way back itself.
+  const [searchParams] = useSearchParams()
+  const fromSetup = searchParams.get('from') === 'setup'
 
   const { event, loading: eventLoading } = useEvent(params.id)
   useCanonicalSlug(params.id, event)
@@ -116,8 +122,14 @@ export default function EventDetailPage() {
   const isPending = myRsvp?.status === 'pending'
 
   // The choice is only offered where it means something: a type with an
-  // audience (blueprint) that has actually switched spectators on (event).
-  const offersViewing = !!event && blueprintFor(event.event_type).allowViewers && event.spectators_enabled
+  // audience (blueprint), spectators switched on (event), and a venue for them
+  // to watch. The flag is left set when the venue goes off, so turning the
+  // venue back on restores the host's choice untouched.
+  const offersViewing =
+    !!event &&
+    blueprintFor(event.event_type).allowViewers &&
+    !!event.spectators_enabled &&
+    !!event.has_venue
 
   const isOrganizer = event?.organizer_id === auth.user?.id
   // An event is only past once it has finished — multi-day events stay active until end_date
@@ -269,6 +281,14 @@ export default function EventDetailPage() {
         actions={
           isOrganizer ? (
             <>
+              {fromSetup && (
+                <Link to={eventManagePath(event, { tab: 'overview', setup: true })}>
+                  <button className="px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 transition-colors">
+                    <ArrowLeft size={14} />
+                    <Trans>Back to setup</Trans>
+                  </button>
+                </Link>
+              )}
               {isDraft && (
                 <button
                   onClick={handlePublish}

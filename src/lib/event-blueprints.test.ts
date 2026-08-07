@@ -152,27 +152,68 @@ describe('event blueprints', () => {
       }
     })
 
-    it('draws one step with no step 2, and ends every longer flow on management', () => {
-      expect(setupSteps('meetup')).toEqual(['Event details'])
-      // Venue types split step 2 in half: the building, then the brief/programme.
-      expect(setupSteps('hackathon')).toEqual([
+    it('gives every type on the picker its own run, ending on the preview', () => {
+      const labels = (type: string) => setupSteps(type).map((s) => s.label)
+
+      // A meetup has no step 2 at all, so there is no run and no stepper.
+      expect(labels('meetup')).toEqual(['Event details'])
+
+      expect(labels('hackathon')).toEqual([
         'Event details',
         'Design the rooms',
         'The brief',
-        'Event management',
+        'Programme',
+        'Preview',
       ])
-      expect(setupSteps('conference')).toEqual([
+      expect(labels('challenge')).toEqual(['Event details', 'The brief', 'Preview'])
+      expect(labels('workshop')).toEqual(['Event details', 'Speakers', 'Programme', 'Preview'])
+      expect(labels('conference')).toEqual([
         'Event details',
         'Design the venue',
-        'The programme',
-        'Event management',
+        'Speakers',
+        'Programme',
+        'Pages',
+        'Preview',
       ])
-      // No venue: one editor step, then management.
-      expect(setupSteps('workshop')).toEqual([
-        'Event details',
-        'Add the facilitator',
-        'Event management',
+      expect(labels('demo_day')).toEqual(['Event details', 'Programme', 'Judging', 'Preview'])
+    })
+
+    it('is a step per management tab, in blueprint order', () => {
+      // The steps are the console's own tabs now, so a wrong id here is a step
+      // that lands on nothing.
+      expect(setupSteps('conference')).toEqual([
+        { label: 'Event details', tab: 'details' },
+        { label: 'Design the venue', tab: 'venue' },
+        { label: 'Speakers', tab: 'speakers' },
+        { label: 'Programme', tab: 'schedule' },
+        { label: 'Pages', tab: 'pages' },
+        // Overview: the event read back, and somewhere to stand while pressing
+        // the button that ends the run.
+        { label: 'Preview', tab: 'overview' },
       ])
+      // 'judging' is the challenge editor in a narrower mode, not a tab of
+      // its own.
+      expect(setupSteps('demo_day')[2].tab).toBe('challenge')
+    })
+
+    it('walks the blueprint sections, bracketed by the details and the preview', () => {
+      for (const type of ALL_TYPES) {
+        const { setup } = blueprintFor(type)
+        const steps = setupSteps(type)
+        expect(steps[0], `${type} does not start on the details`).toEqual({
+          label: 'Event details',
+          tab: 'details',
+        })
+        if (!setup) {
+          expect(steps, `${type} has no step 2, so it has no run`).toHaveLength(1)
+          continue
+        }
+        expect(steps, `${type} is missing a step`).toHaveLength(setup.sections.length + 2)
+        expect(steps.at(-1), `${type} does not end on the preview`).toEqual({
+          label: 'Preview',
+          tab: 'overview',
+        })
+      }
     })
   })
 
@@ -190,7 +231,7 @@ describe('event blueprints', () => {
 
     it('does not claim an unknown type has a step 2', () => {
       expect(hasSetupStep('symposium')).toBe(false)
-      expect(setupSteps(null)).toEqual(['Event details'])
+      expect(setupSteps(null).map((s) => s.label)).toEqual(['Event details'])
     })
   })
 })

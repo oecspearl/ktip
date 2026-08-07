@@ -9,7 +9,8 @@ export function useEventSchedule(eventId: string | undefined) {
       .from('event_schedule')
       .select(`
         *,
-        speaker:event_speakers(*)
+        speaker:event_speakers(*),
+        room:venue_rooms(id, key, name, kind)
       `)
       .eq('event_id', id)
       .order('start_time', { ascending: true })
@@ -38,6 +39,7 @@ export function useCreateScheduleItem() {
       start_time: string
       end_time?: string
       location?: string
+      room_id?: string
       speaker_id?: string
       schedule_type: string
     }) => {
@@ -50,6 +52,7 @@ export function useCreateScheduleItem() {
       if (data.description) insertData.description = data.description
       if (data.end_time) insertData.end_time = data.end_time
       if (data.location) insertData.location = data.location
+      if (data.room_id) insertData.room_id = data.room_id
       if (data.speaker_id) insertData.speaker_id = data.speaker_id
 
       const { data: result, error } = await supabase
@@ -57,7 +60,8 @@ export function useCreateScheduleItem() {
         .insert(insertData)
         .select(`
           *,
-          speaker:event_speakers(*)
+          speaker:event_speakers(*),
+          room:venue_rooms(id, key, name, kind)
         `)
         .single()
 
@@ -89,7 +93,8 @@ export function useUpdateScheduleItem() {
         .eq('id', itemId)
         .select(`
           *,
-          speaker:event_speakers(*)
+          speaker:event_speakers(*),
+          room:venue_rooms(id, key, name, kind)
         `)
         .single()
 

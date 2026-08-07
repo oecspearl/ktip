@@ -50,15 +50,8 @@ export interface EventBlueprint {
     /** Goes on the submit button ("Next: …") and in the stepper */
     label: string
     blurb: string
-    /** Which editors the Step 2 page renders, in this order */
+    /** The management tabs setting this type up walks through, in this order */
     sections: SetupSection[]
-    /**
-     * Stepper label for the non-venue editors when 'venue' is also in
-     * sections — the venue gets a step of its own, and this names the one
-     * after it ("The brief" for a hackathon, "The programme" for a
-     * conference). Ignored when sections has no venue.
-     */
-    programmeLabel?: string
   }
 }
 
@@ -110,9 +103,12 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     setup: {
       label: 'design the rooms',
       blurb:
-        'Lay out the rooms your hackathon needs, then write the brief teams are building against.',
-      sections: ['venue', 'challenge'],
-      programmeLabel: 'The brief',
+        'Lay out the rooms your hackathon needs, write the brief teams are building against, then say when everything happens.',
+      // A hackathon runs to a clock as much as a conference does — the opening
+      // briefing, mentor hours, the judging window, demos — so it gets the
+      // schedule too. Not speakers or pages: nobody is billed to talk at one,
+      // and there are no sponsor microsites.
+      sections: ['venue', 'challenge', 'schedule'],
     },
   },
 
@@ -187,7 +183,6 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
       blurb:
         'Lay out the stage, booths and breakout rooms, then add the speakers and the programme.',
       sections: ['venue', 'speakers', 'schedule', 'pages'],
-      programmeLabel: 'The programme',
     },
   },
 
@@ -269,26 +264,73 @@ export function hasSetupStep(eventType: string | null | undefined): boolean {
 }
 
 /**
- * The stepper labels for a type. One entry means no stepper is drawn — a
- * single-step flow is just a form.
+ * Which management tab each setup section is edited on. Setup used to be two
+ * standalone pages that re-mounted these same editors; now the tabs *are* the
+ * setup, so a section is nothing more than a pointer at one of them.
  *
- * A type whose setup includes the venue gets a step per half — the building,
- * then the programme/brief — and every multi-step flow ends on the event
- * management workspace, where the event is actually run from.
+ * 'judging' shares the challenge tab — it is the same editor in a narrower
+ * mode.
  */
-export function setupSteps(eventType: string | null | undefined): string[] {
+const SECTION_TABS: Record<SetupSection, string> = {
+  venue: 'venue',
+  speakers: 'speakers',
+  schedule: 'schedule',
+  challenge: 'challenge',
+  judging: 'challenge',
+  pages: 'pages',
+}
+
+/**
+ * What each section is called in the stepper. Short on purpose: the run is one
+ * row of up to six steps and the labels truncate before they wrap. The venue
+ * is the exception — it uses the blueprint's own `label`, which is already
+ * written as a step ("design the venue").
+ */
+const SECTION_STEP_LABELS: Record<SetupSection, string> = {
+  venue: 'The venue',
+  speakers: 'Speakers',
+  schedule: 'Programme',
+  challenge: 'The brief',
+  judging: 'Judging',
+  pages: 'Pages',
+}
+
+/** One stop in the setup run. */
+export interface SetupStep {
+  label: string
+  /** The management tab this step is edited on. */
+  tab: string
+}
+
+/**
+ * The setup run for a type: one step per management tab it needs, in blueprint
+ * order, ending on a look at what was built. One entry means no stepper is
+ * drawn — a single-step flow is just a form.
+ *
+ * A step per tab rather than a coarser grouping, because the tabs are what the
+ * host actually moves between; "the programme" was three of them under one
+ * label, which made the stepper and the tab strip disagree about where you
+ * were.
+ *
+ * The run ends on Overview — the event read back rather than another thing to
+ * fill in — so that the last step is a place the host can stand and press
+ * something final, not a walk off the end into the public page.
+ */
+export function setupSteps(eventType: string | null | undefined): SetupStep[] {
+  const details: SetupStep = { label: 'Event details', tab: 'details' }
   const { setup } = blueprintFor(eventType)
-  if (!setup) return ['Event details']
+  if (!setup) return [details]
 
   // The label is written for a button ("Next: design the rooms"), so it needs
   // a capital to stand on its own in the stepper.
   const capitalized = setup.label.charAt(0).toUpperCase() + setup.label.slice(1)
-  const hasVenue = setup.sections.includes('venue')
-  const rest = setup.sections.filter((s) => s !== 'venue')
 
-  const steps = ['Event details']
-  if (hasVenue) steps.push(capitalized)
-  if (rest.length) steps.push(hasVenue ? (setup.programmeLabel ?? 'The programme') : capitalized)
-  steps.push('Event management')
-  return steps
+  return [
+    details,
+    ...setup.sections.map((section) => ({
+      label: section === 'venue' ? capitalized : SECTION_STEP_LABELS[section],
+      tab: SECTION_TABS[section],
+    })),
+    { label: 'Preview', tab: 'overview' },
+  ]
 }

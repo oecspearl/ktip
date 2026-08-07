@@ -44,22 +44,21 @@ export function venueRoomPath(event: VenueAddressable, roomKey: string): string 
 }
 
 /**
- * Where a host builds the venue (089). Sits under the venue rather than under
- * /admin because it is step two of creating a hackathon, and the person who
- * just filled in the form is not thinking about an admin console.
- */
-export function venueSetupPath(event: VenueAddressable): string {
-  return `${venuePath(event)}/setup`
-}
-
-/**
- * Step two for every type that is not a hackathon (092): the brief, the
- * agenda, the speakers — whichever of those its blueprint asks for.
+ * The event management console, optionally opened on one tab and in setup
+ * mode.
  *
- * Sits under /events/<slug> rather than /admin for the same reason the venue
- * setup does: the person who just pressed "Create event" is not thinking about
- * an admin console. The same editors are still reachable from there.
+ * Setting an event up used to be two pages of its own (089, 092) that mounted
+ * the console's editors a second time. It is now the console itself with a
+ * stepper over the tab strip, so there is one address for "work on this
+ * event" and the host never crosses a seam between building it and running it.
  */
-export function eventSetupPath(event: Sluggable): string {
-  return `/events/${event.slug || event.id}/setup`
+export function eventManagePath(
+  event: Sluggable,
+  opts: { tab?: string; setup?: boolean } = {}
+): string {
+  const query = new URLSearchParams()
+  if (opts.tab) query.set('tab', opts.tab)
+  if (opts.setup) query.set('setup', '1')
+  const suffix = query.toString()
+  return `/events/${event.slug || event.id}/manage${suffix ? `?${suffix}` : ''}`
 }

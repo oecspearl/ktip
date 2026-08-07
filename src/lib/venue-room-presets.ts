@@ -32,6 +32,12 @@ export interface VenueRoomPreset {
   recording_enabled: boolean
   /** Empty = everyone in the venue. */
   allowed_roles: VenueRole[]
+  /**
+   * How tall the room stands in 2.5D. Scaled so the tallest thing in a venue —
+   * the showcase stage — is exactly 2, and everything else keeps its ratio to
+   * it. Not a host setting: the height is how a stage reads as a stage and a
+   * help desk as a help desk, so it follows the purpose rather than a slider.
+   */
   wall_height: number
   /** Footprint dropped on the grid, in cells. */
   size: { w: number; h: number }
@@ -61,7 +67,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: null,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 1.4,
+    wall_height: 1.75,
     size: { w: 8, h: 6 },
     icon: 'Landmark',
   },
@@ -76,7 +82,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 40,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 1,
+    wall_height: 1.25,
     size: { w: 8, h: 6 },
     icon: 'Users',
   },
@@ -91,7 +97,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 60,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 1.1,
+    wall_height: 1.38,
     size: { w: 6, h: 5 },
     icon: 'Wrench',
   },
@@ -106,7 +112,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 12,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 0.9,
+    wall_height: 1.13,
     size: { w: 5, h: 4 },
     icon: 'LifeBuoy',
   },
@@ -121,7 +127,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: null,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 1.6,
+    wall_height: 2,
     size: { w: 9, h: 6 },
     icon: 'Presentation',
     // A stage is for watching something, so the entries being demoed are the
@@ -149,7 +155,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 15,
     recording_enabled: false,
     allowed_roles: ['judge', 'organizer'],
-    wall_height: 1.2,
+    wall_height: 1.5,
     size: { w: 5, h: 4 },
     icon: 'Gavel',
   },
@@ -164,7 +170,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 20,
     recording_enabled: false,
     allowed_roles: ['mentor', 'judge', 'organizer'],
-    wall_height: 1,
+    wall_height: 1.25,
     size: { w: 5, h: 4 },
     icon: 'Coffee',
     // Where mentors regroup — so it shows them who still needs help rather
@@ -189,7 +195,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 25,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 1.1,
+    wall_height: 1.38,
     size: { w: 5, h: 4 },
     icon: 'Store',
   },
@@ -204,7 +210,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 8,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 0.8,
+    wall_height: 1,
     size: { w: 4, h: 3 },
     icon: 'Rocket',
     sections: [
@@ -227,7 +233,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: null,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 0.8,
+    wall_height: 1,
     size: { w: 6, h: 4 },
     icon: 'Moon',
     // No chat, on purpose. A quiet room with a conversation in it is a
@@ -245,7 +251,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 10,
     recording_enabled: false,
     allowed_roles: [],
-    wall_height: 0.7,
+    wall_height: 0.88,
     size: { w: 4, h: 3 },
     icon: 'DoorOpen',
     // First stop: check in, find out what to do, find out where to go.
@@ -271,7 +277,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     capacity: 10,
     recording_enabled: false,
     allowed_roles: ['speaker', 'mentor', 'judge', 'organizer'],
-    wall_height: 1,
+    wall_height: 1.25,
     size: { w: 4, h: 4 },
     icon: 'Sparkles',
     // Backstage: who is on, how long is left, and a room log so a presenter

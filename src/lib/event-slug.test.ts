@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { venuePath, venueRoomPath, venueSetupPath, venueSegmentFor } from './event-slug'
+import { eventManagePath, venuePath, venueRoomPath, venueSegmentFor } from './event-slug'
 
 const EVENT = { id: 'd0000000-0000-0000-0000-000000000007', slug: 'oecs-climathon' }
 
@@ -29,7 +29,6 @@ describe('per-type venue segments', () => {
     expect(venueRoomPath(conf, 'main-stage')).toBe(
       '/events/virtual-conference/oecs-climathon/room/main-stage'
     )
-    expect(venueSetupPath(conf)).toBe('/events/virtual-conference/oecs-climathon/setup')
   })
 
   it('keeps the legacy segment for every other type, known or not', () => {
@@ -41,5 +40,22 @@ describe('per-type venue segments', () => {
     )
     expect(venueSegmentFor(null)).toBe('virtual-hackathon')
     expect(venueSegmentFor(undefined)).toBe('virtual-hackathon')
+  })
+})
+
+describe('the management console URL', () => {
+  it('is one address per event, with the tab as a query', () => {
+    expect(eventManagePath(EVENT)).toBe('/events/oecs-climathon/manage')
+    expect(eventManagePath(EVENT, { tab: 'venue' })).toBe('/events/oecs-climathon/manage?tab=venue')
+  })
+
+  it('carries the setup flag so the console can draw the stepper', () => {
+    expect(eventManagePath(EVENT, { tab: 'details', setup: true })).toBe(
+      '/events/oecs-climathon/manage?tab=details&setup=1'
+    )
+  })
+
+  it('falls back to the uuid like every other event path', () => {
+    expect(eventManagePath({ id: EVENT.id, slug: null })).toBe(`/events/${EVENT.id}/manage`)
   })
 })

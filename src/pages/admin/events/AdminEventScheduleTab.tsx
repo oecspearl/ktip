@@ -7,6 +7,7 @@ import {
   useDeleteScheduleItem,
 } from '../../../hooks/useEventSchedule'
 import { useEventSpeakers } from '../../../hooks/useEventSpeakers'
+import { useVenueRooms } from '../../../hooks/useVenueRooms'
 import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../../components/ui/Button'
 import { Badge } from '../../../components/ui/Badge'
@@ -40,12 +41,14 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [location, setLocation] = useState('')
+  const [roomId, setRoomId] = useState('')
   const [speakerId, setSpeakerId] = useState('')
   const [scheduleType, setScheduleType] = useState('session')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const { schedule, loading: scheduleLoading, refetch } = useEventSchedule(eventId)
   const { speakers } = useEventSpeakers(eventId)
+  const { rooms } = useVenueRooms(eventId)
   const { createItem, loading: creating } = useCreateScheduleItem()
   const { updateItem, loading: updating } = useUpdateScheduleItem()
   const { deleteItem, loading: deleting } = useDeleteScheduleItem()
@@ -56,6 +59,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
     setStartTime('')
     setEndTime('')
     setLocation('')
+    setRoomId('')
     setSpeakerId('')
     setScheduleType('session')
     setErrors({})
@@ -70,6 +74,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
     setStartTime(toDatetimeLocal(item.start_time))
     setEndTime(toDatetimeLocal(item.end_time))
     setLocation(item.location || '')
+    setRoomId(item.room_id || '')
     setSpeakerId(item.speaker_id || '')
     setScheduleType(item.schedule_type)
     setShowForm(true)
@@ -94,7 +99,10 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
     }
     if (description.trim()) payload.description = description.trim()
     if (endTime) payload.end_time = new Date(endTime).toISOString()
-    if (location.trim()) payload.location = location.trim()
+    // Both sent explicitly, including the nulls: editing a session that used
+    // to name a room has to be able to clear it.
+    payload.room_id = roomId || null
+    payload.location = location.trim() || null
     if (speakerId) payload.speaker_id = speakerId
 
     try {
@@ -239,16 +247,39 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
 
           {/* Location + Speaker + Type row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Location / Room</label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
-                placeholder="e.g. Main Hall, Room A..."
-              />
-            </div>
+            {/* A drawn venue turns the free-text location into a picker: the
+                rooms exist as rows, so a typed "Main hall" that nearly matches
+                one is a session the audience cannot be sent to. Events with no
+                venue keep the text box — their location is a place in a
+                building nothing here knows about. */}
+            {rooms && rooms.length > 0 ? (
+              <div>
+                <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Room</label>
+                <select
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.currentTarget.value)}
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                >
+                  <option value="">No room</option>
+                  {rooms.map((room) => (
+                    <option key={room.id} value={room.id}>
+                      {room.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Location / Room</label>
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.currentTarget.value)}
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                  placeholder="e.g. Main Hall, Room A..."
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">Speaker</label>
               <select
@@ -377,10 +408,12 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                               {item.speaker.name}
                             </span>
                           )}
-                          {item.location && (
+                          {/* The room's own name, not the copy that was typed
+                              into location when it was still free text. */}
+                          {(item.room?.name || item.location) && (
                             <span className="inline-flex items-center gap-1">
                               <MapPin size={12} />
-                              {item.location}
+                              {item.room?.name || item.location}
                             </span>
                           )}
                         </div>

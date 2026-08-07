@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Map as MapIcon, PencilRuler, Sparkles } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
-import { venueRoomPath, venueSetupPath } from '../../lib/event-slug'
+import { eventManagePath, venueRoomPath } from '../../lib/event-slug'
 import { useEnterVenueRoom, useVenueRooms } from '../../hooks/useVenueRooms'
 import { useVenuePresenceContext } from '../../contexts/VenuePresenceContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -204,7 +204,11 @@ export default function EventVenuePage() {
         titleAs="h1"
         trailing={
           membership.role === 'organizer' && (
-            <Link to={venueSetupPath(event)} aria-label={t`Edit the map`} title={t`Edit the map`}>
+            <Link
+              to={eventManagePath(event, { tab: 'venue' })}
+              aria-label={t`Edit the map`}
+              title={t`Edit the map`}
+            >
               <Button
                 size="sm"
                 variant="secondary"
@@ -239,11 +243,14 @@ export default function EventVenuePage() {
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm text-ktip-sand-600">
                 {membership.role === 'organizer'
-                  ? t`Open the Venue tab on the admin page for this event and create the rooms — there is a one-click starter set.`
+                  ? t`Draw the rooms on the Venue tab of this event's management page — there is a one-click starter set.`
                   : t`The organizer is still setting up. Check back shortly.`}
               </p>
               {membership.role === 'organizer' && (
-                <Link to={`/admin/events/${event.id}`} className="mt-4 inline-block">
+                <Link
+                  to={eventManagePath(event, { tab: 'venue' })}
+                  className="mt-4 inline-block"
+                >
                   <Button size="sm" icon={<Sparkles size={15} />}>
                     <Trans>Set up the venue</Trans>
                   </Button>
