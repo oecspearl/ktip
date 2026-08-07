@@ -72,9 +72,9 @@ describe('event blueprints', () => {
       }
     })
 
-    it('a hackathon is the only type that switches the venue on', () => {
-      const venued = ALL_TYPES.filter((t) => EVENT_BLUEPRINTS[t].onCreate.has_venue)
-      expect(venued).toEqual(['hackathon'])
+    it('hackathon and conference are the only types that switch the venue on', () => {
+      const venued = ALL_TYPES.filter((t) => EVENT_BLUEPRINTS[t].onCreate.has_venue).sort()
+      expect(venued).toEqual(['conference', 'hackathon'])
     })
 
     it('only types with an audience offer a viewer registration', () => {
@@ -152,9 +152,27 @@ describe('event blueprints', () => {
       }
     })
 
-    it('gives two stepper labels when there is a step 2, one when there is not', () => {
+    it('draws one step with no step 2, and ends every longer flow on management', () => {
       expect(setupSteps('meetup')).toEqual(['Event details'])
-      expect(setupSteps('hackathon')).toEqual(['Event details', 'Design the rooms'])
+      // Venue types split step 2 in half: the building, then the brief/programme.
+      expect(setupSteps('hackathon')).toEqual([
+        'Event details',
+        'Design the rooms',
+        'The brief',
+        'Event management',
+      ])
+      expect(setupSteps('conference')).toEqual([
+        'Event details',
+        'Design the venue',
+        'The programme',
+        'Event management',
+      ])
+      // No venue: one editor step, then management.
+      expect(setupSteps('workshop')).toEqual([
+        'Event details',
+        'Add the facilitator',
+        'Event management',
+      ])
     })
   })
 

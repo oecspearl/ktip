@@ -998,6 +998,7 @@ export const VENUE_ROLE_LABELS: Record<string, string> = {
   judge: 'Judge',
   organizer: 'Organizer',
   spectator: 'Spectator',
+  speaker: 'Speaker',
 }
 
 export const VENUE = {

@@ -31,19 +31,21 @@ import {
   loopPath,
   makeProjection,
   parseCells,
+  parseMapConfig,
   rectCells,
   type FloorDoor,
   type MapCell,
   type VenueMapConfig,
 } from '../../../lib/venue-map'
 import {
-  STARTER_LAYOUT,
   VENUE_ROOM_PRESETS,
   presetByKey,
   roomKeyFrom,
   uniqueRoomKey,
   type VenueRoomPreset,
 } from '../../../lib/venue-room-presets'
+import type { VenueTemplate } from '../../../lib/venue-templates'
+import { VenueTemplatePicker, type SavedVenueTemplate } from './VenueTemplatePicker'
 import {
   MAX_SPONSOR_LINKS,
   parseSections,
@@ -121,6 +123,16 @@ interface VenueMapEditorProps {
   rooms: VenueRoom[] | undefined
   config: VenueMapConfig
   saving: boolean
+  /** events.event_type — filters the panel picker per type (venue-room-sections). */
+  eventType?: string | null
+  /** The host's saved buildings (venue_templates, 107), shown in the picker. */
+  savedTemplates?: SavedVenueTemplate[]
+  /**
+   * Persists unsaved edits under this key (sessionStorage) so a host who
+   * walks to another setup step and back finds their half-drawn floor intact.
+   * Pass the event id. Cleared on a successful save.
+   */
+  draftKey?: string
   onSave: (config: VenueMapConfig, rooms: VenueMapRoomInput[]) => Promise<unknown>
 }
 
@@ -141,7 +153,14 @@ const ROOM_KINDS: VenueRoomKind[] = [
   'breakout',
 ]
 
-const RESTRICTABLE_ROLES: VenueRole[] = ['participant', 'mentor', 'judge', 'organizer', 'spectator']
+const RESTRICTABLE_ROLES: VenueRole[] = [
+  'participant',
+  'mentor',
+  'judge',
+  'organizer',
+  'spectator',
+  'speaker',
+]
 
 /**
  * The venue builder.
@@ -154,20 +173,50 @@ const RESTRICTABLE_ROLES: VenueRole[] = ['participant', 'mentor', 'judge', 'orga
  * an undo stack, because an autosaving floorplan means an attendee watching a
  * wall move mid-drag.
  */
-export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditorProps) {
+export function VenueMapEditor({
+  rooms,
+  config,
+  saving,
+  eventType,
+  savedTemplates,
+  draftKey,
+  onSave,
+}: VenueMapEditorProps) {
   const { t, i18n } = useLingui()
   const wrapRef = useRef<HTMLDivElement>(null)
   const size = useElementSize(wrapRef)
 
-  const [state, setState] = useState<EditorState>(() => ({
-    config,
-    rooms: (rooms || []).map(toDraft).filter(Boolean) as DraftRoom[],
-  }))
-  const [dirty, setDirty] = useState(false)
+  // An unsaved draft left behind by this same session (the host stepped to
+  // another setup screen and came back) wins over the server rows; the map is
+  // whatever they last had on the canvas. Session-scoped on purpose — a draft
+  // surviving into next week would be a mystery, not a convenience.
+  const restored = useRef(false)
+  const [state, setState] = useState<EditorState>(() => {
+    if (draftKey) {
+      try {
+        const raw = sessionStorage.getItem(`ktip.venue.draft.${draftKey}`)
+        if (raw) {
+          const parsed = JSON.parse(raw) as EditorState
+          if (parsed && parsed.config && Array.isArray(parsed.rooms)) {
+            restored.current = true
+            return parsed
+          }
+        }
+      } catch {
+        // A malformed draft is dropped; the server rows below are the truth.
+      }
+    }
+    return {
+      config,
+      rooms: (rooms || []).map(toDraft).filter(Boolean) as DraftRoom[],
+    }
+  })
+  const [dirty, setDirty] = useState(() => restored.current)
   const [floor, setFloor] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [armed, setArmed] = useState<VenueRoomPreset | null>(null)
+  const [templatesOpen, setTemplatesOpen] = useState(false)
   /** Which fixture is being placed, if any. Rooms use `armed` instead. */
   const [tool, setTool] = useState<'none' | 'door' | 'stairs'>('none')
   const [toolError, setToolError] = useState<string | null>(null)
@@ -187,6 +236,19 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
     if (dirty) return
     setState({ config, rooms: (rooms || []).map(toDraft).filter(Boolean) as DraftRoom[] })
   }, [rooms, config, dirty])
+
+  // Mirror unsaved edits into sessionStorage so navigating between setup
+  // steps never loses the draft. Written on change, removed once clean.
+  useEffect(() => {
+    if (!draftKey) return
+    const key = `ktip.venue.draft.${draftKey}`
+    try {
+      if (dirty) sessionStorage.setItem(key, JSON.stringify(state))
+      else sessionStorage.removeItem(key)
+    } catch {
+      // Quota or private-mode refusal — the draft just is not cached.
+    }
+  }, [draftKey, dirty, state])
 
   const tilt = useAnimatedValue(preview ? 1 : 0)
   const stack = useAnimatedValue(preview && stacked && state.config.floors.length > 1 ? 1 : 0)
@@ -340,26 +402,35 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
     setHoverCell(null)
   }
 
-  const applyStarter = () => {
-    const taken = occupied()
+  /**
+   * Drop a whole template onto the building. Same rules as placing the presets
+   * by hand: cells already spoken for are skipped, keys are made unique, and
+   * the result is one undo step. A placement naming a floor the building does
+   * not have yet lands on the ground floor rather than nowhere.
+   */
+  const applyTemplate = (template: VenueTemplate) => {
     const additions: DraftRoom[] = []
     const keys = state.rooms.map((r) => r.key)
+    const takenOn = floorOccupancy(state.rooms)
 
-    for (const entry of STARTER_LAYOUT) {
+    for (const entry of template.rooms) {
       const preset = presetByKey(entry.preset)
       if (!preset) continue
+      const targetFloor =
+        entry.floor != null && entry.floor < state.config.floors.length ? entry.floor : 0
+      const taken = takenOn(targetFloor)
       const cells = rectCells(...entry.rect).filter(
         ([x, y]) => inGrid(x, y) && !taken.has(cellKey(x, y))
       )
       if (!cells.length) continue
       for (const [x, y] of cells) taken.add(cellKey(x, y))
 
-      const key = uniqueRoomKey(preset.key, keys)
+      const key = uniqueRoomKey(entry.name ? roomKeyFrom(entry.name) : preset.key, keys)
       keys.push(key)
       additions.push({
         id: `draft-${key}`,
         key,
-        name: preset.name,
+        name: entry.name ?? preset.name,
         kind: preset.kind,
         description: i18n._(preset.description),
         color: preset.color,
@@ -369,7 +440,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
         recording_enabled: preset.recording_enabled,
         is_open: true,
         allowed_roles: [...preset.allowed_roles],
-        floor,
+        floor: targetFloor,
         cells,
         sponsor_name: null,
         sponsor_url: null,
@@ -378,6 +449,78 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
     }
 
     if (additions.length) commit((prev) => ({ ...prev, rooms: [...prev.rooms, ...additions] }))
+  }
+
+  /**
+   * Drop a host-saved building (venue_templates, 107) onto the canvas. The
+   * snapshot's rows are parsed as defensively as rows off the database — a
+   * malformed entry is skipped, never thrown. On an empty canvas the saved
+   * grid and floors are adopted too, so a two-storey template arrives with
+   * both storeys; on a canvas with rooms only the rooms are added.
+   */
+  const applySavedTemplate = (template: { map?: unknown; rooms?: unknown }) => {
+    const adoptConfig = state.rooms.length === 0 && template.map != null
+    const config = adoptConfig ? parseMapConfig(template.map) : state.config
+    const rows = Array.isArray(template.rooms) ? template.rooms : []
+
+    const additions: DraftRoom[] = []
+    const keys = state.rooms.map((r) => r.key)
+    const takenOn = floorOccupancy(state.rooms)
+    const gridOk = (x: number, y: number) => x >= 0 && x < config.cols && y >= 0 && y < config.rows
+
+    for (const raw of rows) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue
+      const row = raw as Record<string, unknown>
+
+      const kind = ROOM_KINDS.includes(row.kind as VenueRoomKind)
+        ? (row.kind as VenueRoomKind)
+        : 'breakout'
+      const storedFloor = Math.max(0, Math.trunc(Number(row.floor) || 0))
+      const targetFloor = storedFloor < config.floors.length ? storedFloor : 0
+      const taken = takenOn(targetFloor)
+      const cells = parseCells(row.cells).filter(
+        ([x, y]) => gridOk(x, y) && !taken.has(cellKey(x, y))
+      )
+      if (!cells.length) continue
+      for (const [x, y] of cells) taken.add(cellKey(x, y))
+
+      const name = typeof row.name === 'string' && row.name.trim() ? row.name.trim() : 'Room'
+      const key = uniqueRoomKey(
+        typeof row.key === 'string' && row.key ? row.key : roomKeyFrom(name),
+        keys
+      )
+      keys.push(key)
+      additions.push({
+        id: `draft-${key}`,
+        key,
+        name,
+        kind,
+        description: typeof row.description === 'string' ? row.description : '',
+        color: typeof row.color === 'string' && row.color ? row.color : '#2A5788',
+        wall_height: clampHeight(row.wall_height),
+        capacity: Number.isFinite(Number(row.capacity)) && row.capacity != null
+          ? Math.max(0, Math.trunc(Number(row.capacity)))
+          : null,
+        audio_mode: AUDIO_MODES.some((m) => m.value === row.audio_mode)
+          ? (row.audio_mode as VenueAudioMode)
+          : 'open',
+        recording_enabled: row.recording_enabled === true,
+        is_open: true,
+        allowed_roles: Array.isArray(row.allowed_roles)
+          ? (row.allowed_roles.filter((r) =>
+              RESTRICTABLE_ROLES.includes(r as VenueRole)
+            ) as VenueRole[])
+          : [],
+        floor: targetFloor,
+        cells,
+        sponsor_name: null,
+        sponsor_url: null,
+        sections: parseSections(row.sections),
+      })
+    }
+
+    if (!additions.length && !adoptConfig) return
+    commit((prev) => ({ config, rooms: [...prev.rooms, ...additions] }))
   }
 
   // ---- floors -------------------------------------------------------------
@@ -1078,13 +1221,28 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
           {state.rooms.length === 0 && (
             <button
               type="button"
-              onClick={applyStarter}
+              onClick={() => setTemplatesOpen(true)}
               className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-ktip-tropical-300 bg-ktip-tropical-50 px-3 py-2 text-xs font-semibold text-ktip-tropical-800 hover:border-ktip-tropical-500"
             >
               <Sparkles size={13} aria-hidden="true" />
-              <Trans>Use the starter layout</Trans>
+              <Trans>Start from a template</Trans>
             </button>
           )}
+
+          <VenueTemplatePicker
+            open={templatesOpen}
+            eventType={eventType}
+            saved={savedTemplates}
+            onApply={(template) => {
+              applyTemplate(template)
+              setTemplatesOpen(false)
+            }}
+            onApplySaved={(template) => {
+              applySavedTemplate(template)
+              setTemplatesOpen(false)
+            }}
+            onClose={() => setTemplatesOpen(false)}
+          />
 
           <p className="mt-3 flex gap-1.5 text-[11px] leading-relaxed text-ktip-sand-500">
             <Eraser size={12} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -1474,7 +1632,9 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                 </p>
 
                 {(['main', 'aside'] as const).map((slot) => {
-                  const choices = sectionChoices(selected).filter((c) => c.def.slot === slot)
+                  const choices = sectionChoices(selected, eventType).filter(
+                    (c) => c.def.slot === slot
+                  )
                   if (!choices.length) return null
                   return (
                     <div key={slot} className="mb-1.5">
@@ -1494,7 +1654,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                               checked={enabled}
                               onChange={() =>
                                 patchRoom(selected.id, {
-                                  sections: toggleSection(selected, def.id, !enabled),
+                                  sections: toggleSection(selected, def.id, !enabled, eventType),
                                 })
                               }
                             />
@@ -1595,7 +1755,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                         }
                         onChange={(e) =>
                           patchRoom(selected.id, {
-                            sections: setSectionConfig(selected, id, { body: e.target.value }),
+                            sections: setSectionConfig(selected, id, { body: e.target.value }, eventType),
                           })
                         }
                         className="w-full rounded-lg border border-ktip-sand-200 px-2 py-1.5 text-[11px]"
@@ -1609,7 +1769,7 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
                     links={rawSponsorLinks(selected)}
                     onChange={(links) =>
                       patchRoom(selected.id, {
-                        sections: setSectionConfig(selected, 'sponsor_links', { links }),
+                        sections: setSectionConfig(selected, 'sponsor_links', { links }, eventType),
                       })
                     }
                   />
@@ -1663,6 +1823,23 @@ export function VenueMapEditor({ rooms, config, saving, onSave }: VenueMapEditor
 }
 
 // ---------------------------------------------------------------------------
+
+/** Cells spoken for per floor, memoised lazily — shared by the template paths. */
+function floorOccupancy(rooms: DraftRoom[]) {
+  const byFloor = new Map<number, Set<string>>()
+  return (f: number) => {
+    let taken = byFloor.get(f)
+    if (!taken) {
+      taken = new Set<string>()
+      for (const room of rooms) {
+        if (room.floor !== f) continue
+        for (const [x, y] of room.cells) taken.add(cellKey(x, y))
+      }
+      byFloor.set(f, taken)
+    }
+    return taken
+  }
+}
 
 function toDraft(room: VenueRoom): DraftRoom | null {
   return {

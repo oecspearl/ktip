@@ -1673,6 +1673,7 @@ Tours can read themselves aloud if you turn narration on.
 The tour action only appears on pages that actually have a tour, so you will not see it everywhere.`,
   msg`Sort a list by "For You"`,
   msg`Spam / Scam`,
+  msg`Speaker`,
   msg`Spectator`,
   msg`Sponsor Booth`,
   msg`Sponsor student applications and supervise student channels.`,
@@ -2243,8 +2244,8 @@ Some roles are self-selected and some are granted after verification, which is w
   msg`Your work in this tool`,
   msg`Yours, and everyone else’s`,
   msg`add the facilitator`,
-  msg`build the agenda`,
   msg`design the rooms`,
+  msg`design the venue`,
   msg`set the line-up`,
   msg`write the brief`,
   msg`• Download B&W or Color — opens the print dialog; choose “Save as PDF”

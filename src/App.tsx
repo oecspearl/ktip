@@ -5,6 +5,7 @@ import {
   Outlet,
   Link,
   Navigate,
+  useParams,
 } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { AuthProvider } from './contexts/AuthContext'
@@ -50,6 +51,12 @@ function Placeholder() {
       </Link>
     </div>
   )
+}
+
+/** /events/:id/edit → /events/:id/manage — the edit page folded into the workspace. */
+function EventEditRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/events/${id}/manage`} replace />
 }
 
 function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
@@ -213,7 +220,18 @@ const router = createBrowserRouter([
                   { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
                 ],
               },
-              { path: '/events/:id/edit', lazy: lazyPage(() => import('./pages/events/EditEventPage')) },
+              // The standalone edit page is gone — event fields are edited on
+              // the management workspace's Details tab. The old URL redirects
+              // so bookmarks and stale links keep working.
+              { path: '/events/:id/edit', element: <EventEditRedirect /> },
+              // The event management workspace, for the event's organizer.
+              // Same page the admin console mounts at /admin/events/:id — the
+              // gate is is_venue_host-shaped (organizer or platform admin),
+              // enforced inside the page and again by RLS on every write.
+              {
+                path: '/events/:id/manage',
+                lazy: lazyPage(() => import('./pages/admin/events/AdminEventDetailPage')),
+              },
               // Virtual Hackathon (migration 070). Absolute literal paths —
               // site-search.test.ts matches route paths literally, and only
               // /hackathons is reachable from site-map.ts because a site-map
@@ -225,6 +243,11 @@ const router = createBrowserRouter([
               // The layout owns the presence channel (VenuePresenceContext),
               // so moving between the floorplan and a room re-tracks on a live
               // socket instead of rebuilding the subscription from zero.
+              // One route set per public segment (virtual-hackathon and
+              // virtual-conference) — same pages behind both doors; the
+              // canonical segment for an event is picked by venuePath().
+              // Spelled out literally rather than looped: tutorials.test.ts
+              // and site-search.test.ts match route paths as source literals.
               {
                 path: '/events/virtual-hackathon/:slug',
                 lazy: lazyPage(() => import('./pages/events/EventVenueLayout')),
@@ -236,11 +259,26 @@ const router = createBrowserRouter([
                   },
                 ],
               },
-              // Step two of creating a hackathon: draw the rooms (migration 089).
-              // Host-gated inside the page, and again by is_venue_host() in the
-              // save RPC.
+              {
+                path: '/events/virtual-conference/:slug',
+                lazy: lazyPage(() => import('./pages/events/EventVenueLayout')),
+                children: [
+                  { index: true, lazy: lazyPage(() => import('./pages/events/EventVenuePage')) },
+                  {
+                    path: '/events/virtual-conference/:slug/room/:roomKey',
+                    lazy: lazyPage(() => import('./pages/events/EventVenueRoomPage')),
+                  },
+                ],
+              },
+              // Step two of creating a hackathon or conference: draw the rooms
+              // (migration 089). Host-gated inside the page, and again by
+              // is_venue_host() in the save RPC.
               {
                 path: '/events/virtual-hackathon/:slug/setup',
+                lazy: lazyPage(() => import('./pages/events/EventVenueSetupPage')),
+              },
+              {
+                path: '/events/virtual-conference/:slug/setup',
                 lazy: lazyPage(() => import('./pages/events/EventVenueSetupPage')),
               },
               // Step two for every other type that has one (092): the brief,

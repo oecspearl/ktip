@@ -52,6 +52,13 @@ export interface EventBlueprint {
     blurb: string
     /** Which editors the Step 2 page renders, in this order */
     sections: SetupSection[]
+    /**
+     * Stepper label for the non-venue editors when 'venue' is also in
+     * sections — the venue gets a step of its own, and this names the one
+     * after it ("The brief" for a hackathon, "The programme" for a
+     * conference). Ignored when sections has no venue.
+     */
+    programmeLabel?: string
   }
 }
 
@@ -105,6 +112,7 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
       blurb:
         'Lay out the rooms your hackathon needs, then write the brief teams are building against.',
       sections: ['venue', 'challenge'],
+      programmeLabel: 'The brief',
     },
   },
 
@@ -153,8 +161,13 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
 
   conference: {
     type: 'conference',
-    ...IN_PERSON_DEFAULTS,
     tagline: 'A multi-day programme with speakers, an agenda and sponsors.',
+    format: 'choice',
+    // Same reasoning as hackathon: the venue system this type switches on is
+    // the virtual one, so a conference starts virtual unless the host says
+    // otherwise.
+    defaultVirtual: true,
+    location: 'required',
     endDate: 'required',
     capacity: 'optional',
     capacityLabel: 'Capacity (Optional)',
@@ -164,11 +177,17 @@ export const EVENT_BLUEPRINTS: Record<EventType, EventBlueprint> = {
     submissionDeadline: false,
     allowViewers: true,
     detailPresets: [],
-    onCreate: {},
+    // has_venue: a virtual conference runs on the same venue engine as a
+    // hackathon — stage, sponsor booths, breakouts (its own default layout,
+    // not team pods). spectators_enabled because allowViewers is already true
+    // and the 096 join flow maps viewer RSVPs to venue spectators.
+    onCreate: { has_venue: true, spectators_enabled: true },
     setup: {
-      label: 'build the agenda',
-      blurb: 'Speakers, the session-by-session programme, and the pages attendees read first.',
-      sections: ['speakers', 'schedule', 'pages'],
+      label: 'design the venue',
+      blurb:
+        'Lay out the stage, booths and breakout rooms, then add the speakers and the programme.',
+      sections: ['venue', 'speakers', 'schedule', 'pages'],
+      programmeLabel: 'The programme',
     },
   },
 
@@ -252,11 +271,24 @@ export function hasSetupStep(eventType: string | null | undefined): boolean {
 /**
  * The stepper labels for a type. One entry means no stepper is drawn — a
  * single-step flow is just a form.
+ *
+ * A type whose setup includes the venue gets a step per half — the building,
+ * then the programme/brief — and every multi-step flow ends on the event
+ * management workspace, where the event is actually run from.
  */
 export function setupSteps(eventType: string | null | undefined): string[] {
   const { setup } = blueprintFor(eventType)
   if (!setup) return ['Event details']
+
   // The label is written for a button ("Next: design the rooms"), so it needs
   // a capital to stand on its own in the stepper.
-  return ['Event details', setup.label.charAt(0).toUpperCase() + setup.label.slice(1)]
+  const capitalized = setup.label.charAt(0).toUpperCase() + setup.label.slice(1)
+  const hasVenue = setup.sections.includes('venue')
+  const rest = setup.sections.filter((s) => s !== 'venue')
+
+  const steps = ['Event details']
+  if (hasVenue) steps.push(capitalized)
+  if (rest.length) steps.push(hasVenue ? (setup.programmeLabel ?? 'The programme') : capitalized)
+  steps.push('Event management')
+  return steps
 }

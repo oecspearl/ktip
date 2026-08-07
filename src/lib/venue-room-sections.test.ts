@@ -239,6 +239,43 @@ describe('the host’s tick list', () => {
   })
 })
 
+describe('per-event-type sections', () => {
+  it('drops team-formation panels from a conference networking room’s defaults', () => {
+    const conf = defaultSectionIds('networking', 'conference')
+    expect(conf).not.toContain('looking_for_team')
+    expect(conf).not.toContain('skill_finder')
+    // A hackathon — and a caller passing no type — keeps them.
+    expect(defaultSectionIds('networking', 'hackathon')).toContain('looking_for_team')
+    expect(defaultSectionIds('networking')).toContain('looking_for_team')
+  })
+
+  it('suppresses hidden ids even when they are stored on the room', () => {
+    // A room cloned from a hackathon template carries the ids in jsonb.
+    const stored = [{ id: 'looking_for_team' }, { id: 'skill_finder' }, { id: 'chat' }]
+    const resolved = ids(sectionsForRoom(room('networking', stored), 'participant', 'conference'))
+    expect(resolved).toEqual(['chat'])
+    // The same room in a hackathon renders all three.
+    expect(ids(sectionsForRoom(room('networking', stored), 'participant', 'hackathon'))).toEqual([
+      'chat',
+      'looking_for_team',
+      'skill_finder',
+    ])
+  })
+
+  it('keeps hidden sections out of a conference host’s picker', () => {
+    const offered = sectionChoices(room('networking'), 'conference').map((c) => c.def.id)
+    expect(offered).not.toContain('looking_for_team')
+    expect(offered).not.toContain('skill_finder')
+    expect(sectionChoices(room('networking'))).toHaveLength(SECTIONS.length)
+  })
+
+  it('never materialises a hidden id when a conference host ticks a box', () => {
+    const next = toggleSection(room('networking'), 'countdown', true, 'conference')
+    expect(next.map((s) => s.id)).not.toContain('looking_for_team')
+    expect(next.map((s) => s.id)).toContain('countdown')
+  })
+})
+
 describe('sponsor links', () => {
   it('drops anything that is not http(s)', () => {
     const links = parseSponsorLinks({

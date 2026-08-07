@@ -279,7 +279,7 @@ export default function EventDetailPage() {
                   {publishing ? t`Publishing…` : t`Publish`}
                 </button>
               )}
-              <Link to={`/events/${params.id}/edit`}>
+              <Link to={`/events/${params.id}/manage`}>
                 {/* Publish takes the brand fill on a draft, so Edit steps back */}
                 <button
                   className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 ${

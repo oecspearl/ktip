@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { ArrowLeft, Check, ExternalLink, Info } from 'lucide-react'
+import { ArrowLeft, BookmarkPlus, Check, ExternalLink, Info, X } from 'lucide-react'
 import { useEvent, useIsEventHost, useUpdateEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { mapConfigOf, useSaveVenueMap } from '../../hooks/useVenueMap'
+import { useSaveVenueTemplate, useVenueTemplates } from '../../hooks/useVenueTemplates'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueMapEditor } from '../../components/venue/map/VenueMapEditor'
@@ -12,11 +13,13 @@ import { PageHero } from '../../components/layout/PageHero'
 import { Stepper } from '../../components/ui/Stepper'
 import { setupSteps } from '../../lib/event-blueprints'
 import { eventSetupPath, venuePath } from '../../lib/event-slug'
+import { venueCopy } from '../../lib/venue-copy'
 import { entityPath } from '../../lib/slug'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
- * Step two of creating a hackathon: build the place it happens in.
+ * Step two of creating a hackathon or a conference: build the place it
+ * happens in.
  *
  * Creating the event and drawing its venue are one job done in two sittings,
  * so this is a page of its own rather than another tab in the admin console —
@@ -28,7 +31,7 @@ import { Trans, useLingui } from '@lingui/react/macro'
  * control.
  */
 export default function EventVenueSetupPage() {
-    const { t } = useLingui()
+    const { t, i18n } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const toast = useToast()
@@ -37,6 +40,12 @@ export default function EventVenueSetupPage() {
   const { rooms, loading: roomsLoading } = useVenueRooms(event?.id)
   const { saveMap, saving } = useSaveVenueMap()
   const { updateEvent } = useUpdateEvent()
+  const { templates } = useVenueTemplates()
+  const { saveTemplate, saving: savingTemplate } = useSaveVenueTemplate()
+
+  const [templateDialog, setTemplateDialog] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateDescription, setTemplateDescription] = useState('')
 
   usePageTitle(event ? t`Set up the venue — ${event.title}` : t`Set up the venue`)
 
@@ -85,7 +94,7 @@ export default function EventVenueSetupPage() {
         compact
         eyebrow={t`Set up your event`}
         title={t`Set up the rooms`}
-        subtitle={t`Drop the rooms your hackathon needs onto the floor, set who is allowed in each one, and add another level if you want the building to have one. Attendees walk this exact map.`}
+        subtitle={i18n._(venueCopy(event.event_type, 'setupSubtitle'))}
         imageSeed="events"
         breadcrumb={[
           { label: t`Home`, href: '/' },
@@ -100,12 +109,11 @@ export default function EventVenueSetupPage() {
           <Stepper steps={setupSteps(event.event_type)} currentStep={1} className="mb-8" />
 
         {/* Step one, not the event page: the same "Event details" the stepper
-            names, which for an event that already exists is its edit form.
-            Addressed by uuid, not slug — EditEventPage saves with
-            .eq('id', …), so a slug in the URL loads but cannot save. */}
+            names, which for an event that already exists is the Details tab of
+            its management workspace. */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <Link
-            to={`/events/${event.id}/edit`}
+            to={`/events/${event.id}/manage`}
             className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-ocean-600"
           >
             <ArrowLeft size={15} aria-hidden="true" />
@@ -129,6 +137,23 @@ export default function EventVenueSetupPage() {
                 <Trans>Turn the venue on</Trans>
               </Button>
             )}
+            {/* Snapshot the drawn building for the host's next event. Only
+                offered once there is something drawn AND saved — the RPC reads
+                the rows, not the editor's draft. */}
+            {(rooms?.length ?? 0) > 0 && (
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<BookmarkPlus size={14} />}
+                onClick={() => {
+                  setTemplateName(event.title)
+                  setTemplateDescription('')
+                  setTemplateDialog(true)
+                }}
+              >
+                <Trans>Save as template</Trans>
+              </Button>
+            )}
             <Button
               size="sm"
               variant="secondary"
@@ -137,14 +162,15 @@ export default function EventVenueSetupPage() {
             >
               <Trans>Open the venue</Trans>
             </Button>
-            {/* The rooms are half the job. The brief teams build against is
-                the other half, and it lives on the shared setup page. */}
+            {/* The rooms are half the job. The other half — the brief for a
+                hackathon, the programme for a conference — lives on the shared
+                setup page. */}
             <Button
               size="sm"
               variant="secondary"
               onClick={() => navigate(eventSetupPath(event))}
             >
-              <Trans>The brief</Trans>
+              {i18n._(venueCopy(event.event_type, 'continueLabel'))}
             </Button>
           </div>
         </div>
@@ -195,6 +221,9 @@ export default function EventVenueSetupPage() {
               rooms={rooms}
               config={config}
               saving={saving}
+              eventType={event.event_type}
+              savedTemplates={templates}
+              draftKey={event.id}
               onSave={async (nextConfig, payload) => {
                 try {
                   await saveMap({ eventId: event.id, map: nextConfig, rooms: payload })
@@ -228,6 +257,91 @@ export default function EventVenueSetupPage() {
           </div>
         </div>
       </div>
+
+      {templateDialog && (
+        <div
+          className="fixed inset-0 z-modal flex items-center justify-center bg-ktip-sand-900/40 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t`Save as template`}
+          onClick={() => setTemplateDialog(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg font-bold text-ktip-sand-900">
+                  <Trans>Save this building as a template</Trans>
+                </h2>
+                <p className="mt-0.5 text-sm text-ktip-sand-600">
+                  <Trans>
+                    The rooms and floors as last saved, minus sponsors and team pods. It will appear
+                    under “My templates” when you build your next venue.
+                  </Trans>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTemplateDialog(false)}
+                aria-label={t`Close`}
+                className="rounded-lg p-1.5 text-ktip-sand-500 hover:bg-ktip-sand-100"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+
+            <label className="mb-3 block text-sm">
+              <span className="mb-1 block font-medium text-ktip-sand-800"><Trans>Name</Trans></span>
+              <input
+                type="text"
+                value={templateName}
+                maxLength={80}
+                onChange={(e) => setTemplateName(e.target.value)}
+                className="w-full rounded-lg border border-ktip-sand-200 px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="mb-4 block text-sm">
+              <span className="mb-1 block font-medium text-ktip-sand-800">
+                <Trans>Description (optional)</Trans>
+              </span>
+              <textarea
+                rows={2}
+                value={templateDescription}
+                maxLength={500}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                className="w-full rounded-lg border border-ktip-sand-200 px-3 py-2 text-sm"
+              />
+            </label>
+
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="secondary" onClick={() => setTemplateDialog(false)}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button
+                size="sm"
+                disabled={!templateName.trim() || savingTemplate}
+                onClick={async () => {
+                  try {
+                    await saveTemplate({
+                      eventId: event.id,
+                      name: templateName.trim(),
+                      description: templateDescription.trim() || undefined,
+                    })
+                    setTemplateDialog(false)
+                    toast.success(t`Template saved`)
+                  } catch (err: any) {
+                    toast.error(err?.message || t`Could not save the template`)
+                  }
+                }}
+              >
+                <Trans>Save template</Trans>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

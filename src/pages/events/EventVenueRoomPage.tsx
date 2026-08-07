@@ -104,7 +104,8 @@ export default function EventVenueRoomPage() {
       room.is_open &&
       room.kind !== 'team' &&
       !!membership &&
-      (roomUsesSignals(room, membership.role) || roomUsesStage(room, membership.role)),
+      (roomUsesSignals(room, membership.role, event?.event_type) ||
+        roomUsesStage(room, membership.role)),
   })
 
   if (eventLoading || roomLoading || joining) {
@@ -173,6 +174,7 @@ export default function EventVenueRoomPage() {
       <VenueTopBar
         eventId={event.id}
         eventSlug={event.slug}
+        eventType={event.event_type}
         eventTitle={event.title}
         headcount={headcount}
         connected={presence.connected}

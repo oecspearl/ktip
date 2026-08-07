@@ -1138,7 +1138,7 @@ msgstr "Classic"
 msgid "Views"
 msgstr "Views"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Please fix {fieldCount} fields before saving: {fieldList}."
 msgstr "Please fix {fieldCount} fields before saving: {fieldList}."
 
@@ -1211,8 +1211,8 @@ msgstr "You are watching this room. Spectators can read chat but not post."
 msgid "Event host"
 msgstr "Event host"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Start Time"
 msgstr "Start Time"
 
@@ -1245,7 +1245,7 @@ msgstr "Actual size"
 msgid "The organizer is still setting up. Check back shortly."
 msgstr "The organizer is still setting up. Check back shortly."
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Attendees are given a goal to accomplish. Objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 msgstr "Attendees are given a goal to accomplish. Objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 
@@ -1391,8 +1391,8 @@ msgstr "How do I continue a draft application?"
 msgid "Click \"Edit\" in the project header — only the owner and team members see this."
 msgstr "Click \"Edit\" in the project header — only the owner and team members see this."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Deadline Time (Optional)"
 msgstr "Deadline Time (Optional)"
 
@@ -1738,7 +1738,7 @@ msgstr "Project updated successfully!"
 msgid "Don't have an account? <0>Sign up</0>"
 msgstr "Don't have an account? <0>Sign up</0>"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Failed to update event"
 msgstr "Failed to update event"
 
@@ -1841,8 +1841,8 @@ msgid "Analytics preferences"
 msgstr "Analytics preferences"
 
 #. placeholder {0}: named[0]
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "{0}: {fieldMessage}"
 msgstr "{0}: {fieldMessage}"
 
@@ -3132,8 +3132,8 @@ msgstr "Approved"
 msgid "↑↓ navigate"
 msgstr "↑↓ navigate"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "One short sentence shown on the homepage hero (optional)"
@@ -4235,8 +4235,8 @@ msgstr "Loading application..."
 msgid "Attach the evidence behind the narrative. Everything you upload here is private to you and the grant assessors — it is never listed on the public grant page."
 msgstr "Attach the evidence behind the narrative. Everything you upload here is private to you and the grant assessors — it is never listed on the public grant page."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Event Type"
 msgstr "Event Type"
 
@@ -4551,8 +4551,8 @@ msgstr "Every long text field in the wizard has AI tools under it.\n"
 msgid "Pick a skill, or type a name."
 msgstr "Pick a skill, or type a name."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "This is a virtual event"
 msgstr "This is a virtual event"
 
@@ -4681,8 +4681,8 @@ msgstr "Grant Information"
 msgid "Any signed-in member can see your full profile and message you"
 msgstr "Any signed-in member can see your full profile and message you"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Optional extra metadata shown under the description — add standalone fields or groups of items"
@@ -4772,7 +4772,7 @@ msgstr "Working"
 msgid "Help by topic"
 msgstr "Help by topic"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "You can only edit your own events."
 msgstr "You can only edit your own events."
 
@@ -5139,8 +5139,8 @@ msgstr "A lot of KTIP is public. Without signing in you can browse Discover, Pro
 msgid "Page Not Found"
 msgstr "Page Not Found"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
-#: src/pages/events/EditEventPage.tsx
 msgid "Demo Day"
 msgstr "Demo Day"
 
@@ -5771,7 +5771,7 @@ msgstr "That Virtual Campus account is already linked to a different KTIP accoun
 msgid "Session"
 msgstr "Session"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Capacity (Optional)"
 msgstr "Capacity (Optional)"
 
@@ -5844,8 +5844,8 @@ msgid "No events organized yet."
 msgstr "No events organized yet."
 
 #: src/components/calendar/CalendarAccentPicker.tsx
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Calendar colour"
 msgstr "Calendar colour"
 
@@ -6044,8 +6044,8 @@ msgstr "Approved by your school"
 msgid "Constraints"
 msgstr "Constraints"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Start Date"
 msgstr "Start Date"
 
@@ -6053,7 +6053,7 @@ msgstr "Start Date"
 msgid "Save this building as a template"
 msgstr "Save this building as a template"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Challenge events always set a goal for attendees. Solutions, objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 msgstr "Challenge events always set a goal for attendees. Solutions, objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 
@@ -6229,7 +6229,6 @@ msgstr "View my public profile"
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventVenueSetupPage.tsx
 #: src/pages/forums/CreatePostPage.tsx
 #: src/pages/grievances/ReportUserPage.tsx
@@ -6639,10 +6638,10 @@ msgstr "Open one to read it as submitted. Approve, reject, or mark under review 
 msgid "{0}/{1} characters"
 msgstr "{0}/{1} characters"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Summary"
@@ -7100,7 +7099,6 @@ msgstr "Session cleared. Please try signing in again."
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/pages/cv/CvPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
@@ -9138,7 +9136,6 @@ msgstr "Necessary only"
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 #: src/pages/directory/DirectoryPage.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/events/EventSetupPage.tsx
 #: src/pages/events/EventsPage.tsx
@@ -9731,7 +9728,7 @@ msgstr "Student applications must be sponsored. Nominate a faculty member in the
 msgid "Please select an image file"
 msgstr "Please select an image file"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Save Changes"
@@ -9773,8 +9770,8 @@ msgstr "Evidence URL (optional)"
 msgid "Submit Application"
 msgstr "Submit Application"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
-#: src/pages/events/EditEventPage.tsx
 msgid "Challenge"
 msgstr "Challenge"
 
@@ -10158,7 +10155,6 @@ msgid "Original file"
 msgstr "Original file"
 
 #: src/components/tutorial/TutorialOverlay.tsx
-#: src/pages/events/EventSetupPage.tsx
 #: src/pages/events/EventVenueSetupPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Finish"
@@ -10288,7 +10284,7 @@ msgstr "Confirm new password"
 msgid "Hi {userName}!"
 msgstr "Hi {userName}!"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "This event sets a challenge"
 msgstr "This event sets a challenge"
 
@@ -10463,8 +10459,8 @@ msgstr "New group"
 msgid "Select the Security tab."
 msgstr "Select the Security tab."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "How this event is coloured on the calendar. Leave it on Auto to follow the event type."
 msgstr "How this event is coloured on the calendar. Leave it on Auto to follow the event type."
 
@@ -10957,7 +10953,7 @@ msgstr "Virtual"
 msgid "How do I create a project?"
 msgstr "How do I create a project?"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Event updated successfully!"
 msgstr "Event updated successfully!"
 
@@ -11084,7 +11080,7 @@ msgstr "Check Settings, Preferences first. There is a switch per stream, and the
 "\n"
 "In-app notifications appear on the bell in the navigation bar rather than as browser pop-ups."
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Back to Event"
 msgstr "Back to Event"
 
@@ -11681,11 +11677,6 @@ msgstr "The step-by-step application and how drafts work."
 msgid "Buttons the sponsor wants clicked — careers, docs, a demo. Added below."
 msgstr "Buttons the sponsor wants clicked — careers, docs, a demo. Added below."
 
-#. placeholder {0}: event.title
-#: src/pages/events/EditEventPage.tsx
-msgid "Edit: {0}"
-msgstr "Edit: {0}"
-
 #: src/hooks/useAIAssistant.ts
 msgid "Sorry, I could not generate a response."
 msgstr "Sorry, I could not generate a response."
@@ -11796,10 +11787,6 @@ msgstr "(sample HTML)"
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "While entries are open you only see your own. Everyone's solutions become visible once submissions close"
 msgstr "While entries are open you only see your own. Everyone's solutions become visible once submissions close"
-
-#: src/pages/events/EditEventPage.tsx
-msgid "Event Workspace"
-msgstr "Event Workspace"
 
 #: src/i18n/harvested.ts
 msgid "What participants must achieve"
@@ -11984,8 +11971,8 @@ msgstr "A question, a comment, a note about the content"
 msgid "Go to Projects in the top navigation bar."
 msgstr "Go to Projects in the top navigation bar."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Submission Deadline (Optional)"
 msgstr "Submission Deadline (Optional)"
 
@@ -12822,7 +12809,7 @@ msgstr "Add item"
 msgid "Type a language and press Enter..."
 msgstr "Type a language and press Enter..."
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "End Date (Optional)"
 msgstr "End Date (Optional)"
 
@@ -12871,11 +12858,11 @@ msgid "e.g., $50,000 USD"
 msgstr "e.g., $50,000 USD"
 
 #: src/components/documents/DocumentUploadModal.tsx
+#: src/components/events/EventDetailsForm.tsx
 #: src/components/events/EventSolutionsPanel.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Description"
@@ -13539,11 +13526,11 @@ msgstr "Loading whiteboard..."
 msgid "Receive reminders about upcoming events you've joined"
 msgstr "Receive reminders about upcoming events you've joined"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/components/ui/TagFilterChips.tsx
 #: src/components/ui/TagFilterSelect.tsx
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Tags"
 msgstr "Tags"
@@ -13662,8 +13649,8 @@ msgstr "Document access declined"
 msgid "Your visual brainstorming boards"
 msgstr "Your visual brainstorming boards"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
@@ -14022,8 +14009,8 @@ msgstr "Badges earned"
 msgid "Neutral"
 msgstr "Neutral"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "End Time (Optional)"
 msgstr "End Time (Optional)"
 
@@ -14109,7 +14096,7 @@ msgstr "Align Left"
 msgid "Show Email"
 msgstr "Show Email"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Challenge Details"
 msgstr "Challenge Details"
 
@@ -14802,11 +14789,11 @@ msgstr "Move up"
 msgid "Open one to run it"
 msgstr "Open one to run it"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 #: src/lib/venue-room-sections.ts
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Capacity"
 msgstr "Capacity"
@@ -15075,7 +15062,7 @@ msgstr "Only the current step’s questions show, and required fields are valida
 msgid "Privacy"
 msgstr "Privacy"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 msgid "Leave empty for unlimited capacity"
 msgstr "Leave empty for unlimited capacity"
 
@@ -15188,8 +15175,8 @@ msgstr "How do I browse projects?"
 msgid "Hackathons, workshops, meetups, conferences and demo days"
 msgstr "Hackathons, workshops, meetups, conferences and demo days"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "e.g., Caribbean Tech Summit 2025"
 msgstr "e.g., Caribbean Tech Summit 2025"
 
@@ -15595,8 +15582,8 @@ msgstr "Climate focus"
 msgid "This tab sat in the background for {minutes} minutes, so your dot went grey automatically. <0>Click here</0> to go back to Working — or pick a status in the bar above. “Do not disturb” never gets downgraded."
 msgstr "This tab sat in the background for {minutes} minutes, so your dot went grey automatically. <0>Click here</0> to go back to Working — or pick a status in the bar above. “Do not disturb” never gets downgraded."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
-#: src/pages/events/EditEventPage.tsx
 msgid "Hackathon"
 msgstr "Hackathon"
 
@@ -15982,10 +15969,6 @@ msgstr "Closed {0}"
 msgid "Select at least one feature"
 msgstr "Select at least one feature"
 
-#: src/pages/events/EditEventPage.tsx
-msgid "Edit Event"
-msgstr "Edit Event"
-
 #. placeholder {0}: room.capacity
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "room for {0}"
@@ -16339,7 +16322,7 @@ msgstr "Failed to save draft"
 msgid "Save map"
 msgstr "Save map"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Loading event..."
 msgstr "Loading event..."
@@ -16395,7 +16378,6 @@ msgstr "Partner API keys"
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/discover/DiscoverPage.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/events/EventSetupPage.tsx
 #: src/pages/events/EventsPage.tsx
@@ -16782,8 +16764,8 @@ msgstr "Organization"
 msgid "Ordered List"
 msgstr "Ordered List"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
-#: src/pages/events/EditEventPage.tsx
 msgid "Conference"
 msgstr "Conference"
 
@@ -17134,8 +17116,8 @@ msgstr "Check back soon for community discussions."
 msgid "An account already exists for that email address. Sign in the way you did originally, or use “Forgot Password?” to set a password for it."
 msgstr "An account already exists for that email address. Sign in the way you did originally, or use “Forgot Password?” to set a password for it."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
-#: src/pages/events/EditEventPage.tsx
 msgid "Workshop"
 msgstr "Workshop"
 
@@ -17430,8 +17412,8 @@ msgstr "My Connections"
 msgid "Note options"
 msgstr "Note options"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "End Date"
 msgstr "End Date"
 
@@ -17647,8 +17629,8 @@ msgstr "No comments yet. Be the first to comment!"
 msgid "User menu"
 msgstr "User menu"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Describe your event, agenda, and what participants can expect..."
 msgstr "Describe your event, agenda, and what participants can expect..."
 
@@ -17662,8 +17644,8 @@ msgstr "Cancelled"
 msgid "Scheduled sessions from mentors and sponsors."
 msgstr "Scheduled sessions from mentors and sponsors."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Maximum number of attendees"
 msgstr "Maximum number of attendees"
 
@@ -18047,9 +18029,9 @@ msgid "Leave both empty if people can enter on their own."
 msgstr "Leave both empty if people can enter on their own."
 
 #: src/components/directory/MemberPanel.tsx
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Location"
 msgstr "Location"
@@ -18879,8 +18861,8 @@ msgstr "Vetting businesses against the corporate registry."
 msgid "Saving..."
 msgstr "Saving..."
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Event Title"
 msgstr "Event Title"
 
@@ -19082,8 +19064,8 @@ msgstr "Next, and previously"
 msgid "Following"
 msgstr "Following"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "e.g., Innovation Hub, Kingston, Jamaica"
 msgstr "e.g., Innovation Hub, Kingston, Jamaica"
 
@@ -19269,7 +19251,7 @@ msgstr "Verify your students, oversee submissions, and sponsor applications."
 msgid "Tracking what you sent"
 msgstr "Tracking what you sent"
 
-#: src/pages/events/EditEventPage.tsx
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Not authorized"
 msgstr "Not authorized"
@@ -19309,6 +19291,10 @@ msgstr "Selected"
 #: src/i18n/harvested.ts
 msgid "Your résumé, built from your KTIP record and ready to send"
 msgstr "Your résumé, built from your KTIP record and ready to send"
+
+#: src/pages/events/EventSetupPage.tsx
+msgid "Event management"
+msgstr "Event management"
 
 #: src/components/notes/StickyNote.tsx
 msgid "Bulleted list"
@@ -19845,8 +19831,8 @@ msgstr "Appear in mentor discovery and accept mentorship requests."
 msgid "Manage access"
 msgstr "Manage access"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
-#: src/pages/events/EditEventPage.tsx
 msgid "Meetup"
 msgstr "Meetup"
 
@@ -19858,8 +19844,8 @@ msgstr "Failed to upload the document"
 msgid "Signing in from the OECS Virtual Campus"
 msgstr "Signing in from the OECS Virtual Campus"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
-#: src/pages/events/EditEventPage.tsx
 msgid "Topics attendees can filter and search by."
 msgstr "Topics attendees can filter and search by."
 

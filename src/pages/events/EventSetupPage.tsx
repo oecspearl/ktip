@@ -115,15 +115,18 @@ export default function EventSetupPage() {
 
       <div className="bg-ktip-sand-50 py-12">
         <div className="mx-auto max-w-page-tight px-4">
-          <Stepper steps={setupSteps(event.event_type)} currentStep={1} className="mb-8" />
+          <Stepper
+            steps={setupSteps(event.event_type)}
+            currentStep={blueprint.setup.sections.includes('venue') ? 2 : 1}
+            className="mb-8"
+          />
 
           {/* Step one, not the event page: this is the same "Event details"
-              the stepper names, which for an event that already exists is its
-              edit form. Addressed by uuid, not slug — EditEventPage saves with
-              .eq('id', …), so a slug in the URL loads but cannot save. */}
+              the stepper names, which for an event that already exists is the
+              Details tab of its management workspace. */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <Link
-              to={`/events/${event.id}/edit`}
+              to={`/events/${event.id}/manage`}
               className="inline-flex items-center gap-1.5 text-sm text-ktip-sand-600 hover:text-ktip-ocean-600"
             >
               <ArrowLeft size={15} aria-hidden="true" />
@@ -167,16 +170,15 @@ export default function EventSetupPage() {
               ))}
           </div>
 
-          {/* Same shape and place as "Next" on step one, because this is the
-              same button at the other end of the same flow. Each section above
-              saves itself, so this is "I am done", not a commit. */}
+          {/* The stepper's last stop. Each section above saves itself, so this
+              is "take me to where I run the event", not a commit. */}
           <div className="mt-10 flex items-center gap-4">
             <Button
               fullWidth
               icon={<Check size={20} />}
-              onClick={() => navigate(entityPath('event', event))}
+              onClick={() => navigate(`/events/${event.id}/manage`)}
             >
-              <Trans>Finish</Trans>
+              <Trans>Event management</Trans>
             </Button>
             <Link
               to={entityPath('event', event)}

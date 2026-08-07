@@ -27,6 +27,8 @@ import type { Event, VenueAudioMode, VenueRole, VenueRoom, VenueRoomKind } from 
 
 interface AdminEventVenueTabProps {
   eventId: string
+  /** events.event_type — filters the map editor's panel picker per type. */
+  eventType?: string | null
   hasVenue: boolean
   venueFloorplanUrl: string | null
   /** The drawn map's grid and floor list (089). Null until one is drawn. */
@@ -52,7 +54,14 @@ const AUDIO_MODES: { value: VenueAudioMode; label: string }[] = [
   { value: 'listen_only', label: 'Listen only' },
 ]
 
-const VENUE_ROLES: VenueRole[] = ['participant', 'mentor', 'judge', 'organizer', 'spectator']
+const VENUE_ROLES: VenueRole[] = [
+  'participant',
+  'mentor',
+  'judge',
+  'organizer',
+  'spectator',
+  'speaker',
+]
 
 /** Slug from a room name, so a host never has to think about the key column. */
 function slugify(name: string): string {
@@ -75,6 +84,7 @@ function slugify(name: string): string {
  */
 export default function AdminEventVenueTab({
   eventId,
+  eventType,
   hasVenue,
   venueFloorplanUrl,
   venueMap,
@@ -207,6 +217,8 @@ export default function AdminEventVenueTab({
           rooms={rooms}
           config={mapConfigOf({ venue_map: venueMap })}
           saving={savingMap}
+          eventType={eventType}
+          draftKey={eventId}
           onSave={async (config, payload) => {
             try {
               await saveMap({ eventId, map: config, rooms: payload })

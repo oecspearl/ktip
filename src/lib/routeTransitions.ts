@@ -1,6 +1,6 @@
 import { createPath, type DataRouter, type RouterNavigateOptions, type To } from 'react-router'
 
-const VENUE_RE = /^\/events\/virtual-hackathon\/([^/]+)/
+const VENUE_RE = /^\/events\/(?:virtual-hackathon|virtual-conference)\/([^/]+)/
 
 /** Same venue on both sides of the navigation: a 500ms frozen snapshot over
  *  live video/chat reads as a hang, so those swaps stay instant. */

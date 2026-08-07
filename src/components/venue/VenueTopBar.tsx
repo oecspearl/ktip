@@ -11,6 +11,8 @@ interface VenueTopBarProps {
   eventId: string
   /** events.slug — null on a row that predates migration 087's backfill. */
   eventSlug: string | null
+  /** events.event_type — picks the canonical venue segment for the map link. */
+  eventType?: string | null
   eventTitle: string
   headcount: number
   connected: boolean
@@ -38,6 +40,7 @@ interface VenueTopBarProps {
 export function VenueTopBar({
   eventId,
   eventSlug,
+  eventType,
   eventTitle,
   headcount,
   connected,
@@ -82,7 +85,7 @@ export function VenueTopBar({
       <Link
         to={
           backToMap
-            ? venuePath({ id: eventId, slug: eventSlug })
+            ? venuePath({ id: eventId, slug: eventSlug, event_type: eventType })
             : `/events/${eventSlug || eventId}`
         }
         className="inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"

@@ -521,7 +521,14 @@ export type VenueRoomKind =
 /** Who may publish audio/video. Consumed by venue_room_grant() in 071. */
 export type VenueAudioMode = 'open' | 'moderated' | 'listen_only'
 
-export type VenueRole = 'participant' | 'mentor' | 'judge' | 'organizer' | 'spectator'
+export type VenueRole =
+  | 'participant'
+  | 'mentor'
+  | 'judge'
+  | 'organizer'
+  | 'spectator'
+  /** Publishes through moderated/listen_only rooms (106). Host-assigned only. */
+  | 'speaker'
 
 /**
  * Self-reported status. 'offline' is never written by a client — the reducer

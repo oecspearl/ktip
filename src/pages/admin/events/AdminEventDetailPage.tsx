@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router'
-import { useEvent } from '../../../hooks/useEvents'
+import { useParams, Link, useLocation } from 'react-router'
+import { useEvent, useIsEventHost } from '../../../hooks/useEvents'
 import { useEventStatusUpdate } from '../../../hooks/useAdminEvents'
 import { useToast } from '../../../contexts/ToastContext'
 import { Badge } from '../../../components/ui/Badge'
@@ -47,9 +47,11 @@ import AdminEventScheduleTab from './AdminEventScheduleTab'
 import AdminEventSpeakersTab from './AdminEventSpeakersTab'
 import AdminEventChallengeTab from './AdminEventChallengeTab'
 import AdminEventVenueTab from './AdminEventVenueTab'
+import { EventDetailsForm } from '../../../components/events/EventDetailsForm'
 
 type TabId =
   | 'overview'
+  | 'details'
   | 'registrations'
   | 'form'
   | 'challenge'
@@ -60,16 +62,28 @@ type TabId =
   | 'updates'
   | 'articles'
 
+/**
+ * The event management workspace.
+ *
+ * Mounted twice: at /admin/events/:id inside the admin console, and at
+ * /events/:id/manage for the event's own organizer — running an event is the
+ * organizer's job, not an admin privilege. The host gate below (and RLS on
+ * every table the tabs write) is the control; the admin route is just one of
+ * two doors.
+ */
 export default function AdminEventDetailPage() {
   const params = useParams<{ id: string }>()
   const id = params.id
   const toast = useToast()
+  const location = useLocation()
+  const inAdminConsole = location.pathname.startsWith('/admin')
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [confirmAction, setConfirmAction] = useState<{
     status: EventStatus
   } | null>(null)
 
   const { event, loading: eventLoading, refetch } = useEvent(id)
+  const isHost = useIsEventHost(event)
   const { updateStatus, loading: statusLoading } = useEventStatusUpdate()
 
   const handleStatusChange = async () => {
@@ -88,6 +102,7 @@ export default function AdminEventDetailPage() {
 
   const tabs: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'details', label: 'Details', icon: Edit },
     { id: 'registrations', label: 'Registrations', icon: ClipboardList },
     { id: 'form', label: 'Reg. Form', icon: FormInput },
     { id: 'challenge', label: 'Challenge', icon: Target },
@@ -121,11 +136,29 @@ export default function AdminEventDetailPage() {
     )
   }
 
+  // The organizer or a platform admin. RLS enforces the same thing on every
+  // write; this gate keeps a curious member from reading the console shell.
+  if (!isHost) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-xl font-semibold text-gray-700">
+          Only the organizer can manage this event
+        </h2>
+        <Link
+          to={`/events/${event.slug || event.id}`}
+          className="text-ktip-ocean-600 hover:underline mt-2 inline-block"
+        >
+          Back to the event
+        </Link>
+      </div>
+    )
+  }
+
   return (
-    <>
+    <div className={inAdminConsole ? undefined : 'mx-auto max-w-7xl px-4 pb-12 pt-[calc(var(--nav-h)+2rem)]'}>
       {/* Back link */}
       <Link
-        to="/admin/events"
+        to={inAdminConsole ? '/admin/events' : '/events'}
         className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-ktip-ocean-600 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
@@ -141,11 +174,14 @@ export default function AdminEventDetailPage() {
         imageSeed={event.id}
         actions={
           <>
-            <Link to={`/events/${event.id}/edit`}>
-              <Button variant="outline" size="sm" icon={<Edit size={14} />}>
-                Edit
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<Edit size={14} />}
+              onClick={() => setActiveTab('details')}
+            >
+              Edit
+            </Button>
             {event.status === 'draft' && (
               <Button
                 size="sm"
@@ -269,6 +305,12 @@ export default function AdminEventDetailPage() {
         </div>
       )}
 
+      {activeTab === 'details' && (
+        <div className="animate-tab-enter border border-ktip-sand-200 rounded-lg p-6">
+          <EventDetailsForm eventId={event.id} onSaved={refetch} />
+        </div>
+      )}
+
       {activeTab === 'registrations' && (
         <div className="animate-tab-enter">
           <AdminEventRegistrationsTab
@@ -289,6 +331,7 @@ export default function AdminEventDetailPage() {
         <div className="animate-tab-enter">
           <AdminEventVenueTab
             eventId={event.id}
+            eventType={event.event_type}
             hasVenue={event.has_venue ?? false}
             venueFloorplanUrl={event.venue_floorplan_url ?? null}
             venueMap={event.venue_map ?? null}
@@ -367,6 +410,6 @@ export default function AdminEventDetailPage() {
         onConfirm={handleStatusChange}
         onCancel={() => setConfirmAction(null)}
       />
-    </>
+    </div>
   )
 }

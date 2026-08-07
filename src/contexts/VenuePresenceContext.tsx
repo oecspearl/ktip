@@ -47,8 +47,11 @@ export function VenuePresenceProvider({ children }: { children: ReactNode }) {
   const { rooms } = useVenueRooms(eventId)
 
   // The provider sits above the :roomKey route, so useParams cannot see the
-  // room segment — match the room path explicitly instead.
-  const roomMatch = useMatch('/events/virtual-hackathon/:slug/room/:roomKey')
+  // room segment — match the room path explicitly instead. The :segment param
+  // is generic (virtual-hackathon | virtual-conference); safe because this
+  // provider only ever mounts inside EventVenueLayout, whose routes are the
+  // only /events/<segment>/:slug patterns in the app.
+  const roomMatch = useMatch('/events/:segment/:slug/room/:roomKey')
   const roomId = useMemo(() => {
     const key = roomMatch?.params.roomKey
     if (!key) return null

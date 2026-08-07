@@ -194,6 +194,7 @@ export default function EventVenuePage() {
       <VenueTopBar
         eventId={event.id}
         eventSlug={event.slug}
+        eventType={event.event_type}
         eventTitle={event.title}
         headcount={headcount}
         connected={presence.connected}

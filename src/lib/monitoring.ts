@@ -83,7 +83,7 @@ const ID_BEARING_COLLECTIONS = ['grants', 'events', 'projects', 'resources', 'us
  * The trailing (?:/|$) is what stops "new" from also matching a grant slugged
  * "newton-fund".
  */
-const RESERVED_SEGMENTS = ['new', 'my-applications', 'virtual-hackathon']
+const RESERVED_SEGMENTS = ['new', 'my-applications', 'virtual-hackathon', 'virtual-conference']
 
 /**
  * Redacts a transaction event and normalises record IDs out of its name.

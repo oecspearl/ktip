@@ -76,6 +76,13 @@ export interface RoomSectionDef {
   defaultFor: VenueRoomKind[] | 'all'
   /** Position within the slot. Lower first; also the picker's order. */
   order: number
+  /**
+   * Event types whose venues never show this section — dropped from the
+   * defaults, the host's picker AND resolution of a stored list, so a room
+   * cloned from another event type's template cannot smuggle it back in.
+   * Absent means every type.
+   */
+  hiddenForEventTypes?: string[]
 }
 
 /** One section as stored on the room. */
@@ -238,6 +245,8 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'aside',
     defaultFor: ['networking'],
     order: 20,
+    // A conference has no teams to form.
+    hiddenForEventTypes: ['conference'],
   },
   {
     id: 'skill_finder',
@@ -246,6 +255,7 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'aside',
     defaultFor: ['networking'],
     order: 25,
+    hiddenForEventTypes: ['conference'],
   },
   {
     id: 'mentors_on_duty',
@@ -343,9 +353,22 @@ export function sectionDef(id: string): RoomSectionDef | undefined {
   return BY_ID.get(id)
 }
 
-/** The ids a room of this kind shows when the host has chosen nothing. */
-export function defaultSectionIds(kind: VenueRoomKind): RoomSectionId[] {
+/** Whether this event type's venues ever show this section. */
+function isHiddenFor(def: RoomSectionDef, eventType: string | null | undefined): boolean {
+  return !!eventType && !!def.hiddenForEventTypes?.includes(eventType)
+}
+
+/**
+ * The ids a room of this kind shows when the host has chosen nothing.
+ * `eventType` is optional — absent means no per-type filtering, which keeps
+ * every pre-existing caller and test exactly as it was.
+ */
+export function defaultSectionIds(
+  kind: VenueRoomKind,
+  eventType?: string | null
+): RoomSectionId[] {
   return SECTIONS.filter((s) => s.defaultFor === 'all' || s.defaultFor.includes(kind))
+    .filter((s) => !isHiddenFor(s, eventType))
     .slice()
     .sort(bySlotThenOrder)
     .map((s) => s.id)
@@ -395,17 +418,22 @@ export function parseSections(raw: unknown): RoomSectionSetting[] {
  */
 export function sectionsForRoom(
   room: Pick<VenueRoom, 'kind'> & { sections?: unknown },
-  viewerRole: VenueRole | null | undefined
+  viewerRole: VenueRole | null | undefined,
+  eventType?: string | null
 ): ResolvedRoomSection[] {
   const stored = parseSections(room.sections)
   const chosen = stored.length
     ? stored
-    : defaultSectionIds(room.kind).map((id) => ({ id }) as RoomSectionSetting)
+    : defaultSectionIds(room.kind, eventType).map((id) => ({ id }) as RoomSectionSetting)
 
   return chosen
     .filter((s) => s.enabled !== false)
     .map((s) => ({ setting: s, def: BY_ID.get(s.id) }))
     .filter((row): row is { setting: RoomSectionSetting; def: RoomSectionDef } => !!row.def)
+    // The stored list is filtered too, not just the defaults: a room cloned
+    // from a hackathon template into a conference keeps the ids in jsonb but
+    // never renders them.
+    .filter(({ def }) => !isHiddenFor(def, eventType))
     .filter(({ def }) => canSeeSection(def, viewerRole))
     .sort(
       (a, b) =>
@@ -431,9 +459,10 @@ export function canSeeSection(def: RoomSectionDef, viewerRole: VenueRole | null 
  */
 export function roomUsesSignals(
   room: Pick<VenueRoom, 'kind'> & { sections?: unknown },
-  viewerRole: VenueRole | null | undefined
+  viewerRole: VenueRole | null | undefined,
+  eventType?: string | null
 ): boolean {
-  return sectionsForRoom(room, viewerRole).some(
+  return sectionsForRoom(room, viewerRole, eventType).some(
     (s) => s.def.id === 'reactions' || s.def.id === 'hand_queue'
   )
 }
@@ -454,10 +483,12 @@ export function sectionsInSlot(
  * at.
  */
 export function sectionChoices(
-  room: Pick<VenueRoom, 'kind'> & { sections?: unknown }
+  room: Pick<VenueRoom, 'kind'> & { sections?: unknown },
+  eventType?: string | null
 ): Array<{ def: RoomSectionDef; enabled: boolean }> {
-  const on = new Set(sectionsForRoom(room, 'organizer').map((s) => s.def.id))
-  return SECTIONS.slice()
+  const on = new Set(sectionsForRoom(room, 'organizer', eventType).map((s) => s.def.id))
+  return SECTIONS.filter((def) => !isHiddenFor(def, eventType))
+    .slice()
     .sort(bySlotThenOrder)
     .map((def) => ({ def, enabled: on.has(def.id) }))
 }
@@ -473,18 +504,19 @@ export function sectionChoices(
 export function toggleSection(
   room: Pick<VenueRoom, 'kind'> & { sections?: unknown },
   id: RoomSectionId,
-  enabled: boolean
+  enabled: boolean,
+  eventType?: string | null
 ): RoomSectionSetting[] {
   const stored = parseSections(room.sections)
   const configs = new Map(stored.map((s) => [s.id, s.config]))
-  const on = new Set(sectionsForRoom(room, 'organizer').map((s) => s.def.id))
+  const on = new Set(sectionsForRoom(room, 'organizer', eventType).map((s) => s.def.id))
 
   if (enabled) on.add(id)
   else on.delete(id)
 
   return SECTIONS.slice()
     .sort(bySlotThenOrder)
-    .filter((def) => on.has(def.id))
+    .filter((def) => on.has(def.id) && !isHiddenFor(def, eventType))
     .map((def) => {
       const config = configs.get(def.id)
       return { id: def.id, ...(config ? { config } : {}) }
@@ -495,9 +527,10 @@ export function toggleSection(
 export function setSectionConfig(
   room: Pick<VenueRoom, 'kind'> & { sections?: unknown },
   id: RoomSectionId,
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
+  eventType?: string | null
 ): RoomSectionSetting[] {
-  const base = toggleSection(room, id, true)
+  const base = toggleSection(room, id, true, eventType)
   return base.map((s) => (s.id === id ? { ...s, config } : s))
 }
 

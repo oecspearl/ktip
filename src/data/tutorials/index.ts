@@ -206,9 +206,19 @@ const REGISTRY: RegisteredTutorial[] = [
   },
 
   // ------------------------------------------------------------------ Events
+  // One entry per public venue segment — a generic ':segment' pattern would
+  // also swallow /events/<slug>/setup (the matcher's :param takes anything),
+  // so the segments are spelled out. Same id, same steps, either door.
   {
     id: TUTORIAL_IDS.VENUE_ROOM,
     route: '/events/virtual-hackathon/:slug/room/:roomKey',
+    name: 'Venue room',
+    description: 'Chat, presence and what is coming next.',
+    steps: venueRoomTutorialSteps,
+  },
+  {
+    id: TUTORIAL_IDS.VENUE_ROOM,
+    route: '/events/virtual-conference/:slug/room/:roomKey',
     name: 'Venue room',
     description: 'Chat, presence and what is coming next.',
     steps: venueRoomTutorialSteps,
@@ -221,19 +231,22 @@ const REGISTRY: RegisteredTutorial[] = [
     steps: venueTutorialSteps,
   },
   {
+    id: TUTORIAL_IDS.VENUE,
+    route: '/events/virtual-conference/:slug',
+    name: 'Virtual venue',
+    description: 'Rooms, presence and how to move between them.',
+    steps: venueTutorialSteps,
+  },
+  {
     id: TUTORIAL_IDS.EVENT_FORM,
     route: '/events/new',
     name: 'Creating an event',
     description: 'What each field on the event form does.',
     steps: eventFormTutorialSteps,
   },
-  {
-    id: TUTORIAL_IDS.EVENT_FORM,
-    route: '/events/:id/edit',
-    name: 'Editing an event',
-    description: 'What each field on the event form does.',
-    steps: eventFormTutorialSteps,
-  },
+  // '/events/:id/edit' has no tutorial entry any more: the route is now a
+  // redirect into the management workspace, where the same form lives on the
+  // Details tab.
   {
     id: TUTORIAL_IDS.EVENT_DETAIL,
     route: '/events/:id',

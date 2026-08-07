@@ -156,6 +156,9 @@ describe('scrubTransaction', () => {
     expect(name('/events/virtual-hackathon/oecs-climathon')).toBe(
       '/events/virtual-hackathon/oecs-climathon'
     )
+    expect(name('/events/virtual-conference/oecs-summit')).toBe(
+      '/events/virtual-conference/oecs-summit'
+    )
     // "newton-fund" begins with "new" and is still a record.
     expect(name('/grants/newton-fund')).toBe('/grants/:id')
   })

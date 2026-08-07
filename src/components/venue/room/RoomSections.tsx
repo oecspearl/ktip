@@ -110,9 +110,12 @@ export function RoomSections({
   className?: string
 }) {
   const { t } = useLingui()
-  const { room, viewerRole, signals } = context
+  const { event, room, viewerRole, signals } = context
 
-  const resolved = useMemo(() => sectionsForRoom(room, viewerRole), [room, viewerRole])
+  const resolved = useMemo(
+    () => sectionsForRoom(room, viewerRole, event.event_type),
+    [room, viewerRole, event.event_type]
+  )
   const ordered = useMemo(() => {
     const byId = new Map(resolved.map((s) => [s.def.id as RoomSectionId, s]))
     return orderSectionIds(

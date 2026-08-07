@@ -37,7 +37,7 @@ export function MainLayout() {
   // The venue floorplan is a full-viewport map; a footer below it would make
   // the page scrollable, so wheel-over-map would scroll the page instead of
   // staying on the floor. Room and setup pages keep the footer.
-  const immersiveVenue = /^\/events\/virtual-hackathon\/[^/]+\/?$/.test(pathname)
+  const immersiveVenue = /^\/events\/(virtual-hackathon|virtual-conference)\/[^/]+\/?$/.test(pathname)
 
   // Tab routes inside a persistent shell (dashboard, admin) share one key, so
   // a tab change swaps only the shell's <Outlet/> pane — hero and rail stay
@@ -81,7 +81,12 @@ export function MainLayout() {
         <Trans>Skip to main content</Trans>
       </a>
       <Navbar />
-      {auth.user && !auth.profile && !auth.loading && <SessionRecoveryBanner />}
+      {/* profileLoading has to be in the guard: auth.loading flips false as soon
+          as Supabase reports the session, while the profile query is still in
+          flight, so without it the banner flashes on every load. */}
+      {auth.user && !auth.profile && !auth.loading && !auth.profileLoading && (
+        <SessionRecoveryBanner />
+      )}
       <main id="main-content" className="flex-1">
         <div key={shell} className="contents page-reveal">
           <Outlet />
