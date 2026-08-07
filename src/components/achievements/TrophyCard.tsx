@@ -167,7 +167,7 @@ function TrophyShowcase({
             className={cn(
               // Night only: by day the pastel ground wash carries the rarity
               // colour, and a dark bloom on a pastel reads as a stain.
-              'pointer-events-none absolute -z-10 hidden h-[30rem] w-[30rem] rounded-full blur-3xl dark:block',
+              'pointer-events-none absolute z-underlay hidden h-[30rem] w-[30rem] rounded-full blur-3xl dark:block',
               'left-1/2 top-0 -translate-x-1/2 sm:left-auto sm:right-[2%] sm:top-[38%] sm:translate-x-0 sm:-translate-y-1/2',
               RARITY_BLOOM[effectiveRarity]
             )}
@@ -175,7 +175,7 @@ function TrophyShowcase({
           <span
             aria-hidden="true"
             className={cn(
-              'pointer-events-none absolute -z-10 hidden h-64 w-64 rounded-full blur-2xl dark:block',
+              'pointer-events-none absolute z-underlay hidden h-64 w-64 rounded-full blur-2xl dark:block',
               'left-1/2 top-20 -translate-x-1/2 sm:left-auto sm:right-[9%] sm:top-[38%] sm:translate-x-0 sm:-translate-y-1/2',
               RARITY_CORE[effectiveRarity]
             )}
@@ -189,7 +189,7 @@ function TrophyShowcase({
           lifts it: a trophy centred on the panel looks parked, one riding high
           out of the top edge looks like it is standing on the card. Nothing in
           the chain may be overflow-hidden. */}
-      <div className="sm:absolute sm:-top-36 sm:-bottom-2 sm:right-0 sm:z-10 sm:flex sm:w-[46%] sm:items-center sm:justify-center">
+      <div className="sm:absolute sm:-top-36 sm:-bottom-2 sm:right-0 sm:z-raised sm:flex sm:w-[46%] sm:items-center sm:justify-center">
         <TrophyImage
           icon={icon}
           trophyType={trophyType}
@@ -217,14 +217,16 @@ function TrophyShowcase({
       >
         {/* Close rides the top-left corner, half off the card. Hover-only on
             pointer devices; always visible on touch, where there is no hover
-            and a hidden close button is a trap. z-20 to clear the artwork. */}
+            and a hidden close button is a trap. Shares the artwork's layer and
+            comes after it in the tree, so it stays clickable where the two
+            corners meet. */}
         {onClose && (
           <button
             type="button"
             onClick={onClose}
             aria-label={t`Close`}
             className={cn(
-              'absolute -left-3 -top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full',
+              'absolute -left-3 -top-3 z-raised inline-flex h-8 w-8 items-center justify-center rounded-full',
               'border border-trophy-ink/20 bg-trophy-ground text-trophy-ink/70 shadow-lg',
               'transition-[opacity,transform,background-color] duration-200',
               'hover:scale-105 hover:bg-trophy-ink/15 hover:text-trophy-ink',
@@ -540,22 +542,23 @@ function TrophyTile({
       )}
     >
       {/* Rarity bloom behind the artwork — same two-disc build as the
-          showcase. -z-10 keeps it under the content without needing a wrapper
-          for every child. */}
+          showcase. The underlay layer keeps it beneath the content without
+          needing a positioned wrapper for every child; the tile's `isolate`
+          is what stops it sinking past the card itself. */}
       {!locked && (
         <>
           <span
             aria-hidden="true"
             className={cn(
               // Night only — see the showcase bloom note.
-              'pointer-events-none absolute left-1/2 top-2 -z-10 hidden h-48 w-48 -translate-x-1/2 rounded-full blur-3xl dark:block',
+              'pointer-events-none absolute left-1/2 top-2 z-underlay hidden h-48 w-48 -translate-x-1/2 rounded-full blur-3xl dark:block',
               RARITY_BLOOM[effectiveRarity]
             )}
           />
           <span
             aria-hidden="true"
             className={cn(
-              'pointer-events-none absolute left-1/2 top-8 -z-10 hidden h-28 w-28 -translate-x-1/2 rounded-full blur-2xl dark:block',
+              'pointer-events-none absolute left-1/2 top-8 z-underlay hidden h-28 w-28 -translate-x-1/2 rounded-full blur-2xl dark:block',
               RARITY_CORE[effectiveRarity]
             )}
           />

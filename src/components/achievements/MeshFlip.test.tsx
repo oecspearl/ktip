@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MeshFlipCell, MeshVeil, useMeshFlip } from './MeshFlip'
@@ -7,6 +7,14 @@ import { MeshFlipCell, MeshVeil, useMeshFlip } from './MeshFlip'
  * jsdom runs no CSS transitions, so the close lifecycle is driven by hand:
  * either a synthetic transitionend on the .mesh-flip element or the fallback
  * settle timer under fake timers.
+ *
+ * It also lays nothing out: every getBoundingClientRect is 0×0, and the cell
+ * refuses to measure a zero-width rect — with no flight vars the portal never
+ * mounts and there is no dialog to assert on. So the tiles are given a
+ * plausible box below.
+ *
+ * The flight and the veil are both portalled to document.body, which is
+ * outside render()'s container — hence the queries here run against the body.
  */
 
 function stubReducedMotion(matches: boolean) {
@@ -50,14 +58,28 @@ function Harness({
 }
 
 const frontButton = () => screen.getByRole('button', { name: /front face/ })
-const veil = (container: HTMLElement) => container.querySelector('[data-capture-hide]')
-const flipEl = (container: HTMLElement) => container.querySelector('.mesh-flip') as HTMLElement
+const veil = () => document.body.querySelector('[data-capture-hide]')
+const flipEl = () => document.body.querySelector('.mesh-flip') as HTMLElement
 
 /** Plays the reverse flight the browser would: transform transition ends. */
-const settleClose = (container: HTMLElement) =>
-  fireEvent.transitionEnd(flipEl(container), { propertyName: 'transform' })
+const settleClose = () => fireEvent.transitionEnd(flipEl(), { propertyName: 'transform' })
+
+/** A tile as the browser would lay it out — see the note at the top. */
+const CELL_RECT = { left: 40, top: 120, width: 220, height: 180 }
+
+beforeEach(() => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    ...CELL_RECT,
+    right: CELL_RECT.left + CELL_RECT.width,
+    bottom: CELL_RECT.top + CELL_RECT.height,
+    x: CELL_RECT.left,
+    y: CELL_RECT.top,
+    toJSON: () => ({}),
+  } as DOMRect)
+})
 
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.useRealTimers()
   document.body.style.overflow = ''
@@ -65,28 +87,28 @@ afterEach(() => {
 
 describe('MeshFlipCell', () => {
   it('renders the front only, no dialog and no veil', () => {
-    const { container } = render(<Harness />)
+    render(<Harness />)
     expect(screen.getByText('front face')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(veil(container)).not.toBeInTheDocument()
+    expect(veil()).not.toBeInTheDocument()
   })
 
   it('opens on click: dialog labelled with the badge name, veil shown, body locked', async () => {
     const user = userEvent.setup()
-    const { container } = render(<Harness />)
+    render(<Harness />)
 
     await user.click(frontButton())
 
     expect(screen.getByRole('dialog', { name: 'Night Owl' })).toBeInTheDocument()
     expect(screen.getByText('showcase content')).toBeInTheDocument()
     expect(frontButton()).toHaveAttribute('aria-expanded', 'true')
-    expect(veil(container)).toBeInTheDocument()
+    expect(veil()).toBeInTheDocument()
     expect(document.body.style.overflow).toBe('hidden')
   })
 
   it('Escape closes; the dialog unmounts after the return flight and focus lands on the tile', async () => {
     const user = userEvent.setup()
-    const { container } = render(<Harness />)
+    render(<Harness />)
     await user.click(frontButton())
 
     fireEvent.keyDown(document, { key: 'Escape' })
@@ -96,7 +118,7 @@ describe('MeshFlipCell', () => {
     expect(frontButton()).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
-    settleClose(container)
+    settleClose()
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(frontButton()).toHaveFocus()
@@ -105,22 +127,22 @@ describe('MeshFlipCell', () => {
 
   it('veil click closes', async () => {
     const user = userEvent.setup()
-    const { container } = render(<Harness />)
+    render(<Harness />)
     await user.click(frontButton())
 
-    fireEvent.click(veil(container)!)
-    settleClose(container)
+    fireEvent.click(veil()!)
+    settleClose()
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('clicking the open card closes it', async () => {
     const user = userEvent.setup()
-    const { container } = render(<Harness />)
+    render(<Harness />)
     await user.click(frontButton())
 
     fireEvent.click(screen.getByRole('dialog'))
-    settleClose(container)
+    settleClose()
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })

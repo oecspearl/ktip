@@ -366,6 +366,12 @@
      Nested stacking inside one overlay does NOT get tokens here — give
      the overlay root `z-tutorial isolation-isolate` and use plain z-0..40
      within it. Skipping that is how the tutorial ended up at z-10009. */
+  /* Decorative wash — a bloom, glow or gradient that belongs under its own
+     card's content. Negative, so it still paints over the card's background
+     but under everything in flow; the card should `isolate` so it cannot sink
+     past its own ancestors. Named because every use of it was a hand-typed
+     `-z-10` whose actual requirement was "under the content", not "-10". */
+  --z-index-underlay: -1;
   --z-index-base: 0;
   --z-index-raised: 10; /* in-card overlays, cancel-nav wrappers */
   --z-index-sticky: 20; /* sticky sub-headers, filter and toolbar bars */
