@@ -1397,7 +1397,7 @@ export function Navbar() {
             <ChevronDown
               size={16}
               className={cn(
-                'shrink-0 text-white/45 transition-transform duration-300',
+                'shrink-0 text-white/45 transition-transform duration-[450ms]',
                 expanded && 'rotate-180'
               )}
             />
@@ -1408,7 +1408,7 @@ export function Navbar() {
               either clip or lag. */}
           <div
             className={cn(
-              'grid transition-[grid-template-rows] duration-300 ease-out',
+              'grid transition-[grid-template-rows] duration-[450ms] ease-out',
               expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             )}
           >

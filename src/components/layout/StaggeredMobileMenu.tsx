@@ -91,6 +91,8 @@ export function StaggeredMobileMenu({
   const bodyRef = useRef<HTMLDivElement>(null)
   const tileRects = useRef(new Map<Element, { left: number; top: number }>())
   const wasExpanded = useRef(expanded)
+  // Layout-viewport height at the last measurement. See the FLIP below.
+  const viewportHeight = useRef(0)
 
   useEffect(() => {
     if (open) {
@@ -109,16 +111,47 @@ export function StaggeredMobileMenu({
     return () => clearTimeout(timer)
   }, [open])
 
-  // The page behind a full-height drawer must not scroll with it, or the
-  // gesture that reaches the end of the list carries on into the article
-  // underneath and the drawer appears to drift.
+  /**
+   * The page behind a full-height drawer must not scroll with it, or the
+   * gesture that reaches the end of the list carries on into the article
+   * underneath and the drawer appears to drift.
+   *
+   * `overflow: hidden` alone does not do this on iOS Safari — touch scrolling
+   * ignores it entirely, so the page kept moving under the scrim and, because
+   * Safari's toolbars grow and shrink with that movement, the drawer's own
+   * fixed box was still being resized right through its entrance.
+   *
+   * Pinning the body instead actually holds on iOS. It costs the scroll
+   * position, which `position: fixed` discards, so it is parked in a local and
+   * restored on unlock — the unlock runs after the closing transition, so the
+   * page does not visibly jump back while the panel is still on screen.
+   */
   useEffect(() => {
     if (!rendered) return
     const { body } = document
-    const previous = body.style.overflow
+    const scrollY = window.scrollY
+    const previous = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.width = '100%'
     body.style.overflow = 'hidden'
     return () => {
-      body.style.overflow = previous
+      body.style.position = previous.position
+      body.style.top = previous.top
+      body.style.left = previous.left
+      body.style.right = previous.right
+      body.style.width = previous.width
+      body.style.overflow = previous.overflow
+      window.scrollTo(0, scrollY)
     }
   }, [rendered])
 
@@ -141,6 +174,18 @@ export function StaggeredMobileMenu({
    * transform is animated, so nothing re-lays-out mid-flight.
    *
    * Runs on layoutKey, which the host changes whenever a span changes.
+   *
+   * Deliberately NOT on `shown`. The entrance is not a layout move — every row
+   * reaches its final cell on the first commit and only its transform changes
+   * after that — so there is nothing here to FLIP. Running it on `shown` was
+   * the mobile jump: the seed pass measured before the scroll lock had been
+   * applied, iOS then restored its toolbars in response to the lock, and the
+   * second pass measured every row ~90px higher in a shorter viewport. The
+   * FLIP read that as a layout move and fired a WAAPI transform on each row —
+   * on the same property the entrance transition was already animating, which
+   * it outranks — so the rows teleported, glided in from the wrong place, and
+   * snapped when the animation handed control back. None of it reproduces in a
+   * desktop viewport, where no browser chrome moves and every delta is zero.
    */
   useLayoutEffect(() => {
     const body = bodyRef.current
@@ -155,6 +200,15 @@ export function StaggeredMobileMenu({
     const resizing = wasExpanded.current !== expanded
     wasExpanded.current = expanded
 
+    // Same argument for the viewport itself. A mobile browser moving its
+    // toolbars resizes the layout viewport under a fixed panel, and every
+    // offset in the map is stale by that delta through no fault of the layout.
+    // Synchronous, rather than a resize listener: the events land whenever the
+    // browser feels like it, and this pass has to know before it animates.
+    const height = window.innerHeight
+    const viewportChanged = viewportHeight.current !== height
+    viewportHeight.current = height
+
     for (const child of Array.from(body.children) as HTMLElement[]) {
       // offsetLeft/Top, not getBoundingClientRect: the wrappers carry an
       // entrance transform, and a measurement that includes it would read the
@@ -162,16 +216,18 @@ export function StaggeredMobileMenu({
       const next = { left: child.offsetLeft, top: child.offsetTop }
       const last = previous.get(child)
       previous.set(child, next)
-      if (!last || reduced || resizing) continue
+      if (!last || reduced || resizing || viewportChanged) continue
       const dx = last.left - next.left
       const dy = last.top - next.top
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue
       child.animate(
         [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
-        { duration: 320, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+        // Tracks the panel's own width transition and the cards' 450ms open, so
+        // the mosaic reflow and the card that caused it move as one gesture.
+        { duration: 450, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
       )
     }
-  }, [layoutKey, expanded, shown])
+  }, [layoutKey, expanded])
 
   if (!rendered) return null
 
@@ -204,10 +260,19 @@ export function StaggeredMobileMenu({
 
           It widens to the whole screen while a category is expanded, so the
           entries have the room the mosaic cannot give them at 26rem — most
-          visible in landscape, where the drawer is a third of the width. */}
+          visible in landscape, where the drawer is a third of the width.
+
+          svh, not inset-y-0: a mobile browser's fixed box is the layout
+          viewport, which on iOS is the tall one until the toolbars come back.
+          The panel got that height for the frames between opening and the
+          scroll lock landing, so its last tiles sat under the bottom toolbar
+          and could not be reached. The small viewport is the one that is
+          always visible, and once the lock holds it is the one in force
+          anyway — so this is the height the panel had been settling on, just
+          without the frames of overshoot on the way there. */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 transition-[width] duration-[420ms]',
+          'fixed right-0 top-0 h-[100svh] transition-[width] duration-[520ms]',
           EASE_OUT,
           expanded
             ? 'w-screen'
