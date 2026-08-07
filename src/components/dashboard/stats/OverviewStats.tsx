@@ -7,7 +7,6 @@ import { PipelineDonut } from './PipelineDonut'
 import { RankProgress } from './RankProgress'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useAchievementContext } from '../../../contexts/AchievementContext'
-import { useConnectionCount } from '../../../hooks/useConnections'
 import { useMemberStats } from '../../../hooks/useMemberStats'
 import { visibleCharts, visibleKpis, type ChartKey, type KpiSource } from '../../../lib/member-kpis'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -27,8 +26,24 @@ const TOP_ROW = 'grid grid-cols-1 gap-4 lg:grid-cols-2'
 const TILE_BLOCK =
   'grid grid-cols-2 gap-4 sm:grid-cols-6 sm:auto-rows-[minmax(3.5rem,auto)] [grid-auto-flow:dense]'
 
-const HERO_TILE = 'sm:col-span-4 sm:row-span-4'
-const SMALL_TILE = 'sm:col-span-2 sm:row-span-2'
+/**
+ * Span for tile `i` of `n`.
+ *
+ * The lead tile is 4x4 and the rest are 2x2 flowing around it — two down the
+ * right edge, then rows of three underneath. Six tiles close a rectangle
+ * exactly; five and seven do not, and how many tiles a member gets is decided
+ * by their role gates, not by this file. So a partial last row is widened to
+ * fill instead of left ragged: a gap beside a card reads as a card that failed
+ * to load rather than as a set that happened to be an awkward size.
+ */
+function tileSpan(i: number, n: number): string {
+  if (i === 0) return n === 1 ? 'sm:col-span-6 sm:row-span-4' : 'sm:col-span-4 sm:row-span-4'
+  // The right edge, beside the lead tile. Alone there, it covers both rows.
+  if (i <= 2) return n === 2 ? 'sm:col-span-2 sm:row-span-4' : 'sm:col-span-2 sm:row-span-2'
+  const trailing = (n - 3) % 3
+  if (trailing === 0 || i < n - trailing) return 'sm:col-span-2 sm:row-span-2'
+  return trailing === 1 ? 'sm:col-span-6 sm:row-span-2' : 'sm:col-span-3 sm:row-span-2'
+}
 
 /** Bottom half: the three charts on a 12-column track. */
 const CHART_ROW = 'grid grid-cols-1 gap-4 md:grid-cols-12'
@@ -69,28 +84,23 @@ export function OverviewStats() {
   const { i18n, t } = useLingui()
   const auth = useAuth()
   const { achievements } = useAchievementContext()
-  const { count: connections } = useConnectionCount(auth.user?.id)
   const { stats, loading: statsLoading } = useMemberStats()
 
   const tiles = useMemo(() => {
-    const source: KpiSource = { stats, achievements: achievements?.stats, connections }
+    const source: KpiSource = { stats, achievements: achievements?.stats }
     return visibleKpis(auth.profile?.roles, auth.profile?.active_role)
       .map((tile) => ({ tile, value: tile.value(source) }))
       .filter(({ value }) => value !== null || statsLoading)
       .slice(0, MAX_TILES)
-  }, [
-    auth.profile?.roles,
-    auth.profile?.active_role,
-    stats,
-    statsLoading,
-    achievements,
-    connections,
-  ])
+  }, [auth.profile?.roles, auth.profile?.active_role, stats, statsLoading, achievements])
 
   const charts: ChartKey[] = useMemo(
     () => visibleCharts(auth.profile?.roles, auth.profile?.active_role),
     [auth.profile?.roles, auth.profile?.active_role]
   )
+
+  const hasPipeline = charts.includes('pipeline')
+  const hasResources = charts.includes('resources')
 
   const engagement = useMemo(
     () =>
@@ -120,7 +130,7 @@ export function OverviewStats() {
           <div className={TOP_ROW}>
             <div className={TILE_BLOCK}>
               {tiles.map(({ tile, value }, i) => {
-                const span = i === 0 ? HERO_TILE : SMALL_TILE
+                const span = tileSpan(i, tiles.length)
                 // Slot held, number pending. Same span, so nothing reflows when
                 // the count lands.
                 if (value === null) {
@@ -158,20 +168,30 @@ export function OverviewStats() {
             )}
           </div>
 
-          {/* Activity takes whatever the pipeline does not — a student has no
-              pipeline to draw, and a hole in the row reads as something that
-              failed to load rather than something that does not apply. */}
+          {/* Activity and Engagement take whatever the two narrow cards do not
+              — a student has no pipeline to draw and only four roles publish
+              resources, and a hole in the row reads as something that failed to
+              load rather than something that does not apply. Every combination
+              has to total twelve or the row wraps and steps. */}
           <div className={CHART_ROW}>
             {charts.includes('activity') && (
               <StatCard
                 title={t`Started in the last 6 months`}
-                className={charts.includes('pipeline') ? 'md:col-span-5' : 'md:col-span-7'}
+                className={
+                  hasPipeline
+                    ? hasResources
+                      ? 'md:col-span-4'
+                      : 'md:col-span-5'
+                    : hasResources
+                      ? 'md:col-span-5'
+                      : 'md:col-span-7'
+                }
               >
                 {statsLoading ? <ChartPending /> : <ActivityBars data={stats?.activity ?? []} />}
               </StatCard>
             )}
 
-            {charts.includes('pipeline') && (
+            {hasPipeline && (
               <StatCard title={t`Application pipeline`} className="md:col-span-3">
                 {statsLoading ? <ChartPending /> : <PipelineDonut data={stats?.pipeline ?? []} />}
               </StatCard>
@@ -180,7 +200,13 @@ export function OverviewStats() {
             {charts.includes('engagement') && (
               <StatCard
                 title={t`Engagement received`}
-                className={charts.includes('pipeline') ? 'md:col-span-4' : 'md:col-span-5'}
+                className={
+                  hasPipeline
+                    ? hasResources
+                      ? 'md:col-span-3'
+                      : 'md:col-span-4'
+                    : 'md:col-span-5'
+                }
               >
                 {statsLoading ? (
                   <ChartPending />
@@ -192,6 +218,23 @@ export function OverviewStats() {
                   <p className="text-sm italic text-ktip-sand-500">
                     <Trans>Publish a project and the engagement it earns shows up here.</Trans>
                   </p>
+                )}
+              </StatCard>
+            )}
+
+            {/* A count, not a plot. It sits in this row rather than the bento
+                because as a tile it was the odd one out of every set that
+                carries it — see the note in member-kpis. */}
+            {hasResources && (
+              <StatCard title={t`Resources published`} className="md:col-span-2">
+                {statsLoading ? (
+                  <ChartPending />
+                ) : (
+                  <div className="flex h-full items-end">
+                    <span className="font-display text-5xl font-extrabold leading-none tabular-nums text-ktip-sand-900">
+                      {stats?.resources == null ? '—' : stats.resources.toLocaleString()}
+                    </span>
+                  </div>
                 )}
               </StatCard>
             )}

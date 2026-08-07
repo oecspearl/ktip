@@ -9,7 +9,6 @@ import {
   MessageSquare,
   Reply,
   UserPlus,
-  Users,
   Wallet,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -24,8 +23,6 @@ import type { MessageDescriptor } from '@lingui/core'
 export interface KpiSource {
   stats?: MemberStats
   achievements?: AchievementStats
-  /** From useConnectionCount — null when the member hid it in privacy settings */
-  connections: number | null
 }
 
 export interface KpiTile {
@@ -43,23 +40,6 @@ export interface KpiTile {
   /** Where the number came from, in a click */
   to?: string
 }
-
-/**
- * Tiles every role gets.
- *
- * Points, badges, streak and active days used to sit here and now live inside
- * the Standing card — they are the four figures the rank arc is computed from,
- * and as separate tiles none of them explained the others.
- */
-const UNIVERSAL: KpiTile[] = [
-  {
-    key: 'connections',
-    label: msg`Connections`,
-    icon: Users,
-    value: (s) => s.connections,
-    to: '/dashboard/connections',
-  },
-]
 
 /**
  * Role-specific tiles, in rail order.
@@ -185,13 +165,9 @@ const ROLE_SPECIFIC: KpiTile[] = [
   },
 
   // --- Organizations ------------------------------------------------------
-  {
-    key: 'resources',
-    label: msg`Resources published`,
-    icon: FileCheck2,
-    value: (s) => s.stats?.resources ?? null,
-    roles: ['educational_partner', 'researcher', 'faculty'],
-  },
+  // `resources` used to sit here. It is a chart-row card now — as a tile it was
+  // the seventh in the faculty set, and seven 2x2s around a 4x4 lead cannot
+  // close a rectangle.
   {
     key: 'forum_activity',
     label: msg`Forum replies`,
@@ -209,10 +185,15 @@ const ROLE_SPECIFIC: KpiTile[] = [
 ]
 
 /**
- * Role-specific first: the head of this list becomes the bento's 4x4 lead
- * tile, and "Connections" is nobody's headline number.
+ * Every tile is role-specific: the head of this list becomes the bento's 4x4
+ * lead tile, and no number belongs to all of them.
+ *
+ * "Connections" used to be a universal tile at the tail. It is reached from the
+ * rail and from the profile, and as the last tile it was the one left over when
+ * a role's set did not divide into the bento — a filler slot for a number that
+ * already had two homes.
  */
-export const MEMBER_KPIS: KpiTile[] = [...ROLE_SPECIFIC, ...UNIVERSAL]
+export const MEMBER_KPIS: KpiTile[] = ROLE_SPECIFIC
 
 /**
  * Tiles this member can see, role-defining ones first.
@@ -232,7 +213,7 @@ export function visibleKpis(
 }
 
 /** Chart cards are gated the same way, by key. */
-export type ChartKey = 'activity' | 'engagement' | 'pipeline' | 'rank'
+export type ChartKey = 'activity' | 'engagement' | 'pipeline' | 'rank' | 'resources'
 
 const CHART_ROLES: Partial<Record<ChartKey, UserRole[]>> = {
   // A student has no application pipeline to draw — see SAFEGUARD_DENY above
@@ -246,6 +227,10 @@ const CHART_ROLES: Partial<Record<ChartKey, UserRole[]>> = {
     'educational_partner',
     'investor',
   ],
+  // The roles that publish to the resource library. A plain count rather than a
+  // plot, but it rides in the chart row because the tile block packs in threes
+  // and this is the number that broke the count for all four of them.
+  resources: ['mentor', 'faculty', 'researcher', 'educational_partner'],
 }
 
 export function visibleCharts(
@@ -254,7 +239,7 @@ export function visibleCharts(
 ): ChartKey[] {
   const held = expandRoles(roles)
   const effective = activeRole && held.includes(activeRole) ? [activeRole] : held
-  const all: ChartKey[] = ['activity', 'engagement', 'pipeline', 'rank']
+  const all: ChartKey[] = ['activity', 'engagement', 'pipeline', 'rank', 'resources']
   return all.filter((key) => {
     const gate = CHART_ROLES[key]
     return !gate || gate.some((r) => effective.includes(r))
