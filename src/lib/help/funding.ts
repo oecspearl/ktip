@@ -59,9 +59,9 @@ export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
     },
     {
       id: 'sponsor-nomination',
-      title: 'Student applications need a faculty sponsor',
-      content: `Students can read grants and write a full application, but cannot submit one alone. This is a safeguarding rule and cannot be switched off.\n\nOn the grant page you nominate a sponsor — a member with the Faculty or Educational Partner role. They receive the nomination and can accept or decline it.\n\nUntil a sponsor accepts, the application stays a draft and the submit action is unavailable. Once accepted, you can submit it.\n\nNominate early. A strong application that misses the deadline waiting for a sponsor is still a missed deadline.`,
-      tags: ['sponsor', 'faculty', 'student', 'nomination', 'submit', 'safeguarding'],
+      title: 'Can a student add a faculty sponsor?',
+      content: `Yes, and it is optional. Students submit their own grant applications — a sponsor is an endorsement, not a permission.\n\nOn the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.\n\nThe application can be submitted with or without one, and nominating someone does not hold up your submission while you wait.\n\nWorth doing anyway. An assessor reading twenty applications treats one an academic has put their name to differently, and the person who endorses it is usually the person who helped you sharpen it.`,
+      tags: ['sponsor', 'faculty', 'student', 'nomination', 'submit', 'endorsement', 'optional'],
     },
     {
       id: 'ai-suggestions',

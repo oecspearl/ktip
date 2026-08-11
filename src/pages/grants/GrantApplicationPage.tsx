@@ -46,7 +46,10 @@ export default function GrantApplicationPage() {
   const [applicationId, setApplicationId] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Students draft freely but cannot leave draft without an accepted sponsor.
+  // Students submit their own applications since migration 110. The sponsor
+  // card is still offered to them — a faculty endorsement is worth having, and
+  // it is the one part of the old flow that carried its own value — but it no
+  // longer gates anything, so it is not offered to anyone else.
   const isStudent = !!auth.profile?.roles?.includes('student')
 
   const steps = GRANT_APPLICATION_STEPS

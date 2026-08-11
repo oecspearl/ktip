@@ -171,7 +171,7 @@ export const VERIFICATION_CATEGORY: HelpCategory = {
     {
       id: 'student-verification',
       title: 'How does student verification work?',
-      content: `Students do not upload anything. Your institutional email domain is the evidence.\n\nSign up with your school or university address and your institution approves the account. Once approved you hold the Student role.\n\nThat role brings the safeguarding rules with it: no unmonitored direct messages, no grant submission without a faculty sponsor, and automatic exclusion from the public leaderboard.\n\nIf your institution is not yet registered on KTIP, your account cannot be domain-verified until it is.`,
+      content: `Students do not upload anything. Your institutional email domain is the evidence.\n\nSign up with your school or university address and your institution approves the account. Once approved you hold the Student role.\n\nThat role brings the safeguarding rules with it: no unmonitored direct messages, no administering awarded funds yourself, and automatic exclusion from the public leaderboard.\n\nIf your institution is not yet registered on KTIP, your account cannot be domain-verified until it is.`,
       tags: ['student', 'verification', 'school', 'email domain', 'institution', 'approve'],
     },
     {

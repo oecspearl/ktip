@@ -25,6 +25,12 @@ export type RoleSlug =
   | 'sme'
   | 'educational_partner'
   | 'chamber_admin'
+  | 'ngo'
+  | 'bso'
+  | 'research_institution'
+  | 'government'
+  | 'diaspora'
+  | 'igo'
   // tier 3 — individual
   | 'researcher'
 

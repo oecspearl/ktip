@@ -180,6 +180,7 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Can I log in with Google or Microsoft?`,
   msg`Can I message more than one person at once?`,
   msg`Can I preview my application before submitting?`,
+  msg`Can a student add a faculty sponsor?`,
   msg`Cancelled`,
   msg`Case Study`,
   msg`Category and phase`,
@@ -1709,25 +1710,17 @@ Students communicate through supervised channels with a designated educator from
 
 If you hold a Student role alongside another role, the restriction still applies to the account.
 
-The same principle sits behind the sponsor requirement on grant applications and the automatic exclusion of students from the public leaderboard.`,
-  msg`Student applications need a faculty sponsor`,
+The same principle sits behind students never administering awarded funds themselves, and the automatic exclusion of students from the public leaderboard.`,
   msg`Student applications need a sponsor to approve them before the funder sees them.
 
 If you have been nominated as someone’s sponsor, their request appears in this section for you to approve or decline. Most members never see anything here.`,
   msg`Student/Youth Innovator`,
   msg`Students`,
-  msg`Students can read grants and write a full application, but cannot submit one alone. This is a safeguarding rule and cannot be switched off.
-
-On the grant page you nominate a sponsor — a member with the Faculty or Educational Partner role. They receive the nomination and can accept or decline it.
-
-Until a sponsor accepts, the application stays a draft and the submit action is unavailable. Once accepted, you can submit it.
-
-Nominate early. A strong application that misses the deadline waiting for a sponsor is still a missed deadline.`,
   msg`Students do not upload anything. Your institutional email domain is the evidence.
 
 Sign up with your school or university address and your institution approves the account. Once approved you hold the Student role.
 
-That role brings the safeguarding rules with it: no unmonitored direct messages, no grant submission without a faculty sponsor, and automatic exclusion from the public leaderboard.
+That role brings the safeguarding rules with it: no unmonitored direct messages, no administering awarded funds yourself, and automatic exclusion from the public leaderboard.
 
 If your institution is not yet registered on KTIP, your account cannot be domain-verified until it is.`,
   msg`Submissions holds your registrations. Projects is the equivalent tab for work you have published.`,
@@ -1788,7 +1781,7 @@ You can sort by "For You" here too, once your personalization topics are set. Re
 
 The Roles page is the permission matrix: a grid of roles against permissions that you can toggle. It is the live source of what each role can do, so a change here changes the product for those users immediately.
 
-Some cells are locked and cannot be toggled. Those are the safeguarding rules — students not initiating direct messages, students not submitting grants unsponsored — and they are deliberately outside admin reach.
+Some cells are locked and cannot be toggled. Those are the safeguarding rules — students not initiating direct messages, students not administering funds — and they are deliberately outside admin reach.
 
 "Reset to defaults" restores the shipped matrix.`,
   msg`The admin console`,
@@ -2188,6 +2181,13 @@ If none of that helps it may be a temporary platform issue. Wait a few minutes, 
   msg`Write your title and message, then publish.`,
   msg`Write, sponsor, submit and track an application.`,
   msg`Writing, running and sharing snippets.`,
+  msg`Yes, and it is optional. Students submit their own grant applications — a sponsor is an endorsement, not a permission.
+
+On the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.
+
+The application can be submitted with or without one, and nominating someone does not hold up your submission while you wait.
+
+Worth doing anyway. An assessor reading twenty applications treats one an academic has put their name to differently, and the person who endorses it is usually the person who helped you sharpen it.`,
   msg`Yes. In Messages, click "New" and select several people to create a named group chat. Group admins can rename the group and add or remove members; anyone can leave.`,
   msg`Yes. In Settings under Preferences, switch off "Show me on the leaderboard". You keep earning achievements and can still see your own rank — nobody else can. Students are never shown on the public leaderboard regardless of this setting.`,
   msg`Yes. On the Login or Sign Up page you will see "Continue with Google" and "Continue with Microsoft".

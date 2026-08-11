@@ -85,12 +85,14 @@ const ROLE_SPECIFIC: KpiTile[] = [
     icon: FilePlus2,
     value: (s) => s.stats?.applications ?? null,
     to: '/dashboard/submissions',
-    // Everyone but students. SAFEGUARD_DENY permanently withholds grant:apply
-    // from student accounts, so this tile could only ever read 0 for them —
-    // and a zero that can never move is a dead end, not a metric.
+    // Students were excluded here while SAFEGUARD_DENY withheld grant:apply
+    // from them — the tile could only ever read 0, and a zero that can never
+    // move is a dead end rather than a metric. Migration 110 gave them the
+    // permission, so the number is theirs to move now.
     roles: [
       'entrepreneur',
       'researcher',
+      'student',
       'mentor',
       'faculty',
       'sme',
@@ -216,10 +218,12 @@ export function visibleKpis(
 export type ChartKey = 'activity' | 'engagement' | 'pipeline' | 'rank' | 'resources'
 
 const CHART_ROLES: Partial<Record<ChartKey, UserRole[]>> = {
-  // A student has no application pipeline to draw — see SAFEGUARD_DENY above
+  // Students are in since 110 gave them grant:apply — same reasoning as the
+  // applications tile above, and for the same reason they were out before.
   pipeline: [
     'entrepreneur',
     'researcher',
+    'student',
     'mentor',
     'faculty',
     'sme',

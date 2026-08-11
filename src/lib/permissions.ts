@@ -118,6 +118,70 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     sortOrder: 70,
   },
 
+  // The six ecosystem actors from Roadmap Table 3. All organisation-tier and
+  // all review-gated: every one of them speaks for a body rather than a person,
+  // and the claim to be that body is exactly what an administrator checks.
+  //
+  // `research_institution` is deliberately NOT "post-secondary institution":
+  // schools and universities are already `educational_partner`, and a second
+  // slug for the same thing would split the student-approval path in two. What
+  // was missing is the research body that publishes and co-hosts without being
+  // anyone's school.
+  {
+    slug: 'ngo',
+    label: msg`Non-Governmental Organization`,
+    tier: 'organization',
+    description: msg`Civil-society organisation delivering programmes. Runs projects and events, applies for funding, contributes knowledge.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 72,
+  },
+  {
+    slug: 'bso',
+    label: msg`Business Support Organization`,
+    tier: 'organization',
+    description: msg`Incubator, accelerator or MSME support agency. Mentors founders, hosts programmes, channels funding to its cohort.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 73,
+  },
+  {
+    slug: 'research_institution',
+    label: msg`Research Institution`,
+    tier: 'organization',
+    description: msg`Research body and academic partner. Publishes knowledge, co-hosts events, sponsors and supervises the students attached to its programmes.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 74,
+  },
+  {
+    slug: 'government',
+    label: msg`Government Ministry / Agency`,
+    tier: 'organization',
+    description: msg`Policy enabler and programme administrator. Publishes public funding calls, administers awards, verifies institutions and businesses.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 75,
+  },
+  {
+    slug: 'diaspora',
+    label: msg`Diaspora Association / Network`,
+    tier: 'organization',
+    description: msg`Reconnects overseas expertise with the home market. Mentors, funds, judges challenges and connects talent.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 76,
+  },
+  {
+    slug: 'igo',
+    label: msg`Inter-governmental Regional Organization`,
+    tier: 'organization',
+    description: msg`Regional body such as the OECS Commission. Strategic partner and ecosystem facilitator; funds and convenes without administering the platform.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 77,
+  },
+
   // Tier 3 — Individual
   {
     slug: 'entrepreneur',
@@ -268,7 +332,7 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
 
   // Grants
   { key: 'grant:view', label: msg`View grants`, description: msg`Browse public grant opportunities.`, category: 'grants', safeguard: false, sortOrder: 80 },
-  { key: 'grant:apply', label: msg`Apply for grants`, description: msg`Submit grant applications. Students are denied — they must be sponsored.`, category: 'grants', safeguard: true, sortOrder: 90 },
+  { key: 'grant:apply', label: msg`Apply for grants`, description: msg`Submit grant applications.`, category: 'grants', safeguard: false, sortOrder: 90 },
   { key: 'grant:sponsor', label: msg`Sponsor student applications`, description: msg`Act as the faculty or school sponsor on a student application.`, category: 'grants', safeguard: true, sortOrder: 100 },
   { key: 'grant:post', label: msg`Post grant opportunities`, description: msg`Publish funding calls to the platform.`, category: 'grants', safeguard: false, sortOrder: 110 },
   { key: 'grant:manage_funds', label: msg`Manage funds`, description: msg`Administer disbursement and award records. Never available to students.`, category: 'grants', safeguard: true, sortOrder: 120 },
@@ -311,6 +375,9 @@ export const ALL_PERMISSION_KEYS: PermissionKey[] = PERMISSION_DEFINITIONS.map((
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   super_admin: ALL_PERMISSION_KEYS,
 
+  // The verification keys are here because a safety admin is the first-line
+  // receipt for every complaint, and a complaint about a body claiming to be a
+  // school or a chamber-verified business is answered by looking at that claim.
   safety_admin: [
     'audit:view',
     'moderation:view',
@@ -322,6 +389,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:initiate',
     'dm:receive',
     'dm:supervise',
+    'sme:verify',
+    'institution:verify',
+    'institution:approve_students',
   ],
 
   investor: [
@@ -355,6 +425,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'event:create',
     'forum:post',
     'forum:comment',
+    'mentorship:offer',
     'dm:initiate',
     'dm:receive',
   ],
@@ -383,6 +454,115 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:receive',
   ],
 
+  // --- Roadmap Table 3 organisations -------------------------------------
+  // None of the six carries org:manage, members:manage or role:manage. They
+  // are participants in the ecosystem, not administrators of the platform —
+  // igo in particular, whose real-world referent (the OECS Commission) also
+  // staffs super_admin. Keeping those two apart is the point: the Commission
+  // acting as a funder is not the Commission acting as the Secretariat.
+
+  // Delivery organisations: they run the programme rather than fund it, so
+  // they apply for money and never post it.
+  ngo: [
+    'grant:view',
+    'grant:apply',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'mentorship:offer',
+    'dm:initiate',
+    'dm:receive',
+  ],
+
+  // ngo's set plus sme:verify. An incubator already knows which of its cohort
+  // are trading businesses — that is the whole content of its programme — so it
+  // is a second competent verifier alongside the chambers.
+  bso: [
+    'grant:view',
+    'grant:apply',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'mentorship:offer',
+    'sme:verify',
+    'dm:initiate',
+    'dm:receive',
+  ],
+
+  // educational_partner's set. A research institution takes on students the
+  // same way a university does — under its own domain, sponsoring their
+  // applications and supervising their channels — so it needs the same three
+  // keys, and it is those keys that make the role worth having separately.
+  research_institution: [
+    'institution:approve_students',
+    'grant:view',
+    'grant:apply',
+    'grant:sponsor',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'dm:initiate',
+    'dm:receive',
+    'dm:supervise',
+  ],
+
+  // Funders and programme administrators: investor's grant keys plus the
+  // ability to run projects and events. government verifies both institutions
+  // and businesses because in most member states it is the registry of record.
+  government: [
+    'grant:view',
+    'grant:post',
+    'grant:manage_funds',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'sme:verify',
+    'institution:verify',
+    'dm:initiate',
+    'dm:receive',
+  ],
+
+  diaspora: [
+    'grant:view',
+    'grant:post',
+    'grant:manage_funds',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'mentorship:offer',
+    'institution:verify',
+    'dm:initiate',
+    'dm:receive',
+  ],
+
+  // No audit:view. Reading the platform's moderation and permission trails is
+  // an operator's power, and it is the one thing that would collapse igo back
+  // into super_admin.
+  igo: [
+    'grant:view',
+    'grant:post',
+    'grant:manage_funds',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'mentorship:offer',
+    'institution:verify',
+    'dm:initiate',
+    'dm:receive',
+  ],
+
   entrepreneur: [
     'grant:view',
     'grant:apply',
@@ -391,6 +571,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'event:create',
     'forum:post',
     'forum:comment',
+    'mentorship:offer',
     'dm:initiate',
     'dm:receive',
   ],
@@ -419,12 +600,19 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'event:create',
     'forum:post',
     'forum:comment',
+    'mentorship:offer',
     'dm:initiate',
     'dm:receive',
   ],
 
+  // The full grant set. A mentor is frequently the person running a small fund
+  // or a prize alongside the mentoring, and splitting those across two accounts
+  // was the only thing the narrower set achieved.
   mentor: [
     'grant:view',
+    'grant:apply',
+    'grant:post',
+    'grant:manage_funds',
     'project:create',
     'project:manage',
     'event:create',
@@ -435,9 +623,12 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:receive',
   ],
 
-  // Read-only on grants, no DM initiation. See SAFEGUARD_DENY.
+  // No DM initiation — see SAFEGUARD_DENY, which is still the boundary for
+  // messaging. Grants are no longer part of it: students apply for their own
+  // funding, with a faculty endorsement available but not required.
   student: [
     'grant:view',
+    'grant:apply',
     'project:create',
     'project:manage',
     'event:create',
@@ -451,9 +642,15 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
  * Hard denials enforced inside has_permission() before the matrix is read.
  * Mirrored in migration 063 — an admin cannot toggle these on, and a direct
  * UPDATE on role_permissions does not grant them either.
+ *
+ * `grant:apply` was on this list until migration 110. It was removed
+ * deliberately: students now submit their own applications, and the sponsor
+ * handshake in 064 became an optional endorsement rather than a precondition.
+ * What remains here is the messaging boundary and the money boundary — a
+ * student can ask for funding but never administer it.
  */
 export const SAFEGUARD_DENY: Record<string, PermissionKey[]> = {
-  student: ['dm:initiate', 'grant:apply', 'grant:manage_funds', 'moderation:action', 'moderation:escalate'],
+  student: ['dm:initiate', 'grant:manage_funds', 'moderation:action', 'moderation:escalate'],
 }
 
 // ============================================================

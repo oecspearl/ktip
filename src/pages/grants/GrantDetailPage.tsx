@@ -46,18 +46,12 @@ export default function GrantDetailPage() {
   const checking = !!auth.user && applicationChecking
 
   const isExpired = !!(grant && grant.deadline && isPast(new Date(grant.deadline)))
-  // Students hold grant:view but never grant:apply — they draft an application
-  // and a faculty sponsor submits it. The DB enforces this; this just keeps the
-  // button honest about what will happen.
-  const isStudent = !!auth.profile?.roles?.includes('student')
-  const canSubmit = auth.can('grant:apply')
-  const canApply = !!(
-    grant &&
-    grant.is_active &&
-    !isExpired &&
-    !hasApplied &&
-    (canSubmit || isStudent)
-  )
+  // One rule for everyone since migration 110. Students used to be routed
+  // through a sponsor here — they held grant:view and never grant:apply — and
+  // the button had to say "Start Application" because submitting was somebody
+  // else's act. They hold grant:apply now, and a faculty endorsement is offered
+  // inside the wizard rather than required before it.
+  const canApply = !!(grant && grant.is_active && !isExpired && !hasApplied && auth.can('grant:apply'))
   // Only OECS admins can write to a grant, so only they see field proposals
   const isOecs = auth.can('org:manage')
 
@@ -302,20 +296,13 @@ export default function GrantDetailPage() {
                   )}
 
                   {!grant.application_url && canApply && (
-                    <>
-                      <Button
-                        fullWidth
-                        onClick={() => navigate(`/grants/${grant.id}/apply`)}
-                        icon={<FileText size={20} />}
-                      >
-                        {hasDraft ? t`Continue Application` : isStudent ? t`Start Application` : t`Apply Now`}
-                      </Button>
-                      {isStudent && (
-                        <p className="mt-2 text-xs text-ktip-sand-600">
-                          <Trans>Student applications must be sponsored. Nominate a faculty member in the application — they accept it, and then it can be submitted.</Trans>
-                        </p>
-                      )}
-                    </>
+                    <Button
+                      fullWidth
+                      onClick={() => navigate(`/grants/${grant.id}/apply`)}
+                      icon={<FileText size={20} />}
+                    >
+                      {hasDraft ? t`Continue Application` : t`Apply Now`}
+                    </Button>
                   )}
 
                   {!grant.application_url && !canApply && !hasApplied && !isExpired && auth.user && (

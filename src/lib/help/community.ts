@@ -84,7 +84,7 @@ export const MESSAGES_CATEGORY: HelpCategory = {
     {
       id: 'student-messaging-safeguards',
       title: 'Messaging rules for student accounts',
-      content: `Student accounts cannot start one-to-one direct messages. This is a safeguarding rule built into the platform and cannot be turned off — not by the student, not by an administrator.\n\nStudents communicate through supervised channels with a designated educator from their institution.\n\nIf you hold a Student role alongside another role, the restriction still applies to the account.\n\nThe same principle sits behind the sponsor requirement on grant applications and the automatic exclusion of students from the public leaderboard.`,
+      content: `Student accounts cannot start one-to-one direct messages. This is a safeguarding rule built into the platform and cannot be turned off — not by the student, not by an administrator.\n\nStudents communicate through supervised channels with a designated educator from their institution.\n\nIf you hold a Student role alongside another role, the restriction still applies to the account.\n\nThe same principle sits behind students never administering awarded funds themselves, and the automatic exclusion of students from the public leaderboard.`,
       tags: ['student', 'safeguarding', 'restriction', 'dm', 'supervised', 'educator'],
     },
     {

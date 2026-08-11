@@ -23,11 +23,16 @@ interface SponsorNominationCardProps {
 /**
  * Student side of the sponsorship handshake.
  *
- * A student holds grant:view but never grant:apply, so the only way an
- * application leaves draft is with a faculty sponsor who has accepted it. The
- * candidate list is filtered by role for convenience; the database re-checks
- * that the nominee actually holds grant:sponsor when the application is
- * submitted, so a stale or hand-crafted nomination cannot get through.
+ * This used to be a gate: a student held grant:view and never grant:apply, so
+ * an accepted faculty sponsor was the only route out of draft. Migration 110
+ * removed both halves of that, and the card stayed — an endorsement from
+ * someone who knows the work is worth having on an application whether or not
+ * anything depends on it. Nothing here blocks submission any more.
+ *
+ * The candidate list is filtered by role for convenience; the database still
+ * re-checks that a nominee who has accepted actually holds grant:sponsor, so a
+ * stale or hand-crafted nomination cannot dress an application in an
+ * endorsement that was never available to give.
  */
 export function SponsorNominationCard({
   applicationId,
@@ -48,7 +53,7 @@ export function SponsorNominationCard({
       let request = (supabase as any)
         .from('profiles')
         .select('*')
-        .overlaps('roles', ['faculty', 'educational_partner'])
+        .overlaps('roles', ['faculty', 'educational_partner', 'research_institution'])
         .limit(10)
 
       if (search) request = request.ilike('display_name', `%${search}%`)
@@ -106,10 +111,10 @@ export function SponsorNominationCard({
     <Card className="mb-6">
       <div className="flex items-center gap-2 mb-1">
         <GraduationCap size={18} className="text-ktip-ocean-600" />
-        <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Faculty sponsor</Trans></h2>
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Faculty sponsor (optional)</Trans></h2>
       </div>
       <p className="text-sm text-ktip-sand-600 mb-4">
-        <Trans>Student applications are submitted under a faculty or school sponsor. Nominate someone from your institution — they will be asked to accept before this can be submitted.</Trans>
+        <Trans>Nominate someone from your institution to endorse this application. They will be asked to accept, and their name appears on the application if they do. You can submit without one.</Trans>
       </p>
 
       {sponsorId && sponsor ? (

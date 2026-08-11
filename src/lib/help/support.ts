@@ -114,7 +114,7 @@ export const ADMIN_CATEGORY: HelpCategory = {
     {
       id: 'admin-users-roles',
       title: 'Managing users and the permission matrix',
-      content: `The Users page lists every account with its roles, and lets you grant or remove roles and suspend accounts.\n\nThe Roles page is the permission matrix: a grid of roles against permissions that you can toggle. It is the live source of what each role can do, so a change here changes the product for those users immediately.\n\nSome cells are locked and cannot be toggled. Those are the safeguarding rules — students not initiating direct messages, students not submitting grants unsponsored — and they are deliberately outside admin reach.\n\n"Reset to defaults" restores the shipped matrix.`,
+      content: `The Users page lists every account with its roles, and lets you grant or remove roles and suspend accounts.\n\nThe Roles page is the permission matrix: a grid of roles against permissions that you can toggle. It is the live source of what each role can do, so a change here changes the product for those users immediately.\n\nSome cells are locked and cannot be toggled. Those are the safeguarding rules — students not initiating direct messages, students not administering funds — and they are deliberately outside admin reach.\n\n"Reset to defaults" restores the shipped matrix.`,
       tags: ['users', 'roles', 'permissions', 'matrix', 'suspend', 'admin', 'rbac'],
     },
     {
