@@ -2023,6 +2023,8 @@ export interface ModerationTerm {
   /** Scopes a regional slur to one country; null applies everywhere. */
   country_code: string | null
   is_active: boolean
+  /** Whether the rule is shipped to browsers for live highlighting (119). */
+  client_visible: boolean
   note: string | null
   created_by: string | null
   created_at: string

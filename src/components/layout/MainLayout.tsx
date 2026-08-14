@@ -30,6 +30,7 @@ import { StickyNotesProvider, useStickyNotesPanel } from '../../contexts/StickyN
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useOrientationTransition } from '../../hooks/useOrientationTransition'
+import { useModerationRules } from '../../hooks/useModerationRules'
 import { shellKey } from '../../lib/routeTransitions'
 
 /**
@@ -100,6 +101,12 @@ export function MainLayout() {
   // Rotating the device swaps every breakpoint in one frame; this puts a short
   // fade over the swap so the new layout arrives instead of snapping.
   useOrientationTransition()
+
+  // Warms the content-filter rule cache for the session. Called here rather
+  // than inside each composer so the first keystroke in a form never waits on
+  // a round trip; the result is shared through React Query, so this is one
+  // request per page load no matter how many fields end up scanning.
+  useModerationRules()
 
   return (
     <MessagingPanelProvider>

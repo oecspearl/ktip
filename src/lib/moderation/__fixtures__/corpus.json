@@ -1,0 +1,30 @@
+{
+  "note": "Golden corpus for the client/server parity check. scan-parity.test.ts runs every entry through scanText() with the 065 seed rules; supabase/tests/111_moderation_client_rules_test.sql runs the identical strings through scan_content(). Both assert the count, so adding a case to one half and not the other fails. `expected` is the RAW severity — the advisory de-obfuscation pass has no server counterpart and is excluded by design. Several entries below are known false positives of the 065 seed, kept deliberately: they are what the category policy in policy.ts exists to soften.",
+  "cases": [
+    { "text": "Call me on +1 758 555 0100", "expected": "medium", "why": "phone" },
+    { "text": "tel: (758) 285-1234", "expected": "medium", "why": "phone, punctuated" },
+    { "text": "The total came to 1 234 567.89 for the year", "expected": "medium", "why": "false positive: space-grouped figure reads as a phone number" },
+    { "text": "Discussed 2024 2025 2026 budgets", "expected": "medium", "why": "false positive: a run of years reads as a phone number" },
+    { "text": "Reach me at ana@example.com", "expected": "low", "why": "email" },
+    { "text": "ANA@EXAMPLE.COM", "expected": "low", "why": "email, uppercase — the scan is case-insensitive" },
+    { "text": "Meet at 12 Bay Street", "expected": "medium", "why": "street address" },
+    { "text": "Follow instagram.com/someone for updates", "expected": "medium", "why": "personal social link" },
+    { "text": "wa.me/17585551234", "expected": "medium", "why": "social link and phone both hit; highest wins" },
+    { "text": "don't tell your parents", "expected": "high", "why": "grooming: secrecy request" },
+    { "text": "dont tell your dad", "expected": "high", "why": "grooming: the apostrophe is optional in the pattern" },
+    { "text": "dont tell any teacher", "expected": null, "why": "known seed gap: the pattern's 'any' branch has no trailing space, so 'any teacher' cannot match. Encoded so a future fix to the seed fails this loudly rather than silently." },
+    { "text": "keep this a secret between us", "expected": "high", "why": "grooming: secrecy request" },
+    { "text": "how old are you? send a pic", "expected": "high", "why": "grooming: age probe plus solicitation" },
+    { "text": "what's your age, want to photo chat", "expected": "high", "why": "grooming: age probe plus solicitation" },
+    { "text": "meet me alone", "expected": "high", "why": "grooming: isolation request" },
+    { "text": "come over without your mum", "expected": "high", "why": "grooming: isolation request" },
+    { "text": "We are building a solar irrigation project for farmers.", "expected": null, "why": "clean" },
+    { "text": "The workshop starts at nine in Castries.", "expected": null, "why": "clean" },
+    { "text": "Our grant request is 45000 XCD over two years.", "expected": null, "why": "clean: five digits is below the phone pattern's floor" },
+    { "text": "Version 2.0.1 shipped to the pilot cohort.", "expected": null, "why": "clean: too short for the phone pattern" },
+    { "text": "l'ete a ete chaud cette annee", "expected": null, "why": "clean: French" },
+    { "text": "Se necesita mas apoyo para los jovenes.", "expected": null, "why": "clean: Spanish" },
+    { "text": "", "expected": null, "why": "empty" },
+    { "text": "     ", "expected": null, "why": "whitespace only" }
+  ]
+}

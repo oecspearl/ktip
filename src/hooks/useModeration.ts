@@ -126,7 +126,13 @@ export function useModerationTerms() {
 
 export function useManageModerationTerms() {
   const queryClient = useQueryClient()
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: keys.all('moderation-terms') })
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: keys.all('moderation-terms') })
+    // The browser scans against its own cached copy of the rules (119), which
+    // never refetches on its own. Without this a moderator adds a term and
+    // watches their own composer ignore it until they reload.
+    queryClient.invalidateQueries({ queryKey: keys.all('moderation-rules') })
+  }
 
   const create = useMutation({
     mutationFn: async (term: Partial<ModerationTerm>) => {
