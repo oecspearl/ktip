@@ -25,6 +25,8 @@ function grant(overrides: Partial<Grant> = {}): Grant {
     details: [],
     created_by: null,
     required_documents: [],
+    employer_id: null,
+    allow_member_engagement: null,
     created_at: '2026-07-01T00:00:00Z',
     ...overrides,
   }

@@ -24,20 +24,21 @@ import type {
 
 const DOMAIN = 'employers'
 
-/** The business this member registered, whatever its verification state. */
+/**
+ * The business this member belongs to, whatever its verification state.
+ *
+ * Migration 111 moved this off a `created_by` filter and onto `my_employer()`.
+ * The filter meant only the registrant could reach the org pages: an owner
+ * added to `employer_members` — which is now how the Team page adds people —
+ * matched nothing and saw the register-your-business screen instead.
+ */
 export function useMyEmployer(userId: string | undefined) {
   const query = useQuery({
     queryKey: keys.sub(DOMAIN, 'mine', userId),
     queryFn: async (): Promise<Employer | null> => {
-      const { data, error } = await (supabase as any)
-        .from('employers')
-        .select('*')
-        .eq('created_by', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
+      const { data, error } = await (supabase as any).rpc('my_employer')
       if (error) throw error
-      return (data as Employer) || null
+      return ((data as Employer[]) || [])[0] ?? null
     },
     enabled: !!userId,
   })
@@ -126,6 +127,28 @@ export function useEmployerProfileMutations() {
     queryClient.invalidateQueries({ queryKey: keys.all(DOMAIN) })
   }
 
+  /**
+   * The master switch (migration 111). Its own RPC, kept apart from
+   * update_my_employer_profile for the same reason setSharing is kept apart
+   * from verification: neither should be flippable by accident while editing
+   * the other. A direct UPDATE would fail anyway — `employers` still has no
+   * member-facing UPDATE policy.
+   */
+  const setMemberEngagement = useMutation({
+    mutationFn: async (params: { employerId: string; allow: boolean }) => {
+      const { error } = await (supabase as any).rpc('set_employer_member_engagement', {
+        p_employer_id: params.employerId,
+        p_allow: params.allow,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      invalidate()
+      // The switch governs the caller's own Apply buttons too.
+      queryClient.invalidateQueries({ queryKey: keys.all('engagement') })
+    },
+  })
+
   const updateProfile = useMutation({
     mutationFn: async (params: {
       employerId: string
@@ -185,6 +208,8 @@ export function useEmployerProfileMutations() {
   return {
     updateProfile: updateProfile.mutateAsync,
     savingProfile: updateProfile.isPending,
+    setMemberEngagement: setMemberEngagement.mutateAsync,
+    savingEngagement: setMemberEngagement.isPending,
     savePortfolioItem: savePortfolioItem.mutateAsync,
     savingItem: savePortfolioItem.isPending,
     deletePortfolioItem: deletePortfolioItem.mutateAsync,

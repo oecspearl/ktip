@@ -10,6 +10,8 @@ import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl
 import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
+import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
 import { normalizeHashtags } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
@@ -42,8 +44,12 @@ export default function EditProjectPage() {
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
+  const [employerId, setEmployerId] = useState<string | null>(null)
+  const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
+
+  const managedEmployers = useManagedEmployers()
 
   useEffect(() => {
     if (project && !initialized) {
@@ -56,6 +62,8 @@ export default function EditProjectPage() {
       setIsPublic(project.is_public ?? true)
       setIsClimateAction(project.is_climate_action ?? false)
       setDetails(project.details || [])
+      setEmployerId(project.employer_id ?? null)
+      setAllowMemberEngagement(project.allow_member_engagement ?? null)
       setInitialized(true)
     }
   }, [project, initialized])
@@ -103,6 +111,8 @@ export default function EditProjectPage() {
         is_public: isPublic,
         is_climate_action: isClimateAction,
         details: cleanDetails(details),
+        employer_id: employerId,
+        allow_member_engagement: employerId ? allowMemberEngagement : null,
       } as any)
 
       toast.success(t`Project updated successfully!`)
@@ -280,6 +290,20 @@ export default function EditProjectPage() {
                 </span>
               </label>
             </div>
+
+            {/* Owner only. An editor member can edit the content but must not
+                reassign who published it — the claim trigger would refuse them
+                anyway, and the state above preserves the existing value. */}
+            {isOwner && (
+              <OrgEngagementFields
+                options={managedEmployers}
+                employerId={employerId}
+                onEmployerChange={setEmployerId}
+                override={allowMemberEngagement}
+                onOverrideChange={setAllowMemberEngagement}
+                itemNoun={t`project`}
+              />
+            )}
 
             <div className="flex items-center gap-4">
               <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>

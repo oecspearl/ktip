@@ -103,7 +103,10 @@ WITH m(num, mfile, kind, t1, t2) AS (
   ('095', '095_message_attachments.sql',              'column',   'messages', 'attachments'),
   ('096', '096_event_registration_approval.sql',      'column',   'event_rsvps', 'attendance_type'),
   ('097', '097_translations.sql',                     'table',    'translations', NULL),
-  ('098', '098_decision_notifications.sql',           'function', 'notify_grant_application_decision', NULL)
+  ('098', '098_decision_notifications.sql',           'function', 'notify_grant_application_decision', NULL),
+  -- 099-110 are still missing from this list; it went stale before 111 and
+  -- filling the gap needs a probe chosen per migration.
+  ('111', '111_org_member_engagement.sql',            'column',   'employers', 'allow_member_engagement')
 ),
 checked AS (
   SELECT

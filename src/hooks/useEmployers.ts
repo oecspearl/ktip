@@ -178,6 +178,27 @@ export function useEmployerMutations() {
     onSuccess: invalidate,
   })
 
+  /**
+   * The organisation's own staff-engagement switch (migration 111), from the
+   * OECS side. A plain UPDATE is enough here — "Admins can update employers"
+   * admits it — where an org owner has to go through
+   * set_employer_member_engagement, because the table has no member-facing
+   * UPDATE policy.
+   */
+  const setMemberEngagementMutation = useMutation({
+    mutationFn: async ({ id, allow }: { id: string; allow: boolean }) => {
+      const { error } = await (supabase as any)
+        .from('employers')
+        .update({ allow_member_engagement: allow })
+        .eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      invalidate()
+      queryClient.invalidateQueries({ queryKey: keys.all('engagement') })
+    },
+  })
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await (supabase as any).from('employers').delete().eq('id', id)
@@ -193,12 +214,15 @@ export function useEmployerMutations() {
     setVerification: setVerificationMutation.mutateAsync,
     setSharing: (employer: Employer, share: boolean) =>
       setSharingMutation.mutateAsync({ employer, share }),
+    setMemberEngagement: (id: string, allow: boolean) =>
+      setMemberEngagementMutation.mutateAsync({ id, allow }),
     deleteEmployer: deleteMutation.mutateAsync,
     loading:
       createMutation.isPending ||
       updateMutation.isPending ||
       setVerificationMutation.isPending ||
       setSharingMutation.isPending ||
+      setMemberEngagementMutation.isPending ||
       deleteMutation.isPending,
   }
 }

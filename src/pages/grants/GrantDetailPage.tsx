@@ -4,6 +4,8 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
+import { EngagementNotice } from '../../components/shared/EngagementNotice'
+import { useEngagementGate } from '../../hooks/useEngagement'
 import { useGrant, useApplyForGrant, useDraftApplication } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -51,7 +53,17 @@ export default function GrantDetailPage() {
   // the button had to say "Start Application" because submitting was somebody
   // else's act. They hold grant:apply now, and a faculty endorsement is offered
   // inside the wizard rather than required before it.
-  const canApply = !!(grant && grant.is_active && !isExpired && !hasApplied && auth.can('grant:apply'))
+  // Migration 111 — the applicant's own organisation may have switched this
+  // off, or this call may be closed to the publisher's staff.
+  const gate = useEngagementGate(grant)
+  const canApply = !!(
+    grant &&
+    grant.is_active &&
+    !isExpired &&
+    !hasApplied &&
+    auth.can('grant:apply') &&
+    gate.allowed
+  )
   // Only OECS admins can write to a grant, so only they see field proposals
   const isOecs = auth.can('org:manage')
 
@@ -285,7 +297,10 @@ export default function GrantDetailPage() {
                     </div>
                   )}
 
-                  {grant.application_url && (
+                  {/* The switch reaches this button too, though only as far as
+                      hiding it: the link leaves KTIP, so no policy can enforce
+                      anything past this point. */}
+                  {grant.application_url && gate.allowed && (
                     <Button
                       fullWidth
                       icon={<ExternalLink size={20} />}
@@ -294,6 +309,8 @@ export default function GrantDetailPage() {
                       <Trans>Apply on External Site</Trans>
                     </Button>
                   )}
+
+                  {!gate.allowed && auth.user && <EngagementNotice verdict={gate} />}
 
                   {!grant.application_url && canApply && (
                     <Button
@@ -305,7 +322,10 @@ export default function GrantDetailPage() {
                     </Button>
                   )}
 
-                  {!grant.application_url && !canApply && !hasApplied && !isExpired && auth.user && (
+                  {/* gate.allowed: the organisation reason is already printed
+                      above, and "your account has no permission" would be the
+                      wrong explanation on top of it. */}
+                  {!grant.application_url && !canApply && gate.allowed && !hasApplied && !isExpired && auth.user && (
                     <p className="text-sm text-ktip-sand-600">
                       <Trans>Your account does not have permission to apply for grants.</Trans>
                     </p>

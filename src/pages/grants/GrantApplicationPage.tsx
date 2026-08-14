@@ -14,6 +14,8 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 import { grantImageFor } from '../../lib/hero-images'
 import { SponsorNominationCard } from '../../components/grants/SponsorNominationCard'
+import { EngagementNotice } from '../../components/shared/EngagementNotice'
+import { useEngagementGate } from '../../hooks/useEngagement'
 import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
 import { truncate } from '../../lib/utils'
 import {
@@ -40,6 +42,10 @@ export default function GrantApplicationPage() {
     auth.user?.id
   )
   const { saveDraft, submitApplication, loading: saving } = useApplyForGrant()
+
+  // Migration 111. Drafting is deliberately still allowed for a blocked
+  // member, so this gates the Submit button and nothing before it.
+  const gate = useEngagementGate(grant)
 
   const [currentStep, setCurrentStep] = useState(0)
   const [applicationData, setApplicationData] = useState<Record<string, any>>({})
@@ -359,15 +365,25 @@ export default function GrantApplicationPage() {
                   {!saving && <ArrowRight size={16} />}
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-brand-navy rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
-                >
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                  <Trans>Submit Application</Trans>
-                </button>
+                // Reachable by direct URL, and 111 deliberately leaves drafting
+                // open — so the wizard stays usable and only the last act is
+                // stopped, with the reason beside it.
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={saving || !gate.allowed}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-ktip-tropical-500 text-brand-navy rounded-xl text-sm font-medium hover:bg-ktip-tropical-600 transition-colors disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                    <Trans>Submit Application</Trans>
+                  </button>
+                  {!gate.allowed && (
+                    <div className="max-w-sm">
+                      <EngagementNotice verdict={gate} />
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

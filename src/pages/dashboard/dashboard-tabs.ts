@@ -5,6 +5,7 @@ import {
   FolderKanban,
   Calendar,
   Users,
+  UsersRound,
   Inbox,
   Wallet,
   GraduationCap,
@@ -77,6 +78,11 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // partner has a profile and a body of work to show for exactly the same
   // reason a business does.
   { to: 'business', label: msg`Business profile`, icon: Building2, description: msg`Your organisation and its portfolio`, roles: ORGANIZATION_ROLES },
+  // Migration 111 gave employer_members a readable policy and a backfilled
+  // owner row, which is what finally made a roster screen possible. The
+  // engagement switch lives here rather than on the Business tab, directly
+  // above the people it governs.
+  { to: 'team', label: msg`Team`, icon: UsersRound, description: msg`Who belongs to your organisation`, roles: ORGANIZATION_ROLES },
   { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'safety_admin'], external: true },
 ]
 

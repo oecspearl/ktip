@@ -7,6 +7,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateProject } from '../../hooks/useProjects'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
+import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
 import { isPermissionDenied, normalizeHashtags } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
@@ -36,8 +38,12 @@ export default function CreateProjectPage() {
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
+  const [employerId, setEmployerId] = useState<string | null>(null)
+  const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
+
+  const managedEmployers = useManagedEmployers()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -77,6 +83,8 @@ export default function CreateProjectPage() {
         is_climate_action: isClimateAction,
         details: cleanDetails(details),
         owner_id: auth.user!.id,
+        employer_id: employerId,
+        allow_member_engagement: employerId ? allowMemberEngagement : null,
       } as any)
 
       analytics.feature('project', 'created', { category })
@@ -256,6 +264,15 @@ export default function CreateProjectPage() {
                 </span>
               </label>
             </div>
+
+            <OrgEngagementFields
+              options={managedEmployers}
+              employerId={employerId}
+              onEmployerChange={setEmployerId}
+              override={allowMemberEngagement}
+              onOverrideChange={setAllowMemberEngagement}
+              itemNoun={t`project`}
+            />
 
             {/* Submit Button */}
             <div className="flex items-center gap-4">

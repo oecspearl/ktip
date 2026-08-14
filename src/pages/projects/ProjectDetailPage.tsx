@@ -13,6 +13,8 @@ import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { useMyJoinRequest } from '../../hooks/useProjectJoinRequests'
 import { RequestCollaborationModal } from '../../components/projects/RequestCollaborationModal'
+import { EngagementNotice } from '../../components/shared/EngagementNotice'
+import { useEngagementGate } from '../../hooks/useEngagement'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
@@ -76,8 +78,11 @@ export default function ProjectDetailPage() {
   const { request: myJoinRequest } = useMyJoinRequest(params.id, auth.user?.id)
   const [requestOpen, setRequestOpen] = useState(false)
 
+  // Migration 111 — the asker's own organisation may have switched engagement
+  // off, or this project may be closed to the publisher's own staff.
+  const gate = useEngagementGate(project)
   const canRequestToCollaborate =
-    !!auth.user && !!project && !isOwner && !myMembership && project.is_public
+    !!auth.user && !!project && !isOwner && !myMembership && project.is_public && gate.allowed
 
   // Count a view once per browser session per project
   useEffect(() => {
@@ -328,6 +333,14 @@ export default function ProjectDetailPage() {
                   </button>
                 ))}
             </div>
+
+            {/* Not an owner or a member, and the switch is the reason there is
+                no button — say which organisation, and why. */}
+            {!gate.allowed && !!auth.user && !!project && !isOwner && !myMembership && (
+              <div className="mt-4">
+                <EngagementNotice verdict={gate} />
+              </div>
+            )}
 
             {project && (
               <RequestCollaborationModal

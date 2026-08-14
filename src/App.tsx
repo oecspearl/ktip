@@ -191,6 +191,7 @@ const router = createBrowserRouter([
                   { path: '/dashboard/submissions', lazy: lazyPage(() => import('./pages/dashboard/tabs/SubmissionsTab')) },
                   // Organisation-tier counterpart to the profile (CV) tab.
                   { path: '/dashboard/business', lazy: lazyPage(() => import('./pages/dashboard/tabs/BusinessTab')) },
+                  { path: '/dashboard/team', lazy: lazyPage(() => import('./pages/dashboard/tabs/TeamTab')) },
                   // Role-gated; each stub bounces to /dashboard without the role.
                   { path: '/dashboard/funding', lazy: lazyPage(() => import('./pages/dashboard/tabs/FundingTab')) },
                   { path: '/dashboard/mentees', lazy: lazyPage(() => import('./pages/dashboard/tabs/MenteesTab')) },
@@ -341,6 +342,7 @@ const router = createBrowserRouter([
               // The business profile lives in the dashboard now (BusinessTab);
               // the old page address keeps resolving for bookmarks.
               { path: '/org/edit', element: <Navigate to="/dashboard/business" replace /> },
+              { path: '/org/members', element: <Navigate to="/dashboard/team" replace /> },
             ],
           },
 

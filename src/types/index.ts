@@ -308,6 +308,18 @@ export interface Project extends Ranked {
   member_count: number
   details: DetailEntry[]
   owner_id: string
+  /**
+   * Migration 111 — the organisation this project belongs to, or NULL for a
+   * personal one. owner_id has always been a person; nothing recorded which
+   * organisation published the work.
+   */
+  employer_id: string | null
+  /**
+   * Migration 111 — NULL inherits the owning organisation's master switch;
+   * TRUE/FALSE override it, for members of employer_id only. See
+   * `resolveEngagement` in src/lib/engagement.ts.
+   */
+  allow_member_engagement: boolean | null
   created_at: string
   updated_at: string
   owner?: Profile
@@ -330,6 +342,13 @@ export interface Event extends Ranked {
   capacity: number | null
   image_url: string | null
   organizer_id: string
+  /** Migration 111 — the organisation this event belongs to, or NULL. */
+  employer_id: string | null
+  /**
+   * Migration 111 — NULL inherits the owning organisation's master switch;
+   * TRUE/FALSE override it, for members of employer_id only.
+   */
+  allow_member_engagement: boolean | null
   registration_fields: RegistrationFieldConfig[]
   /**
    * Migration 105 — the colour this event takes on the calendar. NULL falls
@@ -719,6 +738,13 @@ export interface Grant extends Ranked {
    * writes once per grant, so it is JSONB rather than a relation.
    */
   required_documents: RequiredDocument[]
+  /** Migration 111 — the organisation this call belongs to, or NULL. */
+  employer_id: string | null
+  /**
+   * Migration 111 — NULL inherits the owning organisation's master switch;
+   * TRUE/FALSE override it, for members of employer_id only.
+   */
+  allow_member_engagement: boolean | null
   created_at: string
 }
 
@@ -1151,6 +1177,15 @@ export interface Employer {
   document_count: number
 
   share_externally: boolean
+  /**
+   * Migration 111 — the master switch. FALSE means members of this
+   * organisation cannot apply for grants, request to join projects or register
+   * for events anywhere on the platform. Owners and admins are exempt; a
+   * per-item flag on this organisation's own rows can reopen or close one
+   * item. Written only through `set_employer_member_engagement`, never a
+   * direct UPDATE — `employers` has no member-facing UPDATE policy.
+   */
+  allow_member_engagement: boolean
   created_by: string | null
   created_at: string
   updated_at: string
@@ -1222,6 +1257,38 @@ export interface EmployerMember {
   created_at: string
   user?: Profile
   employer?: Employer
+}
+
+/**
+ * Migration 111 — one row of `employer_roster()`. An RPC rather than a join
+ * because `profiles` is separately RLS'd and the Team page needs names and
+ * avatars; same shape as `get_project_team` (079).
+ */
+export interface EmployerRosterEntry {
+  id: string
+  user_id: string
+  role: EmployerMemberRole
+  created_at: string
+  display_name: string | null
+  avatar_url: string | null
+  country: string | null
+}
+
+/**
+ * Migration 111 — one row of `my_employer_engagement()`: an organisation the
+ * signed-in user belongs to, with its master switch and their role in it.
+ *
+ * Fetched once per session so the client can resolve the engagement rule for
+ * every card in a list without a round trip per item, and — the actual reason
+ * this carries `legal_name` — so a blocked user is told WHICH organisation
+ * turned it off. RLS can refuse; only this can explain.
+ */
+export interface EmployerEngagement {
+  employer_id: string
+  legal_name: string
+  slug: string
+  member_role: EmployerMemberRole
+  allow_member_engagement: boolean
 }
 
 export interface EmployerVerificationEvent {

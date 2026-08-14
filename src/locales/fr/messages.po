@@ -373,6 +373,10 @@ msgstr "Enregistrements du Virtual Campus et modifications manuelles"
 msgid "Projects"
 msgstr "Projets"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Removed from your team"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Pick members from the invite panel and KTIP sends each of them the room link as a message and a notification — no email addresses to copy around.\n"
 "\n"
@@ -608,6 +612,10 @@ msgstr "Vérification des institutions et des domaines qu'elles possèdent."
 msgid "Type"
 msgstr "Type"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Added to your team"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I connect with a member?"
 msgstr "Comment me connecter avec un membre ?"
@@ -680,6 +688,10 @@ msgid "Every submitted application and every completed registration form files a
 "That matters when a form changes after you filled it in, or when a funder asks what you actually claimed. The receipt is your evidence."
 msgstr "Chaque candidature soumise et chaque formulaire d'inscription complété archive une copie immuable sous Soumissions, dans votre tableau de bord.\n"
 ""
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Remove from team"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Guides and answers organised by topic"
@@ -1263,6 +1275,10 @@ msgstr "Personnes"
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 msgid "Back to My Submissions"
 msgstr "Retour à Mes soumissions"
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Could not change that role"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Anyone viewing your profile or the directory"
@@ -2072,6 +2088,7 @@ msgid "Deliverables"
 msgstr "Livrables"
 
 #: src/components/notes/StickyNoteFabPanel.tsx
+#: src/components/ui/FabStickyNotes.tsx
 #: src/components/ui/FloatingActionButton.tsx
 msgid "Sticky notes"
 msgstr "Pense-bêtes"
@@ -2211,6 +2228,10 @@ msgid "Everything you have published, including anything still private — this 
 "Open one to edit it, manage its team, or answer collaboration requests. Projects you were added to by someone else are not here; they are on your profile."
 msgstr "Tout ce que vous avez publié, y compris ce qui est encore privé — cet onglet est le seul endroit où un projet privé est visible.\n"
 ""
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Just me — not on behalf of an organisation"
+msgstr ""
 
 #: src/pages/dashboard/tabs/MyProfileTab.tsx
 msgid "Profile unlocked. Any member can view your full profile."
@@ -2805,6 +2826,10 @@ msgstr "Créer un tableau blanc"
 msgid "Name"
 msgstr "Nom"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Could not add that person"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Open a 1-to-1 conversation. Denied to students — they use supervised channels only."
 msgstr "Ouvrir une conversation individuelle. Non autorisé pour les étudiants — ils utilisent uniquement des canaux supervisés."
@@ -3053,6 +3078,7 @@ msgstr "Les extraits sont enregistrés automatiquement dans votre compte et appa
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 #: src/pages/dashboard/tabs/OverviewTab.tsx
 #: src/pages/sme/ChamberOnboardingPage.tsx
+#: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Dashboard"
 msgstr "Tableau de bord"
@@ -3914,6 +3940,7 @@ msgstr "Les forums sont le volet long format de KTIP — questions, annonces, ap
 ""
 
 #: src/components/documents/ExtractionReviewPanel.tsx
+#: src/pages/events/CreateEventPage.tsx
 msgid "event"
 msgstr "événement"
 
@@ -4594,6 +4621,10 @@ msgstr "{APP_FULL_NAME} — Donner aux innovateurs, mentors et investisseurs des
 msgid "Upload something else"
 msgstr "Téléverser autre chose"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Nobody new by that name."
+msgstr ""
+
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Almost there — set up your KTIP profile."
 msgstr "Presque terminé — configurez votre profil KTIP."
@@ -4782,6 +4813,7 @@ msgstr "Soumissions contient vos inscriptions. Projets est l'onglet équivalent 
 msgid "Enrollment failed"
 msgstr "Échec de l'inscription"
 
+#: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Register your business first"
 msgstr "Enregistrez d'abord votre entreprise"
@@ -5538,6 +5570,10 @@ msgstr "Statut de l'événement"
 msgid "New Messages"
 msgstr "Nouveaux messages"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Let our team take part"
+msgstr ""
+
 #: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "No events organized yet."
 msgstr "Aucun événement organisé pour le moment."
@@ -5692,6 +5728,10 @@ msgstr "Article d'aide — Événements"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Created"
 msgstr "Créé"
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Closed to our team"
+msgstr ""
 
 #: src/components/shared/DeleteEntityDialog.tsx
 msgid "Delete this {noun}?"
@@ -6231,6 +6271,10 @@ msgstr ""
 #: src/pages/events/EventsPage.tsx
 msgid "No events found"
 msgstr "Aucun événement trouvé"
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Could not remove that person"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Filter listings down to climate and environment work"
@@ -6932,6 +6976,7 @@ msgid "Educational Partner"
 msgstr "Partenaire éducatif"
 
 #: src/components/tutorial/TutorialOverlay.tsx
+#: src/components/ui/Coachmark.tsx
 msgid "Close tour"
 msgstr "Fermer la visite"
 
@@ -7102,6 +7147,10 @@ msgstr "Aidez les autres à vous trouver et à collaborer avec vous. Facultatif 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "12. Any other comments?"
 msgstr "12. Avez-vous d'autres commentaires ?"
+
+#: src/pages/dashboard/dashboard-tabs.ts
+msgid "Who belongs to your organisation"
+msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Manage funds"
@@ -7384,6 +7433,10 @@ msgstr "{0} dans le portfolio"
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Loading applications..."
 msgstr "Chargement des candidatures..."
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Search by name"
+msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Not at all useful"
@@ -7920,6 +7973,10 @@ msgstr "Indicateurs d'utilisation, de croissance et d'engagement de la plateform
 msgid "Open menu"
 msgstr ""
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Could not change that setting"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Draft events are only visible to administrators"
 msgstr "Les événements en brouillon ne sont visibles que par les administrateurs"
@@ -8327,6 +8384,10 @@ msgstr "Échec de la mise à jour de la visibilité"
 msgid "Community Safety"
 msgstr "Sécurité de la communauté"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "A team hangs off a registered organisation. Registration takes a few minutes."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Yours, and everyone else’s"
 msgstr "Le vôtre, et celui de tous les autres"
@@ -8681,6 +8742,7 @@ msgstr "Nécessaires uniquement"
 #: src/pages/resources/ResourcesPage.tsx
 #: src/pages/settings/SettingsPage.tsx
 #: src/pages/sme/ChamberOnboardingPage.tsx
+#: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 #: src/pages/sme/OrgProfilePage.tsx
 msgid "Home"
@@ -8752,6 +8814,10 @@ msgstr "Tableaux, publications et modération"
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Search integrations"
 msgstr "Rechercher des intégrations"
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Add someone"
+msgstr ""
 
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Enter your new password below"
@@ -9179,6 +9245,10 @@ msgstr "Conférence plénière"
 #: src/i18n/harvested.ts
 msgid "Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators."
 msgstr "Accédez à Paramètres → Vérification et téléversez un document d'identité (carte d'identité nationale, passeport ou immatriculation d'entreprise). Un administrateur de l'OECS l'examine et, une fois approuvé, votre profil affiche une coche de vérification. Les documents sont stockés de manière privée et visibles uniquement par les administrateurs."
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Only an owner or admin of your organisation can change this."
+msgstr ""
 
 #: src/components/layout/PageHero.tsx
 #: src/pages/dashboard/DashboardTopBar.tsx
@@ -9676,6 +9746,7 @@ msgid "View"
 msgstr "Voir"
 
 #: src/components/projects/ManageTeamModal.tsx
+#: src/pages/sme/OrgMembersPage.tsx
 msgid "Role updated"
 msgstr "Rôle mis à jour"
 
@@ -10094,6 +10165,7 @@ msgstr "Le message original, son auteur et la date de rédaction. Si l'auteur l'
 msgid "Fade settings"
 msgstr "Paramètres d'estompage"
 
+#: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Register with your Chamber"
 msgstr "S'inscrire auprès de votre Chambre"
@@ -10265,6 +10337,8 @@ msgstr "Vérification, historique et publication sur l'API partenaire."
 
 #: src/components/projects/ManageTeamModal.tsx
 #: src/components/projects/TeamWidget.tsx
+#: src/pages/dashboard/dashboard-tabs.ts
+#: src/pages/sme/OrgMembersPage.tsx
 msgid "Team"
 msgstr "Équipe"
 
@@ -10324,6 +10398,10 @@ msgstr "Modifier le plan"
 
 #: src/components/directory/MemberPanel.tsx
 msgid "This profile is private. You can see it because administrators bypass the lock."
+msgstr ""
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Our people cannot take part — for when they would be judging it."
 msgstr ""
 
 #: src/components/layout/Navbar.tsx
@@ -10996,6 +11074,10 @@ msgstr ""
 msgid "Improve this content with AI"
 msgstr "Améliorer ce contenu avec l'IA"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Owner"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Read this before you start"
 msgstr "Lisez ceci avant de commencer"
@@ -11035,6 +11117,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Why is my content hidden or quarantined?"
 msgstr "Pourquoi mon contenu est-il masqué ou mis en quarantaine ?"
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Your team can no longer apply, join or register"
+msgstr ""
 
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
@@ -11108,6 +11194,7 @@ msgstr "Le contenu d'abord — Projets, Événements, Subventions, Forums, Resso
 #: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/messages/GroupSettingsModal.tsx
 #: src/pages/cv/CvEditPage.tsx
+#: src/pages/sme/OrgMembersPage.tsx
 msgid "Add"
 msgstr "Ajouter"
 
@@ -12282,6 +12369,10 @@ msgstr "Impossible d'enregistrer"
 msgid "Failed to create event"
 msgstr "Échec de la création de l'événement"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Your team can apply, join and register again"
+msgstr ""
+
 #: src/components/shared/ReceiptDocument.tsx
 msgid "Evidence"
 msgstr "Preuves"
@@ -12577,6 +12668,7 @@ msgid "Progress toward the next rank"
 msgstr ""
 
 #: src/components/tutorial/TutorialOverlay.tsx
+#: src/components/ui/Coachmark.tsx
 msgid "Guided tour"
 msgstr "Visite guidée"
 
@@ -12616,6 +12708,10 @@ msgstr "Votre demande de vérification est en cours d'examen."
 #: src/i18n/harvested.ts
 msgid "Open the event from Events or the event calendar."
 msgstr "Ouvrez l'événement depuis Événements ou le calendrier des événements."
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Owners and admins can manage this team. Recruiters are ordinary members."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Manage a project team"
@@ -12667,6 +12763,7 @@ msgstr "Page de l'événement"
 msgid "Awards"
 msgstr ""
 
+#: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Your organisation"
 msgstr "Votre organisation"
@@ -12737,6 +12834,10 @@ msgstr "Photo de profil"
 msgid "Prototype"
 msgstr "Prototype"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "When this is off, everyone below can still browse KTIP but cannot apply for grants, ask to join projects or register for events. Owners and admins are not affected. You can still open one of your own projects, grants or events to the team when you publish it."
+msgstr ""
+
 #: src/components/ui/TagInput.tsx
 msgid "Type and press Enter..."
 msgstr "Saisissez puis appuyez sur Entrée..."
@@ -12776,6 +12877,7 @@ msgstr "Fin des inscriptions"
 #: src/pages/events/EventVenueRoomPage.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 #: src/pages/profile/PublicProfilePage.tsx
+#: src/pages/sme/OrgMembersPage.tsx
 msgid "Member"
 msgstr "Membre"
 
@@ -13280,6 +13382,10 @@ msgstr "Ne plus garder ce panneau agrandi"
 msgid "Loading documents…"
 msgstr "Chargement des documents…"
 
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Open to our team"
+msgstr ""
+
 #. placeholder {0}: item.client_name
 #: src/pages/sme/OrgProfileEditPage.tsx
 #: src/pages/sme/OrgProfilePage.tsx
@@ -13389,6 +13495,7 @@ msgstr "Ouvrir le dossier"
 #: src/pages/cv/PublicCvPage.tsx
 #: src/pages/settings/VerificationTab.tsx
 #: src/pages/sme/ChamberOnboardingPage.tsx
+#: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Loading…"
 msgstr "Chargement…"
@@ -13574,6 +13681,11 @@ msgstr "Veuillez d'abord confirmer votre adresse e-mail. Vérifiez votre boîte 
 msgid "AI-guided navigation"
 msgstr "Navigation guidée par IA"
 
+#. placeholder {0}: verdict.employerName
+#: src/components/shared/EngagementNotice.tsx
+msgid "{0} has closed this one to its own team. Everyone else can still take part."
+msgstr ""
+
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Separate from the language the site itself is in. Change this if you would rather read other people's writing in a different language than the one you navigate in."
 msgstr ""
@@ -13707,6 +13819,10 @@ msgstr "Livrable"
 #: src/i18n/harvested.ts
 msgid "How do I get my business verified?"
 msgstr "Comment faire vérifier mon entreprise ?"
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Publishing organisation"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Filed through the report form, with the category, description, and any evidence link the reporter added.\n"
@@ -14016,6 +14132,10 @@ msgstr "Ancien identifiant administrateur. Correspond à Super administrateur."
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Something you'd like changed or added"
 msgstr "Quelque chose que vous aimeriez voir modifié ou ajouté"
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Who belongs to your organisation, and what they may take part in."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The other tools"
@@ -14343,6 +14463,10 @@ msgstr "Mes documents"
 #: src/lib/personalization.ts
 msgid "Top Picks"
 msgstr "Meilleures sélections"
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Our people can take part even if the organisation setting is off."
+msgstr ""
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Back to achievements"
@@ -14672,6 +14796,10 @@ msgstr "Échec du téléversement de l'avatar"
 msgid "Participants submit their work — with their own supporting files — from the event page, up until the deadline above."
 msgstr "Les participants soumettent leur travail — avec leurs propres fichiers justificatifs — depuis la page de l'événement, jusqu'à la date limite indiquée ci-dessus."
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Search KTIP members by name. They join as an ordinary member; change the role afterwards."
+msgstr ""
+
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Could not record your decision"
 msgstr "Impossible d'enregistrer votre décision"
@@ -14783,6 +14911,10 @@ msgstr "Le plan des lieux : les salles, qui est en ligne actuellement, et l'audi
 #: src/components/ui/ToolStatusBar.tsx
 msgid "Unsaved changes"
 msgstr "Modifications non enregistrées"
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Whatever the Team page says applies here too."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Resources is the knowledge base — guides, articles, case studies and templates written for Caribbean innovators.\n"
@@ -15852,6 +15984,7 @@ msgstr "Donner un retour de test (UAT)"
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/dashboard-tabs.ts
+#: src/pages/sme/OrgMembersPage.tsx
 msgid "Admin"
 msgstr "Administration"
 
@@ -17192,6 +17325,10 @@ msgstr "Laissez les deux champs vides si les personnes peuvent entrer d'elles-m�
 msgid "Location"
 msgstr "Emplacement"
 
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Appoint another owner first"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I delete a project?"
 msgstr "Comment supprimer un projet ?"
@@ -17477,6 +17614,10 @@ msgid "The amount, the funder, the deadline and the grant type, all in one block
 "If the deadline has passed the page stays up and says so — closed grants are worth reading, because most funders run the same call again."
 msgstr "Le montant, le bailleur de fonds, la date limite et le type de subvention, réunis en un seul bloc.\n"
 ""
+
+#: src/pages/sme/OrgMembersPage.tsx
+msgid "Nobody has been added yet."
+msgstr ""
 
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "A whole building in one click. Every room stays editable afterwards, and nothing is saved until you press Save."
@@ -17900,6 +18041,11 @@ msgstr "Chambres de commerce"
 #: src/pages/forums/BoardPage.tsx
 msgid "{0} — Forums"
 msgstr "{0} — Forums"
+
+#. placeholder {0}: verdict.employerName
+#: src/components/shared/EngagementNotice.tsx
+msgid "{0} has turned this off for its team. Ask an owner or admin of your organisation to turn it back on."
+msgstr ""
 
 #: src/components/venue/room/SponsorLinksPanel.tsx
 msgid "{sponsorName} links"
@@ -18367,6 +18513,10 @@ msgstr "Non autorisé"
 msgid "Your verified status has been withdrawn and this profile is no longer public."
 msgstr "Votre statut vérifié a été retiré et ce profil n'est plus public."
 
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Follow our organisation setting"
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "Filter by event type"
 msgstr "Filtrer par type d'événement"
@@ -18498,6 +18648,8 @@ msgid "Grant Deadlines"
 msgstr "Dates limites des subventions"
 
 #: src/components/documents/ExtractionReviewPanel.tsx
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
 msgid "project"
 msgstr "projet"
 
@@ -19246,6 +19398,10 @@ msgstr "Zone de danger"
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Verified business"
 msgstr "Entreprise vérifiée"
+
+#: src/components/shared/OrgEngagementFields.tsx
+msgid "Can our own team take part in this {itemNoun}?"
+msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Attached screenshot"

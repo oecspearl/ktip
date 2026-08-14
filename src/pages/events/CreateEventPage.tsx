@@ -10,6 +10,8 @@ import { useCreateEvent } from '../../hooks/useEvents'
 import { readDraft, useFormDraft } from '../../hooks/useFormDraft'
 import { useUploadDocument } from '../../hooks/useEntityDocuments'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
+import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
 import { CalendarAccentPicker } from '../../components/calendar/CalendarAccentPicker'
 import {
@@ -79,6 +81,8 @@ type EventDraft = {
   teamSizeMax: number | undefined
   details: DetailEntry[]
   presetIds: string[]
+  employerId: string | null
+  allowMemberEngagement: boolean | null
 }
 
 
@@ -127,6 +131,10 @@ export default function CreateEventPage() {
   // Which detail rows this page put there, so switching type can take back the
   // ones the user never filled in without touching anything they wrote.
   const [presetIds, setPresetIds] = useState<string[]>(draftSeed.presetIds ?? [])
+  const [employerId, setEmployerId] = useState<string | null>(draftSeed.employerId ?? null)
+  const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(
+    draftSeed.allowMemberEngagement ?? null
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -154,12 +162,16 @@ export default function CreateEventPage() {
     teamSizeMax,
     details,
     presetIds,
+    employerId,
+    allowMemberEngagement,
   })
 
   // Controls the draft/published selector. Capability, not slug: the literal
   // 'oecs' test meant an admin created after 063 could not choose a status and
   // silently published everything.
   const isAdmin = auth.can('org:manage')
+
+  const managedEmployers = useManagedEmployers()
 
   // Everything type-specific below reads off this. No component compares
   // eventType to a string — that is what put the old branches in three places.
@@ -371,6 +383,8 @@ export default function CreateEventPage() {
         team_size_min: blueprint.teamSize ? (teamSizeMin ?? null) : null,
         team_size_max: blueprint.teamSize ? (teamSizeMax ?? null) : null,
         details: cleanDetails(details),
+        employer_id: employerId,
+        allow_member_engagement: employerId ? allowMemberEngagement : null,
         ...(isAdmin ? { status: eventStatus } : {}),
       })
 
@@ -597,6 +611,15 @@ export default function CreateEventPage() {
               </p>
               <DetailsEditor value={details} onChange={setDetails} />
             </div>
+
+            <OrgEngagementFields
+              options={managedEmployers}
+              employerId={employerId}
+              onEmployerChange={setEmployerId}
+              override={allowMemberEngagement}
+              onOverrideChange={setAllowMemberEngagement}
+              itemNoun={t`event`}
+            />
 
             {/* Event Status (Admin only) */}
             {isAdmin && (

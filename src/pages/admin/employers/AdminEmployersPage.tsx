@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { Building2, Plus, Pencil, Trash2, ShieldCheck, ShieldX, Globe, GlobeLock, History } from 'lucide-react'
+import { Building2, Plus, Pencil, Trash2, ShieldCheck, ShieldX, Globe, GlobeLock, History, UserCheck, UserX } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Textarea } from '../../../components/ui/Textarea'
@@ -87,6 +87,7 @@ export default function AdminEmployersPage() {
     updateEmployer,
     setVerification,
     setSharing,
+    setMemberEngagement,
     deleteEmployer,
     loading: mutating,
   } = useEmployerMutations()
@@ -220,6 +221,22 @@ export default function AdminEmployersPage() {
     }
   }
 
+  // Migration 111. Normally the organisation's own owners set this from
+  // /dashboard/team; OECS can see and override it from here.
+  const toggleMemberEngagement = async (employer: Employer) => {
+    try {
+      await setMemberEngagement(employer.id, !employer.allow_member_engagement)
+      toast.success(
+        employer.allow_member_engagement
+          ? 'Members can no longer apply, join or register'
+          : 'Members can apply, join and register again'
+      )
+      refetch()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update member engagement')
+    }
+  }
+
   const handleDelete = async () => {
     if (!confirmDelete) return
     try {
@@ -316,6 +333,11 @@ export default function AdminEmployersPage() {
                           In partner feed
                         </span>
                       )}
+                      {!employer.allow_member_engagement && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-ktip-sun-50 text-ktip-sun-800">
+                          Team engagement off
+                        </span>
+                      )}
                       {!employer.contact_email_verified_at && (
                         <span className="text-[11px] text-ktip-sand-400">contact email unconfirmed</span>
                       )}
@@ -341,6 +363,22 @@ export default function AdminEmployersPage() {
                     }
                   >
                     {employer.share_externally ? <Globe size={16} /> : <GlobeLock size={16} />}
+                  </button>
+                  <button
+                    onClick={() => toggleMemberEngagement(employer)}
+                    disabled={mutating}
+                    className={`p-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                      employer.allow_member_engagement
+                        ? 'text-ktip-tropical-700 hover:bg-ktip-tropical-50'
+                        : 'text-ktip-sun-700 hover:bg-ktip-sun-50'
+                    }`}
+                    title={
+                      employer.allow_member_engagement
+                        ? 'Stop this organisation’s team applying, joining and registering'
+                        : 'Let this organisation’s team apply, join and register again'
+                    }
+                  >
+                    {employer.allow_member_engagement ? <UserCheck size={16} /> : <UserX size={16} />}
                   </button>
                   <button
                     onClick={() => openReview(employer)}

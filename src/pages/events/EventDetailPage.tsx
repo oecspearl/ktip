@@ -14,6 +14,8 @@ import { useEventSchedule } from '../../hooks/useEventSchedule'
 import { useEventSpeakers } from '../../hooks/useEventSpeakers'
 import { useEventCriteria } from '../../hooks/useEventCriteria'
 import { useEntityDocuments } from '../../hooks/useEntityDocuments'
+import { useEngagementGate } from '../../hooks/useEngagement'
+import { EngagementNotice } from '../../components/shared/EngagementNotice'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -223,10 +225,15 @@ export default function EventDetailPage() {
   // closes the door on someone registering to compete. A viewer can still ask.
   const isFull = event?.capacity ? rsvpCount >= event.capacity : false
 
+  // Migration 111 — the registrant's own organisation may have switched
+  // engagement off, or this event may be closed to the organiser's own staff.
+  const gate = useEngagementGate(event)
+
   const canRSVP = (() => {
     if (!event) return false
     if (isPastEvent) return false
     if (isOrganizer) return false
+    if (!gate.allowed) return false
     if (attendanceType === 'viewer') return true
     return !isFull
   })()
@@ -721,6 +728,12 @@ export default function EventDetailPage() {
                           <p className="text-sm text-red-600">
                             <Trans>The organizer did not approve this registration.</Trans>
                           </p>
+                        </div>
+                      )}
+
+                      {!gate.allowed && !myRsvp && (
+                        <div className="mb-4">
+                          <EngagementNotice verdict={gate} />
                         </div>
                       )}
 

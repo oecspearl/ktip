@@ -172,6 +172,10 @@ export function useCreateEvent() {
       registration_closes_at?: string | null
       team_size_min?: number | null
       team_size_max?: number | null
+      /** Migration 111 — the organisation publishing this, or null. */
+      employer_id?: string | null
+      /** Migration 111 — null inherits that organisation's master switch. */
+      allow_member_engagement?: boolean | null
     }) => {
       const { data, error } = await supabase
         .from('events')

@@ -4,6 +4,8 @@ import { Button } from '../../../components/ui/Button'
 import { useCreateGrant, useUpdateGrant } from '../../../hooks/useGrants'
 import { useToast } from '../../../contexts/ToastContext'
 import { DetailsEditor, cleanDetails } from '../../../components/shared/DetailsEditor'
+import { OrgEngagementFields } from '../../../components/shared/OrgEngagementFields'
+import { useAdminEmployers } from '../../../hooks/useEmployers'
 import { TagInput } from '../../../components/ui/TagInput'
 import { CONTENT_TAG_SUGGESTIONS } from '../../../lib/constants'
 import { sanitizeTag } from '../../../lib/utils'
@@ -38,6 +40,16 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [details, setDetails] = useState<DetailEntry[]>([])
+  const [employerId, setEmployerId] = useState<string | null>(null)
+  const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
+
+  // OECS posts on behalf of anyone, so the picker is every organisation rather
+  // than the ones the admin belongs to. can_manage_employer admits 'oecs'.
+  const { employers } = useAdminEmployers()
+  const employerOptions = (employers || []).map((e) => ({
+    id: e.id,
+    label: e.trading_name || e.legal_name,
+  }))
 
   const isEditing = grant !== null
 
@@ -55,6 +67,8 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     setIsClimateAction(false)
     setTags([])
     setDetails([])
+    setEmployerId(null)
+    setAllowMemberEngagement(null)
   }
 
   useEffect(() => {
@@ -72,6 +86,8 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       setIsClimateAction(grant.is_climate_action ?? false)
       setTags(grant.tags || [])
       setDetails(grant.details || [])
+      setEmployerId(grant.employer_id ?? null)
+      setAllowMemberEngagement(grant.allow_member_engagement ?? null)
     } else {
       resetForm()
     }
@@ -89,6 +105,9 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     const grantData: Record<string, any> = {
       title: title.trim(),
       is_climate_action: isClimateAction,
+      employer_id: employerId,
+      // A CHECK constraint refuses an override that names no organisation.
+      allow_member_engagement: employerId ? allowMemberEngagement : null,
     }
 
     grantData.summary = summary.trim() || null
@@ -313,6 +332,15 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
             </span>
           </label>
         </div>
+
+        <OrgEngagementFields
+          options={employerOptions}
+          employerId={employerId}
+          onEmployerChange={setEmployerId}
+          override={allowMemberEngagement}
+          onOverrideChange={setAllowMemberEngagement}
+          itemNoun="grant"
+        />
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
