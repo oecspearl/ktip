@@ -1,8 +1,9 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
-import { Textarea } from '../../components/ui/Textarea'
+import { ModeratedInput, ModeratedTextarea } from '../../components/moderation/ModeratedField'
+import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { useForumBoard, useCreateForumPost } from '../../hooks/useForums'
 import { useAuth } from '../../contexts/AuthContext'
 import { forumPostSchema } from '../../lib/validation'
@@ -31,6 +32,17 @@ export default function CreatePostPage() {
   const [gateOpen, setGateOpen] = useState(false)
   const resumeAfterGate = useRef(false)
 
+  const moderation = useContentModeration(
+    [
+      { name: 'title', value: title, label: t`Title` },
+      { name: 'content', value: content, label: t`Content`, ai: true },
+    ],
+    {
+      surface: 'forum_post',
+      onChange: (field, next) => (field === 'title' ? setTitle(next) : setContent(next)),
+    }
+  )
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setErrors({})
@@ -46,6 +58,14 @@ export default function CreatePostPage() {
         if (field) fieldErrors[field] = issue.message
       }
       setErrors(fieldErrors)
+      return
+    }
+
+    // After zod, before the agreement gate: there is no point asking someone to
+    // accept the publishing terms for a post that cannot be published.
+    const moderationResult = await moderation.checkBeforeSubmit()
+    if (!moderationResult.ok) {
+      setErrors((prev) => ({ ...prev, ...moderationResult.errors }))
       return
     }
 
@@ -119,22 +139,24 @@ export default function CreatePostPage() {
       <div className="bg-ktip-sand-50 py-12">
         <div className="max-w-page-tight mx-auto px-4">
           <form data-tutorial="post-form" onSubmit={handleSubmit} className="space-y-6">
-            <Input
+            <ModeratedInput
               label={t`Title`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t`What's on your mind?`}
               error={errors.title}
+              moderation={moderation.fields.title}
               fullWidth
             />
 
-            <Textarea
+            <ModeratedTextarea
               label={t`Content`}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={t`Share your thoughts, questions, or ideas...`}
               rows={10}
               error={errors.content}
+              moderation={moderation.fields.content}
               fullWidth
             />
 
@@ -146,7 +168,12 @@ export default function CreatePostPage() {
               <AgreementNotice bundle="publishing" />
 
               <div className="flex items-center gap-4">
-                <Button type="submit" loading={loading} fullWidth>
+                <Button
+                  type="submit"
+                  loading={loading || moderation.checking}
+                  disabled={moderation.blocked}
+                  fullWidth
+                >
                   <Trans>Publish Post</Trans>
                 </Button>
                 <button
@@ -161,6 +188,8 @@ export default function CreatePostPage() {
           </form>
         </div>
       </div>
+
+      <ContentWarningModal state={moderation.warning} onClose={moderation.dismissWarning} />
 
       <AgreementGateModal
         gate={gate}

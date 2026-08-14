@@ -9,6 +9,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean
 }
 
+/**
+ * The single-line counterpart to TEXTAREA_SURFACE_CLASSES — see that comment.
+ * white-space is `pre` rather than `pre-wrap`: an input never wraps, it scrolls
+ * horizontally, and a wrapping mirror would misplace every mark past the fold.
+ */
+export const INPUT_SURFACE_CLASSES =
+  'w-full border rounded-control px-4 py-3 min-h-control-md text-body whitespace-pre'
+
 export function Input({
   className,
   label,
@@ -42,7 +50,8 @@ export function Input({
           className={cn(
             // text-body is stated rather than inherited so the field tracks the
             // reading ramp; an unsized input silently kept the browser default.
-            'w-full border rounded-control px-4 py-3 min-h-control-md text-body bg-ktip-sand-50/50 transition-all',
+            INPUT_SURFACE_CLASSES,
+            'bg-ktip-sand-50/50 transition-all',
             'focus:outline-none focus:ring-2 focus:bg-ktip-cream',
             icon && 'pl-10',
             error

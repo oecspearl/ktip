@@ -2485,6 +2485,10 @@ msgstr "Diseño {label} — {description}"
 msgid "No posts yet"
 msgstr "Aún no hay publicaciones"
 
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Part of what you've written matches our community guidelines filter and is struck through in the field. You can still post this, but please take a look first."
+msgstr ""
+
 #: src/lib/reaction-emoji.ts
 msgid "Fire"
 msgstr "Fuego"
@@ -2949,6 +2953,7 @@ msgstr ""
 msgid "Once deleted, your account cannot be recovered. All your projects, events, messages, and profile data will be permanently removed."
 msgstr "Una vez eliminada, su cuenta no se puede recuperar. Todos sus proyectos, eventos, mensajes y datos de perfil se eliminarán de forma permanente."
 
+#: src/components/moderation/ContentWarningModal.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Remove it"
 msgstr ""
@@ -5487,6 +5492,10 @@ msgstr ""
 msgid "Untitled Snippet"
 msgstr "Fragmento sin título"
 
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Submission stopped."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Report any breach affecting KTIP data to %privacyEmail% within 72 hours of becoming aware of it."
 msgstr ""
@@ -5617,6 +5626,10 @@ msgstr "Mi país"
 #: src/lib/achievement-style.ts
 msgid "Silver"
 msgstr "Plata"
+
+#: src/components/moderation/ModeratedField.tsx
+msgid "Flagged text"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "That the information in your notice is accurate."
@@ -8350,6 +8363,10 @@ msgstr ""
 #: src/pages/JoinInvitePage.tsx
 msgid "Join invitation"
 msgstr "Invitación para unirse"
+
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Check your wording"
+msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Backed by regional and global institutions"
@@ -11496,6 +11513,10 @@ msgstr ""
 msgid "Verification of student, faculty and organisational status"
 msgstr ""
 
+#: src/hooks/useContentModeration.ts
+msgid "This can't be posted until the highlighted text is removed."
+msgstr ""
+
 #: src/components/achievements/TrophyCard.tsx
 msgid "Not yet earned"
 msgstr ""
@@ -11855,6 +11876,10 @@ msgstr "Herramienta de anotación"
 msgid "Academic Competencies"
 msgstr "Competencias académicas"
 
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "The highlighted text breaks the community guidelines, so this can't be submitted until it's removed."
+msgstr ""
+
 #: src/components/messages/AssistantChatWindow.tsx
 #: src/components/messages/ChatWindow.tsx
 #: src/components/venue/RoomChatPanel.tsx
@@ -12105,6 +12130,10 @@ msgstr "Guarde este {label} antes de invitar a alguien."
 #: src/i18n/harvested.ts
 msgid "Hidden from everyone else"
 msgstr "Oculto para todos los demás"
+
+#: src/components/moderation/FlaggedTermList.tsx
+msgid "Flagged:"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Start or join a video call"
@@ -12594,6 +12623,10 @@ msgstr "No tiene permiso para patrocinar esta solicitud."
 #: src/i18n/harvested.ts
 msgid "Guide"
 msgstr "Guía"
+
+#: src/components/moderation/FlaggedTermList.tsx
+msgid "Remove \"{text}\""
+msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Category of Infringement"
@@ -18784,6 +18817,7 @@ msgid "Say something to everyone in this room…"
 msgstr "Diga algo a todos en esta sala…"
 
 #: src/components/feedback/FeedbackModal.tsx
+#: src/components/moderation/ModeratedField.tsx
 #: src/components/venue/RoomChatPanel.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
@@ -19244,6 +19278,10 @@ msgstr "Error al guardar el borrador"
 #: src/pages/events/EventDetailPage.tsx
 msgid "Loading event..."
 msgstr "Cargando evento…"
+
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "This can't be posted"
+msgstr ""
 
 #. placeholder {0}: checkedKeys.length
 #: src/components/documents/ExtractionReviewPanel.tsx
@@ -20492,6 +20530,11 @@ msgstr "El catálogo de insignias"
 msgid "My Connections"
 msgstr "Mis conexiones"
 
+#. placeholder {0}: state.fieldLabels.join(', ')
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Affected: {0}"
+msgstr ""
+
 #: src/components/notes/StickyNote.tsx
 msgid "Note options"
 msgstr "Opciones de la nota"
@@ -20946,6 +20989,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Never public"
+msgstr ""
+
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Post anyway"
 msgstr ""
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -23034,6 +23081,7 @@ msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
 #: src/components/documents/DocumentContentModal.tsx
+#: src/components/moderation/ContentWarningModal.tsx
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "Close"
 msgstr "Cerrar"

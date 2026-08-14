@@ -2449,6 +2449,10 @@ msgstr ""
 msgid "No posts yet"
 msgstr ""
 
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Part of what you've written matches our community guidelines filter and is struck through in the field. You can still post this, but please take a look first."
+msgstr ""
+
 #: src/lib/reaction-emoji.ts
 msgid "Fire"
 msgstr ""
@@ -2908,6 +2912,7 @@ msgstr ""
 msgid "Once deleted, your account cannot be recovered. All your projects, events, messages, and profile data will be permanently removed."
 msgstr ""
 
+#: src/components/moderation/ContentWarningModal.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Remove it"
 msgstr ""
@@ -5408,6 +5413,10 @@ msgstr ""
 msgid "Untitled Snippet"
 msgstr ""
 
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Submission stopped."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Report any breach affecting KTIP data to %privacyEmail% within 72 hours of becoming aware of it."
 msgstr ""
@@ -5537,6 +5546,10 @@ msgstr ""
 
 #: src/lib/achievement-style.ts
 msgid "Silver"
+msgstr ""
+
+#: src/components/moderation/ModeratedField.tsx
+msgid "Flagged text"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -8237,6 +8250,10 @@ msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
 msgid "Join invitation"
+msgstr ""
+
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Check your wording"
 msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
@@ -11347,6 +11364,10 @@ msgstr ""
 msgid "Verification of student, faculty and organisational status"
 msgstr ""
 
+#: src/hooks/useContentModeration.ts
+msgid "This can't be posted until the highlighted text is removed."
+msgstr ""
+
 #: src/components/achievements/TrophyCard.tsx
 msgid "Not yet earned"
 msgstr ""
@@ -11703,6 +11724,10 @@ msgstr ""
 msgid "Academic Competencies"
 msgstr ""
 
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "The highlighted text breaks the community guidelines, so this can't be submitted until it's removed."
+msgstr ""
+
 #: src/components/messages/AssistantChatWindow.tsx
 #: src/components/messages/ChatWindow.tsx
 #: src/components/venue/RoomChatPanel.tsx
@@ -11949,6 +11974,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Hidden from everyone else"
+msgstr ""
+
+#: src/components/moderation/FlaggedTermList.tsx
+msgid "Flagged:"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12429,6 +12458,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Guide"
+msgstr ""
+
+#: src/components/moderation/FlaggedTermList.tsx
+msgid "Remove \"{text}\""
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -18567,6 +18600,7 @@ msgid "Say something to everyone in this room…"
 msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
+#: src/components/moderation/ModeratedField.tsx
 #: src/components/venue/RoomChatPanel.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
@@ -19022,6 +19056,10 @@ msgstr ""
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Loading event..."
+msgstr ""
+
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "This can't be posted"
 msgstr ""
 
 #. placeholder {0}: checkedKeys.length
@@ -20259,6 +20297,11 @@ msgstr ""
 msgid "My Connections"
 msgstr ""
 
+#. placeholder {0}: state.fieldLabels.join(', ')
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Affected: {0}"
+msgstr ""
+
 #: src/components/notes/StickyNote.tsx
 msgid "Note options"
 msgstr ""
@@ -20708,6 +20751,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Never public"
+msgstr ""
+
+#: src/components/moderation/ContentWarningModal.tsx
+msgid "Post anyway"
 msgstr ""
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -22774,6 +22821,7 @@ msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
 #: src/components/documents/DocumentContentModal.tsx
+#: src/components/moderation/ContentWarningModal.tsx
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "Close"
 msgstr ""
