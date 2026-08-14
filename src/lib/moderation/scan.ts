@@ -419,3 +419,18 @@ export function mergeRanges(matches: ScanMatch[]): MergedRange[] {
 export function __resetCaches(): void {
   compileCache.clear()
 }
+
+/**
+ * Compile a regex exactly as the scanner would, for the admin-side linter.
+ * Returns null for anything the browser cannot run, so the terms tab can say
+ * so rather than saving a rule that silently never fires client-side.
+ */
+export function compileForLint(pattern: string): RegExp | null {
+  return compileRule({
+    id: '__lint__',
+    pattern,
+    kind: 'regex',
+    severity: 'low',
+    category: null,
+  })
+}

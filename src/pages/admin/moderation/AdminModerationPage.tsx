@@ -32,6 +32,8 @@ import {
   useModerationTerms,
 } from '../../../hooks/useModeration'
 import { REPORT_CATEGORIES } from '../../../components/moderation/ReportModal'
+import { lintPattern } from '../../../lib/moderation/lint'
+import { compileForLint } from '../../../lib/moderation/scan'
 import { TakedownQueue } from './TakedownQueue'
 import { formatDate } from '../../../lib/utils'
 import { cn } from '../../../lib/utils'
@@ -94,14 +96,26 @@ export default function AdminModerationPage() {
   const [aiLoading, setAiLoading] = useState(false)
 
   const [termModalOpen, setTermModalOpen] = useState(false)
+
+  // Rules the composer cannot run: Postgres accepts POSIX classes and \m/\M,
+  // JS does not, and a rule that quietly means something else in the browser
+  // would be worse than one it admits it cannot check.
+  const browserBlindTerms = (terms ?? []).filter(
+    (term) => term.is_active && term.kind === 'regex' && compileForLint(term.pattern) === null
+  ).length
   const [newTerm, setNewTerm] = useState({
     pattern: '',
     kind: 'term' as 'term' | 'regex',
     severity: 'medium' as ModerationSeverity,
     category: '' as string,
     note: '',
+    clientVisible: true,
   })
   const [confirmDeleteTerm, setConfirmDeleteTerm] = useState<ModerationTerm | null>(null)
+
+  // Live feedback while the pattern is typed, so a moderator is not told the
+  // rule is unusable only after pressing Add.
+  const termLint = newTerm.pattern.trim() ? lintPattern(newTerm.pattern, newTerm.kind) : null
 
   const canAction = auth.can('moderation:action')
 
@@ -156,18 +170,36 @@ export default function AdminModerationPage() {
 
   const handleCreateTerm = async () => {
     if (!newTerm.pattern.trim()) return
+    // Validated before the save, not on every keystroke of every member:
+    // a pathological pattern saved once runs on the UI thread forever.
+    const lint = lintPattern(newTerm.pattern, newTerm.kind)
+    if (!lint.ok) {
+      toast.error(lint.error || 'That pattern cannot be saved.')
+      return
+    }
+    if (lint.warning) toast.warning(lint.warning)
     try {
       await createTerm({
         pattern: newTerm.pattern.trim(),
         kind: newTerm.kind,
         severity: newTerm.severity,
         category: (newTerm.category || null) as any,
+        // A grooming pattern's value depends on the subject not knowing it, so
+        // that category defaults to server-only however the toggle was left.
+        client_visible: newTerm.category === 'grooming_risk' ? false : newTerm.clientVisible,
         note: newTerm.note || null,
         created_by: auth.user?.id ?? null,
       })
       toast.success('Filter term added')
       setTermModalOpen(false)
-      setNewTerm({ pattern: '', kind: 'term', severity: 'medium', category: '', note: '' })
+      setNewTerm({
+        pattern: '',
+        kind: 'term',
+        severity: 'medium',
+        category: '',
+        note: '',
+        clientVisible: true,
+      })
       refetchTerms()
     } catch (err: any) {
       toast.error(err.message || 'Failed to add term')
@@ -324,6 +356,21 @@ export default function AdminModerationPage() {
               )}
             </div>
 
+            {/* An honest picture of what the composer can and cannot do. A rule
+                the browser cannot compile is still enforced at write time, but
+                nothing is highlighted while the member types — so it catches
+                the content after the fact instead of preventing it. */}
+            {browserBlindTerms > 0 && (
+              <div className="px-4 py-3 border-b border-ktip-sand-100 bg-ktip-sun-50 flex items-start gap-2.5">
+                <ShieldAlert size={16} className="text-ktip-sun-700 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-ktip-sun-800">
+                  {browserBlindTerms} {browserBlindTerms === 1 ? 'rule uses' : 'rules use'} syntax the
+                  browser cannot run. They still quarantine on posting, but they are not highlighted
+                  as the member types.
+                </p>
+              </div>
+            )}
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -332,6 +379,7 @@ export default function AdminModerationPage() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Kind</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Severity</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Active</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Highlighted</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-ktip-sand-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -358,6 +406,19 @@ export default function AdminModerationPage() {
                           }
                         />
                       </td>
+                      <td className="px-4 py-3">
+                        {/* Off keeps a rule as a tripwire: it still quarantines
+                            on posting, but a member cannot discover it by
+                            typing. Grooming patterns should stay off. */}
+                        <Switch
+                          checked={term.client_visible}
+                          label={`Highlight ${term.pattern} while typing`}
+                          disabled={!canAction}
+                          onChange={(next) =>
+                            updateTerm(term.id, { client_visible: next }).then(() => refetchTerms())
+                          }
+                        />
+                      </td>
                       <td className="px-4 py-3 text-right">
                         <Button
                           variant="ghost"
@@ -373,7 +434,7 @@ export default function AdminModerationPage() {
                   ))}
                   {(terms?.length ?? 0) === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-ktip-sand-500">
+                      <td colSpan={6} className="px-4 py-8 text-center text-ktip-sand-500">
                         No filter terms configured.
                       </td>
                     </tr>
@@ -568,7 +629,10 @@ export default function AdminModerationPage() {
             label="Pattern"
             value={newTerm.pattern}
             onChange={(e) => setNewTerm({ ...newTerm, pattern: e.target.value })}
-            helperText="A word for 'term', or a POSIX regular expression for 'regex'."
+            error={termLint && !termLint.ok ? termLint.error : undefined}
+            helperText={
+              termLint?.warning ?? "A word for 'term', or a POSIX regular expression for 'regex'."
+            }
             fullWidth
           />
 
@@ -619,6 +683,18 @@ export default function AdminModerationPage() {
             value={newTerm.note}
             onChange={(e) => setNewTerm({ ...newTerm, note: e.target.value })}
             fullWidth
+          />
+
+          <Toggle
+            checked={newTerm.category === 'grooming_risk' ? false : newTerm.clientVisible}
+            disabled={newTerm.category === 'grooming_risk'}
+            label="Highlight this while the member types"
+            description={
+              newTerm.category === 'grooming_risk'
+                ? 'Grooming patterns are always server-only. A tripwire someone can find by typing has stopped being a tripwire.'
+                : 'On, the word is struck through in the composer before it is posted. Off keeps the rule as a tripwire: it still quarantines, but it is invisible until then.'
+            }
+            onChange={(checked) => setNewTerm({ ...newTerm, clientVisible: checked })}
           />
 
           <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
