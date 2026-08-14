@@ -106,7 +106,7 @@ export function useAchievementCheck() {
  * Art changes when an admin uploads a new file, which is rare, so this is
  * cached hard — the alternative is refetching 52 rows on every gallery mount.
  */
-export function useTrophyAssets() {
+export function useTrophyAssets(enabled = true) {
   const query = useQuery({
     queryKey: keys.list('trophy_assets'),
     queryFn: async (): Promise<TrophyAsset[]> => {
@@ -118,6 +118,13 @@ export function useTrophyAssets() {
       if (error) throw error
       return (data as TrophyAsset[]) || []
     },
+    // Defaults to true because the public profile and CV pages render trophies
+    // for signed-out viewers and must keep fetching. AchievementProvider, which
+    // sits above the router and therefore runs on EVERY page, passes its own
+    // `enabled` — without it this was the only Supabase request an anonymous
+    // visitor to the landing page made, and it fetched 52 rows of admin artwork
+    // to render nothing.
+    enabled,
     staleTime: Infinity,
   })
 

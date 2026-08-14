@@ -16,6 +16,8 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAccessibilityPrefs } from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { FlipWatermark } from '../../components/ui/FlipWatermark'
+import { ResponsiveImage } from '../../components/ui/ResponsiveImage'
+import { useMobileLite } from '../../hooks/useMediaQuery'
 import { FALLBACK_IMAGE, HERO_WASH, grantImageFor, heroImageFor } from '../../lib/hero-images'
 import { eventHeroDetails, grantHeroDetails, projectHeroDetails } from '../../lib/hero-details'
 import { useProjects } from '../../hooks/useProjects'
@@ -368,6 +370,12 @@ const STAT_TILES: { key: keyof PlatformStats; label: MessageDescriptor }[] = [
  * at the commit, which is the whole thing this is here to avoid.
  */
 function HeroOverlays({ src }: { src: string }) {
+  // The frosted copy is a second full-viewport image under blur(8px), and this
+  // component is rendered TWICE during a carousel swap (base + ghost) — so on a
+  // phone the 6-second tick was scheduling up to two extra full-screen blur
+  // rasters. The washes below are plain gradients and stay: they are what
+  // carries the text contrast.
+  const lite = useMobileLite()
   return (
     <>
       {/* Frosted blur over the left side, fading out toward the right.
@@ -385,10 +393,18 @@ function HeroOverlays({ src }: { src: string }) {
           44%/80% across the whole band — and unchanged below md, where the
           panel was w-full. scale(1.08) overfills so blur() sampling past the
           edges cannot feather the band's own borders. */}
-      <img
+      {!lite && (
+      <ResponsiveImage
         src={src}
         alt=""
         aria-hidden="true"
+        sizes="100vw"
+        // Same reasoning as PageHero's frosted copy: this is the hero photo
+        // under blur(8px), so a 960px rung is indistinguishable from the 1920px
+        // one and costs a third as much. It matters more here than there —
+        // HeroOverlays is rendered twice during a carousel swap, so the full
+        // ladder meant up to two extra full-size fetches per 6-second tick.
+        maxWidth={960}
         // blur(8px), not the panel's old backdrop-blur-md 12px: a blur baked
         // into the photo copy reads stronger than the same radius sampling a
         // live backdrop, and 12px came out heavier than the original frost.
@@ -396,6 +412,7 @@ function HeroOverlays({ src }: { src: string }) {
         loading="eager"
         decoding="sync"
       />
+      )}
       <div className="absolute inset-y-0 left-0 w-full md:w-[80%] bg-black/5 [mask-image:linear-gradient(to_right,black_55%,transparent_100%)]" />
       {/* Neutral dark overlay for text readability */}
       <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/18 to-black/12" />
@@ -1069,10 +1086,13 @@ export default function DiscoverPage() {
         // (URL bar collapsed), so the bottom of the hero sits under the bar
         className="sticky top-0 h-[100svh] bg-hero-base overflow-hidden"
       >
-        {/* Full-bleed hero image — follows the selected item */}
-        <img
+        {/* Full-bleed hero image — follows the selected item.
+            This is the LCP element of the whole site, and until it carried a
+            srcSet a 390px phone downloaded the 1920px source for it. */}
+        <ResponsiveImage
           src={shownSrc}
           alt=""
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover animate-fade-in photo-dimmable"
           loading="eager" fetchPriority="high"
           /* sync: a src swap on a mounted <img> paints EMPTY until the new
@@ -1123,9 +1143,10 @@ export default function DiscoverPage() {
               else probe.decode().then(commit, commit)
             }}
           >
-            <img
+            <ResponsiveImage
               src={anim.src}
               alt=""
+              sizes="100vw"
               className="absolute inset-0 w-full h-full object-cover photo-dimmable"
             />
             {/* The hero's frost and washes settle onto the photo while it is
@@ -1450,9 +1471,18 @@ export default function DiscoverPage() {
                         }`}
                       >
                         {item.image ? (
-                          <img
+                          <ResponsiveImage
                             src={item.image}
                             alt=""
+                            // 100vw, even though a strip card is a fraction of
+                            // that. These are the same photos the hero shows,
+                            // and the note below depends on the hero having
+                            // already fetched them — describing the card's real
+                            // box would resolve to a smaller rung, a different
+                            // URL, and a second download of every image on the
+                            // page. Matching the hero keeps it to one fetch per
+                            // photo while still dropping the full-size original.
+                            sizes="100vw"
                             className="w-full h-full object-cover photo-dimmable"
                             // NOT lazy. There are at most MAX_ITEMS distinct
                             // images and the hero has already fetched them, but
@@ -1567,11 +1597,13 @@ export default function DiscoverPage() {
                 className={`group relative rounded-2xl p-6 flex flex-col justify-between gap-6 overflow-hidden shadow-medium hover:shadow-hard hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 ${f.span}`}
               >
                 {/* Photo + brand color wash (solid at top-left, photo shows through bottom-right) */}
-                <img
+                <ResponsiveImage
                   src={f.image}
                   alt=""
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient}`} />
 

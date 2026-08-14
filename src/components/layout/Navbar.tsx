@@ -248,21 +248,42 @@ export function Navbar() {
   const [scrolledPastHero, setScrolledPastHero] = useState(false)
   const lastScrollY = useRef(0)
 
+  /**
+   * rAF-coalesced, and only ever writes state when a flag actually flips.
+   *
+   * This handler used to run on every scroll event and call both setters
+   * unconditionally. `setScrolledPastHero(y > 120)` passes a fresh boolean each
+   * time — equal by value, so React bails out of the re-render, but only after
+   * the event has already been dispatched at touch-scroll frequency. The real
+   * cost was `setNavHidden`: it flips on any 4px change of direction, and
+   * momentum scrolling on a phone jitters direction constantly, so a flick
+   * re-rendered this 1,630-line component — which re-runs useGlobalSearch and
+   * useNotifications on every render — many times per second.
+   *
+   * Reading scrollY inside rAF also keeps the read on the frame boundary
+   * instead of mid-event, so it cannot force a synchronous layout.
+   */
   useEffect(() => {
-    const onScroll = () => {
+    let frame = 0
+    const sample = () => {
+      frame = 0
       const y = window.scrollY
-      if (y < 80) {
-        setNavHidden(false)
-      } else if (y > lastScrollY.current + 4) {
-        setNavHidden(true)
-      } else if (y < lastScrollY.current - 4) {
-        setNavHidden(false)
-      }
-      setScrolledPastHero(y > 120)
+      const previous = lastScrollY.current
       lastScrollY.current = y
+      if (y < 80) setNavHidden(false)
+      else if (y > previous + 4) setNavHidden(true)
+      else if (y < previous - 4) setNavHidden(false)
+      setScrolledPastHero(y > 120)
+    }
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(sample)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
   }, [])
 
   /**
@@ -357,8 +378,15 @@ export function Navbar() {
   const searchRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Site-wide search: pages, features and live content, optionally AI-ranked
-  const search = useGlobalSearch(searchQuery, aiMode)
+  // Site-wide search: pages, features and live content, optionally AI-ranked.
+  // The third argument gates the site map's dynamic import — see the note in
+  // useGlobalSearch. Both panels (desktop and mobile) share one module cache,
+  // so whichever opens first pays for it and the other is instant.
+  const search = useGlobalSearch(
+    searchQuery,
+    aiMode,
+    searchOpen || mobileSearchFocused || Boolean(searchQuery.trim())
+  )
   // The trailing "see all results" row sits one past the last result
   const optionCount = search.rows.length + 1
 

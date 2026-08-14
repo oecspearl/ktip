@@ -11,6 +11,9 @@ export function AnalyticsConsentBanner() {
   return (
     <section
       aria-label={t`Analytics preferences`}
+      // Picked up by the standalone safe-area rules in index.css so the
+      // buttons clear the home indicator when installed.
+      data-bottom-sheet
       // Below lg the banner is effectively full width, so at bottom-4 it sat
       // squarely on top of the floating dock and hid it completely on phones
       // and tablets. It clears the dock until there is room beside it — from

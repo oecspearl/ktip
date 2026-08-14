@@ -138,8 +138,20 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     queryKey: ['profile', user?.id],
     queryFn: () => fetchProfileQuery(user!.id, user),
     enabled: !!user?.id,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    // One retry, not three.
+    //
+    // ProtectedRoute holds a full-screen RouteSplash until this resolves — it
+    // has to, because the role check below it decides whether an account still
+    // needs onboarding. That makes this query's failure path the app's
+    // time-to-anything on every authenticated route. At `retry: 3` with the
+    // backoff below (1s, 2s, 4s, 8s) a phone on a bad connection sat on a
+    // blank splash for up to ~15 seconds before being told anything at all.
+    //
+    // One retry still covers what retries are actually for here — a single
+    // dropped request as the radio changes cell — while capping the worst case
+    // at about a second.
+    retry: 1,
+    retryDelay: 1000,
   })
 
   const profile = user ? profileData ?? null : null

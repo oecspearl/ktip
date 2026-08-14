@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { escapeIlike, truncate } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { useAuth } from '../contexts/AuthContext'
-import { ALL_ENTRIES, SITE_MAP, type SiteEntry } from '../lib/site-map'
+import type { SiteEntry } from '../lib/site-map'
 import { entityPath, forumPostPath } from '../lib/slug'
 import {
   applyAiRanking,
@@ -255,7 +255,34 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
 
 // --- hook -------------------------------------------------------------------
 
-export function useGlobalSearch(query: string, aiMode: boolean): UseGlobalSearchResult {
+/**
+ * The static site map, loaded the first time the reader engages with search.
+ *
+ * `src/lib/site-map.ts` is ~34 kB and re-exports the entire help corpus
+ * (`help-content` → `src/lib/help/*`, another ~83 kB). This hook is called
+ * unconditionally from Navbar, which MainLayout mounts on every route, so a
+ * static import put all of it in the entry bundle — ~117 kB carried by every
+ * visitor to pre-populate a panel most of them never open.
+ *
+ * Module-scope cache rather than per-hook state: Navbar renders
+ * NavbarSearchPanel twice (desktop and mobile), and the browser would dedupe
+ * the request anyway, but this also dedupes the parse and keeps both instances
+ * on the same object identity so the useMemos below do not both invalidate.
+ */
+type SiteMapModule = { ALL_ENTRIES: SiteEntry[]; SITE_MAP: SiteEntry[] }
+let siteMapCache: SiteMapModule | null = null
+const NO_ENTRIES: SiteEntry[] = []
+
+export function useGlobalSearch(
+  query: string,
+  aiMode: boolean,
+  /**
+   * True once the search UI is open or has a query. Gates the site-map import;
+   * while false the places section is simply empty, which is what it renders
+   * anyway with the panel closed.
+   */
+  active = false
+): UseGlobalSearchResult {
   const auth = useAuth()
   const signedIn = !!auth.user
   // The site map's 'oecs' access level means "admin console", not "holds the
@@ -268,10 +295,24 @@ export function useGlobalSearch(query: string, aiMode: boolean): UseGlobalSearch
   const debouncedQuery = useDebouncedValue(trimmed, CONTENT_DEBOUNCE_MS)
   const debouncedAiQuery = useDebouncedValue(trimmed, AI_DEBOUNCE_MS)
 
-  // 1. Places & actions (+ help articles) — local, instant
+  const [siteMap, setSiteMap] = useState<SiteMapModule | null>(siteMapCache)
+
+  useEffect(() => {
+    if (!active || siteMap) return
+    let cancelled = false
+    void import('../lib/site-map').then((m) => {
+      siteMapCache = { ALL_ENTRIES: m.ALL_ENTRIES, SITE_MAP: m.SITE_MAP }
+      if (!cancelled) setSiteMap(siteMapCache)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [active, siteMap])
+
+  // 1. Places & actions (+ help articles) — local, instant once the map is in
   const visibleEntries = useMemo(
-    () => filterByAccess(ALL_ENTRIES, { signedIn, isOecs }),
-    [signedIn, isOecs]
+    () => filterByAccess(siteMap?.ALL_ENTRIES ?? NO_ENTRIES, { signedIn, isOecs }),
+    [siteMap, signedIn, isOecs]
   )
 
   const placeRows = useMemo(() => {
@@ -372,12 +413,13 @@ export function useGlobalSearch(query: string, aiMode: boolean): UseGlobalSearch
 
   // Suggestions & recent searches
   const suggestions = useMemo(() => {
-    const byId = new Map(SITE_MAP.map((e) => [e.id, e]))
+    if (!siteMap) return []
+    const byId = new Map(siteMap.SITE_MAP.map((e) => [e.id, e]))
     return SUGGESTED_IDS.map((id) => byId.get(id))
       .filter((e): e is SiteEntry => !!e)
       .filter((e) => filterByAccess([e], { signedIn, isOecs }).length > 0)
       .map((e) => toRow(e))
-  }, [signedIn, isOecs])
+  }, [siteMap, signedIn, isOecs])
 
   const [recent, setRecent] = useState<string[]>(() => readRecent())
 

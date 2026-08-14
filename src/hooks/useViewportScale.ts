@@ -80,8 +80,31 @@ export function useViewportScale({
     // Run once on mount: SSR/hydration starts from the fallback above, and OS
     // display-scaling changes arrive as a resize with no other signal
     update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
+
+    /**
+     * On a touch device, ignore resizes that only changed the HEIGHT.
+     *
+     * Mobile browsers fire `resize` continuously while the URL bar collapses
+     * and expands during a scroll — `innerHeight` changes, `innerWidth` does
+     * not. When a caller passes `height` (DiscoverPage does), that feeds
+     * straight into the scale, so every one of those events re-rendered the
+     * 1,680-line hero and reflowed a subtree whose every length is an `em`
+     * against this number. It is a scroll-triggered full-page reflow that
+     * exists only on mobile, and only because the viewport is lying about its
+     * size in the first place.
+     *
+     * Width changes (rotation, split-screen, OS display scaling) still update
+     * normally, so nothing that is a real layout change is missed.
+     */
+    let lastWidth = window.innerWidth
+    const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false
+    const onResize = () => {
+      if (coarse && window.innerWidth === lastWidth) return
+      lastWidth = window.innerWidth
+      update()
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
   }, [width, height, min, hMin, max])
 
   return scale

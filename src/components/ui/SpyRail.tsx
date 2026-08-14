@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { cn } from '../../lib/utils'
 import { useSpySteps } from '../../hooks/useSpySteps'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useLingui } from '@lingui/react/macro'
 
 /**
@@ -49,10 +50,23 @@ export function SpyRail({
   accent?: string
 } = {}) {
   const { t } = useLingui()
+  /**
+   * The rail is `hidden sm:flex`, so below 640px it is not painted — but the
+   * effect below is not conditional on that, and it was the most expensive
+   * thing running during a phone scroll: once per frame, for every step, a
+   * `getElementById` plus a `layoutTop()` walk up the offsetParent chain plus
+   * an `offsetHeight` read. All of them force layout, all of them to light a
+   * dash nobody can see. `useSpySteps` adds a subtree MutationObserver over
+   * the whole <main> on top.
+   *
+   * Gated on the same 640px boundary as the class, so the two cannot drift.
+   */
+  const visible = useMediaQuery('(min-width: 640px)')
   const steps = useSpySteps()
   const [active, setActive] = useState('')
 
   useEffect(() => {
+    if (!visible) return
     // Active = the section whose centre is nearest the viewport centre. Driven
     // by scroll rather than IntersectionObserver so the right dash is lit on
     // first paint — an observer only fires once a section *crosses*, leaving
@@ -85,8 +99,9 @@ export function SpyRail({
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
-  }, [steps])
+  }, [steps, visible])
 
+  if (!visible) return null
   if (steps.length <= 1) return null
 
   // Hero bands opt out of showing the rail at all; the dashes still track, they

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { HERO_IMAGES } from '../../lib/hero-images'
+import { ResponsiveImage } from '../ui/ResponsiveImage'
 import { cn } from '../../lib/utils'
 import { Stepper } from '../ui/Stepper'
 
@@ -174,9 +175,11 @@ export function AuthSplitShell({
         >
           {/* Odd faces land at 180deg (mirrored) — undo it so content reads correctly */}
           <div className="absolute inset-0" style={{ transform: `scaleX(${mirrored ? -1 : 1})` }}>
-            <img
+            <ResponsiveImage
               src={hero}
               alt=""
+              // The panel is hidden below md and 45% of the viewport above it.
+              sizes="(min-width: 768px) 45vw, 100vw"
               loading="eager" fetchPriority="high"
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover"

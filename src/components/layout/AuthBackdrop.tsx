@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { FALLBACK_IMAGE } from '../../lib/hero-images'
+import { ResponsiveImage } from '../ui/ResponsiveImage'
 
 // Homepage-style backdrop for the bare auth pages (login/signup/reset):
 // hero photo + frosted blur + dark gradient overlays behind a centered card.
@@ -8,9 +9,10 @@ import { FALLBACK_IMAGE } from '../../lib/hero-images'
 export function AuthBackdrop({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
     <div className="relative bg-brand-navy min-h-screen flex items-center justify-center p-4 overflow-hidden">
-      <img
+      <ResponsiveImage
         src={FALLBACK_IMAGE}
         alt=""
+        sizes="100vw"
         className="absolute inset-0 w-full h-full object-cover"
         loading="eager" fetchPriority="high" decoding="async"
       />

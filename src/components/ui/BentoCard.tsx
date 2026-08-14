@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { heroImageFor, gradientFor } from '../../lib/hero-images'
+import { ResponsiveImage } from './ResponsiveImage'
 import { cn } from '../../lib/utils'
 
 /** The tile is a fixed min-height, so tags have to stay a single short row. */
@@ -74,12 +75,18 @@ export function BentoCard({
       )}
     >
       {background ?? (
-        <img
+        <ResponsiveImage
           src={image || heroImageFor(imageSeed)}
           alt=""
+          // Tiles run one per row on a phone, two on a tablet, and three to
+          // four in the desktop grids. Without this the browser assumes 100vw
+          // and picks the 1920px rung for a ~350px tile — which is what the
+          // Directory page was doing 48 times per page.
+          sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           style={imagePosition ? { objectPosition: imagePosition } : undefined}
           loading="lazy"
+          decoding="async"
         />
       )}
       {/* The brand wash tames a bright photo; a drawn background (aurora) is

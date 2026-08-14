@@ -1,4 +1,5 @@
 import { createPath, type DataRouter, type RouterNavigateOptions, type To } from 'react-router'
+import { isMobileLite } from '../hooks/useMediaQuery'
 
 const VENUE_RE = /^\/events\/(?:virtual-hackathon|virtual-conference)\/([^/]+)/
 
@@ -80,10 +81,27 @@ export function enableCardShuffle(router: DataRouter) {
   //   ?noshuffle — disable transitions entirely (is an artifact even ours?)
   //   ?slowmo    — run at 4s so an artifact can be pointed at
   const flags = new URLSearchParams(window.location.search)
-  const disabled = flags.has('noshuffle')
+  /**
+   * Off on phones and touch tablets.
+   *
+   * The shuffle is a full-document view transition: the browser rasterises the
+   * whole page into a snapshot layer and holds it for 500ms, and
+   * `heroPhotoReady` below deliberately extends the render-suppressed window by
+   * up to another 250ms so the incoming card has its photo in the first frame.
+   * On a desktop GPU that is a considered trade. On a mid-range phone it is up
+   * to three quarters of a second of frozen screen added to every tap, on top
+   * of the route chunk fetch — measured at 114ms to 972ms in the note below.
+   *
+   * `?noshuffle` still forces it off everywhere, and desktop is untouched.
+   */
+  const disabled = flags.has('noshuffle') || isMobileLite()
   const slowmo = flags.has('slowmo')
   if (disabled) {
-    console.info('[route-shuffle] disabled via ?noshuffle')
+    console.info(
+      flags.has('noshuffle')
+        ? '[route-shuffle] disabled via ?noshuffle'
+        : '[route-shuffle] disabled — mobile-lite viewport'
+    )
     // Kills the pane animation too — the flag answers "is this artifact ours?",
     // so it has to silence both mechanisms.
     document.documentElement.classList.add('route-shuffle-off')

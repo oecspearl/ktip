@@ -173,11 +173,26 @@ function preconnectPlugin(supabaseUrl: string | undefined) {
  *
  * Deliberately only the chunks themselves, not their dependency graphs — those
  * are shared with the entry and are already in flight.
+ *
+ * The same script also preloads the reader's LOCALE CATALOG, for fr and es.
+ * `LanguageProvider` imports it from a useEffect, so without this it cannot be
+ * requested until the entry bundle has downloaded and executed — a strictly
+ * serial second hop for ~170 kB gzip, during which those readers see nothing.
+ * English has no catalog to preload.
  */
 const PRELOAD_ROUTES: Record<string, string> = {
   '/': 'src/pages/discover/DiscoverPage.tsx',
   '/login': 'src/pages/auth/LoginPage.tsx',
 }
+
+/**
+ * Mirrors CATALOGS in src/i18n/LanguageProvider.tsx.
+ *
+ * `en` is absent because English loads no catalog at all — the macro leaves the
+ * English source inline (descriptorFields: 'message' below). `pseudo` is
+ * dev-only and never built.
+ */
+const PRELOAD_LOCALES = ['fr', 'es']
 
 function routeChunkPreloadPlugin() {
   return {
@@ -189,6 +204,7 @@ function routeChunkPreloadPlugin() {
         // Absent under `vite dev`, where there is no bundle and no hashing.
         if (!ctx.bundle) return
         const map: Record<string, string> = {}
+        const catalogs: Record<string, string> = {}
         for (const [fileName, output] of Object.entries(ctx.bundle)) {
           const chunk = output as { type?: string; facadeModuleId?: string | null }
           if (chunk.type !== 'chunk' || !chunk.facadeModuleId) continue
@@ -196,17 +212,29 @@ function routeChunkPreloadPlugin() {
           for (const [pathname, source] of Object.entries(PRELOAD_ROUTES)) {
             if (id.endsWith(source)) map[pathname] = `/${fileName}`
           }
+          for (const locale of PRELOAD_LOCALES) {
+            if (id.endsWith(`src/locales/${locale}/messages.mjs`)) catalogs[locale] = `/${fileName}`
+          }
         }
         // A renamed or moved page silently drops out of the map rather than
         // emitting a preload for a chunk that no longer exists.
-        if (Object.keys(map).length === 0) return
+        if (Object.keys(map).length === 0 && Object.keys(catalogs).length === 0) return
         return [
           {
             tag: 'script',
             children:
-              `(function(){try{var m=${JSON.stringify(map)},h=m[location.pathname];` +
-              `if(!h)return;var l=document.createElement("link");` +
-              `l.rel="modulepreload";l.href=h;document.head.appendChild(l)}catch(e){}})()`,
+              `(function(){try{var d=document,H=d.head;` +
+              `function p(h){var l=d.createElement("link");l.rel="modulepreload";l.href=h;H.appendChild(l)}` +
+              `var m=${JSON.stringify(map)},h=m[location.pathname];if(h)p(h);` +
+              // Locale resolved exactly as the theme/lang script further down
+              // does it, and for the same reason: whatever that script decides
+              // is what LanguageProvider will ask for, so a different answer
+              // here would preload a catalog nobody loads.
+              `var c=${JSON.stringify(catalogs)},` +
+              `q=new URLSearchParams(location.search).get("lang"),` +
+              `L=q||localStorage.getItem("ktip_lang");` +
+              `if(L!=="fr"&&L!=="es")L="en";` +
+              `if(c[L])p(c[L])}catch(e){}})()`,
             // head-prepend, not head: this has to run before the parser reaches
             // the entry <script>, or the route chunk queues behind it instead
             // of alongside it.
@@ -312,14 +340,73 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       sourcemap: uploadSentrySourceMaps ? ('hidden' as const) : false,
+      rollupOptions: {
+        output: {
+          /**
+           * `entry-[hash].js`, not the default `index-[hash].js`.
+           *
+           * Three separate chunks in this build are called `index-*.js` —
+           * tldraw, tiptap and the app entry — because rollup names a chunk
+           * after its facade module and all three are index files. That makes
+           * the entry impossible to identify by glob, which the service
+           * worker's precache list has to do.
+           */
+          entryFileNames: 'assets/entry-[hash].js',
+          /**
+           * Vendor splitting, for cache lifetime rather than for size.
+           *
+           * These libraries are all needed at first paint, so pulling them out
+           * of the entry does not reduce what a first-time visitor downloads.
+           * What it changes is the second visit: the entry chunk's hash moves
+           * on every deploy, and before this split that invalidated ~300 kB
+           * gzip of React, Supabase and router code that had not changed in
+           * months. Now a deploy invalidates the app code alone.
+           *
+           * The locale catalogs get stable names for the same reason the entry
+           * does — `messages-[hash].js` carries no locale, so neither the
+           * precache list nor the preload script could tell en from fr.
+           */
+          manualChunks(id: string) {
+            const path = id.split('\\').join('/')
+            const locale = /\/src\/locales\/([a-z]+)\/messages\.mjs$/.exec(path)
+            if (locale) return `locale-${locale[1]}`
+            if (!path.includes('/node_modules/')) return undefined
+            // react-router does not match the react group: the pattern
+            // requires a path separator directly after the package name.
+            if (/\/node_modules\/(react|react-dom|scheduler)\//.test(path)) return 'vendor-react'
+            if (/\/node_modules\/react-router/.test(path)) return 'vendor-router'
+            if (/\/node_modules\/@supabase\//.test(path)) return 'vendor-supabase'
+            if (/\/node_modules\/@sentry\//.test(path)) return 'vendor-sentry'
+            if (/\/node_modules\/@tanstack\/(react-)?query/.test(path)) return 'vendor-query'
+            return undefined
+          },
+        },
+      },
     },
     plugins: [
       react({
         babel: {
           // Lingui's macros are compile-time only. `t\`Save\`` and <Trans> are
-          // rewritten here into plain runtime calls carrying the English source
-          // as the message id, and nothing of @lingui/*/macro survives into the
-          // bundle.
+          // rewritten here into plain runtime calls, and nothing of
+          // @lingui/*/macro survives into the bundle.
+          //
+          // `descriptorFields: 'message'` is load-bearing, and its default is
+          // not. Message ids are content hashes, NOT the English source — the
+          // catalog is keyed `"-0B-ue": ["Projects"]` — and the default
+          // ('auto') strips everything but the id in production builds. That
+          // combination meant the English source existed in exactly one place,
+          // the compiled en catalog: 553 kB of it, 166 kB gzip, on the critical
+          // path of every English page load, and a hash id rendered on screen
+          // for any moment it was not yet there.
+          //
+          // Keeping `message` inlines each English string in the chunk that
+          // uses it, which is both smaller in total and paid for per route
+          // rather than up front. It also makes the fallback behaviour the rest
+          // of this codebase already documents actually true: a missing
+          // translation renders correct English instead of a raw key.
+          //
+          // Extraction is unaffected — `lingui extract` runs the CLI, which
+          // sets its own descriptorFields.
           //
           // Deliberately NOT @lingui/vite-plugin: that package pulls
           // @rolldown/plugin-babel, which peer-depends on Babel 8, while
@@ -328,7 +415,7 @@ export default defineConfig(({ mode }) => {
           // `lingui compile` step in `npm run build` already produces the
           // compiled ES-module catalogs, which is the shape the service worker
           // needs anyway.
-          plugins: ['@lingui/babel-plugin-lingui-macro'],
+          plugins: [['@lingui/babel-plugin-lingui-macro', { descriptorFields: 'message' }]],
         },
       }),
       edgeApiPlugin(openaiKey),
@@ -352,10 +439,36 @@ export default defineConfig(({ mode }) => {
         manifest: false, // Use public/manifest.json
         workbox: {
           maximumFileSizeToCacheInBytes: 2 * 1024 * 1024, // 2 MB
-          // png deliberately absent: photos/logos are served as webp over the
-          // network with HTTP caching; only the two PWA icons are precached.
+          /**
+           * The app shell, and nothing else.
+           *
+           * This used to be `**\/*.{js,css,html,ico,svg,woff2}`, which matched
+           * every emitted chunk: 300 files and 8.9 MB, fetched in the
+           * background on the FIRST visit while the reader was still waiting
+           * for the first screen. On a phone that is the app competing with
+           * itself for the radio. It precached the pdf.js worker (1.2 MB),
+           * tldraw (1.2 MB), CodeMirror (647 kB), LiveKit (633 kB), mammoth
+           * (488 kB) and the admin console — none of which most members can
+           * even reach — plus all three locale catalogs, of which anyone needs
+           * exactly one.
+           *
+           * Everything dropped from here is still cached, just on demand and
+           * after it has been asked for once: see the /assets runtime rule
+           * below. Chunk URLs are content-hashed and served immutable, so
+           * CacheFirst is exact rather than merely close.
+           *
+           * png deliberately absent apart from the icons: photos and logos are
+           * served as webp with HTTP caching.
+           */
           globPatterns: [
-            '**/*.{js,css,html,ico,svg,woff2}',
+            'index.html',
+            'registerSW.js',
+            'manifest.json',
+            'assets/entry-*.{js,css}',
+            'assets/vendor-*.js',
+            // No locale catalog: English has none, and fr/es are runtime-cached
+            // on use. Precaching all three put 1.5 MB of catalogs on every
+            // device to serve the one its reader needs.
             'pwa-192x192.png',
             'pwa-512x512.png',
             'favicon-*.png', // 5.7 KB total, and the tab icon is the one asset an offline load still shows
@@ -366,7 +479,15 @@ export default defineConfig(({ mode }) => {
           // and the SPA route of that name never runs. index.html is the only
           // HTML this app should ever serve; keep stray pages out of the
           // manifest so that shadowing cannot come back.
-          globIgnores: ['**/node_modules/**/*', '**/auth/**'],
+          //
+          // stats.html and perf/ are build artefacts of the analyzer and the
+          // perf harness (scripts/perf/*), not app assets. Without these two
+          // entries an `ANALYZE=1` build FAILS: the treemap is ~2.3 MB, which
+          // trips maximumFileSizeToCacheInBytes above, and vite-plugin-pwa
+          // treats an oversized asset as a fatal error. It throws after the
+          // chunks are written but before sw.js is generated, leaving a dist/
+          // that looks complete and has registerSW.js pointing at a 404.
+          globIgnores: ['**/node_modules/**/*', '**/auth/**', 'stats.html', 'perf/**'],
           // vercel.json rewrites /auth/vc/* to Edge Functions rather than to
           // the SPA. Those are reached by a top-level navigation, so the
           // navigation fallback would answer them with index.html and the
@@ -383,6 +504,35 @@ export default defineConfig(({ mode }) => {
           // here costs one request and guarantees the current build.
           navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
           runtimeCaching: [
+            {
+              /**
+               * Every chunk that is no longer precached — route code, the
+               * heavy editors, the other two locale catalogs.
+               *
+               * CacheFirst is safe here and nowhere else: these URLs are
+               * content-hashed and vercel.json serves /assets as immutable for
+               * a year, so a hit can never be stale. A changed file is a
+               * different URL and simply misses.
+               */
+              urlPattern: /\/assets\/.*\.(?:js|css)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'ktip-assets',
+                expiration: { maxEntries: 160, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              // Generated responsive variants — also content-hashed and
+              // immutable (see the /_img header in vercel.json). The originals
+              // in /hero, /pages and /grants are NOT hashed, so they are left
+              // to their 7-day HTTP cache rather than held here.
+              urlPattern: /\/_img\/.*\.(?:avif|webp|png|jpg|jpeg)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'ktip-images',
+                expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
             {
               // Public storage objects only.
               //

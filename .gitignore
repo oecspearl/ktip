@@ -27,6 +27,10 @@ dist-ssr
 .env
 .env.local
 .env.production
+# Credentials for the authenticated perf harness (scripts/perf/trace-route.mjs).
+# A real account's password: never commit, never log. The `.env` line above does
+# NOT cover this — gitignore matches that name exactly, not as a prefix.
+.env.perf
 
 # Build output
 build

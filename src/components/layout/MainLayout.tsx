@@ -5,8 +5,9 @@ import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
 import { FloatingActionButton } from '../ui/FloatingActionButton'
 import { SpyRail } from '../ui/SpyRail'
-import { MessagingPanelProvider } from '../../contexts/MessagingPanelContext'
-import { MemberPanelProvider } from '../../contexts/MemberPanelContext'
+import { MessagingPanelProvider, useMessagingPanel } from '../../contexts/MessagingPanelContext'
+import { MemberPanelProvider, useMemberPanel } from '../../contexts/MemberPanelContext'
+import { useEverTrue } from '../../hooks/useEverTrue'
 
 // Overlay panels: closed on first paint, so their code (and the messaging /
 // directory trees behind them) stays out of the entry chunk.
@@ -24,11 +25,46 @@ const MemberPanel = lazy(() =>
 const StickyNoteOverlay = lazy(() =>
   import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay }))
 )
-import { StickyNotesProvider } from '../../contexts/StickyNotesContext'
+import { StickyNotesProvider, useStickyNotesPanel } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useOrientationTransition } from '../../hooks/useOrientationTransition'
 import { shellKey } from '../../lib/routeTransitions'
+
+/**
+ * The three overlay panels, each mounted only once its own trigger has fired.
+ *
+ * These are already `React.lazy` and already return `null` while closed, which
+ * reads as "they cost nothing until used" — but it is not what happens.
+ * `lazy()` starts its import as soon as the element is rendered, so rendering
+ * all three unconditionally resolved all three chunks on every page load, for
+ * panels that were shut. `MessagingPanel` alone is ~40 kB.
+ *
+ * Split into its own component because MainLayout's body runs OUTSIDE the
+ * providers it returns, so it cannot read their state.
+ *
+ * `useEverTrue` latches rather than tracking the live open flag: gating
+ * directly on `isOpen` would unmount each panel the moment it closed, cutting
+ * the exit animation and throwing away its internal state. Past the first
+ * open, this behaves exactly as the unconditional version did.
+ */
+function OverlayPanels() {
+  const messagingOpen = useEverTrue(useMessagingPanel().isOpen)
+  const memberOpen = useEverTrue(useMemberPanel().isOpen)
+  // Notes have no open/closed flag of their own — the layer draws whatever the
+  // account has, so having any at all is the trigger.
+  const hasNotes = useEverTrue(useStickyNotesPanel().notes.length > 0)
+
+  if (!messagingOpen && !memberOpen && !hasNotes) return null
+
+  return (
+    <Suspense fallback={null}>
+      {messagingOpen && <MessagingPanel />}
+      {memberOpen && <MemberPanel />}
+      {hasNotes && <StickyNoteOverlay />}
+    </Suspense>
+  )
+}
 
 export function MainLayout() {
   const auth = useAuth()
@@ -96,11 +132,7 @@ export function MainLayout() {
           data-spy markers, renders nothing when a page has none */}
       <SpyRail />
       <FloatingActionButton />
-      <Suspense fallback={null}>
-        <MessagingPanel />
-        <MemberPanel />
-        <StickyNoteOverlay />
-      </Suspense>
+      <OverlayPanels />
       {!immersiveVenue && <Footer />}
     </div>
     </StickyNotesProvider>

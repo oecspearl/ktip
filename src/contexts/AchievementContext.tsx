@@ -48,7 +48,10 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
 
   const { achievements, loading } = useMyAchievements(enabled)
   const { triggerCheck } = useAchievementCheck()
-  const { assetMap } = useTrophyAssets()
+  // Same gate as useMyAchievements above: this provider is mounted above the
+  // router, so an ungated fetch here runs on every page for every visitor,
+  // signed in or not.
+  const { assetMap } = useTrophyAssets(enabled)
 
   const [pendingUnlocks, setPendingUnlocks] = useState<NewlyEarnedAchievement[]>([])
   // Slugs already queued this session. Guards against a refetch replaying the

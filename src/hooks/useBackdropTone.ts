@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type RefObject } from 'react'
+import { isMobileLite } from './useMediaQuery'
 
 export type BackdropTone = 'light' | 'dark'
 
@@ -96,6 +97,37 @@ export function useBackdropTone(
     }
 
     schedule()
+
+    /**
+     * On mobile-lite the tone is sampled once per route and then left alone.
+     *
+     * Each sample is `getBoundingClientRect` + `document.elementsFromPoint` +
+     * a `getComputedStyle` walk up the ancestor chain of every hit — three
+     * separate forced layouts. It is rAF-coalesced, but the listener is
+     * registered in the CAPTURE phase on window, so it also fires for every
+     * inner scroller on the page, and this hook drives the FAB, which
+     * MainLayout mounts on every route. That made it one of the most expensive
+     * things running during a phone scroll, to decide the fill colour of a
+     * single button.
+     *
+     * The initial sample above still runs, and `deps` (the route path) still
+     * re-runs this effect, so the FAB is correct on arrival at every page. What
+     * it stops doing is re-deciding mid-scroll. Desktop keeps live tracking.
+     */
+    if (isMobileLite()) {
+      window.addEventListener('resize', schedule)
+      const liteThemeWatch = new MutationObserver(schedule)
+      liteThemeWatch.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+      })
+      return () => {
+        if (frame) cancelAnimationFrame(frame)
+        window.removeEventListener('resize', schedule)
+        liteThemeWatch.disconnect()
+      }
+    }
+
     // Capture phase: inner scrollers (panels, map viewports) move content under
     // the FAB without ever bubbling a scroll event to the window.
     window.addEventListener('scroll', schedule, { passive: true, capture: true })

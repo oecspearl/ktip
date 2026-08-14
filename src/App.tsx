@@ -20,6 +20,7 @@ import { AdminRoute } from './components/AdminRoute'
 import { PermissionRoute } from './components/PermissionRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
+import { InstallPrompt } from './components/InstallPrompt'
 import { MainLayout } from './components/layout/MainLayout'
 import { RouteSplash } from './components/RouteSplash'
 import { AppError } from './lib/app-error'
@@ -31,10 +32,38 @@ import { enableCardShuffle } from './lib/routeTransitions'
 // transaction per record and make performance data unaggregatable.
 const createBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRouterBase)
 
+/**
+ * Defaults tuned for a phone on a mobile network.
+ *
+ * `staleTime: 30_000` with react-query's own defaults meant
+ * `refetchOnWindowFocus`, `refetchOnReconnect` and `refetchOnMount` were all
+ * on against a 30-second freshness window. Every one of those fires constantly
+ * on a phone — switching apps, walking between cells, navigating back — and on
+ * the dashboard, where ~30 queries are mounted at once, each event refetched
+ * essentially all of them. That is a self-inflicted request storm at exactly
+ * the moment the radio is least available.
+ *
+ * Raising staleTime is what fixes it, not disabling the triggers: the refetch
+ * hooks only act on data that is already stale, so a 5-minute window turns a
+ * storm into a handful of genuinely-expired queries. Anything that has to be
+ * fresher says so at its own call site (useAchievements, useVenue and friends
+ * already set their own staleTime and refetchInterval).
+ *
+ * refetchOnWindowFocus is off outright — returning to a tab is not evidence
+ * that server state moved, and it is the one trigger with no upper bound on
+ * how often a distracted phone user can fire it. refetchOnReconnect stays on:
+ * coming back from a dead connection genuinely does mean data may have moved.
+ *
+ * gcTime doubles the default so a back-navigation inside the 10 minutes a
+ * session usually spans renders from cache instead of re-fetching a page the
+ * reader just left.
+ */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,
+      staleTime: 5 * 60_000,
+      gcTime: 10 * 60_000,
+      refetchOnWindowFocus: false,
       retry: 1,
     },
   },
@@ -442,6 +471,12 @@ function App() {
               throws — which, caught by a boundary whose fallback also used
               <Trans>, once blanked the entire app. */}
           <AnalyticsConsentBanner />
+          {/* Same placement rules as the banner above: <Trans> copy, so inside
+              LanguageProvider, and no route context needed. It renders nothing
+              at all on desktop, when already installed, or once declined —
+              and never at the same time as the consent sheet, because it waits
+              for `beforeinstallprompt`, which fires well after first paint. */}
+          <InstallPrompt />
           <ToastProvider>
             <AuthProvider>
               {/* Renders nothing. Carries the language choice between this

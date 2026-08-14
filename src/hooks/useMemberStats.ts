@@ -72,11 +72,92 @@ function recentMonths(now: Date, count: number): string[] {
  * ones a `get_my_member_stats()` SECURITY DEFINER RPC would make exact; until
  * then they are only as complete as RLS allows.
  */
+/**
+ * Postgres error codes meaning "that function is not there".
+ *
+ * PGRST202 is PostgREST failing to find the RPC in its schema cache; 42883 is
+ * Postgres' own undefined_function. Either one means the migration has not been
+ * applied to this environment, which is a normal state — not a fault to report.
+ */
+const RPC_MISSING = new Set(['PGRST202', '42883'])
+
+/**
+ * Remembers that this deployment has no `get_my_member_stats`, so the probe is
+ * paid once per session instead of once per dashboard visit.
+ *
+ * Without this the fallback costs an extra SERIAL round trip every time: the
+ * RPC has to fail before the 18 queries may start, which on a mobile link is
+ * ~1s added to the exact page this work exists to speed up. Measured at ~316ms
+ * on a ~90ms-RTT connection.
+ *
+ * sessionStorage, not localStorage: a tab open across a deploy that ADDS the
+ * function should pick it up on the next reload rather than staying on the slow
+ * path indefinitely. Module scope alone would not survive a reload.
+ */
+const RPC_ABSENT_KEY = 'ktip_member_stats_rpc_absent'
+let rpcAbsent: boolean | null = null
+
+function readRpcAbsent(): boolean {
+  if (rpcAbsent !== null) return rpcAbsent
+  try {
+    rpcAbsent = sessionStorage.getItem(RPC_ABSENT_KEY) === '1'
+  } catch {
+    rpcAbsent = false
+  }
+  return rpcAbsent
+}
+
+function markRpcAbsent() {
+  rpcAbsent = true
+  try {
+    sessionStorage.setItem(RPC_ABSENT_KEY, '1')
+  } catch {
+    // Private mode or storage disabled — the module-scope flag still holds for
+    // this page's lifetime, which is where the repeated cost would be.
+  }
+}
+
+/**
+ * The whole bento in one round trip, or null if the RPC is not deployed here.
+ *
+ * Returns null rather than throwing on a missing function so the caller can
+ * fall back silently. Any OTHER error is thrown: an RLS refusal or an outage
+ * must not be quietly papered over with 18 queries that will fail the same way.
+ */
+async function fetchStatsViaRpc(): Promise<MemberStats | null> {
+  if (readRpcAbsent()) return null
+  const { data, error } = await (supabase as any).rpc('get_my_member_stats')
+  if (error) {
+    if (RPC_MISSING.has(error.code)) {
+      markRpcAbsent()
+      return null
+    }
+    throw error
+  }
+  return (data as MemberStats | null) ?? null
+}
+
 export function useMemberStats() {
   const auth = useAuth()
   const userId = auth.user?.id
 
   const fetchStats = async (uid: string): Promise<MemberStats> => {
+    /**
+     * One call when supabase/migrations/114_member_stats_rpc.sql is applied;
+     * the 18-query path below when it is not.
+     *
+     * Kept as a fallback rather than a replacement so the client is safe to
+     * deploy BEFORE the migration — and so a rollback of the migration cannot
+     * take the dashboard down with it. Once 114 has shipped everywhere and
+     * stuck, the block below can be deleted outright.
+     *
+     * Measured cost of the fallback path on /dashboard: 22 unique endpoints,
+     * 44 HTTP requests (each carries a CORS preflight), spread across 2
+     * dependent waterfall levels.
+     */
+    const viaRpc = await fetchStatsViaRpc()
+    if (viaRpc) return viaRpc
+
     /**
      * Head count, degraded to 0 on any error. Selects the filter column rather
      * than `id` — not every join table has an `id`, but the column being

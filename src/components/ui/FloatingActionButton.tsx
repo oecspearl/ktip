@@ -20,7 +20,6 @@ import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useStickyNotesPanel } from '../../contexts/StickyNotesContext'
 import { useTutorials } from '../../contexts/TutorialContext'
 import { useUnreadMessageCount } from '../../hooks/useMessages'
-import { tutorialIdForPath } from '../../data/tutorials'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import { useBackdropTone } from '../../hooks/useBackdropTone'
 import {
@@ -177,9 +176,28 @@ export function FloatingActionButton() {
   const scale = useViewportScale(FAB_DESIGN)
   const px = (n: number) => Math.round(n * scale)
 
-  // Only pages with a registered walkthrough show the graduation-cap action
-  const pageTutorialId = tutorialIdForPath(pathname)
+  // Only pages with a registered walkthrough show the graduation-cap action.
+  //
+  // Resolved from a dynamic import when the cluster is opened, not at render.
+  // This component is mounted on every route via MainLayout, so a static import
+  // of the registry put ~82 kB of tour copy in the entry bundle for every
+  // visitor — to decide the visibility of one button behind a closed menu.
+  // Keyed by pathname so a route change while closed cannot leave the previous
+  // page's tour attached to this one.
+  const [resolvedTour, setResolvedTour] = useState<{ path: string; id: string | null } | null>(null)
+  const pageTutorialId = resolvedTour?.path === pathname ? resolvedTour.id : null
   const noteCount = notes.length
+
+  useEffect(() => {
+    if (!open || resolvedTour?.path === pathname) return
+    let cancelled = false
+    void import('../../data/tutorials').then(({ tutorialIdForPath }) => {
+      if (!cancelled) setResolvedTour({ path: pathname, id: tutorialIdForPath(pathname) })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [open, pathname, resolvedTour])
 
   useEffect(() => {
     if (!open) return

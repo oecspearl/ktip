@@ -1742,6 +1742,80 @@ html[data-capturing] [data-fab] {
 .aurora-drift-0 { animation-name: auroraDriftA; }
 .aurora-drift-1 { animation-name: auroraDriftB; }
 .aurora-drift-2 { animation-name: auroraDriftC; }
+
+/* ---------------------------------------------------------------------------
+   STANDALONE (installed to the home screen)
+   ---------------------------------------------------------------------------
+   index.html sets viewport-fit=cover, so the page paints edge to edge —
+   including under the notch, the status bar and the home indicator. That is
+   what makes the hero reach the top of the screen instead of sitting below an
+   opaque bar, and it is only safe if the things pinned to those edges pad
+   themselves back out.
+
+   Scoped to display-mode: standalone. In a normal browser tab the OS chrome
+   already reserves this space and the insets resolve to 0, but scoping it
+   keeps the intent legible and costs nothing.
+   ------------------------------------------------------------------------ */
+@media (display-mode: standalone) {
+  /* The bar is `fixed` at the top, so its own padding is the only thing
+     between the nav links and the clock. */
+  [data-app-navbar] {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* The dock and any bottom-anchored sheet clear the home indicator, which is
+     a live gesture target — content underneath it is not just clipped, it is
+     unusable. */
+  [data-fab],
+  [data-bottom-sheet] {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Landscape on a notched phone loses horizontal space on one side only,
+     depending on which way it was rotated. */
+  body {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   MOBILE-LITE
+   ---------------------------------------------------------------------------
+   html.mobile-lite is set by the inline script in index.html, before first
+   paint, for phones and touch tablets. Its JS counterpart is useMobileLite()
+   in src/hooks/useMediaQuery.ts — keep the two queries in step.
+
+   These rules cheapen the treatments that are disproportionately expensive on
+   a phone GPU. Everything here is deliberately visual-only: nothing below
+   changes layout, so a device that matches the query gets the same page in a
+   cheaper coat of paint, not a different page. Desktop never matches.
+   ------------------------------------------------------------------------ */
+
+/* A 64px blur on an always-animating layer, composited with plus-lighter, is
+   one of the most expensive things a mobile GPU can be asked to do — and there
+   is one per blob. The colour and the shape are what read as an aurora; the
+   blur radius is the part that has to go. A large radius on a small element is
+   also nearly indistinguishable from a smaller one once it is behind content. */
+.mobile-lite .aurora-blob {
+  filter: blur(28px);
+  animation: none;
+  will-change: auto;
+}
+
+/* The ramp reaches 880ms at the 12th child and every child after it, then runs
+   a 600ms animation on top — content held invisible for up to ~1.5s. On a
+   phone the grid is one column, so "the 12th card" is far enough down that the
+   delay is pure waiting rather than a perceived cascade. Capped, not removed:
+   the first few still stagger, which is where the effect actually reads. */
+.mobile-lite .stagger-children > *,
+.mobile-lite .stagger-rows > * { animation-delay: 240ms; }
+.mobile-lite .stagger-children > :nth-child(1),
+.mobile-lite .stagger-rows > :nth-child(1) { animation-delay: 0ms; }
+.mobile-lite .stagger-children > :nth-child(2),
+.mobile-lite .stagger-rows > :nth-child(2) { animation-delay: 80ms; }
+.mobile-lite .stagger-children > :nth-child(3),
+.mobile-lite .stagger-rows > :nth-child(3) { animation-delay: 160ms; }
 @keyframes auroraDriftA {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(6%, -4%) scale(1.08); }

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { HERO_WASH, pageHeroFor } from '../../lib/hero-images'
+import { ResponsiveImage } from '../ui/ResponsiveImage'
+import { useMobileLite } from '../../hooks/useMediaQuery'
 import { Reveal } from '../ui/Reveal'
 import { useLingui } from '@lingui/react/macro'
 import { resolveCopy, type Copy } from '../../i18n/copy'
@@ -71,6 +73,20 @@ export function PageHero({
   spyLabel = 'Top',
 }: PageHeroProps) {
     const { t, i18n } = useLingui()
+  /**
+   * Phones and touch tablets get one photo layer instead of two, and an async
+   * decode.
+   *
+   * The frosted copy below is the same image again under `blur(24px)` with a
+   * mask and an overscale — a second full-band raster, on 67 pages, re-created
+   * on every cross-shell navigation because MainLayout remounts the routed
+   * subtree. `decoding="sync"` then blocks the main thread on both decodes.
+   * That cost buys a frost that survives a view-transition snapshot, and on
+   * mobile-lite there is no longer a view transition to survive (see
+   * routeTransitions.ts), so the reason for both the copy and the sync decode
+   * is gone with it. Desktop is unchanged.
+   */
+  const lite = useMobileLite()
   const src =
     image ||
     pageHeroFor(
@@ -137,10 +153,14 @@ export function PageHero({
       } ${inset ? 'rounded-surface shadow-medium mb-8' : ''}`}
     >
       {background ?? (<>
-      <img
+      <ResponsiveImage
         ref={photoRef}
         src={src}
         alt=""
+        // The band is full-bleed at every width except `inset`, where it sits
+        // in the admin column. 100vw over-reports that case by one rung, which
+        // is the safe direction to be wrong in.
+        sizes="100vw"
         onLoad={markPhotoReady}
         className={`absolute inset-0 w-full h-full object-cover photo-dimmable ${photoReveal}`}
         style={imagePosition ? { objectPosition: imagePosition } : undefined}
@@ -160,7 +180,7 @@ export function PageHero({
 
            decoding="sync" is still not enough during the card shuffle — see
            the photoReady note above for why the reveal is JS-gated. */
-        decoding="sync"
+        decoding={lite ? 'async' : 'sync'}
       />
       {/* Frosted blur over the right side, fading out toward the left.
           A blurred COPY of the photo, not backdrop-filter. backdrop-filter has
@@ -177,10 +197,18 @@ export function PageHero({
           in hero coordinates: the old panel was 80% of the width with the fade
           starting 55% across itself, which is 44%/80% measured across the
           whole band — and full width below md, where the panel was w-full. */}
-      <img
+      {!lite && (
+      <ResponsiveImage
         src={src}
         alt=""
         aria-hidden="true"
+        sizes="100vw"
+        // Capped at the smallest rung: this copy is under blur(24px), where
+        // 640px and 1920px are the same picture. It used to fetch the full-size
+        // original a second time — on a page-directory band that is 290 kB
+        // downloaded and synchronously decoded purely to be thrown away by a
+        // blur filter.
+        maxWidth={640}
         // One explicit `filter`, not `photo-dimmable blur-2xl`. Both of those
         // set the `filter` property, so the utility won and the copy computed
         // to `brightness(1)` — no blur at all. `scale-110` was lost the same
@@ -192,6 +220,7 @@ export function PageHero({
         style={imagePosition ? { objectPosition: imagePosition } : undefined}
         loading="eager" decoding="sync"
       />
+      )}
       <div className="absolute inset-y-0 right-0 w-full md:w-[80%] bg-black/10 [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
       </>)}
       {/* Neutral dark overlays for text readability — skipped over a drawn

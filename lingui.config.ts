@@ -20,11 +20,21 @@ import { formatter } from '@lingui/format-po'
  *    landed under /assets unhashed, permanently stale. JS modules get both
  *    properties for free.
  *
- * 2. Message ids are the English source text, via `explicitIdAsDefault: false`
- *    (the default) plus `t`/`Trans` macros with no id. A missing translation
- *    therefore renders correct English rather than a raw key like
+ * 2. A missing translation renders correct English rather than a raw key like
  *    "nav.projects.title" — which matters a great deal for a ~5,000-string
  *    migration that lands in slices over weeks.
+ *
+ *    That property comes from the macro keeping the `message` field, NOT from
+ *    the ids: `explicitIdAsDefault: false` (the default) generates CONTENT
+ *    HASHES, so the catalog is keyed `"-0B-ue": ["Projects"]` and an id is not
+ *    readable text. This file was previously commented as though the id were
+ *    the source string; it never was. The fallback is real only because
+ *    vite.config.ts passes `descriptorFields: 'message'` to the Babel macro —
+ *    without it, production strips `message` and a missing catalog renders the
+ *    hash. See the note there before changing either.
+ *
+ *    Keeping `message` is also why English ships no catalog at all: the source
+ *    strings are already inline in the chunk that uses them.
  */
 export default defineConfig({
   sourceLocale: 'en',
