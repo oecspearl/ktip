@@ -1,8 +1,9 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
-import { Textarea } from '../../components/ui/Textarea'
+import { ModeratedInput, ModeratedTextarea } from '../../components/moderation/ModeratedField'
+import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateProject } from '../../hooks/useProjects'
@@ -54,6 +55,22 @@ export default function CreateProjectPage() {
 
   const managedEmployers = useManagedEmployers()
 
+  const moderation = useContentModeration(
+    [
+      { name: 'title', value: title, label: t`Project Title` },
+      { name: 'summary', value: summary, label: t`Summary` },
+      { name: 'description', value: description, label: t`Description`, ai: true },
+    ],
+    {
+      surface: 'project',
+      onChange: (field, next) => {
+        if (field === 'title') setTitle(next)
+        else if (field === 'summary') setSummary(next)
+        else setDescription(next)
+      },
+    }
+  )
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setErrors({})
@@ -77,6 +94,14 @@ export default function CreateProjectPage() {
         }
       })
       setErrors(fieldErrors)
+      return
+    }
+
+    // After zod and before the licensing gate: there is no point asking a
+    // member to accept publishing terms for a project that cannot be posted.
+    const moderationResult = await moderation.checkBeforeSubmit()
+    if (!moderationResult.ok) {
+      setErrors((prev) => ({ ...prev, ...moderationResult.errors }))
       return
     }
 
@@ -159,34 +184,37 @@ export default function CreateProjectPage() {
             )}
 
             {/* Title */}
-            <Input
+            <ModeratedInput
               label={t`Project Title`}
               placeholder={t`Enter a catchy title for your project`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
+              moderation={moderation.fields.title}
               fullWidth
               required
             />
 
             {/* Summary */}
-            <Input
+            <ModeratedInput
               label={t`Summary`}
               placeholder={t`One short sentence shown on the homepage hero (optional)`}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={180}
+              moderation={moderation.fields.summary}
               fullWidth
             />
 
             {/* Description */}
-            <Textarea
+            <ModeratedTextarea
               label={t`Description`}
               placeholder={t`Describe your project, its goals, and potential impact...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
               rows={6}
+              moderation={moderation.fields.description}
               fullWidth
             />
 
@@ -303,7 +331,13 @@ export default function CreateProjectPage() {
               <AgreementNotice bundle="publishing" />
 
               <div className="flex items-center gap-4">
-                <Button type="submit" loading={loading} icon={<Save size={20} />} fullWidth>
+                <Button
+                  type="submit"
+                  loading={loading || moderation.checking}
+                  disabled={moderation.blocked}
+                  icon={<Save size={20} />}
+                  fullWidth
+                >
                   <Trans>Create Project</Trans>
                 </Button>
                 <button
@@ -319,6 +353,8 @@ export default function CreateProjectPage() {
           </form>
         </div>
       </div>
+
+      <ContentWarningModal state={moderation.warning} onClose={moderation.dismissWarning} />
 
       <AgreementGateModal
         gate={gate}

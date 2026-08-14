@@ -2,7 +2,9 @@ import { useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { Textarea } from '../../components/ui/Textarea'
+import { ModeratedInput, ModeratedTextarea } from '../../components/moderation/ModeratedField'
+import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { Stepper } from '../../components/ui/Stepper'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -102,6 +104,22 @@ export default function CreateEventPage() {
   const [title, setTitle] = useState(draftSeed.title ?? '')
   const [summary, setSummary] = useState(draftSeed.summary ?? '')
   const [description, setDescription] = useState(draftSeed.description ?? '')
+
+  const moderation = useContentModeration(
+    [
+      { name: 'title', value: title, label: t`Event Title` },
+      { name: 'summary', value: summary, label: t`Summary` },
+      { name: 'description', value: description, label: t`Description`, ai: true },
+    ],
+    {
+      surface: 'event',
+      onChange: (field, next) => {
+        if (field === 'title') setTitle(next)
+        else if (field === 'summary') setSummary(next)
+        else setDescription(next)
+      },
+    }
+  )
   const [tags, setTags] = useState<string[]>(draftSeed.tags ?? [])
   // Deliberately blank. The type decides which of the questions below even get
   // asked, so defaulting it to 'meetup' meant most events were created by
@@ -364,6 +382,12 @@ export default function CreateEventPage() {
       return
     }
 
+    const moderationResult = await moderation.checkBeforeSubmit()
+    if (!moderationResult.ok) {
+      setErrors((prev) => ({ ...prev, ...moderationResult.errors }))
+      return
+    }
+
     // Only after every field error is resolved. This form is long enough that
     // opening a licensing agreement over a failed validation would be actively
     // hostile.
@@ -573,12 +597,13 @@ export default function CreateEventPage() {
             </div>
 
             {/* Title */}
-            <Input
+            <ModeratedInput
               label={t`Event Title`}
               placeholder={t`e.g., Caribbean Tech Summit 2025`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
+              moderation={moderation.fields.title}
               fullWidth
               required
             />
@@ -594,15 +619,18 @@ export default function CreateEventPage() {
             />
 
             {/* Description */}
-            <Textarea
+            <ModeratedTextarea
               label={t`Description`}
               placeholder={t`Describe your event, agenda, and what participants can expect...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
               rows={6}
+              moderation={moderation.fields.description}
               fullWidth
             />
+
+            <ContentWarningModal state={moderation.warning} onClose={moderation.dismissWarning} />
 
             {/* Tags */}
             <TagInput

@@ -1,8 +1,9 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
-import { Textarea } from '../../components/ui/Textarea'
+import { ModeratedInput, ModeratedTextarea } from '../../components/moderation/ModeratedField'
+import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useProject, useUpdateProject, useDeleteProject } from '../../hooks/useProjects'
@@ -38,6 +39,23 @@ export default function EditProjectPage() {
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
+
+  const moderation = useContentModeration(
+    [
+      { name: 'title', value: title, label: t`Project Title` },
+      { name: 'summary', value: summary, label: t`Summary` },
+      { name: 'description', value: description, label: t`Description`, ai: true },
+    ],
+    {
+      surface: 'project',
+      onChange: (field, next) => {
+        if (field === 'title') setTitle(next)
+        else if (field === 'summary') setSummary(next)
+        else setDescription(next)
+      },
+    }
+  )
+
   const [category, setCategory] = useState('')
   const [phase, setPhase] = useState('concept')
   const [hashtags, setHashtags] = useState<string[]>([])
@@ -97,6 +115,12 @@ export default function EditProjectPage() {
         }
       })
       setErrors(fieldErrors)
+      return
+    }
+
+    const moderationResult = await moderation.checkBeforeSubmit()
+    if (!moderationResult.ok) {
+      setErrors((prev) => ({ ...prev, ...moderationResult.errors }))
       return
     }
 
@@ -169,34 +193,39 @@ export default function EditProjectPage() {
               </div>
             )}
 
-            <Input
+            <ModeratedInput
               label={t`Project Title`}
               placeholder={t`Enter a catchy title for your project`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={errors.title}
+              moderation={moderation.fields.title}
               fullWidth
               required
             />
 
-            <Input
+            <ModeratedInput
               label={t`Summary`}
               placeholder={t`One short sentence shown on the homepage hero (optional)`}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={180}
+              moderation={moderation.fields.summary}
               fullWidth
             />
 
-            <Textarea
+            <ModeratedTextarea
               label={t`Description`}
               placeholder={t`Describe your project, its goals, and potential impact...`}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               error={errors.description}
               rows={6}
+              moderation={moderation.fields.description}
               fullWidth
             />
+
+            <ContentWarningModal state={moderation.warning} onClose={moderation.dismissWarning} />
 
             {/* Additional Details */}
             <div>
@@ -306,7 +335,13 @@ export default function EditProjectPage() {
             )}
 
             <div className="flex items-center gap-4">
-              <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>
+              <Button
+                type="submit"
+                loading={updating || moderation.checking}
+                disabled={moderation.blocked}
+                icon={<Save size={20} />}
+                fullWidth
+              >
                 <Trans>Save Changes</Trans>
               </Button>
               <button

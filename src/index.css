@@ -2282,6 +2282,27 @@ html.route-shuffle::view-transition {
   background-color: var(--color-ktip-canvas);
 }
 
+/* Content-filter marks inside a TipTap editor. The plain-text fields draw
+   their equivalent from a mirror layer; here ProseMirror decorations do it,
+   so this is the whole of the styling. Clicking a mark deletes the run — see
+   moderationHighlight.ts — hence the pointer. */
+.ktip-flag {
+  text-decoration-line: line-through;
+  text-decoration-color: rgb(239 68 68 / 0.8);
+  text-decoration-thickness: 2px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.ktip-flag-low {
+  background: rgb(254 242 242);
+}
+
+.ktip-flag-medium,
+.ktip-flag-high {
+  background: rgb(254 226 226);
+}
+
 /* ProseMirror / TipTap Mini Editor (RichTextField) */
 .prose-editor-mini .ProseMirror {
   min-height: 100px;

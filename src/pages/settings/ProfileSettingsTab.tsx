@@ -3,7 +3,9 @@ import { Card } from '../../components/ui/Card'
 import { TileHead } from '../../components/ui/TileHead'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { Textarea } from '../../components/ui/Textarea'
+import { ModeratedTextarea } from '../../components/moderation/ModeratedField'
+import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { profileUpdateSchema } from '../../lib/validation'
@@ -64,6 +66,13 @@ export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}
 
   const [displayName, setDisplayName] = useState(auth.profile?.display_name || '')
   const [bio, setBio] = useState(auth.profile?.bio || '')
+
+  // A bio is the one piece of free text that follows a member around the
+  // platform, which is why it is worth checking even though it is short.
+  const moderation = useContentModeration(
+    [{ name: 'bio', value: bio, label: t`Bio`, ai: true }],
+    { surface: 'profile', onChange: (_field, next) => setBio(next) }
+  )
   const [country, setCountry] = useState(auth.profile?.country || '')
   const [organization, setOrganization] = useState(auth.profile?.organization || '')
   const [industry, setIndustry] = useState(auth.profile?.industry || '')
@@ -183,6 +192,12 @@ export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}
         if (field) fieldErrors[field] = issue.message
       }
       setErrors(fieldErrors)
+      return
+    }
+
+    const moderationResult = await moderation.checkBeforeSubmit()
+    if (!moderationResult.ok) {
+      setErrors((prev) => ({ ...prev, ...moderationResult.errors }))
       return
     }
 
@@ -395,14 +410,19 @@ export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}
             />
 
             <div className="sm:col-span-2">
-              <Textarea
+              <ModeratedTextarea
                 label={t`Bio`}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 error={errors.bio}
                 rows={3}
                 placeholder={t`Tell us about yourself...`}
+                moderation={moderation.fields.bio}
                 fullWidth
+              />
+              <ContentWarningModal
+                state={moderation.warning}
+                onClose={moderation.dismissWarning}
               />
             </div>
           </div>
@@ -468,7 +488,8 @@ export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}
       <div className="sticky bottom-4 z-sticky flex justify-end pointer-events-none">
         <Button
           onClick={handleSave}
-          loading={saving}
+          loading={saving || moderation.checking}
+          disabled={moderation.blocked}
           icon={<Save size={18} />}
           className="pointer-events-auto"
         >

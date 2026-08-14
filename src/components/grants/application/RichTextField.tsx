@@ -52,6 +52,13 @@ import {
   Palette,
 } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
+import {
+  ModerationHighlight,
+  ModerationHighlightKey,
+  type ModerationFlag,
+} from '../../moderation/moderationHighlight'
+import { useModerationRules } from '../../../hooks/useModerationRules'
+import type { ModerationSurface } from '../../../lib/moderation/types'
 
 interface RichTextFieldProps {
   value: string
@@ -61,6 +68,15 @@ interface RichTextFieldProps {
   error?: boolean
   /** false renders the content read-only and hides the toolbar */
   editable?: boolean
+  /**
+   * Live content-filter highlighting. On by default: this component backs the
+   * long-form answers in a grant application, which is the highest-stakes
+   * free text on the platform.
+   */
+  moderate?: boolean
+  moderationSurface?: ModerationSurface
+  /** Fires whenever the set of blocking matches changes, for the submit gate. */
+  onModerationFlags?: (flags: ModerationFlag[]) => void
 }
 
 const COLORS = [
@@ -68,8 +84,25 @@ const COLORS = [
   '#1e40af', '#6b21a8', '#be185d', '#041E42', '#dc2626',
 ]
 
-export function RichTextField({ value, onChange, placeholder, minHeight, error, editable = true }: RichTextFieldProps) {
+export function RichTextField({
+  value,
+  onChange,
+  placeholder,
+  minHeight,
+  error,
+  editable = true,
+  moderate = true,
+  moderationSurface = 'grant_application',
+  onModerationFlags,
+}: RichTextFieldProps) {
     const { t } = useLingui()
+  const { rules } = useModerationRules()
+  // The editor is built once; the rules arrive from an RPC afterwards. A ref
+  // read through a getter is what lets the plugin see them when they land.
+  const rulesRef = useRef(rules)
+  rulesRef.current = rules
+  const flagsRef = useRef(onModerationFlags)
+  flagsRef.current = onModerationFlags
   const [linkUrl, setLinkUrl] = useState('')
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [showImageInput, setShowImageInput] = useState(false)
@@ -106,6 +139,11 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error, 
       Placeholder.configure({
         placeholder: placeholder || 'Start writing...',
       }),
+      ModerationHighlight.configure({
+        getRules: () => (moderate ? rulesRef.current : []),
+        surface: moderationSurface,
+        onFlagsChange: (flags) => flagsRef.current?.(flags),
+      }),
     ],
     content: value || '',
     editorProps: {
@@ -127,6 +165,14 @@ export function RichTextField({ value, onChange, placeholder, minHeight, error, 
     if (!editor) return
     editor.setEditable(editable)
   }, [editable, editor])
+
+  // The first scan ran against an empty rule list, because the editor mounts
+  // before the RPC answers. Without this the marks never appear on content
+  // that was already in the field.
+  useEffect(() => {
+    if (!editor || !moderate) return
+    editor.view.dispatch(editor.state.tr.setMeta(ModerationHighlightKey, { rescan: true }))
+  }, [editor, rules, moderate])
 
   // Sync external value changes (e.g. AI replacing content)
   useEffect(() => {

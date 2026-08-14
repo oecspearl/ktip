@@ -2,7 +2,9 @@ import { useRef, useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { Textarea } from '../ui/Textarea'
+import { ModeratedInput, ModeratedTextarea } from '../moderation/ModeratedField'
+import { ContentWarningModal } from '../moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useEvent, useUpdateEvent, useDeleteEvent } from '../../hooks/useEvents'
@@ -63,6 +65,22 @@ export function EventDetailsForm({
   const [submissionTime, setSubmissionTime] = useState('')
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const moderation = useContentModeration(
+    [
+      { name: 'title', value: title, label: t`Event Title` },
+      { name: 'summary', value: summary, label: t`Summary` },
+      { name: 'description', value: description, label: t`Description`, ai: true },
+    ],
+    {
+      surface: 'event',
+      onChange: (field, next) => {
+        if (field === 'title') setTitle(next)
+        else if (field === 'summary') setSummary(next)
+        else setDescription(next)
+      },
+    }
+  )
   const [errorMessage, setErrorMessage] = useState('')
 
   const formRef = useRef<HTMLFormElement>(null)
@@ -180,6 +198,12 @@ export function EventDetailsForm({
       return
     }
 
+    const moderationResult = await moderation.checkBeforeSubmit()
+    if (!moderationResult.ok) {
+      setErrors((prev) => ({ ...prev, ...moderationResult.errors }))
+      return
+    }
+
     try {
       await updateEvent(eventId, {
         title,
@@ -245,12 +269,13 @@ export function EventDetailsForm({
         )}
 
         {/* Title */}
-        <Input
+        <ModeratedInput
           label={t`Event Title`}
           placeholder={t`e.g., Caribbean Tech Summit 2025`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           error={errors.title}
+          moderation={moderation.fields.title}
           fullWidth
           required
         />
@@ -265,15 +290,18 @@ export function EventDetailsForm({
           fullWidth
         />
 
-        <Textarea
+        <ModeratedTextarea
           label={t`Description`}
           placeholder={t`Describe your event, agenda, and what participants can expect...`}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           error={errors.description}
           rows={6}
+          moderation={moderation.fields.description}
           fullWidth
         />
+
+        <ContentWarningModal state={moderation.warning} onClose={moderation.dismissWarning} />
 
         {/* Tags */}
         <TagInput
@@ -515,7 +543,13 @@ export function EventDetailsForm({
 
         {/* Submit Button */}
         <div className="flex items-center gap-4">
-          <Button type="submit" loading={updating} icon={<Save size={20} />} fullWidth>
+          <Button
+            type="submit"
+            loading={updating || moderation.checking}
+            disabled={moderation.blocked}
+            icon={<Save size={20} />}
+            fullWidth
+          >
             <Trans>Save Changes</Trans>
           </Button>
         </div>

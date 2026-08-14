@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { Textarea } from '../../components/ui/Textarea'
+import { ModeratedTextarea } from '../../components/moderation/ModeratedField'
+import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
+import { useContentModeration } from '../../hooks/useContentModeration'
 import { ReplyItem } from '../../components/forums/ReplyItem'
 import {
   useForumPost,
@@ -46,6 +48,11 @@ export default function PostDetailPage() {
   const [replyContent, setReplyContent] = useState('')
   const [replyError, setReplyError] = useState('')
 
+  const moderation = useContentModeration(
+    [{ name: 'content', value: replyContent, label: t`Reply`, ai: true }],
+    { surface: 'forum_reply', onChange: (_field, next) => setReplyContent(next) }
+  )
+
   const isAuthor = post?.author_id === auth.user?.id
   const authorName = post?.author?.display_name || t`Unknown User`
 
@@ -56,6 +63,12 @@ export default function PostDetailPage() {
     const result = forumReplySchema.safeParse({ content: replyContent })
     if (!result.success) {
       setReplyError(result.error.issues[0]?.message || t`Invalid reply`)
+      return
+    }
+
+    const gate = await moderation.checkBeforeSubmit()
+    if (!gate.ok) {
+      setReplyError(gate.errors.content ?? '')
       return
     }
 
@@ -227,12 +240,17 @@ export default function PostDetailPage() {
 
               {/* Reply Form */}
               <form onSubmit={handleSubmitReply} className="mt-4 pt-4 border-t border-ktip-sand-200">
-                <Textarea
+                <ModeratedTextarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   placeholder={t`Write a reply...`}
                   rows={4}
+                  moderation={moderation.fields.content}
                   fullWidth
+                />
+                <ContentWarningModal
+                  state={moderation.warning}
+                  onClose={moderation.dismissWarning}
                 />
                 {replyError && (
                   <p className="text-sm text-red-600 mt-1">{replyError}</p>
@@ -241,8 +259,8 @@ export default function PostDetailPage() {
                   <Button
                     type="submit"
                     size="sm"
-                    loading={replyLoading}
-                    disabled={!replyContent.trim()}
+                    loading={replyLoading || moderation.checking}
+                    disabled={!replyContent.trim() || moderation.blocked}
                     icon={<Send size={16} />}
                   >
                     <Trans>Post Reply</Trans>
