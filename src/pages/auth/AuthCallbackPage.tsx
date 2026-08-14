@@ -113,7 +113,7 @@ export default function AuthCallbackPage() {
 
   /** Single exit. `roles` is null when the profile never loaded at all. */
   const finish = useCallback(
-    (signedIn: boolean, roles: string[] | null, owesAge = false) => {
+    (signedIn: boolean, roles: string[] | null, owesAge = false, owesMfa = false) => {
       done.current = true
 
       if (!signedIn) {
@@ -133,6 +133,15 @@ export default function AuthCallbackPage() {
       if (!roles || roles.length === 0 || owesAge) {
         analytics.conversion('signup_success', { provider: 'oauth' })
         navigate('/onboarding', { replace: true })
+        return
+      }
+
+      // Two-factor enrolment (118). Not strictly needed — ProtectedRoute would
+      // catch it — but pre-empted here for exactly the reason owesAge is: it
+      // saves a visible bounce off the dashboard. Checked after the onboarding
+      // branch, because an account with no role owes that first.
+      if (owesMfa) {
+        navigate('/security/set-up', { replace: true })
         return
       }
 
@@ -159,7 +168,12 @@ export default function AuthCallbackPage() {
     // window here where the session is known but roles are not.
     if (done.current || auth.loading || auth.profileLoading) return
     if (!auth.user) return
-    finish(true, auth.profile?.roles ?? null, auth.profile?.requires_age_declaration === true)
+    finish(
+      true,
+      auth.profile?.roles ?? null,
+      auth.profile?.requires_age_declaration === true,
+      auth.profile?.requires_mfa_enrollment === true,
+    )
   }, [auth.loading, auth.profileLoading, auth.user, auth.profile, finish])
 
   // Auth settled with nobody signed in — the exchange failed silently.
@@ -177,7 +191,12 @@ export default function AuthCallbackPage() {
     const timeout = setTimeout(() => {
       if (done.current) return
       const { user, profile } = latest.current
-      finish(!!user, profile?.roles ?? null, profile?.requires_age_declaration === true)
+      finish(
+        !!user,
+        profile?.roles ?? null,
+        profile?.requires_age_declaration === true,
+        profile?.requires_mfa_enrollment === true,
+      )
     }, FALLBACK_TIMEOUT_MS)
     return () => clearTimeout(timeout)
   }, [finish])

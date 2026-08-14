@@ -8,6 +8,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { changePasswordSchema, changeEmailSchema, secondaryEmailSchema } from '../../lib/validation'
 import { useMyEmailAlias, useEmailAliasMutations } from '../../hooks/useEmailAlias'
+import { useBackupCodeStatus, useMfaFactors, useMfaMutations } from '../../hooks/useMfa'
+import { BackupCodesSheet } from '../../components/security/BackupCodesSheet'
 import {
   Lock,
   Mail,
@@ -15,6 +17,7 @@ import {
   Trash2,
   AlertTriangle,
   CheckCircle,
+  ShieldCheck,
 } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -47,6 +50,36 @@ export function SecuritySettingsTab() {
   const [secondaryEmail, setSecondaryEmail] = useState('')
   const [aliasErrors, setAliasErrors] = useState<Record<string, string>>({})
   const [aliasSent, setAliasSent] = useState(false)
+
+  // Two-step verification (118)
+  const { factors, enrolled, loading: factorsLoading } = useMfaFactors(auth.user?.id)
+  const { status: codeStatus } = useBackupCodeStatus(auth.user?.id)
+  const { issueCodes, unenroll, issuing, unenrolling } = useMfaMutations(auth.user?.id)
+  const [freshCodes, setFreshCodes] = useState<string[] | null>(null)
+  const [showRemoveMfaModal, setShowRemoveMfaModal] = useState(false)
+  // Required by a role rather than chosen — removing it would only bounce them
+  // straight back to enrolment, so the option is not offered.
+  const mfaRequired = auth.profile?.mfa_grandfathered === false
+
+  const handleRegenerateCodes = async () => {
+    try {
+      setFreshCodes(await issueCodes())
+    } catch (error: any) {
+      toast.error(error?.message || t`Could not generate recovery codes.`)
+    }
+  }
+
+  const handleRemoveMfa = async () => {
+    const factorId = factors[0]?.id
+    if (!factorId) return
+    try {
+      await unenroll(factorId)
+      setShowRemoveMfaModal(false)
+      toast.success(t`Two-step verification is off.`)
+    } catch (error: any) {
+      toast.error(error?.message || t`Could not remove your authenticator.`)
+    }
+  }
 
   // Delete account
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -233,6 +266,76 @@ export function SecuritySettingsTab() {
         </div>
       </Card>
 
+      {/* Two-step verification (118) */}
+      <Card id="two-step" data-spy="Two-step verification" className="scroll-mt-24">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
+            <ShieldCheck size={20} className="text-ktip-ocean-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900">
+              <Trans>Two-Step Verification</Trans>
+            </h2>
+            <p className="text-sm text-ktip-sand-600">
+              <Trans>An authenticator app code, on top of your password</Trans>
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4 max-w-md">
+          {factorsLoading ? (
+            <div className="h-10 rounded-xl bg-ktip-sand-100 animate-pulse" />
+          ) : enrolled ? (
+            <>
+              <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
+                <CheckCircle size={18} />
+                <Trans>Two-step verification is on for this account.</Trans>
+              </div>
+
+              <p className="text-sm text-ktip-sand-600">
+                {codeStatus ? (
+                  <Trans>
+                    {codeStatus.remaining} of {codeStatus.total} recovery codes left.
+                  </Trans>
+                ) : (
+                  <Trans>Checking your recovery codes…</Trans>
+                )}
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" loading={issuing} onClick={handleRegenerateCodes}>
+                  <Trans>Generate new recovery codes</Trans>
+                </Button>
+                {/* Not offered when a role demands it: removing the factor only
+                    sends them back to /security/set-up, which reads as a broken
+                    button rather than a refusal. */}
+                {!mfaRequired && (
+                  <Button variant="ghost" onClick={() => setShowRemoveMfaModal(true)}>
+                    <Trans>Remove authenticator</Trans>
+                  </Button>
+                )}
+              </div>
+
+              <p className="text-caption text-ktip-sand-500">
+                <Trans>Generating new codes makes every earlier code stop working.</Trans>
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-ktip-sand-600">
+                <Trans>
+                  Add a second step at sign-in using a free authenticator app. It works offline,
+                  and it means a stolen password is not enough to reach your account.
+                </Trans>
+              </p>
+              <Button onClick={() => navigate('/security/set-up')}>
+                <Trans>Set up two-step verification</Trans>
+              </Button>
+            </>
+          )}
+        </div>
+      </Card>
+
       {/* Change Email */}
       <Card id="email" data-spy="Email" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-4">
@@ -411,6 +514,54 @@ export function SecuritySettingsTab() {
           <Trans>Delete My Account</Trans>
         </Button>
       </Card>
+
+      {/* Fresh recovery codes. Same sheet the enrolment wizard shows, and for
+          the same reason: this is the only time these values exist. */}
+      <Modal
+        open={freshCodes !== null}
+        onClose={() => setFreshCodes(null)}
+        title={t`Your new recovery codes`}
+        description={t`Every code from before now stops working.`}
+        size="md"
+      >
+        {freshCodes && (
+          <BackupCodesSheet
+            codes={freshCodes}
+            accountEmail={auth.user?.email}
+            confirmLabel={t`Done`}
+            onConfirm={() => setFreshCodes(null)}
+          />
+        )}
+      </Modal>
+
+      {/* Remove authenticator */}
+      <Modal
+        open={showRemoveMfaModal}
+        onClose={() => setShowRemoveMfaModal(false)}
+        title={t`Remove your authenticator?`}
+        description={t`Your account will be protected by your password alone.`}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-900">
+              <Trans>
+                Your recovery codes stay valid but stop being useful — there will be no second
+                step for them to recover.
+              </Trans>
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowRemoveMfaModal(false)}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button variant="danger" loading={unenrolling} onClick={handleRemoveMfa}>
+              <Trans>Remove it</Trans>
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

@@ -1,15 +1,23 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { ShieldX } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { opensAdminConsole } from '../lib/permissions'
 import { Trans } from '@lingui/react/macro'
 
 export const AdminRoute = () => {
   const auth = useAuth()
   const location = useLocation()
   // Capability, not slug: legacy 'oecs' accounts resolve to super_admin via
-  // ROLE_ALIASES and keep their access, and a Safety Admin can be admitted to
-  // the console by the matrix without being made a Secretariat admin.
-  const isAdmin = auth.can('org:manage') || auth.can('moderation:view')
+  // ROLE_ALIASES and keep their access, and a supervisor or Safety Admin can be
+  // admitted to the console by the matrix without being made a Secretariat
+  // admin.
+  //
+  // This was `can('org:manage') || can('moderation:view')` until 116 split
+  // org:manage into domain keys — at which point the Programmes supervisor, who
+  // owns six console pages, held neither key and was locked out of all of them.
+  // ADMIN_CONSOLE_KEYS keeps the admission list in one place; what each holder
+  // then sees is decided per page by AdminLayout and PermissionRoute.
+  const isAdmin = opensAdminConsole(auth.can)
 
   // `can()` falls back to the compiled defaults for profile.roles until the
   // permissions RPC resolves, so it reads as "no permissions" while the profile

@@ -8,6 +8,7 @@ import { keys } from '../queries/keys'
 import { useAuth } from '../contexts/AuthContext'
 import type { SiteEntry } from '../lib/site-map'
 import { entityPath, forumPostPath } from '../lib/slug'
+import { opensAdminConsole } from '../lib/permissions'
 import {
   applyAiRanking,
   filterByAccess,
@@ -289,7 +290,7 @@ export function useGlobalSearch(
   // legacy oecs slug". Testing the slug hid all 20 admin entries from every
   // admin created after 063 — they could open /admin but could not find it by
   // searching. Resolved through the same capability AdminRoute uses.
-  const isOecs = auth.can('org:manage') || auth.can('moderation:view')
+  const isOecs = opensAdminConsole(auth.can)
 
   const trimmed = query.trim()
   const debouncedQuery = useDebouncedValue(trimmed, CONTENT_DEBOUNCE_MS)

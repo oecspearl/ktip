@@ -23,6 +23,7 @@ import { eventHeroDetails, grantHeroDetails, projectHeroDetails } from '../../li
 import { useProjects } from '../../hooks/useProjects'
 import { useEvents } from '../../hooks/useEvents'
 import { useGrants } from '../../hooks/useGrants'
+import { readHeroSeed } from '../../lib/hero-seed'
 import { usePlatformStats, type PlatformStats } from '../../hooks/usePlatformStats'
 import type { DetailEntry, Grant } from '../../types'
 import { DetailsList } from '../../components/shared/DetailsList'
@@ -447,9 +448,16 @@ export default function DiscoverPage() {
   const { events } = useEvents({ upcoming: true })
   const { stats, loading: statsLoading } = usePlatformStats()
 
+  // Build-time rows, so the opening slide is real content on the FIRST paint
+  // rather than a short placeholder that grows when the query lands. Read at
+  // module scope via a frozen cache, so this is referentially stable and safe
+  // in the memo below. Falls back to `grants` the moment the live query
+  // resolves; if there is no seed this is undefined and nothing changes.
+  const seededGrants = (grants ?? readHeroSeed() ?? undefined) as Grant[] | undefined
+
   const items = useMemo<HeroItem[]>(() => {
     if (mode === 'grants') {
-      return (grants || []).slice(0, MAX_ITEMS).map((g) => ({
+      return (seededGrants || []).slice(0, MAX_ITEMS).map((g) => ({
         id: g.id,
         title: g.title,
         meta: grantAmount(g),
@@ -482,7 +490,7 @@ export default function DiscoverPage() {
       image: e.image_url || heroImageFor(e.id),
     }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, grants, projects, events, t])
+  }, [mode, seededGrants, projects, events, t])
 
   const activeMode = MODES.find((m) => m.id === mode)!
   const modeLabel = i18n._(activeMode.label)

@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { PageHero } from '../../components/layout/PageHero'
+import { useAuth } from '../../contexts/AuthContext'
 import { useAdminStats } from '../../hooks/useAdminDashboard'
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
@@ -34,10 +35,30 @@ import { resolveCopy } from '../../i18n/copy'
 
 export default function AdminDashboardPage() {
     const { i18n } = useLingui()
+  const auth = useAuth()
   const { stats, loading: statsLoading } = useAdminStats()
   const { analytics, loading: analyticsLoading } = useAdminAnalytics()
 
   useTutorialAutoStart(TUTORIAL_IDS.ADMIN, !statsLoading && !analyticsLoading)
+
+  // This is the one admin page with no permission gate — everyone AdminRoute
+  // admits has to land somewhere — so it filters itself instead, the same way
+  // AdminLayout filters its sidebar.
+  //
+  // Without this a supervisor sees "0 Total Events" rather than nothing at all,
+  // because RLS answers a count they cannot read with zero rather than with an
+  // error. A tile reading 0 is a claim about the platform; hiding the tile is
+  // the truth, which is that this is not their surface.
+  const canSeeUsers = auth.can('members:view')
+  const canSeeEvents = auth.can('event:manage')
+  const canSeeGrants = auth.can('grant:manage')
+  const canSeeForums = auth.can('forum:manage')
+  const canSeeResources = auth.can('resource:manage')
+  const canSeeProjects = auth.can('project:manage_all')
+  const canSeeClimate = canSeeProjects || canSeeEvents || canSeeGrants
+  // The analytics block reads across every table at once, so it belongs to the
+  // one key that still means "the whole platform".
+  const canSeeAnalytics = auth.can('org:manage')
 
   return (
     <>
@@ -48,7 +69,7 @@ export default function AdminDashboardPage() {
         title="Platform Overview"
         subtitle="Overview of your platform activity"
         imageSeed="admin"
-        actions={analytics ? <ExportButton analytics={analytics} /> : undefined}
+        actions={analytics && canSeeAnalytics ? <ExportButton analytics={analytics} /> : undefined}
       />
 
       {/* Stats Grid */}
@@ -68,55 +89,63 @@ export default function AdminDashboardPage() {
         </div>
       ) : (
         <div data-tutorial="admin-stats" className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 stagger-children">
-          <div className="border border-ktip-sand-200 rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
-                <Users size={20} className="text-ktip-ocean-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.userCount}</p>
-                <p className="text-xs text-gray-500">Total Users</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border border-ktip-sand-200 rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-ktip-tropical-100 flex items-center justify-center">
-                <Calendar size={20} className="text-ktip-tropical-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.eventCount}</p>
-                <p className="text-xs text-gray-500">Total Events</p>
+          {canSeeUsers && (
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
+                  <Users size={20} className="text-ktip-ocean-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{stats.userCount}</p>
+                  <p className="text-xs text-gray-500">Total Users</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="border border-ktip-sand-200 rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
-                <DollarSign size={20} className="text-ktip-ocean-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.grantCount}</p>
-                <p className="text-xs text-gray-500">Active Grants</p>
+          {canSeeEvents && (
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-ktip-tropical-100 flex items-center justify-center">
+                  <Calendar size={20} className="text-ktip-tropical-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{stats.eventCount}</p>
+                  <p className="text-xs text-gray-500">Total Events</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="border border-ktip-sand-200 rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
-                <MessageSquare size={20} className="text-ktip-sun-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.postCount}</p>
-                <p className="text-xs text-gray-500">Forum Posts</p>
+          {canSeeGrants && (
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
+                  <DollarSign size={20} className="text-ktip-ocean-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{stats.grantCount}</p>
+                  <p className="text-xs text-gray-500">Active Grants</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {analytics && (
+          {canSeeForums && (
+            <div className="border border-ktip-sand-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
+                  <MessageSquare size={20} className="text-ktip-sun-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{stats.postCount}</p>
+                  <p className="text-xs text-gray-500">Forum Posts</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {analytics && canSeeResources && (
             <div className="border border-ktip-sand-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
@@ -133,7 +162,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Climate Action Stats */}
-      {stats && (
+      {stats && canSeeClimate && (
         <div data-tutorial="admin-climate" className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <Leaf size={18} className="text-ktip-tropical-700" />
@@ -166,7 +195,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Analytics Charts */}
-      {analyticsLoading || !analytics ? (
+      {!canSeeAnalytics ? null : analyticsLoading || !analytics ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <div className="border border-ktip-sand-200 rounded-lg p-6 animate-pulse" key={i}>
@@ -263,31 +292,42 @@ export default function AdminDashboardPage() {
       <div data-tutorial="admin-quick-actions" className="border border-ktip-sand-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
-          <Link to="/events/new">
-            <Button size="sm" icon={<Plus size={14} />}>
-              Create Event
-            </Button>
-          </Link>
-          <Link to="/admin/grants">
-            <Button size="sm" variant="secondary" icon={<DollarSign size={14} />}>
-              Manage Grants
-            </Button>
-          </Link>
-          <Link to="/admin/resources">
-            <Button size="sm" variant="secondary" icon={<BookOpen size={14} />}>
-              Manage Resources
-            </Button>
-          </Link>
-          <Link to="/admin/users">
-            <Button size="sm" variant="outline" icon={<Users size={14} />}>
-              Manage Users
-            </Button>
-          </Link>
+          {/* event:create, not event:manage — publishing an event under your own
+              name is something every supervisor can do. */}
+          {auth.can('event:create') && (
+            <Link to="/events/new">
+              <Button size="sm" icon={<Plus size={14} />}>
+                Create Event
+              </Button>
+            </Link>
+          )}
+          {canSeeGrants && (
+            <Link to="/admin/grants">
+              <Button size="sm" variant="secondary" icon={<DollarSign size={14} />}>
+                Manage Grants
+              </Button>
+            </Link>
+          )}
+          {canSeeResources && (
+            <Link to="/admin/resources">
+              <Button size="sm" variant="secondary" icon={<BookOpen size={14} />}>
+                Manage Resources
+              </Button>
+            </Link>
+          )}
+          {canSeeUsers && (
+            <Link to="/admin/users">
+              <Button size="sm" variant="outline" icon={<Users size={14} />}>
+                Manage Users
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Navigation Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+        {canSeeEvents && (
         <Link
           to="/admin/events"
           className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
@@ -305,7 +345,9 @@ export default function AdminDashboardPage() {
             <ArrowRight size={16} className="text-gray-300 group-hover:text-ktip-ocean-500 transition-colors" />
           </div>
         </Link>
+        )}
 
+        {canSeeUsers && (
         <Link
           to="/admin/users"
           className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
@@ -323,7 +365,9 @@ export default function AdminDashboardPage() {
             <ArrowRight size={16} className="text-gray-300 group-hover:text-ktip-ocean-500 transition-colors" />
           </div>
         </Link>
+        )}
 
+        {canSeeGrants && (
         <Link
           to="/admin/grants"
           className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
@@ -341,7 +385,9 @@ export default function AdminDashboardPage() {
             <ArrowRight size={16} className="text-gray-300 group-hover:text-ktip-ocean-500 transition-colors" />
           </div>
         </Link>
+        )}
 
+        {canSeeForums && (
         <Link
           to="/admin/forums"
           className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
@@ -359,7 +405,9 @@ export default function AdminDashboardPage() {
             <ArrowRight size={16} className="text-gray-300 group-hover:text-ktip-ocean-500 transition-colors" />
           </div>
         </Link>
+        )}
 
+        {canSeeResources && (
         <Link
           to="/admin/resources"
           className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
@@ -377,6 +425,7 @@ export default function AdminDashboardPage() {
             <ArrowRight size={16} className="text-gray-300 group-hover:text-ktip-ocean-500 transition-colors" />
           </div>
         </Link>
+        )}
       </div>
     </>
   )

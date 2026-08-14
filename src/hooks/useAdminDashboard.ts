@@ -198,6 +198,25 @@ export function useAdminUserActions() {
     },
   })
 
+  // 118. The answer to "I lost my phone and my recovery codes" — without it a
+  // blocking second factor is a one-way door.
+  const resetMfaMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const auth = await getAuthHeader()
+      const res = await fetch('/api/admin/reset-mfa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: auth },
+        body: JSON.stringify({ user_id: userId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to reset two-step verification')
+      return json as { success: true; cleared: number; warning?: string }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+    },
+  })
+
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
       const auth = await getAuthHeader()
@@ -232,23 +251,28 @@ export function useAdminUserActions() {
 
   const deleteUser = (userId: string) => deleteUserMutation.mutateAsync(userId)
 
+  const resetMfa = (userId: string) => resetMfaMutation.mutateAsync(userId)
+
   return {
     updateRoles,
     toggleVerified,
     createUser,
     resetPassword,
+    resetMfa,
     deleteUser,
     loading:
       updateRolesMutation.isPending ||
       toggleVerifiedMutation.isPending ||
       createUserMutation.isPending ||
       resetPasswordMutation.isPending ||
+      resetMfaMutation.isPending ||
       deleteUserMutation.isPending,
     error:
       updateRolesMutation.error ||
       toggleVerifiedMutation.error ||
       createUserMutation.error ||
       resetPasswordMutation.error ||
+      resetMfaMutation.error ||
       deleteUserMutation.error,
   }
 }

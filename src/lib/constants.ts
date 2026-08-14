@@ -60,14 +60,41 @@ export const DIRECTORY_ROLE_LABELS: Record<string, Copy> = Object.fromEntries(
   ])
 )
 
+/**
+ * Badge styling per role. A slug missing from here renders with an undefined
+ * className, which is a bare unstyled chip rather than a visible error — so the
+ * gap is easy to introduce and hard to notice. Every non-alias slug is listed.
+ *
+ * The admin tier shares the navy family, darkest at the top, so the three seats
+ * read as one group at a glance in the member table.
+ */
 export const ROLE_COLORS: Record<string, string> = {
+  // Admin tier
+  super_admin: 'bg-brand-navy text-white border-brand-navy',
+  oecs: 'bg-brand-navy text-white border-brand-navy',
+  people_supervisor: 'bg-ktip-ocean-700 text-white border-ktip-ocean-700',
+  programme_supervisor: 'bg-ktip-tropical-700 text-white border-ktip-tropical-700',
+  safety_admin: 'bg-red-100 text-red-800 border-red-200',
+
+  // Organization tier
+  investor: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
+  sme: 'bg-ktip-sand-100 text-ktip-sand-800 border-ktip-sand-200',
+  private_sector: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
+  educational_partner: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  chamber_admin: 'bg-ktip-sun-50 text-ktip-sun-800 border-ktip-sun-100',
+  ngo: 'bg-ktip-tropical-50 text-ktip-tropical-800 border-ktip-tropical-100',
+  bso: 'bg-ktip-sun-50 text-ktip-sun-700 border-ktip-sun-100',
+  research_institution: 'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-100',
+  government: 'bg-ktip-sand-200 text-ktip-sand-900 border-ktip-sand-300',
+  diaspora: 'bg-ktip-ocean-100 text-ktip-ocean-800 border-ktip-ocean-200',
+  igo: 'bg-ktip-sand-50 text-ktip-sand-700 border-ktip-sand-200',
+
+  // Individual tier
   student: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   mentor: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-  investor: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
   entrepreneur: 'bg-ktip-ocean-50 text-ktip-ocean-600 border-ktip-ocean-100',
-  private_sector: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
   faculty: 'bg-ktip-tropical-50 text-ktip-tropical-800 border-ktip-tropical-100',
-  oecs: 'bg-brand-navy text-white border-brand-navy',
+  researcher: 'bg-ktip-ocean-50 text-ktip-ocean-800 border-ktip-ocean-200',
 }
 
 /**

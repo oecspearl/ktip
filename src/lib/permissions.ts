@@ -35,6 +35,16 @@ export interface RoleDefinition {
   selfAssignable: boolean
   /** Granted only after institution / chamber / admin review. */
   requiresVerification: boolean
+  /**
+   * Holders must enrol a second factor before reaching the app (118).
+   *
+   * A compiled mirror of role_definitions.requires_mfa, and never authoritative:
+   * the DB column is the switch, this exists so the signup and onboarding paths
+   * can route without waiting on a round trip. If the two disagree the member
+   * lands on the dashboard and ProtectedRoute bounces them — a flash, never a
+   * bypass.
+   */
+  requiresMfa?: boolean
   /** Hidden from the matrix — resolves to another role. */
   aliasOf?: RoleSlug
   sortOrder: number
@@ -50,6 +60,32 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 10,
+  },
+  // The two supervisor seats. Same tier as each other, deliberately: neither
+  // reports to the other, and the split is by subject matter rather than by
+  // seniority. What keeps them apart is that their domain keys are disjoint —
+  // rbac-parity.test.ts fails if anyone widens one into the other's territory.
+  //
+  // Neither holds org:manage, members:manage or role:manage. Assigning roles and
+  // editing this matrix stays with super_admin alone, so a supervisor cannot
+  // promote themselves and cannot promote each other.
+  {
+    slug: 'people_supervisor',
+    label: msg`People & Trust Supervisor (Marvin)`,
+    tier: 'admin',
+    description: msg`Owns who people are and how they behave: member records (read-only), verification, institutions, chamber review, moderation and grievances.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 12,
+  },
+  {
+    slug: 'programme_supervisor',
+    label: msg`Programmes Supervisor (Royston)`,
+    tier: 'admin',
+    description: msg`Owns what the platform publishes: projects, grants, forums, resources, achievements and employers. Events and the venue stay with the Super Admin.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 14,
   },
   {
     slug: 'safety_admin',
@@ -190,6 +226,10 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: msg`Builds and launches innovations, applies for grants.`,
     selfAssignable: true,
     requiresVerification: false,
+    // The only role with this on at 118. It is self-assignable and it applies
+    // for money, which is exactly the pair that makes a throwaway account worth
+    // somebody's time.
+    requiresMfa: true,
     sortOrder: 80,
   },
   {
@@ -290,6 +330,7 @@ export type PermissionCategory =
   | 'moderation'
   | 'grants'
   | 'projects'
+  | 'content'
   | 'community'
   | 'messaging'
   | 'verification'
@@ -313,6 +354,7 @@ export const PERMISSION_CATEGORY_LABELS: Record<PermissionCategory, string> = {
   moderation: 'Moderation & Safety',
   grants: 'Grants & Funding',
   projects: 'Projects',
+  content: 'Content & Programmes',
   community: 'Community',
   messaging: 'Messaging',
   verification: 'Verification',
@@ -322,6 +364,10 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   // Platform
   { key: 'org:manage', label: msg`Manage platform`, description: msg`Global settings, policy and system configuration.`, category: 'platform', safeguard: false, sortOrder: 10 },
   { key: 'members:manage', label: msg`Manage members`, description: msg`Create, edit, suspend and delete user accounts.`, category: 'platform', safeguard: false, sortOrder: 20 },
+  // Read without write. /admin/users is the one console page two people share:
+  // the People supervisor needs the member list to do verification and
+  // moderation work, and creating or deleting an account is a different act.
+  { key: 'members:view', label: msg`View members`, description: msg`Read the member list and account state, without creating, deleting or resetting anyone.`, category: 'platform', safeguard: false, sortOrder: 25 },
   { key: 'role:manage', label: msg`Manage roles & permissions`, description: msg`Assign roles and edit this permission matrix.`, category: 'platform', safeguard: false, sortOrder: 30 },
   { key: 'audit:view', label: msg`View audit logs`, description: msg`Read permission-change and moderation audit trails.`, category: 'platform', safeguard: false, sortOrder: 40 },
 
@@ -356,6 +402,28 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   { key: 'sme:verify', label: msg`Verify SMEs`, description: msg`Chamber of Commerce review of corporate registry data; issues Verified SME status.`, category: 'verification', safeguard: false, sortOrder: 210 },
   { key: 'institution:verify', label: msg`Verify institutions`, description: msg`Approve schools and chambers, and the email domains they own.`, category: 'verification', safeguard: false, sortOrder: 220 },
   { key: 'institution:approve_students', label: msg`Approve student accounts`, description: msg`Approve students registering on the institution’s verified email domain.`, category: 'verification', safeguard: true, sortOrder: 230 },
+  { key: 'verification:review', label: msg`Review verification requests`, description: msg`Work the /admin/verification queue and set a member’s verified badge.`, category: 'verification', safeguard: false, sortOrder: 235 },
+
+  // Content & Programmes — the domain keys carved out of org:manage in
+  // migration 116.
+  //
+  // org:manage was a single bit standing behind fifteen of the twenty-two admin
+  // pages, so there was no way to hand someone Grants without also handing them
+  // the Error Simulator. Each key below is one console page plus the RLS
+  // policies that page writes through; org:manage survives as the residual
+  // operator key (analytics, UAT, feedback, integrations, partner API, errors).
+  //
+  // event:manage is defined even though only super_admin holds it. That is the
+  // point: the events and venue policies stop naming `super_admin` directly, so
+  // delegating them later is one toggle at /admin/roles rather than another
+  // migration.
+  { key: 'project:manage_all', label: msg`Administer all projects`, description: msg`Edit, feature, archive and delete any project, not only owned ones.`, category: 'content', safeguard: false, sortOrder: 240 },
+  { key: 'event:manage', label: msg`Administer all events`, description: msg`Edit any event and its venue, schedule, speakers, articles and registrations.`, category: 'content', safeguard: false, sortOrder: 245 },
+  { key: 'grant:manage', label: msg`Administer grants`, description: msg`Edit any funding call and review, decide and audit the applications to it.`, category: 'content', safeguard: false, sortOrder: 250 },
+  { key: 'forum:manage', label: msg`Administer forums`, description: msg`Edit, pin and remove any post or reply on any board.`, category: 'content', safeguard: false, sortOrder: 255 },
+  { key: 'resource:manage', label: msg`Administer resources`, description: msg`Publish, edit and withdraw resource-library entries.`, category: 'content', safeguard: false, sortOrder: 260 },
+  { key: 'achievement:manage', label: msg`Administer achievements`, description: msg`Define badges and trophies and award or revoke them.`, category: 'content', safeguard: false, sortOrder: 265 },
+  { key: 'employer:manage', label: msg`Administer employers`, description: msg`Create, verify and edit employer organisations and their member lists.`, category: 'content', safeguard: false, sortOrder: 270 },
 ]
 
 export const PERMISSION_BY_KEY: Record<string, PermissionDefinition> = Object.fromEntries(
@@ -374,6 +442,63 @@ export const ALL_PERMISSION_KEYS: PermissionKey[] = PERMISSION_DEFINITIONS.map((
  */
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   super_admin: ALL_PERMISSION_KEYS,
+
+  // The two supervisors. Each holds their own domain keys, plus the ordinary
+  // participant bundle so they can create a project, apply for a grant or post
+  // to a board like any other member — which is what makes the cross-checking
+  // in docs/QA-RELAY-SESSION.md possible without a second account each.
+  //
+  // What neither holds: org:manage, members:manage, role:manage, and each
+  // other's domain keys.
+
+  people_supervisor: [
+    'members:view',
+    'audit:view',
+    'moderation:view',
+    'moderation:action',
+    'moderation:escalate',
+    'sme:verify',
+    'institution:verify',
+    'institution:approve_students',
+    'verification:review',
+    // participant bundle
+    'grant:view',
+    'grant:apply',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'mentorship:offer',
+    'dm:initiate',
+    'dm:receive',
+    'dm:supervise',
+  ],
+
+  // grant:manage_funds rides with grant:manage: the person deciding an
+  // application is the person recording the award, and splitting those across
+  // two seats would only mean every decision waits on someone else.
+  programme_supervisor: [
+    'project:manage_all',
+    'grant:manage',
+    'grant:post',
+    'grant:manage_funds',
+    'forum:manage',
+    'resource:manage',
+    'achievement:manage',
+    'employer:manage',
+    // participant bundle
+    'grant:view',
+    'grant:apply',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'forum:comment',
+    'mentorship:offer',
+    'dm:initiate',
+    'dm:receive',
+  ],
 
   // The verification keys are here because a safety admin is the first-line
   // receipt for every complaint, and a complaint about a body claiming to be a
@@ -654,6 +779,81 @@ export const SAFEGUARD_DENY: Record<string, PermissionKey[]> = {
 }
 
 // ============================================================
+// The admin console
+// ============================================================
+
+/**
+ * Holding any one of these opens /admin.
+ *
+ * It exists because the gate was previously spelled out as
+ * `can('org:manage') || can('moderation:view')` in five separate files, and
+ * splitting org:manage into domain keys made every one of those expressions
+ * wrong in the same way: a Programmes supervisor holds neither key and would
+ * have been locked out of the console that is entirely theirs.
+ *
+ * This is an admission gate, not an authorization. What a console-holder can
+ * actually see is decided per page by AdminLayout's `requires` and the
+ * PermissionRoute around each route; what they can actually write is decided in
+ * SQL.
+ *
+ * `sme:verify` and `institution:verify` are deliberately NOT here, even though
+ * two console pages require them. Chambers, BSOs, governments, diaspora bodies
+ * and IGOs all hold one or the other — they vet the members they are competent
+ * to vet — and listing them would hand five organisation roles the admin
+ * console. Everyone who should reach /admin/chamber or /admin/institutions is
+ * admitted by another key on this list.
+ */
+export const ADMIN_CONSOLE_KEYS: PermissionKey[] = [
+  'org:manage',
+  'members:view',
+  'members:manage',
+  'role:manage',
+  'moderation:view',
+  'verification:review',
+  'project:manage_all',
+  'event:manage',
+  'grant:manage',
+  'forum:manage',
+  'resource:manage',
+  'achievement:manage',
+  'employer:manage',
+]
+
+/** True when this permission set should be shown the admin console at all. */
+export function opensAdminConsole(can: (permission: PermissionKey) => boolean): boolean {
+  return ADMIN_CONSOLE_KEYS.some(can)
+}
+
+/**
+ * The keys that define each supervisor seat, excluding the participant bundle
+ * both of them carry. These two lists must stay disjoint — that is the whole
+ * content of the three-way split, and rbac-parity.test.ts fails if they overlap.
+ */
+export const SUPERVISOR_DOMAIN_KEYS: Record<string, PermissionKey[]> = {
+  people_supervisor: [
+    'members:view',
+    'audit:view',
+    'moderation:view',
+    'moderation:action',
+    'moderation:escalate',
+    'sme:verify',
+    'institution:verify',
+    'institution:approve_students',
+    'verification:review',
+  ],
+  programme_supervisor: [
+    'project:manage_all',
+    'grant:manage',
+    'grant:post',
+    'grant:manage_funds',
+    'forum:manage',
+    'resource:manage',
+    'achievement:manage',
+    'employer:manage',
+  ],
+}
+
+// ============================================================
 // Client-side helpers (rendering only — SQL is authoritative)
 // ============================================================
 
@@ -668,6 +868,26 @@ export function expandRoles(roles: readonly string[] | null | undefined): RoleSl
     if (alias) out.add(alias)
   }
   return [...out]
+}
+
+/**
+ * Does this role demand a second factor (118)?
+ *
+ * Rendering and routing only. role_definitions.requires_mfa is the switch, and
+ * account_mfa_satisfied() is what actually refuses a write. Unknown slugs return
+ * false rather than throwing: this is called with whatever the role picker held,
+ * and a typo must not take the signup form down.
+ */
+export function roleRequiresMfa(role: string | null | undefined): boolean {
+  if (!role) return false
+  return expandRoles([role]).some(
+    (slug) => ROLE_DEFINITIONS.find((definition) => definition.slug === slug)?.requiresMfa === true,
+  )
+}
+
+/** True when any role in the set demands a second factor. */
+export function rolesRequireMfa(roles: readonly string[] | null | undefined): boolean {
+  return expandRoles(roles).some((slug) => roleRequiresMfa(slug))
 }
 
 /** True when the permission is permanently denied to any of these roles. */

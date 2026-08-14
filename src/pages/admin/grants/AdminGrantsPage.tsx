@@ -51,7 +51,7 @@ export default function AdminGrantsPage() {
   // Mirrors migration 077's DELETE policy. Grants created before 077 have no
   // created_by and are OECS-only — showing the button to their original poster
   // would only produce a refusal, because the DB cannot know who that was.
-  const isOecs = auth.can('org:manage')
+  const isOecs = auth.can('grant:manage')
   const canDeleteGrant = (grant: Grant) =>
     isOecs || (!!grant.created_by && grant.created_by === auth.user?.id)
 

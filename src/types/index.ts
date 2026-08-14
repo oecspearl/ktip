@@ -234,6 +234,23 @@ export interface Profile {
   requires_consent?: boolean
   consent_recorded_at?: string | null
   /**
+   * Two-factor state (118). Derived from role_definitions.requires_mfa and
+   * auth.mfa_factors, and guarded the same way the age and consent columns are.
+   *
+   * `requires_mfa_enrollment` is the gate ProtectedRoute reads. Optional for the
+   * same deploy-ahead-of-migration reason as every flag above it, and that is
+   * load-bearing here: a missing column has to read as "nothing owed", or an app
+   * that ships before the migration traps the entire membership on
+   * /security/set-up.
+   *
+   * `mfa_grandfathered` is TRUE for every account that predates 118. It is
+   * surfaced only so Settings can explain why a member is being offered two-step
+   * verification rather than made to do it.
+   */
+  requires_mfa_enrollment?: boolean
+  mfa_enrolled_at?: string | null
+  mfa_grandfathered?: boolean
+  /**
    * Language settings (097, 100). All three optional for the same
    * deploy-ahead-of-migration reason as the fields above.
    *
@@ -1044,6 +1061,23 @@ export interface UserEmailAlias {
   verified_at: string | null
   token_expires_at: string | null
   created_at: string
+}
+
+// Two-factor authentication (118)
+
+/** A TOTP factor as the UI needs it. Never carries the secret or the QR. */
+export interface MfaFactorSummary {
+  id: string
+  friendlyName: string | null
+  status: string
+  createdAt: string
+}
+
+/** Return shape of the mfa_backup_code_status() RPC — counts, never hashes. */
+export interface MfaBackupCodeStatus {
+  total: number
+  remaining: number
+  issued_at: string | null
 }
 
 // Grievance types

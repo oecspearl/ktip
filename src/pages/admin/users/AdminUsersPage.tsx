@@ -5,6 +5,7 @@ import { Modal } from '../../../components/ui/Modal'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { useAdminUsers, useAdminUserActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
+import { useAuth } from '../../../contexts/AuthContext'
 import { ROLE_LABELS, ROLE_COLORS } from '../../../lib/constants'
 import { ROLE_DEFINITIONS } from '../../../lib/permissions'
 import { debounce } from '../../../lib/utils'
@@ -20,6 +21,7 @@ import {
   XCircle,
   UserPlus,
   KeyRound,
+  SmartphoneNfc,
   Trash2,
   Eye,
   EyeOff,
@@ -45,6 +47,7 @@ const ALL_ROLES: UserRole[] = ROLE_DEFINITIONS.filter((r) => !r.aliasOf).map((r)
 export default function AdminUsersPage() {
     const { i18n } = useLingui()
   const toast = useToast()
+  const auth = useAuth()
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
@@ -61,7 +64,24 @@ export default function AdminUsersPage() {
     verified: verifiedFilter || undefined,
   })
 
-  const { updateRoles, toggleVerified, createUser, resetPassword, deleteUser, loading: actionLoading } = useAdminUserActions()
+  const { updateRoles, toggleVerified, createUser, resetPassword, resetMfa, deleteUser, loading: actionLoading } = useAdminUserActions()
+
+  // This page is the one console surface two administrators share, so reading
+  // it and acting on it are separate keys.
+  //
+  //   members:view        the list itself, and the filters   — People supervisor
+  //   members:manage      create, reset password, delete     — Super Admin only
+  //   role:manage         edit roles                         — Super Admin only
+  //   verification:review the verified badge                 — People supervisor
+  //
+  // Every one of these is enforced again server-side: api/admin/* calls
+  // authorize() with members:manage, set_user_roles() checks role:manage, and
+  // the profiles UPDATE policy answers to members:manage or verification:review.
+  // Hiding a control the server would refuse is the difference between a closed
+  // door and a broken screen.
+  const canManageMembers = auth.can('members:manage')
+  const canManageRoles = auth.can('role:manage')
+  const canReviewVerification = auth.can('verification:review')
 
   // Edit roles modal
   const [editingUser, setEditingUser] = useState<Profile | null>(null)
@@ -86,6 +106,12 @@ export default function AdminUsersPage() {
   const [resetUser, setResetUser] = useState<{ id: string; name: string } | null>(null)
   const [resetNewPassword, setResetNewPassword] = useState('')
   const [showResetPassword, setShowResetPassword] = useState(false)
+
+  // Reset two-step verification confirm (118)
+  const [confirmResetMfa, setConfirmResetMfa] = useState<{
+    userId: string
+    userName: string
+  } | null>(null)
 
   // Delete user confirm
   const [confirmDelete, setConfirmDelete] = useState<{
@@ -189,6 +215,23 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleResetMfa = async () => {
+    const action = confirmResetMfa
+    if (!action) return
+
+    try {
+      const result = await resetMfa(action.userId)
+      // The endpoint reports a 200 with a warning when the reset landed but the
+      // audit row did not. Surfacing that is the point — an untraceable reset is
+      // exactly what the audit table exists to prevent.
+      if (result.warning) toast.error(result.warning)
+      else toast.success(`Two-step verification reset for ${action.userName}`)
+      setConfirmResetMfa(null)
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset two-step verification')
+    }
+  }
+
   const handleDeleteUser = async () => {
     const action = confirmDelete
     if (!action) return
@@ -269,10 +312,12 @@ export default function AdminUsersPage() {
               Clear all
             </button>
           )}
-          <Button onClick={() => setCreateModalOpen(true)} className="sm:ml-auto shrink-0">
-            <UserPlus size={16} />
-            Create User
-          </Button>
+          {canManageMembers && (
+            <Button onClick={() => setCreateModalOpen(true)} className="sm:ml-auto shrink-0">
+              <UserPlus size={16} />
+              Create User
+            </Button>
+          )}
         </div>
       </div>
 
@@ -363,26 +408,43 @@ export default function AdminUsersPage() {
                     {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => openEditRoles(user)}
-                          className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
-                          title="Edit roles"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setResetUser({
-                            id: user.id,
-                            name: user.display_name || 'this user',
-                          })}
-                          className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
-                          title="Reset password"
-                        >
-                          <KeyRound size={16} />
-                        </button>
-                        {user.is_verified ? (
+                        {canManageRoles && (
+                          <button
+                            type="button"
+                            onClick={() => openEditRoles(user)}
+                            className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
+                            title="Edit roles"
+                          >
+                            <Edit size={16} />
+                          </button>
+                        )}
+                        {canManageMembers && (
+                          <button
+                            type="button"
+                            onClick={() => setResetUser({
+                              id: user.id,
+                              name: user.display_name || 'this user',
+                            })}
+                            className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
+                            title="Reset password"
+                          >
+                            <KeyRound size={16} />
+                          </button>
+                        )}
+                        {canManageMembers && (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmResetMfa({
+                              userId: user.id,
+                              userName: user.display_name || 'this user',
+                            })}
+                            className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
+                            title="Reset two-step verification"
+                          >
+                            <SmartphoneNfc size={16} />
+                          </button>
+                        )}
+                        {!canReviewVerification ? null : user.is_verified ? (
                           <button
                             type="button"
                             onClick={() => setConfirmVerify({
@@ -409,17 +471,19 @@ export default function AdminUsersPage() {
                             <ShieldCheck size={16} />
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDelete({
-                            userId: user.id,
-                            userName: user.display_name || 'this user',
-                          })}
-                          className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete user"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {canManageMembers && (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDelete({
+                              userId: user.id,
+                              userName: user.display_name || 'this user',
+                            })}
+                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            title="Delete user"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -653,6 +717,18 @@ export default function AdminUsersPage() {
         loading={actionLoading}
         onConfirm={handleToggleVerified}
         onCancel={() => setConfirmVerify(null)}
+      />
+
+      {/* Confirm Reset Two-Step Verification Modal (118) */}
+      <ConfirmModal
+        open={!!confirmResetMfa}
+        title="Reset Two-Step Verification"
+        message={`Remove the authenticator app and recovery codes for "${confirmResetMfa?.userName}"? They will be asked to set up two-step verification again the next time they sign in. This is recorded in the audit trail. Confirm their identity by another means first.`}
+        confirmLabel="Reset"
+        confirmVariant="danger"
+        loading={actionLoading}
+        onConfirm={handleResetMfa}
+        onCancel={() => setConfirmResetMfa(null)}
       />
 
       {/* Confirm Delete User Modal */}

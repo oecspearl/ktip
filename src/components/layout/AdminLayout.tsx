@@ -31,12 +31,19 @@ import type { PermissionKey } from '../../types'
 /**
  * The admin sidebar.
  *
- * `requires` is what keeps this honest. AdminRoute admits anyone holding
- * org:manage OR moderation:view, so a Safety Admin — whose whole remit is the
- * moderation queue — was being shown all 22 entries, including Roles &
- * Permissions and Partner API. The pages themselves were safe (RLS and the
- * api/admin/* guards both refuse), but every one of them rendered as an empty
- * screen or a 403, which reads as a broken console rather than a closed door.
+ * `requires` is what keeps this honest. AdminRoute admits anyone holding one of
+ * ADMIN_CONSOLE_KEYS, so a Safety Admin — whose whole remit is the moderation
+ * queue — was being shown all 22 entries, including Roles & Permissions and
+ * Partner API. The pages themselves were safe (RLS and the api/admin/* guards
+ * both refuse), but every one of them rendered as an empty screen or a 403,
+ * which reads as a broken console rather than a closed door.
+ *
+ * Since 116 these keys are also the division of labour between the three
+ * administrators. Fifteen of the entries below read `org:manage` until then,
+ * which is why handing out part of the console was impossible: one key opened
+ * Grants and the Error Simulator alike. What is left on org:manage is the
+ * residual operator surface — analytics, UAT, feedback, integrations, partner
+ * API and the error console.
  *
  * A super_admin holds every permission, so their sidebar is unchanged.
  */
@@ -48,24 +55,26 @@ const adminNavItems: {
   requires?: PermissionKey
 }[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/projects', label: 'Projects', icon: FolderKanban, requires: 'org:manage' },
-  { href: '/admin/events', label: 'Events', icon: Calendar, requires: 'org:manage' },
-  { href: '/admin/users', label: 'Users', icon: Users, requires: 'members:manage' },
+  { href: '/admin/projects', label: 'Projects', icon: FolderKanban, requires: 'project:manage_all' },
+  { href: '/admin/events', label: 'Events', icon: Calendar, requires: 'event:manage' },
+  // Read and write are two keys here, and two people. The list is Marvin's
+  // working surface; creating and deleting accounts is the Super Admin's.
+  { href: '/admin/users', label: 'Users', icon: Users, requires: 'members:view' },
   { href: '/admin/roles', label: 'Roles & Permissions', icon: ShieldCheck, requires: 'role:manage' },
-  { href: '/admin/achievements', label: 'Achievements', icon: Trophy, requires: 'org:manage' },
+  { href: '/admin/achievements', label: 'Achievements', icon: Trophy, requires: 'achievement:manage' },
   { href: '/admin/moderation', label: 'Moderation', icon: ShieldAlert, requires: 'moderation:view' },
   { href: '/admin/institutions', label: 'Institutions', icon: GraduationCap, requires: 'institution:verify' },
   { href: '/admin/chamber', label: 'Chamber Review', icon: Landmark, requires: 'sme:verify' },
-  { href: '/admin/grants', label: 'Grants', icon: DollarSign, requires: 'org:manage' },
-  { href: '/admin/forums', label: 'Forums', icon: MessageSquare, requires: 'org:manage' },
-  { href: '/admin/resources', label: 'Resources', icon: BookOpen, requires: 'org:manage' },
+  { href: '/admin/grants', label: 'Grants', icon: DollarSign, requires: 'grant:manage' },
+  { href: '/admin/forums', label: 'Forums', icon: MessageSquare, requires: 'forum:manage' },
+  { href: '/admin/resources', label: 'Resources', icon: BookOpen, requires: 'resource:manage' },
   // Grievances and moderation are the same job seen from two directions, so
-  // this is the one non-org:manage page a Safety Admin keeps.
+  // they carry the same key.
   { href: '/admin/grievances', label: 'Grievances', icon: Flag, requires: 'moderation:view' },
   { href: '/admin/feedback', label: 'Feedback', icon: MessageCircle, requires: 'org:manage' },
-  { href: '/admin/verification', label: 'Verification', icon: BadgeCheck, requires: 'org:manage' },
+  { href: '/admin/verification', label: 'Verification', icon: BadgeCheck, requires: 'verification:review' },
   { href: '/admin/integrations', label: 'Integrations', icon: Puzzle, requires: 'org:manage' },
-  { href: '/admin/employers', label: 'Employers', icon: Building2, requires: 'org:manage' },
+  { href: '/admin/employers', label: 'Employers', icon: Building2, requires: 'employer:manage' },
   { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound, requires: 'org:manage' },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, requires: 'org:manage' },
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck, requires: 'org:manage' },

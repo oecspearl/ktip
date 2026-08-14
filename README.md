@@ -256,6 +256,10 @@ All project documentation lives in [docs/](docs/):
 - [TRANSLATION-SETUP.md](docs/TRANSLATION-SETUP.md) — OpenRouter translation setup
 - [PRIVACY-AND-TERMS.md](docs/PRIVACY-AND-TERMS.md) — privacy policy and terms source
 - [TESTER-GUIDE.md](docs/TESTER-GUIDE.md) — guide for manual testers
+- [QA-RELAY-SESSION.md](docs/QA-RELAY-SESSION.md) — the three administrators, one sitting, cross-checking each other's handoffs
+- [QA-SUPER-ADMIN.md](docs/QA-SUPER-ADMIN.md) — solo checklist: roles, members, events, venue, operator surface
+- [QA-MARVIN-PEOPLE.md](docs/QA-MARVIN-PEOPLE.md) — solo checklist: verification, institutions, chamber, moderation, grievances
+- [QA-ROYSTON-PROGRAMMES.md](docs/QA-ROYSTON-PROGRAMMES.md) — solo checklist: projects, grants, forums, resources, achievements, employers
 - [TODO.md](docs/TODO.md) — manual steps needing Supabase dashboard access
 
 ## 📚 Learn More

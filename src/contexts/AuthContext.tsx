@@ -70,6 +70,19 @@ interface AuthContextType {
   permissions: Set<PermissionKey>
   can: (permission: PermissionKey) => boolean
   isAdmin: boolean
+  /**
+   * This session holds a verified second factor but has not proven it yet (118).
+   *
+   * Assurance level is a property of the SESSION, not of the account, which is
+   * why it lives here rather than on `profile`. It is false for anyone with no
+   * verified factor — GoTrue reports nextLevel 'aal1' for them — so it can never
+   * collide with the enrolment gate on `profile.requires_mfa_enrollment`.
+   */
+  mfaChallengeRequired: boolean
+  /** Recompute the flag above after a challenge swaps the access token. */
+  recheckMfaChallenge: () => Promise<void>
+  /** Refetch the profile row — the MFA pages need the gate flags to be current. */
+  refreshProfile: () => Promise<void>
   /** Current operating context for multi-role accounts; null means all roles. */
   activeRole: RoleSlug | null
   setActiveRole: (role: RoleSlug | null) => Promise<void>
@@ -257,6 +270,73 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       cancelled = true
     }
   }, [user?.id, profileLoading, profile?.requires_consent, queryClient])
+
+  // Two-factor state (118), and the two halves are genuinely different things.
+  //
+  // Enrolment lives on the profile row, and nothing on the SQL side writes it —
+  // there is deliberately no trigger on auth.mfa_factors, so this once-per-
+  // session call is the only thing that keeps the column true. It also catches
+  // the accounts the guard triggers structurally cannot: every service-role
+  // write, set_user_roles(), and vc_provision_identity() set
+  // ktip.bypass_profile_guard and skip the derive entirely.
+  //
+  // Failure is ignored on purpose, exactly as the minor check above: the column
+  // is a UI hint, and everything that has to be right calls
+  // account_mfa_satisfied() server-side.
+  const mfaCheckedFor = useRef<string | null>(null)
+  useEffect(() => {
+    const id = user?.id
+    if (!id || profileLoading || mfaCheckedFor.current === id) return
+    mfaCheckedFor.current = id
+    let cancelled = false
+    void (async () => {
+      const { data, error } = await (supabase as any).rpc('ensure_my_mfa_status')
+      if (cancelled || error) return
+      if (data !== profile?.requires_mfa_enrollment) {
+        await queryClient.invalidateQueries({ queryKey: ['profile', id] })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, profileLoading, profile?.requires_mfa_enrollment, queryClient])
+
+  // The challenge half is session state and cannot be cached on the profile.
+  //
+  // Keyed on the access token as well as the user id: verifying a factor swaps
+  // the token within one account, and that is precisely the moment the answer
+  // changes from true to false.
+  const [mfaChallengeRequired, setMfaChallengeRequired] = useState(false)
+
+  const readAssuranceLevel = useCallback(async () => {
+    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (error) return false
+    return data?.nextLevel === 'aal2' && data?.currentLevel === 'aal1'
+  }, [])
+
+  useEffect(() => {
+    if (!user?.id) {
+      setMfaChallengeRequired(false)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      const required = await readAssuranceLevel()
+      if (!cancelled) setMfaChallengeRequired(required)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, session?.access_token, readAssuranceLevel])
+
+  const recheckMfaChallenge = useCallback(async () => {
+    setMfaChallengeRequired(await readAssuranceLevel())
+  }, [readAssuranceLevel])
+
+  const refreshProfile = useCallback(async () => {
+    if (!user?.id) return
+    await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+  }, [user?.id, queryClient])
 
   const roles = useMemo(() => expandRoles(profile?.roles), [profile?.roles])
 
@@ -587,6 +667,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       permissions,
       can,
       isAdmin,
+      mfaChallengeRequired,
+      recheckMfaChallenge,
+      refreshProfile,
       activeRole,
       setActiveRole,
       signIn,
@@ -610,6 +693,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       permissions,
       can,
       isAdmin,
+      mfaChallengeRequired,
+      recheckMfaChallenge,
+      refreshProfile,
       activeRole,
       setActiveRole,
       signIn,

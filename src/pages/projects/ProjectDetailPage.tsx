@@ -59,8 +59,10 @@ export default function ProjectDetailPage() {
 
   const isOwner = project?.owner_id === auth.user?.id
   // Capability, not slug — an admin created after 063 holds super_admin
-  // without the legacy oecs slug and was being shown the member view.
-  const isAdmin = auth.can('org:manage')
+  // without the legacy oecs slug and was being shown the member view. Narrowed
+  // from org:manage to the project key in 116: what this decides is whether
+  // somebody may administer a project they do not own.
+  const isAdmin = auth.can('project:manage_all')
   const myMembership = (members || []).find(
     (m) => m.user_id === auth.user?.id && m.status === 'accepted'
   )

@@ -20,6 +20,7 @@ import {
   VERIFICATION_GATED_ROLES,
 } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
+import { roleRequiresMfa } from '../../lib/permissions'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -246,6 +247,21 @@ export default function OnboardingPage() {
       }
 
       analytics.conversion('onboarding_complete', { role: selectedRole })
+
+      // 118: read the requirement off the role just chosen, NOT off the profile.
+      // updateProfile invalidates the profile query but does not await the
+      // refetch, so auth.profile.requires_mfa_enrollment is still the pre-write
+      // value here and would send an entrepreneur to the dashboard.
+      //
+      // roleRequiresMfa is the compiled mirror of role_definitions.requires_mfa.
+      // If an operator has toggled a role on that this bundle does not know
+      // about, the member lands on '/' and ProtectedRoute bounces them — a
+      // flash, never a bypass.
+      if (roleRequiresMfa(selectedRole)) {
+        navigate('/security/set-up', { replace: true })
+        return
+      }
+
       toast.success(t`Welcome to KTIP!`)
       navigate('/', { replace: true })
     } catch (error: any) {

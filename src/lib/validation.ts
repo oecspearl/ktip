@@ -124,6 +124,52 @@ export const dateOfBirthSchema = z
       ctx.addIssue({ code: 'custom', message: t`Enter a valid date of birth` })
     }
   })
+/**
+ * The six-digit code, shared by three screens (118): the email OTP that ends
+ * signup, the TOTP code that finishes enrolment, and the TOTP challenge on every
+ * later sign-in. One schema so the three cannot drift.
+ *
+ * NOTE the shape. `.length(6, '…')` is the obvious way to write this and it is
+ * the wrong way — a schema-builder argument freezes in English at import time.
+ * The check has to live inside superRefine, where it runs at parse time and
+ * resolves in the reader's language. See the note on PASSWORD_REQUIREMENTS.
+ */
+export const otpCodeSchema = z.string().superRefine((value, ctx) => {
+  const digits = (value ?? '').replace(/\D/g, '')
+  if (digits.length === 0) {
+    ctx.addIssue({ code: 'custom', message: t`Enter the code we sent you` })
+    return
+  }
+  if (digits.length !== 6) {
+    ctx.addIssue({ code: 'custom', message: t`The code is 6 digits` })
+  }
+})
+
+/**
+ * A recovery code. Mirrors the normalisation consume_mfa_backup_code() does in
+ * SQL (118), so a mistyped code is refused here rather than burning one of the
+ * ten attempts an hour the server allows.
+ */
+export const backupCodeSchema = z.string().superRefine((value, ctx) => {
+  const normalised = (value ?? '').replace(/[^0-9A-Za-z]/g, '').toUpperCase()
+  if (normalised.length === 0) {
+    ctx.addIssue({ code: 'custom', message: t`Enter a recovery code` })
+    return
+  }
+  if (normalised.length !== 10) {
+    ctx.addIssue({ code: 'custom', message: t`A recovery code is 10 characters` })
+    return
+  }
+  // Crockford base32 — I, L, O and U are not in the alphabet the codes are
+  // drawn from, so a code containing one was misread off the page.
+  if (/[ILOU]/.test(normalised)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: t`That code contains a letter we never use. Check for a mistyped 1 or 0.`,
+    })
+  }
+})
+
 export const COLLABORATION_VALUES = [
   'research_co_investigation',
   'knowledge_transfer',

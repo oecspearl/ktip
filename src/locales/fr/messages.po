@@ -40,6 +40,10 @@ msgstr "Ouvrir un événement dans la console d'administration vous donne un esp
 msgid "Request failed"
 msgstr "Échec de la requête"
 
+#: src/components/security/BackupCodesSheet.tsx
+msgid "Copy all"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Every policy and agreement, grouped by when it applies"
 msgstr ""
@@ -269,6 +273,11 @@ msgstr "Un étage de stands de sponsors autour d'un hall central, avec une scèn
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Could not open the file"
 msgstr "Impossible d'ouvrir le fichier"
+
+#: src/pages/security/MfaSetupPage.tsx
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Set up two-step verification"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.\n"
@@ -546,6 +555,10 @@ msgstr ""
 msgid "Boards and posts"
 msgstr "Tableaux et publications"
 
+#: src/pages/security/MfaSetupPage.tsx
+msgid "We could not start the setup. Reload the page and try again."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Help article — Resources & Integrations"
 msgstr "Article d'aide — Ressources et intégrations"
@@ -632,6 +645,10 @@ msgstr "Publiez des recherches, trouvez des collaborateurs et rejoignez des proj
 #: src/pages/settings/SettingsPage.tsx
 msgid "Notifications & display"
 msgstr "Notifications et affichage"
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your recovery codes stay valid but stop being useful — there will be no second step for them to recover."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The admin console"
@@ -1370,6 +1387,10 @@ msgstr "Toute la journée"
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "No extra details for this result."
 msgstr "Aucun détail supplémentaire pour ce résultat."
+
+#: src/pages/auth/SignupPage.tsx
+msgid "That code has expired. Send a new one."
+msgstr ""
 
 #: src/components/grants/SponsorNominationCard.tsx
 msgid "Awaiting their acceptance"
@@ -2928,6 +2949,10 @@ msgstr ""
 msgid "Once deleted, your account cannot be recovered. All your projects, events, messages, and profile data will be permanently removed."
 msgstr "Une fois supprimé, votre compte ne peut pas être récupéré. Tous vos projets, événements, messages et données de profil seront définitivement supprimés."
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Remove it"
+msgstr ""
+
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Load more members"
 msgstr "Charger plus de membres"
@@ -3192,6 +3217,10 @@ msgstr "Aucune subvention ouverte ne correspond à ces filtres — les subventio
 msgid "Declare a conflict of interest and step aside — including where they are working on something competing."
 msgstr ""
 
+#: src/components/security/TotpEnrollCard.tsx
+msgid "Code from your authenticator app"
+msgstr ""
+
 #: src/components/venue/room/RoomAnnouncements.tsx
 msgid "Show fewer"
 msgstr "Afficher moins"
@@ -3362,6 +3391,10 @@ msgstr "Résumez l'objectif de la candidature, le problème traité, votre appro
 msgid "Only Chamber-verified organisations are listed here."
 msgstr "Seules les organisations vérifiées par la Chambre sont répertoriées ici."
 
+#: src/components/security/BackupCodesSheet.tsx
+msgid "Copied"
+msgstr ""
+
 #: src/components/legal/MyTakedownNotices.tsx
 msgid "Why they say it infringes:"
 msgstr ""
@@ -3496,6 +3529,10 @@ msgstr "Décrivez les principales phases, activités et étapes du calendrier."
 
 #: src/i18n/harvested.ts
 msgid "If your content was removed"
+msgstr ""
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Authenticator"
 msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
@@ -3670,6 +3707,10 @@ msgid "Snippets autosave to your account and appear in your snippet list next ti
 "Share gives someone else the link and decides whether they can edit. Download takes the file out with the right extension for the language."
 msgstr "Les extraits sont enregistrés automatiquement dans votre compte et apparaissent dans votre liste d'extraits la prochaine fois.\n"
 ""
+
+#: src/pages/auth/SignupPage.tsx
+msgid "Send another code in {resendIn}s"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Answers questions about the platform and helps you draft text"
@@ -3860,6 +3901,10 @@ msgstr ""
 msgid "From {currency} {amount}"
 msgstr "À partir de {currency} {amount}"
 
+#: src/lib/validation.ts
+msgid "The code is 6 digits"
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Event description"
 msgstr "Description de l'événement"
@@ -3926,6 +3971,12 @@ msgid "Those three panels are placeholders. The role gating that decides who see
 msgstr "Ces trois panneaux sont des espaces réservés. Le contrôle d'accès par rôle qui décide qui les voit est entièrement en place, mais le contenu qu'ils doivent afficher n'est pas encore construit.\n"
 ""
 
+#. placeholder {0}: codeStatus.remaining
+#. placeholder {1}: codeStatus.total
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "{0} of {1} recovery codes left."
+msgstr ""
+
 #: src/i18n/harvested.ts
 #: src/lib/timeline.ts
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -3936,6 +3987,10 @@ msgstr "Non accepté"
 #: src/i18n/harvested.ts
 msgid "What is on my dashboard?"
 msgstr "Qu'y a-t-il sur mon tableau de bord ?"
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Could not remove your authenticator."
+msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "e.g. Flood early-warning alerts over SMS"
@@ -4029,6 +4084,10 @@ msgstr ""
 msgid "Invalid email or password. Please try again."
 msgstr "E-mail ou mot de passe incorrect. Veuillez réessayer."
 
+#: src/components/security/BackupCodesSheet.tsx
+msgid "Save these now — this is the only time they are shown. Each code works once, and they are how you get back in if you lose your phone."
+msgstr ""
+
 #: src/components/grants/SponsorNominationCard.tsx
 msgid "Faculty sponsor (optional)"
 msgstr ""
@@ -4096,11 +4155,19 @@ msgstr "Éditeur — Partagé avec vous"
 msgid "Loading topics from across the platform…"
 msgstr "Chargement des sujets depuis toute la plateforme…"
 
+#: src/pages/auth/SignupPage.tsx
+msgid "We've sent a 6-digit code to <0>{email}</0>. Enter it below to finish creating your account."
+msgstr ""
+
 #: src/components/layout/Footer.tsx
 #: src/pages/discover/DiscoverPage.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Explore"
 msgstr "Explorer"
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "An authenticator app code, on top of your password"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Boards"
@@ -4480,6 +4547,10 @@ msgstr "Échec de la mise à jour du rôle"
 msgid "Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice."
 msgstr ""
 
+#: src/components/security/TotpEnrollCard.tsx
+msgid "The code changes every 30 seconds."
+msgstr ""
+
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# forum reply} other {# forum replies}}"
 msgstr ""
@@ -4778,6 +4849,10 @@ msgstr "Utilisez le bouton « Signaler » sur le profil de l'utilisateur. Votre 
 #: src/pages/auth/LoginPage.tsx
 msgid "Log In"
 msgstr "Se connecter"
+
+#: src/pages/auth/SignupPage.tsx
+msgid "Verification code"
+msgstr ""
 
 #: src/components/calendar/CalendarFilterMenu.tsx
 msgid "Only my items"
@@ -5117,6 +5192,10 @@ msgstr "Comment fonctionnent les outils de rédaction par IA ?"
 msgid "Agree & Create Account"
 msgstr ""
 
+#: src/pages/security/MfaChallengePage.tsx
+msgid "Verify it's you"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Reporting"
 msgstr ""
@@ -5390,6 +5469,10 @@ msgstr "Accédez à Paramètres → Préférences. Vous pouvez activer ou désac
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Loading solutions…"
 msgstr "Chargement des solutions…"
+
+#: src/pages/auth/SignupPage.tsx
+msgid "One code, and the account is yours."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The Submission & Competition IP Terms apply the first time you enter a hackathon or submit a solution to an event."
@@ -5744,6 +5827,10 @@ msgstr "Parcourez les opportunités de subventions publiques."
 msgid "Experience"
 msgstr "Expérience"
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your new recovery codes"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Verifying"
 msgstr "En vérification"
@@ -5823,6 +5910,11 @@ msgstr ""
 #: src/components/courses/CourseCard.tsx
 msgid "Enrolling…"
 msgstr "Inscription en cours…"
+
+#: src/pages/security/MfaChallengePage.tsx
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Use a recovery code"
+msgstr ""
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Take the screenshot again"
@@ -5924,6 +6016,10 @@ msgstr "Équipe / Personnel"
 #: src/components/notes/StickyNoteGroupExpanded.tsx
 msgid "{0, plural, one {# note} other {# notes}}"
 msgstr "{0, plural, one {# note} other {# notes}}"
+
+#: src/pages/security/MfaChallengePage.tsx
+msgid "Two steps in, and the account is yours alone."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "A request for your bank credentials, your card details, or a copy of your identity document before any agreement exists."
@@ -6125,6 +6221,10 @@ msgstr "Accepté"
 msgid "Discard"
 msgstr "Annuler"
 
+#: src/components/security/BackupCodesSheet.tsx
+msgid "Print"
+msgstr ""
+
 #: src/i18n/harvested.ts
 #: src/lib/permissions.ts
 msgid "Faculty"
@@ -6293,12 +6393,20 @@ msgstr "Voir l'état du signalement"
 msgid "Sign-up step 1"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Two-Step Verification"
+msgstr ""
+
 #: src/pages/auth/ForgotPasswordPage.tsx
 msgid "Failed to send reset email. Please try again."
 msgstr "Échec de l'envoi de l'e-mail de réinitialisation. Veuillez réessayer."
 
 #: src/i18n/harvested.ts
 msgid "Teams"
+msgstr ""
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Finish and go to KTIP"
 msgstr ""
 
 #: src/components/messages/MessagingPanel.tsx
@@ -6461,6 +6569,10 @@ msgstr "Demandes {0}"
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Failed to reset password. Please try again."
 msgstr "Échec de la réinitialisation du mot de passe. Veuillez réessayer."
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Two-step verification is on."
+msgstr ""
 
 #: src/components/gantt/gantt.tsx
 msgid "Timeline"
@@ -6718,6 +6830,10 @@ msgstr ""
 #: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "No events organized yet."
 msgstr "Aucun événement organisé pour le moment."
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Use this code"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Partner data access"
@@ -7405,6 +7521,7 @@ msgstr "Aucun succès ne correspond à ces filtres."
 
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/lib/calendar-note-item.ts
+#: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Done"
 msgstr "Terminé"
 
@@ -7807,6 +7924,10 @@ msgstr "Rechercher un émoji"
 #: src/lib/venue-room-presets.ts
 msgid "Drop several. Rename them per team."
 msgstr "Déposez-en plusieurs. Renommez-les par équipe."
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "One more step. Then your account is yours alone."
+msgstr ""
 
 #. placeholder {0}: row.current_version
 #: src/pages/settings/LegalSettingsTab.tsx
@@ -8594,6 +8715,8 @@ msgid "Choose the topics, categories and content types you want ranked first"
 msgstr "Choisissez les sujets, catégories et types de contenu à faire apparaître en priorité"
 
 #: src/i18n/harvested.ts
+#: src/pages/security/MfaChallengePage.tsx
+#: src/pages/security/MfaRecoverPage.tsx
 msgid "Sign out"
 msgstr "Déconnexion"
 
@@ -9011,6 +9134,10 @@ msgstr "Importe votre historique de cours et démarre votre CV."
 msgid "We are not a court and we do not decide who owns a work. What we decide is whether content should stay up while the people concerned resolve it between themselves."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Every code from before now stops working."
+msgstr ""
+
 #: src/components/venue/AvailabilityPicker.tsx
 msgid "Heads down, but reachable"
 msgstr "Concentré, mais joignable"
@@ -9055,6 +9182,10 @@ msgstr "Réponses ({0})"
 
 #: src/i18n/harvested.ts
 msgid "What it does"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Generating new codes makes every earlier code stop working."
 msgstr ""
 
 #: src/pages/settings/SecuritySettingsTab.tsx
@@ -9363,6 +9494,10 @@ msgstr ""
 msgid "{teamCount, plural, one {# team member} other {# team members}}"
 msgstr "{teamCount, plural, one {# membre de l'équipe} other {# membres de l'équipe}}"
 
+#: src/lib/validation.ts
+msgid "Enter the code we sent you"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Chat with the AI assistant in Messages — it answers questions and can take you anywhere on the platform"
 msgstr "Discutez avec l'assistant IA dans Messages — il répond aux questions et peut vous emmener n'importe où sur la plateforme"
@@ -9414,6 +9549,10 @@ msgstr ""
 #: src/pages/sme/OrgProfilePage.tsx
 msgid "Directory"
 msgstr "Annuaire"
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Remove authenticator"
+msgstr ""
 
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Failed to revoke access"
@@ -9905,6 +10044,10 @@ msgid "A title and a body, posted to the board you came from — the board is fi
 msgstr "Un titre et un corps de texte, publiés sur le tableau d'où vous venez — le tableau est déterminé par la page, il n'y a donc rien à choisir.\n"
 ""
 
+#: src/components/security/TotpEnrollCard.tsx
+msgid "Scan this with Google Authenticator, Authy, or any authenticator app, then enter the 6-digit code it shows."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Click \"Forums\" in the navigation bar to see the discussion boards.\n"
 "\n"
@@ -9928,6 +10071,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The licence you grant %entityShort%"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your account will be protected by your password alone."
 msgstr ""
 
 #: src/components/legal/Disclaimer.tsx
@@ -10044,6 +10191,10 @@ msgstr "Ajouter un fichier"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "a document"
 msgstr "un document"
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Back to the code from my app"
+msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "The information in this notice is accurate."
@@ -11012,6 +11163,10 @@ msgstr "Vous n'avez pas accès à ce fichier"
 msgid "Only the content submitted to those features"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Remove your authenticator?"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Research and teach in academia"
 msgstr "Faire de la recherche et enseigner dans le milieu universitaire"
@@ -11209,6 +11364,10 @@ msgstr ""
 #: src/pages/dashboard/DashboardTopBar.tsx
 msgid "Breadcrumb"
 msgstr "Fil d'Ariane"
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Two-step verification is off."
+msgstr ""
 
 #: src/components/venue/room/RecordingConsent.tsx
 msgid "If you join the call, your camera, microphone and anything you share on screen are recorded and saved by the organisers. You can stay in the room without joining the call — you will still see the chat and can still take part."
@@ -11656,6 +11815,11 @@ msgid "Student accounts cannot start one-to-one direct messages. This is a safeg
 "The same principle sits behind students never administering awarded funds themselves, and the automatic exclusion of students from the public leaderboard."
 msgstr ""
 
+#: src/hooks/useMfa.ts
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Could not generate recovery codes."
+msgstr ""
+
 #: src/components/achievements/TrophyCard.tsx
 msgid "Secret achievement"
 msgstr "Succès secret"
@@ -12034,6 +12198,10 @@ msgstr "Célébrer"
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "{confidencePct}% sure"
 msgstr "{confidencePct} % sûr"
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Recovery code"
+msgstr ""
 
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Shared documents, whiteboards, and video invites"
@@ -12906,6 +13074,10 @@ msgstr "Groupe"
 msgid "Decided {0}"
 msgstr "Décidé {0}"
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Generate new recovery codes"
+msgstr ""
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Very useful"
 msgstr "Très utile"
@@ -13013,6 +13185,10 @@ msgstr "Depuis une URL"
 msgid "Submissions"
 msgstr "Soumissions"
 
+#: src/components/security/BackupCodesSheet.tsx
+msgid "I have saved these codes somewhere I can reach without my phone."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Grants and their applications"
 msgstr "Subventions et leurs candidatures"
@@ -13078,6 +13254,10 @@ msgstr "p. ex. Énergies renouvelables"
 #: src/lib/personalization.ts
 msgid "Soonest"
 msgstr "Le plus tôt"
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Save your recovery codes"
+msgstr ""
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
 #: src/pages/profile/PublicProfilePage.tsx
@@ -13721,6 +13901,10 @@ msgstr "{0} est requis"
 msgid "Launch projects, apply for grants, and find investors."
 msgstr "Lancez des projets, postulez à des subventions et trouvez des investisseurs."
 
+#: src/pages/auth/SignupPage.tsx
+msgid "Verify email"
+msgstr ""
+
 #: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -14109,6 +14293,11 @@ msgstr "Lecture à voix haute : visite complète"
 msgid "Investor/Funding Agency"
 msgstr "Investisseur/Organisme de financement"
 
+#: src/components/security/TotpEnrollCard.tsx
+#: src/pages/auth/SignupPage.tsx
+msgid "Verify and continue"
+msgstr ""
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Please describe the issue"
 msgstr "Veuillez décrire le problème"
@@ -14260,6 +14449,7 @@ msgid "No courses found"
 msgstr "Aucun cours trouvé"
 
 #: src/components/documents/DocumentCard.tsx
+#: src/components/security/BackupCodesSheet.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Download"
 msgstr "Télécharger"
@@ -14318,6 +14508,11 @@ msgstr "{0, plural, one {# note à l'écran} other {# notes à l'écran}}"
 #: src/i18n/harvested.ts
 msgid "Explore projects, join events, and find funding for your ideas."
 msgstr "Explorez des projets, participez à des événements et trouvez des financements pour vos idées."
+
+#: src/hooks/useMfa.ts
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "That code was not accepted."
+msgstr ""
 
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "People you mentor"
@@ -14569,6 +14764,7 @@ msgid "Grant"
 msgstr "Subvention"
 
 #: src/hooks/useEmailAlias.ts
+#: src/hooks/useMfa.ts
 msgid "No active session"
 msgstr "Aucune session active"
 
@@ -14882,6 +15078,10 @@ msgstr "Signalez un grief concernant la conduite de quelqu'un"
 #: src/lib/delete-guard.ts
 msgid "The grant listing and everything attached to it"
 msgstr "La fiche de subvention et tout ce qui y est attaché"
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Out of codes? Contact KTIP support — an administrator can reset two-step verification on your account."
+msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
 msgid "Period"
@@ -15759,10 +15959,6 @@ msgstr " En tant que {role}, je peux vous aider à tirer le meilleur parti des f
 msgid "Applying through KTIP does not license your idea to the funder — that protection is set out in the Grant Application Confidentiality & IP Terms. What you sign afterwards is a different matter, and it is yours to negotiate."
 msgstr ""
 
-#: src/pages/auth/SignupPage.tsx
-msgid "We've sent a confirmation link to <0>{email}</0>. Click the link to verify your account and get started."
-msgstr "Nous avons envoyé un lien de confirmation à <0>{email}</0>. Cliquez sur le lien pour vérifier votre compte et commencer."
-
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 #: src/components/notes/StickyNote.tsx
@@ -15883,6 +16079,10 @@ msgstr ""
 msgid "Stack"
 msgstr "Pile"
 
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Recovery"
+msgstr ""
+
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Display your country on your profile"
 msgstr "Afficher votre pays sur votre profil"
@@ -15973,6 +16173,10 @@ msgstr "Sponsors"
 
 #: src/i18n/harvested.ts
 msgid "Cookie & Storage Notice"
+msgstr ""
+
+#: src/components/security/TotpEnrollCard.tsx
+msgid "Copy setup key"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -16294,6 +16498,10 @@ msgstr "Lorsque l'article ne couvre pas votre cas"
 msgid "Public Profile"
 msgstr "Profil public"
 
+#: src/pages/auth/SignupPage.tsx
+msgid "That code was not accepted. Check the digits and try again."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "To show your work to other members, you grant %entity% a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, translate, adapt for display and distribute your content — solely to operate and promote KTIP and its programme objectives."
 msgstr ""
@@ -16375,6 +16583,11 @@ msgstr "Aligner à gauche"
 
 #: src/i18n/harvested.ts
 msgid "No sign-in provider supplies a date of birth. Accounts created that way are still asked to declare one before the account is usable."
+msgstr ""
+
+#: src/pages/security/MfaChallengePage.tsx
+#: src/pages/security/MfaSetupPage.tsx
+msgid "That code was not accepted. If it keeps failing, check that automatic date & time is switched on for your phone — an authenticator that is more than 30 seconds out will never produce a code we can accept."
 msgstr ""
 
 #: src/components/legal/MyTakedownNotices.tsx
@@ -17000,6 +17213,10 @@ msgstr "Chargement de votre copie..."
 msgid "CC BY or CC BY-SA"
 msgstr ""
 
+#: src/hooks/useMfa.ts
+msgid "Verify your authenticator app before generating recovery codes."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Find and connect with members across the region."
 msgstr "Trouvez des membres dans toute la région et connectez-vous avec eux."
@@ -17623,6 +17840,10 @@ msgstr "Nouvelle note ici"
 msgid "Keep it"
 msgstr "Conserver"
 
+#: src/components/security/TotpEnrollCard.tsx
+msgid "Open in my authenticator app"
+msgstr ""
+
 #: src/components/directory/MemberPanel.tsx
 #: src/components/profile/BannerStudio.tsx
 msgid "Member preview"
@@ -17658,6 +17879,10 @@ msgstr "La soumission de faux signalements peut entraîner des mesures disciplin
 #: src/i18n/harvested.ts
 msgid "How do I browse projects?"
 msgstr "Comment parcourir les projets ?"
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Lost the phone, not the account."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Hackathons, workshops, meetups, conferences and demo days"
@@ -18141,6 +18366,10 @@ msgstr ""
 msgid "Hackathon"
 msgstr "Hackathon"
 
+#: src/lib/validation.ts
+msgid "A recovery code is 10 characters"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Remove this link"
 msgstr "Supprimer ce lien"
@@ -18181,6 +18410,10 @@ msgstr ""
 #: src/pages/dashboard/tabs/MenteesTab.tsx
 msgid "Mentees"
 msgstr "Mentorés"
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Keep these somewhere safe. They are your way back in."
+msgstr ""
 
 #: src/pages/settings/VerificationTab.tsx
 msgid "Click or drag files here (PDF, JPG, PNG, WebP — max {MAX_FILES} files, 10MB each)"
@@ -18249,6 +18482,10 @@ msgstr "Colonne unique, en-tête centré, filets fins. Sans photo, sans panneaux
 
 #: src/components/legal/AgreementGate.tsx
 msgid "These terms have been updated since this page loaded. Reload and read the current version."
+msgstr ""
+
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Your account applies for funding, so it needs a second step at sign-in. You will need an authenticator app on your phone — it works offline and costs nothing."
 msgstr ""
 
 #: src/hooks/useProjectJoinRequests.ts
@@ -18356,6 +18593,10 @@ msgstr "Se connecter"
 #: src/i18n/harvested.ts
 msgid "Help article — Hackathons & Venues"
 msgstr "Article d'aide — Hackathons et lieux"
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Checking your recovery codes…"
+msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "Sponsor banner"
@@ -19246,6 +19487,10 @@ msgid "Print / Save as PDF gives you a clean document — the page chrome is str
 msgstr "Imprimer / Enregistrer en PDF vous donne un document épuré — les éléments d'interface de la page sont retirés de l'impression.\n"
 ""
 
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Finishing this signs you out anywhere else you are logged in."
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 #: src/pages/settings/SettingsPage.tsx
@@ -19632,6 +19877,10 @@ msgstr "Rechercher ({SHORTCUT_HINT})"
 msgid "Retain data after the agreement ends, or after a member withdraws."
 msgstr ""
 
+#: src/hooks/useMfa.ts
+msgid "Too many attempts. Try again tomorrow."
+msgstr ""
+
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/grants/application/RichTextField.tsx
@@ -19852,6 +20101,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Schedule Change"
 msgstr "Changement d'horaire"
+
+#: src/pages/security/MfaChallengePage.tsx
+msgid "Verify"
+msgstr ""
 
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "This resource doesn't exist or hasn't been published yet."
@@ -20427,6 +20680,10 @@ msgstr ""
 msgid "That is what the rule says, and it is worth being realistic about what a rule can do. Confidentiality obligations are enforceable but not self-enforcing. If your proposal turns on something you can protect — a patentable method, a trade secret — take advice about protecting it before you describe it in detail to anyone, including a funder."
 msgstr ""
 
+#: src/components/security/TotpEnrollCard.tsx
+msgid "Type this key into your authenticator app by hand instead."
+msgstr ""
+
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Create a snippet to write, run and share code with your collaborators."
 msgstr "Créez un extrait de code pour écrire, exécuter et partager du code avec vos collaborateurs."
@@ -20940,6 +21197,10 @@ msgstr " · max {0}"
 msgid "Join community discussions."
 msgstr "Participez aux discussions de la communauté."
 
+#: src/pages/auth/SignupPage.tsx
+msgid "Send another code"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Open Projects, Resources, Events or Grants."
 msgstr "Ouvrez Projets, Ressources, Événements ou Subventions."
@@ -21161,6 +21422,10 @@ msgstr "Autoriser les statistiques"
 #: src/pages/events/EventDetailPage.tsx
 msgid "This event is a draft — only you can see it. Publish it to list it on Events and the hackathon pages."
 msgstr "Cet événement est un brouillon — vous seul pouvez le voir. Publiez-le pour qu'il apparaisse sur les pages Événements et Hackathons."
+
+#: src/lib/validation.ts
+msgid "Enter a recovery code"
+msgstr ""
 
 #: src/lib/validation.ts
 msgid "At least one symbol (e.g. !@#$%)"
@@ -21512,6 +21777,10 @@ msgstr "Calendrier des événements"
 msgid "Followers"
 msgstr ""
 
+#: src/pages/security/MfaSetupPage.tsx
+msgid "Recovery codes"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Manage grants"
 msgstr "Gérer les subventions"
@@ -21714,6 +21983,10 @@ msgstr "Demande annulée"
 msgid "What the problem was, what you built, and what changed as a result."
 msgstr "Quel était le problème, ce que vous avez construit, et ce que cela a changé."
 
+#: src/components/ui/OtpInput.tsx
+msgid "Enter the {length}-digit code"
+msgstr ""
+
 #: src/pages/resources/ResourcesPage.tsx
 msgid "No resources found"
 msgstr "Aucune ressource trouvée"
@@ -21886,6 +22159,10 @@ msgid "This fills empty fields from your KTIP record — profile, public project
 "It does reload the document, so it asks you to save first if you have unsaved edits. Press it on a blank CV, or straight after saving."
 msgstr "Cela remplit les champs vides à partir de votre profil KTIP — profil, projets publics, badges, institution. Cela n'écrase jamais ce que vous avez déjà écrit.\n"
 ""
+
+#: src/pages/security/MfaChallengePage.tsx
+msgid "Open your authenticator app and enter the 6-digit code it shows."
+msgstr ""
 
 #: src/lib/resume-designs.ts
 msgid "Marquee"
@@ -22086,6 +22363,10 @@ msgstr "Compte supprimé avec succès"
 msgid "Add KTIP to your home screen"
 msgstr ""
 
+#: src/components/security/TotpEnrollCard.tsx
+msgid "Can't scan the code?"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Register for an event"
 msgstr "S'inscrire à un événement"
@@ -22222,6 +22503,10 @@ msgstr ""
 
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# different member spoken with} other {# different members spoken with}}"
+msgstr ""
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Enter one of the codes you saved when you set up two-step verification. It works once, and it lets you set up a new authenticator app."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22822,6 +23107,10 @@ msgstr "Évaluation"
 msgid "Not used"
 msgstr ""
 
+#: src/lib/validation.ts
+msgid "That code contains a letter we never use. Check for a mistyped 1 or 0."
+msgstr ""
+
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Suggests the next useful step — starter guides before your first project, grants once you are verified."
 msgstr "Suggère la prochaine étape utile — guides de démarrage avant votre premier projet, subventions une fois vérifié."
@@ -22891,6 +23180,10 @@ msgstr ""
 msgid "Clear all saved"
 msgstr "Effacer tous les éléments enregistrés"
 
+#: src/pages/security/MfaChallengePage.tsx
+msgid "Authentication code"
+msgstr ""
+
 #: src/components/ui/ToolPanelShell.tsx
 msgid "This {what} may have been deleted, or you don't have access to it."
 msgstr "Cet élément ({what}) a peut-être été supprimé, ou vous n'y avez pas accès."
@@ -22913,6 +23206,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Every achievement is worth points depending on how rare it is, from 10 for a common one up to 200 for a legendary. Your level comes from how many achievements you have earned rather than how many points — someone who has done a bit of everything ranks higher than someone with one big win. Levels run from Newcomer to KTIP Champion."
 msgstr "Chaque succès rapporte des points selon sa rareté, de 10 pour un succès courant jusqu'à 200 pour un succès légendaire. Votre niveau dépend du nombre de succès obtenus, et non du nombre de points — une personne qui a touché un peu à tout se classe plus haut qu'une personne avec une seule grande réussite. Les niveaux vont de Nouveau venu à Champion KTIP."
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Add a second step at sign-in using a free authenticator app. It works offline, and it means a stolen password is not enough to reach your account."
+msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
 msgid "Sign in to continue"
@@ -23409,6 +23706,10 @@ msgstr "Salles, invitations et qui peut y participer."
 msgid "Comments, likes, follows and view history"
 msgstr "Commentaires, mentions J'aime, abonnements et historique de consultation"
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Two-step verification is on for this account."
+msgstr ""
+
 #: src/pages/InvitationsPage.tsx
 msgid "Sent — awaiting a response"
 msgstr "Envoyé — en attente d'une réponse"
@@ -23462,6 +23763,10 @@ msgstr "Python"
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Floors"
 msgstr "Étages"
+
+#: src/pages/security/MfaRecoverPage.tsx
+msgid "Recovery code accepted. Set up a new authenticator."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Open \"My Applications\" under Grants. Drafts carry a Draft badge and a Continue action.\n"

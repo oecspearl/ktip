@@ -44,7 +44,7 @@ import { NavbarSearchPanel, SEARCH_PANEL_WIDTH } from './NavbarSearchPanel'
 import { StaggeredMobileMenu, StaggeredMenuIcon } from './StaggeredMobileMenu'
 import { RoleSwitcher } from './RoleSwitcher'
 import { ROLE_LABELS } from '../../lib/constants'
-import { isOrganizationAccount } from '../../lib/permissions'
+import { isOrganizationAccount, opensAdminConsole } from '../../lib/permissions'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
@@ -327,7 +327,7 @@ export function Navbar() {
 
   // Mirrors AdminRoute exactly. Kept as one value so the desktop bar and the
   // mobile menu can never drift apart.
-  const canSeeAdmin = auth.can('org:manage') || auth.can('moderation:view')
+  const canSeeAdmin = opensAdminConsole(auth.can)
 
   /**
    * Dropdown entries this viewer can act on.

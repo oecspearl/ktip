@@ -44,5 +44,27 @@ export const ProtectedRoute = () => {
     return <Navigate to="/onboarding" replace />
   }
 
+  // Two-factor (118), in two parts that must stay in this order.
+  //
+  // The challenge comes first and reads from AuthContext rather than `profile`,
+  // because assurance level is a property of the session. It only ever fires for
+  // an account that already HAS a verified factor, so it cannot collide with the
+  // enrolment gate below.
+  if (auth.mfaChallengeRequired) {
+    return <Navigate to="/security/verify" replace state={{ from: location }} />
+  }
+
+  // Enrolment. Same shape as requires_age_declaration and defaulted FALSE for
+  // the same reason, which is load-bearing twice over here: no account predating
+  // 118 is ever caught, and an app deployed ahead of the migration reads the
+  // column as undefined and gates nobody rather than trapping everyone.
+  //
+  // Deliberately AFTER the roles/onboarding clause — an account with no role
+  // owes onboarding first, and this requirement is derived from a role it does
+  // not hold yet.
+  if (auth.profile?.requires_mfa_enrollment) {
+    return <Navigate to="/security/set-up" replace />
+  }
+
   return <Outlet />
 }

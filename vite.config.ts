@@ -194,6 +194,108 @@ const PRELOAD_ROUTES: Record<string, string> = {
  */
 const PRELOAD_LOCALES = ['fr', 'es']
 
+/**
+ * Bake the first hero slide's rows into index.html.
+ *
+ * `/` opens on a full-bleed hero whose headline is the largest element on the
+ * page, and that headline comes from `useGrants({ active: true })`. Until that
+ * query lands the hero shows a shorter intro slide, so the swap costs twice:
+ * the headline cannot paint until a Supabase round trip completes (measured
+ * LCP 5,856ms on a throttled phone), and the copy column grows 289px -> 453px
+ * when it does, moving up 91px because it is vertically centred (measured CLS
+ * 0.1156 — the only counted shift on the page). Seeding the first render kills
+ * both at once. See src/lib/hero-seed.ts.
+ *
+ * Columns are named rather than `select=*`: the rows are inlined into a
+ * document served to everyone, so only what the hero actually renders goes in.
+ * Filter and order mirror useGrants exactly, or the seeded slide would not be
+ * the slide the live query then shows and the swap would come back.
+ *
+ * Every failure path is non-fatal and silent-but-logged. A build without
+ * network, without env, or against a project that answers 500 must still
+ * produce a working site — the seed is an optimisation, and its absence just
+ * restores today's behaviour.
+ */
+const HERO_SEED_ID = '__ktip_hero_seed'
+const HERO_SEED_COLUMNS = [
+  'id',
+  'slug',
+  'title',
+  'summary',
+  'description',
+  'currency',
+  'amount_max',
+  'amount_min',
+  'grant_type',
+  'deadline',
+  'eligibility',
+  'details',
+  'is_climate_action',
+].join(',')
+/** MAX_ITEMS in DiscoverPage — the strip never shows more than six. */
+const HERO_SEED_LIMIT = 6
+
+async function fetchHeroSeed(env: Record<string, string>): Promise<string | null> {
+  const url = env.VITE_SUPABASE_URL
+  const key = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY
+  if (!url || !key) {
+    console.warn('[hero-seed] no Supabase env — skipping (hero will fetch at runtime)')
+    return null
+  }
+  const query =
+    `${url.replace(/\/$/, '')}/rest/v1/grants` +
+    `?select=${HERO_SEED_COLUMNS}` +
+    `&is_active=eq.true` +
+    `&order=deadline.asc.nullslast` +
+    `&limit=${HERO_SEED_LIMIT}`
+  try {
+    // A hung build is worse than an unseeded one.
+    const res = await fetch(query, {
+      headers: { apikey: key, authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) {
+      console.warn(`[hero-seed] ${res.status} ${res.statusText} — skipping`)
+      return null
+    }
+    const rows = await res.json()
+    if (!Array.isArray(rows) || rows.length === 0) {
+      console.warn('[hero-seed] no active grants returned — skipping')
+      return null
+    }
+    console.log(`[hero-seed] inlined ${rows.length} grant(s)`)
+    return JSON.stringify(rows)
+  } catch (error) {
+    console.warn(`[hero-seed] fetch failed (${(error as Error).message}) — skipping`)
+    return null
+  }
+}
+
+function heroSeedPlugin(env: Record<string, string>) {
+  return {
+    name: 'ktip-hero-seed',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      async handler() {
+        const json = await fetchHeroSeed(env)
+        if (!json) return
+        return [
+          {
+            tag: 'script',
+            // application/json, not a JS assignment: the browser never executes
+            // it, so a stray `</script>` or a quote in a grant title cannot
+            // become script. Vite escapes the closing-tag sequence on inject.
+            attrs: { type: 'application/json', id: HERO_SEED_ID },
+            children: json,
+            injectTo: 'head' as const,
+          },
+        ]
+      },
+    },
+  }
+}
+
 function routeChunkPreloadPlugin() {
   return {
     name: 'ktip-route-chunk-preload',
@@ -421,6 +523,7 @@ export default defineConfig(({ mode }) => {
       edgeApiPlugin(openaiKey),
       preconnectPlugin(env.VITE_SUPABASE_URL),
       routeChunkPreloadPlugin(),
+      heroSeedPlugin(env),
       imageManifestPlugin(resolve(process.cwd(), 'public/_img/manifest.json')),
       // ANALYZE=1 npm run build -> dist/stats.html treemap of the bundle.
       Boolean(process.env.ANALYZE) &&

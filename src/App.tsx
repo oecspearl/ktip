@@ -148,6 +148,13 @@ const router = createBrowserRouter([
         : []),
       { path: '/onboarding', lazy: lazyPage(() => import('./pages/onboarding/OnboardingPage')) },
 
+      // Two-factor (118). Bare, beside /onboarding and for the identical reason:
+      // these are what ProtectedRoute redirects TO, so putting them inside its
+      // subtree is a redirect loop. Each page guards itself instead.
+      { path: '/security/set-up', lazy: lazyPage(() => import('./pages/security/MfaSetupPage')) },
+      { path: '/security/verify', lazy: lazyPage(() => import('./pages/security/MfaChallengePage')) },
+      { path: '/security/recover', lazy: lazyPage(() => import('./pages/security/MfaRecoverPage')) },
+
       {
         Component: MainLayout,
         children: [

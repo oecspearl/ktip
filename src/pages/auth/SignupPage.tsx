@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -9,7 +9,10 @@ import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { PasswordChecklist } from '../../components/ui/PasswordChecklist'
 import { Mail, Lock, User, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
+import { OtpInput } from '../../components/ui/OtpInput'
 import { signupSchema, signupStep1Schema, todayIso } from '../../lib/validation'
+import { supabase } from '../../lib/supabase'
+import { roleRequiresMfa } from '../../lib/permissions'
 import {
   APP_FULL_NAME,
   CARIBBEAN_COUNTRIES,
@@ -31,6 +34,7 @@ const STEPS = [
   { title: msg`About You`, caption: msg`Tell your story — connect across the OECS.` },
   { title: msg`Skills & Collaboration`, caption: msg`Find collaborators. Build what’s next.` },
   { title: msg`Agreements`, caption: msg`The rules of the road. Read them once, then you’re in.` },
+  { title: msg`Verify email`, caption: msg`One code, and the account is yours.` },
 ]
 
 const HEADINGS = [
@@ -38,7 +42,11 @@ const HEADINGS = [
   msg`About you`,
   msg`Skills & collaboration`,
   msg`Before you join`,
+  msg`Check your email`,
 ]
+
+/** GoTrue refuses a resend inside its own 60-second window, so the button says so. */
+const RESEND_COOLDOWN_SECONDS = 60
 
 // Stops the picker offering a future date. The schema rejects one anyway.
 const TODAY_ISO = todayIso()
@@ -57,6 +65,7 @@ const ALL_STEP1_TOUCHED: Record<string, boolean> = {
 export default function SignupPage() {
     const { t, i18n } = useLingui()
   const auth = useAuth()
+  const navigate = useNavigate()
 
   const [step, setStep] = useState(1)
 
@@ -86,8 +95,27 @@ export default function SignupPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
-  const [emailSent, setEmailSent] = useState(false)
   const [pending, setPending] = useState(false)
+
+  // Step 5 — the email one-time code (118). This replaced the old "we sent you a
+  // confirmation link" dead end, and the reason is session continuity rather
+  // than taste: under PKCE the link is only redeemable in the browser that asked
+  // for it, and signUp() returns no session at all. verifyOtp() returns a live
+  // one, which is what makes it possible to walk straight into MFA enrolment in
+  // the same tab.
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [otpError, setOtpError] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [resendIn, setResendIn] = useState(0)
+
+  // Counts the resend button down rather than letting the member press it and
+  // get GoTrue's refusal back as an error.
+  useEffect(() => {
+    if (resendIn <= 0) return
+    const timer = window.setTimeout(() => setResendIn((seconds) => seconds - 1), 1000)
+    return () => window.clearTimeout(timer)
+  }, [resendIn])
 
   const markTouched = (field: string) => setTouched((t) => ({ ...t, [field]: true }))
 
@@ -204,7 +232,9 @@ export default function SignupPage() {
         ...(input.open_to && { open_to: input.open_to }),
       })
       analytics.conversion('signup_success', { role: selectedRole })
-      setEmailSent(true)
+      analytics.funnel('signup', 'otp_sent', { role: selectedRole })
+      setOtpSent(true)
+      setResendIn(RESEND_COOLDOWN_SECONDS)
     } catch (error: any) {
       setErrorMessage(error.message || t`Failed to create account. Please try again.`)
     } finally {
@@ -212,16 +242,59 @@ export default function SignupPage() {
     }
   }
 
+  const verifyCode = async (code: string) => {
+    if (code.length !== 6 || verifying) return
+    setVerifying(true)
+    setOtpError('')
+    try {
+      // 'email' rather than the deprecated 'signup'. This both confirms the
+      // address and returns a session, so the account is signed in right here.
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: code,
+        type: 'email',
+      })
+      if (error) throw error
+
+      analytics.funnel('signup', 'otp_verified', { role: selectedRole })
+
+      // Navigate straight to enrolment rather than letting ProtectedRoute bounce
+      // them there, purely so there is no flash of the dashboard. If the
+      // compiled role catalog ever disagrees with role_definitions the gate
+      // still catches it — a flash, never a bypass.
+      navigate(roleRequiresMfa(selectedRole) ? '/security/set-up' : '/', { replace: true })
+    } catch (error: any) {
+      setOtpCode('')
+      const message: string = error?.message ?? ''
+      setOtpError(
+        /expired/i.test(message)
+          ? t`That code has expired. Send a new one.`
+          : t`That code was not accepted. Check the digits and try again.`,
+      )
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  const resendCode = async () => {
+    if (resendIn > 0) return
+    setOtpError('')
+    setResendIn(RESEND_COOLDOWN_SECONDS)
+    const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+    if (error) setOtpError(error.message)
+  }
+
   const steps = STEPS.map((s) => ({ title: i18n._(s.title), caption: i18n._(s.caption) }))
+  const shellStep = otpSent ? STEPS.length : step
 
   return (
     <AuthSplitShell
-        step={step}
+        step={shellStep}
         steps={steps}
-        heading={emailSent ? t`Check your email` : i18n._(HEADINGS[step - 1])}
-        subheading={!emailSent && step === 1 ? APP_FULL_NAME : undefined}
+        heading={i18n._(HEADINGS[shellStep - 1])}
+        subheading={!otpSent && step === 1 ? APP_FULL_NAME : undefined}
         topLink={
-          emailSent ? undefined : (
+          otpSent ? undefined : (
             <Trans>
               Already have an account?{' '}
               <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
@@ -231,19 +304,54 @@ export default function SignupPage() {
           )
         }
       >
-        {emailSent ? (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-ktip-tropical-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={32} className="text-ktip-tropical-600" />
+        {otpSent ? (
+          <div className="space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 shrink-0 bg-ktip-tropical-100 rounded-full flex items-center justify-center">
+                <CheckCircle size={20} className="text-ktip-tropical-600" />
+              </div>
+              <p className="text-ktip-sand-600">
+                <Trans>
+                  We've sent a 6-digit code to{' '}
+                  <strong className="text-ktip-sand-800">{email}</strong>. Enter it below to finish
+                  creating your account.
+                </Trans>
+              </p>
             </div>
-            <p className="text-ktip-sand-600 mb-6 max-w-md mx-auto">
-              <Trans>
-                We've sent a confirmation link to <strong className="text-ktip-sand-800">{email}</strong>. Click the link to verify your account and get started.
-              </Trans>
-            </p>
-            <Link to="/login">
-              <Button variant="secondary"><Trans>Go to Sign In</Trans></Button>
-            </Link>
+
+            <OtpInput
+              label={t`Verification code`}
+              value={otpCode}
+              onChange={setOtpCode}
+              onComplete={verifyCode}
+              disabled={verifying}
+              error={otpError}
+              autoFocus
+            />
+
+            <Button
+              type="button"
+              fullWidth
+              loading={verifying}
+              disabled={otpCode.length !== 6}
+              onClick={() => void verifyCode(otpCode)}
+            >
+              <Trans>Verify and continue</Trans>
+            </Button>
+
+            <div className="flex items-center justify-between text-body-sm">
+              <button
+                type="button"
+                onClick={() => void resendCode()}
+                disabled={resendIn > 0}
+                className="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium disabled:text-ktip-sand-400 disabled:cursor-not-allowed"
+              >
+                {resendIn > 0 ? t`Send another code in ${resendIn}s` : t`Send another code`}
+              </button>
+              <Link to="/login" className="text-ktip-sand-500 hover:text-ktip-sand-700">
+                <Trans>Go to Sign In</Trans>
+              </Link>
+            </div>
           </div>
         ) : (
           <>

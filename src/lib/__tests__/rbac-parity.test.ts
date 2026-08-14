@@ -2,10 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import {
+  ADMIN_CONSOLE_KEYS,
   ALL_PERMISSION_KEYS,
   DEFAULT_ROLE_PERMISSIONS,
   MATRIX_ROLES,
   SAFEGUARD_DENY,
+  SUPERVISOR_DOMAIN_KEYS,
 } from '../permissions'
 import type { PermissionKey } from '../../types'
 
@@ -104,6 +106,85 @@ describe('the default permission matrix', () => {
     for (const [role, keys] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
       if (role === 'super_admin') continue
       expect(keys.filter((k) => operator.includes(k)), `'${role}' holds an operator key`).toEqual([])
+    }
+  })
+})
+
+/**
+ * The three-way split of the admin console (migration 116).
+ *
+ * The division only exists as long as the two supervisors' domain keys stay
+ * disjoint. Nothing about the matrix enforces that — DEFAULT_ROLE_PERMISSIONS is
+ * a hand-edited object, and widening one seat into the other's territory is a
+ * one-line change that no screen would complain about. So it is checked here.
+ */
+describe('the supervisor split', () => {
+  const people = new Set(DEFAULT_ROLE_PERMISSIONS.people_supervisor ?? [])
+  const programme = new Set(DEFAULT_ROLE_PERMISSIONS.programme_supervisor ?? [])
+
+  it('defines both seats', () => {
+    expect(people.size).toBeGreaterThan(0)
+    expect(programme.size).toBeGreaterThan(0)
+  })
+
+  it('keeps the two domains disjoint', () => {
+    const overlap = SUPERVISOR_DOMAIN_KEYS.people_supervisor.filter((k) =>
+      SUPERVISOR_DOMAIN_KEYS.programme_supervisor.includes(k)
+    )
+    expect(overlap, 'the supervisor seats must not share a domain key').toEqual([])
+  })
+
+  it('grants each seat exactly its own domain and none of the other', () => {
+    for (const [role, keys] of Object.entries(SUPERVISOR_DOMAIN_KEYS)) {
+      const held = role === 'people_supervisor' ? people : programme
+      const other = role === 'people_supervisor' ? programme : people
+
+      for (const key of keys) {
+        expect(held.has(key), `'${role}' should hold its own key ${key}`).toBe(true)
+        expect(other.has(key), `the other seat must not hold ${key}`).toBe(false)
+      }
+    }
+  })
+
+  it('withholds event:manage from everyone but super_admin', () => {
+    // Events, the venue and LiveKit stay with the Super Admin. The key exists so
+    // that the events RLS names a capability instead of a role — delegating it
+    // later should be a toggle at /admin/roles, and a deliberate one.
+    for (const [role, keys] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
+      if (role === 'super_admin') continue
+      expect(keys, `'${role}' holds event:manage`).not.toContain('event:manage')
+    }
+  })
+
+  it('lets both seats act as ordinary members', () => {
+    // The relay session in docs/QA-RELAY-SESSION.md has each supervisor create a
+    // project and apply for a grant so the handoffs are real. Without these they
+    // would need a second account each.
+    for (const key of ['project:create', 'forum:post', 'grant:apply', 'dm:receive'] as const) {
+      expect(people.has(key), `the People seat needs ${key}`).toBe(true)
+      expect(programme.has(key), `the Programmes seat needs ${key}`).toBe(true)
+    }
+  })
+
+  it('opens the admin console to every seat that owns a page in it', () => {
+    // AdminRoute admits on ADMIN_CONSOLE_KEYS. A seat holding none of them would
+    // be locked out of pages that are entirely its own — which is exactly what
+    // happened to the Programmes seat while the gate read org:manage.
+    for (const role of ['super_admin', 'people_supervisor', 'programme_supervisor', 'safety_admin']) {
+      const held = DEFAULT_ROLE_PERMISSIONS[role] ?? []
+      expect(
+        held.some((k) => ADMIN_CONSOLE_KEYS.includes(k)),
+        `'${role}' cannot open /admin`
+      ).toBe(true)
+    }
+  })
+
+  it('never admits an ordinary member to the console', () => {
+    const admin = new Set(['super_admin', 'people_supervisor', 'programme_supervisor', 'safety_admin'])
+    for (const [role, keys] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
+      if (admin.has(role)) continue
+      const opens = keys.filter((k) => ADMIN_CONSOLE_KEYS.includes(k))
+      expect(opens, `'${role}' would be admitted to /admin`).toEqual([])
     }
   })
 })
