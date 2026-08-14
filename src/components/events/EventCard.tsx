@@ -3,7 +3,8 @@ import type { Event } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { EVENT_TYPE_LABELS, EVENT_STATUS_COLORS } from '../../lib/constants'
-import { useTranslatedFields } from '../../hooks/useTranslated'
+import { useTranslatedFields, isMachineTranslated } from '../../hooks/useTranslated'
+import { TranslatedMark } from '../legal/TranslatedMark'
 import { entityPath } from '../../lib/slug'
 import { format, isSameDay, isPast } from 'date-fns'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -18,7 +19,8 @@ export function EventCard({ event: source }: EventCardProps) {
   // proper noun: "Rodney Bay Marina" survives (shouldTranslate rejects nothing
   // here, but the provider leaves place names alone), while "Salle de réunion"
   // becomes something a Spanish reader can act on.
-  const event = useTranslatedFields(source, ['title', 'summary', 'description', 'location']) ?? source
+  const translated = useTranslatedFields(source, ['title', 'summary', 'description', 'location'])
+  const event = translated ?? source
   const startDate = new Date(event.start_date)
   const endDate = event.end_date ? new Date(event.end_date) : null
   const isPastEvent = isPast(endDate || startDate)
@@ -56,6 +58,7 @@ export function EventCard({ event: source }: EventCardProps) {
           </Badge>
         )}
         {event.is_climate_action && <ClimateBadge />}
+        {isMachineTranslated(source, translated) && <TranslatedMark />}
       </div>
     </BentoCard>
   )

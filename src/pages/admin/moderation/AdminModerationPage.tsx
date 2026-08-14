@@ -6,6 +6,7 @@ import {
   Filter,
   ListFilter,
   Plus,
+  Scale,
   Settings2,
   ShieldAlert,
   Sparkles,
@@ -31,13 +32,14 @@ import {
   useModerationTerms,
 } from '../../../hooks/useModeration'
 import { REPORT_CATEGORIES } from '../../../components/moderation/ReportModal'
+import { TakedownQueue } from './TakedownQueue'
 import { formatDate } from '../../../lib/utils'
 import { cn } from '../../../lib/utils'
 import type { ContentReport, ModerationSeverity, ModerationTerm } from '../../../types'
 import { useLingui } from '@lingui/react/macro'
 import { resolveCopy, type Copy } from '../../../i18n/copy'
 
-type TabId = 'reports' | 'automated' | 'terms' | 'settings'
+type TabId = 'reports' | 'automated' | 'takedowns' | 'terms' | 'settings'
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
@@ -111,6 +113,10 @@ export default function AdminModerationPage() {
   const tabs: { id: TabId; label: string; icon: typeof ListFilter }[] = [
     { id: 'reports', label: `Reports (${humanReports.length})`, icon: ListFilter },
     { id: 'automated', label: `Auto-flagged (${automatedFlags.length})`, icon: Bot },
+    // Its own queue, not a category of the report queue: a copyright notice
+    // comes from a rightsholder with no account, so it cannot satisfy
+    // content_reports.reporter_id.
+    { id: 'takedowns', label: 'Takedowns', icon: Scale },
     { id: 'terms', label: 'Filter terms', icon: ShieldAlert },
     { id: 'settings', label: 'Settings', icon: Settings2 },
   ]
@@ -298,6 +304,8 @@ export default function AdminModerationPage() {
             </div>
           </>
         )}
+
+        {activeTab === 'takedowns' && <TakedownQueue />}
 
         {activeTab === 'terms' && (
           <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 overflow-hidden">

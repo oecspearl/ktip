@@ -6,6 +6,7 @@ import { useUpdateGrant } from '../../hooks/useGrants'
 import { useUpdateProject } from '../../hooks/useProjects'
 import { useClearExtractedFields, useReextractFields } from '../../hooks/useEntityDocuments'
 import { fieldLabel } from '../../lib/extracted-fields'
+import { Disclaimer } from '../legal/Disclaimer'
 import type { DocumentEntityType, ExtractedFields } from '../../types'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { msg, plural } from '@lingui/core/macro'
@@ -154,6 +155,18 @@ export function ExtractionReviewPanel({
             {reextracting ? t`Re-reading…` : t`Read again`}
           </button>
         )}
+      </div>
+
+      {/* Block, not inline, and not dismissible: these values get committed to a
+          grant or project record the moment they are accepted, which makes this
+          the highest-stakes AI surface on the platform. */}
+      <div className="px-4 py-3">
+        <Disclaimer variant="ai" placement="block">
+          <Trans>
+            These values were read out of your document by AI and may be wrong or incomplete.
+            Check each one before accepting it — accepted values are written to the record.
+          </Trans>
+        </Disclaimer>
       </div>
 
       <div className="divide-y divide-ktip-sand-100">

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Disclaimer } from '../../components/legal/Disclaimer'
 import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { GrantCard } from '../../components/grants/GrantCard'
@@ -283,6 +284,10 @@ export default function GrantsPage() {
               </p>
             </div>
           )}
+
+          {/* Renders for signed-out visitors too — someone browsing grants
+              without an account is exactly who the advance-fee warning is for. */}
+          <Disclaimer variant="funding" placement="footer" />
         </div>
       </div>
     </>

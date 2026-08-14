@@ -190,6 +190,37 @@ const router = createBrowserRouter([
           { path: '/help/faq', lazy: lazyPage(() => import('./pages/help/FAQPage')) },
           { path: '/integrations', element: <Navigate to="/resources?tab=integrations" replace /> },
 
+          // Legal. Public on purpose, and above ProtectedRoute for a reason: a
+          // policy you must sign in to read is not a published policy, and the
+          // infringement form has to be usable by a rightsholder who has no
+          // account at all.
+          //
+          // Fourteen literal paths rather than /legal/:key, because
+          // site-search.test.ts matches route paths as source literals and a
+          // site-map href can never carry a :param. Each page file is three
+          // lines around LegalDocumentPage: `lazy` has no props channel, and
+          // `element:` would pull all fourteen documents into the entry chunk.
+          { path: '/legal', lazy: lazyPage(() => import('./pages/legal/LegalIndexPage')) },
+          { path: '/legal/terms', lazy: lazyPage(() => import('./pages/legal/TermsPage')) },
+          { path: '/legal/privacy', lazy: lazyPage(() => import('./pages/legal/PrivacyPage')) },
+          { path: '/legal/cookies', lazy: lazyPage(() => import('./pages/legal/CookiesPage')) },
+          { path: '/legal/content-licence', lazy: lazyPage(() => import('./pages/legal/ContentLicencePage')) },
+          { path: '/legal/acceptable-use', lazy: lazyPage(() => import('./pages/legal/AcceptableUsePage')) },
+          { path: '/legal/ai-disclosure', lazy: lazyPage(() => import('./pages/legal/AiDisclosurePage')) },
+          { path: '/legal/copyright', lazy: lazyPage(() => import('./pages/legal/CopyrightPage')) },
+          { path: '/legal/copyright/report', lazy: lazyPage(() => import('./pages/legal/CopyrightReportPage')) },
+          { path: '/legal/safeguarding', lazy: lazyPage(() => import('./pages/legal/SafeguardingPage')) },
+          { path: '/legal/funding-disclaimer', lazy: lazyPage(() => import('./pages/legal/FundingDisclaimerPage')) },
+          { path: '/legal/competition-ip', lazy: lazyPage(() => import('./pages/legal/CompetitionIpPage')) },
+          { path: '/legal/application-confidentiality', lazy: lazyPage(() => import('./pages/legal/ApplicationConfidentialityPage')) },
+          { path: '/legal/trademark', lazy: lazyPage(() => import('./pages/legal/TrademarkPage')) },
+          { path: '/legal/code-contribution', lazy: lazyPage(() => import('./pages/legal/CodeContributionPage')) },
+          { path: '/legal/partner-api', lazy: lazyPage(() => import('./pages/legal/PartnerApiPage')) },
+          // The bare spellings are what people type, what gets printed on a
+          // slide, and what docs/PRIVACY-AND-TERMS.md's checklist asked for.
+          { path: '/terms', element: <Navigate to="/legal/terms" replace /> },
+          { path: '/privacy', element: <Navigate to="/legal/privacy" replace /> },
+
           // Authenticated routes
           {
             Component: ProtectedRoute,
@@ -391,18 +422,39 @@ const router = createBrowserRouter([
                   return { Component: m.AdminLayout }
                 },
                 children: [
+                  // The console index. Deliberately ungated: everyone AdminRoute
+                  // admits has to land somewhere, and the page filters its own
+                  // tiles by permission.
                   { path: '/admin', lazy: lazyPage(() => import('./pages/admin/AdminDashboardPage')) },
-                  { path: '/admin/projects', lazy: lazyPage(() => import('./pages/admin/projects/AdminProjectsPage')) },
-                  { path: '/admin/events', lazy: lazyPage(() => import('./pages/admin/events/AdminEventsPage')) },
-                  { path: '/admin/events/:id', lazy: lazyPage(() => import('./pages/admin/events/AdminEventDetailPage')) },
-                  // AdminRoute admits org:manage OR moderation:view, which is
-                  // right for the console as a whole but too wide for these
-                  // three. The server already refuses a Safety Admin here —
-                  // api/admin/* checks members:manage and org:manage, and the
-                  // matrix is UPDATE-gated on role:manage — so this only turns
-                  // an empty page or a silent 403 into a stated reason.
+
+                  // Every other page carries the same key as its sidebar entry
+                  // in AdminLayout. Until 116 only three of them did, so an
+                  // administrator who typed a URL outside their remit got an
+                  // empty screen or a silent 403 — which reads as a broken
+                  // console rather than a closed door. The server refuses them
+                  // regardless; this only turns the refusal into a stated one.
                   {
-                    element: <PermissionRoute require="members:manage" />,
+                    element: <PermissionRoute require="project:manage_all" />,
+                    children: [
+                      { path: '/admin/projects', lazy: lazyPage(() => import('./pages/admin/projects/AdminProjectsPage')) },
+                    ],
+                  },
+                  {
+                    // /admin/events/:id is also mounted at /events/:id/manage for
+                    // organizers, so it is gated in-page and by RLS rather than
+                    // here — an organizer holds no event:manage.
+                    element: <PermissionRoute require="event:manage" />,
+                    children: [
+                      { path: '/admin/events', lazy: lazyPage(() => import('./pages/admin/events/AdminEventsPage')) },
+                    ],
+                  },
+                  { path: '/admin/events/:id', lazy: lazyPage(() => import('./pages/admin/events/AdminEventDetailPage')) },
+                  {
+                    // Reading the member list, not editing it. The Create User,
+                    // Reset Password and Delete controls on the page check
+                    // members:manage separately, and api/admin/* refuses without
+                    // it.
+                    element: <PermissionRoute require="members:view" />,
                     children: [
                       { path: '/admin/users', lazy: lazyPage(() => import('./pages/admin/users/AdminUsersPage')) },
                     ],
@@ -413,31 +465,78 @@ const router = createBrowserRouter([
                       { path: '/admin/roles', lazy: lazyPage(() => import('./pages/admin/roles/AdminRolesPage')) },
                     ],
                   },
-                  { path: '/admin/achievements', lazy: lazyPage(() => import('./pages/admin/achievements/AdminAchievementsPage')) },
-                  { path: '/admin/moderation', lazy: lazyPage(() => import('./pages/admin/moderation/AdminModerationPage')) },
-                  { path: '/admin/institutions', lazy: lazyPage(() => import('./pages/admin/institutions/AdminInstitutionsPage')) },
-                  { path: '/admin/chamber', lazy: lazyPage(() => import('./pages/admin/chamber/AdminChamberPage')) },
-                  { path: '/admin/grants', lazy: lazyPage(() => import('./pages/admin/grants/AdminGrantsPage')) },
-                  { path: '/admin/forums', lazy: lazyPage(() => import('./pages/admin/forums/AdminForumsPage')) },
-                  { path: '/admin/resources', lazy: lazyPage(() => import('./pages/admin/resources/AdminResourcesPage')) },
-                  { path: '/admin/grievances', lazy: lazyPage(() => import('./pages/admin/grievances/AdminGrievancesPage')) },
-                  { path: '/admin/feedback', lazy: lazyPage(() => import('./pages/admin/feedback/AdminFeedbackPage')) },
-                  { path: '/admin/verification', lazy: lazyPage(() => import('./pages/admin/verification/AdminVerificationPage')) },
-                  { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
-                  { path: '/admin/employers', lazy: lazyPage(() => import('./pages/admin/employers/AdminEmployersPage')) },
                   {
-                    element: <PermissionRoute require="org:manage" />,
+                    element: <PermissionRoute require="achievement:manage" />,
                     children: [
-                      { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
+                      { path: '/admin/achievements', lazy: lazyPage(() => import('./pages/admin/achievements/AdminAchievementsPage')) },
                     ],
                   },
-                  { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
-                  { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
-                  { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
-                  // Sends deliberate events to the live Sentry project, so it is
-                  // gated by AdminRoute like every other page here rather than
-                  // by a build flag.
-                  { path: '/admin/errors/simulate', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorSimulatorPage')) },
+                  {
+                    // Grievances and moderation are the same job seen from two
+                    // directions.
+                    element: <PermissionRoute require="moderation:view" />,
+                    children: [
+                      { path: '/admin/moderation', lazy: lazyPage(() => import('./pages/admin/moderation/AdminModerationPage')) },
+                      { path: '/admin/grievances', lazy: lazyPage(() => import('./pages/admin/grievances/AdminGrievancesPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="institution:verify" />,
+                    children: [
+                      { path: '/admin/institutions', lazy: lazyPage(() => import('./pages/admin/institutions/AdminInstitutionsPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="sme:verify" />,
+                    children: [
+                      { path: '/admin/chamber', lazy: lazyPage(() => import('./pages/admin/chamber/AdminChamberPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="grant:manage" />,
+                    children: [
+                      { path: '/admin/grants', lazy: lazyPage(() => import('./pages/admin/grants/AdminGrantsPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="forum:manage" />,
+                    children: [
+                      { path: '/admin/forums', lazy: lazyPage(() => import('./pages/admin/forums/AdminForumsPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="resource:manage" />,
+                    children: [
+                      { path: '/admin/resources', lazy: lazyPage(() => import('./pages/admin/resources/AdminResourcesPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="verification:review" />,
+                    children: [
+                      { path: '/admin/verification', lazy: lazyPage(() => import('./pages/admin/verification/AdminVerificationPage')) },
+                    ],
+                  },
+                  {
+                    element: <PermissionRoute require="employer:manage" />,
+                    children: [
+                      { path: '/admin/employers', lazy: lazyPage(() => import('./pages/admin/employers/AdminEmployersPage')) },
+                    ],
+                  },
+                  {
+                    // The residual operator surface. org:manage stopped being
+                    // "runs the platform" in 116 and became exactly this list.
+                    element: <PermissionRoute require="org:manage" />,
+                    children: [
+                      { path: '/admin/feedback', lazy: lazyPage(() => import('./pages/admin/feedback/AdminFeedbackPage')) },
+                      { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
+                      { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
+                      { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
+                      { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
+                      { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
+                      // Sends deliberate events to the live Sentry project.
+                      { path: '/admin/errors/simulate', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorSimulatorPage')) },
+                    ],
+                  },
                 ],
               },
             ],

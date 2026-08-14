@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { BarChart3, ShieldCheck } from 'lucide-react'
 import { setAnalyticsConsent, useAnalyticsConsent } from '../lib/analytics-consent'
 import { Button } from './ui/Button'
@@ -27,19 +28,44 @@ export function AnalyticsConsentBanner() {
           </div>
           <div>
             <h2 className="font-display font-bold text-ktip-sand-900"><Trans>Help us improve KTIP</Trans></h2>
+            {/* Names what is actually stored rather than describing the
+                category. "Optional usage analytics help us understand which
+                pages are useful" is true of every tracker anyone has ever
+                objected to; one identifier, page paths and feature events is
+                checkable. */}
             <p className="mt-1 text-sm leading-relaxed text-ktip-sand-600">
-              <Trans>Optional usage analytics help us understand which pages and features are useful. We do not record message or proposal content, and you can change this choice in Settings.</Trans>
+              <Trans>
+                We use one analytics identifier to see which pages and features help people. It
+                records page paths and feature events — never the content of a message, a document
+                or a proposal — and nothing is stored unless you allow it.
+              </Trans>{' '}
+              <Link
+                to="/legal/cookies"
+                className="font-medium text-ktip-ocean-700 underline underline-offset-2 hover:opacity-80"
+              >
+                <Trans>Cookie notice</Trans>
+              </Link>
+              <span aria-hidden className="mx-1.5 text-ktip-sand-300">·</span>
+              <Link
+                to="/legal/privacy"
+                className="font-medium text-ktip-ocean-700 underline underline-offset-2 hover:opacity-80"
+              >
+                <Trans>Privacy policy</Trans>
+              </Link>
             </p>
           </div>
         </div>
         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          {/* "No thanks", not "Necessary only" — the latter reads as a third
+              option sitting beside "Allow analytics" rather than as the refusal
+              it is. */}
           <Button
             variant="secondary"
             size="sm"
             icon={<ShieldCheck size={17} />}
             onClick={() => setAnalyticsConsent('denied')}
           >
-            <Trans>Necessary only</Trans>
+            <Trans>No thanks</Trans>
           </Button>
           <Button size="sm" onClick={() => setAnalyticsConsent('granted')}>
             <Trans>Allow analytics</Trans>

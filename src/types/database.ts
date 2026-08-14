@@ -36,6 +36,10 @@ export interface Database {
           is_minor?: boolean
           requires_age_declaration?: boolean
           age_declared_at?: string | null
+          // 111. Derived from user_consents — likewise never written here. The
+          // guard trigger raises on a direct write to either.
+          requires_consent?: boolean
+          consent_recorded_at?: string | null
           created_at: string
           updated_at: string
         }

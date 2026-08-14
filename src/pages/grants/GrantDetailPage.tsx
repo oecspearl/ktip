@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Disclaimer } from '../../components/legal/Disclaimer'
 import { useParams, useNavigate } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -64,8 +65,9 @@ export default function GrantDetailPage() {
     auth.can('grant:apply') &&
     gate.allowed
   )
-  // Only OECS admins can write to a grant, so only they see field proposals
-  const isOecs = auth.can('org:manage')
+  // Only somebody who administers grants can write to one, so only they see
+  // field proposals. (116: was org:manage.)
+  const isOecs = auth.can('grant:manage')
 
   // Load submitted-application count
   useEffect(() => {
@@ -372,6 +374,8 @@ export default function GrantDetailPage() {
               </div>
             </div>
           </div>
+
+          <Disclaimer variant="funding" placement="footer" />
         </div>
       </div>
 

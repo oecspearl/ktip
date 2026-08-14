@@ -51,6 +51,18 @@ const footerColumns: FooterColumn[] = [
       { label: msg`Contact`, href: 'mailto:support@ktip.org', external: true },
     ],
   },
+  {
+    title: msg`Legal`,
+    links: [
+      { label: msg`Terms of Use`, href: '/legal/terms' },
+      { label: msg`Privacy Policy`, href: '/legal/privacy' },
+      { label: msg`IP & Licensing`, href: '/legal/content-licence' },
+      // In the footer because a rightsholder with no KTIP account has nowhere
+      // else to look, and they are exactly who needs to find it.
+      { label: msg`Report infringement`, href: '/legal/copyright/report' },
+      { label: msg`All policies`, href: '/legal' },
+    ],
+  },
 ]
 
 const socialLinks = [
@@ -75,9 +87,13 @@ export function Footer() {
       />
 
       <div className="relative container mx-auto px-6 md:px-12 py-10 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Six columns, not four: the logo cell spans two and each of the four
+            nav columns takes one. A fifth cell in a four-column grid wrapped
+            raggedly, and at md the logo now spans the full width with the nav
+            columns pairing 2×2 underneath it. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Logo & Mission */}
-          <div className="lg:col-span-1">
+          <div className="md:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
               <img src="/ktip-logo-128.webp" alt="KTiP" loading="lazy" decoding="async" width={48} height={48} className="w-12 h-12 object-contain" />
               <div>

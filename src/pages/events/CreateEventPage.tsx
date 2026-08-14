@@ -10,6 +10,8 @@ import { useCreateEvent } from '../../hooks/useEvents'
 import { readDraft, useFormDraft } from '../../hooks/useFormDraft'
 import { useUploadDocument } from '../../hooks/useEntityDocuments'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
 import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
 import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
@@ -138,6 +140,13 @@ export default function CreateEventPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
+  const gate = useAgreementGate('publishing')
+  const [gateOpen, setGateOpen] = useState(false)
+  // Non-null means "resume the create with these once the gate is accepted".
+  const pendingDatetimes = useRef<{ startDatetime: string; endDatetime: string | undefined } | null>(
+    null
+  )
+
   // Everything above except the files, written back on every change.
   const { clear: clearDraft } = useFormDraft(EVENT_DRAFT_KEY, {
     title,
@@ -168,8 +177,8 @@ export default function CreateEventPage() {
 
   // Controls the draft/published selector. Capability, not slug: the literal
   // 'oecs' test meant an admin created after 063 could not choose a status and
-  // silently published everything.
-  const isAdmin = auth.can('org:manage')
+  // silently published everything. (116: was org:manage.)
+  const isAdmin = auth.can('event:manage')
 
   const managedEmployers = useManagedEmployers()
 
@@ -355,6 +364,24 @@ export default function CreateEventPage() {
       return
     }
 
+    // Only after every field error is resolved. This form is long enough that
+    // opening a licensing agreement over a failed validation would be actively
+    // hostile.
+    if (gate.needsAgreement) {
+      // The validated datetimes are held rather than recomputed after the modal
+      // closes: the member could not have edited the form while it was open, and
+      // recomputing would silently re-derive them from state that the resume
+      // path has no reason to trust more than the values that just passed
+      // validation.
+      pendingDatetimes.current = { startDatetime, endDatetime }
+      setGateOpen(true)
+      return
+    }
+
+    await createEventNow(startDatetime, endDatetime)
+  }
+
+  const createEventNow = async (startDatetime: string, endDatetime: string | undefined) => {
     try {
       const event = await createEvent({
         title,
@@ -976,6 +1003,8 @@ export default function CreateEventPage() {
 
             {/* Submit Button — most types are a two-step create, so the button
                 says where it is going rather than pretending this is the end. */}
+            <AgreementNotice bundle="publishing" />
+
             <div className="flex items-center gap-4">
               <Button
                 type="submit"
@@ -1007,6 +1036,25 @@ export default function CreateEventPage() {
           </form>
         </div>
       </div>
+
+      <AgreementGateModal
+        gate={gate}
+        bundle="publishing"
+        open={gateOpen}
+        context="event"
+        onClose={() => {
+          setGateOpen(false)
+          pendingDatetimes.current = null
+        }}
+        onAccepted={async () => {
+          setGateOpen(false)
+          const pending = pendingDatetimes.current
+          pendingDatetimes.current = null
+          if (pending) {
+            await createEventNow(pending.startDatetime, pending.endDatetime)
+          }
+        }}
+      />
     </>
   )
 }

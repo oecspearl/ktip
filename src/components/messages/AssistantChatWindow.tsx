@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router'
 import { Send, Sparkles, Trash2 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { AssistantBubble } from './AssistantBubble'
+import { Disclaimer } from '../legal/Disclaimer'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
 import { useAuth } from '../../contexts/AuthContext'
 import { ASSISTANT_NAME, ASSISTANT_TAGLINE } from '../../lib/assistant'
+import { opensAdminConsole } from '../../lib/permissions'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
@@ -24,7 +26,7 @@ export function AssistantChatWindow() {
     userName: auth.profile?.display_name ?? null,
     // Capability, not slug — otherwise the assistant refuses to mention admin
     // pages to an admin created after 063. Matches AdminRoute.
-    isOecs: auth.can('org:manage') || auth.can('moderation:view'),
+    isOecs: opensAdminConsole(auth.can),
   })
 
   const [input, setInput] = useState('')
@@ -130,6 +132,11 @@ export function AssistantChatWindow() {
             <Trans>Send</Trans>
           </Button>
         </div>
+
+        {/* Dismissible: a member who chats with the assistant daily has taken
+            the point, and a caveat they scroll past every time is one they stop
+            reading everywhere. */}
+        <Disclaimer variant="ai" placement="inline" dismissible className="mt-2" />
       </form>
     </div>
   )

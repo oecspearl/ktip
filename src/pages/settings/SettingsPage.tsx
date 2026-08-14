@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { User, Shield, Bell, BadgeCheck, Sparkles } from 'lucide-react'
+import { User, Shield, Bell, BadgeCheck, Sparkles, ScrollText } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { ProfileSettingsTab } from './ProfileSettingsTab'
 import { SecuritySettingsTab } from './SecuritySettingsTab'
 import { PreferencesTab } from './PreferencesTab'
 import { PersonalizationTab } from './PersonalizationTab'
 import { VerificationTab } from './VerificationTab'
+import { LegalSettingsTab } from './LegalSettingsTab'
 import { cn } from '../../lib/utils'
 import { useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 
-type SettingsTab = 'profile' | 'security' | 'preferences' | 'personalization' | 'verification'
+type SettingsTab = 'profile' | 'security' | 'preferences' | 'personalization' | 'verification' | 'legal'
 
 const tabs = [
   { id: 'profile' as const, label: msg`Profile`, icon: User, description: msg`Manage your profile info` },
@@ -20,6 +21,7 @@ const tabs = [
   { id: 'preferences' as const, label: msg`Preferences`, icon: Bell, description: msg`Notifications & display` },
   { id: 'personalization' as const, label: msg`Personalization`, icon: Sparkles, description: msg`Tune what you see` },
   { id: 'verification' as const, label: msg`Verification`, icon: BadgeCheck, description: msg`Verify your identity` },
+  { id: 'legal' as const, label: msg`Legal & Consent`, icon: ScrollText, description: msg`What you agreed to` },
 ]
 
 function isSettingsTab(value: string | null): value is SettingsTab {
@@ -87,6 +89,7 @@ export default function SettingsPage() {
             {activeTab === 'preferences' && <PreferencesTab />}
             {activeTab === 'personalization' && <PersonalizationTab />}
             {activeTab === 'verification' && <VerificationTab />}
+            {activeTab === 'legal' && <LegalSettingsTab />}
           </div>
         </div>
       </div>

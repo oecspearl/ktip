@@ -7,7 +7,8 @@ import { BentoCard } from '../ui/BentoCard'
 import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
-import { useTranslatedFields } from '../../hooks/useTranslated'
+import { useTranslatedFields, isMachineTranslated } from '../../hooks/useTranslated'
+import { TranslatedMark } from '../legal/TranslatedMark'
 import { resolveCopy } from '../../i18n/copy'
 
 interface ProjectCardProps {
@@ -52,6 +53,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {resolveCopy(i18n, PHASE_LABELS[project.phase])}
         </Badge>
         {project.is_climate_action && <ClimateBadge />}
+        {/* No source passed: a card is too small to expand the original into,
+            and the detail page offers it. The mark is still worth having here —
+            it is the first place a French reader meets translated copy. */}
+        {isMachineTranslated(project, translated) && <TranslatedMark />}
         {/* Team size, so a browsing member can tell a solo project from one
             already running a group before opening it. */}
         {project.member_count > 0 && (

@@ -14,6 +14,7 @@ import { ShieldAlert, Clock, HelpCircle, ArrowLeft, Receipt } from 'lucide-react
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { MyTakedownNotices } from '../../components/legal/MyTakedownNotices'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function MyGrievancesPage() {
@@ -43,6 +44,13 @@ export default function MyGrievancesPage() {
       />
 
       <div className="w-full max-w-page mx-auto px-4 py-8">
+        {/* Copyright notices filed against this member's content. Renders
+            nothing when there are none, and sits above the grievance list
+            because it is the one thing here that needs an answer from them. */}
+        <div className="mb-8">
+          <MyTakedownNotices />
+        </div>
+
         {/* Navigation helpers — back to home / on to help center */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <Link

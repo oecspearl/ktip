@@ -21,6 +21,8 @@ import { analytics } from '../../hooks/useAnalytics'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
 import { OAuthButtons } from '../../components/auth/OAuthButtons'
+import { ConsentDocument } from '../../components/legal/ConsentDocument'
+import { CONSENT_BUNDLES } from '../../lib/legal'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 
@@ -28,9 +30,15 @@ const STEPS = [
   { title: msg`Account`, caption: msg`Join the Caribbean’s knowledge and innovation network.` },
   { title: msg`About You`, caption: msg`Tell your story — connect across the OECS.` },
   { title: msg`Skills & Collaboration`, caption: msg`Find collaborators. Build what’s next.` },
+  { title: msg`Agreements`, caption: msg`The rules of the road. Read them once, then you’re in.` },
 ]
 
-const HEADINGS = [msg`Create an account`, msg`About you`, msg`Skills & collaboration`]
+const HEADINGS = [
+  msg`Create an account`,
+  msg`About you`,
+  msg`Skills & collaboration`,
+  msg`Before you join`,
+]
 
 // Stops the picker offering a future date. The schema rejects one anyway.
 const TODAY_ISO = todayIso()
@@ -70,6 +78,10 @@ export default function SignupPage() {
   const [skills, setSkills] = useState<string[]>([])
   const [interests, setInterests] = useState<string[]>([])
   const [openTo, setOpenTo] = useState<string[]>([])
+
+  // Step 4 — required. Set by ConsentDocument once the reader has scrolled to
+  // the end of the agreement AND ticked the box.
+  const [consentAccepted, setConsentAccepted] = useState(false)
 
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -126,10 +138,19 @@ export default function SignupPage() {
     if (step === 2) {
       analytics.funnel('signup', 'step_2_complete')
     }
+    if (step === 3) {
+      analytics.funnel('signup', 'step_3_complete')
+    }
     setStep(step + 1)
   }
 
   const handleSubmit = async () => {
+    // Belt and braces — the button is already gated on this. If it were ever
+    // reachable without consent, handle_new_user() would leave the account
+    // owing one and ProtectedRoute would route it to onboarding rather than
+    // letting it through unagreed.
+    if (!consentAccepted) return
+
     const input = {
       ...step1Values,
       organization: organization.trim() || undefined,
@@ -165,6 +186,15 @@ export default function SignupPage() {
         role: selectedRole,
         // Seeds account_age via handle_new_user (091). Never lands on `profiles`.
         date_of_birth: dateOfBirth,
+        // Seeds user_consents via handle_new_user (115), exactly as the date of
+        // birth seeds account_age — and for a reason that is not stylistic
+        // symmetry. With email confirmation on, signUp() returns NO SESSION, so
+        // auth.uid() is null and record_consent() would refuse; meanwhile the
+        // auth user and its profile already exist, because the trigger fired.
+        // An RPC here would leave the account with no consent on file for as
+        // long as the confirmation email went unread.
+        legal_consent: CONSENT_BUNDLES.account,
+        legal_consent_locale: i18n.locale,
         ...(input.organization && { organization: input.organization }),
         ...(input.industry && { industry: input.industry }),
         ...(input.country && { country: input.country }),
@@ -318,6 +348,32 @@ export default function SignupPage() {
                   <Trans>Next</Trans>
                 </Button>
 
+                {/* Said here rather than sprung at step 4. Someone who is not
+                    willing to accept the Terms should find that out before
+                    typing three screens of profile, and the links open in a new
+                    tab so reading them does not cost the form. */}
+                <p className="text-center text-xs leading-relaxed text-ktip-sand-500">
+                  <Trans>
+                    You will be asked to accept our{' '}
+                    <Link
+                      to="/legal/terms"
+                      target="_blank"
+                      className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
+                    >
+                      Terms of Use
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      to="/legal/privacy"
+                      target="_blank"
+                      className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
+                    >
+                      Privacy Policy
+                    </Link>{' '}
+                    before your account is created.
+                  </Trans>
+                </p>
+
                 <OAuthButtons label={t`Or sign up with`} onError={setErrorMessage} />
               </div>
             )}
@@ -420,14 +476,37 @@ export default function SignupPage() {
                   <Button type="button" variant="secondary" onClick={() => setStep(2)} icon={<ArrowLeft size={18} />}>
                     <Trans>Back</Trans>
                   </Button>
+                  <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>
+                    <Trans>Next</Trans>
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-4">
+                <p className="-mt-1 text-sm text-ktip-sand-600">
+                  <Trans>
+                    Four documents govern your account. Read them, then accept to finish creating
+                    it.
+                  </Trans>
+                </p>
+
+                <ConsentDocument bundle="account" onAcceptedChange={setConsentAccepted} />
+
+                <div className="flex gap-3">
+                  <Button type="button" variant="secondary" onClick={() => setStep(3)} icon={<ArrowLeft size={18} />}>
+                    <Trans>Back</Trans>
+                  </Button>
                   <Button
                     type="button"
                     fullWidth
                     loading={pending}
+                    disabled={!consentAccepted}
                     onClick={handleSubmit}
                     icon={<UserPlus size={20} />}
                   >
-                    <Trans>Create Account</Trans>
+                    <Trans>Agree & Create Account</Trans>
                   </Button>
                 </div>
               </div>

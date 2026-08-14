@@ -64,7 +64,8 @@ import type { AttendanceType, RSVPStatus } from '../../types'
 import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
-import { useTranslatedFields } from '../../hooks/useTranslated'
+import { useTranslatedFields, isMachineTranslated } from '../../hooks/useTranslated'
+import { TranslatedMark } from '../../components/legal/TranslatedMark'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
@@ -354,6 +355,10 @@ export default function EventDetailPage() {
           {isPastEvent && event.status !== 'cancelled' && (
             <Badge variant="default"><Trans>Past Event</Trans></Badge>
           )}
+          {/* Marks the title, summary and description above as machine output.
+              Reference inequality is exact here: useTranslatedFields returns the
+              original object untouched when nothing was replaced. */}
+          {isMachineTranslated(event, translatedEvent) && <TranslatedMark source={event.title} />}
         </div>
       </PageHero>
 

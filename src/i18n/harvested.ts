@@ -7,7 +7,7 @@
 // rewritten — site-map.ts in particular is imported by api/ai-search.ts and has
 // to stay React-free. Listing their strings here is what makes
 // `lingui extract` see them, so they can be translated at the render site with
-// `i18n._(entry.label)` rather than by editing 38 data files.
+// `i18n._(entry.label)` rather than by editing 39 data files.
 //
 // Nothing imports the array. Its only job is to exist where the extractor looks.
 import { msg } from '@lingui/core/macro'
@@ -18,6 +18,12 @@ export const harvested = [
 Pending — received, not yet picked up. Under Review — a reviewer is working on it. Resolved — action was taken. Dismissed — the reviewer found no breach.
 
 You are notified when a state changes, so you do not need to keep checking.`,
+  msg`%analyticsRetention%`,
+  msg`%caseRetention% after the account closes — the record is the evidence that consent was given`,
+  msg`%caseRetention%, for legal-defence and safeguarding purposes`,
+  msg`%entity%, %address%. General enquiries %supportEmail%. Legal notices and appeals %legalEmail%. Privacy and data rights %privacyEmail%.`,
+  msg`%entityShort% is not a party to any agreement you reach with a sponsor and does not disburse funds unless it is expressly the named funder. Where it is the named funder, the listing says so.`,
+  msg`%entityShort% is not a party to any agreement you reach with a sponsor, and does not guarantee that a prize will be awarded or paid. The Grant & Funding Disclaimer applies to competition prizes as it does to grants.`,
   msg`A Virtual Hackathon is a hackathon event with a virtual venue attached — a set of rooms you move between instead of a single video link.
 
 The Hackathons page is the front door. It splits into what is live now, what is coming up, and what has already happened.
@@ -26,11 +32,18 @@ Live hackathons show an "Enter the venue" action. Upcoming ones show the event p
   msg`A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.
 
 Under it, the climate-action flag puts the event in the region’s resilience agenda, where it can be filtered for on the events page.`,
+  msg`A child at risk`,
+  msg`A counter-notice needs:`,
+  msg`A declared licence cannot be withdrawn from copies already made under it. That is what makes it a licence rather than a preference.`,
+  msg`A description of the work you own, specific enough for us to recognise it.`,
+  msg`A few things you use on KTIP are run by other organisations and set their own storage while you use them: Google and Microsoft during sign-in, Supabase for the authentication session, and the video service during a call. Error monitoring sends telemetry but does not store an identifier on your device for advertising.`,
+  msg`A first standing notice is a warning, with an explanation of what was removed and why.`,
   msg`A floorplan SVG is optional: without one the rooms render as a grid of cards that works the same way.`,
   msg`A form in stages`,
   msg`A funnel shows where people stop. The gap between two steps is the useful number, not the totals either side of it.
 
 Figures depend on analytics consent, so they undercount rather than overcount. Treat them as a floor.`,
+  msg`A grant or funding application you submit through KTIP is treated as confidential. It is never published, never listed in the directory, never indexed by a search engine, and never shown to other applicants — including applicants to the same call.`,
   msg`A guide, article, case study or tool published for the KTIP community, with its type and topic tags.
 
 The column on the right carries the details, the author, and links to related resources when there are any.`,
@@ -39,9 +52,19 @@ The column on the right carries the details, the author, and links to related re
 You need an account to create anything, apply for a grant, RSVP, post or reply in the forums, send messages, use the collaboration tools, or enter an event venue.
 
 Some actions need more than an account. Creating a project, for example, requires the project-creation permission, which not every role holds.`,
+  msg`A member can withdraw at any time in their settings. Withdrawal removes them from subsequent responses immediately, and the partner must delete previously received records for that member within 30 days.`,
   msg`A member page`,
+  msg`A notice made in bad faith — to remove a competitor, to silence criticism, or over work you do not own — may make you liable for the resulting damages, and we will decline further notices from you.`,
+  msg`A notice names you and describes your claim, and both are passed to the member whose content it concerns — they cannot answer a complaint they cannot see. A counter-notice is passed to the complainant for the same reason.`,
   msg`A page is not loading properly`,
+  msg`A public showcase is public. If your entry contains something you intend to patent, or a trade secret, do not put it in the parts of the entry that will be shown — describe the result rather than the method. Disclosure can affect your ability to obtain a patent later, and that is a decision only you can make.`,
   msg`A published CV`,
+  msg`A record of which legal documents you accepted, when, and in which language you read them`,
+  msg`A request for your bank credentials, your card details, or a copy of your identity document before any agreement exists.`,
+  msg`A request to move the conversation off the platform immediately, to a personal email address or a messaging app.`,
+  msg`A request to receive money and forward part of it to someone else.`,
+  msg`A rightsholder can file an infringement notice against content on KTIP, whether or not they hold an account. If one is filed against yours, you will be told, and you can respond with a counter-notice. The full process — what a notice must contain, what happens to the content while it is reviewed, and what repeated notices lead to — is in the Copyright & Takedown Policy.`,
+  msg`A rolling window of hours`,
   msg`A room gives you a text chat and a list of everyone currently in it, with their availability.
 
 Chat history loads in pages of about fifty messages, so you can scroll back through what you missed.
@@ -51,16 +74,25 @@ Live audio and video inside rooms is a later phase and is not switched on yet �
 
 Cancelling an event keeps its page up with a cancelled badge rather than deleting it — people who registered still need to find out what happened.`,
   msg`A shared document`,
+  msg`A standing notice reversed by a counter-notice is removed from the count. You can see any notices filed against your content, and their current status, from your account.`,
+  msg`A statement of why you believe it infringes.`,
+  msg`A statement that you believe in good faith it was removed as a result of a mistake or a misidentification.`,
   msg`A title and a body, posted to the board you came from — the board is fixed by the page, so there is nothing to choose.
 
 Write the title as the question you actually want answered; it is all most people see in the thread list.
 
 Once published you can edit or delete your own post, and replies notify you as they arrive.`,
+  msg`A verification badge reflects a check made at a point in time and can be revoked. Treat it as one signal among several, not as a guarantee.`,
+  msg`A verification badge reflects a check made at a point in time. It can be revoked if the underlying status changes or if the check turns out to have been wrong, and it is not a warranty by %entityShort% about the member who holds it.`,
   msg`A verified student account keeps a safeguarding record with your institution, and that record carries the year you were born — the year only, never the full date.
 
 It is taken from the date of birth on your account. You are not asked for it twice, and it cannot drift out of step with what you declared.
 
 It is there so your school's designated staff can apply the right protections to their own students. Other members never see it. To correct it, contact support.`,
+  msg`AI`,
+  msg`AI Use Disclosure`,
+  msg`AI assistance on applications`,
+  msg`AI features`,
   msg`AI features call out to a service, so they need a working connection and take a few seconds.
 
 "Improve" needs existing text to work on and does nothing on an empty field. "Suggest" is the one that works from nothing.
@@ -68,13 +100,25 @@ It is there so your school's designated staff can apply the right protections to
 An error message usually means the service is briefly unavailable — wait and try again.
 
 If AI features fail consistently rather than occasionally, that is a configuration problem on the platform side, not something you can fix. Report it through the forums or the KTIP Assistant.`,
+  msg`AI features can be wrong, and they are wrong most convincingly when the subject is specific — a deadline, an eligibility rule, a figure, a name. Check anything that matters before you rely on it or publish it.`,
+  msg`AI features — search, chat assistance, field extraction, CV parsing, moderation assistance`,
+  msg`AI help with applications`,
+  msg`AI output on KTIP is not professional, legal, financial, medical or academic advice. You remain responsible for what you publish or act on, whichever tool helped you write it.`,
   msg`AI review of an application`,
+  msg`AI search`,
+  msg`AI search, chat assistance, field and CV extraction, moderation assistance`,
+  msg`AI use`,
   msg`About`,
   msg`Abusive Interactions`,
+  msg`Acceptable Use & Community Guidelines`,
+  msg`Access to open collaboration surfaces is narrowed to contexts a minor has been invited into by their institution or an event they joined.`,
+  msg`Access, correction, deletion, restriction, objection, portability, withdrawal of consent.`,
   msg`Account`,
   msg`Account & Settings`,
   msg`Account & Verification`,
+  msg`Account and profile`,
   msg`Accounts`,
+  msg`Accounts identified as belonging to minors operate in supervised mode, with restricted messaging and collaboration features that are not user-configurable. How that works, and why the date of birth is handled the way it is, is set out in the Minor Safeguarding Statement.`,
   msg`Accounts, roles and permissions`,
   msg`Accounts, roles, verification and deletion.`,
   msg`Achievements`,
@@ -88,11 +132,13 @@ The Achievements page is the gallery. Filter by category to see what is availabl
 Some badges are secret: they stay hidden in the gallery until you earn them, so you cannot chase them deliberately.
 
 Badges also work as a filter in the member directory, which is how other members find, for instance, everyone with a verification badge.`,
+  msg`Adapt for display`,
   msg`Add members by name and choose whether they can view or edit.`,
   msg`Add or remove collaborators on your project`,
   msg`Admin`,
   msg`Admin Console`,
   msg`Admin Dashboard`,
+  msg`Administrators and moderators can reach non-public data where that is necessary to operate the platform, investigate a report, or meet a safeguarding duty. Those accesses are logged.`,
   msg`Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.
 
 It covers projects, events, users, roles, achievements, moderation, institutions, chambers, grants, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and UAT feedback.
@@ -100,6 +146,7 @@ It covers projects, events, users, roles, achievements, moderation, institutions
 Safety administrators see the moderation and grievance side. Super administrators see everything.
 
 Actions here apply platform-wide, so they are worth being deliberate about.`,
+  msg`Adults outside a shared, supervised context cannot start a direct conversation with a minor. Conversations a minor starts are subject to the same restriction in reverse.`,
   msg`After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.
 
 Step 1 confirms your display name (pre-filled from your provider), asks for your date of birth and asks you to pick a role. This step is required, and the site stays out of reach until it is done.
@@ -108,20 +155,53 @@ Step 2 is optional profile detail: organisation, industry, country, a short bio,
 
 You can skip step 2 and fill it in later from Settings, but a fuller profile makes you much easier to find in the member directory.`,
   msg`After you submit`,
+  msg`Age declaration, minor detection and safeguarding of young members`,
+  msg`Agent`,
+  msg`Aggregate reporting to programme funders — how many applications a call received, from which countries, in which sectors — uses figures that cannot be traced back to an individual application.`,
+  msg`Agree in writing who owns what before you enter, not after you win. A one-paragraph note between the team is enough, and it is by far the most common thing teams regret not having done.`,
+  msg`Agree the licensing of a jointly authored work with your collaborators before publishing it, not after.`,
+  msg`Agreement`,
+  msg`Agreements that apply to particular activities`,
   msg`Agriculture`,
+  msg`All rights reserved`,
+  msg`All stored platform data`,
+  msg`Alter a logo — recolour it, crop it, stretch it, add to it, or combine it with your own mark.`,
+  msg`Alter its meaning. Adapting for display is not editing your argument.`,
+  msg`Always. They cannot evaluate what they cannot read.`,
+  msg`An account belonging to a member under 18 is placed in supervised mode automatically. It cannot be switched off by the member, and it is not visible to other members as a badge or label — protection should not double as a marker.`,
+  msg`An account that repeatedly publishes infringing material is terminated. A notice counts against an account only when we have actioned it and it has not been reversed by a counter-notice — filings alone never count, because otherwise the policy could be used as a weapon by anyone willing to file.`,
+  msg`An award you did not apply for.`,
+  msg`An email address or a domain that is nearly but not quite the organisation it claims to be.`,
+  msg`An entry found to infringe someone else’s rights may be disqualified, and a prize already awarded may be withdrawn.`,
   msg`An infinite canvas`,
+  msg`An organiser or sponsor who receives your entry through KTIP may not:`,
   msg`An unpublished resource is invisible to members — that is the draft state. Publishing puts it in the library immediately; there is no scheduling.
 
 File-based resources upload here; text resources are read in full on the resource page without any download.`,
+  msg`An unsuccessful application may not be used for anything beyond the record of the decision. A funder may not take an idea from a rejected application and pursue it, commission it from someone else, or fold it into their own programme design.`,
   msg`Analytics`,
+  msg`Analytics consent can be changed at any time in Settings, on each device.`,
+  msg`Analytics events`,
+  msg`Analytics events are kept for %analyticsRetention%.`,
+  msg`Analytics is the only optional item. When you allow it, we record which pages are visited, which features are used, and how far people get through flows like sign-up — with a session identifier and, when you are signed in, your user ID.`,
+  msg`Analytics session identifier`,
   msg`Announcement`,
+  msg`Answers questions about the platform and helps you draft text`,
   msg`Any signed-in member can see your full profile and message you`,
   msg`Anyone in the OECS innovation ecosystem — students, mentors, entrepreneurs, investors, private-sector partners, and OECS staff. Pick your roles during signup; they shape what you see across the platform.`,
   msg`Anyone viewing your profile or the directory`,
+  msg`Anything else: %privacyEmail%. We respond within %rightsResponsePeriod%.`,
+  msg`Apache-2.0`,
+  msg`Appeals`,
+  msg`Application assistance`,
   msg`Applications`,
+  msg`Applications are retained while the call is live and afterwards for the period the programme’s own audit and reporting obligations require. Funders and reviewers lose access when the call closes and the decisions are final.`,
+  msg`Applications are saved as you work, so that a closed tab does not cost you an afternoon. A draft is visible only to you until you submit it — the funder sees nothing, not even that a draft exists.`,
+  msg`Applications that are not funded`,
   msg`Apply for a grant`,
   msg`Applying`,
   msg`Applying in KTIP versus on an external site`,
+  msg`Applying through KTIP does not license your idea to the funder — that protection is set out in the Grant Application Confidentiality & IP Terms. What you sign afterwards is a different matter, and it is yours to negotiate.`,
   msg`Approve or reject identity verification`,
   msg`Approved`,
   msg`Article`,
@@ -129,14 +209,27 @@ File-based resources upload here; text resources are read in full on the resourc
   msg`Articles, guides, case studies and templates shown at /resources. Each has a type and topic tags, which are what the public filters use.`,
   msg`Ask a question, or say where you want to go and it will link you there.`,
   msg`Ask the KTIP Assistant`,
+  msg`Asked once, stored apart from your profile, and not editable by you afterwards.`,
+  msg`Asking for permission`,
   msg`Assign roles and toggle what each role can do`,
+  msg`Assistant chat`,
+  msg`At %strikeLimit% standing notices the account is terminated and its published content removed.`,
+  msg`Audit`,
+  msg`Audit and suspension`,
+  msg`Authentication events, administrative actions, moderation actions and rate-limit counters.`,
+  msg`Availability`,
+  msg`Avatar and cover images`,
   msg`Awaiting approval`,
   msg`Away`,
   msg`Backing it, or joining it`,
+  msg`Badges`,
   msg`Badges and points`,
   msg`Badges are awarded automatically for what you do — creating projects, connecting with people, posting in the forums, getting verified, turning up to events, applying for grants, and more. Nothing needs to be claimed: the system checks as you go and awards anything you have already qualified for, including things you did before a badge existed. See everything you have and everything still open under Achievements.`,
   msg`Badges, points and what unlocks them.`,
   msg`Badges, points, streaks, showcase and rankings.`,
+  msg`Basis`,
+  msg`Be honest about who you are and what you are offering`,
+  msg`Before you send money, documents or data`,
   msg`Blog Post`,
   msg`Boards`,
   msg`Boards and posts`,
@@ -162,6 +255,7 @@ Both are stored per device, so your phone and your laptop can be set differently
 Open one for the full text plus the page it was sent from — which is usually the fastest way to understand a vague report.`,
   msg`Bugs and suggestions submitted by users`,
   msg`Build and launch innovations`,
+  msg`Build, commercialise or file intellectual-property protection over your entry, or a work derived from it, without a separate written agreement with you.`,
   msg`Build, publish and download your CV.`,
   msg`Business`,
   msg`Business Verification`,
@@ -174,13 +268,17 @@ Your Chamber reviews the submission against its own records. Once approved your 
 
 A Private Sector account is the unverified state of the same thing — everything keeps working while you wait.`,
   msg`Businesses waiting on your Chamber`,
+  msg`CC BY or CC BY-SA`,
+  msg`CV parsing`,
   msg`Calendar view`,
+  msg`Caller IP addresses are hashed with a secret salt before storage, so the throttle table cannot be read back as a record of who viewed what.`,
   msg`Calls by room name`,
   msg`Can I keep my points off the leaderboard?`,
   msg`Can I log in with Google or Microsoft?`,
   msg`Can I message more than one person at once?`,
   msg`Can I preview my application before submitting?`,
   msg`Can a student add a faculty sponsor?`,
+  msg`Can you refuse it?`,
   msg`Cancelled`,
   msg`Case Study`,
   msg`Category and phase`,
@@ -188,10 +286,16 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Challenges and climate action`,
   msg`Chamber SME review`,
   msg`Chambers of Commerce`,
+  msg`Change it`,
+  msg`Change your analytics choice`,
   msg`Change your email address`,
   msg`Change your name, bio, country, role, skills and avatar`,
   msg`Change your password`,
+  msg`Changes`,
+  msg`Changes to these Terms`,
+  msg`Changes to this policy`,
   msg`Changing a badge that people already hold`,
+  msg`Changing your mind`,
   msg`Chat is live for everyone in the room, and it is per-room — what is said in a breakout stays in that breakout.
 
 Audio, screen sharing and host controls are not here yet; the notice above the chat says so rather than leaving you looking for a mute button that does not exist.
@@ -206,6 +310,8 @@ These preferences are enforced where notifications are created, so a stream that
 For missing email specifically, check your spam folder and, if you added a secondary email, which address the mail actually went to.
 
 In-app notifications appear on the bell in the navigation bar rather than as browser pop-ups.`,
+  msg`Check for a declared licence before you use anything. No licence means no permission.`,
+  msg`Check the legal entity’s name and registration, not just its brand.`,
   msg`Check the legal name and registration number against the national corporate registry — that check is the entire value of the badge you are about to grant.
 
 Applicants cannot edit their submission after sending it, so a correction means rejecting with a reason and having them resubmit. Verified businesses show the badge on their profile and in the directory.`,
@@ -222,6 +328,7 @@ Arriving from the OECS Virtual Campus and bounced back with an error code? The h
 Still locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options.`,
   msg`Checked In`,
   msg`Checked in`,
+  msg`Checklist`,
   msg`Choose "Sign Out" at the bottom of the menu.`,
   msg`Choose the sun or moon icon that fans out above it.`,
   msg`Choose the topics, categories and content types you want ranked first`,
@@ -234,6 +341,7 @@ Mobile browsers on iOS and Android work for browsing, messaging and forms.
 The collaboration tools — whiteboard, code sandbox and especially video conferencing — want a desktop browser and a real keyboard.
 
 Keep your browser current. Older versions silently lack features the platform depends on.`,
+  msg`Claim authorship of it, or publish it without attribution to you.`,
   msg`Clearing the cache fixes a lot of display and loading problems.
 
 Chrome: Ctrl+Shift+Delete, select "Cached images and files", clear.
@@ -245,6 +353,7 @@ Edge: Ctrl+Shift+Delete, select "Cached images and files", clear.
 Safari: Safari menu, Settings, Privacy, Manage Website Data, Remove All.
 
 On Mac use Cmd in place of Ctrl. Clearing the cache does not sign you out; clearing cookies does.`,
+  msg`Clearing your browser’s storage for this site removes everything in the table above, including your session, so you will be signed out and asked about analytics again.`,
   msg`Click "Apply" — you must be logged in.`,
   msg`Click "Connect" on their card or profile header.`,
   msg`Click "Create Event" (you must be logged in).`,
@@ -318,8 +427,15 @@ The brain icon in the panel turns on AI-guided navigation: describe what you are
   msg`Climate Action`,
   msg`Co-editing, formatting and sharing.`,
   msg`Code Editor`,
+  msg`Code and documents shared on KTIP are provided by their authors as is. Neither the author nor %entityShort% warrants that they are correct, secure, fit for any purpose, or free of third-party rights. Review anything before you run it, and never run something you were sent by someone you do not know.`,
+  msg`Code produced with AI assistance is your responsibility to check, in the same way as code from any other source. It can reproduce licensed material, and the licence still applies.`,
+  msg`Code snippets, documents, whiteboards and notes you create on KTIP are yours. %entityShort% claims no ownership of them and takes only the licence needed to host and display them, described in the IP, Content & Licensing Policy.`,
+  msg`Code you did not write`,
   msg`Collaborate`,
+  msg`Collaboration`,
   msg`Collaboration Tools`,
+  msg`Collected`,
+  msg`Combine it with other datasets to re-identify a member who is present in aggregate form, or to build a profile beyond the stated purpose.`,
   msg`Common questions, and how to ask for more.`,
   msg`Community`,
   msg`Community & Network`,
@@ -329,6 +445,7 @@ The brain icon in the panel turns on AI-guided navigation: describe what you are
 Objectives say what you are being asked to achieve. Constraints set the boundaries — technology, time, budget, data you may use. Deliverables list exactly what you must hand in. Judging criteria show how entries are scored and weighted.
 
 Read the judging criteria first. They tell you where the marks actually are, which is not always where the objectives suggest.`,
+  msg`Competitions`,
   msg`Completed`,
   msg`Concept`,
   msg`Concept — still an idea. You are exploring whether it could work.
@@ -340,26 +457,54 @@ Funding — the project needs money to grow and you are looking for grants, inve
 Launch — ready to go live, or already launched.
 
 Update the phase as the project moves. Funders browsing the Projects list filter by phase, so keeping it current matters.`,
+  msg`Concerns`,
+  msg`Conduct`,
+  msg`Conduct and content`,
   msg`Conference`,
+  msg`Confidential`,
   msg`Confirm the change from the verification email that is sent to the new address.`,
   msg`Confirm — this cannot be undone and your content is removed.`,
   msg`Confirmed`,
   msg`Connect with a member`,
+  msg`Consent`,
+  msg`Consent — withdrawable at any time in Settings`,
+  msg`Consent — withdrawable in Settings`,
   msg`Constraint`,
   msg`Constraints`,
   msg`Consultancy`,
+  msg`Contact`,
+  msg`Contact members using details from the feed for anything other than the stated purpose.`,
+  msg`Contact the organisation through details you found yourself, not details supplied to you.`,
+  msg`Contact you outside the platform using details taken from your entry, other than about the competition.`,
+  msg`Content`,
+  msg`Content already shared into another member’s context — a direct message, a collaborative document, a whiteboard, a group chat — stays in that context. We cannot reach into someone else’s conversation and remove your half of it.`,
   msg`Content first — Projects, Events, Grants, Forums, Resources, Achievements. Then people: Users, Roles & Permissions, Institutions, Chamber Review, Employers, Verification.
 
 The safety group is Moderation and Grievances. Integrations, Partner API, Analytics, UAT Feedback and Errors are the operational end.
 
 This rail is on every admin page, so it is always the way back out.`,
+  msg`Content involving minors`,
+  msg`Content moderation, abuse and fraud prevention, security logging`,
   msg`Content that trips the automated moderation filters, or that has been reported and is awaiting review, is quarantined. It stays visible to you with a notice explaining its state, but other members cannot see it.
 
 Quarantine is not a decision — it is a hold. A moderator reviews it and either restores it or removes it.
 
 If you think a filter caught something unfairly, say so in the forums or through the KTIP Assistant rather than reposting: reposting usually trips the same filter again.`,
+  msg`Content we are legally required to retain, such as material attached to a live moderation, copyright or safeguarding case, is held for the period set out in the Privacy Policy and then deleted.`,
+  msg`Content written by members is machine-translated and marked as such.`,
+  msg`Content you mark as public can be read by anyone and may be indexed by search engines. We can stop serving it; we cannot make a search engine forget it.`,
+  msg`Content you submit to an AI feature — a draft you ask the assistant to improve, a document you ask it to extract fields from — is sent to the provider running that feature so it can answer. That is a separate matter from the licence above, and it is described in the AI Use Disclosure.`,
+  msg`Contributing to KTIP itself`,
+  msg`Controlled by your settings`,
+  msg`Cookie & Storage Notice`,
+  msg`Copies already made by others under the public-content rule above, including search-engine caches, are outside our control.`,
   msg`Copies of everything you have submitted.`,
   msg`Copies of everything you sent`,
+  msg`Copyright`,
+  msg`Copyright & Takedown Policy`,
+  msg`Correcting your date of birth requires contacting support, by design.`,
+  msg`Counted on outcomes, not on filings. %strikeLimit% standing notices ends the account.`,
+  msg`Counter-notice`,
   msg`Create Event`,
   msg`Create Project`,
   msg`Create Project opens a short form — title, summary, category, phase and hashtags — and puts your work in this grid.
@@ -371,17 +516,36 @@ You can edit or unpublish it afterwards, so nothing here is one-way. Signed out,
   msg`Create an event`,
   msg`Create and edit the boards members post into. A board’s name and description are what tell people where a discussion belongs, so they do more work than they look like.`,
   msg`Create grants and review applications`,
+  msg`Create or use an account to evade a block, a suspension or a restriction.`,
   msg`Create, browse and manage innovation projects.`,
+  msg`Creating an account accepts these Terms and the Privacy Policy.`,
+  msg`Creating and running your account; delivering the platform`,
   msg`Creating grants and reviewing applications.`,
+  msg`Cropping an image to fit a card, generating a preview or thumbnail, extracting a summary for a listing, building a search index. Formatting work, not editorial work.`,
   msg`Curating the external tools directory.`,
   msg`Curriculum Advisory`,
   msg`Custom Section`,
   msg`Dark mode and readable text`,
+  msg`Dark mode, reduced motion, text scale.`,
+  msg`Data`,
+  msg`Data is hosted outside the OECS, primarily in the United States and the European Union depending on the provider. Those transfers rely on the providers’ standard contractual clauses and equivalent safeguards. Ask at %privacyEmail% for the specific hosting regions in use.`,
+  msg`Database, authentication, file storage, realtime`,
+  msg`Date of birth`,
+  msg`Date of birth and minors`,
+  msg`Date of birth, password, email address unless you publish it yourself, private messages, verification evidence, grant applications, grievance and moderation records, and analytics rows.`,
   msg`Date, time, location or virtual link, event type, and whether it has already happened. Cancelled and past events keep their page — they just say so.
 
 Everything below expands on this; this block is the part worth screenshotting.`,
+  msg`Declaration`,
+  msg`Declare a conflict of interest and step aside — including where they are working on something competing.`,
+  msg`Declaring`,
+  msg`Declaring a false date of birth — in particular one that presents a minor as an adult — is grounds for immediate suspension. It is also the single thing most likely to put a young member in a situation the safeguards were built to prevent.`,
+  msg`Declaring a licence`,
+  msg`Declaring your date of birth`,
   msg`Declined`,
+  msg`Default`,
   msg`Delete your account`,
+  msg`Deletion`,
   msg`Deletion is on the project's own page, and only the owner (or an OECS administrator) can do it.
 
 Before anything is removed you get a summary of exactly what goes with it — comments, likes, team memberships, documents. If something blocks deletion, that is spelled out instead.
@@ -390,21 +554,53 @@ Deleting a project cannot be undone. If you only want it out of public view, swi
   msg`Deliverable`,
   msg`Deliverables`,
   msg`Demo Day`,
+  msg`Derivative works must be shared under the same licence. Choose deliberately — it constrains commercial reuse.`,
   msg`Describe the problem and submit — the OECS team reviews every grievance.`,
   msg`Describe what happened and submit — the OECS team sees it in the admin dashboard.`,
   msg`Developer Tools`,
   msg`Development`,
+  msg`Direct and group messages, and message attachments`,
   msg`Direct and group messaging with other members`,
   msg`Direct messages, group chats and the KTIP Assistant.`,
   msg`Directory, connections, invitations and your public page.`,
+  msg`Disagreement is fine and criticism of an idea is welcome. The line is at the person.`,
   msg`Discover`,
   msg`Discover and fund projects`,
   msg`Discover projects, publish grants, and connect with innovators.`,
   msg`Discussion`,
   msg`Dismissed`,
+  msg`Dismissed notices`,
+  msg`Display name, avatar, declared roles, organisation, country, biography, skills, interests, badges, published projects, public events and forum posts.`,
+  msg`Display name, email address, password (stored hashed)`,
+  msg`Display records to its own authorised users for that purpose.`,
   msg`Distributions and pipeline`,
+  msg`Do almost anything, keep the copyright notice. The usual choice for a snippet you want widely reused.`,
+  msg`Do not ask another member to pay a fee in order to receive a grant, a placement or an opportunity. No legitimate funder on this platform works that way.`,
+  msg`Do not attack or abuse the platform`,
+  msg`Do not attempt to contact a member identified as a minor outside the supervised channels the platform provides, and do not ask a minor to move a conversation to another service.`,
   msg`Do not disturb`,
+  msg`Do not file reports in bad faith. Reporting is counted per member, and using it as a weapon against someone you disagree with is itself a breach of these guidelines.`,
+  msg`Do not impersonate another person or organisation, and do not misrepresent your affiliation with one. Roles that require verification — student and faculty status in particular — are granted only after an institution or chamber confirms them. Claiming one falsely is a breach of these Terms and of the Acceptable Use policy.`,
+  msg`Do not impersonate another person, organisation, institution or funder.`,
+  msg`Do not manipulate points, badges, leaderboards, reactions or view counts, whether by automation, duplicate accounts or coordinated activity.`,
+  msg`Do not misrepresent a grant, project, event or organisation — including its funding, its outcomes, its partners or its endorsements.`,
+  msg`Do not misrepresent your credentials, your affiliation, your role, or a verification status you do not hold.`,
+  msg`Do not paste another person’s confidential information into an AI feature. What you submit is processed by the providers listed in the Privacy Policy.`,
+  msg`Do not paste code whose licence you have not read, into a project whose licence you have.`,
+  msg`Do not paste code you are contractually barred from disclosing, including an employer’s proprietary code.`,
+  msg`Do not paste someone else’s confidential information into an AI feature. That includes another member’s private message, an application you are reviewing, and a document shared with you in confidence.`,
+  msg`Do not post sexual content, and do not post any content that sexualises, endangers or exploits a minor. There is no warning step for this and no appeal in the ordinary sense: accounts are removed and the matter is reported to the authorities where the law requires it.`,
+  msg`Do not post spam, unsolicited bulk promotion, pyramid or multi-level schemes, or fraudulent investment or funding offers.`,
+  msg`Do not probe, load-test or attack the platform’s security without written authorisation. Report vulnerabilities to %privacyEmail% instead — we would rather hear from you than about you.`,
+  msg`Do not put credentials, API keys, tokens or connection strings into a snippet, document or whiteboard. Shared surfaces are shared, collaborators can be added later, and a key in a snippet is a key that has leaked.`,
+  msg`Do not resell or sublicense access to KTIP.`,
+  msg`Do not scrape, crawl or bulk-extract platform data, and do not circumvent rate limits, access controls or the API’s authentication.`,
+  msg`Do not strip a copyright notice, a licence header or an attribution comment.`,
+  msg`Do not upload a partner’s, sponsor’s, employer’s or institution’s logo to suggest a relationship that does not exist. Listing an organisation as a sponsor or partner when it is not is a misrepresentation under the Acceptable Use rules as well as a trade mark problem.`,
+  msg`Do not upload malware, or content designed to compromise another member’s device or account.`,
+  msg`Do not:`,
   msg`Documents`,
+  msg`Documents and whiteboards with several authors`,
   msg`Download, edit, publish`,
   msg`Downloading someone’s published résumé.`,
   msg`Draft`,
@@ -419,6 +615,8 @@ Approved — successful.
 Not accepted — unsuccessful. Where the funder gave feedback, it appears with the decision.
 
 Status changes reach you through notifications, so you do not have to keep checking the page.`,
+  msg`Drafts`,
+  msg`Drafts and autosave`,
   msg`Drafts save automatically, so you can leave and resume from My Applications.`,
   msg`Drafts, publishing and cancellation.`,
   msg`Drafts, submitted applications and decided ones, with the grant and the date on each.
@@ -482,29 +680,42 @@ Delete is permanent and takes their content with it. It asks twice for that reas
 The trophy artwork is picked from the asset set; a badge with no art still works, it just looks unfinished on a profile.`,
   msg`Education`,
   msg`Educational Partners`,
+  msg`Eligibility`,
   msg`Eligibility, deadlines and applying.`,
+  msg`Email address, message content`,
   msg`Email invitations carry a one-time link. Open it and, if you are already signed in, the invitation is redeemed straight away and you land on whatever it gave you access to.
 
 If you are not signed in, you are sent to sign up first. The invitation is remembered and redeemed automatically once your account exists, so you do not need to find the email again.
 
 Each link works once. If it has already been used, ask whoever invited you to send a fresh one.`,
+  msg`Embedded content — a video, a map, a slide deck someone linked — can set storage under its own provider’s terms once you play or open it.`,
   msg`Employers`,
+  msg`Encrypt the data in transit and at rest, and restrict access to staff who need it.`,
   msg`End your session on this device`,
+  msg`Ending your account`,
+  msg`Enforcement`,
   msg`Enter an event venue`,
   msg`Enter the live venue, find a team, build and submit`,
   msg`Enter the new email address and save.`,
   msg`Enter virtual hackathon venues, rooms and presence.`,
   msg`Enter your new password twice and save.`,
+  msg`Entering assigns nothing. Winning assigns nothing either.`,
   msg`Entrepreneur`,
   msg`Entrepreneurs`,
+  msg`Entries by a team`,
   msg`Environment`,
+  msg`Error and performance monitoring`,
+  msg`Error and performance telemetry`,
   msg`Error simulator`,
+  msg`Error telemetry`,
   msg`Errors`,
   msg`Errors captured from real sessions, grouped into issues so a hundred occurrences of one bug are one row.
 
 The columns are sortable and filterable, and Events is the count — a low-level error happening constantly usually matters more than a scary one that happened once.`,
+  msg`Especially with entries that did not win.`,
   msg`Event Recap`,
   msg`Event calendar`,
+  msg`Event rules`,
   msg`Event type`,
   msg`Events`,
   msg`Events works the same way for anything you organize. Connections is the people side.`,
@@ -526,6 +737,8 @@ It cannot be edited afterwards. If you entered it wrong, contact support and a m
 You can browse it two ways, filter it half a dozen ways, and add your own event with the Create Event button in this banner.
 
 This tour takes about a minute. Leave any time with Escape or the red button at the top.`,
+  msg`Every account declares a date of birth — at sign-up, or during onboarding if the account was created through Google, Microsoft or Virtual Campus sign-in, because none of those providers supplies one.`,
+  msg`Every account must declare a date of birth — including accounts created through Google, Microsoft or Virtual Campus single sign-on, because no sign-in provider supplies one.`,
   msg`Every achievement KTIP can award: its name, artwork, category, points and the rule that unlocks it.
 
 Hidden badges do not appear in members’ galleries until earned — only their count does.`,
@@ -561,7 +774,11 @@ It shows your name, role, country, bio, skills, badges, public projects and — 
 It never shows your email address, your messages or anything you marked private.
 
 You can copy the link from your own page.`,
+  msg`Every place KTIP uses AI, what each feature does with your text, how reliable it is, and what it is never allowed to decide on its own.`,
+  msg`Every policy and agreement, grouped by when it applies`,
+  msg`Every policy version you accepted, when, and your cookie choice`,
   msg`Every project members have published, private ones included. Search and filter the same way the public page does, then act on a row.`,
+  msg`Every project, post, comment, profile and message has a report control. Use it — a report reaches the moderation queue with a snapshot of the content attached, so it survives the author editing or deleting it afterwards.`,
   msg`Every registered member, filterable by role and verification status. The count is in the banner.
 
 Create User makes an account directly — used for staff and for members who cannot self-register.`,
@@ -574,14 +791,17 @@ It does not change afterwards. If the event is edited or the grant closes, this 
 Open one to see exactly what you sent and when — not the current state of the record, but the snapshot at the moment of submission.
 
 That matters when a form changes after you filled it in, or when a funder asks what you actually claimed. The receipt is your evidence.`,
+  msg`Every version you have accepted, and the date you accepted it, is listed in your settings.`,
   msg`Everyone`,
   msg`Everyone currently in the venue but not yet inside a room — the lobby, in effect.
 
 Presence is shared: while you are on this page other attendees can see you here too. Closing the tab takes you off the list.`,
   msg`Everyone on the platform`,
+  msg`Everyone who reads your application in an assessment role must:`,
   msg`Everyone whose connection request you accepted, or who accepted yours. Click a card to open their profile in the side panel without leaving this page.
 
 Removing a connection is silent — the other member is not notified — and you can reconnect later.`,
+  msg`Everything KTIP stores on your device, what each item is for, which ones you can refuse, and how to change your mind.`,
   msg`Everything here narrows the events below, and the filters stack — combine as many as you need.
 
 • Event type — workshops, conferences, webinars, training, meetings
@@ -616,11 +836,19 @@ Leave a section empty and it simply does not appear on the printed CV.`,
   msg`Explore Grants`,
   msg`Explore projects, join events, and find funding for your ideas.`,
   msg`External tools`,
+  msg`Extraction. Fields proposed from a document are shown to you for review and are not saved until you accept them.`,
   msg`FAQ`,
   msg`Faculty`,
   msg`Faculty/Researcher`,
+  msg`Feature`,
   msg`Featuring and removing published projects.`,
   msg`Featuring is the main lever`,
+  msg`Featuring your published project or event in a KTIP newsletter, a showcase page, a conference slide or a programme report. Only content you already made public, always attributed to you.`,
+  msg`Feedback`,
+  msg`Feedback and suggestions`,
+  msg`Field extraction`,
+  msg`File a copyright or trade mark notice — no account needed`,
+  msg`File a notice`,
   msg`Filed through the report form, with the category, description, and any evidence link the reporter added.
 
 The person reported is not told who filed it. Keep it that way in anything you write back.`,
@@ -652,6 +880,7 @@ Topic chips below the filters come from the tags organisers actually used, so a 
   msg`Find funding opportunities that fit your work.`,
   msg`Find partnerships, attend events, and support innovation.`,
   msg`Find the Team panel in the sidebar and click "Manage Team".`,
+  msg`Find the funder’s own website independently — type the name into a search engine rather than following the link you were sent — and confirm the call exists there.`,
   msg`Find, filter and create events across the region.`,
   msg`Find, join and organise hackathons, workshops and conferences.`,
   msg`Finding a thread, or starting one.`,
@@ -659,8 +888,12 @@ Topic chips below the filters come from the tags organisers actually used, so a 
   msg`Five ways to narrow it`,
   msg`Fixes for the problems that come up most.`,
   msg`Flip the whole app between light and dark themes`,
+  msg`Follow the licence you find — attribution, notice retention, share-alike, all of it.`,
   msg`Following a project bookmarks it and signals interest to its owner. Use the Follow button on any project page next to Like and Share.`,
   msg`For Administrators`,
+  msg`For anything outside the permitted list — a logo on an event backdrop, a co-branded programme, use in a funding application — write to %legalEmail% with what you want to use, where it will appear, and for how long. Permission is given in writing or not at all.`,
+  msg`For documents, diagrams and written material rather than code.`,
+  msg`For members`,
   msg`Forgot password`,
   msg`Form Builder decides what a registrant is asked beyond their name — add a field and it appears on the public page immediately, so changing it mid-registration means some answers exist and some do not.
 
@@ -687,10 +920,13 @@ You must be registered for the event to enter its venue. If you are not, registe
 Venues only exist for events where the organiser has set one up.`,
   msg`Funding`,
   msg`Funding for the region`,
+  msg`Further standing notices restrict publishing while we review the account.`,
+  msg`GPL or AGPL`,
   msg`Getting Around`,
   msg`Getting Started`,
   msg`Getting your business verified`,
   msg`Getting your business verified by your Chamber.`,
+  msg`Gives moderators a second opinion on a queued report`,
   msg`Go to "My Applications" from the Grants section.
 
 Every application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted.
@@ -754,25 +990,38 @@ Optional: a description, a short summary used on cards and previews, a Details s
 
 Climate Action projects surface in climate filters and get a boost for members who turned on the climate preference.`,
   msg`Go to the final step, "Impact & Review".`,
+  msg`Google and Microsoft`,
+  msg`Google and Microsoft sign-in — your name, email address, profile picture and provider account identifier.`,
+  msg`Governing law`,
   msg`Government`,
+  msg`Grant & Funding Disclaimer`,
+  msg`Grant Application Confidentiality & IP`,
   msg`Grant Applications`,
   msg`Grant Deadlines`,
+  msg`Grant applications`,
   msg`Grant applications also appear under My Applications, where you can see their review status. This tab is the paperwork; that page is the progress.`,
   msg`Grant applications, event registrations, forms — a record of each, as it was at the moment you submitted it.
 
 These do not change when the event or the grant does, which is the point: if a deadline moves or a form is edited afterwards, your copy still shows what you actually sent.
 
 Open one for the full receipt, with a reference number and a print-ready view.`,
+  msg`Grant assessment. The indicative read on your draft is for you, never leaves your draft, and carries no weight with the funder.`,
+  msg`Grant listings, funding opportunities, events and partner offerings on KTIP are published by their sponsors. %entityShort% does not guarantee their accuracy, availability or outcome, is not a party to any agreement you reach with a sponsor, and does not disburse funds unless it is expressly the named funder.`,
   msg`Grants`,
   msg`Grants & Funding`,
+  msg`Grants and opportunities on KTIP are published by their sponsors, not vetted guarantees. How to check one, and the warning signs of a funding scam.`,
   msg`Grants and their applications`,
   msg`Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.
 
 Grants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own five-step wizard — with a URL set, you never see their applications.
 
 Resources and Integrations are straightforward publishing. Forums is where boards are created and posts pinned. Achievements is where badge definitions live.`,
+  msg`Grants, funding and events`,
+  msg`Grants, funding calls, events, competitions and partner offerings on KTIP are published by their sponsors. A listing means a sponsor said this opportunity exists. It is not a guarantee by %entityShort% that the money exists, that the deadline is right, that the process is fair, or that you will be paid.`,
   msg`Grid view`,
   msg`Grouped runtime errors and how to triage them.`,
+  msg`Groups your page views into one visit so we can see which pages help people.`,
+  msg`Guardians`,
   msg`Guide`,
   msg`Guide and support innovators`,
   msg`Guide innovators, review ideas, and share your expertise.`,
@@ -790,12 +1039,15 @@ This section is empty between events, which is normal rather than broken.`,
   msg`Hackathons, workshops, meetups, conferences and demo days`,
   msg`Handle user reports and complaints`,
   msg`Happening right now`,
+  msg`Harass, bully, threaten, intimidate or stalk another member, on or off the platform.`,
   msg`Harassment`,
+  msg`Hashed rate-limit records`,
   msg`Hashtags and climate action`,
   msg`Hate Speech`,
   msg`Healthcare`,
   msg`Help Center`,
   msg`Help Desk`,
+  msg`Help and feedback forms`,
   msg`Help article — Account & Settings`,
   msg`Help article — Achievements & Leaderboard`,
   msg`Help article — Collaboration Tools`,
@@ -819,6 +1071,10 @@ This section is empty between events, which is normal rather than broken.`,
   msg`Help by topic`,
   msg`Hidden from everyone else`,
   msg`Hide yourself from the leaderboard`,
+  msg`Honesty`,
+  msg`Host and store`,
+  msg`Hosting and serverless execution`,
+  msg`How KTIP protects members under 18 — what supervised mode restricts, how the date of birth is handled, and how a parent or guardian can act.`,
   msg`How do I add a secondary email?`,
   msg`How do I add team members to my project?`,
   msg`How do I apply for a grant?`,
@@ -888,17 +1144,51 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How does student verification work?`,
   msg`How does the leaderboard work?`,
   msg`How entries are scored`,
+  msg`How long applications are kept`,
+  msg`How long we keep it`,
+  msg`How machine translation works`,
+  msg`How members under 18 are protected on KTIP`,
   msg`How points and ranks work.`,
   msg`How the ranking works`,
+  msg`How to check a funding offer, and the signs of a scam`,
+  msg`How to report content that infringes your rights, how the member who posted it can respond, and what happens to accounts that infringe repeatedly.`,
+  msg`How you must behave`,
   msg`I am not getting notifications`,
   msg`I cannot log in to my account`,
   msg`I got an invitation by email — how do I use it?`,
+  msg`IP`,
+  msg`IP, Content & Licensing Policy`,
+  msg`Identification of the content that was removed and where it was.`,
+  msg`Identity assertions, linked catalogue activity`,
   msg`Identity requests`,
+  msg`If a child is in immediate danger, contact your local emergency services first. Then tell us, so we can act on the account.`,
+  msg`If a funder is awarded the right to use your work, that comes from the funding agreement you sign with them afterwards — a separate document, negotiated separately, that you are free not to sign. It never comes from the act of applying.`,
   msg`If a recovery banner appears at the top of the page, click "Retry" — that reloads your profile without a full sign-in.
 
 Otherwise sign out and back in, which rebuilds the session.
 
 If fields are genuinely blank, open Settings and check they were saved. The Dashboard profile tab is read-only, so anything you typed there was never stored.`,
+  msg`If content of yours is removed after a notice, you will be notified with the substance of the complaint and the identity of the complainant, and you can file a counter-notice from your account.`,
+  msg`If it goes wrong`,
+  msg`If several people made something together — a project team, a group of co-authors — each of you needs the right to license their part before it is published here.`,
+  msg`If someone claims your content infringes their rights`,
+  msg`If something goes wrong`,
+  msg`If there is no licence and you want to use the work, ask the author. Most say yes, and now you have it in writing.`,
+  msg`If we act on it, the content is removed or made inaccessible, and the member who posted it is told what was removed, why, and who filed the notice.`,
+  msg`If we do not act on it, we tell you why. A notice we decline is not a finding that you are wrong — it may simply be outside what this process can resolve.`,
+  msg`If work you own has been published on KTIP without your permission, tell us and we will look at it. You do not need a KTIP account to file a notice. If your content is removed because of a notice you believe is wrong, you can file a counter-notice and have it restored.`,
+  msg`If you are a member, not a partner`,
+  msg`If you are worried about a young member`,
+  msg`If you believe a partner has used your data outside these terms, tell us at %privacyEmail%. We can suspend their access, and we will tell you what we found.`,
+  msg`If you believe an application of yours has been misused, contact %legalEmail%. We can act on a funder’s or reviewer’s access to the platform, and we will tell you what we found.`,
+  msg`If you believe an automated process has affected you unfairly, write to %privacyEmail%. You are entitled to a human review of it.`,
+  msg`If you believe an entry of yours has been used in breach of this, contact %legalEmail%. We can act on the organiser’s access to the platform; whether to pursue the organiser directly is your decision.`,
+  msg`If you believe your work has been posted here without permission, the Copyright & Takedown Policy sets out how to have it removed and how the person who posted it can respond.`,
+  msg`If you decline, no analytics identifier is written and no events are sent. Declining costs you nothing on the site.`,
+  msg`If you publish on behalf of an organisation, you confirm that you are authorised to license its material on the terms below.`,
+  msg`If you send us a suggestion for how KTIP itself should work — a feature idea, a bug report, a design comment — we may act on it without owing you payment or attribution, and without it becoming confidential. This applies to feedback about the platform only, and never to the work you publish on it.`,
+  msg`If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and "you" in this document means both you and that organisation.`,
+  msg`If you write code as part of your employment or your studies, your employer or institution may own it. That is between you and them, and it is worth checking before you share it here.`,
   msg`If your account holds more than one role, the avatar menu shows an "Acting as" switcher.
 
 Picking a context narrows your Dashboard rail to the tabs that belong to that role. Switching to your SME context, for example, hides the faculty tabs.
@@ -911,7 +1201,15 @@ Tabs that have no role requirement stay visible in every context.`,
 Any field you edit yourself is marked as manually set, and the sync then leaves it alone. Your wording is not overwritten on the next sync.
 
 So: edit freely, and expect course history to keep updating itself around your edits.`,
+  msg`If your account is restricted or terminated under this policy and you believe that is wrong, write to %legalEmail% with the reference from the notification. Appeals are reviewed by someone who was not involved in the original decision.`,
+  msg`If your content was removed`,
+  msg`If your mark has been used on KTIP without permission, report it through the infringement form — the same route as a copyright notice, and it is open to people without an account.`,
   msg`Impersonation`,
+  msg`Imply endorsement, partnership, accreditation, sponsorship or approval by %entityShort% that you do not have.`,
+  msg`In practice, each of those words does a specific job:`,
+  msg`In short`,
+  msg`Indemnity`,
+  msg`Individual competitions may publish their own rules — eligibility, deadlines, judging criteria, prize conditions. Those apply alongside this document. Where a competition rule would take more of your rights than this document does, it has no effect unless it was published before entries opened and you accepted it separately.`,
   msg`Individual fields also have AI suggestion buttons beside them.`,
   msg`Innovation`,
   msg`Innovators, mentors, investors, faculty, researchers and public-sector members from across the OECS.
@@ -924,7 +1222,9 @@ Working — heads down but present. Away — stepped out. Do not disturb — ple
 "Needs help" is the one to use when you are stuck: help-desk staff and mentors watch for it.
 
 If you go idle for about five minutes your status flips to Away automatically, so the floorplan stays honest without you having to manage it.`,
+  msg`Institution or chamber verification flow`,
   msg`Institutions`,
+  msg`Institutions enrolling students have their own safeguarding route through their KTIP institution contact, including a guardian-consent record held against the enrolment.`,
   msg`Institutions that can vouch for their members, each with the email domains it owns.
 
 Those domains are load-bearing: a member signing up with an address at a verified domain can be recognised as belonging to that institution automatically.`,
@@ -934,8 +1234,11 @@ Those domains are load-bearing: a member signing up with an address at a verifie
 They are grouped into Funding, Productivity, Government, Education and Developer Tools.
 
 Each entry explains what the tool does and how it relates to what you are doing on KTIP. OECS administrators curate the list, so it is a vetted set rather than an open directory.`,
+  msg`Integrity`,
   msg`Intellectual Property Infringement`,
   msg`Interests do real work`,
+  msg`International transfers`,
+  msg`Interprets a search phrase and suggests where in KTIP to go`,
   msg`Introduce yourself the first time you message someone. A name with no context usually gets ignored.
 
 Say what you want in the first two lines. "I am a student building a healthcare app and I would like 20 minutes of your advice on pricing" works far better than "Can I ask you something?".
@@ -951,22 +1254,44 @@ Use the forums for questions anyone could answer, and save direct messages for t
   msg`Issue and revoke keys for external platforms pulling employer data`,
   msg`Issuing and revoking`,
   msg`Issuing and revoking partner keys.`,
+  msg`It does not guarantee that a listed grant exists, that funds will be disbursed, or that the funder will behave well. %entityShort% is not a party to your agreement with a funder unless it is expressly the named funder. Read the Grant & Funding Disclaimer before you send anyone money or documents.`,
+  msg`It is first-party. The data goes into our own database, not to an advertising network.`,
+  msg`It is served to the members who are allowed to see it, and to search engines if you marked it public.`,
+  msg`It is stored in its own table with its own access rules, and it is never copied onto your public profile.`,
   msg`Its summary, category and phase — concept, prototype, pilot or scaling — with the hashtags the team chose.
 
 The column on the right carries the owner, the team, and a block of key facts, plus other recent projects if this one is not what you were after.`,
   msg`Join community discussions and share knowledge.`,
   msg`Join community discussions.`,
   msg`Judge`,
+  msg`Judges and organisers`,
   msg`Judging`,
   msg`Judging Criteria`,
   msg`Judging Criterion`,
+  msg`KTIP exists so that innovators, students, mentors, investors and institutions across the OECS can find each other and build things together. Every rule below is here because breaking it makes that harder for someone else.`,
+  msg`KTIP includes AI-assisted search, chat, field extraction, CV parsing, machine translation and moderation support. Output may be inaccurate or incomplete, it is not professional, legal, financial or academic advice, and you remain responsible for anything you publish or act on because of it. What each feature does and where your text goes is set out in the AI Use Disclosure.`,
+  msg`KTIP is a collaboration platform, so some data is deliberately public.`,
+  msg`KTIP is provided "as is" and "as available". We do not warrant uninterrupted or error-free operation, and we may change, suspend or discontinue features. Planned maintenance is announced where practical.`,
+  msg`KTIP serves the OECS region and its members live in several countries, so this policy is written to the stricter of the applicable national data-protection acts and the GDPR standard rather than to the lowest common bar.`,
+  msg`KTIP uses very few cookies. Almost everything it keeps on your device is in your browser’s local storage, which does not travel with every request the way a cookie does. Both are covered here.`,
+  msg`KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform.`,
+  msg`KTIP’s own interface is translated by people. Content written by members — project descriptions, event copy, forum posts, resources — is translated by machine so that the region can read each other’s work without waiting for a translator.`,
+  msg`Keep a record of what was received and when, sufficient to satisfy a deletion request.`,
   msg`Keep earning achievements without appearing on the public board`,
+  msg`Keep it confidential, and not discuss it outside the assessment.`,
+  msg`Keep licence headers and attribution comments intact.`,
+  msg`Keep partner keys secret, server-side, and out of client applications and source control.`,
+  msg`Keep your own copy of anything you cannot afford to lose. Export tools are provided for exactly that purpose.`,
   msg`Keeping and sharing it`,
+  msg`Keeps you signed in between page loads. Without it you would sign in on every navigation.`,
+  msg`Kept`,
   msg`Keynote`,
   msg`Keys for external platforms`,
   msg`Knowledge Transfer`,
+  msg`Language and content-language choice`,
   msg`Launch`,
   msg`Launch projects, apply for grants, and find investors.`,
+  msg`Law`,
   msg`Leaderboard`,
   msg`Learn and collaborate on projects`,
   msg`Learners who arrive from the OECS Virtual Campus are already authenticated by the Campus. You are handed to KTIP with a one-time ticket, which is exchanged for a KTIP session automatically.
@@ -974,11 +1299,26 @@ The column on the right carries the owner, the team, and a block of key facts, p
 You do not need a separate KTIP password for this route.
 
 If the handoff fails you are sent back to the login page with an error code in the address bar and a short explanation on screen. Returning to the Campus and clicking through again usually clears it, because the ticket is single use.`,
+  msg`Legal`,
+  msg`Legal bases`,
+  msg`Legal obligation, and legitimate interests in being able to evidence it`,
+  msg`Legal obligation, and substantial public interest`,
+  msg`Legitimate interests in regional accessibility`,
+  msg`Legitimate interests — in aggregate or de-identified form`,
+  msg`Legitimate interests; consent where the feature is opt-in`,
+  msg`Legitimate interests; legal obligation`,
+  msg`Liability`,
+  msg`Licence`,
+  msg`Licensing code and documents you share with other members`,
+  msg`Like MIT, with an explicit patent grant and a requirement to note changes.`,
   msg`Like signals support. Follow puts the project’s updates in front of you without you having to come back and check.
 
 Share copies a link anyone can open. Request to collaborate sends the owner a note asking to join the team — once sent it shows as pending here until they answer, and you cannot send a second one.
 
 The view and team counts beside them are live.`,
+  msg`Limitation of liability`,
+  msg`Limits`,
+  msg`Link to your KTIP profile, project or event.`,
   msg`Listen only`,
   msg`Listings cover the usual range: research grants for academic and scientific work, startup funding for new ventures, project grants tied to a specific piece of innovation, and scholarships for students studying in innovation-related fields.
 
@@ -986,13 +1326,22 @@ Funders set their own type labels, so the exact wording varies between listings.
 
 Amounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the funding filters are worth checking more than once.`,
   msg`Live Sentry issues from the browser and the API`,
+  msg`Live captions`,
   msg`Live, and it is the same list everyone else in the room is looking at.
 
 Go back to the floorplan to move to another room. Room hosts get moderation controls in the chat that other attendees do not see.`,
   msg`Live, upcoming and past hackathons.`,
+  msg`LiveKit`,
+  msg`Local storage on your device`,
   msg`Locks, history and reset`,
   msg`Log in`,
+  msg`Logos and brands you upload`,
   msg`Look for the questions where the spread is wide rather than the average is low: a feature half of members rate highly and half cannot use at all is a discoverability problem, and it reads as mediocre in the average.`,
+  msg`MIT or BSD`,
+  msg`Machine translation`,
+  msg`Machine translation into French and Spanish so that the whole region can read it. Translated text is marked as machine-translated wherever it appears.`,
+  msg`Machine translation of member content`,
+  msg`Machine-translated text carries a marker wherever it appears, and you can always switch back to the original. Where a translation and the original disagree, the original is what the author wrote.`,
   msg`Main Hall`,
   msg`Main Hall — the default landing room for announcements and general presence.
 
@@ -1024,6 +1373,9 @@ Organisers choose which of these to create, so not every venue has all nine.`,
   msg`Manage users`,
   msg`Manage your account and preferences`,
   msg`Managing users and the permission matrix`,
+  msg`Material changes are announced in the application and by email at least %noticePeriod% before they take effect. The version number and effective date at the top of this page always reflect what is currently in force, and every version you have accepted is listed in your settings.`,
+  msg`May remain after account deletion, attributed to a deleted member, where others rely on it`,
+  msg`Media and chat during a call`,
   msg`Meetup`,
   msg`Member Directory`,
   msg`Member cards`,
@@ -1048,11 +1400,17 @@ Open it from the chat action on the floating button in the bottom right corner.
 
 The /messages address also works — it opens the panel and returns you to where you were. Links of the form /messages?user=<id> open a conversation with that person directly, which is what the "Message" button on a member's profile uses.`,
   msg`Messaging rules for student accounts`,
+  msg`Minimum age`,
+  msg`Minimum age %minimumAge%, a truthful date of birth, one account per person.`,
+  msg`Minor Safeguarding Statement`,
+  msg`Minors`,
   msg`Misrepresentation`,
   msg`Moderate every project, public or private`,
   msg`Moderated`,
   msg`Moderating`,
   msg`Moderation`,
+  msg`Moderation and enforcement`,
+  msg`Moderation assistance`,
   msg`Moderation collects reported content and anything the automated filters caught.
 
 Each item shows the content, who reported it and why, and the author's history. You can restore it, remove it, or escalate.
@@ -1061,6 +1419,8 @@ The filter term list is managed here as well. Terms are what put content into qu
 
 Grievances against members are a separate queue with its own page.`,
   msg`Moderation queue`,
+  msg`Moderation, copyright, grievance and safeguarding records`,
+  msg`Moderation. The assistant gives a moderator a second opinion. A human decides, and a human is accountable for the decision.`,
   msg`Month-by-month view of everything scheduled`,
   msg`Move it through its statuses as you go — the reporter sees that progress on My Reports, and it is the only thing they see.
 
@@ -1091,35 +1451,68 @@ This page is public, so the link works for anyone you send it to — including s
   msg`Narrowing the library`,
   msg`Needs help`,
   msg`Networking`,
+  msg`Never public`,
+  msg`Never published, never listed, never shown to other applicants.`,
   msg`New document`,
   msg`New requests waiting on you are under Invitations, not here. The member directory is where you find people to connect with in the first place.`,
   msg`New whiteboard`,
   msg`Next, and previously`,
+  msg`No advertising cookies, and no advertising network.`,
+  msg`No cross-site tracking, and no third-party trackers embedded in our pages.`,
+  msg`No decision that affects your account or your work is made by an AI feature on its own:`,
+  msg`No fingerprinting to identify you when you have declined analytics.`,
+  msg`No legitimate funder asks you to pay a fee in order to receive a grant. Not an administration fee, not a processing fee, not a legal fee, not a currency-conversion fee, not a deposit that will be refunded. If you are asked, it is a scam — stop and report it.`,
+  msg`No licence`,
+  msg`No sale, no onward licensing, no unrelated advertising, no AI training on your work by us.`,
+  msg`No selling or sharing of your data with data brokers.`,
+  msg`No sign-in provider supplies a date of birth. Accounts created that way are still asked to declare one before the account is usable.`,
+  msg`No system is perfectly secure. If you find a vulnerability, report it to %privacyEmail% rather than demonstrating it against other members’ data.`,
+  msg`No warranty`,
+  msg`No — but you can change the value`,
+  msg`No — clearable in your browser`,
+  msg`No — it is the record of your answer`,
+  msg`No — refusing it means no account`,
+  msg`Nobody else. Not other funders, not partners, not the public, and not other members of your own organisation unless you added them to the application yourself.`,
+  msg`Non-exclusive, worldwide, royalty-free, and only for running and promoting the platform.`,
   msg`Not Currently Seeking`,
   msg`Not a preview of one — a true A4 sheet, scaled to fit the screen and printed at full size. What you see is exactly what an employer receives.
 
 If the page is blank, no CV has been started yet: either sign in from the OECS Virtual Campus to pull in your course history, or write it yourself from Edit.`,
   msg`Not accepted`,
+  msg`Not approach you outside the platform about the substance of your application.`,
+  msg`Not copy, retain or circulate it beyond what the assessment requires.`,
+  msg`Not permitted`,
+  msg`Not used`,
   msg`Note`,
   msg`Nothing here notifies the sender, so this queue is for you rather than a conversation. If a report needs a reply, reach the member directly.
 
 The UAT section next door is the structured version of the same signal.`,
+  msg`Nothing in these Terms limits liability for death or personal injury caused by negligence, for fraud or fraudulent misrepresentation, or for anything else that cannot lawfully be limited. Mandatory consumer-protection rights in your country of residence are unaffected.`,
   msg`Nothing is stored until you save. The note beside the button counts the sections you have touched.
 
 That count matters: a section you have edited is marked as yours, and syncing from the Virtual Campus afterwards leaves it alone. Untouched sections stay in sync with your course record.`,
+  msg`Notice`,
+  msg`Notice privacy`,
+  msg`Notices and counter-notices are retained for %caseRetention%. We do not publish them, and we do not pass them to anyone other than the parties concerned unless the law requires it.`,
+  msg`Notices go to %copyrightAgent%, %address%, or by email to %copyrightEmail%. The quickest route is the online form, which asks for everything a valid notice needs and cannot be filed incomplete.`,
   msg`Notification & display preferences`,
   msg`Notifications`,
   msg`OECS Admin`,
   msg`OECS Administrators`,
+  msg`OECS Commons and catalogue APIs — course and catalogue records linked to your account where you use those integrations.`,
+  msg`OECS Virtual Campus and Commons`,
+  msg`OECS Virtual Campus single sign-on — a verified subject identifier, email address and the campus attributes the Virtual Campus asserts.`,
   msg`Objective`,
   msg`Objectives`,
   msg`Ocean`,
+  msg`Offers your last few searches back to you.`,
   msg`Offline`,
   msg`On long pages a thin rail appears at the right edge with a dot per section.
 
 Hover it to see section names, click a dot to jump straight there, and the current section stays highlighted as you scroll.
 
 The rail builds itself from the page's own sections, and hides itself on pages with fewer than two, so short pages stay clean.`,
+  msg`On termination, the partner deletes all data received and confirms the deletion in writing within 30 days.`,
   msg`On the Achievements page click "Edit showcase", then pick the badges you want to feature. You can pin up to five.
 
 Save the showcase and those five appear on your public member page.
@@ -1132,16 +1525,25 @@ Enter your email address and click "Send Reset Link". You will receive an email 
 Open the link, enter the new password twice, and you can sign in with it right away.
 
 This only applies to email/password accounts. If you signed up with Google or Microsoft, reset your password with that provider instead.`,
+  msg`One account per person. Do not create an account for someone else, and do not share yours.`,
   msg`One bar, every filter`,
   msg`One event, every tab`,
   msg`One step at a time`,
+  msg`Only data members chose to share`,
+  msg`Only if you request a gated role`,
   msg`Only me`,
   msg`Only members you are already connected to`,
+  msg`Only publish material you own or are licensed to publish, and follow the attribution terms of anything you use under a licence. If you include third-party material — a photograph, a dataset, a library, a figure from a paper — say where it came from.`,
+  msg`Only publish material you own or are licensed to publish. That includes text, images, logos, video, audio, datasets, slide decks and code. If you use someone else’s work under a licence, follow its attribution terms.`,
+  msg`Only the content submitted to those features`,
   msg`Only the current step’s questions show, and required fields are validated when you move on — so you find out about a missing answer immediately rather than at submission.
 
 Everything saves as a draft as you go. Save draft is also there explicitly when you want to be sure before closing the tab.
 
 Some grants ask for documents; those upload here and stay attached to the draft.`,
+  msg`Only the purpose named in the partner’s agreement — typically matching opportunities to members, or reporting on regional programme outcomes. A partner may:`,
+  msg`Only where necessary to operate the platform, provide support you asked for, or investigate a report. Those accesses are logged.`,
+  msg`Only where the format is a public showcase or open vote, and only after entries close. This is stated on the event before you enter.`,
   msg`Only your connections can see your full profile or message you. Everyone still sees your name, role and country in the directory, so they can send you a connection request.`,
   msg`Open "Directory" from the Community menu.
 
@@ -1284,25 +1686,46 @@ These scopes apply to that one project only — they are not platform roles.`,
   msg`Open your project detail page.`,
   msg`Open your project from Projects, or from your profile page.`,
   msg`Open your project page and use the Team widget in the sidebar. Click "Manage Team", search for members by name, and invite them as editors (can update the project) or viewers. They accept the invitation from their notifications or the project page.`,
+  msg`Open-Source & Code Contribution Terms`,
+  msg`Open-source licences follow the code into KTIP.`,
+  msg`OpenAI`,
+  msg`OpenRouter and Azure AI Translator`,
   msg`Opening an event in the admin console gives you a workspace of tabs rather than a single edit form.
 
 Registrations — the attendee list, exportable as CSV. Speakers — the speaker grid. Schedule — sessions, keynotes, breaks and networking slots. Updates — announcements, schedule changes and reminders that reach attendees. Articles — recaps and resource posts published after the event. Challenge — the objectives, constraints, deliverables and judging criteria. Form Builder — a custom registration form. Page Builder — the event's own page layout. Venue — virtual rooms and the floorplan.
 
 For anything attendees must notice, post an Update. Editing the event record silently changes the page but does not notify anyone.`,
+  msg`Opting out`,
+  msg`Optional`,
+  msg`Optional email notifications and digests`,
+  msg`Optional, first-party, and nothing is written unless you allow it.`,
+  msg`Organisation, industry, country, biography`,
   msg`Organisations recorded on the platform, with their verification state and whether the partner API may publish them.
 
 Those are two separate switches, and the second is the one with reach outside KTIP.`,
   msg`Organizer`,
   msg`Other`,
+  msg`Other entrants and the public`,
+  msg`Other marks`,
+  msg`Other people’s marks in your content`,
+  msg`Other signs worth stopping over:`,
+  msg`Other terms`,
+  msg`Other work`,
+  msg`Our marks`,
+  msg`Output may be wrong. It is not advice. You remain responsible.`,
   msg`Overview is the summary. Under it: My CV, Progress, Achievements, and then the things you own — Projects, Events, Connections and Submissions.
 
 The rail is built from your roles, so it is not the same for everyone. An investor gets Funding, a mentor gets Mentees, faculty and researchers get Research. Business and Admin are links out to their own pages rather than panels here.
 
 On a narrow screen the column becomes a scrolling row above the panel.`,
+  msg`Ownership`,
+  msg`Page views, feature events, funnel and conversion events, a session identifier, the page path, timestamps, and your user ID when you are signed in. Optional, and only collected if you allow it — see the Cookie & Storage Notice.`,
   msg`Page views, feature usage, funnels and conversions across the platform.
 
 This is aggregate behaviour — it answers “is anyone using this” rather than “what did this member do”.`,
+  msg`Parents and guardians`,
   msg`Participant`,
+  msg`Partner API Terms`,
   msg`Partner API keys`,
   msg`Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.
 
@@ -1312,16 +1735,24 @@ UAT — feedback submitted during user acceptance testing, with its state.
 
 One known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead.`,
   msg`Partner API, analytics and UAT feedback`,
+  msg`Partner data access`,
   msg`Partner tools and services connected to KTIP`,
   msg`Partner tools shown on the Resources page`,
   msg`Partner with innovators`,
+  msg`Pass it to a third party outside the judging process.`,
   msg`Password, email address and account deletion`,
   msg`Pending`,
   msg`Pending approval`,
+  msg`People the funder appoints to assess applications, which may include external experts. Each is bound by the obligations in the next section.`,
   msg`People you are connected to`,
   msg`People you are connected to.`,
   msg`People you know`,
+  msg`Per Sentry retention, typically 90 days`,
+  msg`Performance of a contract`,
+  msg`Performance of a contract; legitimate interests in trust and safety`,
   msg`Permanently remove your account and data`,
+  msg`Permission`,
+  msg`Permitted`,
   msg`Personalize my platform`,
   msg`Pick "KTIP Assistant" at the top of the Chats list.`,
   msg`Pick a design`,
@@ -1338,6 +1769,7 @@ They usually hold announcements, board rules or reference material worth keeping
 Only moderators can pin and unpin.`,
   msg`Platform administration and analytics.`,
   msg`Platform overview and moderation entry point`,
+  msg`Platform staff`,
   msg`Platform usage, growth and engagement metrics`,
   msg`Platform-wide numbers, then everything you can administer, section by section.
 
@@ -1348,16 +1780,27 @@ The board is public on purpose: a rank is only worth chasing if it can be shown 
   msg`Points earned from activity on the platform and the rank that follows from them, plus verification status.
 
 A verified badge means an OECS admin has confirmed the member is who they say they are — worth checking before you take a funding conversation forward.`,
+  msg`Points, badges and leaderboard positions have no monetary value, are not transferable, and may be recalculated or reset — for example when scoring changes or when we remove the effects of gamed activity.`,
   msg`Post a new topic on a discussion board`,
+  msg`Post unlawful, defamatory, harassing, hateful or discriminatory content, including content targeting someone for their nationality, island of origin, race, religion, sex, gender, sexual orientation, disability or age.`,
+  msg`Present the data as endorsed, verified or warranted by %entityShort% beyond what the record itself states.`,
+  msg`Pressure to decide quickly, or a deadline that keeps moving closer.`,
   msg`Print / Save as PDF gives you a clean document — the page chrome is stripped from the print output.
 
 The other button goes to whatever this was submitted to: the event, the grant, the form. Useful when you need the current state of the thing rather than your copy of it.`,
   msg`Print it, or go to the source`,
+  msg`Privacy Policy`,
   msg`Privacy Violations`,
   msg`Privacy and notifications`,
+  msg`Privacy questions and data-rights requests go to %privacyEmail%, handled by %dpo%.`,
   msg`Private`,
   msg`Private Sector`,
   msg`Private Sector/SME`,
+  msg`Process`,
+  msg`Processors`,
+  msg`Processors we use`,
+  msg`Produce aggregate statistics from them.`,
+  msg`Product analytics`,
   msg`Productivity`,
   msg`Profile editing lives in Settings. Click your avatar in the top right, choose "Settings", then open the Profile tab.
 
@@ -1366,6 +1809,9 @@ You can set your display name, avatar, bio, country, organisation, industry, ski
 The Profile tab on your Dashboard is the read-only view — it shows how other members see you, but you make the changes in Settings.
 
 Skills and interests are what the directory filters and the "For You" sorting work from, so they are worth filling in.`,
+  msg`Profile fields that would identify a minor outside the platform are restricted, and directory exposure is reduced.`,
+  msg`Profile settings`,
+  msg`Profile visibility, leaderboard participation and connection counts. Note that a private profile is not an invisible one — a limited teaser may still appear in the directory.`,
   msg`Profile, security, notifications and personalization.`,
   msg`Profile, security, preferences, personalization, verification.`,
   msg`Progress is your activity over time — projects created, events attended, applications submitted, badges earned — as a timeline.
@@ -1374,6 +1820,7 @@ It also offers a Gantt view, which is more useful when you are looking at how pr
 
 It is a record for you. Other members do not see your progress timeline.`,
   msg`Progress next door is the same story as a timeline. Points from here decide where you sit on the public leaderboard.`,
+  msg`Prohibited`,
   msg`Project creation is behind a permission, not just a login. Roles built around funding and oversight — Investor, for example — do not hold it by default.
 
 If your role does not have it, opening the create page tells you so rather than failing after you have filled the form in.
@@ -1390,9 +1837,14 @@ Only the project owner and editors can upload.`,
   msg`Projects & Teams`,
   msg`Projects you own`,
   msg`Projects you own, including private ones.`,
+  msg`Projects, events, grant applications, forum posts, comments, reactions, whiteboards, documents, code snippets, sticky notes`,
   msg`Projects, from the platform side`,
+  msg`Promote the platform`,
   msg`Prototype`,
+  msg`Provider`,
+  msg`Providers`,
   msg`Public`,
+  msg`Public by default`,
   msg`Public or not`,
   msg`Public projects appear in the grid, in search, and to signed-out visitors. Leave it off and the project stays yours — useful while you are still writing it.
 
@@ -1403,11 +1855,13 @@ You can flip this later from the same form, so publishing is not a decision you 
   msg`Publish and unpublish control visibility without deleting the entry, so a tool that goes down temporarily can be pulled and restored.
 
 These are outward links — an entry here is an implicit recommendation, so check the destination still is what it says before publishing.`,
+  msg`Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent.`,
   msg`Publish research and collaborate on studies`,
   msg`Publish research, find collaborators, and join projects.`,
   msg`Publish your own`,
   msg`Published`,
   msg`Published and draft, upcoming and past. Draft events are visible only to administrators, which is how an event is prepared before anyone can see it.`,
+  msg`Published content — projects, events, forum posts`,
   msg`Published events can carry a lot more than a description.
 
 Schedule — a timeline of sessions, keynotes, workshops, breaks and networking slots with times.
@@ -1424,12 +1878,15 @@ Organisers manage all four from the event workspace in the admin console.`,
   msg`Publishing an event`,
   msg`Publishing and removing`,
   msg`Publishing grants, resources and integrations`,
+  msg`Publishing is not reversible in the way deleting is. We can stop serving your content; we cannot remove it from a search engine’s index, a web archive or somebody’s screenshot. Think about that before publishing anything commercially sensitive, and use a private project until you are ready.`,
+  msg`Publishing on KTIP transfers no ownership of anything.`,
   msg`Publishing your CV gives it a public address that works for people who are not signed in to KTIP, which is what you want when sending it to a funder or an employer.
 
 Until you publish, that address does not open for anyone else — an unpublished CV is private even if someone guesses the link.
 
 A published CV is also linked from your public member page.`,
   msg`Purple`,
+  msg`Purpose`,
   msg`Questions and comments, in the open, attached to the project rather than to a forum thread that drifts away from it.
 
 The team is notified when you post, so this is a reasonable place to ask before sending a collaboration request.`,
@@ -1438,6 +1895,8 @@ The team is notified when you post, so this is a reasonable place to ask before 
 Either way a copy of what you sent is saved under Submissions in your dashboard, and you can cancel from right here if your plans change.`,
   msg`Raise a grievance about someone's conduct`,
   msg`Rank projects, resources, events and grants against your interests`,
+  msg`Rate limits and fair use`,
+  msg`Rate-limit records`,
   msg`Reach it from your avatar menu, "My Dashboard". The rail on the left lists your sections.
 
 Overview — your For You rail, recent submissions and calendar at a glance. Profile — how other members see you, read-only. Progress — your activity timeline. Projects — the projects you own. Events — the events you organise. Connections — the people you know, and your pending invitations. Submissions — permanent copies of everything you have submitted.
@@ -1445,6 +1904,7 @@ Overview — your For You rail, recent submissions and calendar at a glance. Pro
 Achievements links out to the full trophy gallery, which is a page rather than a tab.
 
 Some sections only appear for certain roles: Funding for investors, Mentees for mentors and faculty, Research for faculty and researchers, Business for SME and private sector accounts, and Admin for administrators.`,
+  msg`Read the funding agreement, including what rights it takes over your work, before signing.`,
   msg`Read this before you start`,
   msg`Reading a grant card`,
   msg`Reading a profile and connecting.`,
@@ -1454,11 +1914,18 @@ Some sections only appear for certain roles: Funding for investors, Mentees for 
   msg`Reading it`,
   msg`Reading the funnels`,
   msg`Reading the grid`,
+  msg`Reads an uploaded document and proposes values for form fields`,
   msg`Real-time working surfaces you can open on their own or share with a team.
 
 Everything you make here saves to your account and appears in that tool’s list next time — nothing lives only in a browser tab.`,
   msg`Real-time workspace: whiteboards, documents, code and video`,
+  msg`Recent searches`,
+  msg`Recording your acceptance of these policies`,
+  msg`Records of which policies you accepted`,
+  msg`Refer to KTIP truthfully. That is the whole of the permission.`,
+  msg`Refusal to put terms in writing, or a written agreement with no named legal entity in it.`,
   msg`Register for an event`,
+  msg`Register, or attempt to register, a mark or domain that is the same as or confusingly similar to ours.`,
   msg`Registered`,
   msg`Registering`,
   msg`Registering, and finding the venue.`,
@@ -1468,19 +1935,34 @@ Everything you make here saves to your account and appears in that tool’s list
 
 Challenge sets the objectives, constraints, deliverables and judging criteria for a challenge event. Venue creates the rooms attendees walk between — there is a one-click starter set.`,
   msg`Registrations, schedule, venue and the builders.`,
+  msg`Remembers that you allowed or declined analytics, so you are not asked again on this device.`,
+  msg`Remembers which language to show the interface and member content in.`,
+  msg`Remembers which non-essential notices you have closed.`,
   msg`Reminder`,
   msg`Removing content hides it from everyone and notifies its author. Dismissing marks the report reviewed without acting, which is a real outcome and worth using when the report is unfounded.
 
 The rules section is what drives the automated flags. Loosening one reduces false positives and lets more through — the trade is deliberate, so change it knowing which way you are moving.`,
+  msg`Repeat`,
+  msg`Repeat infringement`,
   msg`Replay this any time`,
   msg`Replies`,
   msg`Report a bug or suggest an improvement`,
   msg`Report a member, track your reports, and what happens next.`,
   msg`Report a user`,
+  msg`Report any breach affecting KTIP data to %privacyEmail% within 72 hours of becoming aware of it.`,
+  msg`Report anything matching these through the in-app report control, and tell us at %supportEmail%. Reporting one attempt protects everyone else the same sender contacted.`,
+  msg`Report in-app and contact %privacyEmail%. These are triaged ahead of everything else.`,
+  msg`Report infringement`,
+  msg`Report the listing and the account through the in-app controls, and email %supportEmail% with what happened. We can remove listings, suspend accounts and warn other members. We cannot recover money that has left your account — for that, contact your bank and your local police immediately, and do it before contacting us if the loss is recent.`,
+  msg`Report through the in-app report control and email %privacyEmail%. Safeguarding reports are triaged ahead of everything else, may be acted on immediately without notice to the account holder, and are reported to the relevant authorities where the law requires it.`,
   msg`Reported and flagged content`,
   msg`Reported content, automated flags and filter terms`,
   msg`Reported content, automated flags and the rules.`,
+  msg`Reporting`,
   msg`Reporting a member`,
+  msg`Reporting infringement, counter-notices, repeat infringement`,
+  msg`Reporting something`,
+  msg`Reporting to programme funders and regional partners`,
   msg`Reports about members`,
   msg`Reports go to a queue that only OECS and Safety administrators can see. Content reports and member grievances are separate queues with separate handling.
 
@@ -1489,17 +1971,24 @@ Reviewers look at the report, the content and the account history. Outcomes rang
 Reported content may be quarantined while it is reviewed — visible to its author with a notice, hidden from everyone else.
 
 Your identity as the reporter is not disclosed to the person reported. You are told the outcome, but not the internal detail of what was decided about someone else's account.`,
+  msg`Reports involving a minor are triaged ahead of the ordinary queue and can be acted on before review.`,
   msg`Reports you have filed`,
   msg`Reports you have filed and where they stand.`,
+  msg`Reproduce and distribute`,
+  msg`Reproduce your entry’s title, summary, images and your team’s names in announcing results, in event coverage, and in reporting to the programme’s funders.`,
   msg`Request a verified badge for your account`,
+  msg`Request data, IP addresses, logs`,
+  msg`Requests are rate-limited and paginated. Do not attempt to enumerate the whole dataset, run parallel keys to raise your effective limit, or retry aggressively against an error. Ask for a higher limit instead — there is usually a good reason to say yes.`,
   msg`Requests to join a project, collaborate on a document, or come to an event — anything someone has asked you to accept.
 
 Accepting adds you immediately; declining removes the invitation without notifying anyone beyond the sender. Invitations you have sent are listed here too, with whether they have been answered.`,
   msg`Requests waiting on you, and ones you have sent.`,
+  msg`Required?`,
   msg`Research`,
   msg`Research Co-Investigation`,
   msg`Research and teach in academia`,
   msg`Researchers`,
+  msg`Resend`,
   msg`Reserve your place at an upcoming event`,
   msg`Resolved`,
   msg`Resources`,
@@ -1507,13 +1996,24 @@ Accepting adds you immediately; declining removes the invitation without notifyi
   msg`Resources is the knowledge base — guides, articles, case studies and templates written for Caribbean innovators.
 
 Integrations is the other tab: tools and services KTIP connects to. The tab lives in the URL, so a link you share opens on the one you were looking at.`,
+  msg`Respect`,
+  msg`Respect other people’s work`,
+  msg`Responses are scaled to the breach and to whether it is repeated. In rough order: a warning, removal of the content, quarantine of the content pending review, restriction of a feature, suspension of the account, and termination.`,
   msg`Responses to the usefulness and experience questions, collected during user acceptance testing.
 
 Unlike the free-text feedback queue, these are comparable across members — which is what makes them worth charting.`,
+  msg`Restricted data, stored apart from your profile, and write-once by design.`,
+  msg`Restrictions`,
+  msg`Retain data after the agreement ends, or after a member withdraws.`,
+  msg`Retained in recipients’ threads after your account is deleted`,
+  msg`Retention`,
+  msg`Reusing`,
   msg`Review and rosters`,
   msg`Review feedback`,
   msg`Review grievances`,
   msg`Review, then submit`,
+  msg`Reviewers`,
+  msg`Reviewers appointed for that call`,
   msg`Reviewing a document`,
   msg`Reviewing an employer records who verified it and when — the history view shows that trail, which is what makes the badge auditable rather than merely present.
 
@@ -1540,15 +2040,20 @@ Investor, Private Sector, Entrepreneur, Researcher and Mentor are self-assignabl
 
 What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Two rules never change: Students cannot submit a grant application without a sponsor, and Students cannot start unmonitored direct messages.`,
   msg`Roles decide what you see`,
+  msg`Room audio while captions are running`,
   msg`Rooms, invitations and who can join.`,
   msg`Rooms, presence and how to move between them.`,
   msg`Rose`,
+  msg`Rotate a key immediately on suspicion of exposure, and tell us.`,
   msg`Row actions, and what they mean to the member`,
+  msg`Row-level security on every table, role-based access control scoped to your active role, encrypted transport, hashed passwords, service keys held server-side only, hashed IP addresses for throttling, audit logging on administrative and moderation actions, and sensitive fields such as date of birth quarantined away from ordinary queries.`,
   msg`Rules and limits entries must respect`,
+  msg`Rules binding partners that read KTIP data`,
   msg`Run the platform, publish grants, and organise regional events.`,
   msg`SME verification submissions routed to your member state. Each carries the legal name, registration number and industry the applicant entered.
 
 You see submissions for your own member state, which is why this list is shorter than the platform’s total.`,
+  msg`Safeguarding records are kept for %caseRetention%, longer than ordinary moderation records, because that is what a later investigation needs.`,
   msg`Safety & Reporting`,
   msg`Sand`,
   msg`Save forces a save immediately rather than waiting for the autosave. Export takes the board out as an image or as JSON you can re-import.
@@ -1557,9 +2062,13 @@ Share is the one that matters for collaboration: pick who gets access and whethe
   msg`Save your changes at the bottom of the form.`,
   msg`Save, export, share`,
   msg`Saving, and what it means`,
+  msg`Say that your project, event or organisation is on KTIP, or that you are a member.`,
+  msg`Say truthfully that you participated in, were shortlisted for, or won a KTIP event or programme — with the year and the programme named.`,
+  msg`Say where it came from, so the next reader knows what they are bound by.`,
   msg`Schedule Change`,
   msg`Schedule, speakers, updates and recap articles`,
   msg`Schools, universities and Chambers`,
+  msg`Scope`,
   msg`Score and improve your draft before submitting`,
   msg`Scroll to the Comments section on any project to leave a comment or ask a question.
 
@@ -1585,15 +2094,25 @@ Everything is saved to your account, so you can close the tab and pick it up fro
   msg`Search, tours, notifications and display options.`,
   msg`Sections`,
   msg`Sections, prefill, and what saving marks as yours.`,
+  msg`Security`,
+  msg`Security and operational logs`,
+  msg`Security obligations`,
   msg`Security settings`,
   msg`See your alerts and mark them as read`,
   msg`Select the Security tab.`,
+  msg`Selected role or roles`,
+  msg`Self-service deletion is available in Settings. It removes your profile and authentication record; content that has cascaded into other members’ contexts is handled as described in the retention table above.`,
+  msg`Sell your content, or charge a third party for access to it.`,
+  msg`Sell, rent, sublicense or otherwise transfer the data to anyone else, including within a corporate group, unless the agreement names them.`,
   msg`Send a connection request from someone's profile or the Member Directory. Once they accept, you appear in each other's Connections list. You can remove a connection at any time from your profile's Connections tab.`,
   msg`Send a connection request to someone on KTIP`,
   msg`Send controlled test failures through the live monitoring pipeline`,
   msg`Send feedback`,
   msg`Send yourself a password reset link`,
+  msg`Sentry`,
+  msg`Serious cases — commercial-scale infringement, or repeat infringement after a warning — may be terminated without waiting for the count.`,
   msg`Session`,
+  msg`Session token`,
   msg`Set a new password from the Security tab`,
   msg`Set the type, dates, location or virtual link, and capacity, then publish.`,
   msg`Set up a virtual venue for your event`,
@@ -1631,21 +2150,36 @@ An OECS reviewer approves or declines the request, and you are notified either w
 Verification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Chamber — Chambers of Commerce and the SME submissions they handle. Employers — employer accounts and their recruiters.
 
 Approving an institution's domain is the high-leverage action: every future student signing up with that domain is verified automatically, so getting the domain right matters more than any single account.`,
+  msg`Several subjects have their own documents. Where one applies, it governs that subject and this document does not repeat it. The full set is listed under See also at the foot of this page.`,
   msg`Share a whiteboard or document`,
   msg`Share decides who can open the document and whether they can edit it. Someone with view-only access sees a badge saying so under the title, rather than discovering it when their typing does nothing.
 
 Export takes the content out of KTIP when you need it elsewhere.`,
+  msg`Shared code comes with no warranty`,
+  msg`Shared with no declared licence means: readable, not reusable.`,
+  msg`Sharing a snippet or document with someone does not give them permission to use it. With no declared licence, the default is all rights reserved: they may read it and discuss it with you, and nothing more.`,
+  msg`Sharing is not licensing`,
   msg`Shortcuts`,
+  msg`Show it to other entrants and attendees, where the competition’s format is a public showcase, demo day or open vote.`,
   msg`Sign in with email, Google or Microsoft`,
   msg`Sign out`,
   msg`Sign up`,
+  msg`Sign-in`,
+  msg`Sign-in providers, the OECS Virtual Campus and Commons, video collaboration, machine translation and partner APIs are operated by other organisations under their own terms. We are not responsible for their availability, their conduct, or the content they supply. The providers who process your data on our behalf are listed in the Privacy Policy.`,
+  msg`Sign-up or onboarding age declaration`,
+  msg`Sign-up step 1`,
+  msg`Sign-up step 2`,
+  msg`Sign-up step 3`,
+  msg`Sign-up, onboarding, publishing and settings`,
   msg`Signing in from the OECS Virtual Campus`,
+  msg`Single sign-on and catalogue integration`,
   msg`Six languages, picked from the dropdown in the toolbar — changing it re-highlights what you have already written rather than clearing it.
 
 Run executes the snippet and prints to the output panel underneath, including errors. Nothing leaves your browser to do it.`,
   msg`Skills and interests are not only profile decoration — they are what the “Top Picks” and “For You” sorts rank against, on projects, events and grants.
 
 A profile with no interests gets the plain newest-first ordering everywhere. Filling this in is the single change that most affects what the platform shows you.`,
+  msg`Skills, interests, collaboration preferences`,
   msg`Skills, interests, what they are open to collaborating on, and below that their projects, events and achievements.
 
 Members control how much of this is public from their own settings, so a sparse page is a choice rather than an empty account.`,
@@ -1657,6 +2191,7 @@ Share gives someone else the link and decides whether they can edit. Download ta
   msg`Some cells are locked: permissions a role cannot lose without breaking the platform, with the reason on hover.
 
 Permission change history records who changed what and when. Reset returns the matrix to the shipped defaults — it undoes every customisation, not just the last one.`,
+  msg`Some content is quarantined automatically when several members report it, before a moderator has looked at it. That is a holding action, not a finding, and it is reversed if the review clears the content.`,
   msg`Some events run a virtual venue: rooms you can walk between, open audio, and a live list of who is in each one.
 
 Registered attendees go straight in. The door only appears on events that have one, and it sits above the brief on purpose — during a live event it is the only thing anyone is looking for.`,
@@ -1672,6 +2207,7 @@ The tour highlights each part of the page in turn with a short explanation. Pres
 Tours can read themselves aloud if you turn narration on.
 
 The tour action only appears on pages that actually have a tour, so you will not see it everywhere.`,
+  msg`Some parts of KTIP carry their own terms, which you are asked to accept the first time you use them:`,
   msg`Sort a list by "For You"`,
   msg`Spam / Scam`,
   msg`Speaker`,
@@ -1679,7 +2215,9 @@ The tour action only appears on pages that actually have a tour, so you will not
   msg`Sponsor Booth`,
   msg`Sponsor student applications and supervise student channels.`,
   msg`Sponsors`,
+  msg`Sponsors of that event`,
   msg`Sponsorships`,
+  msg`Stack traces, browser and operating system, route and release version, sent to Sentry so that failures can be diagnosed.`,
   msg`Stage`,
   msg`Standing`,
   msg`Start a conversation`,
@@ -1702,6 +2240,10 @@ Accepted formats are PDF, Word, Excel, CSV, Markdown, plain text and images, up 
 Name each file for what it is. An assessor reading twenty applications should be able to tell your budget from your workplan without opening either.
 
 These files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission.`,
+  msg`Stops the same walkthrough appearing every visit.`,
+  msg`Storage set by other services`,
+  msg`Store records for as long as the purpose requires, and no longer.`,
+  msg`Store your entry and show it to the judges and organisers of that competition.`,
   msg`Structured platform feedback`,
   msg`Structured usefulness and experience scores.`,
   msg`Student accounts cannot start one-to-one direct messages. This is a safeguarding rule built into the platform and cannot be turned off — not by the student, not by an administrator.
@@ -1723,26 +2265,52 @@ Sign up with your school or university address and your institution approves the
 That role brings the safeguarding rules with it: no unmonitored direct messages, no administering awarded funds yourself, and automatic exclusion from the public leaderboard.
 
 If your institution is not yet registered on KTIP, your account cannot be domain-verified until it is.`,
+  msg`Sublicense it to another organisation for that organisation’s own purposes.`,
+  msg`Submission & Competition IP Terms`,
   msg`Submissions holds your registrations. Projects is the equivalent tab for work you have published.`,
+  msg`Submitting an application grants the funder the right to read, assess and decide on it. It grants no licence to use, build, commercialise or file protection over what it describes — whether or not the application succeeds.`,
+  msg`Submitting does not license your idea`,
   msg`Success Story`,
+  msg`Suggests improvements to your application text and gives an indicative read on a draft`,
   msg`Summary`,
   msg`Sun`,
+  msg`Supervised mode`,
   msg`Support`,
+  msg`Support, feedback, testing and grievance submissions`,
   msg`Switch between dark and light mode`,
   msg`Switch from the list view to the calendar view using the toggle at the top.`,
   msg`Switching which role you are acting as`,
+  msg`Take professional advice for anything significant. This platform cannot give it to you.`,
+  msg`Takedown`,
   msg`Taking a page tour`,
   msg`Talking in a room`,
   msg`Task`,
   msg`Teal`,
   msg`Team Space`,
+  msg`Teams`,
   msg`Technology`,
+  msg`Telemetry, user ID, route, browser context`,
   msg`Tell us what is missing`,
   msg`Template`,
+  msg`Termination`,
+  msg`Terms of Use`,
   msg`Text resources are readable in full on this page — no download needed.
 
 Where the resource is a file, a template or an external tool, the download block underneath is what you want instead.`,
+  msg`Text submitted for translation`,
+  msg`Text submitted to an AI feature is sent to the provider that runs it — OpenAI for the assistant, search, extraction and moderation support; OpenRouter or Azure AI Translator for machine translation. They process it to produce the answer and return it to us.`,
+  msg`That default protects authors, and it makes shared code less useful than it looks. If you want people to be able to build on your work — which is usually why you shared it — declare a licence.`,
+  msg`That is what the rule says, and it is worth being realistic about what a rule can do. Confidentiality obligations are enforceable but not self-enforcing. If your proposal turns on something you can protect — a patentable method, a trade secret — take advice about protecting it before you describe it in detail to anyone, including a funder.`,
+  msg`That licence covers running and reporting the competition. It does not permit anyone to build your idea, license it onward, or use it commercially.`,
+  msg`That the funds are available, that the terms are reasonable, that the timeline will hold, that the selection is fair, or that the sponsor will honour an award. We are not able to audit a third party’s finances.`,
+  msg`That the information in your notice is accurate.`,
+  msg`That the listing organisation holds a KTIP account in good standing, and that the listing does not obviously breach the Acceptable Use rules. Verified organisations have been confirmed by an institution or chamber at some point in time.`,
+  msg`That you are the owner of the right, or authorised to act on the owner’s behalf.`,
+  msg`That you believe in good faith the use is not authorised by the owner, an agent, or the law.`,
+  msg`The AI features are optional. The assistant, AI search, extraction and application assistance only run when you invoke them. Automatic translation of member content can be switched off in Settings, and captions are per-room and off unless switched on.`,
+  msg`The AI features that help you draft an application, and the indicative read they give on your draft, are assistance and not assessment. They do not predict whether you will be funded, they carry no weight with the funder, and they can be wrong about eligibility rules and deadlines. Check those against the listing itself.`,
   msg`The AI suggestions are not working`,
+  msg`The API is provided as is. Endpoints and fields may change with notice; breaking changes are versioned.`,
   msg`The Collaborate hub offers four tools.
 
 Whiteboard — an interactive visual canvas for brainstorming and diagrams.
@@ -1754,6 +2322,8 @@ Code Sandbox — write, run and share code snippets across six languages.
 Video Conference — real-time video calls.
 
 All four require an account. Each of the first three opens a list of the items you already have rather than a blank canvas, so nothing you make gets lost.`,
+  msg`The Grant Application Confidentiality & IP Terms apply the first time you submit an application to a funder.`,
+  msg`The IP, Content & Licensing Policy and the Copyright & Takedown Policy apply the first time you publish a project, event, forum post, CV or organisation profile.`,
   msg`The KTIP Assistant is an AI thread pinned to the top of your conversation list.
 
 Ask it how something works and it answers, and where the answer is a place on the platform it gives you links straight there. It knows the site structure and the help articles, so it is usually faster than hunting through menus.
@@ -1770,6 +2340,8 @@ You can also narrow it to your own member state or to your role, which is a fair
 
 It is public, so anyone can view it without signing in.`,
   msg`The OECS Knowledge and Technology Innovation Platform (KTIP) connects students, entrepreneurs, mentors, and investors across the Eastern Caribbean to share projects, find funding, and collaborate on innovation.`,
+  msg`The OECS emblem in particular is the mark of an intergovernmental organisation and is protected accordingly. Treat it as more restricted than an ordinary corporate logo, not less.`,
+  msg`The Partner API Terms apply to any organisation reading platform data through our partner API.`,
   msg`The Resources page has two tabs: the knowledge base and Integrations.
 
 Knowledge base content comes in six types — Article, Guide, Case Study, Template, Video and Success Story — and is filed under categories including Technology, Healthcare, Education, Agriculture, Environment, Climate Action and Business.
@@ -1777,6 +2349,7 @@ Knowledge base content comes in six types — Article, Guide, Case Study, Templa
 Templates are the ones worth knowing about early: reusable documents you can adapt rather than starting a proposal from nothing.
 
 You can sort by "For You" here too, once your personalization topics are set. Resources are public — no account needed to read them.`,
+  msg`The Submission & Competition IP Terms apply the first time you enter a hackathon or submit a solution to an event.`,
   msg`The Users page lists every account with its roles, and lets you grant or remove roles and suspend accounts.
 
 The Roles page is the permission matrix: a grid of roles against permissions that you can toggle. It is the live source of what each role can do, so a change here changes the product for those users immediately.
@@ -1784,14 +2357,19 @@ The Roles page is the permission matrix: a grid of roles against permissions tha
 Some cells are locked and cannot be toggled. Those are the safeguarding rules — students not initiating direct messages, students not administering funds — and they are deliberately outside admin reach.
 
 "Reset to defaults" restores the shipped matrix.`,
+  msg`The address on KTIP of the content you say infringes it. One notice per item.`,
   msg`The admin console`,
   msg`The admin console, for OECS and Safety administrators.`,
+  msg`The agreement`,
+  msg`The agreement between you and %entityShort% for using KTIP — who may hold an account, how you must behave, and where the limits of our responsibility sit.`,
   msg`The amount, the funder, the deadline and the grant type, all in one block.
 
 If the deadline has passed the page stays up and says so — closed grants are worth reading, because most funders run the same call again.`,
   msg`The application is split into steps, and this bar is both the progress indicator and the navigation — click any step you have reached to jump back to it.
 
 Your place is remembered: leave halfway through and you return to the step you were on.`,
+  msg`The application tools include AI features that suggest improvements to your text and give an indicative assessment of your draft. Text you send to those features is processed by the AI provider listed in the Privacy Policy in order to answer, and is not used to train their models.`,
+  msg`The authentication exchange`,
   msg`The badge catalogue`,
   msg`The badge catalogue and its unlock rules.`,
   msg`The badge near the top of the wizard reports the state of your draft.
@@ -1809,6 +2387,7 @@ Open it to see your newest notifications — messages, event and project activit
 
 Which notifications you receive is up to you: Settings has a switch per category under Preferences.`,
   msg`The builders`,
+  msg`The choice is per device and per browser, because that is where it is stored.`,
   msg`The contact block at the bottom reaches a person. The FAQ page is worth a look first — it answers the narrower questions that do not warrant a full article.`,
   msg`The dashboard calendar pulls four things together so you have one place to look.
 
@@ -1817,9 +2396,16 @@ Events — events on the platform. My Registrations — events you have RSVP'd t
 Each kind has its own colour, and you can turn kinds off to reduce the noise.
 
 Click a day to see everything on it in a panel, and click through from there to the event or grant itself.`,
+  msg`The declaration is write-once. Correcting it is an administrative action taken by staff, because an account that can edit its own date of birth is an account that can leave supervised mode.`,
+  msg`The declaration is write-once. You cannot change it yourself, because an account that can edit its own date of birth is an account that can leave supervised mode.`,
+  msg`The declaration must be truthful. A false declaration, and in particular one that presents a minor as an adult, is grounds for immediate suspension.`,
+  msg`The default if you say nothing. Readable, not reusable.`,
   msg`The directory shown to members on the Integrations tab of /resources. Each entry is a tool KTIP points at, with its description and link.`,
+  msg`The draft text you ask it to work on`,
   msg`The essentials first`,
   msg`The event workspace`,
+  msg`The event’s own rules`,
+  msg`The feed carries opt-in data, and withdrawal removes it.`,
   msg`The filters stack, so combine as many as you need.
 
 • Grant type — startup, research, innovation, development, education
@@ -1849,6 +2435,9 @@ Everything here is reachable from the rail as well — this is a shortcut, not a
   msg`The full description sits here, and under it — when the organizer has added them — the schedule, the speaker list, and updates posted as the date approaches.
 
 The rail on the right of the screen jumps between those sections, so a long agenda never means a long scroll.`,
+  msg`The full picture — what supervised mode restricts, and how guardian requests are handled — is in the Minor Safeguarding Statement.`,
+  msg`The funder gets to assess it. That is all.`,
+  msg`The indicative assessment is not a score, not a prediction, and carries no weight with the funder — it never leaves your draft. Treat it as a second read, not a verdict.`,
   msg`The invitations inbox gathers everything waiting on your answer in one place: collaboration shares on whiteboards and documents, project team invitations, and connection requests.
 
 Each one can be accepted or declined from the list.
@@ -1868,7 +2457,15 @@ Revoking takes effect immediately and breaks whatever is using it. That is the i
 Submitting validates every step, not just this one — if something earlier is incomplete you are taken back to it. Students also nominate a sponsor here.
 
 After submitting, the application appears under My Applications with its status.`,
+  msg`The legal documents on this site are a deliberate exception in one direction: they are translated too, but the English text is the authoritative version, and every legal page says so at the top.`,
+  msg`The licence above is limited to running and promoting KTIP. It specifically does not permit %entityShort% to:`,
+  msg`The licence ends when you delete the content or your account — with two exceptions, both of which are about other people rather than about us:`,
+  msg`The licence is non-exclusive, so you remain free to publish the same work anywhere else, on any terms you like.`,
+  msg`The licence you grant %entityShort%`,
+  msg`The licence you grant so the competition can run`,
+  msg`The line that matters most: describing what you did is fine, implying who backs you is not. "Winner, KTIP Climate Challenge 2026" is fine. "An OECS-accredited programme" is not, unless you actually are one.`,
   msg`The live venue`,
+  msg`The messages you send it`,
   msg`The messaging panel lists every conversation you are part of, most recent first, with unread ones marked.
 
 Click one to open its full history. Scroll up to load older messages.
@@ -1880,14 +2477,20 @@ New messages arrive live, so you never need to refresh.`,
 Click any date and the panel on the right loads that day in full — start times, location or virtual link, and event type. Click an entry there for the whole event page.
 
 When you would rather browse than plan around dates, switch to Grid using the toggle up in the filter bar.`,
+  msg`The named funder`,
+  msg`The names KTIP and Knowledge, Technology and Innovation Platform, the name and emblem of the Organisation of Eastern Caribbean States, and the logos and visual identity of both, belong to %entity%. Publishing on the platform gives you no licence to them.`,
   msg`The one personal page. Your name, your roles and your connection count sit up here — click the connection chip to jump straight to the people you know.
 
 Everything that used to live on a separate profile page is now a tab below.`,
+  msg`The one rule worth memorising: no real funder charges you to receive a grant.`,
+  msg`The one you choose`,
+  msg`The organisation running the call you applied to, as named on the grant listing.`,
   msg`The original message, its author and when it was written. If the author has edited it since, that is noted here rather than hidden.
 
 Your own posts carry edit and delete controls; moderators can act on anyone’s.`,
   msg`The other tools`,
   msg`The panel`,
+  msg`The partner feed carries verified employer and organisation records, and member records only where that member has opted in to appear. Nothing enters the feed by default.`,
   msg`The permission matrix, its locks and its history.`,
   msg`The post`,
   msg`The project`,
@@ -1895,10 +2498,16 @@ Your own posts carry edit and delete controls; moderators can act on anyone’s.
   msg`The questions above are the ones we are asked most. If yours is not there, this is where to say so — feedback from this page is what decides which article gets written next.
 
 For anything account-specific, the Help Center’s contact block is the better route.`,
+  msg`The reported content`,
   msg`The resource`,
   msg`The rest of the page`,
+  msg`The rest of the platform reads a derived yes-or-no answer — is this account a minor? — rather than the date itself.`,
   msg`The rest of the profile`,
   msg`The rest of your dashboard`,
+  msg`The rules binding organisations that read KTIP data through the partner API — what they may use it for, what they may never do, and how a member withdraws.`,
+  msg`The rules for using KTIP — accounts, conduct, liability`,
+  msg`The rules for what you may post and how you may treat other members are set out in full in the Acceptable Use & Community Guidelines. Breaching them is breaching these Terms.`,
+  msg`The rules live in the Acceptable Use & Community Guidelines.`,
   msg`The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.
 
 Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.
@@ -1909,8 +2518,13 @@ Grid view also unlocks a sort order back in the filter bar: what is coming up ne
 
 New Post opens the editor. Posts take a title, a body with formatting, and land in this board; you can edit yours afterwards.`,
   msg`The section rail on long pages`,
+  msg`The sections on your content (existing licences), limitation of liability, indemnity and governing law survive the end of this agreement.`,
+  msg`The short version`,
   msg`The step-by-step application and how drafts work.`,
   msg`The tab column`,
+  msg`The text being translated`,
+  msg`The text of the document you uploaded`,
+  msg`The text of your CV`,
   msg`The thread list`,
   msg`The top half assigns roles to members. The matrix below defines what each role can actually do — every permission, every role, one grid.
 
@@ -1918,6 +2532,7 @@ A change here applies to everyone holding that role, immediately.`,
   msg`The top half is the grants themselves — create one, edit it, or deactivate it. Deactivating closes a grant without deleting it, so its page and everyone’s applications survive.
 
 The lower half is the application queue.`,
+  msg`Theme and accessibility preferences`,
   msg`There are five types.
 
 Hackathon — a time-boxed build competition, often with a challenge brief and a venue.
@@ -1941,10 +2556,21 @@ If the funder supplied their own application link, the grant page shows "Apply o
 Otherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.
 
 Either way, the deadline on the grant page is the one that counts.`,
+  msg`These Terms are governed by the laws of %jurisdiction%, and its courts have exclusive jurisdiction — without prejudice to any mandatory consumer-protection rights, or any right to bring a claim before a data-protection authority, in the country where you live.`,
+  msg`These Terms of Use are an agreement between you and %entity%. By creating an account on KTIP, or by using the platform at %platformDomain% without one, you accept them and the Privacy Policy.`,
+  msg`These guidelines apply everywhere on the platform, including private messages, collaborative documents and video rooms — private does not mean unregulated.`,
+  msg`These restrictions lift automatically when the account reaches 18. Nobody has to ask.`,
+  msg`These terms bind any organisation granted programmatic access to KTIP data through the partner API. Accepting them is a condition of holding a partner key.`,
   msg`These two are how people find you. Category is the sector filter on the Projects page; Phase says how far along you are — concept, prototype, funding or launch.
 
 Be honest about phase. Investors and mentors filter on it, and “concept” attracts a different, more useful kind of attention than “launch” does when you are not there yet.`,
+  msg`They are published rather than kept in the partner contract because the members whose data flows through the feed are not parties to that contract, and are entitled to know what the recipient may do.`,
   msg`They will get a notification and can accept your request.`,
+  msg`Third parties`,
+  msg`Third-party`,
+  msg`Third-party services`,
+  msg`Third-party work`,
+  msg`This document is about code you share with other members. If you contribute to the KTIP platform itself — a fix, a translation, a component — that is governed by the contribution terms of the relevant repository, and by any contributor agreement it asks for. Ask at %legalEmail% if there is not one.`,
   msg`This fills empty fields from your KTIP record — profile, public projects, badges, institution. It never overwrites something you have written.
 
 It does reload the document, so it asks you to save first if you have unsaved edits. Press it on a blank CV, or straight after saving.`,
@@ -1958,7 +2584,9 @@ Member state is the one field to get right first: it decides which Chamber revie
 Pick the category that fits best, then describe what happened — what was said or done, when, and anything that helps someone who was not there understand it. Twenty characters is the minimum; more is genuinely better.
 
 The two optional fields matter more than “optional” suggests: a link to the post or screenshot, and where on the platform it happened, are what let the team find the evidence themselves.`,
+  msg`This holds whether you win or not. A prize is a prize, not a purchase. If a particular competition needs different terms — because a sponsor is funding development of the winning entry, for example — those terms must be published in the competition rules before entries open, and you will be asked to accept them separately.`,
   msg`This is the PDF`,
+  msg`This is the opposite of the default for projects and events. Publishing a project is a deliberate act with its own agreement; submitting an application is not publishing.`,
   msg`This member chose to make their CV public, so the link opens for anyone — no KTIP account needed.
 
 Download gives you the A4 PDF in black and white or colour. Read as text drops the page layout, which is easier on a phone or with a screen reader. View profile goes to the rest of their KTIP presence.`,
@@ -1989,6 +2617,12 @@ Nothing here is permanent: everything on this form can be changed after publishi
 The summary is what appears on the events grid and in the calendar day panel, so write it as the thing someone reads before deciding to come.
 
 Admins get an extra Status field — draft events are visible only to administrators until published.`,
+  msg`To KTIP`,
+  msg`To correct a genuine mistake, contact %supportEmail%. Staff can change it; the change is logged.`,
+  msg`To make a guardian request — access, correction, deletion, or a question about an account — contact %privacyEmail%. We will ask for enough information to establish the relationship before acting, which is a protection for the young person rather than an obstacle to you.`,
+  msg`To make judging and announcement possible, you grant %entity% and the organiser of the event you entered a non-exclusive, royalty-free licence to:`,
+  msg`To show your work to other members, you grant %entity% a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, translate, adapt for display and distribute your content — solely to operate and promote KTIP and its programme objectives.`,
+  msg`To the maximum extent permitted by law, %entity% is not liable for indirect, incidental, special, consequential or punitive damages, nor for lost profits, lost opportunities, lost funding or data loss arising from your use of KTIP.`,
   msg`Toggling featured is what puts a project in the home page hero rotation — it is the strongest editorial signal KTIP has, so it is worth spending sparingly.
 
 Removing a project here removes it for its owner too. Prefer talking to them first; a project that breaks the rules is a moderation matter rather than an editorial one.`,
@@ -2000,6 +2634,15 @@ The Climate Action strip underneath is the same three content types filtered to 
   msg`Track grievances you have submitted`,
   msg`Track your grant applications and resume drafts`,
   msg`Tracking what you sent`,
+  msg`Trademark & Brand Use`,
+  msg`Transactional email`,
+  msg`Transcribes speech in video rooms where captions are switched on`,
+  msg`Transfers`,
+  msg`Translate`,
+  msg`Translates member-written content between English, French and Spanish`,
+  msg`Translation`,
+  msg`Translation results are cached so that the next reader of the same content does not trigger a second call.`,
+  msg`Treat other members decently`,
   msg`Triage`,
   msg`Tropical`,
   msg`Troubleshooting`,
@@ -2008,6 +2651,9 @@ The Climate Action strip underneath is the same three content types filtered to 
   msg`Turn on the brain icon for AI-guided navigation when you are not sure what something is called.`,
   msg`Turn the venue on, create rooms, and upload a floorplan`,
   msg`Turn the venue on.`,
+  msg`Turning it off`,
+  msg`Turns an uploaded CV into structured profile fields`,
+  msg`Tutorial and coachmark progress`,
   msg`Two libraries, one page`,
   msg`Two queues in one place: content members reported, and content the automated rules flagged on their own.
 
@@ -2019,6 +2665,7 @@ Each entry links to the thing itself, so you can read it in context before decid
 Under Security: password, a secondary email for recovery, and account deletion. Deletion is permanent and asks you to confirm in writing.`,
   msg`Under Privacy, switch off "Show me on the leaderboard".`,
   msg`Under Review`,
+  msg`Unsuccessful`,
   msg`Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.
 
 The climate-action checkbox underneath is not decorative — it puts the project in the region’s resilience agenda, where funders and the OECS Commission look first.`,
@@ -2027,8 +2674,21 @@ The climate-action checkbox underneath is not decorative — it puts the project
 Past events keep their pages — the brief, the schedule and the submissions stay readable, which is the easiest way to see what a KTIP hackathon actually involves before entering one.`,
   msg`Update the address you sign in with`,
   msg`Update the details of a project you own`,
+  msg`Uploaded documents and CVs`,
+  msg`Uploading a logo asserts that you have the right to use it.`,
+  msg`Uploading someone else’s logo or brand to a profile or an event asserts that you have the right to use it. The Trademark & Brand Use policy covers that in detail.`,
+  msg`Uploads and CV parsing`,
   msg`Usage, not people`,
   msg`Use "Mark all read" at the top of the panel to clear the unread count.`,
+  msg`Use an unsuccessful entry for any purpose beyond the record of the competition itself.`,
+  msg`Use it for advertising, for credit or risk scoring, or for any automated decision that materially affects a person.`,
+  msg`Use it in advertising for a product or programme unconnected with KTIP.`,
+  msg`Use it only to assess the application it belongs to.`,
+  msg`Use it to train a machine-learning model, our own or anyone else’s.`,
+  msg`Use it to train a machine-learning model.`,
+  msg`Use our logos on merchandise, packaging, signage or promotional material without written permission.`,
+  msg`Use our marks in a way that suggests a funding relationship, or that your organisation speaks for the OECS.`,
+  msg`Use our names or logos in your own product name, company name, domain name, application name or social-media handle.`,
   msg`Use the "Report" button on the user's profile. Your report goes to the OECS moderation team through the grievance system, and you can track it under "My Reports". For general platform feedback, use the Feedback button instead.`,
   msg`Use the Connect button on their member page or in the directory drawer.
 
@@ -2042,7 +2702,11 @@ A request you have sent can be withdrawn from your invitations inbox.`,
 The PDF is always the complete document, even if you were looking at the Curated view when you clicked. Curated is a screen setting, not a filter on the export.
 
 If the layout looks wrong, check that scaling is set to 100% and background graphics are enabled in the print dialog.`,
+  msg`Use the KTIP name in plain text in a sentence that describes your relationship accurately.`,
   msg`Use the Sort control and choose "For You".`,
+  msg`Use the in-app report control, or the grievance form for something involving a specific member.`,
+  msg`Use the infringement report form, which is open to people without an account.`,
+  msg`Use the name as written, in the same size and style as the surrounding text. Do not restyle it, abbreviate it, translate it, or fold it into a name of your own.`,
   msg`Use the report action on the member's profile, which opens the grievance form.
 
 Pick one of nine categories: Soliciting, Misrepresentation, Intellectual Property Infringement, Abusive Interactions, Harassment, Spam / Scam, Impersonation, Hate Speech or Privacy Violations.
@@ -2052,6 +2716,7 @@ Describe what happened in at least 20 characters, and add a link to evidence and
 The last step asks you to confirm, and warns that knowingly false reports are themselves a breach. Read it before you submit.
 
 To report one post or message rather than a person, use the report control on the content itself.`,
+  msg`Use this route for copyright, and for trade mark or design-right complaints. For harassment, impersonation, fraud or content involving a minor, use the in-app report control instead — those reach a different queue that is triaged faster.`,
   msg`Use your Chamber-verified status to partner and hire.`,
   msg`User acceptance testing responses`,
   msg`Users by role and by country, projects by category and phase, events by type, and the grant application pipeline by status.
@@ -2059,15 +2724,26 @@ To report one post or message rather than a person, use the report control on th
 The pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.
 
 Above these, the platform calendar shows every scheduled event across the region in one month grid.`,
+  msg`Using AI features responsibly`,
+  msg`Using code you find here`,
+  msg`Using other people’s work`,
+  msg`Using the KTIP and OECS names and logos`,
   msg`Using the notifications bell`,
   msg`Venue`,
+  msg`Vercel`,
   msg`Verification`,
   msg`Verification and history`,
   msg`Verification and vetting queues`,
+  msg`Verification evidence for student, faculty or organisational status`,
+  msg`Verification of student, faculty and organisational status`,
   msg`Verification requests`,
+  msg`Verification, badges and points`,
   msg`Verification, history and partner-API publishing.`,
+  msg`Verification. Student, faculty and organisation status is confirmed by an institution or chamber, not inferred.`,
   msg`Verified SMEs`,
   msg`Verified badges for people, students and businesses.`,
+  msg`Verified employer and organisation data is also made available to approved partners through our partner API, where you have consented to appear in it. The rules those partners are bound by are published in the Partner API Terms.`,
+  msg`Verify any funding opportunity independently before sending money, documents or personal data. No legitimate funder on this platform will ask you to pay a fee to receive a grant.`,
   msg`Verify businesses in your member state`,
   msg`Verify employers and control what the partner API publishes`,
   msg`Verify schools, universities and chambers`,
@@ -2076,16 +2752,43 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`Verifying`,
   msg`Verifying institutions and the domains they own.`,
   msg`Vet and onboard the SMEs in your member state.`,
+  msg`Vetting`,
   msg`Vetting businesses against the corporate registry.`,
   msg`Video`,
   msg`Video Conference`,
+  msg`Video and audio collaboration, recording where enabled`,
   msg`Viewer`,
   msg`Views, features, funnels and what they undercount.`,
   msg`Virtual Campus records and manual edits`,
   msg`Virtual Hackathon`,
+  msg`Visibility`,
   msg`Visit Forums`,
   msg`Waitlisted`,
+  msg`Warning signs`,
+  msg`Warning signs of a funding scam`,
+  msg`We acknowledge your notice by email and give it a reference.`,
+  msg`We also disclose data where the law requires it, to protect the rights and safety of members — particularly minors — and to programme funders in aggregate or de-identified form.`,
+  msg`We are not a court and we do not decide who owns a work. What we decide is whether content should stay up while the people concerned resolve it between themselves.`,
+  msg`We do check`,
+  msg`We do not check`,
+  msg`We do not knowingly maintain accounts for children below that age. If you believe one exists, tell us at %privacyEmail% and it will be removed.`,
+  msg`We do not sell personal data. We use the following processors:`,
+  msg`We do not send an AI feature anything you did not submit to it. Asking the assistant a question does not give it your messages, your drafts or your files.`,
+  msg`We log partner access and may ask a partner to demonstrate compliance, including how records are stored and deleted. Access can be suspended immediately where we reasonably believe these terms have been breached or member data is at risk, and we will explain why.`,
+  msg`We may amend these Terms. Material changes are announced in the application and by email at least %noticePeriod% before they take effect, and you will be asked to accept the new version. The version number and effective date at the top of this page always reflect what is currently in force.`,
+  msg`We never record the content of a message, a proposal, a document or a search result.`,
+  msg`We pass the counter-notice to the complainant. Unless they tell us within a reasonable period that they have started legal proceedings, we restore the content, and the notice stops counting against your account.`,
+  msg`We review the notice. If it is incomplete we come back to you rather than rejecting it silently.`,
+  msg`We take a snapshot of the content, so that the review survives the author editing or deleting it.`,
   msg`Welcome to Events`,
+  msg`What`,
+  msg`What "public" means`,
+  msg`What AI is never allowed to decide`,
+  msg`What KTIP stores on your device, and how to change it`,
+  msg`What a listing on KTIP is`,
+  msg`What a notice must contain`,
+  msg`What a partner may never do`,
+  msg`What a partner may use it for`,
   msg`What are Integrations?`,
   msg`What are pinned posts?`,
   msg`What are points and levels?`,
@@ -2094,6 +2797,7 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`What can I do without an account?`,
   msg`What can my school see about my age?`,
   msg`What collaboration tools are available?`,
+  msg`What data we collect, why, who sees it, and your rights`,
   msg`What do I upload on the Supporting documents step?`,
   msg`What do the application statuses mean?`,
   msg`What do the project phases mean?`,
@@ -2105,6 +2809,10 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`What each field on the project form does.`,
   msg`What each one is for`,
   msg`What happens after I report something?`,
+  msg`What happens to code, documents and whiteboards you share on KTIP — who may use them, how to license them so others actually can, and your obligations for code you did not write.`,
+  msg`What happens to the information in a notice`,
+  msg`What happens to your idea when you enter a hackathon, challenge or pitch on KTIP — who owns it, who may see it, and what a prize does and does not buy.`,
+  msg`What happens when a rule is broken`,
   msg`What is KTIP?`,
   msg`What is breaking`,
   msg`What is different about an account under 18?`,
@@ -2119,44 +2827,107 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`What is the floating button in the corner?`,
   msg`What is the invitations inbox?`,
   msg`What is the onboarding wizard?`,
+  msg`What it does`,
+  msg`What it is`,
+  msg`What it receives`,
   msg`What kinds of rooms will I see?`,
   msg`What members are telling us`,
+  msg`What organisers and sponsors may not do`,
+  msg`What other people can see`,
   msg`What participants must achieve`,
+  msg`What personal data KTIP collects, why, who it reaches, how long it is kept, and the rights you can exercise over it.`,
+  msg`What reaches them`,
+  msg`What reviewers are bound by`,
+  msg`What supervised mode does`,
+  msg`What the licence does not allow`,
   msg`What the numbers count`,
   msg`What the safety team needs, and what happens next.`,
+  msg`What this document does not do`,
+  msg`What this is for`,
   msg`What to do with it`,
   msg`What types of events can I create?`,
   msg`What types of grants are listed?`,
+  msg`What we collect automatically`,
+  msg`What we do and do not check`,
+  msg`What we do not do`,
+  msg`What we do with a notice`,
+  msg`What we receive from other services`,
+  msg`What we store`,
+  msg`What we store on your device`,
+  msg`What you give us directly`,
+  msg`What you have agreed to`,
   msg`What you have made, and what was shared with you.`,
+  msg`What you keep and what you license when you publish`,
+  msg`What you keep, what you grant %entityShort%, what we may never do with your work, and what happens to it when you delete it.`,
+  msg`What you may and may not post or do on KTIP, how we enforce it, and how to report something that breaks the rules.`,
+  msg`What you may and may not post, and how it is enforced`,
+  msg`What you may do without asking`,
+  msg`What you may not do`,
   msg`When the article does not cover it`,
+  msg`When the licence ends`,
+  msg`When you mark a project, event or profile as public, it can be read by anyone — including people with no KTIP account — and it may be indexed by search engines, quoted, linked to and archived by services outside our control.`,
+  msg`When you may use the KTIP and OECS names and logos, when you may not, and what you are asserting when you upload someone else’s logo.`,
+  msg`When you paste in third-party code — an open-source library, a snippet from a forum, a generated block, an example from documentation — its licence comes with it. Sharing it on KTIP does not reset it.`,
   msg`When you start a new conversation you can add several members instead of one, which creates a group chat.
 
 Any member of the group can post, and everyone sees the full history from when they joined.
 
 Group settings let you rename the group, add and remove members, and leave it. Groups are useful for project teams and hackathon teams that need something more durable than a venue room.`,
+  msg`When you upload a logo, brand or mark to a profile, an organisation page, an event or a project, you confirm that you own it or are authorised to use it in that way, and you accept responsibility for that use.`,
+  msg`Where`,
+  msg`Where KTIP uses AI, and what it does with your text`,
+  msg`Where an entry is submitted by a team, the member who submits it confirms that every contributor has agreed to it being entered on these terms. Ownership between team members is a matter between you — KTIP records who submitted and who was credited, and takes no view on the shares.`,
   msg`Where are my messages?`,
   msg`Where are the whiteboards and documents I made?`,
   msg`Where is the copy of what I submitted?`,
+  msg`Where it comes from`,
   msg`Where it happens`,
+  msg`Where it is practical to do so we give notice and a route to appeal, at %legalEmail%. Two exceptions: safeguarding cases involving minors may be acted on immediately without prior notice, and content subject to a copyright notice is handled under the Copyright & Takedown Policy, which has its own counter-notice route.`,
+  msg`Where it is practical we tell you what was actioned and why, and you can appeal to %legalEmail%. Safeguarding cases involving minors are acted on immediately and explained afterwards.`,
+  msg`Where necessary to operate the platform or investigate a report. Those accesses are logged.`,
+  msg`Where several people edit a document or whiteboard, each keeps ownership of their own contribution, and the result is jointly authored. Deleting your account does not remove your contributions from a shared surface — that is the "already shared into another member’s context" exception in the IP, Content & Licensing Policy.`,
+  msg`Where the competition rules say so. Sponsors are bound by the restrictions in the next section.`,
   msg`Where the conversation happens`,
+  msg`Where the law of the country a member lives in sets a minimum age for consenting to online services, and the member is below it, a parent or guardian must consent and may exercise the member’s data-protection rights on their behalf.`,
+  msg`Where to send a notice`,
+  msg`Where we reasonably believe these Terms or the law have been breached, or where safeguarding requires it, we may remove content, restrict features, suspend or terminate an account, and report the matter to the authorities.`,
+  msg`Where we use AI`,
+  msg`Where your text goes`,
+  msg`Whether you are the owner of the right, or an agent authorised to act for the owner.`,
   msg`Which browsers does KTIP support?`,
   msg`Whichever tab is selected renders here, and the page keeps its shell — so moving between your CV, your projects and your submissions never costs you the rail.
 
 Overview pulls the useful parts of the others together: recent network activity, what you have submitted, and what is next on your calendar.`,
+  msg`While your account is active`,
+  msg`While your account is active; deleted with the account`,
   msg`Whiteboards`,
   msg`Whiteboards, documents, code and video in real time.`,
   msg`Whiteboards, documents, code sandboxes and video calls.`,
   msg`Who can join the platform?`,
   msg`Who can see how many connections I have?`,
+  msg`Who can see your entry`,
   msg`Who else is here`,
   msg`Who is in the room`,
+  msg`Who may hold an account`,
+  msg`Who owns a hackathon entry, and what a prize buys`,
+  msg`Who reads it`,
+  msg`Who reads your application`,
+  msg`Who reads your application, and why applying licenses nothing`,
+  msg`Who sees it`,
   msg`Who the funder will accept — country, sector, stage, sometimes an age or institution requirement.
 
 Above it sits the full brief and the detail block; below it, any documents the funder has published. The rail on the right jumps between all of them.`,
+  msg`Who this is for`,
+  msg`Who we are`,
+  msg`Who we share it with`,
+  msg`Why`,
   msg`Why am I asked for my date of birth?`,
   msg`Why can I not create a project?`,
   msg`Why is my content hidden or quarantined?`,
   msg`Why is the Funding, Mentees or Research tab empty?`,
+  msg`Why we process it`,
+  msg`Withdrawal`,
+  msg`Withdrawing an entry`,
   msg`Work through the five steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Impact & Review.`,
   msg`Work through these in order.
 
@@ -2171,6 +2942,7 @@ Above it sits the full brief and the detail block; below it, any documents the f
 5. Try another browser.
 
 If none of that helps it may be a temporary platform issue. Wait a few minutes, then ask the KTIP Assistant.`,
+  msg`Work you did not create`,
   msg`Working`,
   msg`Working a report`,
   msg`Working reports filed about members.`,
@@ -2181,6 +2953,8 @@ If none of that helps it may be a temporary platform issue. Wait a few minutes, 
   msg`Write your title and message, then publish.`,
   msg`Write, sponsor, submit and track an application.`,
   msg`Writing, running and sharing snippets.`,
+  msg`Yes`,
+  msg`Yes — this is the one you choose`,
   msg`Yes, and it is optional. Students submit their own grant applications — a sponsor is an endorsement, not a permission.
 
 On the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.
@@ -2205,6 +2979,34 @@ You can go back to any step from the preview, fix what you found, and return.`,
   msg`You are asked to confirm before it sends — reports are taken seriously and cannot be withdrawn once filed.
 
 Every report you have made is listed under My Reports, with its status as the team works through it. You will not always be told the outcome; some of it is about the other person’s account and is not ours to share.`,
+  msg`You are responsible for the accuracy of your details, for the security of your credentials, and for everything done under your account. Tell us at %supportEmail% as soon as you believe someone else has access to it.`,
+  msg`You can declare a licence on any snippet or document you own. Say which one, in the content itself or in the field provided, and say it plainly — "MIT", "Apache-2.0", "CC BY 4.0" — rather than describing it in your own words.`,
+  msg`You can delete a draft at any time. Once submitted, an application can be withdrawn, but the funder will already have received it.`,
+  msg`You can request access to your data, correction of it, deletion, restriction of processing, and portability; you can object to processing based on legitimate interests; and you can withdraw consent at any time without affecting what was done before you withdrew it.`,
+  msg`You can request deletion of an unsuccessful application at %privacyEmail%. Where an audit obligation prevents deletion we will tell you, and say when it expires.`,
+  msg`You can withdraw an entry before judging closes, and we will remove it from the competition. After results are announced, the record that you entered and what you were awarded remains — a competition result that can be edited afterwards is not a result.`,
+  msg`You confirm that your entry is your own work, or that you are licensed to use everything in it. Open-source libraries, stock images, datasets, fonts and pre-trained models all come with terms — follow them and credit them in your entry.`,
+  msg`You control whether you appear in the partner feed, in your settings. You can ask which partners currently hold your data at %privacyEmail%, and you can require deletion.`,
+  msg`You do not have to disclose that you used AI to help write something. You do have to stand behind what you publish.`,
+  msg`You give us`,
+  msg`You keep ownership of every project, event listing, forum post, comment, document, whiteboard, code snippet, CV and organisation profile you publish on KTIP. Nothing on this platform transfers copyright, assigns a patent, or hands over a trade mark or design right.`,
+  msg`You keep ownership of everything in the application: the proposal, the budget, the technical description, the attachments, and any work already done that you describe in it.`,
+  msg`You keep ownership of everything in your entry — the idea, the code, the design, the prototype, the pitch deck, the video. Entering a competition on KTIP transfers no intellectual property to %entityShort%, to the event organiser, or to a sponsor.`,
+  msg`You keep ownership of everything you post. To display your work to other members we need a limited licence from you, and the exact scope of that licence — what it permits, what it does not permit, and when it ends — is set out in the IP, Content & Licensing Policy.`,
+  msg`You keep ownership. The licence you grant is set out separately.`,
+  msg`You keep what you make`,
+  msg`You may also complain to the data-protection authority in the country where you live. We would rather you came to us first, but that is your right and not a step you have to take second.`,
+  msg`You may delete your account at any time in Settings. What happens to your content afterwards is set out in the IP, Content & Licensing Policy and in the retention table of the Privacy Policy.`,
+  msg`You may name another organisation truthfully — a customer, a technology you build on, a competitor you compare yourself with. You may not use their logo or styling to suggest they endorse you, and you should follow their own brand guidelines where they publish them.`,
+  msg`You may use the AI features to draft, improve and translate your own work. You may not use them to generate content that breaks any rule above, and you must not present AI output as verified fact where its accuracy matters to someone else — a grant application, a funding claim, a safety instruction.`,
+  msg`You may use these features to draft, improve and translate your own work. You must not use them to produce content that breaks the Acceptable Use rules, and you must not present AI output as verified fact where its accuracy matters to someone else.`,
+  msg`You must also affirm, separately, all three of the following:`,
+  msg`You must be at least %minimumAge% years old to hold a KTIP account, or older if the law of the country you live in sets a higher minimum age for online services.`,
+  msg`You must be at least %minimumAge% years old, or the higher minimum age set by the law of the country you live in, whichever is greater.`,
+  msg`You own what you write`,
+  msg`You own your entry`,
+  msg`You will be told, and you can have it restored by filing a counter-notice.`,
+  msg`You will indemnify %entity% against claims, losses and reasonable legal costs arising from content you publish, from your use of the platform, or from your breach of these Terms. This does not apply to the extent the claim arises from our own breach or negligence.`,
   msg`You will receive a notification confirming your place.`,
   msg`Your CV`,
   msg`Your CV lives at its own page, with an editor behind the Edit action.
@@ -2212,9 +3014,14 @@ Every report you have made is listed under My Reports, with its status as the te
 The editor holds the usual sections — education, experience, projects, skills, achievements — and pulls in what KTIP already knows about you so you are not retyping it.
 
 The screen offers two views. Curated shows a shortened selection, useful for a quick read. Full CV shows everything. This affects only how the page displays; it does not delete anything.`,
+  msg`Your account`,
   msg`Your activity on KTIP, in order.`,
   msg`Your activity timeline`,
   msg`Your activity timeline across the platform`,
+  msg`Your analytics choice`,
+  msg`Your analytics choice can be changed at any time in Settings, and it takes effect immediately — turning it off stops events being sent and drops the session identifier.`,
+  msg`Your application is confidential`,
+  msg`Your application is confidential, submitting it licenses nothing to the funder, and only named people read it. Here is exactly who, and for how long.`,
   msg`Your badges, points, level and streak — and what to do next to earn more`,
   msg`Your choice is remembered on this device.`,
   msg`Your choice, in Settings under Preferences.
@@ -2222,27 +3029,43 @@ The screen offers two views. Curated shows a shortened selection, useful for a q
 Everyone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.
 
 This controls the visible count, not the connections themselves. Changing it does not disconnect anyone.`,
+  msg`Your contact details, and your consent to those details being passed to the complainant.`,
+  msg`Your content`,
+  msg`Your content is not used by us to train any model.`,
+  msg`Your content sits in our database and file storage, and in backups of them.`,
   msg`Your copy of everything you have submitted`,
   msg`Your copy of what you sent`,
   msg`Your dashboard`,
+  msg`Your declared date of birth is treated as restricted data: it is stored in its own table behind its own access rules, it is never copied onto your public profile, and ordinary application queries cannot read it back. Everything downstream consumes a derived yes-or-no answer to "is this account a minor?" rather than the date itself.`,
   msg`Your earned badges, the ones still locked with what unlocks them, and the points that follow.
 
 This is the same gallery as the standalone Achievements page, embedded so you keep the rail. Pinned badges show on your public profile — the pin controls are on each badge.`,
   msg`Your hub — network, submissions and calendar`,
+  msg`Your name, your email address, and the organisation you represent if any.`,
   msg`Your organisation, its details and the portfolio of work it publishes`,
   msg`Your overview, calendar, progress and submissions.`,
+  msg`Your part`,
   msg`Your personal page — CV, projects, events, connections.`,
+  msg`Your privacy settings`,
   msg`Your record of something you submitted.`,
+  msg`Your rights`,
   msg`Your roles are what unlock the role-specific parts of KTIP — an investor gets the Funding tab on the dashboard, a mentor gets Mentees, faculty get Research.
 
 Some roles are self-selected and some are granted after verification, which is why a role you expect may not be here yet.`,
   msg`Your résumé, built from your KTIP record and ready to send`,
   msg`Your résumé, ready to download or publish.`,
+  msg`Your search phrase and a map of the site`,
+  msg`Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice.`,
+  msg`Your settings`,
   msg`Your shareable member page`,
   msg`Your shared rich-text documents`,
+  msg`Your side of it`,
+  msg`Your uploads`,
+  msg`Your use of the platform`,
   msg`Your visual brainstorming boards`,
   msg`Your work in this tool`,
   msg`Yours, and everyone else’s`,
+  msg`Zero tolerance, acted on immediately, reported where required.`,
   msg`add the facilitator`,
   msg`design the rooms`,
   msg`design the venue`,

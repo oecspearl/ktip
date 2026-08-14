@@ -24,6 +24,21 @@ export interface SignupMetadata {
    * out of every public read of a member.
    */
   date_of_birth?: string
+  /**
+   * The account-bundle document keys the signup form displayed. handle_new_user()
+   * (115) writes the matching `user_consents` rows in the same transaction that
+   * creates the profile.
+   *
+   * Metadata rather than an RPC for a specific reason: with email confirmation
+   * enabled `signUp()` returns no session, so `auth.uid()` is null and
+   * `record_consent()` would refuse — while the auth user and profile already
+   * exist. The same constraint that put `date_of_birth` here.
+   *
+   * The VERSION is not sent. The trigger reads it from `legal_documents`.
+   */
+  legal_consent?: string[]
+  /** Which catalog the documents were read in — evidence, not a preference. */
+  legal_consent_locale?: string
   organization?: string
   industry?: string
   country?: string
@@ -199,6 +214,49 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       cancelled = true
     }
   }, [user?.id, profileLoading, profile?.is_minor, queryClient])
+
+  // What this account has and has not agreed to (115).
+  //
+  // Owned here rather than prefetched, so one place invalidates it and every
+  // page that calls useConsents() reads the same cache entry synchronously.
+  // That is what makes the publishing gate cost zero requests per create form
+  // instead of one. `staleTime: Infinity` because the answer only moves on a
+  // deploy or on an acceptance, and both invalidate explicitly.
+  useQuery({
+    queryKey: ['consents', user?.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc('get_my_consents')
+      if (error) throw error
+      return data ?? []
+    },
+    enabled: !!user?.id,
+    staleTime: Infinity,
+    retry: 1,
+  })
+
+  // The consent counterpart to the minor sweep above, and the mechanism by
+  // which a NEW VERSION reaches a live session with no pg_cron: the RPC
+  // recomputes profiles.requires_consent against whatever is currently in
+  // force. Failure is ignored — the gate is enforced by RLS and by the
+  // publishing check, never by this cached flag alone.
+  const consentCheckedFor = useRef<string | null>(null)
+  useEffect(() => {
+    const id = user?.id
+    if (!id || profileLoading || consentCheckedFor.current === id) return
+    consentCheckedFor.current = id
+    let cancelled = false
+    void (async () => {
+      const { data, error } = await (supabase as any).rpc('ensure_my_consent_state')
+      if (cancelled || error) return
+      if (data !== profile?.requires_consent) {
+        await queryClient.invalidateQueries({ queryKey: ['profile', id] })
+        await queryClient.invalidateQueries({ queryKey: ['consents', id] })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, profileLoading, profile?.requires_consent, queryClient])
 
   const roles = useMemo(() => expandRoles(profile?.roles), [profile?.roles])
 

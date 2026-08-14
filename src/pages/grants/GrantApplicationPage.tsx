@@ -16,6 +16,8 @@ import { grantImageFor } from '../../lib/hero-images'
 import { SponsorNominationCard } from '../../components/grants/SponsorNominationCard'
 import { EngagementNotice } from '../../components/shared/EngagementNotice'
 import { useEngagementGate } from '../../hooks/useEngagement'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
 import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
 import { truncate } from '../../lib/utils'
 import {
@@ -46,6 +48,13 @@ export default function GrantApplicationPage() {
   // Migration 111. Drafting is deliberately still allowed for a blocked
   // member, so this gates the Submit button and nothing before it.
   const gate = useEngagementGate(grant)
+
+  // Distinct from `gate` above, which is the organisation engagement check.
+  // This one is the confidentiality and IP agreement, and it gates the same
+  // button for an unrelated reason.
+  const agreementGate = useAgreementGate('application')
+  const [gateOpen, setGateOpen] = useState(false)
+  const resumeAfterGate = useRef(false)
 
   const [currentStep, setCurrentStep] = useState(0)
   const [applicationData, setApplicationData] = useState<Record<string, any>>({})
@@ -186,6 +195,19 @@ export default function GrantApplicationPage() {
       }
     }
 
+    // Every step is valid by here. Gating the FINAL submit only, never a draft
+    // save or the autosave — an agreement modal interrupting a background save
+    // would be both baffling and, since drafts reach nobody, unnecessary.
+    if (agreementGate.needsAgreement) {
+      resumeAfterGate.current = true
+      setGateOpen(true)
+      return
+    }
+
+    await submitApplicationNow()
+  }
+
+  const submitApplicationNow = async () => {
     try {
       autoSave.cancel()
       let id = applicationId
@@ -383,12 +405,33 @@ export default function GrantApplicationPage() {
                       <EngagementNotice verdict={gate} />
                     </div>
                   )}
+                  <div className="max-w-sm text-right">
+                    <AgreementNotice bundle="application" />
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      <AgreementGateModal
+        gate={agreementGate}
+        bundle="application"
+        open={gateOpen}
+        context="grant_application"
+        onClose={() => {
+          setGateOpen(false)
+          resumeAfterGate.current = false
+        }}
+        onAccepted={async () => {
+          setGateOpen(false)
+          if (resumeAfterGate.current) {
+            resumeAfterGate.current = false
+            await submitApplicationNow()
+          }
+        }}
+      />
     </>
   )
 }

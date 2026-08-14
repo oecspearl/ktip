@@ -356,6 +356,11 @@
   --container-page-narrow: calc(50vw + 32rem);
   --container-page-mid: calc(50vw + 36rem);
   --container-page-tight: calc(50vw + 24rem); /* forms, auth, single-column reading */
+  /* Measure for legal prose — roughly 75 characters at body size. A fixed rem
+     value, not a 50vw expression like the page containers: those grow with the
+     viewport, and a liability clause set 140 characters wide on a desktop is
+     unreadable no matter how much room there is. */
+  --container-legal: 46rem;
   --container-page-wide: calc(50vw + 64rem); /* dashboards, wide tables */
 
   /* ── LAYER SCALE ──────────────────────────────────────────────────────
@@ -2694,6 +2699,42 @@ html.route-shuffle::view-transition {
   .doc-editor-print-content {
     padding: 0 !important;
     margin: 0 !important;
+  }
+}
+
+/* Printing a legal document.
+   People print these to sign them, file them, or send them to a lawyer, so the
+   printed copy has to stand on its own. The global proposal-export block below
+   hides every `nav` and `button`, which correctly kills the scrollspy rail and
+   the print control but also takes the table of contents with it — the one
+   piece of navigation a paper copy still needs. */
+@media print {
+  .legal-doc nav[data-legal-toc] {
+    display: block !important;
+    break-inside: avoid;
+  }
+
+  .legal-doc [data-print-hide] {
+    display: none !important;
+  }
+
+  /* A heading stranded at the foot of a page, with its clause overleaf, is how
+     a printed contract gets misread. */
+  .legal-doc h2 {
+    break-after: avoid;
+  }
+
+  .legal-doc li,
+  .legal-doc tr {
+    break-inside: avoid;
+  }
+
+  /* On paper a link is just underlined text unless its target is written out. */
+  .legal-doc a[href^="http"]::after,
+  .legal-doc a[href^="mailto:"]::after {
+    content: ' (' attr(href) ')';
+    font-size: 9pt;
+    word-break: break-all;
   }
 }
 

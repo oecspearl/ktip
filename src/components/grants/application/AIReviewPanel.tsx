@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Disclaimer } from '../../legal/Disclaimer'
 import { useAISuggestions } from '../../../hooks/useAISuggestions'
 import type { AIReviewResult } from '../../../hooks/useAISuggestions'
 import { Sparkles, Loader2, CheckCircle, AlertTriangle, Lightbulb } from 'lucide-react'
@@ -66,6 +67,18 @@ export function AIReviewPanel({ grantTitle, applicationTitle, applicationData }:
               <p className="text-xs text-ktip-sand-600 mt-0.5">{review.summary}</p>
             </div>
           </div>
+
+          {/* Not dismissible, and directly under the number. A score is the most
+              authoritative-looking thing this panel produces and the least
+              reliable — it carries no weight with the funder and never reaches
+              them. */}
+          <Disclaimer variant="ai" placement="block">
+            <Trans>
+              This score is a second read on your draft, not an assessment. It carries no weight
+              with the funder and never leaves your draft. AI can be wrong about eligibility rules
+              and deadlines — check those against the listing itself.
+            </Trans>
+          </Disclaimer>
 
           {/* Strengths */}
           {review.strengths.length > 0 && (

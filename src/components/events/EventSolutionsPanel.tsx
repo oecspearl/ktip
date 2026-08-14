@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
@@ -18,6 +18,8 @@ import {
   openDocument,
 } from '../../hooks/useEntityDocuments'
 import { formatFileSize, validateFile } from '../../lib/document-extract'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal, AgreementNotice } from '../legal/AgreementGate'
 import type { EventSolution } from '../../types'
 import {
   Lightbulb,
@@ -73,6 +75,10 @@ export function EventSolutionsPanel({
   const [uploading, setUploading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<EventSolution | null>(null)
 
+  const gate = useAgreementGate('competition')
+  const [gateOpen, setGateOpen] = useState(false)
+  const resumeAfterGate = useRef(false)
+
   const entriesClosed = submissionDeadline
     ? new Date(submissionDeadline).getTime() < Date.now()
     : false
@@ -110,6 +116,21 @@ export function EventSolutionsPanel({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    if (!auth.user || !title.trim()) return
+
+    // The competition bundle, not the publishing one: an entry is judged, not
+    // published, and the terms that matter here are about who may see it and
+    // what a prize does not buy.
+    if (gate.needsAgreement) {
+      resumeAfterGate.current = true
+      setGateOpen(true)
+      return
+    }
+
+    await submitSolutionNow()
+  }
+
+  const submitSolutionNow = async () => {
     if (!auth.user || !title.trim()) return
 
     try {
@@ -324,6 +345,8 @@ export function EventSolutionsPanel({
             {fileError && <p className="mt-2 text-xs text-red-600">{fileError}</p>}
           </div>
 
+          <AgreementNotice bundle="competition" />
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" size="sm" onClick={resetForm} disabled={busy}>
               <Trans>Cancel</Trans>
@@ -334,6 +357,24 @@ export function EventSolutionsPanel({
           </div>
         </form>
       )}
+
+      <AgreementGateModal
+        gate={gate}
+        bundle="competition"
+        open={gateOpen}
+        context="event_solution"
+        onClose={() => {
+          setGateOpen(false)
+          resumeAfterGate.current = false
+        }}
+        onAccepted={async () => {
+          setGateOpen(false)
+          if (resumeAfterGate.current) {
+            resumeAfterGate.current = false
+            await submitSolutionNow()
+          }
+        }}
+      />
 
       {/* Entries */}
       {loading ? (

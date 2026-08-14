@@ -127,7 +127,7 @@ export function useTranslated(
 export function useTranslatedState(
   text: string | null | undefined,
   format: TextFormat = 'text'
-): { text: string; pending: boolean } {
+): { text: string; pending: boolean; translated: boolean; source: string } {
   const { uiLang } = useLanguage()
   useTranslationStore()
 
@@ -151,6 +151,17 @@ export function useTranslatedState(
   return {
     text: known ?? source,
     pending: !skip && known === undefined && !settled,
+    /**
+     * Whether what is being rendered is machine output rather than what the
+     * author wrote.
+     *
+     * Additive, and it closes a real gap: useTranslatedContent has carried this
+     * flag all along but only the room chat acts on it, so a French reader has
+     * been shown machine-translated project and grant text with no indication at
+     * all. `source` comes back with it so a mark can offer the original.
+     */
+    translated: !skip && known !== undefined && known !== source,
+    source,
   }
 }
 
@@ -207,6 +218,21 @@ export function useTranslatedFields<T extends object>(
     return changed ? next : obj
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [obj, fieldKey, format, uiLang, storeVersion])
+}
+
+/**
+ * Whether useTranslatedFields actually replaced anything on this record.
+ *
+ * Reference inequality, not a deep compare, and that is exact rather than
+ * approximate: the hook above deliberately returns the ORIGINAL object when
+ * nothing changed, to preserve referential equality for memoised children. So a
+ * different reference means at least one field is now machine output.
+ *
+ * Free to compute, needs no new plumbing through the hook, and it is what a page
+ * needs in order to mark translated content as such.
+ */
+export function isMachineTranslated<T>(original: T | null | undefined, translated: T | null | undefined): boolean {
+  return !!original && !!translated && original !== translated
 }
 
 /** Translate a list of records. Same rules as useTranslatedFields. */

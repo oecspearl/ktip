@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router'
+import { Disclaimer } from '../../components/legal/Disclaimer'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { ClimateBadge } from '../../components/ui/ClimateBadge'
@@ -241,6 +242,8 @@ export default function ResourceDetailPage() {
               </Link>
             </div>
           </div>
+
+          <Disclaimer variant="advice" placement="footer" />
         </div>
       </div>
     </>

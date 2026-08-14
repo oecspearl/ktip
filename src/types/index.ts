@@ -20,6 +20,8 @@ export type RoleSlug =
   | 'oecs'
   // tier 1 — admin
   | 'super_admin'
+  | 'people_supervisor'
+  | 'programme_supervisor'
   | 'safety_admin'
   // tier 2 — organization
   | 'sme'
@@ -42,6 +44,7 @@ export type RoleTier = 'admin' | 'organization' | 'individual'
 export type PermissionKey =
   | 'org:manage'
   | 'members:manage'
+  | 'members:view'
   | 'role:manage'
   | 'audit:view'
   | 'moderation:view'
@@ -64,6 +67,15 @@ export type PermissionKey =
   | 'sme:verify'
   | 'institution:verify'
   | 'institution:approve_students'
+  | 'verification:review'
+  // content — the domain keys carved out of org:manage in migration 116
+  | 'project:manage_all'
+  | 'event:manage'
+  | 'grant:manage'
+  | 'forum:manage'
+  | 'resource:manage'
+  | 'achievement:manage'
+  | 'employer:manage'
 
 export type ProjectPhase = 'concept' | 'prototype' | 'funding' | 'launch'
 
@@ -209,6 +221,18 @@ export interface Profile {
   is_minor?: boolean
   requires_age_declaration?: boolean
   age_declared_at?: string | null
+  /**
+   * Legal consent state (115). Derived from user_consents and guarded the same
+   * way the age columns are — a member cannot PATCH themselves past the gate.
+   *
+   * `requires_consent` is TRUE only while an account-bundle document is
+   * outstanding; the publishing, competition and application bundles never set
+   * it, because those gate an action rather than the whole session. Optional for
+   * the same deploy-ahead-of-migration reason: a missing column must read as
+   * "nothing owed" rather than trap every member on /onboarding.
+   */
+  requires_consent?: boolean
+  consent_recorded_at?: string | null
   /**
    * Language settings (097, 100). All three optional for the same
    * deploy-ahead-of-migration reason as the fields above.

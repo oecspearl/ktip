@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -8,6 +8,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { forumPostSchema } from '../../lib/validation'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function CreatePostPage() {
@@ -24,6 +26,10 @@ export default function CreatePostPage() {
   const [content, setContent] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
+
+  const gate = useAgreementGate('publishing')
+  const [gateOpen, setGateOpen] = useState(false)
+  const resumeAfterGate = useRef(false)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -43,6 +49,20 @@ export default function CreatePostPage() {
       return
     }
 
+    if (!board || !auth.user) return
+
+    // After validation and after the board check, so the gate never opens over
+    // a submit that was going to fail anyway.
+    if (gate.needsAgreement) {
+      resumeAfterGate.current = true
+      setGateOpen(true)
+      return
+    }
+
+    await createPostNow()
+  }
+
+  const createPostNow = async () => {
     if (!board || !auth.user) return
 
     try {
@@ -122,21 +142,43 @@ export default function CreatePostPage() {
               <p className="text-sm text-red-600">{errorMessage}</p>
             )}
 
-            <div className="flex items-center gap-4">
-              <Button type="submit" loading={loading} fullWidth>
-                <Trans>Publish Post</Trans>
-              </Button>
-              <button
-                type="button"
-                onClick={() => navigate(`/forums/${params.slug}`)}
-                className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
-              >
-                <Trans>Cancel</Trans>
-              </button>
+            <div className="space-y-3">
+              <AgreementNotice bundle="publishing" />
+
+              <div className="flex items-center gap-4">
+                <Button type="submit" loading={loading} fullWidth>
+                  <Trans>Publish Post</Trans>
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/forums/${params.slug}`)}
+                  className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
+                >
+                  <Trans>Cancel</Trans>
+                </button>
+              </div>
             </div>
           </form>
         </div>
       </div>
+
+      <AgreementGateModal
+        gate={gate}
+        bundle="publishing"
+        open={gateOpen}
+        context="forum_post"
+        onClose={() => {
+          setGateOpen(false)
+          resumeAfterGate.current = false
+        }}
+        onAccepted={async () => {
+          setGateOpen(false)
+          if (resumeAfterGate.current) {
+            resumeAfterGate.current = false
+            await createPostNow()
+          }
+        }}
+      />
     </>
   )
 }

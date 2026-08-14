@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
+import { ReconsentBanner } from '../legal/ReconsentBanner'
 import { FloatingActionButton } from '../ui/FloatingActionButton'
 import { SpyRail } from '../ui/SpyRail'
 import { MessagingPanelProvider, useMessagingPanel } from '../../contexts/MessagingPanelContext'
@@ -123,6 +124,10 @@ export function MainLayout() {
       {auth.user && !auth.profile && !auth.loading && !auth.profileLoading && (
         <SessionRecoveryBanner />
       )}
+      {/* Renders itself only when an account-bundle document has been re-issued
+          and the member has not snoozed it. Non-blocking on purpose — see the
+          component. */}
+      {auth.user && <ReconsentBanner />}
       <main id="main-content" className="flex-1">
         <div key={shell} className="contents page-reveal">
           <Outlet />

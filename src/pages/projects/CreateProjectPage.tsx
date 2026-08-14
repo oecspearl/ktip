@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -17,6 +17,8 @@ import { PROJECT_CATEGORIES, CONTENT_TAG_SUGGESTIONS } from '../../lib/constants
 import { analytics } from '../../hooks/useAnalytics'
 import { Save } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
 import { entityPath } from '../../lib/slug'
 import { useWarmTranslations } from '../../hooks/useTranslated'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -42,6 +44,13 @@ export default function CreateProjectPage() {
   const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
+
+  const gate = useAgreementGate('publishing')
+  const [gateOpen, setGateOpen] = useState(false)
+  // Without this the member accepts the agreement, the modal closes, and their
+  // project is not created — so they press Create a second time and read the
+  // whole thing as a bug.
+  const resumeAfterGate = useRef(false)
 
   const managedEmployers = useManagedEmployers()
 
@@ -71,6 +80,19 @@ export default function CreateProjectPage() {
       return
     }
 
+    // After validation, never before: opening a licensing agreement over a form
+    // that is going to be rejected for a missing title wastes the one moment
+    // the member is actually willing to read it.
+    if (gate.needsAgreement) {
+      resumeAfterGate.current = true
+      setGateOpen(true)
+      return
+    }
+
+    await createProjectNow()
+  }
+
+  const createProjectNow = async () => {
     try {
       const project = await createProject({
         title,
@@ -275,22 +297,46 @@ export default function CreateProjectPage() {
             />
 
             {/* Submit Button */}
-            <div className="flex items-center gap-4">
-              <Button type="submit" loading={loading} icon={<Save size={20} />} fullWidth>
-                <Trans>Create Project</Trans>
-              </Button>
-              <button
-                type="button"
-                onClick={() => navigate('/projects')}
-                disabled={loading}
-                className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
-              >
-                <Trans>Cancel</Trans>
-              </button>
+            <div className="space-y-3">
+              {/* Rendered always, not only when the gate is outstanding — the
+                  licence applies to every project, not just the first. */}
+              <AgreementNotice bundle="publishing" />
+
+              <div className="flex items-center gap-4">
+                <Button type="submit" loading={loading} icon={<Save size={20} />} fullWidth>
+                  <Trans>Create Project</Trans>
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/projects')}
+                  disabled={loading}
+                  className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
+                >
+                  <Trans>Cancel</Trans>
+                </button>
+              </div>
             </div>
           </form>
         </div>
       </div>
+
+      <AgreementGateModal
+        gate={gate}
+        bundle="publishing"
+        open={gateOpen}
+        context="project"
+        onClose={() => {
+          setGateOpen(false)
+          resumeAfterGate.current = false
+        }}
+        onAccepted={async () => {
+          setGateOpen(false)
+          if (resumeAfterGate.current) {
+            resumeAfterGate.current = false
+            await createProjectNow()
+          }
+        }}
+      />
     </>
   )
 }

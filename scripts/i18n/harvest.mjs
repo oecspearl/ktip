@@ -65,6 +65,19 @@ const RULES = [
   // filter chips. Singular `_LABEL` exports, so the record pattern below
   // needs its singular forms to see them.
   { module: 'src/lib/achievement-style.ts', keys: ['label'] },
+  // The fourteen legal documents. Widest key list here by some way, because a
+  // policy is prose all the way down — every block variant contributes a field.
+  // `cells` is why LegalBlock's table rows are `{ cells }[]` and not
+  // `string[][]`: collect() returns early on a non-object, so a bare
+  // array-of-arrays-of-strings is never reached by the allowlist below and the
+  // whole table would render in English in every locale, with no error.
+  {
+    module: 'src/lib/legal/index.ts',
+    keys: ['title', 'summary', 'heading', 'railLabel', 'text', 'items', 'columns', 'cells', 'term', 'def', 'label'],
+    // `key`, `id` and `href` are addresses — a translated section id breaks
+    // every deep link into it, including ones already sent to counsel.
+    skipKeys: ['key', 'id', 'href', 'version', 'effectiveDate', 'bundle', 'kind', 'tone', 'relatedKeys'],
+  },
 ]
 
 /** Every tutorial module, discovered rather than listed — there are 33 and more get added. */

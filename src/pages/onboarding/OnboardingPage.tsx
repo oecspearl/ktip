@@ -26,6 +26,8 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useRequestStudentVerification } from '../../hooks/useInstitutions'
 import type { UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { ConsentDocument } from '../../components/legal/ConsentDocument'
+import { CONSENT_BUNDLES, bundleVersion } from '../../lib/legal'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 const TODAY_ISO = todayIso()
@@ -36,13 +38,8 @@ const TODAY_ISO = todayIso()
  * the same optional fields as the email signup wizard.
  */
 export default function OnboardingPage() {
-  const { t } = useLingui()
+  const { t, i18n } = useLingui()
   usePageTitle(t`Complete Your Profile`)
-  const steps = [
-    { title: t`About You`, caption: t`Almost there — set up your KTIP profile.` },
-    { title: t`Skills & Collaboration`, caption: t`Find collaborators. Build what’s next.` },
-  ]
-  const headings = [t`Complete your profile`, t`Skills & collaboration`]
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
@@ -69,6 +66,12 @@ export default function OnboardingPage() {
   const [awaitingSchool, setAwaitingSchool] = useState<string | null>(null)
   const prefilled = useRef(false)
   const submitted = useRef(false)
+
+  // Step 3 (agreements) is reachable from either of step 2's buttons, and they
+  // differ only in whether the optional fields are saved. Held in a ref rather
+  // than state because nothing renders from it.
+  const includeStep2 = useRef(true)
+  const [consentAccepted, setConsentAccepted] = useState(false)
 
   const { requestVerification } = useRequestStudentVerification()
 
@@ -98,12 +101,40 @@ export default function OnboardingPage() {
   // point at which their age can be established.
   const needsDob = auth.profile?.requires_age_declaration === true
 
+  // Same shape as needsDob: an OAuth account never saw the agreements, so it
+  // arrives owing them. False for every account created before 111.
+  const needsConsent = auth.profile?.requires_consent === true
+
   // Already onboarded (role set) and not mid-submit — nothing to do here.
   // An outstanding age declaration keeps them here regardless of role, or
   // ProtectedRoute would bounce them straight back and the two would loop.
-  if (auth.profile && auth.profile.roles.length > 0 && !needsDob && !submitted.current) {
+  //
+  // `!needsConsent` is here for exactly that reason and is easy to leave out:
+  // without it, an account with a role but outstanding agreements is sent to
+  // '/', bounced back by ProtectedRoute, and the two redirect at each other
+  // forever.
+  if (
+    auth.profile &&
+    auth.profile.roles.length > 0 &&
+    !needsDob &&
+    !needsConsent &&
+    !submitted.current
+  ) {
     return <Navigate to="/" replace />
   }
+
+  const steps = [
+    { title: t`About You`, caption: t`Almost there — set up your KTIP profile.` },
+    { title: t`Skills & Collaboration`, caption: t`Find collaborators. Build what’s next.` },
+    ...(needsConsent
+      ? [{ title: t`Agreements`, caption: t`The rules of the road. Read them once, then you’re in.` }]
+      : []),
+  ]
+  const headings = [
+    t`Complete your profile`,
+    t`Skills & collaboration`,
+    ...(needsConsent ? [t`Before you join`] : []),
+  ]
 
   const validateStep1 = (): boolean => {
     const fieldErrors: Record<string, string> = {}
@@ -123,9 +154,13 @@ export default function OnboardingPage() {
     setStep(2)
   }
 
-  const saveProfile = async (includeStep2: boolean) => {
+  const saveProfile = async (withStep2: boolean) => {
     if (!validateStep1()) {
       setStep(1)
+      return
+    }
+    if (needsConsent && !consentAccepted) {
+      setStep(3)
       return
     }
 
@@ -158,6 +193,31 @@ export default function OnboardingPage() {
         }
       }
 
+      // Before updateProfile, for the same reason the declaration above is:
+      // record_consent() clears profiles.requires_consent, and the profile
+      // refetch that updateProfile triggers has to see it already cleared or
+      // ProtectedRoute bounces them straight back here.
+      //
+      // An RPC is correct here and wrong at signup — this account has a live
+      // session, so auth.uid() resolves.
+      if (needsConsent) {
+        const { data, error } = await (supabase as any).rpc('record_consent', {
+          p_keys: CONSENT_BUNDLES.account,
+          p_locale: i18n.locale,
+          p_context: 'onboarding',
+          p_user_agent: typeof navigator === 'undefined' ? null : navigator.userAgent,
+          p_expected_version: bundleVersion('account'),
+        })
+        if (error) throw error
+        if (data?.ok !== true) {
+          throw new Error(
+            data?.reason === 'version_mismatch'
+              ? t`These agreements have been updated. Please reload the page and read the current version.`
+              : t`We could not record your agreement. Please try again.`
+          )
+        }
+      }
+
       await auth.updateProfile({
         display_name: displayName.trim(),
         ...(needsSchool ? {} : { roles: [selectedRole as UserRole] }),
@@ -165,7 +225,7 @@ export default function OnboardingPage() {
         industry: industry.trim() || null,
         country: country || null,
         bio: bio.trim() || null,
-        ...(includeStep2 && {
+        ...(withStep2 && {
           skills,
           interests,
           open_to: openTo,
@@ -432,20 +492,57 @@ export default function OnboardingPage() {
                 type="button"
                 fullWidth
                 loading={pending}
-                onClick={() => saveProfile(true)}
-                icon={<CheckCircle size={20} />}
+                onClick={() => {
+                  includeStep2.current = true
+                  if (needsConsent) setStep(3)
+                  else void saveProfile(true)
+                }}
+                icon={needsConsent ? <ArrowRight size={20} /> : <CheckCircle size={20} />}
               >
-                <Trans>Finish</Trans>
+                {needsConsent ? <Trans>Next</Trans> : <Trans>Finish</Trans>}
               </Button>
             </div>
             <button
               type="button"
-              onClick={() => saveProfile(false)}
+              onClick={() => {
+                includeStep2.current = false
+                // Skipping the optional fields never skips the agreements.
+                if (needsConsent) setStep(3)
+                else void saveProfile(false)
+              }}
               disabled={pending}
               className="w-full text-center text-sm text-ktip-sand-500 hover:text-ktip-ocean-600 transition-colors"
             >
               <Trans>Skip for now</Trans>
             </button>
+          </div>
+        )}
+
+        {step === 3 && needsConsent && (
+          <div className="space-y-4">
+            <p className="-mt-1 text-sm text-ktip-sand-600">
+              <Trans>
+                Four documents govern your account. Read them, then accept to finish setting up.
+              </Trans>
+            </p>
+
+            <ConsentDocument bundle="account" onAcceptedChange={setConsentAccepted} />
+
+            <div className="flex gap-3">
+              <Button type="button" variant="secondary" onClick={() => setStep(2)} icon={<ArrowLeft size={18} />}>
+                <Trans>Back</Trans>
+              </Button>
+              <Button
+                type="button"
+                fullWidth
+                loading={pending}
+                disabled={!consentAccepted}
+                onClick={() => void saveProfile(includeStep2.current)}
+                icon={<CheckCircle size={20} />}
+              >
+                <Trans>Agree & Finish</Trans>
+              </Button>
+            </div>
           </div>
         )}
     </AuthSplitShell>
