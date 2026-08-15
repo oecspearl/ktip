@@ -46,6 +46,55 @@ export type AuthorizeResult = AuthorizeSuccess | GuardFailure
  * RLS would be an unnecessary blast radius. `requirePermission` builds on this
  * and adds the elevated client for the routes that genuinely need one.
  */
+/**
+ * Establishes WHO is asking, and nothing more.
+ *
+ * For routes any signed-in member may call — the pre-publication content check
+ * is the first — where the honest semantic is "is this a member?" and there is
+ * no meaningful deny state. Minting a permission key for it would mean editing
+ * the matrix in four places to express a rule that is always true.
+ *
+ * authorize() is this plus the has_permission() call, so there is still one
+ * code path for token parsing and client construction.
+ */
+export async function authenticate(request: Request): Promise<AuthorizeResult> {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const anonKey =
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !anonKey) {
+    return { ok: false, response: json({ error: 'Server configuration error' }, 503) }
+  }
+
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return { ok: false, response: json({ error: 'Unauthorized' }, 401) }
+  }
+
+  const callerClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  })
+
+  const {
+    data: { user: caller },
+  } = await callerClient.auth.getUser()
+
+  if (!caller) {
+    return { ok: false, response: json({ error: 'Unauthorized' }, 401) }
+  }
+
+  return { ok: true, callerId: caller.id, callerClient }
+}
+
+/** The elevated client, for a route that has already established the caller. */
+export function adminClientOrNull(): SupabaseClient | null {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const supabaseServiceKey =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !supabaseServiceKey) return null
+  return createClient(supabaseUrl, supabaseServiceKey)
+}
+
 export async function authorize(
   request: Request,
   permission: string

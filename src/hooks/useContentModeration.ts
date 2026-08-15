@@ -4,6 +4,7 @@ import { useModerationRules } from './useModerationRules'
 import { mergeRanges, scanText, type MergedRange } from '../lib/moderation/scan'
 import { blockingSeverity, isBlocking } from '../lib/moderation/policy'
 import { normalizeForMatching } from '../lib/moderation/normalize'
+import { AI_MIN_CHARS, runModerationGate } from '../lib/moderation/gate'
 import {
   EMPTY_SCAN,
   maxSeverity,
@@ -75,6 +76,12 @@ export interface WarningState {
 export type ModerationGateResult =
   | { ok: true }
   | { ok: false; reason: 'local'; severity: Severity; errors: Record<string, string> }
+  | {
+      ok: false
+      reason: 'ai_block' | 'ai_warn'
+      message: string
+      errors: Record<string, string>
+    }
 
 export interface UseContentModerationResult {
   fields: Record<string, FieldModeration>
@@ -278,8 +285,70 @@ export function useContentModeration(
     setWarning(null)
   }, [currentSignatures])
 
+  const [checking, setChecking] = useState(false)
+  /** AI warnings are acknowledged per exact draft, so the second press goes through. */
+  const aiAcknowledged = useRef(new Set<string>())
+
+  /**
+   * The model call. Only fields marked `ai`, and only when there is enough
+   * text to be worth it — a three-word event title tells a classifier nothing
+   * and still costs a request.
+   */
+  const runGate = useCallback(
+    async (specsNow: ModerationFieldSpec[]): Promise<ModerationGateResult> => {
+      const aiFields = specsNow
+        .filter((s) => s.ai)
+        .map((s) => ({ name: s.name, text: plainText(s.value, s.format) }))
+      const total = aiFields.reduce((sum, f) => sum + f.text.trim().length, 0)
+      if (aiFields.length === 0 || total < AI_MIN_CHARS) return { ok: true }
+
+      setChecking(true)
+      let verdict
+      try {
+        verdict = await runModerationGate({ surface, fields: aiFields })
+      } finally {
+        setChecking(false)
+      }
+
+      if (verdict.decision === 'allow') return { ok: true }
+
+      const message = verdict.reason ?? t`This needs another look before it goes up.`
+      const affected = specsNow.filter((s) => s.ai && verdict.fields[s.name]?.severity)
+      const fieldErrors: Record<string, string> = {}
+      for (const spec of affected.length > 0 ? affected : specsNow.filter((s) => s.ai)) {
+        fieldErrors[spec.name] = message
+      }
+
+      if (verdict.decision === 'warn') {
+        // Shown once, then trusted. A member who has read the concern and still
+        // means to post is not someone to keep stopping.
+        const signature = JSON.stringify(aiFields)
+        if (aiAcknowledged.current.has(signature)) return { ok: true }
+        aiAcknowledged.current.add(signature)
+        setWarning({
+          severity: 'low',
+          reason: 'ai',
+          message,
+          terms: [],
+          fieldLabels: affected.map((s) => s.label ?? s.name),
+        })
+        return { ok: false, reason: 'ai_warn', message, errors: {} }
+      }
+
+      setWarning({
+        severity: 'medium',
+        reason: 'ai',
+        message,
+        terms: [],
+        fieldLabels: affected.map((s) => s.label ?? s.name),
+      })
+      return { ok: false, reason: 'ai_block', message, errors: fieldErrors }
+    },
+    [surface, t]
+  )
+
   const checkBeforeSubmit = useCallback(async (): Promise<ModerationGateResult> => {
-    if (!enabled || rules.length === 0) return { ok: true }
+    if (!enabled) return { ok: true }
 
     // Re-scan the CURRENT values, not the debounced ones: a member can press
     // submit inside the debounce window, and the stale scan would wave through
@@ -291,7 +360,10 @@ export function useContentModeration(
     }))
 
     const blocking = fresh.filter(({ scan }) => isBlocking(scan, surface))
-    if (blocking.length === 0) return { ok: true }
+    // Nothing local to stop it: hand the draft to the model for a second
+    // opinion the word list cannot give — a paraphrase, an implied threat,
+    // abuse in a dialect the list does not cover.
+    if (blocking.length === 0) return runGate(specsNow)
 
     const worst = blocking.reduce<Severity | null>(
       (acc, { scan }) => maxSeverity(acc, blockingSeverity(scan, surface)),
@@ -315,7 +387,7 @@ export function useContentModeration(
     })
 
     return { ok: false, reason: 'local', severity: worst ?? 'medium', errors: fieldErrors }
-  }, [enabled, rules, surface, t, removeAll])
+  }, [enabled, surface, t, removeAll, rules, runGate])
 
   return {
     fields: withDefaults(specs, fields),
@@ -325,9 +397,7 @@ export function useContentModeration(
     warning,
     dismissWarning,
     checkBeforeSubmit,
-    // The pre-submit model call lands in a later phase; the flag exists now so
-    // callers can bind the button label once and not touch it again.
-    checking: false,
+    checking,
   }
 }
 
