@@ -59,8 +59,13 @@ export default function LegalIndexPage() {
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Legal` }]}
       />
 
-      <div className="w-full max-w-page mx-auto px-4 py-10">
-        <div className="max-w-legal space-y-10">
+      <div className="w-full max-w-page mx-auto px-4 py-8">
+        {/* Wider than the document pages, and deliberately so: these are cards,
+            not prose. The reading measure exists to keep a line of text short,
+            and applying it to a list of summaries just produced a narrow ribbon
+            with two dead bands beside it. The cards go two-up from lg instead,
+            which is what fills that space. */}
+        <div className="mx-auto max-w-page-mid space-y-10">
           {GROUPS.map((group) => {
             const docs = documentsInBundle(group.bundle)
             if (docs.length === 0) return null
@@ -76,7 +81,7 @@ export default function LegalIndexPage() {
                 </h2>
                 <p className="mb-4 mt-1 text-body text-ktip-sand-500">{i18n._(group.blurb)}</p>
 
-                <ul className="space-y-3">
+                <ul className="grid gap-3 lg:grid-cols-2">
                   {docs.map((doc) => (
                     <li key={doc.key}>
                       <Link

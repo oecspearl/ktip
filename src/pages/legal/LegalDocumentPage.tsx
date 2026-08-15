@@ -6,6 +6,55 @@ import { LegalBody, resolveLegal } from '../../components/legal/LegalBody'
 import { AuthoritativeLanguageNotice } from '../../components/legal/AuthoritativeLanguageNotice'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { getLegalDocument, legalPath, type LegalDocumentKey } from '../../lib/legal'
+import type { I18n } from '@lingui/core'
+
+/**
+ * The contents list.
+ *
+ * Two placements, one component. From xl it is a sticky rail in the left band
+ * beside the prose; below that it is a card in the flow. Rendering it twice and
+ * hiding one would put two `data-legal-toc` landmarks and two copies of every
+ * section link in the accessibility tree, and the print rule keys on that
+ * attribute.
+ */
+function LegalToc({
+  doc,
+  i18n,
+  label,
+}: {
+  doc: NonNullable<ReturnType<typeof getLegalDocument>>
+  i18n: I18n
+  label: string
+}) {
+  return (
+    <nav
+      data-legal-toc
+      aria-label={label}
+      className="rounded-surface border border-ktip-sand-200 bg-ktip-cream p-5 xl:sticky xl:top-[calc(var(--nav-h)+1.5rem)] xl:h-fit xl:w-64 xl:shrink-0"
+    >
+      <h2 className="mb-3 text-caption font-semibold uppercase tracking-wide text-ktip-sand-500">
+        <Trans>On this page</Trans>
+      </h2>
+      {/* Two columns while it is a full-width card, one while it is a 16rem
+          rail. */}
+      <ol className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-1">
+        {doc.sections.map((section, index) => (
+          <li key={section.id} className="flex gap-2 text-body">
+            <span aria-hidden className="tabular-nums text-ktip-sand-400">
+              {index + 1}.
+            </span>
+            <a
+              href={`#${section.id}`}
+              className="text-ktip-ocean-700 hover:underline underline-offset-2"
+            >
+              {resolveLegal(i18n, section.heading)}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
 
 /**
  * The shell every published legal document renders in.
@@ -49,8 +98,26 @@ export function LegalDocumentPage({ documentKey }: { documentKey: LegalDocumentK
         ]}
       />
 
-      <div className="legal-doc w-full max-w-page mx-auto px-4 py-10">
-        <div className="max-w-legal">
+      <div className="legal-doc w-full max-w-page mx-auto px-4 py-8">
+        {/* The prose column stays at the 46rem measure — 75 characters is the
+            reading width and widening it would be a worse document. What was
+            wrong was everything AROUND it: a measure-wide ribbon centred in a
+            calc(50vw + 48rem) container left two dead bands the width of the
+            text itself.
+
+            So from xl the contents list moves out of the flow and into the left
+            band as a sticky rail, which is what that space is for. Below xl it
+            falls back into the column, where it has to be: SpyRail is
+            `hidden sm:flex`, so on a phone this is the only navigation a
+            seventeen-section document has.
+
+            The wrapper is one centred block of rail + gap + measure. The version
+            strip and the language notice sit ABOVE the split rather than inside
+            the prose column, so the reading order holds at every width — which
+            text is in force, then which language is authoritative, then the
+            contents, then the document. Left inside the column they would have
+            appeared below a seventeen-item list on a phone. */}
+        <div className="mx-auto max-w-legal xl:max-w-[calc(16rem+3rem+var(--container-legal))]">
           {/* Version strip. Which text is in force, and from when, is the first
               thing anyone checking a legal document needs. */}
           <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-ktip-sand-200 pb-4">
@@ -76,34 +143,10 @@ export function LegalDocumentPage({ documentKey }: { documentKey: LegalDocumentK
 
           <AuthoritativeLanguageNotice className="mb-6" />
 
-          {/* Table of contents. Not a duplicate of the SpyRail — that is
-              `hidden sm:flex`, so on a phone a seventeen-section document would
-              otherwise have no navigation at all. */}
-          <nav
-            data-legal-toc
-            aria-label={t`On this page`}
-            className="mb-8 rounded-surface border border-ktip-sand-200 bg-ktip-cream p-5"
-          >
-            <h2 className="mb-3 text-caption font-semibold uppercase tracking-wide text-ktip-sand-500">
-              <Trans>On this page</Trans>
-            </h2>
-            <ol className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
-              {doc.sections.map((section, index) => (
-                <li key={section.id} className="flex gap-2 text-body">
-                  <span aria-hidden className="tabular-nums text-ktip-sand-400">
-                    {index + 1}.
-                  </span>
-                  <a
-                    href={`#${section.id}`}
-                    className="text-ktip-ocean-700 hover:underline underline-offset-2"
-                  >
-                    {resolveLegal(i18n, section.heading)}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:gap-12">
+            <LegalToc doc={doc} i18n={i18n} label={t`On this page`} />
 
+            <div className="min-w-0 xl:w-full xl:max-w-legal">
           <div className="space-y-10">
             {doc.sections.map((section, index) => (
               <section
@@ -181,6 +224,8 @@ export function LegalDocumentPage({ documentKey }: { documentKey: LegalDocumentK
               <Trans>What you have agreed to</Trans>
             </Link>
           </p>
+            </div>
+          </div>
         </div>
       </div>
     </>

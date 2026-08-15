@@ -6,6 +6,7 @@ import { Modal } from '../ui/Modal'
 import { ConsentDocument } from './ConsentDocument'
 import { useToast } from '../../contexts/ToastContext'
 import { useConsents, useRecordConsent } from '../../hooks/useAgreementGate'
+import { useAnalyticsConsent } from '../../lib/analytics-consent'
 import { CONSENT_BUNDLES, bundleVersion, type LegalBundle, type LegalDocumentKey } from '../../lib/legal'
 
 /**
@@ -21,9 +22,15 @@ import { CONSENT_BUNDLES, bundleVersion, type LegalBundle, type LegalDocumentKey
  * they are relevant and where a member is already in the right frame of mind to
  * read them.
  *
- * Sits at the TOP: the bottom edge is taken by the analytics banner and the
- * floating dock, and that clearance was solved deliberately in
- * AnalyticsConsentBanner rather than by trial and error.
+ * Sits at the BOTTOM, with the clearance AnalyticsConsentBanner already worked
+ * out for the floating dock and the home indicator. At the top it covered the
+ * navbar — logo, primary nav and the account menu all disappeared behind it,
+ * which is a worse trade than sharing the bottom edge.
+ *
+ * Sharing that edge is avoided rather than negotiated: while the analytics
+ * banner is still pending this one renders nothing. Two stacked consent sheets
+ * on a first load is worse than showing them one after the other, and the
+ * analytics choice is a single click away.
  */
 
 const SNOOZE_KEY = 'ktip_reconsent_snoozed_until'
@@ -57,6 +64,7 @@ export function ReconsentBanner() {
   const { data: consents } = useConsents()
   const recordConsent = useRecordConsent()
   const snoozedUntilRaw = useSyncExternalStore(subscribeSnooze, readSnooze, () => '')
+  const analyticsConsent = useAnalyticsConsent()
 
   const [open, setOpen] = useState(false)
   const [accepted, setAccepted] = useState(false)
@@ -70,7 +78,8 @@ export function ReconsentBanner() {
   const snoozedUntil = Number(snoozedUntilRaw)
   const snoozed = Number.isFinite(snoozedUntil) && snoozedUntil > Date.now()
 
-  if (outstanding.length === 0 || snoozed) return null
+  // Both banners take the same bottom edge, so they queue rather than stack.
+  if (outstanding.length === 0 || snoozed || analyticsConsent === 'pending') return null
 
   // The earliest effective date across the outstanding set — what the member
   // needs to know is when this starts to matter, not which of four documents
@@ -103,7 +112,12 @@ export function ReconsentBanner() {
     <>
       <section
         aria-label={t`Updated agreements`}
-        className="fixed inset-x-4 top-4 z-toast mx-auto max-w-3xl rounded-xl border border-ktip-sand-200 bg-ktip-cream p-4 shadow-xl"
+        // Same placement contract as AnalyticsConsentBanner: data-bottom-sheet
+        // picks up the standalone safe-area rules in index.css, and
+        // bottom-fab-clear keeps it off the floating dock until lg, where the
+        // sheet is 3xl centred and the corner is free again.
+        data-bottom-sheet
+        className="fixed inset-x-4 bottom-fab-clear lg:bottom-4 z-toast mx-auto max-w-3xl rounded-xl border border-ktip-sand-200 bg-ktip-cream p-4 shadow-xl"
       >
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="flex flex-1 items-start gap-3">

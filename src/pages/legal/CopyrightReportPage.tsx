@@ -112,7 +112,7 @@ export default function CopyrightReportPage() {
           ]}
         />
         <div className="w-full max-w-page mx-auto px-4 py-10">
-          <div className="max-w-legal rounded-surface border border-ktip-sand-200 bg-ktip-cream p-6">
+          <div className="max-w-legal mx-auto rounded-surface border border-ktip-sand-200 bg-ktip-cream p-6">
             <CheckCircle2 size={28} aria-hidden className="text-ktip-tropical-600" />
             <h2 className="mt-3 font-display text-title-sm font-bold text-ktip-sand-900">
               <Trans>Your notice has been received</Trans>
@@ -158,7 +158,7 @@ export default function CopyrightReportPage() {
       />
 
       <div className="w-full max-w-page mx-auto px-4 py-10">
-        <form onSubmit={handleSubmit} className="max-w-legal space-y-8">
+        <form onSubmit={handleSubmit} className="max-w-legal mx-auto space-y-8">
           <div className="flex gap-3 rounded-surface border border-ktip-ocean-200 bg-ktip-ocean-50 p-4">
             <ShieldAlert size={18} aria-hidden className="mt-0.5 shrink-0 text-ktip-ocean-600" />
             <p className="text-body leading-relaxed text-ktip-sand-800">

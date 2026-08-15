@@ -1,4 +1,3 @@
-import { Link } from 'react-router'
 import { BarChart3, ShieldCheck } from 'lucide-react'
 import { setAnalyticsConsent, useAnalyticsConsent } from '../lib/analytics-consent'
 import { Button } from './ui/Button'
@@ -39,19 +38,30 @@ export function AnalyticsConsentBanner() {
                 records page paths and feature events — never the content of a message, a document
                 or a proposal — and nothing is stored unless you allow it.
               </Trans>{' '}
-              <Link
-                to="/legal/cookies"
+              {/* Plain anchors, NOT <Link>. App.tsx mounts this banner outside
+                  RouterProvider on purpose — the choice gates analytics for the
+                  whole app including the auth pages, and it needs no route of
+                  its own. A <Link> there has no NavigationContext to read, so it
+                  threw "Cannot destructure property 'basename' of null" and the
+                  error boundary blanked the app — on a first visit only, which
+                  is the one visit where consent is still 'pending' and the
+                  banner renders at all.
+                  A full navigation to a legal document is the right behaviour
+                  here anyway: there is no in-app state worth preserving behind a
+                  cookie banner. */}
+              <a
+                href="/legal/cookies"
                 className="font-medium text-ktip-ocean-700 underline underline-offset-2 hover:opacity-80"
               >
                 <Trans>Cookie notice</Trans>
-              </Link>
+              </a>
               <span aria-hidden className="mx-1.5 text-ktip-sand-300">·</span>
-              <Link
-                to="/legal/privacy"
+              <a
+                href="/legal/privacy"
                 className="font-medium text-ktip-ocean-700 underline underline-offset-2 hover:opacity-80"
               >
                 <Trans>Privacy policy</Trans>
-              </Link>
+              </a>
             </p>
           </div>
         </div>
