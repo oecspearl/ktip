@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { checkImage, shouldScanImage } from './moderation/image-gate'
 import type { MessageAttachment } from '../types'
 
 /**
@@ -190,6 +191,18 @@ export async function uploadAttachment(params: {
     .upload(path, file, { contentType: mime, upsert: false })
 
   if (error) throw error
+
+  // After the upload, because the check reads the stored object rather than
+  // trusting bytes the caller describes. A rejection deletes the blob and
+  // throws, which ChatWindow already handles: it restores the draft and the
+  // staged files and shows the message in its existing alert row.
+  if (shouldScanImage(mime, file.size)) {
+    const verdict = await checkImage(MESSAGE_ATTACHMENTS_BUCKET, path)
+    if (!verdict.ok) {
+      await supabase.storage.from(MESSAGE_ATTACHMENTS_BUCKET).remove([path])
+      throw new Error(verdict.reason ?? 'That image cannot be sent.')
+    }
+  }
 
   return { path, name: file.name, mime, size: file.size }
 }

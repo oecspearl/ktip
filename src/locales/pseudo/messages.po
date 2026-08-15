@@ -5051,6 +5051,10 @@ msgstr ""
 msgid "Switch between light and dark mode"
 msgstr ""
 
+#: src/hooks/useContentModeration.ts
+msgid "This needs another look before it goes up."
+msgstr ""
+
 #: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Highest rank reached"
@@ -11012,6 +11016,10 @@ msgstr ""
 msgid "Your institution's designated staff can see the year you were born, taken from the date of birth on your account. They see the year only — never the full date. To correct it, contact support."
 msgstr ""
 
+#: src/pages/forums/PostDetailPage.tsx
+msgid "Reply"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Use the Download action on your CV page. It opens your browser's print dialog against an A4 layout — choose \"Save as PDF\" as the destination.\n"
 "\n"
@@ -12301,6 +12309,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Grant Application Confidentiality & IP"
+msgstr ""
+
+#: src/components/ui/ImageUpload.tsx
+msgid "Checking image..."
 msgstr ""
 
 #: src/i18n/harvested.ts

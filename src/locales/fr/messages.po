@@ -5123,6 +5123,10 @@ msgstr ""
 msgid "Switch between light and dark mode"
 msgstr "Basculer entre le mode clair et le mode sombre"
 
+#: src/hooks/useContentModeration.ts
+msgid "This needs another look before it goes up."
+msgstr ""
+
 #: src/components/dashboard/stats/RankProgress.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Highest rank reached"
@@ -11158,6 +11162,10 @@ msgstr "Échec de la déconnexion"
 msgid "Your institution's designated staff can see the year you were born, taken from the date of birth on your account. They see the year only — never the full date. To correct it, contact support."
 msgstr "Le personnel désigné de votre établissement peut voir votre année de naissance, tirée de la date de naissance de votre compte. Il ne voit que l'année — jamais la date complète. Pour la corriger, contactez le support."
 
+#: src/pages/forums/PostDetailPage.tsx
+msgid "Reply"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Use the Download action on your CV page. It opens your browser's print dialog against an A4 layout — choose \"Save as PDF\" as the destination.\n"
 "\n"
@@ -12462,6 +12470,10 @@ msgstr "Toute personne présente à l'événement dont le statut est « besoin d
 
 #: src/i18n/harvested.ts
 msgid "Grant Application Confidentiality & IP"
+msgstr ""
+
+#: src/components/ui/ImageUpload.tsx
+msgid "Checking image..."
 msgstr ""
 
 #: src/i18n/harvested.ts

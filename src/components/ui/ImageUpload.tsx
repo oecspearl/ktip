@@ -37,6 +37,10 @@ export function ImageUpload({
     const { t } = useLingui()
   const toast = useToast()
   const [uploading, setUploading] = useState(false)
+  // The safety check adds a second or two after the bytes are already up.
+  // Saying "Uploading…" through it would be a lie, and a lie that makes the
+  // slowest part of the interaction look like a stall.
+  const [phase, setPhase] = useState<'uploading' | 'checking'>('uploading')
   const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -59,12 +63,14 @@ export function ImageUpload({
       }
 
       setUploading(true)
+      setPhase('uploading')
       try {
         const publicUrl = await uploadOptimizedImage({
           bucket,
           basePath: path,
           file,
           preset,
+          onPhase: setPhase,
         })
 
         setPreview(publicUrl)
@@ -166,7 +172,9 @@ export function ImageUpload({
           )}
           <span className="text-sm text-ktip-sand-500">
             {uploading
-              ? t`Uploading...`
+              ? phase === 'checking'
+                ? t`Checking image...`
+                : t`Uploading...`
               : isDragging
                 ? t`Drop image to upload`
                 : placeholder || t`Click or drag an image here`}

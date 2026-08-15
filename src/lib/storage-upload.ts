@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { IMAGE_PRESETS } from './constants'
 import { extensionOf, optimizeImage } from './image-optimize'
+import { checkImage, shouldScanImage } from './moderation/image-gate'
 
 /**
  * Shared Supabase Storage upload helpers.
@@ -12,6 +13,13 @@ import { extensionOf, optimizeImage } from './image-optimize'
  */
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+
+/**
+ * Buckets the image safety check covers. Deliberately the ones whose contents
+ * are shown to other members — a verification document or a signed contract is
+ * private, is read by a person already, and gains nothing from a vision call.
+ */
+const MODERATED_BUCKETS = new Set(['avatars', 'project-images', 'event-images'])
 
 /**
  * Best-effort removal of the same logical image stored under a different
@@ -54,18 +62,52 @@ export async function uploadOptimizedImage(params: {
   basePath: string
   file: File
   preset: { maxDim: number; quality: number; maxBytes?: number }
+  /** Run the image safety check. Default on for the buckets it covers. */
+  moderate?: boolean
+  /** Notified when the upload finishes and the check begins. */
+  onPhase?: (phase: 'uploading' | 'checking') => void
 }): Promise<string> {
-  const { bucket, basePath, file, preset } = params
+  const { bucket, basePath, file, preset, onPhase } = params
 
   const optimized = await optimizeImage(file, preset)
   const extension = extensionOf(optimized.name)
   const filePath = `${basePath}.${extension}`
 
+  const scanning =
+    params.moderate !== false &&
+    MODERATED_BUCKETS.has(bucket) &&
+    shouldScanImage(optimized.type, optimized.size)
+
+  // Staged under a throwaway key when it is going to be checked.
+  //
+  // This key is STABLE and the upload is upsert:true, so uploading straight to
+  // it and deleting on a rejection would delete the member's PREVIOUS good
+  // avatar and leave them with nothing — punishing them twice for one bad
+  // file. Staging keeps the old object untouched until the new one passes.
+  const stagedPath = scanning
+    ? `${basePath}.pending-${Math.random().toString(36).slice(2, 8)}.${extension}`
+    : filePath
+
+  onPhase?.('uploading')
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(filePath, optimized, { upsert: true, contentType: optimized.type })
+    .upload(stagedPath, optimized, { upsert: true, contentType: optimized.type })
 
   if (error) throw error
+
+  if (scanning) {
+    onPhase?.('checking')
+    const verdict = await checkImage(bucket, stagedPath)
+    if (!verdict.ok) {
+      await supabase.storage.from(bucket).remove([stagedPath])
+      throw new Error(verdict.reason ?? 'That image cannot be used.')
+    }
+    const { error: moveError } = await supabase.storage.from(bucket).move(stagedPath, filePath)
+    if (moveError) {
+      await supabase.storage.from(bucket).remove([stagedPath])
+      throw moveError
+    }
+  }
 
   await removeStaleVariants(bucket, basePath, extension)
 
