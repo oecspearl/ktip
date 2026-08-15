@@ -1,5 +1,6 @@
 import {
   Children,
+  Fragment,
   isValidElement,
   useEffect,
   useLayoutEffect,
@@ -8,6 +9,27 @@ import {
   type ReactNode,
 } from 'react'
 import { cn } from '../../lib/utils'
+
+/**
+ * Direct children, with fragments opened up.
+ *
+ * `Children.toArray` flattens arrays but stops at a fragment — `<>…</>` counts
+ * as one child. A fragment renders no element, so it can carry no `data-span`,
+ * and the wrapper built for it gets no column span: every tile inside it ended
+ * up stacked inside a single one-column cell of the mosaic. That is what put
+ * the whole signed-in account block in a narrow column at the bottom-left.
+ *
+ * A fragment can therefore never be a meaningful stagger unit, so it is opened
+ * rather than wrapped. Grouping still works — it just has to be a real element
+ * (a `div` carrying `data-span`), which is what the prop doc asks for.
+ */
+function flattenRows(children: ReactNode): ReactNode[] {
+  return Children.toArray(children).flatMap((child) =>
+    isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment
+      ? flattenRows(child.props.children)
+      : [child]
+  )
+}
 
 interface StaggeredMobileMenuProps {
   open: boolean
@@ -231,7 +253,7 @@ export function StaggeredMobileMenu({
 
   if (!rendered) return null
 
-  const rows = Children.toArray(children)
+  const rows = flattenRows(children)
 
   return (
     <div
@@ -262,17 +284,21 @@ export function StaggeredMobileMenu({
           entries have the room the mosaic cannot give them at 26rem — most
           visible in landscape, where the drawer is a third of the width.
 
-          svh, not inset-y-0: a mobile browser's fixed box is the layout
-          viewport, which on iOS is the tall one until the toolbars come back.
-          The panel got that height for the frames between opening and the
-          scroll lock landing, so its last tiles sat under the bottom toolbar
-          and could not be reached. The small viewport is the one that is
-          always visible, and once the lock holds it is the one in force
-          anyway — so this is the height the panel had been settling on, just
-          without the frames of overshoot on the way there. */}
+          inset-y-0, not a viewport unit. A fixed box on iOS is the layout
+          viewport — the TALL one, `lvh`, while the toolbars are retracted — so
+          a panel sized `100svh` inside it stopped a toolbar's height short of
+          the bottom and left the page showing through under it. Any viewport
+          unit is a guess at the box this element already has; matching the box
+          itself cannot be wrong in either direction.
+
+          `svh` was picked to stop the last tiles sitting under the bottom
+          toolbar in the frames before the scroll lock landed. That race is
+          gone: the lock pins the body on the commit that mounts the drawer,
+          before the entrance transition starts, and a pinned body cannot
+          scroll — so the toolbars cannot move while the panel is open. */}
       <div
         className={cn(
-          'fixed right-0 top-0 h-[100svh] transition-[width] duration-[520ms]',
+          'fixed inset-y-0 right-0 transition-[width] duration-[520ms]',
           EASE_OUT,
           expanded
             ? 'w-screen'
