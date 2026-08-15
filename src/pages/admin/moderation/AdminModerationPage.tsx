@@ -68,7 +68,24 @@ const TARGET_LABELS: Record<string, string> = {
   message: 'Message',
   profile: 'Profile',
   grant: 'Grant',
+  event: 'Event',
+  resource: 'Resource',
+  event_solution: 'Event solution',
+  venue_room_message: 'Venue chat message',
+  resume: 'CV',
 }
+
+/** The surfaces 122 can filter, each behind its own switch. */
+const ENFORCEABLE_TABLES = [
+  { value: 'projects', label: 'Projects' },
+  { value: 'events', label: 'Events (flag only)' },
+  { value: 'grants', label: 'Grants (flag only)' },
+  { value: 'resources', label: 'Resources' },
+  { value: 'event_solutions', label: 'Event solutions' },
+  { value: 'venue_room_messages', label: 'Venue chat' },
+  { value: 'profiles', label: 'Profile bios (reverts the edit)' },
+  { value: 'resumes', label: 'Published CVs (unpublishes)' },
+]
 
 export default function AdminModerationPage() {
     const { i18n } = useLingui()
@@ -466,6 +483,37 @@ export default function AdminModerationPage() {
                 )
               }
             />
+
+            {/* The rollout switch for 122. Forum posts, replies, project
+                comments and messages have been filtered since 065 and are not
+                listed — they are always on. Everything here can be turned on
+                one surface at a time and off again in seconds if a
+                false-positive storm hits, which is what makes it safe to have
+                shipped at all. */}
+            <div className="pt-2 border-t border-ktip-sand-100">
+              <h3 className="text-sm font-semibold text-ktip-sand-900">Filter these surfaces too</h3>
+              <p className="text-sm text-ktip-sand-600 mt-1 mb-3">
+                Posts, replies, comments and direct messages are always filtered. Turn the rest on
+                one at a time and watch the automated tab before adding the next.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {ENFORCEABLE_TABLES.map((table) => (
+                  <Switch
+                    key={table.value}
+                    checked={(settings.enforce_tables ?? []).includes(table.value)}
+                    label={table.label}
+                    disabled={!canAction}
+                    onChange={(next) => {
+                      const current = settings.enforce_tables ?? []
+                      const enforce_tables = next
+                        ? [...current, table.value]
+                        : current.filter((t) => t !== table.value)
+                      updateSettings({ enforce_tables }).then(() => toast.success('Setting saved'))
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Input

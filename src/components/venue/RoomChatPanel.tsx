@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { QuarantineNotice } from '../moderation/QuarantineNotice'
 import { Languages, Send, Trash2 } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { cn, formatRelativeTime } from '../../lib/utils'
@@ -70,6 +71,14 @@ function RoomChatMessage({
     return (
       <p className="text-center text-xs italic text-ktip-sand-500">{message.body}</p>
     )
+  }
+
+  // RLS keeps a withheld message out of every other attendee's subscription,
+  // so the only person who can reach this branch is its author (or a
+  // moderator). Saying nothing would leave them watching a room where their
+  // own message simply never appeared.
+  if (message.status && message.status !== 'active') {
+    return <QuarantineNotice isAuthor={mine} isModerator={!mine && canModerate} />
   }
 
   return (

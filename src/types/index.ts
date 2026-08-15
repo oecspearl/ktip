@@ -690,6 +690,13 @@ export interface VenueRoomMessage {
   reply_to: string | null
   is_removed: boolean
   /**
+   * Set by the content filter (122), and deliberately separate from
+   * is_removed: "a host removed this" and "the filter withheld this" are
+   * different facts, and the moderation queue has to tell them apart.
+   */
+  status?: 'active' | 'quarantined' | 'removed'
+  moderation_severity?: string | null
+  /**
    * What the sender was writing in (migration 100). Optional and nullable: rows
    * written before that migration have none, and a reader treats a missing value
    * as English. It is what decides whether this message needs translating for a
@@ -1971,6 +1978,13 @@ export type ModerationTargetType =
   | 'message'
   | 'profile'
   | 'grant'
+  // Added by 122, when write-time moderation reached the rest of the platform.
+  // Mirrors the content_reports.target_type CHECK — both or neither.
+  | 'event'
+  | 'resource'
+  | 'event_solution'
+  | 'venue_room_message'
+  | 'resume'
 
 export type ReportCategory =
   | 'hate_harassment'
@@ -2054,6 +2068,12 @@ export interface ModerationSettings {
   low_action: ModerationAction
   medium_action: ModerationAction
   high_action: ModerationAction
+  /**
+   * Which of the surfaces added in 122 have write-time moderation switched on.
+   * The four tables from 065 are always enforced and never appear here. Empty
+   * means the migration is applied but dormant — the rollout switch.
+   */
+  enforce_tables: string[]
   updated_by: string | null
   updated_at: string
 }
