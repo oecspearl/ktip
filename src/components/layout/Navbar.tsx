@@ -43,6 +43,7 @@ import { DropdownPanel } from '../ui/DropdownPanel'
 import { NavbarSearchPanel, SEARCH_PANEL_WIDTH } from './NavbarSearchPanel'
 import { StaggeredMobileMenu, StaggeredMenuIcon } from './StaggeredMobileMenu'
 import { RoleSwitcher } from './RoleSwitcher'
+import { CircularScroll } from '../ui/CircularScroll'
 import { ROLE_LABELS } from '../../lib/constants'
 import { isOrganizationAccount, opensAdminConsole } from '../../lib/permissions'
 import { cn, formatRelativeTime } from '../../lib/utils'
@@ -1138,70 +1139,78 @@ export function Navbar() {
                   role="menu"
                   className="absolute right-0 mt-2 w-56 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 py-2"
                 >
-                    <RoleSwitcher onSwitch={() => setUserMenuOpen(false)} />
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                    >
-                      <LayoutDashboard size={18} />
-                      <span><Trans>My Dashboard</Trans></span>
-                    </Link>
-                    {/* /cv had no entry point anywhere in the app — the only way
-                        in was the Virtual Campus handoff redirect. It is a
-                        person's résumé, so an organisation account gets its
-                        business profile here instead. */}
-                    {isOrgAccount ? (
+                    {/* An account holding every role makes this menu 700px tall, with
+                        Sign Out last, so the body scrolls and wraps end to end. The cap
+                        is 28rem, or the viewport minus the bar and the panel padding on
+                        a screen too short even for that. Dropping the 28rem half would
+                        leave the menu full height on a tall screen — correct, but then
+                        it only ever loops for the people who cannot see it working. */}
+                    <CircularScroll className="max-h-[min(calc(100vh-var(--nav-h)-2.5rem),28rem)]">
+                      <RoleSwitcher onSwitch={() => setUserMenuOpen(false)} />
                       <Link
-                        to="/dashboard/business"
+                        to="/dashboard"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
-                        <Building2 size={18} />
-                        <span><Trans>Business profile</Trans></span>
+                        <LayoutDashboard size={18} />
+                        <span><Trans>My Dashboard</Trans></span>
                       </Link>
-                    ) : (
+                      {/* /cv had no entry point anywhere in the app — the only way
+                          in was the Virtual Campus handoff redirect. It is a
+                          person's résumé, so an organisation account gets its
+                          business profile here instead. */}
+                      {isOrgAccount ? (
+                        <Link
+                          to="/dashboard/business"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                        >
+                          <Building2 size={18} />
+                          <span><Trans>Business profile</Trans></span>
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/dashboard/profile"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                        >
+                          <FileText size={18} />
+                          <span><Trans>My CV</Trans></span>
+                        </Link>
+                      )}
                       <Link
-                        to="/dashboard/profile"
+                        to="/settings"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
-                        <FileText size={18} />
-                        <span><Trans>My CV</Trans></span>
+                        <Settings size={18} />
+                        <span><Trans>Settings</Trans></span>
                       </Link>
-                    )}
-                    <Link
-                      to="/settings"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                    >
-                      <Settings size={18} />
-                      <span><Trans>Settings</Trans></span>
-                    </Link>
-                    <Link
-                      to="/grievances/my-reports"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                    >
-                      <Flag size={18} />
-                      <span><Trans>My Reports</Trans></span>
-                    </Link>
-                    <Link
-                      to="/help"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                    >
-                      <HelpCircle size={18} />
-                      <span><Trans>Help Center</Trans></span>
-                    </Link>
-                    <hr className="my-2 border-ktip-sand-100" />
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut size={18} />
-                      <span><Trans>Sign Out</Trans></span>
-                    </button>
+                      <Link
+                        to="/grievances/my-reports"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                      >
+                        <Flag size={18} />
+                        <span><Trans>My Reports</Trans></span>
+                      </Link>
+                      <Link
+                        to="/help"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                      >
+                        <HelpCircle size={18} />
+                        <span><Trans>Help Center</Trans></span>
+                      </Link>
+                      <hr className="my-2 border-ktip-sand-100" />
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={18} />
+                        <span><Trans>Sign Out</Trans></span>
+                      </button>
+                    </CircularScroll>
                 </DropdownPanel>
               </div>
             ) : (
