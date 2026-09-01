@@ -16549,6 +16549,10 @@ msgstr ""
 msgid "Project Workspace"
 msgstr ""
 
+#: src/lib/permissions.ts
+msgid "Runs the platform day to day. Every permission, every console page, and full charge of supervisors and members. Cannot suspend, delete or re-role another Admin — that stays with the Super Admin."
+msgstr ""
+
 #: src/lib/extracted-fields.ts
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Currency"
@@ -19437,6 +19441,7 @@ msgstr ""
 
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
+#: src/lib/permissions.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Admin"

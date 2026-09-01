@@ -17334,6 +17334,10 @@ msgstr "Find the funder’s own website independently — type the name into a s
 msgid "Project Workspace"
 msgstr "Project Workspace"
 
+#: src/lib/permissions.ts
+msgid "Runs the platform day to day. Every permission, every console page, and full charge of supervisors and members. Cannot suspend, delete or re-role another Admin — that stays with the Super Admin."
+msgstr "Runs the platform day to day. Every permission, every console page, and full charge of supervisors and members. Cannot suspend, delete or re-role another Admin — that stays with the Super Admin."
+
 #: src/lib/extracted-fields.ts
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Currency"
@@ -20348,6 +20352,7 @@ msgstr "Provide UAT Feedback"
 
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
+#: src/lib/permissions.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Admin"

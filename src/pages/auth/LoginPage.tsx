@@ -116,6 +116,13 @@ export default function LoginPage() {
           errors: {},
           errorMessage: t`Invalid email or password. Please try again.`,
         }
+      } else if (/banned/i.test(msg)) {
+        // GoTrue's wording for an account under ban_duration — what a console
+        // suspension sets (api/admin/suspend-user.ts, 124).
+        return {
+          errors: {},
+          errorMessage: t`This account is suspended. Contact support if you think that is a mistake.`,
+        }
       } else {
         return {
           errors: {},

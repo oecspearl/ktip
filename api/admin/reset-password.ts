@@ -12,7 +12,7 @@ export default async function handler(request: Request) {
 
   const guard = await requirePermission(request, 'members:manage')
   if (!guard.ok) return guard.response
-  const { adminClient } = guard
+  const { adminClient, callerClient } = guard
 
   let body: { user_id: string; new_password: string }
   try {
@@ -38,6 +38,10 @@ export default async function handler(request: Request) {
     )
   }
 
+  // The Super Admin ceiling (124). Setting another Admin's password is a
+  // takeover of their account, and only the Super Admin may do it.
+  const ceiling = await requireCanAdminister(callerClient, body.user_id)
+  if (ceiling) return ceiling
 
   const { error } = await adminClient.auth.admin.updateUserById(body.user_id, {
     password: body.new_password,

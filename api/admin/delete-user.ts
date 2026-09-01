@@ -1,4 +1,4 @@
-import { requirePermission } from '../_lib/require-permission'
+import { requireCanAdminister, requirePermission } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -12,7 +12,7 @@ export default async function handler(request: Request) {
 
   const guard = await requirePermission(request, 'members:manage')
   if (!guard.ok) return guard.response
-  const { callerId, adminClient } = guard
+  const { callerId, callerClient, adminClient } = guard
 
   let body: { user_id: string }
   try {
@@ -38,6 +38,10 @@ export default async function handler(request: Request) {
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     )
   }
+
+  // The Super Admin ceiling (124): an Admin cannot delete another Admin.
+  const ceiling = await requireCanAdminister(callerClient, body.user_id)
+  if (ceiling) return ceiling
 
   const { error } = await adminClient.auth.admin.deleteUser(body.user_id)
 

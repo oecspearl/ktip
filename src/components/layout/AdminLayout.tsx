@@ -45,7 +45,7 @@ import type { PermissionKey } from '../../types'
  * residual operator surface — analytics, UAT, feedback, integrations, partner
  * API and the error console.
  *
- * A super_admin holds every permission, so their sidebar is unchanged.
+ * A super_admin or admin holds every permission, so their sidebar is unchanged.
  */
 const adminNavItems: {
   href: string

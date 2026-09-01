@@ -171,3 +171,42 @@ export async function requirePermission(
     adminClient: createClient(supabaseUrl, supabaseServiceKey),
   }
 }
+
+/**
+ * The Super Admin ceiling (migration 124), asked before a route acts ON an
+ * account rather than merely as one.
+ *
+ * `requirePermission` establishes that the caller holds members:manage. Both
+ * the Admin and the Super Admin do, and that key alone would let the Admin
+ * delete, re-password or strip the second factor from the Super Admin — which
+ * is a takeover, not administration. can_administer_account() answers the
+ * question the way set_user_suspension() and set_user_roles() do in SQL: a
+ * Super Admin may act on anyone but themselves; anyone else only on accounts
+ * holding neither seat (super_admin, admin). Supervisors and the safety admin
+ * are under the Admin and are fair targets.
+ *
+ * Asked through the CALLER's client so auth.uid() is the caller. The service
+ * client has no JWT subject and would answer false for everyone.
+ */
+export async function requireCanAdminister(
+  callerClient: SupabaseClient,
+  targetId: string
+): Promise<Response | null> {
+  const { data, error } = await callerClient.rpc('can_administer_account', {
+    p_target: targetId,
+  })
+  if (error) {
+    // A database that predates 124 has no such function. Failing closed here
+    // would take every admin route down on deploy; the routes keep their own
+    // self-target refusals, and the ceiling arrives with the migration.
+    if (/could not find the function|does not exist/i.test(error.message)) return null
+    return json({ error: 'Could not verify permission for this account' }, 500)
+  }
+  if (data !== true) {
+    return json(
+      { error: 'Only a Super Admin can act on an Admin account, and nobody can act on their own.' },
+      403
+    )
+  }
+  return null
+}

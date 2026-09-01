@@ -12,7 +12,7 @@ export default async function handler(request: Request) {
 
   const guard = await requirePermission(request, 'members:manage')
   if (!guard.ok) return guard.response
-  const { adminClient } = guard
+  const { adminClient, callerClient } = guard
 
   // Parse request body
   let body: { email: string; password: string; display_name?: string; roles?: string[] }
@@ -57,9 +57,27 @@ export default async function handler(request: Request) {
     )
   }
 
-  // Update profile with roles if provided
+  // Roles go through set_user_roles() as the CALLER, not through a service-key
+  // UPDATE. The service key bypasses the profile guard, which meant anyone with
+  // members:manage could create an account that was born super_admin. The RPC
+  // asks for role:manage and applies the Super Admin ceiling (124): an Admin can
+  // create members and supervisors, not Admins. The account already exists at this
+  // point, so a refusal is reported alongside the id rather than rolled back.
+  let roleWarning: string | undefined
   if (body.roles && body.roles.length > 0 && data.user) {
-    await adminClient.from('profiles').update({ roles: body.roles } as any).eq('id', data.user.id)
+    const { data: result, error: roleError } = await callerClient.rpc('set_user_roles', {
+      p_user: data.user.id,
+      p_roles: body.roles,
+    })
+    const reason = roleError ? roleError.message : result?.ok === false ? String(result.reason) : null
+    if (reason) {
+      roleWarning =
+        reason === 'seat_requires_super_admin'
+          ? 'The account was created without roles: only a Super Admin can grant the Admin or Super Admin role.'
+          : reason === 'forbidden'
+            ? 'The account was created without roles: you do not hold role:manage.'
+            : `The account was created, but its roles could not be set (${reason}).`
+    }
   }
 
   // Update display_name in profiles if provided
@@ -68,7 +86,7 @@ export default async function handler(request: Request) {
   }
 
   return new Response(
-    JSON.stringify({ user: { id: data.user?.id, email: data.user?.email } }),
+    JSON.stringify({ user: { id: data.user?.id, email: data.user?.email }, warning: roleWarning }),
     { status: 201, headers: { 'Content-Type': 'application/json' } }
   )
 }

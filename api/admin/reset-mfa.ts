@@ -46,7 +46,7 @@ export default async function handler(request: Request) {
 
   const guard = await requirePermission(request, 'members:manage')
   if (!guard.ok) return guard.response
-  const { adminClient, callerId } = guard
+  const { adminClient, callerClient, callerId } = guard
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL as string
   const serviceKey = (process.env.SUPABASE_SECRET_KEY ||
@@ -61,6 +61,11 @@ export default async function handler(request: Request) {
 
   const userId = String(body.user_id ?? '')
   if (!userId) return json({ error: 'user_id is required' }, 400)
+
+  // The Super Admin ceiling (124). Stripping another Admin's second factor is
+  // the first step of taking their account; only the Super Admin may.
+  const ceiling = await requireCanAdminister(callerClient, userId)
+  if (ceiling) return ceiling
 
   // Factors and codes go together. Leaving the recovery codes behind would let
   // whoever holds that sheet enrol a factor of their own on an account the

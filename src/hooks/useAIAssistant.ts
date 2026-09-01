@@ -36,6 +36,7 @@ const ROLE_LABELS: Partial<Record<UserRole, MessageDescriptor>> = {
   faculty: msg`Faculty/Researcher`,
   oecs: msg`OECS Administrator`,
   super_admin: msg`OECS Administrator`,
+  admin: msg`OECS Administrator`,
   safety_admin: msg`Safety Administrator`,
   sme: msg`Verified SME`,
   educational_partner: msg`Educational Partner`,

@@ -24,6 +24,8 @@ import {
   ROLE_BY_SLUG,
   SCOPED_ROLES,
   TIER_LABELS,
+  assignableRolesFor,
+  canAdministerAccount,
   isCellLocked,
 } from '../../../lib/permissions'
 import { formatDate } from '../../../lib/utils'
@@ -92,6 +94,17 @@ export default function AdminRolesPage() {
   const { events } = useRolePermissionEvents(50)
 
   const canEdit = auth.can('role:manage')
+
+  // The Super Admin ceiling (124). An Admin holds role:manage like the Super
+  // Admin does and manages every role under the seat — supervisors included —
+  // but the two seats themselves, and the roles of anyone holding one, are
+  // the Super Admin's alone. set_user_roles() refuses either way; this keeps
+  // the editor from offering what the save would reject.
+  const assignableRoles = useMemo(() => assignableRolesFor(auth.roles), [auth.roles])
+  // Self is not excluded here: a Super Admin may edit their own roles (the RPC
+  // only stops the last super_admin slug going), and an Admin editing their own
+  // is refused by the same seat rule as anyone else's.
+  const canEditRolesOf = (user: Profile) => canEdit && canAdministerAccount(auth.roles, user.roles)
 
   const groupedPermissions = useMemo(() => {
     const groups = new Map<PermissionCategory, typeof PERMISSION_DEFINITIONS>()
@@ -252,7 +265,12 @@ export default function AdminRolesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={!canEdit}
+                      disabled={!canEditRolesOf(user)}
+                      title={
+                        canEdit && !canEditRolesOf(user)
+                          ? 'Only a Super Admin can change an Admin’s roles'
+                          : undefined
+                      }
                       onClick={() => openRoleEditor(user)}
                     >
                       Edit roles
@@ -346,7 +364,7 @@ export default function AdminRolesPage() {
                           const lockReason = !canEdit
                             ? 'You do not have permission to edit the matrix'
                             : role.slug === 'super_admin'
-                              ? 'Super Admin always holds every permission'
+                              ? 'Super Admin always holds every permission. Admin holds the same set; the difference is that only a Super Admin can suspend, delete or re-role another administrator.'
                               : 'Child-safety rule — enforced in the database and cannot be granted'
                           return (
                             <td key={cellKey} className="px-3 py-2.5 text-center">
@@ -401,7 +419,7 @@ export default function AdminRolesPage() {
           </p>
 
           <div className="flex flex-wrap gap-2">
-            {MATRIX_ROLES.map((role) => {
+            {assignableRoles.map((role) => {
               const selected = draftRoles.includes(role.slug)
               return (
                 <button

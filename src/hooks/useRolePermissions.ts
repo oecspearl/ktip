@@ -182,11 +182,16 @@ export function useSetUserRoles() {
 
       if (error) throw error
       if (data && data.ok === false) {
-        throw new Error(
-          data.reason === 'forbidden'
-            ? 'You do not have permission to change roles.'
-            : `Unknown role: ${(data.roles || []).join(', ')}`
-        )
+        const messages: Record<string, string> = {
+          forbidden: 'You do not have permission to change roles.',
+          unknown_role: `Unknown role: ${(data.roles || []).join(', ')}`,
+          not_found: 'That account no longer exists.',
+          // The Super Admin ceiling (124).
+          seat_requires_super_admin:
+            'Only a Super Admin can grant or remove the Admin or Super Admin role, or change the roles of an Admin.',
+          last_super_admin: 'The last Super Admin cannot be demoted.',
+        }
+        throw new Error(messages[data.reason] || 'Could not update roles.')
       }
       return data
     },

@@ -72,6 +72,7 @@ export const ROLE_COLORS: Record<string, string> = {
   // Admin tier
   super_admin: 'bg-brand-navy text-white border-brand-navy',
   oecs: 'bg-brand-navy text-white border-brand-navy',
+  admin: 'bg-ktip-ocean-800 text-white border-ktip-ocean-800',
   people_supervisor: 'bg-ktip-ocean-700 text-white border-ktip-ocean-700',
   programme_supervisor: 'bg-ktip-tropical-700 text-white border-ktip-tropical-700',
   safety_admin: 'bg-red-100 text-red-800 border-red-200',

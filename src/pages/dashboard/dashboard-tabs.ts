@@ -83,7 +83,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // engagement switch lives here rather than on the Business tab, directly
   // above the people it governs.
   { to: 'team', label: msg`Team`, icon: UsersRound, description: msg`Who belongs to your organisation`, roles: ORGANIZATION_ROLES },
-  { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'safety_admin'], external: true },
+  { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'admin', 'safety_admin'], external: true },
 ]
 
 /**

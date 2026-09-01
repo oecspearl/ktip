@@ -69,7 +69,14 @@ interface AuthContextType {
    */
   permissions: Set<PermissionKey>
   can: (permission: PermissionKey) => boolean
+  /** super_admin or admin — the two seats is_platform_admin() admits (124). */
   isAdmin: boolean
+  /**
+   * The top seat only (124). Rendering: it decides whether the console offers
+   * the controls that act on another administrator. SQL enforces the ceiling
+   * whatever this says.
+   */
+  isSuperAdmin: boolean
   /**
    * This session holds a verified second factor but has not proven it yet (118).
    *
@@ -362,7 +369,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const can = useCallback((permission: PermissionKey) => permissions.has(permission), [permissions])
 
-  const isAdmin = roles.includes('super_admin')
+  const isSuperAdmin = roles.includes('super_admin')
+  const isAdmin = isSuperAdmin || roles.includes('admin')
 
   // If profile fetch fails with an auth error, the session is corrupt — force clear it.
   useEffect(() => {
@@ -667,6 +675,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       permissions,
       can,
       isAdmin,
+      isSuperAdmin,
       mfaChallengeRequired,
       recheckMfaChallenge,
       refreshProfile,
@@ -693,6 +702,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       permissions,
       can,
       isAdmin,
+      isSuperAdmin,
       mfaChallengeRequired,
       recheckMfaChallenge,
       refreshProfile,

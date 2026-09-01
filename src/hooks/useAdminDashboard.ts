@@ -136,6 +136,11 @@ export function useAdminUserActions() {
         const messages: Record<string, string> = {
           forbidden: 'You do not have permission to change roles.',
           unknown_role: `Unknown role: ${(data.roles || []).join(', ')}`,
+          not_found: 'That account no longer exists.',
+          // The Super Admin ceiling (124).
+          seat_requires_super_admin:
+            'Only a Super Admin can grant or remove the Admin or Super Admin role, or change the roles of an Admin.',
+          last_super_admin: 'The last Super Admin cannot be demoted.',
         }
         throw new Error(messages[data.reason] || 'Could not update roles.')
       }
@@ -217,6 +222,35 @@ export function useAdminUserActions() {
     },
   })
 
+  // 124. Suspends the profile row through set_user_suspension() — where the
+  // Super Admin ceiling lives — and then bans the auth user so the account
+  // cannot sign in. Reinstating reverses both. See api/admin/suspend-user.ts.
+  const setSuspensionMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      suspended,
+      reason,
+    }: {
+      userId: string
+      suspended: boolean
+      reason?: string
+    }) => {
+      const auth = await getAuthHeader()
+      const res = await fetch('/api/admin/suspend-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: auth },
+        body: JSON.stringify({ user_id: userId, suspended, reason }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to update the suspension')
+      return json as { success: true; warning?: string }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+      queryClient.invalidateQueries({ queryKey: keys.all('role-members') })
+    },
+  })
+
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
       const auth = await getAuthHeader()
@@ -253,12 +287,16 @@ export function useAdminUserActions() {
 
   const resetMfa = (userId: string) => resetMfaMutation.mutateAsync(userId)
 
+  const setSuspension = (userId: string, suspended: boolean, reason?: string) =>
+    setSuspensionMutation.mutateAsync({ userId, suspended, reason })
+
   return {
     updateRoles,
     toggleVerified,
     createUser,
     resetPassword,
     resetMfa,
+    setSuspension,
     deleteUser,
     loading:
       updateRolesMutation.isPending ||
@@ -266,6 +304,7 @@ export function useAdminUserActions() {
       createUserMutation.isPending ||
       resetPasswordMutation.isPending ||
       resetMfaMutation.isPending ||
+      setSuspensionMutation.isPending ||
       deleteUserMutation.isPending,
     error:
       updateRolesMutation.error ||
@@ -273,6 +312,7 @@ export function useAdminUserActions() {
       createUserMutation.error ||
       resetPasswordMutation.error ||
       resetMfaMutation.error ||
+      setSuspensionMutation.error ||
       deleteUserMutation.error,
   }
 }

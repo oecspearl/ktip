@@ -393,7 +393,7 @@ export function useIsEventHost(event: Pick<Event, 'organizer_id'> | null | undef
   return useMemo(() => {
     if (!event || !auth.user) return false
     if (event.organizer_id === auth.user.id) return true
-    const roles = auth.profile?.roles || []
-    return roles.includes('oecs') || roles.includes('super_admin')
-  }, [event, auth.user, auth.profile])
+    // Both platform-admin seats (124), with the legacy alias resolved.
+    return auth.isAdmin
+  }, [event, auth.user, auth.isAdmin])
 }

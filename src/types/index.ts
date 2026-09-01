@@ -20,6 +20,7 @@ export type RoleSlug =
   | 'oecs'
   // tier 1 — admin
   | 'super_admin'
+  | 'admin'
   | 'people_supervisor'
   | 'programme_supervisor'
   | 'safety_admin'

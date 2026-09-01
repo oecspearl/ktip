@@ -61,6 +61,23 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     requiresVerification: true,
     sortOrder: 10,
   },
+  // The Admin seat (124). Everything super_admin holds — every key, every
+  // console page, every is_platform_admin() policy — and full charge of the
+  // roles under the seat: supervisors, the safety admin, members. The
+  // difference is not in this catalog or in the matrix at all: an Admin cannot
+  // act ON another seat holder (super_admin or admin) — suspend, delete,
+  // re-password, re-role — and cannot hand a seat to anyone. That ceiling is a
+  // role test in SQL (is_super_admin()) and is mirrored here by
+  // holdsSuperAdmin() / holdsAdminSeat() for rendering only.
+  {
+    slug: 'admin',
+    label: msg`Admin`,
+    tier: 'admin',
+    description: msg`Runs the platform day to day. Every permission, every console page, and full charge of supervisors and members. Cannot suspend, delete or re-role another Admin — that stays with the Super Admin.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 11,
+  },
   // The two supervisor seats. Same tier as each other, deliberately: neither
   // reports to the other, and the split is by subject matter rather than by
   // seniority. What keeps them apart is that their domain keys are disjoint —
@@ -291,6 +308,62 @@ export function rolesOfTier(tier: RoleTier): RoleSlug[] {
 
 export const ORGANIZATION_ROLES = rolesOfTier('organization')
 export const INDIVIDUAL_ROLES = rolesOfTier('individual')
+export const ADMIN_TIER_ROLES = rolesOfTier('admin')
+
+/**
+ * The two SEATS (migration 124): the accounts the Super Admin ceiling protects.
+ *
+ * Narrower than the admin tier on purpose. Supervisors and the safety admin sit
+ * under the Admin and are the Admin's to manage — roles, passwords, second
+ * factors, suspension, deletion. What an Admin cannot do is act on another
+ * seat holder, or hand a seat to anyone. Mirrors seat_roles() in SQL; a third
+ * seat is a deliberate edit in both places.
+ */
+export const ADMIN_SEAT_ROLES: RoleSlug[] = ['super_admin', 'admin']
+
+/**
+ * The Super Admin ceiling (migration 124), for rendering.
+ *
+ * Both administrators hold every permission, so `can()` cannot tell them apart
+ * — and must not: a matrix key for "may act on an administrator" would be one
+ * toggle away from being granted by the Admin, to the Admin. The ceiling is a
+ * role test, is_super_admin() in SQL, and these are its client mirrors. Rendering
+ * only: set_user_roles(), set_user_suspension(), the profile guard and
+ * can_administer_account() enforce it whatever the screen shows.
+ */
+export function holdsSuperAdmin(roles: readonly string[] | null | undefined): boolean {
+  return expandRoles(roles).includes('super_admin')
+}
+
+/** Either seat, aliases resolved (oecs → super_admin). */
+export function holdsAdminSeat(roles: readonly string[] | null | undefined): boolean {
+  return expandRoles(roles).some((slug) => ADMIN_SEAT_ROLES.includes(slug))
+}
+
+/**
+ * May an account holding `actorRoles` suspend, delete, re-password or re-role
+ * the account holding `targetRoles`? Mirrors can_administer_account(): a Super
+ * Admin may act on anyone but themselves; anyone else only on accounts holding
+ * no seat. Pass `isSelf` for the self-exclusion.
+ */
+export function canAdministerAccount(
+  actorRoles: readonly string[] | null | undefined,
+  targetRoles: readonly string[] | null | undefined,
+  isSelf = false
+): boolean {
+  if (isSelf) return false
+  return holdsSuperAdmin(actorRoles) || !holdsAdminSeat(targetRoles)
+}
+
+/**
+ * The roles an account holding `actorRoles` may hand out or take away. The two
+ * seats are the Super Admin's to grant; everything else, supervisors and the
+ * safety admin included, is the Admin's (124, narrowing 116).
+ */
+export function assignableRolesFor(actorRoles: readonly string[] | null | undefined): RoleDefinition[] {
+  const superAdmin = holdsSuperAdmin(actorRoles)
+  return MATRIX_ROLES.filter((r) => superAdmin || !ADMIN_SEAT_ROLES.includes(r.slug))
+}
 
 /**
  * Does this account act as an organisation rather than a person?
@@ -442,6 +515,9 @@ export const ALL_PERMISSION_KEYS: PermissionKey[] = PERMISSION_DEFINITIONS.map((
  */
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   super_admin: ALL_PERMISSION_KEYS,
+  // Deliberately identical. See the catalog entry: the seats differ in the
+  // ceiling, not in the matrix, and rbac-parity.test.ts asserts they match.
+  admin: ALL_PERMISSION_KEYS,
 
   // The two supervisors. Each holds their own domain keys, plus the ordinary
   // participant bundle so they can create a project, apply for a grant or post

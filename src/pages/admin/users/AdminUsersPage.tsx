@@ -7,7 +7,7 @@ import { useAdminUsers, useAdminUserActions } from '../../../hooks/useAdminDashb
 import { useToast } from '../../../contexts/ToastContext'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ROLE_LABELS, ROLE_COLORS } from '../../../lib/constants'
-import { ROLE_DEFINITIONS } from '../../../lib/permissions'
+import { ROLE_DEFINITIONS, assignableRolesFor, canAdministerAccount } from '../../../lib/permissions'
 import { debounce } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
 import type { Profile, UserRole } from '../../../types'
@@ -25,6 +25,8 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  Ban,
+  UserCheck,
 } from 'lucide-react'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 import { useLingui } from '@lingui/react/macro'
@@ -64,7 +66,7 @@ export default function AdminUsersPage() {
     verified: verifiedFilter || undefined,
   })
 
-  const { updateRoles, toggleVerified, createUser, resetPassword, resetMfa, deleteUser, loading: actionLoading } = useAdminUserActions()
+  const { updateRoles, toggleVerified, createUser, resetPassword, resetMfa, setSuspension, deleteUser, loading: actionLoading } = useAdminUserActions()
 
   // This page is the one console surface two administrators share, so reading
   // it and acting on it are separate keys.
@@ -82,6 +84,25 @@ export default function AdminUsersPage() {
   const canManageMembers = auth.can('members:manage')
   const canManageRoles = auth.can('role:manage')
   const canReviewVerification = auth.can('verification:review')
+
+  // The Super Admin ceiling (124). Both administrators hold every key above, so
+  // `can()` cannot separate them — and must not. What separates them is a role
+  // test: only a Super Admin may suspend, delete, re-password, reset the second
+  // factor of, or re-role an account that holds a seat (super_admin or admin),
+  // and nobody may do those things to themselves. Supervisors and the safety
+  // admin are under the Admin and fully theirs to manage. Enforced by
+  // can_administer_account() behind api/admin/* and by the RPCs; mirrored here
+  // so the row does not offer a control the server would refuse.
+  const canActOn = (user: Profile) =>
+    canAdministerAccount(auth.roles, user.roles, user.id === auth.user?.id)
+  // Roles are the one action a Super Admin may take on themselves.
+  const canEditRolesOf = (user: Profile) => canManageRoles && canAdministerAccount(auth.roles, user.roles)
+  // The two seats are the Super Admin's to hand out; the pickers hide them
+  // from anyone else so the save does not fail after the fact.
+  const assignableRoles = useMemo(
+    () => assignableRolesFor(auth.roles).map((r) => r.slug),
+    [auth.roles]
+  )
 
   // Edit roles modal
   const [editingUser, setEditingUser] = useState<Profile | null>(null)
@@ -118,6 +139,14 @@ export default function AdminUsersPage() {
     userId: string
     userName: string
   } | null>(null)
+
+  // Suspend / reinstate (124)
+  const [suspendTarget, setSuspendTarget] = useState<{
+    userId: string
+    userName: string
+    suspend: boolean
+  } | null>(null)
+  const [suspendReason, setSuspendReason] = useState('')
 
   const openEditRoles = (user: Profile) => {
     setEditingUser(user)
@@ -229,6 +258,31 @@ export default function AdminUsersPage() {
       setConfirmResetMfa(null)
     } catch (err: any) {
       toast.error(err.message || 'Failed to reset two-step verification')
+    }
+  }
+
+  const handleSuspension = async () => {
+    const action = suspendTarget
+    if (!action) return
+
+    try {
+      const result = await setSuspension(action.userId, action.suspend, suspendReason || undefined)
+      // The route reports 200 with a warning when the profile row changed but
+      // the sign-in ban did not follow. That half-state is worth a red toast:
+      // the account is inert but not locked out, or reinstated but still
+      // banned, and the operator should press the button again.
+      if (result.warning) toast.error(result.warning)
+      else
+        toast.success(
+          action.suspend
+            ? `${action.userName} has been suspended and cannot sign in`
+            : `${action.userName} has been reinstated`
+        )
+      setSuspendTarget(null)
+      setSuspendReason('')
+      refetch()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update the suspension')
     }
   }
 
@@ -364,6 +418,12 @@ export default function AdminUsersPage() {
                           <p className="font-medium text-gray-900 text-sm">
                             {user.display_name || 'Unnamed User'}
                           </p>
+                          {user.is_suspended && (
+                            <p className="text-xs text-red-600" title={user.suspension_reason || undefined}>
+                              Suspended
+                              {user.suspended_until ? ` until ${new Date(user.suspended_until).toLocaleDateString()}` : ''}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -408,7 +468,7 @@ export default function AdminUsersPage() {
                     {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        {canManageRoles && (
+                        {canEditRolesOf(user) && (
                           <button
                             type="button"
                             onClick={() => openEditRoles(user)}
@@ -418,7 +478,7 @@ export default function AdminUsersPage() {
                             <Edit size={16} />
                           </button>
                         )}
-                        {canManageMembers && (
+                        {canManageMembers && canActOn(user) && (
                           <button
                             type="button"
                             onClick={() => setResetUser({
@@ -431,7 +491,7 @@ export default function AdminUsersPage() {
                             <KeyRound size={16} />
                           </button>
                         )}
-                        {canManageMembers && (
+                        {canManageMembers && canActOn(user) && (
                           <button
                             type="button"
                             onClick={() => setConfirmResetMfa({
@@ -471,7 +531,26 @@ export default function AdminUsersPage() {
                             <ShieldCheck size={16} />
                           </button>
                         )}
-                        {canManageMembers && (
+                        {canManageMembers && canActOn(user) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSuspendReason('')
+                              setSuspendTarget({
+                                userId: user.id,
+                                userName: user.display_name || 'this user',
+                                suspend: !user.is_suspended,
+                              })
+                            }}
+                            className={`p-1.5 text-gray-400 transition-colors ${
+                              user.is_suspended ? 'hover:text-ktip-tropical-600' : 'hover:text-red-600'
+                            }`}
+                            title={user.is_suspended ? 'Reinstate user' : 'Suspend user'}
+                          >
+                            {user.is_suspended ? <UserCheck size={16} /> : <Ban size={16} />}
+                          </button>
+                        )}
+                        {canManageMembers && canActOn(user) && (
                           <button
                             type="button"
                             onClick={() => setConfirmDelete({
@@ -551,7 +630,7 @@ export default function AdminUsersPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Roles</label>
             <div className="flex flex-wrap gap-2">
-              {ALL_ROLES.map((role) => (
+              {assignableRoles.map((role) => (
                 <button
                   type="button"
                   onClick={() => toggleNewRole(role)}
@@ -667,7 +746,7 @@ export default function AdminUsersPage() {
             Select the roles for this user.
           </p>
           <div className="space-y-3">
-            {ALL_ROLES.map((role) => (
+            {assignableRoles.map((role) => (
               <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-ktip-sand-50 cursor-pointer transition-colors" key={role}>
                 <input
                   type="checkbox"
@@ -730,6 +809,59 @@ export default function AdminUsersPage() {
         onConfirm={handleResetMfa}
         onCancel={() => setConfirmResetMfa(null)}
       />
+
+      {/* Suspend / Reinstate Modal (124) */}
+      <Modal
+        open={!!suspendTarget}
+        onClose={() => {
+          setSuspendTarget(null)
+          setSuspendReason('')
+        }}
+        title={suspendTarget?.suspend ? 'Suspend User' : 'Reinstate User'}
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {suspendTarget?.suspend
+              ? `Suspend "${suspendTarget?.userName}"? They lose every permission immediately and are blocked from signing in until reinstated. Anything they have open stops working within the hour.`
+              : `Reinstate "${suspendTarget?.userName}"? Their permissions return and they can sign in again.`}
+          </p>
+          {suspendTarget?.suspend && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
+              <textarea
+                value={suspendReason}
+                onChange={(e) => setSuspendReason(e.currentTarget.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="Recorded on the account for other administrators"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              />
+            </div>
+          )}
+          <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSuspendTarget(null)
+                setSuspendReason('')
+              }}
+              disabled={actionLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              variant={suspendTarget?.suspend ? 'danger' : 'primary'}
+              onClick={handleSuspension}
+              loading={actionLoading}
+            >
+              {suspendTarget?.suspend ? 'Suspend' : 'Reinstate'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Confirm Delete User Modal */}
       <ConfirmModal
