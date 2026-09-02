@@ -7728,6 +7728,10 @@ msgstr "Document sans titre"
 msgid "Newest"
 msgstr "Plus récent"
 
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "No file to download"
+msgstr ""
+
 #: src/components/profile/BannerStudio.tsx
 msgid " — drag inside one to position the image for that surface"
 msgstr ""
@@ -15942,6 +15946,10 @@ msgstr "Ce mois-ci"
 msgid "What kind of event is this?"
 msgstr "Quel type d'événement est-ce ?"
 
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "Nothing has been attached to this entry yet."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Click \"Events\" in the navigation bar.\n"
 "\n"
@@ -22796,6 +22804,10 @@ msgstr "Conditions d'admissibilité"
 #: src/components/AnalyticsConsentBanner.tsx
 msgid "Help us improve KTIP"
 msgstr "Aidez-nous à améliorer KTIP"
+
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "This resource is published in full on this page."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Identification of the content that was removed and where it was."

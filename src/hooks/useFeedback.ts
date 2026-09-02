@@ -58,28 +58,33 @@ export function useCreateFeedback() {
   return { createFeedback: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
-// Admin: all feedback with filters
-export function useAdminFeedback(filters?: { status?: string; category?: string }) {
+/**
+ * Admin: the whole queue, newest first.
+ *
+ * Unfiltered on purpose. This used to push `status`/`category` down to
+ * PostgREST and re-query on every dropdown change; the triage page now filters
+ * and sorts in memory instead. The table is a few hundred rows for the entire
+ * platform, so one cached fetch is fewer round trips and instant switching —
+ * and it is the only way the unread count can mean "unread", rather than
+ * "unread among the rows the current filter happened to fetch".
+ *
+ * Two of the sorts the page offers cannot be done here anyway: ordering by
+ * status or category alphabetically gives dismissed → in_review → new →
+ * resolved, which is not an order anyone wants.
+ */
+export function useAdminFeedback() {
   const fetchFeedback = async (): Promise<Feedback[]> => {
-    let query = (supabase as any)
+    const { data, error } = await (supabase as any)
       .from('feedback')
       .select('*, user:profiles!user_id(*)')
       .order('created_at', { ascending: false })
 
-    if (filters?.status) {
-      query = query.eq('status', filters.status)
-    }
-    if (filters?.category) {
-      query = query.eq('category', filters.category)
-    }
-
-    const { data, error } = await query
     if (error) throw error
     return (data as any[]) || []
   }
 
   const query = useQuery({
-    queryKey: keys.list('feedback', filters),
+    queryKey: keys.list('feedback'),
     queryFn: fetchFeedback,
   })
 
@@ -94,6 +99,9 @@ export interface FeedbackTriageUpdate {
   admin_reply?: string
   replied_at?: string
   replied_by?: string
+  /** 128. Nullable in both directions — Mark unread writes null back. */
+  read_at?: string | null
+  read_by?: string | null
 }
 
 // Admin: triage (status + notes + reply)

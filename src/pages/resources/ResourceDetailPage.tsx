@@ -12,6 +12,7 @@ import {
   Download,
   ExternalLink,
   Calendar,
+  FileX,
   User,
 } from 'lucide-react'
 import {
@@ -154,8 +155,15 @@ export default function ResourceDetailPage() {
               </div>
             )}
 
-            {/* Download */}
-            {resource.download_url && (
+            {/* Download — or an explicit account of why there is none.
+                A resource with no file attached used to render nothing here at
+                all, and to a reader "nothing" is indistinguishable from a
+                button that failed to load. Someone reported exactly that, and
+                had to guess at the cause themselves. Saying so costs one line.
+
+                No data-spy on the empty state: the section nav lists places
+                worth jumping to, and this is not one. */}
+            {resource.download_url ? (
               <div id="download" data-spy="Download" className="scroll-mt-24 mt-8 border-t border-ktip-sand-200 pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -174,6 +182,24 @@ export default function ResourceDetailPage() {
                       <Trans>Download</Trans>
                     </Button>
                   </a>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-8 border-t border-ktip-sand-200 pt-6">
+                <div className="flex items-center gap-3">
+                  <FileX size={20} className="text-ktip-sand-400 shrink-0" />
+                  <div>
+                    <p className="font-medium text-ktip-sand-700">
+                      <Trans>No file to download</Trans>
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {resource.content || resource.description || resource.summary ? (
+                        <Trans>This resource is published in full on this page.</Trans>
+                      ) : (
+                        <Trans>Nothing has been attached to this entry yet.</Trans>
+                      )}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

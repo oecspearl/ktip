@@ -8047,6 +8047,10 @@ msgstr "Untitled Document"
 msgid "Newest"
 msgstr "Newest"
 
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "No file to download"
+msgstr "No file to download"
+
 #: src/components/profile/BannerStudio.tsx
 msgid " — drag inside one to position the image for that surface"
 msgstr " — drag inside one to position the image for that surface"
@@ -16514,6 +16518,10 @@ msgstr "This month"
 msgid "What kind of event is this?"
 msgstr "What kind of event is this?"
 
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "Nothing has been attached to this entry yet."
+msgstr "Nothing has been attached to this entry yet."
+
 #: src/i18n/harvested.ts
 msgid "Click \"Events\" in the navigation bar.\n"
 "\n"
@@ -23571,6 +23579,10 @@ msgstr "Eligibility Requirements"
 #: src/components/AnalyticsConsentBanner.tsx
 msgid "Help us improve KTIP"
 msgstr "Help us improve KTIP"
+
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "This resource is published in full on this page."
+msgstr "This resource is published in full on this page."
 
 #: src/i18n/harvested.ts
 msgid "Identification of the content that was removed and where it was."

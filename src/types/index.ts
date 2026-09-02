@@ -1445,6 +1445,10 @@ export interface Feedback {
   admin_reply?: string | null
   replied_at?: string | null
   replied_by?: string | null
+  /** 128. Shared across the admin team, not per-viewer — one admin opening a
+   *  report clears it from everybody's queue. Never shown to the reporter. */
+  read_at?: string | null
+  read_by?: string | null
   // 093. Optional because a deploy can precede the migration.
   rating?: number | null
   page_path?: string | null

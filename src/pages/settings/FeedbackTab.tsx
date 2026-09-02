@@ -7,7 +7,7 @@ import { formatDate } from '../../lib/utils'
 import {
   FEEDBACK_CATEGORY_LABELS,
   FEEDBACK_STATUS_COLORS,
-  FEEDBACK_STATUS_LABELS,
+  feedbackStatusLabel,
 } from '../../lib/feedback-labels'
 
 /**
@@ -78,7 +78,7 @@ export function FeedbackTab() {
                   FEEDBACK_STATUS_COLORS[item.status] ?? FEEDBACK_STATUS_COLORS.new
                 }`}
               >
-                {FEEDBACK_STATUS_LABELS[item.status] ?? item.status}
+                {feedbackStatusLabel(item.status, item.category)}
               </span>
               <span className="text-xs text-ktip-sand-400">
                 {FEEDBACK_CATEGORY_LABELS[item.category] ?? item.category}
