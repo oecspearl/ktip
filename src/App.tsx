@@ -21,6 +21,7 @@ import { PermissionRoute } from './components/PermissionRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { InstallPrompt } from './components/InstallPrompt'
+import { WelcomePanel } from './components/WelcomePanel'
 import { MainLayout } from './components/layout/MainLayout'
 import { RouteSplash } from './components/RouteSplash'
 import { AppError } from './lib/app-error'
@@ -583,6 +584,14 @@ function App() {
               and never at the same time as the consent sheet, because it waits
               for `beforeinstallprompt`, which fires well after first paint. */}
           <InstallPrompt />
+          {/* Same two placement rules again, and both are load-bearing here:
+              inside LanguageProvider because its copy is <Trans>, and outside
+              the router because it must cover whatever URL the reader arrived
+              at, auth pages included. Outside the router also means it may not
+              touch <Link> or any router hook — that is the bug the banner's
+              comment above describes, and it reproduced on a first visit,
+              which is the only visit this panel ever has. */}
+          <WelcomePanel />
           <ToastProvider>
             <AuthProvider>
               {/* Renders nothing. Carries the language choice between this

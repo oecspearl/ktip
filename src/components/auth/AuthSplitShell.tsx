@@ -1,92 +1,15 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { HERO_IMAGES } from '../../lib/hero-images'
 import { ResponsiveImage } from '../ui/ResponsiveImage'
 import { cn } from '../../lib/utils'
 import { Stepper } from '../ui/Stepper'
+import { useDeckFlip } from '../ui/useDeckFlip'
 
 export interface AuthStep {
   title: string
   caption: string
-}
-
-// Deck-style flip: one card, cumulative rotation. Each step adds 180deg, so the
-// card keeps spinning the same way while travelling to the opposite side of the
-// stage. The face content swaps exactly when rotation crosses 90/270/... (card
-// edge-on, swap invisible). Odd faces land at 180deg — mirrored — so the face
-// content is counter-flipped with scaleX(-1).
-
-// Panel is 45% of the stage; travelling the remaining 55% equals 55/45 of the
-// panel's own width, which translateX(%) is relative to.
-const X_MAX = (55 / 45) * 100
-
-const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
-
-const faceFor = (rot: number, n: number) =>
-  Math.max(0, Math.min(Math.floor((rot + 90) / 180), n - 1))
-
-// Continuous horizontal position: within each half-turn the card slides from
-// its current side to the opposite one, so x and rotation stay in lockstep.
-const xFor = (rot: number, maxRot: number) => {
-  const r = Math.max(0, Math.min(rot, maxRot))
-  const seg = Math.min(Math.floor(r / 180), Math.ceil(maxRot / 180) - 1)
-  const t = (r - seg * 180) / 180
-  const from = seg % 2 === 0 ? 0 : X_MAX
-  const to = (seg + 1) % 2 === 0 ? 0 : X_MAX
-  return from + (to - from) * t
-}
-
-const applyTransform = (el: HTMLElement, rot: number, maxRot: number) => {
-  el.style.transform = `translateX(${xFor(rot, maxRot)}%) rotateY(${rot}deg)`
-}
-
-function useDeckFlip(step: number, n: number) {
-  const panelRef = useRef<HTMLDivElement>(null)
-  const [face, setFace] = useState(step - 1)
-  const state = useRef({ rot: (step - 1) * 180, raf: 0 })
-  const maxRot = (n - 1) * 180
-
-  // Paint the initial position before first frame
-  useLayoutEffect(() => {
-    if (panelRef.current) applyTransform(panelRef.current, state.current.rot, maxRot)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const el = panelRef.current
-    const s = state.current
-    const target = (step - 1) * 180
-    if (!el || s.rot === target) return
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced || !el.offsetParent) {
-      // Instant swap: reduced motion, or panel hidden (mobile)
-      s.rot = target
-      applyTransform(el, target, maxRot)
-      setFace(faceFor(target, n))
-      return
-    }
-
-    cancelAnimationFrame(s.raf)
-    const from = s.rot
-    const halfTurns = Math.abs(target - from) / 180
-    const dur = 450 + 200 * halfTurns
-    const t0 = performance.now()
-
-    const tick = (now: number) => {
-      const p = Math.min((now - t0) / dur, 1)
-      const rot = from + (target - from) * easeInOut(p)
-      s.rot = rot
-      applyTransform(el, rot, maxRot)
-      setFace(faceFor(rot, n))
-      if (p < 1) s.raf = requestAnimationFrame(tick)
-    }
-    s.raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(s.raf)
-  }, [step, n, maxRot])
-
-  return { panelRef, face }
 }
 
 /**

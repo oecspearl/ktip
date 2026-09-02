@@ -8,30 +8,41 @@ import { Textarea } from '../../components/ui/Textarea'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
+import { CountrySelect } from '../../components/ui/CountrySelect'
 import { User, CheckCircle, ArrowLeft, ArrowRight, Building2, Clock, GraduationCap, Cake } from 'lucide-react'
 import { dateOfBirthSchema, todayIso } from '../../lib/validation'
 import { supabase } from '../../lib/supabase'
 import {
   APP_FULL_NAME,
-  CARIBBEAN_COUNTRIES,
   SKILL_SUGGESTIONS,
   INTEREST_SUGGESTIONS,
   LIMITS,
   VERIFICATION_GATED_ROLES,
 } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
-import { roleRequiresMfa } from '../../lib/permissions'
+import { ROLE_BY_SLUG, roleRequiresMfa } from '../../lib/permissions'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useRequestStudentVerification } from '../../hooks/useInstitutions'
-import type { UserRole } from '../../types'
+import { useMyVerificationRequest, useRequestOrgRole } from '../../hooks/useVerification'
+import { resolveCopy } from '../../i18n/copy'
+import type { RoleSlug, UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { ConsentDocument } from '../../components/legal/ConsentDocument'
 import { CONSENT_BUNDLES, bundleVersion } from '../../lib/legal'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 const TODAY_ISO = todayIso()
+
+/**
+ * Whether a picked role is reviewed by a KTIP administrator rather than by a
+ * school. Read off the catalogue tier rather than a second list, so adding an
+ * organisation role to the grid needs no change here.
+ */
+function isOrgRole(slug: string): boolean {
+  return ROLE_BY_SLUG[slug]?.tier === 'organization'
+}
 
 /**
  * Post-OAuth profile completion. Name and avatar are pre-filled from the
@@ -61,10 +72,12 @@ export default function OnboardingPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
   const [pending, setPending] = useState(false)
-  // Set once a verification-gated role has been queued with the school. The
-  // account genuinely has no role until an educator approves, so this replaces
-  // the wizard rather than navigating away — there is nowhere to navigate to.
-  const [awaitingSchool, setAwaitingSchool] = useState<string | null>(null)
+  // Set once a verification-gated role has been queued with whoever reviews
+  // it — a school for student and faculty, a KTIP administrator for an
+  // organisation. The account genuinely has no role until that approval, so
+  // this replaces the wizard rather than navigating away: there is nowhere to
+  // navigate to.
+  const [awaitingReview, setAwaitingReview] = useState<string | null>(null)
   const prefilled = useRef(false)
   const submitted = useRef(false)
 
@@ -75,6 +88,12 @@ export default function OnboardingPage() {
   const [consentAccepted, setConsentAccepted] = useState(false)
 
   const { requestVerification } = useRequestStudentVerification()
+  const { requestOrgRole } = useRequestOrgRole()
+
+  // An organisation request is a row, not a piece of local state: someone who
+  // reloads before the reviewer answers would otherwise be shown the picker
+  // again, ask a second time, and trip the one-open-request index.
+  const { request: myRequest } = useMyVerificationRequest(auth.user?.id)
 
   // Pre-fill from the OAuth-created profile once it loads
   useEffect(() => {
@@ -234,15 +253,26 @@ export default function OnboardingPage() {
       })
 
       if (needsSchool) {
-        // Only students have a self-serve request: request_student_verification()
-        // matches the account's email domain against a verified institution.
-        // Faculty is assigned by an institution admin from their side, so there
-        // is nothing to call — we say so rather than pretending to queue it.
+        // Three different reviewers behind one flag:
+        //
+        //   student — request_student_verification() matches the account's
+        //     email domain against a verified institution.
+        //   faculty — assigned by an institution admin from their side, so
+        //     there is nothing to call. We say so rather than pretending to
+        //     queue it.
+        //   organisation — a verification request carrying the role, which a
+        //     KTIP administrator grants at /admin/verification (migration 125).
         if (selectedRole === 'student') {
           await requestVerification()
+        } else if (isOrgRole(selectedRole) && auth.user) {
+          await requestOrgRole({
+            userId: auth.user.id,
+            role: selectedRole as RoleSlug,
+            note: organization.trim() || undefined,
+          })
         }
         analytics.funnel('onboarding', 'verification_requested', { role: selectedRole })
-        setAwaitingSchool(selectedRole)
+        setAwaitingReview(selectedRole)
         return
       }
 
@@ -274,35 +304,67 @@ export default function OnboardingPage() {
 
   /** Back out of the pending state to pick a role that needs no approval. */
   const chooseDifferentRole = () => {
-    setAwaitingSchool(null)
+    setAwaitingReview(null)
     setSelectedRole('')
     setErrorMessage('')
     submitted.current = false
     setStep(1)
   }
 
-  // Waiting on a school. Deliberately terminal rather than a redirect: the
+  // Waiting on a reviewer. Deliberately terminal rather than a redirect: the
   // account holds no role yet, so ProtectedRoute would send it straight back
   // here. Saying so plainly beats a redirect loop.
-  if (awaitingSchool) {
-    const isStudent = awaitingSchool === 'student'
+  //
+  // `pendingOrgRequest` is what makes it survive a reload — the row outlives
+  // the component, and without it a returning organisation would be shown the
+  // picker as though it had never asked.
+  const pendingOrgRequest =
+    myRequest?.status === 'pending' && myRequest.requested_role ? myRequest.requested_role : null
+  const waitingOn = awaitingReview ?? (auth.profile?.roles.length ? null : pendingOrgRequest)
+
+  if (waitingOn) {
+    const isStudent = waitingOn === 'student'
+    const isOrg = isOrgRole(waitingOn)
+    const orgLabel = isOrg ? resolveCopy(i18n, ROLE_BY_SLUG[waitingOn]?.label ?? waitingOn) : ''
     return (
       <AuthSplitShell
         step={1}
         steps={steps}
-        heading={isStudent ? t`Waiting on your school` : t`Your institution adds you`}
+        heading={
+          isOrg
+            ? t`Waiting on KTIP review`
+            : isStudent
+              ? t`Waiting on your school`
+              : t`Your institution adds you`
+        }
         subheading={APP_FULL_NAME}
         heroOffset={3}
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 rounded-xl border border-ktip-ocean-200 bg-ktip-ocean-50 px-4 py-3">
-            {isStudent ? (
+            {isOrg ? (
+              <Building2 size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+            ) : isStudent ? (
               <Clock size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
             ) : (
               <GraduationCap size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
             )}
             <div className="text-sm text-ktip-sand-700">
-              {isStudent ? (
+              {isOrg ? (
+                <>
+                  <p className="font-medium text-ktip-sand-900">
+                    <Trans>Your request has been sent.</Trans>
+                  </p>
+                  <p className="mt-1">
+                    <Trans>
+                      You asked to join as <strong>{orgLabel}</strong>. A KTIP administrator
+                      confirms that <strong>{auth.user?.email}</strong> speaks for the organisation,
+                      and that approval is what turns on the account. You will get an email when it
+                      happens.
+                    </Trans>
+                  </p>
+                </>
+              ) : isStudent ? (
                 <>
                   <p className="font-medium text-ktip-sand-900"><Trans>Your request has been sent.</Trans></p>
                   <p className="mt-1">
@@ -331,7 +393,11 @@ export default function OnboardingPage() {
           </div>
 
           <p className="text-sm text-ktip-sand-600">
-            <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — you can still verify with your school later from Settings.</Trans>
+            {isOrg ? (
+              <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — the organisation role is still added when the review comes back.</Trans>
+            ) : (
+              <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — you can still verify with your school later from Settings.</Trans>
+            )}
           </p>
 
           <Button type="button" variant="secondary" fullWidth onClick={chooseDifferentRole}>
@@ -438,19 +504,7 @@ export default function OnboardingPage() {
 
             <IndustrySelect value={industry} onChange={setIndustry} />
 
-            <div className="flex flex-col gap-1.5 w-full">
-              <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
-              >
-                <option value=""><Trans>Select a country</Trans></option>
-                {[...CARIBBEAN_COUNTRIES].map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+            <CountrySelect value={country} onChange={setCountry} />
 
             <Textarea
               label={t`Bio`}

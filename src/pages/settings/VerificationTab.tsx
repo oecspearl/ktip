@@ -8,6 +8,8 @@ import { useMyVerificationRequest, useSubmitVerification } from '../../hooks/use
 import { useFileDrop } from '../../hooks/useFileDrop'
 import { BadgeCheck, Clock, XCircle, Upload, FileText, X } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
+import { ROLE_LABELS } from '../../lib/constants'
+import { resolveCopy } from '../../i18n/copy'
 import { StudentVerificationCard } from '../../components/safeguarding/StudentVerificationCard'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -16,7 +18,7 @@ const MAX_SIZE = 10 * 1024 * 1024 // matches the bucket limit
 const ACCEPTED = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
 
 export function VerificationTab() {
-    const { t } = useLingui()
+    const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
   const { request, loading } = useMyVerificationRequest(auth.user?.id)
@@ -108,6 +110,14 @@ export function VerificationTab() {
             <Clock size={20} className="shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium"><Trans>Your verification request is under review.</Trans></p>
+              {request.requested_role && (
+                <p className="text-xs mt-1">
+                  <Trans>
+                    Requested role:{' '}
+                    {resolveCopy(i18n, ROLE_LABELS[request.requested_role] ?? request.requested_role)}
+                  </Trans>
+                </p>
+              )}
               <p className="text-xs mt-1"><Trans>Submitted {formatDate(request.created_at)}</Trans></p>
             </div>
           </div>

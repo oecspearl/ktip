@@ -4,13 +4,14 @@ import { keys } from '../queries/keys'
 import type { Feedback, FeedbackStatus } from '../types'
 
 // User: own submitted feedback
+//
+// Read through the my_feedback() RPC rather than the table. 127 took the
+// reporter's SELECT on `feedback` away — RLS is row-level, so any policy that
+// let them read their own row handed them `admin_note` with it. The function
+// projects the member-facing columns only.
 export function useMyFeedback(userId: string | undefined) {
-  const fetchFeedback = async (uid: string): Promise<Feedback[]> => {
-    const { data, error } = await (supabase as any)
-      .from('feedback')
-      .select('*')
-      .eq('user_id', uid)
-      .order('created_at', { ascending: false })
+  const fetchFeedback = async (): Promise<Feedback[]> => {
+    const { data, error } = await (supabase as any).rpc('my_feedback')
 
     if (error) throw error
     return (data as any[]) || []
@@ -18,7 +19,7 @@ export function useMyFeedback(userId: string | undefined) {
 
   const query = useQuery({
     queryKey: keys.sub('feedback', 'mine', userId),
-    queryFn: () => fetchFeedback(userId as string),
+    queryFn: fetchFeedback,
     enabled: !!userId,
   })
 
@@ -41,14 +42,13 @@ export function useCreateFeedback() {
       /** Object key in the private feedback-screenshots bucket */
       screenshot_path?: string | null
     }) => {
-      const { data, error } = await (supabase as any)
-        .from('feedback')
-        .insert(feedbackData)
-        .select()
-        .single()
+      // No .select() on the way out: PostgREST applies the SELECT policy to
+      // RETURNING, and 127 made `feedback` admin-read-only. Asking for the row
+      // back would turn every member's report into a 42501. Nothing reads the
+      // return value.
+      const { error } = await (supabase as any).from('feedback').insert(feedbackData)
 
       if (error) throw error
-      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('feedback') })
@@ -86,7 +86,17 @@ export function useAdminFeedback(filters?: { status?: string; category?: string 
   return { feedback: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-// Admin: triage (status + note)
+/** What triage may write. `admin_reply` and its two stamps move together — a
+ *  reply with no date on it cannot be shown to the reporter honestly. */
+export interface FeedbackTriageUpdate {
+  status?: FeedbackStatus
+  admin_note?: string
+  admin_reply?: string
+  replied_at?: string
+  replied_by?: string
+}
+
+// Admin: triage (status + notes + reply)
 export function useUpdateFeedback() {
   const queryClient = useQueryClient()
 
@@ -96,7 +106,7 @@ export function useUpdateFeedback() {
       updates,
     }: {
       feedbackId: string
-      updates: { status?: FeedbackStatus; admin_note?: string }
+      updates: FeedbackTriageUpdate
     }) => {
       const { data, error } = await (supabase as any)
         .from('feedback')
@@ -113,7 +123,7 @@ export function useUpdateFeedback() {
     },
   })
 
-  const updateFeedback = (feedbackId: string, updates: { status?: FeedbackStatus; admin_note?: string }) =>
+  const updateFeedback = (feedbackId: string, updates: FeedbackTriageUpdate) =>
     mutation.mutateAsync({ feedbackId, updates })
 
   return { updateFeedback, loading: mutation.isPending, error: mutation.error }

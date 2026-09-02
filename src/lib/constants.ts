@@ -28,7 +28,7 @@ const LEGACY_ROLE_LABELS: Record<string, string> = {
   mentor: 'Mentor',
   investor: 'Investor/Funding Agency',
   entrepreneur: 'Entrepreneur',
-  private_sector: 'Private Sector/SME',
+  private_sector: 'Private Sector',
   faculty: 'Faculty/Researcher',
   oecs: 'OECS Admin',
 }
@@ -79,12 +79,10 @@ export const ROLE_COLORS: Record<string, string> = {
 
   // Organization tier
   investor: 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200',
-  sme: 'bg-ktip-sand-100 text-ktip-sand-800 border-ktip-sand-200',
   private_sector: 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200',
   educational_partner: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
   chamber_admin: 'bg-ktip-sun-50 text-ktip-sun-800 border-ktip-sun-100',
   ngo: 'bg-ktip-tropical-50 text-ktip-tropical-800 border-ktip-tropical-100',
-  bso: 'bg-ktip-sun-50 text-ktip-sun-700 border-ktip-sun-100',
   research_institution: 'bg-ktip-ocean-50 text-ktip-ocean-700 border-ktip-ocean-100',
   government: 'bg-ktip-sand-200 text-ktip-sand-900 border-ktip-sand-300',
   diaspora: 'bg-ktip-ocean-100 text-ktip-ocean-800 border-ktip-ocean-200',
@@ -99,29 +97,41 @@ export const ROLE_COLORS: Record<string, string> = {
 }
 
 /**
- * Roles offered on the "I am a..." grid at signup and onboarding.
+ * Roles offered on the "I am..." grid at signup and onboarding.
  *
- * `requiresVerification` is the important column. Student and Faculty are NOT
- * self-assignable: role_definitions marks them verification-gated, and the 063
- * guard triggers enforce that — an INSERT silently strips them and an UPDATE
- * raises. They stayed on this grid anyway, which meant anyone picking either
- * one created an account that could never finish onboarding: stripped to no
- * roles, bounced back here by ProtectedRoute, and rejected again on save.
+ * `requiresVerification` is the important column. A gated role is NOT
+ * self-assignable: role_definitions marks it verification-gated, and the 063
+ * guard triggers enforce that — an INSERT silently strips it and an UPDATE
+ * raises. Such roles are on this grid anyway, because "I am a student" and "we
+ * are an NGO" are the truthful answers for much of the intended audience and
+ * hiding them would be worse. Picking one routes into review instead of
+ * writing the role: a school for student and faculty, a KTIP administrator for
+ * every organisation. See RolePicker and OnboardingPage.
  *
- * They are still offered, because "I am a student" is the truthful answer for
- * a large part of the intended audience and hiding it would be worse. Picking
- * one now routes into school verification instead of writing the role. See
- * RolePicker and OnboardingPage.
+ * `group` splits the grid in two. Fourteen roles in one run is a wall of
+ * text; "am I answering for myself or for a body?" is the question that halves
+ * it, and it is the same line the catalogue draws between the individual and
+ * organisation tiers.
  */
 export const SELECTABLE_ROLES = [
-  { value: USER_ROLES.ENTREPRENEUR, label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations', requiresVerification: false },
-  { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects', requiresVerification: true },
-  { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia', requiresVerification: true },
-  { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators', requiresVerification: false },
-  { value: 'researcher', label: ROLE_LABELS.researcher, description: 'Publish research and collaborate on studies', requiresVerification: false },
-  { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects', requiresVerification: false },
-  { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators', requiresVerification: false },
+  { value: USER_ROLES.ENTREPRENEUR, label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations', requiresVerification: false, group: 'individual' },
+  { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects', requiresVerification: true, group: 'individual' },
+  { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia', requiresVerification: true, group: 'individual' },
+  { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators', requiresVerification: false, group: 'individual' },
+  { value: 'researcher', label: ROLE_LABELS.researcher, description: 'Publish research and collaborate on studies', requiresVerification: false, group: 'individual' },
+  { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects', requiresVerification: false, group: 'organization' },
+  { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators', requiresVerification: false, group: 'organization' },
+  { value: 'ngo', label: ROLE_LABELS.ngo, description: 'Deliver programmes and apply for funding', requiresVerification: true, group: 'organization' },
+  { value: 'chamber_admin', label: ROLE_LABELS.chamber_admin, description: 'Verify and support local businesses', requiresVerification: true, group: 'organization' },
+  { value: 'educational_partner', label: ROLE_LABELS.educational_partner, description: 'Approve students and sponsor their applications', requiresVerification: true, group: 'organization' },
+  { value: 'research_institution', label: ROLE_LABELS.research_institution, description: 'Publish knowledge and co-host events', requiresVerification: true, group: 'organization' },
+  { value: 'government', label: ROLE_LABELS.government, description: 'Publish funding calls and administer awards', requiresVerification: true, group: 'organization' },
+  { value: 'diaspora', label: ROLE_LABELS.diaspora, description: 'Connect overseas expertise with the region', requiresVerification: true, group: 'organization' },
+  { value: 'igo', label: ROLE_LABELS.igo, description: 'Fund and convene across member states', requiresVerification: true, group: 'organization' },
 ] as const
+
+/** The two sections of the "I am..." grid, in the order they are shown. */
+export const SELECTABLE_ROLE_GROUPS = ['individual', 'organization'] as const
 
 /** Slugs from SELECTABLE_ROLES that a school or chamber has to approve. */
 export const VERIFICATION_GATED_ROLES = new Set<string>(
@@ -592,6 +602,10 @@ export const SCHEDULE_TYPE_COLORS: Record<string, string> = {
 }
 
 // Caribbean Countries
+/**
+ * @deprecated Superseded by src/lib/countries.ts, which carries every country
+ * with the OECS states first. Kept for anything still importing it.
+ */
 export const CARIBBEAN_COUNTRIES = [
   'Antigua and Barbuda',
   'Bahamas',
@@ -730,16 +744,29 @@ export const INDUSTRY_OTHER = 'Other'
 
 // Openness to Collaborate
 export const COLLABORATION_OPTIONS = [
+  { value: 'funding', label: 'Funding' },
+  { value: 'co_founders', label: 'Co-founders/Project Partners' },
   { value: 'research_co_investigation', label: 'Research Co-Investigation' },
-  { value: 'knowledge_transfer', label: 'Knowledge Transfer' },
-  { value: 'curriculum_advisory', label: 'Curriculum Advisory' },
+  { value: 'technical_support', label: 'Technical Support' },
   { value: 'consultancy', label: 'Consultancy' },
   { value: 'not_seeking', label: 'Not Currently Seeking' },
 ] as const
 
-export const COLLABORATION_LABELS: Record<string, string> = Object.fromEntries(
-  COLLABORATION_OPTIONS.map((o) => [o.value, o.label])
-)
+/**
+ * Values no longer offered, but still sitting in profiles.open_to for members
+ * who picked them. The read sites fall back to the raw slug for anything they
+ * cannot label, so dropping these from the labels would render
+ * "knowledge_transfer" on a public profile.
+ */
+export const COLLABORATION_LEGACY_LABELS: Record<string, string> = {
+  knowledge_transfer: 'Knowledge Transfer',
+  curriculum_advisory: 'Curriculum Advisory',
+}
+
+export const COLLABORATION_LABELS: Record<string, string> = {
+  ...COLLABORATION_LEGACY_LABELS,
+  ...Object.fromEntries(COLLABORATION_OPTIONS.map((o) => [o.value, o.label])),
+}
 
 // Selecting this clears all other collaboration options
 export const COLLAB_EXCLUSIVE_VALUE = 'not_seeking'

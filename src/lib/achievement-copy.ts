@@ -14,10 +14,13 @@ import type { I18n, MessageDescriptor } from '@lingui/core'
  *   requirementText()  the bare metric behind the badge, per check_key. Derived
  *                      from real definition data, never invented.
  *   CATEGORY_MEANING   what earning something in this category says about the
- *                      member. Written per category rather than per badge:
- *                      sixty-eight bespoke paragraphs would be sixty-eight
- *                      things to keep true as the platform changes, and the
- *                      badge's own description already carries the specifics.
+ *                      member. Written per category rather than per badge: a
+ *                      bespoke paragraph per badge would be one more thing to
+ *                      keep true as the platform changes, and the badge's own
+ *                      description already carries the specifics. Migration
+ *                      126 cutting the catalog from 68 badges to 33 changed
+ *                      nothing here, which is the argument for the choice —
+ *                      all eleven categories survived the trim.
  *
  * Nothing here states a statistic about other members. There is no "held by
  * the top 8%" line, because the schema cannot support that number and a
@@ -56,32 +59,8 @@ export function requirementText(
     // ---------- Projects ----------
     case 'projects_created':
       return plural(n, { one: '# project created', other: '# projects created' })
-    case 'projects_launched':
-      return plural(n, {
-        one: '# project taken to launch',
-        other: '# projects taken to launch',
-      })
-    case 'project_likes_received':
-      return plural(n, {
-        one: '# like across all your projects',
-        other: '# likes across all your projects',
-      })
     case 'top_project_likes':
       return plural(n, { one: '# like on a single project', other: '# likes on a single project' })
-    case 'project_followers':
-      return plural(n, {
-        one: '# member following your projects',
-        other: '# members following your projects',
-      })
-    case 'project_views':
-      return plural(n, { one: '# view of your projects', other: '# views of your projects' })
-    case 'project_comments_made':
-      return plural(n, {
-        one: '# comment left on projects',
-        other: '# comments left on projects',
-      })
-    case 'project_collaborations':
-      return plural(n, { one: '# project team joined', other: '# project teams joined' })
 
     // ---------- Grants ----------
     case 'grant_applications':
@@ -111,32 +90,14 @@ export function requirementText(
     // ---------- Community ----------
     case 'forum_activity':
       return plural(n, { one: '# forum post or reply', other: '# forum posts or replies' })
-    case 'forum_posts':
-      return plural(n, {
-        one: '# forum discussion started',
-        other: '# forum discussions started',
-      })
-    case 'forum_replies':
-      return plural(n, { one: '# forum reply', other: '# forum replies' })
 
     // ---------- Network ----------
     case 'connections_accepted':
       return plural(n, { one: '# connection made', other: '# connections made' })
-    case 'messages_sent':
-      return plural(n, { one: '# message sent', other: '# messages sent' })
-    case 'distinct_conversations':
-      return plural(n, {
-        one: '# different member spoken with',
-        other: '# different members spoken with',
-      })
 
     // ---------- Collaboration ----------
     case 'documents_created':
       return plural(n, { one: '# document created', other: '# documents created' })
-    case 'whiteboards_created':
-      return plural(n, { one: '# whiteboard created', other: '# whiteboards created' })
-    case 'snippets_created':
-      return plural(n, { one: '# code snippet created', other: '# code snippets created' })
     case 'collab_shares':
       return plural(n, { one: '# piece of work shared', other: '# pieces of work shared' })
 
@@ -149,14 +110,10 @@ export function requirementText(
       return t`Identity verification completed`
     case 'profile_complete':
       return t`Every part of your profile filled in`
-    case 'roles_held':
-      return plural(n, { one: '# role held on the platform', other: '# roles held on the platform' })
 
     // ---------- Dedication ----------
     case 'streak_days':
       return plural(n, { one: '# day active in a row', other: '# days active in a row' })
-    case 'total_active_days':
-      return plural(n, { one: '# separate day active', other: '# separate days active' })
 
     // ---------- Meta ----------
     case 'total_points':
@@ -164,24 +121,12 @@ export function requirementText(
         one: '# achievement point earned',
         other: '# achievement points earned',
       })
-    case 'badges_earned':
-      return plural(n, { one: '# achievement earned', other: '# achievements earned' })
-    case 'hidden_earned':
-      return plural(n, {
-        one: '# hidden achievement found',
-        other: '# hidden achievements found',
-      })
 
     // ---------- Hidden ----------
     case 'achievements_views':
       return plural(n, {
         one: 'The achievements gallery opened # time',
         other: 'The achievements gallery opened # times',
-      })
-    case 'leaderboard_views':
-      return plural(n, {
-        one: 'The leaderboard checked # time',
-        other: 'The leaderboard checked # times',
       })
     case 'directory_views':
       return plural(n, { one: '# member profile browsed', other: '# member profiles browsed' })

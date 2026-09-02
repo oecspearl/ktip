@@ -184,7 +184,7 @@ INSERT INTO events (id, title, description, event_type, status, location, is_vir
    'A 48-hour hackathon bringing together developers, designers, and entrepreneurs from across the OECS to build climate-resilient solutions. Prizes include mentorship packages and seed funding.',
    'hackathon', 'published',
    'Bay Gardens Hotel, Rodney Bay, Saint Lucia', false,
-   NOW() + INTERVAL '30 days', NOW() + INTERVAL '32 days',
+   NOW() - INTERVAL '1 day', NOW() + INTERVAL '1 day',
    100,
    'https://images.unsplash.com/photo-1629904869392-ae2a682d4d01?w=800&h=600&fit=crop',
    true,
@@ -254,7 +254,9 @@ INSERT INTO events (id, title, description, event_type, status, location, is_vir
 ON CONFLICT (id) DO UPDATE SET
   image_url = EXCLUDED.image_url,
   title = EXCLUDED.title,
-  description = EXCLUDED.description;
+  description = EXCLUDED.description,
+  start_date = EXCLUDED.start_date,
+  end_date = EXCLUDED.end_date;
 
 
 -- ============================================================
@@ -321,33 +323,34 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- ============================================================
 -- 7. EVENT SCHEDULE (hackathon)
+--
+-- Times are derived from the hackathon's own start_date rather than from
+-- NOW(). They used to be hardcoded at NOW() + 30/31 days, which matched the
+-- event only while the event itself was seeded at +30 days: the moment the
+-- hackathon moved to span today, its agenda stayed a month out and the
+-- detail page showed a schedule for an event that had already happened.
 -- ============================================================
 
-INSERT INTO event_schedule (id, event_id, title, description, start_time, end_time, schedule_type, sort_order) VALUES
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000001',
-   'Registration & Welcome', 'Check in, grab your swag bag, and meet your fellow hackers.',
-   NOW() + INTERVAL '30 days', NOW() + INTERVAL '30 days' + INTERVAL '1 hour',
-   'other', 1),
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000001',
-   'Opening Keynote', 'Setting the stage: Climate innovation in the OECS.',
-   NOW() + INTERVAL '30 days' + INTERVAL '1 hour', NOW() + INTERVAL '30 days' + INTERVAL '2 hours',
-   'keynote', 2),
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000001',
-   'Hacking Begins!', 'Form teams, choose challenges, and start building.',
-   NOW() + INTERVAL '30 days' + INTERVAL '2 hours', NOW() + INTERVAL '31 days' + INTERVAL '14 hours',
-   'session', 3),
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000001',
-   'Lunch & Networking', 'Refuel and exchange ideas with other teams.',
-   NOW() + INTERVAL '30 days' + INTERVAL '5 hours', NOW() + INTERVAL '30 days' + INTERVAL '6 hours',
-   'break', 4),
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000001',
-   'Final Presentations & Judging', 'Each team has 5 minutes to pitch their solution.',
-   NOW() + INTERVAL '31 days' + INTERVAL '14 hours', NOW() + INTERVAL '31 days' + INTERVAL '17 hours',
-   'session', 5),
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000001',
-   'Awards Ceremony & Closing', 'Winners announced and prizes awarded.',
-   NOW() + INTERVAL '31 days' + INTERVAL '17 hours', NOW() + INTERVAL '31 days' + INTERVAL '18 hours',
-   'other', 6)
+INSERT INTO event_schedule (id, event_id, title, description, start_time, end_time, schedule_type, sort_order)
+SELECT gen_random_uuid(), e.id, v.title, v.description,
+       e.start_date + v.starts_after, e.start_date + v.ends_after,
+       v.schedule_type, v.sort_order
+FROM events e
+CROSS JOIN (VALUES
+  ('Registration & Welcome', 'Check in, grab your swag bag, and meet your fellow hackers.',
+   INTERVAL '0 hours', INTERVAL '1 hour', 'other', 1),
+  ('Opening Keynote', 'Setting the stage: Climate innovation in the OECS.',
+   INTERVAL '1 hour', INTERVAL '2 hours', 'keynote', 2),
+  ('Hacking Begins!', 'Form teams, choose challenges, and start building.',
+   INTERVAL '2 hours', INTERVAL '1 day 14 hours', 'session', 3),
+  ('Lunch & Networking', 'Refuel and exchange ideas with other teams.',
+   INTERVAL '5 hours', INTERVAL '6 hours', 'break', 4),
+  ('Final Presentations & Judging', 'Each team has 5 minutes to pitch their solution.',
+   INTERVAL '1 day 14 hours', INTERVAL '1 day 17 hours', 'session', 5),
+  ('Awards Ceremony & Closing', 'Winners announced and prizes awarded.',
+   INTERVAL '1 day 17 hours', INTERVAL '1 day 18 hours', 'other', 6)
+) AS v(title, description, starts_after, ends_after, schedule_type, sort_order)
+WHERE e.id = 'd0000000-0000-0000-0000-000000000001'
 ON CONFLICT DO NOTHING;
 
 

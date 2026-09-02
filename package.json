@@ -15,6 +15,7 @@
     "perf": "node scripts/perf/lighthouse.mjs",
     "perf:bundle": "node scripts/perf/bundle-report.mjs",
     "perf:route": "node scripts/perf/trace-route.mjs",
+    "seed:events": "node scripts/refresh-event-dates.mjs",
     "i18n:scan": "node scripts/i18n/scan.mjs",
     "i18n:harvest": "node scripts/i18n/harvest.mjs",
     "i18n:apply": "node scripts/i18n/apply.mjs",

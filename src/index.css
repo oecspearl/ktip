@@ -540,6 +540,36 @@
     100% { transform: translateY(-90px) scale(1.1); opacity: 0; }
   }
 
+  /* The welcome panel's exit: an iris opening at the centre of the screen.
+     250vmax is comfortably past the corner — the half-diagonal of any viewport
+     is at most ~71vmax, so the hole is off-screen well before the end. */
+  --animate-welcome-iris: welcomeIris 760ms cubic-bezier(0.5, 0, 0.35, 1) forwards;
+
+  @keyframes welcomeIris {
+    0% { width: 0; height: 0; }
+    100% { width: 250vmax; height: 250vmax; }
+  }
+
+  /* A line of welcome copy arriving: a focus pull. It rises out of blur and
+     settles, rather than sliding in — the slide alone reads as a UI list
+     animating, the defocus reads as a title card. */
+  --animate-welcome-line: welcomeLine 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes welcomeLine {
+    0% { opacity: 0; transform: translateY(1.1em) scale(0.985); filter: blur(14px); }
+    55% { opacity: 1; }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+
+  /* The same idea run backwards and faster, because leaving should not take as
+     long as arriving. Used both between slides and on the way out. */
+  --animate-welcome-line-out: welcomeLineOut 340ms cubic-bezier(0.4, 0, 1, 1) both;
+
+  @keyframes welcomeLineOut {
+    0% { opacity: 1; transform: none; filter: blur(0); }
+    100% { opacity: 0; transform: translateY(-0.5em) scale(0.99); filter: blur(10px); }
+  }
+
   /* Partner logo marquee — track holds two copies of the row, so sliding from
      -50% to 0 scrolls rightward and loops seamlessly */
   --animate-marquee-right: marqueeRight 35s linear infinite;
@@ -1859,6 +1889,127 @@ html[data-capturing] [data-fab] {
   65% { transform: translate(-6%, -5%) scale(1.06); }
 }
 
+/* ---------------------------------------------------------------------------
+   Welcome panel (first visit).
+
+   Three slides, then an iris. The panel runs through data-phase:
+
+     (none)   the slides are up and being read
+     exiting  copy blurs out AND the iris ground fades in over the split layout
+     iris     copy is unmounted, the ground is solid, the hole opens
+
+   The middle phase is what makes the exit read as one move instead of two: the
+   design dips to the brand navy first, and only then does the navy open. The
+   copy is gone before the hole exists, so nothing is ever seen through it but
+   the page.
+
+   The ground is NOT a background on the panel: it is the spread of a box-shadow
+   cast by a zero-sized circle at the centre of the screen. 100vmax of spread
+   from a point covers any viewport (the half-diagonal tops out near 71vmax), so
+   while the circle is small the screen is solid navy. Growing it pushes the
+   shadow outward as a ring and the page comes through the middle — the Looney
+   Tunes iris. It is built this way because the obvious version does not work: a
+   mask sized to 0 paints nothing at all, so the panel vanished on frame one
+   instead of opening.
+
+   The circle grows by width/height, not transform: a transform scales the
+   shadow spread along with the box, which would uncover the corners
+   immediately. It is one absolutely-positioned element animating alone, out of
+   everything else's layout flow, so the cost is a paint and not a reflow.
+   --------------------------------------------------------------------------- */
+.welcome-panel-iris {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 9999px;
+  /* translate is a percentage of the circle's own box, so it stays centred at
+     every size the animation passes through. */
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 100vmax var(--color-hero-base);
+  /* Invisible until the exit begins — the slides own the screen until then. */
+  opacity: 0;
+}
+
+.welcome-panel[data-phase='exiting'] .welcome-panel-iris {
+  animation: fadeIn 420ms ease-out both;
+}
+
+.welcome-panel[data-phase='iris'] .welcome-panel-iris {
+  opacity: 1;
+  animation: var(--animate-welcome-iris);
+}
+
+.welcome-panel[data-phase='iris'] {
+  /* The page underneath is live the moment the hole opens; clicks aimed at it
+     must not be caught by the ring on its way off screen. */
+  pointer-events: none;
+}
+
+/* A line of copy. The stagger is an inline animation-delay per line, so one
+   class covers the eyebrow, the heading, the body and the controls. */
+.welcome-line {
+  animation: var(--animate-welcome-line);
+}
+
+/* Leaving — between slides, and on the way out of the last one. The delays the
+   entrance set are cleared, or a line would sit there for its stagger before
+   agreeing to go. */
+.welcome-slide[data-leaving] .welcome-line,
+.welcome-panel[data-phase='exiting'] .welcome-line {
+  animation: var(--animate-welcome-line-out);
+  animation-delay: 0ms;
+}
+
+/* The title card. It plays on the iris ground itself — the navy is solid from
+   the first frame, the card sits on top, and when the card is done the navy
+   dissolves to hand over the deck underneath. Same element, three jobs:
+   opening curtain, exit curtain, iris. */
+.welcome-panel[data-phase='title'] .welcome-panel-iris {
+  opacity: 1;
+}
+
+.welcome-panel[data-phase='title-out'] .welcome-panel-iris {
+  animation: fadeOut 720ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* The mark behind the title: a slow breathe, so a card that is only up for a
+   couple of seconds is never a still. Transform and opacity only — one layer,
+   no paint. */
+.welcome-title-mark {
+  transform: translate(-50%, -50%);
+  opacity: 0.1;
+  animation: welcomeBreathe 6s ease-in-out infinite alternate;
+}
+
+@keyframes welcomeBreathe {
+  0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.08; }
+  100% { transform: translate(-50%, -50%) scale(1.06) rotate(-2deg); opacity: 0.14; }
+}
+
+/* The green rule under the title draws itself in from the left. */
+.welcome-rule {
+  transform-origin: left center;
+  animation: welcomeRule 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes welcomeRule {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+/* Slow push-in on the deck's photo, restarted per slide. Long and shallow: it
+   should be felt as depth, not seen as zoom. */
+.welcome-photo {
+  animation: welcomeDrift 9s cubic-bezier(0.2, 0, 0.2, 1) both;
+}
+
+@keyframes welcomeDrift {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.07); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-reveal-up,
   .page-reveal :where(h2),
@@ -1891,6 +2042,27 @@ html[data-capturing] [data-fab] {
   .animate-marquee-left,
   .animate-marquee-right {
     animation: none;
+  }
+
+  /* The welcome copy still arrives, it just arrives without the focus pull —
+     opacity is the one part of it that is not motion. The title card itself is
+     skipped in JS under this preference; these cover its decorations in case a
+     replay starts one anyway. */
+  .welcome-line,
+  .welcome-title-mark,
+  .welcome-rule,
+  .welcome-photo {
+    animation: none;
+  }
+
+  /* The iris is hidden outright rather than merely stopped: an un-animated
+     circle stays at zero, which leaves its shadow covering the whole screen
+     forever. The panel's own timer still unmounts it, so "gone instantly" is
+     the whole exit here. */
+  .welcome-panel[data-phase='exiting'],
+  .welcome-panel[data-phase='iris'] {
+    animation: none;
+    display: none;
   }
 
   /* Dropdowns, folding sections and the messaging panel snap open/shut

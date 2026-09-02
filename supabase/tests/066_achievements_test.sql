@@ -13,7 +13,10 @@
 -- editor, so the assertions call check_achievements_for(<uuid>) —
 -- the same function the client entry point wraps.
 --
--- Requires 066 and 067 to be applied first.
+-- Requires 066, 067 and 126 to be applied first. 126 retuned the rank
+-- ladder section 9 asserts against; run this file against a database
+-- that stops at 067 and section 9 fails on numbers that were correct
+-- when they were written.
 -- ============================================================
 
 BEGIN;
@@ -200,13 +203,27 @@ BEGIN
 
   -- ------------------------------------------------------------
   -- 9. Rank thresholds
+  --
+  -- Numbers are 126's, not 067's. member_rank() keys on badge count, so
+  -- the ladder has to move whenever the catalog size does; 126 cut the
+  -- catalog to 33 and rescaled 0/5/12/22/33/45/55 to 0/2/6/11/16/22/27
+  -- at the same ratios.
   -- ------------------------------------------------------------
   v_rank := member_rank(0);
   ASSERT v_rank->>'name' = 'Newcomer', 'zero achievements should be Newcomer';
-  ASSERT (v_rank->>'next_required')::INT = 5, 'the next rank should require 5';
+  ASSERT (v_rank->>'next_required')::INT = 2, 'the next rank should require 2';
 
   v_rank := member_rank(12);
-  ASSERT (v_rank->>'level')::INT = 3, '12 achievements should be level 3';
+  ASSERT (v_rank->>'level')::INT = 4, '12 achievements should be level 4';
+
+  -- The boundary either side of a threshold, which is the case an
+  -- off-by-one in the loop passes silently.
+  ASSERT (member_rank(10)->>'level')::INT = 3, '10 achievements should still be level 3';
+  ASSERT (member_rank(11)->>'level')::INT = 4, '11 achievements should reach level 4';
+
+  -- Level 7 has to sit inside the catalog or it is a rank nobody holds.
+  SELECT COUNT(*) INTO v_n FROM badges;
+  ASSERT v_n >= 27, 'the catalog (' || v_n || ') is smaller than the level 7 threshold';
 
   v_rank := member_rank(999);
   ASSERT v_rank->>'name' = 'KTIP Champion', 'a very high count should be the top rank';

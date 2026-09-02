@@ -29,6 +29,7 @@ import {
 } from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { cn } from '../../lib/utils'
+import { replayWelcome } from '../../lib/welcome-panel'
 import { useDisclosureAnimation } from './useDisclosureAnimation'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -186,10 +187,14 @@ export function FloatingActionButton() {
   // page's tour attached to this one.
   const [resolvedTour, setResolvedTour] = useState<{ path: string; id: string | null } | null>(null)
   const pageTutorialId = resolvedTour?.path === pathname ? resolvedTour.id : null
+  // The one page whose tour is not in the registry: see the tutorial action.
+  const isHome = pathname === '/'
   const noteCount = notes.length
 
   useEffect(() => {
-    if (!open || resolvedTour?.path === pathname) return
+    // Home is skipped outright: its tour is the welcome panel, so pulling the
+    // registry in would fetch that whole chunk to be told there is no tour.
+    if (!open || isHome || resolvedTour?.path === pathname) return
     let cancelled = false
     void import('../../data/tutorials').then(({ tutorialIdForPath }) => {
       if (!cancelled) setResolvedTour({ path: pathname, id: tutorialIdForPath(pathname) })
@@ -197,7 +202,7 @@ export function FloatingActionButton() {
     return () => {
       cancelled = true
     }
-  }, [open, pathname, resolvedTour])
+  }, [open, isHome, pathname, resolvedTour])
 
   useEffect(() => {
     if (!open) return
@@ -260,10 +265,13 @@ export function FloatingActionButton() {
       icon: <GraduationCap size={px(23)} />,
       tone: 'green',
       onClick: () => {
-        if (pageTutorialId) startTutorial(pageTutorialId)
+        // Home has no registered walkthrough — its tour is the welcome panel,
+        // replayed. Everywhere else runs the tour the registry resolved.
+        if (isHome) replayWelcome()
+        else if (pageTutorialId) startTutorial(pageTutorialId)
         setOpen(false)
       },
-      show: !!pageTutorialId,
+      show: isHome || !!pageTutorialId,
       badge: !!pageTutorialId && !isTutorialCompleted(pageTutorialId),
     },
     {

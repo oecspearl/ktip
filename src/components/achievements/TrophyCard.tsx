@@ -74,8 +74,10 @@ export interface TrophyCardProps {
   size?: 'sm' | 'lg'
   /**
    * Grid density. Drops the description so a tile is scannable at a glance —
-   * the full text lives in the detail popup the tile opens. 68 tiles each
-   * carrying a full sentence is what made the gallery unreadable.
+   * the full text lives in the detail popup the tile opens. Sixty-eight tiles
+   * each carrying a full sentence is what made the gallery unreadable; 126
+   * cut the catalog to 33, which is why the prop is still worth having rather
+   * than why it stopped being needed.
    */
   compact?: boolean
   /**

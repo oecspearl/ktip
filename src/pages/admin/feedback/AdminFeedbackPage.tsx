@@ -2,31 +2,23 @@ import { useEffect, useState } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { Textarea } from '../../../components/ui/Textarea'
 import { Modal } from '../../../components/ui/Modal'
-import { useAdminFeedback, useUpdateFeedback } from '../../../hooks/useFeedback'
+import { useAdminFeedback, useUpdateFeedback, type FeedbackTriageUpdate } from '../../../hooks/useFeedback'
 import { useToast } from '../../../contexts/ToastContext'
+import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
+import { announceFeedbackReply } from '../../../lib/feedback-reply'
+import {
+  FEEDBACK_CATEGORY_COLORS,
+  FEEDBACK_CATEGORY_LABELS,
+  FEEDBACK_STATUS_COLORS,
+  FEEDBACK_STATUS_LABELS,
+} from '../../../lib/feedback-labels'
 import { formatDate } from '../../../lib/utils'
 import type { Feedback, FeedbackStatus } from '../../../types'
-import { MessageCircle, Filter, X, Clock, FileText, Star } from 'lucide-react'
+import { MessageCircle, Filter, X, Clock, FileText, Star, Send, CornerDownRight } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
-
-export const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
-  bug: 'Bug Report',
-  feature_request: 'Feature Request',
-  general: 'General',
-  content: 'Content',
-  praise: 'Praise',
-}
-
-const FEEDBACK_CATEGORY_COLORS: Record<string, string> = {
-  bug: 'bg-red-100 text-red-700 border-red-200',
-  feature_request: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  general: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  content: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
-  praise: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-}
 
 /** Compact read-only rating. Absent on most rows — a report with no stars is
  *  the common case, so nothing is rendered rather than five empty outlines. */
@@ -86,22 +78,14 @@ function FeedbackScreenshot({ path }: { path: string }) {
   )
 }
 
-export const FEEDBACK_STATUS_LABELS: Record<string, string> = {
-  new: 'New',
-  in_review: 'In Review',
-  resolved: 'Resolved',
-  dismissed: 'Dismissed',
-}
-
-const FEEDBACK_STATUS_COLORS: Record<string, string> = {
-  new: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
-  in_review: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
-  resolved: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
-  dismissed: 'bg-ktip-sand-100 text-gray-700 border-ktip-sand-200',
-}
+/** Offered when a report is marked Resolved and nothing has been written yet.
+ *  A starting point, never a send — every reply leaves through the button. */
+const RESOLVED_REPLY_SUGGESTION =
+  'Thanks for reporting this — it has been fixed and is live now.'
 
 export default function AdminFeedbackPage() {
   const toast = useToast()
+  const auth = useAuth()
 
   usePageTitle('User Feedback')
 
@@ -116,19 +100,61 @@ export default function AdminFeedbackPage() {
 
   const [selected, setSelected] = useState<Feedback | null>(null)
   const [adminNote, setAdminNote] = useState('')
+  const [reply, setReply] = useState('')
   const [detailStatus, setDetailStatus] = useState<FeedbackStatus>('new')
 
   const openDetail = (item: Feedback) => {
     setSelected(item)
     setAdminNote(item.admin_note || '')
+    setReply(item.admin_reply || '')
     setDetailStatus(item.status)
   }
 
-  const handleSave = async () => {
+  // An anonymous report carries no user_id, so there is nobody to answer.
+  const canReply = !!selected?.user_id
+  const trimmedReply = reply.trim()
+
+  /** Marking something Resolved is the moment a reply is worth offering. Only
+   *  ever prefills an empty box — it must not overwrite what was typed, or
+   *  resurrect a reply the admin deliberately cleared. */
+  const handleStatusChange = (next: FeedbackStatus) => {
+    setDetailStatus(next)
+    if (next === 'resolved' && canReply && !reply && !selected?.admin_reply) {
+      setReply(RESOLVED_REPLY_SUGGESTION)
+    }
+  }
+
+  const save = async (sendReply: boolean) => {
     if (!selected) return
+
+    const updates: FeedbackTriageUpdate = {
+      status: detailStatus,
+      admin_note: adminNote || undefined,
+    }
+
+    // The reply and its two stamps move together: a reply the reporter can see
+    // with no date on it cannot be presented honestly.
+    if (sendReply) {
+      updates.admin_reply = trimmedReply
+      updates.replied_at = new Date().toISOString()
+      if (auth.user?.id) updates.replied_by = auth.user.id
+    }
+
     try {
-      await updateFeedback(selected.id, { status: detailStatus, admin_note: adminNote || undefined })
-      toast.success('Feedback updated')
+      await updateFeedback(selected.id, updates)
+
+      // Announced only after the row is committed — the notification and the
+      // email both claim a reply exists, and the endpoint re-reads it.
+      if (sendReply && selected.user_id) {
+        announceFeedbackReply({
+          reporterId: selected.user_id,
+          feedbackId: selected.id,
+          subject: selected.subject,
+          reply: trimmedReply,
+        })
+      }
+
+      toast.success(sendReply ? 'Reply sent' : 'Feedback updated')
       setSelected(null)
       refetch()
     } catch (err: any) {
@@ -219,6 +245,12 @@ export default function AdminFeedbackPage() {
                           {item.page_path && (
                             <span className="text-xs text-ktip-sand-400 truncate">{item.page_path}</span>
                           )}
+                          {item.replied_at && (
+                            <span className="text-xs text-ktip-tropical-700 flex items-center gap-1 shrink-0">
+                              <CornerDownRight size={10} />
+                              Replied
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -291,7 +323,7 @@ export default function AdminFeedbackPage() {
               <label className="block text-xs font-medium text-ktip-sand-500 mb-1">Status</label>
               <select
                 value={detailStatus}
-                onChange={(e) => setDetailStatus(e.currentTarget.value as FeedbackStatus)}
+                onChange={(e) => handleStatusChange(e.currentTarget.value as FeedbackStatus)}
                 className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
                 {Object.entries(FEEDBACK_STATUS_LABELS).map(([value, label]) => (
@@ -301,20 +333,67 @@ export default function AdminFeedbackPage() {
             </div>
 
             <Textarea
-              label="Admin Notes"
+              label="Admin notes"
               placeholder="Internal notes about this feedback..."
+              helperText="Internal only — the reporter never sees this."
               value={adminNote}
               onChange={(e) => setAdminNote(e.currentTarget.value)}
               rows={3}
               fullWidth
             />
 
+            {/* The reply half. Separate box, separate button — closing a
+                duplicate quietly has to stay possible. */}
+            <div className="border-t border-ktip-sand-100 pt-5">
+              {selected.admin_reply && selected.replied_at && (
+                <div className="mb-3 rounded-lg border border-ktip-tropical-200 bg-ktip-tropical-50 p-3">
+                  <p className="text-xs font-medium text-ktip-tropical-800 flex items-center gap-1.5">
+                    <CornerDownRight size={12} />
+                    Replied {formatDate(selected.replied_at)}
+                  </p>
+                  <p className="text-sm text-ktip-sand-800 whitespace-pre-wrap mt-1">
+                    {selected.admin_reply}
+                  </p>
+                </div>
+              )}
+
+              <Textarea
+                label="Reply to the reporter"
+                placeholder={
+                  canReply
+                    ? 'Let them know what came of it...'
+                    : 'This report was filed anonymously.'
+                }
+                helperText={
+                  canReply
+                    ? selected.admin_reply
+                      ? 'Sending again replaces the reply they can see, and notifies them afresh.'
+                      : 'Sent to them in the app and by email.'
+                    : 'Filed anonymously, so there is nobody to reply to.'
+                }
+                value={reply}
+                onChange={(e) => setReply(e.currentTarget.value)}
+                rows={3}
+                disabled={!canReply}
+                fullWidth
+              />
+            </div>
+
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="secondary" onClick={() => setSelected(null)}>
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleSave} loading={updating}>
-                Save Changes
+              <Button variant="secondary" onClick={() => save(false)} loading={updating}>
+                Save changes
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => save(true)}
+                loading={updating}
+                disabled={!canReply || !trimmedReply}
+                icon={<Send size={14} />}
+              >
+                Send reply
               </Button>
             </div>
           </div>

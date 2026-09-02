@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { i18n, type MessageDescriptor } from '@lingui/core'
 import { msg, t } from '@lingui/core/macro'
+import { COLLABORATION_LEGACY_LABELS, COLLABORATION_OPTIONS, SELECTABLE_ROLES } from './constants'
 
 // User Authentication Schemas
 export const loginSchema = z.object({
@@ -33,7 +34,16 @@ const passwordSchema = z.string().superRefine((pw, ctx) => {
   }
 })
 
-export const SIGNUP_ROLES = ['student', 'mentor', 'investor', 'entrepreneur', 'private_sector', 'faculty'] as const
+/**
+ * The roles signup will accept, derived from the grid rather than restated.
+ * Hand-maintained, this list fell behind SELECTABLE_ROLES and left the
+ * Researcher card rejecting itself with "Please select a role".
+ *
+ * A verification-gated role passes validation and is sent as signup metadata;
+ * the 063 insert guard is what stops it reaching profiles.roles, and
+ * onboarding turns it into a review request.
+ */
+export const SIGNUP_ROLES = SELECTABLE_ROLES.map((r) => r.value) as unknown as [string, ...string[]]
 
 /** Youngest account KTIP will create. Under this, signup is refused outright. */
 export const MINIMUM_SIGNUP_AGE = 13
@@ -170,13 +180,16 @@ export const backupCodeSchema = z.string().superRefine((value, ctx) => {
   }
 })
 
+/**
+ * Accepted values for profiles.open_to: what is offered today, plus the
+ * retired values still stored on live profiles. Without the retired ones, a
+ * member who picked "Knowledge Transfer" before could not save any profile
+ * edit at all.
+ */
 export const COLLABORATION_VALUES = [
-  'research_co_investigation',
-  'knowledge_transfer',
-  'curriculum_advisory',
-  'consultancy',
-  'not_seeking',
-] as const
+  ...COLLABORATION_OPTIONS.map((o) => o.value),
+  ...Object.keys(COLLABORATION_LEGACY_LABELS),
+] as unknown as [string, ...string[]]
 
 const signupFields = z.object({
   email: z.string().email('Invalid email address'),

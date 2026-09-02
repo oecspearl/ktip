@@ -25,7 +25,6 @@ import {
   UserRound,
 } from 'lucide-react'
 import {
-  CARIBBEAN_COUNTRIES,
   SELECTABLE_ROLES,
   SKILL_SUGGESTIONS,
   INTEREST_SUGGESTIONS,
@@ -35,6 +34,7 @@ import {
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
+import { CountrySelect } from '../../components/ui/CountrySelect'
 import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
@@ -372,19 +372,7 @@ export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}
 
             <IndustrySelect value={industry} onChange={setIndustry} />
 
-            <div className="flex flex-col gap-1.5 w-full">
-              <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
-              >
-                <option value=""><Trans>Select a country</Trans></option>
-                {[...CARIBBEAN_COUNTRIES].map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+            <CountrySelect value={country} onChange={setCountry} />
 
             {/* Both land on the CV — phone in the contact block, website as the
                 "Website" social. Kept here rather than in the CV editor so the

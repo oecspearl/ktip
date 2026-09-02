@@ -32,6 +32,22 @@
 --   Re-running 067 on its own reverts that spacing and interleaves
 --   the new rows; re-run 088 after it to restore.
 --
+-- SUPERSEDED BY 126, which deletes all thirteen badges added here.
+--
+-- The header above states the case against itself. Every gap this file
+-- closed was closed by laddering a metric an existing badge in the same
+-- category already rewarded: forum_posts and forum_replies are the two
+-- halves of forum_activity, distinct_conversations shadows
+-- connections_accepted, total_active_days shadows streak_days, and
+-- project_likes_received shadows top_project_likes. Closing them doubled
+-- the payout for one behaviour rather than naming a new one, which is
+-- what took the catalog to 68 and made it read as a wall.
+--
+-- Kept, not deleted: the file is the record of that decision, its
+-- section 1 sort_order rescale is still what 067's numbering assumes,
+-- and its backfill block is the pattern 126 reuses. Re-running it
+-- resurrects the thirteen rows, so 126 must be re-run after it.
+--
 -- Idempotent — safe to re-run.
 -- ============================================================
 

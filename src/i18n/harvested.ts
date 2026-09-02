@@ -203,6 +203,7 @@ File-based resources upload here; text resources are read in full on the resourc
   msg`Applying in KTIP versus on an external site`,
   msg`Applying through KTIP does not license your idea to the funder — that protection is set out in the Grant Application Confidentiality & IP Terms. What you sign afterwards is a different matter, and it is yours to negotiate.`,
   msg`Approve or reject identity verification`,
+  msg`Approve students and sponsor their applications`,
   msg`Approved`,
   msg`Article`,
   msg`Articles by topic, and how to reach a person.`,
@@ -285,7 +286,7 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Challenge`,
   msg`Challenges and climate action`,
   msg`Chamber SME review`,
-  msg`Chambers of Commerce`,
+  msg`Chambers of Commerce and BSOs`,
   msg`Change it`,
   msg`Change your analytics choice`,
   msg`Change your email address`,
@@ -426,6 +427,7 @@ The brain icon in the panel turns on AI-guided navigation: describe what you are
   msg`Click your avatar in the top-right corner.`,
   msg`Climate Action`,
   msg`Co-editing, formatting and sharing.`,
+  msg`Co-founders/Project Partners`,
   msg`Code Editor`,
   msg`Code and documents shared on KTIP are provided by their authors as is. Neither the author nor %entityShort% warrants that they are correct, secure, fit for any purpose, or free of third-party rights. Review anything before you run it, and never run something you were sent by someone you do not know.`,
   msg`Code produced with AI assistance is your responsibility to check, in the same way as code from any other source. It can reproduce licensed material, and the licence still applies.`,
@@ -465,6 +467,7 @@ Update the phase as the project moves. Funders browsing the Projects list filter
   msg`Confirm the change from the verification email that is sent to the new address.`,
   msg`Confirm — this cannot be undone and your content is removed.`,
   msg`Confirmed`,
+  msg`Connect overseas expertise with the region`,
   msg`Connect with a member`,
   msg`Consent`,
   msg`Consent — withdrawable at any time in Settings`,
@@ -551,6 +554,7 @@ Everything below expands on this; this block is the part worth screenshotting.`,
 Before anything is removed you get a summary of exactly what goes with it — comments, likes, team memberships, documents. If something blocks deletion, that is spelled out instead.
 
 Deleting a project cannot be undone. If you only want it out of public view, switch its visibility to private instead.`,
+  msg`Deliver programmes and apply for funding`,
   msg`Deliverable`,
   msg`Deliverables`,
   msg`Demo Day`,
@@ -679,7 +683,6 @@ Delete is permanent and takes their content with it. It asks twice for that reas
 
 The trophy artwork is picked from the asset set; a badge with no art still works, it just looks unfinished on a profile.`,
   msg`Education`,
-  msg`Educational Partners`,
   msg`Eligibility`,
   msg`Eligibility, deadlines and applying.`,
   msg`Email address, message content`,
@@ -918,6 +921,7 @@ The venue is a floorplan of rooms. Each room shows who is currently in it, updat
 You must be registered for the event to enter its venue. If you are not, register on the event page first.
 
 Venues only exist for events where the organiser has set one up.`,
+  msg`Fund and convene across member states`,
   msg`Funding`,
   msg`Funding for the region`,
   msg`Further standing notices restrict publishing while we review the account.`,
@@ -1783,6 +1787,7 @@ A verified badge means an OECS admin has confirmed the member is who they say th
   msg`Points, badges and leaderboard positions have no monetary value, are not transferable, and may be recalculated or reset — for example when scoring changes or when we remove the effects of gamed activity.`,
   msg`Post a new topic on a discussion board`,
   msg`Post unlawful, defamatory, harassing, hateful or discriminatory content, including content targeting someone for their nationality, island of origin, race, religion, sex, gender, sexual orientation, disability or age.`,
+  msg`Post-Secondary Institutions`,
   msg`Present the data as endorsed, verified or warranted by %entityShort% beyond what the record itself states.`,
   msg`Pressure to decide quickly, or a deadline that keeps moving closer.`,
   msg`Print / Save as PDF gives you a clean document — the page chrome is stripped from the print output.
@@ -1795,7 +1800,6 @@ The other button goes to whatever this was submitted to: the event, the grant, t
   msg`Privacy questions and data-rights requests go to %privacyEmail%, handled by %dpo%.`,
   msg`Private`,
   msg`Private Sector`,
-  msg`Private Sector/SME`,
   msg`Process`,
   msg`Processors`,
   msg`Processors we use`,
@@ -1856,6 +1860,8 @@ You can flip this later from the same form, so publishing is not a decision you 
 
 These are outward links — an entry here is an implicit recommendation, so check the destination still is what it says before publishing.`,
   msg`Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent.`,
+  msg`Publish funding calls and administer awards`,
+  msg`Publish knowledge and co-host events`,
   msg`Publish research and collaborate on studies`,
   msg`Publish research, find collaborators, and join projects.`,
   msg`Publish your own`,
@@ -2288,6 +2294,7 @@ If your institution is not yet registered on KTIP, your account cannot be domain
   msg`Teal`,
   msg`Team Space`,
   msg`Teams`,
+  msg`Technical Support`,
   msg`Technology`,
   msg`Telemetry, user ID, route, browser context`,
   msg`Tell us what is missing`,
@@ -2717,7 +2724,6 @@ The last step asks you to confirm, and warns that knowingly false reports are th
 
 To report one post or message rather than a person, use the report control on the content itself.`,
   msg`Use this route for copyright, and for trade mark or design-right complaints. For harassment, impersonation, fraud or content involving a minor, use the in-app report control instead — those reach a different queue that is triaged faster.`,
-  msg`Use your Chamber-verified status to partner and hire.`,
   msg`User acceptance testing responses`,
   msg`Users by role and by country, projects by category and phase, events by type, and the grant application pipeline by status.
 
@@ -2740,9 +2746,9 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`Verification, badges and points`,
   msg`Verification, history and partner-API publishing.`,
   msg`Verification. Student, faculty and organisation status is confirmed by an institution or chamber, not inferred.`,
-  msg`Verified SMEs`,
   msg`Verified badges for people, students and businesses.`,
   msg`Verified employer and organisation data is also made available to approved partners through our partner API, where you have consented to appear in it. The rules those partners are bound by are published in the Partner API Terms.`,
+  msg`Verify and support local businesses`,
   msg`Verify any funding opportunity independently before sending money, documents or personal data. No legitimate funder on this platform will ask you to pay a fee to receive a grant.`,
   msg`Verify businesses in your member state`,
   msg`Verify employers and control what the partner API publishes`,
@@ -2751,7 +2757,7 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`Verify your students, oversee submissions, and sponsor applications.`,
   msg`Verifying`,
   msg`Verifying institutions and the domains they own.`,
-  msg`Vet and onboard the SMEs in your member state.`,
+  msg`Vet and support the businesses in your member state.`,
   msg`Vetting`,
   msg`Vetting businesses against the corporate registry.`,
   msg`Video`,

@@ -3,7 +3,9 @@ import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
-import type { VerificationRequest } from '../types'
+import { ROLE_BY_SLUG } from '../lib/permissions'
+import { resolveCopy } from '../i18n/copy'
+import type { RoleSlug, VerificationRequest } from '../types'
 
 const BUCKET = 'verification-documents'
 
@@ -35,7 +37,12 @@ export function useSubmitVerification() {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async (params: { userId: string; files: File[]; note?: string }) => {
+    mutationFn: async (params: {
+      userId: string
+      files: File[]
+      note?: string
+      requestedRole?: RoleSlug
+    }) => {
       const paths: string[] = []
       for (const file of params.files) {
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -53,6 +60,7 @@ export function useSubmitVerification() {
           user_id: params.userId,
           document_paths: paths,
           user_note: params.note || null,
+          requested_role: params.requestedRole ?? null,
         })
         .select()
         .single()
@@ -66,6 +74,38 @@ export function useSubmitVerification() {
   })
 
   return { submitRequest: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
+}
+
+/**
+ * Ask for an organisation-tier role (migration 125).
+ *
+ * No documents: the reviewer is checking that this account speaks for the
+ * organisation it names, and at onboarding there is nothing to upload yet. A
+ * chamber or ministry proves itself by correspondence, not by a file picker.
+ *
+ * 23505 is the one-open-request-per-user index (035). Someone who asks twice
+ * has already asked, so it is a success from where they are standing.
+ */
+export function useRequestOrgRole() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (params: { userId: string; role: RoleSlug; note?: string }) => {
+      const { error } = await (supabase as any).from('verification_requests').insert({
+        user_id: params.userId,
+        document_paths: [],
+        user_note: params.note || null,
+        requested_role: params.role,
+      })
+
+      if (error && error.code !== '23505') throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('verification') })
+    },
+  })
+
+  return { requestOrgRole: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 // Admin: all requests, filterable by status
@@ -100,10 +140,18 @@ export async function getVerificationDocumentUrl(path: string): Promise<string |
   return data?.signedUrl ?? null
 }
 
-// Admin: approve/reject. Approval also flips profiles.is_verified,
-// which fires the verified_member badge trigger.
+/**
+ * Admin: approve or reject. One RPC rather than the two table writes this used
+ * to make (migration 125).
+ *
+ * The request row, the verified badge and — when the member asked for an
+ * organisation role — the role itself are one decision, and an organisation
+ * role cannot be written from a browser at all: it is not self-assignable, so
+ * guard_profile_privileged_columns raises. review_verification_request() holds
+ * the bypass and the Super Admin ceiling.
+ */
 export function useReviewVerification() {
-  const { t } = useLingui()
+  const { t, i18n } = useLingui()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -114,39 +162,45 @@ export function useReviewVerification() {
       reviewerId: string
       adminNote?: string
     }) => {
-      const { error } = await (supabase as any)
-        .from('verification_requests')
-        .update({
-          status: params.approve ? 'approved' : 'rejected',
-          reviewer_id: params.reviewerId,
-          reviewed_at: new Date().toISOString(),
-          admin_note: params.adminNote || null,
-        })
-        .eq('id', params.requestId)
+      const { data, error } = await (supabase as any).rpc('review_verification_request', {
+        p_request: params.requestId,
+        p_approve: params.approve,
+        p_note: params.adminNote || null,
+      })
 
       if (error) throw error
 
-      if (params.approve) {
-        const { error: profileError } = await (supabase as any)
-          .from('profiles')
-          .update({ is_verified: true })
-          .eq('id', params.userId)
-        if (profileError) throw profileError
+      if (data?.ok !== true) {
+        throw new Error(
+          data?.reason === 'forbidden'
+            ? t`You do not have permission to review verification requests.`
+            : data?.reason === 'already_reviewed'
+              ? t`This request has already been reviewed.`
+              : data?.reason === 'seat_requires_super_admin'
+                ? t`Only a Super Admin can review an administrator's account.`
+                : t`This request could not be reviewed.`
+        )
       }
+
+      const granted = data.granted_role as RoleSlug | null
+      const grantedLabel = granted ? resolveCopy(i18n, ROLE_BY_SLUG[granted]?.label ?? granted) : null
 
       sendNotification({
         userId: params.userId,
         type: 'verification_result',
         title: params.approve ? t`Verification approved` : t`Verification not accepted`,
         body: params.approve
-          ? t`Your identity verification was approved. Your profile now shows a verified badge.`
+          ? grantedLabel
+            ? t`Your organisation was approved. Your account now holds the ${grantedLabel} role.`
+            : t`Your identity verification was approved. Your profile now shows a verified badge.`
           : params.adminNote || t`Your verification request was not accepted.`,
-        link: '/settings',
+        link: params.approve && grantedLabel ? '/' : '/settings',
       })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('verification') })
       queryClient.invalidateQueries({ queryKey: keys.all('admin-users') })
+      queryClient.invalidateQueries({ queryKey: keys.all('profile') })
     },
   })
 

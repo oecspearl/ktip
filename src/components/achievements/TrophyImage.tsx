@@ -34,8 +34,9 @@ export interface TrophyImageProps {
   locked?: boolean
   /**
    * Sweeps a specular highlight across the metal. Opt-in rather than always
-   * on: 68 tiles all glinting at once is a light show, so the gallery grid
-   * leaves it off and the showcase turns it on.
+   * on: a gallery of tiles all glinting at once is a light show, so the grid
+   * leaves it off and the showcase turns it on. Still opt-in after 126 cut
+   * the catalog to 33 — 33 is fewer than 68 and no less of a light show.
    */
   glare?: boolean
   className?: string

@@ -7,6 +7,7 @@ import { Textarea } from '../../components/ui/Textarea'
 import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
+import { CountrySelect } from '../../components/ui/CountrySelect'
 import { PasswordChecklist } from '../../components/ui/PasswordChecklist'
 import { Mail, Lock, User, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
 import { OtpInput } from '../../components/ui/OtpInput'
@@ -15,14 +16,16 @@ import { supabase } from '../../lib/supabase'
 import { roleRequiresMfa } from '../../lib/permissions'
 import {
   APP_FULL_NAME,
-  CARIBBEAN_COUNTRIES,
   SKILL_SUGGESTIONS,
   INTEREST_SUGGESTIONS,
   LIMITS,
+  ROLE_LABELS,
 } from '../../lib/constants'
 import { analytics } from '../../hooks/useAnalytics'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
+import { FormSection } from '../../components/ui/FormSection'
+import { resolveCopy } from '../../i18n/copy'
 import { OAuthButtons } from '../../components/auth/OAuthButtons'
 import { ConsentDocument } from '../../components/legal/ConsentDocument'
 import { CONSENT_BUNDLES } from '../../lib/legal'
@@ -53,6 +56,13 @@ const TODAY_ISO = todayIso()
 
 // Every required step-1 field, marked touched at once when the user tries to
 // advance with errors still outstanding.
+/**
+ * Step 1 is two folds: the account, and the role. These are the fields of the
+ * first one — the set whose validity decides when it folds away and the role
+ * grid comes forward.
+ */
+const ACCOUNT_FIELDS = ['display_name', 'email', 'password', 'confirm_password', 'date_of_birth'] as const
+
 const ALL_STEP1_TOUCHED: Record<string, boolean> = {
   display_name: true,
   email: true,
@@ -76,6 +86,13 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
+
+  // Which of step 1's two folds is open. The account comes first and the role
+  // grid waits folded underneath it, so a new visitor sees five fields rather
+  // than five fields and fourteen cards. Leaving the last account field with
+  // everything valid swaps them; either header reopens its section by hand.
+  const [accountOpen, setAccountOpen] = useState(true)
+  const [roleOpen, setRoleOpen] = useState(false)
 
   // Step 2 — optional
   const [organization, setOrganization] = useState('')
@@ -153,12 +170,37 @@ export default function SignupPage() {
     setErrors(validateStep1())
   }
 
+  const accountValid = (fieldErrors: Record<string, string>) =>
+    ACCOUNT_FIELDS.every((field) => !fieldErrors[field])
+
+  // Live, from the values themselves rather than from `errors` — that map is
+  // only refreshed on blur, and autofill or a click straight into a later field
+  // never blurs the earlier ones. The tick would otherwise wait on a ritual.
+  const accountComplete = accountValid(validateStep1())
+
+  // Date of birth is the last account field, so leaving it is the natural
+  // "done with this part" moment. The fold only swaps when everything above is
+  // valid — an account section that folds over a bad email hides the error
+  // instead of showing it.
+  const handleDobBlur = () => {
+    markTouched('date_of_birth')
+    const fieldErrors = validateStep1()
+    setErrors(fieldErrors)
+    if (accountValid(fieldErrors)) {
+      setAccountOpen(false)
+      setRoleOpen(true)
+    }
+  }
+
   const goNext = () => {
     if (step === 1) {
       const fieldErrors = validateStep1()
       setErrors(fieldErrors)
       if (Object.keys(fieldErrors).length > 0) {
         setTouched(ALL_STEP1_TOUCHED)
+        // An error inside a folded section is an error nobody can see.
+        if (!accountValid(fieldErrors)) setAccountOpen(true)
+        if (fieldErrors.role) setRoleOpen(true)
         return
       }
       analytics.funnel('signup', 'step_1_complete', { role: selectedRole })
@@ -363,94 +405,120 @@ export default function SignupPage() {
 
             {step === 1 && (
               <div className="space-y-3">
-                <Input
-                  type="text"
-                  label={t`Display Name`}
-                  placeholder={t`Enter your full name`}
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  onBlur={() => handleBlur('display_name')}
-                  error={visibleError('display_name')}
-                  icon={<User size={20} />}
-                  fullWidth
-                  required
-                />
+                <FormSection
+                  title={t`Your account`}
+                  summary={
+                    displayName.trim() || email.trim()
+                      ? [displayName.trim(), email.trim()].filter(Boolean).join(' · ')
+                      : t`Name, email, password and date of birth`
+                  }
+                  open={accountOpen}
+                  onToggle={() => setAccountOpen((o) => !o)}
+                  complete={accountComplete}
+                >
+                  <div className="space-y-3">
+                    <Input
+                      type="text"
+                      label={t`Display Name`}
+                      placeholder={t`Enter your full name`}
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      onBlur={() => handleBlur('display_name')}
+                      error={visibleError('display_name')}
+                      icon={<User size={20} />}
+                      fullWidth
+                      required
+                    />
 
-                <Input
-                  type="email"
-                  label={t`Email`}
-                  placeholder={t`Enter your email`}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => handleBlur('email')}
-                  error={visibleError('email')}
-                  icon={<Mail size={20} />}
-                  fullWidth
-                  required
-                />
+                    <Input
+                      type="email"
+                      label={t`Email`}
+                      placeholder={t`Enter your email`}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onBlur={() => handleBlur('email')}
+                      error={visibleError('email')}
+                      icon={<Mail size={20} />}
+                      fullWidth
+                      required
+                    />
 
-                <div>
+                    <div>
+                      <Input
+                        type="password"
+                        label={t`Password`}
+                        placeholder={t`Create a password`}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onBlur={() => handleBlur('password')}
+                        error={visibleError('password')}
+                        icon={<Lock size={20} />}
+                        fullWidth
+                        required
+                      />
+                      {(password.length > 0 || touched.password) && (
+                        <PasswordChecklist password={password} />
+                      )}
+                  </div>
+
                   <Input
                     type="password"
-                    label={t`Password`}
-                    placeholder={t`Create a password`}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={() => handleBlur('password')}
-                    error={visibleError('password')}
+                    label={t`Confirm Password`}
+                    placeholder={t`Re-enter your password`}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={() => handleBlur('confirm_password')}
+                    error={
+                      touched.confirm_password && mismatch
+                        ? t`Passwords do not match`
+                        : visibleError('confirm_password')
+                    }
                     icon={<Lock size={20} />}
                     fullWidth
                     required
                   />
-                  {(password.length > 0 || touched.password) && (
-                    <PasswordChecklist password={password} />
-                  )}
-                </div>
 
-                <Input
-                  type="password"
-                  label={t`Confirm Password`}
-                  placeholder={t`Re-enter your password`}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onBlur={() => handleBlur('confirm_password')}
-                  error={
-                    touched.confirm_password && mismatch
-                      ? t`Passwords do not match`
-                      : visibleError('confirm_password')
+                  <Input
+                    type="date"
+                    label={t`Date of Birth`}
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    onBlur={handleDobBlur}
+                    error={visibleError('date_of_birth')}
+                    helperText={t`Members under 18 get extra protections on their account.`}
+                    icon={<Cake size={20} />}
+                    max={TODAY_ISO}
+                    fullWidth
+                    required
+                  />
+                  </div>
+                </FormSection>
+
+                <FormSection
+                  title={t`Your role`}
+                  summary={
+                    selectedRole
+                      ? resolveCopy(i18n, ROLE_LABELS[selectedRole] ?? selectedRole)
+                      : t`Not chosen yet`
                   }
-                  icon={<Lock size={20} />}
-                  fullWidth
-                  required
-                />
-
-                <Input
-                  type="date"
-                  label={t`Date of Birth`}
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  onBlur={() => handleBlur('date_of_birth')}
-                  error={visibleError('date_of_birth')}
-                  helperText={t`Members under 18 get extra protections on their account.`}
-                  icon={<Cake size={20} />}
-                  max={TODAY_ISO}
-                  fullWidth
-                  required
-                />
-
-                <RolePicker
-                  value={selectedRole}
-                  onChange={(value) => {
-                    setSelectedRole(value)
-                    markTouched('role')
-                    setErrors((prev) => {
-                      const next = { ...prev }
-                      delete next.role
-                      return next
-                    })
-                  }}
-                  error={visibleError('role')}
-                />
+                  open={roleOpen}
+                  onToggle={() => setRoleOpen((o) => !o)}
+                  complete={!!selectedRole}
+                >
+                  <RolePicker
+                    value={selectedRole}
+                    onChange={(value) => {
+                      setSelectedRole(value)
+                      markTouched('role')
+                      setErrors((prev) => {
+                        const next = { ...prev }
+                        delete next.role
+                        return next
+                      })
+                    }}
+                    error={visibleError('role')}
+                  />
+                </FormSection>
 
                 <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>
                   <Trans>Next</Trans>
@@ -505,19 +573,7 @@ export default function SignupPage() {
 
                 <IndustrySelect value={industry} onChange={setIndustry} />
 
-                <div className="flex flex-col gap-1.5 w-full">
-                  <label className="text-sm font-medium text-ktip-sand-700"><Trans>Country</Trans></label>
-                  <select
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
-                  >
-                    <option value=""><Trans>Select a country</Trans></option>
-                    {[...CARIBBEAN_COUNTRIES].map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
+                <CountrySelect value={country} onChange={setCountry} />
 
                 <Textarea
                   label={t`Bio`}

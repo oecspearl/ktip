@@ -25,11 +25,9 @@ export type RoleSlug =
   | 'programme_supervisor'
   | 'safety_admin'
   // tier 2 — organization
-  | 'sme'
   | 'educational_partner'
   | 'chamber_admin'
   | 'ngo'
-  | 'bso'
   | 'research_institution'
   | 'government'
   | 'diaspora'
@@ -1176,6 +1174,11 @@ export interface VerificationRequest {
   admin_note: string | null
   reviewer_id: string | null
   reviewed_at: string | null
+  /**
+   * Organisation-tier role the member asked for at onboarding, granted on
+   * approval (migration 125). NULL for a plain identity check.
+   */
+  requested_role: RoleSlug | null
   created_at: string
   updated_at: string
   user?: Profile
@@ -1435,7 +1438,13 @@ export interface Feedback {
   subject: string
   message: string
   status: FeedbackStatus
+  /** Internal triage note. 127 stops the reporter from reading it — it is
+   *  admin-only, and `admin_reply` is the half written for them. */
   admin_note: string | null
+  // 127. The reply the reporter sees in Settings › Feedback.
+  admin_reply?: string | null
+  replied_at?: string | null
+  replied_by?: string | null
   // 093. Optional because a deploy can precede the migration.
   rating?: number | null
   page_path?: string | null

@@ -13,8 +13,8 @@ import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { ConnectButton } from '../../components/directory/ConnectButton'
 import { BentoCard } from '../../components/ui/BentoCard'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
+import { CountrySelect } from '../../components/ui/CountrySelect'
 import {
-  CARIBBEAN_COUNTRIES,
   DIRECTORY_ROLE_LABELS,
   ROLE_LABELS,
   SKILL_SUGGESTIONS,
@@ -234,16 +234,7 @@ export default function DirectoryPage() {
             </select>
 
             {/* Country Filter */}
-            <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
-            >
-              <option value=""><Trans>All Countries</Trans></option>
-              {CARIBBEAN_COUNTRIES.map((country) => (
-                <option key={country} value={country}>{country}</option>
-              ))}
-            </select>
+            <CountrySelect variant="filter" value={selectedCountry} onChange={setSelectedCountry} />
 
             {/* Skill Filter */}
             <select

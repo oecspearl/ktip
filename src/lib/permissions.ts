@@ -135,51 +135,46 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     sortOrder: 30,
   },
   {
-    slug: 'sme',
-    label: msg`Verified SME`,
-    tier: 'organization',
-    description: msg`Business account vetted by its National Chamber of Commerce.`,
-    selfAssignable: false,
-    requiresVerification: true,
-    sortOrder: 40,
-  },
-  {
     slug: 'private_sector',
     label: msg`Private Sector`,
     tier: 'organization',
-    description: msg`Unverified business account. Gains SME capabilities once a Chamber verifies it.`,
+    description: msg`Business account. A Chamber of Commerce can verify the business, which marks the owner verified.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 50,
   },
   {
     slug: 'educational_partner',
-    label: msg`Educational Partner`,
+    label: msg`Post-Secondary Institution`,
     tier: 'organization',
-    description: msg`School or university. Manages domain verification, approves student accounts, oversees submissions.`,
+    description: msg`College, university or other post-secondary institution. Manages domain verification, approves student accounts, oversees submissions.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 60,
   },
   {
     slug: 'chamber_admin',
-    label: msg`Chamber of Commerce`,
+    label: msg`Chamber of Commerce / BSO`,
     tier: 'organization',
-    description: msg`Country-level vetting authority that verifies and onboards local SMEs.`,
+    description: msg`Chamber of Commerce or business support organisation — incubator, accelerator or MSME agency — that verifies local businesses and supports the cohort it works with.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 70,
   },
 
-  // The six ecosystem actors from Roadmap Table 3. All organisation-tier and
-  // all review-gated: every one of them speaks for a body rather than a person,
-  // and the claim to be that body is exactly what an administrator checks.
+  // The ecosystem actors from Roadmap Table 3. All organisation-tier and all
+  // review-gated: every one of them speaks for a body rather than a person, and
+  // the claim to be that body is exactly what an administrator checks.
   //
-  // `research_institution` is deliberately NOT "post-secondary institution":
-  // schools and universities are already `educational_partner`, and a second
-  // slug for the same thing would split the student-approval path in two. What
-  // was missing is the research body that publishes and co-hosts without being
-  // anyone's school.
+  // `research_institution` is deliberately NOT the post-secondary slug —
+  // `educational_partner` carries that label, and a second slug for the same
+  // institution would split the student-approval path in two. What was missing
+  // is the research body that publishes and co-hosts without being anyone's
+  // school.
+  //
+  // `bso` was one of these until 125 folded it into `chamber_admin`: an
+  // incubator and a chamber vet the same businesses, and two slugs for it split
+  // the verifier list without splitting the duty.
   {
     slug: 'ngo',
     label: msg`Non-Governmental Organization`,
@@ -188,15 +183,6 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 72,
-  },
-  {
-    slug: 'bso',
-    label: msg`Business Support Organization`,
-    tier: 'organization',
-    description: msg`Incubator, accelerator or MSME support agency. Mentors founders, hosts programmes, channels funding to its cohort.`,
-    selfAssignable: false,
-    requiresVerification: true,
-    sortOrder: 73,
   },
   {
     slug: 'research_institution',
@@ -472,7 +458,7 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   { key: 'dm:supervise', label: msg`Supervise student channels`, description: msg`Counts as the designated educator that makes a student channel monitored.`, category: 'messaging', safeguard: true, sortOrder: 200 },
 
   // Verification
-  { key: 'sme:verify', label: msg`Verify SMEs`, description: msg`Chamber of Commerce review of corporate registry data; issues Verified SME status.`, category: 'verification', safeguard: false, sortOrder: 210 },
+  { key: 'sme:verify', label: msg`Verify SMEs`, description: msg`Chamber or BSO review of corporate registry data; marks the business owner verified.`, category: 'verification', safeguard: false, sortOrder: 210 },
   { key: 'institution:verify', label: msg`Verify institutions`, description: msg`Approve schools and chambers, and the email domains they own.`, category: 'verification', safeguard: false, sortOrder: 220 },
   { key: 'institution:approve_students', label: msg`Approve student accounts`, description: msg`Approve students registering on the institution’s verified email domain.`, category: 'verification', safeguard: true, sortOrder: 230 },
   { key: 'verification:review', label: msg`Review verification requests`, description: msg`Work the /admin/verification queue and set a member’s verified badge.`, category: 'verification', safeguard: false, sortOrder: 235 },
@@ -606,19 +592,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:receive',
   ],
 
-  sme: [
-    'grant:view',
-    'grant:apply',
-    'project:create',
-    'project:manage',
-    'event:create',
-    'forum:post',
-    'forum:comment',
-    'mentorship:offer',
-    'dm:initiate',
-    'dm:receive',
-  ],
-
   private_sector: [
     'grant:view',
     'project:create',
@@ -646,11 +619,20 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:supervise',
   ],
 
+  // Chamber of Commerce / BSO. One column since 125: the incubator and the
+  // chamber both vet local businesses, and holding two slugs for that split the
+  // verifier list without ever splitting the duty. The union of the two old
+  // sets, so a migrated BSO keeps the projects and events it was running.
   chamber_admin: [
     'sme:verify',
     'grant:view',
+    'grant:apply',
+    'project:create',
+    'project:manage',
+    'event:create',
     'forum:post',
     'forum:comment',
+    'mentorship:offer',
     'dm:initiate',
     'dm:receive',
   ],
@@ -673,23 +655,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'forum:post',
     'forum:comment',
     'mentorship:offer',
-    'dm:initiate',
-    'dm:receive',
-  ],
-
-  // ngo's set plus sme:verify. An incubator already knows which of its cohort
-  // are trading businesses — that is the whole content of its programme — so it
-  // is a second competent verifier alongside the chambers.
-  bso: [
-    'grant:view',
-    'grant:apply',
-    'project:create',
-    'project:manage',
-    'event:create',
-    'forum:post',
-    'forum:comment',
-    'mentorship:offer',
-    'sme:verify',
     'dm:initiate',
     'dm:receive',
   ],

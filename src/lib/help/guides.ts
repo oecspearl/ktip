@@ -116,7 +116,7 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     description: 'Find partnerships, attend events, and support innovation.',
     steps: [
       'Create your account and set your role to Private Sector',
-      'Submit your business to your Chamber of Commerce to become a Verified SME',
+      'Submit your business to your Chamber of Commerce or BSO to have it verified',
       'Browse projects for partnership opportunities',
       'Attend events to meet the innovation community',
       'Use the collaboration tools for joint work',
@@ -128,25 +128,8 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     ],
   },
   {
-    role: 'sme',
-    title: 'Verified SMEs',
-    description: 'Use your Chamber-verified status to partner and hire.',
-    steps: [
-      'Get verified by your national Chamber of Commerce',
-      'Complete your business profile so partners know what you do',
-      'Browse projects for suppliers, partners and pilot opportunities',
-      'Sponsor or host events, including hackathon sponsor booths',
-      'Track your business status from the Business tab on your Dashboard',
-    ],
-    quickLinks: [
-      { label: 'Business Verification', href: '/sme/verification' },
-      { label: 'Browse Projects', href: '/projects' },
-      { label: 'Resources', href: '/resources' },
-    ],
-  },
-  {
     role: 'educational_partner',
-    title: 'Educational Partners',
+    title: 'Post-Secondary Institutions',
     description: 'Verify your students, oversee submissions, and sponsor applications.',
     steps: [
       'Register your institution with OECS to be granted the role',
@@ -163,14 +146,14 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   },
   {
     role: 'chamber_admin',
-    title: 'Chambers of Commerce',
-    description: 'Vet and onboard the SMEs in your member state.',
+    title: 'Chambers of Commerce and BSOs',
+    description: 'Vet and support the businesses in your member state.',
     steps: [
-      'Get your Chamber account granted by OECS',
-      'Work through the SME submissions queued for your member state',
+      'Get your Chamber or BSO account granted by OECS',
+      'Work through the business submissions queued for your member state',
       'Check each legal name and registration number against your own records',
-      'Approve to grant Verified SME status, or decline with a reason',
-      'Keep an eye on the queue — unverified businesses cannot use SME features',
+      'Approve to mark the business verified, or decline with a reason',
+      'Keep an eye on the queue — an unverified business carries no badge',
     ],
     quickLinks: [
       { label: 'Admin Console', href: '/admin/chamber' },

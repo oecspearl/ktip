@@ -19,6 +19,11 @@
 -- Points are never written by hand — rarity_points(rarity) derives
 -- them, so the rarity/points relationship cannot drift.
 --
+-- SUPERSEDED IN PART BY 126. This file still owns the definition of
+-- every badge it seeds, but no longer decides which of them ship: 126
+-- deletes 35 of the 68 rows 067 and 088 create between them. Re-running
+-- this file resurrects those rows, so 126 must be re-run after it.
+--
 -- Idempotent — safe to re-run.
 -- ============================================================
 

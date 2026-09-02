@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { loginSchema, signupSchema, projectSchema } from './validation'
+import { loginSchema, signupSchema, projectSchema, SIGNUP_ROLES } from './validation'
+import { SELECTABLE_ROLES } from './constants'
 
 describe('loginSchema', () => {
   it('accepts valid login data', () => {
@@ -96,6 +97,42 @@ describe('signupSchema', () => {
       role: 'student',
     })
     expect(result.success).toBe(false)
+  })
+
+  // The accepted roles and the offered roles were two hand-kept lists, and they
+  // drifted: the Researcher card was on the grid and rejected by the schema,
+  // so choosing it failed with "Please select a role" and no way forward.
+  it('accepts every role the picker offers', () => {
+    expect([...SIGNUP_ROLES].sort()).toEqual(SELECTABLE_ROLES.map((r) => r.value).sort())
+
+    for (const role of SELECTABLE_ROLES) {
+      const result = signupSchema.safeParse({
+        email: 'user@example.com',
+        password: 'Password123!',
+        confirm_password: 'Password123!',
+        display_name: 'John Doe',
+        role: role.value,
+        date_of_birth: '1995-06-15',
+      })
+      expect(result.success, `role '${role.value}' must pass signup`).toBe(true)
+    }
+  })
+
+  // A retired collaboration value is still on live profiles. Rejecting it here
+  // would lock those members out of saving any profile change at all.
+  it('accepts current and retired collaboration values', () => {
+    for (const openTo of [['funding'], ['co_founders', 'technical_support'], ['knowledge_transfer']]) {
+      const result = signupSchema.safeParse({
+        email: 'user@example.com',
+        password: 'Password123!',
+        confirm_password: 'Password123!',
+        display_name: 'John Doe',
+        role: 'entrepreneur',
+        date_of_birth: '1995-06-15',
+        open_to: openTo,
+      })
+      expect(result.success, `open_to ${openTo.join()} must pass`).toBe(true)
+    }
   })
 })
 

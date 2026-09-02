@@ -10,6 +10,9 @@ import {
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
 import { formatDate } from '../../../lib/utils'
+import { ROLE_COLORS, ROLE_LABELS } from '../../../lib/constants'
+import { resolveCopy } from '../../../i18n/copy'
+import { useLingui } from '@lingui/react/macro'
 import type { VerificationRequest } from '../../../types'
 import { BadgeCheck, CheckCircle, XCircle, ExternalLink, Filter, X, FileText } from 'lucide-react'
 import { usePageTitle } from '../../../hooks/usePageTitle'
@@ -28,9 +31,25 @@ const STATUS_COLORS: Record<string, string> = {
   rejected: 'bg-red-100 text-red-700 border-red-200',
 }
 
+/**
+ * Badge for the organisation role a request asks for (migration 125). A
+ * request with no role is a plain identity check and shows nothing.
+ */
+function RoleChip({ slug }: { slug: string }) {
+  const { i18n } = useLingui()
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${ROLE_COLORS[slug] || 'bg-ktip-sand-100 text-ktip-sand-700 border-ktip-sand-200'}`}
+    >
+      {resolveCopy(i18n, ROLE_LABELS[slug] ?? slug)}
+    </span>
+  )
+}
+
 export default function AdminVerificationPage() {
   const auth = useAuth()
   const toast = useToast()
+  const { i18n } = useLingui()
 
   usePageTitle('Verification Requests')
 
@@ -63,7 +82,13 @@ export default function AdminVerificationPage() {
         reviewerId: auth.user.id,
         adminNote: adminNote.trim() || undefined,
       })
-      toast.success(approve ? 'Request approved — user is now verified' : 'Request not accepted')
+      toast.success(
+        approve
+          ? selected.requested_role
+            ? `Approved — ${resolveCopy(i18n, ROLE_LABELS[selected.requested_role] ?? selected.requested_role)} role granted`
+            : 'Request approved — user is now verified'
+          : 'Request not accepted'
+      )
       setSelected(null)
       refetch()
     } catch (err: any) {
@@ -126,11 +151,15 @@ export default function AdminVerificationPage() {
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-ktip-sand-900 truncate">{name}</p>
                       <p className="text-xs text-ktip-sand-500">
-                        {request.document_paths.length} document{request.document_paths.length !== 1 ? 's' : ''} · {formatDate(request.created_at)}
+                        {request.requested_role && request.document_paths.length === 0
+                          ? 'Role request'
+                          : `${request.document_paths.length} document${request.document_paths.length !== 1 ? 's' : ''}`}{' '}
+                        · {formatDate(request.created_at)}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {request.requested_role && <RoleChip slug={request.requested_role} />}
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${STATUS_COLORS[request.status]}`}
                     >
@@ -169,6 +198,17 @@ export default function AdminVerificationPage() {
               <p className="text-xs text-ktip-sand-500">Submitted {formatDate(selected.created_at)}</p>
             </div>
 
+            {selected.requested_role && (
+              <div>
+                <p className="text-xs font-medium text-ktip-sand-500 mb-1">Requested role</p>
+                <RoleChip slug={selected.requested_role} />
+                <p className="mt-2 text-sm text-ktip-sand-600">
+                  Approving grants this role to the account. Confirm the member speaks for the
+                  organisation before you do.
+                </p>
+              </div>
+            )}
+
             {selected.user_note && (
               <div>
                 <p className="text-xs font-medium text-ktip-sand-500 mb-1">User note</p>
@@ -180,6 +220,9 @@ export default function AdminVerificationPage() {
 
             <div>
               <p className="text-xs font-medium text-ktip-sand-500 mb-2">Documents</p>
+              {selected.document_paths.length === 0 && (
+                <p className="text-sm text-ktip-sand-500">No documents attached.</p>
+              )}
               <div className="space-y-2">
                 {selected.document_paths.map((path) => (
                   <a
@@ -226,7 +269,7 @@ export default function AdminVerificationPage() {
                   loading={reviewing}
                   icon={<CheckCircle size={16} />}
                 >
-                  Approve & Verify
+                  {selected.requested_role ? 'Approve & grant role' : 'Approve & Verify'}
                 </Button>
               </div>
             ) : (

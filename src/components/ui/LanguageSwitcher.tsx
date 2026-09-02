@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Globe } from 'lucide-react'
+import { Check, Languages } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
 import { cn } from '@/lib/utils'
 import { DropdownPanel } from './DropdownPanel'
@@ -14,8 +14,10 @@ import { LANGUAGE_NAMES, SELECTABLE_LANGS } from '@/i18n/language'
  * translated name is exactly the thing they cannot read.
  *
  * Deliberately not a native <select>: the control has to be recognisable at a
- * glance to someone who cannot read the surrounding copy, and a globe plus a
- * two-letter code reads as "language" in every language.
+ * glance to someone who cannot read the surrounding copy. The icon is the
+ * two-scripts glyph rather than a globe — a globe is the icon for region,
+ * country and network as well, while two alphabets side by side can only mean
+ * language.
  */
 export function LanguageSwitcher({
   className,
@@ -65,7 +67,7 @@ export function LanguageSwitcher({
           compact ? 'p-2 hover:scale-125' : 'px-2.5 py-1.5 text-sm hover:bg-white/10 hover:text-white'
         )}
       >
-        <Globe size={compact ? 20 : 16} aria-hidden="true" />
+        <Languages size={compact ? 20 : 16} aria-hidden="true" />
         {!compact && <span className="font-medium uppercase tracking-wide">{uiLang}</span>}
         {/* The current language still has to be announced when the code is
             hidden, or the control reads as an unlabelled globe. */}

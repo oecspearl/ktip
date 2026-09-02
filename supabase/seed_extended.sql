@@ -428,7 +428,9 @@ INSERT INTO project_follows (project_id, user_id) VALUES
   ('b0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000003')
 ON CONFLICT (project_id, user_id) DO NOTHING;
 
--- Realistic view counts (also feeds the wide_reach badge progress)
+-- Realistic view counts. These fed the wide_reach badge until 126 cut it;
+-- project_views is still derived by achievement_counts(), so the numbers
+-- stay here for the project cards and for whatever reads the metric next.
 UPDATE projects SET view_count = GREATEST(view_count, v.views)
 FROM (VALUES
   ('b0000000-0000-0000-0000-000000000001'::uuid, 412),
@@ -825,7 +827,11 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO user_showcase (user_id, badge_id, position)
 SELECT 'a0000000-0000-0000-0000-000000000001'::uuid, b.id, x.pos
-FROM (VALUES ('event_host', 1::smallint), ('well_connected', 2::smallint), ('regular_visitor', 3::smallint)) x(slug, pos)
+-- regular_visitor was cut by 126 (total_active_days shadowed streak_days).
+-- verified_member replaces it: Marcia is seeded is_verified, so this slot
+-- fills deterministically rather than depending on how many days the
+-- backfill happened to mark active.
+FROM (VALUES ('event_host', 1::smallint), ('well_connected', 2::smallint), ('verified_member', 3::smallint)) x(slug, pos)
 JOIN badges b ON b.slug = x.slug
 WHERE EXISTS (SELECT 1 FROM user_badges ub WHERE ub.user_id = 'a0000000-0000-0000-0000-000000000001' AND ub.badge_id = b.id)
 ON CONFLICT DO NOTHING;
