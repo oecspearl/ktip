@@ -40,28 +40,51 @@ export default function ConnectionsTab() {
             : connection.requester_id
         const otherName = other?.display_name || t`Unknown User`
         return (
+          /*
+           * The whole card opens the preview, not just the name.
+           *
+           * A button is the outer element rather than a wrapper around one, so
+           * there is a single tab stop per card and the entire surface is the
+           * target. Remove sits inside it, which nests an interactive element
+           * in a button — invalid, and a real problem for a screen reader — so
+           * the row is a div with a click handler plus an explicit button role
+           * and key handling, and Remove stops propagation.
+           */
           <div
             key={connection.id}
-            className="flex items-center justify-between gap-3 bg-ktip-cream border border-ktip-sand-200 rounded-lg p-4"
+            role="button"
+            tabIndex={0}
+            onClick={() => openMember(otherId)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                openMember(otherId)
+              }
+            }}
+            aria-label={otherName}
+            className="group flex cursor-pointer items-center justify-between gap-3 rounded-surface bg-ktip-cream p-4 shadow-neu transition-shadow hover:shadow-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
           >
-            <button
-              type="button"
-              onClick={() => openMember(otherId)}
-              className="flex items-center gap-3 min-w-0 group text-left"
-            >
+            <span className="flex min-w-0 items-center gap-3 text-left">
               <DiamondAvatar src={other?.avatar_url} name={otherName} size={44} />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-ktip-sand-900 truncate group-hover:text-ktip-ocean-600 transition-colors">
+              <span className="min-w-0">
+                <span className="block truncate text-caption font-bold text-ktip-sand-900 transition-colors group-hover:text-ktip-ocean-600">
                   {otherName}
-                </p>
+                </span>
                 {other?.country && (
-                  <p className="text-xs text-gray-500 truncate">{other.country}</p>
+                  <span className="block truncate text-micro text-ktip-sand-500">
+                    {other.country}
+                  </span>
                 )}
-              </div>
-            </button>
+              </span>
+            </span>
             <button
-              onClick={() => removeConnection(connection.id)}
-              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+              onClick={(e) => {
+                // Without this the card's own handler fires straight after and
+                // opens the preview for the member just removed.
+                e.stopPropagation()
+                removeConnection(connection.id)
+              }}
+              className="shrink-0 rounded-control p-2 text-ktip-sand-400 transition-colors hover:bg-red-50 hover:text-red-500"
               aria-label={t`Remove connection with ${otherName}`}
               title={t`Remove connection`}
             >

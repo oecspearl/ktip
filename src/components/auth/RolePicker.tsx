@@ -12,23 +12,23 @@ type SelectableRole = (typeof SELECTABLE_ROLES)[number]
 /**
  * Shared "I am..." role grid used by the signup and onboarding wizards.
  *
- * Fourteen roles is too many to read as fourteen paragraphs, so a card shows
+ * Thirteen roles is too many to read as thirteen paragraphs, so a card shows
  * only its name until it is chosen, and opens to its description on selection.
  * Only one is ever open — the one you picked — which is the only one whose
  * description you still need.
  *
  * The cards sit on a two-column grid rather than wrapping to their own widths.
- * Equal cells are what make fourteen of them scan as a list instead of a word
+ * Equal cells are what make thirteen of them scan as a list instead of a word
  * cloud, and they give the chosen card somewhere definite to grow to: the full
  * row. Everything around it slides, and the card itself widens, through
  * useFlipChildren; the description folds open through `.disclosure-collapse`.
  *
- * Marked roles carry a badge because they behave differently: they are granted
- * by a reviewer, not chosen. Selecting one does not write the role — it routes
- * into verification, with a school for student and faculty and a KTIP
- * administrator for the organisations. The badge is here rather than only in
- * the copy below the grid so the difference is visible at the moment of
- * choosing.
+ * No per-card badge. Gated roles — the ones a reviewer grants rather than the
+ * member choosing them — used to carry a shield, but it sat on nine of the
+ * thirteen cards and read as decoration rather than as a distinction. The note
+ * under the grid says the same thing once, for every role. Selecting a gated
+ * role still routes into verification rather than writing the role: a school
+ * for student and faculty, a KTIP administrator for the organisations.
  */
 export function RolePicker({
   value,
@@ -44,7 +44,7 @@ export function RolePicker({
   const groups = [
     {
       key: 'individual',
-      heading: t`Joining as a person`,
+      heading: t`Joining as an individual`,
       roles: SELECTABLE_ROLES.filter((r) => r.group === 'individual'),
     },
     {
@@ -134,7 +134,7 @@ function RoleCard({
   selected: boolean
   onSelect: () => void
 }) {
-  const { t, i18n } = useLingui()
+  const { i18n } = useLingui()
   const detail = useDisclosureAnimation(selected, { keepMounted: true })
 
   return (
@@ -153,15 +153,8 @@ function RoleCard({
           : 'border-ktip-sand-200 hover:border-ktip-ocean-300 hover:bg-ktip-sand-50/60'
       )}
     >
-      <span className="flex items-center gap-1.5 text-sm font-medium text-ktip-sand-900">
-        <span className="truncate">{resolveCopy(i18n, role.label)}</span>
-        {role.requiresVerification && (
-          <ShieldCheck
-            size={13}
-            className="flex-shrink-0 text-ktip-ocean-500"
-            aria-label={t`Confirmed by a reviewer`}
-          />
-        )}
+      <span className="block truncate text-sm font-medium text-ktip-sand-900">
+        {resolveCopy(i18n, role.label)}
       </span>
 
       {/* The fold animates height from content; the paragraph inside fades and

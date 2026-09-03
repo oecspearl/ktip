@@ -259,6 +259,7 @@ Open one for the full text plus the page it was sent from — which is usually t
   msg`Build, commercialise or file intellectual-property protection over your entry, or a work derived from it, without a separate written agreement with you.`,
   msg`Build, publish and download your CV.`,
   msg`Business`,
+  msg`Business Support Organisations`,
   msg`Business Verification`,
   msg`Business profile`,
   msg`Business verification is done by your national Chamber of Commerce, not by OECS directly.
@@ -286,7 +287,6 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Challenge`,
   msg`Challenges and climate action`,
   msg`Chamber SME review`,
-  msg`Chambers of Commerce and BSOs`,
   msg`Change it`,
   msg`Change your analytics choice`,
   msg`Change your email address`,
@@ -404,7 +404,9 @@ Click any card for the full project, including the owner, team, documents and co
   msg`Click "Share" in the toolbar.`,
   msg`Click "Sign Up" in the top right corner of any page.
 
-Step 1 asks for your email, a password, your display name and a role. The role picker offers Student, Mentor, Investor, Entrepreneur, Private Sector and Faculty. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.
+Step 1 asks for your email, a password, your date of birth and a role. The role picker is split in two — the roles you join as an individual (Entrepreneur, Student, Faculty, Mentor) and the roles you join for an organisation (Investor, Private Sector, Business Support Organisation, NGO, Post-Secondary Institution and the rest).
+
+There is no name field. Your display name starts as the first part of your email address, and you change it in Settings whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.
 
 Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.
 
@@ -949,7 +951,7 @@ Applications you submitted on a funder's external site will not appear here — 
 
 You can change your display name, avatar image, bio (up to 500 characters), country, organisation, industry, up to 20 skills, up to 20 interests, and what collaboration you are open to.
 
-Roles are on this tab too, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Chamber and admin roles are granted by a reviewer, so they do not appear as options.
+Roles are on this tab too, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Business Support Organisation and admin roles are granted by a reviewer, so they do not appear as options.
 
 Click "Save Changes" when you are done.`,
   msg`Go to Settings and open the Security tab.
@@ -1433,10 +1435,10 @@ Acting on the reported account happens under Users or Moderation; this queue is 
   msg`My Applications is where every grant you have applied for lives — draft, submitted, under review or decided, with the date on each.
 
 Applications save as you go, so you can start one, leave, and come back to it.`,
-  msg`My CV`,
   msg`My Connections`,
   msg`My Dashboard`,
   msg`My Events`,
+  msg`My Feedback`,
   msg`My Invitations`,
   msg`My Notes`,
   msg`My Profile`,
@@ -1717,7 +1719,7 @@ Those are two separate switches, and the second is the one with reach outside KT
   msg`Other work`,
   msg`Our marks`,
   msg`Output may be wrong. It is not advice. You remain responsible.`,
-  msg`Overview is the summary. Under it: My CV, Progress, Achievements, and then the things you own — Projects, Events, Connections and Submissions.
+  msg`Overview is the summary. Under it: My Profile, then the things you use day to day — Connections, Projects, Events and Submissions — and finally Progress and Achievements.
 
 The rail is built from your roles, so it is not the same for everyone. An investor gets Funding, a mentor gets Mentees, faculty and researchers get Research. Business and Admin are links out to their own pages rather than panels here.
 
@@ -1862,8 +1864,6 @@ These are outward links — an entry here is an implicit recommendation, so chec
   msg`Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent.`,
   msg`Publish funding calls and administer awards`,
   msg`Publish knowledge and co-host events`,
-  msg`Publish research and collaborate on studies`,
-  msg`Publish research, find collaborators, and join projects.`,
   msg`Publish your own`,
   msg`Published`,
   msg`Published and draft, upcoming and past. Draft events are visible only to administrators, which is how an event is prepared before anyone can see it.`,
@@ -1993,7 +1993,6 @@ Accepting adds you immediately; declining removes the invitation without notifyi
   msg`Research`,
   msg`Research Co-Investigation`,
   msg`Research and teach in academia`,
-  msg`Researchers`,
   msg`Resend`,
   msg`Reserve your place at an upcoming event`,
   msg`Resolved`,
@@ -2038,11 +2037,11 @@ Several people can type in it at once and you will see their changes as they mak
 
 Admin — Super Admin (OECS Secretariat: system-wide management, policy, audit logs) and Safety Admin (moderation queues and escalations). "OECS Admin" is a legacy label that resolves to Super Admin.
 
-Organisation — Investor / Funding Agency, Verified SME, Private Sector, Educational Partner and Chamber of Commerce.
+Organisation — Investor / Funding Agency, Verified SME, Private Sector, Educational Partner and Business Support Organisation.
 
-Individual — Entrepreneur, Faculty, Researcher, Mentor and Student.
+Individual — Entrepreneur, Faculty, Mentor and Student.
 
-Investor, Private Sector, Entrepreneur, Researcher and Mentor are self-assignable: you pick them yourself. Student, Faculty, Verified SME, Educational Partner, Chamber of Commerce and the admin roles are granted only after review by an institution, a Chamber or OECS.
+Investor, Private Sector, Entrepreneur and Mentor are self-assignable: you pick them yourself. Student, Faculty, Verified SME, Educational Partner, Business Support Organisation and the admin roles are granted only after review by an institution, a business support organisation or OECS.
 
 What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Two rules never change: Students cannot submit a grant application without a sponsor, and Students cannot start unmonitored direct messages.`,
   msg`Roles decide what you see`,
@@ -2393,6 +2392,7 @@ Open it to see your newest notifications — messages, event and project activit
 "Mark all as read" clears the badge, and "View all invitations" jumps to your invitations inbox.
 
 Which notifications you receive is up to you: Settings has a switch per category under Preferences.`,
+  msg`The bugs and requests you sent us, and the replies that came back`,
   msg`The builders`,
   msg`The choice is per device and per browser, because that is where it is stored.`,
   msg`The contact block at the bottom reaches a person. The FAQ page is worth a look first — it answers the narrower questions that do not warrant a full article.`,
@@ -2901,7 +2901,7 @@ Group settings let you rename the group, add and remove members, and leave it. G
   msg`Where your text goes`,
   msg`Whether you are the owner of the right, or an agent authorised to act for the owner.`,
   msg`Which browsers does KTIP support?`,
-  msg`Whichever tab is selected renders here, and the page keeps its shell — so moving between your CV, your projects and your submissions never costs you the rail.
+  msg`Whichever tab is selected renders here, and the page keeps its shell — so moving between your profile, your projects and your submissions never costs you the rail.
 
 Overview pulls the useful parts of the others together: recent network activity, what you have submitted, and what is next on your calendar.`,
   msg`While your account is active`,
@@ -3058,7 +3058,6 @@ This is the same gallery as the standalone Achievements page, embedded so you ke
   msg`Your roles are what unlock the role-specific parts of KTIP — an investor gets the Funding tab on the dashboard, a mentor gets Mentees, faculty get Research.
 
 Some roles are self-selected and some are granted after verification, which is why a role you expect may not be here yet.`,
-  msg`Your résumé, built from your KTIP record and ready to send`,
   msg`Your résumé, ready to download or publish.`,
   msg`Your search phrase and a map of the site`,
   msg`Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice.`,

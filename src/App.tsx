@@ -257,6 +257,10 @@ const router = createBrowserRouter([
                   { path: '/dashboard/events', lazy: lazyPage(() => import('./pages/dashboard/tabs/EventsTab')) },
                   { path: '/dashboard/connections', lazy: lazyPage(() => import('./pages/dashboard/tabs/ConnectionsTab')) },
                   { path: '/dashboard/submissions', lazy: lazyPage(() => import('./pages/dashboard/tabs/SubmissionsTab')) },
+                  // The reporter's end of the feedback loop (127). Renders the
+                  // same panel as /settings?tab=feedback, which still resolves —
+                  // every reply notification ever sent links to that address.
+                  { path: '/dashboard/feedback', lazy: lazyPage(() => import('./pages/dashboard/tabs/FeedbackTab')) },
                   // Organisation-tier counterpart to the profile (CV) tab.
                   { path: '/dashboard/business', lazy: lazyPage(() => import('./pages/dashboard/tabs/BusinessTab')) },
                   { path: '/dashboard/team', lazy: lazyPage(() => import('./pages/dashboard/tabs/TeamTab')) },

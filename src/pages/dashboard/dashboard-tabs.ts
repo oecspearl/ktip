@@ -1,12 +1,12 @@
 import {
   LayoutDashboard,
-  FileText,
   TrendingUp,
   FolderKanban,
   Calendar,
   Users,
   UsersRound,
   Inbox,
+  MessageCircle,
   Wallet,
   GraduationCap,
   FlaskConical,
@@ -16,7 +16,8 @@ import {
   UserPen,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { INDIVIDUAL_ROLES, ORGANIZATION_ROLES, expandRoles, rolesOfTier } from '../../lib/permissions'
+// INDIVIDUAL_ROLES and rolesOfTier come back with the commented-out CV tab.
+import { ORGANIZATION_ROLES, expandRoles } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
@@ -34,6 +35,9 @@ export interface DashboardTab {
 }
 
 export const DASHBOARD_TABS: DashboardTab[] = [
+  // Ordered by how often a member actually opens them, not by how the panels
+  // were built: the day-to-day four sit above the fold, and the two you consult
+  // rather than use — Progress and Achievements — close the personal group.
   { to: '', label: msg`Overview`, icon: LayoutDashboard, description: msg`Network, submissions, calendar` },
   // The member's public face: the profile editor (shared with Settings) plus
   // the profile lock (083). 'profile' was already taken by the CV tab below,
@@ -44,6 +48,24 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     icon: UserPen,
     description: msg`What others see, and who can see it`,
   },
+  { to: 'connections', label: msg`Connections`, icon: Users, description: msg`People you know` },
+  { to: 'projects', label: msg`Projects`, icon: FolderKanban, description: msg`Projects you own` },
+  { to: 'events', label: msg`Events`, icon: Calendar, description: msg`Events you organize` },
+  { to: 'submissions', label: msg`Submissions`, icon: Inbox, description: msg`Your submitted copies` },
+  // Sits next to Submissions because it is the same kind of thing — your copy
+  // of something you sent — and because a reply nobody finds is a reply that
+  // was not sent. Settings keeps its Feedback tab; this is a second door.
+  { to: 'feedback', label: msg`Feedback`, icon: MessageCircle, description: msg`Replies to what you sent us` },
+  { to: 'progress', label: msg`Progress`, icon: TrendingUp, description: msg`Your activity timeline` },
+  // A real panel, not a link out. The gallery renders in embedded mode (see
+  // AchievementsTab); the old /achievements address redirects here.
+  { to: 'achievements', label: msg`Achievements`, icon: Trophy, description: msg`Badges, points and rank` },
+
+  // OFF THE RAIL until the CV panel is finished. The ROUTE is untouched —
+  // /dashboard/profile and /cv still resolve, so existing links and bookmarks
+  // are not broken — it is only the way IN from the rail that is withdrawn.
+  // Restore this entry to bring it back; nothing else has to change.
+  //
   // Kept at 'profile' so existing /dashboard/profile links and bookmarks still
   // land somewhere; the panel is the full CV page — designs, downloads and
   // publishing included. /cv redirects here.
@@ -53,21 +75,13 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // anyway because this entry was the only one in the list with no `roles`.
   // Businesses get the Business profile tab below instead. Admins are people
   // too, so the admin tier keeps the tab even in an admin operating context.
-  {
-    to: 'profile',
-    label: msg`My CV`,
-    icon: FileText,
-    description: msg`Your résumé, ready to send`,
-    roles: [...INDIVIDUAL_ROLES, ...rolesOfTier('admin')],
-  },
-  { to: 'progress', label: msg`Progress`, icon: TrendingUp, description: msg`Your activity timeline` },
-  // A real panel, not a link out. The gallery renders in embedded mode (see
-  // AchievementsTab); the old /achievements address redirects here.
-  { to: 'achievements', label: msg`Achievements`, icon: Trophy, description: msg`Badges, points and rank` },
-  { to: 'projects', label: msg`Projects`, icon: FolderKanban, description: msg`Projects you own` },
-  { to: 'events', label: msg`Events`, icon: Calendar, description: msg`Events you organize` },
-  { to: 'connections', label: msg`Connections`, icon: Users, description: msg`People you know` },
-  { to: 'submissions', label: msg`Submissions`, icon: Inbox, description: msg`Your submitted copies` },
+  // {
+  //   to: 'profile',
+  //   label: msg`My CV`,
+  //   icon: FileText,
+  //   description: msg`Your résumé, ready to send`,
+  //   roles: [...INDIVIDUAL_ROLES, ...rolesOfTier('admin')],
+  // },
 
   // Role-gated. Panels are stubs for now — the gating is what's wired up.
   { to: 'funding', label: msg`Funding`, icon: Wallet, description: msg`Deal flow and applications`, roles: ['investor'] },

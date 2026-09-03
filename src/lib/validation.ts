@@ -195,7 +195,10 @@ const signupFields = z.object({
   email: z.string().email('Invalid email address'),
   password: passwordSchema,
   confirm_password: z.string().min(1, 'Please confirm your password'),
-  display_name: z.string().min(2, 'Name must be at least 2 characters'),
+  // Optional since the field left signup: an account is created from an email
+  // address alone, and SignupPage seeds the profile name from its local part.
+  // Onboarding and Settings still send one, and it is still length-checked.
+  display_name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   role: z.enum(SIGNUP_ROLES, { error: 'Please select a role' }),
   date_of_birth: dateOfBirthSchema,
   organization: z.string().max(200, 'Organisation name too long').optional(),
@@ -233,7 +236,6 @@ export const signupStep1Schema = signupFields
     email: true,
     password: true,
     confirm_password: true,
-    display_name: true,
     role: true,
     date_of_birth: true,
   })

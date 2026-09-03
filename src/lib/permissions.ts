@@ -154,9 +154,9 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   },
   {
     slug: 'chamber_admin',
-    label: msg`Chamber of Commerce / BSO`,
+    label: msg`Business Support Organisation`,
     tier: 'organization',
-    description: msg`Chamber of Commerce or business support organisation — incubator, accelerator or MSME agency — that verifies local businesses and supports the cohort it works with.`,
+    description: msg`Business support organisation — a chamber of commerce, incubator, accelerator or MSME agency — that verifies local businesses and supports the cohort it works with.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 70,

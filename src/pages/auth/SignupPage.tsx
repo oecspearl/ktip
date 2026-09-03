@@ -9,7 +9,7 @@ import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { CountrySelect } from '../../components/ui/CountrySelect'
 import { PasswordChecklist } from '../../components/ui/PasswordChecklist'
-import { Mail, Lock, User, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
+import { Mail, Lock, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
 import { OtpInput } from '../../components/ui/OtpInput'
 import { signupSchema, signupStep1Schema, todayIso } from '../../lib/validation'
 import { supabase } from '../../lib/supabase'
@@ -61,10 +61,22 @@ const TODAY_ISO = todayIso()
  * first one — the set whose validity decides when it folds away and the role
  * grid comes forward.
  */
-const ACCOUNT_FIELDS = ['display_name', 'email', 'password', 'confirm_password', 'date_of_birth'] as const
+const ACCOUNT_FIELDS = ['email', 'password', 'confirm_password', 'date_of_birth'] as const
+
+/**
+ * The name a brand-new profile starts life with.
+ *
+ * Signup asks for no display name at all. handle_new_user() coalesces a missing
+ * one to the account's EMAIL ADDRESS, and that address is then what the member
+ * directory and every profile card would show — so the local part is sent
+ * instead, and never the domain. Members rename themselves in Settings.
+ */
+const nameFromEmail = (email: string) => {
+  const trimmed = email.trim()
+  return trimmed.split('@')[0] || trimmed
+}
 
 const ALL_STEP1_TOUCHED: Record<string, boolean> = {
-  display_name: true,
   email: true,
   password: true,
   confirm_password: true,
@@ -80,7 +92,6 @@ export default function SignupPage() {
   const [step, setStep] = useState(1)
 
   // Step 1 — required account fields
-  const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -137,7 +148,6 @@ export default function SignupPage() {
   const markTouched = (field: string) => setTouched((t) => ({ ...t, [field]: true }))
 
   const step1Values = {
-    display_name: displayName,
     email,
     password,
     confirm_password: confirmPassword,
@@ -252,7 +262,8 @@ export default function SignupPage() {
     setErrorMessage('')
     try {
       await auth.signUp(email, password, {
-        display_name: displayName,
+        // Derived, not asked for — see nameFromEmail.
+        display_name: nameFromEmail(email),
         role: selectedRole,
         // Seeds account_age via handle_new_user (091). Never lands on `profiles`.
         date_of_birth: dateOfBirth,
@@ -407,29 +418,12 @@ export default function SignupPage() {
               <div className="space-y-3">
                 <FormSection
                   title={t`Your account`}
-                  summary={
-                    displayName.trim() || email.trim()
-                      ? [displayName.trim(), email.trim()].filter(Boolean).join(' · ')
-                      : t`Name, email, password and date of birth`
-                  }
+                  summary={email.trim() || t`Email, password and date of birth`}
                   open={accountOpen}
                   onToggle={() => setAccountOpen((o) => !o)}
                   complete={accountComplete}
                 >
                   <div className="space-y-3">
-                    <Input
-                      type="text"
-                      label={t`Display Name`}
-                      placeholder={t`Enter your full name`}
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      onBlur={() => handleBlur('display_name')}
-                      error={visibleError('display_name')}
-                      icon={<User size={20} />}
-                      fullWidth
-                      required
-                    />
-
                     <Input
                       type="email"
                       label={t`Email`}

@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../contexts/AuthContext'
@@ -34,7 +41,44 @@ type SourceTab = 'upload' | 'designs' | 'gradient'
  * drag inside each preview to set that surface's own focal point. Nothing
  * writes to the profile until Save — the previews read a local draft.
  */
-export function BannerStudio({ className }: { className?: string } = {}) {
+/**
+ * Card on the settings grid, plain block inside the editor sheet.
+ *
+ * The scroll-spy marker rides the Card, so in `bare` mode it is deliberately
+ * absent — the collapsed BannerTile on the page carries it instead, and two
+ * elements answering to `[data-spy="Banner"]` would put the same step on the
+ * rail twice.
+ */
+function Shell({
+  bare,
+  className,
+  children,
+}: {
+  bare?: boolean
+  className?: string
+  children: ReactNode
+}) {
+  if (bare) return <div className={className}>{children}</div>
+  return (
+    <Card id="banner" data-spy="Banner" className={cn('scroll-mt-24', className)}>
+      {children}
+    </Card>
+  )
+}
+
+interface BannerStudioProps {
+  className?: string
+  /**
+   * Drop the Card shell and the heading block. For the editor sheet, where the
+   * dialog already supplies a surface and a title and repeating both reads as
+   * a card inside a card.
+   */
+  bare?: boolean
+  /** Fired after a successful save or remove — the sheet closes on it. */
+  onSaved?: () => void
+}
+
+export function BannerStudio({ className, bare, onSaved }: BannerStudioProps = {}) {
   const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
@@ -117,6 +161,7 @@ export function BannerStudio({ className }: { className?: string } = {}) {
     try {
       await auth.updateProfile({ banner: draft } as any)
       toast.success(t`Banner updated!`)
+      onSaved?.()
     } catch (err: any) {
       toast.error(err.message || t`Failed to update banner`)
     } finally {
@@ -131,6 +176,7 @@ export function BannerStudio({ className }: { className?: string } = {}) {
       try {
         await auth.updateProfile({ banner: null } as any)
         toast.success(t`Banner removed`)
+        onSaved?.()
       } catch (err: any) {
         toast.error(err.message || t`Failed to update banner`)
       } finally {
@@ -143,8 +189,13 @@ export function BannerStudio({ className }: { className?: string } = {}) {
   const displayName = auth.profile?.display_name || t`You`
 
   return (
-    <Card id="banner" data-spy="Banner" className={cn('scroll-mt-24', className)}>
-      <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-1"><Trans>Banner</Trans></h2>
+    <Shell bare={bare} className={className}>
+      {/* The dialog supplies the title in `bare` mode, but not this paragraph —
+          it is the only place that explains where a banner actually shows up,
+          so it stays in both. */}
+      {!bare && (
+        <h2 className="text-lg font-display font-bold text-ktip-sand-900 mb-1"><Trans>Banner</Trans></h2>
+      )}
       <p className="text-sm text-ktip-sand-600 mb-4">
         <Trans>
           Shown on your member page, your directory card, the member preview and your dashboard.
@@ -351,7 +402,7 @@ export function BannerStudio({ className }: { className?: string } = {}) {
           <Trans>Save banner</Trans>
         </Button>
       </div>
-    </Card>
+    </Shell>
   )
 }
 

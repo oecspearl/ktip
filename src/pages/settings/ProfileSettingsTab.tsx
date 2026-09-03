@@ -38,7 +38,7 @@ import { CountrySelect } from '../../components/ui/CountrySelect'
 import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
-import { BannerStudio } from '../../components/profile/BannerStudio'
+import { BannerTile } from '../../components/profile/BannerTile'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
@@ -343,10 +343,11 @@ export function ProfileSettingsTab({ leadingTile }: ProfileSettingsTabProps = {}
           )}
         </Card>
 
-        {/* Banner — photo, built-in design or aurora gradient, with live
-            previews of every surface that shows it (104). The previews are the
-            one thing here that genuinely earns the full width. */}
-        <BannerStudio className="md:col-span-6" />
+        {/* Banner — photo, built-in design or aurora gradient (104). Collapsed
+            to a strip: the editor is large, permanently open it pushed every
+            field below it off the screen, and it is set once and then left
+            alone. Clicking opens it over the tab. */}
+        <BannerTile className="md:col-span-6" />
 
         {/* Profile Info — two field columns instead of one, which halves the tile
             without touching a single input. */}

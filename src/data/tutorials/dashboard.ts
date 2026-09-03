@@ -22,7 +22,7 @@ export const dashboardTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="dashboard-tabs"]',
     title: 'The tab column',
     description:
-      'Overview is the summary. Under it: My CV, Progress, Achievements, and then the things you own — Projects, Events, Connections and Submissions.\n\nThe rail is built from your roles, so it is not the same for everyone. An investor gets Funding, a mentor gets Mentees, faculty and researchers get Research. Business and Admin are links out to their own pages rather than panels here.\n\nOn a narrow screen the column becomes a scrolling row above the panel.',
+      'Overview is the summary. Under it: My Profile, then the things you use day to day — Connections, Projects, Events and Submissions — and finally Progress and Achievements.\n\nThe rail is built from your roles, so it is not the same for everyone. An investor gets Funding, a mentor gets Mentees, faculty and researchers get Research. Business and Admin are links out to their own pages rather than panels here.\n\nOn a narrow screen the column becomes a scrolling row above the panel.',
     position: 'right',
     scrollMode: 'top',
   },
@@ -30,7 +30,7 @@ export const dashboardTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="dashboard-panel"]',
     title: 'The panel',
     description:
-      'Whichever tab is selected renders here, and the page keeps its shell — so moving between your CV, your projects and your submissions never costs you the rail.\n\nOverview pulls the useful parts of the others together: recent network activity, what you have submitted, and what is next on your calendar.',
+      'Whichever tab is selected renders here, and the page keeps its shell — so moving between your profile, your projects and your submissions never costs you the rail.\n\nOverview pulls the useful parts of the others together: recent network activity, what you have submitted, and what is next on your calendar.',
     position: 'left',
     scrollMode: 'top',
   },

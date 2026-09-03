@@ -556,16 +556,19 @@ export const SITE_MAP: SiteEntry[] = [
   },
   // The old 'dashboard.profile' entry ("My Profile") merged into this one when
   // the tab became the CV itself; its keywords live on here.
-  {
-    id: 'cv',
-    title: 'My CV',
-    category: 'Account',
-    description: 'Your résumé, built from your KTIP record and ready to send',
-    keywords: ['cv', 'resume', 'résumé', 'curriculum vitae', 'experience', 'education', 'profile', 'me', 'my page'],
-    href: '/dashboard/profile',
-    access: 'auth',
-    icon: 'FileText',
-  },
+  // Out of search while the CV panel is unfinished, alongside its dashboard
+  // rail entry (see pages/dashboard/dashboard-tabs.ts). The route still
+  // resolves — this only stops search offering a way in. Restore both together.
+  // {
+  //   id: 'cv',
+  //   title: 'My CV',
+  //   category: 'Account',
+  //   description: 'Your résumé, built from your KTIP record and ready to send',
+  //   keywords: ['cv', 'resume', 'résumé', 'curriculum vitae', 'experience', 'education', 'profile', 'me', 'my page'],
+  //   href: '/dashboard/profile',
+  //   access: 'auth',
+  //   icon: 'FileText',
+  // },
   {
     id: 'org.profile',
     title: 'Business profile',
@@ -625,6 +628,16 @@ export const SITE_MAP: SiteEntry[] = [
     href: '/dashboard/submissions',
     access: 'auth',
     icon: 'Inbox',
+  },
+  {
+    id: 'dashboard.feedback',
+    title: 'My Feedback',
+    category: 'Account',
+    description: 'The bugs and requests you sent us, and the replies that came back',
+    keywords: ['feedback', 'reply', 'replies', 'bug report', 'reported', 'suggestion', 'support'],
+    href: '/dashboard/feedback',
+    access: 'auth',
+    icon: 'MessageCircle',
   },
   {
     id: 'settings',

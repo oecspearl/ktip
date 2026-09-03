@@ -39,7 +39,7 @@ import { markWelcomeSeen, useHasSeenWelcome } from '../lib/welcome-panel'
 type Phase = 'title' | 'title-out' | 'reading' | 'exiting' | 'iris' | 'gone'
 
 /** How long the title card holds before dissolving on its own. */
-const TITLE_MS = 2600
+const TITLE_MS = 3600
 /** The navy curtain fading out over the deck. Matches the fadeOut in index.css. */
 const TITLE_OUT_MS = 720
 /** Exit beat one: copy leaves, navy arrives. Matches the fadeIn on the ground. */
@@ -52,18 +52,18 @@ const SWAP_MS = 340
 const SLIDES = [
   {
     eyebrow: msg`Welcome`,
-    title: msg`One network for Caribbean innovation.`,
-    body: msg`KTIP is the OECS platform where ideas, funding and the people behind them finally sit in one place — built for the region, in the region.`,
+    title: msg`The OECS virtual innovation ecosystem.`,
+    body: msg`KTIP connects entrepreneurs, academia, civil society, investors and policy makers across the OECS Member States and the diaspora, bringing ideas, funding, knowledge, and collaboration into one trusted regional space.`,
   },
   {
     eyebrow: msg`Who it's for`,
-    title: msg`Students, researchers, founders, institutions.`,
-    body: msg`Whether you are starting a first project or funding a tenth, KTIP connects you to the collaborators, programmes and reviewers who move it forward.`,
+    title: msg`Innovators across the OECS.`,
+    body: msg`Whether you need a collaborator, a mentor, training or funding, KTIP connects you to the people, programmes and resources that move your innovative ideas forward.`,
   },
   {
     eyebrow: msg`What's inside`,
-    title: msg`Projects, grants, events, and everyone working on them.`,
-    body: msg`Search the member directory, apply for funding, join events and forums, and work together in shared rooms — documents, whiteboards, code and video.`,
+    title: msg`Your OECS innovation toolkit.`,
+    body: msg`Discover funding opportunities and events, publish and access knowledge resources, match with mentors, investors and other innovators to collaborate on projects in dedicated shared workspaces.`,
   },
 ]
 

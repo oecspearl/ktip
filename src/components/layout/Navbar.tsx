@@ -36,6 +36,7 @@ import {
   CalendarPlus,
   FileText,
   Building2,
+  UserPlus,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
@@ -208,9 +209,62 @@ const navDropdowns: NavDropdown[] = [
       { name: msg`Directory`, href: '/directory', icon: Users, description: msg`Browse the member directory` },
       { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Join community discussions` },
       { name: msg`Collaborate`, href: '/collaborate', icon: Handshake, description: msg`Work together in real-time` },
+      // Points at the dashboard tab rather than a new top-level page: the list
+      // already exists there, is already in site-map.ts, and both strings are
+      // already in every catalogue (they are shared with dashboard-tabs.ts), so
+      // this entry needs no route, no index update and no re-extraction.
+      { name: msg`Connections`, href: '/dashboard/connections', icon: UserPlus, description: msg`People you know` },
     ],
   },
 ]
+
+/**
+ * Hover-to-open for the desktop menus.
+ *
+ * Opens on enter, closes on leave after a short grace period. The grace period
+ * is the whole trick: every panel hangs `mt-2` below its trigger, and those
+ * 8px belong to neither element, so a pointer travelling from the trigger down
+ * into the menu leaves the group on the way. Closing immediately would shut the
+ * menu under the pointer that was reaching for it. Re-entering — the trigger,
+ * the panel, or the neighbouring menu — cancels the pending close.
+ *
+ * One timer for every menu on purpose. Sliding from one nav group to the next
+ * fires the outgoing leave BEFORE the incoming enter, so the enter cancels the
+ * close that was queued behind it and the panels swap in place instead of
+ * blinking shut between them.
+ *
+ * FINE POINTERS ONLY. On a touch screen the tap that opens a menu also fires
+ * mouseenter, and the click handler would then toggle straight back shut — the
+ * menu would be unopenable. Click stays the only way in there, and remains the
+ * way in for the keyboard everywhere.
+ */
+const HOVER_CLOSE_MS = 180
+
+function useHoverMenu() {
+  const timer = useRef(0)
+
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  const canHover = () =>
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches
+
+  return {
+    /** Pointer arrived: cancel any queued close and open this menu now. */
+    enter(open: () => void) {
+      if (!canHover()) return
+      window.clearTimeout(timer.current)
+      open()
+    },
+    /** Pointer left: close, unless it comes back inside the grace period. */
+    leave(close: () => void) {
+      if (!canHover()) return
+      window.clearTimeout(timer.current)
+      timer.current = window.setTimeout(close, HOVER_CLOSE_MS)
+    },
+  }
+}
 
 export function Navbar() {
   const { i18n, t } = useLingui()
@@ -226,6 +280,7 @@ export function Navbar() {
   // Signed-out, below sm only. See the trigger for why it exists at all.
   const [authMenuOpen, setAuthMenuOpen] = useState(false)
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const hover = useHoverMenu()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
@@ -799,6 +854,16 @@ export function Navbar() {
                 key={dropdown.id}
                 className="relative"
                 ref={(el) => { dropdownRefs.current[dropdown.id] = el }}
+                // The account menu is closed on the way in so two panels can
+                // never hang open at once — a click on this trigger already
+                // closes it through the outside-click handler.
+                onMouseEnter={() =>
+                  hover.enter(() => {
+                    setUserMenuOpen(false)
+                    setOpenDropdownId(dropdown.id)
+                  })
+                }
+                onMouseLeave={() => hover.leave(() => setOpenDropdownId(null))}
               >
                 <button
                   onClick={() => toggleDropdown(dropdown.id)}
@@ -1095,7 +1160,17 @@ export function Navbar() {
 
             {auth.user ? (
               /* User Avatar & Dropdown */
-              <div className="relative" ref={userMenuRef}>
+              <div
+                className="relative"
+                ref={userMenuRef}
+                onMouseEnter={() =>
+                  hover.enter(() => {
+                    setOpenDropdownId(null)
+                    setUserMenuOpen(true)
+                  })
+                }
+                onMouseLeave={() => hover.leave(() => setUserMenuOpen(false))}
+              >
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-label={t`User menu`}

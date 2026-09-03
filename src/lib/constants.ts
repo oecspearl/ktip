@@ -108,7 +108,7 @@ export const ROLE_COLORS: Record<string, string> = {
  * writing the role: a school for student and faculty, a KTIP administrator for
  * every organisation. See RolePicker and OnboardingPage.
  *
- * `group` splits the grid in two. Fourteen roles in one run is a wall of
+ * `group` splits the grid in two. Thirteen roles in one run is a wall of
  * text; "am I answering for myself or for a body?" is the question that halves
  * it, and it is the same line the catalogue draws between the individual and
  * organisation tiers.
@@ -118,7 +118,6 @@ export const SELECTABLE_ROLES = [
   { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects', requiresVerification: true, group: 'individual' },
   { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia', requiresVerification: true, group: 'individual' },
   { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators', requiresVerification: false, group: 'individual' },
-  { value: 'researcher', label: ROLE_LABELS.researcher, description: 'Publish research and collaborate on studies', requiresVerification: false, group: 'individual' },
   { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects', requiresVerification: false, group: 'organization' },
   { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators', requiresVerification: false, group: 'organization' },
   { value: 'ngo', label: ROLE_LABELS.ngo, description: 'Deliver programmes and apply for funding', requiresVerification: true, group: 'organization' },

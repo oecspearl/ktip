@@ -39,7 +39,7 @@ const ROLE_LABELS: Partial<Record<UserRole, MessageDescriptor>> = {
   admin: msg`OECS Administrator`,
   safety_admin: msg`Safety Administrator`,
   educational_partner: msg`Post-Secondary Institution`,
-  chamber_admin: msg`Chamber of Commerce / BSO Administrator`,
+  chamber_admin: msg`Business Support Organisation Administrator`,
   ngo: msg`Non-Governmental Organization`,
   research_institution: msg`Research Institution`,
   government: msg`Government Ministry or Agency`,

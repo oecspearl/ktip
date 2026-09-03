@@ -77,23 +77,6 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     ],
   },
   {
-    role: 'researcher',
-    title: 'Researchers',
-    description: 'Publish research, find collaborators, and join projects.',
-    steps: [
-      'Create your account and set your role to Researcher',
-      'Add your fields and skills so collaborators can find you in the directory',
-      'Browse projects for work that needs a research partner',
-      'Use documents and whiteboards to draft and plan together',
-      'Look for research grants under Grants & Funding',
-    ],
-    quickLinks: [
-      { label: 'Browse Projects', href: '/projects' },
-      { label: 'Collaborate', href: '/collaborate' },
-      { label: 'Find Grants', href: '/grants' },
-    ],
-  },
-  {
     role: 'faculty',
     title: 'Faculty',
     description: 'Sponsor student applications and supervise student channels.',
@@ -116,7 +99,7 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     description: 'Find partnerships, attend events, and support innovation.',
     steps: [
       'Create your account and set your role to Private Sector',
-      'Submit your business to your Chamber of Commerce or BSO to have it verified',
+      'Submit your business to your business support organisation to have it verified',
       'Browse projects for partnership opportunities',
       'Attend events to meet the innovation community',
       'Use the collaboration tools for joint work',
@@ -146,10 +129,10 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   },
   {
     role: 'chamber_admin',
-    title: 'Chambers of Commerce and BSOs',
+    title: 'Business Support Organisations',
     description: 'Vet and support the businesses in your member state.',
     steps: [
-      'Get your Chamber or BSO account granted by OECS',
+      'Get your business support organisation account granted by OECS',
       'Work through the business submissions queued for your member state',
       'Check each legal name and registration number against your own records',
       'Approve to mark the business verified, or decline with a reason',

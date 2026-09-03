@@ -114,7 +114,7 @@ export const SETTINGS_CATEGORY: HelpCategory = {
     {
       id: 'edit-profile',
       title: 'How do I edit my profile?',
-      content: `Go to Settings and open the Profile tab.\n\nYou can change your display name, avatar image, bio (up to 500 characters), country, organisation, industry, up to 20 skills, up to 20 interests, and what collaboration you are open to.\n\nRoles are on this tab too, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Chamber and admin roles are granted by a reviewer, so they do not appear as options.\n\nClick "Save Changes" when you are done.`,
+      content: `Go to Settings and open the Profile tab.\n\nYou can change your display name, avatar image, bio (up to 500 characters), country, organisation, industry, up to 20 skills, up to 20 interests, and what collaboration you are open to.\n\nRoles are on this tab too, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Business Support Organisation and admin roles are granted by a reviewer, so they do not appear as options.\n\nClick "Save Changes" when you are done.`,
       tags: ['edit', 'profile', 'name', 'bio', 'country', 'skills', 'avatar'],
     },
     {

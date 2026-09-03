@@ -88,13 +88,28 @@ describe('signupSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects short display name', () => {
+  // The field left signup entirely — SignupPage seeds the profile name from the
+  // email's local part — so absence is valid. A name that IS supplied (onboarding,
+  // settings) is still held to the two-character minimum.
+  it('accepts a signup with no display name', () => {
+    const result = signupSchema.safeParse({
+      email: 'user@example.com',
+      password: 'Password123!',
+      confirm_password: 'Password123!',
+      role: 'student',
+      date_of_birth: '1995-06-15',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a short display name when one is given', () => {
     const result = signupSchema.safeParse({
       email: 'user@example.com',
       password: 'Password123!',
       confirm_password: 'Password123!',
       display_name: 'J',
       role: 'student',
+      date_of_birth: '1995-06-15',
     })
     expect(result.success).toBe(false)
   })
