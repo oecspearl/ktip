@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
 import { PostCard } from '../../components/forums/PostCard'
 import { useForumBoard, useForumPosts } from '../../hooks/useForums'
-import { Plus, Search, MessageCircle } from 'lucide-react'
+import { Plus, Pencil, Search, MessageCircle } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
 import { PageHero } from '../../components/layout/PageHero'
 import { debounce } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -12,6 +13,7 @@ export default function BoardPage() {
   const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
+  const auth = useAuth()
 
   const { board, loading: boardLoading } = useForumBoard(params.slug)
   usePageTitle(board?.name ? t`${board.name} — Forums` : t`Forums`)
@@ -24,6 +26,12 @@ export default function BoardPage() {
   )
 
   const { posts } = useForumPosts(board?.id, { search: debouncedSearch })
+
+  const canEditBoard =
+    !!board &&
+    (board.created_by && board.created_by === auth.user?.id
+      ? auth.can('forum:board')
+      : auth.can('forum:manage'))
 
   if (boardLoading) {
     return (
@@ -97,6 +105,17 @@ export default function BoardPage() {
                 className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               />
             </div>
+            {/* Mirrors 129's UPDATE policy: the board's own creator, or anyone
+                holding forum:manage. RLS refuses the rest either way. */}
+            {canEditBoard && (
+              <Link to={`/forums/${params.slug}/edit`} className="shrink-0">
+                <button className="inline-flex items-center gap-2 px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream text-ktip-sand-700 hover:border-ktip-sand-400 text-sm font-bold uppercase tracking-wider rounded-lg transition-colors">
+                  <Pencil size={16} />
+                  <Trans>Edit Board</Trans>
+                </button>
+              </Link>
+            )}
+
             <Link to={`/forums/${params.slug}/new`} className="shrink-0">
               <button className="inline-flex items-center gap-2 px-4 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
                 <Plus size={16} />

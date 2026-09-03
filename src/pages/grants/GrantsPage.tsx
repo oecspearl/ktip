@@ -4,7 +4,8 @@ import { Link, useSearchParams } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { GrantCard } from '../../components/grants/GrantCard'
 import { useGrants } from '../../hooks/useGrants'
-import { Wallet, FileText } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+import { Wallet, FileText, Plus } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { TagFilterSelect } from '../../components/ui/TagFilterSelect'
@@ -42,6 +43,9 @@ const OTHER_FUNDING = msg`Other Funding`
 export default function GrantsPage() {
     const { t, i18n } = useLingui()
   usePageTitle(t`Grants`)
+  const auth = useAuth()
+  const canPostGrants = auth.can('grant:post')
+  const canApply = auth.can('grant:apply')
   const typeSelectOptions = useMemo(
     () => TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: i18n._(opt.label) })),
     [i18n]
@@ -140,11 +144,31 @@ export default function GrantsPage() {
         imageSeed="grants"
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Grants` }]}
         actions={
-          <Link to="/grants/my-applications" data-tutorial="grants-applications">
-            <Button icon={<FileText size={16} />} size="sm" className="text-sm">
-              <Trans>My Applications</Trans>
-            </Button>
-          </Link>
+          // Two sides of the same page, and which one you are on is the
+          // permission you hold: a funder tracks the calls it posted, an
+          // applicant tracks what it sent. A mentor holds both keys and gets
+          // both buttons, because a mentor really does do both.
+          <div className="flex flex-wrap items-center gap-2">
+            {canPostGrants && (
+              <Link to="/grants/my-grants">
+                <Button icon={<Wallet size={16} />} size="sm" className="text-sm">
+                  <Trans>My Grants</Trans>
+                </Button>
+              </Link>
+            )}
+            {canApply && (
+              <Link to="/grants/my-applications" data-tutorial="grants-applications">
+                <Button
+                  icon={<FileText size={16} />}
+                  size="sm"
+                  variant={canPostGrants ? 'outline' : undefined}
+                  className="text-sm"
+                >
+                  <Trans>My Applications</Trans>
+                </Button>
+              </Link>
+            )}
+          </div>
         }
       />
 
@@ -222,6 +246,16 @@ export default function GrantsPage() {
       {/* === Grants List === */}
       <div id="grants" data-spy="Grants" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
         <div className="max-w-page-narrow mx-auto px-4">
+          {/* The create CTA lives in the body, not the hero band. */}
+          {canPostGrants && (
+            <div className="flex justify-end mb-6">
+              <Link to="/grants/new">
+                <Button icon={<Plus size={16} />} size="sm" className="text-sm">
+                  <Trans>Post a Grant</Trans>
+                </Button>
+              </Link>
+            </div>
+          )}
           {loading || !grants ? (
             <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
           ) : grants.length > 0 ? (

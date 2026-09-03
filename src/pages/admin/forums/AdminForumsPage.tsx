@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Badge } from '../../../components/ui/Badge'
+import { Button } from '../../../components/ui/Button'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
 import { useForumBoards, useDeleteForumPost } from '../../../hooks/useForums'
 import { useAdminAllPosts, useAdminForumActions } from '../../../hooks/useAdminDashboard'
@@ -12,26 +13,14 @@ import {
   MessageSquare,
   Pin,
   PinOff,
+  Plus,
+  Pencil,
   Trash2,
   Search,
   FileText,
-  FolderKanban,
-  DollarSign,
-  Users,
-  Calendar,
-  HelpCircle,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-
-const boardIconMap: Record<string, LucideIcon> = {
-  MessageSquare,
-  FolderKanban,
-  DollarSign,
-  Users,
-  Calendar,
-  HelpCircle,
-  FileText,
-}
+import { Link } from 'react-router'
+import { boardIcon } from '../../../lib/forum-board-icons'
 
 type Tab = 'boards' | 'posts'
 
@@ -127,47 +116,65 @@ export default function AdminForumsPage() {
 
       {/* Boards Tab */}
       {activeTab === 'boards' && (
-        !boards?.length ? (
-          <div className="p-12 text-center">
-            <MessageSquare size={48} className="mx-auto text-gray-300 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-1">No boards found</h3>
-            <p className="text-gray-500 text-sm">
-              Forum boards will appear here once created.
-            </p>
+        <>
+          {/* Board creation and editing are the member-facing pages, not a
+              second form here: an admin holds forum:board like any organisation
+              does, and one form means one set of rules about names and icons. */}
+          <div className="flex justify-end mb-4">
+            <Link to="/forums/new">
+              <Button size="sm" icon={<Plus size={16} />}>New Board</Button>
+            </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
-            {boards.map((board) => {
-              const IconComp = boardIconMap[board.icon || 'MessageSquare'] || MessageSquare
-              return (
-                <div key={board.id} className="border border-ktip-sand-200 p-4 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center flex-shrink-0">
-                      <IconComp size={20} className="text-ktip-ocean-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 font-display">
-                        {board.name}
-                      </h4>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                        {board.description || 'No description'}
-                      </p>
-                      <div className="flex items-center gap-3 mt-3 text-xs text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <FileText size={12} />
-                          {board.post_count ?? 0} posts
-                        </span>
-                        <span>
-                          Order: {board.sort_order}
-                        </span>
+
+          {!boards?.length ? (
+            <div className="p-12 text-center">
+              <MessageSquare size={48} className="mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-1">No boards found</h3>
+              <p className="text-gray-500 text-sm">
+                Forum boards will appear here once created.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
+              {boards.map((board) => {
+                const IconComp = boardIcon(board.icon)
+                return (
+                  <div key={board.id} className="border border-ktip-sand-200 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center flex-shrink-0">
+                        <IconComp size={20} className="text-ktip-ocean-600" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 font-display">
+                          {board.name}
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                          {board.description || 'No description'}
+                        </p>
+                        <div className="flex items-center gap-3 mt-3 text-xs text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <FileText size={12} />
+                            {board.post_count ?? 0} posts
+                          </span>
+                          <span>
+                            Order: {board.sort_order}
+                          </span>
+                        </div>
+                      </div>
+                      <Link
+                        to={`/forums/${board.slug}/edit`}
+                        className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
+                        title="Edit board"
+                      >
+                        <Pencil size={16} />
+                      </Link>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )
+                )
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* Posts Tab */}

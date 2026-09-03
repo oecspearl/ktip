@@ -277,7 +277,7 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    title: msg`Projects`,
+    title: msg`Innovation Projects`,
     category: msg`Collaboration`,
     description: msg`Launch and collaborate on innovative projects with creators across the Caribbean.`,
     href: '/projects',
@@ -295,7 +295,7 @@ const FEATURES: Feature[] = [
     span: 'md:col-span-2',
   },
   {
-    title: msg`Grants`,
+    title: msg`Innovation Funding`,
     category: msg`Funding`,
     description: msg`Find funding opportunities and grants to turn your ideas into reality.`,
     href: '/grants',
@@ -341,15 +341,12 @@ const FEATURES: Feature[] = [
   },
 ]
 
-// Partner logo wall. Entries without a `logo` render as styled wordmarks —
-// swap in real logo files under /public/partners as they become available.
-const PARTNERS: { name: string; logo?: string }[] = [
+// Partner logo wall. Only confirmed partners with a cleared logo file are
+// listed — a wordmark for an organisation that has not signed on reads as a
+// claim we cannot make. Add entries as real logos land in /public.
+const PARTNERS: { name: string; logo: string }[] = [
   { name: 'OECS Commission', logo: '/oecs.webp' },
   { name: 'World Bank Group', logo: '/worldbank.webp' },
-  { name: 'Caribbean Development Bank' },
-  { name: 'CARICOM' },
-  { name: 'UNDP' },
-  { name: 'ECCB' },
 ]
 
 const STAT_TILES: { key: keyof PlatformStats; label: MessageDescriptor }[] = [
@@ -1663,32 +1660,24 @@ export default function DiscoverPage() {
               </Trans>
             </p>
 
-            {/* Single-row marquee, scrolling right; pauses on hover. The
-                track holds two copies of the row for a seamless loop. */}
-            <div className="mt-10 relative max-w-full overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-              <div className="flex items-center w-max gap-14 md:gap-20 animate-marquee-right hover:[animation-play-state:paused]">
-                {[...PARTNERS, ...PARTNERS].map((p, i) => (
-                  <div
-                    key={`${p.name}-${i}`}
-                    className="group/logo flex items-center justify-center h-20 shrink-0 rounded-xl px-4 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-ktip-cream hover:shadow-medium"
-                    aria-hidden={i >= PARTNERS.length}
-                  >
-                    {p.logo ? (
-                      <img
-                        src={p.logo}
-                        alt={p.name}
-                        className="max-h-16 w-auto object-contain transition-transform duration-300 group-hover/logo:scale-105"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span className="text-lg font-display font-semibold text-ktip-sand-500 whitespace-nowrap transition-colors duration-300 group-hover/logo:text-ktip-sand-900">
-                        {p.name}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* A static row, not the marquee the stats below still use: two
+                logos never fill the band, so a scrolling track would spend
+                most of its loop showing the gap between the copies. */}
+            <ul className="mt-10 flex flex-wrap items-center gap-10 md:gap-16">
+              {PARTNERS.map((p) => (
+                <li
+                  key={p.name}
+                  className="group/logo flex items-center justify-center h-20 rounded-xl px-4 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-ktip-cream hover:shadow-medium"
+                >
+                  <img
+                    src={p.logo}
+                    alt={p.name}
+                    className="max-h-16 w-auto object-contain transition-transform duration-300 group-hover/logo:scale-105"
+                    loading="lazy"
+                  />
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Platform stats — same band, mirrored right and running leftward.

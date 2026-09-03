@@ -58,6 +58,7 @@ export type PermissionKey =
   | 'project:manage'
   | 'event:create'
   | 'forum:post'
+  | 'forum:board'
   | 'forum:comment'
   | 'mentorship:offer'
   | 'dm:initiate'
@@ -926,6 +927,11 @@ export interface ForumBoard {
   icon: string | null
   sort_order: number
   created_at: string
+  /**
+   * Who opened this board (migration 129). NULL on the six boards seeded by
+   * 005 — those are editable by `forum:manage` holders only.
+   */
+  created_by?: string | null
   post_count?: number
   latest_activity?: string
 }
@@ -1999,6 +2005,8 @@ export type ModerationTargetType =
   | 'event_solution'
   | 'venue_room_message'
   | 'resume'
+  // Added by 129, when boards became member-created.
+  | 'forum_board'
 
 export type ReportCategory =
   | 'hate_harassment'

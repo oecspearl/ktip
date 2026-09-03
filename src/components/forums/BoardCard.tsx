@@ -1,24 +1,7 @@
 import type { ForumBoard } from '../../types'
 import { BentoCard } from '../ui/BentoCard'
-import {
-  MessageSquare,
-  FolderKanban,
-  DollarSign,
-  Users,
-  Calendar,
-  HelpCircle,
-} from 'lucide-react'
-import type { ComponentType } from 'react'
+import { boardIcon } from '../../lib/forum-board-icons'
 import { useLingui } from '@lingui/react/macro'
-
-const iconMap: Record<string, ComponentType<{ size?: number; className?: string }>> = {
-  MessageSquare,
-  FolderKanban,
-  DollarSign,
-  Users,
-  Calendar,
-  HelpCircle,
-}
 
 interface BoardCardProps {
   board: ForumBoard
@@ -28,7 +11,7 @@ interface BoardCardProps {
 
 export function BoardCard({ board, className }: BoardCardProps) {
     const { t } = useLingui()
-  const Icon = iconMap[board.icon || 'MessageSquare'] || MessageSquare
+  const Icon = boardIcon(board.icon)
 
   return (
     <BentoCard

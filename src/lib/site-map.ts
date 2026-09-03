@@ -268,6 +268,35 @@ export const SITE_MAP: SiteEntry[] = [
     access: 'auth',
     icon: 'ClipboardList',
   },
+  // The funder's side. `access: 'auth'` rather than a permission — SiteAccess
+  // has no notion of one, and the route guard says no to anyone without
+  // grant:post the moment they open it.
+  {
+    id: 'grants.post',
+    title: 'Post a grant',
+    category: 'Funding',
+    description: 'Publish a funding call for the region to apply to',
+    keywords: ['post grant', 'create grant', 'new grant', 'funding call', 'publish funding', 'funder', 'donor'],
+    href: '/grants/new',
+    access: 'auth',
+    icon: 'FilePlus',
+    howTo: [
+      'Open Funding → Post a Grant. The entry only appears for accounts that may post funding.',
+      'Fill in the title, what the fund is for, the amount range and the deadline.',
+      'Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list.',
+      'Only add an external application link if applications are handled off-platform.',
+    ],
+  },
+  {
+    id: 'grants.my-grants',
+    title: 'My Grants',
+    category: 'Funding',
+    description: 'The funding calls you posted, open and closed',
+    keywords: ['my funding', 'posted grants', 'my calls', 'edit grant', 'close grant'],
+    href: '/grants/my-grants',
+    access: 'auth',
+    icon: 'Wallet',
+  },
   {
     id: 'grants.ai-review',
     title: 'AI review of an application',
@@ -387,6 +416,22 @@ export const SITE_MAP: SiteEntry[] = [
       'Go to Forums and open the board that fits your topic.',
       'Click "New Post" (you must be logged in).',
       'Write your title and message, then publish.',
+    ],
+  },
+  {
+    id: 'forums.new-board',
+    title: 'Start a discussion board',
+    category: 'Community',
+    description: 'Open a new board for a subject the forum does not cover yet',
+    keywords: ['new board', 'create board', 'discussion topic', 'new forum', 'add board', 'new thread'],
+    href: '/forums/new',
+    access: 'auth',
+    icon: 'MessageSquarePlus',
+    howTo: [
+      'Open Community → Start a Board. The entry appears for organisation accounts and administrators.',
+      'Name the board for the subject, not for a single question — threads go inside it.',
+      'Pick an icon and describe who the board is for.',
+      'Members with posting rights can then start discussions on it straight away.',
     ],
   },
   {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   describeEventDeletion,
+  describeForumBoardDeletion,
   describeGrantDeletion,
   describeProjectDeletion,
   isDeleteConfirmed,
@@ -177,6 +178,35 @@ describe('describeGrantDeletion', () => {
         c.includes('application')
       )
     ).toBe(true)
+  })
+})
+
+describe('describeForumBoardDeletion', () => {
+  it('treats an empty board as a low-friction delete', () => {
+    const impact = describeForumBoardDeletion({ postCount: 0 })
+    expect(impact.affectsOthers).toBe(false)
+    expect(impact.requiresTitleConfirmation).toBe(false)
+    expect(impact.warning).toBe(null)
+  })
+
+  it('requires the name back as soon as one discussion exists', () => {
+    const impact = describeForumBoardDeletion({ postCount: 1 })
+    expect(impact.affectsOthers).toBe(true)
+    expect(impact.requiresTitleConfirmation).toBe(true)
+    expect(impact.warning).toContain('1 discussion and')
+  })
+
+  it('pluralises a busy board', () => {
+    expect(describeForumBoardDeletion({ postCount: 12 }).warning).toContain('12 discussions')
+  })
+
+  // Unknown is never treated as empty: the cascade takes other people's
+  // writing, so the guard fails towards friction.
+  it('treats an uncounted board as one that might not be empty', () => {
+    const impact = describeForumBoardDeletion({ postCount: null })
+    expect(impact.affectsOthers).toBe(true)
+    expect(impact.requiresTitleConfirmation).toBe(true)
+    expect(impact.cascades.some((c) => c.includes('reply'))).toBe(true)
   })
 })
 

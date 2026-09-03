@@ -360,6 +360,13 @@ export const forumPostSchema = z.object({
   content: z.string().min(10, 'Content must be at least 10 characters').max(10000, 'Content too long'),
 })
 
+// A board name is a navigation label, not a sentence — the card and the
+// breadcrumb both render it on one line.
+export const forumBoardSchema = z.object({
+  name: z.string().min(3, 'Board name must be at least 3 characters').max(60, 'Board name too long'),
+  description: z.string().max(500, 'Description too long').optional().or(z.literal('')),
+})
+
 export const forumReplySchema = z.object({
   content: z.string().min(1, 'Reply cannot be empty').max(5000, 'Reply too long'),
 })
@@ -430,6 +437,7 @@ export type GrantInput = z.infer<typeof grantSchema>
 export type MessageInput = z.infer<typeof messageSchema>
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
 export type ForumPostInput = z.infer<typeof forumPostSchema>
+export type ForumBoardInput = z.infer<typeof forumBoardSchema>
 export type ForumReplyInput = z.infer<typeof forumReplySchema>
 export type EventUpdateInput = z.infer<typeof eventUpdateSchema>
 export type EventArticleInput = z.infer<typeof eventArticleSchema>

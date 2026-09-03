@@ -4,6 +4,7 @@ import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { isUuid } from '../lib/slug'
+import { useLingui } from '@lingui/react/macro'
 import type { ForumBoard, ForumPost, ForumReply } from '../types'
 
 export function useForumBoards() {
@@ -42,6 +43,30 @@ export function useForumBoard(slug: string | undefined) {
   })
 
   return { board: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+/**
+ * How many threads sit on a board. Its own query rather than a field on the
+ * board row: the board list selects `*`, and the delete guard needs a real
+ * total — the post list is capped at 50 and would understate a busy board.
+ */
+export function useForumBoardPostCount(boardId: string | undefined) {
+  const query = useQuery({
+    queryKey: keys.sub('forum_boards', 'post-count', boardId),
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('forum_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('board_id', boardId as string)
+      if (error) throw error
+      return count ?? 0
+    },
+    enabled: !!boardId,
+  })
+
+  // null, not 0, while it loads or fails: describeForumBoardDeletion() treats
+  // an unknown count as "might not be empty" and asks for the name back.
+  return { postCount: query.isSuccess ? query.data : null, loading: query.isPending }
 }
 
 export function useForumPosts(
@@ -122,6 +147,91 @@ export function useForumReplies(postId: string | undefined) {
   })
 
   return { replies: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+export function useCreateForumBoard() {
+  const { t } = useLingui()
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      name: string
+      description?: string | null
+      icon?: string | null
+    }) => {
+      // Migration 129's INSERT policy requires created_by = auth.uid(): a board
+      // filed under somebody else's name is one its author cannot then edit.
+      // The slug and the sort order are assigned by the trigger, not here.
+      const { data: session } = await supabase.auth.getUser()
+      const createdBy = session?.user?.id
+      if (!createdBy) throw new Error(t`You must be signed in to open a board`)
+
+      const { data: board, error } = await supabase
+        .from('forum_boards')
+        .insert({ ...data, created_by: createdBy } as any)
+        .select()
+        .single()
+      if (error) throw error
+      return board as ForumBoard
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('forum_boards') })
+    },
+  })
+
+  return { createBoard: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
+}
+
+export function useUpdateForumBoard() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      boardId,
+      updates,
+    }: {
+      boardId: string
+      updates: Partial<Pick<ForumBoard, 'name' | 'description' | 'icon' | 'sort_order'>>
+    }) => {
+      const { data, error } = await supabase
+        .from('forum_boards')
+        .update(updates)
+        .eq('id', boardId)
+        .select()
+        .single()
+      if (error) throw error
+      return data as ForumBoard
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('forum_boards') })
+    },
+  })
+
+  const updateBoard = (
+    boardId: string,
+    updates: Partial<Pick<ForumBoard, 'name' | 'description' | 'icon' | 'sort_order'>>
+  ) => mutation.mutateAsync({ boardId, updates })
+
+  return { updateBoard, loading: mutation.isPending, error: mutation.error }
+}
+
+export function useDeleteForumBoard() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (boardId: string) => {
+      const { error } = await supabase.from('forum_boards').delete().eq('id', boardId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      // The delete cascades to every post and reply on the board (005), so the
+      // post lists go with it rather than pointing at a board that is gone.
+      queryClient.invalidateQueries({ queryKey: keys.all('forum_boards') })
+      queryClient.invalidateQueries({ queryKey: keys.all('forum_posts') })
+    },
+  })
+
+  return { deleteBoard: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
 }
 
 export function useCreateForumPost() {

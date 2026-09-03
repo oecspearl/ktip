@@ -116,6 +116,10 @@ msgstr "Project Viewer"
 msgid "Hands up"
 msgstr "Hands up"
 
+#: src/lib/delete-guard.ts
+msgid "Every discussion on it, and every reply to those discussions"
+msgstr "Every discussion on it, and every reply to those discussions"
+
 #: src/components/documents/DocumentContentModal.tsx
 msgid "Download the original to view it."
 msgstr "Download the original to view it."
@@ -173,6 +177,7 @@ msgstr "What personal data KTIP collects, why, who it reaches, how long it is ke
 msgid "{0}% complete"
 msgstr "{0}% complete"
 
+#: src/pages/forums/BoardFormPage.tsx
 #: src/pages/forums/CreatePostPage.tsx
 msgid "Board not found."
 msgstr "Board not found."
@@ -380,6 +385,10 @@ msgstr "Show it to other entrants and attendees, where the competition’s forma
 msgid "Do not misrepresent a grant, project, event or organisation — including its funding, its outcomes, its partners or its endorsements."
 msgstr "Do not misrepresent a grant, project, event or organisation — including its funding, its outcomes, its partners or its endorsements."
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "A board is a place for discussions to gather — name it for the subject, not for a single question."
+msgstr "A board is a place for discussions to gather — name it for the subject, not for a single question."
+
 #: src/i18n/harvested.ts
 msgid "What is the Progress tab?"
 msgstr "What is the Progress tab?"
@@ -443,6 +452,7 @@ msgstr "Virtual Campus records and manual edits"
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
+#: src/lib/forum-board-icons.ts
 #: src/lib/site-search.ts
 #: src/lib/timeline-gantt.ts
 #: src/pages/achievements/AchievementsPage.tsx
@@ -957,6 +967,7 @@ msgstr "Each tile is a room — a main stage, breakouts, a help desk, sponsor ro
 #: src/components/layout/Navbar.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
+#: src/lib/forum-board-icons.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/dashboard/tabs/FundingTab.tsx
 #: src/pages/discover/DiscoverPage.tsx
@@ -1349,6 +1360,7 @@ msgid "Click \"Create starter rooms\" for a Main Hall, networking area, workshop
 msgstr "Click \"Create starter rooms\" for a Main Hall, networking area, workshop room, help desk, stage and quiet room — or add your own."
 
 #: src/lib/extracted-fields.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Minimum award"
 msgstr "Minimum award"
 
@@ -1376,6 +1388,10 @@ msgstr "Read the whole tour aloud"
 #: src/i18n/harvested.ts
 msgid "Say where it came from, so the next reader knows what they are bound by."
 msgstr "Say where it came from, so the next reader knows what they are bound by."
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Who may apply — country, sector, stage, anything an applicant should check first."
+msgstr "Who may apply — country, sector, stage, anything an applicant should check first."
 
 #: src/pages/projects/ProjectsPage.tsx
 msgid "Create First Project"
@@ -1564,6 +1580,7 @@ msgstr "Your draft is saved automatically the first time you upload."
 #: src/components/layout/NavbarSearchPanel.tsx
 #: src/components/notes/StickyNoteGroup.tsx
 #: src/pages/collaborate/CollaborateHubPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
 msgid "Open"
 msgstr "Open"
 
@@ -1634,6 +1651,7 @@ msgstr "Share your thoughts, questions, or ideas..."
 msgid "This grant has expired and is no longer accepting applications."
 msgstr "This grant has expired and is no longer accepting applications."
 
+#: src/lib/forum-board-icons.ts
 #: src/pages/directory/DirectoryPage.tsx
 msgid "People"
 msgstr "People"
@@ -1734,6 +1752,10 @@ msgstr "May remain after account deletion, attributed to a deleted member, where
 msgid "Co-editing, formatting and sharing."
 msgstr "Co-editing, formatting and sharing."
 
+#: src/lib/forum-board-icons.ts
+msgid "Climate"
+msgstr "Climate"
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Add to portfolio"
 msgstr "Add to portfolio"
@@ -1785,6 +1807,10 @@ msgstr "11. What features or improvements would you like to see?"
 #: src/i18n/harvested.ts
 msgid "What a notice must contain"
 msgstr "What a notice must contain"
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Only the person who opened this board, or a forum administrator, can edit it."
+msgstr "Only the person who opened this board, or a forum administrator, can edit it."
 
 #: src/i18n/harvested.ts
 msgid "Translates member-written content between English, French and Spanish"
@@ -1875,6 +1901,11 @@ msgstr "{0} draft"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "user"
 msgstr "user"
+
+#. placeholder {0}: open.length
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "{0, plural, one {# open call} other {# open calls}}"
+msgstr "{0, plural, one {# open call} other {# open calls}}"
 
 #: src/i18n/harvested.ts
 msgid "The knowledge base"
@@ -2135,6 +2166,10 @@ msgstr "Don't have an account? <0>Sign up</0>"
 msgid "Failed to update event"
 msgstr "Failed to update event"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "External application link"
+msgstr "External application link"
+
 #: src/lib/validation.ts
 msgid "Upper and lowercase letters"
 msgstr "Upper and lowercase letters"
@@ -2269,6 +2304,10 @@ msgstr "Run"
 msgid "Analytics preferences"
 msgstr "Analytics preferences"
 
+#: src/pages/discover/DiscoverPage.tsx
+msgid "Innovation Projects"
+msgstr "Innovation Projects"
+
 #. placeholder {0}: named[0]
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
@@ -2299,6 +2338,10 @@ msgstr "Other entrants and the public"
 #: src/i18n/harvested.ts
 msgid "Set your status from the pill in the top bar — green for working, \"Do not disturb\" to be left alone."
 msgstr "Set your status from the pill in the top bar — green for working, \"Do not disturb\" to be left alone."
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Board created"
+msgstr "Board created"
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "Jump to the end"
@@ -2504,6 +2547,10 @@ msgstr "Remove link"
 msgid "Code block"
 msgstr "Code block"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Only if applications are handled off-platform. Otherwise members apply here."
+msgstr "Only if applications are handled off-platform. Otherwise members apply here."
+
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "About You"
@@ -2689,6 +2736,10 @@ msgstr "Word, PDF, Excel, CSV, Markdown or an image. Text documents are read int
 #: src/lib/grant-application-template.ts
 msgid "Budget Breakdown"
 msgstr "Budget Breakdown"
+
+#: src/lib/delete-guard.ts
+msgid "{postCount, plural, one {# discussion and all of its replies will be destroyed. The people who wrote them will not be notified.} other {# discussions and all of their replies will be destroyed. The people who wrote them will not be notified.}}"
+msgstr "{postCount, plural, one {# discussion and all of its replies will be destroyed. The people who wrote them will not be notified.} other {# discussions and all of their replies will be destroyed. The people who wrote them will not be notified.}}"
 
 #: src/components/dashboard/stats/RankProgress.tsx
 msgid "Day streak"
@@ -3158,6 +3209,10 @@ msgstr "ongoing"
 msgid "Click the round KTIP button in the bottom-right corner of any page."
 msgstr "Click the round KTIP button in the bottom-right corner of any page."
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "One line, shown on the card and the homepage"
+msgstr "One line, shown on the card and the homepage"
+
 #: src/components/collaboration/editor/ImageModal.tsx
 msgid "Please select an image file."
 msgstr "Please select an image file."
@@ -3462,6 +3517,10 @@ msgstr "Apply for Grant"
 msgid "Welcome"
 msgstr "Welcome"
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Rename this board, change what it is for, or retire it."
+msgstr "Rename this board, change what it is for, or retire it."
+
 #: src/components/personalization/TopicPicker.tsx
 msgid "e.g. blue economy"
 msgstr "e.g. blue economy"
@@ -3520,6 +3579,7 @@ msgid "Suspend accounts and escalate to safety admins and school administrators.
 msgstr "Suspend accounts and escalate to safety admins and school administrators."
 
 #: src/i18n/harvested.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Startup"
 msgstr "Startup"
 
@@ -3586,6 +3646,10 @@ msgstr "Why they say it infringes:"
 #: src/i18n/harvested.ts
 msgid "Only where the format is a public showcase or open vote, and only after entries close. This is stated on the event before you enter."
 msgstr "Only where the format is a public showcase or open vote, and only after entries close. This is stated on the event before you enter."
+
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "Post one and it appears on the Grants page straight away."
+msgstr "Post one and it appears on the Grants page straight away."
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Everything you need to innovate"
@@ -3930,6 +3994,10 @@ msgstr "Kept"
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "User"
 msgstr "User"
+
+#: src/lib/forum-board-icons.ts
+msgid "Policy"
+msgstr "Policy"
 
 #: src/components/ui/FloatingActionButton.tsx
 msgid "Text size"
@@ -4466,6 +4534,10 @@ msgstr "Sponsorship accepted"
 msgid "Questions about this document? Write to legal@oecsinnovation.org. To see which versions you have accepted, open your legal settings."
 msgstr "Questions about this document? Write to legal@oecsinnovation.org. To see which versions you have accepted, open your legal settings."
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Save Grant"
+msgstr "Save Grant"
+
 #: src/i18n/harvested.ts
 msgid "Using code you find here"
 msgstr "Using code you find here"
@@ -4527,6 +4599,10 @@ msgstr "Individual competitions may publish their own rules — eligibility, dea
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "a whiteboard"
 msgstr "a whiteboard"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Closing the call keeps the record and the applications. Deleting destroys both."
+msgstr "Closing the call keeps the record and the applications. Deleting destroys both."
 
 #: src/i18n/harvested.ts
 msgid "Create, browse and manage innovation projects."
@@ -4651,6 +4727,7 @@ msgid "All other countries"
 msgstr "All other countries"
 
 #: src/lib/extracted-fields.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Maximum award"
 msgstr "Maximum award"
 
@@ -5512,6 +5589,7 @@ msgstr "Captioning needs Chrome, Edge or Safari"
 #: src/components/resume/sheets/SlateSheet.tsx
 #: src/i18n/harvested.ts
 #: src/pages/cv/CvEditPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Education"
 msgstr "Education"
 
@@ -5571,6 +5649,10 @@ msgstr "Every long text field in the wizard has AI tools under it.\n"
 "Tone — recasts your text as Professional, Persuasive, Academic or Concise.\n"
 "\n"
 "Nothing is applied automatically: you see the suggestion and choose to accept, edit or discard it. On the final step, AI Review scores the complete application and points at the weakest sections."
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Grant not found."
+msgstr "Grant not found."
 
 #: src/components/venue/room/RoomPeoplePanels.tsx
 msgid "Pick a skill, or type a name."
@@ -5829,6 +5911,10 @@ msgid "Working"
 msgstr "Working"
 
 #: src/i18n/harvested.ts
+msgid "Open a new board for a subject the forum does not cover yet"
+msgstr "Open a new board for a subject the forum does not cover yet"
+
+#: src/i18n/harvested.ts
 msgid "Legal bases"
 msgstr "Legal bases"
 
@@ -5883,6 +5969,10 @@ msgstr "Failed to send invitations. Please try again."
 #: src/i18n/harvested.ts
 msgid "Direct and group messages, and message attachments"
 msgstr "Direct and group messages, and message attachments"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Only the organisation that posted this grant, or a grants administrator, can edit it."
+msgstr "Only the organisation that posted this grant, or a grants administrator, can edit it."
 
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Report content that infringes your rights"
@@ -5999,6 +6089,7 @@ msgstr "Skills, interests, what they are open to collaborating on, and below tha
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/dashboard/tabs/ResearchTab.tsx
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Research"
 msgstr "Research"
 
@@ -6157,6 +6248,7 @@ msgstr "Verifying"
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
 #: src/pages/discover/DiscoverPage.tsx
+#: src/pages/forums/BoardFormPage.tsx
 #: src/pages/forums/BoardPage.tsx
 #: src/pages/forums/CreatePostPage.tsx
 #: src/pages/forums/ForumsPage.tsx
@@ -6511,6 +6603,10 @@ msgstr "Complete your profile →"
 msgid "Save banner"
 msgstr "Save banner"
 
+#: src/i18n/harvested.ts
+msgid "Only add an external application link if applications are handled off-platform."
+msgstr "Only add an external application link if applications are handled off-platform."
+
 #: src/components/legal/AuthoritativeLanguageNotice.tsx
 msgid "This translation is provided for convenience. The English version is the authoritative one, and it governs if the two differ."
 msgstr "This translation is provided for convenience. The English version is the authoritative one, and it governs if the two differ."
@@ -6518,6 +6614,10 @@ msgstr "This translation is provided for convenience. The English version is the
 #: src/i18n/harvested.ts
 msgid "Edit profile details"
 msgstr "Edit profile details"
+
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "You have not posted a funding call yet"
+msgstr "You have not posted a funding call yet"
 
 #: src/i18n/harvested.ts
 msgid "Selected role or roles"
@@ -6660,6 +6760,7 @@ msgid "Get your business vetted by your National Chamber to unlock SME features"
 msgstr "Get your business vetted by your National Chamber to unlock SME features"
 
 #: src/components/layout/Navbar.tsx
+#: src/lib/forum-board-icons.ts
 #: src/lib/site-search.ts
 msgid "Help"
 msgstr "Help"
@@ -6758,6 +6859,10 @@ msgstr "{unreadCount, plural, one {# unread message} other {# unread messages}}"
 #: src/i18n/harvested.ts
 msgid "Platform overview and moderation entry point"
 msgstr "Platform overview and moderation entry point"
+
+#: src/i18n/harvested.ts
+msgid "Pick an icon and describe who the board is for."
+msgstr "Pick an icon and describe who the board is for."
 
 #: src/i18n/harvested.ts
 msgid "How KTIP protects members under 18 — what supervised mode restricts, how the date of birth is handled, and how a parent or guardian can act."
@@ -6869,6 +6974,10 @@ msgstr "KTIP uses very few cookies. Almost everything it keeps on your device is
 #: src/lib/event-registration.ts
 msgid "{0} wants to attend \"{1}\" as a {how}."
 msgstr "{0} wants to attend \"{1}\" as a {how}."
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Publish a funding opportunity. Applicants see it on the Grants page as soon as you post it."
+msgstr "Publish a funding opportunity. Applicants see it on the Grants page as soon as you post it."
 
 #: src/i18n/harvested.ts
 msgid "Grant listings, funding opportunities, events and partner offerings on KTIP are published by their sponsors. %entityShort% does not guarantee their accuracy, availability or outcome, is not a party to any agreement you reach with a sponsor, and does not disburse funds unless it is expressly the named funder."
@@ -7518,6 +7627,7 @@ msgstr "Break"
 #: src/components/venue/room/RoomCountdown.tsx
 #: src/components/venue/RoomZone.tsx
 #: src/pages/events/EventVenueRoomPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
 msgid "Closed"
 msgstr "Closed"
 
@@ -7674,7 +7784,9 @@ msgstr "View my public profile"
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/events/CreateEventPage.tsx
+#: src/pages/forums/BoardFormPage.tsx
 #: src/pages/forums/CreatePostPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/grievances/ReportUserPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
@@ -7766,6 +7878,10 @@ msgstr "Previous"
 msgid "Switch off anything you would rather we ignored"
 msgstr "Switch off anything you would rather we ignored"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Back to grants"
+msgstr "Back to grants"
+
 #: src/components/grants/GrantCard.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Up to {amount}"
@@ -7804,6 +7920,7 @@ msgid "What can I do inside a venue room?"
 msgstr "What can I do inside a venue room?"
 
 #: src/i18n/harvested.ts
+#: src/lib/forum-board-icons.ts
 #: src/pages/discover/DiscoverPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Discussion"
@@ -8133,6 +8250,7 @@ msgstr "{0}/{1} characters"
 #: src/i18n/harvested.ts
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Summary"
@@ -8378,6 +8496,7 @@ msgid "Quarantine, restore or remove content and issue warnings."
 msgstr "Quarantine, restore or remove content and issue warnings."
 
 #: src/i18n/harvested.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Development"
 msgstr "Development"
 
@@ -8682,8 +8801,12 @@ msgstr "Session cleared. Please try signing in again."
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/ShareEntityModal.tsx
+#: src/components/profile/BannerTile.tsx
 #: src/pages/cv/CvPage.tsx
 #: src/pages/events/EventDetailPage.tsx
+#: src/pages/forums/BoardFormPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Edit"
@@ -8726,6 +8849,10 @@ msgstr "Send a Message"
 #: src/i18n/harvested.ts
 msgid "Your application is confidential"
 msgstr "Your application is confidential"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Change the terms, extend the deadline, or close the call."
+msgstr "Change the terms, extend the deadline, or close the call."
 
 #: src/i18n/harvested.ts
 msgid "add the facilitator"
@@ -9294,6 +9421,10 @@ msgstr "Media and chat during a call"
 msgid "List item one"
 msgstr "List item one"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "A funding call needs a title"
+msgstr "A funding call needs a title"
+
 #: src/components/documents/RequestAccessModal.tsx
 #: src/components/projects/RequestCollaborationModal.tsx
 msgid "Message (optional)"
@@ -9447,6 +9578,10 @@ msgstr "If content of yours is removed after a notice, you will be notified with
 msgid "Failed to load whiteboard"
 msgstr "Failed to load whiteboard"
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Not your board"
+msgstr "Not your board"
+
 #: src/i18n/harvested.ts
 msgid "Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n"
 "\n"
@@ -9462,6 +9597,10 @@ msgstr "Partner API — issue and revoke API keys for partner organisations. Tre
 "UAT — feedback submitted during user acceptance testing, with its state.\n"
 "\n"
 "One known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead."
+
+#: src/components/layout/Navbar.tsx
+msgid "Open a new discussion board"
+msgstr "Open a new discussion board"
 
 #: src/i18n/harvested.ts
 msgid "Employers"
@@ -9779,6 +9918,10 @@ msgstr "Ask the KTIP administrator at your school or university to add <0>{0}</0
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Full"
 msgstr "Full"
+
+#: src/i18n/harvested.ts
+msgid "Open Funding → Post a Grant. The entry only appears for accounts that may post funding."
+msgstr "Open Funding → Post a Grant. The entry only appears for accounts that may post funding."
 
 #: src/components/WelcomePanel.tsx
 msgid "Who it's for"
@@ -10602,6 +10745,10 @@ msgstr "The organizer updates published for this event."
 msgid "Your copy of what you sent"
 msgstr "Your copy of what you sent"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Optional fields shown under the description — reporting terms, contact, panel dates."
+msgstr "Optional fields shown under the description — reporting terms, contact, panel dates."
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Invite Participants"
 msgstr "Invite Participants"
@@ -11003,6 +11150,10 @@ msgstr "How we protect young members"
 msgid "File a notice"
 msgstr "File a notice"
 
+#: src/pages/discover/DiscoverPage.tsx
+msgid "Innovation Funding"
+msgstr "Innovation Funding"
+
 #: src/i18n/harvested.ts
 msgid "Gives moderators a second opinion on a queued report"
 msgstr "Gives moderators a second opinion on a queued report"
@@ -11109,6 +11260,10 @@ msgstr "Original"
 msgid "Hashtags and climate action"
 msgstr "Hashtags and climate action"
 
+#: src/pages/forums/ForumsPage.tsx
+msgid "Open the first one and give the community somewhere to talk."
+msgstr "Open the first one and give the community somewhere to talk."
+
 #: src/components/achievements/AchievementUnlockModal.tsx
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/uat/UATFeedbackForm.tsx
@@ -11214,14 +11369,17 @@ msgstr "The event workspace"
 #: src/pages/events/CreateEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/events/EventsPage.tsx
+#: src/pages/forums/BoardFormPage.tsx
 #: src/pages/forums/BoardPage.tsx
 #: src/pages/forums/CreatePostPage.tsx
 #: src/pages/forums/ForumsPage.tsx
 #: src/pages/forums/PostDetailPage.tsx
 #: src/pages/grants/GrantApplicationPage.tsx
 #: src/pages/grants/GrantDetailPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/grants/GrantsPage.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
 #: src/pages/grievances/MyGrievancesPage.tsx
 #: src/pages/grievances/ReportUserPage.tsx
 #: src/pages/hackathons/HackathonsPage.tsx
@@ -11356,9 +11514,17 @@ msgstr "Enter your new password below"
 msgid "Help article — Achievements & Leaderboard"
 msgstr "Help article — Achievements & Leaderboard"
 
+#: src/i18n/harvested.ts
+msgid "Fill in the title, what the fund is for, the amount range and the deadline."
+msgstr "Fill in the title, what the fund is for, the amount range and the deadline."
+
 #: src/components/collaboration/editor/LinkModal.tsx
 msgid "URL"
 msgstr "URL"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "The maximum cannot be smaller than the minimum"
+msgstr "The maximum cannot be smaller than the minimum"
 
 #: src/lib/calendar.ts
 msgid "You declined this invitation"
@@ -11718,6 +11884,7 @@ msgid "We do not check"
 msgstr "We do not check"
 
 #: src/lib/extracted-fields.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Grant type"
 msgstr "Grant type"
 
@@ -11941,6 +12108,10 @@ msgstr "Publish a new event and open registrations"
 msgid "Help article — Collaboration Tools"
 msgstr "Help article — Collaboration Tools"
 
+#: src/lib/forum-board-icons.ts
+msgid "Ideas"
+msgstr "Ideas"
+
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Search resources..."
 msgstr "Search resources..."
@@ -11960,6 +12131,10 @@ msgstr "Accepted the first time you publish a project, event, post, CV or organi
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Search members..."
 msgstr "Search members..."
+
+#: src/pages/grants/GrantDetailPage.tsx
+msgid "You posted this funding call."
+msgstr "You posted this funding call."
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Evidence URL (optional)"
@@ -12216,6 +12391,10 @@ msgstr "Note title"
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Anything else"
 msgstr "Anything else"
+
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "The calls your organisation has published, open and closed."
+msgstr "The calls your organisation has published, open and closed."
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Submit to Chamber"
@@ -12576,10 +12755,6 @@ msgstr "Hi {userName}!"
 msgid "This event sets a challenge"
 msgstr "This event sets a challenge"
 
-#: src/components/layout/Navbar.tsx
-msgid "Enter the live venue, find a team and build"
-msgstr "Enter the live venue, find a team and build"
-
 #: src/i18n/harvested.ts
 msgid "Whiteboards, documents, code sandboxes and video calls."
 msgstr "Whiteboards, documents, code sandboxes and video calls."
@@ -12660,6 +12835,10 @@ msgstr "Flagged:"
 #: src/i18n/harvested.ts
 msgid "Start or join a video call"
 msgstr "Start or join a video call"
+
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "Loading your grants..."
+msgstr "Loading your grants..."
 
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Verification email sent."
@@ -12773,6 +12952,10 @@ msgstr "Shared documents, whiteboards, and video invites"
 msgid "New group"
 msgstr "New group"
 
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "Nothing open — every call you posted has closed or passed its deadline."
+msgstr "Nothing open — every call you posted has closed or passed its deadline."
+
 #: src/i18n/harvested.ts
 msgid "Select the Security tab."
 msgstr "Select the Security tab."
@@ -12789,6 +12972,10 @@ msgstr "Verify with my school email"
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "What participants have submitted to your challenge"
 msgstr "What participants have submitted to your challenge"
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Create Board"
+msgstr "Create Board"
 
 #: src/i18n/harvested.ts
 msgid "Transactional email"
@@ -12969,6 +13156,11 @@ msgstr "Invite collaborators"
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Description too long"
 msgstr "Description too long"
+
+#. placeholder {0}: closed.length
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "{0, plural, one {# closed call} other {# closed calls}}"
+msgstr "{0, plural, one {# closed call} other {# closed calls}}"
 
 #: src/i18n/harvested.ts
 msgid "These Terms are governed by the laws of %jurisdiction%, and its courts have exclusive jurisdiction — without prejudice to any mandatory consumer-protection rights, or any right to bring a claim before a data-protection authority, in the country where you live."
@@ -13368,6 +13560,7 @@ msgid "Uploading files…"
 msgstr "Uploading files…"
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/BannerTile.tsx
 msgid "Banner"
 msgstr "Banner"
 
@@ -13411,6 +13604,10 @@ msgstr "Legal name"
 msgid "KTIP - Knowledge, Technology and Innovation Platform for Caribbean innovators to collaborate, connect, and grow."
 msgstr "KTIP - Knowledge, Technology and Innovation Platform for Caribbean innovators to collaborate, connect, and grow."
 
+#: src/i18n/harvested.ts
+msgid "Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list."
+msgstr "Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list."
+
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Write a reply..."
 msgstr "Write a reply..."
@@ -13442,6 +13639,10 @@ msgstr "Click \"Log In\" in the top right corner of the page.\n"
 "If you added a secondary email in Settings, you can sign in with either address using the same password.\n"
 "\n"
 "If you forget your password, click \"Forgot Password?\" on the login page."
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Climate action grant"
+msgstr "Climate action grant"
 
 #: src/i18n/harvested.ts
 msgid "This goes to the OECS safety team, not to the person you are reporting. They are not told who filed it.\n"
@@ -13617,6 +13818,10 @@ msgstr "{0, plural, one {# field found in this document} other {# fields found i
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Add another"
 msgstr "Add another"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Open for applications"
+msgstr "Open for applications"
 
 #: src/i18n/harvested.ts
 msgid "How do I report inappropriate behaviour?"
@@ -13824,6 +14029,10 @@ msgstr "I have saved these codes somewhere I can reach without my phone."
 #: src/i18n/harvested.ts
 msgid "Grants and their applications"
 msgstr "Grants and their applications"
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "New Discussion Board"
+msgstr "New Discussion Board"
 
 #: src/pages/help/FAQPage.tsx
 msgid "Send Feedback"
@@ -14586,6 +14795,10 @@ msgstr "Hide yourself from the leaderboard"
 msgid "Awarded automatically"
 msgstr "Awarded automatically"
 
+#: src/components/layout/Navbar.tsx
+msgid "Publish a funding call and open applications"
+msgstr "Publish a funding call and open applications"
+
 #: src/i18n/harvested.ts
 msgid "Room audio while captions are running"
 msgstr "Room audio while captions are running"
@@ -14718,6 +14931,7 @@ msgstr "Do not misrepresent your credentials, your affiliation, your role, or a 
 #: src/components/ui/ToolTitleInput.tsx
 #: src/lib/extracted-fields.ts
 #: src/pages/forums/CreatePostPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Title"
 msgstr "Title"
@@ -14853,6 +15067,10 @@ msgid "This choice is stored on this device, so it is per browser."
 msgstr "This choice is stored on this device, so it is per browser."
 
 #: src/i18n/harvested.ts
+msgid "Post a grant"
+msgstr "Post a grant"
+
+#: src/i18n/harvested.ts
 msgid "Every section"
 msgstr "Every section"
 
@@ -14899,6 +15117,10 @@ msgstr "Can a student add a faculty sponsor?"
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "The work you do, who you do it for, and what makes you the right people for it."
 msgstr "The work you do, who you do it for, and what makes you the right people for it."
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "What belongs on this board, and who it is for."
+msgstr "What belongs on this board, and who it is for."
 
 #: src/components/dashboard/stats/OverviewStats.tsx
 msgid "Engagement received"
@@ -15092,6 +15314,10 @@ msgstr "Build, commercialise or file intellectual-property protection over your 
 #: src/i18n/harvested.ts
 msgid "While your account is active; deleted with the account"
 msgstr "While your account is active; deleted with the account"
+
+#: src/i18n/harvested.ts
+msgid "Start a discussion board"
+msgstr "Start a discussion board"
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "No courses found"
@@ -15595,6 +15821,10 @@ msgstr "Adjust tone"
 msgid "French"
 msgstr "French"
 
+#: src/i18n/harvested.ts
+msgid "Name the board for the subject, not for a single question — threads go inside it."
+msgstr "Name the board for the subject, not for a single question — threads go inside it."
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
 msgstr "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
@@ -15602,6 +15832,10 @@ msgstr "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
 #: src/i18n/harvested.ts
 msgid "Dark mode, reduced motion, text scale."
 msgstr "Dark mode, reduced motion, text scale."
+
+#: src/lib/permissions.ts
+msgid "Create discussion boards"
+msgstr "Create discussion boards"
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Your affirmations"
@@ -15662,6 +15896,10 @@ msgstr "Add to this day"
 #: src/i18n/harvested.ts
 msgid "What this is for"
 msgstr "What this is for"
+
+#: src/pages/grants/GrantDetailPage.tsx
+msgid "You administer this funding call."
+msgstr "You administer this funding call."
 
 #: src/components/grants/GrantCard.tsx
 #: src/pages/grants/GrantDetailPage.tsx
@@ -15775,10 +16013,16 @@ msgstr "e.g., $50,000 USD"
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
+#: src/pages/forums/BoardFormPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Description"
 msgstr "Description"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Grant posted"
+msgstr "Grant posted"
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "I have read and agree to the documents above, and I confirm the details I have given are accurate."
@@ -15805,6 +16049,13 @@ msgstr "The rest of the platform reads a derived yes-or-no answer — is this ac
 msgid "Your photo"
 msgstr "Your photo"
 
+#: src/components/layout/Navbar.tsx
+#: src/pages/grants/GrantFormPage.tsx
+#: src/pages/grants/GrantsPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "Post a Grant"
+msgstr "Post a Grant"
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Remove \"{title}\" from your portfolio?"
 msgstr "Remove \"{title}\" from your portfolio?"
@@ -15813,6 +16064,10 @@ msgstr "Remove \"{title}\" from your portfolio?"
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Resource"
 msgstr "Resource"
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Board updated"
+msgstr "Board updated"
 
 #: src/pages/InvitationsPage.tsx
 msgid "Requests to collaborate on your projects"
@@ -16210,6 +16465,10 @@ msgstr "Pick a room then click the grid to drop it, or drag to size it. Drag a p
 msgid "What's inside"
 msgstr "What's inside"
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Failed to save this board"
+msgstr "Failed to save this board"
+
 #: src/i18n/harvested.ts
 msgid "Sign in with email, Google or Microsoft"
 msgstr "Sign in with email, Google or Microsoft"
@@ -16226,6 +16485,10 @@ msgstr "Reset"
 #: src/lib/grant-application-template.ts
 msgid "Proposed Start Date"
 msgstr "Proposed Start Date"
+
+#: src/components/WelcomePanel.tsx
+msgid "The OECS innovation ecosystem."
+msgstr "The OECS innovation ecosystem."
 
 #: src/i18n/harvested.ts
 msgid "Create grants and review applications"
@@ -16255,6 +16518,10 @@ msgstr "Thinking about where to send you…"
 msgid "Where it happens"
 msgstr "Where it happens"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Select a type"
+msgstr "Select a type"
+
 #: src/components/dashboard/stats/RankProgress.tsx
 #: src/components/profile/StandingMeter.tsx
 msgid "Progress toward the next rank"
@@ -16272,6 +16539,14 @@ msgstr "Could not load courses"
 #: src/i18n/harvested.ts
 msgid "Performance of a contract"
 msgstr "Performance of a contract"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Not your funding call"
+msgstr "Not your funding call"
+
+#: src/hooks/useForums.ts
+msgid "You must be signed in to open a board"
+msgstr "You must be signed in to open a board"
 
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "JPG, PNG, GIF or WebP. Max 5MB. Click or drag & drop — large images are resized and optimized automatically."
@@ -16592,6 +16867,7 @@ msgstr "Receive reminders about upcoming events you've joined"
 #: src/components/ui/TagFilterSelect.tsx
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Tags"
 msgstr "Tags"
@@ -16828,10 +17104,6 @@ msgstr "Reset links work once, expire after an hour, and only open in the browse
 msgid "Not now"
 msgstr "Not now"
 
-#: src/components/layout/Navbar.tsx
-msgid "Month-by-month view of what is scheduled"
-msgstr "Month-by-month view of what is scheduled"
-
 #: src/components/directory/MemberPanel.tsx
 #: src/components/resume/ResumeOutline.tsx
 #: src/components/resume/sheets/AtlasSheet.tsx
@@ -16873,6 +17145,10 @@ msgstr "How do badges, points and levels work?"
 #: src/i18n/harvested.ts
 msgid "Sponsors"
 msgstr "Sponsors"
+
+#: src/lib/delete-guard.ts
+msgid "The discussions on this board could not be counted. Anything posted here — by anyone — is destroyed with it and cannot be recovered."
+msgstr "The discussions on this board could not be counted. Anything posted here — by anyone — is destroyed with it and cannot be recovered."
 
 #: src/pages/settings/FeedbackTab.tsx
 msgid "Use the feedback button in the corner of any page to report a bug, ask for something, or tell us what is working. Replies appear here."
@@ -17152,6 +17428,10 @@ msgstr "Easy"
 msgid "My Projects"
 msgstr "My Projects"
 
+#: src/components/layout/Navbar.tsx
+msgid "The funding calls you posted"
+msgstr "The funding calls you posted"
+
 #. placeholder {0}: room.name
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Message {0}"
@@ -17424,6 +17704,7 @@ msgstr "Runs the platform day to day. Every permission, every console page, and 
 
 #: src/lib/extracted-fields.ts
 #: src/pages/grants/GrantDetailPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Currency"
 msgstr "Currency"
 
@@ -17518,6 +17799,7 @@ msgstr "• Download B&W or Color — opens the print dialog; choose “Save as 
 "• Public / Private — a public CV gets a shareable link that opens for anyone, even signed out. Private is the default."
 
 #: src/i18n/harvested.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Innovation"
 msgstr "Innovation"
 
@@ -17679,6 +17961,10 @@ msgstr "Open document"
 msgid "The member may have unpublished it, or the link may be wrong."
 msgstr "The member may have unpublished it, or the link may be wrong."
 
+#: src/lib/delete-guard.ts
+msgid "The board and its description"
+msgstr "The board and its description"
+
 #: src/i18n/harvested.ts
 msgid "Required?"
 msgstr "Required?"
@@ -17830,6 +18116,11 @@ msgstr "Only me"
 #: src/i18n/harvested.ts
 msgid "Deliver programmes and apply for funding"
 msgstr "Deliver programmes and apply for funding"
+
+#: src/pages/grants/GrantDetailPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Edit Grant"
+msgstr "Edit Grant"
 
 #: src/components/gantt/gantt-view.tsx
 msgid "{markerLabel} — {markerDate}"
@@ -18095,6 +18386,10 @@ msgstr "The challenge"
 msgid "+{points} pts"
 msgstr "+{points} pts"
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Board name"
+msgstr "Board name"
+
 #: src/i18n/harvested.ts
 msgid "Integrity"
 msgstr "Integrity"
@@ -18264,6 +18559,10 @@ msgstr "This invitation has already been redeemed by another account."
 #: src/i18n/harvested.ts
 msgid "Triage"
 msgstr "Triage"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Edit Funding Call"
+msgstr "Edit Funding Call"
 
 #: src/hooks/useInstitutions.ts
 msgid "You must be signed in."
@@ -18529,6 +18828,13 @@ msgstr "Top Picks"
 msgid "You must be at least %minimumAge% years old, or the higher minimum age set by the law of the country you live in, whichever is greater."
 msgstr "You must be at least %minimumAge% years old, or the higher minimum age set by the law of the country you live in, whichever is greater."
 
+#: src/components/layout/Navbar.tsx
+#: src/i18n/harvested.ts
+#: src/pages/grants/GrantsPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "My Grants"
+msgstr "My Grants"
+
 #: src/components/shared/OrgEngagementFields.tsx
 msgid "Our people can take part even if the organisation setting is off."
 msgstr "Our people can take part even if the organisation setting is off."
@@ -18561,6 +18867,10 @@ msgstr "You may also complain to the data-protection authority in the country wh
 msgid "Assign roles and edit this permission matrix."
 msgstr "Assign roles and edit this permission matrix."
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Deleting a board takes every discussion on it, and every reply, with it. There is no undo."
+msgstr "Deleting a board takes every discussion on it, and every reply, with it. There is no undo."
+
 #: src/lib/venue-room-presets.ts
 msgid "Speakers prepare here before going on stage."
 msgstr "Speakers prepare here before going on stage."
@@ -18587,6 +18897,10 @@ msgstr "How to check a funding offer, and the signs of a scam"
 #: src/i18n/harvested.ts
 msgid "Registration cancelled"
 msgstr "Registration cancelled"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Application deadline"
+msgstr "Application deadline"
 
 #: src/i18n/harvested.ts
 msgid "Shared with no declared licence means: readable, not reusable."
@@ -18975,6 +19289,10 @@ msgstr "View grant"
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Share Document"
 msgstr "Share Document"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Post Grant"
+msgstr "Post Grant"
 
 #: src/components/directory/MemberPanel.tsx
 #: src/pages/profile/PublicProfilePage.tsx
@@ -19894,6 +20212,10 @@ msgstr "Leaderboard"
 msgid "Review your application before submitting. You can go back to edit any section."
 msgstr "Review your application before submitting. You can go back to edit any section."
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Topics applicants filter and search by — also what the personalized ranking matches on."
+msgstr "Topics applicants filter and search by — also what the personalized ranking matches on."
+
 #. placeholder {0}: closedGrants.length
 #: src/pages/grants/GrantsPage.tsx
 msgid " · {0} closed"
@@ -19998,6 +20320,10 @@ msgstr "No — clearable in your browser"
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Required"
 msgstr "Required"
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Save Board"
+msgstr "Save Board"
 
 #: src/i18n/harvested.ts
 msgid "Reading a profile and connecting."
@@ -20118,6 +20444,7 @@ msgstr "What a partner may use it for"
 #: src/components/uat/UATFeedbackForm.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
+#: src/lib/forum-board-icons.ts
 #: src/lib/site-search.ts
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
@@ -20236,6 +20563,10 @@ msgstr "Idea"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Active days"
 msgstr "Active days"
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "board"
+msgstr "board"
 
 #: src/i18n/harvested.ts
 msgid "The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.\n"
@@ -20575,6 +20906,10 @@ msgstr "Organization"
 msgid "Ordered List"
 msgstr "Ordered List"
 
+#: src/i18n/harvested.ts
+msgid "The funding calls you posted, open and closed"
+msgstr "The funding calls you posted, open and closed"
+
 #: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
 msgid "Conference"
@@ -20660,6 +20995,11 @@ msgstr "Repeated intimidation, humiliation or threats."
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "By submitting this report, you confirm that:"
 msgstr "By submitting this report, you confirm that:"
+
+#: src/pages/forums/BoardFormPage.tsx
+#: src/pages/forums/BoardPage.tsx
+msgid "Edit Board"
+msgstr "Edit Board"
 
 #: src/i18n/harvested.ts
 msgid "Who this is for"
@@ -21230,6 +21570,10 @@ msgstr "Change Email"
 msgid "Conduct and content"
 msgstr "Conduct and content"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "New Funding Call"
+msgstr "New Funding Call"
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Save your changes first — filling from your profile reloads the document."
 msgstr "Save your changes first — filling from your profile reloads the document."
@@ -21577,6 +21921,10 @@ msgstr "Create a snippet to write, run and share code with your collaborators."
 msgid "Loading post..."
 msgstr "Loading post..."
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "New Board"
+msgstr "New Board"
+
 #: src/components/shared/DetailsEditor.tsx
 msgid "Remove item"
 msgstr "Remove item"
@@ -21585,9 +21933,17 @@ msgstr "Remove item"
 msgid "Hosting and serverless execution"
 msgstr "Hosting and serverless execution"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "What the fund is for, what it will pay for, and how decisions are made."
+msgstr "What the fund is for, what it will pay for, and how decisions are made."
+
 #: src/i18n/harvested.ts
 msgid "Change it"
 msgstr "Change it"
+
+#: src/i18n/harvested.ts
+msgid "Publish a funding call for the region to apply to"
+msgstr "Publish a funding call for the region to apply to"
 
 #: src/i18n/harvested.ts
 msgid "What a partner may never do"
@@ -21601,10 +21957,6 @@ msgstr "Enter new password"
 #: src/i18n/harvested.ts
 msgid "A rolling window of hours"
 msgstr "A rolling window of hours"
-
-#: src/components/WelcomePanel.tsx
-msgid "The OECS virtual innovation ecosystem."
-msgstr "The OECS virtual innovation ecosystem."
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Submit a solution"
@@ -21708,11 +22060,16 @@ msgid "Refresh preview"
 msgstr "Refresh preview"
 
 #: src/lib/permissions.ts
+msgid "Open a new forum board and edit or retire the ones you opened."
+msgstr "Open a new forum board and edit or retire the ones you opened."
+
+#: src/lib/permissions.ts
 msgid "Administer achievements"
 msgstr "Administer achievements"
 
 #: src/i18n/harvested.ts
 #: src/lib/extracted-fields.ts
+#: src/pages/grants/GrantFormPage.tsx
 msgid "Eligibility"
 msgstr "Eligibility"
 
@@ -21735,6 +22092,10 @@ msgstr "Loading attachments…"
 #: src/pages/collaborate/CollaborateHubPage.tsx
 msgid "Connect face-to-face with team members through real-time video conferencing."
 msgstr "Connect face-to-face with team members through real-time video conferencing."
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Climate Innovation"
+msgstr "Climate Innovation"
 
 #: src/lib/permissions.ts
 msgid "Edit, feature, archive and delete any project, not only owned ones."
@@ -22000,6 +22361,10 @@ msgstr "Group name"
 msgid "Stuck? A mentor is here."
 msgstr "Stuck? A mentor is here."
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Failed to save this grant"
+msgstr "Failed to save this grant"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "e.g. 5"
 msgstr "e.g. 5"
@@ -22110,6 +22475,10 @@ msgstr "Open Projects, Resources, Events or Grants."
 #: src/i18n/harvested.ts
 msgid "Combine it with other datasets to re-identify a member who is present in aggregate form, or to build a profile beyond the stated purpose."
 msgstr "Combine it with other datasets to re-identify a member who is present in aggregate form, or to build a profile beyond the stated purpose."
+
+#: src/pages/grants/MyGrantsPage.tsx
+msgid "Funding You Posted"
+msgstr "Funding You Posted"
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
@@ -22274,6 +22643,10 @@ msgstr "Start from a template"
 msgid "Show Country"
 msgstr "Show Country"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Leave empty for a rolling call. A passed deadline moves the grant to the closed list."
+msgstr "Leave empty for a rolling call. A passed deadline moves the grant to the closed list."
+
 #: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Upload a photo"
 msgstr "Upload a photo"
@@ -22354,6 +22727,10 @@ msgstr "Characters"
 #: src/lib/venue-room-presets.ts
 msgid "Scoring and deliberation."
 msgstr "Scoring and deliberation."
+
+#: src/lib/forum-board-icons.ts
+msgid "Learning"
+msgstr "Learning"
 
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# document created} other {# documents created}}"
@@ -22500,6 +22877,10 @@ msgstr "Error 404"
 msgid "Use the KTIP name in plain text in a sentence that describes your relationship accurately."
 msgstr "Use the KTIP name in plain text in a sentence that describes your relationship accurately."
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Icon"
+msgstr "Icon"
+
 #: src/components/moderation/ReportModal.tsx
 msgid "Report submitted. Our safety team will review it."
 msgstr "Report submitted. Our safety team will review it."
@@ -22638,6 +23019,10 @@ msgstr "Hidden from others — <0>change</0>"
 msgid "The authentication exchange"
 msgstr "The authentication exchange"
 
+#: src/pages/settings/LegalSettingsTab.tsx
+msgid "when posting a funding call"
+msgstr "when posting a funding call"
+
 #: src/i18n/harvested.ts
 msgid "Using the KTIP and OECS names and logos"
 msgstr "Using the KTIP and OECS names and logos"
@@ -22674,10 +23059,6 @@ msgstr "Video Conference Invitation"
 msgid "Uploading someone else’s logo or brand to a profile or an event asserts that you have the right to use it. The Trademark & Brand Use policy covers that in detail."
 msgstr "Uploading someone else’s logo or brand to a profile or an event asserts that you have the right to use it. The Trademark & Brand Use policy covers that in detail."
 
-#: src/components/layout/Navbar.tsx
-msgid "Event Calendar"
-msgstr "Event Calendar"
-
 #: src/components/dashboard/stats/OverviewStats.tsx
 msgid "Followers"
 msgstr "Followers"
@@ -22708,8 +23089,10 @@ msgstr "A description of the work you own, specific enough for us to recognise i
 #: src/pages/discover/DiscoverPage.tsx
 #: src/pages/grants/GrantApplicationPage.tsx
 #: src/pages/grants/GrantDetailPage.tsx
+#: src/pages/grants/GrantFormPage.tsx
 #: src/pages/grants/GrantsPage.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
+#: src/pages/grants/MyGrantsPage.tsx
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Grants"
 msgstr "Grants"
@@ -22780,6 +23163,12 @@ msgstr "{0, plural, one {Invite # user & Start Call} other {Invite # users & Sta
 msgid "Browse the member directory and connect with innovators across the Caribbean."
 msgstr "Browse the member directory and connect with innovators across the Caribbean."
 
+#: src/components/layout/Navbar.tsx
+#: src/pages/forums/BoardFormPage.tsx
+#: src/pages/forums/ForumsPage.tsx
+msgid "Start a Board"
+msgstr "Start a Board"
+
 #: src/components/legal/AgreementGate.tsx
 msgid "Before you publish"
 msgstr "Before you publish"
@@ -22794,6 +23183,10 @@ msgstr "Clear"
 #: src/components/collaboration/PreviewPanel.tsx
 msgid "This is a paragraph of text to demonstrate your CSS styles."
 msgstr "This is a paragraph of text to demonstrate your CSS styles."
+
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Edit Discussion Board"
+msgstr "Edit Discussion Board"
 
 #: src/components/directory/MemberPanel.tsx
 #: src/components/venue/room/LookingForTeamPanel.tsx
@@ -22907,7 +23300,6 @@ msgstr "Enter the {length}-digit code"
 msgid "No resources found"
 msgstr "No resources found"
 
-#: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Virtual Hackathon"
@@ -22922,6 +23314,7 @@ msgid "Activity"
 msgstr "Activity"
 
 #: src/components/documents/ExtractionReviewPanel.tsx
+#: src/pages/grants/GrantFormPage.tsx
 msgid "grant"
 msgstr "grant"
 
@@ -23008,6 +23401,10 @@ msgstr "This project addresses climate change solutions"
 msgid "Untitled Application"
 msgstr "Untitled Application"
 
+#: src/i18n/harvested.ts
+msgid "Members with posting rights can then start discussions on it straight away."
+msgstr "Members with posting rights can then start discussions on it straight away."
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "7. Does the platform look professional and visually appealing?"
 msgstr "7. Does the platform look professional and visually appealing?"
@@ -23093,6 +23490,10 @@ msgstr "No mentors in the venue yet."
 #: src/lib/permissions.ts
 msgid "Business Support Organisation"
 msgstr "Business Support Organisation"
+
+#: src/i18n/harvested.ts
+msgid "Open Community → Start a Board. The entry appears for organisation accounts and administrators."
+msgstr "Open Community → Start a Board. The entry appears for organisation accounts and administrators."
 
 #: src/i18n/harvested.ts
 msgid "Saving, and what it means"
@@ -23567,6 +23968,10 @@ msgstr "Network, submissions, calendar"
 msgid "What does the Saving / Saved badge mean?"
 msgstr "What does the Saving / Saved badge mean?"
 
+#: src/pages/forums/BoardFormPage.tsx
+msgid "Back to the board"
+msgstr "Back to the board"
+
 #: src/lib/resume-designs.ts
 msgid "Ledger"
 msgstr "Ledger"
@@ -23578,6 +23983,10 @@ msgstr "Eligibility Requirements"
 #: src/components/AnalyticsConsentBanner.tsx
 msgid "Help us improve KTIP"
 msgstr "Help us improve KTIP"
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Additional details"
+msgstr "Additional details"
 
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "This resource is published in full on this page."
@@ -23734,6 +24143,10 @@ msgstr "{n, plural, one {The achievements gallery opened # time} other {The achi
 msgid "Preview {memberName}"
 msgstr "Preview {memberName}"
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Grant updated"
+msgstr "Grant updated"
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Open..."
 msgstr "Open..."
@@ -23794,6 +24207,10 @@ msgstr "Live Sentry issues from the browser and the API"
 #: src/i18n/harvested.ts
 msgid "Do not post sexual content, and do not post any content that sexualises, endangers or exploits a minor. There is no warning step for this and no appeal in the ordinary sense: accounts are removed and the matter is reported to the authorities where the law requires it."
 msgstr "Do not post sexual content, and do not post any content that sexualises, endangers or exploits a minor. There is no warning step for this and no appeal in the ordinary sense: accounts are removed and the matter is reported to the authorities where the law requires it."
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Blue Economy Innovation Fund 2027"
+msgstr "Blue Economy Innovation Fund 2027"
 
 #: src/i18n/harvested.ts
 msgid "Breakout"

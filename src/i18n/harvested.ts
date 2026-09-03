@@ -861,6 +861,7 @@ The person reported is not told who filed it. Keep it that way in anything you w
 
 Anyone can read what is here. Uploading and removing is limited to the owner and editors, so a public project cannot be edited by the people browsing it.`,
   msg`Fill in the title, description, category, phase and hashtags, then submit.`,
+  msg`Fill in the title, what the fund is for, the amount range and the deadline.`,
   msg`Filter by country or by period to see who is most active in your own member state, or this month rather than all-time.
 
 Your own standing is pinned in its own row further down, so you never have to scroll for it.`,
@@ -1305,6 +1306,7 @@ The column on the right carries the owner, the team, and a block of key facts, p
 You do not need a separate KTIP password for this route.
 
 If the handoff fails you are sent back to the login page with an error code in the address bar and a short explanation on screen. Returning to the Campus and clicking through again usually clears it, because the ticket is single use.`,
+  msg`Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list.`,
   msg`Legal`,
   msg`Legal bases`,
   msg`Legal obligation, and legitimate interests in being able to evidence it`,
@@ -1395,6 +1397,7 @@ The protections lift by themselves on the account's 18th birthday. Nothing needs
   msg`Members who have submitted documents to be verified, with what they uploaded.
 
 Verification is what puts the badge on a profile, and members use that badge to decide whether to take a funding or partnership conversation seriously.`,
+  msg`Members with posting rights can then start discussions on it straight away.`,
   msg`Mentor`,
   msg`Mentors`,
   msg`Message a member directly or create a group chat`,
@@ -1439,6 +1442,7 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My Dashboard`,
   msg`My Events`,
   msg`My Feedback`,
+  msg`My Grants`,
   msg`My Invitations`,
   msg`My Notes`,
   msg`My Profile`,
@@ -1450,6 +1454,7 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My connections`,
   msg`My old code drafts are missing from my snippets`,
   msg`My profile information is not showing`,
+  msg`Name the board for the subject, not for a single question — threads go inside it.`,
   msg`Name, roles, country and a short bio, with the buttons to act on it: Connect sends a request, Message opens a conversation once you are connected.
 
 This page is public, so the link works for anyone you send it to — including someone without a KTIP account.`,
@@ -1535,6 +1540,7 @@ This only applies to email/password accounts. If you signed up with Google or Mi
   msg`One bar, every filter`,
   msg`One event, every tab`,
   msg`One step at a time`,
+  msg`Only add an external application link if applications are handled off-platform.`,
   msg`Only data members chose to share`,
   msg`Only if you request a gated role`,
   msg`Only me`,
@@ -1591,7 +1597,9 @@ The canvas is free-form: draw, add text, place shapes, arrange and connect them.
 Boards are good for the thinking stage — mapping a problem, sketching an architecture, running a retrospective — before any of it goes into a document.
 
 Share a board with collaborators to work on it together.`,
+  msg`Open Community → Start a Board. The entry appears for organisation accounts and administrators.`,
   msg`Open Events → Virtual Hackathon and pick a live hackathon.`,
+  msg`Open Funding → Post a Grant. The entry only appears for accounts that may post funding.`,
   msg`Open Messages from the chat button at the bottom-right.`,
   msg`Open Projects, Resources, Events or Grants.`,
   msg`Open Settings from the avatar menu in the top-right corner.`,
@@ -1610,6 +1618,7 @@ The wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & T
 Your work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.
 
 The final step shows the whole application for review before you submit.`,
+  msg`Open a new board for a subject the forum does not cover yet`,
   msg`Open an issue for its stack, the route it happened on, and how often it recurs. Status marks what you have already triaged so the list stays meaningful.
 
 The Error Simulator next door sends deliberate failures through the live pipeline — useful for confirming monitoring works, and it does produce real entries here.`,
@@ -1762,6 +1771,7 @@ One known gap worth being aware of: some guidance refers to a feedback button on
   msg`Personalize my platform`,
   msg`Pick "KTIP Assistant" at the top of the Chats list.`,
   msg`Pick a design`,
+  msg`Pick an icon and describe who the board is for.`,
   msg`Pick members from the invite panel and KTIP sends each of them the room link as a message and a notification — no email addresses to copy around.
 
 The same link works for anyone you paste it to, so you can pull in someone outside the platform when you need to.`,
@@ -1787,6 +1797,7 @@ The board is public on purpose: a rank is only worth chasing if it can be shown 
 
 A verified badge means an OECS admin has confirmed the member is who they say they are — worth checking before you take a funding conversation forward.`,
   msg`Points, badges and leaderboard positions have no monetary value, are not transferable, and may be recalculated or reset — for example when scoring changes or when we remove the effects of gamed activity.`,
+  msg`Post a grant`,
   msg`Post a new topic on a discussion board`,
   msg`Post unlawful, defamatory, harassing, hateful or discriminatory content, including content targeting someone for their nationality, island of origin, race, religion, sex, gender, sexual orientation, disability or age.`,
   msg`Post-Secondary Institutions`,
@@ -1855,6 +1866,7 @@ Only the project owner and editors can upload.`,
   msg`Public projects appear in the grid, in search, and to signed-out visitors. Leave it off and the project stays yours — useful while you are still writing it.
 
 You can flip this later from the same form, so publishing is not a decision you have to get right now.`,
+  msg`Publish a funding call for the region to apply to`,
   msg`Publish a new event and open registrations`,
   msg`Publish a new innovation project`,
   msg`Publish and edit guides and articles`,
@@ -2226,6 +2238,7 @@ The tour action only appears on pages that actually have a tour, so you will not
   msg`Stage`,
   msg`Standing`,
   msg`Start a conversation`,
+  msg`Start a discussion board`,
   msg`Start a forum discussion`,
   msg`Start from what you already have`,
   msg`Start or join a video call`,
@@ -2444,6 +2457,7 @@ Everything here is reachable from the rail as well — this is a shortcut, not a
 The rail on the right of the screen jumps between those sections, so a long agenda never means a long scroll.`,
   msg`The full picture — what supervised mode restricts, and how guardian requests are handled — is in the Minor Safeguarding Statement.`,
   msg`The funder gets to assess it. That is all.`,
+  msg`The funding calls you posted, open and closed`,
   msg`The indicative assessment is not a score, not a prediction, and carries no weight with the funder — it never leaves your draft. Treat it as a second read, not a verdict.`,
   msg`The invitations inbox gathers everything waiting on your answer in one place: collaboration shares on whiteboards and documents, project team invitations, and connection requests.
 

@@ -370,7 +370,43 @@ const router = createBrowserRouter([
               },
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
+              // The funder's half of /grants. grant:post has been on the grants
+              // INSERT policy since 064 with no member-facing form to reach it;
+              // 129 is where the form lands. Guarded here for the same reason
+              // /projects/new is — a role without the key is told so before it
+              // fills in a funding call.
+              {
+                element: <PermissionRoute require="grant:post" />,
+                children: [
+                  { path: '/grants/new', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                  { path: '/grants/my-grants', lazy: lazyPage(() => import('./pages/grants/MyGrantsPage')) },
+                ],
+              },
+              {
+                element: <PermissionRoute require={['grant:post', 'grant:manage']} />,
+                children: [
+                  { path: '/grants/:id/edit', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                ],
+              },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
+              // Boards, unlike posts, are permission-gated: migration 129 put a
+              // forum:board check on the forum_boards INSERT policy, so the
+              // guard is here for the same reason it is on /projects/new —
+              // otherwise a role without the key fills in the form and collects
+              // a 403 from RLS on submit. Editing admits forum:manage as well,
+              // which is how a moderator reaches the six boards seeded by 005.
+              {
+                element: <PermissionRoute require="forum:board" />,
+                children: [
+                  { path: '/forums/new', lazy: lazyPage(() => import('./pages/forums/BoardFormPage')) },
+                ],
+              },
+              {
+                element: <PermissionRoute require={['forum:board', 'forum:manage']} />,
+                children: [
+                  { path: '/forums/:slug/edit', lazy: lazyPage(() => import('./pages/forums/BoardFormPage')) },
+                ],
+              },
               // The gallery lives in the dashboard now (AchievementsTab); the
               // old page address keeps resolving for bookmarks and the
               // notification links stored by 066_achievements_engine.sql.

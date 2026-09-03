@@ -37,6 +37,8 @@ export type ConsentContext =
   | 'org_publish'
   | 'event_solution'
   | 'grant_application'
+  /** Publishing a funding call, as opposed to applying to one (129). */
+  | 'grant_post'
 
 export const consentsQueryKey = (userId: string | undefined) => ['consents', userId] as const
 

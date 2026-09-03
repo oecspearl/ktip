@@ -31,12 +31,13 @@ import {
   ClipboardList,
   LayoutDashboard,
   Inbox,
-  Trophy,
-  CalendarDays,
   CalendarPlus,
   FileText,
   Building2,
   UserPlus,
+  FilePlus,
+  Wallet,
+  MessageSquarePlus,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
@@ -182,10 +183,8 @@ const navDropdowns: NavDropdown[] = [
     icon: Calendar,
     items: [
       { name: msg`All Events`, href: '/events', icon: Calendar, description: msg`Hackathons, workshops, meetups and conferences` },
-      { name: msg`Virtual Hackathon`, href: '/hackathons', icon: Trophy, description: msg`Enter the live venue, find a team and build` },
-      { name: msg`Event Calendar`, href: '/events?view=calendar', icon: CalendarDays, description: msg`Month-by-month view of what is scheduled` },
-      { name: msg`Create an Event`, href: '/events/new', icon: CalendarPlus, description: msg`Publish an event and open registrations`, requires: 'event:create' },
       { name: msg`My Events`, href: '/dashboard/events', icon: LayoutDashboard, description: msg`Events you organise or registered for` },
+      { name: msg`Create an Event`, href: '/events/new', icon: CalendarPlus, description: msg`Publish an event and open registrations`, requires: 'event:create' },
     ],
   },
   {
@@ -194,6 +193,11 @@ const navDropdowns: NavDropdown[] = [
     icon: DollarSign,
     items: [
       { name: msg`Grants`, href: '/grants', icon: DollarSign, description: msg`Browse funding opportunities` },
+      // The funder's two entries. Only a grant:post holder sees them, which is
+      // every organisation that funds — investor, government, IGO, diaspora,
+      // the BSO since 129 — plus mentors running a fund of their own.
+      { name: msg`Post a Grant`, href: '/grants/new', icon: FilePlus, description: msg`Publish a funding call and open applications`, requires: 'grant:post' },
+      { name: msg`My Grants`, href: '/grants/my-grants', icon: Wallet, description: msg`The funding calls you posted`, requires: 'grant:post' },
       // A funding agency posts calls, it does not answer them — and a student
       // has to be sponsored rather than apply. Neither has an application to
       // track, so neither gets the entry.
@@ -208,6 +212,9 @@ const navDropdowns: NavDropdown[] = [
     items: [
       { name: msg`Directory`, href: '/directory', icon: Users, description: msg`Browse the member directory` },
       { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Join community discussions` },
+      // Organisation-tier only (129). Members start threads from inside a
+      // board; opening the board itself is the permissioned act.
+      { name: msg`Start a Board`, href: '/forums/new', icon: MessageSquarePlus, description: msg`Open a new discussion board`, requires: 'forum:board' },
       { name: msg`Collaborate`, href: '/collaborate', icon: Handshake, description: msg`Work together in real-time` },
       // Points at the dashboard tab rather than a new top-level page: the list
       // already exists there, is already in site-map.ts, and both strings are

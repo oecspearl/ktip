@@ -17,6 +17,8 @@ export function useGrants(filters?: {
   climateAction?: boolean
   tags?: string[]
   sort?: ContentSort
+  /** Only the calls this member posted — what /grants/my-grants lists. */
+  createdBy?: string
 }) {
   // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
   const tags = filters?.tags?.length
@@ -43,6 +45,12 @@ export function useGrants(filters?: {
     // Filter by grant type
     if (filters?.type) {
       query = query.eq('grant_type', filters.type)
+    }
+
+    // The funder's own list. Closed and expired calls belong on it too, so it
+    // deliberately does not touch is_active.
+    if (filters?.createdBy) {
+      query = query.eq('created_by', filters.createdBy)
     }
 
     // Climate action filter

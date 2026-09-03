@@ -69,6 +69,14 @@ export interface GrantDeleteFacts {
   applicationCount: number | null
 }
 
+export interface ForumBoardDeleteFacts {
+  /**
+   * Threads on the board. `null` when the count has not loaded — unknown is
+   * treated as "might not be zero", the same way the event guard treats it.
+   */
+  postCount: number | null
+}
+
 /** Published and completed events are already public and already indexed. */
 function isEventPubliclyVisible(status: EventStatus): boolean {
   return status === 'published' || status === 'completed'
@@ -179,6 +187,43 @@ export function describeGrantDeletion(facts: GrantDeleteFacts): DeleteImpact {
     cascades,
     affectsOthers: applicantsAffected,
     requiresTitleConfirmation: applicantsAffected || isActive,
+    warning,
+  }
+}
+
+/**
+ * Deleting a board is the most destructive delete a non-admin can reach: every
+ * FK into forum_boards cascades (005), so the threads and replies of everyone
+ * who ever posted there go with it. An empty board is the owner's own mistake
+ * to undo; a board with a single thread on it already holds somebody else's
+ * writing, which is why the threshold is one and not some larger number.
+ */
+export function describeForumBoardDeletion(facts: ForumBoardDeleteFacts): DeleteImpact {
+  const { postCount } = facts
+
+  const cascades = [i18n._(msg`The board and its description`)]
+  if (postCount === null || postCount > 0) {
+    cascades.push(i18n._(msg`Every discussion on it, and every reply to those discussions`))
+  }
+
+  const holdsOtherPeoplesWriting = postCount === null || postCount > 0
+
+  let warning: string | null = null
+  if (postCount !== null && postCount > 0) {
+    warning = plural(postCount, {
+      one: '# discussion and all of its replies will be destroyed. The people who wrote them will not be notified.',
+      other: '# discussions and all of their replies will be destroyed. The people who wrote them will not be notified.',
+    })
+  } else if (postCount === null) {
+    warning = i18n._(
+      msg`The discussions on this board could not be counted. Anything posted here — by anyone — is destroyed with it and cannot be recovered.`
+    )
+  }
+
+  return {
+    cascades,
+    affectsOthers: holdsOtherPeoplesWriting,
+    requiresTitleConfirmation: holdsOtherPeoplesWriting,
     warning,
   }
 }

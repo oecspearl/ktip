@@ -71,6 +71,7 @@ export type ModerationSurface =
   | 'profile'
   | 'resume'
   | 'forum_post'
+  | 'forum_board'
   | 'forum_reply'
   | 'message'
   | 'venue_room_message'

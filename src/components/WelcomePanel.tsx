@@ -52,7 +52,7 @@ const SWAP_MS = 340
 const SLIDES = [
   {
     eyebrow: msg`Welcome`,
-    title: msg`The OECS virtual innovation ecosystem.`,
+    title: msg`The OECS innovation ecosystem.`,
     body: msg`KTIP connects entrepreneurs, academia, civil society, investors and policy makers across the OECS Member States and the diaspora, bringing ideas, funding, knowledge, and collaboration into one trusted regional space.`,
   },
   {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Disclaimer } from '../../components/legal/Disclaimer'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { DetailsList } from '../../components/shared/DetailsList'
@@ -18,6 +18,7 @@ import {
   CheckCircle,
   AlertCircle,
   Wallet,
+  Pencil,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { grantImageFor } from '../../lib/hero-images'
@@ -68,6 +69,10 @@ export default function GrantDetailPage() {
   // Only somebody who administers grants can write to one, so only they see
   // field proposals. (116: was org:manage.)
   const isOecs = auth.can('grant:manage')
+  // 077's owner arm: the funder who posted the call manages it and its
+  // documents, exactly as the RLS policies on grants and entity documents say.
+  const ownsGrant = !!grant && !!auth.user && grant.created_by === auth.user.id
+  const canManageThisGrant = isOecs || (ownsGrant && auth.can('grant:post'))
 
   // Load submitted-application count
   useEffect(() => {
@@ -156,6 +161,25 @@ export default function GrantDetailPage() {
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
+            {/* The funder's own strip. Only the poster and a grants
+                administrator see it, which is what RLS allows to write. */}
+            {canManageThisGrant && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-ktip-cream border border-ktip-sand-200 rounded-xl px-4 py-3">
+                <p className="text-sm text-ktip-sand-600">
+                  {ownsGrant ? (
+                    <Trans>You posted this funding call.</Trans>
+                  ) : (
+                    <Trans>You administer this funding call.</Trans>
+                  )}
+                </p>
+                <Link to={`/grants/${grant.slug || grant.id}/edit`}>
+                  <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
+                    <Trans>Edit Grant</Trans>
+                  </Button>
+                </Link>
+              </div>
+            )}
+
             {/* Status Banner */}
             {isExpired && (
               <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -248,7 +272,7 @@ export default function GrantDetailPage() {
               <DocumentsPanel
                 entityType="grant"
                 entityId={grant.id}
-                canEditEntity={isOecs}
+                canEditEntity={canManageThisGrant}
                 entity={grant}
               />
             </div>
