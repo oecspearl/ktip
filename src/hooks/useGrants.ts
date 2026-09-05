@@ -8,7 +8,12 @@ import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import { isUuid } from '../lib/slug'
-import type { DetailEntry, Grant } from '../types'
+import type {
+  DetailEntry,
+  Grant,
+  GrantApplication,
+  GrantApplicationStatus,
+} from '../types'
 
 export function useGrants(filters?: {
   type?: string
@@ -216,6 +221,74 @@ export function useDeleteGrant() {
   })
 
   return { deleteGrant: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
+}
+
+/**
+ * The applications to one call, for the funder who posted it (migration 130).
+ *
+ * Drafts never arrive: the funder's SELECT policy carries `status <> 'draft'`,
+ * so this needs no filter of its own and could not see one if it tried.
+ */
+export function useFunderApplications(grantId: string | undefined) {
+  const fetchApplications = async (gid: string): Promise<GrantApplication[]> => {
+    const { data, error } = await supabase
+      .from('grant_applications')
+      .select('*, applicant:profiles(*)')
+      .eq('grant_id', gid)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data as any[]) || []
+  }
+
+  const query = useQuery({
+    queryKey: keys.sub('grants', 'funder-applications', grantId),
+    queryFn: () => fetchApplications(grantId as string),
+    enabled: !!grantId,
+  })
+
+  return { applications: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+/**
+ * Record a decision on an application.
+ *
+ * Goes through decide_grant_application() rather than an UPDATE: the funder has
+ * no write policy on the table, and deliberately — the RPC moves `status` and
+ * nothing else, so assessing a proposal can never turn into editing one.
+ */
+export function useDecideApplication() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      applicationId,
+      status,
+    }: {
+      applicationId: string
+      status: Extract<GrantApplicationStatus, 'under_review' | 'approved' | 'rejected'>
+    }) => {
+      // `as any` for the same reason every other RPC call here does it: the
+      // generated Database type lists functions up to the migration it was
+      // generated from, and 130 is newer than that snapshot.
+      const { data, error } = await (supabase as any).rpc('decide_grant_application', {
+        p_application: applicationId,
+        p_status: status,
+      })
+      if (error) throw error
+      return data as GrantApplication
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('grants') })
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-grant-applications') })
+    },
+  })
+
+  const decide = (
+    applicationId: string,
+    status: Extract<GrantApplicationStatus, 'under_review' | 'approved' | 'rejected'>
+  ) => mutation.mutateAsync({ applicationId, status })
+
+  return { decide, loading: mutation.isPending, error: mutation.error }
 }
 
 // Grant Applications

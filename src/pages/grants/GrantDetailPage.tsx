@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Wallet,
   Pencil,
+  Inbox,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { grantImageFor } from '../../lib/hero-images'
@@ -172,11 +173,18 @@ export default function GrantDetailPage() {
                     <Trans>You administer this funding call.</Trans>
                   )}
                 </p>
-                <Link to={`/grants/${grant.slug || grant.id}/edit`}>
-                  <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
-                    <Trans>Edit Grant</Trans>
-                  </Button>
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link to={`/grants/${grant.slug || grant.id}/applications`}>
+                    <Button variant="outline" size="sm" icon={<Inbox size={14} />}>
+                      <Trans>Applications</Trans>
+                    </Button>
+                  </Link>
+                  <Link to={`/grants/${grant.slug || grant.id}/edit`}>
+                    <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
+                      <Trans>Edit Grant</Trans>
+                    </Button>
+                  </Link>
+                </div>
               </div>
             )}
 

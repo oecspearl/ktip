@@ -4,7 +4,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useGrants } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
-import { Plus, Pencil, Wallet, Calendar, DollarSign } from 'lucide-react'
+import { Plus, Pencil, Wallet, Calendar, DollarSign, Inbox } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -68,6 +68,11 @@ export default function MyGrantsPage() {
         <Badge size="sm" variant={isClosed ? 'default' : 'primary'}>
           {isClosed ? t`Closed` : t`Open`}
         </Badge>
+        <Link to={`/grants/${grant.slug || grant.id}/applications`}>
+          <Button variant="outline" size="sm" icon={<Inbox size={14} />}>
+            <Trans>Applications</Trans>
+          </Button>
+        </Link>
         <Link to={`/grants/${grant.slug || grant.id}/edit`}>
           <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
             <Trans>Edit</Trans>
