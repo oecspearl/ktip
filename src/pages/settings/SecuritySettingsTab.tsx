@@ -19,8 +19,10 @@ import {
   CheckCircle,
   ShieldCheck,
   PauseCircle,
+  Download,
 } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
+import { buildDataExport, downloadJson, exportFileName } from '../../lib/data-export'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 // The word the user must type to confirm deletion. It is compared literally
@@ -87,6 +89,7 @@ export function SecuritySettingsTab() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [closeMode, setCloseMode] = useState<'deactivate' | 'delete' | null>(null)
   const [closeLoading, setCloseLoading] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -195,6 +198,31 @@ export function SecuritySettingsTab() {
       toast.success(t`Secondary email removed`)
     } catch (err: any) {
       setAliasErrors({ _form: err.message || t`Failed to remove the address` })
+    }
+  }
+
+  // Take a copy before you go — or at any other time. Portability is a right
+  // on its own, not a step in the leaving flow, which is why the control sits
+  // above the exits rather than inside their confirmation.
+  const handleExportData = async () => {
+    if (!auth.user) return
+    setExportLoading(true)
+    try {
+      const bundle = await buildDataExport(auth.user.id)
+      downloadJson(bundle, exportFileName())
+      if (bundle.unavailable.length > 0) {
+        // Named, not swallowed: a partial export that claims to be complete is
+        // worse than one that says what is missing.
+        toast.success(
+          t`Your data was downloaded. ${bundle.unavailable.length} section(s) could not be read — see "unavailable" in the file.`
+        )
+      } else {
+        toast.success(t`Your data was downloaded`)
+      }
+    } catch (err: any) {
+      toast.error(err.message || t`Could not build your data export`)
+    } finally {
+      setExportLoading(false)
     }
   }
 
@@ -522,6 +550,41 @@ export function SecuritySettingsTab() {
             </p>
           )}
         </div>
+      </Card>
+
+      {/* Your data, on your disk */}
+      <Card id="export-data" data-spy="Download your data" className="scroll-mt-24">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
+            <Download size={20} className="text-ktip-ocean-700" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900">
+              <Trans>Download your data</Trans>
+            </h2>
+            <p className="text-sm text-ktip-sand-600">
+              <Trans>A copy of everything on your account, as one JSON file</Trans>
+            </p>
+          </div>
+        </div>
+
+        <p className="text-sm text-ktip-sand-600 mb-4">
+          <Trans>
+            Your profile, applications and the copies of what you submitted, projects, events and
+            funding calls you posted, forum posts and replies, the messages you sent, and the
+            documents you uploaded. Built in your browser from your own account, so it contains
+            what you can see and nothing more.
+          </Trans>
+        </p>
+
+        <Button
+          variant="outline"
+          icon={<Download size={18} />}
+          loading={exportLoading}
+          onClick={handleExportData}
+        >
+          <Trans>Download my data</Trans>
+        </Button>
       </Card>
 
       {/* Leaving, reversibly (migration 140).

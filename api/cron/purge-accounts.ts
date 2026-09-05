@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { emailFrom, resendKey } from '../_lib/email'
 
 export const config = { runtime: 'edge' }
 
@@ -47,6 +48,42 @@ interface DueAccount {
   purge_after: string
 }
 
+const DAY = 'en-GB'
+
+function warningEmailHtml(params: {
+  status: 'deactivated' | 'pending_deletion'
+  closesOn: string
+  siteUrl: string
+}): string {
+  const deleting = params.status === 'pending_deletion'
+  const what = deleting
+    ? 'your account and personal data will be permanently deleted'
+    : 'your account will be anonymised — your name, photo and profile details removed'
+
+  return `<!doctype html>
+<html><body style="margin:0;padding:24px;background:#faf7f2;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#2f2a24">
+  <div style="max-width:520px;margin:0 auto;background:#fffdf9;border:1px solid #e7ded1;border-radius:16px;padding:28px">
+    <h1 style="margin:0 0 12px;font-size:20px;line-height:1.3">You still have time to keep your KTIP account</h1>
+    <p style="margin:0 0 12px;font-size:15px;line-height:1.6">
+      On <strong>${params.closesOn}</strong>, ${what}.
+    </p>
+    <p style="margin:0 0 20px;font-size:15px;line-height:1.6">
+      If you want to keep it, just sign in before then. That is all it takes — nothing has been
+      removed yet.
+    </p>
+    <p style="margin:0 0 24px">
+      <a href="${params.siteUrl}/login"
+         style="display:inline-block;background:#1f6f8b;color:#fff;text-decoration:none;padding:11px 20px;border-radius:10px;font-size:15px;font-weight:600">
+        Sign in and keep my account
+      </a>
+    </p>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#7a7065">
+      If you meant to leave, you do not need to do anything. This is the only reminder we will send.
+    </p>
+  </div>
+</body></html>`
+}
+
 export default async function handler(req: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET
   if (!secret) {
@@ -66,6 +103,76 @@ export default async function handler(req: Request): Promise<Response> {
 
   const admin = createClient(supabaseUrl, serviceKey)
 
+  // ── Pass 1: remind the people whose window is about to close ────────────
+  //
+  // Before the purge pass, deliberately. If a run is late enough that somebody
+  // is both due a warning and due to be purged, they are past the notice period
+  // and the warning would be a lie; accounts_due_for_closure_warning() excludes
+  // them, and doing this first keeps the two passes from racing on one row.
+  const warned: string[] = []
+  const warnFailed: { user_id: string; detail: string }[] = []
+  const apiKey = resendKey()
+  const fromEmail = emailFrom()
+  const siteUrl = (process.env.SITE_URL || '').replace(/\/$/, '')
+
+  if (apiKey && fromEmail && siteUrl) {
+    const { data: pending, error: warnError } = await admin.rpc(
+      'accounts_due_for_closure_warning'
+    )
+    if (warnError) {
+      warnFailed.push({ user_id: '-', detail: warnError.message })
+    }
+
+    for (const account of (pending || []) as DueAccount[]) {
+      const { data: authUser } = await admin.auth.admin.getUserById(account.user_id)
+      const to = authUser?.user?.email
+      if (!to) {
+        // Nothing to send to, and nothing to retry tomorrow either.
+        await admin.rpc('mark_closure_warned', { p_user: account.user_id })
+        continue
+      }
+
+      const closesOn = new Date(account.purge_after).toLocaleDateString(DAY, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [to],
+          subject:
+            account.account_status === 'pending_deletion'
+              ? 'Your KTIP account is deleted in 2 days'
+              : 'Your KTIP account is anonymised in 7 days',
+          html: warningEmailHtml({
+            status: account.account_status,
+            closesOn,
+            siteUrl,
+          }),
+        }),
+      })
+
+      if (!res.ok) {
+        // Left unmarked on purpose: tomorrow's run tries again, which is the
+        // right answer for a transient provider failure and harmless for a
+        // permanent one — the window closes either way.
+        warnFailed.push({
+          user_id: account.user_id,
+          detail: `resend ${res.status}`,
+        })
+        continue
+      }
+
+      await admin.rpc('mark_closure_warned', { p_user: account.user_id })
+      warned.push(account.user_id)
+    }
+  }
+
+  // ── Pass 2: close out the windows that have expired ──────────────────────
   const { data, error } = await admin.rpc('accounts_due_for_purge')
   if (error) {
     return json({ error: 'could not read the purge queue', detail: error.message }, 502)
@@ -109,12 +216,15 @@ export default async function handler(req: Request): Promise<Response> {
 
   return json(
     {
-      ok: failed.length === 0,
+      ok: failed.length === 0 && warnFailed.length === 0,
+      emailConfigured: !!(apiKey && fromEmail && siteUrl),
+      warned: warned.length,
+      warnFailed,
       due: due.length,
       anonymised: anonymised.length,
       purged: purged.length,
       failed,
     },
-    failed.length === 0 ? 200 : 207
+    failed.length === 0 && warnFailed.length === 0 ? 200 : 207
   )
 }
