@@ -17,7 +17,7 @@ import {
   VERIFICATION_GATED_PERMISSIONS,
 } from '../lib/permissions'
 import type { User, Session } from '@supabase/supabase-js'
-import type { PermissionKey, Profile, RoleSlug } from '../types'
+import type { AccountStatus, PermissionKey, Profile, RoleSlug } from '../types'
 
 export interface SignupMetadata {
   display_name?: string
@@ -118,6 +118,18 @@ interface AuthContextType {
   updateEmail: (newEmail: string) => Promise<void>
   resetPassword: (email: string) => Promise<void>
   deleteAccount: () => Promise<void>
+  /**
+   * Migration 140 — close the account reversibly. 'deactivate' hides it for 90
+   * days, 'delete' schedules the purge for 7. Both sign the member out; both
+   * are undone by signing back in.
+   */
+  closeAccount: (mode: 'deactivate' | 'delete') => Promise<void>
+  /** Cancel a closure while its window is still open. */
+  reopenAccount: () => Promise<void>
+  /** 'active' unless a closure is pending. Absent column reads as active. */
+  accountStatus: AccountStatus
+  /** When the retention window closes, or null while active. */
+  purgeAfter: string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -370,6 +382,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // is what keeps the safeguard denials — which are a property of everything the
   // account is, not of the hat it is currently wearing — from being switched off
   // by choosing a context that never had them.
+  // Migration 140. A deploy can run ahead of the migration, so a missing
+  // column reads as active rather than as a closed account nobody can use.
+  const accountStatus: AccountStatus = profile?.account_status ?? 'active'
+  const purgeAfter = profile?.purge_after ?? null
+
   // Migration 139. Admin seats read verified so the review queue is never
   // blocked by itself — is_verified_member() makes the same exception.
   const verified =
@@ -628,6 +645,53 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (error) throw error
   }, [])
 
+  /**
+   * Close the account, reversibly (migration 140).
+   *
+   * 'deactivate' hides the member for 90 days and 'delete' schedules the purge
+   * for 7 — both undone by signing back in, which is the entire reason they
+   * exist. deleteAccount() below is the other door: immediate and final, for a
+   * member who says so explicitly.
+   */
+  const closeAccount = useCallback(
+    async (mode: 'deactivate' | 'delete') => {
+      if (!user) throw new Error('No user logged in')
+      const { error } = await (supabase as any).rpc('close_my_account', { p_mode: mode })
+      if (error) throw error
+      await supabase.auth.signOut()
+    },
+    [user]
+  )
+
+  /** Cancel a closure while its window is still open. */
+  const reopenAccount = useCallback(async () => {
+    if (!user) throw new Error('No user logged in')
+    const { error } = await (supabase as any).rpc('reopen_my_account')
+    if (error) throw error
+    await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+  }, [user, queryClient])
+
+  /**
+   * Signing in IS the reactivation gesture (migration 140).
+   *
+   * Only for 'deactivated' — that state means "I am stepping away", and coming
+   * back is the whole contract; making them find a button first would be a
+   * second hurdle for someone who already cleared the real one. A scheduled
+   * DELETION is not undone silently: that decision gets an explicit cancel, so
+   * nobody who meant it discovers weeks later that a login reversed it.
+   */
+  const reopenedFor = useRef<string | null>(null)
+  useEffect(() => {
+    if (!user?.id || profile?.account_status !== 'deactivated') return
+    if (reopenedFor.current === user.id) return
+    reopenedFor.current = user.id
+    void reopenAccount().catch(() => {
+      // Non-fatal: they are signed in either way, and the settings page still
+      // offers the button. Retrying on every render would not help.
+      reopenedFor.current = null
+    })
+  }, [user?.id, profile?.account_status, reopenAccount])
+
   // Delete account — server endpoint removes profile AND auth user via service role
   const deleteAccount = useCallback(async () => {
     if (!user) throw new Error('No user logged in')
@@ -720,6 +784,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       updateEmail,
       resetPassword,
       deleteAccount,
+      closeAccount,
+      reopenAccount,
+      accountStatus,
+      purgeAfter,
     }),
     [
       user,
@@ -748,6 +816,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       updateEmail,
       resetPassword,
       deleteAccount,
+      closeAccount,
+      reopenAccount,
+      accountStatus,
+      purgeAfter,
     ]
   )
 

@@ -147,6 +147,9 @@ export type ProjectCategory =
 /** Who may see a member's connection count. */
 export type ConnectionCountVisibility = 'public' | 'connections' | 'private'
 
+/** Migration 140 — where an account sits between "here" and "gone". */
+export type AccountStatus = 'active' | 'deactivated' | 'pending_deletion'
+
 /**
  * Whether a member's profile is open to every signed-in member, or only to
  * the connections they have accepted (083). Everyone still sees the teaser —
@@ -193,6 +196,15 @@ export interface Profile {
   website?: string | null
   languages?: string[]
   is_verified: boolean
+  /**
+   * Migration 140 — 'active', 'deactivated' (hidden, sign in to come back) or
+   * 'pending_deletion' (purge scheduled). Optional because a deploy can run
+   * ahead of the migration; absent means active.
+   */
+  account_status?: AccountStatus
+  /** Migration 140 — when the retention window closes. NULL while active. */
+  purge_after?: string | null
+  status_changed_at?: string | null
   connection_count_visibility: ConnectionCountVisibility
   /**
    * Leaderboard opt-out (066). 'private' keeps the member off the public

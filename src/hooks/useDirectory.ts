@@ -37,6 +37,11 @@ export function useDirectoryMembers(filters?: {
     let query = supabase
       .from('profiles')
       .select(select)
+      // Migration 140: a deactivated member is hidden from the surfaces that
+      // list PEOPLE. Their contributions keep their author — this is the
+      // directory, not authorship — and NULL covers a deploy that has run ahead
+      // of the migration.
+      .or('account_status.eq.active,account_status.is.null')
       .order('display_name', { ascending: true })
 
     if (filters?.search) {

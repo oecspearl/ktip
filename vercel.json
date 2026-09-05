@@ -75,6 +75,10 @@
     {
       "path": "/api/cron/kpi-snapshot",
       "schedule": "5 3 * * 1"
+    },
+    {
+      "path": "/api/cron/purge-accounts",
+      "schedule": "20 3 * * *"
     }
   ]
 }

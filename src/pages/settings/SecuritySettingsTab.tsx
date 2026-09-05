@@ -18,7 +18,9 @@ import {
   AlertTriangle,
   CheckCircle,
   ShieldCheck,
+  PauseCircle,
 } from 'lucide-react'
+import { formatDate } from '../../lib/utils'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 // The word the user must type to confirm deletion. It is compared literally
@@ -83,6 +85,8 @@ export function SecuritySettingsTab() {
 
   // Delete account
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [closeMode, setCloseMode] = useState<'deactivate' | 'delete' | null>(null)
+  const [closeLoading, setCloseLoading] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -191,6 +195,37 @@ export function SecuritySettingsTab() {
       toast.success(t`Secondary email removed`)
     } catch (err: any) {
       setAliasErrors({ _form: err.message || t`Failed to remove the address` })
+    }
+  }
+
+  // Migration 140. The two reversible exits, beside the irreversible one.
+  const handleCloseAccount = async (mode: 'deactivate' | 'delete') => {
+    setCloseLoading(true)
+    try {
+      await auth.closeAccount(mode)
+      toast.success(
+        mode === 'deactivate'
+          ? t`Your account is deactivated. Sign in any time in the next 90 days to bring it back.`
+          : t`Your account is scheduled for deletion. Sign in within 7 days to stop it.`
+      )
+      navigate('/login')
+    } catch (err: any) {
+      toast.error(err.message || t`Failed to close the account`)
+    } finally {
+      setCloseLoading(false)
+      setCloseMode(null)
+    }
+  }
+
+  const handleReopenAccount = async () => {
+    setCloseLoading(true)
+    try {
+      await auth.reopenAccount()
+      toast.success(t`Your account is active again. Nothing was deleted.`)
+    } catch (err: any) {
+      toast.error(err.message || t`Failed to cancel the closure`)
+    } finally {
+      setCloseLoading(false)
     }
   }
 
@@ -489,6 +524,96 @@ export function SecuritySettingsTab() {
         </div>
       </Card>
 
+      {/* Leaving, reversibly (migration 140).
+          Above the permanent option on purpose: a member who wants to step away
+          should meet the door that lets them come back first. */}
+      <Card id="close-account" data-spy="Leaving KTIP" className="scroll-mt-24">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-ktip-sand-100 rounded-xl flex items-center justify-center">
+            <PauseCircle size={20} className="text-ktip-sand-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-display font-bold text-ktip-sand-900">
+              <Trans>Leaving KTIP</Trans>
+            </h2>
+            <p className="text-sm text-ktip-sand-600">
+              <Trans>Step away for a while, or close the account for good</Trans>
+            </p>
+          </div>
+        </div>
+
+        {auth.accountStatus !== 'active' ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-900">
+              {auth.accountStatus === 'pending_deletion' ? (
+                <Trans>This account is scheduled for deletion</Trans>
+              ) : (
+                <Trans>This account is deactivated</Trans>
+              )}
+            </p>
+            <p className="mt-1 text-sm text-amber-800">
+              {auth.purgeAfter ? (
+                <Trans>Your data is kept until {formatDate(auth.purgeAfter)}. Until then, nothing is lost.</Trans>
+              ) : (
+                <Trans>Your data is kept for now.</Trans>
+              )}
+            </p>
+            <Button
+              size="sm"
+              className="mt-3"
+              loading={closeLoading}
+              onClick={handleReopenAccount}
+            >
+              <Trans>Keep my account</Trans>
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-ktip-sand-200 p-4">
+              <h3 className="text-sm font-semibold text-ktip-sand-900">
+                <Trans>Deactivate</Trans>
+              </h3>
+              <p className="mt-1 text-sm text-ktip-sand-600">
+                <Trans>
+                  You disappear from the directory and can no longer post. What you have already
+                  contributed stays where it is. Sign in within 90 days and everything is exactly as
+                  you left it; after that the account is anonymised.
+                </Trans>
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => setCloseMode('deactivate')}
+              >
+                <Trans>Deactivate my account</Trans>
+              </Button>
+            </div>
+
+            <div className="rounded-xl border border-ktip-sand-200 p-4">
+              <h3 className="text-sm font-semibold text-ktip-sand-900">
+                <Trans>Delete, with a week to change your mind</Trans>
+              </h3>
+              <p className="mt-1 text-sm text-ktip-sand-600">
+                <Trans>
+                  Your account and personal data are erased after 7 days. Signing in during that
+                  week stops it — which is also how an account somebody else took over gets
+                  recovered.
+                </Trans>
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => setCloseMode('delete')}
+              >
+                <Trans>Schedule deletion</Trans>
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
       {/* Delete Account */}
       <Card id="delete-account" data-spy="Delete account" className="scroll-mt-24 border-red-200">
         <div className="flex items-center gap-3 mb-4">
@@ -558,6 +683,50 @@ export function SecuritySettingsTab() {
             </Button>
             <Button variant="danger" loading={unenrolling} onClick={handleRemoveMfa}>
               <Trans>Remove it</Trans>
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Closure confirmation. Short on purpose — neither of these destroys
+          anything today, and a DELETE-to-confirm ritual on a reversible act
+          teaches people to type it without reading. */}
+      <Modal
+        open={closeMode !== null}
+        onClose={() => setCloseMode(null)}
+        title={closeMode === 'delete' ? t`Schedule deletion?` : t`Deactivate your account?`}
+        description={
+          closeMode === 'delete'
+            ? t`Your data is erased in 7 days. Signing in before then cancels it.`
+            : t`You can bring it back by signing in within 90 days.`
+        }
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-ktip-sand-600">
+            {closeMode === 'delete' ? (
+              <Trans>
+                Funding calls you posted that already have applications against them stay published
+                and are handed to your organisation — deleting them would take other people's
+                submissions with them.
+              </Trans>
+            ) : (
+              <Trans>
+                You will be signed out. Applications you have submitted keep their place in the
+                queue and are still reviewed.
+              </Trans>
+            )}
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setCloseMode(null)} disabled={closeLoading}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button
+              variant="danger"
+              loading={closeLoading}
+              onClick={() => closeMode && handleCloseAccount(closeMode)}
+            >
+              {closeMode === 'delete' ? <Trans>Schedule it</Trans> : <Trans>Deactivate</Trans>}
             </Button>
           </div>
         </div>
