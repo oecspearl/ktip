@@ -11,7 +11,11 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { purgeSupabaseResponseCache } from '../lib/service-worker'
-import { defaultPermissionsFor, expandRoles } from '../lib/permissions'
+import {
+  defaultPermissionsFor,
+  expandRoles,
+  VERIFICATION_GATED_PERMISSIONS,
+} from '../lib/permissions'
 import type { User, Session } from '@supabase/supabase-js'
 import type { PermissionKey, Profile, RoleSlug } from '../types'
 
@@ -69,6 +73,13 @@ interface AuthContextType {
    */
   permissions: Set<PermissionKey>
   can: (permission: PermissionKey) => boolean
+  /**
+   * Migration 139 — has an admin approved this account? Admin seats read TRUE
+   * so the queue is never blocked by itself. Publishing and applying keys are
+   * absent from `permissions` until this is true, so `can()` already answers
+   * correctly; this is here for the UI that has to say WHY.
+   */
+  verified: boolean
   /** super_admin or admin — the two seats is_platform_admin() admits (124). */
   isAdmin: boolean
   /**
@@ -359,13 +370,30 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // is what keeps the safeguard denials — which are a property of everything the
   // account is, not of the hat it is currently wearing — from being switched off
   // by choosing a context that never had them.
+  // Migration 139. Admin seats read verified so the review queue is never
+  // blocked by itself — is_verified_member() makes the same exception.
+  const verified =
+    roles.includes('oecs') ||
+    roles.includes('admin') ||
+    roles.includes('super_admin') ||
+    !!profile?.is_verified
+
   const permissions = useMemo(() => {
+    // get_my_permissions() has already applied the verification gate, so a
+    // resolved set needs nothing further.
     if (permissionData) return new Set(permissionData)
     const held = defaultPermissionsFor(profile?.roles)
-    if (!activeRole || !roles.includes(activeRole)) return held
-    const scoped = defaultPermissionsFor([activeRole])
-    return new Set([...held].filter((key) => scoped.has(key)))
-  }, [permissionData, profile?.roles, activeRole, roles])
+    const scopedSet =
+      !activeRole || !roles.includes(activeRole)
+        ? held
+        : new Set([...held].filter((key) => defaultPermissionsFor([activeRole]).has(key)))
+    // The fallback is computed from the compiled matrix, which knows nothing
+    // about this account's verification. Without this subtraction an unverified
+    // member sees every create button for the length of one round trip, clicks
+    // one, and is refused by RLS — worse than never having been offered it.
+    if (verified) return scopedSet
+    return new Set([...scopedSet].filter((key) => !VERIFICATION_GATED_PERMISSIONS.includes(key)))
+  }, [permissionData, profile?.roles, activeRole, roles, verified])
 
   const can = useCallback((permission: PermissionKey) => permissions.has(permission), [permissions])
 
@@ -674,6 +702,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       roles,
       permissions,
       can,
+      verified,
       isAdmin,
       isSuperAdmin,
       mfaChallengeRequired,
@@ -701,6 +730,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       roles,
       permissions,
       can,
+      verified,
       isAdmin,
       isSuperAdmin,
       mfaChallengeRequired,

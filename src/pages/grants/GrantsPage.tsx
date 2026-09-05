@@ -15,6 +15,7 @@ import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { FilterBar } from '../../components/ui/FilterBar'
+import { VerificationNotice } from '../../components/verification/VerificationNotice'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
@@ -267,6 +268,11 @@ export default function GrantsPage() {
       {/* === Grants List === */}
       <div id="grants" data-spy="Grants" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
         <div className="max-w-page-narrow mx-auto px-4">
+          {/* 139 withholds grant:apply and grant:post until an admin approves
+              the account, which silently removes both the Apply button on every
+              card and the CTA below. Say so rather than let it read as a bug. */}
+          <VerificationNotice action={t`apply for funding`} className="mb-6" />
+
           {/* The create CTA lives in the body, not the hero band. */}
           {canPostGrants && (
             <div className="flex justify-end mb-6">

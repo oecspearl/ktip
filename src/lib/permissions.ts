@@ -494,6 +494,33 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   { key: 'employer:manage', label: msg`Administer employers`, description: msg`Create, verify and edit employer organisations and their member lists.`, category: 'content', safeguard: false, sortOrder: 270 },
 ]
 
+/**
+ * Permissions withheld until an admin has verified the account (migration 139).
+ *
+ * Publishing and applying only. Reading, receiving and every administrative key
+ * are deliberately absent: the gate exists to keep an unverified stranger from
+ * reaching real members and real money, not to make the platform look empty to
+ * somebody still deciding whether to finish signing up.
+ *
+ * Mirrors the verification_gated_permissions table. The database is the
+ * authority — get_my_permissions() has already applied the gate by the time the
+ * client sees it — and this copy exists for the pre-RPC fallback set in
+ * AuthContext and for the UI that explains why a control is missing.
+ */
+export const VERIFICATION_GATED_PERMISSIONS: PermissionKey[] = [
+  'grant:post',
+  'grant:apply',
+  'grant:sponsor',
+  'project:create',
+  'event:create',
+  'forum:post',
+  'forum:board',
+  'forum:comment',
+  'resource:submit',
+  'mentorship:offer',
+  'dm:initiate',
+]
+
 export const PERMISSION_BY_KEY: Record<string, PermissionDefinition> = Object.fromEntries(
   PERMISSION_DEFINITIONS.map((p) => [p.key, p])
 )

@@ -10,6 +10,7 @@ import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
+import { VerificationNotice } from '../../components/verification/VerificationNotice'
 import { BENTO_GRID, BENTO_TILE, bentoSpans, sortNewestFirst } from '../../lib/bento'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -42,6 +43,8 @@ export default function ForumsPage() {
           {/* Boards are permission-gated (129), so this is the only place the
               forum tells an organisation it may open one. Above the grid rather
               than in the hero — see PageHero's rule about create CTAs. */}
+          <VerificationNotice action={t`post and reply`} className="mb-6" />
+
           {canCreateBoard && (
             <div className="flex justify-end mb-6">
               <Link to="/forums/new">
