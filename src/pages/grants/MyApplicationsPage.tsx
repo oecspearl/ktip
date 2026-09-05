@@ -19,6 +19,7 @@ import {
   AlertCircle,
   PencilLine,
   Receipt,
+  Download,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { GRANT_APPLICATION_STATUS_LABELS } from '../../lib/constants'
@@ -283,12 +284,24 @@ export default function MyApplicationsPage() {
                       </Link>
                     ) : (
                       <div className="flex flex-wrap items-center justify-end gap-2">
+                        {/* Two doors to one page: read it, or go straight to
+                            the print dialog. "Download PDF" is what applicants
+                            search for — "submitted copy" is what it is. */}
                         {receiptByApplication.has(application.id) && (
-                          <Link to={`/dashboard/submissions/${receiptByApplication.get(application.id)}`}>
-                            <Button variant="outline" size="sm" icon={<Receipt size={16} />}>
-                              <Trans>View submitted copy</Trans>
-                            </Button>
-                          </Link>
+                          <>
+                            <Link
+                              to={`/dashboard/submissions/${receiptByApplication.get(application.id)}?print=1`}
+                            >
+                              <Button variant="outline" size="sm" icon={<Download size={16} />}>
+                                <Trans>Download PDF</Trans>
+                              </Button>
+                            </Link>
+                            <Link to={`/dashboard/submissions/${receiptByApplication.get(application.id)}`}>
+                              <Button variant="outline" size="sm" icon={<Receipt size={16} />}>
+                                <Trans>View submitted copy</Trans>
+                              </Button>
+                            </Link>
+                          </>
                         )}
                         <Link to={entityPath('grant', application.grant)}>
                           <Button variant="outline" size="sm">

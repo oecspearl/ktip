@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { ArrowLeft, Printer, ExternalLink, FileQuestion } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { Button } from '../../components/ui/Button'
@@ -23,10 +24,25 @@ const SOURCE_LINK_LABELS: Record<string, MessageDescriptor> = {
 export default function SubmissionReceiptPage() {
     const { t, i18n } = useLingui()
   const params = useParams()
+  const [searchParams] = useSearchParams()
   const { receipt, loading } = useSubmissionReceipt(params.id)
 
   const receiptTitle = receipt?.title
   usePageTitle(receipt ? t`Copy — ${receiptTitle}` : t`Submission Copy`)
+
+  // ?print=1 opens the dialog on arrival, so "Download PDF" elsewhere in the
+  // app is one click rather than a page followed by a hunt for the control.
+  // Fired once, and only after the receipt is on the page — printing an empty
+  // document is worse than not printing.
+  const printed = useRef(false)
+  useEffect(() => {
+    if (printed.current || !receipt) return
+    if (searchParams.get('print') !== '1') return
+    printed.current = true
+    // A frame, so the browser paints the document before it is captured.
+    const timer = window.setTimeout(() => window.print(), 100)
+    return () => window.clearTimeout(timer)
+  }, [receipt, searchParams])
 
   if (loading) {
     return (
