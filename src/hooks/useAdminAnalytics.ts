@@ -1,7 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
-import { useLingui } from '@lingui/react/macro'
+import {
+  measuredCount,
+  okList,
+  unavailableList,
+  type Measured,
+  type MeasuredList,
+} from '../lib/measured'
 
 export interface DistributionItem {
   label: string
@@ -13,25 +19,55 @@ export interface MonthlyGrowth {
   count: number
 }
 
+/**
+ * Every series is a MeasuredList rather than a bare array.
+ *
+ * The old shape could not tell a caller the difference between "this platform
+ * has no projects in any category" and "get_projects_by_category no longer
+ * exists" — both arrived as `[]` and BarChart rendered "No data available" for
+ * each. The `error` this hook built was never read by anything.
+ *
+ * Migration 131 makes the RPCs raise on a refusal instead of returning an empty
+ * set, which is what lets the distinction survive the round trip at all.
+ */
 export interface AnalyticsData {
-  usersByRole: DistributionItem[]
-  usersByCountry: DistributionItem[]
-  projectsByCategory: DistributionItem[]
-  projectsByPhase: DistributionItem[]
-  eventsByType: DistributionItem[]
-  grantPipeline: DistributionItem[]
-  userGrowth: MonthlyGrowth[]
-  resourceCount: number
+  usersByRole: MeasuredList<DistributionItem>
+  usersByCountry: MeasuredList<DistributionItem>
+  projectsByCategory: MeasuredList<DistributionItem>
+  projectsByPhase: MeasuredList<DistributionItem>
+  eventsByType: MeasuredList<DistributionItem>
+  grantPipeline: MeasuredList<DistributionItem>
+  userGrowth: MeasuredList<MonthlyGrowth>
+  resourceCount: Measured
+}
+
+/**
+ * Why these strings are not translated.
+ *
+ * They name a failing RPC to whoever is going to fix it. That is the same
+ * argument scripts/i18n/config.mjs makes for app-error.ts's SAFE_MESSAGES: a
+ * developer-facing diagnostic translated into French helps nobody, and the
+ * previous code shipped `t\`RPC not available\`` into all four catalogs.
+ */
+function reasonFor(name: string, error: unknown): string {
+  const message =
+    typeof error === 'object' && error && 'message' in error
+      ? String((error as { message: unknown }).message)
+      : ''
+  return message ? `${name}: ${message}` : `${name} did not respond`
 }
 
 export function useAdminAnalytics() {
-    const { t } = useLingui()
   const fetchAnalytics = async (): Promise<AnalyticsData> => {
-    // Use `as any` to call RPC functions not yet in generated Supabase types
+    // `as any`: these RPCs are not in the generated Supabase types.
     const rpc = (name: string, params?: any) =>
       (supabase.rpc as any)(name, params).then(
-        (r: any) => r,
-        () => ({ data: null, error: { message: t`RPC not available` } })
+        (r: any) => ({ name, data: r.data, error: r.error }),
+        // A rejected promise (network, or a function that no longer exists) has
+        // to become a *failed* result. `true` rather than a synthetic error
+        // object: reasonFor() falls back to "<name> did not respond", which is
+        // more use to whoever is fixing it than a message we invented here.
+        (err: any) => ({ name, data: null, error: err ?? true })
       )
 
     const [
@@ -54,31 +90,54 @@ export function useAdminAnalytics() {
       (supabase as any).from('resources').select('*', { count: 'exact', head: true }),
     ])
 
-    const mapDistribution = (data: any[] | null): DistributionItem[] => {
-      if (!data || !Array.isArray(data)) return []
-      return data.map((item: any) => ({
-        label: item.role || item.country || item.category || item.phase || item.event_type || item.status || 'Unknown',
-        count: Number(item.count) || 0,
-      }))
+    const asDistribution = (res: {
+      name: string
+      data: any
+      error: unknown
+    }): MeasuredList<DistributionItem> => {
+      if (res.error || !Array.isArray(res.data)) {
+        return unavailableList(reasonFor(res.name, res.error))
+      }
+      return okList(
+        res.data.map((item: any) => ({
+          label:
+            item.role ||
+            item.country ||
+            item.category ||
+            item.phase ||
+            item.event_type ||
+            item.status ||
+            'Unknown',
+          count: Number(item.count) || 0,
+        }))
+      )
     }
 
-    const mapGrowth = (data: any[] | null): MonthlyGrowth[] => {
-      if (!data || !Array.isArray(data)) return []
-      return data.map((item: any) => ({
-        month: item.month || '',
-        count: Number(item.count) || 0,
-      }))
+    const asGrowth = (res: {
+      name: string
+      data: any
+      error: unknown
+    }): MeasuredList<MonthlyGrowth> => {
+      if (res.error || !Array.isArray(res.data)) {
+        return unavailableList(reasonFor(res.name, res.error))
+      }
+      return okList(
+        res.data.map((item: any) => ({
+          month: item.month || '',
+          count: Number(item.count) || 0,
+        }))
+      )
     }
 
     return {
-      usersByRole: mapDistribution(roleRes.data),
-      usersByCountry: mapDistribution(countryRes.data),
-      projectsByCategory: mapDistribution(categoryRes.data),
-      projectsByPhase: mapDistribution(phaseRes.data),
-      eventsByType: mapDistribution(eventTypeRes.data),
-      grantPipeline: mapDistribution(pipelineRes.data),
-      userGrowth: mapGrowth(growthRes.data),
-      resourceCount: resourceCountRes.count || 0,
+      usersByRole: asDistribution(roleRes),
+      usersByCountry: asDistribution(countryRes),
+      projectsByCategory: asDistribution(categoryRes),
+      projectsByPhase: asDistribution(phaseRes),
+      eventsByType: asDistribution(eventTypeRes),
+      grantPipeline: asDistribution(pipelineRes),
+      userGrowth: asGrowth(growthRes),
+      resourceCount: measuredCount(resourceCountRes, 'resources count was refused'),
     }
   }
 

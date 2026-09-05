@@ -23,7 +23,26 @@ import {
   TrendingUp,
   Globe,
   FolderKanban,
+  FileText,
+  Target,
 } from 'lucide-react'
+import { AdminStatTile } from '../../components/admin/AdminStatTile'
+import { KpiTargetTile } from '../../components/admin/kpi/KpiTargetTile'
+import { usePlatformPulse, useKpiTargets } from '../../hooks/usePlatformPulse'
+import { PLATFORM_KPIS } from '../../lib/kpi-catalog'
+import { itemsOf, type Measured } from '../../lib/measured'
+
+/**
+ * The four the programme lead is asked about most: are people joining, are they
+ * coming back, is there work on the platform, and is money moving. The other
+ * thirty are one click away.
+ */
+const HEADLINE_KPI_KEYS = [
+  't33.new_registrations_total',
+  't34.mau_pct',
+  't35.active_projects',
+  't37.users_connected_to_funding',
+]
 import {
   ROLE_LABELS,
   PHASE_LABELS,
@@ -33,11 +52,31 @@ import {
 import { useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
+function ClimateFigure({ label, measured }: { label: string; measured: Measured }) {
+  return (
+    <div title={measured.state === 'unavailable' ? measured.reason : undefined}>
+      <p
+        className={`text-2xl font-bold ${
+          measured.state === 'ok' ? 'text-ktip-tropical-800' : 'text-ktip-sand-400'
+        }`}
+      >
+        {measured.state === 'ok' ? measured.value.toLocaleString() : '—'}
+      </p>
+      <p className="text-xs text-ktip-tropical-700">{label}</p>
+      {measured.state === 'unavailable' && (
+        <p className="text-xs text-ktip-sun-700">Couldn't load</p>
+      )}
+    </div>
+  )
+}
+
 export default function AdminDashboardPage() {
     const { i18n } = useLingui()
   const auth = useAuth()
   const { stats, loading: statsLoading } = useAdminStats()
-  const { analytics, loading: analyticsLoading } = useAdminAnalytics()
+  const { analytics, loading: analyticsLoading, refetch: refetchAnalytics } = useAdminAnalytics()
+  const { pulse } = usePlatformPulse()
+  const { targets } = useKpiTargets()
 
   useTutorialAutoStart(TUTORIAL_IDS.ADMIN, !statsLoading && !analyticsLoading)
 
@@ -88,75 +127,68 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       ) : (
-        <div data-tutorial="admin-stats" className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 stagger-children">
+        <div data-tutorial="admin-stats" className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8 stagger-children">
           {canSeeUsers && (
-            <div className="border border-ktip-sand-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
-                  <Users size={20} className="text-ktip-ocean-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.userCount}</p>
-                  <p className="text-xs text-gray-500">Total Users</p>
-                </div>
-              </div>
-            </div>
+            <AdminStatTile
+              emphasis
+              icon={<Users size={20} className="text-ktip-ocean-600" />}
+              iconClass="bg-ktip-ocean-100"
+              label="Total Users"
+              measured={stats.userCount}
+            />
           )}
 
           {canSeeEvents && (
-            <div className="border border-ktip-sand-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-ktip-tropical-100 flex items-center justify-center">
-                  <Calendar size={20} className="text-ktip-tropical-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.eventCount}</p>
-                  <p className="text-xs text-gray-500">Total Events</p>
-                </div>
-              </div>
-            </div>
+            <AdminStatTile
+              emphasis
+              icon={<Calendar size={20} className="text-ktip-tropical-600" />}
+              iconClass="bg-ktip-tropical-100"
+              label="Events Hosted"
+              measured={stats.eventCount}
+            />
           )}
 
           {canSeeGrants && (
-            <div className="border border-ktip-sand-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center">
-                  <DollarSign size={20} className="text-ktip-ocean-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.grantCount}</p>
-                  <p className="text-xs text-gray-500">Active Grants</p>
-                </div>
-              </div>
-            </div>
+            <AdminStatTile
+              emphasis
+              icon={<DollarSign size={20} className="text-ktip-ocean-600" />}
+              iconClass="bg-ktip-ocean-100"
+              label="Active Grants"
+              measured={stats.grantCount}
+            />
+          )}
+
+          {/* Fetched on every load since the dashboard was written and never
+              rendered. Roadmap §14 T37 counts exactly this ("users connected to
+              funding"), so it earns the tile rather than being deleted. */}
+          {canSeeGrants && (
+            <AdminStatTile
+              emphasis
+              icon={<FileText size={20} className="text-ktip-ocean-600" />}
+              iconClass="bg-ktip-ocean-100"
+              label="Grant Applications"
+              measured={stats.applicationCount}
+            />
           )}
 
           {canSeeForums && (
-            <div className="border border-ktip-sand-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
-                  <MessageSquare size={20} className="text-ktip-sun-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.postCount}</p>
-                  <p className="text-xs text-gray-500">Forum Posts</p>
-                </div>
-              </div>
-            </div>
+            <AdminStatTile
+              emphasis
+              icon={<MessageSquare size={20} className="text-ktip-sun-600" />}
+              iconClass="bg-ktip-sun-100"
+              label="Discussions"
+              measured={stats.postCount}
+            />
           )}
 
           {analytics && canSeeResources && (
-            <div className="border border-ktip-sand-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-ktip-sun-100 flex items-center justify-center">
-                  <BookOpen size={20} className="text-ktip-sun-700" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{analytics.resourceCount}</p>
-                  <p className="text-xs text-gray-500">Resources</p>
-                </div>
-              </div>
-            </div>
+            <AdminStatTile
+              emphasis
+              icon={<BookOpen size={20} className="text-ktip-sun-700" />}
+              iconClass="bg-ktip-sun-100"
+              label="Resources"
+              measured={analytics.resourceCount}
+            />
           )}
         </div>
       )}
@@ -168,19 +200,50 @@ export default function AdminDashboardPage() {
             <Leaf size={18} className="text-ktip-tropical-700" />
             <h2 className="text-sm font-semibold text-ktip-tropical-900">Climate Action</h2>
           </div>
+          {/* These three used to hard-fall-back to 0 whenever the
+              is_climate_action query failed, which is the failure mode this
+              page's own comment above calls unacceptable. */}
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <p className="text-2xl font-bold text-ktip-tropical-800">{stats.climateProjectCount}</p>
-              <p className="text-xs text-ktip-tropical-700">Projects</p>
+            <ClimateFigure label="Projects" measured={stats.climateProjectCount} />
+            <ClimateFigure label="Events" measured={stats.climateEventCount} />
+            <ClimateFigure label="Grants" measured={stats.climateGrantCount} />
+          </div>
+        </div>
+      )}
+
+      {/* Results framework summary.
+          Four tiles, not thirty. The full §14 board lives at /admin/impact:
+          this page is the console landing page that every seat AdminRoute
+          admits has to pass through, and burying a thirty-KPI grid behind
+          org:manage here would make most of it invisible to both supervisors. */}
+      {canSeeAnalytics && (
+        <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <Target size={18} className="text-ktip-ocean-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Results Framework</h2>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-ktip-tropical-800">{stats.climateEventCount}</p>
-              <p className="text-xs text-ktip-tropical-700">Events</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-ktip-tropical-800">{stats.climateGrantCount}</p>
-              <p className="text-xs text-ktip-tropical-700">Grants</p>
-            </div>
+            <Link
+              to="/admin/impact"
+              className="inline-flex items-center gap-1 text-sm font-medium text-ktip-ocean-700 hover:underline"
+            >
+              All KPIs
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {HEADLINE_KPI_KEYS.map((key) => {
+              const kpi = PLATFORM_KPIS.find((k) => k.key === key)
+              if (!kpi) return null
+              return (
+                <KpiTargetTile
+                  key={kpi.key}
+                  kpi={kpi}
+                  measured={kpi.read(pulse)}
+                  target={targets?.[kpi.key]?.target_value ?? null}
+                />
+              )
+            })}
           </div>
         </div>
       )}
@@ -210,16 +273,22 @@ export default function AdminDashboardPage() {
         </div>
       ) : (
         <>
-          {/* User Growth Chart */}
-          {analytics.userGrowth.length > 0 && (
-            <div className="border border-ktip-sand-200 rounded-lg p-6 mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp size={18} className="text-ktip-ocean-600" />
-                <h2 className="text-lg font-semibold text-gray-900">User Growth</h2>
-              </div>
-              <GrowthChart data={analytics.userGrowth} />
+          {/* User Growth Chart. Rendered unconditionally now — hiding it on an
+              empty series also hid it when get_user_growth was refused, and the
+              chart itself is what distinguishes the two. */}
+          <div className="border border-ktip-sand-200 rounded-lg p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp size={18} className="text-ktip-ocean-600" />
+              <h2 className="text-lg font-semibold text-gray-900">User Growth</h2>
             </div>
-          )}
+            <GrowthChart
+              data={itemsOf(analytics.userGrowth)}
+              unavailable={
+                analytics.userGrowth.state === 'unavailable' ? analytics.userGrowth.reason : undefined
+              }
+              onRetry={refetchAnalytics}
+            />
+          </div>
 
           {/* Distribution Charts Grid */}
           <div data-tutorial="admin-charts" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -232,7 +301,9 @@ export default function AdminDashboardPage() {
               {/* BarChart wants plain strings, so the descriptors are resolved
                   here rather than inside the chart. */}
               <BarChart
-                data={analytics.usersByRole}
+                data={itemsOf(analytics.usersByRole)}
+                unavailable={analytics.usersByRole.state === 'unavailable' ? analytics.usersByRole.reason : undefined}
+                onRetry={refetchAnalytics}
                 colorClass="bg-ktip-ocean-500"
                 labelMap={Object.fromEntries(
                   Object.entries(ROLE_LABELS).map(([slug, label]) => [slug, resolveCopy(i18n, label)])
@@ -246,7 +317,9 @@ export default function AdminDashboardPage() {
                 <Globe size={18} className="text-ktip-tropical-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Users by Country</h2>
               </div>
-              <BarChart data={analytics.usersByCountry} colorClass="bg-ktip-tropical-500" />
+              <BarChart data={itemsOf(analytics.usersByCountry)}
+                unavailable={analytics.usersByCountry.state === 'unavailable' ? analytics.usersByCountry.reason : undefined}
+                onRetry={refetchAnalytics} colorClass="bg-ktip-tropical-500" />
             </div>
 
             {/* Projects by Category */}
@@ -255,7 +328,9 @@ export default function AdminDashboardPage() {
                 <FolderKanban size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Projects by Category</h2>
               </div>
-              <BarChart data={analytics.projectsByCategory} colorClass="bg-ktip-ocean-500" />
+              <BarChart data={itemsOf(analytics.projectsByCategory)}
+                unavailable={analytics.projectsByCategory.state === 'unavailable' ? analytics.projectsByCategory.reason : undefined}
+                onRetry={refetchAnalytics} colorClass="bg-ktip-ocean-500" />
             </div>
 
             {/* Projects by Phase */}
@@ -264,7 +339,9 @@ export default function AdminDashboardPage() {
                 <BarChart3 size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Projects by Phase</h2>
               </div>
-              <BarChart data={analytics.projectsByPhase} colorClass="bg-ktip-ocean-500" labelMap={PHASE_LABELS} />
+              <BarChart data={itemsOf(analytics.projectsByPhase)}
+                unavailable={analytics.projectsByPhase.state === 'unavailable' ? analytics.projectsByPhase.reason : undefined}
+                onRetry={refetchAnalytics} colorClass="bg-ktip-ocean-500" labelMap={PHASE_LABELS} />
             </div>
 
             {/* Events by Type */}
@@ -273,7 +350,9 @@ export default function AdminDashboardPage() {
                 <Calendar size={18} className="text-ktip-tropical-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Events by Type</h2>
               </div>
-              <BarChart data={analytics.eventsByType} colorClass="bg-ktip-tropical-500" labelMap={EVENT_TYPE_LABELS} />
+              <BarChart data={itemsOf(analytics.eventsByType)}
+                unavailable={analytics.eventsByType.state === 'unavailable' ? analytics.eventsByType.reason : undefined}
+                onRetry={refetchAnalytics} colorClass="bg-ktip-tropical-500" labelMap={EVENT_TYPE_LABELS} />
             </div>
 
             {/* Grant Application Pipeline */}
@@ -282,7 +361,9 @@ export default function AdminDashboardPage() {
                 <DollarSign size={18} className="text-ktip-ocean-600" />
                 <h2 className="text-sm font-semibold text-gray-900">Grant Application Pipeline</h2>
               </div>
-              <BarChart data={analytics.grantPipeline} colorClass="bg-ktip-ocean-500" labelMap={GRANT_APPLICATION_STATUS_LABELS} />
+              <BarChart data={itemsOf(analytics.grantPipeline)}
+                unavailable={analytics.grantPipeline.state === 'unavailable' ? analytics.grantPipeline.reason : undefined}
+                onRetry={refetchAnalytics} colorClass="bg-ktip-ocean-500" labelMap={GRANT_APPLICATION_STATUS_LABELS} />
             </div>
           </div>
         </>

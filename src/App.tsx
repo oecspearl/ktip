@@ -293,6 +293,22 @@ const router = createBrowserRouter([
                   { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
                 ],
               },
+              // Contributing to the resource library (130). Gated for the same
+              // reason as the two above: resource:submit is checked in the
+              // INSERT policy, so a role without it should be told here rather
+              // than after uploading a file.
+              //
+              // Both paths outrank the public `/resources/:id` on React Router's
+              // specificity ranking — a static segment always beats a dynamic
+              // one — so `submit` is never resolved as a resource slug, whatever
+              // order the two branches are declared in.
+              { path: '/resources/my-submissions', lazy: lazyPage(() => import('./pages/resources/MySubmissionsPage')) },
+              {
+                element: <PermissionRoute require="resource:submit" />,
+                children: [
+                  { path: '/resources/submit', lazy: lazyPage(() => import('./pages/resources/SubmitResourcePage')) },
+                ],
+              },
               // The standalone edit page is gone — event fields are edited on
               // the management workspace's Details tab. The old URL redirects
               // so bookmarks and stale links keep working.
@@ -386,6 +402,10 @@ const router = createBrowserRouter([
                 element: <PermissionRoute require={['grant:post', 'grant:manage']} />,
                 children: [
                   { path: '/grants/:id/edit', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                  // Reading the applications to your own call (130). The route
+                  // guard is the coarse one — holding grant:post at all; which
+                  // call is yours is decided by RLS and re-checked in the page.
+                  { path: '/grants/:id/applications', lazy: lazyPage(() => import('./pages/grants/GrantApplicationsPage')) },
                 ],
               },
               { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
@@ -579,6 +599,12 @@ const router = createBrowserRouter([
                       { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
                       { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
                       { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
+                      // Roadmap §14's results framework. org:manage like the
+                      // rest of this block: it reads across every table at once.
+                      { path: '/admin/impact', lazy: lazyPage(() => import('./pages/admin/impact/AdminImpactPage')) },
+                      // §14 Table 39's four reports — weekly, monthly,
+                      // quarterly, annual — as one surface with a period switch.
+                      { path: '/admin/pulse', lazy: lazyPage(() => import('./pages/admin/pulse/AdminPulsePage')) },
                       { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
                       { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
                       // Sends deliberate events to the live Sentry project.

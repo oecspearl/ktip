@@ -77,11 +77,11 @@ Cancelling an event keeps its page up with a cancelled badge rather than deletin
   msg`A standing notice reversed by a counter-notice is removed from the count. You can see any notices filed against your content, and their current status, from your account.`,
   msg`A statement of why you believe it infringes.`,
   msg`A statement that you believe in good faith it was removed as a result of a mistake or a misidentification.`,
-  msg`A title and a body, posted to the board you came from — the board is fixed by the page, so there is nothing to choose.
+  msg`A title and a body, added to the board you came from — the board is fixed by the page, so there is nothing to choose.
 
 Write the title as the question you actually want answered; it is all most people see in the thread list.
 
-Once published you can edit or delete your own post, and replies notify you as they arrive.`,
+Once published you can edit or delete your own discussion, and replies notify you as they arrive.`,
   msg`A verification badge reflects a check made at a point in time and can be revoked. Treat it as one signal among several, not as a guarantee.`,
   msg`A verification badge reflects a check made at a point in time. It can be revoked if the underlying status changes or if the check turns out to have been wrong, and it is not a warranty by %entityShort% about the member who holds it.`,
   msg`A verified student account keeps a safeguarding record with your institution, and that record carries the year you were born — the year only, never the full date.
@@ -202,6 +202,7 @@ File-based resources upload here; text resources are read in full on the resourc
   msg`Applying`,
   msg`Applying in KTIP versus on an external site`,
   msg`Applying through KTIP does not license your idea to the funder — that protection is set out in the Grant Application Confidentiality & IP Terms. What you sign afterwards is a different matter, and it is yours to negotiate.`,
+  msg`Approve or decline from the list or from inside an application; the applicant is notified either way.`,
   msg`Approve or reject identity verification`,
   msg`Approve students and sponsor their applications`,
   msg`Approved`,
@@ -372,9 +373,9 @@ Each card carries the title, date, location and type, so you can scan quickly.
 A sort control at the top lets you order by date or by "For You", which ranks events against the topics you chose in your personalization settings.`,
   msg`Click "Forums" in the navigation bar to see the discussion boards.
 
-Each board covers one area — general discussion, project help, funding advice and so on. Open a board to see its posts.
+Each board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.
 
-Anyone can read the forums without signing in. Posting and replying need an account.`,
+Anyone can read the forums without signing in. Starting a discussion and replying need an account.`,
   msg`Click "Grants" in the navigation bar to see every open funding opportunity.
 
 Search by keyword and filter by grant type or status. Each listing shows the funding range, the currency, the deadline and the eligibility summary.
@@ -390,7 +391,7 @@ If you added a secondary email in Settings, you can sign in with either address 
 
 If you forget your password, click "Forgot Password?" on the login page.`,
   msg`Click "New Conversation".`,
-  msg`Click "New Post" (you must be logged in).`,
+  msg`Click "New Discussion" (you must be logged in).`,
   msg`Click "Projects" in the navigation bar.
 
 You will see every public project. Search by keyword, filter by category (Technology, Healthcare, Education, Agriculture, Environment or Other) or by phase (Concept, Prototype, Funding or Launch).
@@ -411,6 +412,7 @@ There is no name field. Your display name starts as the first part of your email
 Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.
 
 After you submit, check your email for a confirmation link. Roles that need review (such as Student or Faculty) are confirmed by your institution or an OECS reviewer after you sign up.`,
+  msg`Click "Submit for Review". A reviewer publishes it and you are notified either way.`,
   msg`Click Save. You keep earning points and can still see your own rank — nobody else can.`,
   msg`Click a notification to open what it refers to.`,
   msg`Click a result to go there, or click the chevron on the right to see how to do it yourself.`,
@@ -499,6 +501,7 @@ If you think a filter caught something unfairly, say so in the forums or through
   msg`Content written by members is machine-translated and marked as such.`,
   msg`Content you mark as public can be read by anyone and may be indexed by search engines. We can stop serving it; we cannot make a search engine forget it.`,
   msg`Content you submit to an AI feature — a draft you ask the assistant to improve, a document you ask it to extract fields from — is sent to the provider running that feature so it can answer. That is a separate matter from the licence above, and it is described in the AI Use Disclosure.`,
+  msg`Contribute a guide, template or case study to the library`,
   msg`Contributing to KTIP itself`,
   msg`Controlled by your settings`,
   msg`Cookie & Storage Notice`,
@@ -623,6 +626,7 @@ Not accepted — unsuccessful. Where the funder gave feedback, it appears with t
 Status changes reach you through notifications, so you do not have to keep checking the page.`,
   msg`Drafts`,
   msg`Drafts and autosave`,
+  msg`Drafts never appear — an application arrives once the applicant submits it.`,
   msg`Drafts save automatically, so you can leave and resume from My Applications.`,
   msg`Drafts, publishing and cancellation.`,
   msg`Drafts, submitted applications and decided ones, with the grant and the date on each.
@@ -652,12 +656,12 @@ One print note: Signature has a navy sidebar, so it needs “Background graphics
   msg`Each report with its category, the date, and where the safety team has got to with it.
 
 You will not always be told the outcome. Some of what follows a report concerns the other person’s account and is not ours to share — “resolved” means the team has acted, not that nothing happened.`,
-  msg`Each row shows the author, when it was posted and how many replies it has drawn. Pinned announcements sit at the top regardless of age.
+  msg`Each row shows the author, when it was started and how many replies it has drawn. Pinned announcements sit at the top regardless of age.
 
-Open a post to read it in full and reply. Moderators can pin, lock or remove threads here — if a post disappears, that is why.`,
+Open a discussion to read it in full and reply. Moderators can pin, lock or remove threads here — if one disappears, that is why.`,
   msg`Each tile is a board with its own topic. The tile shows how many discussions it holds and when it was last active, so you can tell a busy board from a quiet one at a glance.
 
-Open a board to see its posts — newest first, pinned announcements on top — and to start a discussion of your own.`,
+Open a board to see its discussions — newest first, pinned announcements on top — and to start one of your own.`,
   msg`Each tile is a room — a main stage, breakouts, a help desk, sponsor rooms. The count on a room is who is in it right now, updating live.
 
 Click one to walk in. You can leave and enter another at any time; nothing here is a commitment.
@@ -826,7 +830,7 @@ Once anything is active, a Clear all filters link appears underneath to reset in
 The count in the middle updates as you go, and a Clear all filters link appears underneath once anything is active.`,
   msg`Everything that follows, oldest first, so the thread reads top to bottom.
 
-The box at the bottom is where you add yours — it posts immediately and notifies the thread’s author. You can delete your own reply afterwards; it disappears from the thread rather than leaving a stub.`,
+The box at the bottom is where you add yours — Reply publishes it immediately and notifies the discussion’s author. You can delete your own reply afterwards; it disappears from the thread rather than leaving a stub.`,
   msg`Everything you have done on KTIP in order — projects published, events organized, applications sent, achievements earned, connections made.
 
 It is built from real records rather than a counter, so it doubles as a way to find something you did months ago and cannot otherwise place.`,
@@ -914,7 +918,7 @@ To report a person rather than a single piece of content, use the grievance form
   msg`Forums`,
   msg`Forums are the long-form side of KTIP — questions, announcements, calls for collaborators, and the discussions that do not fit in a comment on a project.
 
-Anyone can read. Posting and replying need an account.`,
+Anyone can read. Starting a discussion and replying need an account.`,
   msg`Four tools, one account`,
   msg`Frequently asked questions`,
   msg`From the Hackathons page or the event page, click through to the venue.
@@ -933,6 +937,7 @@ Venues only exist for events where the organiser has set one up.`,
   msg`Getting Started`,
   msg`Getting your business verified`,
   msg`Getting your business verified by your Chamber.`,
+  msg`Give it a title, a description and a category, then attach a file or link to where it lives.`,
   msg`Gives moderators a second opinion on a queued report`,
   msg`Go to "My Applications" from the Grants section.
 
@@ -1097,7 +1102,6 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How do I continue a draft application?`,
   msg`How do I control what I get notified about?`,
   msg`How do I control which notifications I get?`,
-  msg`How do I create a forum post?`,
   msg`How do I create a new project?`,
   msg`How do I create a project?`,
   msg`How do I create an account?`,
@@ -1125,7 +1129,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How do I pin trophies to my profile?`,
   msg`How do I read a challenge brief?`,
   msg`How do I register for an event?`,
-  msg`How do I reply to a post?`,
+  msg`How do I reply to a discussion?`,
   msg`How do I report a member?`,
   msg`How do I report a post, reply or message?`,
   msg`How do I report inappropriate behaviour?`,
@@ -1135,6 +1139,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How do I set up my profile?`,
   msg`How do I share a whiteboard, document or snippet?`,
   msg`How do I share my CV publicly?`,
+  msg`How do I start a forum discussion?`,
   msg`How do I start a video conference?`,
   msg`How do I track a report I filed?`,
   msg`How do I track my grant applications?`,
@@ -1454,6 +1459,7 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My connections`,
   msg`My old code drafts are missing from my snippets`,
   msg`My profile information is not showing`,
+  msg`My submissions`,
   msg`Name the board for the subject, not for a single question — threads go inside it.`,
   msg`Name, roles, country and a short bio, with the buttons to act on it: Connect sends a request, Message opens a conversation once you are connected.
 
@@ -1599,9 +1605,11 @@ Boards are good for the thinking stage — mapping a problem, sketching an archi
 Share a board with collaborators to work on it together.`,
   msg`Open Community → Start a Board. The entry appears for organisation accounts and administrators.`,
   msg`Open Events → Virtual Hackathon and pick a live hackathon.`,
+  msg`Open Funding → My Grants.`,
   msg`Open Funding → Post a Grant. The entry only appears for accounts that may post funding.`,
   msg`Open Messages from the chat button at the bottom-right.`,
   msg`Open Projects, Resources, Events or Grants.`,
+  msg`Open Resources and click Submit.`,
   msg`Open Settings from the avatar menu in the top-right corner.`,
   msg`Open Settings from your avatar menu. There are five tabs.
 
@@ -1627,12 +1635,17 @@ The Error Simulator next door sends deliberate failures through the live pipelin
 
 Student applications need a sponsor’s approval before they reach you.`,
   msg`Open one to run it`,
-  msg`Open the board you want to post in and click "New Post".
+  msg`Open the board you want to post in and click "New Discussion".
 
-Give it a title and write the body. Be specific — posts that say what you already tried get better answers than posts that just describe the problem.
+Give it a title and write the body. Be specific — a discussion that says what you already tried gets better answers than one that just describes the problem.
 
-Click "Create Post" to publish. Other members can then reply, and you are notified when they do.`,
+Click "Start Discussion" to publish. Other members can then reply, and you are notified when they do.`,
   msg`Open the chat bubble in the bottom-right corner, or go to Messages.`,
+  msg`Open the discussion and scroll to the reply box at the bottom.
+
+Type your response and click "Reply". It is added to the end of the thread and the discussion's author is notified.
+
+KTIP spans many countries and backgrounds — keep replies respectful and useful.`,
   msg`Open the document and use its export action.
 
 Export gives you a copy you can attach to an email or upload elsewhere, with the formatting preserved.
@@ -1661,11 +1674,6 @@ Type your message and press Enter. Messages are delivered in real time — if th
 Messages are capped at 2000 characters.
 
 You can also start a conversation straight from someone's profile or from the member drawer in the directory.`,
-  msg`Open the post and scroll to the reply box at the bottom.
-
-Type your response and click "Reply". It is added to the end of the thread and the post author is notified.
-
-KTIP spans many countries and backgrounds — keep replies respectful and useful.`,
   msg`Open the profile of the member you want to report, from the Directory or a post.`,
   msg`Open the project and click "Edit" near the top.
 
@@ -1798,10 +1806,10 @@ The board is public on purpose: a rank is only worth chasing if it can be shown 
 A verified badge means an OECS admin has confirmed the member is who they say they are — worth checking before you take a funding conversation forward.`,
   msg`Points, badges and leaderboard positions have no monetary value, are not transferable, and may be recalculated or reset — for example when scoring changes or when we remove the effects of gamed activity.`,
   msg`Post a grant`,
-  msg`Post a new topic on a discussion board`,
   msg`Post unlawful, defamatory, harassing, hateful or discriminatory content, including content targeting someone for their nationality, island of origin, race, religion, sex, gender, sexual orientation, disability or age.`,
   msg`Post-Secondary Institutions`,
   msg`Present the data as endorsed, verified or warranted by %entityShort% beyond what the record itself states.`,
+  msg`Press Applications beside a call to read everything submitted to it.`,
   msg`Pressure to decide quickly, or a deadline that keeps moving closer.`,
   msg`Print / Save as PDF gives you a clean document — the page chrome is stripped from the print output.
 
@@ -2240,6 +2248,7 @@ The tour action only appears on pages that actually have a tour, so you will not
   msg`Start a conversation`,
   msg`Start a discussion board`,
   msg`Start a forum discussion`,
+  msg`Start a new topic on a discussion board`,
   msg`Start from what you already have`,
   msg`Start or join a video call`,
   msg`Start writing a shared document`,
@@ -2286,6 +2295,7 @@ If your institution is not yet registered on KTIP, your account cannot be domain
   msg`Sublicense it to another organisation for that organisation’s own purposes.`,
   msg`Submission & Competition IP Terms`,
   msg`Submissions holds your registrations. Projects is the equivalent tab for work you have published.`,
+  msg`Submit a resource`,
   msg`Submitting an application grants the funder the right to read, assess and decide on it. It grants no licence to use, build, commercialise or file protection over what it describes — whether or not the application succeeds.`,
   msg`Submitting does not license your idea`,
   msg`Success Story`,
@@ -2457,7 +2467,7 @@ Everything here is reachable from the rail as well — this is a shortcut, not a
 The rail on the right of the screen jumps between those sections, so a long agenda never means a long scroll.`,
   msg`The full picture — what supervised mode restricts, and how guardian requests are handled — is in the Minor Safeguarding Statement.`,
   msg`The funder gets to assess it. That is all.`,
-  msg`The funding calls you posted, open and closed`,
+  msg`The funding calls you posted, and the applications to them`,
   msg`The indicative assessment is not a score, not a prediction, and carries no weight with the funder — it never leaves your draft. Treat it as a second read, not a verdict.`,
   msg`The invitations inbox gathers everything waiting on your answer in one place: collaboration shares on whiteboards and documents, project team invitations, and connection requests.
 
@@ -2486,6 +2496,9 @@ After submitting, the application appears under My Applications with its status.
   msg`The licence you grant so the competition can run`,
   msg`The line that matters most: describing what you did is fine, implying who backs you is not. "Winner, KTIP Climate Challenge 2026" is fine. "An OECS-accredited programme" is not, unless you actually are one.`,
   msg`The live venue`,
+  msg`The message that started the discussion, its author and when it was written. If the author has edited it since, that is noted here rather than hidden.
+
+Your own discussions carry edit and delete controls; moderators can act on anyone’s.`,
   msg`The messages you send it`,
   msg`The messaging panel lists every conversation you are part of, most recent first, with unread ones marked.
 
@@ -2505,15 +2518,12 @@ When you would rather browse than plan around dates, switch to Grid using the to
 Everything that used to live on a separate profile page is now a tab below.`,
   msg`The one rule worth memorising: no real funder charges you to receive a grant.`,
   msg`The one you choose`,
+  msg`The opening message`,
   msg`The organisation running the call you applied to, as named on the grant listing.`,
-  msg`The original message, its author and when it was written. If the author has edited it since, that is noted here rather than hidden.
-
-Your own posts carry edit and delete controls; moderators can act on anyone’s.`,
   msg`The other tools`,
   msg`The panel`,
   msg`The partner feed carries verified employer and organisation records, and member records only where that member has opted in to appear. Nothing enters the feed by default.`,
   msg`The permission matrix, its locks and its history.`,
-  msg`The post`,
   msg`The project`,
   msg`The project archive`,
   msg`The questions above are the ones we are asked most. If yours is not there, this is where to say so — feedback from this page is what decides which article gets written next.
@@ -2521,6 +2531,7 @@ Your own posts carry edit and delete controls; moderators can act on anyone’s.
 For anything account-specific, the Help Center’s contact block is the better route.`,
   msg`The reported content`,
   msg`The resource`,
+  msg`The resources you contributed, and where each one stands`,
   msg`The rest of the page`,
   msg`The rest of the platform reads a derived yes-or-no answer — is this account a minor? — rather than the date itself.`,
   msg`The rest of the profile`,
@@ -2535,9 +2546,9 @@ Upcoming events are grouped by type — fold a section shut to get it out of the
 
 Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile.`,
   msg`The same filter exists on the Events, Grants and Resources pages.`,
-  msg`The search box filters this board’s posts as you type — titles and bodies both.
+  msg`The search box filters this board’s discussions as you type — titles and bodies both.
 
-New Post opens the editor. Posts take a title, a body with formatting, and land in this board; you can edit yours afterwards.`,
+New Discussion opens the editor. A discussion takes a title, a body with formatting, and lands in this board; you can edit yours afterwards.`,
   msg`The section rail on long pages`,
   msg`The sections on your content (existing licences), limitation of liability, indemnity and governing law survive the end of this agreement.`,
   msg`The short version`,
@@ -2648,7 +2659,9 @@ Admins get an extra Status field — draft events are visible only to administra
 
 Removing a project here removes it for its owner too. Prefer talking to them first; a project that breaks the rules is a moderation matter rather than an editorial one.`,
   msg`Top members by achievement points, all time or this month, globally or by country and role`,
-  msg`Total Users is every account, including unverified ones. Total Events counts past and upcoming together. Active Grants excludes anything past its deadline or switched off. Forum Posts counts posts, not replies.
+  msg`Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.
+
+A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.
 
 The Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.`,
   msg`Track drafts, submissions and sponsorships.`,
@@ -2970,7 +2983,7 @@ If none of that helps it may be a temporary platform issue. Wait a few minutes, 
   msg`Workshop`,
   msg`Write and run code in the browser`,
   msg`Write it, then run it`,
-  msg`Write your title and message, then publish.`,
+  msg`Write your title and message, then click "Start Discussion".`,
   msg`Write, sponsor, submit and track an application.`,
   msg`Writing, running and sharing snippets.`,
   msg`Yes`,

@@ -2,51 +2,95 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { measuredCount, type Measured } from '../lib/measured'
 import type { Profile, GrantApplication, GrantApplicationStatus, UserRole } from '../types'
 
 // ============================================================
 // Dashboard Stats
 // ============================================================
 
+/**
+ * Every tile is a Measured, not a number.
+ *
+ * The page's own comment says it best: "A tile reading 0 is a claim about the
+ * platform." It was true of the climate strip, which hard-fell-back to 0 on any
+ * failure, and quietly true of the five head counts as well, where `count || 0`
+ * turned a refused query into a confident zero.
+ */
 export interface AdminStats {
-  userCount: number
-  eventCount: number
-  grantCount: number
-  applicationCount: number
-  postCount: number
-  climateProjectCount: number
-  climateEventCount: number
-  climateGrantCount: number
+  userCount: Measured
+  eventCount: Measured
+  grantCount: Measured
+  applicationCount: Measured
+  postCount: Measured
+  climateProjectCount: Measured
+  climateEventCount: Measured
+  climateGrantCount: Measured
 }
 
 export function useAdminStats() {
   const fetchStats = async (): Promise<AdminStats> => {
-    // Climate queries may fail with 400 if is_climate_action column doesn't exist yet
-    const climateFallback = { count: 0, error: true, data: null }
+    // A rejected promise (the 400 the climate columns used to throw) has to
+    // become a *failed* result, not a zero one.
+    const failed = (message: string) => ({ count: null, error: { message } })
+    const guarded = <T extends { count: number | null; error: unknown }>(
+      promise: PromiseLike<T>,
+      label: string
+    ) => Promise.resolve(promise).then((r) => r, () => failed(`${label} query failed`))
 
-    const [users, events, grants, applications, posts, climateProjects, climateEvents, climateGrants] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('events').select('*', { count: 'exact', head: true }),
-      supabase.from('grants').select('*', { count: 'exact', head: true }).eq('is_active', true),
-      supabase.from('grant_applications').select('*', { count: 'exact', head: true }),
-      supabase.from('forum_posts').select('*', { count: 'exact', head: true }),
-      supabase.from('projects').select('*', { count: 'exact', head: true }).eq('is_climate_action', true)
-        .then((r) => r, () => climateFallback),
-      supabase.from('events').select('*', { count: 'exact', head: true }).eq('is_climate_action', true)
-        .then((r) => r, () => climateFallback),
-      supabase.from('grants').select('*', { count: 'exact', head: true }).eq('is_climate_action', true)
-        .then((r) => r, () => climateFallback),
-    ])
+    const now = new Date().toISOString()
+
+    const [users, events, grants, applications, posts, climateProjects, climateEvents, climateGrants] =
+      await Promise.all([
+        guarded(supabase.from('profiles').select('*', { count: 'exact', head: true }), 'profiles'),
+        // Drafts and cancellations are not events the platform hosted. The
+        // status vocabulary is draft/published/cancelled/completed (007).
+        guarded(
+          supabase
+            .from('events')
+            .select('*', { count: 'exact', head: true })
+            .in('status', ['published', 'completed']),
+          'events'
+        ),
+        // A NULL deadline means "no deadline" and stays active; a passed one
+        // does not. The guided tour at src/data/tutorials/admin.ts already told
+        // admins this was the rule — now it is.
+        guarded(
+          supabase
+            .from('grants')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_active', true)
+            .or(`deadline.is.null,deadline.gte.${now}`),
+          'grants'
+        ),
+        guarded(
+          supabase.from('grant_applications').select('*', { count: 'exact', head: true }),
+          'grant applications'
+        ),
+        guarded(supabase.from('forum_posts').select('*', { count: 'exact', head: true }), 'forum posts'),
+        guarded(
+          supabase.from('projects').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
+          'climate projects'
+        ),
+        guarded(
+          supabase.from('events').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
+          'climate events'
+        ),
+        guarded(
+          supabase.from('grants').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
+          'climate grants'
+        ),
+      ])
 
     return {
-      userCount: users.count || 0,
-      eventCount: events.count || 0,
-      grantCount: grants.count || 0,
-      applicationCount: applications.count || 0,
-      postCount: posts.count || 0,
-      climateProjectCount: climateProjects.error ? 0 : (climateProjects.count || 0),
-      climateEventCount: climateEvents.error ? 0 : (climateEvents.count || 0),
-      climateGrantCount: climateGrants.error ? 0 : (climateGrants.count || 0),
+      userCount: measuredCount(users, 'Could not read the member count'),
+      eventCount: measuredCount(events, 'Could not read the event count'),
+      grantCount: measuredCount(grants, 'Could not read the grant count'),
+      applicationCount: measuredCount(applications, 'Could not read the application count'),
+      postCount: measuredCount(posts, 'Could not read the discussion count'),
+      climateProjectCount: measuredCount(climateProjects, 'Could not read climate projects'),
+      climateEventCount: measuredCount(climateEvents, 'Could not read climate events'),
+      climateGrantCount: measuredCount(climateGrants, 'Could not read climate grants'),
     }
   }
 

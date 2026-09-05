@@ -1,3 +1,5 @@
+import { ChartUnavailable } from './ChartUnavailable'
+
 interface BarChartItem {
   label: string
   count: number
@@ -7,10 +9,21 @@ interface BarChartProps {
   data: BarChartItem[]
   colorClass?: string
   labelMap?: Record<string, string>
+  /**
+   * Set when the query failed. An empty `data` then means "nothing matched",
+   * which is the only thing the italic line below should ever say — see
+   * src/lib/measured.ts for why the two were worth separating.
+   */
+  unavailable?: string
+  onRetry?: () => void
 }
 
-export function BarChart({ data, colorClass, labelMap }: BarChartProps) {
+export function BarChart({ data, colorClass, labelMap, unavailable, onRetry }: BarChartProps) {
   const maxCount = Math.max(...(data?.map((d) => d.count) || [0])) || 1
+
+  if (unavailable) {
+    return <ChartUnavailable reason={unavailable} onRetry={onRetry} />
+  }
 
   if (!data?.length) {
     return <p className="text-sm text-ktip-sand-500 italic">No data available</p>

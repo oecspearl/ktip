@@ -1,11 +1,15 @@
 import { useMemo } from 'react'
 import type { MonthlyGrowth } from '../../../hooks/useAdminAnalytics'
+import { ChartUnavailable } from './ChartUnavailable'
 
 interface GrowthChartProps {
   data: MonthlyGrowth[]
+  /** Set when the query failed — see BarChart for the reasoning. */
+  unavailable?: string
+  onRetry?: () => void
 }
 
-export function GrowthChart({ data }: GrowthChartProps) {
+export function GrowthChart({ data, unavailable, onRetry }: GrowthChartProps) {
   const maxCount = useMemo(() => {
     const max = Math.max(...(data?.map((d) => d.count) || [0]))
     return max || 1
@@ -16,6 +20,10 @@ export function GrowthChart({ data }: GrowthChartProps) {
     const [year, m] = month.split('-')
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     return `${monthNames[parseInt(m, 10) - 1]} ${year?.slice(2)}`
+  }
+
+  if (unavailable) {
+    return <ChartUnavailable reason={unavailable} onRetry={onRetry} />
   }
 
   if (!data?.length) {
