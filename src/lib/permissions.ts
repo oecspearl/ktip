@@ -609,6 +609,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
 
   private_sector: [
     'grant:view',
+    'grant:post',
     'project:create',
     'project:manage',
     'event:create',
@@ -626,6 +627,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'grant:view',
     'grant:apply',
     'grant:sponsor',
+    'grant:post',
     'project:create',
     'project:manage',
     'event:create',
@@ -666,11 +668,14 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   // staffs super_admin. Keeping those two apart is the point: the Commission
   // acting as a funder is not the Commission acting as the Secretariat.
 
-  // Delivery organisations: they run the programme rather than fund it, so
-  // they apply for money and never post it.
+  // Delivery organisations. 136 gave them grant:post as well: an NGO that
+  // wins a donor envelope re-grants it as a small-grants window, and
+  // withholding the key meant that window was posted from somebody else’s
+  // account or not at all.
   ngo: [
     'grant:view',
     'grant:apply',
+    'grant:post',
     'project:create',
     'project:manage',
     'event:create',
@@ -692,6 +697,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'grant:view',
     'grant:apply',
     'grant:sponsor',
+    'grant:post',
     'project:create',
     'project:manage',
     'event:create',
@@ -806,13 +812,14 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:receive',
   ],
 
-  // The full grant set. A mentor is frequently the person running a small fund
-  // or a prize alongside the mentoring, and splitting those across two accounts
-  // was the only thing the narrower set achieved.
+  // 136 took grant:post back off. A mentor is an individual-tier seat and a
+  // funding call is published in an organisation’s name; the mentor who does
+  // run a fund holds it through that organisation account. grant:apply and
+  // grant:manage_funds stay — a mentor still applies, and still records
+  // disbursements against a call somebody else posted.
   mentor: [
     'grant:view',
     'grant:apply',
-    'grant:post',
     'grant:manage_funds',
     'project:create',
     'project:manage',
