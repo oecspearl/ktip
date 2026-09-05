@@ -606,6 +606,7 @@ export interface Database {
           eligibility: string | null
           application_url: string | null
           grant_type: string | null
+          funding_type: string
           is_active: boolean
           created_at: string
           updated_at: string
@@ -622,6 +623,7 @@ export interface Database {
           eligibility?: string | null
           application_url?: string | null
           grant_type?: string | null
+          funding_type?: string
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -638,6 +640,7 @@ export interface Database {
           eligibility?: string | null
           application_url?: string | null
           grant_type?: string | null
+          funding_type?: string
           is_active?: boolean
           created_at?: string
           updated_at?: string

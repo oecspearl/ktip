@@ -1,5 +1,6 @@
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
+import { FUNDING_TYPE_VALUES } from './funding-types'
 
 /**
  * The contract between the document scraper and the entities it can fill in.
@@ -72,10 +73,17 @@ export const FIELD_SPECS: Record<string, Record<string, FieldSpec>> = {
       label: msg`Application link`,
       describe: 'Link to apply, only if one appears in the text',
     },
+    funding_type: {
+      kind: 'enum',
+      label: msg`Type of funding`,
+      describe:
+        'The instrument on offer. Only what the source states — a call that never says otherwise is a grant',
+      values: FUNDING_TYPE_VALUES,
+    },
     grant_type: {
       kind: 'enum',
-      label: msg`Grant type`,
-      describe: 'Closest category',
+      label: msg`Focus area`,
+      describe: 'Closest category for what the money is for',
       values: GRANT_TYPES,
     },
     is_climate_action: {

@@ -297,6 +297,7 @@ export const grantSchema = z.object({
   eligibility: z.string().max(1000, 'Eligibility text too long').optional(),
   application_url: z.string().url('Invalid URL').optional(),
   grant_type: z.string().max(100).optional(),
+  funding_type: z.string().max(50).optional(),
 })
 
 // Message Schema

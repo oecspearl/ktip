@@ -22,6 +22,7 @@ import { useGridColumns } from '../../hooks/useGridColumns'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { grantTypeIcon } from '../../lib/category-icons'
+import { FUNDING_TYPES } from '../../lib/funding-types'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { cn, debounce } from '../../lib/utils'
 import { isPast } from 'date-fns'
@@ -37,8 +38,11 @@ const GRANT_TYPES = [
   { value: 'education', label: msg`Education Grants` },
 ]
 
-const TYPE_OPTIONS = [{ value: '', label: msg`All Grant Types` }, ...GRANT_TYPES]
+const TYPE_OPTIONS = [{ value: '', label: msg`All Focus Areas` }, ...GRANT_TYPES]
 const OTHER_FUNDING = msg`Other Funding`
+
+// The instrument (137) — a separate axis from the focus areas above.
+const FUNDING_TYPE_OPTIONS = [{ value: '', label: msg`All Funding Types` }, ...FUNDING_TYPES]
 
 export default function GrantsPage() {
     const { t, i18n } = useLingui()
@@ -50,7 +54,12 @@ export default function GrantsPage() {
     () => TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: i18n._(opt.label) })),
     [i18n]
   )
+  const fundingTypeSelectOptions = useMemo(
+    () => FUNDING_TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: i18n._(opt.label) })),
+    [i18n]
+  )
   const [selectedType, setSelectedType] = useState<string>('')
+  const [selectedFundingType, setSelectedFundingType] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -75,6 +84,7 @@ export default function GrantsPage() {
   // below and parked in a folded section at the end of the list.
   const { grants, loading } = useGrants({
     type: selectedType,
+    fundingType: selectedFundingType,
     search: debouncedSearch,
     tags: selectedTags,
     sort,
@@ -121,6 +131,7 @@ export default function GrantsPage() {
 
   const clearFilters = () => {
     setSelectedType('')
+    setSelectedFundingType('')
     setSearchQuery('')
     setDebouncedSearch('')
     setSelectedTags([])
@@ -131,15 +142,18 @@ export default function GrantsPage() {
   // much. Tags count as one filter however many are picked — the trigger stands
   // for the tag control, not for its contents.
   const activeFilterCount =
-    (selectedType ? 1 : 0) + (searchQuery ? 1 : 0) + (selectedTags.length ? 1 : 0)
+    (selectedType ? 1 : 0) +
+    (selectedFundingType ? 1 : 0) +
+    (searchQuery ? 1 : 0) +
+    (selectedTags.length ? 1 : 0)
   const hasActiveFilters = activeFilterCount > 0
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
 
   return (
     <>
       <PageHero
-        eyebrow={t`Grant Archives`}
-        title={t`Grants & Funding`}
+        eyebrow={t`Funding Archives`}
+        title={t`Funding Opportunities`}
         image="/grants/grant-startup.webp"
         imageSeed="grants"
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Grants` }]}
@@ -152,7 +166,7 @@ export default function GrantsPage() {
             {canPostGrants && (
               <Link to="/grants/my-grants">
                 <Button icon={<Wallet size={16} />} size="sm" className="text-sm">
-                  <Trans>My Grants</Trans>
+                  <Trans>My Funding Calls</Trans>
                 </Button>
               </Link>
             )}
@@ -183,7 +197,7 @@ export default function GrantsPage() {
       >
         <div className="max-w-page-narrow mx-auto px-4">
           <FilterBar
-            sheetTitle={t`Filter grants`}
+            sheetTitle={t`Filter funding`}
             open={filterSheetOpen}
             onOpenChange={setFilterSheetOpen}
             activeCount={activeFilterCount}
@@ -191,10 +205,17 @@ export default function GrantsPage() {
             filters={
               <>
                 <Select
+                  value={selectedFundingType}
+                  onChange={setSelectedFundingType}
+                  options={fundingTypeSelectOptions}
+                  ariaLabel={t`Filter by type of funding`}
+                />
+
+                <Select
                   value={selectedType}
                   onChange={setSelectedType}
                   options={typeSelectOptions}
-                  ariaLabel={t`Filter by grant type`}
+                  ariaLabel={t`Filter by focus area`}
                 />
 
                 <TagFilterSelect
@@ -219,8 +240,8 @@ export default function GrantsPage() {
                 <>
                   <Plural
                     value={openGrants.length}
-                    one="Found # open grant"
-                    other="Found # open grants"
+                    one="Found # open opportunity"
+                    other="Found # open opportunities"
                   />
                   {closedGrants.length > 0 && (
                     <Trans> · {closedGrants.length} closed</Trans>
@@ -233,8 +254,8 @@ export default function GrantsPage() {
                 <CollapsibleSearch
                   value={searchQuery}
                   onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                  placeholder={t`Search grants...`}
-                  ariaLabel={t`Search grants`}
+                  placeholder={t`Search funding...`}
+                  ariaLabel={t`Search funding`}
                 />
                 <ColumnToggle value={columns} onChange={setColumns} />
               </>
@@ -251,7 +272,7 @@ export default function GrantsPage() {
             <div className="flex justify-end mb-6">
               <Link to="/grants/new">
                 <Button icon={<Plus size={16} />} size="sm" className="text-sm">
-                  <Trans>Post a Grant</Trans>
+                  <Trans>Add Funding</Trans>
                 </Button>
               </Link>
             </div>
@@ -262,7 +283,7 @@ export default function GrantsPage() {
             <div>
               {openGrants.length === 0 ? (
                 <p className="text-sm text-gray-500 mb-8">
-                  <Trans>No open grants match these filters — the closed ones are below.</Trans>
+                  <Trans>Nothing open matches these filters — the closed calls are below.</Trans>
                 </p>
               ) : typeGroups.length > 1 ? (
                 <div className="space-y-2">
@@ -291,7 +312,7 @@ export default function GrantsPage() {
 
               {closedGrants.length > 0 && (
                 <CollapsibleSection
-                  title={t`Closed grants`}
+                  title={t`Closed calls`}
                   count={closedGrants.length}
                   subtitle={t`Expired or no longer accepting applications`}
                   defaultOpen={false}
@@ -309,12 +330,12 @@ export default function GrantsPage() {
                 <Wallet size={32} className="text-gray-400" />
               </div>
               <h3 className="text-2xl font-display font-bold text-ktip-sand-900 mb-2">
-                <Trans>No grants found</Trans>
+                <Trans>No funding found</Trans>
               </h3>
               <p className="text-gray-500 mb-6">
                 {hasActiveFilters
                   ? t`Try adjusting your filters or search query`
-                  : t`No grants are currently available`}
+                  : t`No funding is currently available`}
               </p>
             </div>
           )}

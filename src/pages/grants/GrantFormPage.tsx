@@ -6,6 +6,11 @@ import { ContentWarningModal } from '../../components/moderation/ContentWarningM
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
+import { ApplicationPipelinePreview } from '../../components/grants/ApplicationPipelinePreview'
+import {
+  RequiredDocumentsEditor,
+  cleanRequiredDocuments,
+} from '../../components/grants/RequiredDocumentsEditor'
 import { TagInput } from '../../components/ui/TagInput'
 import { useContentModeration } from '../../hooks/useContentModeration'
 import { useManagedEmployers } from '../../hooks/useEngagement'
@@ -14,16 +19,19 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { describeGrantDeletion } from '../../lib/delete-guard'
 import { CONTENT_TAG_SUGGESTIONS } from '../../lib/constants'
+import { FUNDING_TYPES } from '../../lib/funding-types'
+import { DEFAULT_REQUIRED_DOCUMENTS } from '../../lib/grant-application-template'
 import { sanitizeTag } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
 import { useAgreementGate } from '../../hooks/useAgreementGate'
 import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
-import type { DetailEntry } from '../../types'
+import type { DetailEntry, RequiredDocument } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 
+// The focus area (migration 003), not the instrument — FUNDING_TYPES is that.
 const GRANT_TYPES = [
   { value: 'startup', label: msg`Startup` },
   { value: 'research', label: msg`Research` },
@@ -54,7 +62,7 @@ export default function GrantFormPage() {
   const toast = useToast()
 
   const isEditing = !!params.id
-  usePageTitle(isEditing ? t`Edit Grant` : t`Post a Grant`)
+  usePageTitle(isEditing ? t`Edit Funding` : t`Add Funding`)
 
   const { grant, loading: grantLoading } = useGrant(params.id)
   const { createGrant, loading: creating } = useCreateGrant()
@@ -64,6 +72,7 @@ export default function GrantFormPage() {
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
+  const [fundingType, setFundingType] = useState('grant')
   const [grantType, setGrantType] = useState('')
   const [amountMin, setAmountMin] = useState('')
   const [amountMax, setAmountMax] = useState('')
@@ -75,6 +84,11 @@ export default function GrantFormPage() {
   const [isActive, setIsActive] = useState(true)
   const [tags, setTags] = useState<string[]>([])
   const [details, setDetails] = useState<DetailEntry[]>([])
+  // Seeded on a new call: migration 080's column default is '[]', so a call
+  // posted without this reaches the wizard's upload step asking for nothing.
+  const [requiredDocuments, setRequiredDocuments] = useState<RequiredDocument[]>(() =>
+    DEFAULT_REQUIRED_DOCUMENTS.map((d) => ({ ...d }))
+  )
   const [employerId, setEmployerId] = useState<string | null>(null)
   const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -93,6 +107,7 @@ export default function GrantFormPage() {
     setTitle(grant.title)
     setSummary(grant.summary || '')
     setDescription(grant.description || '')
+    setFundingType(grant.funding_type || 'grant')
     setGrantType(grant.grant_type || '')
     setAmountMin(grant.amount_min != null ? String(grant.amount_min) : '')
     setAmountMax(grant.amount_max != null ? String(grant.amount_max) : '')
@@ -104,6 +119,7 @@ export default function GrantFormPage() {
     setIsActive(grant.is_active ?? true)
     setTags(grant.tags || [])
     setDetails(grant.details || [])
+    setRequiredDocuments(grant.required_documents || [])
     setEmployerId(grant.employer_id ?? null)
     setAllowMemberEngagement(grant.allow_member_engagement ?? null)
   }, [grant?.id])
@@ -167,6 +183,7 @@ export default function GrantFormPage() {
       title: title.trim(),
       summary: summary.trim() || null,
       description: description.trim() || null,
+      funding_type: fundingType || 'grant',
       grant_type: grantType || null,
       amount_min: amountMin ? Number(amountMin) : null,
       amount_max: amountMax ? Number(amountMax) : null,
@@ -177,6 +194,7 @@ export default function GrantFormPage() {
       is_climate_action: isClimateAction,
       tags: tags.map(sanitizeTag).filter(Boolean),
       details: cleanDetails(details),
+      required_documents: cleanRequiredDocuments(requiredDocuments),
       employer_id: employerId,
       // A CHECK constraint refuses an override that names no organisation.
       allow_member_engagement: employerId ? allowMemberEngagement : null,
@@ -186,16 +204,16 @@ export default function GrantFormPage() {
       if (isEditing) {
         if (!grant) return
         await updateGrant(grant.id, { ...payload, is_active: isActive } as any)
-        toast.success(t`Grant updated`)
+        toast.success(t`Funding call updated`)
         navigate(entityPath('grant', grant))
         return
       }
 
       const created = await createGrant(payload as any)
-      toast.success(t`Grant posted`)
+      toast.success(t`Funding call posted`)
       navigate(entityPath('grant', created as any))
     } catch (err: any) {
-      setErrorMessage(err.message || t`Failed to save this grant`)
+      setErrorMessage(err.message || t`Failed to save this funding call`)
     }
   }
 
@@ -210,7 +228,7 @@ export default function GrantFormPage() {
   if (isEditing && !grant) {
     return (
       <div className="w-full max-w-page mx-auto px-4 py-12 text-center">
-        <p className="text-ktip-sand-600"><Trans>Grant not found.</Trans></p>
+        <p className="text-ktip-sand-600"><Trans>Funding call not found.</Trans></p>
       </div>
     )
   }
@@ -222,10 +240,10 @@ export default function GrantFormPage() {
           <Trans>Not your funding call</Trans>
         </h2>
         <p className="text-gray-500 mb-6">
-          <Trans>Only the organisation that posted this grant, or a grants administrator, can edit it.</Trans>
+          <Trans>Only the organisation that posted this funding call, or a funding administrator, can edit it.</Trans>
         </p>
         <Button onClick={() => navigate('/grants')}>
-          <Trans>Back to grants</Trans>
+          <Trans>Back to funding</Trans>
         </Button>
       </div>
     )
@@ -235,18 +253,18 @@ export default function GrantFormPage() {
     <>
       <PageHero
         eyebrow={isEditing ? t`Edit Funding Call` : t`New Funding Call`}
-        title={isEditing ? t`Edit Grant` : t`Post a Grant`}
+        title={isEditing ? t`Edit Funding` : t`Add Funding`}
         subtitle={
           isEditing
             ? t`Change the terms, extend the deadline, or close the call.`
-            : t`Publish a funding opportunity. Applicants see it on the Grants page as soon as you post it.`
+            : t`Publish a funding opportunity of any kind — grant, venture, angel, debt. Applicants see it as soon as you post it.`
         }
         image="/grants/grant-startup.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },
           { label: t`Grants`, href: '/grants' },
-          { label: isEditing ? t`Edit` : t`Post a Grant` },
+          { label: isEditing ? t`Edit` : t`Add Funding` },
         ]}
       />
 
@@ -286,23 +304,44 @@ export default function GrantFormPage() {
               fullWidth
             />
 
-            <div>
-              <label className={labelClass}><Trans>Grant type</Trans></label>
-              <select
-                value={grantType}
-                onChange={(e) => setGrantType(e.currentTarget.value)}
-                className={inputClass}
-              >
-                <option value="">{t`Select a type`}</option>
-                {GRANT_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>{i18n._(type.label)}</option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}><Trans>Type of funding</Trans></label>
+                <select
+                  value={fundingType}
+                  onChange={(e) => setFundingType(e.currentTarget.value)}
+                  className={inputClass}
+                >
+                  {FUNDING_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>{i18n._(type.label)}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-ktip-sand-500">
+                  <Trans>What is actually on offer. Applicants filter on this first.</Trans>
+                </p>
+              </div>
+
+              <div>
+                <label className={labelClass}><Trans>Focus area</Trans></label>
+                <select
+                  value={grantType}
+                  onChange={(e) => setGrantType(e.currentTarget.value)}
+                  className={inputClass}
+                >
+                  <option value="">{t`Select a focus area`}</option>
+                  {GRANT_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>{i18n._(type.label)}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-ktip-sand-500">
+                  <Trans>What the money is for. Optional.</Trans>
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className={labelClass}><Trans>Minimum award</Trans></label>
+                <label className={labelClass}><Trans>Minimum amount</Trans></label>
                 <input
                   type="number"
                   value={amountMin}
@@ -314,7 +353,7 @@ export default function GrantFormPage() {
                 />
               </div>
               <div>
-                <label className={labelClass}><Trans>Maximum award</Trans></label>
+                <label className={labelClass}><Trans>Maximum amount</Trans></label>
                 <input
                   type="number"
                   value={amountMax}
@@ -347,7 +386,7 @@ export default function GrantFormPage() {
                 className={inputClass}
               />
               <p className="mt-1 text-xs text-ktip-sand-500">
-                <Trans>Leave empty for a rolling call. A passed deadline moves the grant to the closed list.</Trans>
+                <Trans>Leave empty for a rolling call. A passed deadline moves it to the closed list.</Trans>
               </p>
             </div>
 
@@ -376,6 +415,36 @@ export default function GrantFormPage() {
               </p>
             </div>
 
+            {/* The other half of the feedback: applicants were being walked
+                through a documents step the funder had no way to define. */}
+            <div className="space-y-3 border-t border-ktip-sand-200 pt-6">
+              <div>
+                <h2 className="text-sm font-semibold text-ktip-sand-900 uppercase tracking-wide">
+                  <Trans>Application requirements</Trans>
+                </h2>
+                <p className="mt-1 text-xs text-ktip-sand-500">
+                  {applicationUrl.trim() ? (
+                    <Trans>
+                      This call sends applicants to an external link, so nothing below is shown to
+                      them. Clear the link above to take applications here.
+                    </Trans>
+                  ) : (
+                    <Trans>What applicants must attach before they can submit.</Trans>
+                  )}
+                </p>
+              </div>
+
+              <ApplicationPipelinePreview />
+
+              <div>
+                <label className={labelClass}><Trans>Supporting documents checklist</Trans></label>
+                <RequiredDocumentsEditor
+                  value={requiredDocuments}
+                  onChange={setRequiredDocuments}
+                />
+              </div>
+            </div>
+
             <div>
               <label className={labelClass}><Trans>Additional details</Trans></label>
               <p className="text-xs text-ktip-sand-500 mb-2">
@@ -400,7 +469,7 @@ export default function GrantFormPage() {
                 onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
                 className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
               />
-              <span className="text-sm text-ktip-sand-700"><Trans>Climate action grant</Trans></span>
+              <span className="text-sm text-ktip-sand-700"><Trans>Climate action funding</Trans></span>
             </label>
 
             {/* Closing a call is the reversible alternative to deleting it, so
@@ -425,7 +494,7 @@ export default function GrantFormPage() {
               onEmployerChange={setEmployerId}
               override={allowMemberEngagement}
               onOverrideChange={setAllowMemberEngagement}
-              itemNoun={t`grant`}
+              itemNoun={t`funding call`}
             />
 
             {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
@@ -440,7 +509,7 @@ export default function GrantFormPage() {
                   disabled={moderation.blocked}
                   fullWidth
                 >
-                  {isEditing ? <Trans>Save Grant</Trans> : <Trans>Post Grant</Trans>}
+                  {isEditing ? <Trans>Save Funding</Trans> : <Trans>Add Funding</Trans>}
                 </Button>
                 <button
                   type="button"
@@ -456,7 +525,7 @@ export default function GrantFormPage() {
           {isEditing && grant && (
             <div className="mt-10">
               <DeleteEntityControl
-                noun={t`grant`}
+                noun={t`funding call`}
                 title={grant.title}
                 // The count is deliberately unknown here: applications are
                 // readable by their own author and by grant:manage (116), so a

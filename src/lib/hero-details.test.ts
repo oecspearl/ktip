@@ -19,6 +19,7 @@ function grant(overrides: Partial<Grant> = {}): Grant {
     eligibility: 'Ed-tech startups with at least an MVP. Must have a Caribbean co-founder.',
     application_url: null,
     grant_type: 'education',
+    funding_type: 'grant',
     tags: [],
     is_active: true,
     is_climate_action: false,
@@ -38,7 +39,8 @@ describe('grantHeroDetails', () => {
 
     expect(funding.label).toBe('Funding')
     expect(funding.items?.map((i) => [i.label, i.value])).toEqual([
-      ['Type', 'Education'],
+      ['Type', 'Grant'],
+      ['Focus', 'Education'],
       ['Amount', '$10,000.00 – $30,000.00'],
       ['Deadline', 'Oct 14, 2026'],
     ])
@@ -57,7 +59,13 @@ describe('grantHeroDetails', () => {
 
   it('skips fields the record does not have', () => {
     const rows = grantHeroDetails(
-      grant({ grant_type: null, amount_min: null, amount_max: null, deadline: null })
+      grant({
+        funding_type: '',
+        grant_type: null,
+        amount_min: null,
+        amount_max: null,
+        deadline: null,
+      })
     )
     expect(rows.map((r) => r.label)).toEqual(['Eligibility'])
   })
@@ -66,6 +74,7 @@ describe('grantHeroDetails', () => {
     expect(
       grantHeroDetails(
         grant({
+          funding_type: '',
           grant_type: null,
           amount_min: null,
           amount_max: null,

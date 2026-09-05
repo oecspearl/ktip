@@ -34,6 +34,7 @@ export type HeroSeedGrant = Pick<
   | 'amount_max'
   | 'amount_min'
   | 'grant_type'
+  | 'funding_type'
   | 'deadline'
   | 'eligibility'
   | 'details'

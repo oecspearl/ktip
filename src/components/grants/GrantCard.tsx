@@ -4,6 +4,7 @@ import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { grantImageFor } from '../../lib/hero-images'
+import { FUNDING_TYPES } from '../../lib/funding-types'
 import { entityPath } from '../../lib/slug'
 import { isPast } from 'date-fns'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -13,7 +14,10 @@ interface GrantCardProps {
 }
 
 export function GrantCard({ grant }: GrantCardProps) {
-    const { t } = useLingui()
+    const { t, i18n } = useLingui()
+  // The instrument leads the card: whether this is a grant or an equity
+  // round changes whether an applicant reads any further.
+  const fundingType = FUNDING_TYPES.find((f) => f.value === grant.funding_type)?.label
   const hasDeadline = !!grant.deadline
   const isExpired = hasDeadline && isPast(new Date(grant.deadline!))
 
@@ -34,7 +38,7 @@ export function GrantCard({ grant }: GrantCardProps) {
       to={entityPath('grant', grant)}
       image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
       imageSeed={grant.id}
-      eyebrow={grant.grant_type ? grant.grant_type.replace('_', ' ') : t`Funding`}
+      eyebrow={fundingType ? i18n._(fundingType) : t`Funding`}
       title={grant.title}
       description={grant.summary || grant.description}
       meta={
@@ -44,7 +48,7 @@ export function GrantCard({ grant }: GrantCardProps) {
         </>
       }
       tags={grant.tags}
-      cta={t`View Grant`}
+      cta={t`View Funding`}
     >
       <div className="flex flex-wrap items-center gap-2">
         {isExpired && (

@@ -13,10 +13,14 @@ import type {
   Grant,
   GrantApplication,
   GrantApplicationStatus,
+  RequiredDocument,
 } from '../types'
 
 export function useGrants(filters?: {
+  /** Focus area — grants.grant_type (003). */
   type?: string
+  /** Instrument on offer — grants.funding_type (137). */
+  fundingType?: string
   active?: boolean
   search?: string
   climateAction?: boolean
@@ -47,9 +51,14 @@ export function useGrants(filters?: {
       query = query.eq('is_active', filters.active)
     }
 
-    // Filter by grant type
+    // Filter by focus area
     if (filters?.type) {
       query = query.eq('grant_type', filters.type)
+    }
+
+    // Filter by the instrument on offer
+    if (filters?.fundingType) {
+      query = query.eq('funding_type', filters.fundingType)
     }
 
     // The funder's own list. Closed and expired calls belong on it too, so it
@@ -138,6 +147,8 @@ export function useCreateGrant() {
       eligibility?: string
       application_url?: string
       grant_type?: string
+      funding_type?: string
+      required_documents?: RequiredDocument[]
       is_climate_action?: boolean
       details?: DetailEntry[]
     }) => {

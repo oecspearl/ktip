@@ -5,6 +5,7 @@ import {
   PHASE_LABELS,
   PROJECT_CATEGORIES,
 } from './constants'
+import { fundingTypeLabel } from './funding-types'
 import { formatCurrency } from './utils'
 import type { DetailEntry, DetailItem, Event, Grant, Project } from '../types'
 
@@ -64,7 +65,8 @@ export function grantHeroDetails(g: Grant): DetailEntry[] {
       'd-funding',
       'Funding',
       items([
-        ['Type', g.grant_type ? GRANT_TYPE_LABELS[g.grant_type] || g.grant_type : null],
+        ['Type', fundingTypeLabel(g.funding_type)],
+        ['Focus', g.grant_type ? GRANT_TYPE_LABELS[g.grant_type] || g.grant_type : null],
         ['Amount', grantAmount(g)],
         ['Deadline', safeDate(g.deadline)],
       ])

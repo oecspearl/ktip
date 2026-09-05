@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { grantImageFor } from '../../lib/hero-images'
+import { fundingTypeLabel } from '../../lib/funding-types'
 import { formatCurrency, formatDate, truncate } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -131,7 +132,7 @@ export default function GrantDetailPage() {
   return (
     <>
       <PageHero
-        eyebrow={t`Grant Detail`}
+        eyebrow={t`Funding Detail`}
         title={grant.title}
         image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
         imageSeed={grant.id}
@@ -142,8 +143,13 @@ export default function GrantDetailPage() {
         ]}
       >
         <div className="flex flex-wrap items-center gap-2">
-          {grant.grant_type && (
+          {grant.funding_type && (
             <Badge variant="primary">
+              {(fundingTypeLabel(grant.funding_type) || '').toUpperCase()}
+            </Badge>
+          )}
+          {grant.grant_type && (
+            <Badge variant="default">
               {grant.grant_type?.replace('_', ' ').toUpperCase()}
             </Badge>
           )}

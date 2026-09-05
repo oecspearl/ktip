@@ -3,6 +3,7 @@
 
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
+import type { RequiredDocument } from '../types'
 
 /**
  * `documents` is not a value the applicant types — it renders the upload
@@ -108,3 +109,47 @@ export const GRANT_APPLICATION_STEPS: StepConfig[] = [
 ]
 
 export const TOTAL_APPLICATION_STEPS = GRANT_APPLICATION_STEPS.length
+
+/**
+ * The checklist a new call starts with.
+ *
+ * Migration 080 backfilled exactly these five rows onto every grant that
+ * existed then, but its column default is `'[]'` — so a call posted after 080
+ * reached the wizard's upload step with nothing to ask for. The form now seeds
+ * this and lets the funder edit it, which is the other half of the same fix.
+ *
+ * Kept in step with 080's UPDATE: the wording is that migration's, verbatim.
+ */
+export const DEFAULT_REQUIRED_DOCUMENTS: RequiredDocument[] = [
+  {
+    key: 'budget',
+    label: 'Detailed budget',
+    description: 'A line-item budget covering the full amount requested, in the grant currency.',
+    required: true,
+  },
+  {
+    key: 'registration',
+    label: 'Proof of registration',
+    description:
+      "Certificate of incorporation, business registration, or your institution's letter of standing.",
+    required: true,
+  },
+  {
+    key: 'financials',
+    label: 'Recent financial statements',
+    description: 'The last full year. Audited if you have them; management accounts are accepted otherwise.',
+    required: false,
+  },
+  {
+    key: 'workplan',
+    label: 'Workplan or timeline',
+    description: 'Activities against dates. A one-page Gantt or table is enough.',
+    required: false,
+  },
+  {
+    key: 'support',
+    label: 'Letters of support',
+    description: 'From partners, host institutions or beneficiary organisations.',
+    required: false,
+  },
+]

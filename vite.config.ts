@@ -227,6 +227,7 @@ const HERO_SEED_COLUMNS = [
   'amount_max',
   'amount_min',
   'grant_type',
+  'funding_type',
   'deadline',
   'eligibility',
   'details',

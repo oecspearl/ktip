@@ -771,6 +771,12 @@ export interface Grant extends Ranked {
   eligibility: string | null
   application_url: string | null
   grant_type: string | null
+  /**
+   * Migration 137 — the instrument on offer: grant, venture capital, angel,
+   * private equity and the rest. NOT NULL in the database, so every row has
+   * one; `grant_type` above is the focus area, which is a different question.
+   */
+  funding_type: string
   /** Migration 060 — grants joined the tag vocabulary last. */
   tags: string[]
   is_active: boolean

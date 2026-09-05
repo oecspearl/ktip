@@ -5,11 +5,18 @@ import { useCreateGrant, useUpdateGrant } from '../../../hooks/useGrants'
 import { useToast } from '../../../contexts/ToastContext'
 import { DetailsEditor, cleanDetails } from '../../../components/shared/DetailsEditor'
 import { OrgEngagementFields } from '../../../components/shared/OrgEngagementFields'
+import { ApplicationPipelinePreview } from '../../../components/grants/ApplicationPipelinePreview'
+import {
+  RequiredDocumentsEditor,
+  cleanRequiredDocuments,
+} from '../../../components/grants/RequiredDocumentsEditor'
 import { useAdminEmployers } from '../../../hooks/useEmployers'
 import { TagInput } from '../../../components/ui/TagInput'
 import { CONTENT_TAG_SUGGESTIONS } from '../../../lib/constants'
+import { FUNDING_TYPES, FUNDING_TYPE_LABELS } from '../../../lib/funding-types'
+import { DEFAULT_REQUIRED_DOCUMENTS } from '../../../lib/grant-application-template'
 import { sanitizeTag } from '../../../lib/utils'
-import type { DetailEntry, Grant } from '../../../types'
+import type { DetailEntry, Grant, RequiredDocument } from '../../../types'
 import { Save } from 'lucide-react'
 
 interface AdminGrantFormModalProps {
@@ -30,6 +37,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const [title, setTitle] = useState('')
   const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
+  const [fundingType, setFundingType] = useState('grant')
   const [grantType, setGrantType] = useState('')
   const [amountMin, setAmountMin] = useState('')
   const [amountMax, setAmountMax] = useState('')
@@ -40,6 +48,11 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [details, setDetails] = useState<DetailEntry[]>([])
+  // Migration 080 gave the column a '[]' default, so a call created without
+  // this asks its applicants for nothing. New calls start on the standard set.
+  const [requiredDocuments, setRequiredDocuments] = useState<RequiredDocument[]>(() =>
+    DEFAULT_REQUIRED_DOCUMENTS.map((d) => ({ ...d }))
+  )
   const [employerId, setEmployerId] = useState<string | null>(null)
   const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
 
@@ -57,6 +70,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     setTitle('')
     setSummary('')
     setDescription('')
+    setFundingType('grant')
     setGrantType('')
     setAmountMin('')
     setAmountMax('')
@@ -67,6 +81,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     setIsClimateAction(false)
     setTags([])
     setDetails([])
+    setRequiredDocuments(DEFAULT_REQUIRED_DOCUMENTS.map((d) => ({ ...d })))
     setEmployerId(null)
     setAllowMemberEngagement(null)
   }
@@ -76,6 +91,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       setTitle(grant.title)
       setSummary(grant.summary || '')
       setDescription(grant.description || '')
+      setFundingType(grant.funding_type || 'grant')
       setGrantType(grant.grant_type || '')
       setAmountMin(grant.amount_min != null ? String(grant.amount_min) : '')
       setAmountMax(grant.amount_max != null ? String(grant.amount_max) : '')
@@ -86,6 +102,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       setIsClimateAction(grant.is_climate_action ?? false)
       setTags(grant.tags || [])
       setDetails(grant.details || [])
+      setRequiredDocuments(grant.required_documents || [])
       setEmployerId(grant.employer_id ?? null)
       setAllowMemberEngagement(grant.allow_member_engagement ?? null)
     } else {
@@ -104,6 +121,9 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
 
     const grantData: Record<string, any> = {
       title: title.trim(),
+      // NOT NULL in 137, so it is always sent rather than sent when truthy.
+      funding_type: fundingType || 'grant',
+      required_documents: cleanRequiredDocuments(requiredDocuments),
       is_climate_action: isClimateAction,
       employer_id: employerId,
       // A CHECK constraint refuses an override that names no organisation.
@@ -125,16 +145,16 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     try {
       if (isEditing) {
         await updateGrant(grant!.id, grantData as any)
-        toast.success('Grant updated successfully')
+        toast.success('Funding call updated successfully')
       } else {
         await createGrant(grantData as any)
-        toast.success('Grant created successfully')
+        toast.success('Funding call created successfully')
       }
       onSaved()
       onClose()
       resetForm()
     } catch (err: any) {
-      toast.error(err.message || `Failed to ${isEditing ? 'update' : 'create'} grant`)
+      toast.error(err.message || `Failed to ${isEditing ? 'update' : 'create'} funding call`)
     }
   }
 
@@ -144,7 +164,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     <Modal
       open={open}
       onClose={onClose}
-      title={isEditing ? 'Edit Grant' : 'Create Grant'}
+      title={isEditing ? 'Edit Funding' : 'Add Funding'}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,7 +177,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
             type="text"
             value={title}
             onChange={(e) => setTitle(e.currentTarget.value)}
-            placeholder="Enter grant title"
+            placeholder="Enter the name of the funding call"
             required
             className={inputClass}
           />
@@ -186,7 +206,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
           <textarea
             value={description}
             onChange={(e) => setDescription(e.currentTarget.value)}
-            placeholder="Describe the grant opportunity"
+            placeholder="Describe the funding opportunity"
             rows={3}
             className={inputClass}
           />
@@ -203,23 +223,44 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
           <DetailsEditor value={details} onChange={setDetails} />
         </div>
 
-        {/* Grant Type */}
-        <div>
-          <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
-            Grant Type
-          </label>
-          <select
-            value={grantType}
-            onChange={(e) => setGrantType(e.currentTarget.value)}
-            className={inputClass}
-          >
-            <option value="">Select type</option>
-            <option value="startup">Startup</option>
-            <option value="research">Research</option>
-            <option value="innovation">Innovation</option>
-            <option value="development">Development</option>
-            <option value="education">Education</option>
-          </select>
+        {/* Type of funding — the instrument (137), not the focus area */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+              Type of Funding
+            </label>
+            <select
+              value={fundingType}
+              onChange={(e) => setFundingType(e.currentTarget.value)}
+              className={inputClass}
+            >
+              {FUNDING_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {FUNDING_TYPE_LABELS[type.value]}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-ktip-sand-500">What is on offer</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+              Focus Area
+            </label>
+            <select
+              value={grantType}
+              onChange={(e) => setGrantType(e.currentTarget.value)}
+              className={inputClass}
+            >
+              <option value="">Select focus area</option>
+              <option value="startup">Startup</option>
+              <option value="research">Research</option>
+              <option value="innovation">Innovation</option>
+              <option value="development">Development</option>
+              <option value="education">Education</option>
+            </select>
+            <p className="mt-1 text-xs text-ktip-sand-500">What the money is for</p>
+          </div>
         </div>
 
         {/* Amount Min / Amount Max */}
@@ -309,6 +350,29 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
           />
         </div>
 
+        {/* Application requirements — the funder-side half of the wizard the
+            applicant walks through. required_documents has existed since 080
+            and no form exposed it until now. */}
+        <div className="space-y-3 border-t border-ktip-sand-100 pt-4">
+          <div>
+            <h3 className="text-sm font-semibold text-ktip-sand-900">Application Requirements</h3>
+            <p className="text-xs text-ktip-sand-500 mt-0.5">
+              {applicationUrl.trim()
+                ? 'This call sends applicants to an external link, so nothing below is shown to them.'
+                : 'What applicants must attach before they can submit.'}
+            </p>
+          </div>
+
+          <ApplicationPipelinePreview />
+
+          <div>
+            <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
+              Supporting Documents Checklist
+            </label>
+            <RequiredDocumentsEditor value={requiredDocuments} onChange={setRequiredDocuments} />
+          </div>
+        </div>
+
         <TagInput
           label="Tags"
           description="Topics applicants can filter and search by — also what the personalized ranking matches on."
@@ -328,7 +392,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
               className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
             />
             <span className="text-sm text-ktip-sand-700">
-              Climate Action grant
+              Climate Action funding
             </span>
           </label>
         </div>
@@ -339,7 +403,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
           onEmployerChange={setEmployerId}
           override={allowMemberEngagement}
           onOverrideChange={setAllowMemberEngagement}
-          itemNoun="grant"
+          itemNoun="funding call"
         />
 
         {/* Actions */}
@@ -359,7 +423,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
             icon={<Save size={16} />}
             loading={loading}
           >
-            {isEditing ? 'Update Grant' : 'Create Grant'}
+            {isEditing ? 'Update Funding' : 'Add Funding'}
           </Button>
         </div>
       </form>

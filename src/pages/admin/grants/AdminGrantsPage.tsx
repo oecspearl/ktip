@@ -17,6 +17,7 @@ import {
   GRANT_APPLICATION_STATUS_LABELS,
   GRANT_APPLICATION_STATUS_COLORS,
 } from '../../../lib/constants'
+import { FUNDING_TYPE_COLORS, fundingTypeLabel } from '../../../lib/funding-types'
 import { format } from 'date-fns'
 import { cn } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
@@ -144,8 +145,8 @@ export default function AdminGrantsPage() {
         inset
         compact
         eyebrow="Administration"
-        title="Grant Management"
-        subtitle="Manage grants and review applications"
+        title="Funding Management"
+        subtitle="Manage funding calls and review applications"
         imageSeed="admin-grants"
       />
 
@@ -163,7 +164,7 @@ export default function AdminGrantsPage() {
             )}
           >
             <DollarSign size={16} />
-            Grants
+            Funding
           </button>
           <button
             type="button"
@@ -184,10 +185,10 @@ export default function AdminGrantsPage() {
       {/* Grants Tab */}
       {activeTab === 'grants' && (
         <div className="animate-tab-enter">
-          {/* Create Grant Button */}
+          {/* Add Funding Button */}
           <div className="flex justify-end mb-4">
             <Button size="sm" icon={<Plus size={16} />} onClick={handleOpenCreate}>
-              Create Grant
+              Add Funding
             </Button>
           </div>
 
@@ -195,14 +196,14 @@ export default function AdminGrantsPage() {
           <div className="overflow-hidden">
             {grantsLoading ? (
               <div className="p-12 text-center text-gray-500">
-                Loading grants...
+                Loading funding calls...
               </div>
             ) : !grants?.length ? (
               <div className="p-12 text-center">
                 <DollarSign size={48} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700 mb-1">No grants found</h3>
+                <h3 className="text-lg font-semibold text-gray-700 mb-1">No funding calls found</h3>
                 <p className="text-gray-500 text-sm">
-                  Create your first grant to get started
+                  Add your first funding call to get started
                 </p>
               </div>
             ) : (
@@ -211,7 +212,8 @@ export default function AdminGrantsPage() {
                   <thead>
                     <tr className="border-b border-ktip-sand-200">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Funding Type</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Focus</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount Range</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Active</th>
@@ -223,6 +225,18 @@ export default function AdminGrantsPage() {
                       <tr className="hover:bg-ktip-sand-50 transition-colors" key={grant.id}>
                         <td className="px-4 py-3">
                           <span className="font-medium text-gray-900">{grant.title}</span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {grant.funding_type ? (
+                            <Badge
+                              size="sm"
+                              className={FUNDING_TYPE_COLORS[grant.funding_type] || ''}
+                            >
+                              {fundingTypeLabel(grant.funding_type)}
+                            </Badge>
+                          ) : (
+                            <span className="text-sm text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           {grant.grant_type ? (
@@ -268,7 +282,7 @@ export default function AdminGrantsPage() {
                               type="button"
                               onClick={() => handleOpenEdit(grant)}
                               className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
-                              title="Edit grant"
+                              title="Edit funding call"
                             >
                               <FileText size={16} />
                             </button>
