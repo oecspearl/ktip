@@ -123,5 +123,59 @@ export const AnalyticsProvider = ({ children }: { children: ReactNode }) => {
     })
   }, [consent, location.pathname])
 
+  // ── Session heartbeat (roadmap §14 T34: average session duration) ──
+  //
+  // Without this, session length can only be inferred from the gap between the
+  // first and last page view — which makes every single-page session zero and
+  // undercounts the rest by however long the reader spent on the page they left
+  // on. A 60-second beat turns that into a bound tight enough to report.
+  //
+  // Consent-gated like everything else here, so the KPI describes consenting
+  // sessions and must be labelled that way. MAU/DAU deliberately do NOT come
+  // from this table — they come from user_activity_days, which needs no consent.
+  useEffect(() => {
+    if (consent !== 'granted') return
+
+    const beat = () => {
+      // Nothing to record about a backgrounded tab, and beating through a long
+      // background would inflate every session that was left open overnight.
+      if (document.visibilityState !== 'visible') return
+      analytics.feature('session', 'heartbeat')
+    }
+
+    const timer = window.setInterval(beat, 60_000)
+    return () => window.clearInterval(timer)
+  }, [consent])
+
+  // ── Largest Contentful Paint (T36: page load under 3s on 3G) ──
+  //
+  // One reading per page load, p75 computed in SQL. scripts/perf/lighthouse.mjs
+  // is a CI artefact measured on a build machine; this is what real readers on
+  // real Caribbean connections actually experienced, which is the KPI.
+  useEffect(() => {
+    if (consent !== 'granted') return
+    if (typeof PerformanceObserver === 'undefined') return
+
+    let reported = false
+    let observer: PerformanceObserver
+
+    try {
+      observer = new PerformanceObserver((list) => {
+        const entries = list.getEntries()
+        const last = entries[entries.length - 1]
+        if (!last || reported) return
+        reported = true
+        analytics.feature('web_vitals', 'lcp', { ms: Math.round(last.startTime) })
+      })
+      observer.observe({ type: 'largest-contentful-paint', buffered: true })
+    } catch {
+      // Safari before 16 has no LCP entry type. A missing metric is fine; a
+      // thrown constructor on every page load is not.
+      return
+    }
+
+    return () => observer.disconnect()
+  }, [consent])
+
   return children
 }
