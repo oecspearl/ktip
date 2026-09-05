@@ -1,4 +1,5 @@
 import { useAnalyticsData, type DateRange } from '../../../hooks/useAnalyticsData'
+import { useAnalyticsConsent } from '../../../lib/analytics-consent'
 import { PageHero } from '../../../components/layout/PageHero'
 import { Card } from '../../../components/ui/Card'
 import {
@@ -9,6 +10,8 @@ import {
   Target,
   Activity,
   ArrowRight,
+  AlertTriangle,
+  Info,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -55,7 +58,15 @@ export default function AdminAnalyticsPage() {
     conversions,
     recentSessions,
     loading,
+    error,
   } = useAnalyticsData()
+
+  // Ingestion is consent-gated (see AnalyticsProvider), so an empty table is a
+  // normal state and not a fault. The admin's own consent is shown because it
+  // is the one setting they can check from here — and on a small pilot it is
+  // very often the reason the table is empty.
+  const consent = useAnalyticsConsent()
+  const isEmpty = !error && totalEvents === 0
 
   return (
     <>
@@ -89,8 +100,53 @@ export default function AdminAnalyticsPage() {
 
       {loading ? (
         <div className="text-ktip-sand-500 py-12 text-center">Loading analytics...</div>
+      ) : error ? (
+        // Never again render a failed read as a page of zeros.
+        <Card className="mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-600" />
+            <div>
+              <h2 className="font-semibold text-ktip-sand-900">Analytics could not be read</h2>
+              <p className="mt-1 text-sm text-ktip-sand-600">
+                The events table refused the query, so no figure on this page would be true. This
+                is not the same as "no activity".
+              </p>
+              <p className="mt-2 font-mono text-xs text-ktip-sand-500">{error.message}</p>
+            </div>
+          </div>
+        </Card>
       ) : (
         <>
+          {isEmpty && (
+            <Card className="mb-6">
+              <div className="flex items-start gap-3">
+                <Info size={20} className="mt-0.5 shrink-0 text-ktip-ocean-600" />
+                <div>
+                  <h2 className="font-semibold text-ktip-sand-900">
+                    No events recorded in this period
+                  </h2>
+                  <p className="mt-1 text-sm text-ktip-sand-600">
+                    The query succeeded — the table is genuinely empty for the selected range.
+                    Usage events are only written for visitors who accepted the analytics banner,
+                    so a platform in pilot with few acceptances records nothing here even while it
+                    is being used.
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-ktip-sand-600 list-disc pl-5">
+                    <li>
+                      Your own browser: analytics consent is{' '}
+                      <span className="font-medium text-ktip-sand-900">{consent}</span>
+                      {consent !== 'granted' && ' — your own visits are not being counted'}.
+                    </li>
+                    <li>Try "All time" above before concluding there is no traffic.</li>
+                    <li>
+                      Member counts, active days and the roadmap KPIs do not come from this table —
+                      they are on the Pulse and Impact pages and need no consent.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+          )}
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard icon={Eye} label="Total Events" value={totalEvents ?? 0} />

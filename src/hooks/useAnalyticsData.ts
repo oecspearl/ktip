@@ -47,6 +47,26 @@ function getDateFilter(range: DateRange): string | null {
   return d.toISOString()
 }
 
+/**
+ * Unwraps a PostgREST result, raising on error.
+ *
+ * Every query below used to drop `error` on the floor and fall back to 0 or
+ * [] — so a refused read, a dropped table and a genuinely quiet week all
+ * rendered as the same dashboard of zeros. Reported from /admin/analytics as
+ * "this does not seem to be pulling any information", which is precisely the
+ * ambiguity: the page could not say which of the three it was looking at.
+ *
+ * Note what this does NOT catch. A row-level-security refusal on SELECT is not
+ * an error in PostgREST — it is an empty result — so an empty dashboard still
+ * has to explain itself in the UI rather than rely on this.
+ */
+// Untyped in, rows out: the query builder is reached through `supabase as any`
+// everywhere in this file, so a typed generic here infers {} and nothing else.
+function unwrap(result: any): any[] | null {
+  if (result?.error) throw new Error(result.error.message)
+  return result?.data ?? null
+}
+
 export function useAnalyticsData() {
   const [range, setRange] = useState<DateRange>('30d')
 
@@ -65,8 +85,9 @@ export function useAnalyticsData() {
       const since = getDateFilter(range)
       let q = (supabase as any).from('analytics_events').select('*', { count: 'exact', head: true })
       if (since) q = q.gte('created_at', since)
-      const { count } = await q
-      return count || 0
+      const { count, error } = await q
+      if (error) throw new Error(error.message)
+      return count ?? 0
     },
   })
 
@@ -74,7 +95,7 @@ export function useAnalyticsData() {
   const uniqueSessionsQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'unique-sessions', range),
     queryFn: async () => {
-      const { data } = await buildQuery().select('session_id')
+      const data = unwrap(await buildQuery().select('session_id'))
       if (!data) return 0
       return new Set(data.map((e: any) => e.session_id)).size
     },
@@ -84,7 +105,7 @@ export function useAnalyticsData() {
   const topPagesQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'top-pages', range),
     queryFn: async (): Promise<PageViewStat[]> => {
-      const { data } = await buildQuery('page_view').select('page_path').limit(1000)
+      const data = unwrap(await buildQuery('page_view').select('page_path').limit(1000))
       if (!data) return []
       const counts: Record<string, number> = {}
       for (const e of data) {
@@ -102,7 +123,7 @@ export function useAnalyticsData() {
   const dailyPageViewsQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'daily-page-views', range),
     queryFn: async (): Promise<DailyCount[]> => {
-      const { data } = await buildQuery('page_view').select('created_at').limit(5000)
+      const data = unwrap(await buildQuery('page_view').select('created_at').limit(5000))
       if (!data) return []
       const counts: Record<string, number> = {}
       for (const e of data) {
@@ -119,7 +140,9 @@ export function useAnalyticsData() {
   const featureUsageQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'feature-usage', range),
     queryFn: async (): Promise<FeatureUsageStat[]> => {
-      const { data } = await buildQuery('feature_use').select('event_name, properties').limit(2000)
+      const data = unwrap(
+        await buildQuery('feature_use').select('event_name, properties').limit(2000)
+      )
       if (!data) return []
       const counts: Record<string, number> = {}
       for (const e of data) {
@@ -140,8 +163,15 @@ export function useAnalyticsData() {
   const preregFunnelQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'prereg-funnel', range),
     queryFn: async (): Promise<FunnelStep[]> => {
-      const { data } = await buildQuery('funnel_step').select('event_name').eq('event_name', 'prereg:modal_auto_opened').limit(5000)
-      const { data: data2 } = await buildQuery('funnel_step').select('event_name').like('event_name', 'prereg:%').limit(5000)
+      const data = unwrap(
+        await buildQuery('funnel_step')
+          .select('event_name')
+          .eq('event_name', 'prereg:modal_auto_opened')
+          .limit(5000)
+      )
+      const data2 = unwrap(
+        await buildQuery('funnel_step').select('event_name').like('event_name', 'prereg:%').limit(5000)
+      )
       const allData = [...(data || []), ...(data2 || [])]
 
       const steps = ['modal_auto_opened', 'modal_cta_opened', 'step_1_complete', 'submit_attempt', 'modal_dismissed']
@@ -161,7 +191,7 @@ export function useAnalyticsData() {
   const conversionsQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'conversions', range),
     queryFn: async (): Promise<ConversionStat[]> => {
-      const { data } = await buildQuery('conversion').select('event_name').limit(2000)
+      const data = unwrap(await buildQuery('conversion').select('event_name').limit(2000))
       if (!data) return []
       const counts: Record<string, number> = {}
       for (const e of data) {
@@ -177,9 +207,11 @@ export function useAnalyticsData() {
   const recentSessionsQuery = useQuery({
     queryKey: keys.sub('analytics-data', 'recent-sessions', range),
     queryFn: async (): Promise<SessionSummary[]> => {
-      const { data } = await buildQuery('page_view')
-        .select('session_id, user_id, page_path, created_at')
-        .limit(2000)
+      const data = unwrap(
+        await buildQuery('page_view')
+          .select('session_id, user_id, page_path, created_at')
+          .limit(2000)
+      )
       if (!data) return []
 
       const sessions: Record<string, { user_id: string | null; pages: string[]; started_at: string }> = {}
@@ -206,9 +238,23 @@ export function useAnalyticsData() {
     },
   })
 
+  // The first failure, whichever query hit it. One message is enough: they
+  // all read the same table through the same policy, so they fail together.
+  const error =
+    (totalEventsQuery.error ||
+      uniqueSessionsQuery.error ||
+      topPagesQuery.error ||
+      dailyPageViewsQuery.error ||
+      featureUsageQuery.error ||
+      preregFunnelQuery.error ||
+      conversionsQuery.error ||
+      recentSessionsQuery.error) ??
+    null
+
   return {
     range,
     setRange,
+    error,
     totalEvents: totalEventsQuery.data,
     uniqueSessions: uniqueSessionsQuery.data,
     topPages: topPagesQuery.data,
