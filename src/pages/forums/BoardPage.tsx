@@ -101,7 +101,7 @@ export default function BoardPage() {
                   setSearchQuery(e.target.value)
                   debouncedSetSearch(e.target.value)
                 }}
-                placeholder={t`Search posts...`}
+                placeholder={t`Search discussions...`}
                 className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
               />
             </div>
@@ -119,7 +119,10 @@ export default function BoardPage() {
             <Link to={`/forums/${params.slug}/new`} className="shrink-0">
               <button className="inline-flex items-center gap-2 px-4 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg">
                 <Plus size={16} />
-                <Trans>New Post</Trans>
+                {/* "Discussion", not "Post": a reader who arrives on a board
+                    reads "post" as the reply they are about to write. The row
+                    this button creates is a thread. */}
+                <Trans>New Discussion</Trans>
               </button>
             </Link>
           </div>
@@ -138,7 +141,7 @@ export default function BoardPage() {
               <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle size={32} className="text-gray-400" />
               </div>
-              <p className="text-lg font-medium text-ktip-sand-700 mb-2"><Trans>No posts yet</Trans></p>
+              <p className="text-lg font-medium text-ktip-sand-700 mb-2"><Trans>No discussions yet</Trans></p>
               <p className="text-sm text-gray-500"><Trans>Start the discussion!</Trans></p>
             </div>
           )}

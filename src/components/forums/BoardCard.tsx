@@ -1,7 +1,7 @@
 import type { ForumBoard } from '../../types'
 import { BentoCard } from '../ui/BentoCard'
 import { boardIcon } from '../../lib/forum-board-icons'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 interface BoardCardProps {
   board: ForumBoard
@@ -20,7 +20,7 @@ export function BoardCard({ board, className }: BoardCardProps) {
       eyebrow={
         <span className="inline-flex items-center gap-1.5">
           <Icon size={12} />
-          Discussion Board
+          <Trans>Discussion Board</Trans>
         </span>
       }
       title={board.name}

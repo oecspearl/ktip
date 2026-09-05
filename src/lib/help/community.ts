@@ -9,19 +9,19 @@ export const FORUMS_CATEGORY: HelpCategory = {
     {
       id: 'browse-forums',
       title: 'How do I browse the forums?',
-      content: `Click "Forums" in the navigation bar to see the discussion boards.\n\nEach board covers one area — general discussion, project help, funding advice and so on. Open a board to see its posts.\n\nAnyone can read the forums without signing in. Posting and replying need an account.`,
+      content: `Click "Forums" in the navigation bar to see the discussion boards.\n\nEach board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.\n\nAnyone can read the forums without signing in. Starting a discussion and replying need an account.`,
       tags: ['forums', 'browse', 'boards', 'discussions', 'topics'],
     },
     {
       id: 'create-post',
-      title: 'How do I create a forum post?',
-      content: `Open the board you want to post in and click "New Post".\n\nGive it a title and write the body. Be specific — posts that say what you already tried get better answers than posts that just describe the problem.\n\nClick "Create Post" to publish. Other members can then reply, and you are notified when they do.`,
-      tags: ['create', 'post', 'new', 'forum', 'write'],
+      title: 'How do I start a forum discussion?',
+      content: `Open the board you want to post in and click "New Discussion".\n\nGive it a title and write the body. Be specific — a discussion that says what you already tried gets better answers than one that just describes the problem.\n\nClick "Start Discussion" to publish. Other members can then reply, and you are notified when they do.`,
+      tags: ['create', 'post', 'new', 'forum', 'write', 'discussion', 'thread'],
     },
     {
       id: 'reply-post',
-      title: 'How do I reply to a post?',
-      content: `Open the post and scroll to the reply box at the bottom.\n\nType your response and click "Reply". It is added to the end of the thread and the post author is notified.\n\nKTIP spans many countries and backgrounds — keep replies respectful and useful.`,
+      title: 'How do I reply to a discussion?',
+      content: `Open the discussion and scroll to the reply box at the bottom.\n\nType your response and click "Reply". It is added to the end of the thread and the discussion's author is notified.\n\nKTIP spans many countries and backgrounds — keep replies respectful and useful.`,
       tags: ['reply', 'respond', 'comment', 'forum', 'post'],
     },
     {

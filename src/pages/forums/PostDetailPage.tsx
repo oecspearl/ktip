@@ -89,7 +89,7 @@ export default function PostDetailPage() {
 
   const handleDeletePost = async () => {
     if (!post) return
-    if (!confirm(t`Are you sure you want to delete this post?`)) return
+    if (!confirm(t`Are you sure you want to delete this discussion?`)) return
 
     try {
       await deletePost(post.id)
@@ -124,9 +124,9 @@ export default function PostDetailPage() {
           <FileText size={32} className="text-gray-400" />
         </div>
         <h2 className="text-2xl font-display font-bold uppercase text-ktip-sand-900 mb-2">
-          <Trans>Post Not Found</Trans>
+          <Trans>Discussion Not Found</Trans>
         </h2>
-        <p className="text-gray-500 mb-6"><Trans>This post doesn't exist or was deleted.</Trans></p>
+        <p className="text-gray-500 mb-6"><Trans>This discussion doesn't exist or was deleted.</Trans></p>
         <button
           onClick={() => navigate('/forums')}
           className="px-6 py-2.5 btn-brand text-sm font-bold uppercase tracking-wider rounded-lg"
@@ -140,7 +140,7 @@ export default function PostDetailPage() {
   return (
     <>
       <PageHero
-        eyebrow={t`Forum Post`}
+        eyebrow={t`Forum Discussion`}
         title={post.title}
         imageSeed={post.id}
         breadcrumb={[
@@ -154,7 +154,7 @@ export default function PostDetailPage() {
             <button
               onClick={handleDeletePost}
               className="inline-flex items-center gap-2 px-4 py-2 border border-red-400 text-red-300 text-sm font-medium rounded-lg hover:bg-red-500/20 transition-colors"
-              title={t`Delete post`}
+              title={t`Delete discussion`}
             >
               <Trash2 size={14} />
               <Trans>Delete</Trans>
@@ -165,7 +165,7 @@ export default function PostDetailPage() {
               targetId={post.id}
               targetAuthorId={post.author_id}
               contentSnapshot={post.content}
-              targetLabel={t`this post`}
+              targetLabel={t`this discussion`}
               className="text-white/70 hover:text-red-300"
             />
           )
@@ -207,7 +207,7 @@ export default function PostDetailPage() {
             {/* Content */}
             <div
               id="post"
-              data-spy="Post"
+              data-spy="Discussion"
               className="scroll-mt-24 text-gray-700 whitespace-pre-wrap leading-relaxed text-base mb-8"
             >
               {post.content}
@@ -263,7 +263,10 @@ export default function PostDetailPage() {
                     disabled={!replyContent.trim() || moderation.blocked}
                     icon={<Send size={16} />}
                   >
-                    <Trans>Post Reply</Trans>
+                    {/* Just "Reply". "Post Reply" used "post" as a verb one
+                        screen after the board used it as a noun, which is the
+                        collision that made "New Post" read as "respond". */}
+                    <Trans>Reply</Trans>
                   </Button>
                 </div>
               </form>
@@ -283,7 +286,7 @@ export default function PostDetailPage() {
                 </p>
                 <Link to={`/forums/${params.slug}`}>
                   <button className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5">
-                    <Trans>View All Posts</Trans>
+                    <Trans>All Discussions</Trans>
                   </button>
                 </Link>
               </div>
@@ -292,7 +295,7 @@ export default function PostDetailPage() {
             {/* Widget 2: Post Details */}
             <div className="mb-10">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                <Trans>Post Details</Trans>
+                <Trans>Discussion Details</Trans>
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
               <div className="text-sm divide-y divide-ktip-sand-100">

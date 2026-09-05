@@ -6,7 +6,7 @@ import { forumPostPath } from '../../lib/slug'
 import { MessageCircle, Pin } from 'lucide-react'
 import { formatRelativeTime, truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
-import { Trans } from '@lingui/react/macro'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 interface PostCardProps {
   post: ForumPost
@@ -14,7 +14,8 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, boardSlug }: PostCardProps) {
-  const authorName = post.author?.display_name || 'Unknown User'
+  const { t } = useLingui()
+  const authorName = post.author?.display_name || t`Unknown User`
 
   return (
     <Link to={forumPostPath(boardSlug, post)}>
@@ -45,12 +46,15 @@ export function PostCard({ post, boardSlug }: PostCardProps) {
             {/* Footer */}
             <div className="flex items-center justify-between text-xs text-ktip-sand-400">
               <span>
-                by <span className="font-medium text-ktip-sand-600">{authorName}</span>
+                <Trans>by <span className="font-medium text-ktip-sand-600">{authorName}</span></Trans>
               </span>
               <div className="flex items-center gap-3">
+                {/* The count is what tells a reader this row is a thread with
+                    responses rather than a single message. A bare "Replies"
+                    label said nothing. */}
                 <span className="flex items-center gap-1">
                   <MessageCircle size={14} />
-                  Replies
+                  <Plural value={post.reply_count ?? 0} one="# reply" other="# replies" />
                 </span>
                 <span>{formatRelativeTime(post.created_at)}</span>
               </div>

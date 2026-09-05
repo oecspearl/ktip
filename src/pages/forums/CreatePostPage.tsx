@@ -15,7 +15,7 @@ import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function CreatePostPage() {
   const { t } = useLingui()
-  usePageTitle(t`New Post`)
+  usePageTitle(t`New Discussion`)
   const params = useParams()
   const navigate = useNavigate()
   const auth = useAuth()
@@ -96,7 +96,7 @@ export default function CreatePostPage() {
         navigate(`/forums/${params.slug}/${(post as any).id}`)
       }
     } catch (err: any) {
-      setErrorMessage(err.message || t`Failed to create post`)
+      setErrorMessage(err.message || t`Failed to start discussion`)
     }
   }
 
@@ -119,11 +119,11 @@ export default function CreatePostPage() {
   return (
     <>
       <PageHero
-        eyebrow={t`New Forum Post`}
-        title={t`New Post`}
+        eyebrow={t`New Forum Discussion`}
+        title={t`Start a Discussion`}
         subtitle={
           <Trans>
-            Posting in <span className="text-white font-medium">{board.name}</span>
+            Starting a discussion in <span className="text-white font-medium">{board.name}</span>
           </Trans>
         }
         imageSeed="forums"
@@ -131,7 +131,7 @@ export default function CreatePostPage() {
           { label: t`Home`, href: '/' },
           { label: t`Forums`, href: '/forums' },
           { label: board.name, href: `/forums/${params.slug}` },
-          { label: t`New Post` },
+          { label: t`New Discussion` },
         ]}
       />
 
@@ -174,7 +174,7 @@ export default function CreatePostPage() {
                   disabled={moderation.blocked}
                   fullWidth
                 >
-                  <Trans>Publish Post</Trans>
+                  <Trans>Start Discussion</Trans>
                 </Button>
                 <button
                   type="button"

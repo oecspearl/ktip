@@ -7,7 +7,7 @@ export const forumBoardTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="board-toolbar"]',
     title: 'Find a thread, or start one',
     description:
-      'The search box filters this board’s posts as you type — titles and bodies both.\n\nNew Post opens the editor. Posts take a title, a body with formatting, and land in this board; you can edit yours afterwards.',
+      'The search box filters this board’s discussions as you type — titles and bodies both.\n\nNew Discussion opens the editor. A discussion takes a title, a body with formatting, and lands in this board; you can edit yours afterwards.',
     position: 'bottom',
     scrollMode: 'top',
   },
@@ -15,7 +15,7 @@ export const forumBoardTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="board-posts"]',
     title: 'The thread list',
     description:
-      'Each row shows the author, when it was posted and how many replies it has drawn. Pinned announcements sit at the top regardless of age.\n\nOpen a post to read it in full and reply. Moderators can pin, lock or remove threads here — if a post disappears, that is why.',
+      'Each row shows the author, when it was started and how many replies it has drawn. Pinned announcements sit at the top regardless of age.\n\nOpen a discussion to read it in full and reply. Moderators can pin, lock or remove threads here — if one disappears, that is why.',
     position: 'top',
     scrollMode: 'top',
   },

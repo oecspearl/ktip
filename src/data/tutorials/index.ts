@@ -298,14 +298,14 @@ const REGISTRY: RegisteredTutorial[] = [
   {
     id: TUTORIAL_IDS.FORUM_POST_FORM,
     route: '/forums/:slug/new',
-    name: 'New post',
+    name: 'New discussion',
     description: 'Starting a discussion on a board.',
     steps: forumPostFormTutorialSteps,
   },
   {
     id: TUTORIAL_IDS.FORUM_POST,
     route: '/forums/:slug/:postId',
-    name: 'Forum post',
+    name: 'Forum discussion',
     description: 'Reading a thread and replying.',
     steps: forumPostTutorialSteps,
   },

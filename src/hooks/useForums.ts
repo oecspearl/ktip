@@ -74,9 +74,12 @@ export function useForumPosts(
   filters?: { search?: string }
 ) {
   const fetchPosts = async (bid: string): Promise<ForumPost[]> => {
+    // forum_replies(count) is an embedded aggregate, so the reply totals arrive
+    // in the same round trip rather than one query per row. PostgREST returns
+    // it as `forum_replies: [{ count }]`, flattened into reply_count below.
     let query = supabase
       .from('forum_posts')
-      .select('*, author:profiles(*)')
+      .select('*, author:profiles(*), forum_replies(count)')
       .eq('board_id', bid)
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
@@ -94,7 +97,10 @@ export function useForumPosts(
 
     const { data, error } = await query
     if (error) throw error
-    return (data as any[]) || []
+    return ((data as any[]) || []).map((row) => ({
+      ...row,
+      reply_count: row.forum_replies?.[0]?.count ?? 0,
+    }))
   }
 
   const query = useQuery({

@@ -13,7 +13,7 @@ interface ReplyItemProps {
 
 export function ReplyItem({ reply, isAuthor, onDelete }: ReplyItemProps) {
     const { t } = useLingui()
-  const authorName = reply.author?.display_name || 'Unknown User'
+  const authorName = reply.author?.display_name || t`Unknown User`
 
   return (
     <div className="py-4 border-b border-ktip-sand-100 last:border-b-0">
@@ -38,7 +38,7 @@ export function ReplyItem({ reply, isAuthor, onDelete }: ReplyItemProps) {
             targetId={reply.id}
             targetAuthorId={reply.author_id}
             contentSnapshot={reply.content}
-            targetLabel="this reply"
+            targetLabel={t`this reply`}
           />
           {isAuthor && (
             <button
