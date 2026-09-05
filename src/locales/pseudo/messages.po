@@ -1271,10 +1271,6 @@ msgstr ""
 msgid "design the rooms"
 msgstr ""
 
-#: src/pages/directory/DirectoryPage.tsx
-msgid "Businesses"
-msgstr ""
-
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
 msgstr ""
@@ -1595,7 +1591,6 @@ msgid "This grant has expired and is no longer accepting applications."
 msgstr ""
 
 #: src/lib/forum-board-icons.ts
-#: src/pages/directory/DirectoryPage.tsx
 msgid "People"
 msgstr ""
 
@@ -3406,6 +3401,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "If you believe an automated process has affected you unfairly, write to %privacyEmail%. You are entitled to a human review of it."
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Individuals"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5885,10 +5884,6 @@ msgstr ""
 
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Choosing your showcase."
-msgstr ""
-
-#: src/pages/directory/DirectoryPage.tsx
-msgid "The most powerful way to grow your Caribbean network."
 msgstr ""
 
 #: src/pages/collaborate/VideoConferencePage.tsx
@@ -9906,6 +9901,10 @@ msgstr ""
 msgid "Click the bell icon in the top navigation bar."
 msgstr ""
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Organisations"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "New whiteboard"
 msgstr ""
@@ -10390,6 +10389,10 @@ msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "The information in this notice is accurate."
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "The most powerful way to grow your Caribbean innovation network."
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx

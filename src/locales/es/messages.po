@@ -1292,10 +1292,6 @@ msgstr "Esta subvención está activa. Los enlaces existentes a ella dejarán de
 msgid "design the rooms"
 msgstr "diseñar las salas"
 
-#: src/pages/directory/DirectoryPage.tsx
-msgid "Businesses"
-msgstr "Empresas"
-
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
 msgstr ""
@@ -1620,7 +1616,6 @@ msgid "This grant has expired and is no longer accepting applications."
 msgstr "Esta subvención ha vencido y ya no acepta solicitudes."
 
 #: src/lib/forum-board-icons.ts
-#: src/pages/directory/DirectoryPage.tsx
 msgid "People"
 msgstr "Personas"
 
@@ -3451,6 +3446,10 @@ msgstr "Nuevo evento"
 
 #: src/i18n/harvested.ts
 msgid "If you believe an automated process has affected you unfairly, write to %privacyEmail%. You are entitled to a human review of it."
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Individuals"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5966,10 +5965,6 @@ msgstr "Gestionar los elementos de moderación"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Choosing your showcase."
 msgstr "Eligiendo su vitrina."
-
-#: src/pages/directory/DirectoryPage.tsx
-msgid "The most powerful way to grow your Caribbean network."
-msgstr "La forma más eficaz de hacer crecer su red caribeña."
 
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "📹 You've been invited to a video conference!\n"
@@ -10032,6 +10027,10 @@ msgstr "Explique por qué lo necesita: ayuda al propietario a decidir."
 msgid "Click the bell icon in the top navigation bar."
 msgstr "Haga clic en el icono de la campana en la barra de navegación superior."
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Organisations"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "New whiteboard"
 msgstr "Nueva pizarra"
@@ -10520,6 +10519,10 @@ msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "The information in this notice is accurate."
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "The most powerful way to grow your Caribbean innovation network."
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx

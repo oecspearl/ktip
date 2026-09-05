@@ -1292,10 +1292,6 @@ msgstr "Cette subvention est en ligne. Les liens existants vers celle-ci seront 
 msgid "design the rooms"
 msgstr "concevoir les salles"
 
-#: src/pages/directory/DirectoryPage.tsx
-msgid "Businesses"
-msgstr "Entreprises"
-
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
 msgstr ""
@@ -1620,7 +1616,6 @@ msgid "This grant has expired and is no longer accepting applications."
 msgstr "Cette subvention a expiré et n'accepte plus de candidatures."
 
 #: src/lib/forum-board-icons.ts
-#: src/pages/directory/DirectoryPage.tsx
 msgid "People"
 msgstr "Personnes"
 
@@ -3451,6 +3446,10 @@ msgstr "Nouvel événement"
 
 #: src/i18n/harvested.ts
 msgid "If you believe an automated process has affected you unfairly, write to %privacyEmail%. You are entitled to a human review of it."
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Individuals"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5966,10 +5965,6 @@ msgstr "Traiter les éléments de modération"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Choosing your showcase."
 msgstr "Choix de votre vitrine."
-
-#: src/pages/directory/DirectoryPage.tsx
-msgid "The most powerful way to grow your Caribbean network."
-msgstr "Le moyen le plus efficace de développer votre réseau caribéen."
 
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "📹 You've been invited to a video conference!\n"
@@ -10032,6 +10027,10 @@ msgstr "Expliquez pourquoi vous en avez besoin — cela aide le propriétaire à
 msgid "Click the bell icon in the top navigation bar."
 msgstr "Cliquez sur l'icône de cloche dans la barre de navigation supérieure."
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Organisations"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "New whiteboard"
 msgstr "Nouveau tableau blanc"
@@ -10520,6 +10519,10 @@ msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "The information in this notice is accurate."
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "The most powerful way to grow your Caribbean innovation network."
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx

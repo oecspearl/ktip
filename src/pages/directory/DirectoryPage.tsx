@@ -168,7 +168,7 @@ export default function DirectoryPage() {
                 : t`Search for a member to connect with`}
             </h2>
             <p className="text-ktip-ocean-600 italic">
-              <Trans>The most powerful way to grow your Caribbean network.</Trans>
+              <Trans>The most powerful way to grow your Caribbean innovation network.</Trans>
             </p>
           </div>
 
@@ -190,7 +190,7 @@ export default function DirectoryPage() {
                     : 'text-ktip-sand-600 hover:text-ktip-ocean-700'
                 }`}
               >
-                {key === 'businesses' ? t`Businesses` : t`People`}
+                {key === 'businesses' ? t`Organisations` : t`Individuals`}
               </button>
             ))}
           </div>
