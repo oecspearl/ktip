@@ -4,7 +4,10 @@ import { Badge } from '../../../components/ui/Badge'
 import { useAdminResources, useDeleteResource } from '../../../hooks/useResources'
 import { useToast } from '../../../contexts/ToastContext'
 import { AdminResourceFormModal } from './AdminResourceFormModal'
+import { AdminResourceReviewTab } from './AdminResourceReviewTab'
+import { useResourceSubmissions } from '../../../hooks/useResources'
 import { PageHero } from '../../../components/layout/PageHero'
+import { cn } from '../../../lib/utils'
 import {
   Plus,
   Edit,
@@ -28,6 +31,12 @@ export default function AdminResourcesPage() {
 
   const [showModal, setShowModal] = useState(false)
   const [editingResource, setEditingResource] = useState<Resource | null>(null)
+  const [tab, setTab] = useState<'library' | 'review'>('library')
+
+  // Fetched at this level so the tab strip can carry the count — a review queue
+  // nobody knows has anything in it is a queue nobody works.
+  const { submissions } = useResourceSubmissions()
+  const pendingCount = submissions?.length ?? 0
 
   const openCreate = () => {
     setEditingResource(null)
@@ -66,6 +75,37 @@ export default function AdminResourcesPage() {
         imageSeed="admin-resources"
       />
 
+      <div role="tablist" aria-label="Resource sections" className="flex gap-1 border-b border-ktip-sand-200 mb-4">
+        {([
+          { id: 'library' as const, label: 'Library' },
+          { id: 'review' as const, label: 'Review queue' },
+        ]).map(({ id, label }) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2.5 text-sm font-semibold -mb-px border-b-2 transition-colors',
+              tab === id
+                ? 'border-ktip-ocean-600 text-ktip-ocean-700'
+                : 'border-transparent text-ktip-sand-500 hover:text-ktip-sand-700'
+            )}
+          >
+            {label}
+            {id === 'review' && pendingCount > 0 && (
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ktip-ocean-600 px-1.5 py-0.5 text-xs font-bold tabular-nums text-white">
+                {pendingCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'review' ? (
+        <AdminResourceReviewTab />
+      ) : (
+      <>
       {/* The empty state carries its own CTA, so this row only matters once the
           table has rows. */}
       {!!resources?.length && (
@@ -171,6 +211,8 @@ export default function AdminResourcesPage() {
           </div>
         )}
       </div>
+      </>
+      )}
 
       {/* Form Modal */}
       <AdminResourceFormModal

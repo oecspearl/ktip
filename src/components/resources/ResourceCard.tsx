@@ -8,7 +8,7 @@ import {
 import { formatDate } from '../../lib/utils'
 import type { Resource } from '../../types'
 import { entityPath } from '../../lib/slug'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
 interface ResourceCardProps {
@@ -28,7 +28,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
       description={resource.summary || resource.description}
       meta={
         <>
-          {resource.author && <>By {resource.author!.display_name} · </>}
+          {resource.author && <><Trans>By {resource.author!.display_name}</Trans> · </>}
           {formatDate(resource.created_at)}
         </>
       }

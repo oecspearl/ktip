@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { ResourceCard } from '../../components/resources/ResourceCard'
 import { IntegrationCard } from '../../components/integrations/IntegrationCard'
 import { CourseCard } from '../../components/courses/CourseCard'
@@ -14,11 +14,13 @@ import { Select } from '../../components/ui/Select'
 import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { FilterBar } from '../../components/ui/FilterBar'
+import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
-import { Search, BookOpen, Puzzle, GraduationCap } from 'lucide-react'
+import { Search, BookOpen, Puzzle, GraduationCap, Plus } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { integrationCategoryIcon, resourceCategoryIcon } from '../../lib/category-icons'
@@ -149,6 +151,8 @@ export default function ResourcesPage() {
 
 function ResourcesTab() {
   const { t, i18n } = useLingui()
+  const auth = useAuth()
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -194,6 +198,15 @@ function ResourcesTab() {
 
   const hasActiveFilters = !!(searchQuery || typeFilter || categoryFilter || tagFilter.length)
 
+  // Only the controls that live inside the sheet count toward the badge —
+  // search has its own visible affordance in the bar at every width.
+  const activeFilterCount =
+    (typeFilter ? 1 : 0) + (categoryFilter ? 1 : 0) + (tagFilter.length ? 1 : 0)
+
+  // Signed-out visitors keep the CTA: it funnels to login rather than hiding
+  // that contributing is possible at all. Same call ProjectsPage makes.
+  const canSubmit = !auth.user || auth.can('resource:submit')
+
   const clearFilters = () => {
     setSearchQuery('')
     setDebouncedSearch('')
@@ -215,60 +228,80 @@ function ResourcesTab() {
         className="scroll-mt-24 bg-ktip-sand-50 py-8"
       >
         <div className="max-w-page-narrow mx-auto px-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <Select
-              value={typeFilter}
-              onChange={setTypeFilter}
-              options={RESOURCE_TYPE_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
-              ariaLabel={t`Filter by resource type`}
-            />
+          {/* Was a hand-rolled `flex flex-wrap` row. FilterBar is the same bar
+              on a desktop and a working one on a phone — see its header. The
+              submit CTA is the reason for the swap: `ml-auto` puts a button
+              past the viewport edge at 393px, which is exactly where a member
+              is most likely to be reading. */}
+          <FilterBar
+            open={filtersOpen}
+            onOpenChange={setFiltersOpen}
+            sheetTitle={t`Filter resources`}
+            activeCount={activeFilterCount}
+            onClear={hasActiveFilters ? clearFilters : undefined}
+            filters={
+              <>
+                <Select
+                  value={typeFilter}
+                  onChange={setTypeFilter}
+                  options={RESOURCE_TYPE_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
+                  ariaLabel={t`Filter by resource type`}
+                />
 
-            <Select
-              value={categoryFilter}
-              onChange={setCategoryFilter}
-              options={RESOURCE_CATEGORY_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
-              ariaLabel={t`Filter by category`}
-            />
+                <Select
+                  value={categoryFilter}
+                  onChange={setCategoryFilter}
+                  options={RESOURCE_CATEGORY_OPTIONS.map((o) => ({ ...o, label: resolveCopy(i18n, o.label) }))}
+                  ariaLabel={t`Filter by category`}
+                />
 
-            <TagFilterSelect options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
-
-            {!loading && resources && (
-              <p className="text-sm text-gray-500">
-                <Plural value={resources.length} one="Found # resource" other="Found # resources" />
-                {categoryGroups.length > 1 && (
-                  <>
-                    {' '}
-                    <Plural value={categoryGroups.length} one="in # category" other="in # categories" />
-                  </>
-                )}
-              </p>
-            )}
-
-            <div className="ml-auto flex items-center gap-2">
-              <SortSelect
-                value={sort}
-                onChange={setSort}
-                options={SORT_OPTIONS.resource.options}
-                personalizationActive={personalizationActive}
-              />
-              <CollapsibleSearch
-                value={searchQuery}
-                onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
-                placeholder={t`Search resources...`}
-                ariaLabel={t`Search resources`}
-              />
-              <ColumnToggle value={columns} onChange={setColumns} />
-            </div>
-          </div>
-
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="mt-2 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 hover:underline transition-colors"
-            >
-              <Trans>Clear all filters</Trans>
-            </button>
-          )}
+                <TagFilterSelect options={tagOptions} selected={tagFilter} onChange={setTagFilter} />
+              </>
+            }
+            count={
+              !loading && resources ? (
+                <>
+                  <Plural value={resources.length} one="Found # resource" other="Found # resources" />
+                  {categoryGroups.length > 1 && (
+                    <>
+                      {' '}
+                      <Plural value={categoryGroups.length} one="in # category" other="in # categories" />
+                    </>
+                  )}
+                </>
+              ) : undefined
+            }
+            actions={
+              <>
+                <SortSelect
+                  value={sort}
+                  onChange={setSort}
+                  options={SORT_OPTIONS.resource.options}
+                  personalizationActive={personalizationActive}
+                />
+                <CollapsibleSearch
+                  value={searchQuery}
+                  onChange={(val) => { setSearchQuery(val); debouncedSetSearch(val) }}
+                  placeholder={t`Search resources...`}
+                  ariaLabel={t`Search resources`}
+                />
+                <ColumnToggle value={columns} onChange={setColumns} />
+              </>
+            }
+            cta={
+              canSubmit ? (
+                <Link to="/resources/submit">
+                  <button
+                    className="btn-brand inline-flex items-center gap-2 rounded-control px-4 py-2 text-label font-bold uppercase tracking-wider"
+                    aria-label={t`Submit a resource`}
+                  >
+                    <Plus size={16} />
+                    <span className="hidden sm:inline"><Trans>Submit</Trans></span>
+                  </button>
+                </Link>
+              ) : undefined
+            }
+          />
         </div>
       </div>
 
@@ -319,13 +352,25 @@ function ResourcesTab() {
                   ? t`Try adjusting your filters to find more resources.`
                   : t`Resources will appear here once they are published.`}
               </p>
-              {hasActiveFilters && (
+              {hasActiveFilters ? (
                 <button
                   onClick={clearFilters}
                   className="px-5 py-2.5 btn-brand text-sm rounded-lg"
                 >
                   <Trans>Clear Filters</Trans>
                 </button>
+              ) : (
+                // An empty library with no filters on is the one moment the
+                // invitation to contribute is most useful — same placement
+                // ProjectsPage uses.
+                canSubmit && (
+                  <Link to="/resources/submit">
+                    <button className="btn-brand inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm">
+                      <Plus size={16} />
+                      <Trans>Submit a Resource</Trans>
+                    </button>
+                  </Link>
+                )
               )}
             </div>
           )}

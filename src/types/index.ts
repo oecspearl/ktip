@@ -61,6 +61,7 @@ export type PermissionKey =
   | 'forum:board'
   | 'forum:comment'
   | 'mentorship:offer'
+  | 'resource:submit'
   | 'dm:initiate'
   | 'dm:receive'
   | 'dm:supervise'
@@ -966,6 +967,15 @@ export type ResourceType = 'article' | 'guide' | 'case_study' | 'template' | 'vi
 
 export type ResourceCategory = 'technology' | 'healthcare' | 'education' | 'agriculture' | 'environment' | 'climate_action' | 'business' | 'other'
 
+/**
+ * Has a reviewer looked at it (migration 135).
+ *
+ * Orthogonal to `is_published` (is it live — the admin's staging switch, 015)
+ * and to `status` (did the moderation filter object, 122). All three are on the
+ * row and folding any two together breaks one of the queries that reads them.
+ */
+export type ResourceApprovalStatus = 'draft' | 'pending' | 'approved' | 'rejected'
+
 export interface Resource extends Ranked {
   id: string
   /** URL segment (migration 087). Assigned on insert, frozen after. */
@@ -982,6 +992,19 @@ export interface Resource extends Ranked {
   download_url: string | null
   thumbnail_url: string | null
   is_climate_action: boolean
+  /** Moderation verdict (migration 122). Untyped until 130 needed the badge. */
+  status: 'active' | 'quarantined' | 'removed'
+  moderation_severity: string | null
+  approval_status: ResourceApprovalStatus
+  submitted_at: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  review_note: string | null
+  /** Object key in the private `resource-files` bucket; read via a signed URL. */
+  file_path: string | null
+  file_name: string | null
+  file_size: number | null
+  file_mime: string | null
   created_at: string
   updated_at: string
   author?: Profile

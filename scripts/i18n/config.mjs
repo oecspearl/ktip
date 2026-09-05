@@ -111,6 +111,10 @@ export const MIGRATED_PATHS = [
   'src/components/notes/',
   'src/components/messages/',
   'src/pages/resources/',
+  // Added with 135's submission flow. Directory-level like the rest: the two
+  // files in it were clean already, and guarding the directory is what stops a
+  // later card or field shipping English.
+  'src/components/resources/',
   'src/pages/forums/',
   'src/pages/directory/',
   'src/pages/leaderboard/',
