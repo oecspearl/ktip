@@ -39,16 +39,18 @@ export function usePlatformPulse(period?: { start: string; end: string }) {
       // Phases 2 and 3 are tolerated: their functions may genuinely not exist
       // yet on an environment that has only run 131, and the catalog already
       // renders a missing key as "not yet measured", which is the truth.
-      const [core, phase2, phase3] = await Promise.all([
+      const tolerated = (fn: string) =>
+        (supabase as any).rpc(fn, params).then(
+          (r: any) => r,
+          () => ({ data: null, error: true })
+        )
+
+      const [core, phase2, phase3, phase4] = await Promise.all([
         (supabase as any).rpc('get_platform_pulse', params),
-        (supabase as any).rpc('get_phase2_pulse', params).then(
-          (r: any) => r,
-          () => ({ data: null, error: true })
-        ),
-        (supabase as any).rpc('get_phase3_pulse', params).then(
-          (r: any) => r,
-          () => ({ data: null, error: true })
-        ),
+        tolerated('get_phase2_pulse'),
+        tolerated('get_phase3_pulse'),
+        // The roadmap indicators outside §14's tables (migration 143).
+        tolerated('get_phase4_pulse'),
       ])
 
       if (core.error) throw core.error
@@ -57,6 +59,7 @@ export function usePlatformPulse(period?: { start: string; end: string }) {
         ...((core.data || {}) as PlatformPulse),
         ...((phase2.error ? {} : phase2.data || {}) as PlatformPulse),
         ...((phase3.error ? {} : phase3.data || {}) as PlatformPulse),
+        ...((phase4.error ? {} : phase4.data || {}) as PlatformPulse),
       }
     },
     // These are month-scale figures; re-reading them on every focus is a wave of

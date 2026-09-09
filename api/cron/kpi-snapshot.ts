@@ -96,5 +96,42 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   const written = await res.json().catch(() => null)
-  return json({ ok: true, periodKind, periodStart, written }, 200)
+
+  // The weekly reading also takes a health sample (roadmap §14 T36). The p75
+  // page-load figure is computed in SQL from real-user beacons; uptime and the
+  // 5xx rate cannot be measured from inside the platform, so they are accepted
+  // from whoever calls this — an external probe passing ?uptime=&error_rate= —
+  // and stored as NULL otherwise. NULL is the honest reading; a sample row
+  // with a made-up 100% is the thing a report would believe.
+  //
+  // Non-fatal: a failed sample must not turn a successful snapshot into a 502
+  // and mask the reading that matters more.
+  let health: unknown = null
+  if (periodKind === 'week') {
+    const uptime = Number(url.searchParams.get('uptime'))
+    const errorRate = Number(url.searchParams.get('error_rate'))
+    const sample = await fetch(`${supabaseUrl}/rest/v1/rpc/sample_platform_health`, {
+      method: 'POST',
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        p_source: url.searchParams.get('source') || 'kpi-snapshot',
+        p_window_label: '7d',
+        p_uptime_pct: url.searchParams.has('uptime') && Number.isFinite(uptime) ? uptime : null,
+        p_error_rate_5xx:
+          url.searchParams.has('error_rate') && Number.isFinite(errorRate) ? errorRate : null,
+        p_window_days: 7,
+      }),
+    }).catch(() => null)
+    health = sample
+      ? sample.ok
+        ? await sample.json().catch(() => null)
+        : { error: 'health sample failed', status: sample.status }
+      : { error: 'health sample failed' }
+  }
+
+  return json({ ok: true, periodKind, periodStart, written, health }, 200)
 }

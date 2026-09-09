@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { useAdminEvents, useEventStatusUpdate } from '../../../hooks/useAdminEvents'
+import { useAdminEventCounts, useAdminEvents, useEventStatusUpdate } from '../../../hooks/useAdminEvents'
+import type { Measured } from '../../../lib/measured'
 import { useToast } from '../../../contexts/ToastContext'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
@@ -22,7 +23,7 @@ import {
   EVENT_STATUS_LABELS,
   EVENT_STATUS_COLORS,
 } from '../../../lib/constants'
-import { format, isPast } from 'date-fns'
+import { format } from 'date-fns'
 import { debounce } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
 import type { EventStatus } from '../../../types'
@@ -49,15 +50,18 @@ export default function AdminEventsPage() {
 
   const { updateStatus, loading: statusLoading } = useEventStatusUpdate()
 
+  // Real head counts, not the length of the filtered page (see
+  // useAdminEventCounts). A count that could not be read shows an em dash.
+  const { counts } = useAdminEventCounts()
   const stats = useMemo(() => {
-    const list = events || []
+    const show = (m: Measured | undefined) => (m?.state === 'ok' ? m.value.toLocaleString() : '—')
     return {
-      total: list.length,
-      upcoming: list.filter(e => !isPast(new Date(e.end_date || e.start_date))).length,
-      drafts: list.filter(e => e.status === 'draft').length,
-      published: list.filter(e => e.status === 'published').length,
+      total: show(counts?.total),
+      upcoming: show(counts?.upcoming),
+      drafts: show(counts?.drafts),
+      published: show(counts?.published),
     }
-  }, [events])
+  }, [counts])
 
   const handleStatusChange = async () => {
     const action = confirmAction
