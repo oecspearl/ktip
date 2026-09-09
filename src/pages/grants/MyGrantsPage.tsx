@@ -2,14 +2,15 @@ import { useMemo } from 'react'
 import { Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { useGrants } from '../../hooks/useGrants'
+import { useGrants, useFunderApplicationTotals } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
-import { Plus, Pencil, Wallet, Calendar, DollarSign, Inbox } from 'lucide-react'
+import { Plus, Pencil, Wallet, Calendar, DollarSign, Inbox, Megaphone, Clock, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
+import { FundingStats } from '../../components/grants/FundingStats'
+import { applicationTallies, isOpenCall, sumByCurrency } from '../../lib/grant-metrics'
 import { entityPath } from '../../lib/slug'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
-import { isPast } from 'date-fns'
 import type { Grant } from '../../types'
 import { Trans, Plural, useLingui } from '@lingui/react/macro'
 
@@ -31,11 +32,34 @@ export default function MyGrantsPage() {
     const openCalls: Grant[] = []
     const closedCalls: Grant[] = []
     for (const grant of grants ?? []) {
-      const expired = !!grant.deadline && isPast(new Date(grant.deadline))
-      ;(grant.is_active === false || expired ? closedCalls : openCalls).push(grant)
+      ;(isOpenCall(grant) ? openCalls : closedCalls).push(grant)
     }
     return { open: openCalls, closed: closedCalls }
   }, [grants])
+
+  const { totals } = useFunderApplicationTotals(grants?.map((grant) => grant.id))
+
+  const stats = useMemo(() => {
+    const tallies = applicationTallies(totals)
+    return {
+      tallies,
+      // The ceiling, not a midpoint: amount_max is what the call promises at
+      // most, and averaging a range with a missing end invents a number.
+      advertised: sumByCurrency(
+        open,
+        (grant) => grant.amount_max ?? grant.amount_min,
+        (grant) => grant.currency
+      ),
+      // What was actually paid out, which is a different question and the one
+      // a funder is usually asked. Reads '—' until somebody records an award.
+      awarded: sumByCurrency(
+        (totals ?? []).filter((row) => row.status === 'approved'),
+        (row) => row.awarded_amount,
+        (row) => row.awarded_currency,
+        'XCD'
+      ),
+    }
+  }, [open, totals])
 
   const renderRow = (grant: Grant, isClosed: boolean) => (
     <li key={grant.id} className="px-4 py-4 flex flex-wrap items-center justify-between gap-3">
@@ -125,6 +149,22 @@ export default function MyGrantsPage() {
           </div>
         ) : (
           <div className="space-y-6">
+            <FundingStats
+              tiles={[
+                { label: t`Open calls`, value: open.length, icon: Megaphone },
+                { label: t`Applications`, value: stats.tallies.submitted, icon: Inbox },
+                { label: t`Awaiting review`, value: stats.tallies.awaitingDecision, icon: Clock },
+                { label: t`Approved`, value: stats.tallies.approved, icon: CheckCircle },
+              ]}
+              money={{
+                title: t`Funding`,
+                lines: [
+                  { label: t`Advertised`, totals: stats.advertised },
+                  { label: t`Awarded`, totals: stats.awarded },
+                ],
+              }}
+            />
+
             <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg">
               <div className="px-4 py-3 border-b border-ktip-sand-200">
                 <p className="text-sm text-ktip-sand-600">

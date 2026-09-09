@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import {
+  alphaBounds,
   analyseMask,
   coverageIsPlausible,
   frameToPixels,
+  remapAnalysis,
   subjectSideOf,
 } from './portrait-mask'
 
@@ -93,5 +95,71 @@ describe('coverageIsPlausible', () => {
     // Measured range on good cuts in the spike.
     expect(coverageIsPlausible(0.39)).toBe(true)
     expect(coverageIsPlausible(0.92)).toBe(true)
+  })
+})
+
+describe('alphaBounds', () => {
+  it('finds the rectangle of kept pixels, padded and clamped', () => {
+    const w = 40
+    const h = 30
+    const m = new Float32Array(w * h)
+    for (let y = 10; y < 20; y++) for (let x = 5; x < 15; x++) m[y * w + x] = 1
+    expect(alphaBounds(m, w, h)).toEqual({ x: 5, y: 10, w: 10, h: 10 })
+    expect(alphaBounds(m, w, h, 0.02, 3)).toEqual({ x: 2, y: 7, w: 16, h: 16 })
+    expect(alphaBounds(m, w, h, 0.02, 100)).toEqual({ x: 0, y: 0, w, h })
+  })
+
+  it('keeps a faint fringe that the analysis threshold would drop', () => {
+    const w = 10
+    const m = new Float32Array(w * 10)
+    m[5 * w + 5] = 1
+    m[5 * w + 2] = 0.05
+    expect(alphaBounds(m, w, 10)).toEqual({ x: 2, y: 5, w: 4, h: 1 })
+  })
+
+  it('is null for an empty mask', () => {
+    expect(alphaBounds(new Float32Array(16), 4, 4)).toBeNull()
+  })
+})
+
+describe('remapAnalysis', () => {
+  it('moves the head and frame into the crop and keeps the side', () => {
+    const w = 200
+    const h = 200
+    // Person on the right of a wide photo: head at (150, 60).
+    const m = person(w, h, 150, 60, 20)
+    const a = analyseMask(m, w, h)
+    expect(a.side).toBe('right')
+    const crop = alphaBounds(m, w, h)
+    if (!crop) throw new Error('expected bounds')
+    const r = remapAnalysis(a, crop, w, h)
+    // The same head, in photo pixels.
+    expect(r.head.cx * crop.w + crop.x).toBeCloseTo(a.head.cx * w, 5)
+    expect(r.head.cy * crop.h + crop.y).toBeCloseTo(a.head.cy * h, 5)
+    expect(r.head.w * crop.w).toBeCloseTo(a.head.w * w, 5)
+    // Now roughly centred in its own image.
+    expect(r.head.cx).toBeGreaterThan(0.3)
+    expect(r.head.cx).toBeLessThan(0.7)
+    // The frame still fits inside the (smaller) image.
+    const f = frameToPixels(r.frame, crop.w, crop.h)
+    expect(f.x).toBeGreaterThanOrEqual(0)
+    expect(f.y).toBeGreaterThanOrEqual(0)
+    expect(f.x + f.s).toBeLessThanOrEqual(crop.w + 1e-6)
+    expect(f.y + f.s).toBeLessThanOrEqual(crop.h + 1e-6)
+    // Composition is a fact about the photo, not the crop.
+    expect(r.side).toBe('right')
+    // Fewer transparent pixels: coverage goes up, never past 1.
+    expect(r.coverage).toBeGreaterThan(a.coverage)
+    expect(r.coverage).toBeLessThanOrEqual(1)
+  })
+
+  it('is the identity for a crop that is the whole image', () => {
+    const w = 120
+    const h = 100
+    const a = analyseMask(person(w, h, 60, 30, 15), w, h)
+    const r = remapAnalysis(a, { x: 0, y: 0, w, h }, w, h)
+    expect(r.head.cx).toBeCloseTo(a.head.cx, 9)
+    expect(r.frame.s).toBeCloseTo(a.frame.s, 9)
+    expect(r.coverage).toBeCloseTo(a.coverage, 9)
   })
 })

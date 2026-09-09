@@ -260,6 +260,97 @@ export function useFunderApplications(grantId: string | undefined) {
   return { applications: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/** One application, flattened to what the funder's stat strip needs to count. */
+export interface FunderApplicationTotal {
+  grant_id: string
+  status: GrantApplicationStatus
+  awarded_amount: number | null
+  awarded_currency: string
+}
+
+/**
+ * Every application across a funder's calls, in one query, for the totals on
+ * /grants/my-grants.
+ *
+ * Four columns rather than `*`: this is arithmetic, and pulling whole
+ * application_data blobs for a member with fifty applications to count them
+ * would be the expensive way to render a number.
+ *
+ * Drafts never arrive here either — the same migration 130 SELECT policy the
+ * inbox relies on carries `status <> 'draft'`, so "applications received"
+ * cannot accidentally include something the applicant has not sent.
+ */
+export function useFunderApplicationTotals(grantIds: string[] | undefined) {
+  const ids = [...(grantIds ?? [])].sort()
+
+  const query = useQuery({
+    queryKey: keys.sub('grants', 'funder-totals', ids.join(',')),
+    queryFn: async (): Promise<FunderApplicationTotal[]> => {
+      const { data, error } = await supabase
+        .from('grant_applications')
+        .select('grant_id,status,awarded_amount,awarded_currency')
+        .in('grant_id', ids)
+      if (error) throw error
+      return (data as any[]) || []
+    },
+    enabled: ids.length > 0,
+    staleTime: 60_000,
+  })
+
+  return { totals: query.data, loading: query.isPending, error: query.error }
+}
+
+/**
+ * Record what was awarded on an application.
+ *
+ * record_grant_award() (133, guarded by 149) writes the four award columns and
+ * forces the row to 'approved' in the same statement, so this REPLACES the
+ * decide call on approval rather than following it — running both would notify
+ * the applicant twice.
+ *
+ * The RPC answers with `{ ok: false, reason }` instead of raising, so a refusal
+ * arrives as data and has to be turned back into an error here.
+ */
+export function useRecordAward() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      applicationId,
+      amount,
+      currency,
+    }: {
+      applicationId: string
+      amount: number
+      currency: string
+    }) => {
+      // `as any` for the same reason the other RPC calls here do it: the
+      // generated Database type predates these functions.
+      const { data, error } = await (supabase as any).rpc('record_grant_award', {
+        p_application: applicationId,
+        p_amount: amount,
+        p_currency: currency,
+      })
+      if (error) throw error
+      if (data?.ok === false) {
+        const refusal = new Error(data.reason || 'failed') as Error & { reason?: string }
+        refusal.reason = data.reason
+        throw refusal
+      }
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('grants') })
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-grant-applications') })
+    },
+  })
+
+  const recordAward = (applicationId: string, amount: number, currency: string) =>
+    mutation.mutateAsync({ applicationId, amount, currency })
+
+  return { recordAward, loading: mutation.isPending, error: mutation.error }
+}
+
 /**
  * Record a decision on an application.
  *

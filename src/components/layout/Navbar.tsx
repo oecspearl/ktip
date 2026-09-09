@@ -243,6 +243,16 @@ const navDropdowns: NavDropdown[] = [
  */
 const HOVER_CLOSE_MS = 180
 
+/**
+ * True while the current page has asked for the bar to stay hidden over its
+ * opening band. The page says so with a class on <html> (ProfileCanvas sets
+ * `nav-auto-hide` for the member page) rather than through a context, because
+ * the bar reads it from inside a scroll sampler and a class check is free.
+ */
+function autoHidesOnHero(): boolean {
+  return document.documentElement.classList.contains('nav-auto-hide')
+}
+
 function useHoverMenu() {
   const timer = useRef(0)
 
@@ -329,7 +339,12 @@ export function Navbar() {
       const y = window.scrollY
       const previous = lastScrollY.current
       lastScrollY.current = y
-      if (y < 80) setNavHidden(false)
+      // Near the top the bar normally stays put — except on a page that has
+      // asked for it to be gone while its opening band is on screen (the
+      // member page: the bar there is chrome over a portrait, not a way to
+      // anywhere). There, the top of the page is the HIDDEN state, and only
+      // a scroll up, a wheel up or a hover at the top edge brings it back.
+      if (y < 80) setNavHidden(autoHidesOnHero() && y >= previous)
       else if (y > previous + 4) setNavHidden(true)
       else if (y < previous - 4) setNavHidden(false)
       setScrolledPastHero(y > 120)
@@ -338,11 +353,37 @@ export function Navbar() {
       if (frame) return
       frame = requestAnimationFrame(sample)
     }
+    // At scrollY 0 there is no scroll event to carry "up" — the page cannot
+    // move — so the gesture itself is read. Wheel only: a touch drag at the top
+    // is the pull-to-refresh gesture on a phone and must not open a bar.
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY < -2 && autoHidesOnHero()) setNavHidden(false)
+    }
     window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('wheel', onWheel, { passive: true })
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('wheel', onWheel)
       if (frame) cancelAnimationFrame(frame)
     }
+  }, [])
+
+  /**
+   * The page sets the flag from an effect that runs after this component's
+   * route-change layout effect below, so the first paint of the member page
+   * would show the bar and then hide it a frame later. Watching the root's
+   * class list closes that gap in either direction: the flag arriving hides
+   * the bar, the flag leaving (navigating away) shows it.
+   */
+  useEffect(() => {
+    const root = document.documentElement
+    const apply = () => {
+      if (window.scrollY < 80) setNavHidden(autoHidesOnHero())
+    }
+    apply()
+    const observer = new MutationObserver(apply)
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
   }, [])
 
   /**
@@ -362,7 +403,10 @@ export function Navbar() {
    * runs inside flushSync, ahead of the snapshot.
    */
   useLayoutEffect(() => {
-    setNavHidden(false)
+    // Not unconditionally shown: a page that hides the bar over its band keeps
+    // it hidden across a navigation that lands there. The class observer above
+    // catches the page's own flag arriving a frame later.
+    setNavHidden(autoHidesOnHero())
     setScrolledPastHero(false)
     lastScrollY.current = 0
   }, [location.pathname])

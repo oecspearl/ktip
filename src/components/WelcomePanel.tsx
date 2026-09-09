@@ -6,7 +6,7 @@ import { Button } from './ui/Button'
 import { ResponsiveImage } from './ui/ResponsiveImage'
 import { Stepper } from './ui/Stepper'
 import { useDeckFlip } from './ui/useDeckFlip'
-import { HERO_IMAGES } from '../lib/hero-images'
+import { PHOTO_SETS } from '../lib/hero-images'
 import { markWelcomeSeen, useHasSeenWelcome } from '../lib/welcome-panel'
 
 /**
@@ -48,6 +48,13 @@ const EXIT_MS = 420
 const IRIS_MS = 760
 /** Between slides: the outgoing copy's `welcomeLineOut`. */
 const SWAP_MS = 340
+
+/**
+ * One photo per slide, in slide order. The first is the welcome frame — the
+ * team in front of the SKIP banner — and is fixed: it does not rotate and is
+ * not shared with any page band, so a new reader always opens onto it.
+ */
+const SLIDE_PHOTOS = ['/photos/welcome-1.webp', PHOTO_SETS.cohort[0], PHOTO_SETS.cohort[2]]
 
 const SLIDES = [
   {
@@ -129,7 +136,7 @@ export function WelcomePanel() {
     if (!open) return
     for (const offset of [step - 1, step]) {
       const img = new Image()
-      img.src = HERO_IMAGES[offset % HERO_IMAGES.length]
+      img.src = SLIDE_PHOTOS[offset % SLIDE_PHOTOS.length]
     }
   }, [open, step])
 
@@ -232,7 +239,7 @@ export function WelcomePanel() {
                 <ResponsiveImage
                   // Keyed per face so the push-in restarts with each photo.
                   key={face}
-                  src={HERO_IMAGES[face % HERO_IMAGES.length]}
+                  src={SLIDE_PHOTOS[face % SLIDE_PHOTOS.length]}
                   alt=""
                   sizes="(min-width: 768px) 45vw, 100vw"
                   loading="eager"

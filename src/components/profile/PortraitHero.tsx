@@ -267,7 +267,13 @@ export function PortraitHero({
         h0 = natural.h * s
       }
       const x0 = (from.width - w0) / 2
-      const y0 = from.height - h0
+      // A cut-out stands ON the band's bottom edge, so it is anchored there. A
+      // photo is a cover crop and must be CENTRED, exactly as `object-cover`
+      // centres the same picture in the slot underneath and in the rail's
+      // diamond. Bottom-anchoring it pushed the face up out of the frame by
+      // half the overflow, so the hero showed a chest where every other
+      // surface showed a head.
+      const y0 = cutout ? from.height - h0 : (from.height - h0) / 2
       const w1 = to.width / frame.s
       const h1 = w1 / a
       const x1 = -frame.x * w1
@@ -281,7 +287,14 @@ export function PortraitHero({
       const sideFade = (7 * (1 - e)).toFixed(2)
       const style = img.style as unknown as Record<string, string>
       if (cutout && e < 1) {
-        img.style.maskImage = `linear-gradient(to bottom, #000 ${60 + 40 * e}%, rgba(0,0,0,${e}) 100%), linear-gradient(to right, rgba(0,0,0,${e}), #000 ${sideFade}%, #000 ${100 - Number(sideFade)}%, rgba(0,0,0,${e}))`
+        // The base is not a flat fade but a V: two diagonal fades, one toward
+        // each bottom corner, intersected. Their meeting line is the lower
+        // half of the diamond the figure is about to fly into, so the rest
+        // of the page's shape is already in the band before the flight.
+        const vStart = 58 + 42 * e
+        const vEnd = 84 + 16 * e
+        const v = (deg: number) => `linear-gradient(${deg}deg, #000 ${vStart}%, rgba(0,0,0,${e}) ${vEnd}%)`
+        img.style.maskImage = `${v(135)}, ${v(225)}, linear-gradient(to right, rgba(0,0,0,${e}), #000 ${sideFade}%, #000 ${100 - Number(sideFade)}%, rgba(0,0,0,${e}))`
         style.maskComposite = 'intersect'
         style.webkitMaskComposite = 'source-in'
       } else {
@@ -456,10 +469,28 @@ export function PortraitHero({
           <div
             className={cn(
               'mt-7 grid items-end gap-x-12 gap-y-8 lg:mt-5 xl:gap-x-16',
-              // Tall enough that the band is the whole of what you see: a
-              // shorter one put the rail's identity plate on screen beside the
-              // name in the band, which reads as the page rendering twice.
-              compact ? 'lg:min-h-[34rem]' : 'lg:min-h-[36rem]',
+              // Now the band is a screenful, bottom-aligned words sat in the
+              // last third of it with a void above. Centring lifts them into
+              // the band. The portrait is unaffected — it carries its own
+              // `self-end`, because a cut-out has to stand on the bottom edge.
+              !compact && 'lg:items-center',
+              // The band is the whole of the first screen, deliberately.
+              //
+              // 36rem was a fixed guess, and on any viewport taller than about
+              // 1300px it left the rail's identity plate and the standing meter
+              // showing under it — the same name, level, points and figures the
+              // band is already displaying. That duplication is not a bug in
+              // the layout: the portrait's flight fades the band's words out as
+              // the rail wakes up, so the two are never MEANT to be read at
+              // once. Sizing the band to the viewport is what guarantees that,
+              // instead of hoping 36rem is enough.
+              //
+              // svh, not vh: on mobile Chrome and Safari `vh` is the largest
+              // viewport, so a vh-sized band hides content behind the URL bar.
+              // The 36rem floor keeps it from collapsing on a short laptop.
+              compact
+                ? 'lg:min-h-[34rem]'
+                : 'lg:min-h-[max(36rem,calc(100svh-var(--nav-h)-1.75rem))]',
               gridCols
             )}
           >
@@ -556,11 +587,50 @@ export function PortraitHero({
                 // The subject is drawn `object-contain`, so for a square or
                 // near-square cut-out it is the WIDTH that decides how tall
                 // the person reads. Both clamps grow together for that reason.
+                // The band fills the screen now, so the person in it can be the
+                // size a person on their own page should be. Every desktop
+                // clamp grew; the phone ones did not, because there the band is
+                // a stack and the portrait already leads it.
+                // Ceilings, not just floors. A cut-out drawn 1000 px tall puts a
+                // head on screen at half a metre, and at that size the lens of
+                // the phone that took it starts to show: front cameras are wide,
+                // faces shot at arm's length broaden across the cheeks, and what
+                // was invisible at 300 px reads as a stretched image at 500. So
+                // the centred portrait stops growing at about 720.
+                //
+                // To one side the rule is different: the person should stand
+                // TALLER than the column of words beside them, so the head sits
+                // above the eyebrow and the figure owns the band rather than
+                // sitting in its lower half. That column is about three quarters
+                // of the screen, so the box is keyed to svh, not vw — a wide
+                // short laptop must not get a taller person than a tall monitor.
+                // The width grows with it because a near-square cut-out is
+                // width-bound under object-contain: at 900 px wide a 0.9:1
+                // figure only ever reached 1000 px tall however tall the box.
+                // Lifted off the band's bottom edge by a few svh, too — the
+                // bottom fade in the mask already dissolves the figure, so the
+                // gap under it is invisible and the head clears the eyebrow.
+                // The wider box must not take its width from the words: the
+                // portrait track is `auto`, sized from the margin box, so a
+                // negative right margin hands that width back to the words and
+                // slides the figure toward the screen edge instead. The band is
+                // overflow-hidden, so the box's overhang is simply cropped.
+                // The height is the grid's own minimum, never more: a taller
+                // box is the row's tallest item, so it stretches the row and
+                // shoves the centred words down off the first screen.
                 cutout && side === 'center'
-                  ? 'h-[clamp(340px,62vw,460px)] w-[clamp(280px,52vw,380px)] lg:h-[clamp(440px,40vw,620px)] lg:w-[clamp(300px,27vw,440px)]'
+                  ? 'h-[clamp(340px,62vw,460px)] w-[clamp(280px,52vw,380px)] lg:h-[clamp(540px,52vw,720px)] lg:w-[clamp(380px,35vw,500px)]'
                   : cutout
-                  ? 'h-[clamp(340px,62vw,460px)] w-[clamp(280px,52vw,380px)] lg:h-[clamp(480px,50vw,720px)] lg:w-[clamp(360px,38vw,560px)]'
-                  : 'mb-8 h-[clamp(230px,46vw,300px)] w-[clamp(230px,46vw,300px)] lg:mb-14 lg:h-[clamp(320px,29vw,460px)] lg:w-[clamp(320px,29vw,460px)]'
+                  ? 'h-[clamp(340px,62vw,460px)] w-[clamp(280px,52vw,380px)] lg:h-[clamp(640px,calc(100svh-var(--nav-h)-1.75rem),1500px)] lg:w-[clamp(480px,56vw,1500px)]'
+                  : 'mb-8 h-[clamp(230px,46vw,300px)] w-[clamp(230px,46vw,300px)] lg:mb-14 lg:h-[clamp(420px,40vw,760px)] lg:w-[clamp(420px,40vw,760px)]',
+                // Both boxes overhang the page edge by the same margin so the
+                // words column is the same width either way; each is then
+                // nudged so the FACE lands in the same place. The cut-out's face
+                // is in its top third and the diamond's is at its centre, so the
+                // diamond sits further left and lower than the cut-out's box.
+                side !== 'center' && 'lg:-mr-[14vw] lg:justify-self-end',
+                side !== 'center' &&
+                  (cutout ? 'lg:-translate-x-[4vw] lg:-translate-y-[5svh]' : 'lg:-translate-x-[10vw] lg:-translate-y-[16svh]')
               )}
               aria-hidden="true"
             >
@@ -596,7 +666,7 @@ export function PortraitHero({
                     // side fades hide the straight edge a cut-out has wherever
                     // the original photo was cropped through the person.
                     cutout
-                      ? 'object-contain object-bottom [mask-composite:intersect] [mask-image:linear-gradient(to_bottom,#000_70%,transparent),linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]'
+                      ? 'object-contain object-bottom [mask-composite:intersect] [mask-image:linear-gradient(135deg,#000_58%,transparent_84%),linear-gradient(225deg,#000_58%,transparent_84%),linear-gradient(to_right,transparent,#000_7%,#000_93%,transparent)]'
                       : 'object-cover [clip-path:polygon(50%_0,100%_50%,50%_100%,0_50%)]'
                   )}
                   decoding="async"

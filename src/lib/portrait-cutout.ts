@@ -17,7 +17,7 @@
  */
 
 import { canEncodeWebp, decodeImage, fitDimensions } from './image-optimize'
-import { analyseMask, coverageIsPlausible, type MaskAnalysis } from './portrait-mask'
+import { alphaBounds, analyseMask, coverageIsPlausible, remapAnalysis, type MaskAnalysis } from './portrait-mask'
 import { greyGuide, refineMatte } from './portrait-matte'
 
 export type CutoutPhase = 'loading-model' | 'cutting' | 'refining'
@@ -216,17 +216,55 @@ export async function cutOutPortrait(file: File, opts: CutoutOptions = {}): Prom
     if ('filter' in pctx) pctx.filter = 'none'
     pctx.globalCompositeOperation = 'source-over'
 
+    // Crop the air away. A cut-out that keeps the photo's canvas carries the
+    // removed background as transparent margin, and every surface that draws
+    // it `object-contain` centres the CANVAS — so a person who stood to one
+    // side of their photo stands to one side of the hero's box, the flyer
+    // starts off-centre, and the diamond and the standing figure disagree
+    // about where the face is. Trimming to the alpha puts the person where the
+    // box is. The pad keeps the feathered fringe: the blur above spread alpha
+    // FEATHER_PX beyond the mask, so the mask's own bounds are a hair too
+    // tight.
+    const maskBounds = alphaBounds(refined.mask, mw, mh, 0.02, Math.ceil(FEATHER_PX * 3) + 1)
+    let out: OffscreenCanvas = photo
+    let outW = width
+    let outH = height
+    let finalAnalysis = analysis
+    if (maskBounds && (maskBounds.w < mw || maskBounds.h < mh)) {
+      const sx = width / mw
+      const sy = height / mh
+      const crop = {
+        x: Math.floor(maskBounds.x * sx),
+        y: Math.floor(maskBounds.y * sy),
+        w: Math.min(width, Math.ceil(maskBounds.w * sx)),
+        h: Math.min(height, Math.ceil(maskBounds.h * sy)),
+      }
+      crop.w = Math.min(crop.w, width - crop.x)
+      crop.h = Math.min(crop.h, height - crop.y)
+      if (crop.w > 0 && crop.h > 0) {
+        const cropped = new OffscreenCanvas(crop.w, crop.h)
+        const cctx = cropped.getContext('2d')
+        if (cctx) {
+          cctx.drawImage(photo, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h)
+          out = cropped
+          outW = crop.w
+          outH = crop.h
+          finalAnalysis = remapAnalysis(analysis, crop, width, height)
+        }
+      }
+    }
+
     // Lossy WebP carries alpha; nothing downstream flattens it. Safari cannot
     // encode WebP from a canvas, so it gets PNG — bigger, still transparent.
-    const cutout = await photo.convertToBlob(
+    const cutout = await out.convertToBlob(
       canEncodeWebp() ? { type: 'image/webp', quality: 0.9 } : { type: 'image/png' }
     )
 
     return {
-      ...analysis,
+      ...finalAnalysis,
       cutout,
-      width,
-      height,
+      width: outW,
+      height: outH,
       strayPatches: refined.droppedComponents,
       strayPixels: refined.droppedPixels,
       filledHoles: refined.filledHoles,

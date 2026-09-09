@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { HERO_IMAGES } from '../../lib/hero-images'
@@ -50,6 +50,7 @@ export function AuthSplitShell({
   subheading,
   topLink,
   heroOffset = 0,
+  heroPhotos,
   children,
 }: {
   step: number
@@ -58,22 +59,33 @@ export function AuthSplitShell({
   subheading?: ReactNode
   topLink?: ReactNode
   heroOffset?: number
+  /**
+   * Photos pinned to specific steps, indexed from zero. A defined entry is used
+   * for that step; a hole (or a short array) falls through to the rotating
+   * pool, so a page can fix the one or two frames it cares about without
+   * having to name a photo for every step it has.
+   */
+  heroPhotos?: ReadonlyArray<string | undefined>
   children: ReactNode
 }) {
   const n = steps.length
   const { panelRef, face } = useDeckFlip(step, n)
   const mirrored = face % 2 === 1
   const imageOnLeft = face % 2 === 0
-  const hero = HERO_IMAGES[(heroOffset + face) % HERO_IMAGES.length]
+  const heroAt = useCallback(
+    (i: number) => heroPhotos?.[i] ?? HERO_IMAGES[(heroOffset + i) % HERO_IMAGES.length],
+    [heroPhotos, heroOffset],
+  )
+  const hero = heroAt(face)
   const current = steps[Math.min(face, n - 1)]
 
   // Preload the target step's photo so the midpoint face swap never shows a blank panel
   useEffect(() => {
     const img = new Image()
-    img.src = HERO_IMAGES[(heroOffset + step - 1) % HERO_IMAGES.length]
+    img.src = heroAt(step - 1)
     const next = new Image()
-    next.src = HERO_IMAGES[(heroOffset + step) % HERO_IMAGES.length]
-  }, [step, heroOffset])
+    next.src = heroAt(step)
+  }, [step, heroAt])
 
   // Move focus to the new step's content for keyboard/SR users (skip initial mount)
   const contentRef = useRef<HTMLDivElement>(null)

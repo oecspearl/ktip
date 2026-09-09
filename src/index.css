@@ -1180,6 +1180,47 @@ html.dark {
     --color-neu-lo: rgba(0, 0, 0, 0.42);
   }
 
+  /* Two panels on the member page: the band, then everything under it.
+
+     The band is a screenful and the portrait flies out of it into the rail as
+     you scroll, so stopping halfway leaves the reader looking at a half-band
+     with a portrait frozen mid-flight. Snapping means one gesture takes you
+     from one to the other, which is the shape the page already had.
+
+     `mandatory`, and `scroll-snap-stop: always` on both: the two are what make
+     it read as a switch rather than as a drift. Without the stop, one firm
+     flick carries you past the band and deep into the content; with it, a
+     gesture moves you exactly one panel. Mandatory is safe here ONLY because
+     there are two snap points and the second is the top of a column taller
+     than the viewport — once you are inside it there is nothing below to be
+     pulled toward, so reading the middle of the page is untouched.
+
+     `scroll-behavior: auto` is stated rather than assumed. A `smooth` set
+     anywhere above this would turn the switch back into the slow ease the
+     snap is here to replace.
+
+     `scroll-margin-top` on the second panel only: the navbar is fixed, so
+     aligning a panel to the top of the scrollport puts its first 100-odd
+     pixels underneath it. The band wants that — it is drawn to sit under the
+     chrome — and the content column does not.
+
+     Scoped to a class the page puts on <html> while it is mounted, so no other
+     route inherits a snap container. Off below lg (the band is a stack there,
+     not a screenful) and off under reduced motion. */
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    html.snap-profile {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: auto;
+    }
+    html.snap-profile [data-snap] {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+    html.snap-profile [data-snap='content'] {
+      scroll-margin-top: var(--nav-h);
+    }
+  }
+
   /* The member page's portrait flight (PortraitHero → IdentityPlate rail).
 
      The hero writes ONE number, --land (0 = the portrait is up in the hero,

@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from 'react'
+import { useEffect, type ReactNode, type RefObject } from 'react'
 import { Link } from 'react-router'
 import {
   Calendar,
@@ -187,6 +187,22 @@ export function ProfileCanvas({
 }: ProfileCanvasProps) {
   const { t, i18n } = useLingui()
   const pane = layout === 'pane'
+
+  // The snap container has to be the scrolling element, which is <html> — so
+  // the page marks it while it is mounted and clears it on the way out rather
+  // than leaving every other route inside a snap container. Page layout only:
+  // a pane scrolls inside the dashboard, and snapping it would drag the rail
+  // beside it around.
+  useEffect(() => {
+    if (pane) return
+    const root = document.documentElement
+    // nav-auto-hide: the navbar stays out of the way while the band is on
+    // screen and comes back on a scroll up or a hover at the top edge. Read by
+    // Navbar; the band is the one screen where the bar over it is chrome over
+    // a portrait rather than a way to get somewhere.
+    root.classList.add('snap-profile', 'nav-auto-hide')
+    return () => root.classList.remove('snap-profile', 'nav-auto-hide')
+  }, [pane])
   const prompting = (emptyBlocks ?? (edit ? 'prompt' : 'omit')) === 'prompt'
 
   /**
@@ -217,6 +233,23 @@ export function ProfileCanvas({
       ]
     : []
 
+  /**
+   * Where this member works, as the page should say it.
+   *
+   * Two fields have always answered that question. `profiles.organization` is
+   * free text typed at signup and checked by nobody; `employer` is the entity
+   * a Chamber verified, with a slug and a page of its own. The band was reading
+   * the first while the rail showed the second, so a member could see their own
+   * page name their employer two different ways a few hundred pixels apart.
+   *
+   * The verified name wins wherever both exist: it is the one the platform can
+   * vouch for, and putting the unchecked claim in the largest type on the page
+   * while the checked fact sits in a small card is the trust ordering upside
+   * down. The free text stays the fallback, so the majority — who have no
+   * verified employer — are unaffected.
+   */
+  const orgName = employer?.trading_name || employer?.legal_name || profile.organization
+
   // The rail plate's lines: the full record — country, employer, joined —
   // one per line. The plate's words column is about 170px wide beside the
   // diamond, and a dotted run wraps there with the dots orphaned at line
@@ -229,9 +262,9 @@ export function ProfileCanvas({
           {profile.country}
         </span>
       )}
-      {(profile.organization || profile.industry) && (
+      {(orgName || profile.industry) && (
         <span className="basis-full">
-          {[profile.organization, profile.industry].filter(Boolean).join(' · ')}
+          {[orgName, profile.industry].filter(Boolean).join(' · ')}
         </span>
       )}
       <span className="basis-full">
@@ -282,14 +315,12 @@ export function ProfileCanvas({
     )
   const bioLede = ledeFrom(profile.bio)
   const heroLede =
-    profile.organization || profile.industry || bioLede ? (
+    orgName || profile.industry || bioLede ? (
       <>
-        {profile.organization && (
-          <em className="not-italic font-semibold text-white">{profile.organization}</em>
-        )}
-        {profile.organization && profile.industry && <span className="text-white/60">, </span>}
+        {orgName && <em className="not-italic font-semibold text-white">{orgName}</em>}
+        {orgName && profile.industry && <span className="text-white/60">, </span>}
         {profile.industry && <span>{profile.industry}</span>}
-        {(profile.organization || profile.industry) && bioLede && <span className="text-white/60">. </span>}
+        {(orgName || profile.industry) && bioLede && <span className="text-white/60">. </span>}
         {bioLede}
       </>
     ) : null
@@ -307,6 +338,11 @@ export function ProfileCanvas({
 
   return (
     <>
+      {/* Panel one. A plain wrapper so the band has something to snap to —
+          PortraitHero renders a section AND its fixed flyer, and the flyer is
+          positioned in viewport coordinates, so this must never gain a
+          transform of its own. */}
+      <div data-snap={pane ? undefined : 'hero'}>
       <PortraitHero
         name={displayName}
         verified={profile.is_verified}
@@ -346,7 +382,13 @@ export function ProfileCanvas({
         }
       />
 
-      <div className={cn(pane ? 'w-full' : 'mx-auto max-w-page-mid px-4 pb-gutter-lg')}>
+      </div>
+
+      {/* Panel two: everything the band is not. */}
+      <div
+        data-snap={pane ? undefined : 'content'}
+        className={cn(pane ? 'w-full' : 'mx-auto max-w-page-mid px-4 pb-gutter-lg')}
+      >
         <div
           className={cn(
             'mt-8 grid items-start gap-gutter',

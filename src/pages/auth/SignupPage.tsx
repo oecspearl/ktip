@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../../components/ui/Button'
@@ -12,6 +12,7 @@ import { PasswordChecklist } from '../../components/ui/PasswordChecklist'
 import { Mail, Lock, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
 import { OtpInput } from '../../components/ui/OtpInput'
 import { signupSchema, signupStep1Schema, todayIso } from '../../lib/validation'
+import { canCheckEmail, checkEmailAvailable } from '../../lib/email-available'
 import { supabase } from '../../lib/supabase'
 import { roleRequiresMfa } from '../../lib/permissions'
 import {
@@ -38,6 +39,22 @@ const STEPS = [
   { title: msg`Skills & Collaboration`, caption: msg`Find collaborators. Build what’s next.` },
   { title: msg`Agreements`, caption: msg`The rules of the road. Read them once, then you’re in.` },
   { title: msg`Verify email`, caption: msg`One code, and the account is yours.` },
+]
+
+/**
+ * Photos pinned to individual signup steps, indexed from zero. Step 1 is the
+ * hole: it falls through to the rotating pool the shell uses everywhere else.
+ *
+ * Step 4 names a pool frame explicitly rather than leaving a hole, because a
+ * hole there would resolve by position and the positions have all shifted —
+ * it is pinned so it keeps the frame it was picked for.
+ */
+const STEP_PHOTOS = [
+  undefined,
+  '/photos/signup-about.webp',
+  '/photos/signup-collab.webp',
+  '/photos/cohort-5.webp',
+  '/photos/signup-verify.webp',
 ]
 
 const HEADINGS = [
@@ -122,6 +139,15 @@ export default function SignupPage() {
 
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // The address the server said already has an account — kept as the address
+  // itself rather than a flag, so the error is tied to what was checked and
+  // disappears the moment the field is edited, with no reset to remember.
+  // The check runs on blur; see handleEmailBlur.
+  const [takenEmail, setTakenEmail] = useState<string | null>(null)
+  const emailCheck = useRef<AbortController | null>(null)
+  const normalisedEmail = email.trim().toLowerCase()
+  const emailTaken = takenEmail !== null && takenEmail === normalisedEmail
   const [errorMessage, setErrorMessage] = useState('')
   const [pending, setPending] = useState(false)
 
@@ -171,17 +197,41 @@ export default function SignupPage() {
   // either password field changes instead of waiting for the next blur.
   const mismatch = confirmPassword.length > 0 && confirmPassword !== password
 
-  // Live per-field error shown only once the field is touched
-  const visibleError = (field: string): string | undefined =>
-    touched[field] ? errors[field] : undefined
+  // Live per-field error shown only once the field is touched. A taken address
+  // outranks a shape error on the email field, but a taken address has a valid
+  // shape by construction, so in practice they never compete.
+  const takenEmailMessage = t`An account already exists for this email. Log in instead, or use “Forgot password?” if you have lost access to it.`
+  const visibleError = (field: string): string | undefined => {
+    if (field === 'email' && emailTaken) return takenEmailMessage
+    return touched[field] ? errors[field] : undefined
+  }
 
   const handleBlur = (field: string) => {
     markTouched(field)
     setErrors(validateStep1())
   }
 
+  // Leaving the email field asks the server whether it is already an account.
+  // Only an address that passes the shape check is worth asking about, and a
+  // newer blur cancels an older in-flight question so the answer that lands
+  // is always about the address in the field. Every failure answers 'unknown'
+  // and the field stays valid: signUp() still catches a real duplicate later,
+  // so a broken check must never block anyone.
+  const handleEmailBlur = () => {
+    handleBlur('email')
+    const address = email.trim().toLowerCase()
+    emailCheck.current?.abort()
+    if (!canCheckEmail(address) || address === takenEmail) return
+    const controller = new AbortController()
+    emailCheck.current = controller
+    void checkEmailAvailable(address, controller.signal).then((result) => {
+      if (controller.signal.aborted) return
+      if (result === 'taken') setTakenEmail(address)
+    })
+  }
+
   const accountValid = (fieldErrors: Record<string, string>) =>
-    ACCOUNT_FIELDS.every((field) => !fieldErrors[field])
+    !emailTaken && ACCOUNT_FIELDS.every((field) => !fieldErrors[field])
 
   // Live, from the values themselves rather than from `errors` — that map is
   // only refreshed on blur, and autofill or a click straight into a later field
@@ -206,7 +256,7 @@ export default function SignupPage() {
     if (step === 1) {
       const fieldErrors = validateStep1()
       setErrors(fieldErrors)
-      if (Object.keys(fieldErrors).length > 0) {
+      if (Object.keys(fieldErrors).length > 0 || emailTaken) {
         setTouched(ALL_STEP1_TOUCHED)
         // An error inside a folded section is an error nobody can see.
         if (!accountValid(fieldErrors)) setAccountOpen(true)
@@ -344,6 +394,7 @@ export default function SignupPage() {
     <AuthSplitShell
         step={shellStep}
         steps={steps}
+        heroPhotos={STEP_PHOTOS}
         heading={i18n._(HEADINGS[shellStep - 1])}
         subheading={!otpSent && step === 1 ? APP_FULL_NAME : undefined}
         topLink={
@@ -430,7 +481,7 @@ export default function SignupPage() {
                       placeholder={t`Enter your email`}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      onBlur={() => handleBlur('email')}
+                      onBlur={handleEmailBlur}
                       error={visibleError('email')}
                       icon={<Mail size={20} />}
                       fullWidth

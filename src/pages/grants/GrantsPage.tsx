@@ -26,7 +26,7 @@ import { grantTypeIcon } from '../../lib/category-icons'
 import { FUNDING_TYPES } from '../../lib/funding-types'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { cn, debounce } from '../../lib/utils'
-import { isPast } from 'date-fns'
+import { isOpenCall } from '../../lib/grant-metrics'
 import type { Grant } from '../../types'
 import { Trans, Plural, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
@@ -96,8 +96,7 @@ export default function GrantsPage() {
     const open: Grant[] = []
     const closed: Grant[] = []
     for (const grant of grants ?? []) {
-      const expired = !!grant.deadline && isPast(new Date(grant.deadline))
-      ;(grant.is_active === false || expired ? closed : open).push(grant)
+      ;(isOpenCall(grant) ? open : closed).push(grant)
     }
     return { openGrants: open, closedGrants: closed }
   }, [grants])

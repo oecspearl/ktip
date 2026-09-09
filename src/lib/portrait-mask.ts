@@ -176,6 +176,90 @@ export function frameToPixels(frame: PortraitFrame, w: number, h: number) {
   }
 }
 
+/** A pixel rectangle inside a w×h image. */
+export interface PixelRect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+/**
+ * The rectangle that holds every pixel with alpha above `threshold`, grown by
+ * `pad` px and clamped to the image. Null when nothing clears the threshold.
+ *
+ * The threshold is deliberately far below the 0.5 the analysis uses: the
+ * feathered fringe of hair sits at 0.05 and must not be cut through.
+ */
+export function alphaBounds(
+  data: ArrayLike<number>,
+  w: number,
+  h: number,
+  threshold = 0.02,
+  pad = 0
+): PixelRect | null {
+  let minx = w
+  let maxx = -1
+  let miny = h
+  let maxy = -1
+  for (let y = 0; y < h; y++) {
+    const row = y * w
+    for (let x = 0; x < w; x++) {
+      if (data[row + x] > threshold) {
+        if (x < minx) minx = x
+        if (x > maxx) maxx = x
+        if (y < miny) miny = y
+        if (y > maxy) maxy = y
+      }
+    }
+  }
+  if (maxx < 0) return null
+  const x0 = Math.max(0, minx - pad)
+  const y0 = Math.max(0, miny - pad)
+  const x1 = Math.min(w - 1, maxx + pad)
+  const y1 = Math.min(h - 1, maxy + pad)
+  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 }
+}
+
+/**
+ * Re-express an analysis made over a w×h image in the coordinates of
+ * `crop`, a rectangle cut from it.
+ *
+ * Everything that is a fraction of the image moves: the head, the bounding
+ * box and the diamond frame (re-clamped so it stays inside the crop). Coverage
+ * and softness are recomputed for the new pixel count. `side` does NOT move —
+ * it says where the person stood in the photo they uploaded, which decides
+ * which side of the hero their name goes on, and cropping the air away does
+ * not change that.
+ */
+export function remapAnalysis(a: MaskAnalysis, crop: PixelRect, w: number, h: number): MaskAnalysis {
+  const fx = (v: number) => (v * w - crop.x) / crop.w
+  const fy = (v: number) => (v * h - crop.y) / crop.h
+  const total = w * h
+  const cropTotal = crop.w * crop.h
+  const scale = cropTotal ? total / cropTotal : 1
+  const head = { cx: clamp01(fx(a.head.cx)), cy: clamp01(fy(a.head.cy)), w: (a.head.w * w) / crop.w }
+  const bbox = a.bbox
+    ? {
+        x: clamp01(fx(a.bbox.x)),
+        y: clamp01(fy(a.bbox.y)),
+        w: Math.min(1, (a.bbox.w * w) / crop.w),
+        h: Math.min(1, (a.bbox.h * h) / crop.h),
+      }
+    : null
+  // The frame is rebuilt from the moved head rather than translated, so the
+  // clamp against the new edges is the same one a fresh analysis would apply.
+  const frame = centredFrame(head.cx, head.cy, head.w, crop.w, crop.h)
+  return {
+    coverage: Math.min(1, a.coverage * scale),
+    softness: Math.min(1, a.softness * scale),
+    bbox,
+    head,
+    side: a.side,
+    frame,
+  }
+}
+
 /** True when the model plausibly found one person against some background. */
 export function coverageIsPlausible(coverage: number): boolean {
   return coverage >= COVERAGE_MIN && coverage <= COVERAGE_MAX

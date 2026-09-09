@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -22,6 +23,8 @@ import {
   Download,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '../../lib/utils'
+import { FundingStats } from '../../components/grants/FundingStats'
+import { applicationTallies, sumByCurrency } from '../../lib/grant-metrics'
 import { GRANT_APPLICATION_STATUS_LABELS } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { PageHero } from '../../components/layout/PageHero'
@@ -37,6 +40,18 @@ export default function MyApplicationsPage() {
   const { requests: sponsorships, refetch: refetchSponsorships } = useSponsorshipRequests(auth.user?.id)
   const { reviewSponsorship } = useReviewSponsorship()
   const toast = useToast()
+
+  const tallies = useMemo(() => applicationTallies(applications), [applications])
+  const awardedTotals = useMemo(
+    () =>
+      sumByCurrency(
+        (applications ?? []).filter((application) => application.status === 'approved'),
+        (application) => application.awarded_amount,
+        (application) => application.awarded_currency,
+        'XCD'
+      ),
+    [applications]
+  )
 
   const handleSponsorship = async (applicationId: string, accept: boolean) => {
     try {
@@ -125,6 +140,27 @@ export default function MyApplicationsPage() {
           the sponsorships one at all, so the rail would be a single dash under
           the hero's. Markers stay for the tour. */}
       <div data-spy-off className="w-full max-w-page mx-auto px-4 pt-8 pb-8">
+        {/* Where the applicant stands, from the rows already loaded — no extra
+            query. There is deliberately no "total requested" figure: the amount
+            an applicant asks for is free text inside application_data
+            (grant-application-template.ts), so a sum of it would be arithmetic
+            on strings like "around $50k". Awarded is a real column. */}
+        {(applications?.length ?? 0) > 0 && (
+          <FundingStats
+            className="mb-6"
+            tiles={[
+              { label: t`Submitted`, value: tallies.submitted, icon: FileText },
+              { label: t`In review`, value: tallies.awaitingDecision, icon: Clock },
+              { label: t`Approved`, value: tallies.approved, icon: CheckCircle },
+              { label: t`Drafts`, value: tallies.drafts, icon: PencilLine },
+            ]}
+            money={{
+              title: t`Funding`,
+              lines: [{ label: t`Awarded to you`, totals: awardedTotals }],
+            }}
+          />
+        )}
+
         {/* Sponsorship requests. Only faculty and school partners see this —
             a student's application cannot be submitted until one is accepted. */}
         {(sponsorships?.length ?? 0) > 0 && (
