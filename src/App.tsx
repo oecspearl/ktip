@@ -607,6 +607,8 @@ const router = createBrowserRouter([
                       // bookmarks land on the right one.
                       { path: '/admin/impact', element: <Navigate to="/admin/analytics?tab=results" replace /> },
                       { path: '/admin/pulse', element: <Navigate to="/admin/analytics?tab=reports" replace /> },
+                      // A periodic report on its own page, for print-to-PDF (147).
+                      { path: '/admin/analytics/reports/:id', lazy: lazyPage(() => import('./pages/admin/analytics/ReportPrintPage')) },
                       { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
                       { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
                       // Sends deliberate events to the live Sentry project.

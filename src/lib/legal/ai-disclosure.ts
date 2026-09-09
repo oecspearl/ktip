@@ -91,6 +91,13 @@ export const AI_DISCLOSURE: LegalDocument = {
                 'Room audio while captions are running',
               ],
             },
+            {
+              cells: [
+                'Periodic platform reports',
+                'Drafts the commentary and suggested actions of the monthly and quarterly KPI report for administrators; every report is reviewed and published by a person, and the model never decides a KPI’s status',
+                'Aggregate platform figures only — counts, percentages, targets and the titles of already-public projects, events and resources. Never a member record, message or document',
+              ],
+            },
           ],
         },
       ],
