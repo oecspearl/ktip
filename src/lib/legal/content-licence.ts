@@ -135,7 +135,7 @@ export const CONTENT_LICENCE: LegalDocument = {
           text: 'Copies already made by others under the public-content rule above, including search-engine caches, are outside our control.',
         },
       ],
-      actions: [{ label: 'Delete your account', href: '/settings?tab=security' }],
+      actions: [{ label: 'Delete your account', href: '/dashboard/security' }],
     },
     {
       id: 'others-work',

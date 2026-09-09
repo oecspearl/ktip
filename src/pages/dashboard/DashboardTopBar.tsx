@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
-import { CheckCircle, ChevronRight, Users } from 'lucide-react'
+import { ChevronRight, Users } from 'lucide-react'
+import { VerifiedBadge } from '../../components/ui/VerifiedBadge'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { ROLE_LABELS } from '../../lib/constants'
 import type { UserRole } from '../../types'
@@ -66,11 +67,7 @@ export function DashboardTopBar({
           <span className="hidden sm:flex items-center gap-2 min-w-0 text-sm text-white/85">
             <DiamondAvatar src={avatarUrl} name={displayName} size={26} frameClassName="ring-1 ring-white/40" />
             <span className="font-semibold text-white truncate max-w-[12rem]">{displayName}</span>
-            {isVerified && (
-              <span className="text-white/90 shrink-0" title={t`Verified`}>
-                <CheckCircle size={14} />
-              </span>
-            )}
+            <VerifiedBadge verified={isVerified} size={14} tone="inverse" />
           </span>
 
           <span className="hidden lg:flex items-center gap-2">

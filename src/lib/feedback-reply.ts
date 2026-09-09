@@ -35,7 +35,7 @@ export function announceFeedbackReply(params: {
     type: 'feedback_reply',
     title: i18n._(msg`We replied to your feedback`),
     body: preview,
-    link: '/settings?tab=feedback',
+    link: '/dashboard/feedback',
   })
 
   void emailReporter(params.feedbackId).catch(() => {})

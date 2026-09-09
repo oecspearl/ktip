@@ -151,7 +151,7 @@ export function SignalSummary() {
 
       {(!interests || !skills) && (
         <Link
-          to="/settings?tab=profile"
+          to="/dashboard/my-profile"
           className="inline-block mt-3 text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
         >
           <Trans>Complete your profile →</Trans>

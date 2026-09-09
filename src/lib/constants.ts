@@ -651,10 +651,14 @@ export const ROUTES = {
   // the URL will be shared.
   PROFILE: (id: string) => `/directory?member=${id}`,
   MEMBER_PAGE: (id: string) => `/user/${id}`,
-  MY_PROFILE: '/dashboard/profile',
+  // The profile tab, not the CV one. This pointed at /dashboard/profile,
+  // which is the CV — a leftover from before the slug collision was resolved.
+  MY_PROFILE: '/dashboard/my-profile',
   ACHIEVEMENTS: '/dashboard/achievements',
   LEADERBOARD: '/leaderboard',
-  SETTINGS: '/settings',
+  // SETTINGS removed with the page itself. /settings still resolves as a
+  // redirect (see SettingsRedirect in App.tsx) for the notification rows and
+  // mail that already point at it, but nothing new should be built on it.
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
   COLLABORATE: '/collaborate',
@@ -950,7 +954,13 @@ export const LIMITS = {
 
 // Image optimization presets — see src/lib/image-optimize.ts
 export const IMAGE_PRESETS = {
-  AVATAR: { maxDim: 512, quality: 0.85, maxBytes: 300 * 1024 },
+  // 400 KB, not 300: since 148 the avatar may be a cut-out composite, and
+  // the quality ladder would otherwise grind a feathered edge to mush chasing
+  // a budget set for a flat JPEG.
+  AVATAR: { maxDim: 512, quality: 0.85, maxBytes: 400 * 1024 },
+  // The transparent cut-out the member page hero draws at ~560 CSS px on a 2×
+  // screen. Alpha WebP; the budget is loose because it loads on one page only.
+  PORTRAIT: { maxDim: 1024, quality: 0.9, maxBytes: 700 * 1024 },
   SPEAKER: { maxDim: 800, quality: 0.85, maxBytes: 500 * 1024 },
   DOCUMENT: { maxDim: 1600, quality: 0.82, maxBytes: 1024 * 1024 },
   // Trophies render at 128px at most and there are ~52 of them, so they are

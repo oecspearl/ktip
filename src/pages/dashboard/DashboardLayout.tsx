@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
-import { CheckCircle, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
+import { VerifiedBadge } from '../../components/ui/VerifiedBadge'
 import { PageHero } from '../../components/layout/PageHero'
 import { useAuth } from '../../contexts/AuthContext'
 import { useConnectionCount } from '../../hooks/useConnections'
@@ -90,11 +91,7 @@ export default function DashboardLayout() {
               frameClassName="ring-2 ring-white/40"
             />
             <span className="font-semibold truncate">{displayName}</span>
-            {profile?.is_verified && (
-              <span className="text-white/90 shrink-0" title={t`Verified`}>
-                <CheckCircle size={15} />
-              </span>
-            )}
+            <VerifiedBadge verified={profile?.is_verified} size={15} tone="inverse" />
           </span>
         }
         title={t`Dashboard`}
@@ -146,6 +143,16 @@ export default function DashboardLayout() {
 
       <div
         className="w-full max-w-page mx-auto px-4 pt-8 pb-12"
+        // No scroll-spy rail anywhere under /dashboard. The dashboard already
+        // has a rail — the tab column to the left — and a second one down the
+        // right edge, listing the sections of whichever panel happens to be
+        // open, is two navigations for one page competing at the same weight.
+        //
+        // This switches the RAIL off, not the markers: `data-spy` attributes
+        // stay in the DOM, which is what the tours in src/data/tutorials target
+        // by literal selector. Removing them to quiet the rail would break
+        // walkthrough steps with no error anywhere.
+        data-spy-off
         // The rail sticks under whatever is above it: navbar alone at the top of
         // the page, navbar + collapsed band once the hero is gone.
         style={{ '--dash-bar-h': collapsed ? DASH_BAR_H : '0px' } as CSSProperties}
@@ -189,8 +196,22 @@ export default function DashboardLayout() {
                       : pathname.startsWith(to) ||
                         (tab.to === 'achievements' && pathname.startsWith('/dashboard/leaderboard'))
                   return (
+                    <Fragment key={tab.to}>
+                    {/* A section opens on the first tab that names one. The
+                        rail is a column above lg and a sideways scroller below
+                        it, so the same break is a labelled hairline in one and
+                        a plain rule between runs in the other — a heading in a
+                        row of pills is a pill-shaped word. */}
+                    {tab.group && (
+                      <div className="flex shrink-0 items-center lg:mt-3 lg:block">
+                        <span aria-hidden className="mx-1 h-6 w-px bg-ktip-sand-200 lg:hidden" />
+                        <span className="hidden items-center gap-2 px-2 pb-1 text-micro font-bold uppercase tracking-[0.16em] text-ktip-sand-500 lg:flex">
+                          {i18n._(tab.group)}
+                          <span aria-hidden className="h-px flex-1 bg-ktip-sand-200" />
+                        </span>
+                      </div>
+                    )}
                     <NavLink
-                      key={tab.to}
                       to={to}
                       className={cn(
                         // Soft-UI selection: the current tab is a well pressed
@@ -214,6 +235,7 @@ export default function DashboardLayout() {
                         <div className="text-xs opacity-70 hidden lg:block">{i18n._(tab.description)}</div>
                       </div>
                     </NavLink>
+                    </Fragment>
                   )
                 })}
               </nav>

@@ -363,8 +363,8 @@ export const PRIVACY: LegalDocument = {
         },
       ],
       actions: [
-        { label: 'Your privacy settings', href: '/settings?tab=legal' },
-        { label: 'Delete your account', href: '/settings?tab=security' },
+        { label: 'Your privacy settings', href: '/dashboard/legal' },
+        { label: 'Delete your account', href: '/dashboard/security' },
       ],
     },
     {

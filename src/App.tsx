@@ -6,6 +6,7 @@ import {
   Link,
   Navigate,
   useParams,
+  useSearchParams,
 } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { AuthProvider } from './contexts/AuthContext'
@@ -89,6 +90,40 @@ function EventEditRedirect() {
   return <Navigate to={`/events/${id}/manage`} replace />
 }
 
+/** Which dashboard panel each of the old Settings tabs became. */
+const SETTINGS_TAB_ROUTES: Record<string, string> = {
+  profile: '/dashboard/my-profile',
+  security: '/dashboard/security',
+  preferences: '/dashboard/preferences',
+  personalization: '/dashboard/personalization',
+  verification: '/dashboard/verification',
+  legal: '/dashboard/legal',
+  feedback: '/dashboard/feedback',
+}
+
+/**
+ * /settings → the dashboard, carrying its tab.
+ *
+ * A component rather than a plain <Navigate>, because a plain one would throw
+ * the query string away — and the query string is the whole address. Rows
+ * written by migrations 064, 098, 125 and 145, by api/admin/reset-mfa.ts and
+ * api/auth/mfa-recover.ts, and mail already delivered by
+ * api/feedback/reply-notify.ts all point at /settings or /settings?tab=…, and
+ * none of them can be rewritten. Every one of those has to keep landing on the
+ * panel it meant, indefinitely.
+ *
+ * The literal `path: '/settings'` also has to stay in this file:
+ * src/lib/site-search.test.ts reads App.tsx as text and asserts every site-map
+ * href resolves to a route that exists.
+ */
+function SettingsRedirect() {
+  const [searchParams] = useSearchParams()
+  const tab = searchParams.get('tab')
+  // No tab named, or one that never existed: the profile is what /settings
+  // opened on, so that is what it still opens on.
+  return <Navigate to={(tab && SETTINGS_TAB_ROUTES[tab]) || '/dashboard/my-profile'} replace />
+}
+
 function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
   return async () => {
     const mod = await importer().catch((error: unknown) => {
@@ -139,13 +174,23 @@ const router = createBrowserRouter([
       // browser afterwards, carrying a one-time ticket instead of a session.
       { path: '/auth/vc/land', lazy: lazyPage(() => import('./pages/auth/VcLandingPage')) },
       { path: '/verify-email/:token', lazy: lazyPage(() => import('./pages/auth/VerifyEmailAliasPage')) },
+      // 145: a work or school address proving itself for the verified badge.
+      { path: '/verify-institution-email/:token', lazy: lazyPage(() => import('./pages/auth/VerifyEmailProofPage')) },
 
       // Responsive preview harness. Bare (it iframes the app, so it must not
       // sit inside a layout) and dev-only — spreading an empty array leaves no
       // route and no dynamic import for Rollup to follow, so the page is not
       // in the production bundle at all.
       ...(import.meta.env.DEV
-        ? [{ path: '/design', lazy: lazyPage(() => import('./pages/design/ResponsivePreviewPage')) }]
+        ? [{ path: '/design', lazy: lazyPage(() => import('./pages/design/ResponsivePreviewPage')) },
+           // The member page is behind sign-in and, for an admin, behind the MFA
+           // step-up, so the portrait hero cannot be screenshotted headlessly.
+           // This renders it with fixture data. Dev-only for the same reason.
+           { path: '/design/portrait', lazy: lazyPage(() => import('./pages/design/PortraitHeroPreviewPage')) },
+           // The Portrait Studio lives in a dialog on the settings page, which
+           // is behind sign-in and the MFA step-up. This renders it at the
+           // dialog's real width so the layout can be checked. Dev-only.
+           { path: '/design/studio', lazy: lazyPage(() => import('./pages/design/PortraitStudioPreviewPage')) }]
         : []),
       { path: '/onboarding', lazy: lazyPage(() => import('./pages/onboarding/OnboardingPage')) },
 
@@ -268,6 +313,14 @@ const router = createBrowserRouter([
                   { path: '/dashboard/funding', lazy: lazyPage(() => import('./pages/dashboard/tabs/FundingTab')) },
                   { path: '/dashboard/mentees', lazy: lazyPage(() => import('./pages/dashboard/tabs/MenteesTab')) },
                   { path: '/dashboard/research', lazy: lazyPage(() => import('./pages/dashboard/tabs/ResearchTab')) },
+                  // The account, in from /settings. That page is gone; its
+                  // address survives as SettingsRedirect below, which maps
+                  // ?tab= onto these five slugs.
+                  { path: '/dashboard/security', lazy: lazyPage(() => import('./pages/dashboard/tabs/SecurityTab')) },
+                  { path: '/dashboard/preferences', lazy: lazyPage(() => import('./pages/dashboard/tabs/PreferencesTab')) },
+                  { path: '/dashboard/personalization', lazy: lazyPage(() => import('./pages/dashboard/tabs/PersonalizationTab')) },
+                  { path: '/dashboard/verification', lazy: lazyPage(() => import('./pages/dashboard/tabs/VerificationTab')) },
+                  { path: '/dashboard/legal', lazy: lazyPage(() => import('./pages/dashboard/tabs/LegalTab')) },
                 ],
               },
               // Full-page receipt, deliberately outside the tab shell
@@ -449,7 +502,7 @@ const router = createBrowserRouter([
               { path: '/profile/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/u/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
-              { path: '/settings', lazy: lazyPage(() => import('./pages/settings/SettingsPage')) },
+              { path: '/settings', element: <SettingsRedirect /> },
               { path: '/grievances/report/:userId', lazy: lazyPage(() => import('./pages/grievances/ReportUserPage')) },
               { path: '/grievances/my-reports', lazy: lazyPage(() => import('./pages/grievances/MyGrievancesPage')) },
               { path: '/collaborate', lazy: lazyPage(() => import('./pages/collaborate/CollaborateHubPage')) },

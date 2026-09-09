@@ -11,7 +11,10 @@ import { formatDate } from '../../lib/utils'
 import { ROLE_LABELS } from '../../lib/constants'
 import { resolveCopy } from '../../i18n/copy'
 import { StudentVerificationCard } from '../../components/safeguarding/StudentVerificationCard'
+import { InstitutionalEmailCard } from '../../components/verification/InstitutionalEmailCard'
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
 import { Trans, useLingui } from '@lingui/react/macro'
+import type { VerifiedVia } from '../../types'
 
 const MAX_FILES = 3
 const MAX_SIZE = 10 * 1024 * 1024 // matches the bucket limit
@@ -28,6 +31,25 @@ export function VerificationTab() {
   const [note, setNote] = useState('')
 
   const isVerified = auth.profile?.is_verified
+  const verifiedVia = (auth.profile?.verified_via ?? null) as VerifiedVia | null
+
+  // How the badge was earned (145). Grandfathered members are simply verified;
+  // saying "we never checked" to the pilot cohort helps nobody.
+  const verifiedHow: string | null = (() => {
+    switch (verifiedVia) {
+      case 'document':
+        return t`Verified from the identity documents you submitted.`
+      case 'domain':
+        return t`Verified by your organisation's email domain.`
+      case 'institution':
+      case 'roster':
+        return t`Verified through your institution.`
+      case 'admin':
+        return t`Verified by a KTIP administrator.`
+      default:
+        return null
+    }
+  })()
 
   const addFiles = useCallback(
     (picked: File[]) => {
@@ -77,35 +99,52 @@ export function VerificationTab() {
     return <Card><p className="text-sm text-ktip-sand-500 py-8 text-center"><Trans>Loading…</Trans></p></Card>
   }
 
+  // The document upload is the fallback, so it folds away unless it is the
+  // path the member is actually on (a request in flight, or one sent back).
+  const documentPathActive = request?.status === 'pending' || request?.status === 'rejected'
+
   return (
-    // data-spy-off: two cards, and non-students only ever see the second — the
-    // other settings tabs are long enough to earn a rail, this one is not.
+    // data-spy-off: three short cards at most — the other settings tabs are
+    // long enough to earn a rail, this one is not.
     <div data-spy-off className="space-y-6">
-      {/* School verification is a separate track from identity KYC below: the
-          evidence is the account's email domain, and a school approves it. */}
+      {isVerified ? (
+        <Card id="identity" data-spy="Identity" className="scroll-mt-24">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-ktip-tropical-100 rounded-xl flex items-center justify-center">
+              <BadgeCheck size={20} className="text-ktip-tropical-700" />
+            </div>
+            <div>
+              <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Your account is verified</Trans></h2>
+              <p className="text-sm text-ktip-sand-600">
+                {verifiedHow ?? t`Your profile shows the verified badge.`}
+              </p>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        /* 145: one button for every track. The server decides whether the
+           address is a trusted organisation, a partner institution, or neither. */
+        <div id="email" data-spy="Email" className="scroll-mt-24">
+          <InstitutionalEmailCard />
+        </div>
+      )}
+
+      {/* Where a student stands with their institution. Renders nothing for
+          an account with no student relationship. */}
       <div id="student" data-spy="Student" className="scroll-mt-24">
         <StudentVerificationCard />
       </div>
 
-      <Card id="identity" data-spy="Identity" className="scroll-mt-24">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center">
-            <BadgeCheck size={20} className="text-ktip-ocean-600" />
-          </div>
-          <div>
-            <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Identity Verification</Trans></h2>
-            <p className="text-sm text-ktip-sand-600">
-              <Trans>Verified members get a badge on their profile</Trans>
-            </p>
-          </div>
-        </div>
-
-        {isVerified ? (
-          <div className="flex items-center gap-2 p-4 bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-lg text-ktip-tropical-700">
-            <BadgeCheck size={20} />
-            <p className="text-sm font-medium"><Trans>Your account is verified.</Trans></p>
-          </div>
-        ) : request?.status === 'pending' ? (
+      {!isVerified && (
+      <div id="identity" data-spy="Identity" className="scroll-mt-24">
+      <CollapsibleSection
+        title={t`No work or school email? Upload an identity document`}
+        subtitle={t`A KTIP administrator reviews it.`}
+        icon={<FileText size={16} className="text-ktip-ocean-600" />}
+        defaultOpen={documentPathActive}
+      >
+      <Card>
+        {request?.status === 'pending' ? (
           <div className="flex items-start gap-2 p-4 bg-ktip-sun-50 border border-ktip-sun-200 rounded-lg text-ktip-sun-800">
             <Clock size={20} className="shrink-0 mt-0.5" />
             <div>
@@ -199,6 +238,9 @@ export function VerificationTab() {
           </>
         )}
       </Card>
+      </CollapsibleSection>
+      </div>
+      )}
     </div>
   )
 }

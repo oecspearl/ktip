@@ -146,7 +146,7 @@ export default function LegalIndexPage() {
               To see which versions you have accepted and when, open your legal settings.
             </Trans>{' '}
             <Link
-              to="/settings?tab=legal"
+              to="/dashboard/legal"
               className="font-semibold text-ktip-ocean-700 hover:underline underline-offset-2"
             >
               <Trans>What you have agreed to</Trans>

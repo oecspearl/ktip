@@ -155,7 +155,7 @@ export const COOKIES: LegalDocument = {
           text: 'Clearing your browser’s storage for this site removes everything in the table above, including your session, so you will be signed out and asked about analytics again.',
         },
       ],
-      actions: [{ label: 'Change your analytics choice', href: '/settings?tab=legal' }],
+      actions: [{ label: 'Change your analytics choice', href: '/dashboard/legal' }],
     },
   ],
 }

@@ -254,7 +254,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
             <Trans>Pick a few topics and we will put the projects, resources, events and grants that suit you at the top of every list. Nothing gets hidden.</Trans>
           </p>
           <Link
-            to="/settings?tab=personalization"
+            to="/dashboard/personalization"
             className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
           >
             <Trans>Choose my topics</Trans>
@@ -337,7 +337,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
             {expanded ? <ChevronUp size={14} /> : <ChevronRight size={14} />}
           </button>
           <Link
-            to="/settings?tab=personalization"
+            to="/dashboard/personalization"
             className="text-sm font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
           >
             <Trans>Tune this</Trans>

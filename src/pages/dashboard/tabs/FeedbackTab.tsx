@@ -1,6 +1,6 @@
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { useLingui } from '@lingui/react/macro'
-import { FeedbackTab as FeedbackList } from '../../settings/FeedbackTab'
+import { FeedbackTab as FeedbackList } from '../../../components/settings/FeedbackTab'
 
 /**
  * Replies to the feedback you sent, on the rail rather than buried in Settings.

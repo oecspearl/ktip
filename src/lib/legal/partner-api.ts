@@ -149,7 +149,7 @@ export const PARTNER_API: LegalDocument = {
           text: 'If you believe a partner has used your data outside these terms, tell us at %privacyEmail%. We can suspend their access, and we will tell you what we found.',
         },
       ],
-      actions: [{ label: 'Your privacy settings', href: '/settings?tab=legal' }],
+      actions: [{ label: 'Your privacy settings', href: '/dashboard/legal' }],
     },
   ],
 }

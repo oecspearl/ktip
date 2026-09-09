@@ -25,10 +25,18 @@ export const adminTutorialSteps: TutorialStep[] = [
     scrollMode: 'top',
   },
   {
+    target: '[data-tutorial="admin-attention"]',
+    title: 'What is waiting on you',
+    description:
+      'Every queue you are allowed to work, counted, busiest first. Identity documents, reported content, grievances, grant applications at review, institutions and businesses awaiting verification, submitted resources and feedback.\n\nA tile is amber when there is work in it and grey with a tick when the queue is clear. Each one opens the queue it counts.\n\nYou only see the queues your role can action — a queue missing here belongs to another desk, not to nobody.',
+    position: 'bottom',
+    scrollMode: 'top',
+  },
+  {
     target: '[data-tutorial="admin-stats"]',
     title: 'What the numbers count',
     description:
-      'Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n\nA figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.\n\nThe Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.',
+      'Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n\nThe second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n\nA figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.\n\nThe Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.',
     position: 'bottom',
     secondaryTarget: '[data-tutorial="admin-climate"]',
     scrollMode: 'top',

@@ -199,7 +199,7 @@ export const AI_DISCLOSURE: LegalDocument = {
           text: 'The AI features are optional. The assistant, AI search, extraction and application assistance only run when you invoke them. Automatic translation of member content can be switched off in Settings, and captions are per-room and off unless switched on.',
         },
       ],
-      actions: [{ label: 'Your settings', href: '/settings?tab=legal' }],
+      actions: [{ label: 'Your settings', href: '/dashboard/legal' }],
     },
   ],
 }

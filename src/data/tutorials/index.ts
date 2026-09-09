@@ -71,7 +71,7 @@ import { publicCvTutorialSteps } from './public-cv'
 import { publicProfileTutorialSteps } from './public-profile'
 import { reportUserTutorialSteps } from './report-user'
 import { resourceDetailTutorialSteps } from './resource-detail'
-import { settingsTutorialSteps } from './settings'
+import { myProfileTutorialSteps } from './my-profile'
 import { submissionReceiptTutorialSteps } from './submission-receipt'
 import { venueRoomTutorialSteps, venueTutorialSteps } from './venue'
 
@@ -118,7 +118,7 @@ export const TUTORIAL_IDS = {
   DASHBOARD_EVENTS: 'dashboard-events',
   DASHBOARD_CONNECTIONS: 'dashboard-connections',
   DASHBOARD_SUBMISSIONS: 'dashboard-submissions',
-  SETTINGS: 'settings',
+  MY_PROFILE: 'my-profile',
   CV: 'cv',
   CV_EDIT: 'cv-edit',
   REPORT_USER: 'report-user',
@@ -542,11 +542,11 @@ const REGISTRY: RegisteredTutorial[] = [
     autoStart: true,
   },
   {
-    id: TUTORIAL_IDS.SETTINGS,
-    route: '/settings',
-    name: 'Settings',
-    description: 'Profile, security, preferences, personalization, verification.',
-    steps: settingsTutorialSteps,
+    id: TUTORIAL_IDS.MY_PROFILE,
+    route: '/dashboard/my-profile',
+    name: 'My Profile',
+    description: 'Your public profile, edited in place, and who can see it.',
+    steps: myProfileTutorialSteps,
   },
   {
     id: TUTORIAL_IDS.CV_EDIT,

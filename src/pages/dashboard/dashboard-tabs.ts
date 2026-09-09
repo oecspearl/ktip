@@ -14,6 +14,14 @@ import {
   Shield,
   Trophy,
   UserPen,
+  // The account group, in from Settings. KeyRound rather than the Shield that
+  // panel used: Admin already holds Shield on this rail, and two shields a few
+  // rows apart is a rail that looks like it has two admin sections.
+  KeyRound,
+  Bell,
+  Sparkles,
+  BadgeCheck,
+  ScrollText,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 // INDIVIDUAL_ROLES and rolesOfTier come back with the commented-out CV tab.
@@ -32,6 +40,14 @@ export interface DashboardTab {
   roles?: UserRole[]
   /** Absolute link out of the dashboard rather than a tab panel */
   external?: boolean
+  /**
+   * Rail section this tab opens. The first VISIBLE tab carrying a given group
+   * draws a divider and a label above itself; every tab after it belongs to
+   * that section until another group appears. The day-to-day tabs at the top
+   * carry none, because a rail whose first entry is a heading has spent a line
+   * telling you that a list of your things is a list of your things.
+   */
+  group?: MessageDescriptor
 }
 
 export const DASHBOARD_TABS: DashboardTab[] = [
@@ -97,7 +113,25 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // engagement switch lives here rather than on the Business tab, directly
   // above the people it governs.
   { to: 'team', label: msg`Team`, icon: UsersRound, description: msg`Who belongs to your organisation`, roles: ORGANIZATION_ROLES },
-  { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'admin', 'safety_admin'], external: true },
+
+  // The account, folded in from /settings. There is no second rail any more:
+  // Settings was a seven-tab sidebar whose Profile and Feedback panels were
+  // already mounted here, and having two places to manage yourself meant every
+  // link had to guess which one the reader meant. /settings still resolves —
+  // SettingsRedirect in App.tsx maps ?tab= onto these slugs, because the
+  // notification rows written by migrations 064, 098, 125 and 145 and the mail
+  // already sent by api/feedback/reply-notify.ts all point at the old address.
+  //
+  // Below the role-gated block on purpose: these are consulted, not used, and
+  // the tabs somebody actually opens all day should not move down the rail to
+  // make room for them.
+  { to: 'security', label: msg`Security`, icon: KeyRound, description: msg`Password, two-step and your addresses`, group: msg`Account` },
+  { to: 'preferences', label: msg`Preferences`, icon: Bell, description: msg`Notifications, privacy and display` },
+  { to: 'personalization', label: msg`Personalization`, icon: Sparkles, description: msg`Tune what you see` },
+  { to: 'verification', label: msg`Verification`, icon: BadgeCheck, description: msg`Verify your identity` },
+  { to: 'legal', label: msg`Legal & Consent`, icon: ScrollText, description: msg`What you agreed to` },
+
+  { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'admin', 'safety_admin'], external: true, group: msg`Administration` },
 ]
 
 /**

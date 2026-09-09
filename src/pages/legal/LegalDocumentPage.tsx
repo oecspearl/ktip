@@ -218,7 +218,7 @@ export function LegalDocumentPage({ documentKey }: { documentKey: LegalDocumentK
               versions you have accepted, open your legal settings.
             </Trans>{' '}
             <Link
-              to="/settings?tab=legal"
+              to="/dashboard/legal"
               className="font-semibold text-ktip-ocean-700 hover:underline underline-offset-2"
             >
               <Trans>What you have agreed to</Trans>

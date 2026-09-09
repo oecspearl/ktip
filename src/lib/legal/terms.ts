@@ -273,7 +273,7 @@ export const TERMS: LegalDocument = {
           text: 'The sections on your content (existing licences), limitation of liability, indemnity and governing law survive the end of this agreement.',
         },
       ],
-      actions: [{ label: 'Delete your account', href: '/settings?tab=security' }],
+      actions: [{ label: 'Delete your account', href: '/dashboard/security' }],
     },
     {
       id: 'governing-law',
@@ -300,7 +300,7 @@ export const TERMS: LegalDocument = {
           text: 'Every version you have accepted, and the date you accepted it, is listed in your settings.',
         },
       ],
-      actions: [{ label: 'What you have agreed to', href: '/settings?tab=legal' }],
+      actions: [{ label: 'What you have agreed to', href: '/dashboard/legal' }],
     },
     {
       id: 'contact',
