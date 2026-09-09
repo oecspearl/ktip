@@ -121,7 +121,7 @@ export default function HealthTrustTab({ filters, period, trend, country }: HubP
             height={240}
           />
         </div>
-        <div className="rounded-lg border border-ktip-sand-200 bg-ktip-cream p-4">
+        <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-4">
           <div className="mb-3 flex items-center gap-2">
             <Bug size={16} className="text-ktip-ocean-600" />
             <h3 className="text-sm font-semibold text-ktip-sand-900">Errors, last 14 days</h3>

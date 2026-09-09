@@ -67,7 +67,7 @@ export default function OverviewTab({ period, trend, country }: HubProps) {
             readable ? kpiProgress(measured.value, target, kpi.direction) : null,
           )
           return (
-            <div key={kpi.key} className="flex items-center gap-4 rounded-lg border border-ktip-sand-200 p-4">
+            <div key={kpi.key} className="flex items-center gap-4 neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-4">
               {readable ? (
                 <RadialTarget value={measured.value} target={target} direction={kpi.direction} label={kpi.label} />
               ) : (
@@ -101,7 +101,7 @@ export default function OverviewTab({ period, trend, country }: HubProps) {
       </div>
 
       {/* Status strip */}
-      <div className="grid grid-cols-2 divide-x divide-ktip-sand-200 overflow-hidden rounded-lg border border-ktip-sand-200 sm:grid-cols-4">
+      <div className="grid grid-cols-2 divide-x divide-ktip-sand-200 overflow-hidden neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm sm:grid-cols-4">
         {(
           [
             ['good', 'on track'],

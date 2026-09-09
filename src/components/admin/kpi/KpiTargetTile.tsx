@@ -66,12 +66,12 @@ export function KpiTargetTile({ kpi, measured, target, periodLabel, history }: K
 
   return (
     <div
-      className={`rounded-lg border p-4 ${
+      className={`neu-surface rounded-2xl border p-4 shadow-neu-sm ${
         failed
           ? 'border-ktip-sun-200 bg-ktip-sun-50/50'
           : pending
-            ? 'border-dashed border-ktip-sand-200 bg-ktip-sand-50/40'
-            : 'border-ktip-sand-200'
+            ? 'border-dashed border-ktip-sand-200 bg-ktip-cream'
+            : 'border-ktip-sand-200 bg-ktip-cream'
       }`}
     >
       <div className="mb-2 flex items-start gap-2">

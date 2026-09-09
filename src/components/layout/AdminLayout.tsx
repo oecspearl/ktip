@@ -108,7 +108,7 @@ export function AdminLayout() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar — desktop */}
         <div className="hidden lg:block lg:w-56 shrink-0">
-          <div className="bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 sticky top-[calc(var(--nav-h)+1.5rem)]">
+          <div className="neu-surface bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 shadow-neu-sm sticky top-[calc(var(--nav-h)+1.5rem)]">
             {/* Both navs carry the anchor; only one has a non-zero rect at any
                 width, and findVisible picks that one. */}
             <nav data-tutorial="admin-sidebar" className="space-y-1">
@@ -117,10 +117,13 @@ export function AdminLayout() {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors',
+                    // Soft-UI selection, as the member dashboard rail: the
+                    // current page is a well pressed into the panel, an idle
+                    // one lifts a pixel on hover.
+                    'flex items-center gap-3 px-4 py-3 rounded-neu-sm text-left transition-all',
                     isActive(item.href, item.exact)
-                      ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                      : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                      ? 'shadow-neu-sm-inset text-ktip-ocean-700'
+                      : 'text-ktip-sand-600 hover:-translate-y-px hover:shadow-neu-sm hover:text-ktip-sand-900'
                   )}
                 >
                   <item.icon size={20} />
@@ -135,17 +138,17 @@ export function AdminLayout() {
         <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
           <nav
             data-tutorial="admin-sidebar"
-            className="flex gap-1 min-w-max bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2"
+            className="flex gap-1 min-w-max neu-surface bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 shadow-neu-sm"
           >
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors',
+                  'flex items-center gap-2 px-4 py-2.5 rounded-neu-sm text-sm font-medium whitespace-nowrap transition-all',
                   isActive(item.href, item.exact)
-                    ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                    : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                    ? 'shadow-neu-sm-inset text-ktip-ocean-700'
+                    : 'text-ktip-sand-600 hover:-translate-y-px hover:shadow-neu-sm hover:text-ktip-sand-900'
                 )}
               >
                 <item.icon size={16} />

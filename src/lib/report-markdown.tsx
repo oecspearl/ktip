@@ -23,7 +23,7 @@ export function renderInline(text: string, keyBase = 'i'): ReactNode[] {
     }
     if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
       return (
-        <code key={key} className="rounded bg-ktip-sand-100 px-1 text-[0.9em]">
+        <code key={key} className="rounded bg-ktip-sand-100 px-1 text-xs">
           {part.slice(1, -1)}
         </code>
       )

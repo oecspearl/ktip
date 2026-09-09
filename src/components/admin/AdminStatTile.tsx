@@ -29,8 +29,8 @@ export function AdminStatTile({ icon, iconClass, label, measured, emphasis }: Ad
 
   return (
     <div
-      className={`border rounded-lg p-4 ${
-        failed ? 'border-ktip-sun-200 bg-ktip-sun-50/50' : 'border-ktip-sand-200'
+      className={`neu-surface rounded-2xl border p-4 shadow-neu-sm ${
+        failed ? 'border-ktip-sun-200 bg-ktip-sun-50/50' : 'border-ktip-sand-200 bg-ktip-cream'
       }`}
       title={failed ? measured.reason : undefined}
     >

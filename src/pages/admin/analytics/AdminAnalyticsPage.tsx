@@ -90,7 +90,7 @@ export default function AdminAnalyticsPage() {
       {/* Filter row. One row above the tabs, per the chart interaction spec:
           filters change what every chart shows, so they sit above all of them
           rather than inside any one. */}
-      <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-lg border border-ktip-sand-200 bg-ktip-cream px-4 py-3">
+      <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">Period</span>
           <div className="inline-flex overflow-hidden rounded-lg border border-ktip-sand-300" role="group" aria-label="Period kind">
@@ -202,7 +202,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       <div role="tabpanel">
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-lg border border-ktip-sand-200" />}>
+        <Suspense fallback={<div className="h-64 animate-pulse neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm" />}>
           <Tab filters={filters} period={period} trend={trend} country={filters.country} />
         </Suspense>
       </div>

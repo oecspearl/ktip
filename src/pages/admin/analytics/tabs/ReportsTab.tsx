@@ -76,7 +76,7 @@ function ReportsIndex({ onOpen }: { onOpen: (id: string) => void }) {
           </div>
         )}
         {loading ? (
-          <div className="h-48 animate-pulse rounded-lg border border-ktip-sand-200" />
+          <div className="h-48 animate-pulse neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm" />
         ) : (
           <ReportList reports={reports ?? []} onOpen={onOpen} />
         )}
@@ -109,7 +109,7 @@ function ReportDetail({ id, onBack }: { id: string; onBack: () => void }) {
     [draft, report],
   )
 
-  if (loading || !draft) return <div className="h-64 animate-pulse rounded-lg border border-ktip-sand-200" />
+  if (loading || !draft) return <div className="h-64 animate-pulse neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm" />
   if (error) {
     return (
       <div className="flex items-start gap-2 rounded-lg border border-ktip-sun-200 bg-ktip-sun-50 px-4 py-3">
@@ -200,13 +200,13 @@ function ReportDetail({ id, onBack }: { id: string; onBack: () => void }) {
       </div>
 
       {editable && (
-        <p className="rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 px-4 py-2.5 text-xs text-ktip-sand-700">
+        <p className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm-inset px-4 py-2.5 text-xs text-ktip-sand-700">
           You are reviewing a draft. The figures are the platform's readings and cannot be edited; the summary and
           section commentary can. Publishing records your name and locks the report.
         </p>
       )}
 
-      <div className="rounded-lg border border-ktip-sand-200 bg-ktip-cream p-6">
+      <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-6">
         <ReportView
           report={draft}
           editable={editable}
@@ -315,9 +315,9 @@ function PulseMatrix() {
       )}
 
       {loading ? (
-        <div className="h-64 animate-pulse rounded-lg border border-ktip-sand-200" />
+        <div className="h-64 animate-pulse neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm" />
       ) : !periods.length ? (
-        <div className="rounded-lg border border-ktip-sand-200 py-16 text-center">
+        <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm py-16 text-center">
           <h3 className="mb-1 text-lg font-semibold text-gray-900">No readings recorded</h3>
           <p className="mx-auto max-w-md text-sm text-gray-600">
             Point-in-time metrics cannot be reconstructed later, so a period with no reading stays blank permanently.
@@ -325,7 +325,7 @@ function PulseMatrix() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-ktip-sand-200">
+        <div className="overflow-x-auto neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm">
           <table className="w-full">
             <thead>
               <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50">

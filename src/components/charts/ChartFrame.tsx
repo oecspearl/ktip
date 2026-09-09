@@ -72,10 +72,8 @@ export function ChartFrame<T>({
   return (
     <section
       aria-labelledby={titleId}
-      className={`rounded-lg border bg-ktip-cream p-4 ${
-        input.state === 'not-instrumented'
-          ? 'border-dashed border-ktip-sand-200'
-          : 'border-ktip-sand-200'
+      className={`neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-4 shadow-neu-sm ${
+        input.state === 'not-instrumented' ? 'border-dashed' : ''
       }`}
     >
       <div className="mb-3 flex items-start justify-between gap-3">

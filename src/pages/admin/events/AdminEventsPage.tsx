@@ -155,13 +155,13 @@ export default function AdminEventsPage() {
               placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Statuses</option>
             <option value="draft">Draft</option>
@@ -172,7 +172,7 @@ export default function AdminEventsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
           >
             <option value="">All Types</option>
             <option value="hackathon">Hackathon</option>

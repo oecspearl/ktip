@@ -108,7 +108,7 @@ export default function EngagementTab({ filters, period, trend, country }: HubPr
       </div>
 
       <SectionHeading title="Usage" note="consenting sessions only" />
-      <div className="flex items-start gap-3 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 px-4 py-3">
+      <div className="flex items-start gap-3 neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm-inset px-4 py-3">
         <Info size={16} className="mt-0.5 shrink-0 text-ktip-ocean-600" />
         <p className="text-sm text-ktip-sand-700">
           Usage events are written only for visitors who accepted the analytics banner, so these

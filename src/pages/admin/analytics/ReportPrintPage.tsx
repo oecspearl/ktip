@@ -52,7 +52,7 @@ export default function ReportPrintPage() {
             Print / Save as PDF
           </Button>
         </div>
-        {loading && <div className="h-64 animate-pulse rounded-lg border border-ktip-sand-200" />}
+        {loading && <div className="h-64 animate-pulse neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm" />}
         {error && <p className="text-sm text-ktip-sun-800">This report could not be read: {(error as Error).message}</p>}
         {report && <ReportView report={report} />}
       </div>

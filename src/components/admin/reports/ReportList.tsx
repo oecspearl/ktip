@@ -53,7 +53,7 @@ export function ReportList({ reports, onOpen }: ReportListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border border-ktip-sand-200 bg-ktip-cream p-4">
+      <div className="flex flex-wrap items-end gap-3 neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-4">
         <div>
           <label htmlFor="report-kind" className="block text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">
             Report
@@ -106,12 +106,12 @@ export function ReportList({ reports, onOpen }: ReportListProps) {
       </div>
 
       {reports.length === 0 ? (
-        <div className="rounded-lg border border-ktip-sand-200 py-12 text-center">
+        <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm py-12 text-center">
           <FileText size={24} className="mx-auto mb-2 text-ktip-sand-400" />
           <p className="text-sm text-ktip-sand-600">No reports yet. The first monthly draft arrives on the 1st; or generate one above.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-ktip-sand-200">
+        <div className="overflow-x-auto neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50 text-left text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">

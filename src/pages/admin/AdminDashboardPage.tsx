@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
       {statsLoading || !stats ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
           {[1, 2, 3, 4].map((i) => (
-            <div className="border border-ktip-sand-200 rounded-lg p-4 animate-pulse" key={i}>
+            <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-4 animate-pulse" key={i}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-ktip-sand-100" />
                 <div className="space-y-2">
@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
 
       {/* Climate Action Stats */}
       {stats && canSeeClimate && (
-        <div data-tutorial="admin-climate" className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+        <div data-tutorial="admin-climate" className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <Leaf size={18} className="text-ktip-tropical-700" />
             <h2 className="text-sm font-semibold text-ktip-tropical-900">Climate Action</h2>
@@ -205,7 +205,7 @@ export default function AdminDashboardPage() {
           admits has to pass through, and burying a thirty-KPI grid behind
           org:manage here would make most of it invisible to both supervisors. */}
       {canSeeAnalytics && (
-        <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+        <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 mb-8">
           <div className="flex items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
               <Target size={18} className="text-ktip-ocean-600" />
@@ -237,7 +237,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Platform Calendar */}
-      <div className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+      <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Calendar size={18} className="text-ktip-ocean-600" />
           <h2 className="text-lg font-semibold text-gray-900">Platform Calendar</h2>
@@ -252,7 +252,7 @@ export default function AdminDashboardPage() {
           The landing page keeps the numbers and the calendar; the charts are
           one click away with the filters they needed. */}
       {canSeeAnalytics && (
-        <div data-tutorial="admin-charts" className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+        <div data-tutorial="admin-charts" className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 mb-8">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <BarChart3 size={18} className="text-ktip-ocean-600" />
@@ -280,7 +280,7 @@ export default function AdminDashboardPage() {
               <Link
                 key={tab}
                 to={`/admin/analytics?tab=${tab}`}
-                className="rounded-lg border border-ktip-sand-200 px-3 py-2 transition-colors hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50"
+                className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm px-3 py-2 transition-colors hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50"
               >
                 <p className="font-medium text-gray-900">{label}</p>
                 <p className="text-xs text-gray-500">{hint}</p>
@@ -291,7 +291,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <div data-tutorial="admin-quick-actions" className="border border-ktip-sand-200 rounded-lg p-6">
+      <div data-tutorial="admin-quick-actions" className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           {/* event:create, not event:manage — publishing an event under your own
@@ -332,7 +332,7 @@ export default function AdminDashboardPage() {
         {canSeeEvents && (
         <Link
           to="/admin/events"
-          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -352,7 +352,7 @@ export default function AdminDashboardPage() {
         {canSeeUsers && (
         <Link
           to="/admin/users"
-          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -372,7 +372,7 @@ export default function AdminDashboardPage() {
         {canSeeGrants && (
         <Link
           to="/admin/grants"
-          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -392,7 +392,7 @@ export default function AdminDashboardPage() {
         {canSeeForums && (
         <Link
           to="/admin/forums"
-          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -412,7 +412,7 @@ export default function AdminDashboardPage() {
         {canSeeResources && (
         <Link
           to="/admin/resources"
-          className="group border border-ktip-sand-200 rounded-lg p-5 hover:border-ktip-ocean-300 transition-all"
+          className="group neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 hover:border-ktip-ocean-300 transition-all"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -44,7 +44,7 @@ export function RecipientsPanel() {
   }
 
   return (
-    <div className="rounded-lg border border-ktip-sand-200 bg-ktip-cream p-4">
+    <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-4">
       <div className="mb-3 flex items-center gap-2">
         <Mail size={16} className="text-ktip-ocean-600" />
         <h3 className="text-sm font-semibold text-ktip-sand-900">Report recipients</h3>

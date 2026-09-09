@@ -44,7 +44,7 @@ export default function ResultsTab({ filters, period, country }: HubProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-ktip-sand-200 bg-ktip-sand-50 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3 neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm-inset px-4 py-3">
         <Target size={16} className="shrink-0 text-ktip-ocean-600" />
         <p className="text-sm text-ktip-sand-700">
           Showing <strong>{period.label}</strong>. {measurable} of {PLATFORM_KPIS.length} KPIs are
@@ -63,7 +63,7 @@ export default function ResultsTab({ filters, period, country }: HubProps) {
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 9 }, (_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-lg border border-ktip-sand-200" />
+            <div key={i} className="h-32 animate-pulse neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm" />
           ))}
         </div>
       ) : (

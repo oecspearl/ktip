@@ -44,7 +44,7 @@ export function SuggestedActionsTable({ actions }: { actions: ReadonlyArray<Sugg
                 </td>
                 <td className="py-2.5 pr-3 text-xs text-ktip-sand-700">
                   {kpi ? kpi.label : action.kpi_key}
-                  <span className="block font-mono text-[0.7rem] text-ktip-sand-400">{action.kpi_key}</span>
+                  <span className="block font-mono text-xs text-ktip-sand-400">{action.kpi_key}</span>
                 </td>
                 <td className="py-2.5 pr-3 text-xs text-ktip-sand-700">{action.owner_role}</td>
                 <td className="py-2.5">

@@ -88,7 +88,7 @@ export function ReportView({ report, editable = false, onSummaryChange, onSectio
             className="w-full rounded-lg border border-ktip-sand-300 bg-ktip-cream p-3 text-sm leading-relaxed text-ktip-sand-900 focus:border-ktip-ocean-500 focus:outline-none"
           />
         ) : report.summary_md ? (
-          <div className="text-[0.95rem] leading-relaxed">{renderMarkdown(report.summary_md)}</div>
+          <div className="text-sm leading-relaxed sm:text-base">{renderMarkdown(report.summary_md)}</div>
         ) : (
           <p className="text-sm italic text-ktip-sand-500">
             No commentary was written for this period. The figures below are complete.
