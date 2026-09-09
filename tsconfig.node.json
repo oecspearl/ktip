@@ -28,16 +28,16 @@
    * Those tests have to live here rather than with the app project — they pull
    * in api/_lib, which uses process.env, and tsconfig.app.json deliberately has
    * no node types.
+   *
+   * ALL of api/, not a hand-picked list. The list this replaced covered six
+   * paths, and the routes outside it were compiled by nothing before deploy —
+   * which is how two admin routes shipped calling a function they never
+   * imported (ERROR-LOG, 2026-09-09). Vercel's bundler is not a type checker.
    */
   "include": [
     "vite.config.ts",
     "vitest.config.ts",
-    "api/_lib",
-    "api/auth",
-    "api/vc",
-    "api/_monitoring.ts",
-    "api/_sentry-api.ts",
-    "api/admin/sentry.ts",
+    "api",
     "src/lib/__tests__"
   ]
 }
