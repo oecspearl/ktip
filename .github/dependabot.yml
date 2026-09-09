@@ -6,6 +6,14 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # plugin-react 6 is rolldown/oxc-based: it peers vite ^8 and drags a
+      # babel 8 toolchain in through @rolldown/plugin-babel, while
+      # workbox-build (vite-plugin-pwa) holds @babel/core at 7. Nothing
+      # installs until that split closes, and 5.x already peers vite ^8, so
+      # sitting on it costs nothing.
+      - dependency-name: "@vitejs/plugin-react"
+        update-types: [version-update:semver-major]
     groups:
       # One PR for the patch-level noise; security advisories still open on
       # their own so they are never buried in a grouped bump.
