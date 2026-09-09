@@ -174,7 +174,7 @@ function ResourcesTab() {
     setSearchParams(params, { replace: true })
   }
 
-  const { resources, loading } = useResources({
+  const { resources, loading, error, refetch } = useResources({
     search: debouncedSearch,
     type: typeFilter,
     category: categoryFilter,
@@ -308,8 +308,26 @@ function ResourcesTab() {
       {/* === Resources List === */}
       <div id="resources" data-spy="Resources" className="scroll-mt-24 bg-ktip-sand-50 pb-12">
         <div className="max-w-page-narrow mx-auto px-4">
-          {loading || !resources ? (
+          {loading ? (
             <SkeletonGrid count={6} className={cn(gridClass, 'gap-4 auto-rows-fr')} />
+          ) : error || !resources ? (
+            // A failed fetch used to fall into the skeleton branch above and
+            // sit there forever; the reader could not tell "slow" from "broken".
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen size={32} className="text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-ktip-sand-900 mb-1">
+                <Trans>Resources could not be loaded</Trans>
+              </h3>
+              <p className="text-gray-500 text-sm mb-4"><Trans>Please try again shortly.</Trans></p>
+              <button
+                onClick={() => refetch()}
+                className="px-5 py-2.5 bg-ktip-ocean-600 text-white text-sm rounded-lg hover:bg-ktip-ocean-700 transition-colors"
+              >
+                <Trans>Retry</Trans>
+              </button>
+            </div>
           ) : resources.length ? (
             categoryGroups.length > 1 ? (
               <div className="space-y-2">

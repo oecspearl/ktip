@@ -13,6 +13,11 @@ import {
 } from '../lib/resource-uploads'
 import type { Resource } from '../types'
 
+// 135 added reviewed_by → profiles alongside author_id → profiles, so a bare
+// `profiles(*)` embed is ambiguous (PGRST201, HTTP 300) and every read below
+// would fail. The FK name pins it to the author.
+const RESOURCE_SELECT = '*, author:profiles!resources_author_id_fkey(*)'
+
 export function useResources(filters?: {
   type?: string
   category?: string
@@ -40,7 +45,7 @@ export function useResources(filters?: {
     // public grid and nobody else would.
     let query = (supabase as any)
       .from('resources')
-      .select('*, author:profiles(*)')
+      .select(RESOURCE_SELECT)
       .eq('is_published', true)
       .eq('approval_status', 'approved')
       .order('created_at', { ascending: false })
@@ -98,7 +103,7 @@ export function useResource(id: string | undefined) {
   const fetchResource = async (resourceId: string): Promise<Resource | null> => {
     const { data, error } = await (supabase as any)
       .from('resources')
-      .select('*, author:profiles(*)')
+      .select(RESOURCE_SELECT)
       .eq(isUuid(resourceId) ? 'id' : 'slug', resourceId)
       .single()
 
@@ -119,7 +124,7 @@ export function useAdminResources() {
   const fetchResources = async (): Promise<Resource[]> => {
     const { data, error } = await (supabase as any)
       .from('resources')
-      .select('*, author:profiles(*)')
+      .select(RESOURCE_SELECT)
       .order('created_at', { ascending: false })
 
     if (error) throw error
@@ -213,7 +218,7 @@ export function useMyResourceSubmissions(userId: string | undefined) {
     queryFn: async (): Promise<Resource[]> => {
       const { data, error } = await (supabase as any)
         .from('resources')
-        .select('*, author:profiles(*)')
+        .select(RESOURCE_SELECT)
         .eq('author_id', userId as string)
         .order('created_at', { ascending: false })
 
@@ -242,7 +247,7 @@ export function useResourceSubmissions() {
     queryFn: async (): Promise<Resource[]> => {
       const { data, error } = await (supabase as any)
         .from('resources')
-        .select('*, author:profiles(*)')
+        .select(RESOURCE_SELECT)
         .eq('approval_status', 'pending')
         .order('submitted_at', { ascending: true, nullsFirst: false })
 
