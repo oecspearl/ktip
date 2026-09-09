@@ -64,8 +64,8 @@ export function TotpEnrollCard({
 
         <p className="text-body-sm text-ktip-sand-600 mt-4 max-w-sm mx-auto">
           <Trans>
-            Scan this with Google Authenticator, Authy, or any authenticator app, then enter
-            the 6-digit code it shows.
+            Scan this with your authenticator app — Apple Passwords, Google Authenticator,
+            Microsoft Authenticator or any other — then enter the 6-digit code it shows.
           </Trans>
         </p>
       </div>

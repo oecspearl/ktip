@@ -19,6 +19,35 @@ export const BACKUP_CODE_LENGTH = 10
 /** Digits in an email OTP and in a TOTP code alike. */
 export const OTP_LENGTH = 6
 
+/** Seconds before "Send a new code" is offered again (150). */
+export const EMAIL_CODE_RESEND_SECONDS = 30
+
+/** How long one session's email step-up lasts. Mirrors verify_mfa_email_code(). */
+export const EMAIL_STEP_UP_DAYS = 30
+
+/**
+ * `delon.pierre@oecs.int` -> `d•••@oecs.int`. The member already knows their
+ * address; the page only has to confirm which one the code went to without
+ * printing it in full on a screen that may be shared.
+ */
+export function maskEmail(email: string | null | undefined): string {
+  const value = (email ?? '').trim()
+  const at = value.indexOf('@')
+  if (at <= 0) return value
+  return `${value[0]}•••${value.slice(at)}`
+}
+
+/**
+ * Whole days until an email step-up lapses, or null when there is none. Never
+ * negative — an expired one reads as 0 and the caller treats it as gone.
+ */
+export function stepUpDaysLeft(expiresAt: string | null | undefined, now = Date.now()): number | null {
+  if (!expiresAt) return null
+  const end = new Date(expiresAt).getTime()
+  if (Number.isNaN(end)) return null
+  return Math.max(0, Math.ceil((end - now) / 86_400_000))
+}
+
 /**
  * mfa.enroll() returns `totp.qr_code` as an SVG. Older auth-js versions hand
  * back a bare `<svg …>` document and document that you should prefix it

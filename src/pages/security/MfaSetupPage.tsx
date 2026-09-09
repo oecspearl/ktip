@@ -1,20 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router'
+import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
+import { AuthSplitShell, type AuthStep } from '../../components/auth/AuthSplitShell'
 import { RouteSplash } from '../../components/RouteSplash'
+import { Button } from '../../components/ui/Button'
 import { TotpEnrollCard } from '../../components/security/TotpEnrollCard'
 import { BackupCodesSheet } from '../../components/security/BackupCodesSheet'
+import { MethodPicker } from '../../components/security/MethodPicker'
+import { EmailCodeCard } from '../../components/security/EmailCodeCard'
+import { AuthenticatorAppGuide } from '../../components/security/AuthenticatorAppGuide'
 import { useMfaFactors, useMfaMutations } from '../../hooks/useMfa'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { analytics } from '../../hooks/useAnalytics'
 import { APP_FULL_NAME } from '../../lib/constants'
+import type { MfaMethod } from '../../types'
 
 /**
- * Two-factor enrolment (118). A bare route, deliberately outside the
+ * Two-factor enrolment (118, 150). A bare route, deliberately outside the
  * ProtectedRoute subtree — inside it, the gate that sends people here would send
  * them here from here.
  *
@@ -23,15 +28,28 @@ import { APP_FULL_NAME } from '../../lib/constants'
  * Campus arrives through ProtectedRoute without knowing this page exists. One
  * component, three entry points, which is what makes switching another role on
  * a config change rather than a code change.
+ *
+ * Since 150 it is a choice, not a wall. Step one asks HOW the member wants their
+ * code — an authenticator app, or an email — and only then starts the flow for
+ * that method. Settings deep-links straight to a method with `?method=`.
  */
+
+function methodFromParam(value: string | null): MfaMethod | null {
+  return value === 'totp' || value === 'email' ? value : null
+}
+
 export default function MfaSetupPage() {
   const { t } = useLingui()
   usePageTitle(t`Set up two-step verification`)
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
+  const [searchParams] = useSearchParams()
   const { enroll, verify, issueCodes, enrolling, verifying, issuing } = useMfaMutations(auth.user?.id)
   const { enrolled } = useMfaFactors(auth.user?.id)
+
+  const [method, setMethod] = useState<MfaMethod | null>(() => methodFromParam(searchParams.get('method')))
+  const [picked, setPicked] = useState<MfaMethod | null>(method)
 
   const [factorId, setFactorId] = useState<string | null>(null)
   const [qrCode, setQrCode] = useState<string | null>(null)
@@ -48,10 +66,13 @@ export default function MfaSetupPage() {
   // React 19 StrictMode runs effects twice in dev, and every enroll() call
   // persists a factor — so the guard is not belt-and-braces, it is the
   // difference between one enrolment and a slow leak toward GoTrue's limit.
+  //
+  // Enrolment starts only once the authenticator is CHOSEN (150): choosing
+  // email must leave no half-made factor behind.
   const started = useRef(false)
 
   useEffect(() => {
-    if (started.current || !auth.user?.id) return
+    if (started.current || !auth.user?.id || method !== 'totp') return
     started.current = true
     analytics.funnel('mfa', 'enrol_started')
     void (async () => {
@@ -67,7 +88,7 @@ export default function MfaSetupPage() {
         )
       }
     })()
-  }, [auth.user?.id, enroll, t])
+  }, [auth.user?.id, method, enroll, t])
 
   if (auth.loading || auth.profileLoading) {
     return <RouteSplash />
@@ -92,8 +113,24 @@ export default function MfaSetupPage() {
   // straight back out. The `finishing` ref then holds the page open long enough
   // for the recovery sheet to be read — without it the flag clears the instant
   // the factor verifies and the codes are destroyed before anyone copies them.
+  //
+  // An email-method account is NOT caught here (no factor), which is right: it
+  // may be here to switch to an authenticator.
   if (enrolled && !finishing.current) {
     return <Navigate to="/" replace />
+  }
+
+  const chooseMethod = () => {
+    if (!picked) return
+    analytics.funnel('mfa', 'method_chosen', { method: picked })
+    setErrorMessage('')
+    setMethod(picked)
+  }
+
+  const changeMethod = () => {
+    setErrorMessage('')
+    setCode('')
+    setMethod(null)
   }
 
   const handleVerify = async (submitted: string) => {
@@ -115,19 +152,43 @@ export default function MfaSetupPage() {
     }
   }
 
-  const steps = [
-    { title: t`Authenticator`, caption: t`One more step. Then your account is yours alone.` },
-    { title: t`Recovery codes`, caption: t`Keep these somewhere safe. They are your way back in.` },
-  ]
+  const handleEmailVerified = async () => {
+    // verify_mfa_email_code() already cleared requires_mfa_enrollment on the
+    // row; the profile query has to catch up BEFORE ProtectedRoute reads it, or
+    // the dashboard bounces straight back here.
+    await auth.refreshProfile()
+    await auth.recheckMfaChallenge()
+    toast.success(t`Two-step verification is on.`)
+    navigate('/', { replace: true })
+  }
+
+  const chooseStep: AuthStep = { title: t`Choose`, caption: t`One more step. Then your account is yours alone.` }
+  const steps: AuthStep[] =
+    method === 'email'
+      ? [chooseStep, { title: t`Email code`, caption: t`A code to your inbox, and you are in.` }]
+      : [
+          chooseStep,
+          { title: t`Authenticator`, caption: t`A code from your app, and you are in.` },
+          { title: t`Recovery codes`, caption: t`Keep these somewhere safe. They are your way back in.` },
+        ]
 
   const onSheet = codes !== null
+  const step = method === null ? 1 : onSheet ? 3 : 2
+  const heading =
+    method === null
+      ? t`Set up two-step verification`
+      : onSheet
+        ? t`Save your recovery codes`
+        : method === 'email'
+          ? t`Check your email`
+          : t`Set up your authenticator app`
 
   return (
     <AuthSplitShell
-      step={onSheet ? 2 : 1}
+      step={step}
       steps={steps}
-      heading={onSheet ? t`Save your recovery codes` : t`Set up two-step verification`}
-      subheading={onSheet ? undefined : APP_FULL_NAME}
+      heading={heading}
+      subheading={method === null ? APP_FULL_NAME : undefined}
       heroOffset={5}
     >
       {errorMessage && (
@@ -136,28 +197,36 @@ export default function MfaSetupPage() {
         </div>
       )}
 
-      {onSheet ? (
-        <BackupCodesSheet
-          codes={codes}
-          accountEmail={auth.user.email}
-          confirmLabel={t`Finish and go to KTIP`}
-          onConfirm={() => {
-            toast.success(t`Two-step verification is on.`)
-            navigate('/', { replace: true })
-          }}
-          confirming={issuing}
-        />
-      ) : (
+      {method === null && (
         <div className="space-y-5">
           <div className="flex gap-3 rounded-control border border-ktip-ocean-200 bg-ktip-ocean-50/50 p-4">
             <ShieldCheck size={20} className="text-ktip-ocean-600 shrink-0 mt-0.5" />
             <p className="text-body-sm text-ktip-sand-700">
-              <Trans>
-                Your account applies for funding, so it needs a second step at sign-in. You will
-                need an authenticator app on your phone — it works offline and costs nothing.
-              </Trans>
+              {auth.profile?.requires_mfa_enrollment ? (
+                <Trans>
+                  Your account applies for funding, so it needs a second step at sign-in. You can
+                  use a free authenticator app, or a code sent to your email.
+                </Trans>
+              ) : (
+                <Trans>
+                  A second step at sign-in means a stolen password is not enough to reach your
+                  account. Use a free authenticator app, or a code sent to your email.
+                </Trans>
+              )}
             </p>
           </div>
+
+          <MethodPicker value={picked} onChange={setPicked} />
+
+          <Button type="button" fullWidth disabled={!picked} onClick={chooseMethod}>
+            <Trans>Continue</Trans>
+          </Button>
+        </div>
+      )}
+
+      {method === 'totp' && !onSheet && (
+        <div className="space-y-6">
+          <AuthenticatorAppGuide mode="setup" uri={uri} />
 
           <TotpEnrollCard
             qrCode={qrCode}
@@ -169,12 +238,47 @@ export default function MfaSetupPage() {
             verifying={verifying || enrolling || issuing}
           />
 
-          <p className="text-caption text-ktip-sand-500 text-center">
-            {/* GoTrue signs other sessions out when a factor is verified. Better
-                said here than discovered on another device. */}
-            <Trans>Finishing this signs you out anywhere else you are logged in.</Trans>
-          </p>
+          <div className="flex items-center justify-between text-body-sm">
+            <button
+              type="button"
+              onClick={changeMethod}
+              className="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
+            >
+              <Trans>Use an email code instead</Trans>
+            </button>
+            <p className="text-caption text-ktip-sand-500 text-right">
+              {/* GoTrue signs other sessions out when a factor is verified. Better
+                  said here than discovered on another device. */}
+              <Trans>Finishing this signs you out anywhere else you are logged in.</Trans>
+            </p>
+          </div>
         </div>
+      )}
+
+      {method === 'email' && (
+        <EmailCodeCard
+          email={auth.user.email}
+          userId={auth.user.id}
+          mode="setup"
+          onVerified={handleEmailVerified}
+          onSwitchToApp={() => {
+            setPicked('totp')
+            setMethod('totp')
+          }}
+        />
+      )}
+
+      {onSheet && codes && (
+        <BackupCodesSheet
+          codes={codes}
+          accountEmail={auth.user.email}
+          confirmLabel={t`Finish and go to KTIP`}
+          onConfirm={() => {
+            toast.success(t`Two-step verification is on.`)
+            navigate('/', { replace: true })
+          }}
+          confirming={issuing}
+        />
       )}
     </AuthSplitShell>
   )

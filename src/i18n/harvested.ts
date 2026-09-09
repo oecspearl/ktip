@@ -117,6 +117,7 @@ If AI features fail consistently rather than occasionally, that is a configurati
   msg`Account & Settings`,
   msg`Account & Verification`,
   msg`Account and profile`,
+  msg`Account settings`,
   msg`Accounts`,
   msg`Accounts identified as belonging to minors operate in supervised mode, with restricted messaging and collaboration features that are not user-configurable. How that works, and why the date of birth is handled the way it is, is set out in the Minor Safeguarding Statement.`,
   msg`Accounts, roles and permissions`,
@@ -293,7 +294,6 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Change it`,
   msg`Change your analytics choice`,
   msg`Change your email address`,
-  msg`Change your name, bio, country, role, skills and avatar`,
   msg`Change your password`,
   msg`Changes`,
   msg`Changes to these Terms`,
@@ -537,6 +537,25 @@ You can edit or unpublish it afterwards, so nothing here is one-way. Signed out,
   msg`Custom Section`,
   msg`Dark mode and readable text`,
   msg`Dark mode, reduced motion, text scale.`,
+  msg`Dashboard, Personalization.
+
+Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.
+
+Once set, the "For You" sort option on the Projects, Events, Grants and Resources lists ranks against these choices instead of sorting by date.
+
+Everything else stays browsable — personalization changes the order, not what exists.`,
+  msg`Dashboard, Preferences. There is a switch for each stream: email, messages, events, projects, forums, collaboration, connections and achievements.
+
+The email switch governs whether anything reaches your inbox. The other seven govern in-app notifications by area.
+
+These are enforced where notifications are created, not just where they are displayed, so turning one off actually stops it rather than hiding it.`,
+  msg`Dashboard, Security, Secondary Email.
+
+A secondary email is a backup sign-in address. Once confirmed, it signs you in with the same password as your primary address — useful when a student or work address is about to expire.
+
+Add the address and a confirmation link is sent to it. The link is valid for 24 hours; you can resend it, or remove the address entirely, from the same panel.
+
+This is for password accounts. If you only ever sign in with Google or Microsoft, there is no password for a second address to use.`,
   msg`Data`,
   msg`Data is hosted outside the OECS, primarily in the United States and the European Union depending on the provider. Those transfers rely on the providers’ standard contractual clauses and equivalent safeguards. Ask at %privacyEmail% for the specific hosting regions in use.`,
   msg`Database, authentication, file storage, realtime`,
@@ -686,6 +705,7 @@ Reset password sends them a reset — it does not show you anything. Verify mark
 
 Delete is permanent and takes their content with it. It asks twice for that reason.`,
   msg`Edit what other members see, and lock your profile so only connections can view it`,
+  msg`Edit your profile on a live preview of the page other members see`,
   msg`Edit your project`,
   msg`Editing points or criteria affects future awards, not the ones already granted — nobody loses a badge because the rule was tightened.
 
@@ -795,6 +815,11 @@ You can copy the link from your own page.`,
   msg`Every policy version you accepted, when, and your cookie choice`,
   msg`Every project members have published, private ones included. Search and filter the same way the public page does, then act on a row.`,
   msg`Every project, post, comment, profile and message has a report control. Use it — a report reaches the moderation queue with a snapshot of the content attached, so it survives the author editing or deleting it afterwards.`,
+  msg`Every queue you are allowed to work, counted, busiest first. Identity documents, reported content, grievances, grant applications at review, institutions and businesses awaiting verification, submitted resources and feedback.
+
+A tile is amber when there is work in it and grey with a tick when the queue is clear. Each one opens the queue it counts.
+
+You only see the queues your role can action — a queue missing here belongs to another desk, not to nobody.`,
   msg`Every registered member, filterable by role and verification status. The count is in the banner.
 
 Create User makes an account directly — used for staff and for members who cannot self-register.`,
@@ -838,6 +863,9 @@ The count in the middle updates as you go, and a Clear all filters link appears 
   msg`Everything that follows, oldest first, so the thread reads top to bottom.
 
 The box at the bottom is where you add yours — Reply publishes it immediately and notifies the discussion’s author. You can delete your own reply afterwards; it disappears from the thread rather than leaving a stub.`,
+  msg`Everything that used to live under Settings is on this rail, under Account: Security for your password, two-step verification and closing the account; Preferences for notifications and what the directory shows; Personalization for what feeds “For You”; Verification for student and identity checks.
+
+Old /settings links still work — they land on the matching tab.`,
   msg`Everything you have done on KTIP in order — projects published, events organized, applications sent, achievements earned, connections made.
 
 It is built from real records rather than a counter, so it doubles as a way to find something you did months ago and cannot otherwise place.`,
@@ -901,7 +929,6 @@ Topic chips below the filters come from the tags organisers actually used, so a 
   msg`Find, filter and create events across the region.`,
   msg`Find, join and organise hackathons, workshops and conferences.`,
   msg`Finding a thread, or starting one.`,
-  msg`Five groups of settings`,
   msg`Five ways to narrow it`,
   msg`Fixes for the problems that come up most.`,
   msg`Flip the whole app between light and dark themes`,
@@ -954,6 +981,8 @@ Every application you have started in KTIP is listed with its current status: Dr
 Drafts show a Continue action that drops you back at the step where you stopped.
 
 Applications you submitted on a funder's external site will not appear here — KTIP never sees those.`,
+  msg`Go to Dashboard › Security and scroll to the bottom.`,
+  msg`Go to Dashboard › Security.`,
   msg`Go to Events in the top navigation bar.`,
   msg`Go to Events.`,
   msg`Go to Forums and open the board that fits your topic.`,
@@ -961,27 +990,6 @@ Applications you submitted on a funder's external site will not appear here — 
   msg`Go to Projects and click "Create Project". Give it a title, description, category, and phase (concept, prototype, funding, or launch). You can keep it private until you are ready to share it publicly.`,
   msg`Go to Projects in the top navigation bar.`,
   msg`Go to Projects.`,
-  msg`Go to Settings and open the Profile tab.
-
-You can change your display name, avatar image, bio (up to 500 characters), country, organisation, industry, up to 20 skills, up to 20 interests, and what collaboration you are open to.
-
-Roles are on this tab too, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Business Support Organisation and admin roles are granted by a reviewer, so they do not appear as options.
-
-Click "Save Changes" when you are done.`,
-  msg`Go to Settings and open the Security tab.
-
-Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.
-
-The change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.
-
-If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider.`,
-  msg`Go to Settings and scroll to the Danger Zone at the bottom of the page, then click "Delete Account" and confirm.
-
-Deletion is permanent. Your projects, grant applications, messages, badges and other data are removed and cannot be recovered.
-
-If you only need a break, sign out instead. If it is the notifications that are the problem, turn them off under Preferences — that is reversible and this is not.`,
-  msg`Go to Settings › Security and scroll to the bottom.`,
-  msg`Go to Settings › Security.`,
   msg`Go to Settings → Preferences. You can switch categories (messages, events, projects, forums, collaboration, connections) on or off — switched-off categories stop generating notifications entirely.`,
   msg`Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators.`,
   msg`Go to Settings, open Preferences and turn off "Show me on the leaderboard".
@@ -989,11 +997,6 @@ If you only need a break, sign out instead. If it is the notifications that are 
 You keep earning badges and points; you simply stop appearing in the public ranking.
 
 Student accounts are excluded automatically and permanently — that is a safeguarding rule, not a setting, so there is nothing for a student to turn on or off.`,
-  msg`Go to Settings, open the Security tab and update the email field. You will need to confirm the new address by clicking the link sent to it.
-
-Until you confirm, sign-in stays on the old address.
-
-If you signed up with Google or Microsoft, your email belongs to that provider and cannot be changed here. Add a secondary email instead if you need a second way in.`,
   msg`Go to the Events page and click "Create Event".
 
 Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.
@@ -1391,7 +1394,6 @@ Organisers choose which of these to create, so not every venue has all nine.`,
   msg`Manage projects (admin)`,
   msg`Manage resources`,
   msg`Manage users`,
-  msg`Manage your account and preferences`,
   msg`Managing users and the permission matrix`,
   msg`Material changes are announced in the application and by email at least %noticePeriod% before they take effect. The version number and effective date at the top of this page always reflect what is currently in force, and every version you have accepted is listed in your settings.`,
   msg`May remain after account deletion, attributed to a deleted member, where others rely on it`,
@@ -1550,6 +1552,11 @@ Enter your email address and click "Send Reset Link". You will receive an email 
 Open the link, enter the new password twice, and you can sign in with it right away.
 
 This only applies to email/password accounts. If you signed up with Google or Microsoft, reset your password with that provider instead.`,
+  msg`On your Dashboard. There is no separate Settings page any more — everything that was on it is a tab on the dashboard rail.
+
+My Profile — your name, photo, banner, bio, country, organisation, skills, interests and languages, edited directly on a preview of the page other members see. Under Account, further down the rail: Security — password, two-step verification and your sign-in addresses. Preferences — notifications, leaderboard visibility, connection-count privacy, dark mode and readable text. Personalization — the topics that drive "For You" sorting. Verification — evidence for a verified badge. Legal & Consent — what you have agreed to.
+
+Old /settings links still work and land on the matching tab.`,
   msg`One account per person. Do not create an account for someone else, and do not share yours.`,
   msg`One bar, every filter`,
   msg`One event, every tab`,
@@ -1617,14 +1624,32 @@ Share a board with collaborators to work on it together.`,
   msg`Open Funding → My Grants.`,
   msg`Open Funding → Post a Grant. The entry only appears for accounts that may post funding.`,
   msg`Open Messages from the chat button at the bottom-right.`,
+  msg`Open My Profile on your Dashboard.
+
+The tab shows your profile as other members see it. Every block you can change carries a pencil — click one and a small editor opens over the preview, which updates as you type. Between them they cover your display name, photo, banner, bio (up to 500 characters), country, organisation, industry, website, up to 20 skills, up to 20 interests, your languages, and what collaboration you are open to.
+
+Roles are in the name-and-roles editor, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Business Support Organisation and admin roles are granted by a reviewer, so they do not appear as options.
+
+Each editor saves on its own — there is no page-wide Save.`,
   msg`Open Projects, Resources, Events or Grants.`,
   msg`Open Resources and click Submit.`,
-  msg`Open Settings from the avatar menu in the top-right corner.`,
-  msg`Open Settings from your avatar menu. There are five tabs.
+  msg`Open Security on your Dashboard and update the email field. You will need to confirm the new address by clicking the link sent to it.
 
-Profile — name, avatar, bio, country, organisation, industry, skills, interests. Security — password and secondary email. Preferences — notifications, leaderboard visibility, connection-count privacy, dark mode and readable text. Personalization — the topics that drive "For You" sorting. Verification — evidence for a verified badge.
+Until you confirm, sign-in stays on the old address.
 
-Profile editing is here, not on your Dashboard: the Dashboard's profile tab is the read-only preview.`,
+If you signed up with Google or Microsoft, your email belongs to that provider and cannot be changed here. Add a secondary email instead if you need a second way in.`,
+  msg`Open Security on your Dashboard, scroll to the Danger Zone at the bottom, then click "Delete Account" and confirm.
+
+Deletion is permanent. Your projects, grant applications, messages, badges and other data are removed and cannot be recovered.
+
+If you only need a break, sign out instead. If it is the notifications that are the problem, turn them off under Preferences — that is reversible and this is not.`,
+  msg`Open Security on your Dashboard, under Account.
+
+Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.
+
+The change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.
+
+If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider.`,
   msg`Open Settings, then the Preferences tab.`,
   msg`Open a blank collaborative canvas`,
   msg`Open a draft from My Applications.`,
@@ -1696,6 +1721,7 @@ OECS administrators can edit any project from the admin console.`,
 
 Approving grants the badge immediately. Rejecting should carry a reason — the member cannot tell what was wrong with an unexplained rejection, and will simply submit the same thing again.`,
   msg`Open the whiteboard or document you want to share.`,
+  msg`Open your Dashboard and choose Security, under Account on the rail.`,
   msg`Open your event and click "Edit". The organiser can edit their own event; OECS administrators can edit any event from the admin console, which also gives them the registration list, speakers, schedule, updates, articles, the challenge brief, form and page builders and the venue.
 
 You can change the title, summary, description, type, dates, location, capacity and registration deadline.
@@ -1824,7 +1850,6 @@ The other button goes to whatever this was submitted to: the event, the grant, t
   msg`Print it, or go to the source`,
   msg`Privacy Policy`,
   msg`Privacy Violations`,
-  msg`Privacy and notifications`,
   msg`Privacy questions and data-rights requests go to %privacyEmail%, handled by %dpo%.`,
   msg`Private`,
   msg`Private Sector`,
@@ -1844,8 +1869,6 @@ Skills and interests are what the directory filters and the "For You" sorting wo
   msg`Profile fields that would identify a minor outside the platform are restricted, and directory exposure is reduced.`,
   msg`Profile settings`,
   msg`Profile visibility, leaderboard participation and connection counts. Note that a private profile is not an invisible one — a limited teaser may still appear in the directory.`,
-  msg`Profile, security, notifications and personalization.`,
-  msg`Profile, security, preferences, personalization, verification.`,
   msg`Progress is your activity over time — projects created, events attended, applications submitted, badges earned — as a timeline.
 
 It also offers a Gantt view, which is more useful when you are looking at how project work and deadlines overlap rather than at individual events.
@@ -2131,8 +2154,8 @@ Everything is saved to your account, so you can close the tab and pick it up fro
   msg`Security and operational logs`,
   msg`Security obligations`,
   msg`Security settings`,
+  msg`Security, preferences, personalization, verification and consent — on the dashboard rail`,
   msg`See your alerts and mark them as read`,
-  msg`Select the Security tab.`,
   msg`Selected role or roles`,
   msg`Self-service deletion is available in Settings. It removes your profile and authentication record; content that has cascaded into other members’ contexts is handled as described in the retention table above.`,
   msg`Sell your content, or charge a third party for access to it.`,
@@ -2146,31 +2169,11 @@ Everything is saved to your account, so you can close the tab and pick it up fro
   msg`Serious cases — commercial-scale infringement, or repeat infringement after a warning — may be terminated without waiting for the count.`,
   msg`Session`,
   msg`Session token`,
-  msg`Set a new password from the Security tab`,
+  msg`Set a new password from Dashboard › Security`,
   msg`Set the type, dates, location or virtual link, and capacity, then publish.`,
   msg`Set up a virtual venue for your event`,
   msg`Set your status from the pill in the top bar — green for working, "Do not disturb" to be left alone.`,
   msg`Setting your availability in a venue`,
-  msg`Settings`,
-  msg`Settings, Personalization tab.
-
-Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.
-
-Once set, the "For You" sort option on the Projects, Events, Grants and Resources lists ranks against these choices instead of sorting by date.
-
-Everything else stays browsable — personalization changes the order, not what exists.`,
-  msg`Settings, Preferences tab. There is a switch for each stream: email, messages, events, projects, forums, collaboration, connections and achievements.
-
-The email switch governs whether anything reaches your inbox. The other seven govern in-app notifications by area.
-
-These are enforced where notifications are created, not just where they are displayed, so turning one off actually stops it rather than hiding it.`,
-  msg`Settings, Security tab, Secondary Email.
-
-A secondary email is a backup sign-in address. Once confirmed, it signs you in with the same password as your primary address — useful when a student or work address is about to expire.
-
-Add the address and a confirmation link is sent to it. The link is valid for 24 hours; you can resend it, or remove the address entirely, from the same panel.
-
-This is for password accounts. If you only ever sign in with Google or Microsoft, there is no password for a second address to use.`,
   msg`Settings, Verification tab. The fastest way is a work or school email address.
 
 If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.
@@ -2545,6 +2548,7 @@ For anything account-specific, the Help Center’s contact block is the better r
   msg`The rest of the page`,
   msg`The rest of the platform reads a derived yes-or-no answer — is this account a minor? — rather than the date itself.`,
   msg`The rest of the profile`,
+  msg`The rest of your account`,
   msg`The rest of your dashboard`,
   msg`The row at the top picks the month, quarter, year or a custom range, and optionally one OECS state. Every tab reads the same choice, so the same month is never two different windows on two pages.
 
@@ -2636,6 +2640,7 @@ The two optional fields matter more than “optional” suggests: a link to the 
   msg`This member chose to make their CV public, so the link opens for anyone — no KTIP account needed.
 
 Download gives you the A4 PDF in black and white or colour. Read as text drops the page layout, which is easier on a phone or with a screen reader. View profile goes to the rest of their KTIP presence.`,
+  msg`This page is your profile`,
   msg`This row is on every collaboration tool — whiteboards, documents, code and video — so moving between them never means going back to the hub first.
 
 Collaborate Hub on the left does go back, when that is what you want.`,
@@ -2675,6 +2680,8 @@ Removing a project here removes it for its owner too. Prefer talking to them fir
   msg`Top members by achievement points, all time or this month, globally or by country and role`,
   msg`Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.
 
+The second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.
+
 A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.
 
 The Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.`,
@@ -2694,7 +2701,7 @@ The Climate Action strip underneath is the same three content types filtered to 
   msg`Triage`,
   msg`Tropical`,
   msg`Troubleshooting`,
-  msg`Tune what it matches on in Settings › Personalization.`,
+  msg`Tune what it matches on in Dashboard › Personalization.`,
   msg`Turn on the "Climate Action" filter above the project grid.`,
   msg`Turn on the brain icon for AI-guided navigation when you are not sure what something is called.`,
   msg`Turn the venue on, create rooms, and upload a floorplan`,
@@ -2708,9 +2715,6 @@ The Climate Action strip underneath is the same three content types filtered to 
 Each entry links to the thing itself, so you can read it in context before deciding.`,
   msg`Type what you are looking for — a page, a feature, or the name of a project, event or person.`,
   msg`UAT feedback`,
-  msg`Under Preferences: which emails KTIP sends you, whether your connection count is public, whether you appear in the member directory and on the leaderboard at all.
-
-Under Security: password, a secondary email for recovery, and account deletion. Deletion is permanent and asks you to confirm in writing.`,
   msg`Under Privacy, switch off "Show me on the leaderboard".`,
   msg`Under Review`,
   msg`Unsuccessful`,
@@ -2858,7 +2862,6 @@ To report one post or message rather than a person, use the report control on th
   msg`What is breaking`,
   msg`What is different about an account under 18?`,
   msg`What is in Resources?`,
-  msg`What is in Settings?`,
   msg`What is in the admin console?`,
   msg`What is on my dashboard?`,
   msg`What is on offer`,
@@ -2868,6 +2871,7 @@ To report one post or message rather than a person, use the report control on th
   msg`What is the floating button in the corner?`,
   msg`What is the invitations inbox?`,
   msg`What is the onboarding wizard?`,
+  msg`What is waiting on you`,
   msg`What it does`,
   msg`What it is`,
   msg`What it receives`,
@@ -2905,6 +2909,9 @@ To report one post or message rather than a person, use the report control on th
   msg`What you may and may not post, and how it is enforced`,
   msg`What you may do without asking`,
   msg`What you may not do`,
+  msg`What you see below is what other members see — not a form that describes it. Every block you can change has a pencil on it; click one and the preview updates as you type.
+
+Locking your profile leaves the teaser (name, photo, country) public and puts everything else behind an accepted connection request.`,
   msg`When the article does not cover it`,
   msg`When the licence ends`,
   msg`When you mark a project, event or profile as public, it can be read by anyone — including people with no KTIP account — and it may be indexed by search engines, quoted, linked to and archived by services outside our control.`,
@@ -2920,6 +2927,7 @@ Group settings let you rename the group, add and remove members, and leave it. G
   msg`Where KTIP uses AI, and what it does with your text`,
   msg`Where an entry is submitted by a team, the member who submits it confirms that every contributor has agreed to it being entered on these terms. Ownership between team members is a matter between you — KTIP records who submitted and who was credited, and takes no view on the shares.`,
   msg`Where are my messages?`,
+  msg`Where are my settings?`,
   msg`Where are the whiteboards and documents I made?`,
   msg`Where is the copy of what I submitted?`,
   msg`Where it comes from`,
@@ -3089,11 +3097,13 @@ This is the same gallery as the standalone Achievements page, embedded so you ke
   msg`Your part`,
   msg`Your personal page — CV, projects, events, connections.`,
   msg`Your privacy settings`,
+  msg`Your profile, security, notifications and personalization — all on the dashboard.`,
+  msg`Your public profile, edited in place, and who can see it.`,
   msg`Your record of something you submitted.`,
   msg`Your rights`,
   msg`Your roles are what unlock the role-specific parts of KTIP — an investor gets the Funding tab on the dashboard, a mentor gets Mentees, faculty get Research.
 
-Some roles are self-selected and some are granted after verification, which is why a role you expect may not be here yet.`,
+Some roles are self-selected and some are granted after verification, which is why a role you expect may not be here yet. Edit this block to choose the ones you can.`,
   msg`Your résumé, ready to download or publish.`,
   msg`Your search phrase and a map of the site`,
   msg`Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice.`,
@@ -3117,13 +3127,6 @@ Some roles are self-selected and some are granted after verification, which is w
 • Sync from Virtual Campus — pulls in your OECS course history and leaves any section you have edited alone
 • Edit — opens the editor
 • Public / Private — a public CV gets a shareable link that opens for anyone, even signed out. Private is the default.`,
-  msg`• Profile — your name, photo, bio, skills and what you are open to
-• Security — password, email address, and deleting your account
-• Preferences — notifications, privacy, accessibility and light/dark
-• Personalization — what feeds the “For You” ranking across the site
-• Verification — student status and identity checks
-
-The tab is in the URL, so a link to a particular tab opens on it.`,
   msg`• Whiteboard — visual brainstorming on an infinite canvas, several people drawing at once
 • Document Editor — rich-text documents with live co-editing
 • Code Sandbox — write, run and share snippets in six languages

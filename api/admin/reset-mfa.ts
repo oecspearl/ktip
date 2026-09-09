@@ -75,6 +75,13 @@ export default async function handler(request: Request) {
     await deleteFactor(supabaseUrl, serviceKey, userId, factor.id)
   }
   await adminClient.from('mfa_backup_codes').delete().eq('user_id', userId)
+  // The email method too (150): a live thirty-day step-up left behind would
+  // keep a compromised session writing after the administrator was told the
+  // account was cleared.
+  await adminClient.rpc('clear_mfa_email_method', { p_user: userId }).then(
+    () => {},
+    () => {},
+  )
 
   await adminClient.rpc('sync_mfa_status', { p_user: userId }).then(
     () => {},
@@ -105,7 +112,7 @@ export default async function handler(request: Request) {
       user_id: userId,
       type: 'security',
       title: 'Two-step verification was reset on your account',
-      body: 'A KTIP administrator cleared your authenticator app. Set up a new one the next time you sign in.',
+      body: 'A KTIP administrator cleared your second sign-in step. Choose an authenticator app or an email code the next time you sign in.',
       link: '/dashboard/security',
     })
     .then(

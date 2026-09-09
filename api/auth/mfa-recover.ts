@@ -124,6 +124,13 @@ export default async function handler(request: Request) {
   for (const factor of factors) {
     await deleteFactor(supabaseUrl, serviceKey, caller.id, factor.id)
   }
+  // An account recovering a lost authenticator holds no email step-ups — sync
+  // deletes them the moment a factor verifies — but "reset" should mean reset
+  // whatever the state, so the email method goes too (150).
+  await admin.rpc('clear_mfa_email_method', { p_user: caller.id }).then(
+    () => {},
+    () => {},
+  )
 
   // The derived column is stale the moment the factors go, and the member is
   // about to be routed off this response — so it is corrected here rather than

@@ -200,6 +200,11 @@ const router = createBrowserRouter([
       { path: '/security/set-up', lazy: lazyPage(() => import('./pages/security/MfaSetupPage')) },
       { path: '/security/verify', lazy: lazyPage(() => import('./pages/security/MfaChallengePage')) },
       { path: '/security/recover', lazy: lazyPage(() => import('./pages/security/MfaRecoverPage')) },
+      // Public on purpose (150): this is what a phone lands on after scanning
+      // the "get an authenticator app" QR from a signed-in computer. The phone
+      // has no session, and the page needs none — it only says where the apps
+      // are and how to add KTIP to one.
+      { path: '/get-authenticator', lazy: lazyPage(() => import('./pages/security/GetAuthenticatorPage')) },
 
       {
         Component: MainLayout,

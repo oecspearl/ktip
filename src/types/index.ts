@@ -278,6 +278,12 @@ export interface Profile {
   mfa_enrolled_at?: string | null
   mfa_grandfathered?: boolean
   /**
+   * Which second step the account uses (150): an authenticator app, a code to
+   * the account email, or none yet. Derived server-side; optional for the same
+   * deploy-order reason as the flags above.
+   */
+  mfa_method?: MfaMethod | null
+  /**
    * Language settings (097, 100). All three optional for the same
    * deploy-ahead-of-migration reason as the fields above.
    *
@@ -848,6 +854,16 @@ export interface GrantApplication {
   application_data: Record<string, any>
   status: GrantApplicationStatus
   current_step: number
+  /**
+   * Migration 133 — what was actually awarded. On the application, not the
+   * grant: one call can award several applicants different amounts, and
+   * `grants.amount_min/max` describes the call rather than any award.
+   * Stored in `awarded_currency` and never converted for reporting.
+   */
+  awarded_amount: number | null
+  awarded_currency: string
+  awarded_at: string | null
+  awarded_by: string | null
   created_at: string
   updated_at: string
   grant?: Grant
@@ -1147,6 +1163,20 @@ export interface MfaBackupCodeStatus {
   total: number
   remaining: number
   issued_at: string | null
+}
+
+/** The second-step methods an account can hold (150). */
+export type MfaMethod = 'totp' | 'email'
+
+/**
+ * Return shape of mfa_email_session_status() (150). `step_up_ok` is a property
+ * of THIS session — another device has its own answer.
+ */
+export interface MfaEmailSessionStatus {
+  method: MfaMethod | null
+  required: boolean
+  step_up_ok: boolean
+  expires_at: string | null
 }
 
 // Grievance types

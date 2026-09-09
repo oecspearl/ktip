@@ -3,14 +3,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
-import type { MfaBackupCodeStatus, MfaFactorSummary } from '../types'
+import { EMAIL_CODE_RESEND_SECONDS } from '../lib/mfa'
+import type { MfaBackupCodeStatus, MfaEmailSessionStatus, MfaFactorSummary } from '../types'
 
 /**
- * Two-factor enrolment (118), wrapped over Supabase's native MFA.
+ * Two-factor enrolment (118), wrapped over Supabase's native MFA, plus the
+ * email-code alternative (150) that sits beside it.
  *
- * Only TOTP is used. Supabase's phone factor is a paid add-on and SMS to OECS
- * carriers costs real money per message; an authenticator app costs nothing and
- * works offline, which matters more here than it would elsewhere.
+ * Only TOTP is a GoTrue factor. Supabase's phone factor is a paid add-on and
+ * SMS to OECS carriers costs real money per message; an authenticator app costs
+ * nothing and works offline. The email code is not a GoTrue factor at all — it
+ * is an application-level step-up (see migration 150) for the member with no
+ * smartphone, and it goes through our own RPCs and edge function.
  */
 
 /** Verified TOTP factors on the signed-in account. */
@@ -62,6 +66,8 @@ export function useMfaMutations(userId?: string) {
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: keys.all('mfa-factors') })
     queryClient.invalidateQueries({ queryKey: keys.all('mfa-backup-codes') })
+    // Verifying a factor flips mfa_method to totp server-side (150).
+    queryClient.invalidateQueries({ queryKey: keys.all('mfa-email') })
     if (userId) queryClient.invalidateQueries({ queryKey: ['profile', userId] })
   }, [queryClient, userId])
 
@@ -189,6 +195,142 @@ export function useMfaRecovery() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all('mfa-factors') })
       queryClient.invalidateQueries({ queryKey: keys.all('mfa-backup-codes') })
+      queryClient.invalidateQueries({ queryKey: keys.all('mfa-email') })
     },
   })
+}
+
+// ---------------------------------------------------------------------------
+// The email code (150)
+// ---------------------------------------------------------------------------
+
+/**
+ * Whether THIS session has a live email step-up. Session state, like the
+ * assurance level: the same account on another device gets its own answer.
+ * A missing RPC (app deployed ahead of 150) reads as null, which every caller
+ * treats as "nothing owed".
+ */
+export function useMfaEmailStatus(userId: string | undefined) {
+  const query = useQuery({
+    queryKey: keys.detail('mfa-email', userId),
+    queryFn: async (): Promise<MfaEmailSessionStatus | null> => {
+      const { data, error } = await (supabase as any).rpc('mfa_email_session_status')
+      if (error) return null
+      return (data as MfaEmailSessionStatus | null) ?? null
+    },
+    enabled: !!userId,
+  })
+  return { status: query.data ?? null, loading: query.isPending, refetch: query.refetch }
+}
+
+export interface EmailCodeSendResult {
+  ok: true
+  expires_at: string
+  /** Present only outside production when Resend is unconfigured. */
+  dev_code?: string
+}
+
+export interface EmailCodeVerifyResult {
+  ok: true
+  expires_at: string
+  first_time: boolean
+}
+
+export function useMfaEmailMutations(userId?: string) {
+  const { t } = useLingui()
+  const queryClient = useQueryClient()
+
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: keys.all('mfa-email') })
+    if (userId) queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+  }, [queryClient, userId])
+
+  /**
+   * Ask for a code. Goes through an edge function because the plaintext must
+   * never reach the browser that holds the password — the RPC that mints it is
+   * service-role only, and the mail goes to the account's own address.
+   */
+  const sendMutation = useMutation({
+    mutationFn: async (): Promise<EmailCodeSendResult> => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error(t`No active session`)
+
+      const failed = t`We could not send a code. Try again in a moment.`
+      const res = await fetch('/api/auth/mfa-email-send', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      const body = await res.json().catch(() => ({ error: failed }))
+      if (!res.ok) throw new Error(body.error || failed)
+      return body as EmailCodeSendResult
+    },
+  })
+
+  /**
+   * Spend the code. Runs on the caller's own session — verify_mfa_email_code()
+   * needs nothing the browser lacks — and on a first-time choice signs every
+   * other session out, which is what GoTrue does when a factor first verifies.
+   */
+  const verifyMutation = useMutation({
+    mutationFn: async (code: string): Promise<EmailCodeVerifyResult> => {
+      const { data, error } = await (supabase as any).rpc('verify_mfa_email_code', { p_code: code })
+      if (error) throw error
+      const result = data as { ok: boolean; reason?: string; expires_at?: string; first_time?: boolean }
+      if (!result?.ok) {
+        if (result?.reason === 'rate_limited') {
+          throw new Error(t`Too many attempts. Wait a while and try again.`)
+        }
+        if (result?.reason === 'totp_enrolled') {
+          throw new Error(t`This account uses an authenticator app. Enter the code from the app instead.`)
+        }
+        if (result?.reason === 'not_authenticated') {
+          throw new Error(t`Your session has ended. Sign in again.`)
+        }
+        throw new Error(t`That code was not accepted. Check the digits, or send a new code.`)
+      }
+      if (result.first_time) {
+        await supabase.auth.signOut({ scope: 'others' }).catch(() => {
+          /* best effort */
+        })
+      }
+      return { ok: true, expires_at: result.expires_at ?? '', first_time: !!result.first_time }
+    },
+    onSuccess: invalidate,
+  })
+
+  /**
+   * Switch the email method off, for an account that chose it. The RPC refuses
+   * when a role requires a second step, and when this session has not itself
+   * verified a code — the same rule GoTrue applies to removing a factor.
+   */
+  const disableMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await (supabase as any).rpc('disable_my_mfa_email')
+      if (error) throw error
+      const result = data as { ok: boolean; reason?: string }
+      if (!result?.ok) {
+        if (result?.reason === 'required') {
+          throw new Error(t`Your account needs a second step at sign-in, so this cannot be switched off.`)
+        }
+        if (result?.reason === 'step_up_required') {
+          throw new Error(t`Sign out and back in with a fresh email code, then try again.`)
+        }
+        throw new Error(t`Could not switch off email codes.`)
+      }
+    },
+    onSuccess: invalidate,
+  })
+
+  return {
+    sendCode: sendMutation.mutateAsync,
+    verifyCode: verifyMutation.mutateAsync,
+    disableEmail: disableMutation.mutateAsync,
+    sending: sendMutation.isPending,
+    verifying: verifyMutation.isPending,
+    disabling: disableMutation.isPending,
+    resendSeconds: EMAIL_CODE_RESEND_SECONDS,
+  }
 }

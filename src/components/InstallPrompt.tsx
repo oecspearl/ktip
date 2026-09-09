@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Download, Share, SquarePlus, X } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Button } from './ui/Button'
+import { isIos, isStandalone, isTouchDevice } from '../lib/platform'
 
 /**
  * Offers to install the app to the home screen.
@@ -26,18 +27,6 @@ interface InstallEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-function isStandalone(): boolean {
-  return (
-    window.matchMedia?.('(display-mode: standalone)').matches ||
-    // iOS predates display-mode and reports it here instead.
-    (window.navigator as { standalone?: boolean }).standalone === true
-  )
-}
-
-function isIos(): boolean {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent)
-}
-
 export function InstallPrompt() {
   const { t } = useLingui()
   const [event, setEvent] = useState<InstallEvent | null>(null)
@@ -49,8 +38,7 @@ export function InstallPrompt() {
     // listened for: already installed, already declined, or on a desktop where
     // "add to home screen" means nothing to the reader.
     if (isStandalone()) return
-    const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false
-    if (!coarse) return
+    if (!isTouchDevice()) return
     try {
       if (localStorage.getItem(DISMISSED_KEY) === '1') return
     } catch {

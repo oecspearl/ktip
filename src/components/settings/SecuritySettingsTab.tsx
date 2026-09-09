@@ -8,8 +8,15 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { changePasswordSchema, changeEmailSchema, secondaryEmailSchema } from '../../lib/validation'
 import { useMyEmailAlias, useEmailAliasMutations } from '../../hooks/useEmailAlias'
-import { useBackupCodeStatus, useMfaFactors, useMfaMutations } from '../../hooks/useMfa'
+import {
+  useBackupCodeStatus,
+  useMfaEmailMutations,
+  useMfaEmailStatus,
+  useMfaFactors,
+  useMfaMutations,
+} from '../../hooks/useMfa'
 import { BackupCodesSheet } from '../../components/security/BackupCodesSheet'
+import { stepUpDaysLeft } from '../../lib/mfa'
 import {
   Lock,
   Mail,
@@ -65,6 +72,17 @@ export function SecuritySettingsTab() {
   // straight back to enrolment, so the option is not offered.
   const mfaRequired = auth.profile?.mfa_grandfathered === false
 
+  // The email method (150). `enrolled` is the authenticator; this is the other
+  // one, and an account holds at most one of the two.
+  const { status: emailStatus } = useMfaEmailStatus(auth.user?.id)
+  const { disableEmail, disabling: disablingEmail } = useMfaEmailMutations(auth.user?.id)
+  const emailMethod = !enrolled && auth.mfaMethod === 'email'
+  const emailDaysLeft = stepUpDaysLeft(auth.emailStepUpExpiresAt)
+  // The remove-authenticator confirmation doubles as "switch to email": same
+  // consequence (the factor goes), different destination afterwards.
+  const [switchingToEmail, setSwitchingToEmail] = useState(false)
+  const [showDisableEmailModal, setShowDisableEmailModal] = useState(false)
+
   const handleRegenerateCodes = async () => {
     try {
       setFreshCodes(await issueCodes())
@@ -79,9 +97,25 @@ export function SecuritySettingsTab() {
     try {
       await unenroll(factorId)
       setShowRemoveMfaModal(false)
+      if (switchingToEmail) {
+        navigate('/security/set-up?method=email')
+        return
+      }
       toast.success(t`Two-step verification is off.`)
     } catch (error: any) {
       toast.error(error?.message || t`Could not remove your authenticator.`)
+    }
+  }
+
+  const handleDisableEmail = async () => {
+    try {
+      await disableEmail()
+      setShowDisableEmailModal(false)
+      await auth.refreshProfile()
+      await auth.recheckMfaChallenge()
+      toast.success(t`Two-step verification is off.`)
+    } catch (error: any) {
+      toast.error(error?.message || t`Could not switch off email codes.`)
     }
   }
 
@@ -340,7 +374,7 @@ export function SecuritySettingsTab() {
               <Trans>Two-Step Verification</Trans>
             </h2>
             <p className="text-sm text-ktip-sand-600">
-              <Trans>An authenticator app code, on top of your password</Trans>
+              <Trans>A second code at sign-in, on top of your password</Trans>
             </p>
           </div>
         </div>
@@ -352,7 +386,7 @@ export function SecuritySettingsTab() {
             <>
               <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
                 <CheckCircle size={18} />
-                <Trans>Two-step verification is on for this account.</Trans>
+                <Trans>Two-step verification is on, using your authenticator app.</Trans>
               </div>
 
               <p className="text-sm text-ktip-sand-600">
@@ -369,11 +403,28 @@ export function SecuritySettingsTab() {
                 <Button variant="secondary" loading={issuing} onClick={handleRegenerateCodes}>
                   <Trans>Generate new recovery codes</Trans>
                 </Button>
-                {/* Not offered when a role demands it: removing the factor only
-                    sends them back to /security/set-up, which reads as a broken
+                {/* Switching is offered to everyone: the factor goes, and set-up
+                    picks the email method straight up. Removing OUTRIGHT is not
+                    offered when a role demands a second step — it would only
+                    send them back to /security/set-up, which reads as a broken
                     button rather than a refusal. */}
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setSwitchingToEmail(true)
+                    setShowRemoveMfaModal(true)
+                  }}
+                >
+                  <Trans>Switch to email codes</Trans>
+                </Button>
                 {!mfaRequired && (
-                  <Button variant="ghost" onClick={() => setShowRemoveMfaModal(true)}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSwitchingToEmail(false)
+                      setShowRemoveMfaModal(true)
+                    }}
+                  >
                     <Trans>Remove authenticator</Trans>
                   </Button>
                 )}
@@ -383,12 +434,51 @@ export function SecuritySettingsTab() {
                 <Trans>Generating new codes makes every earlier code stop working.</Trans>
               </p>
             </>
+          ) : emailMethod ? (
+            <>
+              <div className="flex items-center gap-2 bg-ktip-tropical-50 border border-ktip-tropical-200 text-ktip-tropical-700 px-4 py-3 rounded-xl text-sm">
+                <CheckCircle size={18} />
+                <Trans>Two-step verification is on, using a code sent to your email.</Trans>
+              </div>
+
+              <p className="text-sm text-ktip-sand-600">
+                {emailDaysLeft !== null && emailDaysLeft > 0 ? (
+                  <Trans>
+                    You enter a code the first time you sign in on a new device, and again every 30
+                    days. This device is good for another {emailDaysLeft} days.
+                  </Trans>
+                ) : (
+                  <Trans>
+                    You enter a code the first time you sign in on a new device, and again every 30
+                    days.
+                  </Trans>
+                )}
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" onClick={() => navigate('/security/set-up?method=totp')}>
+                  <Trans>Switch to an authenticator app</Trans>
+                </Button>
+                {!mfaRequired && (
+                  <Button variant="ghost" onClick={() => setShowDisableEmailModal(true)}>
+                    <Trans>Turn off</Trans>
+                  </Button>
+                )}
+              </div>
+
+              <p className="text-caption text-ktip-sand-500">
+                <Trans>
+                  An authenticator app is the stronger option: it works offline, and a stolen
+                  password and inbox together are still not enough.
+                </Trans>
+              </p>
+            </>
           ) : (
             <>
               <p className="text-sm text-ktip-sand-600">
                 <Trans>
-                  Add a second step at sign-in using a free authenticator app. It works offline,
-                  and it means a stolen password is not enough to reach your account.
+                  Add a second step at sign-in — a free authenticator app, or a code sent to your
+                  email. Either way, a stolen password is not enough to reach your account.
                 </Trans>
               </p>
               <Button onClick={() => navigate('/security/set-up')}>
@@ -396,6 +486,9 @@ export function SecuritySettingsTab() {
               </Button>
             </>
           )}
+          {/* Keeps the hook's result in the tree so the days-left line above
+              refreshes when the session status does. */}
+          <span className="sr-only">{emailStatus?.method ?? ''}</span>
         </div>
       </Card>
 
@@ -722,22 +815,33 @@ export function SecuritySettingsTab() {
         )}
       </Modal>
 
-      {/* Remove authenticator */}
+      {/* Remove authenticator — or swap it for email codes (150) */}
       <Modal
         open={showRemoveMfaModal}
         onClose={() => setShowRemoveMfaModal(false)}
-        title={t`Remove your authenticator?`}
-        description={t`Your account will be protected by your password alone.`}
+        title={switchingToEmail ? t`Switch to email codes?` : t`Remove your authenticator?`}
+        description={
+          switchingToEmail
+            ? t`Your authenticator is removed first. Then we email you a code to finish switching.`
+            : t`Your account will be protected by your password alone.`
+        }
         size="sm"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
             <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
             <p className="text-sm text-amber-900">
-              <Trans>
-                Your recovery codes stay valid but stop being useful — there will be no second
-                step for them to recover.
-              </Trans>
+              {switchingToEmail ? (
+                <Trans>
+                  Email codes are a little weaker than an app: whoever controls your inbox could pass
+                  this step. Your recovery codes stop being useful.
+                </Trans>
+              ) : (
+                <Trans>
+                  Your recovery codes stay valid but stop being useful — there will be no second
+                  step for them to recover.
+                </Trans>
+              )}
             </p>
           </div>
           <div className="flex justify-end gap-3">
@@ -745,7 +849,28 @@ export function SecuritySettingsTab() {
               <Trans>Cancel</Trans>
             </Button>
             <Button variant="danger" loading={unenrolling} onClick={handleRemoveMfa}>
-              <Trans>Remove it</Trans>
+              {switchingToEmail ? <Trans>Switch to email</Trans> : <Trans>Remove it</Trans>}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Turn off email codes (150). Voluntary accounts only; the RPC refuses
+          the rest, and the button is not shown to them. */}
+      <Modal
+        open={showDisableEmailModal}
+        onClose={() => setShowDisableEmailModal(false)}
+        title={t`Turn off email codes?`}
+        description={t`Your account will be protected by your password alone.`}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowDisableEmailModal(false)}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button variant="danger" loading={disablingEmail} onClick={handleDisableEmail}>
+              <Trans>Turn it off</Trans>
             </Button>
           </div>
         </div>

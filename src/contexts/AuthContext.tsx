@@ -18,7 +18,14 @@ import {
   VERIFICATION_GATED_PERMISSIONS,
 } from '../lib/permissions'
 import type { User, Session } from '@supabase/supabase-js'
-import type { AccountStatus, PermissionKey, Profile, RoleSlug } from '../types'
+import type {
+  AccountStatus,
+  MfaEmailSessionStatus,
+  MfaMethod,
+  PermissionKey,
+  Profile,
+  RoleSlug,
+} from '../types'
 
 export interface SignupMetadata {
   display_name?: string
@@ -98,6 +105,14 @@ interface AuthContextType {
    * collide with the enrolment gate on `profile.requires_mfa_enrollment`.
    */
   mfaChallengeRequired: boolean
+  /**
+   * Which second step the account uses (150), or null for none yet. From the
+   * session-status RPC rather than the profile row, so the challenge page can
+   * render the right form before the profile query has caught up.
+   */
+  mfaMethod: MfaMethod | null
+  /** When this session's email step-up lapses, or null. Rendering only. */
+  emailStepUpExpiresAt: string | null
   /** Recompute the flag above after a challenge swaps the access token. */
   recheckMfaChallenge: () => Promise<void>
   /** Refetch the profile row — the MFA pages need the gate flags to be current. */
@@ -337,7 +352,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Keyed on the access token as well as the user id: verifying a factor swaps
   // the token within one account, and that is precisely the moment the answer
   // changes from true to false.
+  //
+  // Two halves again (150): GoTrue's assurance level for an authenticator
+  // factor, and our own session status for the email code. Either one owing
+  // sends the member to /security/verify; the page reads `mfaMethod` to know
+  // which form to show.
   const [mfaChallengeRequired, setMfaChallengeRequired] = useState(false)
+  const [mfaEmail, setMfaEmail] = useState<MfaEmailSessionStatus | null>(null)
 
   const readAssuranceLevel = useCallback(async () => {
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
@@ -345,24 +366,65 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return data?.nextLevel === 'aal2' && data?.currentLevel === 'aal1'
   }, [])
 
+  // Any failure — including the RPC not existing yet on a database that has
+  // not run 150 — reads as "nothing owed". Same rule as every gate flag: a
+  // missing column or function must never trap the whole membership.
+  const readEmailStepUp = useCallback(async (): Promise<MfaEmailSessionStatus | null> => {
+    const { data, error } = await (supabase as any).rpc('mfa_email_session_status')
+    if (error || !data) return null
+    return data as MfaEmailSessionStatus
+  }, [])
+
+  const readChallenge = useCallback(async () => {
+    const [aalOwed, email] = await Promise.all([readAssuranceLevel(), readEmailStepUp()])
+    const emailOwed = email?.method === 'email' && !email.step_up_ok
+    return { required: aalOwed || emailOwed, email }
+  }, [readAssuranceLevel, readEmailStepUp])
+
   useEffect(() => {
     if (!user?.id) {
       setMfaChallengeRequired(false)
+      setMfaEmail(null)
       return
     }
     let cancelled = false
     void (async () => {
-      const required = await readAssuranceLevel()
-      if (!cancelled) setMfaChallengeRequired(required)
+      const result = await readChallenge()
+      if (cancelled) return
+      setMfaChallengeRequired(result.required)
+      setMfaEmail(result.email)
     })()
     return () => {
       cancelled = true
     }
-  }, [user?.id, session?.access_token, readAssuranceLevel])
+  }, [user?.id, session?.access_token, readChallenge])
+
+  // An email step-up lapses on a clock, not on an auth event. Re-ask at the
+  // moment it does, so the member is challenged rather than met with a wall
+  // of 42501s. setTimeout caps at 2^31-1 ms (~24.8 days); a longer wait is
+  // re-armed by the hourly token refresh re-running the effect above.
+  useEffect(() => {
+    if (!user?.id || !mfaEmail?.expires_at || !mfaEmail.step_up_ok) return
+    const delay = new Date(mfaEmail.expires_at).getTime() - Date.now()
+    if (!Number.isFinite(delay) || delay <= 0 || delay > 2_147_000_000) return
+    const timer = window.setTimeout(() => {
+      void readChallenge().then((result) => {
+        setMfaChallengeRequired(result.required)
+        setMfaEmail(result.email)
+      })
+    }, delay + 1000)
+    return () => window.clearTimeout(timer)
+  }, [user?.id, mfaEmail?.expires_at, mfaEmail?.step_up_ok, readChallenge])
 
   const recheckMfaChallenge = useCallback(async () => {
-    setMfaChallengeRequired(await readAssuranceLevel())
-  }, [readAssuranceLevel])
+    const result = await readChallenge()
+    setMfaChallengeRequired(result.required)
+    setMfaEmail(result.email)
+  }, [readChallenge])
+
+  const mfaMethod: MfaMethod | null =
+    mfaEmail?.method ?? (profile?.mfa_method as MfaMethod | null | undefined) ?? null
+  const emailStepUpExpiresAt = mfaEmail?.step_up_ok ? (mfaEmail.expires_at ?? null) : null
 
   const refreshProfile = useCallback(async () => {
     if (!user?.id) return
@@ -799,6 +861,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       isAdmin,
       isSuperAdmin,
       mfaChallengeRequired,
+      mfaMethod,
+      emailStepUpExpiresAt,
       recheckMfaChallenge,
       refreshProfile,
       activeRole,
@@ -831,6 +895,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       isAdmin,
       isSuperAdmin,
       mfaChallengeRequired,
+      mfaMethod,
+      emailStepUpExpiresAt,
       recheckMfaChallenge,
       refreshProfile,
       activeRole,
