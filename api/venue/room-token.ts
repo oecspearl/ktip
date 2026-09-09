@@ -78,7 +78,7 @@ export default async function handler(request: Request): Promise<Response> {
 
   let body: { roomId?: unknown }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }

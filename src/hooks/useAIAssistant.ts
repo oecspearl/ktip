@@ -5,6 +5,7 @@ import { msg } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react/macro'
 import type { MessageDescriptor } from '@lingui/core'
 import { resolveDestinations, type AssistantDestination } from '../lib/assistant'
+import { supabase } from '../lib/supabase'
 import type { UserRole } from '../types'
 
 export interface ChatMessage {
@@ -159,12 +160,25 @@ interface NavigatorResult {
   destinations: AssistantDestination[]
 }
 
+/**
+ * Both AI routes read the caller from the bearer token. /api/ai-chat refuses
+ * without one; /api/ai-search uses it to decide which pages it may point at,
+ * and treats its absence as a guest.
+ */
+async function aiHeaders(): Promise<HeadersInit> {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  return token
+    ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+    : { 'Content-Type': 'application/json' }
+}
+
 async function callChat(
   apiMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>
 ): Promise<string> {
   const res = await fetch('/api/ai-chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await aiHeaders(),
     body: JSON.stringify({ messages: apiMessages, temperature: 0.7, max_tokens: 1000 }),
   })
 
@@ -186,10 +200,12 @@ async function callNavigator(
   query: string,
   viewer: { signedIn: boolean; isOecs: boolean }
 ): Promise<NavigatorResult> {
+  // The server works out who is asking from the token; `viewer` is only for
+  // filtering the destinations it sends back.
   const res = await fetch('/api/ai-search', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, signedIn: viewer.signedIn, isOecs: viewer.isOecs }),
+    headers: await aiHeaders(),
+    body: JSON.stringify({ query }),
   })
 
   if (!res.ok) throw new Error(`Navigator error: ${res.status}`)

@@ -22,17 +22,6 @@ const json = (body: unknown, status: number) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
 
-function clientIp(request: Request): string {
-  const raw =
-    request.headers.get('x-real-ip') ||
-    (request.headers.get('x-vercel-forwarded-for') || '').split(',')[0].trim() ||
-    (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() ||
-    ''
-  if (!raw) return 'unknown'
-  if (raw.includes(':')) return raw.split(':').slice(0, 4).join(':')
-  return raw
-}
-
 export default async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
@@ -72,7 +61,7 @@ export default async function handler(request: Request): Promise<Response> {
 
     let body: { course_id?: string }
     try {
-      body = await request.json()
+      body = (await request.json()) as typeof body
     } catch {
       return json({ error: 'Invalid request body' }, 400)
     }

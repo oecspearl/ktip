@@ -57,7 +57,7 @@ export default async function handler(request: Request) {
 
   let body: { bucket?: string; path?: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }

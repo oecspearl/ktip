@@ -134,7 +134,7 @@ export default async function handler(request: Request) {
       html: replyEmailHtml({
         subject,
         reply,
-        feedbackUrl: `${siteOrigin(request)}/settings?tab=feedback`,
+        feedbackUrl: `${siteOrigin(request)}/dashboard/feedback`,
       }),
     }),
   })

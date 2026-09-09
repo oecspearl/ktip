@@ -360,11 +360,18 @@ export function useGlobalSearch(
 
     ;(async () => {
       try {
+        // The server reads who is asking from the token, not from the body —
+        // a guest gets no header and is treated as one.
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData.session?.access_token
         const res = await fetch('/api/ai-search', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           signal: controller.signal,
-          body: JSON.stringify({ query: debouncedAiQuery, signedIn, isOecs }),
+          body: JSON.stringify({ query: debouncedAiQuery }),
         })
         if (!res.ok) throw new Error(`AI search failed: ${res.status}`)
         const data = (await res.json()) as { ids?: string[]; answer?: string; steps?: string[] }

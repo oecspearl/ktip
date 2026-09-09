@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { getProvider } from './_lib/translate-provider'
+import { clientIp } from './_lib/client-ip'
 import { contentHash } from '../src/lib/i18n/hash'
 import { isTargetLang } from '../src/lib/i18n/protocol'
 import {
@@ -32,14 +33,14 @@ export const config = { runtime: 'edge' }
  *    text that is already rendered. Holding the request for half a minute to
  *    improve wording nobody is waiting on is the wrong trade.
  *
- * 3. **It is rate limited.** ai-chat.ts is behind auth-gated UI; this route is
- *    reachable anonymously from public pages and spends a budget shared by every
- *    reader of the site.
+ * 3. **It is rate limited per address, not per account.** ai-chat.ts requires
+ *    a member's token; this route is reachable anonymously from public pages
+ *    and spends a budget shared by every reader of the site.
  */
 
 const PROVIDER_TIMEOUT_MS = 12_000
 
-const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
+const json = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json', ...headers },
@@ -111,7 +112,7 @@ export default async function handler(request: Request): Promise<Response> {
 
   let body: { to?: unknown; items?: unknown; store?: unknown }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
@@ -139,7 +140,11 @@ export default async function handler(request: Request): Promise<Response> {
   // Salted before storage: translation_rate_limit would otherwise be an access
   // log of every reader of every page. The salt being unset is survivable (the
   // hash is still one-way) but is called out in .env.example.
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  //
+  // The address is the one the platform accepted the connection from, not the
+  // leftmost x-forwarded-for entry this used to read — that one is written by
+  // the client, so a fresh header meant a fresh budget.
+  const ip = clientIp(request)
   const ipHash = await contentHash(`${process.env.TRANSLATION_IP_SALT ?? ''}${ip}`, 'text')
 
   const cap = Number(process.env.TRANSLATION_MONTHLY_CHAR_CAP ?? 1_800_000)

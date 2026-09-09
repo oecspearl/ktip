@@ -16,7 +16,7 @@ export default async function handler(request: Request) {
 
   let body: { user_id: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,

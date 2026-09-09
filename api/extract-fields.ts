@@ -1,10 +1,19 @@
 import { createClient } from '@supabase/supabase-js'
 import { FIELD_SPECS, describeFields, sanitizeFields } from '../src/lib/extracted-fields'
+import { adminClientOrNull } from './_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
 const MODEL = 'gpt-4o-mini'
 const MAX_MARKDOWN_CHARS = 12_000
+
+/**
+ * One extraction per uploaded document; a member filling in a grant might do
+ * a handful in a sitting. Twenty in fifteen minutes is generous for a human
+ * and a hard stop for a loop.
+ */
+const USER_LIMIT = 20
+const USER_WINDOW = 900
 
 /**
  * Proposes values for a grant's or project's structured columns from the text
@@ -83,9 +92,25 @@ export default async function handler(request: Request) {
     return json({ error: 'Unauthorized' }, 401)
   }
 
+  // Authenticated is not the same as metered. Every other paid route consumes
+  // a bucket before it parses; this one required a token and then let the
+  // holder call it as often as they liked. Fail closed without the elevated
+  // client, the same as ai-chat.
+  const adminClient = adminClientOrNull()
+  if (!adminClient) return json({ error: 'Server configuration error' }, 503)
+
+  const { data: limit } = await adminClient.rpc('consume_auth_rate_limit', {
+    p_bucket: `extract-fields:user:${caller.id}`,
+    p_window_seconds: USER_WINDOW,
+    p_limit: USER_LIMIT,
+  })
+  if ((limit as { allowed?: boolean } | null)?.allowed === false) {
+    return json({ error: 'Too many requests. Please try again in a few minutes.' }, 429)
+  }
+
   let body: { entityType?: string; markdown?: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
@@ -133,7 +158,7 @@ export default async function handler(request: Request) {
       return json({ error: `AI error: ${res.status}`, detail: detail.slice(0, 200) }, res.status)
     }
 
-    const data = await res.json()
+    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }
     const content = data.choices?.[0]?.message?.content
 
     let parsed: { fields?: unknown } = {}

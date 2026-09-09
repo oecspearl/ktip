@@ -7,7 +7,6 @@ import {
   formatCurrency,
   parseHashtags,
   escapeIlike,
-  sanitizeHTML,
 } from './utils'
 
 describe('cn', () => {
@@ -142,19 +141,5 @@ describe('escapeIlike', () => {
 
   it('passes through normal text', () => {
     expect(escapeIlike('hello world')).toBe('hello world')
-  })
-})
-
-describe('sanitizeHTML', () => {
-  it('escapes angle brackets', () => {
-    expect(sanitizeHTML('<script>alert("xss")</script>')).not.toContain('<script>')
-  })
-
-  it('escapes quotes', () => {
-    expect(sanitizeHTML('"hello"')).toBe('&quot;hello&quot;')
-  })
-
-  it('leaves plain text unchanged', () => {
-    expect(sanitizeHTML('hello world')).toBe('hello world')
   })
 })

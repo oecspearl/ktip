@@ -79,19 +79,6 @@ export function formatRelativeTime(date: string | Date): string {
 }
 
 /**
- * Sanitize HTML to prevent XSS attacks
- * For production, consider using DOMPurify library
- */
-export function sanitizeHTML(html: string): string {
-  return html
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
-}
-
-/**
  * Truncate text to a specified length
  */
 export function truncate(text: string, length: number): string {

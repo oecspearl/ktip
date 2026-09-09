@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { buildKtipResumeData, mergeResume, type KtipCvInput } from '../_lib/cv-build'
+import { clientIp } from '../_lib/client-ip'
 import {
   RESUME_PATHS,
   RESUME_TEMPLATE_KEY,
@@ -40,17 +41,6 @@ const json = (body: unknown, status: number) =>
     status,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
-
-function clientIp(request: Request): string {
-  const raw =
-    request.headers.get('x-real-ip') ||
-    (request.headers.get('x-vercel-forwarded-for') || '').split(',')[0].trim() ||
-    (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() ||
-    ''
-  if (!raw) return 'unknown'
-  if (raw.includes(':')) return raw.split(':').slice(0, 4).join(':')
-  return raw
-}
 
 const BASE_PROFILE_COLUMNS = 'display_name, bio, country, organization, industry, skills, interests, open_to'
 const CONTACT_COLUMNS = 'phone, website, languages'

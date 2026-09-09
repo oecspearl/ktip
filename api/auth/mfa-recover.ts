@@ -66,7 +66,7 @@ async function notify(admin: SupabaseClient, userId: string) {
       body:
         'Your authenticator app was removed and you were asked to set up a new one. ' +
         'If this was not you, change your password and contact KTIP support.',
-      link: '/settings',
+      link: '/dashboard/security',
     })
   } catch {
     /* ignore */

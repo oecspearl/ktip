@@ -76,7 +76,7 @@ export default async function handler(request: Request) {
 
   let body: { surface?: string; fields?: Array<{ name: string; text: string }>; locale?: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }

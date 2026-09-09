@@ -1,4 +1,4 @@
-import { requirePermission } from '../_lib/require-permission'
+import { requireCanAdminister, requirePermission } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -54,7 +54,7 @@ export default async function handler(request: Request) {
 
   let body: { user_id?: string; note?: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
@@ -106,7 +106,7 @@ export default async function handler(request: Request) {
       type: 'security',
       title: 'Two-step verification was reset on your account',
       body: 'A KTIP administrator cleared your authenticator app. Set up a new one the next time you sign in.',
-      link: '/settings',
+      link: '/dashboard/security',
     })
     .then(
       () => {},

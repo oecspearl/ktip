@@ -329,9 +329,13 @@ export const profileUpdateSchema = z.object({
 })
 
 // Change Password Schema
+//
+// The same rules as signup. This used to accept six characters of anything,
+// so the reset path could set a password the signup form would have refused —
+// and a reset is exactly when someone reaches for the shortest thing allowed.
 export const changePasswordSchema = z.object({
-  new_password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirm_password: z.string().min(6, 'Password must be at least 6 characters'),
+  new_password: passwordSchema,
+  confirm_password: z.string(),
 }).superRefine((data, ctx) => {
   // superRefine rather than refine: refine's options object is evaluated once
   // at module scope, freezing the message in English; this resolves per parse.

@@ -17,7 +17,7 @@ export default async function handler(request: Request) {
   // Parse request body
   let body: { email: string; password: string; display_name?: string; roles?: string[] }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,
@@ -74,9 +74,11 @@ export default async function handler(request: Request) {
       roleWarning =
         reason === 'seat_requires_super_admin'
           ? 'The account was created without roles: only a Super Admin can grant the Admin or Super Admin role.'
-          : reason === 'forbidden'
-            ? 'The account was created without roles: you do not hold role:manage.'
-            : `The account was created, but its roles could not be set (${reason}).`
+          : reason === 'seat_limit_reached'
+            ? 'The account was created without roles: every seat of that role is already taken (143).'
+            : reason === 'forbidden'
+              ? 'The account was created without roles: you do not hold role:manage.'
+              : `The account was created, but its roles could not be set (${reason}).`
     }
   }
 

@@ -196,10 +196,12 @@ export async function requireCanAdminister(
     p_target: targetId,
   })
   if (error) {
-    // A database that predates 124 has no such function. Failing closed here
-    // would take every admin route down on deploy; the routes keep their own
-    // self-target refusals, and the ceiling arrives with the migration.
-    if (/could not find the function|does not exist/i.test(error.message)) return null
+    // Fail closed, including when the function is missing. This used to return
+    // null (allowed) on "could not find the function" so a deploy that ran
+    // ahead of migration 124 would not take the admin routes down — but that
+    // meant the whole Super Admin ceiling silently evaporated on any database
+    // without it, and 124 has been live on every environment for weeks. A
+    // missing function is now a configuration error, answered as one.
     return json({ error: 'Could not verify permission for this account' }, 500)
   }
   if (data !== true) {

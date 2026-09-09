@@ -1,4 +1,4 @@
-import { requirePermission } from '../_lib/require-permission'
+import { requireCanAdminister, requirePermission } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -16,7 +16,7 @@ export default async function handler(request: Request) {
 
   let body: { user_id: string; new_password: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,
@@ -49,7 +49,7 @@ export default async function handler(request: Request) {
 
   if (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Could not update the password for this account.' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     )
   }

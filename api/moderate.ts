@@ -47,7 +47,7 @@ export default async function handler(request: Request) {
 
   let body: { report_id?: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
@@ -95,7 +95,7 @@ export default async function handler(request: Request) {
       return json({ severity: null, rationale: 'Review service unavailable.' }, 200)
     }
 
-    const payload = await completion.json()
+    const payload = (await completion.json()) as { choices?: Array<{ message?: { content?: string } }> }
     const raw = payload?.choices?.[0]?.message?.content ?? '{}'
 
     let verdict: { severity?: string; rationale?: string }

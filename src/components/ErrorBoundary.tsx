@@ -69,14 +69,21 @@ export class AppErrorBoundary extends Component<PropsWithChildren, State> {
                 </Button>
               </a>
             </div>
-            <details className="mt-8 text-left">
-              <summary className="text-sm text-ktip-sand-500 cursor-pointer hover:text-ktip-sand-700">
-                {i18n._(msg`Error details`)}
-              </summary>
-              <pre className="mt-2 p-4 bg-ktip-sand-100 rounded-xl text-xs text-ktip-sand-700 overflow-auto max-h-40">
-                {err?.message || String(err)}
-              </pre>
-            </details>
+            {/* The raw message can carry a PostgREST error, a storage path or a
+                member's own text. Sentry has it (wrapped, above); a reader in
+                production gets the code they can quote to support instead. */}
+            {import.meta.env.DEV ? (
+              <details className="mt-8 text-left">
+                <summary className="text-sm text-ktip-sand-500 cursor-pointer hover:text-ktip-sand-700">
+                  {i18n._(msg`Error details`)}
+                </summary>
+                <pre className="mt-2 p-4 bg-ktip-sand-100 rounded-xl text-xs text-ktip-sand-700 overflow-auto max-h-40">
+                  {err?.message || String(err)}
+                </pre>
+              </details>
+            ) : (
+              <p className="mt-8 text-xs text-ktip-sand-500">REACT_COMPONENT_ERROR</p>
+            )}
           </div>
         </div>
       )

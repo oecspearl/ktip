@@ -1,10 +1,23 @@
+import { createClient } from '@supabase/supabase-js'
 import { SITE_MAP_COMPACT, SITE_ENTRY_IDS } from '../src/lib/site-map'
+import { ADMIN_CONSOLE_KEYS } from '../src/lib/admin-console-keys'
+import { adminClientOrNull } from './_lib/require-permission'
+import { clientIp } from './_lib/client-ip'
 
 export const config = { runtime: 'edge' }
 
 const MODEL = 'gpt-4o-mini'
 const MAX_QUERY_CHARS = 300
 const MAX_IDS = 6
+
+/**
+ * Search is debounced client-side, so one call is one settled query, and the
+ * assistant fires one per turn. Thirty in fifteen minutes is a busy human.
+ */
+const IP_LIMIT = 30
+const IP_WINDOW = 900
+const IP_DAILY_LIMIT = 300
+const IP_DAILY_WINDOW = 86_400
 
 /**
  * AI-guided navigation for the navbar search panel.
@@ -14,9 +27,55 @@ const MAX_IDS = 6
  * first thing in the system prompt, which keeps the prefix identical between
  * requests so OpenAI's automatic prompt caching applies.
  *
- * Request:  { query: string, signedIn?: boolean, isOecs?: boolean }
+ * Reachable by guests — the navbar search is the front door — so the throttle
+ * is per address rather than per account, keyed on the IP the platform saw
+ * (see _lib/client-ip.ts), and it is consumed before anything else is done.
+ *
+ * Who the caller is comes from the Authorization header, never the body. The
+ * request used to carry `signedIn` and `isOecs` flags and the prompt repeated
+ * them back as fact, which made "the user is an administrator" something any
+ * caller could assert. The ids were always filtered against the public site
+ * map, so nothing was exposed — but a privilege claim belongs in a token, not
+ * in a JSON body. The two fields are now ignored.
+ *
+ * Request:  { query: string }, optional bearer token
  * Response: { ids: string[], answer: string, steps: string[] }
  */
+
+interface Viewer {
+  signedIn: boolean
+  isOecs: boolean
+}
+
+/**
+ * Resolves the caller from their token. No token, or a bad one, is a guest;
+ * a valid token whose permission lookup fails is a plain member — the safe
+ * direction is always "less".
+ */
+async function resolveViewer(request: Request): Promise<Viewer> {
+  const guest: Viewer = { signedIn: false, isOecs: false }
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) return guest
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const anonKey =
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !anonKey) return guest
+
+  const callerClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  })
+  const {
+    data: { user },
+  } = await callerClient.auth.getUser()
+  if (!user) return guest
+
+  // The site map's 'oecs' access level means "admin console", resolved through
+  // the same capability list the client's opensAdminConsole() uses.
+  const { data: permissions } = await callerClient.rpc('get_my_permissions')
+  const held = new Set(Array.isArray(permissions) ? (permissions as string[]) : [])
+  return { signedIn: true, isOecs: ADMIN_CONSOLE_KEYS.some((key) => held.has(key)) }
+}
 
 const INSTRUCTIONS = `You are the navigator for KTIP (Knowledge, Technology and Innovation Platform), an OECS Caribbean innovation platform. You help users find the page, feature or action they are describing, even when they do not know what it is called.
 
@@ -55,9 +114,33 @@ export default async function handler(request: Request) {
     return json({ error: 'AI service is not configured' }, 503)
   }
 
-  let body: { query?: string; signedIn?: boolean; isOecs?: boolean }
+  // Fail closed without the elevated client: the throttle is the only thing
+  // standing between an anonymous caller and the paid key.
+  const adminClient = adminClientOrNull()
+  if (!adminClient) return json({ error: 'Server configuration error' }, 503)
+
+  const ip = clientIp(request)
+  const [burst, daily] = await Promise.all([
+    adminClient.rpc('consume_auth_rate_limit', {
+      p_bucket: `ai-search:ip:${ip}`,
+      p_window_seconds: IP_WINDOW,
+      p_limit: IP_LIMIT,
+    }),
+    adminClient.rpc('consume_auth_rate_limit', {
+      p_bucket: `ai-search:ip-daily:${ip}`,
+      p_window_seconds: IP_DAILY_WINDOW,
+      p_limit: IP_DAILY_LIMIT,
+    }),
+  ])
+  const denied = (r: { data: unknown }) =>
+    (r.data as { allowed?: boolean } | null)?.allowed === false
+  if (denied(burst) || denied(daily)) {
+    return json({ error: 'Too many requests. Please try again in a few minutes.' }, 429)
+  }
+
+  let body: { query?: string }
   try {
-    body = await request.json()
+    body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
@@ -67,9 +150,10 @@ export default async function handler(request: Request) {
     return json({ error: 'query is required' }, 400)
   }
 
-  const viewer = body.isOecs
+  const who = await resolveViewer(request)
+  const viewer = who.isOecs
     ? 'The user is signed in as an OECS administrator.'
-    : body.signedIn
+    : who.signedIn
       ? 'The user is signed in as a regular member.'
       : 'The user is NOT signed in.'
 
@@ -104,7 +188,7 @@ export default async function handler(request: Request) {
       return json({ error: `AI error: ${res.status}`, detail: detail.slice(0, 200) }, res.status)
     }
 
-    const data = await res.json()
+    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }
     const content = data.choices?.[0]?.message?.content
 
     let parsed: { ids?: unknown; answer?: unknown; steps?: unknown } = {}

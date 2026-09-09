@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
+import { supabase } from '../lib/supabase'
 
 export type AIAction = 'improve_field' | 'suggest_section' | 'review_application' | 'adjust_tone'
 
@@ -13,9 +14,15 @@ export interface AIReviewResult {
 }
 
 async function callOpenAI(systemPrompt: string, userPrompt: string): Promise<string> {
+  // /api/ai-chat is members-only and reads the caller from the bearer token.
+  const { data: sessionData } = await supabase.auth.getSession()
+  const token = sessionData.session?.access_token
   const res = await fetch('/api/ai-chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({
       messages: [
         { role: 'system', content: systemPrompt },
