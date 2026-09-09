@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Languages } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
 import { cn } from '@/lib/utils'
 import { DropdownPanel } from './DropdownPanel'
+import { LanguageFlag } from './LanguageFlag'
 import { useLanguage } from '@/i18n/LanguageContext'
 import { LANGUAGE_NAMES, SELECTABLE_LANGS } from '@/i18n/language'
 
@@ -14,10 +15,9 @@ import { LANGUAGE_NAMES, SELECTABLE_LANGS } from '@/i18n/language'
  * translated name is exactly the thing they cannot read.
  *
  * Deliberately not a native <select>: the control has to be recognisable at a
- * glance to someone who cannot read the surrounding copy. The icon is the
- * two-scripts glyph rather than a globe — a globe is the icon for region,
- * country and network as well, while two alphabets side by side can only mean
- * language.
+ * glance to someone who cannot read the surrounding copy. The trigger shows
+ * the CURRENT language's flag and each row pairs a flag with its endonym —
+ * see LanguageFlag for why flags, and why they are inline SVG.
  */
 export function LanguageSwitcher({
   className,
@@ -67,7 +67,7 @@ export function LanguageSwitcher({
           compact ? 'p-2 hover:scale-125' : 'px-2.5 py-1.5 text-sm hover:bg-white/10 hover:text-white'
         )}
       >
-        <Languages size={compact ? 20 : 16} aria-hidden="true" />
+        <LanguageFlag lang={uiLang} className={compact ? 'h-4 w-[22px] ring-white/30' : 'ring-white/30'} />
         {!compact && <span className="font-medium uppercase tracking-wide">{uiLang}</span>}
         {/* The current language still has to be announced when the code is
             hidden, or the control reads as an unlabelled globe. */}
@@ -123,7 +123,10 @@ export function LanguageSwitcher({
                 {/* lang= on the option itself, so a screen reader pronounces
                     "Français" with a French voice rather than reading it as
                     mangled English. */}
-                <span lang={option}>{LANGUAGE_NAMES[option]}</span>
+                <span className="flex items-center gap-3">
+                  <LanguageFlag lang={option} />
+                  <span lang={option}>{LANGUAGE_NAMES[option]}</span>
+                </span>
                 {option === lang && <Check size={14} aria-hidden="true" />}
               </button>
             </li>
