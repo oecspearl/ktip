@@ -70,6 +70,12 @@ BEGIN
      '{}'::JSONB, jsonb_build_object('display_name', 'Member 124', 'country', 'Saint Lucia'))
   ON CONFLICT (id) DO NOTHING;
 
+  -- This fixture seats a whole establishment of its own on top of whatever the
+  -- live database already has, so 143's capacity guard would refuse it. The
+  -- flag is transaction-local and this file ends in ROLLBACK; what 143 itself
+  -- caps is asserted in its own test.
+  PERFORM set_config('ktip.bypass_seat_cap', 'on', TRUE);
+
   INSERT INTO profiles (id, display_name, roles, country) VALUES
     (v_boss,   'Boss 124',   ARRAY['super_admin'],       'Saint Lucia'),
     (v_deputy, 'Deputy 124', ARRAY['admin'],             'Saint Lucia'),

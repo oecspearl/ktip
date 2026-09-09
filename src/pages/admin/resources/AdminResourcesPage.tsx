@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { Button } from '../../../components/ui/Button'
 import { Badge } from '../../../components/ui/Badge'
 import { useAdminResources, useDeleteResource } from '../../../hooks/useResources'
@@ -31,7 +32,12 @@ export default function AdminResourcesPage() {
 
   const [showModal, setShowModal] = useState(false)
   const [editingResource, setEditingResource] = useState<Resource | null>(null)
-  const [tab, setTab] = useState<'library' | 'review'>('library')
+  // ?tab=review, so the dashboard's submissions tile lands on the queue rather
+  // than on the library — see AdminGrantsPage for the same one-line contract.
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState<'library' | 'review'>(
+    searchParams.get('tab') === 'review' ? 'review' : 'library'
+  )
 
   // Fetched at this level so the tab strip can carry the count — a review queue
   // nobody knows has anything in it is a queue nobody works.

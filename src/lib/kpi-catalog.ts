@@ -540,7 +540,7 @@ export const PLATFORM_KPIS: PlatformKpi[] = [
   // Indicators the roadmap states outside §14's tables — the §3 objectives and
   // the Table 15–17 phase success criteria — plus two T36 figures the pulse
   // already emitted and nothing rendered. Read from get_phase4_pulse
-  // (migration 143). Grouped by `table` for display, so their position here
+  // (migration 146). Grouped by `table` for display, so their position here
   // does not matter.
   // ------------------------------------------------------------------------
   {

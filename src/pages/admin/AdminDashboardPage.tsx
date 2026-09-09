@@ -1,8 +1,14 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { PageHero } from '../../components/layout/PageHero'
 import { useAuth } from '../../contexts/AuthContext'
-import { useAdminStats } from '../../hooks/useAdminDashboard'
+import {
+  useAdminStats,
+  useAdminAttention,
+  TREND_WINDOW_DAYS,
+  type AttentionKey,
+} from '../../hooks/useAdminDashboard'
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
@@ -20,8 +26,16 @@ import {
   BarChart3,
   FileText,
   Target,
+  Inbox,
+  BadgeCheck,
+  ShieldAlert,
+  Flag,
+  GraduationCap,
+  Landmark,
+  MessageCircle,
 } from 'lucide-react'
 import { AdminStatTile } from '../../components/admin/AdminStatTile'
+import { AdminQueueTile } from '../../components/admin/AdminQueueTile'
 import { KpiTargetTile } from '../../components/admin/kpi/KpiTargetTile'
 import { usePlatformPulse, useKpiTargets } from '../../hooks/usePlatformPulse'
 import { PLATFORM_KPIS } from '../../lib/kpi-catalog'
@@ -38,6 +52,24 @@ const HEADLINE_KPI_KEYS = [
   't35.active_projects',
   't37.users_connected_to_funding',
 ]
+
+/** "+6 in 30d", or nothing at all when that particular count was refused. */
+function since(measured: Measured): string | null {
+  if (measured.state !== 'ok') return null
+  return `+${measured.value.toLocaleString()} in ${TREND_WINDOW_DAYS}d`
+}
+
+/** Sort weight: work first (deepest queue leftmost), then unreadable, then clear. */
+function rankOf(measured: Measured | undefined): number {
+  if (!measured || measured.state !== 'ok') return 0
+  return measured.value > 0 ? -measured.value : 1
+}
+
+/** The parts of a hint that could actually be read, joined; undefined if none. */
+function hintOf(...parts: (string | null)[]): string | undefined {
+  const real = parts.filter((part): part is string => !!part)
+  return real.length ? real.join(' · ') : undefined
+}
 
 function ClimateFigure({ label, measured }: { label: string; measured: Measured }) {
   return (
@@ -86,6 +118,89 @@ export default function AdminDashboardPage() {
   // The analytics block reads across every table at once, so it belongs to the
   // one key that still means "the whole platform".
   const canSeeAnalytics = auth.can('org:manage')
+  const canSeeVerification = auth.can('verification:review')
+  const canSeeModeration = auth.can('moderation:view')
+  const canSeeInstitutions = auth.can('institution:verify')
+  const canSeeChamber = auth.can('sme:verify')
+
+  // Each queue is fetched only for the seat that can work it — the same rule as
+  // the tiles above, and here it also decides what gets queried at all.
+  const { attention } = useAdminAttention({
+    verification: canSeeVerification,
+    moderation: canSeeModeration,
+    grants: canSeeGrants,
+    institutions: canSeeInstitutions,
+    chamber: canSeeChamber,
+    resources: canSeeResources,
+    feedback: canSeeAnalytics,
+  })
+
+  const allQueues: { key: AttentionKey; label: string; noun: string; to: string; icon: ReactNode }[] = [
+    {
+      key: 'verification',
+      label: 'Verification',
+      noun: 'documents waiting',
+      to: '/admin/verification',
+      icon: <BadgeCheck size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'reports',
+      label: 'Reported content',
+      noun: 'reports open',
+      to: '/admin/moderation',
+      icon: <ShieldAlert size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'grievances',
+      label: 'Grievances',
+      noun: 'cases open',
+      to: '/admin/grievances',
+      icon: <Flag size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'applications',
+      label: 'Grant applications',
+      noun: 'awaiting review',
+      to: '/admin/grants?tab=applications',
+      icon: <FileText size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'institutions',
+      label: 'Institutions',
+      noun: 'awaiting verification',
+      to: '/admin/institutions',
+      icon: <GraduationCap size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'employers',
+      label: 'Chamber review',
+      noun: 'businesses waiting',
+      to: '/admin/chamber',
+      icon: <Landmark size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'submissions',
+      label: 'Resource submissions',
+      noun: 'awaiting approval',
+      to: '/admin/resources?tab=review',
+      icon: <BookOpen size={20} className="text-ktip-sun-700" />,
+    },
+    {
+      key: 'feedback',
+      label: 'Feedback',
+      noun: 'reports open',
+      to: '/admin/feedback',
+      icon: <MessageCircle size={20} className="text-ktip-sun-700" />,
+    },
+  ]
+
+  // Only the queues this seat was allowed to read came back at all.
+  const queues = allQueues
+    .filter((queue) => !!attention?.[queue.key])
+    // Busiest first, then anything that could not be read, then the clear ones.
+    // Whoever opens this page at nine in the morning should not have to scan
+    // eight tiles to find the one with work in it.
+    .sort((a, b) => rankOf(attention?.[a.key]) - rankOf(attention?.[b.key]))
 
   return (
     <>
@@ -98,6 +213,33 @@ export default function AdminDashboardPage() {
         imageSeed="admin"
         actions={analytics && canSeeAnalytics ? <ExportButton analytics={analytics} /> : undefined}
       />
+
+      {/* Needs attention.
+          First, and above the totals, because it is the only band on the page
+          that names something to do. The totals below say how big the platform
+          is; this says who is waiting on you. Each tile is a link into the
+          queue it counts, so the answer to "what should I open" is one click
+          rather than a guess at which of twenty-two sections has entries. */}
+      {queues.length > 0 && (
+        <div data-tutorial="admin-attention" className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <Inbox size={18} className="text-ktip-sun-700" />
+            <h2 className="text-lg font-semibold text-gray-900">Needs attention</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
+            {queues.map((queue) => (
+              <AdminQueueTile
+                key={queue.key}
+                icon={queue.icon}
+                label={queue.label}
+                noun={queue.noun}
+                to={queue.to}
+                measured={attention![queue.key]!}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid */}
       {statsLoading || !stats ? (
@@ -123,6 +265,12 @@ export default function AdminDashboardPage() {
               iconClass="bg-ktip-ocean-100"
               label="Total Users"
               measured={stats.userCount}
+              hint={hintOf(
+                since(stats.newUserCount),
+                stats.verifiedUserCount.state === 'ok'
+                  ? `${stats.verifiedUserCount.value.toLocaleString()} verified`
+                  : null
+              )}
             />
           )}
 
@@ -133,6 +281,11 @@ export default function AdminDashboardPage() {
               iconClass="bg-ktip-tropical-100"
               label="Events Hosted"
               measured={stats.eventCount}
+              hint={
+                stats.upcomingEventCount.state === 'ok'
+                  ? `${stats.upcomingEventCount.value.toLocaleString()} still to come`
+                  : undefined
+              }
             />
           )}
 
@@ -143,6 +296,11 @@ export default function AdminDashboardPage() {
               iconClass="bg-ktip-ocean-100"
               label="Active Grants"
               measured={stats.grantCount}
+              hint={
+                stats.closingGrantCount.state === 'ok'
+                  ? `${stats.closingGrantCount.value.toLocaleString()} close in ${TREND_WINDOW_DAYS}d`
+                  : undefined
+              }
             />
           )}
 
@@ -156,6 +314,7 @@ export default function AdminDashboardPage() {
               iconClass="bg-ktip-ocean-100"
               label="Grant Applications"
               measured={stats.applicationCount}
+              hint={hintOf(since(stats.newApplicationCount))}
             />
           )}
 
@@ -166,6 +325,7 @@ export default function AdminDashboardPage() {
               iconClass="bg-ktip-sun-100"
               label="Discussions"
               measured={stats.postCount}
+              hint={hintOf(since(stats.newPostCount))}
             />
           )}
 

@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import {
   ADMIN_CONSOLE_KEYS,
+  ADMIN_SEAT_LIMITS,
   ADMIN_SEAT_ROLES,
   ADMIN_TIER_ROLES,
   ALL_PERMISSION_KEYS,
@@ -14,6 +15,7 @@ import {
   canAdministerAccount,
   holdsAdminSeat,
   holdsSuperAdmin,
+  seatCapacity,
 } from '../permissions'
 import type { PermissionKey } from '../../types'
 
@@ -311,5 +313,55 @@ describe('the student safeguard list', () => {
     for (const keys of Object.values(SAFEGUARD_DENY)) {
       expect(keys.filter((k) => !known.has(k))).toEqual([])
     }
+  })
+})
+
+/**
+ * The establishment (migration 143): one Super Admin, two Admins.
+ *
+ * The numbers live twice — as the CASE inside seat_capacity() in SQL, which is
+ * what actually refuses the write, and as ADMIN_SEAT_LIMITS here, which is what
+ * the console renders from. Raising one and not the other would show a free
+ * chair the server will not seat anyone in, so the migration is parsed and the
+ * two are compared.
+ */
+describe('the seat establishment', () => {
+  /** The `WHEN '<seat>' THEN <n>` pairs inside seat_capacity(). */
+  function parseSeatCapacity(sql: string): Record<string, number> {
+    const body = sql.slice(sql.indexOf('CREATE OR REPLACE FUNCTION seat_capacity('))
+    const end = body.indexOf('$$;')
+    const limits: Record<string, number> = {}
+    for (const [, slug, n] of body.slice(0, end).matchAll(/WHEN\s+'([a-z_]+)'\s+THEN\s+(\d+)/g)) {
+      limits[slug] = Number(n)
+    }
+    return limits
+  }
+
+  it('matches seat_capacity() in SQL', () => {
+    const { name, sql } = latestMigrationDefining('seat_capacity')
+    const fromSql = parseSeatCapacity(sql)
+
+    expect(Object.keys(fromSql).sort(), `${name} must cap exactly the seats`).toEqual(
+      [...ADMIN_SEAT_ROLES].sort()
+    )
+    expect(fromSql, `ADMIN_SEAT_LIMITS disagrees with ${name}`).toEqual(ADMIN_SEAT_LIMITS)
+  })
+
+  it('is one Super Admin and two Admins, and a change has to break this first', () => {
+    expect(ADMIN_SEAT_LIMITS).toEqual({ super_admin: 1, admin: 2 })
+  })
+
+  it('caps the seats, aliases resolved, and nothing else', () => {
+    expect(seatCapacity('super_admin')).toBe(1)
+    expect(seatCapacity('oecs')).toBe(1)
+    expect(seatCapacity('admin')).toBe(2)
+
+    // Everything under the seats is uncapped: supervisors and safety admins
+    // are appointed by the Admin as the work needs them.
+    for (const slug of ADMIN_TIER_ROLES) {
+      if (ADMIN_SEAT_ROLES.includes(slug) || slug === 'oecs') continue
+      expect(seatCapacity(slug), `'${slug}' is not a seat and must be uncapped`).toBeNull()
+    }
+    expect(seatCapacity('entrepreneur')).toBeNull()
   })
 })

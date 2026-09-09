@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Badge } from '../../../components/ui/Badge'
+import { VerifiedBadge } from '../../../components/ui/VerifiedBadge'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
@@ -17,7 +18,6 @@ import {
   ShieldCheck,
   ShieldX,
   Edit,
-  CheckCircle,
   XCircle,
   UserPlus,
   KeyRound,
@@ -453,10 +453,7 @@ export default function AdminUsersPage() {
                     {/* Verified */}
                     <td className="px-4 py-3">
                       {user.is_verified ? (
-                        <Badge size="sm" variant="success">
-                          <CheckCircle size={12} />
-                          Verified
-                        </Badge>
+                        <VerifiedBadge verified variant="pill" size={12} label="Verified" />
                       ) : (
                         <Badge size="sm" variant="danger">
                           <XCircle size={12} />

@@ -8,6 +8,12 @@ interface AdminStatTileProps {
   iconClass?: string
   label: string
   measured: Measured
+  /**
+   * The second line: what has changed, or what part of the total still matters.
+   * A lifetime count on its own is inert — see TREND_WINDOW_DAYS. Omitted
+   * entirely when its own reading failed, rather than rendered as a zero.
+   */
+  hint?: string
   /** Larger figure styling for the headline tiles. */
   emphasis?: boolean
 }
@@ -24,7 +30,7 @@ interface AdminStatTileProps {
  * English, not lingui — src/pages/admin/ and its components are excluded in
  * scripts/i18n/config.mjs.
  */
-export function AdminStatTile({ icon, iconClass, label, measured, emphasis }: AdminStatTileProps) {
+export function AdminStatTile({ icon, iconClass, label, measured, hint, emphasis }: AdminStatTileProps) {
   const failed = measured.state === 'unavailable'
 
   return (
@@ -53,6 +59,9 @@ export function AdminStatTile({ icon, iconClass, label, measured, emphasis }: Ad
               : /* U+2014. Not "0", and not "—" spelled as a hyphen. */ '—'}
           </p>
           <p className="text-xs text-gray-500">{label}</p>
+          {hint && !failed && (
+            <p className="text-xs font-medium text-ktip-ocean-700 mt-0.5 truncate">{hint}</p>
+          )}
           {failed && <p className="text-xs text-ktip-sun-700 mt-0.5">Couldn't load</p>}
           {measured.state === 'not-instrumented' && (
             <p className="text-xs text-ktip-sand-400 mt-0.5">Not yet measured</p>

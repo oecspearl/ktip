@@ -308,6 +308,28 @@ export const ADMIN_TIER_ROLES = rolesOfTier('admin')
 export const ADMIN_SEAT_ROLES: RoleSlug[] = ['super_admin', 'admin']
 
 /**
+ * How many accounts may hold each seat (migration 143).
+ *
+ * One Super Admin, two Admins. Everything below the seats is uncapped. The
+ * numbers are enforced in SQL — seat_capacity(), the trigger under it and
+ * set_user_roles() — and mirrored here for rendering and for the message the
+ * console shows before the server has to say no. rbac-parity.test.ts reads the
+ * migration and fails if the two ever disagree.
+ */
+export const ADMIN_SEAT_LIMITS: Record<'super_admin' | 'admin', number> = {
+  super_admin: 1,
+  admin: 2,
+}
+
+/** The establishment for a seat slug, aliases resolved; null if it is not a seat. */
+export function seatCapacity(slug: string): number | null {
+  const resolved = expandRoles([slug])
+  if (resolved.includes('super_admin')) return ADMIN_SEAT_LIMITS.super_admin
+  if (resolved.includes('admin')) return ADMIN_SEAT_LIMITS.admin
+  return null
+}
+
+/**
  * The Super Admin ceiling (migration 124), for rendering.
  *
  * Both administrators hold every permission, so `can()` cannot tell them apart
@@ -908,33 +930,11 @@ export const SAFEGUARD_DENY: Record<string, PermissionKey[]> = {
  * PermissionRoute around each route; what they can actually write is decided in
  * SQL.
  *
- * `sme:verify` and `institution:verify` are deliberately NOT here, even though
- * two console pages require them. Chambers, BSOs, governments, diaspora bodies
- * and IGOs all hold one or the other — they vet the members they are competent
- * to vet — and listing them would hand five organisation roles the admin
- * console. Everyone who should reach /admin/chamber or /admin/institutions is
- * admitted by another key on this list.
+ * The list itself lives in admin-console-keys.ts, a Lingui-free module, because
+ * api/ai-search.ts needs it too and this file's macro import does not survive
+ * the edge bundler. Re-exported here so every existing import keeps working.
  */
-export const ADMIN_CONSOLE_KEYS: PermissionKey[] = [
-  'org:manage',
-  'members:view',
-  'members:manage',
-  'role:manage',
-  'moderation:view',
-  'verification:review',
-  'project:manage_all',
-  'event:manage',
-  'grant:manage',
-  'forum:manage',
-  'resource:manage',
-  'achievement:manage',
-  'employer:manage',
-]
-
-/** True when this permission set should be shown the admin console at all. */
-export function opensAdminConsole(can: (permission: PermissionKey) => boolean): boolean {
-  return ADMIN_CONSOLE_KEYS.some(can)
-}
+export { ADMIN_CONSOLE_KEYS, opensAdminConsole } from './admin-console-keys'
 
 /**
  * The keys that define each supervisor seat, excluding the participant bundle

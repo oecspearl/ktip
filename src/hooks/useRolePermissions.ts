@@ -190,6 +190,8 @@ export function useSetUserRoles() {
           seat_requires_super_admin:
             'Only a Super Admin can grant or remove the Admin or Super Admin role, or change the roles of an Admin.',
           last_super_admin: 'The last Super Admin cannot be demoted.',
+          // The establishment (143): one Super Admin, two Admins.
+          seat_limit_reached: `Every ${data.role === 'super_admin' ? 'Super Admin' : 'Admin'} seat is taken (${data.limit} of ${data.limit}). Remove the role from an account that holds it first.`,
         }
         throw new Error(messages[data.reason] || 'Could not update roles.')
       }

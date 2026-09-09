@@ -55,6 +55,10 @@ BEGIN
   -- super_admin is what is_platform_admin() answers to (124 widened it to the
   -- admin seat as well). The legacy 'oecs' slug is deliberately absent so the
   -- fixture cannot lean on any alias handling.
+  -- 143 caps the super_admin seat at one, and the live database already has
+  -- it. Transaction-local, and this file ends in ROLLBACK.
+  PERFORM set_config('ktip.bypass_seat_cap', 'on', TRUE);
+
   INSERT INTO profiles (id, display_name, roles, country)
   VALUES (v_admin,  'Admin 127',  ARRAY['super_admin'], 'Saint Lucia'),
          (v_member, 'Member 127', ARRAY['student'],     'Saint Lucia')

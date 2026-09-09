@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
@@ -39,7 +40,14 @@ type TabId = 'grants' | 'applications'
 export default function AdminGrantsPage() {
   const toast = useToast()
   const auth = useAuth()
-  const [activeTab, setActiveTab] = useState<TabId>('grants')
+  // ?tab=applications so the dashboard's "awaiting review" tile can land on the
+  // queue it counted. Read once, as the initial value: the tab strip is still
+  // the thing that drives it, and rewriting the URL on every click would put
+  // eight entries in the back stack for one visit.
+  const [searchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState<TabId>(
+    searchParams.get('tab') === 'applications' ? 'applications' : 'grants'
+  )
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [editingGrant, setEditingGrant] = useState<Grant | null>(null)
   const [statusFilter, setStatusFilter] = useState('')

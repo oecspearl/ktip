@@ -72,6 +72,10 @@ BEGIN
      '{}'::JSONB, jsonb_build_object('display_name', 'Member 116', 'country', 'Saint Lucia'))
   ON CONFLICT (id) DO NOTHING;
 
+  -- A fixture super_admin on top of the live one is two, and 143 caps the seat
+  -- at one. Transaction-local, and this file ends in ROLLBACK.
+  PERFORM set_config('ktip.bypass_seat_cap', 'on', TRUE);
+
   INSERT INTO profiles (id, display_name, roles, country) VALUES
     (v_boss,    'Boss 116',    ARRAY['super_admin'],          'Saint Lucia'),
     (v_marvin,  'Marvin 116',  ARRAY['people_supervisor'],    'Saint Lucia'),

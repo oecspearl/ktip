@@ -24,9 +24,34 @@ import {
   Bug,
   FlaskConical,
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { cn } from '../../lib/utils'
+import { supabase } from '../../lib/supabase'
+import { keys } from '../../queries/keys'
 import { useAuth } from '../../contexts/AuthContext'
 import type { PermissionKey } from '../../types'
+
+/**
+ * How many identity documents are waiting (145). The queue used to be silent:
+ * nothing on the console said it had entries. Fetched only for accounts that
+ * can work it, refreshed each minute while the console is open.
+ */
+function usePendingVerificationCount(enabled: boolean) {
+  const query = useQuery({
+    queryKey: keys.sub('verification', 'pending-count'),
+    queryFn: async (): Promise<number> => {
+      const { count, error } = await (supabase.from('verification_requests') as any)
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending')
+      if (error) throw error
+      return count ?? 0
+    },
+    enabled,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  })
+  return query.data ?? 0
+}
 
 /**
  * The admin sidebar.
@@ -90,6 +115,9 @@ export function AdminLayout() {
   const location = useLocation()
   const auth = useAuth()
   const navItems = adminNavItems.filter((item) => !item.requires || auth.can(item.requires))
+  const pendingVerification = usePendingVerificationCount(auth.can('verification:review'))
+  const badgeFor = (href: string) =>
+    href === '/admin/verification' && pendingVerification > 0 ? pendingVerification : null
 
   // Admin sections behave like separate pages, so keep the land-at-top
   // contract locally — MainLayout no longer scrolls on intra-shell changes
@@ -127,7 +155,15 @@ export function AdminLayout() {
                   )}
                 >
                   <item.icon size={20} />
-                  <span className="font-medium text-sm">{item.label}</span>
+                  <span className="font-medium text-sm flex-1">{item.label}</span>
+                  {badgeFor(item.href) !== null && (
+                    <span
+                      className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-ktip-sun-500 text-white text-xs font-semibold tabular-nums"
+                      aria-label={`${badgeFor(item.href)} pending`}
+                    >
+                      {badgeFor(item.href)}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -153,6 +189,11 @@ export function AdminLayout() {
               >
                 <item.icon size={16} />
                 {item.label}
+                {badgeFor(item.href) !== null && (
+                  <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-ktip-sun-500 text-white text-[11px] font-semibold tabular-nums">
+                    {badgeFor(item.href)}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>

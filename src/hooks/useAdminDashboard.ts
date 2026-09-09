@@ -19,14 +19,30 @@ import type { Profile, GrantApplication, GrantApplicationStatus, UserRole } from
  */
 export interface AdminStats {
   userCount: Measured
+  verifiedUserCount: Measured
+  newUserCount: Measured
   eventCount: Measured
+  upcomingEventCount: Measured
   grantCount: Measured
+  closingGrantCount: Measured
   applicationCount: Measured
+  newApplicationCount: Measured
   postCount: Measured
+  newPostCount: Measured
   climateProjectCount: Measured
   climateEventCount: Measured
   climateGrantCount: Measured
 }
+
+/**
+ * The window every "recently" figure on this page is measured over.
+ *
+ * A lifetime total answers "how big is the platform", which almost never
+ * changes between two visits to the console and so tells the reader nothing
+ * about the week they are in. The same total with a 30-day companion answers
+ * "is it moving", which is the question the tile is actually being read for.
+ */
+export const TREND_WINDOW_DAYS = 30
 
 export function useAdminStats() {
   const fetchStats = async (): Promise<AdminStats> => {
@@ -38,11 +54,40 @@ export function useAdminStats() {
       label: string
     ) => Promise.resolve(promise).then((r) => r, () => failed(`${label} query failed`))
 
-    const now = new Date().toISOString()
+    const clock = Date.now()
+    const now = new Date(clock).toISOString()
+    const since = new Date(clock - TREND_WINDOW_DAYS * 86_400_000).toISOString()
+    const soon = new Date(clock + TREND_WINDOW_DAYS * 86_400_000).toISOString()
 
-    const [users, events, grants, applications, posts, climateProjects, climateEvents, climateGrants] =
+    const [
+      users,
+      verifiedUsers,
+      newUsers,
+      events,
+      upcomingEvents,
+      grants,
+      closingGrants,
+      applications,
+      newApplications,
+      posts,
+      newPosts,
+      climateProjects,
+      climateEvents,
+      climateGrants,
+    ] =
       await Promise.all([
         guarded(supabase.from('profiles').select('*', { count: 'exact', head: true }), 'profiles'),
+        // 139 makes verification the gate on publishing and applying, so the
+        // share of the membership that has passed it is the difference between
+        // a roster and a working platform.
+        guarded(
+          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_verified', true),
+          'verified profiles'
+        ),
+        guarded(
+          supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', since),
+          'new profiles'
+        ),
         // Drafts and cancellations are not events the platform hosted. The
         // status vocabulary is draft/published/cancelled/completed (007).
         guarded(
@@ -51,6 +96,17 @@ export function useAdminStats() {
             .select('*', { count: 'exact', head: true })
             .in('status', ['published', 'completed']),
           'events'
+        ),
+        // The half of the events figure an operator can still act on. A
+        // completed event is history; a published one that has not happened yet
+        // is a room that may still need speakers, a page or a registration fix.
+        guarded(
+          supabase
+            .from('events')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'published')
+            .gte('start_date', now),
+          'upcoming events'
         ),
         // A NULL deadline means "no deadline" and stays active; a passed one
         // does not. The guided tour at src/data/tutorials/admin.ts already told
@@ -63,11 +119,36 @@ export function useAdminStats() {
             .or(`deadline.is.null,deadline.gte.${now}`),
           'grants'
         ),
+        // The ones with a clock on them. A funding round nobody has promoted is
+        // only visible as a problem while there is still time to promote it.
+        guarded(
+          supabase
+            .from('grants')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_active', true)
+            .gte('deadline', now)
+            .lte('deadline', soon),
+          'closing grants'
+        ),
         guarded(
           supabase.from('grant_applications').select('*', { count: 'exact', head: true }),
           'grant applications'
         ),
+        guarded(
+          supabase
+            .from('grant_applications')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', since),
+          'new grant applications'
+        ),
         guarded(supabase.from('forum_posts').select('*', { count: 'exact', head: true }), 'forum posts'),
+        guarded(
+          supabase
+            .from('forum_posts')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', since),
+          'new forum posts'
+        ),
         guarded(
           supabase.from('projects').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
           'climate projects'
@@ -84,10 +165,16 @@ export function useAdminStats() {
 
     return {
       userCount: measuredCount(users, 'Could not read the member count'),
+      verifiedUserCount: measuredCount(verifiedUsers, 'Could not read the verified member count'),
+      newUserCount: measuredCount(newUsers, 'Could not read recent sign-ups'),
       eventCount: measuredCount(events, 'Could not read the event count'),
+      upcomingEventCount: measuredCount(upcomingEvents, 'Could not read upcoming events'),
       grantCount: measuredCount(grants, 'Could not read the grant count'),
+      closingGrantCount: measuredCount(closingGrants, 'Could not read closing grants'),
       applicationCount: measuredCount(applications, 'Could not read the application count'),
+      newApplicationCount: measuredCount(newApplications, 'Could not read recent applications'),
       postCount: measuredCount(posts, 'Could not read the discussion count'),
+      newPostCount: measuredCount(newPosts, 'Could not read recent discussions'),
       climateProjectCount: measuredCount(climateProjects, 'Could not read climate projects'),
       climateEventCount: measuredCount(climateEvents, 'Could not read climate events'),
       climateGrantCount: measuredCount(climateGrants, 'Could not read climate grants'),
@@ -100,6 +187,159 @@ export function useAdminStats() {
   })
 
   return { stats: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+// ============================================================
+// Work Queues
+// ============================================================
+
+/**
+ * Which queues this seat is allowed to work.
+ *
+ * The same argument the dashboard page already makes about head counts, applied
+ * to queues: RLS answers a count a Safety Admin cannot read with zero rather
+ * than with an error, so an ungated "0 institutions waiting" would be a
+ * confident lie told to the one person who cannot check it. A queue nobody at
+ * this desk can action is also simply noise — 116 split the console into three
+ * jobs precisely so each of them could see their own.
+ */
+export interface AttentionScopes {
+  verification: boolean
+  moderation: boolean
+  grants: boolean
+  institutions: boolean
+  chamber: boolean
+  resources: boolean
+  feedback: boolean
+}
+
+export type AttentionKey =
+  | 'verification'
+  | 'reports'
+  | 'grievances'
+  | 'applications'
+  | 'institutions'
+  | 'employers'
+  | 'submissions'
+  | 'feedback'
+
+/**
+ * How much work is waiting, per queue.
+ *
+ * The console had every lifetime total on its landing page and not one figure
+ * an operator could act on: whether documents were waiting, whether a report
+ * had gone unread, whether an application had been sitting at review for a
+ * week. Those numbers existed — each queue page counted its own on arrival —
+ * but only after you had guessed which page to open. The sidebar badge added
+ * in 145 made the point for one queue; this is the other seven.
+ *
+ * Refreshed on the same minute the sidebar badge uses, because a work queue
+ * that is stale is a work queue that gets worked twice.
+ */
+export function useAdminAttention(scopes: AttentionScopes) {
+  const query = useQuery({
+    queryKey: keys.list('admin-attention', scopes),
+    queryFn: async (): Promise<Partial<Record<AttentionKey, Measured>>> => {
+      const table = (name: string) => (supabase.from(name as any) as any)
+
+      // Only the queues this seat can work are queried at all — see the note on
+      // AttentionScopes. `filter` builds the query; nothing runs until here.
+      const all: { key: AttentionKey; reason: string; build: () => any }[] = [
+        {
+          key: 'verification',
+          reason: 'Could not read the verification queue',
+          build: () => table('verification_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        },
+        {
+          key: 'reports',
+          reason: 'Could not read the moderation queue',
+          build: () =>
+            table('content_reports')
+              .select('id', { count: 'exact', head: true })
+              // 065's vocabulary. 'reviewing' is picked up by someone but not
+              // finished, so it is still work in the room.
+              .in('status', ['open', 'reviewing']),
+        },
+        {
+          key: 'grievances',
+          reason: 'Could not read the grievance queue',
+          build: () =>
+            table('grievances').select('id', { count: 'exact', head: true }).in('status', ['pending', 'under_review']),
+        },
+        {
+          key: 'applications',
+          reason: 'Could not read the application queue',
+          build: () =>
+            table('grant_applications')
+              .select('id', { count: 'exact', head: true })
+              .in('status', ['pending', 'under_review']),
+        },
+        {
+          key: 'institutions',
+          reason: 'Could not read the institution queue',
+          build: () => table('institutions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        },
+        {
+          key: 'employers',
+          reason: 'Could not read the chamber queue',
+          build: () => table('employers').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+        },
+        {
+          key: 'submissions',
+          reason: 'Could not read the resource queue',
+          // 135: approval_status is "has a reviewer looked at it", which is a
+          // different question from is_published and from moderation's status.
+          build: () => table('resources').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
+        },
+        {
+          key: 'feedback',
+          reason: 'Could not read the feedback queue',
+          build: () => table('feedback').select('id', { count: 'exact', head: true }).in('status', ['new', 'in_review']),
+        },
+      ]
+
+      const wanted = all.filter(({ key }) => {
+        switch (key) {
+          case 'verification':
+            return scopes.verification
+          case 'reports':
+          case 'grievances':
+            return scopes.moderation
+          case 'applications':
+            return scopes.grants
+          case 'institutions':
+            return scopes.institutions
+          case 'employers':
+            return scopes.chamber
+          case 'submissions':
+            return scopes.resources
+          case 'feedback':
+            return scopes.feedback
+        }
+      })
+
+      const results = await Promise.all(
+        wanted.map(({ build, reason }) =>
+          // A rejected promise — a table this deployment has not migrated yet,
+          // or a refusal — has to arrive as a failed reading, never as zero.
+          Promise.resolve(build()).then(
+            (r: any) => r,
+            () => ({ count: null, error: { message: reason } })
+          )
+        )
+      )
+
+      const byKey: Partial<Record<AttentionKey, Measured>> = {}
+      wanted.forEach(({ key, reason }, i) => {
+        byKey[key] = measuredCount(results[i], reason)
+      })
+      return byKey
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  })
+
+  return { attention: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
 // ============================================================
@@ -185,6 +425,8 @@ export function useAdminUserActions() {
           seat_requires_super_admin:
             'Only a Super Admin can grant or remove the Admin or Super Admin role, or change the roles of an Admin.',
           last_super_admin: 'The last Super Admin cannot be demoted.',
+          // The establishment (143): one Super Admin, two Admins.
+          seat_limit_reached: `Every ${data.role === 'super_admin' ? 'Super Admin' : 'Admin'} seat is taken (${data.limit} of ${data.limit}). Remove the role from an account that holds it first.`,
         }
         throw new Error(messages[data.reason] || 'Could not update roles.')
       }
@@ -200,9 +442,14 @@ export function useAdminUserActions() {
 
   const toggleVerifiedMutation = useMutation({
     mutationFn: async ({ userId, verified }: { userId: string; verified: boolean }) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_verified: verified })
+      // 145: the flag carries its reason. A manual flip is 'admin'; clearing
+      // the flag clears the reason with it.
+      const { error } = await (supabase.from('profiles') as any)
+        .update({
+          is_verified: verified,
+          verified_via: verified ? 'admin' : null,
+          verified_at: verified ? new Date().toISOString() : null,
+        })
         .eq('id', userId)
 
       if (error) throw error
