@@ -3,14 +3,33 @@ import type { Measured } from '../../../lib/measured'
 import {
   formatKpiValue,
   kpiProgress,
+  kpiStatus,
+  type KpiStatus,
   type PlatformKpi,
 } from '../../../lib/kpi-catalog'
+import { Sparkline } from '../../charts/Sparkline'
 
 interface KpiTargetTileProps {
   kpi: PlatformKpi
   measured: Measured
   target: number | null
   periodLabel?: string
+  /** Past readings, oldest first, for the sparkline. Nulls are gaps. */
+  history?: ReadonlyArray<number | null>
+}
+
+const BAR_CLASS: Record<KpiStatus, string> = {
+  good: 'bg-chart-good',
+  warn: 'bg-chart-warn',
+  bad: 'bg-chart-bad',
+  none: 'bg-ktip-sand-300',
+}
+
+const STATUS_WORD: Record<KpiStatus, string> = {
+  good: 'on track',
+  warn: 'at risk',
+  bad: 'off track',
+  none: '',
 }
 
 /**
@@ -26,27 +45,24 @@ interface KpiTargetTileProps {
  * A tile that rendered 0 for the first two would put a false figure in a report
  * to the World Bank, which is the failure this whole surface exists to avoid.
  *
+ * The bar's colour is a status from kpiStatus() — the same thresholds the
+ * gauges and the report use — and the word is printed beside it, so colour is
+ * never the only carrier. A reported-only KPI (complaint volumes) shows the
+ * reading and no bar: there is nothing to be on track toward.
+ *
  * English, not lingui — src/pages/admin/ is excluded in scripts/i18n/config.mjs.
  */
-export function KpiTargetTile({ kpi, measured, target, periodLabel }: KpiTargetTileProps) {
+export function KpiTargetTile({ kpi, measured, target, periodLabel, history }: KpiTargetTileProps) {
   const Icon = kpi.icon
   const progress =
-    measured.state === 'ok' && target !== null
+    measured.state === 'ok' && target !== null && !kpi.reportedOnly
       ? kpiProgress(measured.value, target, kpi.direction)
       : null
-
-  // 100% is met, 80% is close enough to leave alone, below that needs someone.
-  const barClass =
-    progress === null
-      ? 'bg-ktip-sand-300'
-      : progress >= 1
-        ? 'bg-ktip-tropical-500'
-        : progress >= 0.8
-          ? 'bg-ktip-sun-500'
-          : 'bg-red-400'
+  const status = kpiStatus(progress)
 
   const failed = measured.state === 'unavailable'
   const pending = measured.state === 'not-instrumented'
+  const hasHistory = history !== undefined && history.some((v) => v !== null)
 
   return (
     <div
@@ -87,28 +103,36 @@ export function KpiTargetTile({ kpi, measured, target, periodLabel }: KpiTargetT
         </span>
       </div>
 
-      <div className="flex items-baseline gap-2">
-        <span
-          className={`text-2xl font-bold ${
-            measured.state === 'ok' ? 'text-gray-900' : 'text-ktip-sand-400'
-          }`}
-        >
-          {measured.state === 'ok' ? formatKpiValue(measured.value, kpi.unit) : '—'}
-        </span>
-        {target !== null && (
-          <span className="text-xs text-gray-500">
-            {kpi.direction === 'down' ? 'max' : 'of'} {formatKpiValue(target, kpi.unit)}
+      <div className="flex items-end justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <span
+            className={`text-2xl font-bold tabular-nums ${
+              measured.state === 'ok' ? 'text-gray-900' : 'text-ktip-sand-400'
+            }`}
+          >
+            {measured.state === 'ok' ? formatKpiValue(measured.value, kpi.unit) : '—'}
           </span>
-        )}
+          {target !== null && !kpi.reportedOnly && (
+            <span className="text-xs text-gray-500">
+              {kpi.direction === 'down' ? 'max' : 'of'} {formatKpiValue(target, kpi.unit)}
+            </span>
+          )}
+        </div>
+        {hasHistory && <Sparkline values={history} label={`${kpi.label}, recent readings`} />}
       </div>
 
       {progress !== null && (
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ktip-sand-100">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${barClass}`}
-            style={{ width: `${Math.min(progress, 1) * 100}%` }}
-          />
-        </div>
+        <>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ktip-sand-100">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${BAR_CLASS[status]}`}
+              style={{ width: `${Math.min(progress, 1) * 100}%` }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-ktip-sand-500">
+            {Math.round(progress * 100)}% of target · {STATUS_WORD[status]}
+          </p>
+        </>
       )}
 
       {failed && <p className="mt-2 text-xs text-ktip-sun-700">{measured.reason}</p>}

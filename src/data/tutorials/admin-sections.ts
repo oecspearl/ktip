@@ -243,12 +243,20 @@ export const adminPartnerApiTutorialSteps: TutorialStep[] = [
 
 export const adminAnalyticsTutorialSteps: TutorialStep[] = [
   section(
-    'Usage, not people',
-    'Page views, feature usage, funnels and conversions across the platform.\n\nThis is aggregate behaviour — it answers “is anyone using this” rather than “what did this member do”.'
+    'One period, one filter, every tab',
+    'The row at the top picks the month, quarter, year or a custom range, and optionally one OECS state. Every tab reads the same choice, so the same month is never two different windows on two pages.\n\nTiles report the selected period; the trend charts look back further, so the shape is visible around the number.'
   ),
   section(
-    'Reading the funnels',
-    'A funnel shows where people stop. The gap between two steps is the useful number, not the totals either side of it.\n\nFigures depend on analytics consent, so they undercount rather than overcount. Treat them as a floor.'
+    'The tabs',
+    'Overview is the four headline figures against target and a count of how many KPIs are on or off track. Results framework is every roadmap KPI, Tables 32–38 and the indicators stated elsewhere. Community, Activity and Engagement are the trends behind them. Health & trust is uptime, errors, tickets and complaints. Reports is the weekly pulse and the periodic reports.'
+  ),
+  section(
+    'Reading the charts',
+    'A ring is one value against its target and its colour is a status — green on track, amber within twenty percent, red off track. An area is a trend. Every chart has a table view for the exact figures.\n\nAn em dash is a reading that could not be taken. It is never zero, and it is worth reporting.'
+  ),
+  section(
+    'What needs consent',
+    'Member counts, active days and the roadmap KPIs need no consent. Page views, funnels and feature usage are written only for visitors who accepted the analytics banner, so they undercount. Treat them as a floor.'
   ),
   replayStep,
 ]

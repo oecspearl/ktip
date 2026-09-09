@@ -10,8 +10,6 @@ import {
   BookOpen,
   Flag,
   BarChart3,
-  Target,
-  Activity,
   ClipboardCheck,
   BadgeCheck,
   MessageCircle,
@@ -78,9 +76,10 @@ const adminNavItems: {
   { href: '/admin/integrations', label: 'Integrations', icon: Puzzle, requires: 'org:manage' },
   { href: '/admin/employers', label: 'Employers', icon: Building2, requires: 'employer:manage' },
   { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound, requires: 'org:manage' },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, requires: 'org:manage' },
-  { href: '/admin/impact', label: 'Impact & KPIs', icon: Target, requires: 'org:manage' },
-  { href: '/admin/pulse', label: 'Reports', icon: Activity, requires: 'org:manage' },
+  // Usage, the §14 results framework and the reporting pulse were three
+  // entries and three pages; they are tabs of one hub now, with one period
+  // and country filter between them.
+  { href: '/admin/analytics', label: 'Analytics & Reports', icon: BarChart3, requires: 'org:manage' },
   { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck, requires: 'org:manage' },
   // exact, or the simulator route below would light both entries up.
   { href: '/admin/errors', label: 'Errors', icon: Bug, exact: true, requires: 'org:manage' },

@@ -6,8 +6,6 @@ import { useAdminStats } from '../../hooks/useAdminDashboard'
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
-import { BarChart } from '../../components/admin/analytics/BarChart'
-import { GrowthChart } from '../../components/admin/analytics/GrowthChart'
 import { ExportButton } from '../../components/admin/analytics/ExportButton'
 import { DashboardCalendar } from '../../components/calendar/DashboardCalendar'
 import {
@@ -20,9 +18,6 @@ import {
   ArrowRight,
   Leaf,
   BarChart3,
-  TrendingUp,
-  Globe,
-  FolderKanban,
   FileText,
   Target,
 } from 'lucide-react'
@@ -30,7 +25,7 @@ import { AdminStatTile } from '../../components/admin/AdminStatTile'
 import { KpiTargetTile } from '../../components/admin/kpi/KpiTargetTile'
 import { usePlatformPulse, useKpiTargets } from '../../hooks/usePlatformPulse'
 import { PLATFORM_KPIS } from '../../lib/kpi-catalog'
-import { itemsOf, type Measured } from '../../lib/measured'
+import type { Measured } from '../../lib/measured'
 
 /**
  * The four the programme lead is asked about most: are people joining, are they
@@ -43,14 +38,6 @@ const HEADLINE_KPI_KEYS = [
   't35.active_projects',
   't37.users_connected_to_funding',
 ]
-import {
-  ROLE_LABELS,
-  PHASE_LABELS,
-  EVENT_TYPE_LABELS,
-  GRANT_APPLICATION_STATUS_LABELS,
-} from '../../lib/constants'
-import { useLingui } from '@lingui/react/macro'
-import { resolveCopy } from '../../i18n/copy'
 
 function ClimateFigure({ label, measured }: { label: string; measured: Measured }) {
   return (
@@ -71,10 +58,11 @@ function ClimateFigure({ label, measured }: { label: string; measured: Measured 
 }
 
 export default function AdminDashboardPage() {
-    const { i18n } = useLingui()
   const auth = useAuth()
   const { stats, loading: statsLoading } = useAdminStats()
-  const { analytics, loading: analyticsLoading, refetch: refetchAnalytics } = useAdminAnalytics()
+  // Still fetched for the CSV export in the hero; the charts it fed moved to
+  // the analytics hub.
+  const { analytics, loading: analyticsLoading } = useAdminAnalytics()
   const { pulse } = usePlatformPulse()
   const { targets } = useKpiTargets()
 
@@ -257,116 +245,49 @@ export default function AdminDashboardPage() {
         <DashboardCalendar scope="platform" />
       </div>
 
-      {/* Analytics Charts */}
-      {!canSeeAnalytics ? null : analyticsLoading || !analytics ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div className="border border-ktip-sand-200 rounded-lg p-6 animate-pulse" key={i}>
-              <div className="h-5 w-32 bg-ktip-sand-100 rounded mb-4" />
-              <div className="space-y-3">
-                <div className="h-3 w-full bg-ktip-sand-100 rounded" />
-                <div className="h-3 w-3/4 bg-ktip-sand-100 rounded" />
-                <div className="h-3 w-1/2 bg-ktip-sand-100 rounded" />
-              </div>
+      {/* The distribution charts that used to sit here — users by role and
+          country, projects by category and phase, events by type, the grant
+          pipeline — live on the analytics hub now, as trends with a period and
+          country filter, alongside the usage figures and the reporting pulse.
+          The landing page keeps the numbers and the calendar; the charts are
+          one click away with the filters they needed. */}
+      {canSeeAnalytics && (
+        <div data-tutorial="admin-charts" className="border border-ktip-sand-200 rounded-lg p-5 mb-8">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 size={18} className="text-ktip-ocean-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Analytics &amp; Reports</h2>
             </div>
-          ))}
+            <Link
+              to="/admin/analytics"
+              className="inline-flex items-center gap-1 text-sm font-medium text-ktip-ocean-700 hover:underline"
+            >
+              Open the hub
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-sm">
+            {(
+              [
+                ['community', 'Community', 'members by role, state, partnerships'],
+                ['activity', 'Activity', 'projects, events, funding pipeline'],
+                ['engagement', 'Engagement', 'active members, usage, funnels'],
+                ['health', 'Health & trust', 'uptime, errors, complaints'],
+                ['results', 'Results framework', 'every roadmap KPI vs target'],
+                ['reports', 'Reports', 'weekly pulse, monthly reports'],
+              ] as const
+            ).map(([tab, label, hint]) => (
+              <Link
+                key={tab}
+                to={`/admin/analytics?tab=${tab}`}
+                className="rounded-lg border border-ktip-sand-200 px-3 py-2 transition-colors hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50"
+              >
+                <p className="font-medium text-gray-900">{label}</p>
+                <p className="text-xs text-gray-500">{hint}</p>
+              </Link>
+            ))}
+          </div>
         </div>
-      ) : (
-        <>
-          {/* User Growth Chart. Rendered unconditionally now — hiding it on an
-              empty series also hid it when get_user_growth was refused, and the
-              chart itself is what distinguishes the two. */}
-          <div className="border border-ktip-sand-200 rounded-lg p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={18} className="text-ktip-ocean-600" />
-              <h2 className="text-lg font-semibold text-gray-900">User Growth</h2>
-            </div>
-            <GrowthChart
-              data={itemsOf(analytics.userGrowth)}
-              unavailable={
-                analytics.userGrowth.state === 'unavailable' ? analytics.userGrowth.reason : undefined
-              }
-              onRetry={refetchAnalytics}
-            />
-          </div>
-
-          {/* Distribution Charts Grid */}
-          <div data-tutorial="admin-charts" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Users by Role */}
-            <div className="border border-ktip-sand-200 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Users size={18} className="text-ktip-ocean-600" />
-                <h2 className="text-sm font-semibold text-gray-900">Users by Role</h2>
-              </div>
-              {/* BarChart wants plain strings, so the descriptors are resolved
-                  here rather than inside the chart. */}
-              <BarChart
-                data={itemsOf(analytics.usersByRole)}
-                unavailable={analytics.usersByRole.state === 'unavailable' ? analytics.usersByRole.reason : undefined}
-                onRetry={refetchAnalytics}
-                colorClass="bg-ktip-ocean-500"
-                labelMap={Object.fromEntries(
-                  Object.entries(ROLE_LABELS).map(([slug, label]) => [slug, resolveCopy(i18n, label)])
-                )}
-              />
-            </div>
-
-            {/* Users by Country */}
-            <div className="border border-ktip-sand-200 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Globe size={18} className="text-ktip-tropical-600" />
-                <h2 className="text-sm font-semibold text-gray-900">Users by Country</h2>
-              </div>
-              <BarChart data={itemsOf(analytics.usersByCountry)}
-                unavailable={analytics.usersByCountry.state === 'unavailable' ? analytics.usersByCountry.reason : undefined}
-                onRetry={refetchAnalytics} colorClass="bg-ktip-tropical-500" />
-            </div>
-
-            {/* Projects by Category */}
-            <div className="border border-ktip-sand-200 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FolderKanban size={18} className="text-ktip-ocean-600" />
-                <h2 className="text-sm font-semibold text-gray-900">Projects by Category</h2>
-              </div>
-              <BarChart data={itemsOf(analytics.projectsByCategory)}
-                unavailable={analytics.projectsByCategory.state === 'unavailable' ? analytics.projectsByCategory.reason : undefined}
-                onRetry={refetchAnalytics} colorClass="bg-ktip-ocean-500" />
-            </div>
-
-            {/* Projects by Phase */}
-            <div className="border border-ktip-sand-200 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <BarChart3 size={18} className="text-ktip-ocean-600" />
-                <h2 className="text-sm font-semibold text-gray-900">Projects by Phase</h2>
-              </div>
-              <BarChart data={itemsOf(analytics.projectsByPhase)}
-                unavailable={analytics.projectsByPhase.state === 'unavailable' ? analytics.projectsByPhase.reason : undefined}
-                onRetry={refetchAnalytics} colorClass="bg-ktip-ocean-500" labelMap={PHASE_LABELS} />
-            </div>
-
-            {/* Events by Type */}
-            <div className="border border-ktip-sand-200 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar size={18} className="text-ktip-tropical-600" />
-                <h2 className="text-sm font-semibold text-gray-900">Events by Type</h2>
-              </div>
-              <BarChart data={itemsOf(analytics.eventsByType)}
-                unavailable={analytics.eventsByType.state === 'unavailable' ? analytics.eventsByType.reason : undefined}
-                onRetry={refetchAnalytics} colorClass="bg-ktip-tropical-500" labelMap={EVENT_TYPE_LABELS} />
-            </div>
-
-            {/* Grant Application Pipeline */}
-            <div className="border border-ktip-sand-200 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <DollarSign size={18} className="text-ktip-ocean-600" />
-                <h2 className="text-sm font-semibold text-gray-900">Grant Application Pipeline</h2>
-              </div>
-              <BarChart data={itemsOf(analytics.grantPipeline)}
-                unavailable={analytics.grantPipeline.state === 'unavailable' ? analytics.grantPipeline.reason : undefined}
-                onRetry={refetchAnalytics} colorClass="bg-ktip-ocean-500" labelMap={GRANT_APPLICATION_STATUS_LABELS} />
-            </div>
-          </div>
-        </>
       )}
 
       {/* Quick Actions */}

@@ -598,13 +598,15 @@ const router = createBrowserRouter([
                       { path: '/admin/feedback', lazy: lazyPage(() => import('./pages/admin/feedback/AdminFeedbackPage')) },
                       { path: '/admin/integrations', lazy: lazyPage(() => import('./pages/admin/integrations/AdminIntegrationsPage')) },
                       { path: '/admin/partner-api', lazy: lazyPage(() => import('./pages/admin/partner-api/AdminPartnerApiPage')) },
+                      // The analytics hub: usage, the roadmap §14 results
+                      // framework and the Table 39 reporting pulse as tabs of
+                      // one page. org:manage like the rest of this block: it
+                      // reads across every table at once.
                       { path: '/admin/analytics', lazy: lazyPage(() => import('./pages/admin/analytics/AdminAnalyticsPage')) },
-                      // Roadmap §14's results framework. org:manage like the
-                      // rest of this block: it reads across every table at once.
-                      { path: '/admin/impact', lazy: lazyPage(() => import('./pages/admin/impact/AdminImpactPage')) },
-                      // §14 Table 39's four reports — weekly, monthly,
-                      // quarterly, annual — as one surface with a period switch.
-                      { path: '/admin/pulse', lazy: lazyPage(() => import('./pages/admin/pulse/AdminPulsePage')) },
+                      // The pages these used to be are tabs now. Old links and
+                      // bookmarks land on the right one.
+                      { path: '/admin/impact', element: <Navigate to="/admin/analytics?tab=results" replace /> },
+                      { path: '/admin/pulse', element: <Navigate to="/admin/analytics?tab=reports" replace /> },
                       { path: '/admin/uat', lazy: lazyPage(() => import('./pages/admin/uat/AdminUATPage')) },
                       { path: '/admin/errors', lazy: lazyPage(() => import('./pages/admin/errors/AdminErrorsPage')) },
                       // Sends deliberate events to the live Sentry project.

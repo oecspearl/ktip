@@ -35,9 +35,9 @@ export const adminTutorialSteps: TutorialStep[] = [
   },
   {
     target: '[data-tutorial="admin-charts"]',
-    title: 'Distributions and pipeline',
+    title: 'Analytics & Reports',
     description:
-      'Users by role and by country, projects by category and phase, events by type, and the grant application pipeline by status.\n\nThe pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.\n\nAbove these, the platform calendar shows every scheduled event across the region in one month grid.',
+      'Every chart lives on one hub now: members by role and state, projects by category and phase, events by type, the grant pipeline, usage and the roadmap results framework — all as trends with one period picker and one country filter.\n\nThe pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.\n\nAbove this, the platform calendar shows every scheduled event across the region in one month grid.',
     position: 'top',
     scrollMode: 'top',
   },

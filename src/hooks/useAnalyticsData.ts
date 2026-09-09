@@ -67,24 +67,36 @@ function unwrap(result: any): any[] | null {
   return result?.data ?? null
 }
 
-export function useAnalyticsData() {
+/**
+ * @param period  An explicit window (ISO dates, end exclusive). When given, it
+ *                replaces the trailing `range` — the analytics hub drives every
+ *                tab from one period picker, and "last 30 days" and "August"
+ *                must not silently be two different windows on one page.
+ */
+export function useAnalyticsData(period?: { start: string; end: string }) {
   const [range, setRange] = useState<DateRange>('30d')
+  // The cache key: a period wins over the trailing range whenever it is set.
+  const window = period ? `${period.start}..${period.end}` : range
+
+  const applyWindow = (q: any) => {
+    if (period) return q.gte('created_at', period.start).lt('created_at', period.end)
+    const since = getDateFilter(range)
+    return since ? q.gte('created_at', since) : q
+  }
 
   const buildQuery = (eventType?: string) => {
-    let q = (supabase as any).from('analytics_events').select('*')
-    const since = getDateFilter(range)
-    if (since) q = q.gte('created_at', since)
+    let q = applyWindow((supabase as any).from('analytics_events').select('*'))
     if (eventType) q = q.eq('event_type', eventType)
     return q.order('created_at', { ascending: false })
   }
 
   // Total event count
   const totalEventsQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'total-events', range),
+    queryKey: keys.sub('analytics-data', 'total-events', window),
     queryFn: async () => {
-      const since = getDateFilter(range)
-      let q = (supabase as any).from('analytics_events').select('*', { count: 'exact', head: true })
-      if (since) q = q.gte('created_at', since)
+      const q = applyWindow(
+        (supabase as any).from('analytics_events').select('*', { count: 'exact', head: true })
+      )
       const { count, error } = await q
       if (error) throw new Error(error.message)
       return count ?? 0
@@ -93,7 +105,7 @@ export function useAnalyticsData() {
 
   // Unique sessions
   const uniqueSessionsQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'unique-sessions', range),
+    queryKey: keys.sub('analytics-data', 'unique-sessions', window),
     queryFn: async () => {
       const data = unwrap(await buildQuery().select('session_id'))
       if (!data) return 0
@@ -103,7 +115,7 @@ export function useAnalyticsData() {
 
   // Page views — top pages
   const topPagesQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'top-pages', range),
+    queryKey: keys.sub('analytics-data', 'top-pages', window),
     queryFn: async (): Promise<PageViewStat[]> => {
       const data = unwrap(await buildQuery('page_view').select('page_path').limit(1000))
       if (!data) return []
@@ -121,7 +133,7 @@ export function useAnalyticsData() {
 
   // Daily page views (for chart)
   const dailyPageViewsQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'daily-page-views', range),
+    queryKey: keys.sub('analytics-data', 'daily-page-views', window),
     queryFn: async (): Promise<DailyCount[]> => {
       const data = unwrap(await buildQuery('page_view').select('created_at').limit(5000))
       if (!data) return []
@@ -138,7 +150,7 @@ export function useAnalyticsData() {
 
   // Feature usage
   const featureUsageQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'feature-usage', range),
+    queryKey: keys.sub('analytics-data', 'feature-usage', window),
     queryFn: async (): Promise<FeatureUsageStat[]> => {
       const data = unwrap(
         await buildQuery('feature_use').select('event_name, properties').limit(2000)
@@ -161,7 +173,7 @@ export function useAnalyticsData() {
 
   // Pre-reg funnel
   const preregFunnelQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'prereg-funnel', range),
+    queryKey: keys.sub('analytics-data', 'prereg-funnel', window),
     queryFn: async (): Promise<FunnelStep[]> => {
       const data = unwrap(
         await buildQuery('funnel_step')
@@ -189,7 +201,7 @@ export function useAnalyticsData() {
 
   // Conversions
   const conversionsQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'conversions', range),
+    queryKey: keys.sub('analytics-data', 'conversions', window),
     queryFn: async (): Promise<ConversionStat[]> => {
       const data = unwrap(await buildQuery('conversion').select('event_name').limit(2000))
       if (!data) return []
@@ -205,7 +217,7 @@ export function useAnalyticsData() {
 
   // Recent sessions (user journeys)
   const recentSessionsQuery = useQuery({
-    queryKey: keys.sub('analytics-data', 'recent-sessions', range),
+    queryKey: keys.sub('analytics-data', 'recent-sessions', window),
     queryFn: async (): Promise<SessionSummary[]> => {
       const data = unwrap(
         await buildQuery('page_view')

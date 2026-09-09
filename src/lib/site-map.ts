@@ -1297,10 +1297,10 @@ export const SITE_MAP: SiteEntry[] = [
   },
   {
     id: 'admin.analytics',
-    title: 'Analytics',
+    title: 'Analytics & Reports',
     category: 'Admin',
-    description: 'Platform usage, growth and engagement metrics',
-    keywords: ['analytics', 'stats', 'metrics', 'reports', 'charts', 'growth', 'export'],
+    description: 'Results framework, community, activity, engagement, health and the reporting pulse',
+    keywords: ['analytics', 'stats', 'metrics', 'reports', 'charts', 'growth', 'export', 'kpi', 'impact', 'results framework', 'pulse', 'targets', 'roadmap'],
     href: '/admin/analytics',
     access: 'oecs',
     icon: 'BarChart3',
