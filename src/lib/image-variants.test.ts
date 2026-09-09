@@ -14,26 +14,26 @@ describe('capLadder', () => {
   it('never upscales past the source', () => {
     // Mirrors sharp's withoutEnlargement: a rung above the source would be a
     // blurrier copy of it, not a larger one.
-    expect(capLadder(1600, LADDERS.hero)).toEqual([640, 960, 1280, 1600])
-    expect(capLadder(1920, LADDERS.hero)).toEqual([640, 960, 1280, 1920])
+    expect(capLadder(1600, LADDERS.photos)).toEqual([640, 960, 1280, 1600])
+    expect(capLadder(1920, LADDERS.photos)).toEqual([640, 960, 1280, 1920])
   })
 
   it('keeps the source width as a rung when it falls between steps', () => {
     // ktiphero.webp is 1748 wide. Without this it would top out at 1280 and a
     // full-bleed backdrop would be upscaled on every desktop.
-    expect(capLadder(1748, LADDERS.hero)).toEqual([640, 960, 1280, 1748])
+    expect(capLadder(1748, LADDERS.photos)).toEqual([640, 960, 1280, 1748])
   })
 
   it('does not duplicate a source width that is already a rung', () => {
-    expect(capLadder(960, LADDERS.hero)).toEqual([640, 960])
+    expect(capLadder(960, LADDERS.photos)).toEqual([640, 960])
   })
 
   it('returns the source alone when it is smaller than every rung', () => {
-    expect(capLadder(285, LADDERS.pages)).toEqual([285])
+    expect(capLadder(285, LADDERS.photos)).toEqual([285])
   })
 
   it('returns nothing for a source with no width', () => {
-    expect(capLadder(0, LADDERS.hero)).toEqual([])
+    expect(capLadder(0, LADDERS.photos)).toEqual([])
   })
 })
 
@@ -41,21 +41,21 @@ describe('variantPath', () => {
   it('round-trips the exact filename the generator writes', () => {
     // This is THE contract: the generator and the browser build this string
     // independently, and a mismatch is a 404 that nothing catches at build time.
-    expect(variantPath('hero', 'hero-1', 1280, '4f3a9c21', 'avif')).toBe(
-      '/_img/hero/hero-1-1280.4f3a9c21.avif'
+    expect(variantPath('photos', 'cohort-1', 1280, '4f3a9c21', 'avif')).toBe(
+      '/_img/photos/cohort-1-1280.4f3a9c21.avif'
     )
   })
 
   it('puts the hash before the extension so the file is content-addressed', () => {
     // A query string would not survive the immutable Cache-Control in
     // vercel.json the way a distinct filename does.
-    const path = variantPath('grants', 'grant-nature', 640, 'deadbeef', 'webp')
+    const path = variantPath('photos', 'cohort-4', 640, 'deadbeef', 'webp')
     expect(path.endsWith('.deadbeef.webp')).toBe(true)
     expect(path).not.toContain('?')
   })
 
   it('is rooted at the base the manifest advertises', () => {
-    expect(variantPath('pages', 'page-help', 960, 'abc12345', 'avif').startsWith(IMG_BASE)).toBe(
+    expect(variantPath('photos', 'discussion-2', 960, 'abc12345', 'avif').startsWith(IMG_BASE)).toBe(
       true
     )
   })
@@ -63,7 +63,7 @@ describe('variantPath', () => {
 
 describe('srcKeyParts', () => {
   it('splits a nested source key', () => {
-    expect(srcKeyParts('/hero/hero-1.webp')).toEqual({ dir: 'hero', name: 'hero-1' })
+    expect(srcKeyParts('/photos/cohort-1.webp')).toEqual({ dir: 'photos', name: 'cohort-1' })
   })
 
   it('files a root-level source under root so variants stay one level deep', () => {
@@ -71,7 +71,7 @@ describe('srcKeyParts', () => {
   })
 
   it('keeps dots inside the basename', () => {
-    expect(srcKeyParts('/pages/page-v1.2.webp')).toEqual({ dir: 'pages', name: 'page-v1.2' })
+    expect(srcKeyParts('/photos/keynote-v1.2.webp')).toEqual({ dir: 'photos', name: 'keynote-v1.2' })
   })
 })
 
@@ -94,15 +94,15 @@ describe('settingsHash', () => {
 
 describe('lookupManifest', () => {
   const images = {
-    '/hero/hero-1.webp': { w: 1920, h: 1280, hash: 'aaaaaaaa', widths: [640, 1920] },
+    '/photos/cohort-1.webp': { w: 1920, h: 1280, hash: 'aaaaaaaa', widths: [640, 1920] },
   }
 
   it('finds a plain key', () => {
-    expect(lookupManifest(images, '/hero/hero-1.webp')?.w).toBe(1920)
+    expect(lookupManifest(images, '/photos/cohort-1.webp')?.w).toBe(1920)
   })
 
   it('finds a key carrying the ?v= cache-buster storage-upload.ts appends', () => {
-    expect(lookupManifest(images, '/hero/hero-1.webp?v=1738000000')?.hash).toBe('aaaaaaaa')
+    expect(lookupManifest(images, '/photos/cohort-1.webp?v=1738000000')?.hash).toBe('aaaaaaaa')
   })
 
   it('misses cleanly for a remote URL', () => {
@@ -115,6 +115,6 @@ describe('lookupManifest', () => {
 
   it('misses every lookup against the empty manifest', () => {
     // The degraded path: no generator run means no srcset, not a broken page.
-    expect(lookupManifest(EMPTY_MANIFEST.images, '/hero/hero-1.webp')).toBeUndefined()
+    expect(lookupManifest(EMPTY_MANIFEST.images, '/photos/cohort-1.webp')).toBeUndefined()
   })
 })

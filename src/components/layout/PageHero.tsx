@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
-import { HERO_WASH, pageHeroFor } from '../../lib/hero-images'
+import { HERO_WASH, focalFor, pageHeroFor } from '../../lib/hero-images'
 import { ResponsiveImage } from '../ui/ResponsiveImage'
 import { useMobileLite } from '../../hooks/useMediaQuery'
 import { Reveal } from '../ui/Reveal'
@@ -95,6 +95,11 @@ export function PageHero({
       typeof title === 'string' ? title : null
     )
 
+  // A member's own banner carries the focal point they dragged; ours carry the
+  // one baked into hero-images.ts. Neither falls back to centre, because the
+  // band is far wider than the photo and centre is chest height.
+  const objectPosition = imagePosition ?? focalFor(src)
+
   /**
    * Photo reveal, gated on the browser having actually PAINTED the image.
    *
@@ -163,7 +168,7 @@ export function PageHero({
         sizes="100vw"
         onLoad={markPhotoReady}
         className={`absolute inset-0 w-full h-full object-cover photo-dimmable ${photoReveal}`}
-        style={imagePosition ? { objectPosition: imagePosition } : undefined}
+        style={objectPosition ? { objectPosition } : undefined}
         loading="eager" fetchPriority="high"
         /* sync, not async. `decoding="async"` is permission to paint a frame
            WITHOUT this image and decode it afterwards — and MainLayout remounts
@@ -217,7 +222,7 @@ export function PageHero({
         // 40px read as over-frosted; the long stop range is what makes it a
         // gradient blur rather than a hard frosted panel with a fading tint.
         className={`absolute inset-0 w-full h-full object-cover ${photoReveal} [filter:blur(24px)_brightness(var(--photo-brightness,1))] [transform:scale(1.08)] [mask-image:linear-gradient(to_left,black_25%,transparent_95%)] md:[mask-image:linear-gradient(to_left,black_20%,transparent_78%)]`}
-        style={imagePosition ? { objectPosition: imagePosition } : undefined}
+        style={objectPosition ? { objectPosition } : undefined}
         loading="eager" decoding="sync"
       />
       )}

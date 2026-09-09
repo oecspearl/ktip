@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
-import { heroImageFor, gradientFor } from '../../lib/hero-images'
+import { focalFor, heroImageFor, gradientFor } from '../../lib/hero-images'
 import { ResponsiveImage } from './ResponsiveImage'
 import { cn } from '../../lib/utils'
 
@@ -62,6 +62,7 @@ export function BentoCard({
 }: BentoCardProps) {
   const visibleTags = tags?.slice(0, MAX_CARD_TAGS) ?? []
   const overflowTags = Math.max((tags?.length ?? 0) - MAX_CARD_TAGS, 0)
+  const src = image || heroImageFor(imageSeed)
 
   return (
     <Link
@@ -76,7 +77,7 @@ export function BentoCard({
     >
       {background ?? (
         <ResponsiveImage
-          src={image || heroImageFor(imageSeed)}
+          src={src}
           alt=""
           // Tiles run one per row on a phone, two on a tablet, and three to
           // four in the desktop grids. Without this the browser assumes 100vw
@@ -84,7 +85,7 @@ export function BentoCard({
           // Directory page was doing 48 times per page.
           sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          style={imagePosition ? { objectPosition: imagePosition } : undefined}
+          style={{ objectPosition: imagePosition ?? focalFor(src) }}
           loading="lazy"
           decoding="async"
         />

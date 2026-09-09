@@ -2,10 +2,9 @@
 // Usage: node scripts/optimize-images.mjs   (wired to `prebuild`, so `npm run
 // build` runs it automatically)
 //
-// Scope is the full-bleed photography only — public/hero, public/pages,
-// public/grants and the standalone backdrop. The fixed-size marks (logo,
-// reaction emoji) are a different problem with a different answer and live in
-// scripts/optimize-brand-assets.mjs.
+// Scope is the full-bleed photography only — public/photos and the standalone
+// backdrop. The fixed-size marks (logo, reaction emoji) are a different problem
+// with a different answer and live in scripts/optimize-brand-assets.mjs.
 //
 // Everything it writes goes to public/_img/, which is gitignored. Vite copies
 // publicDir verbatim into dist/, and npm runs `prebuild` ahead of `build`, so
@@ -37,9 +36,11 @@ const CACHE_PATH = join(CACHE_DIR, 'optimize-images.json')
 
 /** Directories swept wholesale, each with the ladder its contents are sized to. */
 const SWEPT = [
-  ['hero', 'hero'],
-  ['pages', 'pages'],
-  ['grants', 'grants'],
+  // The platform's own session photography, grouped by moment (keynote,
+  // workshop, pairing, focus, discussion, cohort). hero-images.ts picks a set
+  // per topic and a frame per seed, so these are one flat folder rather than
+  // one folder per place they appear.
+  ['photos', 'photos'],
   // Achievement trophy artwork. Not photography, but it belongs here rather
   // than in optimize-brand-assets.mjs because there are 48 of them rendered
   // across a 3x size range, which is exactly what a ladder is for.
@@ -47,7 +48,7 @@ const SWEPT = [
 ]
 
 /** Individually named sources that sit at the public root. */
-const STANDALONE = [['ktiphero.webp', 'hero']]
+const STANDALONE = [['ktiphero.webp', 'photos']]
 
 /**
  * Encoder settings. Bumping any value here changes settingsHash() and so
@@ -56,8 +57,8 @@ const STANDALONE = [['ktiphero.webp', 'hero']]
  * The largest width runs AVIF at a higher quality than the rest because it is
  * the candidate a desktop LCP pulls, and because it sits under PageHero's four
  * stacked overlays: blur and gradient washes mask compression artifacts but
- * generate their own banding, and the two compound in the smooth sky and water
- * that dominate this photo set.
+ * generate their own banding, and the two compound in the flat conference-room
+ * walls and ceilings that back most of this photo set.
  */
 const ENCODE = {
   avifTop: { quality: 55, effort: 4 },
@@ -273,9 +274,9 @@ async function main() {
 
   // The number that actually matters. Disk total goes UP (that is the point of
   // a ladder); what falls is what any one visitor downloads.
-  const sample = images['/hero/hero-1.webp']
+  const sample = images['/photos/cohort-1.webp']
   if (sample) {
-    const { dir, name } = srcKeyParts('/hero/hero-1.webp')
+    const { dir, name } = srcKeyParts('/photos/cohort-1.webp')
     const pick = async (width, ext) => {
       try {
         return (await stat(join(PUBLIC, variantPath(dir, name, width, sample.hash, ext)))).size

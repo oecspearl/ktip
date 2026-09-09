@@ -12,7 +12,7 @@
  * callers stops being able to import it.
  */
 
-export type LadderName = 'hero' | 'pages' | 'grants' | 'trophies'
+export type LadderName = 'photos' | 'trophies'
 
 /**
  * Widths generated per source, in `w`-descriptor terms.
@@ -22,14 +22,17 @@ export type LadderName = 'hero' | 'pages' | 'grants' | 'trophies'
  * DPR 2 wants 2880 and clamps to the top rung. A bento tile is ~320 CSS px, so
  * it lands on 640.
  *
- * Gaps are ~1.5x, the usual spacing for srcset candidates. The hero ladder
+ * Gaps are ~1.5x, the usual spacing for srcset candidates. The ladder
  * deliberately omits 1600 — it costs a third of the encode time for a step only
  * a 768px tablet at DPR 2 would pick, on desktop-class bandwidth.
+ *
+ * One ladder for all the photography: every photo in public/photos serves both
+ * a full-bleed page band and a bento tile, because a page asks the pools in
+ * hero-images.ts for a kind of photo rather than for a particular file. Sizing
+ * them differently by folder stopped meaning anything once that was true.
  */
 export const LADDERS: Record<LadderName, readonly number[]> = {
-  hero: [640, 960, 1280, 1920],
-  pages: [640, 960, 1600],
-  grants: [640, 960, 1600],
+  photos: [640, 960, 1280, 1920],
   // Trophies are the odd one out: not photography but fixed-size marks, so the
   // ladder is sized to the boxes they render in rather than to viewport widths.
   // Four call sites — 40px admin thumbnail, 56px profile shelf, 72px gallery
@@ -84,7 +87,7 @@ export function capLadder(sourceWidth: number, ladder: readonly number[]): numbe
 }
 
 /**
- * `/_img/hero/hero-1-1280.4f3a9c21.avif`
+ * `/_img/photos/cohort-1-1280.4f3a9c21.avif`
  *
  * The hash sits before the extension rather than in a query string so the file
  * is content-addressed: vercel.json can serve `/_img/*` as immutable, and a
@@ -101,7 +104,7 @@ export function variantPath(
 }
 
 /**
- * Splits a manifest key (`/hero/hero-1.webp`) into the directory and basename
+ * Splits a manifest key (`/photos/cohort-1.webp`) into the directory and basename
  * used to build its variant paths. Root-level sources (`/ktiphero.webp`) are
  * filed under `root` so every variant lives one level deep.
  */
