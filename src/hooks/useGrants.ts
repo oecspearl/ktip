@@ -244,7 +244,7 @@ export function useFunderApplications(grantId: string | undefined) {
   const fetchApplications = async (gid: string): Promise<GrantApplication[]> => {
     const { data, error } = await supabase
       .from('grant_applications')
-      .select('*, applicant:profiles(*)')
+      .select('*, applicant:profiles!user_id(*)')
       .eq('grant_id', gid)
       .order('created_at', { ascending: false })
     if (error) throw error

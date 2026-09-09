@@ -37,7 +37,6 @@ import {
   UserPlus,
   FilePlus,
   Wallet,
-  MessageSquarePlus,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
@@ -192,16 +191,16 @@ const navDropdowns: NavDropdown[] = [
     name: msg`Funding`,
     icon: DollarSign,
     items: [
-      { name: msg`Grants`, href: '/grants', icon: DollarSign, description: msg`Browse funding opportunities` },
+      { name: msg`Funding Opportunities`, href: '/grants', icon: DollarSign, description: msg`Grants, seed funding, competitions and more` },
       // The funder's two entries. Only a grant:post holder sees them, which is
       // every organisation that funds — investor, government, IGO, diaspora,
       // the BSO since 129 — plus mentors running a fund of their own.
-      { name: msg`Post a Grant`, href: '/grants/new', icon: FilePlus, description: msg`Publish a funding call and open applications`, requires: 'grant:post' },
-      { name: msg`My Grants`, href: '/grants/my-grants', icon: Wallet, description: msg`The funding calls you posted`, requires: 'grant:post' },
+      { name: msg`Post Funding`, href: '/grants/new', icon: FilePlus, description: msg`Publish a funding call and open applications`, requires: 'grant:post' },
+      { name: msg`My Funding Calls`, href: '/grants/my-grants', icon: Wallet, description: msg`The funding calls you posted`, requires: 'grant:post' },
       // A funding agency posts calls, it does not answer them — and a student
       // has to be sponsored rather than apply. Neither has an application to
       // track, so neither gets the entry.
-      { name: msg`My Applications`, href: '/grants/my-applications', icon: ClipboardList, description: msg`Track your grant applications`, requires: 'grant:apply' },
+      { name: msg`My Applications`, href: '/grants/my-applications', icon: ClipboardList, description: msg`Track your funding applications`, requires: 'grant:apply' },
       { name: msg`My Submissions`, href: '/dashboard/submissions', icon: Inbox, description: msg`Your copy of everything you submitted` },
     ],
   },
@@ -211,10 +210,7 @@ const navDropdowns: NavDropdown[] = [
     icon: Users,
     items: [
       { name: msg`Directory`, href: '/directory', icon: Users, description: msg`Browse the member directory` },
-      { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Join community discussions` },
-      // Organisation-tier only (129). Members start threads from inside a
-      // board; opening the board itself is the permissioned act.
-      { name: msg`Start a Board`, href: '/forums/new', icon: MessageSquarePlus, description: msg`Open a new discussion board`, requires: 'forum:board' },
+      { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Start community discussions` },
       { name: msg`Collaborate`, href: '/collaborate', icon: Handshake, description: msg`Work together in real-time` },
       // Points at the dashboard tab rather than a new top-level page: the list
       // already exists there, is already in site-map.ts, and both strings are
@@ -1261,7 +1257,7 @@ export function Navbar() {
                         </Link>
                       )}
                       <Link
-                        to="/settings"
+                        to="/dashboard/security"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                       >
@@ -1686,7 +1682,7 @@ export function Navbar() {
           )}
         </Link>
         <Link
-          to="/settings"
+          to="/dashboard/security"
           data-span="col-span-1"
           title={t`Settings`}
           aria-label={t`Settings`}

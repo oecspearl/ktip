@@ -355,7 +355,7 @@ export default function GrantDetailPage() {
                   {!grant.application_url && canApply && (
                     <Button
                       fullWidth
-                      onClick={() => navigate(`/grants/${grant.id}/apply`)}
+                      onClick={() => navigate(`/grants/${grant.slug || grant.id}/apply`)}
                       icon={<FileText size={20} />}
                     >
                       {hasDraft ? t`Continue Application` : t`Apply Now`}

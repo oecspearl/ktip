@@ -112,7 +112,7 @@ export default function MyApplicationsPage() {
         eyebrow={t`My Applications`}
         title={t`Grant Applications`}
         subtitle={t`Track the status of your funding applications`}
-        image="/grants/grant-pitch.webp"
+        image="/photos/focus-1.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },
@@ -277,7 +277,7 @@ export default function MyApplicationsPage() {
                       </span>
                     </div>
                     {application.status === 'draft' ? (
-                      <Link to={`/grants/${application.grant.id}/apply`}>
+                      <Link to={`/grants/${application.grant.slug || application.grant.id}/apply`}>
                         <Button size="sm" icon={<PencilLine size={16} />}>
                           <Trans>Continue</Trans>
                         </Button>

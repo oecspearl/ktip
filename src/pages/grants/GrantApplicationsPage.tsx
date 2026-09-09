@@ -42,7 +42,7 @@ export default function GrantApplicationsPage() {
   const { grant, loading: grantLoading } = useGrant(params.id)
   usePageTitle(grant?.title ? t`Applications — ${grant.title}` : t`Applications`)
 
-  const { applications, loading, refetch } = useFunderApplications(grant?.id)
+  const { applications, loading, error: applicationsError, refetch } = useFunderApplications(grant?.id)
   const { decide, loading: deciding } = useDecideApplication()
 
   const [viewing, setViewing] = useState<GrantApplication | null>(null)
@@ -123,7 +123,7 @@ export default function GrantApplicationsPage() {
         eyebrow={t`Applications`}
         title={grant.title}
         subtitle={t`Everything submitted to this call. Drafts are never shown — an application appears here once the applicant submits it.`}
-        image="/grants/grant-pitch.webp"
+        image="/photos/keynote-1.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },
@@ -134,7 +134,13 @@ export default function GrantApplicationsPage() {
       />
 
       <div data-spy-off className="w-full max-w-page mx-auto px-4 pt-8 pb-12">
-        {loading || !applications ? (
+        {applicationsError ? (
+          <div className="text-center py-12">
+            <p className="text-red-600"><Trans>Could not load applications.</Trans></p>
+            <p className="mt-1 text-sm text-ktip-sand-600">{(applicationsError as Error).message}</p>
+            <Button className="mt-4" variant="outline" onClick={() => refetch()}><Trans>Try again</Trans></Button>
+          </div>
+        ) : loading || !applications ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ktip-ocean-500 mx-auto" />
             <p className="mt-4 text-ktip-sand-600"><Trans>Loading applications...</Trans></p>

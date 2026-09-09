@@ -96,7 +96,7 @@ export default function GrantApplicationPage() {
   useEffect(() => {
     if (grantLoading || !grant) return
     if (!grant.is_active || isExpired || grant.application_url) {
-      navigate(`/grants/${grant.id}`, { replace: true })
+      navigate(`/grants/${grant.slug || grant.id}`, { replace: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grantLoading, grant?.id])
@@ -263,7 +263,7 @@ export default function GrantApplicationPage() {
         breadcrumb={[
           { label: t`Home`, href: '/' },
           { label: t`Grants`, href: '/grants' },
-          { label: truncate(grant.title, 30), href: `/grants/${grant.id}` },
+          { label: truncate(grant.title, 30), href: `/grants/${grant.slug || grant.id}` },
           { label: t`Apply` },
         ]}
       >
@@ -355,7 +355,7 @@ export default function GrantApplicationPage() {
             ) : (
               <button
                 type="button"
-                onClick={() => navigate(`/grants/${grant.id}`)}
+                onClick={() => navigate(`/grants/${grant.slug || grant.id}`)}
                 className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-ktip-sand-600 hover:text-ktip-sand-800 transition-colors"
               >
                 <ArrowLeft size={16} />

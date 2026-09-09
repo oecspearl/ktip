@@ -155,7 +155,7 @@ export default function GrantsPage() {
       <PageHero
         eyebrow={t`Funding Archives`}
         title={t`Funding Opportunities`}
-        image="/grants/grant-startup.webp"
+        image="/photos/workshop-1.webp"
         imageSeed="grants"
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Grants` }]}
         actions={
