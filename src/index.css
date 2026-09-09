@@ -181,6 +181,41 @@
   --color-ktip-nav-accent: #97D700; /* brand green */
   --color-ktip-nav-accent-contrast: #041E42; /* brand navy, text on accent */
 
+  /* Chart palette — THEME-RESPONSIVE; html.dark re-points every one below.
+     Read at draw time by components/charts/palette.ts, because an SVG mark
+     needs a literal colour and a `dark:` class on a chart is a bug under
+     inverted ramps.
+
+     Series slots carry IDENTITY (which line is which). They are assigned in
+     fixed order and never cycled; a sixth series folds into chart-other.
+     Validated with the data-viz palette checks (OKLCH lightness band, chroma
+     floor, protan/deutan separation >= 8, normal-vision floor >= 15, 3:1 on
+     the chart surface) in BOTH modes. The brand ramps alone fail: tropical
+     and sun collapse under protan/deutan simulation (dE 3.3 light, 0.3
+     dark), which is why plum and rose sit in the set and brand green is
+     never adjacent to amber. */
+  --color-chart-1: #2560A8;
+  --color-chart-2: #B38500;
+  --color-chart-3: #8E3B8E;
+  --color-chart-4: #5E8A00;
+  --color-chart-5: #C2416B;
+  --color-chart-other: #86867F;
+  /* Sequential — MAGNITUDE, one hue light to dark (ocean 100 to 500). */
+  --color-chart-seq-1: #D3DEEC;
+  --color-chart-seq-2: #A9BFDB;
+  --color-chart-seq-3: #7E9EC7;
+  --color-chart-seq-4: #4F7AAE;
+  --color-chart-seq-5: #2A5788;
+  /* Status — STATE against a target. Reserved; never reused as a series. */
+  --color-chart-good: #5E8A00;
+  --color-chart-warn: #B38500;
+  --color-chart-bad: #B23A3A;
+  --color-chart-none: #A9A9A2;
+  /* Chrome: a hairline grid one shade off the surface, and tick text. */
+  --color-chart-grid: #E3E3DF;
+  --color-chart-axis: #D3D3CE;
+  --color-chart-label: #63635D;
+
   /* Border Radius — brand tokens: buttons 6px, cards 8px */
   --radius-md: 0.25rem;
   --radius-lg: 0.375rem;
@@ -708,6 +743,28 @@ html.dark {
   --color-ktip-sun-700: #FFE48A;
   --color-ktip-sun-800: #FFF1C4;
   --color-ktip-sun-900: #FFF9E6;
+
+  /* Chart palette at night: the same five identities, re-stepped into the
+     dark lightness band and re-validated against the #1F1F1D card surface.
+     Not a flip of the light values — a flipped rose reads as brown. */
+  --color-chart-1: #3D82D9;
+  --color-chart-2: #C98500;
+  --color-chart-3: #B455B4;
+  --color-chart-4: #6FA000;
+  --color-chart-5: #D55181;
+  --color-chart-other: #8C8C86;
+  --color-chart-seq-1: #1B3A5F;
+  --color-chart-seq-2: #2A578C;
+  --color-chart-seq-3: #4F7AAE;
+  --color-chart-seq-4: #7BA1CB;
+  --color-chart-seq-5: #9DBBDC;
+  --color-chart-good: #AEE12B;
+  --color-chart-warn: #FFC72C;
+  --color-chart-bad: #E27070;
+  --color-chart-none: #8C8C86;
+  --color-chart-grid: #2C2C2A;
+  --color-chart-axis: #3D3D3A;
+  --color-chart-label: #A5A59F;
 
   /* Trophy card flips to its original dark set: near-black ground, bright
      accents, white ink. This is the surface the gold/silver/bronze artwork

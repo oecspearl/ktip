@@ -217,6 +217,43 @@ describe('the scale ramps survive the build', () => {
   })
 })
 
+describe('the chart palette follows the theme', () => {
+  const css = appCss.replace(/\/\*[\s\S]*?\*\//g, '')
+  const theme = css.slice(css.indexOf('@theme'), css.indexOf('@layer base'))
+  const dark = css.slice(css.indexOf('html.dark {'))
+  const CHART_TOKENS = [
+    ...[1, 2, 3, 4, 5].map((n) => `--color-chart-${n}`),
+    '--color-chart-other',
+    ...[1, 2, 3, 4, 5].map((n) => `--color-chart-seq-${n}`),
+    '--color-chart-good',
+    '--color-chart-warn',
+    '--color-chart-bad',
+    '--color-chart-none',
+    '--color-chart-grid',
+    '--color-chart-axis',
+    '--color-chart-label',
+  ]
+
+  it('declares every chart token in @theme and again under html.dark', () => {
+    // components/charts/palette.ts reads these back with getComputedStyle. A
+    // slot declared in only one block paints one theme's mark on the other
+    // theme's surface — the exact bug `dark:` classes on charts used to cause.
+    for (const name of CHART_TOKENS) {
+      expect(theme, `${name} missing from @theme`).toMatch(new RegExp(`${name}:\\s*#[0-9A-Fa-f]{6};`))
+      expect(dark, `${name} missing from html.dark`).toMatch(new RegExp(`${name}:\\s*#[0-9A-Fa-f]{6};`))
+    }
+  })
+
+  it('never uses a dark: class inside the chart kit', () => {
+    // The ramps invert under html.dark, so a dark: twin double-flips. Charts
+    // read colour from the tokens instead, which already know the theme.
+    const offenders = findAll(/\bdark:[a-z]/g).filter(({ path }) =>
+      path.startsWith('/src/components/charts/'),
+    )
+    expect(offenders).toEqual([])
+  })
+})
+
 describe('class strings stay unambiguous', () => {
   it('never puts two unconditional max-w utilities in one class string', () => {
     // A literal class string never reaches cn(), so tailwind-merge cannot

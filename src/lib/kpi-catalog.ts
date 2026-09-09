@@ -3,24 +3,34 @@ import {
   Activity,
   Award,
   BarChart3,
+  BookOpen,
   Building2,
   CalendarDays,
   DollarSign,
+  Flag,
   FolderKanban,
   Gauge,
   Globe,
   Handshake,
   Heart,
+  Landmark,
   Layers,
   LifeBuoy,
+  Link2,
+  MapPin,
   MessageSquare,
+  Plane,
   Repeat,
+  Scale,
+  ShieldAlert,
   Sparkles,
+  Ticket,
   Timer,
   TrendingUp,
   UserCheck,
   UserPlus,
   Users,
+  Zap,
 } from 'lucide-react'
 import { ok, unavailable, type Measured } from './measured'
 
@@ -54,6 +64,7 @@ export type KpiUnit =
   | 'rating'
   | 'currency_xcd'
   | 'nps'
+  | 'milliseconds'
 
 export type KpiCadence =
   | 'daily'
@@ -83,6 +94,12 @@ export interface PlatformKpi {
    * 3 — a fact no query can produce; a human attests it.
    */
   phase: 1 | 2 | 3
+  /**
+   * Reported, not targeted. The roadmap asks for some figures to be published
+   * without setting a number to hit (§6 complaint volumes); a tile for one of
+   * these shows the reading and no bar.
+   */
+  reportedOnly?: true
   read: (pulse: PlatformPulse | undefined) => Measured
 }
 
@@ -518,6 +535,196 @@ export const PLATFORM_KPIS: PlatformKpi[] = [
     phase: 3,
     read: (p) => num(p, 't38.non_grant_revenue_pct'),
   },
+
+  // ------------------------------------------------------------------------
+  // Indicators the roadmap states outside §14's tables — the §3 objectives and
+  // the Table 15–17 phase success criteria — plus two T36 figures the pulse
+  // already emitted and nothing rendered. Read from get_phase4_pulse
+  // (migration 143). Grouped by `table` for display, so their position here
+  // does not matter.
+  // ------------------------------------------------------------------------
+  {
+    key: 't33.resources_published',
+    table: 'T33',
+    label: 'Knowledge resources published',
+    icon: BookOpen,
+    unit: 'count',
+    cadence: 'monthly',
+    direction: 'up',
+    definitionNote:
+      'resources with is_published, cumulative. Roadmap §3 "50+ knowledge resources published and accessed" and Table 15 "knowledge library seeded".',
+    phase: 1,
+    read: (p) => num(p, 't33.resources_published'),
+  },
+  {
+    key: 't33.partners_integrated',
+    table: 'T33',
+    label: 'Partners formally integrated',
+    icon: Landmark,
+    unit: 'count',
+    cadence: 'quarterly',
+    direction: 'up',
+    definitionNote:
+      'Verified institutions (064) plus verified employers (058). "Formally integrated" is undefined by the roadmap; a completed verification, which names who verified and when, is the closest thing the platform records to a signed MOU.',
+    phase: 1,
+    read: (p) => num(p, 't33.partners_integrated'),
+  },
+  {
+    key: 't33.partner_onboarded_users',
+    table: 'T33',
+    label: 'Members onboarded through partnerships',
+    icon: Link2,
+    unit: 'count',
+    cadence: 'monthly',
+    direction: 'up',
+    definitionNote:
+      'Distinct members who arrived through Virtual Campus single sign-on (vc_identities, 068) or hold an approved institution membership (064). Table 15 asks for 50 by launch and Table 16 for 100 by month six.',
+    phase: 1,
+    read: (p) => num(p, 't33.partner_onboarded_users'),
+  },
+  {
+    key: 't33.diaspora_members',
+    table: 'T33',
+    label: 'Diaspora members registered',
+    icon: Plane,
+    unit: 'count',
+    cadence: 'quarterly',
+    direction: 'up',
+    definitionNote:
+      'Members holding the diaspora organisation role (110). Table 17 targets 50; the dedicated diaspora onboarding it describes is a Months 6–12 item, so this reads low until that lands.',
+    phase: 2,
+    read: (p) => num(p, 't33.diaspora_members'),
+  },
+  {
+    key: 't35.event_registrations',
+    table: 'T35',
+    label: 'Event registrations',
+    icon: Ticket,
+    unit: 'count',
+    cadence: 'monthly',
+    direction: 'up',
+    definitionNote: 'event_rsvps created in the period. Table 15: "10+ events listed; 500+ event registrations".',
+    phase: 1,
+    read: (p) => num(p, 't35.event_registrations'),
+  },
+  {
+    key: 't35.resource_reach_pct',
+    table: 'T35',
+    label: 'Resource library reach',
+    icon: BookOpen,
+    unit: 'percent',
+    cadence: 'monthly',
+    direction: 'up',
+    definitionNote:
+      'Signed-in members with at least one page view under /resources in the period, as a share of monthly active users. Page views are consent-gated (022), so this can only ever describe consenting sessions and will read LOW — the same caveat as session duration. Table 15 targets 70%.',
+    phase: 1,
+    read: (p) => num(p, 't35.resource_reach_pct'),
+  },
+  {
+    key: 't35.challenge_submission_states',
+    table: 'T35',
+    label: 'States represented in challenge submissions',
+    icon: MapPin,
+    unit: 'count',
+    cadence: 'quarterly',
+    direction: 'up',
+    definitionNote:
+      'Distinct profile countries among event_solutions authors in the period. Table 16: "35+ challenge submissions from >= 7 OECS states".',
+    phase: 1,
+    read: (p) => num(p, 't35.challenge_submission_states'),
+  },
+  {
+    key: 't36.p75_lcp_ms',
+    table: 'T36',
+    label: 'Page load, p75',
+    icon: Zap,
+    unit: 'milliseconds',
+    cadence: 'weekly',
+    direction: 'down',
+    definitionNote:
+      '75th percentile of Largest Contentful Paint reported by real readers (web_vitals:lcp beacons, consent-gated) over the period. Roadmap §14 Table 36: "<3 seconds (3G)". The Lighthouse figure in scripts/perf is a build-machine number and is not this.',
+    phase: 1,
+    read: (p) => num(p, 't36.p75_lcp_ms_rum'),
+  },
+  {
+    key: 't36.security_incidents',
+    table: 'T36',
+    label: 'Critical security incidents',
+    icon: ShieldAlert,
+    unit: 'count',
+    cadence: 'quarterly',
+    direction: 'down',
+    definitionNote:
+      'impact_records of kind security_incident in the period (134) — attested by a person with evidence, never inferred from logs. The target is zero, so the reading is met only by an empty count.',
+    phase: 1,
+    read: (p) => num(p, 't36.security_incidents'),
+  },
+  {
+    key: 't36.moderation_review_hours',
+    table: 'T36',
+    label: 'Flagged content review time',
+    icon: Flag,
+    unit: 'hours',
+    cadence: 'monthly',
+    direction: 'down',
+    definitionNote:
+      'Mean hours from content_reports.created_at to resolved_at for reports resolved in the period (065). Roadmap §5: "flagged content reviewed within 24 hours".',
+    phase: 1,
+    read: (p) => num(p, 't36.moderation_review_hours'),
+  },
+  {
+    key: 't36.complaints_total',
+    table: 'T36',
+    label: 'Complaints & reports received',
+    icon: Scale,
+    unit: 'count',
+    cadence: 'monthly',
+    direction: 'down',
+    definitionNote:
+      'Content reports (065) + takedown notices (117) + grievances (018) filed in the period. Roadmap §6 requires aggregate complaint volumes in the monthly and quarterly report; there is no target, only the number.',
+    phase: 1,
+    reportedOnly: true,
+    read: (p) => num(p, 't36.complaints_total'),
+  },
+  {
+    key: 't37.grants_listed',
+    table: 'T37',
+    label: 'Funding opportunities listed',
+    icon: DollarSign,
+    unit: 'count',
+    cadence: 'monthly',
+    direction: 'up',
+    definitionNote:
+      'Active grants whose deadline is unset or has not passed at the start of the period. Table 15: "20+ funding opportunities listed".',
+    phase: 1,
+    read: (p) => num(p, 't37.grants_listed'),
+  },
+  {
+    key: 't37.grants_directory_reach_pct',
+    table: 'T37',
+    label: 'Grants directory reach',
+    icon: DollarSign,
+    unit: 'percent',
+    cadence: 'monthly',
+    direction: 'up',
+    definitionNote:
+      'Signed-in members with at least one page view under /grants in the period, as a share of monthly active users. Consent-gated, so reads low — see resource reach. Table 15 targets 60% of active users monthly.',
+    phase: 1,
+    read: (p) => num(p, 't37.grants_directory_reach_pct'),
+  },
+  {
+    key: 't37.projects_reached_revenue',
+    table: 'T37',
+    label: 'Projects tracked to early revenue',
+    icon: TrendingUp,
+    unit: 'count',
+    cadence: 'annual',
+    direction: 'up',
+    definitionNote:
+      'Roadmap §3: "at least 5 innovation projects tracked from ideation to early-stage revenue". Nothing links a revenue record to a project yet, so this is attested — a Phase 3 collector.',
+    phase: 3,
+    read: (p) => num(p, 't37.projects_reached_revenue'),
+  },
 ]
 
 export const KPI_TABLE_TITLES: Record<KpiTable, string> = {
@@ -547,6 +754,8 @@ export function formatKpiValue(value: number, unit: KpiUnit): string {
       return value > 0 ? `+${value}` : String(value)
     case 'currency_xcd':
       return `EC$${value.toLocaleString()}`
+    case 'milliseconds':
+      return `${Math.round(value).toLocaleString()} ms`
     default:
       return value.toLocaleString()
   }
@@ -564,7 +773,28 @@ export function kpiProgress(
   target: number,
   direction: 'up' | 'down'
 ): number | null {
-  if (!Number.isFinite(target) || target === 0) return null
+  if (!Number.isFinite(target)) return null
+  // A zero target only makes sense for a 'down' KPI ("zero critical
+  // incidents"): met exactly when the reading is zero, missed by any other
+  // reading. There is no ratio to take, so it is decided outright.
+  if (target === 0) return direction === 'down' ? (value <= 0 ? 1 : 0) : null
   const raw = direction === 'up' ? value / target : target / (value || target)
   return Math.max(0, Math.min(raw, 1.5))
+}
+
+/** On track, close enough, needs someone, or nothing to judge. */
+export type KpiStatus = 'good' | 'warn' | 'bad' | 'none'
+
+/**
+ * The one place the thresholds live.
+ *
+ * 100% is met, 80% is close enough to leave alone, below that needs someone.
+ * Tiles, the radial gauges, the overview strip and the report fact pack all
+ * read this so a KPI cannot be amber on one surface and green on another.
+ */
+export function kpiStatus(progress: number | null): KpiStatus {
+  if (progress === null) return 'none'
+  if (progress >= 1) return 'good'
+  if (progress >= 0.8) return 'warn'
+  return 'bad'
 }
