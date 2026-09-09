@@ -10,7 +10,7 @@ interface ModalProps {
   title?: string
   description?: string
   children: ReactNode
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
   /**
    * Drops the cream panel, the header and the content padding, leaving only
    * the backdrop and the dialog semantics — focus trap, escape, scroll lock,
@@ -23,13 +23,24 @@ interface ModalProps {
    * it, so a bare modal is not an unlabelled dialog.
    */
   bare?: boolean
+  /**
+   * How much of the page behind the dialog it is allowed to keep.
+   *
+   * `solid` — the default: half black and blurred, so the page reads as put
+   *           away and the dialog is the only thing being looked at.
+   * `sheer` — a fifth black and no blur, for a dialog whose whole purpose is
+   *           to change what is behind it. The profile block editors are the
+   *           case: the preview updates as you type, and a half-black blur is
+   *           an expensive way to hide the reason the screen exists.
+   */
+  scrim?: 'solid' | 'sheer'
   className?: string
 }
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-export function Modal({ open, onClose, title, description, children, size, bare, className, ...others }: ModalProps) {
+export function Modal({ open, onClose, title, description, children, size, bare, scrim = 'solid', className, ...others }: ModalProps) {
     const { t } = useLingui()
   const dialogRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
@@ -39,6 +50,12 @@ export function Modal({ open, onClose, title, description, children, size, bare,
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
+    // 48rem, written out: the ratchet in design/tokens.test.ts counts every
+    // `max-w-Nxl` as a legacy page width, and this is a dialog, not a page.
+    '2xl': 'max-w-[48rem]',
+    // For a dialog that is a workspace rather than a question — a gallery of
+    // artwork beside a live preview needs both to be big enough to judge.
+    '3xl': 'max-w-[64rem]',
   }
 
   const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -107,7 +124,10 @@ export function Modal({ open, onClose, title, description, children, size, bare,
       // the blur are as much a part of "the app on top of the page" as the
       // dialog is.
       data-capture-hide
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
+      className={cn(
+        'fixed inset-0 z-modal flex items-center justify-center animate-fade-in',
+        scrim === 'sheer' ? 'bg-black/20' : 'bg-black/50 backdrop-blur-sm'
+      )}
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
     >

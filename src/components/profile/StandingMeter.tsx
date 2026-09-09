@@ -55,16 +55,20 @@ export function StandingMeter({
         // L3 of the elevation ladder: recessed into the plate above it, so the
         // plate reads as one object with a slot cut into it rather than as two
         // stacked cards.
-        'flex flex-wrap items-center gap-x-gutter gap-y-4 rounded-surface bg-ktip-sand-100 px-5 py-3.5 shadow-neu-sm-inset',
+        'flex flex-wrap items-center gap-x-gutter gap-y-4 rounded-surface-lg bg-gradient-to-r from-ktip-cream to-ktip-sand-100 px-6 py-5 shadow-neu-sm-inset',
         className
       )}
     >
       <div className="min-w-[11rem] flex-1">
-        <p className="text-micro font-semibold uppercase tracking-[0.14em] text-ktip-sand-500">
-          <Trans>Level {rank.level}</Trans>
-        </p>
-        <p className="font-display text-title-sm font-bold leading-tight text-ktip-sand-900">
-          {rank.name}
+        {/* Level and rank on one baseline — "LEVEL 3  Collaborator" — the way
+            the hero writes it, so the two say the same thing in the same voice. */}
+        <p className="flex flex-wrap items-baseline gap-x-3">
+          <span className="text-micro font-bold uppercase tracking-[0.16em] text-ktip-sand-500">
+            <Trans>Level {rank.level}</Trans>
+          </span>
+          <span className="font-display text-title-lg font-semibold leading-none text-ktip-sand-900">
+            {rank.name}
+          </span>
         </p>
 
         <div
@@ -73,15 +77,15 @@ export function StandingMeter({
           aria-valuemin={0}
           aria-valuemax={rank.next_required ?? rank.earned}
           aria-label={t`Progress toward the next rank`}
-          className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ktip-sand-300"
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-ktip-sand-300"
         >
           <div
-            className="h-full rounded-full bg-ktip-tropical-500 transition-[width] duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-brand-green to-ktip-tropical-300 transition-[width] duration-500"
             style={{ width: `${pct}%` }}
           />
         </div>
 
-        <p className="mt-1.5 text-micro text-ktip-sand-500">
+        <p className="mt-2 text-micro text-ktip-sand-500">
           {rank.next_required ? (
             <Trans>
               {rank.earned} / {rank.next_required} toward {rank.next_name}
@@ -92,7 +96,10 @@ export function StandingMeter({
         </p>
       </div>
 
-      <dl className="flex">
+      {/* Wraps: four figures at this size are wider than a phone, and a
+          flex row that cannot wrap is the one thing that makes the whole
+          page scroll sideways — the rail cards above share its column. */}
+      <dl className="flex min-w-0 flex-wrap gap-y-3">
         <Figure label={t`Points`} value={points} />
         <Figure label={t`Achievements`} value={badgeCount} />
         {connectionCount != null && <Figure label={t`Connections`} value={connectionCount} />}
@@ -119,14 +126,14 @@ function Figure({
   icon?: React.ReactNode
 }) {
   return (
-    <div className="border-l border-ktip-sand-300 px-4 text-center first:border-l-0 first:pl-0 last:pr-0">
-      <dt className="flex items-center justify-center gap-1 text-micro font-semibold uppercase tracking-[0.12em] text-ktip-sand-500">
+    <div className="border-l border-ktip-sand-300 px-3 text-center first:border-l-0 first:pl-0 last:pr-0 sm:px-5">
+      <dd className="font-display text-title-lg font-semibold leading-none tabular-nums text-ktip-sand-900">
+        {value}
+      </dd>
+      <dt className="mt-1.5 flex items-center justify-center gap-1 text-micro font-bold uppercase tracking-[0.12em] text-ktip-sand-500">
         {icon}
         {label}
       </dt>
-      <dd className="mt-0.5 font-display text-title font-bold leading-none tabular-nums text-ktip-ocean-700">
-        {value}
-      </dd>
     </div>
   )
 }

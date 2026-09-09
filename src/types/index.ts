@@ -1,6 +1,7 @@
 // Custom types for KTIP application
 
 import type { BannerSpec } from '../lib/banner'
+import type { AvatarStyle } from '../lib/avatar-backdrop'
 import type { CalendarAccent, CalendarNoteKind } from '../lib/constants'
 
 /**
@@ -175,6 +176,13 @@ export interface Profile {
    * malformed value the client-owned JSONB might hold.
    */
   banner?: BannerSpec | null
+  /**
+   * How avatar_url was made (148) — plain photo, or a cut-out on a backdrop
+   * with the transparent cut-out URL, subject side and head frame the member
+   * page hero needs. Read it through parseAvatarStyle(). Optional for the same
+   * deploy-ahead-of-migration reason as banner.
+   */
+  avatar_style?: AvatarStyle | null
   country: string | null
   organization: string | null
   industry: string | null
@@ -196,6 +204,12 @@ export interface Profile {
   website?: string | null
   languages?: string[]
   is_verified: boolean
+  /**
+   * Migration 145 — why is_verified is TRUE. Optional because a deploy can run
+   * ahead of the migration; absent reads as "verified, reason not recorded".
+   */
+  verified_via?: VerifiedVia | null
+  verified_at?: string | null
   /**
    * Migration 140 — 'active', 'deactivated' (hidden, sign in to come back) or
    * 'pending_deletion' (purge scheduled). Optional because a deploy can run
@@ -294,6 +308,8 @@ export interface ProfileView {
   avatar_url: string | null
   /** Teaser field like the avatar (104): a private member's cover still shows. */
   banner?: BannerSpec | null
+  /** Teaser field like the avatar (148): the cut-out is the face they already show. */
+  avatar_style?: AvatarStyle | null
   roles: UserRole[]
   country: string | null
   is_verified: boolean
@@ -1212,6 +1228,68 @@ export interface Connection {
 // Verification types
 export type VerificationStatus = 'pending' | 'approved' | 'rejected'
 
+/** Migration 145 — the track an account was verified on. */
+export type VerifiedVia =
+  | 'document'
+  | 'domain'
+  | 'institution'
+  | 'roster'
+  | 'admin'
+  | 'grandfathered'
+
+/** What apply_verified_email() decided about a proven address (145). */
+export type VerificationOutcome =
+  | 'verified'
+  | 'already_verified'
+  | 'student_approved'
+  | 'student_pending'
+  | 'already_member'
+
+export interface EmailVerificationResult {
+  ok: boolean
+  outcome?: VerificationOutcome
+  reason?: 'unauthenticated' | 'no_email' | 'no_profile' | 'email_unconfirmed' | 'domain_not_recognised'
+  domain?: string
+  /** Trusted-domain label, when the outcome came from one. */
+  label?: string
+  institution_id?: string
+  institution_name?: string
+  granted_role?: RoleSlug | null
+}
+
+/** A domain whose confirmed addresses verify an account by themselves (145). */
+export interface TrustedEmailDomain {
+  domain: string
+  label: string
+  grants_role: RoleSlug | null
+  is_active: boolean
+  notes: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** An address an institution has vouched for ahead of time (145). */
+export interface InstitutionRosterRow {
+  id: string
+  institution_id: string
+  email: string
+  role: 'student' | 'educator'
+  added_by: string | null
+  added_at: string
+  claimed_by: string | null
+  claimed_at: string | null
+}
+
+/** A work or school address the member has proven they control (145). */
+export interface EmailProof {
+  id: string
+  email: string
+  verified_at: string | null
+  token_expires_at: string | null
+  created_at: string
+}
+
 export interface VerificationRequest {
   id: string
   user_id: string
@@ -1951,6 +2029,12 @@ export interface Institution {
   country_code: string
   /** Email domains this institution owns, e.g. ['dsc.edu.dm']. */
   email_domains: string[]
+  /**
+   * Migration 145 — a confirmed address at one of email_domains is approved
+   * as a student with no educator click. Optional: a deploy can run ahead of
+   * the migration.
+   */
+  auto_approve_students?: boolean
   status: InstitutionStatus
   contact_email: string | null
   website_url: string | null

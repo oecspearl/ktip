@@ -92,8 +92,12 @@ export function extensionOf(fileName: string): string {
 /**
  * Decode a file to a bitmap, applying EXIF orientation so phone photos are not
  * rotated sideways.
+ *
+ * Exported for portrait-cutout.ts and portrait-composite.ts: a sideways phone
+ * photo segments as a sideways person, so they must decode the way this does.
+ * Callers close an ImageBitmap when done; an HTMLImageElement needs nothing.
  */
-async function decode(file: File): Promise<ImageBitmap | HTMLImageElement> {
+export async function decodeImage(file: File): Promise<ImageBitmap | HTMLImageElement> {
   if (typeof createImageBitmap === 'function') {
     try {
       return await createImageBitmap(file, { imageOrientation: 'from-image' })
@@ -167,7 +171,7 @@ async function encode(
 export async function optimizeImage(file: File, opts: OptimizeOptions): Promise<File> {
   if (shouldSkipOptimization(file) || !canEncodeWebp()) return file
 
-  const source = await decode(file)
+  const source = await decodeImage(file)
   try {
     const { width: srcW, height: srcH } = sizeOf(source)
     if (!srcW || !srcH) return file

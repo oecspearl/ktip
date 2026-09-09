@@ -102,11 +102,24 @@ export async function uploadOptimizedImage(params: {
       await supabase.storage.from(bucket).remove([stagedPath])
       throw new Error(verdict.reason ?? 'That image cannot be used.')
     }
-    const { error: moveError } = await supabase.storage.from(bucket).move(stagedPath, filePath)
-    if (moveError) {
-      await supabase.storage.from(bucket).remove([stagedPath])
-      throw moveError
-    }
+    // Promote by re-uploading the bytes we still hold, NOT by move().
+    //
+    // Storage's move() refuses a destination that already exists — it answers
+    // "The resource already exists" — and this destination is a stable key, so
+    // it exists for every member who has uploaded before. That made replacing
+    // an avatar (or a project/event image: same moderated path) fail outright
+    // while a first upload worked, which is why it read as random.
+    //
+    // Deleting the destination first and then moving would fix the error and
+    // introduce a worse one: a failure between the two leaves the member with
+    // no image at all. `optimized` is already in memory, so an upsert write
+    // costs one more request and never destroys what is there until the new
+    // bytes have landed.
+    const { error: promoteError } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, optimized, { upsert: true, contentType: optimized.type })
+    await supabase.storage.from(bucket).remove([stagedPath])
+    if (promoteError) throw promoteError
   }
 
   await removeStaleVariants(bucket, basePath, extension)
@@ -123,10 +136,19 @@ export async function uploadOptimizedImage(params: {
  * modal and the editor's drop/paste handler so they cannot drift apart.
  */
 export async function uploadDocumentImage(file: File): Promise<string> {
+  // Namespaced under the uploader, like avatars and project images, so the
+  // storage policies (migration 144) can read the owner out of the path. The
+  // old flat "documents/" prefix had no owner, which is why 027 had to let
+  // every member update and delete every object in the bucket.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('You need to be signed in to add an image.')
+
   const optimized = await optimizeImage(file, IMAGE_PRESETS.DOCUMENT)
   const extension = extensionOf(optimized.name)
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`
-  const filePath = `documents/${fileName}`
+  const filePath = `${user.id}/${fileName}`
 
   const { error } = await supabase.storage
     .from('document-images')

@@ -441,6 +441,25 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_SENTRY_RELEASE': JSON.stringify(sentryRelease),
     },
+    optimizeDeps: {
+      /**
+       * The background remover, pre-bundled at server start.
+       *
+       * It is reached ONLY through `await import('@mediapipe/tasks-vision')`
+       * in lib/portrait-cutout.ts, so Vite's initial dependency scan never
+       * sees it. The first member to open the Portrait Studio makes the dev
+       * server discover it, re-optimize, and hand every already-issued
+       * `/deps/…?v=<old hash>` URL a 404 — including the one that import is
+       * waiting on. The studio catches that and quietly keeps the plain photo,
+       * which reads as "cut-outs are broken" and is really "the dev server
+       * moved the file mid-request".
+       *
+       * Naming it here means it is bundled before the first request instead of
+       * during one. Dev-only concern; the production build resolves it
+       * statically either way.
+       */
+      include: ['@mediapipe/tasks-vision'],
+    },
     build: {
       sourcemap: uploadSentrySourceMaps ? ('hidden' as const) : false,
       rollupOptions: {

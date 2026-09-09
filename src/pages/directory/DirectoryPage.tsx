@@ -14,6 +14,7 @@ import { ConnectButton } from '../../components/directory/ConnectButton'
 import { BentoCard } from '../../components/ui/BentoCard'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { CountrySelect } from '../../components/ui/CountrySelect'
+import { VerifiedBadge } from '../../components/ui/VerifiedBadge'
 import {
   DIRECTORY_ROLE_LABELS,
   ROLE_LABELS,
@@ -381,6 +382,7 @@ export default function DirectoryPage() {
                           frameClassName="ring-2 ring-white/60"
                         />
                         <span className="truncate">{member.display_name || t`Anonymous`}</span>
+                        <VerifiedBadge verified={member.is_verified} size={16} tone="inverse" />
                       </span>
                     }
                     meta={

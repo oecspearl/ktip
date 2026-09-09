@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect } from 'react'
+import { Suspense, useLayoutEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
@@ -9,22 +9,30 @@ import { SpyRail } from '../ui/SpyRail'
 import { MessagingPanelProvider, useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { MemberPanelProvider, useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useEverTrue } from '../../hooks/useEverTrue'
+import { lazyOverlay } from '../../lib/lazy-overlay'
 
 // Overlay panels: closed on first paint, so their code (and the messaging /
 // directory trees behind them) stays out of the entry chunk.
-const MessagingPanel = lazy(() =>
-  import('../messages/MessagingPanel').then((m) => ({ default: m.MessagingPanel }))
+//
+// lazyOverlay, not lazy: a panel whose chunk does not arrive must not be able
+// to blank the site. See src/lib/lazy-overlay.ts — this is a page shell, and
+// everything below it is optional to the page.
+const MessagingPanel = lazyOverlay(
+  () => import('../messages/MessagingPanel').then((m) => ({ default: m.MessagingPanel })),
+  'messaging-panel'
 )
 
 import { Trans } from '@lingui/react/macro'
 
-const MemberPanel = lazy(() =>
-  import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel }))
+const MemberPanel = lazyOverlay(
+  () => import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel })),
+  'member-panel'
 )
 // Renders nothing until there is a note to draw, so the editor, the folder
 // graphics and the drag handling stay out of the entry chunk for everyone else.
-const StickyNoteOverlay = lazy(() =>
-  import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay }))
+const StickyNoteOverlay = lazyOverlay(
+  () => import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay })),
+  'sticky-notes'
 )
 import { StickyNotesProvider, useStickyNotesPanel } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'

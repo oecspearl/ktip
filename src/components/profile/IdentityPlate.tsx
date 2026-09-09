@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from 'react'
-import { CheckCircle } from 'lucide-react'
+import { useState, type CSSProperties, type ReactNode, type Ref } from 'react'
 import { useLingui } from '@lingui/react/macro'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { VerifiedBadge } from '../ui/VerifiedBadge'
 import { ROLE_LABELS } from '../../lib/constants'
 import { resolveCopy } from '../../i18n/copy'
 import { cn } from '../../lib/utils'
@@ -29,8 +29,21 @@ interface IdentityPlateProps {
    *           the banner becomes its backdrop instead of a stripe above a gap.
    * `panel` — no surface of its own. The drawer is already a surface, and a
    *           plate inside it would be a card inside a card.
+   * `rail`  — the top of the member page's sticky rail: a rail-tone card with
+   *           the diamond, the name and the credentials stacked, so the person
+   *           stays on screen beside whatever is being read about them. The
+   *           hero's portrait flies into this diamond (PortraitHero).
    */
-  variant?: 'page' | 'panel'
+  variant?: 'page' | 'panel' | 'rail'
+  /** The box around the DiamondAvatar — the flight's landing rectangle. */
+  avatarRef?: Ref<HTMLDivElement>
+  avatarStyle?: CSSProperties
+  /**
+   * Drop the diamond. For a surface that is already showing the member's
+   * portrait somewhere else — the member panel's cover — where a second copy
+   * of the same face a centimetre below the first reads as a rendering fault.
+   */
+  hideAvatar?: boolean
   /** Rendered while the profile is still loading. */
   loading?: boolean
   className?: string
@@ -57,11 +70,14 @@ export function IdentityPlate({
   actions,
   standing,
   variant = 'page',
+  avatarRef,
+  avatarStyle,
+  hideAvatar,
   loading,
   className,
 }: IdentityPlateProps) {
-  const { t } = useLingui()
   const page = variant === 'page'
+  const rail = variant === 'rail'
 
   return (
     <header
@@ -71,23 +87,82 @@ export function IdentityPlate({
         'scroll-mt-24',
         page &&
           'neu-surface relative z-raised -mt-16 rounded-surface-lg bg-ktip-cream p-card-pad shadow-hard',
+        rail && 'neu-surface rounded-surface-lg bg-ktip-cream p-5 shadow-hard',
         className
       )}
     >
-      <div className={cn('flex gap-5', page ? 'flex-wrap items-start' : 'flex-col')}>
-        <DiamondAvatar
-          src={avatarUrl}
-          name={loading ? '' : name}
-          size={page ? 112 : 88}
-          colorClass={loading ? 'bg-ktip-sand-300' : undefined}
-          // Pulled up so the diamond breaks the plate's top edge on the page
-          // and the drawer's cover fade in the panel. Half in, half out is what
-          // ties the two planes together.
-          className={page ? '-mt-14' : '-mt-11'}
-          frameClassName="ring-4 ring-ktip-cream shadow-soft"
-        />
+      {/* The rail is a two-column grid — diamond, then the words — with the
+          action row spanning both underneath. The page and the panel keep
+          their flex arrangements. */}
+      <div
+        className={cn(
+          page && 'flex flex-wrap items-start gap-5',
+          rail && 'grid grid-cols-[7.5rem_minmax(0,1fr)] items-center gap-x-4',
+          !page && !rail && 'flex flex-col gap-5'
+        )}
+      >
+        {/* The wrapper is the flight's landing box: the footprint DiamondAvatar
+            reserves is exactly the diamond's bounding square.
 
-        <div className="min-w-0 flex-1">
+            In the rail it is full size from the first paint, holding a dashed
+            slot until the hero's portrait arrives — the page saying "the face
+            lands here", the way the approved design draws it. PortraitHero
+            writes `--land` on the rail as the portrait flies, and the `.land-*`
+            rules in index.css fade the slot out, the ring and the face in.
+            With no flight (no portrait, below lg) `--land` is unset and reads
+            as 1: the face is simply there. */}
+        {!hideAvatar && (
+        <div
+          ref={avatarRef}
+          style={avatarStyle}
+          className={cn('relative shrink-0', rail && 'self-start')}
+        >
+          {rail && (
+            <>
+              {/* The empty slot the portrait lands in: the same diamond as the
+                  green edge, drawn as a hairline outline on the plate's fill,
+                  so the card says "the face belongs here" before it arrives. */}
+              <span
+                aria-hidden
+                className="land-slot pointer-events-none absolute inset-0 bg-ktip-sand-300 [clip-path:polygon(50%_0,100%_50%,50%_100%,0_50%)]"
+              >
+                <span className="absolute inset-px bg-ktip-cream [clip-path:polygon(50%_0,100%_50%,50%_100%,0_50%)]" />
+              </span>
+              {/* The green edge. It is the one place the brand colour touches
+                  the member's own face, so it is a hairline, not a band. */}
+              <span
+                aria-hidden
+                className="land-ring pointer-events-none absolute inset-[-5px] bg-[linear-gradient(150deg,var(--color-ktip-tropical-400),var(--color-ktip-tropical-600)_38%,transparent_72%)] [clip-path:polygon(50%_0,100%_50%,50%_100%,0_50%)]"
+              >
+                <span className="absolute inset-[5px] bg-ktip-cream [clip-path:polygon(50%_0,100%_50%,50%_100%,0_50%)]" />
+              </span>
+            </>
+          )}
+          <DiamondAvatar
+            src={avatarUrl}
+            name={loading ? '' : name}
+            // 120 in the rail: the plate is 21.25rem wide, which leaves the
+            // name about 170px — "Andre Williams" wraps to two lines at
+            // title size, which the design accepts.
+            size={page ? 112 : rail ? RAIL_AVATAR : 88}
+            colorClass={loading ? 'bg-ktip-sand-300' : undefined}
+            // Pulled up so the diamond breaks the plate's top edge on the page
+            // and the drawer's cover fade in the panel. Half in, half out is what
+            // ties the two planes together. The rail's sits flush.
+            className={cn(page ? '-mt-14' : rail ? 'land-avatar' : '-mt-11')}
+            // `rounded-none` in the rail: DiamondAvatar rounds the tilted
+            // square's corners by 11% of its side, and behind it the green
+            // edge and the empty slot are true diamonds with points. Two
+            // shapes, one inside the other, disagreeing at all four corners.
+            // The frame gives way to the sharp one.
+            frameClassName={
+              rail ? 'relative rounded-none shadow-soft' : 'ring-4 ring-ktip-cream shadow-soft'
+            }
+          />
+        </div>
+        )}
+
+        <div className={cn('min-w-0 flex-1', rail && 'land-who')}>
           {loading ? (
             <div className="space-y-2">
               <div className="h-7 w-48 animate-pulse-soft rounded-control bg-ktip-sand-100" />
@@ -101,18 +176,16 @@ export function IdentityPlate({
               <Heading
                 level={page ? 1 : 2}
                 className={cn(
-                  'flex min-w-0 items-center gap-2 font-display font-bold leading-tight text-ktip-sand-900',
-                  page ? 'text-title-lg' : 'text-title'
+                  'flex min-w-0 items-center gap-2 font-display text-ktip-sand-900',
+                  page
+                    ? 'text-title-lg font-bold leading-tight'
+                    : rail
+                      ? 'text-title font-semibold leading-[1.05]'
+                      : 'text-title font-bold leading-tight'
                 )}
               >
                 <span className="min-w-0 break-words">{name}</span>
-                {verified && (
-                  <CheckCircle
-                    size={20}
-                    className="shrink-0 text-ktip-ocean-500"
-                    aria-label={t`Verified member`}
-                  />
-                )}
+                <VerifiedBadge verified={verified} size={20} />
               </Heading>
 
               {roles?.length ? <RoleLine roles={roles} /> : null}
@@ -126,13 +199,33 @@ export function IdentityPlate({
           )}
         </div>
 
-        {actions && <div className="flex shrink-0 flex-wrap items-start gap-2">{actions}</div>}
+        {actions && (
+          <div
+            className={cn(
+              'flex shrink-0 flex-wrap items-start gap-2',
+              // In the rail the row spans both columns under the diamond and
+              // the words; the two real actions share the width evenly and the
+              // icon-only report keeps its own size at the end of the row —
+              // stretching a 16px flag to a third of the card made reporting
+              // someone look like a primary thing to do. It fades in as the
+              // portrait lands (.land-actions), because until then the hero
+              // above still carries the same two buttons.
+              rail &&
+                'land-actions col-span-full mt-4 w-full flex-nowrap items-center [&>*:not([aria-label])]:min-w-0 [&>*:not([aria-label])]:flex-1 [&>[aria-label]]:shrink-0 [&_button]:w-full'
+            )}
+          >
+            {actions}
+          </div>
+        )}
       </div>
 
       {standing && <div className="mt-5">{standing}</div>}
     </header>
   )
 }
+
+/** The rail diamond's footprint, px — the box the flight lands in. */
+const RAIL_AVATAR = 120
 
 /** Roles shown before the rest fold behind a "+N". */
 const ROLE_CAP = 6

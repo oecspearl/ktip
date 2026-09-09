@@ -326,6 +326,13 @@
   --text-display-xl--line-height: 1.02;
   --text-display-xl--letter-spacing: -0.03em;
 
+  /* The member page's name. One step past display-xl because the portrait
+     beside it is 540px tall and a 72px name reads as a caption under it. Set
+     tight (0.94) so a two-line name stays one object. */
+  --text-hero: calc(6rem * var(--scale-display)); /* 96px */
+  --text-hero--line-height: 0.94;
+  --text-hero--letter-spacing: -0.025em;
+
   /* ── DENSITY & GEOMETRY ───────────────────────────────────────────────
      Named --spacing-* entries generate p-*, m-*, gap-*, w-*, h-*, size-*,
      min-h-*, inset-* and friends, so `p-card-pad` and `gap-card-gap` both
@@ -509,6 +516,11 @@
   --animate-slide-up: slideUp 0.5s ease-out;
   --animate-scale-in: scaleIn 0.3s ease-out;
   --animate-pulse-soft: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  /* Member page hero (PortraitHero), animated avatar style: the backdrop art
+     drifts and the glow behind the person breathes. Stilled by the global
+     reduced-motion rule like everything else. */
+  --animate-backdrop-drift: backdropDrift 28s ease-in-out infinite alternate;
+  --animate-halo-breathe: haloBreathe 6s ease-in-out infinite alternate;
   /* Right-edge drawers (member preview) — slide in over the page */
   --animate-slide-in-right: slideInRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   /* Their exit — the entry played backwards: same duration, same curve. The
@@ -560,6 +572,14 @@
     100% { opacity: 0; }
   }
 
+  @keyframes backdropDrift {
+    from { transform: scale(1.04) translate(0, 0); }
+    to { transform: scale(1.12) translate(-2%, 2%); }
+  }
+  @keyframes haloBreathe {
+    from { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+    to { opacity: 1; transform: translate(-50%, -52%) scale(1.08); }
+  }
   @keyframes pulse-soft {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -1158,6 +1178,31 @@ html.dark {
   .neu-on-dark {
     --color-neu-hi: rgba(255, 255, 255, 0.16);
     --color-neu-lo: rgba(0, 0, 0, 0.42);
+  }
+
+  /* The member page's portrait flight (PortraitHero → IdentityPlate rail).
+
+     The hero writes ONE number, --land (0 = the portrait is up in the hero,
+     1 = it has settled into the rail's diamond), onto the rail element on
+     every scroll frame. Everything in the rail that reacts to the landing
+     derives its opacity from that number here, in CSS, so the hero never
+     reaches into the plate's markup and the plate never knows about scroll.
+     Unset (no flight: below lg, no portrait, reduced motion's snap) reads
+     as 1, i.e. the plate simply renders whole. */
+  .land-avatar {
+    opacity: clamp(0, calc((var(--land, 1) - 0.94) / 0.06), 1);
+  }
+  .land-slot {
+    opacity: clamp(0, calc((0.97 - var(--land, 1)) / 0.03), 1);
+  }
+  .land-ring {
+    opacity: clamp(0, calc((var(--land, 1) - 0.7) / 0.3), 1);
+  }
+  .land-who {
+    opacity: calc(0.5 + 0.5 * var(--land, 1));
+  }
+  .land-actions {
+    opacity: clamp(0, calc((var(--land, 1) - 0.6) / 0.4), 1);
   }
 
   /* Skin only — brand pair, homepage shadow depth, lift on hover — with no

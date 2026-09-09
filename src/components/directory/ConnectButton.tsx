@@ -15,13 +15,19 @@ interface ConnectButtonProps {
   status?: ConnectionStatus
   /** Pair with `status` while the batch query is still in flight. */
   statusPending?: boolean
+  /**
+   * `hero` dresses the control for the member page's band: solid white for
+   * the one action, frosted glass for the rest. The brand-navy fill of the
+   * default reads as a hole on a navy backdrop.
+   */
+  tone?: 'default' | 'hero'
 }
 
 /**
  * State-aware connect control: Connect -> Pending -> (other side)
  * Accept/Decline -> Connected.
  */
-export function ConnectButton({ otherUserId, size = 'md', status, statusPending }: ConnectButtonProps) {
+export function ConnectButton({ otherUserId, size = 'md', status, statusPending, tone = 'default' }: ConnectButtonProps) {
     const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
@@ -35,10 +41,20 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
 
   if (!myId || myId === otherUserId) return null
 
-  const base =
-    size === 'sm'
+  const hero = tone === 'hero'
+  const base = hero
+    ? 'inline-flex items-center justify-center gap-2 rounded-neu px-5 py-3 text-label font-bold transition-colors disabled:opacity-60'
+    : size === 'sm'
       ? 'px-3 py-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50'
       : 'px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50'
+  // The primary fill and the quiet fill, per tone.
+  const primary = hero ? 'bg-white text-brand-navy hover:bg-ktip-sand-100' : 'btn-brand'
+  const quiet = hero
+    ? 'border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
+    : 'bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200'
+  const done = hero
+    ? 'border border-white/30 bg-white/10 text-white backdrop-blur-sm cursor-default'
+    : 'bg-ktip-tropical-100 text-ktip-tropical-700 cursor-default'
   const iconSize = size === 'sm' ? 14 : 16
   const busy = loading || statusLoading
 
@@ -83,7 +99,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
 
   if (state === 'connected') {
     return (
-      <span className={`${base} bg-ktip-tropical-100 text-ktip-tropical-700 cursor-default`}>
+      <span className={`${base} ${done}`}>
         <UserCheck size={iconSize} />
         {t`Connected`}
       </span>
@@ -92,7 +108,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
 
   if (state === 'pending_sent') {
     return (
-      <button onClick={handleCancel} disabled={busy} className={`${base} bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200`} title={t`Cancel request`}>
+      <button onClick={handleCancel} disabled={busy} className={`${base} ${quiet}`} title={t`Cancel request`}>
         <Clock size={iconSize} />
         {t`Pending`}
       </button>
@@ -102,11 +118,11 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
   if (state === 'pending_received') {
     return (
       <span className="flex items-center gap-1.5">
-        <button onClick={() => handleRespond(true)} disabled={busy} className={`${base} btn-brand`}>
+        <button onClick={() => handleRespond(true)} disabled={busy} className={`${base} ${primary}`}>
           <Check size={iconSize} />
           {t`Accept`}
         </button>
-        <button onClick={() => handleRespond(false)} disabled={busy} className={`${base} bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200`}>
+        <button onClick={() => handleRespond(false)} disabled={busy} className={`${base} ${quiet}`}>
           <X size={iconSize} />
           {t`Decline`}
         </button>
@@ -115,7 +131,7 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending 
   }
 
   return (
-    <button onClick={handleConnect} disabled={busy} className={`${base} btn-brand`}>
+    <button onClick={handleConnect} disabled={busy} className={`${base} ${primary}`}>
       <UserPlus size={iconSize} />
       {t`Connect`}
     </button>

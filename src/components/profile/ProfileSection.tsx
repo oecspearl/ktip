@@ -37,8 +37,8 @@ interface ProfileSectionProps {
 }
 
 const TONE = {
-  card: 'neu-surface rounded-surface bg-ktip-cream shadow-neu p-card-pad',
-  rail: 'neu-surface rounded-surface bg-ktip-cream shadow-neu p-card-pad-sm',
+  card: 'neu-surface rounded-surface-lg bg-ktip-cream shadow-neu p-card-pad',
+  rail: 'neu-surface rounded-surface-lg bg-ktip-cream shadow-neu p-5',
   flush: 'border-t border-ktip-sand-200 px-gutter py-5 first:border-t-0',
 } as const
 
@@ -70,19 +70,22 @@ export function ProfileSection({
     >
       <h2
         className={cn(
-          'flex items-center gap-2',
+          'flex items-center gap-2.5',
           rail
-            ? 'mb-2.5 text-micro font-semibold uppercase tracking-[0.14em] text-ktip-sand-500'
-            : 'mb-3 font-display text-title-sm font-bold text-ktip-sand-900'
+            ? 'mb-3 text-micro font-bold uppercase tracking-[0.16em] text-ktip-sand-500'
+            : // Title-lg, not title-sm: the content column's sections are the
+              // page's chapters, and a 20px chapter head under an 88px name
+              // read as a form label.
+              'mb-4 font-display text-title-lg font-semibold text-ktip-sand-900'
         )}
       >
         <span
           aria-hidden
-          className={cn('shrink-0 rounded-sm bg-brand-green', rail ? 'h-3 w-[3px]' : 'h-4 w-1')}
+          className={cn('shrink-0 rounded-sm bg-brand-green', rail ? 'h-3.5 w-[3px]' : 'h-5 w-1')}
         />
         {title}
         {count != null && (
-          <span className="ml-auto text-micro font-semibold tabular-nums text-ktip-sand-500">
+          <span className="ml-auto text-caption font-semibold tabular-nums text-ktip-sand-500">
             {count}
           </span>
         )}

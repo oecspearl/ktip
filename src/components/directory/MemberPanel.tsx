@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import {
   Calendar,
-  CheckCircle,
   ChevronRight,
   Flag,
   FolderKanban,
@@ -12,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { VerifiedBadge } from '../ui/VerifiedBadge'
 import { ConnectButton } from './ConnectButton'
 import { useProfileId, useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
 import { useUserBadges } from '../../hooks/useBadges'
@@ -24,6 +24,12 @@ import { useAuth } from '../../contexts/AuthContext'
 import { dmBlockedReason } from '../../lib/minor-safety'
 import { heroImageFor, gradientFor } from '../../lib/hero-images'
 import { BANNER_WASH, bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
+import {
+  avatarBackdropImage,
+  avatarGradientSpec,
+  isCutoutStyle,
+  parseAvatarStyle,
+} from '../../lib/avatar-backdrop'
 import { BannerAurora } from '../profile/BannerAurora'
 import { IdentityPlate } from '../profile/IdentityPlate'
 import { ProfileSection } from '../profile/ProfileSection'
@@ -39,6 +45,7 @@ import {
 } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { entityPath, memberPath } from '../../lib/slug'
+import { CountryFlag } from '../ui/CountryFlag'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
@@ -219,6 +226,11 @@ export function MemberPanel() {
   // cover whether they were opened by username or by uuid.
   const coverSeed = resolvedId ?? 'member'
   const coverBanner = parseBanner(profile?.banner)
+  // The same portrait the member page opens with, at panel size: their cut-out
+  // standing on their own backdrop. The summary and the page are the same face
+  // seen twice, so they should not be two different designs.
+  const coverStyle = parseAvatarStyle(profile?.avatar_style)
+  const coverCutout = isCutoutStyle(coverStyle) ? coverStyle : null
   const hasSections = !!(
     profile?.bio ||
     badges?.length ||
@@ -254,7 +266,11 @@ export function MemberPanel() {
         role="complementary"
         aria-label={t`Member preview`}
         className={
-          `fixed inset-y-0 right-0 z-drawer flex w-full flex-col overflow-hidden border-l border-ktip-sand-200 bg-ktip-cream shadow-hard sm:w-[50vw] sm:min-w-[30rem] sm:rounded-l-surface-lg ${
+          // 50vw with no ceiling: on a 2560px screen that is a 1280px drawer
+          // holding one person's card, and the facts grid inside it stretches
+          // to two columns half a metre apart. It is a preview, so it is capped
+          // at a reading width and stops growing.
+          `fixed inset-y-0 right-0 z-drawer flex w-full flex-col overflow-hidden border-l border-ktip-sand-200 bg-ktip-cream shadow-hard sm:w-[50vw] sm:min-w-[30rem] sm:max-w-[40rem] sm:rounded-l-surface-lg ${
             closing ? 'animate-slide-out-right pointer-events-none' : 'animate-slide-in-right'
           }`
         }
@@ -274,13 +290,7 @@ export function MemberPanel() {
                 <span className="truncate font-display text-body font-bold text-ktip-sand-900">
                   {displayName}
                 </span>
-                {profile.is_verified && (
-                  <CheckCircle
-                    size={14}
-                    className="shrink-0 text-ktip-ocean-500"
-                    aria-label={t`Verified`}
-                  />
-                )}
+                <VerifiedBadge verified={profile.is_verified} size={14} />
               </span>
             </>
           )}
@@ -310,28 +320,65 @@ export function MemberPanel() {
               privacy lock) replaces the seeded art when they have set one.
               Taller than it was, and faded into the surface at the bottom, so
               the avatar sits on a gradient rather than across a hard seam. */}
-          <div className="relative h-40 shrink-0 overflow-hidden">
+          <div className={`relative shrink-0 overflow-hidden ${coverCutout ? 'h-64' : 'h-40'}`}>
             {isGradientBanner(coverBanner) ? (
               <BannerAurora spec={coverBanner} />
-            ) : (
+            ) : bannerImage(coverBanner) ? (
               <img
-                src={bannerImage(coverBanner) || heroImageFor(coverSeed)}
+                src={bannerImage(coverBanner) as string}
                 alt=""
                 loading="lazy"
                 decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
                 style={{ objectPosition: bannerPosition(coverBanner, 'panel') }}
               />
+            ) : coverCutout?.kind === 'gradient' ? (
+              <BannerAurora spec={avatarGradientSpec(coverCutout)} animated={false} />
+            ) : coverCutout?.kind === 'backdrop' ? (
+              <img
+                src={avatarBackdropImage(coverCutout) ?? undefined}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <img
+                src={heroImageFor(coverSeed)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             )}
-            {/* Same rule as BentoCard: no wash over the aurora, a neutral
-                scrim over chosen banner art, the seeded brand wash only over
-                seeded stock photos. */}
-            {!isGradientBanner(coverBanner) && (
+            {/* Same rule as BentoCard: no wash over anything DRAWN — the aurora
+                and the backdrop art are born dark and the wash crushes them —
+                a neutral scrim over chosen banner art, the seeded brand wash
+                only over seeded stock photos. */}
+            {!isGradientBanner(coverBanner) && !(coverCutout && !bannerImage(coverBanner)) && (
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${
                   bannerImage(coverBanner) ? BANNER_WASH : gradientFor(coverSeed)
                 }`}
               />
+            )}
+            {/* The member, standing on the bottom edge — the member page's hero
+                at panel scale. The glow is what keeps a soft matte edge from
+                reading as a cut-out sticker. */}
+            {coverCutout && (
+              <>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute bottom-0 left-1/2 h-40 w-56 -translate-x-1/2 translate-y-1/4 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.3),transparent_62%)] blur-2xl"
+                />
+                <img
+                  src={coverCutout.cutout}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-x-0 bottom-0 mx-auto h-[92%] w-auto max-w-[78%] object-contain object-bottom [mask-image:linear-gradient(to_bottom,#000_72%,transparent)]"
+                />
+              </>
             )}
             <p className="absolute left-gutter top-4 text-micro font-semibold uppercase tracking-[0.2em] text-white/75">
               <Trans>Member</Trans>
@@ -369,6 +416,7 @@ export function MemberPanel() {
               <div className="px-gutter pb-5">
                 <IdentityPlate
                   variant="panel"
+                  hideAvatar={!!coverCutout}
                   loading={loading || !profile}
                   name={displayName}
                   avatarUrl={profile?.avatar_url}
@@ -391,7 +439,15 @@ export function MemberPanel() {
                   <ProfileFacts
                     className="mt-5"
                     items={[
-                      !!profile.country && { label: t`Location`, value: profile.country },
+                      !!profile.country && {
+                        label: t`Location`,
+                        value: (
+                          <span className="inline-flex items-center gap-2">
+                            <CountryFlag country={profile.country} />
+                            {profile.country}
+                          </span>
+                        ),
+                      },
                       !!profile.organization && {
                         label: t`Organization`,
                         value: profile.organization,
@@ -564,7 +620,11 @@ export function MemberPanel() {
         {/* ---------- Pinned actions ----------
             Always reachable, however far the content has scrolled. */}
         {showFooter && profile && (
-          <div className="flex items-center gap-2 border-t border-ktip-sand-200 bg-ktip-cream px-gutter py-3">
+          // Extra right padding, not decoration: the floating action button is
+          // z-fab, which is deliberately above z-drawer, and it parks exactly
+          // where this row's last control sits. Without the gap "View full
+          // profile" is behind it and unclickable.
+          <div className="flex items-center gap-2 border-t border-ktip-sand-200 bg-ktip-cream py-3 pl-gutter pr-[5.5rem]">
             {!isSelf && (
               <>
                 <ConnectButton otherUserId={profile.id} size="sm" />

@@ -1,17 +1,22 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { StickyNote } from 'lucide-react'
 import { useStickyNotesPanel } from '../../contexts/StickyNotesContext'
 import { GhostOpacityControl } from './GhostOpacityControl'
 import type { FabAction } from './FabCluster'
+import { lazyOverlay } from '../../lib/lazy-overlay'
 import { useLingui } from '@lingui/react/macro'
 
 // Both lazy: someone who never opens a note should not pay for the editor, the
-// folder graphics or the drag handling in the entry chunk.
-const StickyNoteFabPanel = lazy(() =>
-  import('../notes/StickyNoteFabPanel').then((m) => ({ default: m.StickyNoteFabPanel }))
+// folder graphics or the drag handling in the entry chunk. lazyOverlay rather
+// than lazy, for the reason MainLayout gives — a chunk that does not arrive
+// must cost the reader the notes, not the site.
+const StickyNoteFabPanel = lazyOverlay(
+  () => import('../notes/StickyNoteFabPanel').then((m) => ({ default: m.StickyNoteFabPanel })),
+  'sticky-notes-panel'
 )
-const StickyNoteOverlay = lazy(() =>
-  import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay }))
+const StickyNoteOverlay = lazyOverlay(
+  () => import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay })),
+  'sticky-notes'
 )
 
 /**
