@@ -309,6 +309,7 @@ msgid "Flip the whole app between light and dark themes"
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Gradient"
 msgstr ""
 
@@ -339,6 +340,10 @@ msgid "Like signals support. Follow puts the project’s updates in front of you
 "Share copies a link anyone can open. Request to collaborate sends the owner a note asking to join the team — once sent it shows as pending here until they answer, and you cannot send a second one.\n"
 "\n"
 "The view and team counts beside them are live."
+msgstr ""
+
+#: src/hooks/useEmailVerification.ts
+msgid "Attaching a role to a domain needs the role management permission."
 msgstr ""
 
 #: src/components/dashboard/TimelineSection.tsx
@@ -408,6 +413,10 @@ msgstr ""
 msgid "Meridian"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your data is erased in 7 days. Signing in before then cancels it."
+msgstr ""
+
 #: src/pages/settings/PersonalizationTab.tsx
 msgid "Failed to save personalization"
 msgstr ""
@@ -463,6 +472,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Reviewers appointed for that call"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your account is active again. Nothing was deleted."
 msgstr ""
 
 #: src/pages/cv/CvPage.tsx
@@ -628,6 +641,10 @@ msgstr ""
 msgid "Approve students registering on the institution’s verified email domain."
 msgstr ""
 
+#: src/components/layout/Navbar.tsx
+msgid "Track your funding applications"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What you give us directly"
 msgstr ""
@@ -733,6 +750,10 @@ msgstr ""
 msgid "Who can open it"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Failed to cancel the closure"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What data we collect, why, who sees it, and your rights"
 msgstr ""
@@ -806,6 +827,10 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Schedule deletion"
+msgstr ""
+
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Added to your team"
 msgstr ""
@@ -816,6 +841,16 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Material changes are announced in the application and by email at least %noticePeriod% before they take effect. The version number and effective date at the top of this page always reflect what is currently in force, and every version you have accepted is listed in your settings."
+msgstr ""
+
+#. placeholder {0}: confirmed.institution
+#. placeholder {1}: confirmed.email ?? 'this address'
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "{0} recognised {1}. Your account is verified and holds the student role."
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Leave empty for a rolling call. A passed deadline moves it to the closed list."
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -933,6 +968,10 @@ msgstr ""
 msgid "You must be at least %minimumAge% years old to hold a KTIP account, or older if the law of the country you live in sets a higher minimum age for online services."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Keep my account"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "You are asked to confirm before it sends — reports are taken seriously and cannot be withdrawn once filed.\n"
 "\n"
@@ -973,6 +1012,7 @@ msgid "Find collaborators. Build what’s next."
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Shuffle placement"
 msgstr ""
 
@@ -1007,6 +1047,10 @@ msgstr ""
 
 #: src/components/moderation/QuarantineNotice.tsx
 msgid "This is held for review by our safety team and is not visible to others yet."
+msgstr ""
+
+#: src/hooks/useEmailVerification.ts
+msgid "You do not have permission to manage trusted domains."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1066,16 +1110,6 @@ msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
 msgid "Join a collaboration"
-msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Settings, Verification tab.\n"
-"\n"
-"Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs.\n"
-"\n"
-"Only OECS administrators can see what you upload. It is not shown on your profile and other members never have access to it.\n"
-"\n"
-"An OECS reviewer approves or declines the request, and you are notified either way. Approved accounts carry a verification badge, which members can filter by in the directory."
 msgstr ""
 
 #: src/pages/collaborate/CodeEditorPage.tsx
@@ -1290,6 +1324,10 @@ msgstr ""
 msgid "You are at"
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Minimum amount"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "A child at risk"
 msgstr ""
@@ -1307,7 +1345,6 @@ msgid "Click \"Create starter rooms\" for a Main Hall, networking area, workshop
 msgstr ""
 
 #: src/lib/extracted-fields.ts
-#: src/pages/grants/GrantFormPage.tsx
 msgid "Minimum award"
 msgstr ""
 
@@ -1390,6 +1427,10 @@ msgid "Share decides who can open the document and whether they can edit it. Som
 "Export takes the content out of KTIP when you need it elsewhere."
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Loading the background remover — about 12 MB, once…"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Stops the same walkthrough appearing every visit."
 msgstr ""
@@ -1415,6 +1456,10 @@ msgstr ""
 msgid "No extra details for this result."
 msgstr ""
 
+#: src/components/verification/VerificationNotice.tsx
+msgid "Read the reviewer's note, then send new documents. Everything on the platform stays readable in the meantime."
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 msgid "That code has expired. Send a new one."
 msgstr ""
@@ -1425,6 +1470,16 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Reports involving a minor are triaged ahead of the ordinary queue and can be acted on before review."
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "No funding is currently available"
+msgstr ""
+
+#: src/components/layout/Navbar.tsx
+#: src/i18n/harvested.ts
+#: src/pages/grants/GrantsPage.tsx
+msgid "My Funding Calls"
 msgstr ""
 
 #: src/lib/grant-application-template.ts
@@ -1653,6 +1708,11 @@ msgstr ""
 msgid "Administer forums"
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+#: src/pages/grants/GrantsPage.tsx
+msgid "Add Funding"
+msgstr ""
+
 #: src/pages/JoinInvitePage.tsx
 msgid "Invitation not found"
 msgstr ""
@@ -1680,6 +1740,12 @@ msgstr ""
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
 msgid "Deadline Time (Optional)"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "The row at the top picks the month, quarter, year or a custom range, and optionally one OECS state. Every tab reads the same choice, so the same month is never two different windows on two pages.\n"
+"\n"
+"Tiles report the selected period; the trend charts look back further, so the shape is visible around the number."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1807,10 +1873,6 @@ msgstr ""
 msgid "Rooms, open audio and everyone who is online right now. Registered attendees can walk straight in."
 msgstr ""
 
-#: src/components/layout/Navbar.tsx
-msgid "Join community discussions"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Go to Settings, open Preferences and turn off \"Show me on the leaderboard\".\n"
 "\n"
@@ -1882,6 +1944,7 @@ msgid "Toggle theme"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Wait an hour and try the link again."
 msgstr ""
 
@@ -2025,6 +2088,7 @@ msgstr ""
 
 #. placeholder {0}: i + 1
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Gradient colour {0}"
 msgstr ""
 
@@ -2103,8 +2167,16 @@ msgstr ""
 msgid "Can I keep my points off the leaderboard?"
 msgstr ""
 
+#: src/components/grants/ApplicationPipelinePreview.tsx
+msgid "Every call on the platform uses the same application form, so applications can be compared side by side. The supporting documents below are the part you set yourself."
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Beside it"
+msgstr ""
+
+#: src/components/grants/ApplicationPipelinePreview.tsx
+msgid "What applicants will be asked"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2173,6 +2245,10 @@ msgstr ""
 msgid "to {0}"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Cutting out the background…"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Where KTIP uses AI, and what it does with your text"
 msgstr ""
@@ -2193,6 +2269,7 @@ msgstr ""
 msgid "The bugs and requests you sent us, and the replies that came back"
 msgstr ""
 
+#: src/components/grants/RequiredDocumentsEditor.tsx
 #: src/components/shared/DetailsEditor.tsx
 msgid "Move down"
 msgstr ""
@@ -2311,12 +2388,22 @@ msgstr ""
 msgid "Create an account"
 msgstr ""
 
+#: src/components/layout/Navbar.tsx
+#: src/i18n/harvested.ts
+#: src/pages/grants/GrantsPage.tsx
+msgid "Funding Opportunities"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Verification evidence for student, faculty or organisational status"
 msgstr ""
 
 #: src/components/notes/StickyNoteGroup.tsx
 msgid "Minimize"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your data is kept for now."
 msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
@@ -2429,6 +2516,12 @@ msgstr ""
 msgid "Sending invites..."
 msgstr ""
 
+#. placeholder {0}: confirmed.email ?? 'This address'
+#. placeholder {1}: confirmed.label
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "{0} belongs to {1}, which verifies your KTIP account. Your profile now shows the badge."
+msgstr ""
+
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Save Preferences"
 msgstr ""
@@ -2468,6 +2561,10 @@ msgstr ""
 msgid "Waiting…"
 msgstr ""
 
+#: src/components/profile/PortraitTile.tsx
+msgid "Plain photo"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Find any page, feature or record from the navbar search box"
 msgstr ""
@@ -2482,6 +2579,10 @@ msgstr ""
 
 #: src/components/venue/room/RoomSignalPanels.tsx
 msgid "Nobody is waiting to speak."
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "An educator there approves it, and that approval is what verifies you. You will be notified."
 msgstr ""
 
 #: src/components/venue/AvailabilityPicker.tsx
@@ -2505,6 +2606,10 @@ msgstr ""
 #: src/components/events/EventCard.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Virtual Event"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "Funding Archives"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2560,6 +2665,14 @@ msgstr ""
 msgid "Analyze Application"
 msgstr ""
 
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Your institution approved your account. Welcome to KTIP!"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Moving backdrop"
+msgstr ""
+
 #: src/hooks/useVerification.ts
 msgid "This request has already been reviewed."
 msgstr ""
@@ -2570,14 +2683,6 @@ msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "9. Did you encounter any issues or confusing areas?"
-msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Users by role and by country, projects by category and phase, events by type, and the grant application pipeline by status.\n"
-"\n"
-"The pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.\n"
-"\n"
-"Above these, the platform calendar shows every scheduled event across the region in one month grid."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2610,6 +2715,18 @@ msgstr ""
 
 #: src/components/ui/IndustrySelect.tsx
 msgid "Select an industry"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Settings, Verification tab. The fastest way is a work or school email address.\n"
+"\n"
+"If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.\n"
+"\n"
+"Signed up with a personal address? Enter your work or school address on the Verification tab. KTIP emails it a link; press Confirm and the same check runs. That address never becomes a way to sign in — it only proves you hold it.\n"
+"\n"
+"No such address? Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs. Only OECS administrators can see what you upload. A reviewer approves or declines the request, and you are notified either way.\n"
+"\n"
+"Verified accounts carry a badge, which members can filter by in the directory, and can publish, apply for funding and message other members."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2679,6 +2796,10 @@ msgid "On the Achievements page click \"Edit showcase\", then pick the badges yo
 "Until you choose, your page shows your most recent badges. Pinning is how you put the ones that matter for your goals — a funding badge, a verification badge — in front of people instead."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Leaving KTIP"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do comments, likes and follows work?"
 msgstr ""
@@ -2709,6 +2830,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Profile, security, notifications and personalization."
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Click or drop a photo"
 msgstr ""
 
 #. placeholder {0}: selected.length
@@ -2761,6 +2886,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Copyright"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your profile, applications and the copies of what you submitted, projects, events and funding calls you posted, forum posts and replies, the messages you sent, and the documents you uploaded. Built in your browser from your own account, so it contains what you can see and nothing more."
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -2855,6 +2984,10 @@ msgid "Certificates"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "What needs consent"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "What AI is never allowed to decide"
 msgstr ""
 
@@ -2939,6 +3072,10 @@ msgstr ""
 msgid "{0}, Col {1}"
 msgstr ""
 
+#: src/pages/grants/GrantsPage.tsx
+msgid "All Focus Areas"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Constraint"
 msgstr ""
@@ -2963,8 +3100,13 @@ msgstr ""
 msgid "One event, every tab"
 msgstr ""
 
+#: src/lib/funding-types.ts
+msgid "Loan or debt financing"
+msgstr ""
+
 #: src/components/directory/MemberPanel.tsx
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 #: src/pages/JoinInvitePage.tsx
 msgid "Sign in"
 msgstr ""
@@ -3028,6 +3170,10 @@ msgstr ""
 msgid "Once deleted, your account cannot be recovered. All your projects, events, messages, and profile data will be permanently removed."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Results framework, community, activity, engagement, health and the reporting pulse"
+msgstr ""
+
 #: src/components/moderation/ContentWarningModal.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Remove it"
@@ -3084,6 +3230,10 @@ msgstr ""
 msgid "One line, shown on the card and the homepage"
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Open the email and press Confirm. The link works for 24 hours."
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 msgid "Please select an image file."
 msgstr ""
@@ -3122,6 +3272,10 @@ msgstr ""
 msgid "You keep ownership of everything in your entry — the idea, the code, the design, the prototype, the pitch deck, the video. Entering a competition on KTIP transfers no intellectual property to %entityShort%, to the event organiser, or to a sponsor."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Deactivate"
+msgstr ""
+
 #: src/components/ui/ImageUpload.tsx
 msgid "Remove image"
 msgstr ""
@@ -3153,6 +3307,11 @@ msgstr ""
 
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "solution"
+msgstr ""
+
+#. placeholder {0}: confirmed.email ?? 'This address'
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "{0} verifies your KTIP account. Your profile now shows the badge."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3245,6 +3404,10 @@ msgstr ""
 msgid "Limits"
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Removing an address does not remove a badge it already earned."
+msgstr ""
+
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Access articles, guides, case studies, and tools for Caribbean innovation."
 msgstr ""
@@ -3290,10 +3453,6 @@ msgstr ""
 msgid "Messaging rules for student accounts"
 msgstr ""
 
-#: src/pages/grants/GrantsPage.tsx
-msgid "No open grants match these filters — the closed ones are below."
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Declare a conflict of interest and step aside — including where they are working on something competing."
 msgstr ""
@@ -3308,6 +3467,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The declaration is write-once. You cannot change it yourself, because an account that can edit its own date of birth is an account that can leave supervised mode."
+msgstr ""
+
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Confirm your work or school email"
 msgstr ""
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -3393,6 +3556,10 @@ msgstr ""
 #: src/components/calendar/WeekView.tsx
 #: src/components/gantt/gantt-bar.tsx
 msgid "{0, plural, one {# item} other {# items}}"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Step away for a while, or close the account for good"
 msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
@@ -3715,6 +3882,10 @@ msgstr ""
 msgid "Getting started"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "You will be signed out. Applications you have submitted keep their place in the queue and are still reviewed."
+msgstr ""
+
 #: src/pages/InvitationsPage.tsx
 msgid "When someone invites you to collaborate, it will show up here."
 msgstr ""
@@ -3832,7 +4003,6 @@ msgstr ""
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/layout/Navbar.tsx
 #: src/pages/collaborate/VideoConferencePage.tsx
-#: src/pages/settings/ProfileSettingsTab.tsx
 msgid "User"
 msgstr ""
 
@@ -3933,6 +4103,7 @@ msgid "Dedication"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Confirm"
 msgstr ""
 
@@ -3958,6 +4129,10 @@ msgstr ""
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Circle"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Uploading photo…"
 msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
@@ -4095,6 +4270,10 @@ msgstr ""
 msgid "What is on my dashboard?"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Aggregate platform figures only — counts, percentages, targets and the titles of already-public projects, events and resources. Never a member record, message or document"
+msgstr ""
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Could not remove your authenticator."
 msgstr ""
@@ -4172,6 +4351,7 @@ msgid "Hi there!"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Confirm this email address"
 msgstr ""
 
@@ -4218,6 +4398,10 @@ msgstr ""
 
 #: src/components/notes/StickyNote.tsx
 msgid "Link address"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "The background could not be removed from that photo."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -4281,7 +4465,6 @@ msgid "Boards"
 msgstr ""
 
 #: src/i18n/harvested.ts
-#: src/pages/grants/GrantsPage.tsx
 msgid "Grants & Funding"
 msgstr ""
 
@@ -4291,6 +4474,7 @@ msgid "{0}: only PDF, JPG, PNG, or WebP files are allowed"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Link is malformed"
 msgstr ""
 
@@ -4317,12 +4501,21 @@ msgstr ""
 msgid "Administer all events"
 msgstr ""
 
+#: src/lib/extracted-fields.ts
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Type of funding"
+msgstr ""
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "About this Grant"
 msgstr ""
 
 #: src/pages/events/EventVenuePage.tsx
 msgid "The organizer has not turned one on. Everything about the event is on its main page."
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Checking photo…"
 msgstr ""
 
 #: src/components/grants/application/AIFieldActions.tsx
@@ -4368,10 +4561,6 @@ msgstr ""
 msgid "Questions about this document? Write to legal@oecsinnovation.org. To see which versions you have accepted, open your legal settings."
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Save Grant"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Using code you find here"
 msgstr ""
@@ -4392,12 +4581,6 @@ msgstr ""
 #: src/hooks/useVenue.ts
 #: src/hooks/useVenueRoomMessages.ts
 msgid "Not signed in"
-msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "A funnel shows where people stop. The gap between two steps is the useful number, not the totals either side of it.\n"
-"\n"
-"Figures depend on analytics consent, so they undercount rather than overcount. Treat them as a floor."
 msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
@@ -4528,6 +4711,10 @@ msgstr ""
 msgid "Asking for permission"
 msgstr ""
 
+#: src/pages/settings/VerificationTab.tsx
+msgid "Your profile shows the verified badge."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "%caseRetention% after the account closes — the record is the evidence that consent was given"
 msgstr ""
@@ -4543,12 +4730,15 @@ msgid "All other countries"
 msgstr ""
 
 #: src/lib/extracted-fields.ts
-#: src/pages/grants/GrantFormPage.tsx
 msgid "Maximum award"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Declaring your date of birth"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "Filter by type of funding"
 msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
@@ -4598,6 +4788,10 @@ msgstr ""
 #. placeholder {0}: receipts.length
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 msgid "{0, plural, one {# submission} other {# submissions}}"
+msgstr ""
+
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Approved by your institution"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -4705,10 +4899,6 @@ msgid "Open the item and use its share action.\n"
 "Everyone you add gets a notification and an entry in their invitations inbox — they do not have to be watching for a link.\n"
 "\n"
 "You can change someone's access level or remove them later from the same dialog. Removing access takes effect immediately."
-msgstr ""
-
-#: src/pages/grants/GrantsPage.tsx
-msgid "Filter grants"
 msgstr ""
 
 #: src/pages/forums/BoardPage.tsx
@@ -4821,6 +5011,10 @@ msgid "Not chosen yet"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Post funding"
+msgstr ""
+
+#: src/i18n/harvested.ts
 #: src/pages/settings/SettingsPage.tsx
 msgid "Security"
 msgstr ""
@@ -4831,6 +5025,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Content you mark as public can be read by anyone and may be indexed by search engines. We can stop serving it; we cannot make a search engine forget it."
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Publish a funding opportunity of any kind — grant, venture, angel, debt. Applicants see it as soon as you post it."
 msgstr ""
 
 #: src/components/messages/ChatSidebar.tsx
@@ -4853,6 +5051,10 @@ msgstr ""
 msgid "Failed to apply the fields"
 msgstr ""
 
+#: src/components/profile/PortraitTile.tsx
+msgid "Cut out, on a backdrop"
+msgstr ""
+
 #: src/components/collaboration/OutputPanel.tsx
 msgid "Clear output"
 msgstr ""
@@ -4872,10 +5074,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Member cards"
-msgstr ""
-
-#: src/pages/settings/ProfileSettingsTab.tsx
-msgid "Avatar updated!"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -4944,6 +5142,14 @@ msgstr ""
 
 #: src/pages/settings/LegalSettingsTab.tsx
 msgid "Recorded. Thank you."
+msgstr ""
+
+#: src/lib/funding-types.ts
+msgid "Convertible note"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Failed to update photo"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5131,6 +5337,10 @@ msgstr ""
 msgid "This account is suspended. Contact support if you think that is a mistake."
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Work or school email"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Confirm — this cannot be undone and your content is removed."
 msgstr ""
@@ -5173,6 +5383,10 @@ msgstr ""
 msgid "Registrations lists who is coming and what they answered, exportable. Schedule and Speakers build the agenda shown on the public page. Updates posts announcements to everyone registered.\n"
 "\n"
 "Challenge sets the objectives, constraints, deliverables and judging criteria for a challenge event. Venue creates the rooms attendees walk between — there is a one-click starter set."
+msgstr ""
+
+#: src/pages/settings/VerificationTab.tsx
+msgid "Verified through your institution."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5315,6 +5529,10 @@ msgstr ""
 msgid "Invitation withdrawn"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your account is scheduled for deletion. Sign in within 7 days to stop it."
+msgstr ""
+
 #: src/components/dashboard/TimelineSection.tsx
 msgid "Apply for a grant or start a project to track its journey here."
 msgstr ""
@@ -5390,6 +5608,10 @@ msgstr ""
 msgid "Attach screenshot"
 msgstr ""
 
+#: src/components/verification/VerificationNotice.tsx
+msgid "Get verified"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Every long text field in the wizard has AI tools under it.\n"
 "\n"
@@ -5403,7 +5625,6 @@ msgid "Every long text field in the wizard has AI tools under it.\n"
 msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
-#: src/pages/grants/GrantFormPage.tsx
 msgid "Grant not found."
 msgstr ""
 
@@ -5419,6 +5640,10 @@ msgstr ""
 #: src/components/events/EventCard.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Past Event"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "Nothing open matches these filters — the closed calls are below."
 msgstr ""
 
 #: src/components/calendar/CalendarDayPanel.tsx
@@ -5487,6 +5712,10 @@ msgstr ""
 
 #: src/lib/achievement-copy.ts
 msgid "You went looking. Some of KTIP only rewards curiosity, and this is what that looks like."
+msgstr ""
+
+#: src/components/layout/Navbar.tsx
+msgid "Grants, seed funding, competitions and more"
 msgstr ""
 
 #: src/components/events/EventChallengeBrief.tsx
@@ -5701,10 +5930,6 @@ msgstr ""
 msgid "Direct and group messages, and message attachments"
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Only the organisation that posted this grant, or a grants administrator, can edit it."
-msgstr ""
-
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Report content that infringes your rights"
 msgstr ""
@@ -5821,6 +6046,10 @@ msgstr ""
 msgid "Skills, interests, what they are open to collaborating on, and below that their projects, events and achievements.\n"
 "\n"
 "Members control how much of this is public from their own settings, so a sparse page is a choice rather than an empty account."
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Application requirements"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6119,10 +6348,6 @@ msgstr ""
 msgid "Demo Day"
 msgstr ""
 
-#: src/pages/grants/GrantsPage.tsx
-msgid "Closed grants"
-msgstr ""
-
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Failed to submit feedback"
 msgstr ""
@@ -6241,6 +6466,10 @@ msgstr ""
 msgid "At least 8 characters"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Member counts, active days and the roadmap KPIs need no consent. Page views, funnels and feature usage are written only for visitors who accepted the analytics banner, so they undercount. Treat them as a floor."
+msgstr ""
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "One-line summary"
 msgstr ""
@@ -6271,20 +6500,12 @@ msgstr ""
 msgid "Could not remove sponsor"
 msgstr ""
 
-#: src/pages/settings/ProfileSettingsTab.tsx
-msgid "Drop photo to upload"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Applying in KTIP versus on an external site"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Government"
-msgstr ""
-
-#: src/pages/grants/GrantDetailPage.tsx
-msgid "Grant Detail"
 msgstr ""
 
 #: src/lib/grant-application-template.ts
@@ -6589,6 +6810,10 @@ msgstr ""
 msgid "Close this room"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Upload a photo to cut out first."
+msgstr ""
+
 #: src/components/layout/NavbarSearchPanel.tsx
 #: src/components/ui/EmojiPicker.tsx
 msgid "Recent"
@@ -6606,6 +6831,10 @@ msgstr ""
 msgid "Innovators, mentors, investors, faculty, researchers and public-sector members from across the OECS.\n"
 "\n"
 "Members who have opted out of the directory are not listed, and students are excluded by default — so what you see here is people who want to be found."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "One period, one filter, every tab"
 msgstr ""
 
 #: src/pages/settings/PersonalizationTab.tsx
@@ -6654,10 +6883,6 @@ msgstr ""
 #. placeholder {1}: params.eventTitle
 #: src/lib/event-registration.ts
 msgid "{0} wants to attend \"{1}\" as a {how}."
-msgstr ""
-
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Publish a funding opportunity. Applicants see it on the Grants page as soon as you post it."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6717,6 +6942,10 @@ msgstr ""
 
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Two-step verification is on."
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Climate action funding"
 msgstr ""
 
 #: src/components/gantt/gantt.tsx
@@ -6890,6 +7119,10 @@ msgstr ""
 
 #: src/components/legal/Disclaimer.tsx
 msgid "AI can get things wrong, and it is most convincing when it is being specific. Check anything that matters before you rely on it."
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "This call sends applicants to an external link, so nothing below is shown to them. Clear the link above to take applications here."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7103,16 +7336,16 @@ msgstr ""
 msgid "Structured usefulness and experience scores."
 msgstr ""
 
-#: src/pages/grants/GrantsPage.tsx
-msgid "No grants found"
-msgstr ""
-
 #: src/lib/achievement-copy.ts
 msgid "You worked in the open with other people. Shared documents, boards and snippets are how a good idea survives its author moving on."
 msgstr ""
 
 #: src/components/notes/StickyNoteGroupExpanded.tsx
 msgid "Ungroup this folder?"
+msgstr ""
+
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "Use the standard checklist"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7244,8 +7477,16 @@ msgstr ""
 msgid "Challenge events always set a goal for attendees. Solutions, objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 msgstr ""
 
+#: src/lib/funding-types.ts
+msgid "Angel investment"
+msgstr ""
+
 #: src/components/ui/TagInput.tsx
 msgid "Remove {tag}"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "awaiting confirmation"
 msgstr ""
 
 #: src/pages/settings/LegalSettingsTab.tsx
@@ -7309,6 +7550,10 @@ msgstr ""
 #: src/pages/collaborate/CollaborateHubPage.tsx
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Document Editor"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "Filter by focus area"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7375,6 +7620,10 @@ msgstr ""
 msgid "A grant or funding application you submit through KTIP is treated as confidential. It is never published, never listed in the directory, never indexed by a search engine, and never shown to other applicants — including applicants to the same call."
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Edit Funding"
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Cancel RSVP"
 msgstr ""
@@ -7417,6 +7666,10 @@ msgstr ""
 msgid "A record of which legal documents you accepted, when, and in which language you read them"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "You sit on the"
+msgstr ""
+
 #: src/pages/dashboard/tabs/MyProfileTab.tsx
 msgid "View my public profile"
 msgstr ""
@@ -7450,8 +7703,16 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Periodic platform reports"
+msgstr ""
+
 #: src/components/resume/ResumePaper.tsx
 msgid "Fit to width"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "The tabs"
 msgstr ""
 
 #: src/components/messages/GroupSettingsModal.tsx
@@ -7491,12 +7752,20 @@ msgid "If a recovery banner appears at the top of the page, click \"Retry\" — 
 "If fields are genuinely blank, open Settings and check they were saved. The Dashboard profile tab is read-only, so anything you typed there was never stored."
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Your institution recognised this address. Your account is verified and holds the student role."
+msgstr ""
+
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Published by the organizer — briefs, rules and any datasets"
 msgstr ""
 
 #: src/components/collaboration/PreviewPanel.tsx
 msgid "A Button"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Centre"
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -7535,7 +7804,6 @@ msgid "Switch off anything you would rather we ignored"
 msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
-#: src/pages/grants/GrantFormPage.tsx
 msgid "Back to grants"
 msgstr ""
 
@@ -7695,6 +7963,10 @@ msgstr ""
 msgid "Knowledge Transfer"
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "If you weren't expecting this email, close this page — nothing will be verified."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Browse Projects"
 msgstr ""
@@ -7715,6 +7987,10 @@ msgid "On the Login page, click \"Forgot Password?\".\n"
 "Open the link, enter the new password twice, and you can sign in with it right away.\n"
 "\n"
 "This only applies to email/password accounts. If you signed up with Google or Microsoft, reset your password with that provider instead."
+msgstr ""
+
+#: src/lib/funding-types.ts
+msgid "Other funding"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7896,6 +8172,10 @@ msgstr ""
 msgid "Only you. Nobody else sees it listed."
 msgstr ""
 
+#: src/lib/funding-types.ts
+msgid "Prize or competition award"
+msgstr ""
+
 #: src/components/WelcomePanel.tsx
 msgid "Your OECS innovation toolkit."
 msgstr ""
@@ -7929,6 +8209,10 @@ msgstr ""
 msgid "Drag on the image to mark what you are talking about. Only the marked-up copy is sent."
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "An address at a trusted organisation verifies your account on the spot. An address at a partner school or college links you to it as a student. Your sign-in address is checked immediately; any other address gets a confirmation email first."
+msgstr ""
+
 #: src/components/documents/DocumentsPanel.tsx
 #: src/components/ui/ToolPanelShell.tsx
 #: src/i18n/harvested.ts
@@ -7936,10 +8220,6 @@ msgstr ""
 #: src/pages/collaborate/DocumentsListPage.tsx
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Documents"
-msgstr ""
-
-#: src/pages/grants/GrantsPage.tsx
-msgid "Filter by grant type"
 msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
@@ -8115,6 +8395,10 @@ msgstr ""
 msgid "What the licence does not allow"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Your member page puts your name on the other side. Auto read it from the photo."
+msgstr ""
+
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Prefer not to appear?"
 msgstr ""
@@ -8167,6 +8451,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Your badges, points, level and streak — and what to do next to earn more"
+msgstr ""
+
+#: src/components/profile/PortraitTile.tsx
+msgid "Upload a photo, remove its background on your device, and choose what sits behind you."
 msgstr ""
 
 #: src/components/legal/MyTakedownNotices.tsx
@@ -8249,6 +8537,11 @@ msgstr ""
 
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "e.g. Call for Proposals 2026"
+msgstr ""
+
+#. placeholder {0}: confirmed.domain ?? ''
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "@{0} is not a trusted organisation or partner institution yet. Upload an identity document from Settings instead."
 msgstr ""
 
 #: src/components/uat/UATReminderPopup.tsx
@@ -8431,6 +8724,7 @@ msgstr ""
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/profile/BannerTile.tsx
+#: src/components/profile/PortraitTile.tsx
 #: src/pages/cv/CvPage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/forums/BoardFormPage.tsx
@@ -8439,6 +8733,11 @@ msgstr ""
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Edit"
+msgstr ""
+
+#. placeholder {0}: outcome.institution
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Request sent to {0}."
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -8661,6 +8960,10 @@ msgstr ""
 msgid "If you believe an entry of yours has been used in breach of this, contact %legalEmail%. We can act on the organiser’s access to the platform; whether to pursue the organiser directly is your decision."
 msgstr ""
 
+#: src/pages/grants/GrantsPage.tsx
+msgid "Filter funding"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Changing the colour now replaces that swatch, and keeps it for your next venue."
 msgstr ""
@@ -8733,6 +9036,7 @@ msgid "Filter projects"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Open Settings"
 msgstr ""
 
@@ -8846,6 +9150,10 @@ msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Documents (Optional)"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Only the organisation that posted this funding call, or a funding administrator, can edit it."
 msgstr ""
 
 #: src/pages/collaborate/CodeEditorPage.tsx
@@ -9096,6 +9404,10 @@ msgstr ""
 msgid "No members found"
 msgstr ""
 
+#: src/hooks/useEmailVerification.ts
+msgid "Institution not found."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Only your connections can see your full profile or message you. Everyone still sees your name, role and country in the directory, so they can send you a connection request."
 msgstr ""
@@ -9106,6 +9418,10 @@ msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Private profile"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Schedule deletion?"
 msgstr ""
 
 #: src/pages/projects/ProjectDetailPage.tsx
@@ -9197,10 +9513,6 @@ msgid "Partner API — issue and revoke API keys for partner organisations. Trea
 "UAT — feedback submitted during user acceptance testing, with its state.\n"
 "\n"
 "One known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead."
-msgstr ""
-
-#: src/components/layout/Navbar.tsx
-msgid "Open a new discussion board"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -9426,6 +9738,11 @@ msgstr ""
 msgid "Gold"
 msgstr ""
 
+#: src/lib/extracted-fields.ts
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Focus area"
+msgstr ""
+
 #: src/components/messages/ChatSidebar.tsx
 msgid "Direct"
 msgstr ""
@@ -9515,6 +9832,10 @@ msgstr ""
 msgid "Full"
 msgstr ""
 
+#: src/hooks/useEmailVerification.ts
+msgid "That is not a domain KTIP can trust. Free-mail providers are refused."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Open Funding → Post a Grant. The entry only appears for accounts that may post funding."
 msgstr ""
@@ -9562,6 +9883,7 @@ msgid "Case Study"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Confirmation links work once. If you have already confirmed this address, you are all set — otherwise request a fresh link from Settings."
 msgstr ""
 
@@ -9718,6 +10040,16 @@ msgstr ""
 msgid "Manage roles & permissions"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Students do not upload anything. Your institutional email address is the evidence.\n"
+"\n"
+"Sign up with your school or university address, or add it on the Verification tab, and confirm it. If your institution has switched on automatic approval, or gave KTIP a list of its students, you are approved on the spot. Otherwise an educator there approves the request. Either way, once approved you hold the Student role and a verified badge.\n"
+"\n"
+"That role brings the safeguarding rules with it: no unmonitored direct messages, no administering awarded funds yourself, and automatic exclusion from the public leaderboard.\n"
+"\n"
+"If your institution is not yet registered on KTIP, your account cannot be domain-verified until it is."
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "Already happened, most recent first"
 msgstr ""
@@ -9733,6 +10065,10 @@ msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "8. How would you rate your overall experience?"
+msgstr ""
+
+#: src/components/verification/VerificationNotice.tsx
+msgid "Send new documents"
 msgstr ""
 
 #: src/pages/settings/LegalSettingsTab.tsx
@@ -9933,10 +10269,6 @@ msgstr ""
 msgid "Your content is not used by us to train any model."
 msgstr ""
 
-#: src/components/safeguarding/StudentVerificationCard.tsx
-msgid "Could not request verification"
-msgstr ""
-
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Results for “{term}”"
 msgstr ""
@@ -9981,8 +10313,8 @@ msgstr ""
 msgid "The feed carries opt-in data, and withdrawal removes it."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Platform usage, growth and engagement metrics"
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Your institution approved your account."
 msgstr ""
 
 #: src/components/layout/Navbar.tsx
@@ -10066,7 +10398,6 @@ msgstr ""
 
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/ui/ImageUpload.tsx
-#: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Uploading..."
 msgstr ""
 
@@ -10271,6 +10602,7 @@ msgid "About machine translation"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "These links are valid for 24 hours. Open Settings and send yourself a new one."
 msgstr ""
 
@@ -10284,6 +10616,10 @@ msgstr ""
 
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Could not save the draft — try again before uploading"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "The photo exactly as you uploaded it, background and all. Pick Backdrops or Gradient to use the cut-out instead."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10375,6 +10711,10 @@ msgstr ""
 msgid "Looking for a team"
 msgstr ""
 
+#: src/components/verification/VerificationNotice.tsx
+msgid "Your verification is being reviewed"
+msgstr ""
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Add a file"
 msgstr ""
@@ -10409,6 +10749,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "You do not have to disclose that you used AI to help write something. You do have to stand behind what you publish."
+msgstr ""
+
+#: src/pages/resources/ResourcesPage.tsx
+msgid "Resources could not be loaded"
 msgstr ""
 
 #: src/pages/settings/PreferencesTab.tsx
@@ -10465,6 +10809,11 @@ msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
 msgid "Click or drop to replace your banner photo"
+msgstr ""
+
+#. placeholder {0}: openGrants.length
+#: src/pages/grants/GrantsPage.tsx
+msgid "{0, plural, one {Found # open opportunity} other {Found # open opportunities}}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10611,6 +10960,10 @@ msgstr ""
 msgid "Sponsorship requests"
 msgstr ""
 
+#: src/pages/grants/GrantDetailPage.tsx
+msgid "Funding Detail"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "You keep what you make"
 msgstr ""
@@ -10675,8 +11028,8 @@ msgid "Each card carries the project’s title, summary, category and phase, plu
 "Click any card for the full project: its story, team, updates, and how to ask to join."
 msgstr ""
 
-#: src/pages/settings/VerificationTab.tsx
-msgid "Identity Verification"
+#: src/hooks/useEmailVerification.ts
+msgid "Could not send the confirmation email"
 msgstr ""
 
 #: src/pages/grants/MyApplicationsPage.tsx
@@ -10740,10 +11093,8 @@ msgstr ""
 msgid "Search contacts"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Page views, feature usage, funnels and conversions across the platform.\n"
-"\n"
-"This is aggregate behaviour — it answers “is anyone using this” rather than “what did this member do”."
+#: src/pages/settings/VerificationTab.tsx
+msgid "Verified by a KTIP administrator."
 msgstr ""
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
@@ -10772,6 +11123,10 @@ msgstr ""
 #: src/components/legal/MyTakedownNotices.tsx
 #: src/i18n/harvested.ts
 msgid "Standing"
+msgstr ""
+
+#: src/components/verification/VerificationNotice.tsx
+msgid "You can keep browsing while it is checked. Posting, applying and messaging open as soon as it is approved."
 msgstr ""
 
 #: src/components/legal/AgreementGate.tsx
@@ -10857,6 +11212,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "What we do and do not check"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Confirm your sign-in email first."
 msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
@@ -10996,6 +11355,11 @@ msgstr ""
 msgid "The AI features that help you draft an application, and the indicative read they give on your draft, are assistance and not assessment. They do not predict whether you will be funded, they carry no weight with the funder, and they can be wrong about eligibility rules and deadlines. Check those against the listing itself."
 msgstr ""
 
+#. placeholder {0}: confirmed.institution
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "{0} owns this email domain. An educator there approves the request, and that approval is what verifies you."
+msgstr ""
+
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Contact email"
 msgstr ""
@@ -11036,12 +11400,21 @@ msgstr ""
 msgid "Where necessary to operate the platform or investigate a report. Those accesses are logged."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Could not build your data export"
+msgstr ""
+
 #: src/pages/settings/LegalSettingsTab.tsx
 msgid "when submitting a grant application"
 msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "All Badges"
+msgstr ""
+
+#. placeholder {0}: outcome.domain
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "@{0} is not a partner domain yet."
 msgstr ""
 
 #. placeholder {0}: occupancy[hoveredRoom.id] || 0
@@ -11162,6 +11535,10 @@ msgstr ""
 msgid "Give it a title, a description and a category, then attach a file or link to where it lives."
 msgstr ""
 
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "Required — the applicant is told they cannot submit without it"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Agent"
 msgstr ""
@@ -11221,6 +11598,10 @@ msgstr ""
 
 #: src/lib/venue-templates.ts
 msgid "Conference Center"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "On your member page the colours drift slowly behind you. Still everywhere else."
 msgstr ""
 
 #: src/components/messages/MessagingPanel.tsx
@@ -11328,6 +11709,10 @@ msgid "Not a preview of one — a true A4 sheet, scaled to fit the screen and pr
 "If the page is blank, no CV has been started yet: either sign in from the OECS Virtual Campus to pull in your course history, or write it yourself from Edit."
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Funding call not found."
+msgstr ""
+
 #: src/lib/venue-room-sections.ts
 msgid "How full the room is. Hidden if it has no limit."
 msgstr ""
@@ -11412,11 +11797,6 @@ msgstr ""
 msgid "We do not check"
 msgstr ""
 
-#: src/lib/extracted-fields.ts
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Grant type"
-msgstr ""
-
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Your reference is <0>{reference}</0>. We have emailed a copy to {claimantEmail}. Quote the reference in any follow-up."
 msgstr ""
@@ -11437,6 +11817,10 @@ msgstr ""
 #. placeholder {0}: pendingUnlocks.length - 1
 #: src/components/achievements/AchievementUnlockModal.tsx
 msgid "{0, plural, one {# more to reveal} other {# more to reveal}}"
+msgstr ""
+
+#: src/hooks/useEmailVerification.ts
+msgid "Could not save the domain."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -11473,7 +11857,13 @@ msgid "Agreement text"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Link already used, or not valid"
+msgstr ""
+
+#. placeholder {0}: roleLabel(outcome.role)
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Your account now holds the {0} role."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -11516,6 +11906,10 @@ msgstr ""
 
 #: src/components/messages/ChatSidebar.tsx
 msgid "No contacts match."
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Photo updated!"
 msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
@@ -11607,8 +12001,8 @@ msgid "%analyticsRetention%"
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 #: src/components/ui/ImageUpload.tsx
-#: src/pages/settings/ProfileSettingsTab.tsx
 msgid "Please select an image file"
 msgstr ""
 
@@ -11677,6 +12071,10 @@ msgstr ""
 #: src/components/events/EventDetailsForm.tsx
 #: src/i18n/harvested.ts
 msgid "Challenge"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "Closed calls"
 msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
@@ -11793,6 +12191,10 @@ msgstr ""
 msgid "Send controlled test failures through the live monitoring pipeline"
 msgstr ""
 
+#: src/pages/grants/GrantsPage.tsx
+msgid "Search funding"
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Newcomer"
 msgstr ""
@@ -11820,6 +12222,10 @@ msgstr ""
 
 #: src/pages/cv/CvPage.tsx
 msgid "Résumé"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "funding call"
 msgstr ""
 
 #: src/components/grants/application/AIFieldActions.tsx
@@ -11857,6 +12263,10 @@ msgstr ""
 msgid "One bullet per line."
 msgstr ""
 
+#: src/lib/funding-types.ts
+msgid "Venture capital"
+msgstr ""
+
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Search resources"
 msgstr ""
@@ -11867,6 +12277,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "One bar, every filter"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "This account is scheduled for deletion"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -11911,6 +12325,10 @@ msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Platform Feedback"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Select a focus area"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
@@ -12331,6 +12749,10 @@ msgstr ""
 msgid "Loading your grants..."
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Save Funding"
+msgstr ""
+
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Verification email sent."
 msgstr ""
@@ -12415,6 +12837,7 @@ msgid "Step five of the wizard lists exactly what this call asks for. Every fund
 msgstr ""
 
 #: src/components/calendar/CalendarNoteComposer.tsx
+#: src/components/profile/PortraitStudio.tsx
 #: src/components/ui/ToolStatusBar.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Saving…"
@@ -12453,10 +12876,6 @@ msgstr ""
 msgid "How this event is coloured on the calendar. Leave it on Auto to follow the event type."
 msgstr ""
 
-#: src/components/safeguarding/StudentVerificationCard.tsx
-msgid "Verify with my school email"
-msgstr ""
-
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "What participants have submitted to your challenge"
 msgstr ""
@@ -12475,10 +12894,6 @@ msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Sponsor link"
-msgstr ""
-
-#: src/pages/grants/GrantsPage.tsx
-msgid "No grants are currently available"
 msgstr ""
 
 #: src/components/layout/Navbar.tsx
@@ -12555,16 +12970,6 @@ msgid "No replies yet. Be the first to reply!"
 msgstr ""
 
 #: src/i18n/harvested.ts
-msgid "Students do not upload anything. Your institutional email domain is the evidence.\n"
-"\n"
-"Sign up with your school or university address and your institution approves the account. Once approved you hold the Student role.\n"
-"\n"
-"That role brings the safeguarding rules with it: no unmonitored direct messages, no administering awarded funds yourself, and automatic exclusion from the public leaderboard.\n"
-"\n"
-"If your institution is not yet registered on KTIP, your account cannot be domain-verified until it is."
-msgstr ""
-
-#: src/i18n/harvested.ts
 msgid "This row is on every collaboration tool — whiteboards, documents, code and video — so moving between them never means going back to the hub first.\n"
 "\n"
 "Collaborate Hub on the left does go back, when that is what you want."
@@ -12604,6 +13009,10 @@ msgstr ""
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 msgid "Redo (Ctrl+Shift+Z)"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Verification could not be completed."
 msgstr ""
 
 #: src/pages/auth/ResetPasswordPage.tsx
@@ -12650,6 +13059,10 @@ msgid "The filters stack, so combine as many as you need.\n"
 "• Sort — by deadline (soonest first), newest, or Top Picks once your profile carries interests\n"
 "\n"
 "The count tells you how many are open versus closed, and Clear all filters resets everything."
+msgstr ""
+
+#: src/pages/grants/GrantApplicationsPage.tsx
+msgid "Try again"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12909,6 +13322,10 @@ msgstr ""
 msgid "Working through them"
 msgstr ""
 
+#: src/pages/grants/MyApplicationsPage.tsx
+msgid "Download PDF"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How machine translation works"
 msgstr ""
@@ -12945,10 +13362,6 @@ msgstr ""
 #: src/components/forums/PostCard.tsx
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Pinned"
-msgstr ""
-
-#: src/components/safeguarding/StudentVerificationCard.tsx
-msgid "Request sent to your institution for approval"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -13095,10 +13508,6 @@ msgid "Click \"Log In\" in the top right corner of the page.\n"
 "If you forget your password, click \"Forgot Password?\" on the login page."
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Climate action grant"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "This goes to the OECS safety team, not to the person you are reporting. They are not told who filed it.\n"
 "\n"
@@ -13108,10 +13517,11 @@ msgid "This goes to the OECS safety team, not to the person you are reporting. T
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
+#: src/components/profile/PortraitTile.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/pages/events/EventVenuePage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
-#: src/pages/settings/ProfileSettingsTab.tsx
 msgid "You"
 msgstr ""
 
@@ -13545,8 +13955,8 @@ msgid "Save your recovery codes"
 msgstr ""
 
 #: src/components/profile/IdentityPlate.tsx
+#: src/components/profile/PortraitHero.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
-#: src/pages/profile/PublicProfilePage.tsx
 msgid "Verified member"
 msgstr ""
 
@@ -13624,6 +14034,10 @@ msgstr ""
 msgid "That the funds are available, that the terms are reasonable, that the timeline will hold, that the selection is fair, or that the sponsor will honour an award. We are not able to audit a third party’s finances."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Open Community → Forums and click Start a Board. The button appears for organisation accounts and administrators."
+msgstr ""
+
 #. placeholder {0}: formatDate(grant.deadline!)
 #: src/components/grants/GrantCard.tsx
 msgid " · Deadline {0}"
@@ -13635,6 +14049,10 @@ msgstr ""
 
 #: src/components/uat/UATFeedbackButton.tsx
 msgid "More Feedback"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Funding call posted"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -13721,6 +14139,10 @@ msgstr ""
 
 #: src/components/venue/map/VenueRoomList.tsx
 msgid "Nothing on this floor"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "JPG, PNG or WebP, up to 5MB. This browser cannot remove backgrounds; the photo is used as it is."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -13942,6 +14364,11 @@ msgstr ""
 msgid "Awaiting approval"
 msgstr ""
 
+#. placeholder {0}: roleLabel(outcome.role ?? 'student')
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "You are verified and now hold the {0} role."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Availability"
 msgstr ""
@@ -13955,8 +14382,16 @@ msgstr ""
 msgid "Describe what happened and submit — the OECS team sees it in the admin dashboard."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your account and personal data are erased after 7 days. Signing in during that week stops it — which is also how an account somebody else took over gets recovered."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The step-by-step application and how drafts work."
+msgstr ""
+
+#: src/pages/forums/ForumsPage.tsx
+msgid "post and reply"
 msgstr ""
 
 #: src/pages/settings/LegalSettingsTab.tsx
@@ -13993,6 +14428,10 @@ msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Your solution"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Funding call updated"
 msgstr ""
 
 #: src/components/documents/DocumentAccessModal.tsx
@@ -14065,6 +14504,10 @@ msgstr ""
 msgid "Application: {title}"
 msgstr ""
 
+#: src/hooks/useEmailVerification.ts
+msgid "Could not update the roster."
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "+ Add a link"
 msgstr ""
@@ -14087,8 +14530,16 @@ msgstr ""
 msgid "Try adjusting your search, category or tag filters."
 msgstr ""
 
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "Detailed budget"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Click \"Delete Account\" in the danger zone."
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Verify with a work or school email"
 msgstr ""
 
 #: src/pages/forums/CreatePostPage.tsx
@@ -14155,6 +14606,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "This holds whether you win or not. A prize is a prize, not a purchase. If a particular competition needs different terms — because a sponsor is funding development of the winning entry, for example — those terms must be published in the competition rules before entries open, and you will be asked to accept them separately."
+msgstr ""
+
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Address confirmed — waiting on your institution"
 msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
@@ -14519,10 +14974,6 @@ msgid "This choice is stored on this device, so it is per browser."
 msgstr ""
 
 #: src/i18n/harvested.ts
-msgid "Post a grant"
-msgstr ""
-
-#: src/i18n/harvested.ts
 msgid "Every section"
 msgstr ""
 
@@ -14584,8 +15035,8 @@ msgstr ""
 msgid "Portfolio"
 msgstr ""
 
-#: src/components/safeguarding/StudentVerificationCard.tsx
-msgid "If you are studying at a partner school or university, verify with your institutional email address to unlock student features. Your school approves the request."
+#: src/i18n/harvested.ts
+msgid "Analytics & Reports"
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -15088,11 +15539,13 @@ msgid "Your overview, calendar, progress and submissions."
 msgstr ""
 
 #: src/components/personalization/ForYouRail.tsx
+#: src/lib/funding-types.ts
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Grant"
 msgstr ""
 
 #: src/hooks/useEmailAlias.ts
+#: src/hooks/useEmailVerification.ts
 #: src/hooks/useMfa.ts
 msgid "No active session"
 msgstr ""
@@ -15271,6 +15724,10 @@ msgstr ""
 msgid "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Save photo"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Dark mode, reduced motion, text scale."
 msgstr ""
@@ -15315,6 +15772,10 @@ msgstr ""
 msgid "Acceptable"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "The photo exactly as you uploaded it. Upload one and the background is cut out for you; then Backdrops and Gradient open up."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Go to Settings and open the Profile tab.\n"
 "\n"
@@ -15340,6 +15801,10 @@ msgstr ""
 #: src/components/grants/GrantCard.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Inactive"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Right"
 msgstr ""
 
 #: src/pages/dashboard/tabs/ConnectionsTab.tsx
@@ -15457,10 +15922,6 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Grant posted"
-msgstr ""
-
 #: src/components/legal/ConsentDocument.tsx
 msgid "I have read and agree to the documents above, and I confirm the details I have given are accurate."
 msgstr ""
@@ -15486,9 +15947,6 @@ msgstr ""
 msgid "Your photo"
 msgstr ""
 
-#: src/components/layout/Navbar.tsx
-#: src/pages/grants/GrantFormPage.tsx
-#: src/pages/grants/GrantsPage.tsx
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "Post a Grant"
 msgstr ""
@@ -15518,6 +15976,10 @@ msgstr ""
 msgid "Failed to send request"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Deactivate my account"
+msgstr ""
+
 #. placeholder {0}: pendingRequests.length
 #: src/components/projects/TeamWidget.tsx
 msgid "{0, plural, one {# request to collaborate} other {# requests to collaborate}}"
@@ -15530,6 +15992,7 @@ msgstr ""
 
 #: src/components/ErrorBoundary.tsx
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Something went wrong"
 msgstr ""
 
@@ -15638,6 +16101,10 @@ msgstr ""
 
 #: src/components/resources/ResourceFileField.tsx
 msgid "Choose a file, or drag one here"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Maximum amount"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15786,6 +16253,7 @@ msgid "A short checklist for a new arrival. Disappears once they finish it."
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Confirmation link expired"
 msgstr ""
 
@@ -15819,6 +16287,10 @@ msgstr ""
 msgid "Search what you already have, or start something new with the button on the right.\n"
 "\n"
 "Everything is saved to your account, so you can close the tab and pick it up from another machine."
+msgstr ""
+
+#: src/lib/funding-types.ts
+msgid "Blended finance"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15864,6 +16336,10 @@ msgstr ""
 msgid "Ownership"
 msgstr ""
 
+#: src/pages/grants/GrantsPage.tsx
+msgid "All Funding Types"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What happens to code, documents and whiteboards you share on KTIP — who may use them, how to license them so others actually can, and your obligations for code you did not write."
 msgstr ""
@@ -15906,6 +16382,10 @@ msgid "Everything that follows, oldest first, so the thread reads top to bottom.
 "The box at the bottom is where you add yours — Reply publishes it immediately and notifies the discussion’s author. You can delete your own reply afterwards; it disappears from the thread rather than leaving a stub."
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Backdrops"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and \"you\" in this document means both you and that organisation."
 msgstr ""
@@ -15943,6 +16423,10 @@ msgstr ""
 msgid "Showing all your roles"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Kept the plain photo:"
+msgstr ""
+
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Thinking about where to send you…"
 msgstr ""
@@ -15951,13 +16435,13 @@ msgstr ""
 msgid "Where it happens"
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Select a type"
-msgstr ""
-
 #: src/components/dashboard/stats/RankProgress.tsx
 #: src/components/profile/StandingMeter.tsx
 msgid "Progress toward the next rank"
+msgstr ""
+
+#: src/hooks/useInstitutions.ts
+msgid "Confirm your email address first — open the link KTIP sent when you signed up."
 msgstr ""
 
 #: src/components/tutorial/TutorialOverlay.tsx
@@ -15980,10 +16464,6 @@ msgstr ""
 
 #: src/hooks/useForums.ts
 msgid "You must be signed in to open a board"
-msgstr ""
-
-#: src/pages/settings/ProfileSettingsTab.tsx
-msgid "JPG, PNG, GIF or WebP. Max 5MB. Click or drag & drop — large images are resized and optimized automatically."
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -16009,6 +16489,10 @@ msgstr ""
 
 #: src/pages/settings/VerificationTab.tsx
 msgid "Your verification request is under review."
+msgstr ""
+
+#: src/pages/settings/VerificationTab.tsx
+msgid "Verified from the identity documents you submitted."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -16055,6 +16539,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Where is the copy of what I submitted?"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Use the plain photo"
 msgstr ""
 
 #: src/components/grants/application/AIFieldActions.tsx
@@ -16139,7 +16627,7 @@ msgstr ""
 msgid "Please enter a valid email address"
 msgstr ""
 
-#: src/pages/settings/ProfileSettingsTab.tsx
+#: src/components/profile/PortraitTile.tsx
 msgid "Profile Photo"
 msgstr ""
 
@@ -16160,6 +16648,7 @@ msgid "Explore the latest work"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Back to Settings"
 msgstr ""
 
@@ -16186,6 +16675,7 @@ msgstr ""
 #: src/components/directory/MemberPanel.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitHero.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/components/venue/AvatarCluster.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
@@ -16277,6 +16767,10 @@ msgstr ""
 
 #: src/components/collaboration/TldrawWrapper.tsx
 msgid "Loading whiteboard..."
+msgstr ""
+
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "Add a document"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -16585,6 +17079,10 @@ msgstr ""
 msgid "The discussions on this board could not be counted. Anything posted here — by anyone — is destroyed with it and cannot be recovered."
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your account is deactivated. Sign in any time in the next 90 days to bring it back."
+msgstr ""
+
 #: src/pages/settings/FeedbackTab.tsx
 msgid "Use the feedback button in the corner of any page to report a bug, ask for something, or tell us what is working. Replies appear here."
 msgstr ""
@@ -16696,6 +17194,10 @@ msgstr ""
 msgid "Your own text — conduct, ground rules, what this room is not for."
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Confirming proves that a KTIP account holder controls this work or school mailbox. It does not let this address sign in."
+msgstr ""
+
 #: src/components/venue/room/AvStage.tsx
 msgid "Stop recording"
 msgstr ""
@@ -16708,6 +17210,10 @@ msgid "Reports go to a queue that only OECS and Safety administrators can see. C
 "Reported content may be quarantined while it is reviewed — visible to its author with a notice, hidden from everyone else.\n"
 "\n"
 "Your identity as the reporter is not disclosed to the person reported. You are told the outcome, but not the internal detail of what was decided about someone else's account."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Reading the charts"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -16735,6 +17241,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform."
+msgstr ""
+
+#: src/components/layout/Navbar.tsx
+msgid "Start community discussions"
 msgstr ""
 
 #. placeholder {0}: document.title
@@ -16812,10 +17322,6 @@ msgstr ""
 msgid "What can I do without an account?"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Track your grant applications and resume drafts"
-msgstr ""
-
 #: src/pages/JoinInvitePage.tsx
 msgid "Invitation accepted — taking you there…"
 msgstr ""
@@ -16845,6 +17351,11 @@ msgstr ""
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/tabs/ProjectsTab.tsx
 msgid "My Projects"
+msgstr ""
+
+#. placeholder {0}: formatDate(auth.purgeAfter)
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your data is kept until {0}. Until then, nothing is lost."
 msgstr ""
 
 #: src/components/layout/Navbar.tsx
@@ -16978,6 +17489,10 @@ msgstr ""
 
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Translate messages into"
+msgstr ""
+
+#: src/components/profile/PortraitTile.tsx
+msgid "Edit profile photo"
 msgstr ""
 
 #: src/components/notes/StickyNoteGroup.tsx
@@ -17141,7 +17656,7 @@ msgstr ""
 msgid "Reading a project, and joining one."
 msgstr ""
 
-#: src/pages/settings/VerificationTab.tsx
+#: src/components/verification/InstitutionalEmailCard.tsx
 msgid "Your account is verified."
 msgstr ""
 
@@ -17220,6 +17735,10 @@ msgstr ""
 
 #: src/pages/auth/LoginPage.tsx
 msgid "Please confirm your email address first. Check your inbox for a confirmation link."
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Photo"
 msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
@@ -17379,6 +17898,10 @@ msgstr ""
 msgid "Required?"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Download my data"
+msgstr ""
+
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Failed to update role"
 msgstr ""
@@ -17455,6 +17978,10 @@ msgstr ""
 msgid "Updates"
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "What applicants must attach before they can submit."
+msgstr ""
+
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Search courses..."
 msgstr ""
@@ -17514,7 +18041,6 @@ msgid "Deliver programmes and apply for funding"
 msgstr ""
 
 #: src/pages/grants/GrantDetailPage.tsx
-#: src/pages/grants/GrantFormPage.tsx
 msgid "Edit Grant"
 msgstr ""
 
@@ -17561,6 +18087,10 @@ msgstr ""
 
 #: src/pages/events/EventVenuePage.tsx
 msgid "Set up the venue"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Directory · row"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -17620,7 +18150,6 @@ msgstr ""
 msgid "Read more"
 msgstr ""
 
-#: src/components/grants/GrantCard.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "View Grant"
 msgstr ""
@@ -17637,6 +18166,10 @@ msgstr ""
 #: src/components/messages/NewConversationModal.tsx
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "No users found"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "Search funding..."
 msgstr ""
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
@@ -17661,10 +18194,6 @@ msgid "Open your event and click \"Edit\". The organiser can edit their own even
 "You can change the title, summary, description, type, dates, location, capacity and registration deadline.\n"
 "\n"
 "Changes are visible to attendees immediately. For anything attendees need to notice — a time or room change — post an Update as well, because that reaches their notifications."
-msgstr ""
-
-#: src/pages/settings/VerificationTab.tsx
-msgid "Verified members get a badge on their profile"
 msgstr ""
 
 #: src/components/resume/sheets/SheetFrame.tsx
@@ -17734,6 +18263,10 @@ msgstr ""
 msgid "All Events"
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "What is actually on offer. Applicants filter on this first."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Reporting something"
 msgstr ""
@@ -17750,12 +18283,20 @@ msgstr ""
 msgid "No limit"
 msgstr ""
 
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "What it should contain, and what you will accept instead."
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Edit showcase"
 msgstr ""
 
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Make the site easier to read"
+msgstr ""
+
+#: src/pages/grants/GrantApplicationsPage.tsx
+msgid "Could not load applications."
 msgstr ""
 
 #: src/pages/settings/SettingsPage.tsx
@@ -17816,6 +18357,10 @@ msgstr ""
 msgid "To see which versions you have accepted and when, open your legal settings."
 msgstr ""
 
+#: src/components/verification/VerificationNotice.tsx
+msgid "Browsing is open to everyone. Publishing, applying for funding and messaging other members need one identity check first. Have a work or school email? That verifies you instantly."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Create and edit the boards members post into. A board’s name and description are what tell people where a discussion belongs, so they do more work than they look like."
 msgstr ""
@@ -17844,6 +18389,7 @@ msgstr ""
 msgid "Yellow"
 msgstr ""
 
+#: src/components/grants/RequiredDocumentsEditor.tsx
 #: src/components/shared/DetailsEditor.tsx
 msgid "Move up"
 msgstr ""
@@ -17912,6 +18458,10 @@ msgstr ""
 
 #: src/components/grants/application/AIReviewPanel.tsx
 msgid "This score is a second read on your draft, not an assessment. It carries no weight with the funder and never leaves your draft. AI can be wrong about eligibility rules and deadlines — check those against the listing itself."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Track your funding applications and resume drafts"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
@@ -18012,6 +18562,7 @@ msgid "We replied to your feedback"
 msgstr ""
 
 #: src/components/calendar/CalendarAccentPicker.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Auto"
 msgstr ""
 
@@ -18025,6 +18576,14 @@ msgstr ""
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Your business is verified. You can post industry projects, offer mentorship, and access private-sector grants."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Every chart lives on one hub now: members by role and state, projects by category and phase, events by type, the grant pipeline, usage and the roadmap results framework — all as trends with one period picker and one country filter.\n"
+"\n"
+"The pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.\n"
+"\n"
+"Above this, the platform calendar shows every scheduled event across the region in one month grid."
 msgstr ""
 
 #: src/pages/profile/PublicProfilePage.tsx
@@ -18077,6 +18636,7 @@ msgstr ""
 
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/collaboration/PreviewPanel.tsx
+#: src/components/profile/PortraitStudio.tsx
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Preview"
 msgstr ""
@@ -18202,10 +18762,7 @@ msgstr ""
 msgid "You must be at least %minimumAge% years old, or the higher minimum age set by the law of the country you live in, whichever is greater."
 msgstr ""
 
-#: src/components/layout/Navbar.tsx
-#: src/i18n/harvested.ts
 #: src/pages/grants/GrantApplicationsPage.tsx
-#: src/pages/grants/GrantsPage.tsx
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "My Grants"
 msgstr ""
@@ -18242,6 +18799,10 @@ msgstr ""
 msgid "Assign roles and edit this permission matrix."
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "The fastest way. Nothing to upload, and usually nobody to wait for."
+msgstr ""
+
 #: src/pages/forums/BoardFormPage.tsx
 msgid "Deleting a board takes every discussion on it, and every reply, with it. There is no undo."
 msgstr ""
@@ -18257,6 +18818,10 @@ msgstr ""
 #: src/components/documents/DocumentCard.tsx
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Restricted"
+msgstr ""
+
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Address confirmed, but not recognised"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18288,6 +18853,10 @@ msgstr ""
 #. placeholder {0}: employers.length
 #: src/pages/directory/DirectoryPage.tsx
 msgid "{0, plural, one {Found # business} other {Found # businesses}}"
+msgstr ""
+
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "No documents asked for. Applicants will see an upload step with nothing on the checklist."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18390,10 +18959,6 @@ msgstr ""
 msgid "{0} · {1} pts"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Distributions and pipeline"
-msgstr ""
-
 #: src/components/calendar/CalendarShell.tsx
 msgid "12h"
 msgstr ""
@@ -18480,10 +19045,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "You must also affirm, separately, all three of the following:"
-msgstr ""
-
-#: src/pages/grants/GrantsPage.tsx
-msgid "All Grant Types"
 msgstr ""
 
 #: src/components/dashboard/TimelineSection.tsx
@@ -18616,10 +19177,6 @@ msgstr ""
 msgid "Bullet List"
 msgstr ""
 
-#: src/pages/settings/ProfileSettingsTab.tsx
-msgid "Failed to upload avatar"
-msgstr ""
-
 #: src/pages/events/CreateEventPage.tsx
 msgid "Participants submit their work — with their own supporting files — from the event page, up until the deadline above."
 msgstr ""
@@ -18663,10 +19220,6 @@ msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Share Document"
-msgstr ""
-
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Post Grant"
 msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
@@ -18769,6 +19322,10 @@ msgstr ""
 msgid "Unsaved changes"
 msgstr ""
 
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Back to funding"
+msgstr ""
+
 #: src/components/shared/OrgEngagementFields.tsx
 msgid "Whatever the Team page says applies here too."
 msgstr ""
@@ -18791,11 +19348,6 @@ msgstr ""
 msgid "Difficult"
 msgstr ""
 
-#. placeholder {0}: openGrants.length
-#: src/pages/grants/GrantsPage.tsx
-msgid "{0, plural, one {Found # open grant} other {Found # open grants}}"
-msgstr ""
-
 #: src/lib/venue-room-sections.ts
 msgid "Files"
 msgstr ""
@@ -18815,6 +19367,10 @@ msgstr ""
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Heading 3"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Directory · row · member page"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18846,6 +19402,11 @@ msgstr ""
 msgid "Remove this link"
 msgstr ""
 
+#. placeholder {0}: outcome.institution
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "{0} approved your account."
+msgstr ""
+
 #: src/lib/achievement-copy.ts
 msgid "Identity verification completed"
 msgstr ""
@@ -18872,6 +19433,10 @@ msgstr ""
 
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Invitations sent! Users will receive a message with the room link."
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Failed to save this funding call"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -19046,6 +19611,10 @@ msgstr ""
 msgid "Provide the foundational details of your application."
 msgstr ""
 
+#: src/components/verification/VerificationNotice.tsx
+msgid "Verify your account to {action}"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Main Hall"
 msgstr ""
@@ -19162,6 +19731,10 @@ msgstr ""
 msgid "The rest of your dashboard"
 msgstr ""
 
+#: src/pages/settings/VerificationTab.tsx
+msgid "A KTIP administrator reviews it."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Where to send a notice"
 msgstr ""
@@ -19243,6 +19816,7 @@ msgstr ""
 #: src/components/feedback/FeedbackModal.tsx
 #: src/components/moderation/ModeratedField.tsx
 #: src/components/venue/RoomChatPanel.tsx
+#: src/components/verification/InstitutionalEmailCard.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Remove"
@@ -19330,6 +19904,7 @@ msgid "Code Sandbox"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Try the link again in a moment."
 msgstr ""
 
@@ -19423,12 +19998,20 @@ msgstr ""
 msgid "Failed to save preferences"
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Your institution owns this email domain. An educator there approves the request, and that approval is what verifies you."
+msgstr ""
+
 #: src/components/notes/StickyNote.tsx
 msgid "Pinned everywhere — unpin to stop it fading"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Judging Criteria"
+msgstr ""
+
+#: src/components/verification/VerificationNotice.tsx
+msgid "Your verification was not approved"
 msgstr ""
 
 #: src/pages/settings/PersonalizationTab.tsx
@@ -19492,6 +20075,11 @@ msgstr ""
 msgid "e.g., KTIP Innovation Lab"
 msgstr ""
 
+#. placeholder {0}: bundle.unavailable.length
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your data was downloaded. {0} section(s) could not be read — see \"unavailable\" in the file."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Waitlisted"
 msgstr ""
@@ -19501,6 +20089,10 @@ msgstr ""
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/collaborate/WhiteboardPage.tsx
 msgid "Save"
+msgstr ""
+
+#: src/hooks/useEmailVerification.ts
+msgid "You do not have permission to manage this roster."
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -19588,7 +20180,6 @@ msgstr ""
 msgid "Grant Not Found"
 msgstr ""
 
-#: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 msgid "Browse funding opportunities"
 msgstr ""
@@ -19655,6 +20246,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "No — clearable in your browser"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "You disappear from the directory and can no longer post. What you have already contributed stays where it is. Sign in within 90 days and everything is exactly as you left it; after that the account is anonymised."
 msgstr ""
 
 #: src/components/grants/application/ApplicationDocumentsField.tsx
@@ -19733,10 +20328,6 @@ msgstr ""
 
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# like on a single project} other {# likes on a single project}}"
-msgstr ""
-
-#: src/pages/grants/GrantsPage.tsx
-msgid "Search grants..."
 msgstr ""
 
 #: src/pages/forums/PostDetailPage.tsx
@@ -20099,6 +20690,11 @@ msgstr ""
 msgid "Project Not Found"
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+#: src/pages/settings/VerificationTab.tsx
+msgid "Your account is verified"
+msgstr ""
+
 #: src/components/uat/UATFeedbackButton.tsx
 msgid "Provide UAT Feedback"
 msgstr ""
@@ -20178,6 +20774,7 @@ msgid "Verification request submitted"
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "+ Colour"
 msgstr ""
 
@@ -20430,10 +21027,6 @@ msgstr ""
 msgid "Prohibited"
 msgstr ""
 
-#: src/pages/grants/GrantsPage.tsx
-msgid "Grant Archives"
-msgstr ""
-
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Subject"
 msgstr ""
@@ -20455,6 +21048,7 @@ msgid "Create events"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Too many attempts"
 msgstr ""
 
@@ -20481,6 +21075,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "They will get a notification and can accept your request."
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Left"
 msgstr ""
 
 #. placeholder {0}: format(new Date(submissionDeadline), 'MMM d, yyyy')
@@ -20516,6 +21114,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Remembers which non-essential notices you have closed."
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Schedule it"
 msgstr ""
 
 #: src/pages/auth/LoginPage.tsx
@@ -20555,7 +21157,7 @@ msgstr ""
 msgid "The KTIP home page — featured projects, events and grants"
 msgstr ""
 
-#: src/pages/settings/ProfileSettingsTab.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Image must be less than 5MB"
 msgstr ""
 
@@ -20565,6 +21167,14 @@ msgstr ""
 
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Search all members..."
+msgstr ""
+
+#: src/components/profile/PortraitTile.tsx
+msgid "Profile photo"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "A copy of everything on your account, as one JSON file"
 msgstr ""
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
@@ -20577,6 +21187,10 @@ msgstr ""
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "Scroll to the end to continue."
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Download your data"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20614,6 +21228,7 @@ msgstr ""
 msgid "No discussions yet"
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
 #: src/pages/security/MfaChallengePage.tsx
 msgid "Verify"
 msgstr ""
@@ -20731,12 +21346,12 @@ msgstr ""
 msgid "Connect overseas expertise with the region"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Non-exclusive, worldwide, royalty-free, and only for running and promoting the platform."
+#: src/components/grants/RequiredDocumentsEditor.tsx
+msgid "Remove document"
 msgstr ""
 
-#: src/pages/grants/GrantsPage.tsx
-msgid "Search grants"
+#: src/i18n/harvested.ts
+msgid "Non-exclusive, worldwide, royalty-free, and only for running and promoting the platform."
 msgstr ""
 
 #. placeholder {0}: auth.user?.email
@@ -20774,6 +21389,10 @@ msgstr ""
 
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Resume"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Delete, with a week to change your mind"
 msgstr ""
 
 #: src/pages/auth/ForgotPasswordPage.tsx
@@ -20817,6 +21436,7 @@ msgstr ""
 msgid "Enter virtual hackathon venues, rooms and presence."
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Could not remove it"
 msgstr ""
@@ -20866,6 +21486,10 @@ msgstr ""
 msgid "Image must be less than 10MB."
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Your photo shows in the directory, on your member page and wherever you post. Cut the background out and it sits on a backdrop everywhere — and large on your member page."
+msgstr ""
+
 #: src/pages/settings/PreferencesTab.tsx
 msgid "Translate into"
 msgstr ""
@@ -20880,6 +21504,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Conduct and content"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Open the confirmation email KTIP sent when you signed up, then try again."
 msgstr ""
 
 #: src/pages/grants/GrantFormPage.tsx
@@ -20901,6 +21529,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "If it goes wrong"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Failed to close the account"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20949,6 +21581,11 @@ msgid "Clearing the cache fixes a lot of display and loading problems.\n"
 "Safari: Safari menu, Settings, Privacy, Manage Website Data, Remove All.\n"
 "\n"
 "On Mac use Cmd in place of Ctrl. Clearing the cache does not sign you out; clearing cookies does."
+msgstr ""
+
+#. placeholder {0}: outcome.email
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Check {0}."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21031,6 +21668,12 @@ msgstr ""
 
 #: src/pages/events/EventsPage.tsx
 msgid "All Event Types"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A ring is one value against its target and its colour is a status — green on track, amber within twenty percent, red off track. An area is a trend. Every chart has a table view for the exact figures.\n"
+"\n"
+"An em dash is a reading that could not be taken. It is never zero, and it is worth reporting."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21244,6 +21887,10 @@ msgstr ""
 #: src/pages/auth/ResetPasswordPage.tsx
 #: src/pages/settings/SecuritySettingsTab.tsx
 msgid "Enter new password"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "apply for funding"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21505,8 +22152,16 @@ msgstr ""
 msgid "Verification withdrawn"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Drafts the commentary and suggested actions of the monthly and quarterly KPI report for administrators; every report is reviewed and published by a person, and the model never decides a KPI’s status"
+msgstr ""
+
 #: src/components/calendar/CalendarShell.tsx
 msgid "24h"
+msgstr ""
+
+#: src/components/grants/GrantCard.tsx
+msgid "View Funding"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21520,6 +22175,10 @@ msgstr ""
 #. placeholder {0}: item.weight
 #: src/components/events/EventChallengeBrief.tsx
 msgid "weight {0}"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "If your organisation or school should be recognised, ask them to register on KTIP. Otherwise, upload an identity document below."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21587,6 +22246,10 @@ msgstr ""
 msgid "{0, plural, one {Found # member} other {Found # members}}"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "This account is deactivated"
+msgstr ""
+
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 msgid "Nobody is here yet."
 msgstr ""
@@ -21617,6 +22280,10 @@ msgstr ""
 #. placeholder {0}: params.projectTitle
 #: src/hooks/useProjectMembers.ts
 msgid "You've been invited to join \"{0}\""
+msgstr ""
+
+#: src/components/layout/Navbar.tsx
+msgid "Post Funding"
 msgstr ""
 
 #: src/pages/settings/PersonalizationTab.tsx
@@ -21655,8 +22322,8 @@ msgstr ""
 msgid "Stuck? A mentor is here."
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Failed to save this grant"
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "You can bring it back by signing in within 90 days."
 msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
@@ -21920,10 +22587,6 @@ msgstr ""
 msgid "Up to {MAX_ATTACHMENTS_PER_MESSAGE} files, with a note if you like"
 msgstr ""
 
-#: src/components/layout/Navbar.tsx
-msgid "Track your grant applications"
-msgstr ""
-
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "Start from a template"
@@ -21938,16 +22601,13 @@ msgstr ""
 msgid "Show Country"
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Leave empty for a rolling call. A passed deadline moves the grant to the closed list."
-msgstr ""
-
-#: src/pages/settings/ProfileSettingsTab.tsx
-msgid "Upload a photo"
-msgstr ""
-
 #: src/components/messages/NewConversationModal.tsx
 msgid "New Conversation"
+msgstr ""
+
+#. placeholder {0}: formatDate(proof.verified_at)
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "confirmed {0}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22282,6 +22942,7 @@ msgid "Failed to invite collaborators."
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Remove colour"
 msgstr ""
 
@@ -22317,6 +22978,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Using the KTIP and OECS names and logos"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Deactivate your account?"
 msgstr ""
 
 #: src/pages/settings/ProfileSettingsTab.tsx
@@ -22375,7 +23040,6 @@ msgstr ""
 #: src/components/layout/Navbar.tsx
 #: src/components/personalization/ForYouRail.tsx
 #: src/components/uat/UATFeedbackForm.tsx
-#: src/i18n/harvested.ts
 #: src/lib/site-search.ts
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/discover/DiscoverPage.tsx
@@ -22444,7 +23108,6 @@ msgstr ""
 msgid "Browse the member directory and connect with innovators across the Caribbean."
 msgstr ""
 
-#: src/components/layout/Navbar.tsx
 #: src/pages/forums/BoardFormPage.tsx
 #: src/pages/forums/ForumsPage.tsx
 msgid "Start a Board"
@@ -22509,6 +23172,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I track a report I filed?"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Request sent to your institution."
 msgstr ""
 
 #: src/components/events/EventCalendar.tsx
@@ -22588,17 +23255,28 @@ msgstr ""
 msgid "A stale session may be blocking sign-in. Clear it and try again."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Overview is the four headline figures against target and a count of how many KPIs are on or off track. Results framework is every roadmap KPI, Tables 32–38 and the indicators stated elsewhere. Community, Activity and Engagement are the trends behind them. Health & trust is uptime, errors, tickets and complaints. Reports is the weekly pulse and the periodic reports."
+msgstr ""
+
+#: src/components/profile/PortraitTile.tsx
+msgid "Drop to open the photo studio"
+msgstr ""
+
 #: src/components/personalization/SignalSummary.tsx
 msgid "Activity"
 msgstr ""
 
 #: src/components/documents/ExtractionReviewPanel.tsx
-#: src/pages/grants/GrantFormPage.tsx
 msgid "grant"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Verify schools, universities and chambers"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "Supporting documents checklist"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22623,8 +23301,16 @@ msgstr ""
 msgid "Speakers"
 msgstr ""
 
+#: src/lib/funding-types.ts
+msgid "Private equity"
+msgstr ""
+
 #: src/lib/achievement-copy.ts
 msgid "You keep the conversation going. Forums are only worth reading because members answer each other's questions instead of leaving them to sit."
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Composing your avatar…"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -22695,6 +23381,7 @@ msgid "Third-party"
 msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
+#: src/components/verification/InstitutionalEmailCard.tsx
 msgid "Enter a valid email address."
 msgstr ""
 
@@ -22783,11 +23470,11 @@ msgid "Business Support Organisation"
 msgstr ""
 
 #: src/i18n/harvested.ts
-msgid "Open Community → Start a Board. The entry appears for organisation accounts and administrators."
+msgid "Saving, and what it means"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Saving, and what it means"
+#: src/lib/funding-types.ts
+msgid "In-kind support"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -23066,6 +23753,10 @@ msgstr ""
 msgid "Legitimate interests in regional accessibility"
 msgstr ""
 
+#: src/pages/settings/VerificationTab.tsx
+msgid "No work or school email? Upload an identity document"
+msgstr ""
+
 #: src/lib/achievement-copy.ts
 msgid "You have engaged with KTIP broadly rather than deeply in one place. Rank is earned across the whole platform, not by grinding a single number."
 msgstr ""
@@ -23140,6 +23831,10 @@ msgstr ""
 msgid "Badges, points and rank"
 msgstr ""
 
+#: src/hooks/useEmailVerification.ts
+msgid "Verify the institution before adding a roster."
+msgstr ""
+
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Replies to what you sent us"
 msgstr ""
@@ -23165,6 +23860,10 @@ msgstr ""
 #: src/lib/timeline-gantt.ts
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Grant Applications"
+msgstr ""
+
+#: src/pages/grants/GrantFormPage.tsx
+msgid "What the money is for. Optional."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -23414,10 +24113,6 @@ msgstr ""
 msgid "Preview {memberName}"
 msgstr ""
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Grant updated"
-msgstr ""
-
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Open..."
 msgstr ""
@@ -23448,6 +24143,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Discover and fund projects"
+msgstr ""
+
+#: src/pages/settings/VerificationTab.tsx
+msgid "Verified by your organisation's email domain."
 msgstr ""
 
 #: src/components/forums/BoardCard.tsx
@@ -23512,6 +24211,7 @@ msgid "project"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
+#: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Copy the full address from the email — some mail clients break long links across lines."
 msgstr ""
 
@@ -23590,6 +24290,10 @@ msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Knowledge Base"
+msgstr ""
+
+#: src/pages/grants/GrantsPage.tsx
+msgid "No funding found"
 msgstr ""
 
 #: src/lib/achievement-copy.ts
@@ -23729,6 +24433,10 @@ msgstr ""
 msgid "Not used"
 msgstr ""
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Upload a photo first."
+msgstr ""
+
 #: src/lib/validation.ts
 msgid "That code contains a letter we never use. Check for a mistyped 1 or 0."
 msgstr ""
@@ -23826,6 +24534,7 @@ msgid "This project is public. Existing links to it will break."
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Drop to upload"
 msgstr ""
 
@@ -23877,6 +24586,10 @@ msgstr ""
 msgid "No reports submitted"
 msgstr ""
 
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Your data was downloaded"
+msgstr ""
+
 #: src/components/directory/ConnectButton.tsx
 #: src/components/projects/TeamWidget.tsx
 msgid "Failed to respond"
@@ -23914,8 +24627,8 @@ msgstr ""
 msgid "Do not paste code you are contractually barred from disclosing, including an employer’s proprietary code."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Usage, not people"
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Development link:"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -24104,6 +24817,11 @@ msgstr ""
 msgid "Optional email notifications and digests"
 msgstr ""
 
+#. placeholder {0}: outcome.label
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Your {0} email address did it. "
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Pulled from the OECS Virtual Campus. Remove one and it stays removed on future syncs."
 msgstr ""
@@ -24118,6 +24836,10 @@ msgstr ""
 
 #: src/lib/delete-guard.ts
 msgid "The challenge brief, its criteria, every solution participants submitted and the files attached to them"
+msgstr ""
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "JPG, PNG or WebP, up to 5MB. The background is removed on your device — nothing is sent anywhere for it."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -24239,10 +24961,6 @@ msgstr ""
 msgid "set the line-up"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Reading the funnels"
-msgstr ""
-
 #: src/pages/cv/CvPage.tsx
 msgid "Loading your CV…"
 msgstr ""
@@ -24302,6 +25020,10 @@ msgstr ""
 
 #: src/lib/achievement-style.ts
 msgid "Rare"
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "Addresses you have confirmed"
 msgstr ""
 
 #: src/pages/auth/LoginPage.tsx
@@ -24404,6 +25126,10 @@ msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Verified business"
+msgstr ""
+
+#: src/pages/settings/SecuritySettingsTab.tsx
+msgid "Funding calls you posted that already have applications against them stay published and are handed to your organisation — deleting them would take other people's submissions with them."
 msgstr ""
 
 #: src/components/shared/OrgEngagementFields.tsx

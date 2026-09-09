@@ -40,9 +40,6 @@ Under it, the climate-action flag puts the event in the region’s resilience ag
   msg`A first standing notice is a warning, with an explanation of what was removed and why.`,
   msg`A floorplan SVG is optional: without one the rooms render as a grid of cards that works the same way.`,
   msg`A form in stages`,
-  msg`A funnel shows where people stop. The gap between two steps is the useful number, not the totals either side of it.
-
-Figures depend on analytics consent, so they undercount rather than overcount. Treat them as a floor.`,
   msg`A grant or funding application you submit through KTIP is treated as confidential. It is never published, never listed in the directory, never indexed by a search engine, and never shown to other applicants — including applicants to the same call.`,
   msg`A guide, article, case study or tool published for the KTIP community, with its type and topic tags.
 
@@ -64,6 +61,9 @@ Some actions need more than an account. Creating a project, for example, require
   msg`A request to move the conversation off the platform immediately, to a personal email address or a messaging app.`,
   msg`A request to receive money and forward part of it to someone else.`,
   msg`A rightsholder can file an infringement notice against content on KTIP, whether or not they hold an account. If one is filed against yours, you will be told, and you can respond with a counter-notice. The full process — what a notice must contain, what happens to the content while it is reviewed, and what repeated notices lead to — is in the Copyright & Takedown Policy.`,
+  msg`A ring is one value against its target and its colour is a status — green on track, amber within twenty percent, red off track. An area is a trend. Every chart has a table view for the exact figures.
+
+An em dash is a reading that could not be taken. It is never zero, and it is worth reporting.`,
   msg`A rolling window of hours`,
   msg`A room gives you a text chat and a list of everyone currently in it, with their availability.
 
@@ -157,6 +157,7 @@ You can skip step 2 and fill it in later from Settings, but a fuller profile mak
   msg`After you submit`,
   msg`Age declaration, minor detection and safeguarding of young members`,
   msg`Agent`,
+  msg`Aggregate platform figures only — counts, percentages, targets and the titles of already-public projects, events and resources. Never a member record, message or document`,
   msg`Aggregate reporting to programme funders — how many applications a call received, from which countries, in which sectors — uses figures that cannot be traced back to an individual application.`,
   msg`Agree in writing who owns what before you enter, not after you win. A one-paragraph note between the team is enough, and it is by far the most common thing teams regret not having done.`,
   msg`Agree the licensing of a jointly authored work with your collaborators before publishing it, not after.`,
@@ -180,6 +181,7 @@ You can skip step 2 and fill it in later from Settings, but a fuller profile mak
 File-based resources upload here; text resources are read in full on the resource page without any download.`,
   msg`An unsuccessful application may not be used for anything beyond the record of the decision. A funder may not take an idea from a rejected application and pursue it, commission it from someone else, or fold it into their own programme design.`,
   msg`Analytics`,
+  msg`Analytics & Reports`,
   msg`Analytics consent can be changed at any time in Settings, on each device.`,
   msg`Analytics events`,
   msg`Analytics events are kept for %analyticsRetention%.`,
@@ -582,7 +584,6 @@ Deleting a project cannot be undone. If you only want it out of public view, swi
   msg`Display name, avatar, declared roles, organisation, country, biography, skills, interests, badges, published projects, public events and forum posts.`,
   msg`Display name, email address, password (stored hashed)`,
   msg`Display records to its own authorised users for that purpose.`,
-  msg`Distributions and pipeline`,
   msg`Do almost anything, keep the copyright notice. The usual choice for a snippet you want widely reused.`,
   msg`Do not ask another member to pay a fee in order to receive a grant, a placement or an opportunity. No legitimate funder on this platform works that way.`,
   msg`Do not attack or abuse the platform`,
@@ -628,6 +629,7 @@ Status changes reach you through notifications, so you do not have to keep check
   msg`Drafts and autosave`,
   msg`Drafts never appear — an application arrives once the applicant submits it.`,
   msg`Drafts save automatically, so you can leave and resume from My Applications.`,
+  msg`Drafts the commentary and suggested actions of the monthly and quarterly KPI report for administrators; every report is reviewed and published by a person, and the model never decides a KPI’s status`,
   msg`Drafts, publishing and cancellation.`,
   msg`Drafts, submitted applications and decided ones, with the grant and the date on each.
 
@@ -756,6 +758,11 @@ Hidden badges do not appear in members’ galleries until earned — only their 
   msg`Every article grouped by category, with the search box up in the banner searching all of them at once.
 
 Picking a category never hides the other counts, so you can see where else your answer might be.`,
+  msg`Every chart lives on one hub now: members by role and state, projects by category and phase, events by type, the grant pipeline, usage and the roadmap results framework — all as trends with one period picker and one country filter.
+
+The pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.
+
+Above this, the platform calendar shows every scheduled event across the region in one month grid.`,
   msg`Every event on the platform`,
   msg`Every grant has an Eligibility section describing who may apply.
 
@@ -930,6 +937,7 @@ You must be registered for the event to enter its venue. If you are not, registe
 Venues only exist for events where the organiser has set one up.`,
   msg`Fund and convene across member states`,
   msg`Funding`,
+  msg`Funding Opportunities`,
   msg`Funding for the region`,
   msg`Further standing notices restrict publishing while we review the account.`,
   msg`GPL or AGPL`,
@@ -1019,7 +1027,6 @@ These do not change when the event or the grant does, which is the point: if a d
 Open one for the full receipt, with a reference number and a print-ready view.`,
   msg`Grant assessment. The indicative read on your draft is for you, never leaves your draft, and carries no weight with the funder.`,
   msg`Grant listings, funding opportunities, events and partner offerings on KTIP are published by their sponsors. %entityShort% does not guarantee their accuracy, availability or outcome, is not a party to any agreement you reach with a sponsor, and does not disburse funds unless it is expressly the named funder.`,
-  msg`Grants`,
   msg`Grants & Funding`,
   msg`Grants and opportunities on KTIP are published by their sponsors, not vetted guarantees. How to check one, and the warning signs of a funding scam.`,
   msg`Grants and their applications`,
@@ -1392,6 +1399,7 @@ Organisers choose which of these to create, so not every venue has all nine.`,
   msg`Meetup`,
   msg`Member Directory`,
   msg`Member cards`,
+  msg`Member counts, active days and the roadmap KPIs need no consent. Page views, funnels and feature usage are written only for visitors who accepted the analytics banner, so they undercount. Treat them as a floor.`,
   msg`Members under 18 use KTIP normally, with protections that cannot be switched off.
 
 The main one is messaging: one-to-one direct messages between an adult member and a member under 18 are not available in either direction. Group channels, event rooms and forums are open as usual — those are visible to more than two people, which is the point.
@@ -1447,7 +1455,7 @@ Applications save as you go, so you can start one, leave, and come back to it.`,
   msg`My Dashboard`,
   msg`My Events`,
   msg`My Feedback`,
-  msg`My Grants`,
+  msg`My Funding Calls`,
   msg`My Invitations`,
   msg`My Notes`,
   msg`My Profile`,
@@ -1545,6 +1553,7 @@ This only applies to email/password accounts. If you signed up with Google or Mi
   msg`One account per person. Do not create an account for someone else, and do not share yours.`,
   msg`One bar, every filter`,
   msg`One event, every tab`,
+  msg`One period, one filter, every tab`,
   msg`One step at a time`,
   msg`Only add an external application link if applications are handled off-platform.`,
   msg`Only data members chose to share`,
@@ -1603,7 +1612,7 @@ The canvas is free-form: draw, add text, place shapes, arrange and connect them.
 Boards are good for the thinking stage — mapping a problem, sketching an architecture, running a retrospective — before any of it goes into a document.
 
 Share a board with collaborators to work on it together.`,
-  msg`Open Community → Start a Board. The entry appears for organisation accounts and administrators.`,
+  msg`Open Community → Forums and click Start a Board. The button appears for organisation accounts and administrators.`,
   msg`Open Events → Virtual Hackathon and pick a live hackathon.`,
   msg`Open Funding → My Grants.`,
   msg`Open Funding → Post a Grant. The entry only appears for accounts that may post funding.`,
@@ -1736,6 +1745,7 @@ Those are two separate switches, and the second is the one with reach outside KT
   msg`Other work`,
   msg`Our marks`,
   msg`Output may be wrong. It is not advice. You remain responsible.`,
+  msg`Overview is the four headline figures against target and a count of how many KPIs are on or off track. Results framework is every roadmap KPI, Tables 32–38 and the indicators stated elsewhere. Community, Activity and Engagement are the trends behind them. Health & trust is uptime, errors, tickets and complaints. Reports is the weekly pulse and the periodic reports.`,
   msg`Overview is the summary. Under it: My Profile, then the things you use day to day — Connections, Projects, Events and Submissions — and finally Progress and Achievements.
 
 The rail is built from your roles, so it is not the same for everyone. An investor gets Funding, a mentor gets Mentees, faculty and researchers get Research. Business and Admin are links out to their own pages rather than panels here.
@@ -1743,9 +1753,6 @@ The rail is built from your roles, so it is not the same for everyone. An invest
 On a narrow screen the column becomes a scrolling row above the panel.`,
   msg`Ownership`,
   msg`Page views, feature events, funnel and conversion events, a session identifier, the page path, timestamps, and your user ID when you are signed in. Optional, and only collected if you allow it — see the Cookie & Storage Notice.`,
-  msg`Page views, feature usage, funnels and conversions across the platform.
-
-This is aggregate behaviour — it answers “is anyone using this” rather than “what did this member do”.`,
   msg`Parents and guardians`,
   msg`Participant`,
   msg`Partner API Terms`,
@@ -1773,6 +1780,7 @@ One known gap worth being aware of: some guidance refers to a feedback button on
   msg`Per Sentry retention, typically 90 days`,
   msg`Performance of a contract`,
   msg`Performance of a contract; legitimate interests in trust and safety`,
+  msg`Periodic platform reports`,
   msg`Permanently remove your account and data`,
   msg`Permission`,
   msg`Permitted`,
@@ -1794,7 +1802,6 @@ Only moderators can pin and unpin.`,
   msg`Platform administration and analytics.`,
   msg`Platform overview and moderation entry point`,
   msg`Platform staff`,
-  msg`Platform usage, growth and engagement metrics`,
   msg`Platform-wide numbers, then everything you can administer, section by section.
 
 Export in the corner takes the whole analytics set — every chart on this page — as a file you can hand on.`,
@@ -1805,7 +1812,7 @@ The board is public on purpose: a rank is only worth chasing if it can be shown 
 
 A verified badge means an OECS admin has confirmed the member is who they say they are — worth checking before you take a funding conversation forward.`,
   msg`Points, badges and leaderboard positions have no monetary value, are not transferable, and may be recalculated or reset — for example when scoring changes or when we remove the effects of gamed activity.`,
-  msg`Post a grant`,
+  msg`Post funding`,
   msg`Post unlawful, defamatory, harassing, hateful or discriminatory content, including content targeting someone for their nationality, island of origin, race, religion, sex, gender, sexual orientation, disability or age.`,
   msg`Post-Secondary Institutions`,
   msg`Present the data as endorsed, verified or warranted by %entityShort% beyond what the record itself states.`,
@@ -1938,7 +1945,7 @@ Some sections only appear for certain roles: Funding for investors, Mentees for 
   msg`Reading a thread and replying.`,
   msg`Reading and downloading a resource.`,
   msg`Reading it`,
-  msg`Reading the funnels`,
+  msg`Reading the charts`,
   msg`Reading the grid`,
   msg`Reads an uploaded document and proposes values for form fields`,
   msg`Real-time working surfaces you can open on their own or share with a team.
@@ -2029,6 +2036,7 @@ Integrations is the other tab: tools and services KTIP connects to. The tab live
 Unlike the free-text feedback queue, these are comparable across members — which is what makes them worth charting.`,
   msg`Restricted data, stored apart from your profile, and write-once by design.`,
   msg`Restrictions`,
+  msg`Results framework, community, activity, engagement, health and the reporting pulse`,
   msg`Retain data after the agreement ends, or after a member withdraws.`,
   msg`Retained in recipients’ threads after your account is deleted`,
   msg`Retention`,
@@ -2163,13 +2171,15 @@ A secondary email is a backup sign-in address. Once confirmed, it signs you in w
 Add the address and a confirmation link is sent to it. The link is valid for 24 hours; you can resend it, or remove the address entirely, from the same panel.
 
 This is for password accounts. If you only ever sign in with Google or Microsoft, there is no password for a second address to use.`,
-  msg`Settings, Verification tab.
+  msg`Settings, Verification tab. The fastest way is a work or school email address.
 
-Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs.
+If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.
 
-Only OECS administrators can see what you upload. It is not shown on your profile and other members never have access to it.
+Signed up with a personal address? Enter your work or school address on the Verification tab. KTIP emails it a link; press Confirm and the same check runs. That address never becomes a way to sign in — it only proves you hold it.
 
-An OECS reviewer approves or declines the request, and you are notified either way. Approved accounts carry a verification badge, which members can filter by in the directory.`,
+No such address? Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs. Only OECS administrators can see what you upload. A reviewer approves or declines the request, and you are notified either way.
+
+Verified accounts carry a badge, which members can filter by in the directory, and can publish, apply for funding and message other members.`,
   msg`Several queues sit behind the verified badges.
 
 Verification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Chamber — Chambers of Commerce and the SME submissions they handle. Employers — employer accounts and their recruiters.
@@ -2285,9 +2295,9 @@ The same principle sits behind students never administering awarded funds themse
 If you have been nominated as someone’s sponsor, their request appears in this section for you to approve or decline. Most members never see anything here.`,
   msg`Student/Youth Innovator`,
   msg`Students`,
-  msg`Students do not upload anything. Your institutional email domain is the evidence.
+  msg`Students do not upload anything. Your institutional email address is the evidence.
 
-Sign up with your school or university address and your institution approves the account. Once approved you hold the Student role.
+Sign up with your school or university address, or add it on the Verification tab, and confirm it. If your institution has switched on automatic approval, or gave KTIP a list of its students, you are approved on the spot. Otherwise an educator there approves the request. Either way, once approved you hold the Student role and a verified badge.
 
 That role brings the safeguarding rules with it: no unmonitored direct messages, no administering awarded funds yourself, and automatic exclusion from the public leaderboard.
 
@@ -2536,6 +2546,9 @@ For anything account-specific, the Help Center’s contact block is the better r
   msg`The rest of the platform reads a derived yes-or-no answer — is this account a minor? — rather than the date itself.`,
   msg`The rest of the profile`,
   msg`The rest of your dashboard`,
+  msg`The row at the top picks the month, quarter, year or a custom range, and optionally one OECS state. Every tab reads the same choice, so the same month is never two different windows on two pages.
+
+Tiles report the selected period; the trend charts look back further, so the shape is visible around the number.`,
   msg`The rules binding organisations that read KTIP data through the partner API — what they may use it for, what they may never do, and how a member withdraws.`,
   msg`The rules for using KTIP — accounts, conduct, liability`,
   msg`The rules for what you may post and how you may treat other members are set out in full in the Acceptable Use & Community Guidelines. Breaching them is breaching these Terms.`,
@@ -2554,6 +2567,7 @@ New Discussion opens the editor. A discussion takes a title, a body with formatt
   msg`The short version`,
   msg`The step-by-step application and how drafts work.`,
   msg`The tab column`,
+  msg`The tabs`,
   msg`The text being translated`,
   msg`The text of the document you uploaded`,
   msg`The text of your CV`,
@@ -2666,7 +2680,7 @@ A figure shown as an em dash could not be read — that is a failed query, not a
 The Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.`,
   msg`Track drafts, submissions and sponsorships.`,
   msg`Track grievances you have submitted`,
-  msg`Track your grant applications and resume drafts`,
+  msg`Track your funding applications and resume drafts`,
   msg`Tracking what you sent`,
   msg`Trademark & Brand Use`,
   msg`Transactional email`,
@@ -2712,7 +2726,6 @@ Past events keep their pages — the brief, the schedule and the submissions sta
   msg`Uploading a logo asserts that you have the right to use it.`,
   msg`Uploading someone else’s logo or brand to a profile or an event asserts that you have the right to use it. The Trademark & Brand Use policy covers that in detail.`,
   msg`Uploads and CV parsing`,
-  msg`Usage, not people`,
   msg`Use "Mark all read" at the top of the panel to clear the unread count.`,
   msg`Use an unsuccessful entry for any purpose beyond the record of the competition itself.`,
   msg`Use it for advertising, for credit or risk scoring, or for any automated decision that materially affects a person.`,
@@ -2752,11 +2765,6 @@ The last step asks you to confirm, and warns that knowingly false reports are th
 To report one post or message rather than a person, use the report control on the content itself.`,
   msg`Use this route for copyright, and for trade mark or design-right complaints. For harassment, impersonation, fraud or content involving a minor, use the in-app report control instead — those reach a different queue that is triaged faster.`,
   msg`User acceptance testing responses`,
-  msg`Users by role and by country, projects by category and phase, events by type, and the grant application pipeline by status.
-
-The pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.
-
-Above these, the platform calendar shows every scheduled event across the region in one month grid.`,
   msg`Using AI features responsibly`,
   msg`Using code you find here`,
   msg`Using other people’s work`,
@@ -2865,6 +2873,7 @@ Above these, the platform calendar shows every scheduled event across the region
   msg`What it receives`,
   msg`What kinds of rooms will I see?`,
   msg`What members are telling us`,
+  msg`What needs consent`,
   msg`What organisers and sponsors may not do`,
   msg`What other people can see`,
   msg`What participants must achieve`,

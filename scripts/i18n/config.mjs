@@ -97,7 +97,10 @@ export const MIGRATED_PATHS = [
   'src/components/events/',
   'src/components/venue/',
   'src/lib/venue-room-sections.ts',
-  'src/pages/settings/',
+  // Was src/pages/settings/. The page is gone — its panels are dashboard tabs
+  // now and live here; the guard follows them, or six translated screens
+  // quietly leave the gate.
+  'src/components/settings/',
   'src/pages/collaborate/',
   'src/components/collaboration/',
   'src/pages/grants/',
