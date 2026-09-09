@@ -67,17 +67,20 @@ export default function SettingsPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Tabs */}
           <div className="lg:w-64 shrink-0">
-            <div className="bg-ktip-cream border border-ktip-sand-200 rounded-lg p-2">
+            <div className="neu-surface bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 shadow-neu-sm">
               <nav data-tutorial="settings-nav" className="space-y-1">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
+                      // Soft-UI selection, as the dashboard and admin rails:
+                      // the current tab is a well pressed into the panel, an
+                      // idle one lifts a pixel on hover.
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-neu-sm text-left transition-all',
                       activeTab === tab.id
-                        ? 'bg-ktip-ocean-50 text-ktip-ocean-700'
-                        : 'text-ktip-sand-600 hover:bg-ktip-sand-50 hover:text-ktip-sand-900'
+                        ? 'shadow-neu-sm-inset text-ktip-ocean-700'
+                        : 'text-ktip-sand-600 hover:-translate-y-px hover:shadow-neu-sm hover:text-ktip-sand-900'
                     )}
                   >
                     <tab.icon size={20} />

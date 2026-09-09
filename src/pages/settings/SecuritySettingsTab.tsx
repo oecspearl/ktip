@@ -632,7 +632,7 @@ export function SecuritySettingsTab() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-ktip-sand-200 p-4">
+            <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-4 shadow-neu-sm">
               <h3 className="text-sm font-semibold text-ktip-sand-900">
                 <Trans>Deactivate</Trans>
               </h3>
@@ -653,7 +653,7 @@ export function SecuritySettingsTab() {
               </Button>
             </div>
 
-            <div className="rounded-xl border border-ktip-sand-200 p-4">
+            <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-4 shadow-neu-sm">
               <h3 className="text-sm font-semibold text-ktip-sand-900">
                 <Trans>Delete, with a week to change your mind</Trans>
               </h3>

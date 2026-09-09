@@ -293,10 +293,10 @@ export function PreferencesTab() {
                     role="radio"
                     aria-checked={selected}
                     onClick={() => setConnVisibility(option.value)}
-                    className={`flex-1 text-left px-3 py-2.5 rounded-xl border transition-colors ${
+                    className={`flex-1 text-left px-3 py-2.5 rounded-neu-sm border transition-all ${
                       selected
-                        ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-800'
-                        : 'border-ktip-sand-200 hover:border-ktip-sand-300 text-ktip-sand-700'
+                        ? 'border-ktip-ocean-300 shadow-neu-sm-inset text-ktip-ocean-800'
+                        : 'border-ktip-sand-200 text-ktip-sand-700 hover:-translate-y-px hover:shadow-neu-sm'
                     }`}
                   >
                     <span className="block text-sm font-medium">{resolveCopy(i18n, option.label)}</span>
@@ -357,10 +357,10 @@ export function PreferencesTab() {
                     aria-checked={selected}
                     disabled={!autoTranslate}
                     onClick={() => setContentLang(option)}
-                    className={`flex-1 text-left px-3 py-2.5 rounded-xl border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`flex-1 text-left px-3 py-2.5 rounded-neu-sm border transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
-                        ? 'border-ktip-ocean-500 bg-ktip-ocean-50 text-ktip-ocean-800'
-                        : 'border-ktip-sand-200 hover:border-ktip-sand-300 text-ktip-sand-700'
+                        ? 'border-ktip-ocean-300 shadow-neu-sm-inset text-ktip-ocean-800'
+                        : 'border-ktip-sand-200 text-ktip-sand-700 hover:-translate-y-px hover:shadow-neu-sm'
                     }`}
                   >
                     {/* The endonym, and lang= on it, for the same reasons as the
