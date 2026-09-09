@@ -158,6 +158,21 @@ const SCHEDULE = [
     status: 'cancelled',
     patch: { start_date: at(18 * DAY), end_date: at(18 * DAY + 8 * HOUR) },
   },
+
+  // --- seed_venue.sql ----------------------------------------------------
+  {
+    // The third in-progress event: the only one with a drawn, multi-floor
+    // venue. Kept live for the same reason 0007 is.
+    id: id(21),
+    label: 'OECS Blue Economy Hackathon: Virtual Build Week',
+    patch: {
+      start_date: at(-2 * DAY),
+      end_date: at(3 * DAY),
+      submission_deadline: at(60 * HOUR),
+      venue_opens_at: at(-3 * DAY),
+      venue_closes_at: at(4 * DAY),
+    },
+  },
 ]
 
 // --- apply -------------------------------------------------------------
