@@ -1,4 +1,4 @@
--- Migration 143: the indicators the roadmap states outside §14's tables, a
+-- Migration 146: the indicators the roadmap states outside §14's tables, a
 -- time-series reader for the analytics hub, and a feeder for health samples.
 --
 -- Audited the six documents in the repo root against src/lib/kpi-catalog.ts.
