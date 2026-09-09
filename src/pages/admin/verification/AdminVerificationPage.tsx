@@ -18,6 +18,7 @@ import { BadgeCheck, CheckCircle, XCircle, ExternalLink, Filter, X, FileText } f
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
+import { TrustedDomainsPanel } from './TrustedDomainsPanel'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
@@ -106,6 +107,9 @@ export default function AdminVerificationPage() {
         subtitle="Review identity documents and verify members"
         imageSeed="admin-verification"
       />
+
+      {/* 145: the zero-click track. What is listed here never reaches the queue below. */}
+      <TrustedDomainsPanel />
 
       {/* Filter */}
       <div className="bg-ktip-cream rounded-2xl shadow-card border border-ktip-sand-100 p-4 mb-6">

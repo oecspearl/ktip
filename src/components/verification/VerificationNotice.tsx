@@ -81,7 +81,8 @@ export function VerificationNotice({ action, className }: VerificationNoticeProp
             ) : (
               <Trans>
                 Browsing is open to everyone. Publishing, applying for funding and messaging other
-                members need one identity check first.
+                members need one identity check first. Have a work or school email? That verifies
+                you instantly.
               </Trans>
             )}
           </p>
@@ -89,7 +90,7 @@ export function VerificationNotice({ action, className }: VerificationNoticeProp
       </div>
 
       {!pending && (
-        <Link to="/settings?tab=verification" className="shrink-0">
+        <Link to="/dashboard/verification" className="shrink-0">
           <Button size="sm" variant={rejected ? 'danger' : undefined}>
             {rejected ? t`Send new documents` : t`Get verified`}
           </Button>

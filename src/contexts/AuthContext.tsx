@@ -11,6 +11,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { purgeSupabaseResponseCache } from '../lib/service-worker'
+import { keys } from '../queries/keys'
 import {
   defaultPermissionsFor,
   expandRoles,
@@ -395,6 +396,30 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     roles.includes('super_admin') ||
     !!profile?.is_verified
 
+  // Migration 145. New signups are verified by the auth trigger the moment
+  // their address is confirmed; this is the safety net for everyone else — an
+  // account that predates a newly trusted domain, or an environment with
+  // confirmation switched off. Once per session, only while unverified, and
+  // silent unless it changes something.
+  const claimedRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!user?.id || !profile || verified) return
+    if (claimedRef.current === user.id) return
+    claimedRef.current = user.id
+    ;(supabase as any)
+      .rpc('claim_email_verification')
+      .then(({ data }: { data: { ok?: boolean; outcome?: string } | null }) => {
+        if (!data?.ok) return
+        if (data.outcome === 'verified' || data.outcome === 'student_approved') {
+          queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+          queryClient.invalidateQueries({ queryKey: ['permissions', user.id] })
+        }
+      })
+      .catch(() => {
+        /* a failed claim changes nothing; the Verification tab offers it again */
+      })
+  }, [user?.id, profile, verified, queryClient])
+
   const permissions = useMemo(() => {
     // get_my_permissions() has already applied the verification gate, so a
     // resolved set needs nothing further.
@@ -730,6 +755,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
       // Refresh profile
       await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+      // …and the row every OTHER surface reads you through. get_profile_view()
+      // is cached under its own key, so without this your own member page and
+      // your directory card kept serving the values from before the save.
+      await queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'view', user.id) })
     },
     [user, queryClient]
   )

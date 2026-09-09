@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { ArrowLeft, BadgeCheck, EyeOff, Trophy } from 'lucide-react'
+import { ArrowLeft, EyeOff, Trophy } from 'lucide-react'
+import { VerifiedBadge } from '../../components/ui/VerifiedBadge'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLeaderboard, useMyRank } from '../../hooks/useLeaderboard'
@@ -216,13 +217,7 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
                         <span className="font-medium text-ktip-sand-900">
                           {entry.display_name || t`Member`}
                         </span>
-                        {entry.is_verified && (
-                          <BadgeCheck
-                            size={14}
-                            className="shrink-0 text-ktip-tropical-700"
-                            aria-label={t`Verified member`}
-                          />
-                        )}
+                        <VerifiedBadge verified={entry.is_verified} size={14} />
                         {isMe && (
                           <span className="text-xs text-ktip-ocean-600"><Trans>(you)</Trans></span>
                         )}
@@ -267,7 +262,7 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
               <EyeOff size={12} aria-hidden="true" />
               <Trans>
                 Hidden from others —{' '}
-                <Link to="/settings?tab=profile" className="text-ktip-ocean-600 hover:underline">
+                <Link to="/dashboard/preferences" className="text-ktip-ocean-600 hover:underline">
                   change
                 </Link>
               </Trans>
@@ -279,7 +274,7 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
       {auth.user && myRank?.listed && (
         <p className="text-center text-xs text-ktip-sand-400">
           <Trans>Prefer not to appear?</Trans>{' '}
-          <Link to="/settings?tab=profile" className="text-ktip-ocean-600 hover:underline">
+          <Link to="/dashboard/preferences" className="text-ktip-ocean-600 hover:underline">
             <Trans>Hide yourself from the leaderboard</Trans>
           </Link>
           .

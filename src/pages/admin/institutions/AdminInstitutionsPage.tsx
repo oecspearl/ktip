@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { BadgeCheck, Building2, Filter, GraduationCap, Users, X } from 'lucide-react'
+import { BadgeCheck, Building2, Filter, GraduationCap, ListChecks, Trash2, Users, X } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Textarea } from '../../../components/ui/Textarea'
 import { Modal } from '../../../components/ui/Modal'
+import { Switch } from '../../../components/ui/Toggle'
 import { PageHero } from '../../../components/layout/PageHero'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { useToast } from '../../../contexts/ToastContext'
@@ -14,6 +15,13 @@ import {
   useReviewInstitution,
   useReviewInstitutionMember,
 } from '../../../hooks/useInstitutions'
+import {
+  useInstitutionRoster,
+  useRemoveRosterRow,
+  useSetAutoApproveStudents,
+  useUpsertInstitutionRoster,
+} from '../../../hooks/useEmailVerification'
+import { parseRosterInput } from '../../../lib/email-domain'
 import { formatDate } from '../../../lib/utils'
 import type { Institution, InstitutionKind, InstitutionStatus } from '../../../types'
 
@@ -56,10 +64,52 @@ export default function AdminInstitutionsPage() {
   const [domainsDraft, setDomainsDraft] = useState('')
   const [note, setNote] = useState('')
   const [rosterFor, setRosterFor] = useState<Institution | null>(null)
+  const [vouchedFor, setVouchedFor] = useState<Institution | null>(null)
+  const [rosterDraft, setRosterDraft] = useState('')
+  const [rosterRole, setRosterRole] = useState<'student' | 'educator'>('student')
 
   const { members, refetch: refetchMembers } = useInstitutionMembers(rosterFor?.id, 'pending')
 
+  // 145: the zero-click controls. A switch for "approve anyone on our domain",
+  // and a list of addresses the institution vouches for by name.
+  const { roster } = useInstitutionRoster(vouchedFor?.id)
+  const { upsertRoster, loading: savingRoster } = useUpsertInstitutionRoster()
+  const { removeRow } = useRemoveRosterRow()
+  const { setAutoApprove, loading: savingAuto } = useSetAutoApproveStudents()
+
   const canVerify = auth.can('institution:verify')
+
+  const handleAutoApprove = async (institution: Institution, enabled: boolean) => {
+    try {
+      await setAutoApprove({ institutionId: institution.id, enabled })
+      toast.success(
+        enabled
+          ? `Students at ${institution.name} are now approved automatically`
+          : `Students at ${institution.name} now wait for an educator`
+      )
+    } catch (err: any) {
+      toast.error(err.message || 'Could not update the institution')
+    }
+  }
+
+  const handleRosterAdd = async () => {
+    if (!vouchedFor) return
+    const { emails, skipped } = parseRosterInput(rosterDraft)
+    if (emails.length === 0) {
+      toast.error('Paste at least one email address, one per line.')
+      return
+    }
+    try {
+      const result = await upsertRoster({ institutionId: vouchedFor.id, emails, role: rosterRole })
+      const dropped = skipped + result.skipped
+      toast.success(
+        `${result.added} ${rosterRole} address${result.added === 1 ? '' : 'es'} added${dropped ? `, ${dropped} skipped` : ''}`
+      )
+      setRosterDraft('')
+    } catch (err: any) {
+      toast.error(err.message || 'Could not update the roster')
+    }
+  }
 
   const openReview = (institution: Institution) => {
     setSelected(institution)
@@ -181,19 +231,37 @@ export default function AdminInstitutionsPage() {
                   </p>
                   <p className="text-xs text-ktip-sand-500 mt-0.5">
                     Registered {formatDate(institution.created_at)}
+                    {institution.status === 'verified' && institution.kind !== 'chamber' && (
+                      <>
+                        {' · '}
+                        {institution.auto_approve_students
+                          ? 'students approved automatically'
+                          : 'educator approves students'}
+                      </>
+                    )}
                   </p>
                 </div>
 
                 <div className="flex gap-2 flex-shrink-0">
                   {institution.status === 'verified' && institution.kind !== 'chamber' && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={<Users size={14} />}
-                      onClick={() => setRosterFor(institution)}
-                    >
-                      Roster
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={<ListChecks size={14} />}
+                        onClick={() => setVouchedFor(institution)}
+                      >
+                        Vouched addresses
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={<Users size={14} />}
+                        onClick={() => setRosterFor(institution)}
+                      >
+                        Pending
+                      </Button>
+                    </>
                   )}
                   <Button
                     variant="outline"
@@ -237,6 +305,28 @@ export default function AdminInstitutionsPage() {
               fullWidth
             />
 
+            {selected.status === 'verified' && selected.kind !== 'chamber' && (
+              <div className="flex items-start justify-between gap-4 rounded-xl border border-ktip-sand-200 bg-ktip-sand-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-ktip-sand-900">Approve students automatically</p>
+                  <p className="text-xs text-ktip-sand-600 mt-0.5">
+                    Anyone who confirms an address on these domains becomes a verified student
+                    with no educator click. Leave off if the institution reissues addresses or
+                    wants to check each one.
+                  </p>
+                </div>
+                <Switch
+                  checked={!!selected.auto_approve_students}
+                  disabled={savingAuto}
+                  label="Approve students automatically"
+                  onChange={async (next) => {
+                    await handleAutoApprove(selected, next)
+                    setSelected({ ...selected, auto_approve_students: next })
+                  }}
+                />
+              </div>
+            )}
+
             <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
               <Button variant="outline" size="sm" onClick={() => setSelected(null)}>
                 Cancel
@@ -253,6 +343,80 @@ export default function AdminInstitutionsPage() {
                 Verify institution
               </Button>
             </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Vouched addresses (145) */}
+      <Modal
+        open={!!vouchedFor}
+        onClose={() => {
+          setVouchedFor(null)
+          setRosterDraft('')
+        }}
+        title={vouchedFor ? `Vouched addresses — ${vouchedFor.name}` : ''}
+        description="Addresses the institution has confirmed are its people. A member who confirms one of these is approved on the spot, whatever domain it is on: students get the Student role, educators get Faculty."
+        size="md"
+      >
+        {vouchedFor && (
+          <div className="space-y-4">
+            <Textarea
+              label="Add addresses"
+              value={rosterDraft}
+              onChange={(e) => setRosterDraft(e.target.value)}
+              rows={5}
+              placeholder={'one@school.edu.lc\ntwo@gmail.com\n…or paste a CSV column'}
+              fullWidth
+            />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <label className="flex items-center gap-2 text-sm text-ktip-sand-700">
+                <span>These people are</span>
+                <select
+                  value={rosterRole}
+                  onChange={(e) => setRosterRole(e.target.value as 'student' | 'educator')}
+                  className="border border-ktip-sand-200 rounded-lg px-3 py-1.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                >
+                  <option value="student">students</option>
+                  <option value="educator">educators (Faculty role)</option>
+                </select>
+              </label>
+              <Button size="sm" loading={savingRoster} onClick={handleRosterAdd}>
+                Add to roster
+              </Button>
+            </div>
+
+            {roster.length === 0 ? (
+              <p className="text-sm text-ktip-sand-600">No vouched addresses yet.</p>
+            ) : (
+              <ul className="divide-y divide-ktip-sand-100 max-h-72 overflow-y-auto">
+                {roster.map((row) => (
+                  <li key={row.id} className="py-2 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm text-ktip-sand-900 truncate">{row.email}</p>
+                      <p className="text-xs text-ktip-sand-500">
+                        {row.role === 'educator' ? 'Educator' : 'Student'}
+                        {' · '}
+                        {row.claimed_at
+                          ? `claimed ${formatDate(row.claimed_at)}`
+                          : `added ${formatDate(row.added_at)}, not yet claimed`}
+                      </p>
+                    </div>
+                    {!row.claimed_at && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeRow(row.id).catch(() => toast.error('Could not remove the address'))
+                        }
+                        className="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors shrink-0"
+                        title="Remove"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </Modal>

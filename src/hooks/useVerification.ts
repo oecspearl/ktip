@@ -194,7 +194,7 @@ export function useReviewVerification() {
             ? t`Your organisation was approved. Your account now holds the ${grantedLabel} role.`
             : t`Your identity verification was approved. Your profile now shows a verified badge.`
           : params.adminNote || t`Your verification request was not accepted.`,
-        link: params.approve && grantedLabel ? '/' : '/settings',
+        link: params.approve && grantedLabel ? '/' : '/dashboard/verification',
       })
     },
     onSuccess: () => {

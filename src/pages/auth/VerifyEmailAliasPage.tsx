@@ -109,7 +109,7 @@ export default function VerifyEmailAliasPage() {
                 be used to recover it.
               </Trans>
             </p>
-            <Link to={auth.user ? '/settings?tab=security' : '/login'}>
+            <Link to={auth.user ? '/dashboard/security' : '/login'}>
               <Button fullWidth>{auth.user ? t`Back to Settings` : t`Sign in`}</Button>
             </Link>
           </>
@@ -122,7 +122,7 @@ export default function VerifyEmailAliasPage() {
               {i18n._(failure.title)}
             </h1>
             <p className="text-ktip-sand-600 mb-6">{i18n._(failure.body)}</p>
-            <Link to={auth.user ? '/settings?tab=security' : '/login'}>
+            <Link to={auth.user ? '/dashboard/security' : '/login'}>
               <Button variant="secondary" fullWidth>
                 {auth.user ? t`Open Settings` : t`Sign in`}
               </Button>

@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router'
-import { BadgeCheck, Building2, ExternalLink, Globe, MapPin } from 'lucide-react'
+import { Building2, ExternalLink, Globe, MapPin } from 'lucide-react'
+import { VerifiedBadge } from '../../components/ui/VerifiedBadge'
 import { PageHero } from '../../components/layout/PageHero'
 import { Card } from '../../components/ui/Card'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -85,19 +86,17 @@ export default function OrgProfilePage() {
             <div className="min-w-0 flex-1">
               <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ktip-sand-900">
                 {name}
-                {isVerified && (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full bg-ktip-tropical-100 px-2 py-0.5 text-xs font-medium text-ktip-tropical-800"
-                    title={
-                      employer.verified_at
-                        ? t`Verified ${formatDate(employer.verified_at, 'MMM dd, yyyy')}`
-                        : t`Chamber verified`
-                    }
-                  >
-                    <BadgeCheck size={13} aria-hidden="true" />
-                    <Trans>Chamber verified</Trans>
-                  </span>
-                )}
+                <VerifiedBadge
+                  verified={isVerified}
+                  variant="pill"
+                  size={13}
+                  label={t`Chamber verified`}
+                  title={
+                    employer.verified_at
+                      ? t`Verified ${formatDate(employer.verified_at, 'MMM dd, yyyy')}`
+                      : t`Chamber verified`
+                  }
+                />
               </h1>
 
               {employer.legal_name !== name && (

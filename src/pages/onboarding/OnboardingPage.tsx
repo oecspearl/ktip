@@ -252,7 +252,12 @@ export default function OnboardingPage() {
         }),
       })
 
-      if (needsSchool) {
+      // 145: a trusted email domain may already have granted this role at
+      // confirmation (gov.lc -> Government). Asking a reviewer for a role the
+      // account holds would queue a no-op; carry on as verified instead.
+      const alreadyHeld = (auth.profile?.roles ?? []).includes(selectedRole as UserRole)
+
+      if (needsSchool && !alreadyHeld) {
         // Three different reviewers behind one flag:
         //
         //   student — request_student_verification() matches the account's
@@ -263,7 +268,17 @@ export default function OnboardingPage() {
         //   organisation — a verification request carrying the role, which a
         //     KTIP administrator grants at /admin/verification (migration 125).
         if (selectedRole === 'student') {
-          await requestVerification()
+          const result = await requestVerification()
+          // 145: a roster match, or an institution that opted in, approves on
+          // the spot. There is nothing to wait on — carry on as a new student.
+          if (result?.outcome === 'student_approved') {
+            analytics.funnel('onboarding', 'verification_requested', { role: selectedRole })
+            analytics.conversion('onboarding_complete', { role: selectedRole })
+            await auth.refreshProfile()
+            toast.success(t`Your institution approved your account. Welcome to KTIP!`)
+            navigate('/', { replace: true })
+            return
+          }
         } else if (isOrgRole(selectedRole) && auth.user) {
           await requestOrgRole({
             userId: auth.user.id,

@@ -1,58 +1,31 @@
 import { BadgeCheck, Clock, GraduationCap, ShieldCheck } from 'lucide-react'
 import { Card } from '../ui/Card'
-import { Button } from '../ui/Button'
 import { useAuth } from '../../contexts/AuthContext'
-import { useToast } from '../../contexts/ToastContext'
-import { useMyStudentRecord, useRequestStudentVerification } from '../../hooks/useInstitutions'
+import { useMyStudentRecord } from '../../hooks/useInstitutions'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
- * School verification for students.
+ * School verification status, for accounts that have one.
  *
  * The account's own email domain is the evidence — there is nothing to upload.
- * Requesting only queues the account with whichever verified institution owns
- * that domain; an educator there approves it, and that approval is what grants
- * the student role.
+ * Since 145 the request itself is made from InstitutionalEmailCard (one button
+ * for every track); this card only reports where a student stands. It renders
+ * nothing for an account with no student relationship, which is every
+ * entrepreneur, investor and admin — the old "verify with my school email"
+ * pitch used to show to all of them.
  */
 export function StudentVerificationCard() {
     const { t } = useLingui()
   const auth = useAuth()
-  const toast = useToast()
 
-  const { record, loading, refetch } = useMyStudentRecord(auth.user?.id)
-  const { requestVerification, loading: requesting } = useRequestStudentVerification()
+  const { record, loading } = useMyStudentRecord(auth.user?.id)
 
   const isStudent = (auth.profile?.roles || []).includes('student')
-
-  const handleRequest = async () => {
-    try {
-      await requestVerification()
-      toast.success(t`Request sent to your institution for approval`)
-      refetch()
-    } catch (err: any) {
-      toast.error(err.message || t`Could not request verification`)
-    }
-  }
 
   if (loading) return null
 
   // Nothing to show for accounts with no student relationship at all.
-  if (!record && !isStudent) {
-    return (
-      <Card className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <GraduationCap size={18} className="text-ktip-ocean-600" />
-          <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Student verification</Trans></h2>
-        </div>
-        <p className="text-sm text-ktip-sand-600 mb-4">
-          <Trans>If you are studying at a partner school or university, verify with your institutional email address to unlock student features. Your school approves the request.</Trans>
-        </p>
-        <Button size="sm" loading={requesting} onClick={handleRequest}>
-          <Trans>Verify with my school email</Trans>
-        </Button>
-      </Card>
-    )
-  }
+  if (!record && !isStudent) return null
 
   return (
     <Card className="mb-6">
