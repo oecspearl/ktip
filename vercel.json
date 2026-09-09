@@ -79,6 +79,14 @@
     {
       "path": "/api/cron/purge-accounts",
       "schedule": "20 3 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/cron/quarterly-report",
+      "schedule": "0 6 1 1,4,7,10 *"
     }
   ]
 }
