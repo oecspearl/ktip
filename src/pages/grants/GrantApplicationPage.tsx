@@ -29,6 +29,16 @@ import {
 } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 
+/** True for an absolute http(s) address the browser can actually open. */
+function isHttpUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 export default function GrantApplicationPage() {
     const { t, i18n } = useLingui()
   const params = useParams()
@@ -130,12 +140,17 @@ export default function GrantApplicationPage() {
   const validateStep = (stepIndex: number, data: Record<string, any>): Record<string, string> => {
     const stepErrors: Record<string, string> = {}
     for (const field of steps[stepIndex].fields) {
-      if (field.required) {
-        const val = data[field.name]
-        if (!val || !String(val).trim()) {
-          const label = i18n._(field.label)
-          stepErrors[field.name] = t`${label} is required`
-        }
+      const val = data[field.name]
+      const trimmed = val ? String(val).trim() : ''
+      if (field.required && !trimmed) {
+        const label = i18n._(field.label)
+        stepErrors[field.name] = t`${label} is required`
+        continue
+      }
+      // Optional links are only checked when filled in: an assessor cannot
+      // open "drive.google.com/..." pasted without its scheme.
+      if (field.type === 'url' && trimmed && !isHttpUrl(trimmed)) {
+        stepErrors[field.name] = t`Paste the full link, starting with https://`
       }
     }
     return stepErrors

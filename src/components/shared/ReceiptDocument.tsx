@@ -19,6 +19,11 @@ function isHtml(str: string): boolean {
   return /<[a-z][\s\S]*>/i.test(str)
 }
 
+/** A bare http(s) link with no surrounding text, e.g. the video-link field. */
+function isBareUrl(str: string): boolean {
+  return /^https?:\/\/\S+$/i.test(str.trim())
+}
+
 export interface ReceiptField {
   label: string
   value: string
@@ -95,6 +100,15 @@ export function ReceiptDocument({
                       }),
                     }}
                   />
+                ) : isBareUrl(field.value) ? (
+                  <a
+                    href={field.value.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 underline break-all leading-relaxed"
+                  >
+                    {field.value.trim()}
+                  </a>
                 ) : (
                   <div className="text-sm text-ktip-sand-800 whitespace-pre-wrap leading-relaxed">
                     {field.value}

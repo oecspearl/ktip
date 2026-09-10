@@ -10,8 +10,12 @@ import type { RequiredDocument } from '../types'
  * checklist for the call and stores nothing in application_data. It is a field
  * type rather than a bespoke step so the wizard's stepper, validation and
  * navigation all keep working unchanged.
+ *
+ * `url` is a plain text input the wizard validates as an http(s) address when
+ * it is filled in. Videos are too large to upload, so the applicant hosts the
+ * file themselves and pastes the shared link.
  */
-export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'documents'
+export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'url' | 'documents'
 
 export interface FieldConfig {
   name: string
@@ -95,6 +99,14 @@ export const GRANT_APPLICATION_STEPS: StepConfig[] = [
         type: 'documents',
         helpText:
           msg`PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them.`,
+      },
+      {
+        name: 'video_url',
+        label: msg`Video link (optional)`,
+        type: 'url',
+        placeholder: msg`https://drive.google.com/...`,
+        helpText:
+          msg`A short pitch or demonstration video, if you have one. Upload it to Google Drive, YouTube or similar, set sharing to "Anyone with the link can view", and paste the link to the video or the folder holding it here. Check the link in a private browser window first — an assessor who cannot open it will move on.`,
       },
     ],
   },

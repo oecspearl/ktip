@@ -162,7 +162,9 @@ export function useAgreementGate(bundle: Exclude<LegalBundle, 'informational'>):
     // Never gate while the answer is unknown. A false positive here blocks a
     // member who has already agreed; a false negative only means the gate fires
     // one submit later, once the query resolves.
-    needsAgreement: !isPending && outstanding.length > 0,
+    // DEMO-ONLY (2026-09-10): re-prompt on every gated action. REVERT to:
+    //   needsAgreement: !isPending && outstanding.length > 0,
+    needsAgreement: !isPending,
     outstanding,
     accept,
     accepting: record.isPending,

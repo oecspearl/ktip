@@ -105,7 +105,13 @@ export function StepForm({
                 </select>
               ) : (
                 <input
-                  type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
+                  type={
+                    field.type === 'date' ? 'date'
+                      : field.type === 'number' ? 'number'
+                      : field.type === 'url' ? 'url'
+                      : 'text'
+                  }
+                  inputMode={field.type === 'url' ? 'url' : undefined}
                   value={value}
                   onChange={(e) => onChange(field.name, e.target.value)}
                   placeholder={placeholder}
