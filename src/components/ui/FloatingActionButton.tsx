@@ -5,9 +5,7 @@ import {
   GraduationCap,
   Megaphone,
   MessageSquare,
-  Minus,
   Moon,
-  Plus,
   RotateCcw,
   StickyNote,
   Sun,
@@ -28,6 +26,7 @@ import {
   useAccessibilityPrefs,
 } from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
+import { NumberStepper } from './NumberStepper'
 import { cn } from '../../lib/utils'
 import { replayWelcome } from '../../lib/welcome-panel'
 import { useDisclosureAnimation } from './useDisclosureAnimation'
@@ -87,55 +86,6 @@ interface FabAction {
   count?: number
 }
 
-interface NumberStepperProps {
-  icon: ReactNode
-  label: string
-  value: string
-  onDecrease: () => void
-  onIncrease: () => void
-  atMin: boolean
-  atMax: boolean
-  /** px size for the +/− glyphs, scaled by the caller off the FAB factor */
-  iconSize: number
-}
-
-/** One labelled −/value/+ row in the accessibility panel. Not a progress
- *  stepper — that one lives in `ui/Stepper.tsx`. */
-function NumberStepper({
-  icon,
-  label,
-  value,
-  onDecrease,
-  onIncrease,
-  atMin,
-  atMax,
-  iconSize,
-}: NumberStepperProps) {
-  const { t } = useLingui()
-  const button =
-    'w-[1.75em] h-[1.75em] rounded-[0.375em] flex items-center justify-center border border-ktip-sand-200 text-ktip-sand-700 hover:bg-ktip-sand-50 hover:text-ktip-ocean-600 disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-ktip-sand-700 transition-colors'
-
-  return (
-    <div className="mt-[0.75em] first:mt-0">
-      <div className="flex items-center gap-[0.375em] text-[0.75em] text-ktip-sand-600 mb-[0.375em]">
-        {icon}
-        {label}
-      </div>
-      <div className="flex items-center gap-[0.5em]">
-        <button onClick={onDecrease} disabled={atMin} aria-label={t`Decrease ${label}`} className={button}>
-          <Minus size={iconSize} />
-        </button>
-        {/* tabular-nums so the row does not reflow as the number changes */}
-        <span className="flex-1 text-center text-[0.8125em] font-medium tabular-nums text-ktip-sand-900">
-          {value}
-        </span>
-        <button onClick={onIncrease} disabled={atMax} aria-label={t`Increase ${label}`} className={button}>
-          <Plus size={iconSize} />
-        </button>
-      </div>
-    </div>
-  )
-}
 
 /**
  * Expandable quick-actions cluster fixed to the bottom-right corner.

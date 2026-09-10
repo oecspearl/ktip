@@ -87,6 +87,12 @@
         }
       } catch (e) {}
       try {
+        // The member's own reduced-motion switch (155) — same first-paint
+        // timing as the theme, for the same reason.
+        if (localStorage.getItem('ktip_motion') === 'true')
+          document.documentElement.classList.add('reduce-motion')
+      } catch (e) {}
+      try {
         var t = localStorage.getItem('ktip_theme');
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches))
           document.documentElement.classList.add('dark')

@@ -3276,3 +3276,22 @@ html.route-shuffle::view-transition {
     break-inside: avoid;
   }
 }
+
+/* The member's own reduced-motion switch (155, useReducedMotionPref). Mirrors
+   what the prefers-reduced-motion blocks above do for the OS setting: no
+   keyframes, no transitions, marquee tracks become scrollable rows. One
+   blanket rule rather than a copy of every block, so a new animation is
+   covered the day it is written. */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+html.reduce-motion .animate-marquee-left,
+html.reduce-motion .animate-marquee-right {
+  animation: none !important;
+  transform: none !important;
+}

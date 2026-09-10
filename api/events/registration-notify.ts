@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
+import { emailAllowed } from '../_lib/email-prefs'
 
 export const config = { runtime: 'edge' }
 
@@ -131,6 +132,12 @@ export default async function handler(request: Request) {
     // The registration and the in-app notification both landed. Only delivery
     // is unconfigured, and that is not the registrant's problem.
     return json({ sent: false, reason: 'email_not_configured' }, 200)
+  }
+
+  // The organizer's Email toggle (Settings › Preferences). The in-app
+  // notification already landed; this is the optional channel.
+  if (!(await emailAllowed(admin, (event as any).organizer_id))) {
+    return json({ sent: false, reason: 'email_disabled' }, 200)
   }
 
   const { data: organizer } = await admin.auth.admin.getUserById((event as any).organizer_id)

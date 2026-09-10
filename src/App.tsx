@@ -14,6 +14,7 @@ import { ToastProvider } from './contexts/ToastContext'
 import { AchievementProvider } from './contexts/AchievementContext'
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { LanguageProfileSync } from './i18n/LanguageProfileSync'
+import { DisplayPrefsSync } from './components/DisplayPrefsSync'
 import { AchievementUnlockModal } from './components/achievements/AchievementUnlockModal'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -727,6 +728,9 @@ function App() {
                   AuthProvider to see the profile, and it cannot live inside
                   AuthProvider itself because LanguageProvider is above it. */}
               <LanguageProfileSync />
+              {/* Same job for theme, readable font, text size, brightness and
+                  reduced motion (155). */}
+              <DisplayPrefsSync />
               <AchievementProvider>
                 <RouterProvider router={router} />
               </AchievementProvider>
