@@ -101,6 +101,45 @@ describe('filterByAccess', () => {
     const visible = filterByAccess(SITE_MAP, { signedIn: false, isOecs: false })
     expect(visible.some((e) => e.href?.startsWith('/admin'))).toBe(false)
   })
+
+  it('hides a capability-gated row from a member who lacks the capability', () => {
+    // A student cannot host an event; the panel must not offer /events/new.
+    const ids = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false, can: () => false }).map((e) => e.id)
+    expect(ids).not.toContain('events.new')
+    expect(ids).not.toContain('projects.new')
+    expect(ids).not.toContain('grants.post')
+  })
+
+  it('keeps a capability-gated row for a member who holds the capability', () => {
+    const can = (k: string) => k === 'event:create'
+    const ids = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false, can }).map((e) => e.id)
+    expect(ids).toContain('events.new')
+    expect(ids).not.toContain('projects.new')
+  })
+
+  it('keeps capability-gated rows for a signed-out visitor only through the access level', () => {
+    // 'auth' rows are hidden signed out regardless; the capability layer never
+    // applies to a visitor, whose CTAs route to login.
+    const ids = filterByAccess(SITE_MAP, { signedIn: false, isOecs: false, can: () => false }).map((e) => e.id)
+    expect(ids).not.toContain('events.new')
+    expect(ids).toContain('discover')
+  })
+
+  it('shows the business profile and Chamber rows only to organisation accounts', () => {
+    const person = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false, isOrgAccount: false }).map((e) => e.id)
+    const org = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false, isOrgAccount: true }).map((e) => e.id)
+    expect(person).not.toContain('org.profile')
+    expect(person).not.toContain('org.chamber-verification')
+    expect(org).toContain('org.profile')
+    expect(org).toContain('org.chamber-verification')
+  })
+
+  it('keeps every row for a caller that only knows the coarse levels', () => {
+    // Older callers pass no `can`; behaviour for them is unchanged.
+    const ids = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false }).map((e) => e.id)
+    expect(ids).toContain('events.new')
+    expect(ids).toContain('org.profile')
+  })
 })
 
 describe('applyAiRanking', () => {

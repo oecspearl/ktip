@@ -2,6 +2,7 @@ import { i18n } from '@lingui/core'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
 import type { SiteEntry } from './site-map'
+import type { PermissionKey } from '../types'
 
 /**
  * Local (offline, instant) matching for the navbar search panel.
@@ -138,21 +139,45 @@ export function localSearch(query: string, entries: SiteEntry[]): SiteEntry[] {
 export interface Viewer {
   signedIn: boolean
   isOecs: boolean
+  /**
+   * Capability check for a signed-in member. Optional so callers that only
+   * know the coarse levels keep working; absent, `requires` rows are kept for
+   * a signed-in viewer rather than hidden, which is the pre-existing behaviour.
+   */
+  can?: (permission: PermissionKey) => boolean
+  /** Acts as an organisation — holds a business profile rather than a CV. */
+  isOrgAccount?: boolean
 }
 
-/** Hide entries the current viewer cannot reach. */
+/** Does the coarse access level admit this viewer? */
+function passesLevel(entry: SiteEntry, viewer: Viewer): boolean {
+  switch (entry.access) {
+    case 'guest':
+      return !viewer.signedIn
+    case 'auth':
+      return viewer.signedIn
+    case 'oecs':
+      return viewer.isOecs
+    default:
+      return true
+  }
+}
+
+/**
+ * Hide entries the current viewer cannot reach.
+ *
+ * Two layers: the coarse `access` level, then — for a signed-in member only —
+ * the capability or account shape the destination actually demands. A
+ * signed-out visitor is never filtered on capability: those rows route to
+ * login, which is the right answer for them.
+ */
 export function filterByAccess(entries: SiteEntry[], viewer: Viewer): SiteEntry[] {
   return entries.filter((entry) => {
-    switch (entry.access) {
-      case 'guest':
-        return !viewer.signedIn
-      case 'auth':
-        return viewer.signedIn
-      case 'oecs':
-        return viewer.isOecs
-      default:
-        return true
-    }
+    if (!passesLevel(entry, viewer)) return false
+    if (!viewer.signedIn) return true
+    if (entry.requires && viewer.can && !viewer.can(entry.requires)) return false
+    if (entry.requiresOrgAccount && viewer.isOrgAccount === false) return false
+    return true
   })
 }
 

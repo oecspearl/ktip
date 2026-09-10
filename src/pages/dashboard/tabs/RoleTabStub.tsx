@@ -2,7 +2,7 @@ import { Navigate } from 'react-router'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
-import { expandRoles } from '../../../lib/permissions'
+import { effectiveRoles } from '../../../lib/permissions'
 import type { UserRole } from '../../../types'
 import { Trans } from '@lingui/react/macro'
 
@@ -30,10 +30,9 @@ export function RoleTabStub({
     return <div className="bg-ktip-cream rounded-2xl border border-ktip-sand-200 h-48 animate-pulse-soft" />
   }
 
-  // expandRoles, not the raw column: a legacy 'oecs' account resolves to
-  // super_admin, and a tab list written against the modern slug would otherwise
-  // bounce an admin off their own dashboard.
-  const held = expandRoles(auth.profile?.roles)
+  // The same rule the rail uses to decide whether to show this tab at all —
+  // otherwise a tab the switcher hid stays reachable by typing its URL.
+  const held = effectiveRoles(auth.profile?.roles, auth.profile?.active_role)
   const allowed = roles.some((role) => held.includes(role))
   if (!allowed) return <Navigate to="/dashboard" replace />
 

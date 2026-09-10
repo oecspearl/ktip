@@ -381,7 +381,7 @@ export function assignableRolesFor(actorRoles: readonly string[] | null | undefi
  * makes sense for a company. An account holding both (a founder who is also a
  * mentor) keeps the CV — only a purely organisational account loses it.
  */
-export function isOrganizationAccount(roles: RoleSlug[] | undefined): boolean {
+export function isOrganizationAccount(roles: readonly string[] | null | undefined): boolean {
   const held = roles || []
   if (held.length === 0) return false
   const org = new Set<string>(ORGANIZATION_ROLES)
@@ -980,6 +980,76 @@ export function expandRoles(roles: readonly string[] | null | undefined): RoleSl
     if (alias) out.add(alias)
   }
   return [...out]
+}
+
+/**
+ * The roles a surface should render for.
+ *
+ * `expandRoles` first, so lists written against the modern slug still match a
+ * legacy account, then narrowed to the active context — but only when that
+ * context is a role the account actually holds. A stale or spoofed active_role
+ * can never widen anything. This is the one rule the navbar, the dashboard rail,
+ * the role-tab stubs and the ranker's client all agree on; it used to be written
+ * out longhand at each of them.
+ */
+export function effectiveRoles(
+  roles: readonly string[] | null | undefined,
+  activeRole: string | null | undefined
+): RoleSlug[] {
+  const held = expandRoles(roles)
+  if (activeRole && held.includes(activeRole as RoleSlug)) return [activeRole as RoleSlug]
+  return held
+}
+
+/**
+ * Roles as they should appear on chips and badges.
+ *
+ * `effectiveRoles` keeps both halves of an alias pair (`oecs` and `super_admin`)
+ * so RLS and tab lists keep working; rendered as chips that is two labels for
+ * one identity. This collapses each slug onto its alias target and dedupes.
+ */
+export function displayRoles(
+  roles: readonly string[] | null | undefined,
+  activeRole: string | null | undefined
+): RoleSlug[] {
+  const out = new Set<RoleSlug>()
+  for (const slug of effectiveRoles(roles, activeRole)) {
+    out.add(ROLE_ALIASES[slug] ?? slug)
+  }
+  return [...out]
+}
+
+/** The single role a surface should speak to, or null for an account with none. */
+export function primaryRole(
+  roles: readonly string[] | null | undefined,
+  activeRole: string | null | undefined
+): RoleSlug | null {
+  return displayRoles(roles, activeRole)[0] ?? null
+}
+
+/**
+ * Can this member reach "My Applications"?
+ *
+ * One rule for the navbar, the grants hero and the search index, so a member
+ * who can start an application can always find the way back to it. Students
+ * hold grant:apply since migration 110; before that they were routed through a
+ * sponsor and this helper would have had to widen for them.
+ */
+export function canUseGrantApplications(can: (permission: PermissionKey) => boolean): boolean {
+  return can('grant:apply')
+}
+
+/**
+ * Where "your profile" lives for this account: the CV for a person, the
+ * business profile for a purely organisational account. Written once here
+ * because it used to be forked in three places that disagreed at the edges.
+ */
+export function primaryProfileLink(
+  roles: readonly string[] | null | undefined
+): { to: '/dashboard/business' | '/dashboard/profile'; kind: 'business' | 'cv' } {
+  return isOrganizationAccount(roles)
+    ? { to: '/dashboard/business', kind: 'business' }
+    : { to: '/dashboard/profile', kind: 'cv' }
 }
 
 /**

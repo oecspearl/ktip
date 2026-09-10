@@ -1,4 +1,5 @@
 import { HELP_CATEGORIES } from './help-content'
+import type { PermissionKey } from '../types'
 
 /**
  * Static index of everything the app can do — every page, every feature, every
@@ -26,6 +27,14 @@ export interface SiteEntry {
   keywords: string[]
   href?: string
   access?: SiteAccess
+  /**
+   * Capability a signed-in member must hold to see this row. Signed-out
+   * viewers are governed by `access` alone — a CTA that routes to login is
+   * fine; a CTA that routes a member to a refusal is not.
+   */
+  requires?: PermissionKey
+  /** Only for accounts that act as an organisation (business profile holders). */
+  requiresOrgAccount?: boolean
   /** Steps shown when the row is expanded instead of navigated to. */
   howTo?: string[]
   /** lucide-react icon name. */
@@ -88,6 +97,7 @@ export const SITE_MAP: SiteEntry[] = [
     keywords: ['new project', 'add project', 'submit idea', 'post project', 'contributor'],
     href: '/projects/new',
     access: 'auth',
+    requires: 'project:create',
     icon: 'Plus',
     howTo: [
       'Go to Projects in the top navigation bar.',
@@ -156,6 +166,7 @@ export const SITE_MAP: SiteEntry[] = [
     keywords: ['new event', 'host event', 'add event', 'organise', 'organize'],
     href: '/events/new',
     access: 'auth',
+    requires: 'event:create',
     icon: 'CalendarPlus',
     howTo: [
       'Go to Events in the top navigation bar.',
@@ -266,11 +277,10 @@ export const SITE_MAP: SiteEntry[] = [
     keywords: ['my grants', 'drafts', 'submissions', 'application status', 'resume'],
     href: '/grants/my-applications',
     access: 'auth',
+    requires: 'grant:apply',
     icon: 'ClipboardList',
   },
-  // The funder's side. `access: 'auth'` rather than a permission — SiteAccess
-  // has no notion of one, and the route guard says no to anyone without
-  // grant:post the moment they open it.
+  // The funder's side, shown only to accounts that may post funding.
   {
     id: 'grants.post',
     title: 'Post funding',
@@ -279,6 +289,7 @@ export const SITE_MAP: SiteEntry[] = [
     keywords: ['post grant', 'create grant', 'new grant', 'funding call', 'publish funding', 'funder', 'donor'],
     href: '/grants/new',
     access: 'auth',
+    requires: 'grant:post',
     icon: 'FilePlus',
     howTo: [
       'Open Funding → Post a Grant. The entry only appears for accounts that may post funding.',
@@ -659,7 +670,19 @@ export const SITE_MAP: SiteEntry[] = [
     keywords: ['business', 'organisation', 'organization', 'company', 'sme', 'portfolio', 'employer'],
     href: '/dashboard/business',
     access: 'auth',
+    requiresOrgAccount: true,
     icon: 'Building2',
+  },
+  {
+    id: 'org.chamber-verification',
+    title: 'Chamber verification',
+    category: 'Account',
+    description: 'Register your business with your National Chamber of Commerce for verified status',
+    keywords: ['chamber', 'verify business', 'sme verification', 'registry', 'registration number', 'verified sme'],
+    href: '/sme/verification',
+    access: 'auth',
+    requiresOrgAccount: true,
+    icon: 'Landmark',
   },
   {
     id: 'dashboard.progress',

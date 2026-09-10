@@ -34,6 +34,7 @@ import {
   CalendarPlus,
   FileText,
   Building2,
+  Landmark,
   UserPlus,
   FilePlus,
   Wallet,
@@ -46,7 +47,11 @@ import { StaggeredMobileMenu, StaggeredMenuIcon } from './StaggeredMobileMenu'
 import { RoleSwitcher } from './RoleSwitcher'
 import { CircularScroll } from '../ui/CircularScroll'
 import { ROLE_LABELS } from '../../lib/constants'
-import { isOrganizationAccount, opensAdminConsole } from '../../lib/permissions'
+import {
+  effectiveRoles as effectiveRolesOf,
+  opensAdminConsole,
+  primaryProfileLink,
+} from '../../lib/permissions'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from '../../hooks/useNotifications'
 import { useGlobalSearch } from '../../hooks/useGlobalSearch'
@@ -419,14 +424,13 @@ export function Navbar() {
    * since the switcher landed. Anything not actually held is ignored, so a stale
    * active_role cannot invent a context.
    */
-  const heldRoles = auth.roles
-  const effectiveRoles =
-    auth.activeRole && heldRoles.includes(auth.activeRole) ? [auth.activeRole] : heldRoles
+  const effectiveRoles = effectiveRolesOf(auth.roles, auth.activeRole)
 
   // Organisation-tier accounts see a business profile where a person sees a CV.
   // A founder who is also a mentor keeps the CV — until they explicitly act as
   // the organisation, at which point the business profile is what they want.
-  const isOrgAccount = isOrganizationAccount(effectiveRoles)
+  const profileLink = primaryProfileLink(effectiveRoles)
+  const isOrgAccount = profileLink.kind === 'business'
 
   // Mirrors AdminRoute exactly. Kept as one value so the desktop bar and the
   // mobile menu can never drift apart.
@@ -1281,23 +1285,25 @@ export function Navbar() {
                           in was the Virtual Campus handoff redirect. It is a
                           person's résumé, so an organisation account gets its
                           business profile here instead. */}
-                      {isOrgAccount ? (
+                      <Link
+                        to={profileLink.to}
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                      >
+                        {isOrgAccount ? <Building2 size={18} /> : <FileText size={18} />}
+                        <span>{isOrgAccount ? <Trans>Business profile</Trans> : <Trans>My CV</Trans>}</span>
+                      </Link>
+                      {/* The Chamber registration had no way in from anywhere in
+                          the app; it lives beside the business profile because it
+                          is the business's other piece of paperwork. */}
+                      {isOrgAccount && (
                         <Link
-                          to="/dashboard/business"
+                          to="/sme/verification"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                         >
-                          <Building2 size={18} />
-                          <span><Trans>Business profile</Trans></span>
-                        </Link>
-                      ) : (
-                        <Link
-                          to="/dashboard/profile"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
-                        >
-                          <FileText size={18} />
-                          <span><Trans>My CV</Trans></span>
+                          <Landmark size={18} />
+                          <span><Trans>Chamber verification</Trans></span>
                         </Link>
                       )}
                       <Link
@@ -1707,7 +1713,7 @@ export function Navbar() {
           <LayoutDashboard size={18} className="shrink-0 text-white/45" />
         </Link>
         <Link
-          to={isOrgAccount ? '/dashboard/business' : '/dashboard/profile'}
+          to={profileLink.to}
           data-span={SQUARE_TILE_SPAN}
           title={isOrgAccount ? t`Business profile` : t`My CV`}
           aria-label={isOrgAccount ? t`Business profile` : t`My CV`}

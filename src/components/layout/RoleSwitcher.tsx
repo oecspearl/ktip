@@ -1,7 +1,7 @@
 import { Check, Repeat } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
-import { ROLE_BY_SLUG } from '../../lib/permissions'
+import { ROLE_BY_SLUG, displayRoles } from '../../lib/permissions'
 import type { RoleSlug } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -25,7 +25,9 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
   const auth = useAuth()
   const toast = useToast()
 
-  const held = (auth.profile?.roles || []) as RoleSlug[]
+  // Every held role, aliases collapsed, never narrowed by the current context —
+  // a switcher that only offered the narrowed set would lock the member in.
+  const held = displayRoles(auth.profile?.roles, null)
 
   // A single-role account has nothing to switch between.
   if (held.length < 2) return null

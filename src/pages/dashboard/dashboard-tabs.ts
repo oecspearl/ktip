@@ -22,10 +22,10 @@ import {
   Sparkles,
   BadgeCheck,
   ScrollText,
+  FileText,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-// INDIVIDUAL_ROLES and rolesOfTier come back with the commented-out CV tab.
-import { ORGANIZATION_ROLES, expandRoles } from '../../lib/permissions'
+import { ADMIN_TIER_ROLES, INDIVIDUAL_ROLES, ORGANIZATION_ROLES, effectiveRoles } from '../../lib/permissions'
 import type { UserRole } from '../../types'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
@@ -77,11 +77,6 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // AchievementsTab); the old /achievements address redirects here.
   { to: 'achievements', label: msg`Achievements`, icon: Trophy, description: msg`Badges, points and rank` },
 
-  // OFF THE RAIL until the CV panel is finished. The ROUTE is untouched —
-  // /dashboard/profile and /cv still resolve, so existing links and bookmarks
-  // are not broken — it is only the way IN from the rail that is withdrawn.
-  // Restore this entry to bring it back; nothing else has to change.
-  //
   // Kept at 'profile' so existing /dashboard/profile links and bookmarks still
   // land somewhere; the panel is the full CV page — designs, downloads and
   // publishing included. /cv redirects here.
@@ -90,14 +85,15 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // SME account has no version of it to write, and was being offered one
   // anyway because this entry was the only one in the list with no `roles`.
   // Businesses get the Business profile tab below instead. Admins are people
-  // too, so the admin tier keeps the tab even in an admin operating context.
-  // {
-  //   to: 'profile',
-  //   label: msg`My CV`,
-  //   icon: FileText,
-  //   description: msg`Your résumé, ready to send`,
-  //   roles: [...INDIVIDUAL_ROLES, ...rolesOfTier('admin')],
-  // },
+  // too, so the admin tier keeps the tab even in an admin operating context —
+  // which means an admin-only account now has a CV tab it did not have before.
+  {
+    to: 'profile',
+    label: msg`My CV`,
+    icon: FileText,
+    description: msg`Your résumé, ready to send`,
+    roles: [...INDIVIDUAL_ROLES, ...ADMIN_TIER_ROLES],
+  },
 
   // Role-gated. Panels are stubs for now — the gating is what's wired up.
   { to: 'funding', label: msg`Funding`, icon: Wallet, description: msg`Deal flow and applications`, roles: ['investor'] },
@@ -146,11 +142,10 @@ export function visibleDashboardTabs(
   roles: UserRole[] | undefined,
   activeRole?: UserRole | null
 ): DashboardTab[] {
-  // Aliases resolved first, so a tab list can be written against the modern
-  // slug alone. The Admin entry below still names 'oecs' explicitly for the
-  // same reason 063 kept the slug alive, but new entries need not.
-  const held = expandRoles(roles)
-  // Never widen: the context must be a role the account actually holds.
-  const effective = activeRole && held.includes(activeRole) ? [activeRole] : held
+  // Aliases resolved and the context narrowed by the one shared rule, so this
+  // rail can never disagree with the navbar about which roles are in play. The
+  // Admin entry below still names 'oecs' explicitly for the same reason 063 kept
+  // the slug alive, but new entries need not.
+  const effective = effectiveRoles(roles, activeRole)
   return DASHBOARD_TABS.filter((tab) => !tab.roles || tab.roles.some((r) => effective.includes(r)))
 }

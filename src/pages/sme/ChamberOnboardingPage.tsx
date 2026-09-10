@@ -15,6 +15,7 @@ import { keys } from '../../queries/keys'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Employer } from '../../types'
 import { slugify } from '../../lib/slug'
+import { expandRoles, isOrganizationAccount } from '../../lib/permissions'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
@@ -85,6 +86,12 @@ export default function ChamberOnboardingPage() {
 
   if (!auth.loading && !auth.user) {
     return <Navigate to="/login" replace />
+  }
+  // A Chamber registration is a business's act. A person — a student, a mentor
+  // — has no company to register, and until now could file one anyway because
+  // this page only ever checked for a session.
+  if (auth.profile && !isOrganizationAccount(expandRoles(auth.profile.roles))) {
+    return <Navigate to="/dashboard" replace />
   }
 
   const handleSubmit = async () => {

@@ -7,7 +7,7 @@ import { Disclaimer } from '../legal/Disclaimer'
 import { useAIAssistant } from '../../hooks/useAIAssistant'
 import { useAuth } from '../../contexts/AuthContext'
 import { ASSISTANT_NAME, ASSISTANT_TAGLINE } from '../../lib/assistant'
-import { opensAdminConsole } from '../../lib/permissions'
+import { effectiveRoles, isOrganizationAccount, opensAdminConsole, primaryRole } from '../../lib/permissions'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
@@ -22,11 +22,15 @@ export function AssistantChatWindow() {
 
   const assistant = useAIAssistant({
     userId: auth.user?.id,
-    userRole: auth.profile?.roles?.[0] ?? null,
+    // The context the member switched into, not whichever role happens to be
+    // first in the array — otherwise the persona ignores the switcher.
+    userRole: primaryRole(auth.roles, auth.activeRole),
     userName: auth.profile?.display_name ?? null,
     // Capability, not slug — otherwise the assistant refuses to mention admin
     // pages to an admin created after 063. Matches AdminRoute.
     isOecs: opensAdminConsole(auth.can),
+    can: auth.can,
+    isOrgAccount: isOrganizationAccount(effectiveRoles(auth.roles, auth.activeRole)),
   })
 
   const [input, setInput] = useState('')

@@ -10,6 +10,7 @@ import { TUTORIAL_IDS } from '../../data/tutorials'
 import { visibleDashboardTabs } from './dashboard-tabs'
 import { DASH_BAR_H, DashboardTopBar } from './DashboardTopBar'
 import { ROLE_LABELS } from '../../lib/constants'
+import { displayRoles } from '../../lib/permissions'
 import { cn } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { Plural, useLingui } from '@lingui/react/macro'
@@ -33,6 +34,9 @@ export default function DashboardLayout() {
   const dashBanner = parseBanner(profile?.banner)
   const displayName = profile?.display_name || t`Your dashboard`
   const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role)
+  // Chips follow the operating context the rail follows, and a legacy alias
+  // pair collapses to one chip — the rail and the band must never disagree.
+  const chipRoles = displayRoles(profile?.roles, profile?.active_role)
 
   // The rail is role-aware, so the tour has to wait for the profile — otherwise
   // it spotlights a shorter rail than the member actually has.
@@ -105,7 +109,7 @@ export default function DashboardLayout() {
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Dashboard` }]}
       >
         <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          {profile?.roles?.map((role) => (
+          {chipRoles.map((role) => (
             <span
               key={role}
               className="px-2.5 py-1 rounded-md bg-white/15 border border-white/25 text-white text-sm font-medium backdrop-blur-sm"
@@ -136,7 +140,7 @@ export default function DashboardLayout() {
         displayName={displayName}
         avatarUrl={profile?.avatar_url}
         isVerified={profile?.is_verified}
-        roles={profile?.roles}
+        roles={chipRoles}
         connectionCount={connectionCount ?? 0}
         shown={collapsed}
       />

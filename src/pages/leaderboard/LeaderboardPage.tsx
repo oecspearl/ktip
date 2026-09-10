@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useLeaderboard, useMyRank } from '../../hooks/useLeaderboard'
 import { useTrackFlag } from '../../hooks/useAchievements'
 import { ROLE_LABELS } from '../../lib/constants'
+import { primaryRole } from '../../lib/permissions'
 import { cn } from '../../lib/utils'
 import type { LeaderboardScope, LeaderboardWindow } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
@@ -45,7 +46,7 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
   // version that means anything to them — an arbitrary-country picker would be
   // browsing, not competing.
   const myCountry = auth.profile?.country || null
-  const myRole = auth.profile?.active_role || auth.profile?.roles?.[0] || null
+  const myRole = primaryRole(auth.profile?.roles, auth.profile?.active_role)
 
   const value = scope === 'country' ? myCountry : scope === 'role' ? myRole : null
 

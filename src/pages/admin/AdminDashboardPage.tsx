@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { PageHero } from '../../components/layout/PageHero'
+import { visibleAdminNavItems } from '../../components/layout/AdminLayout'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   useAdminStats,
@@ -194,6 +195,17 @@ export default function AdminDashboardPage() {
     },
   ]
 
+  // A seat that can see none of the tiles, none of the queues and none of the
+  // quick actions gets told so, and pointed at whatever the sidebar does hold
+  // for them, rather than an empty page that looks like a loading failure.
+  // Never a redirect: the sidebar's first entry is this page, so a redirect
+  // to "the first visible entry" would loop.
+  const hasAnyTile =
+    canSeeUsers || canSeeEvents || canSeeGrants || canSeeForums || canSeeResources ||
+    canSeeProjects || canSeeAnalytics || canSeeVerification || canSeeModeration ||
+    canSeeInstitutions || canSeeChamber || auth.can('event:create')
+  const elsewhere = visibleAdminNavItems(auth.can).filter((item) => item.href !== '/admin')
+
   // Only the queues this seat was allowed to read came back at all.
   const queues = allQueues
     .filter((queue) => !!attention?.[queue.key])
@@ -213,6 +225,27 @@ export default function AdminDashboardPage() {
         imageSeed="admin"
         actions={analytics && canSeeAnalytics ? <ExportButton analytics={analytics} /> : undefined}
       />
+
+      {!hasAnyTile && (
+        <div className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-6 mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Nothing assigned to this account yet</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            This seat opens the console but holds none of the capabilities the overview reports on.
+            {elsewhere.length > 0
+              ? ' The sections you can work are listed below and in the sidebar.'
+              : ' Ask a Super Admin to assign the sections you should be working.'}
+          </p>
+          {elsewhere.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {elsewhere.map((item) => (
+                <Link key={item.href} to={item.href}>
+                  <Button size="sm" variant="secondary">{item.label}</Button>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Needs attention.
           First, and above the totals, because it is the only band on the page

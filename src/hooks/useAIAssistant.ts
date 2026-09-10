@@ -5,8 +5,9 @@ import { msg } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react/macro'
 import type { MessageDescriptor } from '@lingui/core'
 import { resolveDestinations, type AssistantDestination } from '../lib/assistant'
+import type { Viewer } from '../lib/site-search'
 import { supabase } from '../lib/supabase'
-import type { UserRole } from '../types'
+import type { PermissionKey, UserRole } from '../types'
 
 export interface ChatMessage {
   id: string
@@ -196,10 +197,7 @@ async function callChat(
  * already validated server-side against SITE_ENTRY_IDS, so anything reaching
  * `resolveDestinations` is a real entry.
  */
-async function callNavigator(
-  query: string,
-  viewer: { signedIn: boolean; isOecs: boolean }
-): Promise<NavigatorResult> {
+async function callNavigator(query: string, viewer: Viewer): Promise<NavigatorResult> {
   // The server works out who is asking from the token; `viewer` is only for
   // filtering the destinations it sends back.
   const res = await fetch('/api/ai-search', {
@@ -225,6 +223,9 @@ export interface UseAIAssistantOptions {
   userRole?: UserRole | null
   userName?: string | null
   isOecs?: boolean
+  /** Capability check so suggested destinations are ones this member can open. */
+  can?: (permission: PermissionKey) => boolean
+  isOrgAccount?: boolean
 }
 
 /**
@@ -242,6 +243,8 @@ export function useAIAssistant(options?: UseAIAssistantOptions) {
   const name = options?.userName
   const isOecs = options?.isOecs ?? false
   const signedIn = !!userId
+  const can = options?.can
+  const isOrgAccount = options?.isOrgAccount
 
   // Computed once, at mount — the welcome text depends only on identity.
   const welcomeMsgRef = useRef<ChatMessage | null>(null)
@@ -295,7 +298,7 @@ export function useAIAssistant(options?: UseAIAssistantOptions) {
 
       const [chat, nav] = await Promise.allSettled([
         callChat(apiMessages),
-        callNavigator(trimmed, { signedIn, isOecs }),
+        callNavigator(trimmed, { signedIn, isOecs, can, isOrgAccount }),
       ])
 
       const navResult = nav.status === 'fulfilled' ? nav.value : null

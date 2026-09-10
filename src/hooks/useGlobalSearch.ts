@@ -8,7 +8,7 @@ import { keys } from '../queries/keys'
 import { useAuth } from '../contexts/AuthContext'
 import type { SiteEntry } from '../lib/site-map'
 import { entityPath, forumPostPath } from '../lib/slug'
-import { opensAdminConsole } from '../lib/permissions'
+import { effectiveRoles, isOrganizationAccount, opensAdminConsole } from '../lib/permissions'
 import {
   applyAiRanking,
   filterByAccess,
@@ -17,6 +17,7 @@ import {
   toRow,
   type SearchGroup,
   type SearchRow,
+  type Viewer,
 } from '../lib/site-search'
 
 /**
@@ -291,6 +292,13 @@ export function useGlobalSearch(
   // admin created after 063 — they could open /admin but could not find it by
   // searching. Resolved through the same capability AdminRoute uses.
   const isOecs = opensAdminConsole(auth.can)
+  // Rows that name a capability are hidden from a member who lacks it, so the
+  // search panel never offers a page the route guard will refuse.
+  const isOrgAccount = isOrganizationAccount(effectiveRoles(auth.roles, auth.activeRole))
+  const viewer = useMemo<Viewer>(
+    () => ({ signedIn, isOecs, can: auth.can, isOrgAccount }),
+    [signedIn, isOecs, auth.can, isOrgAccount]
+  )
 
   const trimmed = query.trim()
   const debouncedQuery = useDebouncedValue(trimmed, CONTENT_DEBOUNCE_MS)
@@ -312,8 +320,8 @@ export function useGlobalSearch(
 
   // 1. Places & actions (+ help articles) — local, instant once the map is in
   const visibleEntries = useMemo(
-    () => filterByAccess(siteMap?.ALL_ENTRIES ?? NO_ENTRIES, { signedIn, isOecs }),
-    [siteMap, signedIn, isOecs]
+    () => filterByAccess(siteMap?.ALL_ENTRIES ?? NO_ENTRIES, viewer),
+    [siteMap, viewer]
   )
 
   const placeRows = useMemo(() => {
@@ -425,9 +433,9 @@ export function useGlobalSearch(
     const byId = new Map(siteMap.SITE_MAP.map((e) => [e.id, e]))
     return SUGGESTED_IDS.map((id) => byId.get(id))
       .filter((e): e is SiteEntry => !!e)
-      .filter((e) => filterByAccess([e], { signedIn, isOecs }).length > 0)
+      .filter((e) => filterByAccess([e], viewer).length > 0)
       .map((e) => toRow(e))
-  }, [siteMap, signedIn, isOecs])
+  }, [siteMap, viewer])
 
   const [recent, setRecent] = useState<string[]>(() => readRecent())
 

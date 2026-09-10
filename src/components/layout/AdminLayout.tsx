@@ -111,10 +111,18 @@ const adminNavItems: {
   { href: '/admin/errors/simulate', label: 'Error Simulator', icon: FlaskConical, requires: 'org:manage' },
 ]
 
+/**
+ * The sidebar entries this viewer can open. Exported so the admin dashboard can
+ * offer the same list rather than a second, drifting copy of the filter.
+ */
+export function visibleAdminNavItems(can: (permission: PermissionKey) => boolean) {
+  return adminNavItems.filter((item) => !item.requires || can(item.requires))
+}
+
 export function AdminLayout() {
   const location = useLocation()
   const auth = useAuth()
-  const navItems = adminNavItems.filter((item) => !item.requires || auth.can(item.requires))
+  const navItems = visibleAdminNavItems(auth.can)
   const pendingVerification = usePendingVerificationCount(auth.can('verification:review'))
   const badgeFor = (href: string) =>
     href === '/admin/verification' && pendingVerification > 0 ? pendingVerification : null
