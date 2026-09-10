@@ -83,9 +83,9 @@ msgstr "Generado con KTIP Grant Application"
 msgid "Project Editor"
 msgstr "Editor de proyecto"
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Receive email updates about your account activity (coming soon)"
-msgstr "Recibir actualizaciones por correo electrónico sobre la actividad de su cuenta (próximamente)"
+#: src/i18n/harvested.ts
+msgid "Setting up an authenticator app"
+msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Active Grants"
@@ -289,17 +289,6 @@ msgstr "No se pudo abrir el archivo"
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Set up two-step verification"
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.\n"
-"\n"
-"Step 1 confirms your display name (pre-filled from your provider), asks for your date of birth and asks you to pick a role. This step is required, and the site stays out of reach until it is done.\n"
-"\n"
-"Step 2 is optional profile detail: organisation, industry, country, a short bio, skills, interests and your openness to collaborate.\n"
-"\n"
-"You can skip step 2 and fill it in later from Settings, but a fuller profile makes you much easier to find in the member directory."
-msgstr "Tras un registro con Google o Microsoft, llegará al asistente de incorporación en lugar de ir directamente al sitio.\n"
-""
 
 #: src/i18n/harvested.ts
 msgid "Projects, events, grant applications, forum posts, comments, reactions, whiteboards, documents, code snippets, sticky notes"
@@ -517,6 +506,10 @@ msgstr "Titular"
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your profile and personal data"
 msgstr "Su perfil y sus datos personales"
+
+#: src/lib/personalization.ts
+msgid "A good starting point for your first project"
+msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Failed to send feedback"
@@ -997,6 +990,10 @@ msgstr "Se le pedirá confirmación antes del envío — las denuncias se toman 
 msgid "Reproduce and distribute"
 msgstr ""
 
+#: src/lib/personalization.ts
+msgid "Recently added"
+msgstr ""
+
 #: src/pages/dashboard/tabs/my-profile/ProfilePreviewToolbar.tsx
 msgid "Name, photo and country only, until you accept a connection."
 msgstr ""
@@ -1100,6 +1097,16 @@ msgstr "Esta subvención está actualmente inactiva."
 msgid "Work through the five steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Impact & Review."
 msgstr "Recorra los cinco pasos: Datos básicos, Resumen y problema, Solución y plan, Presupuesto y equipo, Impacto y evaluación."
 
+#: src/i18n/harvested.ts
+msgid "Business verification is done by a Business Support Organisation, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.\n"
+"\n"
+"Open the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.\n"
+"\n"
+"The reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.\n"
+"\n"
+"A Private Sector account is the unverified state of the same thing — everything keeps working while you wait."
+msgstr ""
+
 #. placeholder {0}: params.projectTitle
 #: src/hooks/useProjectJoinRequests.ts
 msgid "You are now on the team for \"{0}\"."
@@ -1154,6 +1161,7 @@ msgstr "Excelente"
 
 #: src/components/events/EventCard.tsx
 #: src/components/personalization/ForYouRail.tsx
+#: src/components/settings/PersonalizationTab.tsx
 #: src/hooks/useCalendarFeed.ts
 msgid "Event"
 msgstr "Evento"
@@ -1174,6 +1182,10 @@ msgid "Yes. The final step of the wizard renders the complete application as the
 "You can go back to any step from the preview, fix what you found, and return."
 msgstr "Sí. El último paso del asistente muestra la solicitud completa tal como la leerá el revisor, sección por sección, en lugar de como un conjunto de campos de formulario.\n"
 ""
+
+#: src/pages/discover/DiscoverPage.tsx
+msgid "You can host the first event."
+msgstr ""
 
 #. placeholder {0}: credential.code
 #: src/components/resume/ResumeOutline.tsx
@@ -1335,12 +1347,21 @@ msgstr "• Pizarra: lluvia de ideas visual en un lienzo infinito, con varias pe
 msgid "This grant is live. Existing links to it will break."
 msgstr "Esta subvención está activa. Los enlaces existentes a ella dejarán de funcionar."
 
+#: src/lib/personalization.ts
+msgid "Shares your skills"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "design the rooms"
 msgstr "diseñar las salas"
 
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
+msgstr ""
+
+#. placeholder {0}: params.country
+#: src/lib/personalization.ts
+msgid "In {0}"
 msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
@@ -1533,17 +1554,6 @@ msgstr "Inicie debates en los foros."
 #: src/pages/InvitationsPage.tsx
 msgid "Registrations waiting on you"
 msgstr "Inscripciones a la espera de su acción"
-
-#: src/i18n/harvested.ts
-msgid "Click \"Grants\" in the navigation bar to see every open funding opportunity.\n"
-"\n"
-"Search by keyword and filter by grant type or status. Each listing shows the funding range, the currency, the deadline and the eligibility summary.\n"
-"\n"
-"Open a grant for the full detail, including how to apply and who to contact.\n"
-"\n"
-"Grant deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss."
-msgstr "Haga clic en «Subvenciones» en la barra de navegación para ver todas las oportunidades de financiación abiertas.\n"
-""
 
 #: src/lib/permissions.ts
 msgid "Diaspora Association / Network"
@@ -1930,13 +1940,14 @@ msgid "Rooms, open audio and everyone who is online right now. Registered attend
 msgstr "Salas, audio abierto y todas las personas conectadas en este momento. Los asistentes registrados pueden entrar directamente."
 
 #: src/i18n/harvested.ts
-msgid "Go to Settings, open Preferences and turn off \"Show me on the leaderboard\".\n"
+msgid "After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.\n"
 "\n"
-"You keep earning badges and points; you simply stop appearing in the public ranking.\n"
+"Step 1 confirms your display name (pre-filled from your provider), asks for your date of birth and asks you to pick a role. This step is required, and the site stays out of reach until it is done.\n"
 "\n"
-"Student accounts are excluded automatically and permanently — that is a safeguarding rule, not a setting, so there is nothing for a student to turn on or off."
-msgstr "Vaya a Configuración, abra Preferencias y desactive «Mostrarme en la clasificación».\n"
-""
+"Step 2 is optional profile detail: organisation, industry, country, a short bio, skills, interests and your openness to collaborate.\n"
+"\n"
+"You can skip step 2 and fill it in later from your Dashboard, but a fuller profile makes you much easier to find in the member directory."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The badge catalogue and its unlock rules."
@@ -2048,17 +2059,6 @@ msgstr "Visibilidad"
 msgid "Stop presenting"
 msgstr "Dejar de presentar"
 
-#: src/i18n/harvested.ts
-msgid "Click the magnifier in the navigation bar, or press Ctrl+K (Cmd+K on Mac), to open search from anywhere.\n"
-"\n"
-"Search covers pages, projects, events, grants, forum boards, members, resources and every help article at once. Use the arrow keys to move through results and Enter to open one.\n"
-"\n"
-"When a result is a how-to, press the right arrow to expand the steps inline instead of leaving the page.\n"
-"\n"
-"The brain icon in the panel turns on AI-guided navigation: describe what you are trying to do in plain language and it points you to the right page."
-msgstr "Haga clic en la lupa de la barra de navegación, o pulse Ctrl+K (Cmd+K en Mac), para abrir la búsqueda desde cualquier lugar.\n"
-""
-
 #: src/components/notes/StickyNote.tsx
 msgid "Expand note"
 msgstr "Expandir nota"
@@ -2080,6 +2080,10 @@ msgstr "El inicio de sesión se canceló antes de que su proveedor lo confirmara
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "About you"
 msgstr "Sobre usted"
+
+#: src/i18n/harvested.ts
+msgid "Run the platform, publish funding calls, and organise regional events."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Consent — withdrawable at any time in Settings"
@@ -2318,6 +2322,10 @@ msgstr "a {0}"
 msgid "Cutting out the background…"
 msgstr ""
 
+#: src/components/directory/PeopleLikeYouRail.tsx
+msgid "Members like you"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Where KTIP uses AI, and what it does with your text"
 msgstr ""
@@ -2412,6 +2420,16 @@ msgstr "Configure su estado desde la etiqueta en la barra superior: verde para i
 
 #: src/pages/forums/BoardFormPage.tsx
 msgid "Board created"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Dashboard, Personalization.\n"
+"\n"
+"Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.\n"
+"\n"
+"Once set, the \"For You\" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n"
+"\n"
+"Everything else stays browsable — personalization changes the order, not what exists."
 msgstr ""
 
 #: src/components/legal/ConsentDocument.tsx
@@ -2711,15 +2729,6 @@ msgid "Application pipeline"
 msgstr ""
 
 #: src/i18n/harvested.ts
-msgid "Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.\n"
-"\n"
-"Grants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own five-step wizard — with a URL set, you never see their applications.\n"
-"\n"
-"Resources and Integrations are straightforward publishing. Forums is where boards are created and posts pinned. Achievements is where badge definitions live."
-msgstr "Subvenciones, Recursos, Integraciones, Foros y Logros cuentan cada uno con una página de administración para crear y seleccionar lo que ven los miembros.\n"
-""
-
-#: src/i18n/harvested.ts
 msgid "Do not strip a copyright notice, a licence header or an attribution comment."
 msgstr ""
 
@@ -2808,18 +2817,6 @@ msgstr "Acotar la búsqueda"
 #: src/components/ui/IndustrySelect.tsx
 msgid "Select an industry"
 msgstr "Seleccione un sector"
-
-#: src/i18n/harvested.ts
-msgid "Settings, Verification tab. The fastest way is a work or school email address.\n"
-"\n"
-"If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.\n"
-"\n"
-"Signed up with a personal address? Enter your work or school address on the Verification tab. KTIP emails it a link; press Confirm and the same check runs. That address never becomes a way to sign in — it only proves you hold it.\n"
-"\n"
-"No such address? Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs. Only OECS administrators can see what you upload. A reviewer approves or declines the request, and you are notified either way.\n"
-"\n"
-"Verified accounts carry a badge, which members can filter by in the directory, and can publish, apply for funding and message other members."
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Use our marks in a way that suggests a funding relationship, or that your organisation speaks for the OECS."
@@ -2947,6 +2944,10 @@ msgstr ""
 msgid "Post Comment"
 msgstr "Publicar comentario"
 
+#: src/lib/personalization.ts
+msgid "Near you"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "See reported and auto-flagged content, including quarantined items."
 msgstr "Consulte el contenido denunciado y marcado automáticamente, incluidos los elementos en cuarentena."
@@ -3023,6 +3024,10 @@ msgstr "Crear primer evento"
 msgid "Opting out"
 msgstr ""
 
+#: src/components/personalization/NotInterestedButton.tsx
+msgid "Could not hide this right now"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Four tools, one account"
 msgstr "Cuatro herramientas, una sola cuenta"
@@ -3089,21 +3094,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Publish funding calls and administer awards"
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Roles are a list, not a single choice — an account can hold several. They sit in three tiers.\n"
-"\n"
-"Admin — Super Admin (OECS Secretariat: system-wide management, policy, audit logs) and Safety Admin (moderation queues and escalations). \"OECS Admin\" is a legacy label that resolves to Super Admin.\n"
-"\n"
-"Organisation — Investor / Funding Agency, Verified SME, Private Sector, Educational Partner and Business Support Organisation.\n"
-"\n"
-"Individual — Entrepreneur, Faculty, Mentor and Student.\n"
-"\n"
-"Investor, Private Sector, Entrepreneur and Mentor are self-assignable: you pick them yourself. Student, Faculty, Verified SME, Educational Partner, Business Support Organisation and the admin roles are granted only after review by an institution, a business support organisation or OECS.\n"
-"\n"
-"What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Two rules never change: Students cannot submit a grant application without a sponsor, and Students cannot start unmonitored direct messages."
-msgstr "Los roles forman una lista, no una opción única — una cuenta puede tener varios. Se organizan en tres niveles.\n"
-""
 
 #: src/i18n/harvested.ts
 msgid "You may name another organisation truthfully — a customer, a technology you build on, a competitor you compare yourself with. You may not use their logo or styling to suggest they endorse you, and you should follow their own brand guidelines where they publish them."
@@ -3262,6 +3252,10 @@ msgstr "Código en línea"
 msgid "The licence ends when you delete the content or your account — with two exceptions, both of which are about other people rather than about us:"
 msgstr ""
 
+#: src/lib/grant-application-template.ts
+msgid "https://drive.google.com/..."
+msgstr ""
+
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "Back to KTIP"
 msgstr ""
@@ -3311,6 +3305,7 @@ msgstr "Palabras"
 msgid "Next day"
 msgstr ""
 
+#: src/components/dashboard/RoleQuickActions.tsx
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/dashboard-tabs.ts
@@ -3439,21 +3434,6 @@ msgstr ""
 msgid "Student verification"
 msgstr "Verificación de estudiantes"
 
-#: src/i18n/harvested.ts
-msgid "Draft — not submitted. Continue to finish it. Student drafts also need a sponsor to accept before they can be submitted.\n"
-"\n"
-"Pending — submitted, waiting to be picked up.\n"
-"\n"
-"Under Review — a reviewer is actively assessing it.\n"
-"\n"
-"Approved — successful.\n"
-"\n"
-"Not accepted — unsuccessful. Where the funder gave feedback, it appears with the decision.\n"
-"\n"
-"Status changes reach you through notifications, so you do not have to keep checking the page."
-msgstr "Borrador — no enviado. Continúe para finalizarlo. Los borradores de los estudiantes también requieren la aceptación de un patrocinador antes de poder enviarse.\n"
-""
-
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Spanish"
 msgstr ""
@@ -3486,18 +3466,14 @@ msgstr "Verificado por la Cámara"
 msgid "Failed to save the address"
 msgstr "No se pudo guardar la dirección"
 
-#: src/i18n/harvested.ts
-msgid "What happens to your idea when you enter a hackathon, challenge or pitch on KTIP — who owns it, who may see it, and what a prize does and does not buy."
+#. placeholder {0}: labels.join('; ')
+#: src/components/ui/MatchReasonChip.tsx
+msgid "Why this is recommended: {0}"
 msgstr ""
 
 #: src/i18n/harvested.ts
-msgid "Your choice, in Settings under Preferences.\n"
-"\n"
-"Everyone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.\n"
-"\n"
-"This controls the visible count, not the connections themselves. Changing it does not disconnect anyone."
-msgstr "Su elección, en Configuración, dentro de Preferencias.\n"
-""
+msgid "What happens to your idea when you enter a hackathon, challenge or pitch on KTIP — who owns it, who may see it, and what a prize does and does not buy."
+msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Update your account password"
@@ -3510,6 +3486,11 @@ msgstr "Desconectado"
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Remove \"{title}\" from this application?"
 msgstr "¿Quitar «{title}» de esta solicitud?"
+
+#. placeholder {0}: params.days
+#: src/lib/personalization.ts
+msgid "Happening in {0} days"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Limits"
@@ -3525,6 +3506,10 @@ msgstr "Acceda a artículos, guías, estudios de caso y herramientas para la inn
 
 #: src/lib/permissions.ts
 msgid "Reconnects overseas expertise with the home market. Mentors, funds, judges challenges and connects talent."
+msgstr ""
+
+#: src/lib/personalization.ts
+msgid "Looking for what you offer"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3623,6 +3608,10 @@ msgstr "Se unió a un equipo de proyecto"
 #: src/pages/forums/ForumsPage.tsx
 msgid "Community Forums"
 msgstr "Foros de la comunidad"
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Filter by what members are open to"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Partner tools and services connected to KTIP"
@@ -3754,6 +3743,16 @@ msgstr "Utilidad y valor"
 
 #: src/i18n/harvested.ts
 msgid "If we act on it, the content is removed or made inaccessible, and the member who posted it is told what was removed, why, and who filed the notice."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "The dashboard calendar pulls four things together so you have one place to look.\n"
+"\n"
+"Events — events on the platform. My Registrations — events you have RSVP'd to. Funding Deadlines — closing dates for the calls you are tracking. Applications — dates attached to your own funding applications.\n"
+"\n"
+"Each kind has its own colour, and you can turn kinds off to reduce the noise.\n"
+"\n"
+"Click a day to see everything on it in a panel, and click through from there to the event or grant itself."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3944,6 +3943,11 @@ msgstr "Describa las fases principales, las actividades y los hitos del cronogra
 msgid "If your content was removed"
 msgstr ""
 
+#. placeholder {0}: counts.likes
+#: src/components/personalization/SignalSummary.tsx
+msgid "{0} liked"
+msgstr ""
+
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Authenticator"
 msgstr ""
@@ -4012,6 +4016,11 @@ msgstr "Ir al inicio"
 msgid "How do I control which notifications I get?"
 msgstr "¿Cómo controlo qué notificaciones recibo?"
 
+#. placeholder {0}: counts.applications
+#: src/components/personalization/SignalSummary.tsx
+msgid "{0} grant applications"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The AI features are optional. The assistant, AI search, extraction and application assistance only run when you invoke them. Automatic translation of member content can be switched off in Settings, and captions are per-room and off unless switched on."
 msgstr ""
@@ -4060,6 +4069,10 @@ msgstr "Acciones rápidas"
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "Approved"
 msgstr "Aprobado"
+
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Nothing hidden. Use the eye icon on a recommended card to hide something."
+msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "↑↓ navigate"
@@ -4162,6 +4175,7 @@ msgstr "Usuario"
 msgid "Policy"
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
 #: src/components/ui/FloatingActionButton.tsx
 msgid "Text size"
 msgstr "Tamaño del texto"
@@ -4289,6 +4303,10 @@ msgstr "Círculo"
 msgid "Uploading photo…"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Help article — Funding Opportunities"
+msgstr ""
+
 #: src/pages/discover/DiscoverPage.tsx
 msgid "The Platform"
 msgstr "La plataforma"
@@ -4405,15 +4423,6 @@ msgstr "Siga explorando para encontrarlo"
 #: src/i18n/harvested.ts
 msgid "Co-founders/Project Partners"
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Those three panels are placeholders. The role gating that decides who sees them is fully wired up, but the content inside is not built yet.\n"
-"\n"
-"So the tab appearing is correct — it means your role holds the right permission — and the empty panel is expected rather than a fault.\n"
-"\n"
-"The Business and Admin entries in the same rail are different: those link out to real pages."
-msgstr "Esos tres paneles son marcadores de posición. El control de acceso por rol que decide quién los ve ya está completamente configurado, pero el contenido que deben mostrar aún no se ha creado.\n"
-""
 
 #. placeholder {0}: codeStatus.remaining
 #. placeholder {1}: codeStatus.total
@@ -4609,6 +4618,10 @@ msgstr "Chats"
 msgid "Editor — Shared with you"
 msgstr "Editor — Compartido con usted"
 
+#: src/lib/personalization.ts
+msgid "You are verified — you can apply"
+msgstr ""
+
 #: src/components/personalization/TopicPicker.tsx
 msgid "Loading topics from across the platform…"
 msgstr "Cargando temas de toda la plataforma…"
@@ -4699,6 +4712,10 @@ msgstr "Respuestas a las preguntas sobre utilidad y experiencia, recopiladas dur
 #: src/components/collaboration/OutputPanel.tsx
 msgid "Console Output"
 msgstr "Salida de la consola"
+
+#: src/components/personalization/NotInterestedButton.tsx
+msgid "Hidden. You can bring it back under Settings › Personalization."
+msgstr ""
 
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Welcome to KTIP!"
@@ -4847,6 +4864,10 @@ msgstr ""
 msgid "Your request to access \"{0}\" was declined."
 msgstr "Su solicitud de acceso a «{0}» fue rechazada."
 
+#: src/components/directory/PeopleLikeYouRail.tsx
+msgid "Suggested from shared interests, skills, country and industry. Nobody sees this list but you."
+msgstr ""
+
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Tell us what's broken, what you'd change, or what you like"
 msgstr "Cuéntenos qué no funciona, qué cambiaría o qué le gusta"
@@ -4903,6 +4924,20 @@ msgstr "Financiación inicial, subvenciones de investigación, premios de innova
 
 #: src/lib/countries.ts
 msgid "All other countries"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Draft — not submitted. Continue to finish it. A draft is yours to submit whenever it is ready; nobody else has to release it for you.\n"
+"\n"
+"Pending — submitted, waiting to be picked up.\n"
+"\n"
+"Under Review — a reviewer is actively assessing it.\n"
+"\n"
+"Approved — successful.\n"
+"\n"
+"Not accepted — unsuccessful. Where the funder gave feedback, it appears with the decision.\n"
+"\n"
+"Status changes reach you through notifications, so you do not have to keep checking the page."
 msgstr ""
 
 #: src/lib/extracted-fields.ts
@@ -5076,6 +5111,10 @@ msgstr "Aprobar cuentas de estudiantes"
 
 #: src/pages/events/EventVenuePage.tsx
 msgid "Enter"
+msgstr ""
+
+#: src/lib/personalization.ts
+msgid "Online — join from anywhere"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5327,6 +5366,10 @@ msgstr ""
 msgid "Manage resources"
 msgstr "Gestionar recursos"
 
+#: src/components/personalization/SignalSummary.tsx
+msgid "None yet"
+msgstr ""
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Anything flagged as climate action ranks higher for you."
 msgstr "Todo lo marcado como acción climática se clasifica más alto para usted."
@@ -5529,14 +5572,6 @@ msgstr "Renombrar nota"
 msgid "Calendar"
 msgstr "Calendario"
 
-#: src/i18n/harvested.ts
-msgid "On your Dashboard. There is no separate Settings page any more — everything that was on it is a tab on the dashboard rail.\n"
-"\n"
-"My Profile — your name, photo, banner, bio, country, organisation, skills, interests and languages, edited directly on a preview of the page other members see. Under Account, further down the rail: Security — password, two-step verification and your sign-in addresses. Preferences — notifications, leaderboard visibility, connection-count privacy, dark mode and readable text. Personalization — the topics that drive \"For You\" sorting. Verification — evidence for a verified badge. Legal & Consent — what you have agreed to.\n"
-"\n"
-"Old /settings links still work and land on the matching tab."
-msgstr ""
-
 #: src/lib/grant-application-template.ts
 msgid "Supporting documents"
 msgstr "Documentos justificativos"
@@ -5564,17 +5599,6 @@ msgstr "Ver evento"
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Who can enter"
 msgstr "Quién puede entrar"
-
-#: src/i18n/harvested.ts
-msgid "Open a grant and click the apply button — it reads \"Apply Now\", or \"Start Application\" if your role needs a sponsor.\n"
-"\n"
-"The wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Supporting documents, and Impact & Review.\n"
-"\n"
-"Your work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n"
-"\n"
-"The final step shows the whole application for review before you submit."
-msgstr "Abra una subvención y haga clic en el botón de postulación: dice «Postular ahora», o «Iniciar solicitud» si su rol necesita un patrocinador.\n"
-""
 
 #: src/components/help/HelpCategoryNav.tsx
 msgid "Help categories"
@@ -5739,6 +5763,16 @@ msgstr ""
 msgid "How do the AI writing tools work?"
 msgstr "¿Cómo funcionan las herramientas de redacción con IA?"
 
+#: src/i18n/harvested.ts
+msgid "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
+"\n"
+"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
+"\n"
+"Some roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.\n"
+"\n"
+"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 msgid "Agree & Create Account"
 msgstr ""
@@ -5894,7 +5928,7 @@ msgstr "La clasificación ordena a los miembros por puntos y muestra los cincuen
 msgid "Wake panel"
 msgstr "Reactivar el panel"
 
-#: src/components/ui/FloatingActionButton.tsx
+#: src/components/ui/NumberStepper.tsx
 msgid "Decrease {label}"
 msgstr "Reducir {label}"
 
@@ -6142,10 +6176,6 @@ msgstr "Audio y video"
 msgid "Your analytics choice can be changed at any time in Settings, and it takes effect immediately — turning it off stops events being sent and drops the session identifier."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Write, sponsor, submit and track an application."
-msgstr "Redacte, patrocine, envíe y siga una solicitud."
-
 #: src/lib/annotate.ts
 msgid "Navy"
 msgstr "Azul marino"
@@ -6303,6 +6333,10 @@ msgid "Reviewing an institution is what turns it live. Check the domain genuinel
 msgstr "Revisar una institución es lo que la activa. Compruebe que el dominio le pertenece realmente: un dominio asociado a la institución equivocada otorga a sus miembros la reputación de esa institución.\n"
 ""
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Text size and photos"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Google and Microsoft sign-in — your name, email address, profile picture and provider account identifier."
 msgstr ""
@@ -6336,6 +6370,10 @@ msgstr ""
 #: src/components/messages/GroupSettingsModal.tsx
 msgid "You left the group"
 msgstr "Usted salió del grupo"
+
+#: src/i18n/harvested.ts
+msgid "Discover projects, publish funding calls, and connect with innovators."
+msgstr ""
 
 #: src/components/legal/AgreementGate.tsx
 msgid "One agreement covers every entry you submit. You will not be asked again unless it changes."
@@ -6449,16 +6487,6 @@ msgstr "Verificando"
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Forums"
 msgstr "Foros"
-
-#: src/i18n/harvested.ts
-msgid "Yes, and it is optional. Students submit their own grant applications — a sponsor is an endorsement, not a permission.\n"
-"\n"
-"On the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.\n"
-"\n"
-"The application can be submitted with or without one, and nominating someone does not hold up your submission while you wait.\n"
-"\n"
-"Worth doing anyway. An assessor reading twenty applications treats one an academic has put their name to differently, and the person who endorses it is usually the person who helped you sharpen it."
-msgstr ""
 
 #: src/pages/projects/ProjectsPage.tsx
 msgid "Search projects"
@@ -6574,15 +6602,6 @@ msgstr "Se ha solicitado a {name} que patrocine esta solicitud"
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "What happened and where..."
 msgstr "Qué ocurrió y dónde..."
-
-#: src/i18n/harvested.ts
-msgid "A lot of KTIP is public. Without signing in you can browse Discover, Projects, Events, Grants, Forums, the member Directory, the Leaderboard, member pages, published CVs, Resources and this Help Center.\n"
-"\n"
-"You need an account to create anything, apply for a grant, RSVP, post or reply in the forums, send messages, use the collaboration tools, or enter an event venue.\n"
-"\n"
-"Some actions need more than an account. Creating a project, for example, requires the project-creation permission, which not every role holds."
-msgstr "Gran parte de KTIP es público. Sin iniciar sesión, puede consultar Descubrir, Proyectos, Eventos, Subvenciones, Foros, el Directorio de miembros, la Clasificación, las páginas de miembros, los CV publicados, Recursos y este Centro de ayuda.\n"
-""
 
 #: src/pages/NotFoundPage.tsx
 msgid "Page Not Found"
@@ -6835,6 +6854,16 @@ msgstr ""
 msgid "Accepted"
 msgstr "Aceptado"
 
+#: src/i18n/harvested.ts
+msgid "Open My Profile on your Dashboard.\n"
+"\n"
+"The tab shows your profile as other members see it. Every block you can change carries a pencil — click one and a small editor opens over the preview, which updates as you type. Between them they cover your display name, photo, banner, bio (up to 500 characters), country, organisation, industry, website, up to 20 skills, up to 20 interests, your languages, and what collaboration you are open to. The photo block opens the portrait studio, which can cut the background out of your picture.\n"
+"\n"
+"Roles are in the name-and-roles editor, but you can only add roles that are self-assignable. Student, Faculty, the organisation roles and the admin roles are granted by a reviewer, so they do not appear as options.\n"
+"\n"
+"Each editor saves on its own — there is no page-wide Save."
+msgstr ""
+
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Discard"
 msgstr "Descartar"
@@ -7014,6 +7043,20 @@ msgstr "¿Cómo cambio mi dirección de correo electrónico principal?"
 msgid "All stored platform data"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Roles are a list, not a single choice — an account can hold several. They sit in three tiers.\n"
+"\n"
+"Admin — Super Admin (system-wide management, policy, audit logs), Admin, People & Trust Supervisor (verification, institutions, moderation and grievances), Programmes Supervisor (projects, funding, forums, resources and achievements) and Safety Admin (moderation queues and escalations). \"OECS Admin\" is a legacy label that resolves to Super Admin.\n"
+"\n"
+"Organisation — Investor / Funding Agency, Private Sector, Business Support Organisation, Post-Secondary Institution, NGO, Research Institution, Government, Diaspora and IGO.\n"
+"\n"
+"Individual — Entrepreneur, Faculty / Researcher, Researcher, Mentor and Student / Youth Innovator.\n"
+"\n"
+"Investor, Private Sector, Entrepreneur, Mentor and Researcher are self-assignable: you pick them yourself. Student, Faculty, the organisation roles and the admin roles are granted only after review by an institution, a business support organisation or OECS.\n"
+"\n"
+"What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Students carry one standing restriction of their own: they cannot start unmonitored direct messages."
+msgstr ""
+
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 msgid "View report status"
 msgstr "Ver el estado del informe"
@@ -7172,6 +7215,10 @@ msgstr ""
 msgid "Grant listings, funding opportunities, events and partner offerings on KTIP are published by their sponsors. %entityShort% does not guarantee their accuracy, availability or outcome, is not a party to any agreement you reach with a sponsor, and does not disburse funds unless it is expressly the named funder."
 msgstr ""
 
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Hidden items"
+msgstr ""
+
 #: src/components/grants/application/AIFieldActions.tsx
 msgid "Academic"
 msgstr "Académico"
@@ -7250,17 +7297,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "We acknowledge your notice by email and give it a reference."
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Go to \"My Applications\" from the Grants section.\n"
-"\n"
-"Every application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted.\n"
-"\n"
-"Drafts show a Continue action that drops you back at the step where you stopped.\n"
-"\n"
-"Applications you submitted on a funder's external site will not appear here — KTIP never sees those."
-msgstr "Vaya a «Mis solicitudes» desde la sección Subvenciones.\n"
-""
 
 #. placeholder {0}: roomsById.get(enteringRoomId)?.name
 #: src/components/venue/map/VenueMapExplorer.tsx
@@ -7394,6 +7430,10 @@ msgstr ""
 msgid "Review feedback"
 msgstr "Comentarios de la revisión"
 
+#: src/components/personalization/SignalSummary.tsx
+msgid "Not set — add them on the Profile tab"
+msgstr ""
+
 #: src/pages/auth/LoginPage.tsx
 msgid "That Virtual Campus account is already linked to a different KTIP account."
 msgstr "Esa cuenta de Virtual Campus ya está vinculada a otra cuenta de KTIP."
@@ -7510,6 +7550,18 @@ msgid "Calendar colour"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Setting up two-step verification gives you ten recovery codes. Each one works once. They are the way back in when the phone or the mailbox is gone, so save them somewhere separate — printed, or in a password manager, not on the phone itself.\n"
+"\n"
+"On the code screen at sign-in, click \"Use a recovery code\" and enter one.\n"
+"\n"
+"Security on your Dashboard shows how many you have left and can generate a fresh ten. Generating a new set makes every earlier code stop working, so replace your saved copy at the same time.\n"
+"\n"
+"You can also switch methods there at any time, in either direction, without losing your account.\n"
+"\n"
+"Out of codes and out of devices? An OECS administrator can reset the second step once they have confirmed who you are. Use the contact options at the foot of the Help Center."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Shortcuts"
 msgstr "Atajos"
 
@@ -7536,6 +7588,16 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Open Events → Virtual Hackathon and pick a live hackathon."
 msgstr "Abra Eventos → Hackatón virtual y elija un hackatón en directo."
+
+#: src/i18n/harvested.ts
+msgid "Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n"
+"\n"
+"It covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics, error reports and UAT feedback.\n"
+"\n"
+"What you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.\n"
+"\n"
+"Actions here apply platform-wide, so they are worth being deliberate about."
+msgstr ""
 
 #: src/lib/venue-room-presets.ts
 msgid "Place it beside the entrance corner."
@@ -7582,6 +7644,10 @@ msgstr ""
 msgid "Report in-app and contact %privacyEmail%. These are triaged ahead of everything else."
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Site language"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Who can see your entry"
 msgstr ""
@@ -7602,6 +7668,10 @@ msgstr "{0, plural, one {# solicitud} other {# solicitudes}}"
 #: src/i18n/harvested.ts
 msgid "Live, upcoming and past hackathons."
 msgstr "Hackatones en vivo, próximos y pasados."
+
+#: src/components/personalization/SignalSummary.tsx
+msgid "Nothing yet — likes, follows, RSVPs, applications and what you open count here"
+msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Redirecting you to <0>My Reports</0>. Click the link if you are not redirected automatically."
@@ -7812,6 +7882,10 @@ msgid "Open Collaborate, click Whiteboard, then create a new board or open an ex
 msgstr "Abra Colaborar, haga clic en Pizarra, luego cree un nuevo tablero o abra uno existente.\n"
 ""
 
+#: src/i18n/harvested.ts
+msgid "How do I track my funding applications?"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Contribute a guide, template or case study to the resource library. Published after review."
 msgstr ""
@@ -7943,6 +8017,10 @@ msgid "Why am I asked for my date of birth?"
 msgstr "¿Por qué se me pide mi fecha de nacimiento?"
 
 #: src/i18n/harvested.ts
+msgid "How do I find funding?"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "The messaging panel lists every conversation you are part of, most recent first, with unread ones marked.\n"
 "\n"
 "Click one to open its full history. Scroll up to load older messages.\n"
@@ -7951,7 +8029,7 @@ msgid "The messaging panel lists every conversation you are part of, most recent
 msgstr "El panel de mensajería enumera todas las conversaciones en las que participa, las más recientes primero, con las no leídas marcadas.\n"
 ""
 
-#: src/components/ui/FloatingActionButton.tsx
+#: src/components/ui/NumberStepper.tsx
 msgid "Increase {label}"
 msgstr "Aumentar {label}"
 
@@ -8043,15 +8121,6 @@ msgstr "En vivo"
 msgid "Nobody is speaking in here."
 msgstr "Nadie está hablando aquí."
 
-#: src/i18n/harvested.ts
-msgid "If a recovery banner appears at the top of the page, click \"Retry\" — that reloads your profile without a full sign-in.\n"
-"\n"
-"Otherwise sign out and back in, which rebuilds the session.\n"
-"\n"
-"If fields are genuinely blank, open Settings and check they were saved. The Dashboard profile tab is read-only, so anything you typed there was never stored."
-msgstr "Si aparece un banner de recuperación en la parte superior de la página, haga clic en «Reintentar» — esto recarga su perfil sin necesidad de iniciar sesión por completo.\n"
-""
-
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Your institution recognised this address. Your account is verified and holds the student role."
 msgstr ""
@@ -8107,10 +8176,19 @@ msgstr "Desactive todo lo que prefiera que ignoremos"
 msgid "Back to grants"
 msgstr ""
 
+#: src/lib/personalization.ts
+msgid "Shares your interests"
+msgstr ""
+
 #: src/components/grants/GrantCard.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Up to {amount}"
 msgstr "Hasta {amount}"
+
+#. placeholder {0}: params.days
+#: src/lib/personalization.ts
+msgid "Closing in {0} days"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "SME verification submissions routed to your member state. Each carries the legal name, registration number and industry the applicant entered.\n"
@@ -8146,6 +8224,10 @@ msgstr "¿Qué puedo hacer dentro de una sala del recinto?"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Discussion"
 msgstr "Debate"
+
+#: src/components/personalization/SignalSummary.tsx
+msgid "1 event RSVP"
+msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "Who is here right now, with their status."
@@ -8274,6 +8356,10 @@ msgstr ""
 msgid "Browse Projects"
 msgstr "Explorar proyectos"
 
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Could not unhide this right now"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Switch to email codes?"
 msgstr ""
@@ -8324,6 +8410,10 @@ msgstr "Defina su estado"
 #: src/i18n/harvested.ts
 msgid "Events you organize."
 msgstr "Los eventos que organiza."
+
+#: src/components/settings/PersonalizationTab.tsx
+msgid "No longer available"
+msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "You enter a code the first time you sign in on a new device, and again every 30 days."
@@ -8437,6 +8527,10 @@ msgstr ""
 msgid "Filter listings down to climate and environment work"
 msgstr "Filtre los listados para mostrar solo trabajos sobre clima y medio ambiente"
 
+#: src/components/help/HelpRoleQuickStart.tsx
+msgid "Choose a role"
+msgstr ""
+
 #: src/hooks/useEntityDocuments.ts
 msgid "Field extraction failed"
 msgstr "Error en la extracción de campos"
@@ -8456,6 +8550,20 @@ msgstr ""
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Complete Your Profile"
 msgstr "Complete su perfil"
+
+#: src/i18n/harvested.ts
+msgid "Step five of the wizard lists exactly what this call asks for. Every funder sets their own list, so read the one on your grant rather than assuming.\n"
+"\n"
+"A typical list is: a detailed budget covering the full amount requested, proof of registration, recent financial statements, a workplan, and any letters of support. Required items are marked; the rest strengthen the application without being mandatory.\n"
+"\n"
+"Accepted formats are PDF, Word, Excel, CSV, Markdown, plain text and images, up to 25MB per file. If a file is refused, the reason appears under the file picker — it is either the size or the format, nothing else.\n"
+"\n"
+"Name each file for what it is. An assessor reading twenty applications should be able to tell your budget from your workplan without opening either.\n"
+"\n"
+"These files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission.\n"
+"\n"
+"Video is the exception: it is too large to upload. If you have a short pitch or demonstration, host it yourself — Google Drive, YouTube, Vimeo — and paste the link in the optional Video link field under the file list. Set sharing to \"Anyone with the link can view\", and test the link in a private browser window before you submit. The link can point at the video itself or at a folder holding it. It is stored with the application, so assessors see it alongside your documents."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Open one to read it as submitted. Approve, reject, or mark under review — the applicant sees the status change on My Applications, so “under review” is worth setting rather than leaving them at “submitted” for weeks.\n"
@@ -8488,6 +8596,10 @@ msgstr "Solo usted. Nadie más lo ve en la lista."
 
 #: src/lib/funding-types.ts
 msgid "Prize or competition award"
+msgstr ""
+
+#: src/lib/personalization.ts
+msgid "A content type you asked for"
 msgstr ""
 
 #: src/components/WelcomePanel.tsx
@@ -8577,6 +8689,7 @@ msgstr ""
 #: src/components/dashboard/TimelineItemDetail.tsx
 #: src/components/personalization/ForYouRail.tsx
 #: src/components/projects/ProjectCard.tsx
+#: src/components/settings/PersonalizationTab.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Project"
@@ -8628,6 +8741,10 @@ msgstr "Cualquier miembro de KTIP con sesión iniciada puede abrirlo."
 msgid "Your standing appears once you have earned a badge."
 msgstr ""
 
+#: src/pages/discover/DiscoverPage.tsx
+msgid "You can start the first project."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Drafts save automatically, so you can leave and resume from My Applications."
 msgstr "Los borradores se guardan automáticamente, así que puede salir y retomar desde Mis solicitudes."
@@ -8671,15 +8788,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "How do I share my CV publicly?"
 msgstr "¿Cómo comparto mi CV públicamente?"
-
-#: src/i18n/harvested.ts
-msgid "The floating button in the bottom right corner is a shortcut stack.\n"
-"\n"
-"It opens your messages panel, toggles dark mode, and starts the page tour when the page you are on has one.\n"
-"\n"
-"It stays available on every page inside the app, so you never have to go back to the navigation bar for those three things."
-msgstr "El botón flotante en la esquina inferior derecha es una pila de accesos directos.\n"
-""
 
 #: src/i18n/harvested.ts
 msgid "Judging Criterion"
@@ -8744,6 +8852,10 @@ msgstr "Desarrollo"
 msgid "Your profile is private until a Chamber of Commerce verifies the business."
 msgstr "Su perfil es privado hasta que una cámara de comercio verifique la empresa."
 
+#: src/lib/personalization.ts
+msgid "Same country"
+msgstr ""
+
 #: src/components/calendar/CalendarShell.tsx
 #: src/components/gantt/gantt-nav.tsx
 #: src/components/gantt/gantt-view.tsx
@@ -8762,17 +8874,6 @@ msgstr "No se pudo enviar la solicitud"
 msgid "your details"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "The dashboard calendar pulls four things together so you have one place to look.\n"
-"\n"
-"Events — events on the platform. My Registrations — events you have RSVP'd to. Grant Deadlines — closing dates for grants you are tracking. Applications — dates attached to your own grant applications.\n"
-"\n"
-"Each kind has its own colour, and you can turn kinds off to reduce the noise.\n"
-"\n"
-"Click a day to see everything on it in a panel, and click through from there to the event or grant itself."
-msgstr "El calendario del panel reúne cuatro elementos para que tenga un único lugar donde consultar.\n"
-""
-
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Subscript"
@@ -8785,6 +8886,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Your badges, points, level and streak — and what to do next to earn more"
 msgstr "Sus insignias, puntos, nivel y racha — y qué hacer a continuación para ganar más"
+
+#: src/components/help/HelpArticleCard.tsx
+msgid "Link copied"
+msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Switch to email codes"
@@ -8889,6 +8994,12 @@ msgstr "¡Su opinión importa!"
 msgid "What does following a project do?"
 msgstr "¿Qué hace seguir un proyecto?"
 
+#: src/components/dashboard/RoleQuickActions.tsx
+#: src/pages/discover/DiscoverPage.tsx
+#: src/pages/grants/GrantsPage.tsx
+msgid "Post a funding call"
+msgstr ""
+
 #: src/lib/reaction-emoji.ts
 msgid "Applause"
 msgstr "Aplausos"
@@ -8904,10 +9015,6 @@ msgstr ""
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Access granted"
 msgstr "Acceso concedido"
-
-#: src/i18n/harvested.ts
-msgid "Discover projects, publish grants, and connect with innovators."
-msgstr "Descubra proyectos, publique subvenciones y conéctese con innovadores."
 
 #: src/pages/auth/SignupPage.tsx
 msgid "Re-enter your password"
@@ -8925,6 +9032,10 @@ msgstr "Encabezado 2"
 #: src/pages/resources/ResourcesPage.tsx
 msgid "All Types"
 msgstr "Todos los tipos"
+
+#: src/i18n/harvested.ts
+msgid "Launch projects, apply for funding, and find investors."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I start a video conference?"
@@ -9078,6 +9189,10 @@ msgstr "Editar"
 msgid "Request sent to {0}."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Find Funding"
+msgstr ""
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Removed"
 msgstr "Eliminado"
@@ -9169,6 +9284,10 @@ msgstr ""
 msgid "Join invitation"
 msgstr "Invitación para unirse"
 
+#: src/lib/personalization.ts
+msgid "Your project has traction — worth funding"
+msgstr ""
+
 #: src/components/moderation/ContentWarningModal.tsx
 msgid "Check your wording"
 msgstr ""
@@ -9192,10 +9311,6 @@ msgstr "Estado miembro de la OECO"
 #: src/i18n/harvested.ts
 msgid "Platform administration and analytics."
 msgstr "Administración de la plataforma y análisis."
-
-#: src/components/settings/PreferencesTab.tsx
-msgid "How other members' messages are shown to you"
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Refer to KTIP truthfully. That is the whole of the permission."
@@ -9283,6 +9398,16 @@ msgid "Open an issue for its stack, the route it happened on, and how often it r
 "The Error Simulator next door sends deliberate failures through the live pipeline — useful for confirming monitoring works, and it does produce real entries here."
 msgstr "Abra una incidencia para ver su pila de llamadas, la ruta en la que ocurrió y con qué frecuencia se repite. El estado indica lo que ya ha clasificado para que la lista siga siendo útil.\n"
 ""
+
+#: src/i18n/harvested.ts
+msgid "Most of what is listed is not a grant, which is why the section is called Funding Opportunities rather than Grants.\n"
+"\n"
+"Alongside research grants, startup funding, project grants and scholarships you will find seed investment, competitions and prizes, fellowships, and open calls for proposals. The \"type of funding\" filter is how you narrow to one kind.\n"
+"\n"
+"Funders set their own labels, so the exact wording varies between listings.\n"
+"\n"
+"Amounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the filters are worth checking more than once."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Harassment"
@@ -9408,6 +9533,10 @@ msgstr "Preguntas frecuentes"
 msgid "Atlas"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Cutting the background out of your photo"
+msgstr ""
+
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Analytics off."
 msgstr ""
@@ -9456,6 +9585,16 @@ msgstr "Usted entiende que presentar informes falsos o engañosos constituye una
 
 #: src/components/calendar/CalendarDayPanel.tsx
 msgid "Note, task or reminder"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Every grant has an Eligibility section describing who may apply.\n"
+"\n"
+"Criteria commonly cover your role, your member state, the type of project and the phase it is in.\n"
+"\n"
+"Read it before you start writing. If it is ambiguous, contact the funder using the details on the grant page rather than guessing.\n"
+"\n"
+"Eligibility is separate from your role. Eligibility is the funder's rule about who may apply; your role only decides what you can do on the platform. A student who is eligible submits their own application, with or without a faculty sponsor."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -9673,6 +9812,10 @@ msgstr ""
 msgid "Message (optional)"
 msgstr "Mensaje (opcional)"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Menus, buttons and labels. Applies immediately and follows you to your other devices."
+msgstr ""
+
 #: src/components/legal/ReconsentBanner.tsx
 #: src/components/uat/UATReminderPopup.tsx
 msgid "Later"
@@ -9833,17 +9976,6 @@ msgstr "Error al cargar la pizarra"
 msgid "Not your board"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n"
-"\n"
-"Analytics — platform usage across projects, events, grants and members.\n"
-"\n"
-"UAT — feedback submitted during user acceptance testing, with its state.\n"
-"\n"
-"One known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead."
-msgstr "API de socios — emita y revoque claves API para organizaciones asociadas. Trate una clave como una credencial: revóquela en lugar de reutilizarla cuando cambie una relación con un socio.\n"
-""
-
 #: src/lib/authenticator-apps.ts
 msgid "Tap the + button in the bottom corner."
 msgstr ""
@@ -9984,6 +10116,10 @@ msgstr "El proyecto"
 msgid "Other signs worth stopping over:"
 msgstr ""
 
+#: src/components/personalization/ForYouRail.tsx
+msgid "Pick a few topics and we will put the projects, resources, events and grants that suit you at the top of every list. Nothing gets hidden unless you say so."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Always. They cannot evaluate what they cannot read."
 msgstr ""
@@ -9993,21 +10129,16 @@ msgid "Description *"
 msgstr "Descripción *"
 
 #: src/i18n/harvested.ts
+msgid "Register your business with your National Chamber of Commerce for verified status"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Use \"Mark all read\" at the top of the panel to clear the unread count."
 msgstr "Use «Marcar todo como leído» en la parte superior del panel para borrar el contador de no leídos."
 
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Back to Grant"
 msgstr "Volver a la subvención"
-
-#: src/i18n/harvested.ts
-msgid "Both live in Settings under Preferences, and dark mode is also on the floating action button.\n"
-"\n"
-"Dark mode applies instantly across the whole platform. Readable font mode switches to a more legible typeface with looser spacing, which helps with long articles and forms.\n"
-"\n"
-"Both are stored per device, so your phone and your laptop can be set differently."
-msgstr "Ambos se encuentran en Configuración, dentro de Preferencias, y el modo oscuro también está disponible en el botón de acción flotante.\n"
-""
 
 #. placeholder {0}: replies?.length || 0
 #: src/pages/forums/PostDetailPage.tsx
@@ -10119,10 +10250,6 @@ msgstr "Active el lugar."
 msgid "{0, plural, one {# point} other {# points}}"
 msgstr "{0, plural, one {# punto} other {# puntos}}"
 
-#: src/i18n/harvested.ts
-msgid "How do I find grants?"
-msgstr "¿Cómo encuentro subvenciones?"
-
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Not connected to this room’s live channel"
 msgstr "No conectado al canal en vivo de esta sala"
@@ -10210,6 +10337,14 @@ msgstr "Haga clic en «Entrar al recinto» (debe estar inscrito en el evento)."
 
 #: src/i18n/harvested.ts
 msgid "Local storage on your device"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "The floating button in the bottom right corner opens a stack of six shortcuts.\n"
+"\n"
+"Sticky notes — pin a note to the page you are on. Accessibility — text size, readable font and the other display controls. Feedback — tell us about a problem or an idea, and get a reply back in your Dashboard. Page tour — a walkthrough, on the pages that have one. Messages — your messaging panel. And a dark mode switch.\n"
+"\n"
+"It stays available on every page inside the app, so none of the six needs a trip back to the navigation bar."
 msgstr ""
 
 #: src/components/calendar/CalendarDayPanel.tsx
@@ -10354,6 +10489,10 @@ msgstr ""
 msgid "{teamCount, plural, one {# team member} other {# team members}}"
 msgstr "{teamCount, plural, one {# miembro del equipo} other {# miembros del equipo}}"
 
+#: src/components/personalization/SignalSummary.tsx
+msgid "Role"
+msgstr ""
+
 #: src/lib/validation.ts
 msgid "Enter the code we sent you"
 msgstr ""
@@ -10414,6 +10553,10 @@ msgstr ""
 
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "when you completed your profile"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Using email codes instead of an app"
 msgstr ""
 
 #: src/components/layout/Footer.tsx
@@ -10515,6 +10658,10 @@ msgstr "Publicar un evento"
 msgid "Notices go to %copyrightAgent%, %address%, or by email to %copyrightEmail%. The quickest route is the online form, which asks for everything a valid notice needs and cannot be filed incomplete."
 msgstr ""
 
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Projects you like or follow, events you RSVP to, grants you apply for, and the pages you open. Things you have already engaged with are pushed down, not hidden."
+msgstr ""
+
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Registered legal name"
 msgstr "Nombre legal registrado"
@@ -10542,10 +10689,6 @@ msgstr "Destacar y eliminar proyectos publicados."
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Pick any colour"
 msgstr ""
-
-#: src/components/personalization/ForYouRail.tsx
-msgid "Pick a few topics and we will put the projects, resources, events and grants that suit you at the top of every list. Nothing gets hidden."
-msgstr "Elija algunos temas y colocaremos al principio de cada lista los proyectos, recursos, eventos y subvenciones que le convengan. Nada queda oculto."
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Not very useful"
@@ -10865,10 +11008,6 @@ msgstr ""
 msgid "Entering assigns nothing. Winning assigns nothing either."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Help article — Grants & Funding"
-msgstr "Artículo de ayuda: Subvenciones y financiación"
-
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "Change photo"
 msgstr ""
@@ -10952,6 +11091,16 @@ msgid "The resource"
 msgstr "El recurso"
 
 #: src/i18n/harvested.ts
+msgid "Reach it from your avatar menu, \"My Dashboard\". The rail on the left lists your sections.\n"
+"\n"
+"Overview — your For You rail, recent submissions and calendar at a glance. My Profile — the editor for everything other members see. Connections — the people you know, and your pending invitations. Projects — the projects you own. Events — the events you organise. Submissions — permanent copies of everything you have submitted. Feedback — what you have sent us, and our replies. Progress — your activity timeline. Achievements — the full trophy gallery, embedded here rather than on a page of its own.\n"
+"\n"
+"Under Account, further down: Security, Preferences, Personalization, Verification, and Legal & Consent.\n"
+"\n"
+"Some sections only appear for certain roles: Funding for investors, Mentees for mentors and faculty, Research for faculty and researchers, Business profile and Team for organisation accounts, and Admin for administrators."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Host and store"
 msgstr ""
 
@@ -10979,14 +11128,6 @@ msgstr "Revisión de solicitudes"
 #: src/components/layout/Navbar.tsx
 msgid "No notifications yet"
 msgstr "Aún no hay notificaciones"
-
-#: src/i18n/harvested.ts
-msgid "Open Security on your Dashboard, scroll to the Danger Zone at the bottom, then click \"Delete Account\" and confirm.\n"
-"\n"
-"Deletion is permanent. Your projects, grant applications, messages, badges and other data are removed and cannot be recovered.\n"
-"\n"
-"If you only need a break, sign out instead. If it is the notifications that are the problem, turn them off under Preferences — that is reversible and this is not."
-msgstr ""
 
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Could not save the draft — try again before uploading"
@@ -11161,6 +11302,16 @@ msgid "Working a report"
 msgstr "Gestionar una denuncia"
 
 #: src/i18n/harvested.ts
+msgid "Click the magnifier in the navigation bar, or press Ctrl+K (Cmd+K on Mac), to open search from anywhere.\n"
+"\n"
+"Search covers pages, projects, events, funding, forum boards, members, resources and every help article at once. Use the arrow keys to move through results and Enter to open one.\n"
+"\n"
+"When a result is a how-to, press the right arrow to expand the steps inline instead of leaving the page.\n"
+"\n"
+"The brain icon in the panel turns on AI-guided navigation: describe what you are trying to do in plain language and it points you to the right page."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "How do I reset my password?"
 msgstr "¿Cómo restablezco mi contraseña?"
 
@@ -11259,6 +11410,16 @@ msgstr "Todos los roles"
 #: src/components/grants/application/RichTextField.tsx
 msgid "Text Color"
 msgstr "Color del texto"
+
+#: src/i18n/harvested.ts
+msgid "Open a listing and click \"Apply Now\". Once you have a draft for it, the same button reads \"Continue Application\".\n"
+"\n"
+"The wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Supporting documents, and Impact & Review.\n"
+"\n"
+"Your work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n"
+"\n"
+"The final step shows the whole application for review before you submit."
+msgstr ""
 
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 msgid "In a room"
@@ -11450,6 +11611,24 @@ msgstr ""
 #: src/components/documents/DocumentContentModal.tsx
 msgid "No readable text in this file."
 msgstr "No hay texto legible en este archivo."
+
+#: src/i18n/harvested.ts
+msgid "Open Security on your Dashboard and scroll to the bottom. There are three ways to leave, and two of them can be undone.\n"
+"\n"
+"Deactivate — you disappear from the directory and your contributions stay where they are. Sign in again within 90 days and nothing is lost. After that the account is anonymised.\n"
+"\n"
+"Schedule deletion — the account is erased after 7 days. Signing in during that week cancels it, and a banner tells you the date your data is kept until.\n"
+"\n"
+"Delete now — permanent. Your projects, funding applications, messages, badges and other data are removed and cannot be recovered.\n"
+"\n"
+"Before any of them, \"Download your data\" gives you a single file with your content in it, built in your browser.\n"
+"\n"
+"If it is only the notifications that are the problem, turn them off under Preferences instead."
+msgstr ""
+
+#: src/components/personalization/NotInterestedButton.tsx
+msgid "Not interested"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The licence you grant so the competition can run"
@@ -11827,6 +12006,16 @@ msgid "Enter your new password below"
 msgstr "Introduzca su nueva contraseña a continuación"
 
 #: src/i18n/harvested.ts
+msgid "Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n"
+"\n"
+"Analytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.\n"
+"\n"
+"UAT — feedback submitted during user acceptance testing, with its state.\n"
+"\n"
+"Member feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Help article — Achievements & Leaderboard"
 msgstr "Artículo de ayuda: Logros y clasificación"
 
@@ -11952,6 +12141,14 @@ msgid "Edit work"
 msgstr "Editar trabajo"
 
 #: src/i18n/harvested.ts
+msgid "Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.\n"
+"\n"
+"Grants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own six-step wizard — with a URL set, you never see their applications.\n"
+"\n"
+"Resources and Integrations are straightforward publishing. Forums is where boards are created and posts pinned. Achievements is where badge definitions live."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Points, badges and leaderboard positions have no monetary value, are not transferable, and may be recalculated or reset — for example when scoring changes or when we remove the effects of gamed activity."
 msgstr ""
 
@@ -12048,21 +12245,6 @@ msgstr "Progreso es su actividad a lo largo del tiempo — proyectos creados, ev
 #: src/components/dashboard/TimelineSection.tsx
 msgid "Nothing in motion yet"
 msgstr "Nada en curso todavía"
-
-#: src/i18n/harvested.ts
-msgid "Check the obvious first: the right email, the right password, caps lock off.\n"
-"\n"
-"If you signed up with Google or Microsoft you have no KTIP password. Use the same provider button you originally signed up with — the email/password form will always fail for you.\n"
-"\n"
-"If you added a secondary email, either address works with the same password.\n"
-"\n"
-"Forgotten password? Use \"Forgot Password?\" on the login page.\n"
-"\n"
-"Arriving from the OECS Virtual Campus and bounced back with an error code? The handoff ticket is single use. Go back to the Campus and click through again.\n"
-"\n"
-"Still locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options."
-msgstr "Primero revise lo obvio: el correo electrónico correcto, la contraseña correcta, el bloqueo de mayúsculas desactivado.\n"
-""
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Search integrations..."
@@ -12297,6 +12479,10 @@ msgstr ""
 msgid "Help article — Community & Network"
 msgstr "Artículo de ayuda — Comunidad y red"
 
+#: src/lib/personalization.ts
+msgid "Like things you have engaged with"
+msgstr ""
+
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Discussion Not Found"
 msgstr ""
@@ -12349,6 +12535,16 @@ msgstr "Chrome 90+ (recomendado), Firefox 90+, Edge 90+ y Safari 15+.\n"
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 msgid "Ordered list"
 msgstr "Lista numerada"
+
+#: src/i18n/harvested.ts
+msgid "Members under 18 use KTIP normally, with protections that cannot be switched off.\n"
+"\n"
+"The main one is messaging: one-to-one direct messages between an adult member and a member under 18 are not available in either direction. Group channels, event rooms and forums are open as usual — those are visible to more than two people, which is the point.\n"
+"\n"
+"Student accounts carry one further rule on top, whatever their age: the public leaderboard excludes them. Funding applications do not need a faculty sponsor — a sponsor is an endorsement students may add if they want one.\n"
+"\n"
+"The protections lift by themselves on the account's 18th birthday. Nothing needs to be requested."
+msgstr ""
 
 #: src/components/grants/application/AIReviewPanel.tsx
 msgid "AI Application Review"
@@ -12488,6 +12684,10 @@ msgstr ""
 msgid "Challenge"
 msgstr "Desafío"
 
+#: src/lib/personalization.ts
+msgid "In a category you follow"
+msgstr ""
+
 #: src/pages/grants/GrantsPage.tsx
 msgid "Closed calls"
 msgstr ""
@@ -12504,6 +12704,10 @@ msgstr "Ya ha presentado una solicitud para esta subvención."
 #: src/lib/venue-room-presets.ts
 msgid "Mentors, judges and organizers only."
 msgstr "Solo para mentores, jueces y organizadores."
+
+#: src/lib/personalization.ts
+msgid "Matches your topics"
+msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
 msgid "Flat colour shapes are diffused into a slow-moving glow — placement is random per shuffle, then stays the same everywhere your banner appears."
@@ -12522,19 +12726,6 @@ msgstr "Archivo"
 #: src/components/courses/CourseCard.tsx
 msgid "Enroll"
 msgstr "Inscribirse"
-
-#: src/i18n/harvested.ts
-msgid "Click \"Sign Up\" in the top right corner of any page.\n"
-"\n"
-"Step 1 asks for your email, a password, your date of birth and a role. The role picker is split in two — the roles you join as an individual (Entrepreneur, Student, Faculty, Mentor) and the roles you join for an organisation (Investor, Private Sector, Business Support Organisation, NGO, Post-Secondary Institution and the rest).\n"
-"\n"
-"There is no name field. Your display name starts as the first part of your email address, and you change it in Settings whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.\n"
-"\n"
-"Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.\n"
-"\n"
-"After you submit, check your email for a confirmation link. Roles that need review (such as Student or Faculty) are confirmed by your institution or an OECS reviewer after you sign up."
-msgstr "Haga clic en «Registrarse» en la esquina superior derecha de cualquier página.\n"
-""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Save profile"
@@ -12702,6 +12893,16 @@ msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Publish, edit and withdraw resource-library entries."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Click \"Log In\" in the top right corner of the page.\n"
+"\n"
+"Enter the email and password you signed up with, then click \"Log In\".\n"
+"\n"
+"If you added a secondary email on your Dashboard, under Security, you can sign in with either address using the same password.\n"
+"\n"
+"If you forget your password, click \"Forgot Password?\" on the login page."
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -12985,8 +13186,10 @@ msgstr "Finalizar"
 msgid "Structured platform feedback"
 msgstr "Comentarios estructurados sobre la plataforma"
 
+#: src/components/events/EventDetailsForm.tsx
 #: src/components/personalization/SignalSummary.tsx
 #: src/components/ui/CountrySelect.tsx
+#: src/pages/events/CreateEventPage.tsx
 msgid "Country"
 msgstr "País"
 
@@ -13031,6 +13234,10 @@ msgid "View"
 msgstr "Ver"
 
 #: src/i18n/harvested.ts
+msgid "Verify your students, oversee submissions, and endorse applications."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Collected"
 msgstr ""
 
@@ -13067,17 +13274,6 @@ msgstr ""
 #: src/components/venue/room/AvStage.tsx
 msgid "Connecting…"
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Business verification is done by your national Chamber of Commerce, not by OECS directly.\n"
-"\n"
-"Open the SME verification page (it is also the Business entry on your dashboard rail if you hold a Private Sector or SME role). Enter your legal business name, your member state and your business registration number, then click \"Submit to Chamber\".\n"
-"\n"
-"Your Chamber reviews the submission against its own records. Once approved your account becomes a Verified SME, which unlocks the SME capabilities and shows a verified badge to funders and partners.\n"
-"\n"
-"A Private Sector account is the unverified state of the same thing — everything keeps working while you wait."
-msgstr "La verificación empresarial la realiza su cámara de comercio nacional, no directamente la OECS.\n"
-""
 
 #: src/components/resume/ResumePortrait.tsx
 msgid "{name} — portrait"
@@ -13226,6 +13422,10 @@ msgstr ""
 msgid "Email, password and date of birth"
 msgstr "Correo electrónico, contraseña y fecha de nacimiento"
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Open to anything"
+msgstr ""
+
 #: src/components/calendar/CalendarGrid.tsx
 msgid "+{overflow} more"
 msgstr "+{overflow} más"
@@ -13254,19 +13454,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Row actions, and what they mean to the member"
 msgstr "Acciones de fila, y qué significan para el miembro"
-
-#: src/i18n/harvested.ts
-msgid "Step five of the wizard lists exactly what this call asks for. Every funder sets their own list, so read the one on your grant rather than assuming.\n"
-"\n"
-"A typical list is: a detailed budget covering the full amount requested, proof of registration, recent financial statements, a workplan, and any letters of support. Required items are marked; the rest strengthen the application without being mandatory.\n"
-"\n"
-"Accepted formats are PDF, Word, Excel, CSV, Markdown, plain text and images, up to 25MB per file. If a file is refused, the reason appears under the file picker — it is either the size or the format, nothing else.\n"
-"\n"
-"Name each file for what it is. An assessor reading twenty applications should be able to tell your budget from your workplan without opening either.\n"
-"\n"
-"These files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission."
-msgstr "El paso cinco del asistente indica exactamente lo que solicita esta convocatoria. Cada financiador define su propia lista, así que consulte la de su subvención en lugar de dar nada por supuesto.\n"
-""
 
 #: src/components/security/EmailCodeCard.tsx
 msgid "Verify and turn on"
@@ -13344,17 +13531,6 @@ msgid "My Dashboard"
 msgstr "Mi panel"
 
 #: src/i18n/harvested.ts
-msgid "There are two routes, and the grant decides which one you get.\n"
-"\n"
-"If the funder supplied their own application link, the grant page shows \"Apply on External Site\" and takes you to their form. Nothing about that application is tracked in KTIP.\n"
-"\n"
-"Otherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.\n"
-"\n"
-"Either way, the deadline on the grant page is the one that counts."
-msgstr "Existen dos rutas, y la subvención determina cuál le corresponde.\n"
-""
-
-#: src/i18n/harvested.ts
 msgid "These terms bind any organisation granted programmatic access to KTIP data through the partner API. Accepting them is a condition of holding a partner key."
 msgstr ""
 
@@ -13362,14 +13538,6 @@ msgstr ""
 #: src/components/grants/application/RichTextField.tsx
 msgid "Insert table"
 msgstr "Insertar tabla"
-
-#: src/i18n/harvested.ts
-msgid "Click \"Forums\" in the navigation bar to see the discussion boards.\n"
-"\n"
-"Each board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.\n"
-"\n"
-"Anyone can read the forums without signing in. Starting a discussion and replying need an account."
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Profile fields that would identify a minor outside the platform are restricted, and directory exposure is reduced."
@@ -13412,6 +13580,10 @@ msgstr "Describa las funciones, cambios o mejoras que le resultarían útiles...
 msgid "Awarded to you"
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Use Atkinson Hyperlegible across the site for easier reading."
+msgstr ""
+
 #: src/pages/forums/PostDetailPage.tsx
 msgid "No replies yet. Be the first to reply!"
 msgstr "Aún no hay respuestas. ¡Sea el primero en responder!"
@@ -13449,10 +13621,6 @@ msgid "The KTIP Assistant is an AI thread pinned to the top of your conversation
 msgstr "El Asistente de KTIP es un hilo de IA fijado en la parte superior de su lista de conversaciones.\n"
 ""
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Use a dark color theme across the site. Applies immediately."
-msgstr "Use un tema de colores oscuro en todo el sitio. Se aplica de inmediato."
-
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Only you, unless the general access setting says otherwise."
 msgstr "Solo usted, a menos que la configuración de acceso general indique lo contrario."
@@ -13463,6 +13631,10 @@ msgstr "Rehacer (Ctrl+Shift+Z)"
 
 #: src/components/verification/InstitutionalEmailCard.tsx
 msgid "Verification could not be completed."
+msgstr ""
+
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Back in your recommendations"
 msgstr ""
 
 #: src/pages/auth/ResetPasswordPage.tsx
@@ -13573,6 +13745,10 @@ msgstr "Registrarse con su Cámara"
 msgid "What others see, and who can see it"
 msgstr ""
 
+#: src/lib/personalization.ts
+msgid "Featured by OECS"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "All messages and conversations"
 msgstr "Todos los mensajes y conversaciones"
@@ -13589,8 +13765,10 @@ msgstr ""
 msgid "Look for the questions where the spread is wide rather than the average is low: a feature half of members rate highly and half cannot use at all is a discoverability problem, and it reads as mediocre in the average."
 msgstr "Busque las preguntas donde la dispersión es amplia en lugar de que el promedio sea bajo: una función que la mitad de los miembros valora muy bien y la otra mitad no puede usar en absoluto es un problema de descubribilidad, y en el promedio parece mediocre."
 
+#: src/components/dashboard/RoleQuickActions.tsx
 #: src/components/layout/Navbar.tsx
 #: src/pages/cv/CvPage.tsx
+#: src/pages/dashboard/dashboard-tabs.ts
 msgid "My CV"
 msgstr "Mi CV"
 
@@ -13623,6 +13801,10 @@ msgstr "Tipo de directorio"
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Our Partners"
 msgstr "Nuestros socios"
+
+#: src/pages/discover/DiscoverPage.tsx
+msgid "Apply for this grant"
+msgstr ""
 
 #: src/components/moderation/ReportModal.tsx
 msgid "Unsolicited promotion, fraud, or a deceptive funding offer."
@@ -13937,12 +14119,21 @@ msgstr ""
 msgid "Legal name"
 msgstr "Razón social"
 
+#: src/components/dashboard/RoleQuickActions.tsx
+#: src/pages/discover/DiscoverPage.tsx
+msgid "Host an event"
+msgstr ""
+
 #: src/hooks/usePageTitle.ts
 msgid "KTIP - Knowledge, Technology and Innovation Platform for Caribbean innovators to collaborate, connect, and grow."
 msgstr "KTIP - Plataforma de Conocimiento, Tecnología e Innovación para que los innovadores del Caribe colaboren, se conecten y crezcan."
 
 #: src/i18n/harvested.ts
 msgid "Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list."
+msgstr ""
+
+#: src/lib/personalization.ts
+msgid "Happening soon"
 msgstr ""
 
 #: src/pages/forums/PostDetailPage.tsx
@@ -13960,17 +14151,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Go to the Member Directory, or open someone's profile."
 msgstr "Vaya al Directorio de miembros, o abra el perfil de una persona."
-
-#: src/i18n/harvested.ts
-msgid "Click \"Log In\" in the top right corner of the page.\n"
-"\n"
-"Enter the email and password you signed up with, then click \"Log In\".\n"
-"\n"
-"If you added a secondary email in Settings, you can sign in with either address using the same password.\n"
-"\n"
-"If you forget your password, click \"Forgot Password?\" on the login page."
-msgstr "Haga clic en «Iniciar sesión» en la esquina superior derecha de la página.\n"
-""
 
 #: src/i18n/harvested.ts
 msgid "This goes to the OECS safety team, not to the person you are reporting. They are not told who filed it.\n"
@@ -14022,10 +14202,6 @@ msgstr ""
 msgid "Files attached to this project"
 msgstr "Archivos adjuntos a este proyecto"
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Use Atkinson Hyperlegible across the site for easier reading. Applies immediately."
-msgstr "Use Atkinson Hyperlegible en todo el sitio para facilitar la lectura. Se aplica de inmediato."
-
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "{label} is required"
 msgstr "{label} es obligatorio"
@@ -14038,6 +14214,10 @@ msgstr "Algo que funciona bien — deje una reseña"
 #: src/components/projects/RequestCollaborationModal.tsx
 msgid "The owner"
 msgstr "El propietario"
+
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Things you marked “not interested”. They stay out of every ranked list until you bring them back."
+msgstr ""
 
 #: src/lib/authenticator-apps.ts
 msgid "Install Microsoft Authenticator from the App Store or Google Play, then open it."
@@ -14367,14 +14547,22 @@ msgstr "Enviar comentarios"
 msgid "Table (3x3)"
 msgstr "Tabla (3x3)"
 
-#: src/components/settings/PersonalizationTab.tsx
-msgid "Projects you like or follow, events you RSVP to, grants you apply for. Things you have already engaged with are pushed down, not hidden."
-msgstr "Los proyectos que le gustan o sigue, los eventos a los que confirma asistencia, las subvenciones a las que se postula. Los elementos con los que ya ha interactuado se desplazan hacia abajo, no se ocultan."
-
 #: src/components/notes/StickyNoteGroup.tsx
 #: src/components/notes/StickyNoteGroupExpanded.tsx
 msgid "Close folder"
 msgstr "Cerrar carpeta"
+
+#: src/components/personalization/SignalSummary.tsx
+msgid "{roleNames} (acting as this role only)"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Go to your Dashboard, open Preferences and turn off \"Show me on the leaderboard\".\n"
+"\n"
+"You keep earning badges and points; you simply stop appearing in the public ranking.\n"
+"\n"
+"Student accounts are excluded automatically and permanently — that is a safeguarding rule, not a setting, so there is nothing for a student to turn on or off."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "A request to move the conversation off the platform immediately, to a personal email address or a messaging app."
@@ -14497,6 +14685,18 @@ msgid "That the funds are available, that the terms are reasonable, that the tim
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Pick \"Email code\" under Security if you would rather not install anything, or do not have a smartphone.\n"
+"\n"
+"We send a six-digit code to your account's email address. It lasts ten minutes, only one code is live at a time, and you can ask for another after 30 seconds.\n"
+"\n"
+"You are asked for a code the first time you sign in on a new device, and then again every 30 days on that same device. The Security tab tells you how long the device you are on has left.\n"
+"\n"
+"A new browser, a new phone or a cleared cookie jar all count as a new device, so expect a code then.\n"
+"\n"
+"If nothing arrives, wait out the 30 seconds and send another, then check your spam folder."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Open Community → Forums and click Start a Board. The button appears for organisation accounts and administrators."
 msgstr ""
 
@@ -14509,9 +14709,23 @@ msgstr " · Fecha límite {0}"
 msgid "Wake note"
 msgstr "Reactivar la nota"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Stops the scrolling rails, the rotating home page hero and page transitions. Your device's own setting is always honoured too."
+msgstr ""
+
 #: src/components/uat/UATFeedbackButton.tsx
 msgid "More Feedback"
 msgstr "Más comentarios"
+
+#: src/i18n/harvested.ts
+msgid "Click \"Projects\" in the navigation bar.\n"
+"\n"
+"You will see every public project. Search by keyword, filter by category (Technology, Healthcare, Education, Agriculture, Environment or Other) or by phase (Concept, Prototype, Funding or Launch).\n"
+"\n"
+"Once you have set your interests on your Dashboard you can also sort by \"For You\", which ranks projects against the topics you picked.\n"
+"\n"
+"Click any card for the full project, including the owner, team, documents and comments."
+msgstr ""
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Funding call posted"
@@ -14532,6 +14746,10 @@ msgstr "Mostrando {label}"
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "Re-reading…"
 msgstr "Releyendo…"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Email me about activity"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I set up my profile?"
@@ -14712,6 +14930,16 @@ msgstr "Hackatones y lugares"
 #: src/components/projects/ManageTeamModal.tsx
 msgid "No team members yet. Invite someone above."
 msgstr "Aún no hay miembros del equipo. Invite a alguien arriba."
+
+#: src/i18n/harvested.ts
+msgid "There are two routes, and the funder decides which one you get.\n"
+"\n"
+"If the funder supplied their own application link, the listing shows \"Apply on External Site\" and takes you to their form. Nothing about that application is tracked in KTIP.\n"
+"\n"
+"Otherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.\n"
+"\n"
+"Either way, the deadline on the listing is the one that counts."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Progress next door is the same story as a timeline. Points from here decide where you sit on the public leaderboard."
@@ -15132,10 +15360,6 @@ msgstr "Mis inscripciones"
 msgid "{0} is required"
 msgstr "{0} es obligatorio"
 
-#: src/i18n/harvested.ts
-msgid "Launch projects, apply for grants, and find investors."
-msgstr "Lance proyectos, postule a subvenciones y encuentre inversores."
-
 #: src/pages/auth/SignupPage.tsx
 msgid "Verify email"
 msgstr ""
@@ -15176,6 +15400,10 @@ msgstr "Otorgado automáticamente"
 
 #: src/components/layout/Navbar.tsx
 msgid "Publish a funding call and open applications"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Find funding that fits your work, and check what you qualify for."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15262,6 +15490,10 @@ msgstr "¿Cómo uso el entorno de pruebas de código?"
 msgid "Bugs and suggestions submitted by users"
 msgstr "Errores y sugerencias enviados por los usuarios"
 
+#: src/i18n/harvested.ts
+msgid "Write, submit and track an application — and run a call of your own."
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Read permission-change and moderation audit trails."
 msgstr "Consulte los registros de auditoría de cambios de permisos y de moderación."
@@ -15346,10 +15578,6 @@ msgstr ""
 #: src/components/projects/CommentSection.tsx
 msgid "Comments ({commentCount})"
 msgstr "Comentarios ({commentCount})"
-
-#: src/i18n/harvested.ts
-msgid "What types of grants are listed?"
-msgstr "¿Qué tipos de subvenciones se enumeran?"
 
 #: src/i18n/harvested.ts
 msgid "Translation results are cached so that the next reader of the same content does not trigger a second call."
@@ -15580,6 +15808,10 @@ msgstr "Iniciando sesión…"
 msgid "Edit any funding call and review, decide and audit the applications to it."
 msgstr ""
 
+#: src/lib/personalization.ts
+msgid "Popular right now"
+msgstr ""
+
 #: src/components/shared/ReceiptDocument.tsx
 msgid "Report Details"
 msgstr "Detalles del reporte"
@@ -15607,6 +15839,10 @@ msgstr "¿Quién se beneficiará directamente de este proyecto? Describa la pobl
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Nothing matched “{term}”."
 msgstr "No hay coincidencias para «{term}»."
+
+#: src/components/personalization/SignalSummary.tsx
+msgid "Not set"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The key is shown once, at the moment it is issued. It is not recoverable afterwards: copy it then, and if it is lost, revoke and issue a new one.\n"
@@ -15643,17 +15879,6 @@ msgstr "Estudiante verificado"
 #: src/i18n/harvested.ts
 msgid "The agreement between you and %entityShort% for using KTIP — who may hold an account, how you must behave, and where the limits of our responsibility sit."
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Click \"Projects\" in the navigation bar.\n"
-"\n"
-"You will see every public project. Search by keyword, filter by category (Technology, Healthcare, Education, Agriculture, Environment or Other) or by phase (Concept, Prototype, Funding or Launch).\n"
-"\n"
-"Once you have set your interests in Settings you can also sort by \"For You\", which ranks projects against the topics you picked.\n"
-"\n"
-"Click any card for the full project, including the owner, team, documents and comments."
-msgstr "Haga clic en «Proyectos» en la barra de navegación.\n"
-""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Record the award"
@@ -15933,6 +16158,10 @@ msgstr "Ofrecer mentoría"
 msgid "Click \"Report\" on their profile."
 msgstr "Haga clic en «Denunciar» en su perfil."
 
+#: src/lib/personalization.ts
+msgid "Your first event is coming up"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Only where necessary to operate the platform, provide support you asked for, or investigate a report. Those accesses are logged."
 msgstr ""
@@ -16027,6 +16256,7 @@ msgid "Your overview, calendar, progress and submissions."
 msgstr "Su resumen, calendario, progreso y envíos."
 
 #: src/components/personalization/ForYouRail.tsx
+#: src/components/settings/PersonalizationTab.tsx
 #: src/lib/funding-types.ts
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Grant"
@@ -16085,6 +16315,10 @@ msgid "Edit roles changes what the member can reach; Roles & Permissions is wher
 "Delete is permanent and takes their content with it. It asks twice for that reason."
 msgstr "Editar roles cambia a qué puede acceder el miembro; Roles y permisos es donde se definen esos roles.\n"
 ""
+
+#: src/components/help/HelpRoleQuickStart.tsx
+msgid "Start here"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Your record of something you submitted."
@@ -16150,6 +16384,18 @@ msgstr "Haga clic en hasta {MAX_SHOWCASE} trofeos obtenidos — {pinnedCount} se
 msgid "Delete comment"
 msgstr "Eliminar comentario"
 
+#: src/i18n/harvested.ts
+msgid "your Dashboard, Verification tab. The fastest way is a work or school email address.\n"
+"\n"
+"If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.\n"
+"\n"
+"Signed up with a personal address? Enter your work or school address on the Verification tab. KTIP emails it a link; press Confirm and the same check runs. That address never becomes a way to sign in — it only proves you hold it.\n"
+"\n"
+"No such address? Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs. Only OECS administrators can see what you upload. A reviewer approves or declines the request, and you are notified either way.\n"
+"\n"
+"Verified accounts carry a badge, which members can filter by in the directory, and can publish, apply for funding and message other members."
+msgstr ""
+
 #: src/components/moderation/ReportModal.tsx
 msgid "Personal information exposed"
 msgstr "Información personal expuesta"
@@ -16173,6 +16419,10 @@ msgstr "Nada programado para este día"
 #: src/components/reusable-components/StatsWheel.tsx
 msgid "Platform statistics"
 msgstr "Estadísticas de la plataforma"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Reduce motion"
+msgstr ""
 
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Attach a file or give a link to where the resource lives."
@@ -16375,6 +16625,10 @@ msgstr "Presente una queja sobre la conducta de alguien"
 msgid "The grant listing and everything attached to it"
 msgstr "La ficha de la subvención y todo lo adjunto a ella"
 
+#: src/components/help/HelpRoleQuickStart.tsx
+msgid "The short path through KTIP for your role."
+msgstr ""
+
 #: src/pages/security/MfaRecoverPage.tsx
 msgid "Out of codes? Contact KTIP support — an administrator can reset two-step verification on your account."
 msgstr ""
@@ -16439,6 +16693,7 @@ msgid "Remove \"{title}\" from your portfolio?"
 msgstr "¿Quitar «{title}» de su portafolio?"
 
 #: src/components/personalization/ForYouRail.tsx
+#: src/components/settings/PersonalizationTab.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Resource"
 msgstr "Recurso"
@@ -16579,6 +16834,16 @@ msgid "Change"
 msgstr "Cambiar"
 
 #: src/i18n/harvested.ts
+msgid "Profile editing lives on your Dashboard, under My Profile. Click your avatar in the top right to reach the Dashboard, then pick My Profile from the rail on the left.\n"
+"\n"
+"There is no separate Settings page any more, and nothing on the Dashboard is a read-only copy — My Profile is where the changes are made and saved.\n"
+"\n"
+"You can set your display name, photo, banner, bio, country, organisation, industry, skills, interests and what collaboration you are open to.\n"
+"\n"
+"Skills and interests are what the directory filters and the \"For You\" sorting work from, so they are worth filling in."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "You may use these features to draft, improve and translate your own work. You must not use them to produce content that breaks the Acceptable Use rules, and you must not present AI output as verified fact where its accuracy matters to someone else."
 msgstr ""
 
@@ -16612,6 +16877,10 @@ msgstr "Opacidad atenuada"
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Guest"
 msgstr "Invitado"
+
+#: src/components/personalization/SignalSummary.tsx
+msgid "1 grant application"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The licence is non-exclusive, so you remain free to publish the same work anywhere else, on any terms you like."
@@ -16881,6 +17150,7 @@ msgstr ""
 msgid "If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and \"you\" in this document means both you and that organisation."
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
 #: src/components/ui/FloatingActionButton.tsx
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Reset"
@@ -17106,6 +17376,10 @@ msgstr "Se envió a <0>{invitedEmail}</0>. Inicie sesión con esa cuenta para ac
 msgid "Search members by name..."
 msgstr "Buscar miembros por nombre..."
 
+#: src/i18n/harvested.ts
+msgid "What is two-step verification?"
+msgstr ""
+
 #: src/components/achievements/TrophyCard.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Earned"
@@ -17173,6 +17447,7 @@ msgid "Registration closes"
 msgstr "Cierre de inscripciones"
 
 #: src/components/directory/MemberPanel.tsx
+#: src/components/directory/PeopleLikeYouRail.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/profile/BannerStudio.tsx
 #: src/components/profile/ProfileCanvas.tsx
@@ -17242,17 +17517,6 @@ msgstr ""
 #: src/components/grants/application/RichTextField.tsx
 msgid "Inline code"
 msgstr "Código en línea"
-
-#: src/i18n/harvested.ts
-msgid "Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n"
-"\n"
-"It covers projects, events, users, roles, achievements, moderation, institutions, chambers, grants, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and UAT feedback.\n"
-"\n"
-"Safety administrators see the moderation and grievance side. Super administrators see everything.\n"
-"\n"
-"Actions here apply platform-wide, so they are worth being deliberate about."
-msgstr "Los administradores acceden a la consola desde la entrada Administración en la barra del panel. Solo es visible para las cuentas que tienen un rol de administrador.\n"
-""
 
 #: src/components/messages/MessagingPanel.tsx
 msgid "Unpin panel"
@@ -17497,10 +17761,6 @@ msgstr "Pila"
 msgid "Recovery"
 msgstr ""
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Display your country on your profile"
-msgstr "Mostrar su país en su perfil"
-
 #: src/i18n/harvested.ts
 msgid "Articles, guides, case studies and templates shown at /resources. Each has a type and topic tags, which are what the public filters use."
 msgstr "Artículos, guías, estudios de caso y plantillas que se muestran en /resources. Cada uno tiene un tipo y etiquetas temáticas, que son las que usan los filtros públicos."
@@ -17626,10 +17886,6 @@ msgid "Switching which role you are acting as"
 msgstr "Cambiar el rol con el que actúa"
 
 #: src/i18n/harvested.ts
-msgid "Find funding opportunities that fit your work."
-msgstr "Encuentre oportunidades de financiamiento adecuadas a su trabajo."
-
-#: src/i18n/harvested.ts
 msgid "Keys for external platforms"
 msgstr "Claves para plataformas externas"
 
@@ -17729,6 +17985,10 @@ msgstr ""
 #. placeholder {0}: maskEmail(email)
 #: src/components/security/EmailCodeCard.tsx
 msgid "Sending a 6-digit code to <0>{0}</0>…"
+msgstr ""
+
+#: src/pages/auth/SignupPage.tsx
+msgid "An account already exists for this email. Log in instead, or use “Forgot password?” if you have lost access to it."
 msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
@@ -18013,6 +18273,14 @@ msgstr ""
 msgid "Open folder"
 msgstr "Abrir carpeta"
 
+#: src/i18n/harvested.ts
+msgid "A lot of KTIP is public. Without signing in you can browse Discover, Projects, Events, Funding Opportunities, Forums, the member Directory, the Leaderboard, member pages, published CVs, Resources and this Help Center.\n"
+"\n"
+"You need an account to create anything, apply for funding, RSVP, post or reply in the forums, send messages, use the collaboration tools, or enter an event venue.\n"
+"\n"
+"Some actions need more than an account. Creating a project, for example, requires the project-creation permission, which not every role holds."
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/hooks/useMfa.ts
 msgid "Could not switch off email codes."
@@ -18052,10 +18320,6 @@ msgstr ""
 #: src/components/legal/MyTakedownNotices.tsx
 msgid "How this works"
 msgstr ""
-
-#: src/components/settings/PreferencesTab.tsx
-msgid "Show Email"
-msgstr "Mostrar correo electrónico"
 
 #: src/components/events/EventDetailsForm.tsx
 msgid "Challenge Details"
@@ -18331,6 +18595,11 @@ msgstr "Ese enlace de inicio de sesión está incompleto. Vuelva a intentarlo de
 msgid "Verify any funding opportunity independently before sending money, documents or personal data. No legitimate funder on this platform will ask you to pay a fee to receive a grant."
 msgstr ""
 
+#. placeholder {0}: counts.follows
+#: src/components/personalization/SignalSummary.tsx
+msgid "{0} followed"
+msgstr ""
+
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "When one is announced it will show up here, along with a way into the live venue."
 msgstr "Cuando se anuncie uno, aparecerá aquí, junto con una vía de acceso al lugar en directo."
@@ -18462,6 +18731,10 @@ msgstr "Presentado a través del formulario de informe, con la categoría, la de
 msgid "Post grant opportunities"
 msgstr "Publicar oportunidades de subvención"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "The language the site is in, and how other members' writing is shown to you"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Who the funder will accept — country, sector, stage, sometimes an age or institution requirement.\n"
 "\n"
@@ -18512,6 +18785,16 @@ msgstr "Actualizaciones"
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "What applicants must attach before they can submit."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "The photo block on My Profile opens the portrait studio. Upload a picture, then use the cut action to lift yourself off the background and drop a colour, a gradient or one of the backdrops behind you instead.\n"
+"\n"
+"The cut happens in your own browser. The picture is not sent anywhere to be processed, and nothing leaves your device until you save the result.\n"
+"\n"
+"That also means it depends on your device. If the cut is refused or comes back looking wrong, your plain photo is kept and used as it is — nothing is lost. A clear subject, an uncluttered background and decent light give it the best chance; a second person at the edge of the frame is what most often confuses it.\n"
+"\n"
+"You can go back to the plain photo at any time from the same studio."
 msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
@@ -18595,6 +18878,10 @@ msgstr "Presencial"
 msgid "{0, plural, one {# field found} other {# fields found}}"
 msgstr "{0, plural, one {# campo encontrado} other {# campos encontrados}}"
 
+#: src/components/directory/PeopleLikeYouRail.tsx
+msgid "Mentors for you"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Pinned posts stay at the top of a board regardless of activity, marked with a pin icon.\n"
 "\n"
@@ -18614,6 +18901,24 @@ msgstr "Enviar enlace de restablecimiento"
 
 #: src/i18n/harvested.ts
 msgid "Counter-notice"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Check the obvious first: the right email, the right password, caps lock off.\n"
+"\n"
+"If you signed up with Google or Microsoft you have no KTIP password. Use the same provider button you originally signed up with — the email/password form will always fail for you.\n"
+"\n"
+"If you added a secondary email, either address works with the same password.\n"
+"\n"
+"Forgotten password? Use \"Forgot Password?\" on the login page.\n"
+"\n"
+"Arriving from the OECS Virtual Campus and bounced back with an error code? The handoff ticket is single use. Go back to the Campus and click through again.\n"
+"\n"
+"Stuck at the six-digit code? That screen is two-step verification, and there are three ways past it. If you use an authenticator app, check your phone's clock is set automatically — a drifting clock is the usual cause of codes that look right and are refused. If you use email codes and nothing arrived, wait the thirty seconds and send another, then check your spam folder. If the phone or mailbox itself is gone, use \"Use a recovery code\" on that screen and spend one of the ten codes you saved at set-up.\n"
+"\n"
+"Out of recovery codes as well? An OECS administrator can reset the second step for you once they have confirmed who you are. Reach out through the Help Center contact options below.\n"
+"\n"
+"Still locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18661,6 +18966,14 @@ msgstr ""
 msgid "Apply to this {0}"
 msgstr "Postularse a este {0}"
 
+#: src/i18n/harvested.ts
+msgid "If a recovery banner appears at the top of the page, click \"Retry\" — that reloads your profile without a full sign-in.\n"
+"\n"
+"Otherwise sign out and back in, which rebuilds the session.\n"
+"\n"
+"If fields are genuinely blank, open My Profile on your Dashboard and check they were saved. That page is the editor, so what you type there is stored — if a field is empty after a save, say so through the Feedback action on the floating button."
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Target Beneficiaries"
 msgstr "Beneficiarios objetivo"
@@ -18671,6 +18984,10 @@ msgstr "Todos los proyectos que los miembros han publicado, incluidos los privad
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "You are filing as"
+msgstr ""
+
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Unhide"
 msgstr ""
 
 #: src/components/venue/map/VenueMapExplorer.tsx
@@ -18827,10 +19144,6 @@ msgstr ""
 msgid "Edit showcase"
 msgstr "Editar muestra"
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Make the site easier to read"
-msgstr "Hacer que el sitio sea más fácil de leer"
-
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Could not load applications."
 msgstr ""
@@ -18952,6 +19265,10 @@ msgid "All Categories"
 msgstr "Todas las categorías"
 
 #: src/i18n/harvested.ts
+msgid "What kinds of funding are listed?"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Rotate a key immediately on suspicion of exposure, and tell us."
 msgstr ""
 
@@ -19021,6 +19338,10 @@ msgstr "Cuente su historia — conéctese a través de la OECS."
 #: src/lib/permissions.ts
 msgid "Participate in conversations they have been added to."
 msgstr "Participar en las conversaciones a las que han sido añadidos."
+
+#: src/components/settings/PersonalizationTab.tsx
+msgid "Interests, skills and industry. Your role and country always count — switching role changes what ranks first."
+msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
 msgid "This invitation has already been redeemed by another account."
@@ -19196,6 +19517,16 @@ msgstr "Denunciar {targetLabel}"
 msgid "Failed to create conversation"
 msgstr "No se pudo crear la conversación"
 
+#: src/i18n/harvested.ts
+msgid "The bell in the navigation bar carries a count of everything unread.\n"
+"\n"
+"Open it to see your newest notifications — messages, event and project activity, collaboration shares, connection requests and achievements. Clicking one takes you to whatever it refers to and marks it read.\n"
+"\n"
+"\"Mark all as read\" clears the badge, and \"View all invitations\" jumps to your invitations inbox.\n"
+"\n"
+"Which notifications you receive is up to you: Your Dashboard has a switch per category under Preferences."
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Moderated — hosts grant the mic"
 msgstr "Moderado — los anfitriones ceden el micrófono"
@@ -19223,6 +19554,16 @@ msgstr "Legendario"
 
 #: src/components/profile/ProfileCanvas.tsx
 msgid "your interests"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Open the Funding menu in the navigation bar and choose \"Funding Opportunities\" to see every open call.\n"
+"\n"
+"Search by keyword, then narrow it with the two filters: type of funding, and focus area. Each listing shows the funding range, the currency, the deadline and the eligibility summary.\n"
+"\n"
+"There is no status filter. Calls that have closed move into their own \"Closed calls\" section further down the page, so what you scroll through at the top is always still open.\n"
+"\n"
+"Open a listing for the full detail, including how to apply and who to contact. Deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss."
 msgstr ""
 
 #: src/components/messages/GroupSettingsModal.tsx
@@ -19269,6 +19610,10 @@ msgstr ""
 
 #: src/components/legal/AgreementGate.tsx
 msgid "By publishing you agree to the IP, Content & Licensing Policy and the Copyright & Takedown Policy. You keep ownership of your work."
+msgstr ""
+
+#: src/lib/personalization.ts
+msgid "Closing soon"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -19497,6 +19842,8 @@ msgstr "p. ej., Caribbean Tech Summit 2025"
 msgid "A member page"
 msgstr "Una página de miembro"
 
+#: src/components/layout/Navbar.tsx
+#: src/i18n/harvested.ts
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Chamber verification"
 msgstr "Verificación de la Cámara"
@@ -19515,6 +19862,10 @@ msgstr "Compartido conmigo"
 msgid "Build something in a weekend"
 msgstr "Cree algo en un fin de semana"
 
+#: src/components/dashboard/RoleQuickActions.tsx
+msgid "My applications"
+msgstr ""
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Submit for Review"
 msgstr ""
@@ -19527,6 +19878,14 @@ msgstr "{0} · {1} pts"
 
 #: src/components/calendar/CalendarShell.tsx
 msgid "12h"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Open \"My Applications\" under Funding. Drafts carry a Draft badge and a Continue action.\n"
+"\n"
+"Continue returns you to the step you left, with everything you had written intact.\n"
+"\n"
+"You can also go back to the listing itself — the button there reads \"Continue Application\" once a draft exists, so you never accidentally start a second one."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -19659,10 +20018,6 @@ msgstr ""
 msgid "Your publications, student projects and the research collaborations you're part of."
 msgstr "Sus publicaciones, sus proyectos estudiantiles y las colaboraciones de investigación de las que forma parte."
 
-#: src/i18n/harvested.ts
-msgid "Explore Grants"
-msgstr "Explorar subvenciones"
-
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Description must be at least 20 characters"
 msgstr "La descripción debe tener al menos 20 caracteres"
@@ -19681,16 +20036,6 @@ msgstr "Roles y permisos"
 #: src/i18n/harvested.ts
 msgid "The live venue"
 msgstr "El recinto en vivo"
-
-#: src/i18n/harvested.ts
-msgid "Open My Profile on your Dashboard.\n"
-"\n"
-"The tab shows your profile as other members see it. Every block you can change carries a pencil — click one and a small editor opens over the preview, which updates as you type. Between them they cover your display name, photo, banner, bio (up to 500 characters), country, organisation, industry, website, up to 20 skills, up to 20 interests, your languages, and what collaboration you are open to.\n"
-"\n"
-"Roles are in the name-and-roles editor, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Business Support Organisation and admin roles are granted by a reviewer, so they do not appear as options.\n"
-"\n"
-"Each editor saves on its own — there is no page-wide Save."
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Output may be wrong. It is not advice. You remain responsible."
@@ -19748,6 +20093,7 @@ msgstr ""
 
 #: src/lib/personalization.ts
 #: src/pages/dashboard/tabs/OverviewTab.tsx
+#: src/pages/discover/DiscoverPage.tsx
 msgid "For You"
 msgstr "Para ti"
 
@@ -20041,21 +20387,6 @@ msgid "Verification and history"
 msgstr "Verificación e historial"
 
 #: src/i18n/harvested.ts
-msgid "Run the platform, publish grants, and organise regional events."
-msgstr "Administre la plataforma, publique subvenciones y organice eventos regionales."
-
-#: src/i18n/harvested.ts
-msgid "Profile editing lives in Settings. Click your avatar in the top right, choose \"Settings\", then open the Profile tab.\n"
-"\n"
-"You can set your display name, avatar, bio, country, organisation, industry, skills, interests and what collaboration you are open to.\n"
-"\n"
-"The Profile tab on your Dashboard is the read-only view — it shows how other members see you, but you make the changes in Settings.\n"
-"\n"
-"Skills and interests are what the directory filters and the \"For You\" sorting work from, so they are worth filling in."
-msgstr "La edición del perfil se encuentra en Configuración. Haga clic en su avatar en la esquina superior derecha, elija «Configuración» y luego abra la pestaña Perfil.\n"
-""
-
-#: src/i18n/harvested.ts
 msgid "You own your entry"
 msgstr ""
 
@@ -20170,6 +20501,10 @@ msgstr "La columna de pestañas"
 msgid "Gestures"
 msgstr "Gestos"
 
+#: src/components/personalization/NotInterestedButton.tsx
+msgid "Not interested — hide this from my recommendations"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The text being translated"
 msgstr ""
@@ -20279,6 +20614,10 @@ msgstr "Buscar logros"
 #: src/lib/delete-guard.ts
 msgid "Uploaded documents and their extracted fields"
 msgstr "Los documentos subidos y sus campos extraídos"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Make the site easier to read. Applies immediately and follows you to your other devices."
+msgstr ""
 
 #: src/components/layout/Navbar.tsx
 msgid "Your copy of everything you submitted"
@@ -20390,6 +20729,10 @@ msgstr "Ver detalles"
 #: src/pages/projects/ProjectsPage.tsx
 msgid "Be the first to create a project!"
 msgstr "¡Sea el primero en crear un proyecto!"
+
+#: src/lib/personalization.ts
+msgid "Same industry"
+msgstr ""
 
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "25 min"
@@ -20520,6 +20863,10 @@ msgstr "Mensajes"
 msgid "Everyone at once. Hosts hold the mic."
 msgstr "Todos a la vez. Los anfitriones controlan el micrófono."
 
+#: src/lib/personalization.ts
+msgid "A good place to meet people"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Each row shows the author, when it was started and how many replies it has drawn. Pinned announcements sit at the top regardless of age.\n"
 "\n"
@@ -20618,10 +20965,6 @@ msgstr "Capturar pantalla"
 #: src/components/messages/ChatWindow.tsx
 msgid "Attach a file"
 msgstr "Adjuntar un archivo"
-
-#: src/components/settings/PersonalizationTab.tsx
-msgid "Interests, skills, industry, country and roles."
-msgstr "Intereses, habilidades, sector, país y roles."
 
 #. placeholder {0}: alias.email
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -20741,6 +21084,10 @@ msgstr "Publicar convocatorias de financiamiento en la plataforma."
 msgid "Leaderboard"
 msgstr "Clasificación"
 
+#: src/lib/personalization.ts
+msgid "Like things you have been reading"
+msgstr ""
+
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Review your application before submitting. You can go back to edit any section."
 msgstr "Revise su solicitud antes de enviarla. Puede volver atrás para editar cualquier sección."
@@ -20790,6 +21137,10 @@ msgstr "Supervisar los canales de estudiantes"
 #: src/components/shared/DeleteEntityControl.tsx
 msgid "Could not delete this {noun}. You may no longer own it."
 msgstr "No se pudo eliminar este {noun}. Puede que ya no sea de su propiedad."
+
+#: src/lib/personalization.ts
+msgid "Related to your profile"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Especially with entries that did not win."
@@ -20869,10 +21220,6 @@ msgstr "Leer un perfil y conectar."
 msgid "Can I log in with Google or Microsoft?"
 msgstr "¿Puedo iniciar sesión con Google o Microsoft?"
 
-#: src/i18n/harvested.ts
-msgid "Find Grants"
-msgstr "Buscar subvenciones"
-
 #: src/lib/achievement-style.ts
 msgid "Epic"
 msgstr "Épico"
@@ -20895,6 +21242,10 @@ msgstr ""
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Enter {0}"
 msgstr "Introduzca {0}"
+
+#: src/i18n/harvested.ts
+msgid "Explore Funding"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The resources you contributed, and where each one stands"
@@ -20971,6 +21322,14 @@ msgstr ""
 #: src/lib/reaction-emoji.ts
 msgid "Laughing"
 msgstr "Riendo"
+
+#: src/i18n/harvested.ts
+msgid "Those three panels are placeholders. The role gating that decides who sees them is fully wired up, but the content inside is not built yet.\n"
+"\n"
+"So the tab appearing is correct — it means your role holds the right permission — and the empty panel is expected rather than a fault.\n"
+"\n"
+"Business profile is a real tab in the same rail. Admin is the only entry that leaves the dashboard."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Partner API keys"
@@ -21077,6 +21436,10 @@ msgstr ""
 msgid "Team invitations, follows, and updates on your projects"
 msgstr "Invitaciones de equipo, seguimientos y novedades sobre sus proyectos"
 
+#: src/lib/grant-application-template.ts
+msgid "A short pitch or demonstration video, if you have one. Upload it to Google Drive, YouTube or similar, set sharing to \"Anyone with the link can view\", and paste the link to the video or the folder holding it here. Check the link in a private browser window first — an assessor who cannot open it will move on."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The builders"
 msgstr "Los constructores"
@@ -21092,10 +21455,6 @@ msgstr "Buscar contactos…"
 #: src/components/resume/sheets/SlateSheet.tsx
 msgid "Nothing has been added to this CV yet."
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "How do I track my grant applications?"
-msgstr "¿Cómo hago seguimiento de mis solicitudes de subvención?"
 
 #: src/i18n/harvested.ts
 msgid "The essentials first"
@@ -21134,6 +21493,16 @@ msgid "The same events as cards — type, title, summary, date and location at a
 "Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile."
 msgstr "Los mismos eventos en forma de tarjetas: tipo, título, resumen, fecha y lugar de un vistazo, además de insignias para eventos cancelados, pasados y de acción climática. El número indicado arriba muestra cuántos coinciden con sus filtros.\n"
 ""
+
+#: src/i18n/harvested.ts
+msgid "Yes, and it is optional. Students submit their own funding applications — a sponsor is an endorsement, not a permission.\n"
+"\n"
+"On the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.\n"
+"\n"
+"The application can be submitted with or without one, and nominating someone does not hold up your submission while you wait.\n"
+"\n"
+"Worth doing anyway. An assessor reading twenty applications treats one an academic has put their name to differently, and the person who endorses it is usually the person who helped you sharpen it."
+msgstr ""
 
 #: src/hooks/useAIAssistant.ts
 msgid "Safety Administrator"
@@ -21870,6 +22239,10 @@ msgstr "Este recurso no existe o aún no se ha publicado."
 msgid "Failed to save your profile. Please try again."
 msgstr "No se pudo guardar su perfil. Vuelva a intentarlo."
 
+#: src/pages/events/EventsPage.tsx
+msgid "Nothing scheduled yet — check back soon."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Go to the Events page and click \"Create Event\".\n"
 "\n"
@@ -22242,6 +22615,10 @@ msgstr ""
 msgid "Use the pill in the top bar — it tells people whether to interrupt you."
 msgstr "Use la etiqueta en la barra superior: indica a los demás si pueden interrumpirle."
 
+#: src/lib/personalization.ts
+msgid "By someone whose work you follow"
+msgstr ""
+
 #: src/components/personalization/TopicPicker.tsx
 msgid "Anything not listed above. Matches content tagged with the same word."
 msgstr "Cualquier cosa no incluida arriba. Coincide con el contenido etiquetado con la misma palabra."
@@ -22275,15 +22652,6 @@ msgstr "Esperamos verle en el evento."
 #: src/components/venue/RoomChatPanel.tsx
 msgid "{0} chat"
 msgstr "Chat de {0}"
-
-#: src/i18n/harvested.ts
-msgid "Listings cover the usual range: research grants for academic and scientific work, startup funding for new ventures, project grants tied to a specific piece of innovation, and scholarships for students studying in innovation-related fields.\n"
-"\n"
-"Funders set their own type labels, so the exact wording varies between listings.\n"
-"\n"
-"Amounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the funding filters are worth checking more than once."
-msgstr "Las convocatorias cubren la gama habitual: subvenciones de investigación para trabajos académicos y científicos, financiación inicial para nuevas empresas, subvenciones de proyecto vinculadas a una innovación concreta, y becas para estudiantes en campos relacionados con la innovación.\n"
-""
 
 #: src/i18n/harvested.ts
 msgid "The badge catalogue"
@@ -22329,6 +22697,18 @@ msgstr "Busque a un miembro, o seleccione varios para crear un chat grupal."
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Project Owner"
 msgstr "Propietario del proyecto"
+
+#: src/i18n/harvested.ts
+msgid "Click \"Sign Up\" in the top right corner of any page.\n"
+"\n"
+"Step 1 asks for your email, a password, your date of birth and a role. The role picker is split in two — the roles you join as an individual (Entrepreneur, Student, Faculty, Mentor) and the roles you join for an organisation (Investor, Private Sector, Business Support Organisation, NGO, Post-Secondary Institution and the rest).\n"
+"\n"
+"There is no name field. Your display name starts as the first part of your email address, and you change it on your Dashboard whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.\n"
+"\n"
+"Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.\n"
+"\n"
+"After you submit, check your email for a confirmation link. Roles that need review (such as Student or Faculty) are confirmed by your institution or an OECS reviewer after you sign up."
+msgstr ""
 
 #: src/pages/cv/CvPage.tsx
 #: src/pages/cv/PublicCvPage.tsx
@@ -22553,6 +22933,10 @@ msgstr ""
 msgid "A rolling window of hours"
 msgstr ""
 
+#: src/components/personalization/SignalSummary.tsx
+msgid "events near you rank higher"
+msgstr ""
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Submit a solution"
 msgstr "Enviar una solución"
@@ -22564,6 +22948,10 @@ msgstr "Invitación a colaborar"
 #: src/components/messages/ChatWindow.tsx
 msgid "Add a note to these files…"
 msgstr "Añadir una nota a estos archivos…"
+
+#: src/i18n/harvested.ts
+msgid "Recovery codes, and losing your phone"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Agreements that apply to particular activities"
@@ -22603,6 +22991,10 @@ msgstr "Solo escucha"
 
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "at sign-up"
+msgstr ""
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Use a dark color theme across the site. Applies immediately and follows you to your other devices."
 msgstr ""
 
 #: src/components/venue/room/RoomWayfindingPanels.tsx
@@ -23155,6 +23547,10 @@ msgstr "¿Ya tiene una cuenta? <0>Iniciar sesión</0>"
 msgid "By submitting an entry you agree to the Submission & Competition IP Terms. You keep ownership of your work, and a prize buys no rights to it."
 msgstr ""
 
+#: src/lib/personalization.ts
+msgid "Relevant to your role"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Chamber SME review"
 msgstr "Revisión de pymes por la cámara"
@@ -23277,10 +23673,6 @@ msgstr "Empezar desde una plantilla"
 msgid "{0} will be told their application was approved."
 msgstr ""
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Show Country"
-msgstr "Mostrar país"
-
 #: src/components/messages/NewConversationModal.tsx
 msgid "New Conversation"
 msgstr "Nueva conversación"
@@ -23306,6 +23698,10 @@ msgstr "Filtrar por insignia"
 msgid "Failed to update password"
 msgstr "No se pudo actualizar la contraseña"
 
+#: src/pages/dashboard/dashboard-tabs.ts
+msgid "Your résumé, ready to send"
+msgstr ""
+
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 msgid "this floor"
 msgstr "esta planta"
@@ -23313,6 +23709,11 @@ msgstr "esta planta"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "snippet"
 msgstr "fragmento de código"
+
+#. placeholder {0}: counts.rsvps
+#: src/components/personalization/SignalSummary.tsx
+msgid "{0} event RSVPs"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Sections, prefill, and what saving marks as yours."
@@ -23403,6 +23804,16 @@ msgstr "Describa a los miembros clave del equipo, sus funciones y sus cualificac
 #: src/pages/events/EventDetailPage.tsx
 msgid "Request to attend"
 msgstr "Solicitud de asistencia"
+
+#: src/i18n/harvested.ts
+msgid "Open Security on your Dashboard and choose the authenticator app method. A QR code appears; scan it with your app and type the six-digit code back to confirm.\n"
+"\n"
+"If you have no app yet, the set-up screen carries a second QR that opens a guide to the ones we recommend, including Apple Passwords, Google Authenticator and Microsoft Authenticator, plus desktop options. The same guide is on the sign-in screen behind \"Where do I find my code?\".\n"
+"\n"
+"Codes change every 30 seconds and are generated on the device itself, so this method works on a plane or with no signal.\n"
+"\n"
+"If a code is refused even though it looks right, check that your phone's clock is set automatically. A drifting clock is the usual cause."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Everything here narrows the events below, and the filters stack — combine as many as you need.\n"
@@ -24337,6 +24748,14 @@ msgid "Some cells are locked: permissions a role cannot lose without breaking th
 msgstr "Algunas celdas están bloqueadas: permisos que un rol no puede perder sin comprometer la plataforma, con el motivo al pasar el cursor.\n"
 ""
 
+#: src/i18n/harvested.ts
+msgid "Open the Community menu in the navigation bar and choose \"Forums\" to see the discussion boards.\n"
+"\n"
+"Each board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.\n"
+"\n"
+"Anyone can read the forums without signing in. Starting a discussion and replying need an account. Opening a whole new board is a different matter: that is a \"Start a Board\" action on the forums page, and only organisation-tier roles hold it."
+msgstr ""
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Record Award"
 msgstr ""
@@ -24408,16 +24827,9 @@ msgstr "Inscribirse en un evento"
 msgid "KTIP is a collaboration platform, so some data is deliberately public."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Members under 18 use KTIP normally, with protections that cannot be switched off.\n"
-"\n"
-"The main one is messaging: one-to-one direct messages between an adult member and a member under 18 are not available in either direction. Group channels, event rooms and forums are open as usual — those are visible to more than two people, which is the point.\n"
-"\n"
-"Student accounts carry further rules on top, whatever their age: grant applications need a faculty sponsor, and the public leaderboard excludes them.\n"
-"\n"
-"The protections lift by themselves on the account's 18th birthday. Nothing needs to be requested."
-msgstr "Los miembros menores de 18 años utilizan KTIP con normalidad, con protecciones que no se pueden desactivar.\n"
-""
+#: src/components/help/HelpArticleCard.tsx
+msgid "Copy link"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Drawing, exporting and sharing a board."
@@ -24448,17 +24860,6 @@ msgstr "{displayName} ha solicitado conectarse con usted. Acepte y ambos podrán
 msgid "{0, plural, one {Found # upcoming event} other {Found # upcoming events}}"
 msgstr "{0, plural, one {Se encontró # evento próximo} other {Se encontraron # eventos próximos}}"
 
-#: src/i18n/harvested.ts
-msgid "The bell in the navigation bar carries a count of everything unread.\n"
-"\n"
-"Open it to see your newest notifications — messages, event and project activity, collaboration shares, connection requests and achievements. Clicking one takes you to whatever it refers to and marks it read.\n"
-"\n"
-"\"Mark all as read\" clears the badge, and \"View all invitations\" jumps to your invitations inbox.\n"
-"\n"
-"Which notifications you receive is up to you: Settings has a switch per category under Preferences."
-msgstr "La campana en la barra de navegación muestra el número de todo lo que no se ha leído.\n"
-""
-
 #: src/pages/security/MfaSetupPage.tsx
 msgid "A code to your inbox, and you are in."
 msgstr ""
@@ -24483,16 +24884,6 @@ msgstr "Guardar cambios"
 
 #: src/i18n/harvested.ts
 msgid "If a child is in immediate danger, contact your local emergency services first. Then tell us, so we can act on the account."
-msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Dashboard, Personalization.\n"
-"\n"
-"Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.\n"
-"\n"
-"Once set, the \"For You\" sort option on the Projects, Events, Grants and Resources lists ranks against these choices instead of sorting by date.\n"
-"\n"
-"Everything else stays browsable — personalization changes the order, not what exists."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -24657,6 +25048,10 @@ msgstr "La mensajería es un panel que se acopla al costado de la página en la 
 msgid "Add context that would help a reviewer."
 msgstr "Añada contexto que pueda ayudar a un revisor."
 
+#: src/lib/grant-application-template.ts
+msgid "Video link (optional)"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Minimum age"
 msgstr ""
@@ -24758,6 +25153,14 @@ msgstr "Verificación"
 msgid "New requests waiting on you are under Invitations, not here. The member directory is where you find people to connect with in the first place."
 msgstr "Las nuevas solicitudes pendientes de su respuesta están en Invitaciones, no aquí. El directorio de miembros es donde encuentra personas con quienes conectar en primer lugar."
 
+#: src/i18n/harvested.ts
+msgid "Both live on your Dashboard under Preferences, and dark mode is also on the floating action button. Text size and readable font are on the floating button too, behind Accessibility.\n"
+"\n"
+"Dark mode applies instantly across the whole platform. Readable font mode switches to a more legible typeface with looser spacing, which helps with long articles and forms.\n"
+"\n"
+"Both are stored per device, so your phone and your laptop can be set differently."
+msgstr ""
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Or link to it"
 msgstr ""
@@ -24791,10 +25194,6 @@ msgid "Open — everyone can speak"
 msgstr "Abierto — todos pueden hablar"
 
 #: src/i18n/harvested.ts
-msgid "Verify your students, oversee submissions, and sponsor applications."
-msgstr "Verifique a sus estudiantes, supervise las presentaciones y patrocine solicitudes."
-
-#: src/i18n/harvested.ts
 msgid "Tracking what you sent"
 msgstr "Seguimiento de lo que ha enviado"
 
@@ -24823,6 +25222,10 @@ msgstr "Filtrar por tipo de evento"
 msgid "Failed to delete account"
 msgstr "Error al eliminar la cuenta"
 
+#: src/pages/discover/DiscoverPage.tsx
+msgid "You can post the first funding call."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Tick “virtual” and the location field disappears; leave it off and you are asked for a physical address.\n"
 "\n"
@@ -24841,6 +25244,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "How do I report a post, reply or message?"
 msgstr "¿Cómo denuncio una publicación, una respuesta o un mensaje?"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Event registrations waiting on you and replies to your feedback. Security and legal mail — sign-in codes, verification, account notices — always arrives regardless."
+msgstr ""
 
 #: src/components/messages/NewConversationModal.tsx
 msgid "Selected"
@@ -24886,17 +25293,6 @@ msgstr "Abrir…"
 msgid "Then come back to this screen and scan the code above with the app."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Every grant has an Eligibility section describing who may apply.\n"
-"\n"
-"Criteria commonly cover your role, your member state, the type of project and the phase it is in.\n"
-"\n"
-"Read it before you start writing. If it is ambiguous, contact the funder using the details on the grant page rather than guessing.\n"
-"\n"
-"Eligibility is separate from permissions. A Student may be eligible for a grant and still need a faculty sponsor to submit the application."
-msgstr "Cada subvención tiene una sección de Elegibilidad que describe quién puede postularse.\n"
-""
-
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Achievements are awarded automatically from what you do on KTIP."
 msgstr "Los logros se otorgan automáticamente según su actividad en KTIP."
@@ -24915,6 +25311,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Discover and fund projects"
 msgstr "Descubra y financie proyectos"
+
+#: src/components/layout/AuthBackdrop.tsx
+msgid "Back to website"
+msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
 msgid "Verified by your organisation's email domain."
@@ -25101,6 +25501,14 @@ msgstr "Las publicaciones del foro, las respuestas del foro y los mensajes de ch
 msgid "Work together in real-time"
 msgstr "Trabajad juntos en tiempo real"
 
+#: src/i18n/harvested.ts
+msgid "On your Dashboard. There is no separate Settings page any more — everything that was on it is a tab on the dashboard rail.\n"
+"\n"
+"My Profile — your name, photo, banner, bio, country, organisation, skills, interests and languages, edited directly on a preview of the page other members see. Under Account, further down the rail: Security — password, two-step verification, your sign-in addresses, a download of your own data, and the options for leaving KTIP. Preferences — notifications, leaderboard visibility, connection-count privacy, dark mode and readable text. Personalization — the topics that drive \"For You\" sorting. Verification — evidence for a verified badge. Legal & Consent — what you have agreed to.\n"
+"\n"
+"Old /settings links still work and land on the matching tab."
+msgstr ""
+
 #. placeholder {0}: doc.version
 #. placeholder {0}: row.accepted_version
 #: src/components/legal/ConsentDocument.tsx
@@ -25266,6 +25674,7 @@ msgstr "Invitaciones del equipo del proyecto"
 msgid "Love it"
 msgstr "Me encanta"
 
+#: src/components/settings/PreferencesTab.tsx
 #: src/components/ui/FloatingActionButton.tsx
 msgid "Photo brightness"
 msgstr "Brillo de las fotos"
@@ -25410,6 +25819,18 @@ msgid "Arrow"
 msgstr "Flecha"
 
 #: src/i18n/harvested.ts
+msgid "Go to \"My Applications\" from the Funding menu.\n"
+"\n"
+"Every application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted. Drafts show a Continue action that drops you back at the step where you stopped.\n"
+"\n"
+"Four counts summarise the page across the top — Submitted, In review, Approved and Drafts — beside a card showing what has been awarded to you.\n"
+"\n"
+"There is deliberately no \"total requested\" figure. Applicants write the amount they are asking for in their own words, so there is nothing dependable to add up.\n"
+"\n"
+"Applications you submitted on a funder's external site will not appear here — KTIP never sees those."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "The OECS Knowledge and Technology Innovation Platform (KTIP) connects students, entrepreneurs, mentors, and investors across the Eastern Caribbean to share projects, find funding, and collaborate on innovation."
 msgstr "La Plataforma de Innovación en Conocimiento y Tecnología de la OECS (KTIP) conecta a estudiantes, emprendedores, mentores e inversionistas de todo el Caribe Oriental para compartir proyectos, encontrar financiamiento y colaborar en innovación."
 
@@ -25552,10 +25973,6 @@ msgstr "Concepto — todavía una idea. Está explorando si podría funcionar.\n
 msgid "Your authenticator is removed first. Then we email you a code to finish switching."
 msgstr ""
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Display your email address on your profile"
-msgstr "Mostrar su dirección de correo electrónico en su perfil"
-
 #: src/lib/minor-safety.ts
 msgid "This member is under 18. Direct messages are limited to supervised group and event channels."
 msgstr "Este miembro es menor de 18 años. Los mensajes directos se limitan a los canales de grupo y de eventos supervisados."
@@ -25623,6 +26040,10 @@ msgstr ""
 msgid "Your {0} email address did it. "
 msgstr ""
 
+#: src/lib/personalization.ts
+msgid "Similar to what you engage with"
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Pulled from the OECS Virtual Campus. Remove one and it stays removed on future syncs."
 msgstr "Importado desde OECS Virtual Campus. Elimine uno y permanecerá eliminado en futuras sincronizaciones."
@@ -25684,10 +26105,6 @@ msgstr "Aparece como Ausente."
 msgid "Admin Console"
 msgstr "Consola de administración"
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Email Notifications"
-msgstr "Notificaciones por correo electrónico"
-
 #: src/i18n/harvested.ts
 msgid "Early drafts were kept only in your browser rather than on the platform. Those are not lost, but they are not in your snippets list either.\n"
 "\n"
@@ -25696,6 +26113,14 @@ msgid "Early drafts were kept only in your browser rather than on the platform. 
 "Do this from the same browser and profile you originally wrote them in — that is where the local copies live."
 msgstr "Los primeros borradores se guardaban solo en su navegador, no en la plataforma. No se han perdido, pero tampoco figuran en su lista de fragmentos.\n"
 ""
+
+#: src/i18n/harvested.ts
+msgid "Your choice, on your Dashboard under Preferences.\n"
+"\n"
+"Everyone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.\n"
+"\n"
+"This controls the visible count, not the connections themselves. Changing it does not disconnect anyone."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Your choice is remembered on this device."
@@ -25743,17 +26168,6 @@ msgid "Responses are scaled to the breach and to whether it is repeated. In roug
 msgstr ""
 
 #: src/i18n/harvested.ts
-msgid "Reach it from your avatar menu, \"My Dashboard\". The rail on the left lists your sections.\n"
-"\n"
-"Overview — your For You rail, recent submissions and calendar at a glance. Profile — how other members see you, read-only. Progress — your activity timeline. Projects — the projects you own. Events — the events you organise. Connections — the people you know, and your pending invitations. Submissions — permanent copies of everything you have submitted.\n"
-"\n"
-"Achievements links out to the full trophy gallery, which is a page rather than a tab.\n"
-"\n"
-"Some sections only appear for certain roles: Funding for investors, Mentees for mentors and faculty, Research for faculty and researchers, Business for SME and private sector accounts, and Admin for administrators."
-msgstr "Acceda desde el menú de su avatar, «Mi panel». La barra a la izquierda enumera sus secciones.\n"
-""
-
-#: src/i18n/harvested.ts
 msgid "Do not attempt to contact a member identified as a minor outside the supervised channels the platform provides, and do not ask a minor to move a conversation to another service."
 msgstr ""
 
@@ -25798,6 +26212,7 @@ msgid "What we know about you"
 msgstr "Lo que sabemos sobre usted"
 
 #: src/lib/extracted-fields.ts
+#: src/lib/personalization.ts
 msgid "Climate action"
 msgstr "Acción climática"
 
@@ -25854,6 +26269,11 @@ msgstr "O continuar con"
 msgid "Private"
 msgstr "Privado"
 
+#: src/components/dashboard/RoleQuickActions.tsx
+#: src/pages/discover/DiscoverPage.tsx
+msgid "Start a project"
+msgstr ""
+
 #: src/hooks/useDocumentAccess.ts
 msgid "Document access granted"
 msgstr "Acceso al documento concedido"
@@ -25893,6 +26313,10 @@ msgstr "Ver registros de auditoría"
 msgid "Launch - Ready to go!"
 msgstr "Lanzamiento - ¡Listo para empezar!"
 
+#: src/pages/grants/GrantApplicationPage.tsx
+msgid "Paste the full link, starting with https://"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Dismissed notices"
 msgstr ""
@@ -25927,15 +26351,6 @@ msgstr "Pisos"
 #: src/pages/security/MfaRecoverPage.tsx
 msgid "Recovery code accepted. Set up a new authenticator."
 msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Open \"My Applications\" under Grants. Drafts carry a Draft badge and a Continue action.\n"
-"\n"
-"Continue returns you to the step you left, with everything you had written intact.\n"
-"\n"
-"You can also go back to the grant itself — the button there reads \"Continue Application\" once a draft exists, so you never accidentally start a second one."
-msgstr "Abra «Mis solicitudes» en Subvenciones. Los borradores llevan una insignia de Borrador y una acción Continuar.\n"
-""
 
 #: src/components/shared/DeleteEntityControl.tsx
 msgid "Danger zone"

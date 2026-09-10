@@ -727,6 +727,37 @@ export const INTEREST_SUGGESTIONS = [
   'Ocean Conservation',
 ] as const
 
+/**
+ * Interest chips offered first, by the role the member picked at signup. The
+ * shared list above is the fallback and always follows; this only reorders
+ * the front of the row so a student is not scrolling past "Financial
+ * Inclusion" to find "Youth Entrepreneurship". Values are ranked topics, so
+ * every entry must also read well as a personalization topic (055 aliases).
+ */
+export const INTEREST_SUGGESTIONS_BY_ROLE: Partial<Record<string, readonly string[]>> = {
+  student: ['Youth Entrepreneurship', 'Artificial Intelligence', 'Creative Industries', 'Digital Transformation'],
+  faculty: ['Digital Transformation', 'Health Innovation', 'Climate Adaptation', 'Artificial Intelligence'],
+  researcher: ['Climate Adaptation', 'Ocean Conservation', 'Health Innovation', 'Food Security'],
+  research_institution: ['Climate Adaptation', 'Blue Economy', 'Renewable Energy', 'Health Innovation'],
+  educational_partner: ['Youth Entrepreneurship', 'Digital Transformation', 'Creative Industries'],
+  mentor: ['Youth Entrepreneurship', 'Social Innovation', 'Financial Inclusion', 'Digital Transformation'],
+  entrepreneur: ['Financial Inclusion', 'Digital Transformation', 'Sustainable Tourism', 'AgriTech'],
+  investor: ['Financial Inclusion', 'Renewable Energy', 'Blue Economy', 'AgriTech'],
+  private_sector: ['Digital Transformation', 'Sustainable Tourism', 'Renewable Energy', 'Circular Economy'],
+  chamber_admin: ['Financial Inclusion', 'Digital Transformation', 'Sustainable Tourism'],
+  ngo: ['Social Innovation', 'Climate Adaptation', 'Food Security', 'Youth Entrepreneurship'],
+  government: ['Smart Cities', 'Digital Transformation', 'Climate Adaptation', 'Renewable Energy'],
+  igo: ['Climate Adaptation', 'Blue Economy', 'Financial Inclusion', 'Food Security'],
+  diaspora: ['Youth Entrepreneurship', 'Creative Industries', 'Financial Inclusion'],
+}
+
+/** The interest chips for a role: its own first, then the shared list, deduped. */
+export function interestSuggestionsFor(role: string | null | undefined): string[] {
+  const own = (role && INTEREST_SUGGESTIONS_BY_ROLE[role]) || []
+  const seen = new Set(own)
+  return [...own, ...INTEREST_SUGGESTIONS.filter((s) => !seen.has(s))]
+}
+
 // Industries (curated Caribbean-relevant list; "Other" handled in UI)
 export const INDUSTRIES = [
   'Agriculture & Agri-processing',

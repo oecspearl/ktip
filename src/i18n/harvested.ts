@@ -44,9 +44,9 @@ Under it, the climate-action flag puts the event in the region’s resilience ag
   msg`A guide, article, case study or tool published for the KTIP community, with its type and topic tags.
 
 The column on the right carries the details, the author, and links to related resources when there are any.`,
-  msg`A lot of KTIP is public. Without signing in you can browse Discover, Projects, Events, Grants, Forums, the member Directory, the Leaderboard, member pages, published CVs, Resources and this Help Center.
+  msg`A lot of KTIP is public. Without signing in you can browse Discover, Projects, Events, Funding Opportunities, Forums, the member Directory, the Leaderboard, member pages, published CVs, Resources and this Help Center.
 
-You need an account to create anything, apply for a grant, RSVP, post or reply in the forums, send messages, use the collaboration tools, or enter an event venue.
+You need an account to create anything, apply for funding, RSVP, post or reply in the forums, send messages, use the collaboration tools, or enter an event venue.
 
 Some actions need more than an account. Creating a project, for example, requires the project-creation permission, which not every role holds.`,
   msg`A member can withdraw at any time in their settings. Withdrawal removes them from subsequent responses immediately, and the partner must delete previously received records for that member within 30 days.`,
@@ -73,6 +73,13 @@ Live audio and video inside rooms is a later phase and is not switched on yet �
   msg`A row opens that event’s admin page, where the real work is: registrations and their answers, the schedule, speakers, articles, updates, the challenge brief, the virtual venue, and the registration form builder.
 
 Cancelling an event keeps its page up with a cancelled badge rather than deleting it — people who registered still need to find out what happened.`,
+  msg`A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.
+
+There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.
+
+Some roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.
+
+Either way you also get ten recovery codes. Keep them somewhere that is not the phone.`,
   msg`A shared document`,
   msg`A standing notice reversed by a counter-notice is removed from the count. You can see any notices filed against your content, and their current status, from your account.`,
   msg`A statement of why you believe it infringes.`,
@@ -142,9 +149,9 @@ Badges also work as a filter in the member directory, which is how other members
   msg`Administrators and moderators can reach non-public data where that is necessary to operate the platform, investigate a report, or meet a safeguarding duty. Those accesses are logged.`,
   msg`Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.
 
-It covers projects, events, users, roles, achievements, moderation, institutions, chambers, grants, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and UAT feedback.
+It covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics, error reports and UAT feedback.
 
-Safety administrators see the moderation and grievance side. Super administrators see everything.
+What you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.
 
 Actions here apply platform-wide, so they are worth being deliberate about.`,
   msg`Adults outside a shared, supervised context cannot start a direct conversation with a minor. Conversations a minor starts are subject to the same restriction in reverse.`,
@@ -154,7 +161,7 @@ Step 1 confirms your display name (pre-filled from your provider), asks for your
 
 Step 2 is optional profile detail: organisation, industry, country, a short bio, skills, interests and your openness to collaborate.
 
-You can skip step 2 and fill it in later from Settings, but a fuller profile makes you much easier to find in the member directory.`,
+You can skip step 2 and fill it in later from your Dashboard, but a fuller profile makes you much easier to find in the member directory.`,
   msg`After you submit`,
   msg`Age declaration, minor detection and safeguarding of young members`,
   msg`Agent`,
@@ -240,7 +247,7 @@ File-based resources upload here; text resources are read in full on the resourc
   msg`Boards and posts`,
   msg`Boards, pinning, locking and removal.`,
   msg`Boards, posts and moderation`,
-  msg`Both live in Settings under Preferences, and dark mode is also on the floating action button.
+  msg`Both live on your Dashboard under Preferences, and dark mode is also on the floating action button. Text size and readable font are on the floating button too, behind Accessibility.
 
 Dark mode applies instantly across the whole platform. Readable font mode switches to a more legible typeface with looser spacing, which helps with long articles and forms.
 
@@ -266,11 +273,11 @@ Open one for the full text plus the page it was sent from — which is usually t
   msg`Business Support Organisations`,
   msg`Business Verification`,
   msg`Business profile`,
-  msg`Business verification is done by your national Chamber of Commerce, not by OECS directly.
+  msg`Business verification is done by a Business Support Organisation, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.
 
-Open the SME verification page (it is also the Business entry on your dashboard rail if you hold a Private Sector or SME role). Enter your legal business name, your member state and your business registration number, then click "Submit to Chamber".
+Open the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.
 
-Your Chamber reviews the submission against its own records. Once approved your account becomes a Verified SME, which unlocks the SME capabilities and shows a verified badge to funders and partners.
+The reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.
 
 A Private Sector account is the unverified state of the same thing — everything keeps working while you wait.`,
   msg`Businesses waiting on your Chamber`,
@@ -291,6 +298,7 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Challenge`,
   msg`Challenges and climate action`,
   msg`Chamber SME review`,
+  msg`Chamber verification`,
   msg`Change it`,
   msg`Change your analytics choice`,
   msg`Change your email address`,
@@ -328,6 +336,10 @@ If you added a secondary email, either address works with the same password.
 Forgotten password? Use "Forgot Password?" on the login page.
 
 Arriving from the OECS Virtual Campus and bounced back with an error code? The handoff ticket is single use. Go back to the Campus and click through again.
+
+Stuck at the six-digit code? That screen is two-step verification, and there are three ways past it. If you use an authenticator app, check your phone's clock is set automatically — a drifting clock is the usual cause of codes that look right and are refused. If you use email codes and nothing arrived, wait the thirty seconds and send another, then check your spam folder. If the phone or mailbox itself is gone, use "Use a recovery code" on that screen and spend one of the ten codes you saved at set-up.
+
+Out of recovery codes as well? An OECS administrator can reset the second step for you once they have confirmed who you are. Reach out through the Help Center contact options below.
 
 Still locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options.`,
   msg`Checked In`,
@@ -373,23 +385,11 @@ The page offers two views. The calendar shows a month grid where multi-day event
 Each card carries the title, date, location and type, so you can scan quickly.
 
 A sort control at the top lets you order by date or by "For You", which ranks events against the topics you chose in your personalization settings.`,
-  msg`Click "Forums" in the navigation bar to see the discussion boards.
-
-Each board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.
-
-Anyone can read the forums without signing in. Starting a discussion and replying need an account.`,
-  msg`Click "Grants" in the navigation bar to see every open funding opportunity.
-
-Search by keyword and filter by grant type or status. Each listing shows the funding range, the currency, the deadline and the eligibility summary.
-
-Open a grant for the full detail, including how to apply and who to contact.
-
-Grant deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss.`,
   msg`Click "Log In" in the top right corner of the page.
 
 Enter the email and password you signed up with, then click "Log In".
 
-If you added a secondary email in Settings, you can sign in with either address using the same password.
+If you added a secondary email on your Dashboard, under Security, you can sign in with either address using the same password.
 
 If you forget your password, click "Forgot Password?" on the login page.`,
   msg`Click "New Conversation".`,
@@ -398,7 +398,7 @@ If you forget your password, click "Forgot Password?" on the login page.`,
 
 You will see every public project. Search by keyword, filter by category (Technology, Healthcare, Education, Agriculture, Environment or Other) or by phase (Concept, Prototype, Funding or Launch).
 
-Once you have set your interests in Settings you can also sort by "For You", which ranks projects against the topics you picked.
+Once you have set your interests on your Dashboard you can also sort by "For You", which ranks projects against the topics you picked.
 
 Click any card for the full project, including the owner, team, documents and comments.`,
   msg`Click "Register" and complete the registration form.`,
@@ -409,7 +409,7 @@ Click any card for the full project, including the owner, team, documents and co
 
 Step 1 asks for your email, a password, your date of birth and a role. The role picker is split in two — the roles you join as an individual (Entrepreneur, Student, Faculty, Mentor) and the roles you join for an organisation (Investor, Private Sector, Business Support Organisation, NGO, Post-Secondary Institution and the rest).
 
-There is no name field. Your display name starts as the first part of your email address, and you change it in Settings whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.
+There is no name field. Your display name starts as the first part of your email address, and you change it on your Dashboard whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.
 
 Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.
 
@@ -423,7 +423,7 @@ After you submit, check your email for a confirmation link. Roles that need revi
   msg`Click the feedback button on any page.`,
   msg`Click the magnifier in the navigation bar, or press Ctrl+K (Cmd+K on Mac), to open search from anywhere.
 
-Search covers pages, projects, events, grants, forum boards, members, resources and every help article at once. Use the arrow keys to move through results and Enter to open one.
+Search covers pages, projects, events, funding, forum boards, members, resources and every help article at once. Use the arrow keys to move through results and Enter to open one.
 
 When a result is a how-to, press the right arrow to expand the steps inline instead of leaving the page.
 
@@ -535,13 +535,14 @@ You can edit or unpublish it afterwards, so nothing here is one-way. Signed out,
   msg`Curating the external tools directory.`,
   msg`Curriculum Advisory`,
   msg`Custom Section`,
+  msg`Cutting the background out of your photo`,
   msg`Dark mode and readable text`,
   msg`Dark mode, reduced motion, text scale.`,
   msg`Dashboard, Personalization.
 
 Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.
 
-Once set, the "For You" sort option on the Projects, Events, Grants and Resources lists ranks against these choices instead of sorting by date.
+Once set, the "For You" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.
 
 Everything else stays browsable — personalization changes the order, not what exists.`,
   msg`Dashboard, Preferences. There is a switch for each stream: email, messages, events, projects, forums, collaboration, connections and achievements.
@@ -596,7 +597,7 @@ Deleting a project cannot be undone. If you only want it out of public view, swi
   msg`Disagreement is fine and criticism of an idea is welcome. The line is at the person.`,
   msg`Discover`,
   msg`Discover and fund projects`,
-  msg`Discover projects, publish grants, and connect with innovators.`,
+  msg`Discover projects, publish funding calls, and connect with innovators.`,
   msg`Discussion`,
   msg`Dismissed`,
   msg`Dismissed notices`,
@@ -633,7 +634,7 @@ Deleting a project cannot be undone. If you only want it out of public view, swi
   msg`Download, edit, publish`,
   msg`Downloading someone’s published résumé.`,
   msg`Draft`,
-  msg`Draft — not submitted. Continue to finish it. Student drafts also need a sponsor to accept before they can be submitted.
+  msg`Draft — not submitted. Continue to finish it. A draft is yours to submit whenever it is ready; nobody else has to release it for you.
 
 Pending — submitted, waiting to be picked up.
 
@@ -790,7 +791,7 @@ Criteria commonly cover your role, your member state, the type of project and th
 
 Read it before you start writing. If it is ambiguous, contact the funder using the details on the grant page rather than guessing.
 
-Eligibility is separate from permissions. A Student may be eligible for a grant and still need a faculty sponsor to submit the application.`,
+Eligibility is separate from your role. Eligibility is the funder's rule about who may apply; your role only decides what you can do on the platform. A student who is eligible submits their own application, with or without a faculty sponsor.`,
   msg`Every innovation project published on KTIP — ideas at concept stage, ventures already trading, and everything between.
 
 Projects are public, so this page reads the same whether or not you are signed in. What changes once you sign in is that you can create your own and join someone else’s.`,
@@ -877,7 +878,7 @@ Open one to edit it, manage its team, or answer collaboration requests. Projects
 Courses are shown but not editable — they are the Virtual Campus’s record of what you completed, and a CV field an employer could quietly rewrite would be worth nothing. Delete an entry and it stays deleted.
 
 Leave a section empty and it simply does not appear on the printed CV.`,
-  msg`Explore Grants`,
+  msg`Explore Funding`,
   msg`Explore projects, join events, and find funding for your ideas.`,
   msg`External tools`,
   msg`Extraction. Fields proposed from a document are shown to you for review and are not saved until you accept them.`,
@@ -916,13 +917,13 @@ Topic chips below the filters come from the tags organisers actually used, so a 
 
 "Clear all filters" resets everything at once.`,
   msg`Find Events`,
-  msg`Find Grants`,
+  msg`Find Funding`,
   msg`Find a thread, or start one`,
   msg`Find and connect with members across the region.`,
   msg`Find any page, feature or record from the navbar search box`,
   msg`Find anything with global search`,
   msg`Find climate-action projects`,
-  msg`Find funding opportunities that fit your work.`,
+  msg`Find funding that fits your work, and check what you qualify for.`,
   msg`Find partnerships, attend events, and support innovation.`,
   msg`Find the Team panel in the sidebar and click "Manage Team".`,
   msg`Find the funder’s own website independently — type the name into a search engine rather than following the link you were sent — and confirm the call exists there.`,
@@ -974,11 +975,13 @@ Venues only exist for events where the organiser has set one up.`,
   msg`Getting your business verified by your Chamber.`,
   msg`Give it a title, a description and a category, then attach a file or link to where it lives.`,
   msg`Gives moderators a second opinion on a queued report`,
-  msg`Go to "My Applications" from the Grants section.
+  msg`Go to "My Applications" from the Funding menu.
 
-Every application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted.
+Every application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted. Drafts show a Continue action that drops you back at the step where you stopped.
 
-Drafts show a Continue action that drops you back at the step where you stopped.
+Four counts summarise the page across the top — Submitted, In review, Approved and Drafts — beside a card showing what has been awarded to you.
+
+There is deliberately no "total requested" figure. Applicants write the amount they are asking for in their own words, so there is nothing dependable to add up.
 
 Applications you submitted on a funder's external site will not appear here — KTIP never sees those.`,
   msg`Go to Dashboard › Security and scroll to the bottom.`,
@@ -992,11 +995,6 @@ Applications you submitted on a funder's external site will not appear here — 
   msg`Go to Projects.`,
   msg`Go to Settings → Preferences. You can switch categories (messages, events, projects, forums, collaboration, connections) on or off — switched-off categories stop generating notifications entirely.`,
   msg`Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators.`,
-  msg`Go to Settings, open Preferences and turn off "Show me on the leaderboard".
-
-You keep earning badges and points; you simply stop appearing in the public ranking.
-
-Student accounts are excluded automatically and permanently — that is a safeguarding rule, not a setting, so there is nothing for a student to turn on or off.`,
   msg`Go to the Events page and click "Create Event".
 
 Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.
@@ -1013,6 +1011,11 @@ Optional: a description, a short summary used on cards and previews, a Details s
 
 Climate Action projects surface in climate filters and get a boost for members who turned on the climate preference.`,
   msg`Go to the final step, "Impact & Review".`,
+  msg`Go to your Dashboard, open Preferences and turn off "Show me on the leaderboard".
+
+You keep earning badges and points; you simply stop appearing in the public ranking.
+
+Student accounts are excluded automatically and permanently — that is a safeguarding rule, not a setting, so there is nothing for a student to turn on or off.`,
   msg`Google and Microsoft`,
   msg`Google and Microsoft sign-in — your name, email address, profile picture and provider account identifier.`,
   msg`Governing law`,
@@ -1035,7 +1038,7 @@ Open one for the full receipt, with a reference number and a print-ready view.`,
   msg`Grants and their applications`,
   msg`Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.
 
-Grants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own five-step wizard — with a URL set, you never see their applications.
+Grants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own six-step wizard — with a URL set, you never see their applications.
 
 Resources and Integrations are straightforward publishing. Forums is where boards are created and posts pinned. Achievements is where badge definitions live.`,
   msg`Grants, funding and events`,
@@ -1077,10 +1080,10 @@ This section is empty between events, which is normal rather than broken.`,
   msg`Help article — Events`,
   msg`Help article — For Administrators`,
   msg`Help article — Forums`,
+  msg`Help article — Funding Opportunities`,
   msg`Help article — Getting Around`,
   msg`Help article — Getting Started`,
   msg`Help article — Grant Applications`,
-  msg`Help article — Grants & Funding`,
   msg`Help article — Hackathons & Venues`,
   msg`Help article — Messages`,
   msg`Help article — My Dashboard`,
@@ -1128,7 +1131,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How do I filter the events list?`,
   msg`How do I find an old conversation?`,
   msg`How do I find events?`,
-  msg`How do I find grants?`,
+  msg`How do I find funding?`,
   msg`How do I get a verified badge?`,
   msg`How do I get my business verified?`,
   msg`How do I hide myself from the leaderboard?`,
@@ -1152,7 +1155,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`How do I start a forum discussion?`,
   msg`How do I start a video conference?`,
   msg`How do I track a report I filed?`,
-  msg`How do I track my grant applications?`,
+  msg`How do I track my funding applications?`,
   msg`How do I use the Code Sandbox?`,
   msg`How do I use the Document Editor?`,
   msg`How do I use the Whiteboard?`,
@@ -1189,7 +1192,7 @@ This section is empty between events, which is normal rather than broken.`,
 
 Otherwise sign out and back in, which rebuilds the session.
 
-If fields are genuinely blank, open Settings and check they were saved. The Dashboard profile tab is read-only, so anything you typed there was never stored.`,
+If fields are genuinely blank, open My Profile on your Dashboard and check they were saved. That page is the editor, so what you type there is stored — if a field is empty after a save, say so through the Feedback action on the floating button.`,
   msg`If content of yours is removed after a notice, you will be notified with the substance of the complaint and the identity of the complainant, and you can file a counter-notice from your account.`,
   msg`If it goes wrong`,
   msg`If several people made something together — a project team, a group of co-authors — each of you needs the right to license their part before it is published here.`,
@@ -1312,7 +1315,7 @@ The column on the right carries the owner, the team, and a block of key facts, p
   msg`Knowledge Transfer`,
   msg`Language and content-language choice`,
   msg`Launch`,
-  msg`Launch projects, apply for grants, and find investors.`,
+  msg`Launch projects, apply for funding, and find investors.`,
   msg`Law`,
   msg`Leaderboard`,
   msg`Learn and collaborate on projects`,
@@ -1343,11 +1346,6 @@ The view and team counts beside them are live.`,
   msg`Limits`,
   msg`Link to your KTIP profile, project or event.`,
   msg`Listen only`,
-  msg`Listings cover the usual range: research grants for academic and scientific work, startup funding for new ventures, project grants tied to a specific piece of innovation, and scholarships for students studying in innovation-related fields.
-
-Funders set their own type labels, so the exact wording varies between listings.
-
-Amounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the funding filters are worth checking more than once.`,
   msg`Live Sentry issues from the browser and the API`,
   msg`Live captions`,
   msg`Live, and it is the same list everyone else in the room is looking at.
@@ -1406,7 +1404,7 @@ Organisers choose which of these to create, so not every venue has all nine.`,
 
 The main one is messaging: one-to-one direct messages between an adult member and a member under 18 are not available in either direction. Group channels, event rooms and forums are open as usual — those are visible to more than two people, which is the point.
 
-Student accounts carry further rules on top, whatever their age: grant applications need a faculty sponsor, and the public leaderboard excludes them.
+Student accounts carry one further rule on top, whatever their age: the public leaderboard excludes them. Funding applications do not need a faculty sponsor — a sponsor is an endorsement students may add if they want one.
 
 The protections lift by themselves on the account's 18th birthday. Nothing needs to be requested.`,
   msg`Members who have submitted documents to be verified, with what they uploaded.
@@ -1446,6 +1444,13 @@ Grievances against members are a separate queue with its own page.`,
   msg`Moderation, copyright, grievance and safeguarding records`,
   msg`Moderation. The assistant gives a moderator a second opinion. A human decides, and a human is accountable for the decision.`,
   msg`Month-by-month view of everything scheduled`,
+  msg`Most of what is listed is not a grant, which is why the section is called Funding Opportunities rather than Grants.
+
+Alongside research grants, startup funding, project grants and scholarships you will find seed investment, competitions and prizes, fellowships, and open calls for proposals. The "type of funding" filter is how you narrow to one kind.
+
+Funders set their own labels, so the exact wording varies between listings.
+
+Amounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the filters are worth checking more than once.`,
   msg`Move it through its statuses as you go — the reporter sees that progress on My Reports, and it is the only thing they see.
 
 Acting on the reported account happens under Users or Moderation; this queue is the record of the complaint, not the enforcement.`,
@@ -1554,7 +1559,7 @@ Open the link, enter the new password twice, and you can sign in with it right a
 This only applies to email/password accounts. If you signed up with Google or Microsoft, reset your password with that provider instead.`,
   msg`On your Dashboard. There is no separate Settings page any more — everything that was on it is a tab on the dashboard rail.
 
-My Profile — your name, photo, banner, bio, country, organisation, skills, interests and languages, edited directly on a preview of the page other members see. Under Account, further down the rail: Security — password, two-step verification and your sign-in addresses. Preferences — notifications, leaderboard visibility, connection-count privacy, dark mode and readable text. Personalization — the topics that drive "For You" sorting. Verification — evidence for a verified badge. Legal & Consent — what you have agreed to.
+My Profile — your name, photo, banner, bio, country, organisation, skills, interests and languages, edited directly on a preview of the page other members see. Under Account, further down the rail: Security — password, two-step verification, your sign-in addresses, a download of your own data, and the options for leaving KTIP. Preferences — notifications, leaderboard visibility, connection-count privacy, dark mode and readable text. Personalization — the topics that drive "For You" sorting. Verification — evidence for a verified badge. Legal & Consent — what you have agreed to.
 
 Old /settings links still work and land on the matching tab.`,
   msg`One account per person. Do not create an account for someone else, and do not share yours.`,
@@ -1586,11 +1591,11 @@ Search by name, and filter by country, role or the badges a member has earned. T
 Clicking a member opens a drawer over the page with their profile, skills, projects and a message action, so you can look at several people without losing your place in the list.
 
 For the full page, open their member page.`,
-  msg`Open "My Applications" under Grants. Drafts carry a Draft badge and a Continue action.
+  msg`Open "My Applications" under Funding. Drafts carry a Draft badge and a Continue action.
 
 Continue returns you to the step you left, with everything you had written intact.
 
-You can also go back to the grant itself — the button there reads "Continue Application" once a draft exists, so you never accidentally start a second one.`,
+You can also go back to the listing itself — the button there reads "Continue Application" once a draft exists, so you never accidentally start a second one.`,
   msg`Open Collaborate and click Video Conference.
 
 Name a room or let KTIP generate a name, then join. Your browser will ask for camera and microphone permission — the call cannot start until you allow it.
@@ -1626,23 +1631,36 @@ Share a board with collaborators to work on it together.`,
   msg`Open Messages from the chat button at the bottom-right.`,
   msg`Open My Profile on your Dashboard.
 
-The tab shows your profile as other members see it. Every block you can change carries a pencil — click one and a small editor opens over the preview, which updates as you type. Between them they cover your display name, photo, banner, bio (up to 500 characters), country, organisation, industry, website, up to 20 skills, up to 20 interests, your languages, and what collaboration you are open to.
+The tab shows your profile as other members see it. Every block you can change carries a pencil — click one and a small editor opens over the preview, which updates as you type. Between them they cover your display name, photo, banner, bio (up to 500 characters), country, organisation, industry, website, up to 20 skills, up to 20 interests, your languages, and what collaboration you are open to. The photo block opens the portrait studio, which can cut the background out of your picture.
 
-Roles are in the name-and-roles editor, but you can only add roles that are self-assignable. Student, Faculty, Verified SME, Educational Partner and the Business Support Organisation and admin roles are granted by a reviewer, so they do not appear as options.
+Roles are in the name-and-roles editor, but you can only add roles that are self-assignable. Student, Faculty, the organisation roles and the admin roles are granted by a reviewer, so they do not appear as options.
 
 Each editor saves on its own — there is no page-wide Save.`,
   msg`Open Projects, Resources, Events or Grants.`,
   msg`Open Resources and click Submit.`,
+  msg`Open Security on your Dashboard and choose the authenticator app method. A QR code appears; scan it with your app and type the six-digit code back to confirm.
+
+If you have no app yet, the set-up screen carries a second QR that opens a guide to the ones we recommend, including Apple Passwords, Google Authenticator and Microsoft Authenticator, plus desktop options. The same guide is on the sign-in screen behind "Where do I find my code?".
+
+Codes change every 30 seconds and are generated on the device itself, so this method works on a plane or with no signal.
+
+If a code is refused even though it looks right, check that your phone's clock is set automatically. A drifting clock is the usual cause.`,
+  msg`Open Security on your Dashboard and scroll to the bottom. There are three ways to leave, and two of them can be undone.
+
+Deactivate — you disappear from the directory and your contributions stay where they are. Sign in again within 90 days and nothing is lost. After that the account is anonymised.
+
+Schedule deletion — the account is erased after 7 days. Signing in during that week cancels it, and a banner tells you the date your data is kept until.
+
+Delete now — permanent. Your projects, funding applications, messages, badges and other data are removed and cannot be recovered.
+
+Before any of them, "Download your data" gives you a single file with your content in it, built in your browser.
+
+If it is only the notifications that are the problem, turn them off under Preferences instead.`,
   msg`Open Security on your Dashboard and update the email field. You will need to confirm the new address by clicking the link sent to it.
 
 Until you confirm, sign-in stays on the old address.
 
 If you signed up with Google or Microsoft, your email belongs to that provider and cannot be changed here. Add a secondary email instead if you need a second way in.`,
-  msg`Open Security on your Dashboard, scroll to the Danger Zone at the bottom, then click "Delete Account" and confirm.
-
-Deletion is permanent. Your projects, grant applications, messages, badges and other data are removed and cannot be recovered.
-
-If you only need a break, sign out instead. If it is the notifications that are the problem, turn them off under Preferences — that is reversible and this is not.`,
   msg`Open Security on your Dashboard, under Account.
 
 Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.
@@ -1653,7 +1671,7 @@ If you signed in with Google or Microsoft you have no KTIP password to change �
   msg`Open Settings, then the Preferences tab.`,
   msg`Open a blank collaborative canvas`,
   msg`Open a draft from My Applications.`,
-  msg`Open a grant and click the apply button — it reads "Apply Now", or "Start Application" if your role needs a sponsor.
+  msg`Open a listing and click "Apply Now". Once you have a draft for it, the same button reads "Continue Application".
 
 The wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Supporting documents, and Impact & Review.
 
@@ -1669,6 +1687,18 @@ The Error Simulator next door sends deliberate failures through the live pipelin
 
 Student applications need a sponsor’s approval before they reach you.`,
   msg`Open one to run it`,
+  msg`Open the Community menu in the navigation bar and choose "Forums" to see the discussion boards.
+
+Each board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.
+
+Anyone can read the forums without signing in. Starting a discussion and replying need an account. Opening a whole new board is a different matter: that is a "Start a Board" action on the forums page, and only organisation-tier roles hold it.`,
+  msg`Open the Funding menu in the navigation bar and choose "Funding Opportunities" to see every open call.
+
+Search by keyword, then narrow it with the two filters: type of funding, and focus area. Each listing shows the funding range, the currency, the deadline and the eligibility summary.
+
+There is no status filter. Calls that have closed move into their own "Closed calls" section further down the page, so what you scroll through at the top is always still open.
+
+Open a listing for the full detail, including how to apply and who to contact. Deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss.`,
   msg`Open the board you want to post in and click "New Discussion".
 
 Give it a title and write the body. Be specific — a discussion that says what you already tried gets better answers than one that just describes the problem.
@@ -1785,11 +1815,11 @@ On a narrow screen the column becomes a scrolling row above the panel.`,
   msg`Partner API keys`,
   msg`Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.
 
-Analytics — platform usage across projects, events, grants and members.
+Analytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.
 
 UAT — feedback submitted during user acceptance testing, with its state.
 
-One known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead.`,
+Member feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback.`,
   msg`Partner API, analytics and UAT feedback`,
   msg`Partner data access`,
   msg`Partner tools and services connected to KTIP`,
@@ -1811,6 +1841,15 @@ One known gap worth being aware of: some guidance refers to a feedback button on
   msg`Permission`,
   msg`Permitted`,
   msg`Personalize my platform`,
+  msg`Pick "Email code" under Security if you would rather not install anything, or do not have a smartphone.
+
+We send a six-digit code to your account's email address. It lasts ten minutes, only one code is live at a time, and you can ask for another after 30 seconds.
+
+You are asked for a code the first time you sign in on a new device, and then again every 30 days on that same device. The Security tab tells you how long the device you are on has left.
+
+A new browser, a new phone or a cleared cookie jar all count as a new device, so expect a code then.
+
+If nothing arrives, wait out the 30 seconds and send another, then check your spam folder.`,
   msg`Pick "KTIP Assistant" at the top of the Chats list.`,
   msg`Pick a design`,
   msg`Pick an icon and describe who the board is for.`,
@@ -1859,11 +1898,11 @@ The other button goes to whatever this was submitted to: the event, the grant, t
   msg`Produce aggregate statistics from them.`,
   msg`Product analytics`,
   msg`Productivity`,
-  msg`Profile editing lives in Settings. Click your avatar in the top right, choose "Settings", then open the Profile tab.
+  msg`Profile editing lives on your Dashboard, under My Profile. Click your avatar in the top right to reach the Dashboard, then pick My Profile from the rail on the left.
 
-You can set your display name, avatar, bio, country, organisation, industry, skills, interests and what collaboration you are open to.
+There is no separate Settings page any more, and nothing on the Dashboard is a read-only copy — My Profile is where the changes are made and saved.
 
-The Profile tab on your Dashboard is the read-only view — it shows how other members see you, but you make the changes in Settings.
+You can set your display name, photo, banner, bio, country, organisation, industry, skills, interests and what collaboration you are open to.
 
 Skills and interests are what the directory filters and the "For You" sorting work from, so they are worth filling in.`,
   msg`Profile fields that would identify a minor outside the platform are restricted, and directory exposure is reduced.`,
@@ -1955,11 +1994,11 @@ Either way a copy of what you sent is saved under Submissions in your dashboard,
   msg`Rate-limit records`,
   msg`Reach it from your avatar menu, "My Dashboard". The rail on the left lists your sections.
 
-Overview — your For You rail, recent submissions and calendar at a glance. Profile — how other members see you, read-only. Progress — your activity timeline. Projects — the projects you own. Events — the events you organise. Connections — the people you know, and your pending invitations. Submissions — permanent copies of everything you have submitted.
+Overview — your For You rail, recent submissions and calendar at a glance. My Profile — the editor for everything other members see. Connections — the people you know, and your pending invitations. Projects — the projects you own. Events — the events you organise. Submissions — permanent copies of everything you have submitted. Feedback — what you have sent us, and our replies. Progress — your activity timeline. Achievements — the full trophy gallery, embedded here rather than on a page of its own.
 
-Achievements links out to the full trophy gallery, which is a page rather than a tab.
+Under Account, further down: Security, Preferences, Personalization, Verification, and Legal & Consent.
 
-Some sections only appear for certain roles: Funding for investors, Mentees for mentors and faculty, Research for faculty and researchers, Business for SME and private sector accounts, and Admin for administrators.`,
+Some sections only appear for certain roles: Funding for investors, Mentees for mentors and faculty, Research for faculty and researchers, Business profile and Team for organisation accounts, and Admin for administrators.`,
   msg`Read the funding agreement, including what rights it takes over your work, before signing.`,
   msg`Read this before you start`,
   msg`Reading a grant card`,
@@ -1978,9 +2017,11 @@ Everything you make here saves to your account and appears in that tool’s list
   msg`Recent searches`,
   msg`Recording your acceptance of these policies`,
   msg`Records of which policies you accepted`,
+  msg`Recovery codes, and losing your phone`,
   msg`Refer to KTIP truthfully. That is the whole of the permission.`,
   msg`Refusal to put terms in writing, or a written agreement with no named legal entity in it.`,
   msg`Register for an event`,
+  msg`Register your business with your National Chamber of Commerce for verified status`,
   msg`Register, or attempt to register, a mark or domain that is the same as or confusingly similar to ours.`,
   msg`Registered`,
   msg`Registering`,
@@ -2086,15 +2127,15 @@ Several people can type in it at once and you will see their changes as they mak
   msg`Roles and the permission matrix`,
   msg`Roles are a list, not a single choice — an account can hold several. They sit in three tiers.
 
-Admin — Super Admin (OECS Secretariat: system-wide management, policy, audit logs) and Safety Admin (moderation queues and escalations). "OECS Admin" is a legacy label that resolves to Super Admin.
+Admin — Super Admin (system-wide management, policy, audit logs), Admin, People & Trust Supervisor (verification, institutions, moderation and grievances), Programmes Supervisor (projects, funding, forums, resources and achievements) and Safety Admin (moderation queues and escalations). "OECS Admin" is a legacy label that resolves to Super Admin.
 
-Organisation — Investor / Funding Agency, Verified SME, Private Sector, Educational Partner and Business Support Organisation.
+Organisation — Investor / Funding Agency, Private Sector, Business Support Organisation, Post-Secondary Institution, NGO, Research Institution, Government, Diaspora and IGO.
 
-Individual — Entrepreneur, Faculty, Mentor and Student.
+Individual — Entrepreneur, Faculty / Researcher, Researcher, Mentor and Student / Youth Innovator.
 
-Investor, Private Sector, Entrepreneur and Mentor are self-assignable: you pick them yourself. Student, Faculty, Verified SME, Educational Partner, Business Support Organisation and the admin roles are granted only after review by an institution, a business support organisation or OECS.
+Investor, Private Sector, Entrepreneur, Mentor and Researcher are self-assignable: you pick them yourself. Student, Faculty, the organisation roles and the admin roles are granted only after review by an institution, a business support organisation or OECS.
 
-What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Two rules never change: Students cannot submit a grant application without a sponsor, and Students cannot start unmonitored direct messages.`,
+What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Students carry one standing restriction of their own: they cannot start unmonitored direct messages.`,
   msg`Roles decide what you see`,
   msg`Room audio while captions are running`,
   msg`Rooms, invitations and who can join.`,
@@ -2105,7 +2146,7 @@ What each role can do is controlled by a permission matrix that OECS administrat
   msg`Row-level security on every table, role-based access control scoped to your active role, encrypted transport, hashed passwords, service keys held server-side only, hashed IP addresses for throttling, audit logging on administrative and moderation actions, and sensitive fields such as date of birth quarantined away from ordinary queries.`,
   msg`Rules and limits entries must respect`,
   msg`Rules binding partners that read KTIP data`,
-  msg`Run the platform, publish grants, and organise regional events.`,
+  msg`Run the platform, publish funding calls, and organise regional events.`,
   msg`SME verification submissions routed to your member state. Each carries the legal name, registration number and industry the applicant entered.
 
 You see submissions for your own member state, which is why this list is shorter than the platform’s total.`,
@@ -2173,16 +2214,17 @@ Everything is saved to your account, so you can close the tab and pick it up fro
   msg`Set the type, dates, location or virtual link, and capacity, then publish.`,
   msg`Set up a virtual venue for your event`,
   msg`Set your status from the pill in the top bar — green for working, "Do not disturb" to be left alone.`,
+  msg`Setting up an authenticator app`,
+  msg`Setting up two-step verification gives you ten recovery codes. Each one works once. They are the way back in when the phone or the mailbox is gone, so save them somewhere separate — printed, or in a password manager, not on the phone itself.
+
+On the code screen at sign-in, click "Use a recovery code" and enter one.
+
+Security on your Dashboard shows how many you have left and can generate a fresh ten. Generating a new set makes every earlier code stop working, so replace your saved copy at the same time.
+
+You can also switch methods there at any time, in either direction, without losing your account.
+
+Out of codes and out of devices? An OECS administrator can reset the second step once they have confirmed who you are. Use the contact options at the foot of the Help Center.`,
   msg`Setting your availability in a venue`,
-  msg`Settings, Verification tab. The fastest way is a work or school email address.
-
-If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.
-
-Signed up with a personal address? Enter your work or school address on the Verification tab. KTIP emails it a link; press Confirm and the same check runs. That address never becomes a way to sign in — it only proves you hold it.
-
-No such address? Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs. Only OECS administrators can see what you upload. A reviewer approves or declines the request, and you are notified either way.
-
-Verified accounts carry a badge, which members can filter by in the directory, and can publish, apply for funding and message other members.`,
   msg`Several queues sit behind the verified badges.
 
 Verification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Chamber — Chambers of Commerce and the SME submissions they handle. Employers — employer accounts and their recruiters.
@@ -2279,7 +2321,9 @@ Accepted formats are PDF, Word, Excel, CSV, Markdown, plain text and images, up 
 
 Name each file for what it is. An assessor reading twenty applications should be able to tell your budget from your workplan without opening either.
 
-These files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission.`,
+These files are private. They are attached to your application, visible only to you and the people assessing the grant, and never listed on the public grant page. The Documents panel on the grant page itself is the funder's — it holds the call and its annexes, not your submission.
+
+Video is the exception: it is too large to upload. If you have a short pitch or demonstration, host it yourself — Google Drive, YouTube, Vimeo — and paste the link in the optional Video link field under the file list. Set sharing to "Anyone with the link can view", and test the link in a private browser window before you submit. The link can point at the video itself or at a folder holding it. It is stored with the application, so assessors see it alongside your documents.`,
   msg`Stops the same walkthrough appearing every visit.`,
   msg`Storage set by other services`,
   msg`Store records for as long as the purpose requires, and no longer.`,
@@ -2427,14 +2471,14 @@ Open it to see your newest notifications — messages, event and project activit
 
 "Mark all as read" clears the badge, and "View all invitations" jumps to your invitations inbox.
 
-Which notifications you receive is up to you: Settings has a switch per category under Preferences.`,
+Which notifications you receive is up to you: Your Dashboard has a switch per category under Preferences.`,
   msg`The bugs and requests you sent us, and the replies that came back`,
   msg`The builders`,
   msg`The choice is per device and per browser, because that is where it is stored.`,
   msg`The contact block at the bottom reaches a person. The FAQ page is worth a look first — it answers the narrower questions that do not warrant a full article.`,
   msg`The dashboard calendar pulls four things together so you have one place to look.
 
-Events — events on the platform. My Registrations — events you have RSVP'd to. Grant Deadlines — closing dates for grants you are tracking. Applications — dates attached to your own grant applications.
+Events — events on the platform. My Registrations — events you have RSVP'd to. Funding Deadlines — closing dates for the calls you are tracking. Applications — dates attached to your own funding applications.
 
 Each kind has its own colour, and you can turn kinds off to reduce the noise.
 
@@ -2460,11 +2504,11 @@ The count tells you how many are open versus closed, and Clear all filters reset
   msg`The first list is what you created — hover a row for the delete control.
 
 Underneath, Shared with me holds anything someone else gave you access to. Whether you can edit or only read is set by whoever shared it, and it is shown on the item itself once you open it.`,
-  msg`The floating button in the bottom right corner is a shortcut stack.
+  msg`The floating button in the bottom right corner opens a stack of six shortcuts.
 
-It opens your messages panel, toggles dark mode, and starts the page tour when the page you are on has one.
+Sticky notes — pin a note to the page you are on. Accessibility — text size, readable font and the other display controls. Feedback — tell us about a problem or an idea, and get a reply back in your Dashboard. Page tour — a walkthrough, on the pages that have one. Messages — your messaging panel. And a dark mode switch.
 
-It stays available on every page inside the app, so you never have to go back to the navigation bar for those three things.`,
+It stays available on every page inside the app, so none of the six needs a trip back to the navigation bar.`,
   msg`The floor`,
   msg`The floorplan: rooms, who is online right now, and open audio`,
   msg`The form is replaced by a status card — pending, verified or rejected — showing what you sent.
@@ -2537,6 +2581,13 @@ Everything that used to live on a separate profile page is now a tab below.`,
   msg`The panel`,
   msg`The partner feed carries verified employer and organisation records, and member records only where that member has opted in to appear. Nothing enters the feed by default.`,
   msg`The permission matrix, its locks and its history.`,
+  msg`The photo block on My Profile opens the portrait studio. Upload a picture, then use the cut action to lift yourself off the background and drop a colour, a gradient or one of the backdrops behind you instead.
+
+The cut happens in your own browser. The picture is not sent anywhere to be processed, and nothing leaves your device until you save the result.
+
+That also means it depends on your device. If the cut is refused or comes back looking wrong, your plain photo is kept and used as it is — nothing is lost. A clear subject, an uncluttered background and decent light give it the best chance; a second person at the edge of the frame is what most often confuses it.
+
+You can go back to the plain photo at any time from the same studio.`,
   msg`The project`,
   msg`The project archive`,
   msg`The questions above are the ones we are asked most. If yours is not there, this is where to say so — feedback from this page is what decides which article gets written next.
@@ -2599,13 +2650,13 @@ The type drives how the event is badged and filtered, so pick the closest fit.`,
   msg`There are no meeting IDs to manage: type a room name, or generate one, and anyone who enters the same name joins the same call.
 
 That also means a guessable room name is a guessable call. Generate one for anything you would not want walked into.`,
-  msg`There are two routes, and the grant decides which one you get.
+  msg`There are two routes, and the funder decides which one you get.
 
-If the funder supplied their own application link, the grant page shows "Apply on External Site" and takes you to their form. Nothing about that application is tracked in KTIP.
+If the funder supplied their own application link, the listing shows "Apply on External Site" and takes you to their form. Nothing about that application is tracked in KTIP.
 
 Otherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.
 
-Either way, the deadline on the grant page is the one that counts.`,
+Either way, the deadline on the listing is the one that counts.`,
   msg`These Terms are governed by the laws of %jurisdiction%, and its courts have exclusive jurisdiction — without prejudice to any mandatory consumer-protection rights, or any right to bring a claim before a data-protection authority, in the country where you live.`,
   msg`These Terms of Use are an agreement between you and %entity%. By creating an account on KTIP, or by using the platform at %platformDomain% without one, you accept them and the Privacy Policy.`,
   msg`These guidelines apply everywhere on the platform, including private messages, collaborative documents and video rooms — private does not mean unregulated.`,
@@ -2648,7 +2699,7 @@ Collaborate Hub on the left does go back, when that is what you want.`,
 
 So the tab appearing is correct — it means your role holds the right permission — and the empty panel is expected rather than a fault.
 
-The Business and Admin entries in the same rail are different: those link out to real pages.`,
+Business profile is a real tab in the same rail. Admin is the only entry that leaves the dashboard.`,
   msg`Tick "This is a virtual event" when creating it. Virtual events need no physical location.
 
 You can point attendees at KTIP's own Video Conference tool, add a link to your preferred platform in the description, or — for larger events — set up a full virtual venue with rooms.
@@ -2771,6 +2822,7 @@ To report one post or message rather than a person, use the report control on th
   msg`User acceptance testing responses`,
   msg`Using AI features responsibly`,
   msg`Using code you find here`,
+  msg`Using email codes instead of an app`,
   msg`Using other people’s work`,
   msg`Using the KTIP and OECS names and logos`,
   msg`Using the notifications bell`,
@@ -2793,7 +2845,7 @@ To report one post or message rather than a person, use the report control on th
   msg`Verify employers and control what the partner API publishes`,
   msg`Verify schools, universities and chambers`,
   msg`Verify your identity`,
-  msg`Verify your students, oversee submissions, and sponsor applications.`,
+  msg`Verify your students, oversee submissions, and endorse applications.`,
   msg`Verifying`,
   msg`Verifying institutions and the domains they own.`,
   msg`Vet and support the businesses in your member state.`,
@@ -2871,10 +2923,12 @@ To report one post or message rather than a person, use the report control on th
   msg`What is the floating button in the corner?`,
   msg`What is the invitations inbox?`,
   msg`What is the onboarding wizard?`,
+  msg`What is two-step verification?`,
   msg`What is waiting on you`,
   msg`What it does`,
   msg`What it is`,
   msg`What it receives`,
+  msg`What kinds of funding are listed?`,
   msg`What kinds of rooms will I see?`,
   msg`What members are telling us`,
   msg`What needs consent`,
@@ -2892,7 +2946,6 @@ To report one post or message rather than a person, use the report control on th
   msg`What this is for`,
   msg`What to do with it`,
   msg`What types of events can I create?`,
-  msg`What types of grants are listed?`,
   msg`What we collect automatically`,
   msg`What we do and do not check`,
   msg`What we do not do`,
@@ -3001,11 +3054,11 @@ If none of that helps it may be a temporary platform issue. Wait a few minutes, 
   msg`Write and run code in the browser`,
   msg`Write it, then run it`,
   msg`Write your title and message, then click "Start Discussion".`,
-  msg`Write, sponsor, submit and track an application.`,
+  msg`Write, submit and track an application — and run a call of your own.`,
   msg`Writing, running and sharing snippets.`,
   msg`Yes`,
   msg`Yes — this is the one you choose`,
-  msg`Yes, and it is optional. Students submit their own grant applications — a sponsor is an endorsement, not a permission.
+  msg`Yes, and it is optional. Students submit their own funding applications — a sponsor is an endorsement, not a permission.
 
 On the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.
 
@@ -3074,7 +3127,7 @@ The screen offers two views. Curated shows a shortened selection, useful for a q
   msg`Your application is confidential, submitting it licenses nothing to the funder, and only named people read it. Here is exactly who, and for how long.`,
   msg`Your badges, points, level and streak — and what to do next to earn more`,
   msg`Your choice is remembered on this device.`,
-  msg`Your choice, in Settings under Preferences.
+  msg`Your choice, on your Dashboard under Preferences.
 
 Everyone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.
 
@@ -3122,6 +3175,15 @@ Some roles are self-selected and some are granted after verification, which is w
   msg`design the venue`,
   msg`set the line-up`,
   msg`write the brief`,
+  msg`your Dashboard, Verification tab. The fastest way is a work or school email address.
+
+If you signed up with an address at a trusted organisation — OECS, a ministry, a partner agency — your account is verified the moment you confirm that address. Nothing to upload, nobody to wait for. The same goes for a partner school or college, which links you to it as a student.
+
+Signed up with a personal address? Enter your work or school address on the Verification tab. KTIP emails it a link; press Confirm and the same check runs. That address never becomes a way to sign in — it only proves you hold it.
+
+No such address? Upload up to three files as evidence — PDF, JPG, PNG or WebP, each up to 10MB — and add a note if there is context a reviewer needs. Only OECS administrators can see what you upload. A reviewer approves or declines the request, and you are notified either way.
+
+Verified accounts carry a badge, which members can filter by in the directory, and can publish, apply for funding and message other members.`,
   msg`• Download B&W or Color — opens the print dialog; choose “Save as PDF”
 • Read as text — the same content without page geometry, easier on a phone
 • Sync from Virtual Campus — pulls in your OECS course history and leaves any section you have edited alone

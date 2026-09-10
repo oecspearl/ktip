@@ -15,10 +15,11 @@ import { supabase } from '../../lib/supabase'
 import {
   APP_FULL_NAME,
   SKILL_SUGGESTIONS,
-  INTEREST_SUGGESTIONS,
+  interestSuggestionsFor,
   LIMITS,
   VERIFICATION_GATED_ROLES,
 } from '../../lib/constants'
+import { seedPersonalizationTopics } from '../../hooks/usePersonalization'
 import { analytics } from '../../hooks/useAnalytics'
 import { ROLE_BY_SLUG, roleRequiresMfa } from '../../lib/permissions'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
@@ -251,6 +252,13 @@ export default function OnboardingPage() {
           open_to: openTo,
         }),
       })
+
+      // The interests become explicit personalization topics — full weight in
+      // the ranker, not the half weight a profile field gets. Fire-and-forget:
+      // a failure here must not stall an onboarding that already succeeded.
+      if (withStep2 && interests.length && auth.user) {
+        void seedPersonalizationTopics(auth.user.id, interests)
+      }
 
       // 145: a trusted email domain may already have granted this role at
       // confirmation (gov.lc -> Government). Asking a reviewer for a role the
@@ -557,7 +565,7 @@ export default function OnboardingPage() {
               label={t`Interests`}
               values={interests}
               onChange={setInterests}
-              suggestions={INTEREST_SUGGESTIONS}
+              suggestions={interestSuggestionsFor(selectedRole)}
               max={LIMITS.MAX_INTERESTS}
               placeholder={t`Type an interest and press Enter...`}
             />

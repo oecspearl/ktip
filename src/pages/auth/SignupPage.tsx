@@ -18,10 +18,11 @@ import { roleRequiresMfa } from '../../lib/permissions'
 import {
   APP_FULL_NAME,
   SKILL_SUGGESTIONS,
-  INTEREST_SUGGESTIONS,
+  interestSuggestionsFor,
   LIMITS,
   ROLE_LABELS,
 } from '../../lib/constants'
+import { seedPersonalizationTopics } from '../../hooks/usePersonalization'
 import { analytics } from '../../hooks/useAnalytics'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
@@ -352,7 +353,7 @@ export default function SignupPage() {
     try {
       // 'email' rather than the deprecated 'signup'. This both confirms the
       // address and returns a session, so the account is signed in right here.
-      const { error } = await supabase.auth.verifyOtp({
+      const { data: otpData, error } = await supabase.auth.verifyOtp({
         email: email.trim(),
         token: code,
         type: 'email',
@@ -360,6 +361,13 @@ export default function SignupPage() {
       if (error) throw error
 
       analytics.funnel('signup', 'otp_verified', { role: selectedRole })
+
+      // The interests typed at step 3 become explicit personalization topics,
+      // so the very first list this member opens is already theirs. Best
+      // effort — the account exists whether or not this lands.
+      if (otpData?.user?.id && interests.length) {
+        void seedPersonalizationTopics(otpData.user.id, interests)
+      }
 
       // Navigate straight to enrolment rather than letting ProtectedRoute bounce
       // them there, purely so there is no flash of the dashboard. If the
@@ -669,7 +677,7 @@ export default function SignupPage() {
                   label={t`Interests`}
                   values={interests}
                   onChange={setInterests}
-                  suggestions={INTEREST_SUGGESTIONS}
+                  suggestions={interestSuggestionsFor(selectedRole)}
                   max={LIMITS.MAX_INTERESTS}
                   placeholder={t`Type an interest and press Enter...`}
                 />
