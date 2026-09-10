@@ -25,9 +25,14 @@ import { useEvents } from '../../hooks/useEvents'
 import { useGrants } from '../../hooks/useGrants'
 import { readHeroSeed } from '../../lib/hero-seed'
 import { usePlatformStats, type PlatformStats } from '../../hooks/usePlatformStats'
-import type { DetailEntry, Grant } from '../../types'
+import type { DetailEntry, Grant, PermissionKey } from '../../types'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { entityPath } from '../../lib/slug'
+import { useAuth } from '../../contexts/AuthContext'
+import { ForYouRail } from '../../components/personalization/ForYouRail'
+import { defaultModeFor, type DiscoverMode } from '../../lib/personalization'
+import { canUseGrantApplications } from '../../lib/permissions'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 import {
   FolderKanban,
   Calendar,
@@ -38,7 +43,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-type Mode = 'grants' | 'projects' | 'events'
+type Mode = DiscoverMode
 
 const MODES: { id: Mode; label: MessageDescriptor; icon: LucideIcon; href: string }[] = [
   { id: 'grants', label: msg`Grants`, icon: DollarSign, href: '/grants' },
@@ -76,25 +81,9 @@ function useVisibleCount() {
   return n
 }
 
-/**
- * The hero's motion is inline styles and Tailwind `transition-*`, neither of
- * which the global `prefers-reduced-motion` block in index.css touches — that
- * one only disables keyframe animations. So it is checked here by hand.
- */
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(
-    () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    if (!mq) return
-    const update = () => setReduced(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
-  return reduced
-}
+// The hero's motion is inline styles and Tailwind `transition-*`, neither of
+// which the CSS reduced-motion blocks touch, so it is checked in JS — through
+// the shared hook, which also honours the member's own switch (155).
 
 /**
  * Hero ratio map — how the hero translates across screens.
@@ -273,6 +262,10 @@ interface Feature {
   image: string
   gradient: string
   span: string
+  /** Hidden from signed-out visitors — the page behind it needs an account. */
+  authOnly?: boolean
+  /** Hidden from a signed-in member who lacks this capability. */
+  requires?: PermissionKey
 }
 
 const FEATURES: Feature[] = [
@@ -320,6 +313,7 @@ const FEATURES: Feature[] = [
     image: '/photos/discussion-3.webp',
     gradient: 'from-[#163A63] via-[#2A5788]/70 to-[#7AB000]/10',
     span: '',
+    authOnly: true,
   },
   {
     title: msg`Resources`,
@@ -338,6 +332,7 @@ const FEATURES: Feature[] = [
     image: '/photos/cohort-1.webp',
     gradient: 'from-[#446400] via-[#7AB000]/70 to-[#AEE12B]/10',
     span: '',
+    authOnly: true,
   },
 ]
 
@@ -439,11 +434,36 @@ export default function DiscoverPage() {
   }
 
   // --- Mode toggle + live data ---
-  const [mode, setMode] = useState<Mode>('grants')
-  const { grants } = useGrants({ active: true })
-  const { projects } = useProjects()
-  const { events } = useEvents({ upcoming: true })
+  const auth = useAuth()
+  // The hero opens on the mode this member's role tends to want (an investor
+  // sees grants, a student sees events) and re-tailors when they switch
+  // operating context — but only until they touch the toggle themselves. A
+  // manual pick always wins for the rest of the visit.
+  const [mode, setMode] = useState<Mode>(() => defaultModeFor(auth.roles, auth.activeRole))
+  const userPickedMode = useRef(false)
+  useEffect(() => {
+    if (userPickedMode.current) return
+    setMode(defaultModeFor(auth.roles, auth.activeRole))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.activeRole, auth.roles.join(',')])
+  // `for_you` ranks for a signed-in member with personalization on; every
+  // other viewer takes the hook's own fallback — deadline, newest, soonest —
+  // which is exactly the ordering this page always had.
+  const { grants } = useGrants({ active: true, sort: 'for_you' })
+  const { projects } = useProjects({ sort: 'for_you' })
+  const { events } = useEvents({ upcoming: true, sort: 'for_you' })
   const { stats, loading: statsLoading } = usePlatformStats()
+
+  // The one action this member can take from here, by mode and capability.
+  // Signed-out visitors keep the browse CTA (it routes to login where needed).
+  const canApplyGrant = !!auth.user && canUseGrantApplications(auth.can)
+  const canPostGrant = !!auth.user && auth.can('grant:post')
+  const canStartProject = !!auth.user && auth.can('project:create')
+  const canHostEvent = !!auth.user && auth.can('event:create')
+
+  const visibleFeatures = FEATURES.filter((f) =>
+    !auth.user ? !f.authOnly && !f.requires : !f.requires || auth.can(f.requires)
+  )
 
   // Build-time rows, so the opening slide is real content on the FIRST paint
   // rather than a short placeholder that grows when the query lands. Read at
@@ -733,12 +753,37 @@ export default function DiscoverPage() {
   }, [next, prev])
 
   const switchMode = (m: Mode) => {
+    userPickedMode.current = true
     setMode(m)
     setIndex(0)
     setPendingIndex(null)
   }
 
   const active: HeroItem | null = count > 0 ? items[index] : null
+
+  /**
+   * Primary CTA by mode and capability. Falls back to the browse/details link
+   * every visitor always had. When the capability CTA goes somewhere other
+   * than the active item, "View Details" stays as a secondary link.
+   */
+  const primaryCta: { to: string; label: string } = (() => {
+    if (mode === 'grants' && active && canApplyGrant) return { to: active.href, label: t`Apply for this grant` }
+    if (mode === 'grants' && canPostGrant) return { to: '/grants/new', label: t`Post a funding call` }
+    if (mode === 'projects' && canStartProject) return { to: '/projects/new', label: t`Start a project` }
+    if (mode === 'events' && canHostEvent) return { to: '/events/new', label: t`Host an event` }
+    return { to: active ? active.href : activeMode.href, label: active ? t`View Details` : t`Browse ${modeLabel}` }
+  })()
+  const showDetailsLink = !!active && primaryCta.to !== active.href
+
+  /** Second line of the empty state, shaped by what this member can do here. */
+  const emptyStateHint: string | null =
+    mode === 'grants' && canPostGrant
+      ? t`You can post the first funding call.`
+      : mode === 'projects' && canStartProject
+        ? t`You can start the first project.`
+        : mode === 'events' && canHostEvent
+          ? t`You can host the first event.`
+          : null
 
   // --- Fit the text column to the space the counter and strip leave ---
   // Every length in the column is em-based, so one font-size on the group
@@ -1333,6 +1378,7 @@ export default function DiscoverPage() {
                       Nothing to show here yet — explore the platform to see what&apos;s happening
                       across the Caribbean.
                     </Trans>
+                    {emptyStateHint && <> {emptyStateHint}</>}
                   </p>
                 </div>
               </div>
@@ -1346,9 +1392,9 @@ export default function DiscoverPage() {
                 thing below the fold. No scrim behind it: a full-width fade
                 painted a navy band straight across the hero photo, and the
                 button is opaque enough to read over whatever scrolls under. */}
-            <div className="shrink-0 mt-[2em] flex items-center landscape-short:sticky landscape-short:bottom-0 landscape-short:z-raised landscape-short:mt-[1em] landscape-short:self-end landscape-short:pb-[0.5em]">
+            <div className="shrink-0 mt-[2em] flex flex-wrap items-center gap-[0.75em] landscape-short:sticky landscape-short:bottom-0 landscape-short:z-raised landscape-short:mt-[1em] landscape-short:self-end landscape-short:pb-[0.5em]">
               <Link
-                to={active ? active.href : activeMode.href}
+                to={primaryCta.to}
                 // px/py/gap are divided by 0.875 because an `em` length on an
                 // element that also sets font-size resolves against that new
                 // size: 2em × 0.875 × 16 = the 28px of the original px-7
@@ -1357,7 +1403,7 @@ export default function DiscoverPage() {
                 // fit scale, at the soft-UI proportion rather than the 6px one.
                 className="neu-on-dark group inline-flex items-center gap-[0.571em] px-[2em] py-[0.857em] rounded-[0.9em] bg-brand-navy text-white text-[max(calc(0.875*var(--hero-type)),var(--hero-type-floor))] font-medium tracking-wide shadow-neu-sm hover:bg-brand-green hover:text-brand-navy hover:-translate-y-px active:translate-y-px active:shadow-neu-sm-inset dark:bg-brand-green dark:text-brand-navy dark:hover:bg-brand-navy dark:hover:text-brand-green transition-all duration-200"
               >
-                {active ? t`View Details` : t`Browse ${modeLabel}`}
+                {primaryCta.label}
                 {/* Icons take numeric px, so the fit multiplier that the `em`
                     lengths get for free has to be applied by hand here */}
                 <ArrowRight
@@ -1365,6 +1411,14 @@ export default function DiscoverPage() {
                   className="group-hover:translate-x-1 transition-transform"
                 />
               </Link>
+              {showDetailsLink && active && (
+                <Link
+                  to={active.href}
+                  className="inline-flex items-center gap-[0.571em] px-[1.5em] py-[0.857em] rounded-[0.9em] border border-white/40 text-white/90 text-[max(calc(0.875*var(--hero-type)),var(--hero-type-floor))] font-medium tracking-wide hover:bg-white/10 hover:text-white transition-colors duration-200"
+                >
+                  {t`View Details`}
+                </Link>
+              )}
             </div>
             </div>
           </div>
@@ -1582,6 +1636,12 @@ export default function DiscoverPage() {
         />
 
         <div className="relative container mx-auto px-6 md:px-12">
+          {/* The member's own recommendations, on the first light band rather
+              than bare on the dark hero: the rail's cream cards were drawn for
+              a light canvas. Renders nothing signed out, switched off or with
+              no signals, so visitors see the page exactly as before. */}
+          {auth.user && <ForYouRail title={t`For You`} limit={12} />}
+
           <div className="mb-12">
             <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-ktip-sand-500 mb-3">
               <Trans>The Platform</Trans>
@@ -1595,7 +1655,7 @@ export default function DiscoverPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:auto-rows-[minmax(10.5rem,auto)] stagger-children">
-            {FEATURES.map((f) => (
+            {visibleFeatures.map((f) => (
               <Link
                 key={f.href}
                 to={f.href}

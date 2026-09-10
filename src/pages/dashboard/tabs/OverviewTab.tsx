@@ -2,6 +2,7 @@ import { CalendarDays } from 'lucide-react'
 import { DashboardCalendar } from '../../../components/calendar/DashboardCalendar'
 import { OverviewStats } from '../../../components/dashboard/stats/OverviewStats'
 import { ForYouRail } from '../../../components/personalization/ForYouRail'
+import { RoleQuickActions } from '../../../components/dashboard/RoleQuickActions'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -11,6 +12,9 @@ export default function OverviewTab() {
 
   return (
     <>
+      {/* What this role can do from here — one strip, capability-filtered */}
+      <RoleQuickActions />
+
       {/* Numbers first — this is the one tab that should answer "how am I
           doing" before it answers "what next" */}
       <OverviewStats />
