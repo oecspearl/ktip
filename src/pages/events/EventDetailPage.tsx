@@ -64,6 +64,7 @@ import type { AttendanceType, RSVPStatus } from '../../types'
 import { format, isPast, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { useRecordView } from '../../hooks/useRecordView'
 import { useTranslatedFields, isMachineTranslated } from '../../hooks/useTranslated'
 import { TranslatedMark } from '../../components/legal/TranslatedMark'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
@@ -84,6 +85,7 @@ export default function EventDetailPage() {
 
   const { event, loading: eventLoading } = useEvent(params.id)
   useCanonicalSlug(params.id, event)
+  useRecordView('event', event?.id)
   /**
    * The reader's copy of the same row.
    *

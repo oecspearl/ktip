@@ -28,6 +28,7 @@ import { formatCurrency, formatDate, truncate } from '../../lib/utils'
 import { isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { useRecordView } from '../../hooks/useRecordView'
 import { Trans, Plural, useLingui } from '@lingui/react/macro'
 
 export default function GrantDetailPage() {
@@ -38,6 +39,7 @@ export default function GrantDetailPage() {
 
   const { grant, loading: grantLoading } = useGrant(params.id)
   useCanonicalSlug(params.id, grant)
+  useRecordView('grant', grant?.id)
   usePageTitle(grant?.title)
   const { getApplicationCount } = useApplyForGrant()
   const { application, loading: applicationChecking } = useDraftApplication(

@@ -157,6 +157,8 @@ export function useCreateEvent() {
       /** Calendar colour (105). Null follows the event_type palette. */
       accent_color?: CalendarAccent | null
       location?: string
+      /** Migration 153 — ISO alpha-2, null for virtual or unknown. */
+      country_code?: string | null
       is_virtual?: boolean
       start_date: string
       end_date?: string

@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button'
 import { GrantCard } from '../../components/grants/GrantCard'
 import { useGrants } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
+import { canUseGrantApplications } from '../../lib/permissions'
 import { Wallet, FileText, Plus } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
@@ -50,7 +51,7 @@ export default function GrantsPage() {
   usePageTitle(t`Grants`)
   const auth = useAuth()
   const canPostGrants = auth.can('grant:post')
-  const canApply = auth.can('grant:apply')
+  const canApply = canUseGrantApplications(auth.can)
   const typeSelectOptions = useMemo(
     () => TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: i18n._(opt.label) })),
     [i18n]
@@ -164,8 +165,15 @@ export default function GrantsPage() {
           // both buttons, because a mentor really does do both.
           <div className="flex flex-wrap items-center gap-2">
             {canPostGrants && (
+              <Link to="/grants/new">
+                <Button icon={<Plus size={16} />} size="sm" className="text-sm">
+                  <Trans>Post a funding call</Trans>
+                </Button>
+              </Link>
+            )}
+            {canPostGrants && (
               <Link to="/grants/my-grants">
-                <Button icon={<Wallet size={16} />} size="sm" className="text-sm">
+                <Button icon={<Wallet size={16} />} size="sm" variant="outline" className="text-sm">
                   <Trans>My Funding Calls</Trans>
                 </Button>
               </Link>
@@ -303,7 +311,7 @@ export default function GrantsPage() {
                         className="first:border-t-0 first:pt-0"
                       >
                         <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
-                          {group.items.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
+                          {group.items.map((grant) => <GrantCard key={grant.id} grant={grant} dismissible={sort === 'for_you'} />)}
                         </div>
                       </CollapsibleSection>
                     )
@@ -311,7 +319,7 @@ export default function GrantsPage() {
                 </div>
               ) : (
                 <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
-                  {openGrants.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
+                  {openGrants.map((grant) => <GrantCard key={grant.id} grant={grant} dismissible={sort === 'for_you'} />)}
                 </div>
               )}
 
@@ -324,7 +332,7 @@ export default function GrantsPage() {
                   className="mt-10"
                 >
                   <div className={cn(gridClass, 'gap-4 auto-rows-fr opacity-75')}>
-                    {closedGrants.map((grant) => <GrantCard key={grant.id} grant={grant} />)}
+                    {closedGrants.map((grant) => <GrantCard key={grant.id} grant={grant} dismissible={sort === 'for_you'} />)}
                   </div>
                 </CollapsibleSection>
               )}

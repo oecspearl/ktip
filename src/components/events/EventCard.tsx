@@ -2,6 +2,7 @@ import { Badge } from '../ui/Badge'
 import type { Event } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
+import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { EVENT_TYPE_LABELS, EVENT_STATUS_COLORS } from '../../lib/constants'
 import { useTranslatedFields, isMachineTranslated } from '../../hooks/useTranslated'
 import { TranslatedMark } from '../legal/TranslatedMark'
@@ -11,9 +12,11 @@ import { Trans, useLingui } from '@lingui/react/macro'
 
 interface EventCardProps {
   event: Event
+  /** Under the "For You" sort: offer "not interested" on the card. */
+  dismissible?: boolean
 }
 
-export function EventCard({ event: source }: EventCardProps) {
+export function EventCard({ event: source, dismissible }: EventCardProps) {
     const { t } = useLingui()
   // Member-written copy. `location` is in here on purpose and `title` is not a
   // proper noun: "Rodney Bay Marina" survives (shouldTranslate rejects nothing
@@ -36,6 +39,7 @@ export function EventCard({ event: source }: EventCardProps) {
       to={entityPath('event', event)}
       image={event.image_url}
       imageSeed={event.id}
+      action={dismissible ? <NotInterestedButton entity="event" id={event.id} tone="dark" /> : undefined}
       eyebrow={EVENT_TYPE_LABELS[event.event_type] || t`Event`}
       title={event.title}
       description={event.summary || event.description}

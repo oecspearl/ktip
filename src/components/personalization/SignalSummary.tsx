@@ -1,10 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
-import { Award, Heart, MapPin, Sparkles, Tag, Briefcase } from 'lucide-react'
+import { Award, Heart, MapPin, Sparkles, Tag, Briefcase, Repeat } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUserBadges } from '../../hooks/useBadges'
 import { keys } from '../../queries/keys'
+import { countryFlagUrl } from '../../lib/country-flag'
+import { ROLE_LABELS } from '../../lib/constants'
+import { displayRoles } from '../../lib/permissions'
+import { resolveCopy } from '../../i18n/copy'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
@@ -45,7 +49,7 @@ function useEngagementCounts(userId: string | undefined) {
 interface SignalRowProps {
   icon: React.ReactNode
   label: string
-  value: string
+  value: React.ReactNode
   empty?: boolean
 }
 
@@ -72,10 +76,11 @@ function SignalRow({ icon, label, value, empty }: SignalRowProps) {
  *
  * Two jobs: it makes the ranking explainable rather than magic, and it is the
  * most effective nudge to fill in a sparse profile — the fields listed here
- * are exactly the ones that are worth nothing when empty.
+ * are exactly the ones that are worth nothing when empty. Every row here is a
+ * signal the formula (154) really reads; a row that was not would be a lie.
  */
 export function SignalSummary() {
-    const { t } = useLingui()
+  const { t, i18n } = useLingui()
   const auth = useAuth()
   const profile = auth.profile
   const { badges } = useUserBadges(auth.user?.id)
@@ -90,18 +95,34 @@ export function SignalSummary() {
     ? badges.map((b) => b.badge?.name).filter(Boolean).join(', ')
     : null
 
+  const roleNames = displayRoles(auth.roles, auth.activeRole)
+    .map((slug) => resolveCopy(i18n, ROLE_LABELS[slug] || slug))
+    .join(', ')
+  const roleValue = auth.activeRole
+    ? t`${roleNames} (acting as this role only)`
+    : roleNames
+
   const engagement = counts
     ? [
-        counts.likes ? `${counts.likes} liked` : null,
-        counts.follows ? `${counts.follows} followed` : null,
-        counts.rsvps ? `${counts.rsvps} event RSVP${counts.rsvps === 1 ? '' : 's'}` : null,
+        counts.likes ? t`${counts.likes} liked` : null,
+        counts.follows ? t`${counts.follows} followed` : null,
+        counts.rsvps
+          ? counts.rsvps === 1
+            ? t`1 event RSVP`
+            : t`${counts.rsvps} event RSVPs`
+          : null,
         counts.applications
-          ? `${counts.applications} grant application${counts.applications === 1 ? '' : 's'}`
+          ? counts.applications === 1
+            ? t`1 grant application`
+            : t`${counts.applications} grant applications`
           : null,
       ]
         .filter(Boolean)
         .join(' · ')
     : ''
+
+  const flag = countryFlagUrl(profile?.country)
+  const notSetProfile = t`Not set — add them on the Profile tab`
 
   return (
     <div className="rounded-xl border border-ktip-sand-200 bg-ktip-sand-50/50 p-4">
@@ -117,34 +138,48 @@ export function SignalSummary() {
         <SignalRow
           icon={<Tag size={14} />}
           label={t`Interests`}
-          value={interests || 'Not set — add them on the Profile tab'}
+          value={interests || notSetProfile}
           empty={!interests}
         />
         <SignalRow
           icon={<Briefcase size={14} />}
           label={t`Skills & industry`}
-          value={
-            [skills, profile?.industry].filter(Boolean).join(' · ') ||
-            'Not set — add them on the Profile tab'
-          }
+          value={[skills, profile?.industry].filter(Boolean).join(' · ') || notSetProfile}
           empty={!skills && !profile?.industry}
+        />
+        <SignalRow
+          icon={<Repeat size={14} />}
+          label={t`Role`}
+          value={roleValue || t`Not set`}
+          empty={!roleNames}
         />
         <SignalRow
           icon={<MapPin size={14} />}
           label={t`Country`}
-          value={profile?.country || 'Not set'}
+          value={
+            profile?.country ? (
+              <span className="inline-flex items-center gap-1.5">
+                {flag && <img src={flag} alt="" width={16} height={12} className="rounded-[2px]" />}
+                {profile.country}
+                <span className="text-ktip-sand-400"> · </span>
+                <span className="text-ktip-sand-500"><Trans>events near you rank higher</Trans></span>
+              </span>
+            ) : (
+              t`Not set`
+            )
+          }
           empty={!profile?.country}
         />
         <SignalRow
           icon={<Award size={14} />}
           label={t`Badges earned`}
-          value={badgeNames || 'None yet'}
+          value={badgeNames || t`None yet`}
           empty={!badgeNames}
         />
         <SignalRow
           icon={<Heart size={14} />}
           label={t`Activity`}
-          value={engagement || 'Nothing yet — likes, follows, RSVPs and applications count here'}
+          value={engagement || t`Nothing yet — likes, follows, RSVPs, applications and what you open count here`}
           empty={!engagement}
         />
       </div>

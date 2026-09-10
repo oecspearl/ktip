@@ -260,3 +260,51 @@ export const COUNTRY_GROUPS: readonly CountryGroup[] = [
 
 /** Every offered country, flat. Used to spot a stored value we no longer list. */
 export const ALL_COUNTRIES: readonly string[] = COUNTRY_GROUPS.flatMap((g) => [...g.countries])
+
+/**
+ * Name → ISO 3166-1 alpha-2 for every country the `countries` table (058)
+ * seeds, which is what an FK column such as events.country_code (153) holds.
+ * Profiles keep the name; events keep the code; this is the bridge, and the
+ * spellings match the table exactly so the two vocabularies meet in SQL.
+ */
+export const COUNTRY_CODES: Readonly<Record<string, string>> = {
+  'Antigua and Barbuda': 'AG',
+  Dominica: 'DM',
+  Grenada: 'GD',
+  'Saint Kitts and Nevis': 'KN',
+  'Saint Lucia': 'LC',
+  'Saint Vincent and the Grenadines': 'VC',
+  Anguilla: 'AI',
+  Montserrat: 'MS',
+  'British Virgin Islands': 'VG',
+  Martinique: 'MQ',
+  Guadeloupe: 'GP',
+  Barbados: 'BB',
+  'Trinidad and Tobago': 'TT',
+  Jamaica: 'JM',
+  Guyana: 'GY',
+  Bahamas: 'BS',
+  Belize: 'BZ',
+  Suriname: 'SR',
+  Haiti: 'HT',
+  'Dominican Republic': 'DO',
+  'United States': 'US',
+  Canada: 'CA',
+  'United Kingdom': 'GB',
+  France: 'FR',
+  Germany: 'DE',
+  Netherlands: 'NL',
+  India: 'IN',
+  China: 'CN',
+  Brazil: 'BR',
+  'South Africa': 'ZA',
+  Australia: 'AU',
+}
+
+/** Code → name, the inverse of COUNTRY_CODES. */
+export const COUNTRY_NAMES_BY_CODE: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(COUNTRY_CODES).map(([name, code]) => [code, name])
+)
+
+/** Countries that have a code — the only ones an FK-backed picker may offer. */
+export const CODED_COUNTRIES: readonly string[] = Object.keys(COUNTRY_CODES)

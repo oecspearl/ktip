@@ -202,6 +202,8 @@ export interface Database {
           event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
           status: 'draft' | 'published' | 'cancelled' | 'completed'
           location: string | null
+          // 153. Optional because a deploy can precede the migration.
+          country_code?: string | null
           is_virtual: boolean
           start_date: string
           end_date: string | null
@@ -235,6 +237,7 @@ export interface Database {
           event_type: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
           status?: 'draft' | 'published' | 'cancelled' | 'completed'
           location?: string | null
+          country_code?: string | null
           is_virtual?: boolean
           start_date: string
           end_date?: string | null
@@ -268,6 +271,7 @@ export interface Database {
           event_type?: 'hackathon' | 'workshop' | 'meetup' | 'conference' | 'demo_day' | 'challenge'
           status?: 'draft' | 'published' | 'cancelled' | 'completed'
           location?: string | null
+          country_code?: string | null
           is_virtual?: boolean
           start_date?: string
           end_date?: string | null

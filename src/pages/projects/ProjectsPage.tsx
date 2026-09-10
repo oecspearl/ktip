@@ -259,7 +259,7 @@ export default function ProjectsPage() {
                         >
                           <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
                             {group.items.map((project) => (
-                              <ProjectCard key={project.id} project={project} />
+                              <ProjectCard key={project.id} project={project} dismissible={sort === 'for_you'} />
                             ))}
                           </div>
                         </CollapsibleSection>
@@ -269,7 +269,7 @@ export default function ProjectsPage() {
                 ) : (
                   <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
                     {projects.map((project) => (
-                      <ProjectCard key={project.id} project={project} />
+                      <ProjectCard key={project.id} project={project} dismissible={sort === 'for_you'} />
                     ))}
                   </div>
                 )}

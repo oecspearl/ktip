@@ -1,14 +1,128 @@
 import { supabase } from './supabase'
-import { ROUTES } from './constants'
-import type { MatchReason, Ranked } from '../types'
+import { ROLE_LABELS, ROUTES } from './constants'
+import type { MatchReason, Ranked, RoleSlug } from '../types'
 import { msg } from '@lingui/core/macro'
-import type { MessageDescriptor } from '@lingui/core'
+import type { I18n, MessageDescriptor } from '@lingui/core'
+import { resolveCopy } from '../i18n/copy'
+import { effectiveRoles } from './permissions'
 
 export type { MatchReason, Ranked }
 
 export type ContentSort = 'for_you' | 'newest' | 'deadline' | 'upcoming' | 'popular'
 
 export type RankableEntity = 'project' | 'resource' | 'event' | 'grant'
+
+/** The homepage hero's three modes. Lives here so the role default is testable. */
+export type DiscoverMode = 'grants' | 'projects' | 'events'
+
+/**
+ * Which hero mode the homepage opens on for a role. Admin-tier roles and
+ * anything unlisted fall through to the signed-out default, `grants`.
+ */
+export const DEFAULT_MODE_BY_ROLE: Partial<Record<RoleSlug, DiscoverMode>> = {
+  investor: 'grants',
+  private_sector: 'grants',
+  entrepreneur: 'grants',
+  ngo: 'grants',
+  government: 'grants',
+  igo: 'grants',
+  diaspora: 'grants',
+  student: 'events',
+  faculty: 'events',
+  educational_partner: 'events',
+  mentor: 'projects',
+  researcher: 'projects',
+  research_institution: 'projects',
+  chamber_admin: 'projects',
+}
+
+/** The hero mode for this account's operating context. */
+export function defaultModeFor(
+  roles: readonly string[] | null | undefined,
+  activeRole: string | null | undefined
+): DiscoverMode {
+  for (const role of effectiveRoles(roles, activeRole)) {
+    const mode = DEFAULT_MODE_BY_ROLE[role]
+    if (mode) return mode
+  }
+  return 'grants'
+}
+
+/**
+ * One sentence per reason code the ranker (154) can emit. Codes with a
+ * `topics` param list what matched; `days`, `role`, `country` and `category`
+ * are interpolated. Anything the catalogue does not know renders as the raw
+ * code rather than blank — a slug on screen is a visible bug, silence is not.
+ */
+const REASON_LABELS: Record<string, MessageDescriptor> = {
+  topic: msg`Matches your topics`,
+  category: msg`In a category you follow`,
+  type: msg`A content type you asked for`,
+  climate: msg`Climate action`,
+  profile: msg`Related to your profile`,
+  role: msg`Relevant to your role`,
+  geo: msg`Near you`,
+  online: msg`Online — join from anywhere`,
+  author: msg`By someone whose work you follow`,
+  engaged_category: msg`Like things you have engaged with`,
+  engaged_topic: msg`Similar to what you engage with`,
+  browsed: msg`Like things you have been reading`,
+  badge_starter: msg`A good starting point for your first project`,
+  badge_connect: msg`A good place to meet people`,
+  badge_event: msg`Your first event is coming up`,
+  badge_verified: msg`You are verified — you can apply`,
+  verified: msg`You are verified — you can apply`,
+  badge_traction: msg`Your project has traction — worth funding`,
+  recency: msg`Recently added`,
+  deadline: msg`Closing soon`,
+  soon: msg`Happening soon`,
+  popular: msg`Popular right now`,
+  featured: msg`Featured by OECS`,
+  // Member suggestions (156) share the chip.
+  shared_interests: msg`Shares your interests`,
+  shared_skills: msg`Shares your skills`,
+  same_country: msg`Same country`,
+  same_industry: msg`Same industry`,
+  complementary: msg`Looking for what you offer`,
+}
+
+/** The translated sentence for one reason, with its details attached. */
+export function reasonLabel(i18n: I18n, reason: MatchReason): string {
+  // A 061-era row still carries an English label; honour it rather than
+  // guessing, so a half-applied deploy never reads worse than before.
+  const legacy = (reason as { label?: string }).label
+  const descriptor = REASON_LABELS[reason.code]
+  if (!descriptor) return legacy ?? reason.code
+  const base = i18n._(descriptor)
+  const params = reason.params ?? {}
+
+  const topics = Array.isArray(params.topics) ? (params.topics as string[]) : null
+  if (topics?.length) return `${base}: ${topics.join(', ')}`
+
+  if (typeof params.days === 'number') {
+    if (reason.code === 'deadline') return i18n._(msg`Closing in ${params.days} days`)
+    if (reason.code === 'soon') return i18n._(msg`Happening in ${params.days} days`)
+  }
+
+  if (typeof params.country === 'string' && params.country) {
+    return i18n._(msg`In ${params.country}`)
+  }
+
+  if (typeof params.role === 'string' && params.role) {
+    const role = ROLE_LABELS[params.role]
+    return role ? `${base}: ${resolveCopy(i18n, role)}` : base
+  }
+
+  if (typeof params.category === 'string' && params.category) {
+    return `${base}: ${params.category.replace(/[_-]/g, ' ')}`
+  }
+
+  if (typeof params.industry === 'string' && params.industry) {
+    return `${base}: ${params.industry}`
+  }
+
+  return base
+}
 
 /** One row of the `rank_content` RPC. */
 export interface RankRow {

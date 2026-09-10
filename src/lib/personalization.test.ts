@@ -22,7 +22,7 @@ describe('mergeScores', () => {
   })
 
   it('attaches score and reasons to the matching row', () => {
-    const reasons = [{ code: 'topic', label: 'Matches your topics: climate', w: 25 }]
+    const reasons = [{ code: 'topic', w: 25, params: { topics: ['climate'] } }]
     const out = mergeScores(rows('a'), [{ id: 'a', score: 25, reasons }])
     expect(out[0].match_score).toBe(25)
     expect(out[0].match_reasons).toEqual(reasons)

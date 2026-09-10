@@ -183,6 +183,13 @@ export interface Profile {
    * deploy-ahead-of-migration reason as banner.
    */
   avatar_style?: AvatarStyle | null
+  /**
+   * Migration 155 — theme, readable font, text size, photo brightness and
+   * reduced motion, so they follow the member across devices. Every key is
+   * optional; NULL means the device's own storage stands. Optional on the type
+   * because a deploy can run ahead of the migration.
+   */
+  display_prefs?: DisplayPrefs | null
   country: string | null
   organization: string | null
   industry: string | null
@@ -348,10 +355,26 @@ export interface ProfileView {
  * from the same contribution array server-side, so the chip on a card can
  * never disagree with the ordering it produced.
  */
+/** Migration 155 — what profiles.display_prefs may hold. All optional. */
+export interface DisplayPrefs {
+  theme?: 'dark' | 'light'
+  readable?: boolean
+  fontScale?: number
+  brightness?: number
+  reducedMotion?: boolean
+}
+
 export interface MatchReason {
+  /** Stable key the client maps to a translated sentence — see REASON_LABELS. */
   code: string
-  label: string
   w: number
+  /**
+   * Migration 154 — what the sentence needs: matched `topics`, a `role`, a
+   * `country`, a `category`, `days`. Optional because a 061 ranker returned a
+   * `label` string here instead; anything without params falls back to the
+   * code's plain wording.
+   */
+  params?: Record<string, unknown>
 }
 
 /**
@@ -412,6 +435,12 @@ export interface Event extends Ranked {
   event_type: EventType
   status: EventStatus
   location: string | null
+  /**
+   * Migration 153 — ISO alpha-2, FK to countries. NULL for virtual events or
+   * an unknown country. Optional because a deploy can run ahead of the
+   * migration, and PostgREST then omits the column from every row.
+   */
+  country_code?: string | null
   is_virtual: boolean
   start_date: string
   end_date: string | null
@@ -1576,6 +1605,12 @@ export interface UserPersonalization {
   topics: string[]
   categories: string[]
   content_types: string[]
+  /**
+   * Migration 153 — when the "tell us your interests" prompt was last closed.
+   * Optional because a deploy can run ahead of the migration; absent reads as
+   * never dismissed.
+   */
+  prompt_dismissed_at?: string | null
   created_at: string
   updated_at: string
 }

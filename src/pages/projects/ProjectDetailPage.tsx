@@ -35,6 +35,7 @@ import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/consta
 import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { useRecordView } from '../../hooks/useRecordView'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { entityPath, memberPath } from '../../lib/slug'
@@ -51,6 +52,7 @@ export default function ProjectDetailPage() {
 
   const { project, loading: projectLoading } = useProject(params.id)
   useCanonicalSlug(params.id, project)
+  useRecordView('project', project?.id)
   const { projects: recentProjects } = useProjects()
   usePageTitle(project?.title)
 

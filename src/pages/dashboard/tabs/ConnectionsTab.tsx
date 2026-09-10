@@ -5,6 +5,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useMemberPanel } from '../../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
+import { PeopleLikeYouRail } from '../../../components/directory/PeopleLikeYouRail'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 export default function ConnectionsTab() {
@@ -17,19 +18,26 @@ export default function ConnectionsTab() {
 
   if (!connections?.length) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Users size={32} className="text-ktip-sand-400" />
+      <>
+        {/* The people worth a first request, before the empty state tells
+            you there is nobody. Self-hides when it has no one to offer. */}
+        <PeopleLikeYouRail className="mb-8" />
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-ktip-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users size={32} className="text-ktip-sand-400" />
+          </div>
+          <p className="text-ktip-sand-600 mb-2"><Trans>No connections yet.</Trans></p>
+          <Link to="/directory" className="text-sm text-ktip-ocean-600 hover:underline">
+            <Trans>Browse the member directory</Trans>
+          </Link>
         </div>
-        <p className="text-ktip-sand-600 mb-2"><Trans>No connections yet.</Trans></p>
-        <Link to="/directory" className="text-sm text-ktip-ocean-600 hover:underline">
-          <Trans>Browse the member directory</Trans>
-        </Link>
-      </div>
+      </>
     )
   }
 
   return (
+    <>
+    <PeopleLikeYouRail className="mb-8" />
     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-children">
       {connections.map((connection) => {
         const other =
@@ -94,5 +102,6 @@ export default function ConnectionsTab() {
         )
       })}
     </div>
+    </>
   )
 }

@@ -4,6 +4,7 @@ import { Badge } from '../ui/Badge'
 import type { Project } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
+import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
@@ -13,9 +14,11 @@ import { resolveCopy } from '../../i18n/copy'
 
 interface ProjectCardProps {
   project: Project
+  /** Under the "For You" sort: offer "not interested" on the card. */
+  dismissible?: boolean
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, dismissible }: ProjectCardProps) {
   const { t, i18n } = useLingui()
 
   /**
@@ -41,6 +44,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       to={entityPath('project', project)}
       image={project.image_url}
       imageSeed={project.id}
+      action={dismissible ? <NotInterestedButton entity="project" id={project.id} tone="dark" /> : undefined}
       eyebrow={categoryLabel || t`Project`}
       title={shown.title}
       description={shown.summary || shown.description}

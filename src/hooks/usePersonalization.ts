@@ -23,6 +23,25 @@ export const DEFAULT_PERSONALIZATION: PersonalizationSettings = {
   topics: [],
   categories: [],
   content_types: [],
+  prompt_dismissed_at: null,
+}
+
+/**
+ * Seed the explicit topics from what a new member typed at signup or
+ * onboarding. Upsert, not update: there is no row yet for a brand-new
+ * account. Swallows every error — this runs at the tail of a flow that has
+ * already succeeded, and the member can always set topics in Settings.
+ */
+export async function seedPersonalizationTopics(userId: string, interests: string[]): Promise<void> {
+  const topics = [...new Set(interests.map((s) => s.trim()).filter(Boolean))].slice(0, 40)
+  if (!topics.length) return
+  try {
+    await (supabase as any)
+      .from('user_personalization')
+      .upsert({ user_id: userId, enabled: true, topics }, { onConflict: 'user_id' })
+  } catch {
+    // Non-fatal by design.
+  }
 }
 
 /** Settings › Personalization. Returns defaults when the user has no row yet. */
@@ -48,6 +67,7 @@ export function useMyPersonalization(userId: string | undefined) {
       topics: data.topics ?? [],
       categories: data.categories ?? [],
       content_types: data.content_types ?? [],
+      prompt_dismissed_at: data.prompt_dismissed_at ?? null,
     }
   }
 

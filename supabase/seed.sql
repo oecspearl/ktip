@@ -258,6 +258,26 @@ ON CONFLICT (id) DO UPDATE SET
   start_date = EXCLUDED.start_date,
   end_date = EXCLUDED.end_date;
 
+-- Migration 153 — the country each in-person seed event is in, so the
+-- ranker's geo term has something to fire on. Separate statement rather than a
+-- column in the INSERT above so the seed still loads on a database that has
+-- not yet run 153. The virtual meetup (…03) deliberately stays NULL.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+              WHERE table_name = 'events' AND column_name = 'country_code') THEN
+    UPDATE events SET country_code = v.code
+      FROM (VALUES
+        ('d0000000-0000-0000-0000-000000000001'::uuid, 'LC'),
+        ('d0000000-0000-0000-0000-000000000002'::uuid, 'VC'),
+        ('d0000000-0000-0000-0000-000000000004'::uuid, 'DM'),
+        ('d0000000-0000-0000-0000-000000000005'::uuid, 'GD'),
+        ('d0000000-0000-0000-0000-000000000006'::uuid, 'AG')
+      ) AS v(id, code)
+     WHERE events.id = v.id;
+  END IF;
+END $$;
+
 
 -- ============================================================
 -- 5. EVENT RSVPs

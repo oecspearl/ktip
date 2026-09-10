@@ -2,6 +2,7 @@ import { Badge } from '../ui/Badge'
 import type { Grant } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
+import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import { grantImageFor } from '../../lib/hero-images'
 import { FUNDING_TYPES } from '../../lib/funding-types'
@@ -11,9 +12,11 @@ import { Trans, useLingui } from '@lingui/react/macro'
 
 interface GrantCardProps {
   grant: Grant
+  /** Under the "For You" sort: offer "not interested" on the card. */
+  dismissible?: boolean
 }
 
-export function GrantCard({ grant }: GrantCardProps) {
+export function GrantCard({ grant, dismissible }: GrantCardProps) {
     const { t, i18n } = useLingui()
   // The instrument leads the card: whether this is a grant or an equity
   // round changes whether an applicant reads any further.
@@ -38,6 +41,7 @@ export function GrantCard({ grant }: GrantCardProps) {
       to={entityPath('grant', grant)}
       image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
       imageSeed={grant.id}
+      action={dismissible ? <NotInterestedButton entity="grant" id={grant.id} tone="dark" /> : undefined}
       eyebrow={fundingType ? i18n._(fundingType) : t`Funding`}
       title={grant.title}
       description={grant.summary || grant.description}

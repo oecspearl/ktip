@@ -31,6 +31,7 @@ import { FilterBar } from '../../components/ui/FilterBar'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useGridColumns } from '../../hooks/useGridColumns'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { useAuth } from '../../contexts/AuthContext'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
@@ -65,6 +66,11 @@ export default function EventsPage() {
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
+  const auth = useAuth()
+  // Signed-out visitors keep the CTA — it routes to login, which is the point.
+  // It is hidden only for a member whose role cannot host, so a button never
+  // promises a page that will refuse them. Same rule as ProjectsPage.
+  const canCreate = !auth.user || auth.can('event:create')
 
   const { tags: tagOptions } = useTagVocabulary('events')
 
@@ -412,19 +418,21 @@ export default function EventsPage() {
               </>
             }
             cta={
-              <Link to="/events/new">
-                {/* Icon-only below sm: the label is the widest thing in the bar,
-                    and dropping it is what keeps the CTA on the row. */}
-                <Button
-                  data-tutorial="events-create"
-                  icon={<Plus size={16} />}
-                  size="sm"
-                  aria-label={t`Create event`}
-                  className="text-label"
-                >
-                  <span className="hidden sm:inline"><Trans>Create Event</Trans></span>
-                </Button>
-              </Link>
+              canCreate ? (
+                <Link to="/events/new">
+                  {/* Icon-only below sm: the label is the widest thing in the bar,
+                      and dropping it is what keeps the CTA on the row. */}
+                  <Button
+                    data-tutorial="events-create"
+                    icon={<Plus size={16} />}
+                    size="sm"
+                    aria-label={t`Create event`}
+                    className="text-label"
+                  >
+                    <span className="hidden sm:inline"><Trans>Create Event</Trans></span>
+                  </Button>
+                </Link>
+              ) : undefined
             }
           />
         </div>
@@ -485,7 +493,7 @@ export default function EventsPage() {
                     >
                       <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
                         {group.items.map((event) => (
-                          <EventCard key={event.id} event={event} />
+                          <EventCard key={event.id} event={event} dismissible={sort === 'for_you'} />
                         ))}
                       </div>
                     </CollapsibleSection>
@@ -497,7 +505,7 @@ export default function EventsPage() {
                   className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}
                 >
                   {events.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard key={event.id} event={event} dismissible={sort === 'for_you'} />
                   ))}
                 </div>
               )}
@@ -512,7 +520,7 @@ export default function EventsPage() {
                 >
                   <div className={cn(gridClass, 'gap-4 auto-rows-fr opacity-75')}>
                     {pastEvents.map((event) => (
-                      <EventCard key={event.id} event={event} />
+                      <EventCard key={event.id} event={event} dismissible={sort === 'for_you'} />
                     ))}
                   </div>
                 </CollapsibleSection>
@@ -529,9 +537,11 @@ export default function EventsPage() {
               <p className="text-gray-500 mb-6">
                 {hasActiveFilters
                   ? t`Try adjusting your filters or search query`
-                  : t`Be the first to create an event!`}
+                  : canCreate
+                    ? t`Be the first to create an event!`
+                    : t`Nothing scheduled yet — check back soon.`}
               </p>
-              {!hasActiveFilters && (
+              {!hasActiveFilters && canCreate && (
                 <Link to="/events/new">
                   <Button icon={<Plus size={20} />}><Trans>Create First Event</Trans></Button>
                 </Link>

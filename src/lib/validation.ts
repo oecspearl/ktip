@@ -264,6 +264,8 @@ export const eventSchema = z.object({
   description: z.string().max(5000, 'Description too long').optional(),
   event_type: z.enum(['hackathon', 'workshop', 'meetup', 'conference', 'demo_day', 'challenge']),
   location: z.string().max(200, 'Location too long').optional(),
+  // Migration 153 — ISO alpha-2 from the country picker; absent for virtual.
+  country_code: z.string().length(2, 'Invalid country').nullable().optional(),
   is_virtual: z.boolean(),
   start_date: z.string().datetime('Invalid date format'),
   end_date: z.string().datetime('Invalid date format').optional(),

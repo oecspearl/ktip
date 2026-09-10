@@ -1,5 +1,6 @@
 import { Badge } from '../ui/Badge'
 import { ClimateBadge } from '../ui/ClimateBadge'
+import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { BentoCard } from '../ui/BentoCard'
 import {
   RESOURCE_TYPE_LABELS,
@@ -13,9 +14,11 @@ import { resolveCopy } from '../../i18n/copy'
 
 interface ResourceCardProps {
   resource: Resource
+  /** Under the "For You" sort: offer "not interested" on the card. */
+  dismissible?: boolean
 }
 
-export function ResourceCard({ resource }: ResourceCardProps) {
+export function ResourceCard({ resource, dismissible }: ResourceCardProps) {
     const { t, i18n } = useLingui()
   const resourceTypeLabel = RESOURCE_TYPE_LABELS[resource.resource_type]
   return (
@@ -23,6 +26,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
       to={entityPath('resource', resource)}
       image={resource.thumbnail_url}
       imageSeed={resource.id}
+      action={dismissible ? <NotInterestedButton entity="resource" id={resource.id} tone="dark" /> : undefined}
       eyebrow={resourceTypeLabel ? resolveCopy(i18n, resourceTypeLabel) : resource.resource_type}
       title={resource.title}
       description={resource.summary || resource.description}

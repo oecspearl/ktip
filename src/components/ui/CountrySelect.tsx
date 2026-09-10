@@ -1,5 +1,11 @@
 import { useLingui } from '@lingui/react/macro'
-import { ALL_COUNTRIES, COUNTRY_GROUPS } from '../../lib/countries'
+import {
+  ALL_COUNTRIES,
+  CODED_COUNTRIES,
+  COUNTRY_CODES,
+  COUNTRY_GROUPS,
+  COUNTRY_NAMES_BY_CODE,
+} from '../../lib/countries'
 import { cn } from '../../lib/utils'
 
 interface CountrySelectProps {
@@ -10,6 +16,13 @@ interface CountrySelectProps {
    * forms; `filter` is the bare control used in the directory filter bar.
    */
   variant?: 'form' | 'filter'
+  /**
+   * What `value` holds. Profiles store the country's name; FK columns such as
+   * events.country_code (153) store the ISO alpha-2 code. In `code` mode the
+   * list is trimmed to the countries the `countries` table knows, because an
+   * FK cannot hold anything else.
+   */
+  valueKind?: 'name' | 'code'
   /** Form variant only. Defaults to "Country". */
   label?: string
   /** Text of the empty option. Defaults per variant. */
@@ -43,6 +56,7 @@ export function CountrySelect({
   value,
   onChange,
   variant = 'form',
+  valueKind = 'name',
   label,
   placeholder,
   id,
@@ -53,7 +67,11 @@ export function CountrySelect({
   const { t, i18n } = useLingui()
 
   const empty = placeholder ?? (variant === 'filter' ? t`All Countries` : t`Select a country`)
-  const unlisted = value !== '' && !ALL_COUNTRIES.includes(value)
+  const byCode = valueKind === 'code'
+  const optionValue = (country: string) => (byCode ? COUNTRY_CODES[country] : country)
+  const known = byCode ? Object.values(COUNTRY_CODES).includes(value) : ALL_COUNTRIES.includes(value)
+  const unlisted = value !== '' && !known
+  const unlistedLabel = byCode ? (COUNTRY_NAMES_BY_CODE[value] ?? value) : value
 
   const select = (
     <select
@@ -65,16 +83,22 @@ export function CountrySelect({
       className={cn(variant === 'filter' ? FILTER_CLASSES : FORM_CLASSES, className)}
     >
       <option value="">{empty}</option>
-      {unlisted && <option value={value}>{value}</option>}
-      {COUNTRY_GROUPS.map((group) => (
-        <optgroup key={group.label.id ?? String(group.label)} label={i18n._(group.label)}>
-          {group.countries.map((country) => (
-            <option key={country} value={country}>
-              {country}
-            </option>
-          ))}
-        </optgroup>
-      ))}
+      {unlisted && <option value={value}>{unlistedLabel}</option>}
+      {COUNTRY_GROUPS.map((group) => {
+        const countries = byCode
+          ? group.countries.filter((c) => CODED_COUNTRIES.includes(c))
+          : group.countries
+        if (!countries.length) return null
+        return (
+          <optgroup key={group.label.id ?? String(group.label)} label={i18n._(group.label)}>
+            {countries.map((country) => (
+              <option key={country} value={optionValue(country)}>
+                {country}
+              </option>
+            ))}
+          </optgroup>
+        )
+      })}
     </select>
   )
 

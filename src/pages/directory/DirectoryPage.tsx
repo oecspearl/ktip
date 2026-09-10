@@ -14,8 +14,11 @@ import { ConnectButton } from '../../components/directory/ConnectButton'
 import { BentoCard } from '../../components/ui/BentoCard'
 import { AchievementBadge } from '../../components/ui/AchievementBadge'
 import { CountrySelect } from '../../components/ui/CountrySelect'
+import { PeopleLikeYouRail } from '../../components/directory/PeopleLikeYouRail'
 import { VerifiedBadge } from '../../components/ui/VerifiedBadge'
 import {
+  COLLAB_EXCLUSIVE_VALUE,
+  COLLABORATION_OPTIONS,
   DIRECTORY_ROLE_LABELS,
   ROLE_LABELS,
   SKILL_SUGGESTIONS,
@@ -78,6 +81,7 @@ export default function DirectoryPage() {
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedSkill, setSelectedSkill] = useState<string>('')
   const [selectedBadge, setSelectedBadge] = useState<string>('')
+  const [selectedOpenTo, setSelectedOpenTo] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -88,7 +92,7 @@ export default function DirectoryPage() {
   const [pageLimit, setPageLimit] = useState(PAGE_SIZE)
   useEffect(() => {
     setPageLimit(PAGE_SIZE)
-  }, [debouncedSearch, selectedRole, selectedCountry, selectedSkill, selectedBadge])
+  }, [debouncedSearch, selectedRole, selectedCountry, selectedSkill, selectedBadge, selectedOpenTo])
 
   const { members, loading } = useDirectoryMembers({
     search: debouncedSearch,
@@ -96,6 +100,7 @@ export default function DirectoryPage() {
     country: selectedCountry,
     skill: selectedSkill,
     badge: selectedBadge,
+    openTo: selectedOpenTo,
     limit: pageLimit,
   })
   const { badges: allBadges } = useAllBadges()
@@ -136,11 +141,12 @@ export default function DirectoryPage() {
     setSelectedCountry('')
     setSelectedSkill('')
     setSelectedBadge('')
+    setSelectedOpenTo('')
     setSearchQuery('')
     setDebouncedSearch('')
   }
 
-  const hasActiveFilters = !!(selectedRole || selectedCountry || selectedSkill || selectedBadge || searchQuery)
+  const hasActiveFilters = !!(selectedRole || selectedCountry || selectedSkill || selectedBadge || selectedOpenTo || searchQuery)
 
   return (
     <>
@@ -198,7 +204,7 @@ export default function DirectoryPage() {
 
           <div
             className={`grid grid-cols-1 gap-4 mb-3 ${
-              tab === 'businesses' ? '' : 'md:grid-cols-3 lg:grid-cols-5'
+              tab === 'businesses' ? '' : 'md:grid-cols-3 lg:grid-cols-6'
             }`}
           >
             {/* Search */}
@@ -259,6 +265,21 @@ export default function DirectoryPage() {
               <option value=""><Trans>All Badges</Trans></option>
               {(allBadges || []).map((badge) => (
                 <option key={badge.slug} value={badge.slug}>{badge.name}</option>
+              ))}
+            </select>
+
+            {/* Open-to filter — what the member says they are looking for.
+                Collected at signup since 041, shown on the panel, filterable
+                nowhere until now. */}
+            <select
+              value={selectedOpenTo}
+              onChange={(e) => setSelectedOpenTo(e.currentTarget.value)}
+              aria-label={t`Filter by what members are open to`}
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+            >
+              <option value=""><Trans>Open to anything</Trans></option>
+              {COLLABORATION_OPTIONS.filter((o) => o.value !== COLLAB_EXCLUSIVE_VALUE).map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
               </>
@@ -337,6 +358,10 @@ export default function DirectoryPage() {
       {tab === 'people' && (
       <div id="members" data-spy="Members" className="scroll-mt-24 bg-ktip-sand-50 pb-16">
         <div className="w-full max-w-page mx-auto px-4">
+          {/* Who you should meet, before the alphabet. Self-hides signed out
+              or with nobody to suggest. Not shown while a filter is active —
+              a member who asked for Grenadian mentors wants that list, not ours. */}
+          {!hasActiveFilters && <PeopleLikeYouRail className="mb-8" />}
           {loading || !members ? (
             <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
           ) : members.length > 0 ? (
@@ -387,6 +412,8 @@ export default function DirectoryPage() {
                     }
                     meta={
                       <>
+                        {member.organization && <>{member.organization}</>}
+                        {member.organization && member.country && <> · </>}
                         {member.country && <>{member.country}</>}
                         {!isLocked && member.country && member.skills?.length > 0 && <> · </>}
                         {!isLocked && member.skills?.length > 0 && <>{member.skills[0]}</>}

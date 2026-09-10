@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { Sparkles, X, CalendarDays, Clock, ChevronRight, ChevronUp } from 'lucide-react'
 import { Segmented } from '../ui/Segmented'
+import { MatchReasonChip } from '../ui/MatchReasonChip'
+import { NotInterestedButton } from './NotInterestedButton'
 import { useAuth } from '../../contexts/AuthContext'
-import { usePersonalizationActive } from '../../hooks/usePersonalization'
+import { usePersonalizationActive, useSavePersonalization } from '../../hooks/usePersonalization'
 import {
   fallbackFeedImage,
   useFeedImages,
@@ -31,7 +33,13 @@ const ENTITY_SECTIONS: { entity: RankableEntity; label: MessageDescriptor }[] = 
   { entity: 'grant', label: msg`Grants` },
 ]
 
-const PROMPT_DISMISSED_KEY = 'ktip_personalization_prompt_dismissed'
+/**
+ * How long a dismissed "tell us your interests" prompt stays away while the
+ * member still has no signals. Stored on the row (153), so it holds across
+ * devices — the old localStorage flag asked again on every new phone and
+ * never again on the one it was closed on.
+ */
+const PROMPT_SNOOZE_DAYS = 30
 
 /** Filter value: an entity slug, or everything. */
 type Category = RankableEntity | 'all'
@@ -74,6 +82,7 @@ function FeedCard({
   image,
   className,
   decorative,
+  onHidden,
 }: {
   item: FeedItem
   /** The entity's own artwork; falls back to the seeded pick the cards use */
@@ -81,6 +90,8 @@ function FeedCard({
   className?: string
   /** The marquee's second copy: present for the loop, absent to assistive tech */
   decorative?: boolean
+  /** Drop the card locally the moment it is hidden, ahead of the refetch */
+  onHidden?: () => void
 }) {
   const { i18n, t } = useLingui()
   const closesDate = item.deadline_at ? formatDate(item.deadline_at) : ''
@@ -91,64 +102,73 @@ function FeedCard({
       : null
 
   return (
-    <Link
-      to={personalizedHref(item.entity, item.id)}
-      // aria-hidden alone would still leave the duplicate in the tab order,
-      // which is how you end up tabbing the same rail twice
-      aria-hidden={decorative}
-      tabIndex={decorative ? -1 : undefined}
-      className={cn(
-        'group flex flex-row overflow-hidden bg-ktip-cream border border-ktip-sand-200 rounded-2xl hover:border-ktip-ocean-300 transition-colors',
-        className
-      )}
-    >
-      {/* Photo down the leading edge rather than across the top: that is what
-          keeps the card landscape. A full-width band forces the content under
-          it and the card is portrait again however short the band is. */}
-      <div className="relative w-24 shrink-0 self-stretch overflow-hidden bg-ktip-sand-100 sm:w-28">
-        <img
-          src={image || fallbackFeedImage(item)}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3 py-2.5">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-ktip-ocean-600">
-          {i18n._(ENTITY_LABELS[item.entity])}
-        </span>
-
-        <h3 className="font-display text-sm font-bold leading-snug text-ktip-sand-900 line-clamp-2 group-hover:text-ktip-ocean-700">
-          {item.title}
-        </h3>
-
-        {/* No summary. At this height it is one clipped line that says less
-            than the category does. */}
-        <div className="flex items-center gap-x-2 overflow-hidden text-[11px] text-ktip-sand-500">
-          {when && (
-            <span className="flex shrink-0 items-center gap-1">
-              {when.icon}
-              {when.text}
-            </span>
-          )}
-          <FacetList item={item} divided={!!when} />
+    <div className={cn('group relative', className)}>
+      <Link
+        to={personalizedHref(item.entity, item.id)}
+        // aria-hidden alone would still leave the duplicate in the tab order,
+        // which is how you end up tabbing the same rail twice
+        aria-hidden={decorative}
+        tabIndex={decorative ? -1 : undefined}
+        className="flex h-full flex-row overflow-hidden bg-ktip-cream border border-ktip-sand-200 rounded-2xl hover:border-ktip-ocean-300 transition-colors"
+      >
+        {/* Photo down the leading edge rather than across the top: that is what
+            keeps the card landscape. A full-width band forces the content under
+            it and the card is portrait again however short the band is. */}
+        <div className="relative w-24 shrink-0 self-stretch overflow-hidden bg-ktip-sand-100 sm:w-28">
+          <img
+            src={image || fallbackFeedImage(item)}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         </div>
-      </div>
-    </Link>
+
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3 py-2.5 pr-9">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-ktip-ocean-600">
+            {i18n._(ENTITY_LABELS[item.entity])}
+            {/* The why, as a sparkle with every reason in its tooltip. The
+                card's last line stays for what the thing IS; this is for the
+                reader who wants to know why it is here. */}
+            <MatchReasonChip reasons={item.reasons} iconOnly />
+          </span>
+
+          <h3 className="font-display text-sm font-bold leading-snug text-ktip-sand-900 line-clamp-2 group-hover:text-ktip-ocean-700">
+            {item.title}
+          </h3>
+
+          {/* No summary. At this height it is one clipped line that says less
+              than the category does. */}
+          <div className="flex items-center gap-x-2 overflow-hidden text-[11px] text-ktip-sand-500">
+            {when && (
+              <span className="flex shrink-0 items-center gap-1">
+                {when.icon}
+                {when.text}
+              </span>
+            )}
+            <FacetList item={item} divided={!!when} />
+          </div>
+        </div>
+      </Link>
+
+      {/* Outside the link so a click here never navigates. Hidden on the
+          marquee's decorative copy for the same reason its link is. */}
+      {!decorative && (
+        <NotInterestedButton
+          entity={item.entity}
+          id={item.id}
+          onHidden={onHidden}
+          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        />
+      )}
+    </div>
   )
 }
 
 /**
  * What the thing is about — its category and its own tags, divided by rules.
  *
- * This replaced the match-reason chip. "Popular right now +3" explains why the
- * ranker surfaced the card, which is the ranker's business; on a card the
- * reader is scanning, the useful line is what the thing actually is.
- *
- * `item.reasons` is still on the payload and MatchReasonChip still exists, so
- * the why can come back as a hover or a detail row — it just no longer costs
- * the card its last line.
+ * The match-reason sparkle sits in the eyebrow; this line stays for what the
+ * thing actually is, which is what the reader scanning the rail wants first.
  */
 function FacetList({ item, divided }: { item: FeedItem; divided?: boolean }) {
   // Category first, then tags — most general to most specific, deduped because
@@ -193,7 +213,8 @@ function FacetList({ item, divided }: { item: FeedItem; divided?: boolean }) {
  *
  * The rail itself is a marquee, matching the platform-stats band on the home
  * page: one `w-max` track holding two copies of the list, sliding right to
- * left, paused on hover so the cards can be clicked. Under reduced motion the
+ * left, paused on hover so the cards can be clicked. Under reduced motion —
+ * the OS setting or the member's own toggle (html.reduce-motion) — the
  * animation is switched off in index.css and the track becomes a scrollable
  * row, so nothing goes unreachable.
  *
@@ -206,13 +227,19 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
   const { i18n, t } = useLingui()
   const auth = useAuth()
   const { active, personalization } = usePersonalizationActive()
-  const { items, loading } = usePersonalizedFeed({ limit })
-  const images = useFeedImages(items)
-  const [dismissed, setDismissed] = useState(
-    () => localStorage.getItem(PROMPT_DISMISSED_KEY) === '1'
-  )
+  const { savePersonalization } = useSavePersonalization()
+  const { items: fetched, loading } = usePersonalizedFeed({ limit })
+  const images = useFeedImages(fetched)
+  const [hidden, setHidden] = useState<Set<string>>(() => new Set())
   const [category, setCategory] = useState<Category>('all')
   const [expanded, setExpanded] = useState(false)
+
+  // Cards the member hid this session vanish at once; the refetch the
+  // suppression triggers makes it permanent.
+  const items = useMemo(
+    () => fetched.filter((i) => !hidden.has(`${i.entity}:${i.id}`)),
+    [fetched, hidden]
+  )
 
   // One query covers every category, so switching costs nothing and the
   // marquee restarts instantly rather than flashing a loading state
@@ -240,7 +267,13 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
   if (!auth.user || !active) return null
 
   if (!hasSignals(personalization, auth.profile)) {
-    if (dismissed) return null
+    const dismissedAt = personalization?.prompt_dismissed_at
+      ? new Date(personalization.prompt_dismissed_at).getTime()
+      : null
+    const snoozed =
+      dismissedAt !== null && Date.now() - dismissedAt < PROMPT_SNOOZE_DAYS * 86_400_000
+    if (snoozed) return null
+    const userId = auth.user.id
     return (
       <div className="mb-8 flex items-start gap-4 bg-ktip-ocean-50 border border-ktip-ocean-200 rounded-2xl p-5">
         <div className="w-10 h-10 bg-ktip-ocean-100 rounded-xl flex items-center justify-center shrink-0">
@@ -251,7 +284,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
             <Trans>Tell us what you are interested in</Trans>
           </h3>
           <p className="text-sm text-ktip-sand-600 mt-0.5">
-            <Trans>Pick a few topics and we will put the projects, resources, events and grants that suit you at the top of every list. Nothing gets hidden.</Trans>
+            <Trans>Pick a few topics and we will put the projects, resources, events and grants that suit you at the top of every list. Nothing gets hidden unless you say so.</Trans>
           </p>
           <Link
             to="/dashboard/personalization"
@@ -265,8 +298,11 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
           type="button"
           aria-label={t`Dismiss`}
           onClick={() => {
-            localStorage.setItem(PROMPT_DISMISSED_KEY, '1')
-            setDismissed(true)
+            // Fire-and-forget: the prompt is gone on this render either way,
+            // and the row write is what keeps it gone on the next device.
+            void savePersonalization(userId, { prompt_dismissed_at: new Date().toISOString() }).catch(
+              () => undefined
+            )
           }}
           className="text-ktip-sand-400 hover:text-ktip-sand-600 shrink-0"
         >
@@ -308,6 +344,9 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
       label: i18n._(s.label),
     })),
   ]
+
+  const hide = (item: FeedItem) => () =>
+    setHidden((prev) => new Set(prev).add(`${item.entity}:${item.id}`))
 
   return (
     <div className="mb-8">
@@ -358,6 +397,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
                     key={`${item.entity}:${item.id}`}
                     item={item}
                     image={images[`${item.entity}:${item.id}`]}
+                    onHidden={hide(item)}
                   />
                 ))}
               </div>
@@ -365,7 +405,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
           ))}
         </div>
       ) : shown.length ? (
-        <div className="relative max-w-full overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+        <div className="relative max-w-full overflow-hidden motion-reduce:overflow-x-auto [.reduce-motion_&]:overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
           {/* Keyed on the category so switching restarts the loop from the
               left edge rather than resuming mid-track with new content.
 
@@ -377,7 +417,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
             style={{
               animationDuration: `${Math.max(MIN_DURATION, shown.length * SECONDS_PER_CARD)}s`,
             }}
-            className="flex w-max animate-marquee-left hover:[animation-play-state:paused]"
+            className="flex w-max animate-marquee-left hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
           >
             {[0, 1].map((copy) => (
               <div key={copy} className="flex items-stretch gap-4 pr-4 py-1">
@@ -388,6 +428,7 @@ export function ForYouRail({ title = 'For You', limit = 40 }: ForYouRailProps) {
                     image={images[`${item.entity}:${item.id}`]}
                     decorative={copy === 1}
                     className={MARQUEE_CARD}
+                    onHidden={hide(item)}
                   />
                 ))}
               </div>

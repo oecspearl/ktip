@@ -35,6 +35,11 @@ interface BentoCardProps {
   tags?: string[]
   cta?: string
   onClick?: () => void
+  /**
+   * A control pinned to the top-right corner, outside the link's click: the
+   * "not interested" button on a ranked card. Clicks inside it never navigate.
+   */
+  action?: ReactNode
   /** Grid span / sizing classes (see lib/bento.ts); merged over the defaults. */
   className?: string
   /** Extra overlay content (badges, action buttons). Rendered above the CTA row. */
@@ -57,6 +62,7 @@ export function BentoCard({
   tags,
   cta = 'View',
   onClick,
+  action,
   className,
   children,
 }: BentoCardProps) {
@@ -94,6 +100,18 @@ export function BentoCard({
           built on a near-black base and the /90 corner just crushes it. */}
       {!background && (
         <div className={`absolute inset-0 bg-gradient-to-br ${wash ?? gradientFor(imageSeed)}`} />
+      )}
+
+      {action && (
+        <div
+          className="absolute top-3 right-3 z-raised"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          {action}
+        </div>
       )}
 
       <div className="relative flex gap-4">

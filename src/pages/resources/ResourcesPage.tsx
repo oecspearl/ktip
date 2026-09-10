@@ -343,7 +343,7 @@ function ResourcesTab() {
                     >
                       <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
                         {group.items.map((resource) => (
-                          <ResourceCard key={resource.id} resource={resource} />
+                          <ResourceCard key={resource.id} resource={resource} dismissible={sort === 'for_you'} />
                         ))}
                       </div>
                     </CollapsibleSection>
@@ -353,7 +353,7 @@ function ResourcesTab() {
             ) : (
               <div className={cn(gridClass, 'gap-4 auto-rows-fr stagger-children')}>
                 {resources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
+                  <ResourceCard key={resource.id} resource={resource} dismissible={sort === 'for_you'} />
                 ))}
               </div>
             )

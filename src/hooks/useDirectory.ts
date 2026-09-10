@@ -18,7 +18,7 @@ const BADGE_FILTER_EMBED = 'badge_filter:user_badges!inner(badge:badges!inner(sl
 // Unlike `*`, a named list breaks if the deploy runs ahead of the migration:
 // apply 083 before shipping this.
 const MEMBER_COLUMNS =
-  'id, username, display_name, avatar_url, banner, bio, country, organization, industry, roles, skills, is_verified, created_at, profile_visibility'
+  'id, username, display_name, avatar_url, banner, bio, country, organization, industry, roles, skills, interests, open_to, is_verified, created_at, profile_visibility'
 
 export function useDirectoryMembers(filters?: {
   search?: string
@@ -26,6 +26,8 @@ export function useDirectoryMembers(filters?: {
   country?: string
   skill?: string
   badge?: string
+  /** A COLLABORATION_OPTIONS value — what the member says they are open to. */
+  openTo?: string
   /** Row cap; the page raises it for "load more". The query was unbounded before. */
   limit?: number
 }) {
@@ -67,6 +69,10 @@ export function useDirectoryMembers(filters?: {
 
     if (filters?.badge) {
       query = query.eq('badge_filter.badge.slug', filters.badge)
+    }
+
+    if (filters?.openTo) {
+      query = query.contains('open_to', [filters.openTo])
     }
 
     if (filters?.limit) {

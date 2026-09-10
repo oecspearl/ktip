@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Sparkles, Save, Layers, FileType, Leaf, SlidersHorizontal, RotateCcw } from 'lucide-react'
+import { Sparkles, Save, Layers, FileType, Leaf, SlidersHorizontal, RotateCcw, EyeOff, Undo2 } from 'lucide-react'
+import { Link } from 'react-router'
+import { cn } from '../../lib/utils'
+import { useMySuppressions, useUnsuppressContent } from '../../hooks/useSuppressions'
+import { personalizedHref } from '../../lib/personalization'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Toggle } from '../../components/ui/Toggle'
@@ -99,6 +103,71 @@ function Section({ icon, iconClass, title, subtitle, children }: SectionProps) {
   )
 }
 
+/** The member's "not interested" list, each row with an Unhide. */
+function HiddenItems() {
+  const { t, i18n } = useLingui()
+  const auth = useAuth()
+  const toast = useToast()
+  const { suppressions, loading } = useMySuppressions(auth.user?.id)
+  const { unsuppress, loading: undoing } = useUnsuppressContent()
+
+  if (loading) {
+    return <div className="h-10 rounded-lg bg-ktip-sand-100 animate-pulse-soft" />
+  }
+  if (!suppressions.length) {
+    return (
+      <p className="text-sm text-ktip-sand-500">
+        <Trans>Nothing hidden. Use the eye icon on a recommended card to hide something.</Trans>
+      </p>
+    )
+  }
+
+  const entityLabel: Record<string, MessageDescriptor> = {
+    project: msg`Project`,
+    resource: msg`Resource`,
+    event: msg`Event`,
+    grant: msg`Grant`,
+  }
+
+  return (
+    <ul className="divide-y divide-ktip-sand-100">
+      {suppressions.map((row) => (
+        <li key={`${row.entity}:${row.content_id}`} className="flex items-center gap-3 py-2.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ktip-ocean-600 w-16 shrink-0">
+            {i18n._(entityLabel[row.entity])}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm text-ktip-sand-800">
+            {row.title ? (
+              <Link to={personalizedHref(row.entity, row.content_id)} className="hover:text-ktip-ocean-700">
+                {row.title}
+              </Link>
+            ) : (
+              <span className="italic text-ktip-sand-400"><Trans>No longer available</Trans></span>
+            )}
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Undo2 size={14} />}
+            loading={undoing}
+            onClick={async () => {
+              if (!auth.user) return
+              try {
+                await unsuppress(auth.user.id, row.entity, row.content_id)
+                toast.success(t`Back in your recommendations`)
+              } catch {
+                toast.error(t`Could not unhide this right now`)
+              }
+            }}
+          >
+            <Trans>Unhide</Trans>
+          </Button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function PersonalizationTab() {
     const { t, i18n } = useLingui()
   const auth = useAuth()
@@ -177,6 +246,14 @@ export function PersonalizationTab() {
         </div>
       </Section>
 
+      {/* Everything below the master switch is inert while it is off — a
+          picker that still takes clicks while the ranking ignores it is a
+          control that lies. */}
+      <fieldset
+        disabled={off}
+        aria-disabled={off}
+        className={cn('space-y-6 min-w-0 border-0 p-0 m-0', off && 'opacity-50 pointer-events-none')}
+      >
       <Section
         icon={<Sparkles size={20} className="text-ktip-tropical-600" />}
         iconClass="bg-ktip-tropical-100"
@@ -251,6 +328,16 @@ export function PersonalizationTab() {
           />
         </div>
       </Section>
+      </fieldset>
+
+      <Section
+        icon={<EyeOff size={20} className="text-ktip-sand-600" />}
+        iconClass="bg-ktip-sand-100"
+        title={t`Hidden items`}
+        subtitle={t`Things you marked “not interested”. They stay out of every ranked list until you bring them back.`}
+      >
+        <HiddenItems />
+      </Section>
 
       <Section
         icon={<SlidersHorizontal size={20} className="text-ktip-sand-600" />}
@@ -264,14 +351,14 @@ export function PersonalizationTab() {
             onChange={(v) => set('use_profile_signals', v)}
             disabled={off}
             label={t`My profile`}
-            description={t`Interests, skills, industry, country and roles.`}
+            description={t`Interests, skills and industry. Your role and country always count — switching role changes what ranks first.`}
           />
           <Toggle
             checked={form.use_behavior_signals}
             onChange={(v) => set('use_behavior_signals', v)}
             disabled={off}
             label={t`My activity`}
-            description={t`Projects you like or follow, events you RSVP to, grants you apply for. Things you have already engaged with are pushed down, not hidden.`}
+            description={t`Projects you like or follow, events you RSVP to, grants you apply for, and the pages you open. Things you have already engaged with are pushed down, not hidden.`}
           />
           <Toggle
             checked={form.use_badge_signals}

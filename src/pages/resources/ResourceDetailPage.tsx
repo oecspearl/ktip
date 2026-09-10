@@ -7,6 +7,7 @@ import { useResource } from '../../hooks/useResources'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
+import { useRecordView } from '../../hooks/useRecordView'
 import {
   BookOpen,
   Download,
@@ -31,6 +32,7 @@ export default function ResourceDetailPage() {
 
   const { resource, loading } = useResource(params.id)
   useCanonicalSlug(params.id, resource)
+  useRecordView('resource', resource?.id)
 
   usePageTitle(resource?.title ? t`${resource.title} — Resources` : t`Resource`)
 

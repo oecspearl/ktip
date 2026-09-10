@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { CountrySelect } from '../../components/ui/CountrySelect'
 import { ModeratedInput, ModeratedTextarea } from '../../components/moderation/ModeratedField'
 import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
 import { useContentModeration } from '../../hooks/useContentModeration'
@@ -70,6 +71,7 @@ type EventDraft = {
   eventType: string
   accentColor: CalendarAccent | null
   location: string
+  countryCode: string
   isVirtual: boolean
   startDate: string
   startTime: string
@@ -130,6 +132,7 @@ export default function CreateEventPage() {
     draftSeed.accentColor ?? null
   )
   const [location, setLocation] = useState(draftSeed.location ?? '')
+  const [countryCode, setCountryCode] = useState(draftSeed.countryCode ?? '')
   const [isVirtual, setIsVirtual] = useState(draftSeed.isVirtual ?? false)
   const [startDate, setStartDate] = useState(draftSeed.startDate ?? '')
   const [startTime, setStartTime] = useState(draftSeed.startTime ?? '')
@@ -174,6 +177,7 @@ export default function CreateEventPage() {
     eventType,
     accentColor,
     location,
+    countryCode,
     isVirtual,
     startDate,
     startTime,
@@ -351,6 +355,7 @@ export default function CreateEventPage() {
       description,
       event_type: eventType,
       location: virtual ? 'Virtual' : location,
+      country_code: virtual || !countryCode ? null : countryCode,
       is_virtual: virtual,
       start_date: startDatetime,
       end_date: endDatetime,
@@ -415,6 +420,8 @@ export default function CreateEventPage() {
         event_type: eventType,
         accent_color: accentColor,
         location: virtual ? 'Virtual' : location,
+        // A virtual event has no country; the ranker gives it the Online term.
+        country_code: virtual || !countryCode ? null : countryCode,
         is_virtual: virtual,
         start_date: startDatetime,
         end_date: endDatetime,
@@ -716,18 +723,29 @@ export default function CreateEventPage() {
               </div>
             )}
 
-            {/* Location (if not virtual) */}
+            {/* Location (if not virtual). Country sits inside the same guard:
+                it is what lets the ranker put this event in front of the
+                members who can actually get to it. */}
             {showLocation && (
-              <Input
-                label={t`Location`}
-                placeholder={t`e.g., Innovation Hub, Kingston, Jamaica`}
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                error={errors.location}
-                icon={<MapPin size={20} />}
-                fullWidth
-                required
-              />
+              <>
+                <Input
+                  label={t`Location`}
+                  placeholder={t`e.g., Innovation Hub, Kingston, Jamaica`}
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  error={errors.location}
+                  icon={<MapPin size={20} />}
+                  fullWidth
+                  required
+                />
+                <CountrySelect
+                  id="event-country"
+                  valueKind="code"
+                  value={countryCode}
+                  onChange={setCountryCode}
+                  label={t`Country`}
+                />
+              </>
             )}
 
             {/* Date and Time */}

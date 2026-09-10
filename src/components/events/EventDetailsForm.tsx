@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
+import { CountrySelect } from '../ui/CountrySelect'
 import { ModeratedInput, ModeratedTextarea } from '../moderation/ModeratedField'
 import { ContentWarningModal } from '../moderation/ContentWarningModal'
 import { useContentModeration } from '../../hooks/useContentModeration'
@@ -54,6 +55,7 @@ export function EventDetailsForm({
   // null = follow the event type, which is what every event did before 105
   const [accentColor, setAccentColor] = useState<CalendarAccent | null>(null)
   const [location, setLocation] = useState('')
+  const [countryCode, setCountryCode] = useState('')
   const [isVirtual, setIsVirtual] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [startTime, setStartTime] = useState('')
@@ -123,6 +125,7 @@ export function EventDetailsForm({
       setEventType(event.event_type || 'meetup')
       setAccentColor(event.accent_color ?? null)
       setLocation(event.location || '')
+      setCountryCode(event.country_code || '')
       setIsVirtual(event.is_virtual ?? false)
       setCapacity(event.capacity ?? undefined)
       setHasChallenge(event.has_challenge ?? false)
@@ -213,6 +216,7 @@ export function EventDetailsForm({
         event_type: eventType as any,
         accent_color: accentColor,
         location: isVirtual ? 'Virtual' : location,
+        country_code: isVirtual || !countryCode ? null : countryCode,
         is_virtual: isVirtual,
         start_date: startDatetime,
         end_date: endDatetime,
@@ -377,16 +381,25 @@ export function EventDetailsForm({
 
         {/* Location (if not virtual) */}
         {!isVirtual && (
-          <Input
-            label={t`Location`}
-            placeholder={t`e.g., Innovation Hub, Kingston, Jamaica`}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            error={errors.location}
-            icon={<MapPin size={20} />}
-            fullWidth
-            required
-          />
+          <>
+            <Input
+              label={t`Location`}
+              placeholder={t`e.g., Innovation Hub, Kingston, Jamaica`}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              error={errors.location}
+              icon={<MapPin size={20} />}
+              fullWidth
+              required
+            />
+            <CountrySelect
+              id="event-country"
+              valueKind="code"
+              value={countryCode}
+              onChange={setCountryCode}
+              label={t`Country`}
+            />
+          </>
         )}
 
         {/* Date and Time */}
