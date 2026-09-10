@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
 import { Plural, useLingui } from '@lingui/react/macro'
 
@@ -11,6 +12,26 @@ interface HelpSearchProps {
 // not belong on the hero image, and 20 categories will not fit in one.
 export function HelpSearch({ searchQuery, setSearchQuery, resultCount }: HelpSearchProps) {
     const { t } = useLingui()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // "/" jumps to the search box, the convention every documentation site keeps,
+  // on a page whose 20 categories are otherwise a lot of scrolling. Ignored
+  // while the reader is already typing somewhere — in a field, in a select, or
+  // in anything contenteditable — so it never eats a literal slash. Escape
+  // gives the field back rather than trapping focus in it.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return
+      const el = e.target as HTMLElement | null
+      if (el?.isContentEditable) return
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return
+      e.preventDefault()
+      inputRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   return (
     <div>
       <div className="relative">
@@ -19,10 +40,14 @@ export function HelpSearch({ searchQuery, setSearchQuery, resultCount }: HelpSea
           className="absolute left-4 top-1/2 -translate-y-1/2 text-ktip-sand-400"
         />
         <input
-          type="text"
+          ref={inputRef}
+          type="search"
           placeholder={t`Search help articles...`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') e.currentTarget.blur()
+          }}
           className="w-full pl-12 pr-4 py-3 bg-ktip-cream border border-ktip-sand-200 rounded-xl text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
         />
         {searchQuery && (
@@ -37,11 +62,14 @@ export function HelpSearch({ searchQuery, setSearchQuery, resultCount }: HelpSea
         )}
       </div>
 
-      {resultCount !== undefined && (
-        <p className="mt-2 text-sm text-white/80 md:text-right">
+      {/* Always mounted, so the live region exists before the first result
+          lands — a region added to the DOM at the same moment as its text is
+          not reliably announced. */}
+      <p role="status" aria-live="polite" className="mt-2 text-sm text-white/80 md:text-right">
+        {resultCount !== undefined && (
           <Plural value={resultCount} one="Found # article" other="Found # articles" />
-        </p>
-      )}
+        )}
+      </p>
     </div>
   )
 }

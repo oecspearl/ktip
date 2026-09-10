@@ -168,9 +168,15 @@ describe('SITE_MAP integrity', () => {
     expect(lines.every((line) => line.split('|').length >= 4)).toBe(true)
     // Bodies of help articles must never reach the prompt — keep it small.
     // 87 page entries (~7.8k chars) plus one title-only line per help article
-    // (~12.5k chars across 124 of them). The ceiling is set well above that but
-    // far below what a single leaked article body would add, which is the
-    // regression this guards.
-    expect(SITE_MAP_COMPACT.length).toBeLessThan(24_000)
+    // (~16k chars across 132 of them). The ceiling is set well above that but
+    // far below what a leaked body would add, which is the regression this
+    // guards: article bodies average ~900 characters, so letting even a
+    // handful through would clear this by thousands rather than by tens.
+    //
+    // Raised from 24k when the Help Center gained its two-step verification
+    // and portrait articles. Adding an article is expected and costs ~120
+    // characters; if this ceiling is ever hit again, check first that it is
+    // titles growing and not a body that has escaped into the serialiser.
+    expect(SITE_MAP_COMPACT.length).toBeLessThan(28_000)
   })
 })

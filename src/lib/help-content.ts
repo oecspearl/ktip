@@ -26,6 +26,14 @@ export function searchHelpContent(
     .map((cat) => {
       if (!q) return cat
 
+      // A query that names the category keeps every article in it. Someone who
+      // types "funding" or "safety" is naming a topic, not a phrase to find,
+      // and matching only article bodies answered them with the handful of
+      // articles that happened to repeat the word in their own text.
+      const categoryMatches =
+        cat.title.toLowerCase().includes(q) || cat.description.toLowerCase().includes(q)
+      if (categoryMatches) return cat
+
       const filteredArticles = cat.articles.filter(
         (article) =>
           article.title.toLowerCase().includes(q) ||

@@ -2,39 +2,39 @@ import type { HelpCategory } from './types'
 
 export const GRANTS_CATEGORY: HelpCategory = {
   id: 'grants',
-  title: 'Grants & Funding',
-  description: 'Find funding opportunities that fit your work.',
+  title: 'Funding Opportunities',
+  description: 'Find funding that fits your work, and check what you qualify for.',
   icon: 'DollarSign',
   articles: [
     {
       id: 'browse-grants',
-      title: 'How do I find grants?',
-      content: `Click "Grants" in the navigation bar to see every open funding opportunity.\n\nSearch by keyword and filter by grant type or status. Each listing shows the funding range, the currency, the deadline and the eligibility summary.\n\nOpen a grant for the full detail, including how to apply and who to contact.\n\nGrant deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss.`,
-      tags: ['grants', 'funding', 'browse', 'find', 'money', 'deadline'],
+      title: 'How do I find funding?',
+      content: `Open the Funding menu in the navigation bar and choose "Funding Opportunities" to see every open call.\n\nSearch by keyword, then narrow it with the two filters: type of funding, and focus area. Each listing shows the funding range, the currency, the deadline and the eligibility summary.\n\nThere is no status filter. Calls that have closed move into their own "Closed calls" section further down the page, so what you scroll through at the top is always still open.\n\nOpen a listing for the full detail, including how to apply and who to contact. Deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss.`,
+      tags: ['funding', 'grants', 'browse', 'find', 'money', 'deadline', 'filter'],
     },
     {
       id: 'grant-eligibility',
       title: 'How do I know if I am eligible?',
-      content: `Every grant has an Eligibility section describing who may apply.\n\nCriteria commonly cover your role, your member state, the type of project and the phase it is in.\n\nRead it before you start writing. If it is ambiguous, contact the funder using the details on the grant page rather than guessing.\n\nEligibility is separate from permissions. A Student may be eligible for a grant and still need a faculty sponsor to submit the application.`,
+      content: `Every grant has an Eligibility section describing who may apply.\n\nCriteria commonly cover your role, your member state, the type of project and the phase it is in.\n\nRead it before you start writing. If it is ambiguous, contact the funder using the details on the grant page rather than guessing.\n\nEligibility is separate from your role. Eligibility is the funder's rule about who may apply; your role only decides what you can do on the platform. A student who is eligible submits their own application, with or without a faculty sponsor.`,
       tags: ['eligibility', 'qualify', 'requirements', 'criteria', 'grant'],
     },
     {
       id: 'apply-grant',
       title: 'Applying in KTIP versus on an external site',
-      content: `There are two routes, and the grant decides which one you get.\n\nIf the funder supplied their own application link, the grant page shows "Apply on External Site" and takes you to their form. Nothing about that application is tracked in KTIP.\n\nOtherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.\n\nEither way, the deadline on the grant page is the one that counts.`,
+      content: `There are two routes, and the funder decides which one you get.\n\nIf the funder supplied their own application link, the listing shows "Apply on External Site" and takes you to their form. Nothing about that application is tracked in KTIP.\n\nOtherwise you get KTIP's built-in six-step wizard, and the whole application — drafts, autosave, AI help, status — lives here under My Applications.\n\nEither way, the deadline on the listing is the one that counts.`,
       tags: ['apply', 'external', 'wizard', 'grant', 'submit', 'deadline'],
     },
     {
       id: 'track-applications',
-      title: 'How do I track my grant applications?',
-      content: `Go to "My Applications" from the Grants section.\n\nEvery application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted.\n\nDrafts show a Continue action that drops you back at the step where you stopped.\n\nApplications you submitted on a funder's external site will not appear here — KTIP never sees those.`,
-      tags: ['track', 'applications', 'status', 'my applications', 'grants'],
+      title: 'How do I track my funding applications?',
+      content: `Go to "My Applications" from the Funding menu.\n\nEvery application you have started in KTIP is listed with its current status: Draft, Pending, Under Review, Approved or Not accepted. Drafts show a Continue action that drops you back at the step where you stopped.\n\nFour counts summarise the page across the top — Submitted, In review, Approved and Drafts — beside a card showing what has been awarded to you.\n\nThere is deliberately no "total requested" figure. Applicants write the amount they are asking for in their own words, so there is nothing dependable to add up.\n\nApplications you submitted on a funder's external site will not appear here — KTIP never sees those.`,
+      tags: ['track', 'applications', 'status', 'my applications', 'funding', 'awarded'],
     },
     {
       id: 'grant-types',
-      title: 'What types of grants are listed?',
-      content: `Listings cover the usual range: research grants for academic and scientific work, startup funding for new ventures, project grants tied to a specific piece of innovation, and scholarships for students studying in innovation-related fields.\n\nFunders set their own type labels, so the exact wording varies between listings.\n\nAmounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the funding filters are worth checking more than once.`,
-      tags: ['types', 'research', 'startup', 'scholarship', 'funding'],
+      title: 'What kinds of funding are listed?',
+      content: `Most of what is listed is not a grant, which is why the section is called Funding Opportunities rather than Grants.\n\nAlongside research grants, startup funding, project grants and scholarships you will find seed investment, competitions and prizes, fellowships, and open calls for proposals. The "type of funding" filter is how you narrow to one kind.\n\nFunders set their own labels, so the exact wording varies between listings.\n\nAmounts, currencies and deadlines differ for every opportunity, and new listings appear regularly — the filters are worth checking more than once.`,
+      tags: ['types', 'research', 'startup', 'scholarship', 'funding', 'fellowship', 'competition'],
     },
   ],
 }
@@ -42,13 +42,13 @@ export const GRANTS_CATEGORY: HelpCategory = {
 export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
   id: 'grant-applications',
   title: 'Grant Applications',
-  description: 'Write, sponsor, submit and track an application.',
+  description: 'Write, submit and track an application — and run a call of your own.',
   icon: 'FileText',
   articles: [
     {
       id: 'apply-for-grant',
       title: 'How do I use the application wizard?',
-      content: `Open a grant and click the apply button — it reads "Apply Now", or "Start Application" if your role needs a sponsor.\n\nThe wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Supporting documents, and Impact & Review.\n\nYour work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n\nThe final step shows the whole application for review before you submit.`,
+      content: `Open a listing and click "Apply Now". Once you have a draft for it, the same button reads "Continue Application".\n\nThe wizard has six steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Supporting documents, and Impact & Review.\n\nYour work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n\nThe final step shows the whole application for review before you submit.`,
       tags: ['apply', 'grant', 'application', 'wizard', 'steps'],
     },
     {
@@ -60,7 +60,7 @@ export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
     {
       id: 'sponsor-nomination',
       title: 'Can a student add a faculty sponsor?',
-      content: `Yes, and it is optional. Students submit their own grant applications — a sponsor is an endorsement, not a permission.\n\nOn the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.\n\nThe application can be submitted with or without one, and nominating someone does not hold up your submission while you wait.\n\nWorth doing anyway. An assessor reading twenty applications treats one an academic has put their name to differently, and the person who endorses it is usually the person who helped you sharpen it.`,
+      content: `Yes, and it is optional. Students submit their own funding applications — a sponsor is an endorsement, not a permission.\n\nOn the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.\n\nThe application can be submitted with or without one, and nominating someone does not hold up your submission while you wait.\n\nWorth doing anyway. An assessor reading twenty applications treats one an academic has put their name to differently, and the person who endorses it is usually the person who helped you sharpen it.`,
       tags: ['sponsor', 'faculty', 'student', 'nomination', 'submit', 'endorsement', 'optional'],
     },
     {
@@ -78,7 +78,7 @@ export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
     {
       id: 'resume-draft',
       title: 'How do I continue a draft application?',
-      content: `Open "My Applications" under Grants. Drafts carry a Draft badge and a Continue action.\n\nContinue returns you to the step you left, with everything you had written intact.\n\nYou can also go back to the grant itself — the button there reads "Continue Application" once a draft exists, so you never accidentally start a second one.`,
+      content: `Open "My Applications" under Funding. Drafts carry a Draft badge and a Continue action.\n\nContinue returns you to the step you left, with everything you had written intact.\n\nYou can also go back to the listing itself — the button there reads "Continue Application" once a draft exists, so you never accidentally start a second one.`,
       tags: ['draft', 'resume', 'continue', 'edit', 'save', 'application'],
     },
     {
@@ -90,7 +90,7 @@ export const GRANT_APPLICATIONS_CATEGORY: HelpCategory = {
     {
       id: 'application-status',
       title: 'What do the application statuses mean?',
-      content: `Draft — not submitted. Continue to finish it. Student drafts also need a sponsor to accept before they can be submitted.\n\nPending — submitted, waiting to be picked up.\n\nUnder Review — a reviewer is actively assessing it.\n\nApproved — successful.\n\nNot accepted — unsuccessful. Where the funder gave feedback, it appears with the decision.\n\nStatus changes reach you through notifications, so you do not have to keep checking the page.`,
+      content: `Draft — not submitted. Continue to finish it. A draft is yours to submit whenever it is ready; nobody else has to release it for you.\n\nPending — submitted, waiting to be picked up.\n\nUnder Review — a reviewer is actively assessing it.\n\nApproved — successful.\n\nNot accepted — unsuccessful. Where the funder gave feedback, it appears with the decision.\n\nStatus changes reach you through notifications, so you do not have to keep checking the page.`,
       tags: ['status', 'track', 'pending', 'under review', 'approved', 'rejected'],
     },
     {

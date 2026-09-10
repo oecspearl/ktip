@@ -17,28 +17,28 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
       'Complete your profile with your skills and interests',
       'Browse projects for inspiration or create your own',
       'Check Events for hackathons and workshops you can join',
-      'Nominate a faculty sponsor early — you need one to submit a grant application',
+      'Nominate a faculty sponsor if you want one — it is an endorsement, and you can submit without it',
     ],
     quickLinks: [
       { label: 'Browse Projects', href: '/projects' },
       { label: 'Find Events', href: '/events' },
-      { label: 'Explore Grants', href: '/grants' },
+      { label: 'Explore Funding', href: '/grants' },
     ],
   },
   {
     role: 'entrepreneur',
     title: 'Entrepreneurs',
-    description: 'Launch projects, apply for grants, and find investors.',
+    description: 'Launch projects, apply for funding, and find investors.',
     steps: [
       'Create your account and set your role to Entrepreneur',
       'Create a project to showcase your innovation',
-      'Browse grants and apply with the guided five-step wizard',
+      'Browse funding opportunities and apply with the guided six-step wizard',
       'Track your applications under My Applications',
       'Connect with mentors and investors from the member directory',
     ],
     quickLinks: [
       { label: 'Create Project', href: '/projects/new' },
-      { label: 'Find Grants', href: '/grants' },
+      { label: 'Find Funding', href: '/grants' },
       { label: 'My Applications', href: '/grants/my-applications' },
     ],
   },
@@ -62,7 +62,7 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   {
     role: 'investor',
     title: 'Investors & Funding Agencies',
-    description: 'Discover projects, publish grants, and connect with innovators.',
+    description: 'Discover projects, publish funding calls, and connect with innovators.',
     steps: [
       'Create your account and set your role to Investor',
       'Browse projects, filtering by phase to find Funding-stage work',
@@ -83,13 +83,13 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     steps: [
       'Sign up and select Faculty — your institution confirms the role',
       'Watch your invitations for student sponsor nominations',
-      'Review a nominated application before you accept: your acceptance unlocks submission',
+      'Review a nominated application before you accept: your name goes on it, but the student submits either way',
       'Supervise the student channels your institution assigns to you',
       'Track your students and research from the Dashboard rail',
     ],
     quickLinks: [
       { label: 'My Invitations', href: '/invitations' },
-      { label: 'Find Grants', href: '/grants' },
+      { label: 'Find Funding', href: '/grants' },
       { label: 'My Dashboard', href: '/dashboard' },
     ],
   },
@@ -113,18 +113,18 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   {
     role: 'educational_partner',
     title: 'Post-Secondary Institutions',
-    description: 'Verify your students, oversee submissions, and sponsor applications.',
+    description: 'Verify your students, oversee submissions, and endorse applications.',
     steps: [
       'Register your institution with OECS to be granted the role',
       'Confirm the email domains that verify your students automatically',
       'Approve student accounts as they sign up',
-      'Accept sponsor nominations on student grant applications',
+      'Accept sponsor nominations on student funding applications',
       'Oversee what your students submit from the admin queues',
     ],
     quickLinks: [
       { label: 'My Invitations', href: '/invitations' },
       { label: 'My Dashboard', href: '/dashboard' },
-      { label: 'Find Grants', href: '/grants' },
+      { label: 'Find Funding', href: '/grants' },
     ],
   },
   {
@@ -147,10 +147,10 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   {
     role: 'oecs',
     title: 'OECS Administrators',
-    description: 'Run the platform, publish grants, and organise regional events.',
+    description: 'Run the platform, publish funding calls, and organise regional events.',
     steps: [
       'Ask an existing Super Admin to grant your admin role — it cannot be self-assigned',
-      'Publish grant opportunities, leaving the external URL empty to use the in-app wizard',
+      'Publish funding opportunities, leaving the external URL empty to use the in-app wizard',
       'Organise events and build out their workspace, schedule and venue',
       'Work the moderation, grievance and verification queues',
       'Maintain the permission matrix under Roles',

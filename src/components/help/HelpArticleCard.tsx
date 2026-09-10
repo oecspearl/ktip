@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Check, ChevronDown, Link2 } from 'lucide-react'
 import { useDisclosureAnimation } from '../ui/useDisclosureAnimation'
+import { copyToClipboard } from '../../lib/utils'
 import type { HelpArticle } from '../../lib/help-content'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 
 /** Marks a card root so the outside-click handler can tell cards from the page. */
 const CARD_MARKER = 'data-help-card'
@@ -45,6 +46,22 @@ export function HelpArticleCard({
   const wide = expanded || !answer.settled
 
   const rootRef = useRef<HTMLElement>(null)
+
+  // /help?article=<id> has always worked and has never been reachable from the
+  // page — the global search panel could build one, a reader looking at the
+  // answer could not. Shown only on the open card, where there is one obvious
+  // article being linked to.
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    if (!copied) return
+    const timer = window.setTimeout(() => setCopied(false), 2000)
+    return () => window.clearTimeout(timer)
+  }, [copied])
+
+  const copyLink = async () => {
+    const url = new URL(`/help?article=${article.id}`, window.location.origin)
+    if (await copyToClipboard(url.toString())) setCopied(true)
+  }
 
   // Only the open card listens, so this is one document listener rather than one
   // per article. `mousedown` rather than `click`: it fires before the click that
@@ -115,18 +132,29 @@ export function HelpArticleCard({
               </p>
             ))}
 
-            {article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {article.tags.slice(0, 6).map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs text-ktip-sand-500 bg-ktip-sand-50 px-2 py-0.5 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              {article.tags.slice(0, 6).map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs text-ktip-sand-500 bg-ktip-sand-50 px-2 py-0.5 rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+
+              {/* Pushed to the far end so it does not read as another tag. */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void copyLink()
+                }}
+                className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
+              >
+                {copied ? <Check size={13} /> : <Link2 size={13} />}
+                {copied ? <Trans>Link copied</Trans> : <Trans>Copy link</Trans>}
+              </button>
+            </div>
           </div>
         </div>
       </div>

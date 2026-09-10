@@ -9,7 +9,7 @@ export const FORUMS_CATEGORY: HelpCategory = {
     {
       id: 'browse-forums',
       title: 'How do I browse the forums?',
-      content: `Click "Forums" in the navigation bar to see the discussion boards.\n\nEach board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.\n\nAnyone can read the forums without signing in. Starting a discussion and replying need an account.`,
+      content: `Open the Community menu in the navigation bar and choose "Forums" to see the discussion boards.\n\nEach board covers one area — general discussion, project help, funding advice and so on. Open a board to see its discussions.\n\nAnyone can read the forums without signing in. Starting a discussion and replying need an account. Opening a whole new board is a different matter: that is a "Start a Board" action on the forums page, and only organisation-tier roles hold it.`,
       tags: ['forums', 'browse', 'boards', 'discussions', 'topics'],
     },
     {
@@ -135,7 +135,7 @@ export const NETWORK_CATEGORY: HelpCategory = {
     {
       id: 'connection-count-privacy',
       title: 'Who can see how many connections I have?',
-      content: `Your choice, in Settings under Preferences.\n\nEveryone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.\n\nThis controls the visible count, not the connections themselves. Changing it does not disconnect anyone.`,
+      content: `Your choice, on your Dashboard under Preferences.\n\nEveryone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.\n\nThis controls the visible count, not the connections themselves. Changing it does not disconnect anyone.`,
       tags: ['privacy', 'connections', 'count', 'visibility', 'preferences'],
     },
   ],

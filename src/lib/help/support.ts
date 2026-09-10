@@ -63,13 +63,13 @@ export const TROUBLESHOOTING_CATEGORY: HelpCategory = {
     {
       id: 'cant-login',
       title: 'I cannot log in to my account',
-      content: `Check the obvious first: the right email, the right password, caps lock off.\n\nIf you signed up with Google or Microsoft you have no KTIP password. Use the same provider button you originally signed up with — the email/password form will always fail for you.\n\nIf you added a secondary email, either address works with the same password.\n\nForgotten password? Use "Forgot Password?" on the login page.\n\nArriving from the OECS Virtual Campus and bounced back with an error code? The handoff ticket is single use. Go back to the Campus and click through again.\n\nStill locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options.`,
-      tags: ['login', 'cannot', 'error', 'locked', 'access', 'oauth', 'suspended'],
+      content: `Check the obvious first: the right email, the right password, caps lock off.\n\nIf you signed up with Google or Microsoft you have no KTIP password. Use the same provider button you originally signed up with — the email/password form will always fail for you.\n\nIf you added a secondary email, either address works with the same password.\n\nForgotten password? Use "Forgot Password?" on the login page.\n\nArriving from the OECS Virtual Campus and bounced back with an error code? The handoff ticket is single use. Go back to the Campus and click through again.\n\nStuck at the six-digit code? That screen is two-step verification, and there are three ways past it. If you use an authenticator app, check your phone's clock is set automatically — a drifting clock is the usual cause of codes that look right and are refused. If you use email codes and nothing arrived, wait the thirty seconds and send another, then check your spam folder. If the phone or mailbox itself is gone, use "Use a recovery code" on that screen and spend one of the ten codes you saved at set-up.\n\nOut of recovery codes as well? An OECS administrator can reset the second step for you once they have confirmed who you are. Reach out through the Help Center contact options below.\n\nStill locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options.`,
+      tags: ['login', 'cannot', 'error', 'locked', 'access', 'oauth', 'suspended', 'two-step', 'code', 'recovery code', 'authenticator', 'lost phone'],
     },
     {
       id: 'profile-not-showing',
       title: 'My profile information is not showing',
-      content: `If a recovery banner appears at the top of the page, click "Retry" — that reloads your profile without a full sign-in.\n\nOtherwise sign out and back in, which rebuilds the session.\n\nIf fields are genuinely blank, open Settings and check they were saved. The Dashboard profile tab is read-only, so anything you typed there was never stored.`,
+      content: `If a recovery banner appears at the top of the page, click "Retry" — that reloads your profile without a full sign-in.\n\nOtherwise sign out and back in, which rebuilds the session.\n\nIf fields are genuinely blank, open My Profile on your Dashboard and check they were saved. That page is the editor, so what you type there is stored — if a field is empty after a save, say so through the Feedback action on the floating button.`,
       tags: ['profile', 'missing', 'not showing', 'blank', 'empty', 'recovery'],
     },
     {
@@ -108,7 +108,7 @@ export const ADMIN_CATEGORY: HelpCategory = {
     {
       id: 'admin-overview',
       title: 'What is in the admin console?',
-      content: `Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n\nIt covers projects, events, users, roles, achievements, moderation, institutions, chambers, grants, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and UAT feedback.\n\nSafety administrators see the moderation and grievance side. Super administrators see everything.\n\nActions here apply platform-wide, so they are worth being deliberate about.`,
+      content: `Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n\nIt covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics, error reports and UAT feedback.\n\nWhat you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.\n\nActions here apply platform-wide, so they are worth being deliberate about.`,
       tags: ['admin', 'console', 'overview', 'oecs', 'management'],
     },
     {
@@ -138,13 +138,13 @@ export const ADMIN_CATEGORY: HelpCategory = {
     {
       id: 'admin-publishing',
       title: 'Publishing grants, resources and integrations',
-      content: `Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.\n\nGrants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own five-step wizard — with a URL set, you never see their applications.\n\nResources and Integrations are straightforward publishing. Forums is where boards are created and posts pinned. Achievements is where badge definitions live.`,
+      content: `Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.\n\nGrants take a title, description, amount range, currency, deadline, eligibility text and either an external application URL or nothing. Leaving the URL empty is what routes applicants into KTIP's own six-step wizard — with a URL set, you never see their applications.\n\nResources and Integrations are straightforward publishing. Forums is where boards are created and posts pinned. Achievements is where badge definitions live.`,
       tags: ['publishing', 'grants', 'resources', 'integrations', 'forums', 'admin', 'curate'],
     },
     {
       id: 'admin-api-analytics',
       title: 'Partner API, analytics and UAT feedback',
-      content: `Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n\nAnalytics — platform usage across projects, events, grants and members.\n\nUAT — feedback submitted during user acceptance testing, with its state.\n\nOne known gap worth being aware of: some guidance refers to a feedback button on every page, but that control is not currently mounted in the app. Feedback reaches you through the forums and the KTIP Assistant instead.`,
+      content: `Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n\nAnalytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.\n\nUAT — feedback submitted during user acceptance testing, with its state.\n\nMember feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback.`,
       tags: ['api', 'partner', 'keys', 'analytics', 'uat', 'feedback', 'admin'],
     },
   ],

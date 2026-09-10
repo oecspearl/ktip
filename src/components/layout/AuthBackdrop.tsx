@@ -29,10 +29,17 @@ export function AuthBackdrop({ children, wide = false }: { children: ReactNode; 
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/30" />
       <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 to-transparent" />
       {/* Same pill the split shell wears on its photo panel, so the two auth
-          layouts offer the same way out in the same corner. */}
+          layouts offer the same way out in the same corner.
+
+          No stacking index of its own: it is positioned after every overlay
+          in source order, so it already paints over them, and the card below
+          it comes later still — which is the priority you want if a short
+          viewport ever overlaps the two. Naming a raw layer number here would
+          have inverted that, and the design token ratchet counts one wherever
+          it appears, comments included. */}
       <Link
         to="/"
-        className="absolute top-4 right-4 md:top-6 md:right-6 z-10 inline-flex items-center gap-1.5 rounded-full bg-brand-white/15 px-4 py-1.5 text-sm font-medium text-brand-white backdrop-blur-sm hover:bg-brand-white/25 transition-colors"
+        className="absolute top-4 right-4 md:top-6 md:right-6 inline-flex items-center gap-1.5 rounded-full bg-brand-white/15 px-4 py-1.5 text-sm font-medium text-brand-white backdrop-blur-sm hover:bg-brand-white/25 transition-colors"
       >
         <Trans>Back to website</Trans> <ArrowRight size={14} />
       </Link>

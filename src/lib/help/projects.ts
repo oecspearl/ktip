@@ -9,7 +9,7 @@ export const PROJECTS_CATEGORY: HelpCategory = {
     {
       id: 'browse-projects',
       title: 'How do I browse projects?',
-      content: `Click "Projects" in the navigation bar.\n\nYou will see every public project. Search by keyword, filter by category (Technology, Healthcare, Education, Agriculture, Environment or Other) or by phase (Concept, Prototype, Funding or Launch).\n\nOnce you have set your interests in Settings you can also sort by "For You", which ranks projects against the topics you picked.\n\nClick any card for the full project, including the owner, team, documents and comments.`,
+      content: `Click "Projects" in the navigation bar.\n\nYou will see every public project. Search by keyword, filter by category (Technology, Healthcare, Education, Agriculture, Environment or Other) or by phase (Concept, Prototype, Funding or Launch).\n\nOnce you have set your interests on your Dashboard you can also sort by "For You", which ranks projects against the topics you picked.\n\nClick any card for the full project, including the owner, team, documents and comments.`,
       tags: ['browse', 'projects', 'search', 'filter', 'explore', 'for you'],
     },
     {

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router'
 import { HelpSearch } from '../../components/help/HelpSearch'
 import { HelpCategoryNav } from '../../components/help/HelpCategoryNav'
 import { HelpCategorySection } from '../../components/help/HelpCategory'
+import { HelpRoleQuickStart } from '../../components/help/HelpRoleQuickStart'
 import { HELP_CATEGORIES, searchHelpContent } from '../../lib/help-content'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { HelpCircle, MessageSquare, Users, Sparkles } from 'lucide-react'
@@ -110,6 +111,8 @@ export default function HelpCenterPage() {
               start cards used to sit above this; they duplicated the
               "Getting Started" category (same heading, same `getting-started`
               anchor), so the category is now the single source. */}
+          {!isFiltered && <HelpRoleQuickStart />}
+
           <section id="topics" data-spy="Topics" className="scroll-mt-24">
             <div className="flex flex-col lg:flex-row gap-6 items-start">
               <HelpCategoryNav
@@ -172,41 +175,41 @@ export default function HelpCenterPage() {
             </div>
           </section>
 
-          {/* Contact CTA */}
-          {!isFiltered && (
-            <section id="contact" data-spy="Contact" className="scroll-mt-24 mt-12">
-              <div className="bg-ktip-ocean-700 dark:bg-ktip-ocean-200 rounded-2xl text-center py-10 px-6">
-                <h3 className="text-xl font-display font-bold text-white mb-2"><Trans>Still need help?</Trans></h3>
-                <p className="text-white/80 mb-6 max-w-lg mx-auto">
-                  <Trans>If you could not find what you are looking for, reach out to the community or chat with our AI assistant.</Trans>
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => openPanel({ conversationId: ASSISTANT_CONVERSATION_ID })}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-cream text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
-                  >
-                    <Sparkles size={18} />
-                    <Trans>Ask the {ASSISTANT_NAME}</Trans>
-                  </button>
-                  <Link
-                    to="/messages"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
-                  >
-                    <MessageSquare size={18} />
-                    <Trans>Send a Message</Trans>
-                  </Link>
-                  <Link
-                    to="/forums"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
-                  >
-                    <Users size={18} />
-                    <Trans>Visit Forums</Trans>
-                  </Link>
-                </div>
+          {/* Contact CTA. Never gated on the filter state: a search that found
+              nothing is the moment a reader most needs a way to reach a human,
+              and hiding this block then was backwards. */}
+          <section id="contact" data-spy="Contact" className="scroll-mt-24 mt-12">
+            <div className="bg-ktip-ocean-700 dark:bg-ktip-ocean-200 rounded-2xl text-center py-10 px-6">
+              <h3 className="text-xl font-display font-bold text-white mb-2"><Trans>Still need help?</Trans></h3>
+              <p className="text-white/80 mb-6 max-w-lg mx-auto">
+                <Trans>If you could not find what you are looking for, reach out to the community or chat with our AI assistant.</Trans>
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => openPanel({ conversationId: ASSISTANT_CONVERSATION_ID })}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-ktip-cream text-ktip-ocean-700 rounded-lg hover:bg-ktip-ocean-50 transition-colors font-medium text-sm"
+                >
+                  <Sparkles size={18} />
+                  <Trans>Ask the {ASSISTANT_NAME}</Trans>
+                </button>
+                <Link
+                  to="/messages"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
+                >
+                  <MessageSquare size={18} />
+                  <Trans>Send a Message</Trans>
+                </Link>
+                <Link
+                  to="/forums"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/30 text-white rounded-lg hover:bg-white/10 transition-colors font-medium text-sm"
+                >
+                  <Users size={18} />
+                  <Trans>Visit Forums</Trans>
+                </Link>
               </div>
-            </section>
-          )}
+            </div>
+          </section>
         </div>
       </div>
     </>
