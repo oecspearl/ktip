@@ -52,6 +52,12 @@ export const ProtectedRoute = () => {
   // because assurance level is a property of the session. It only ever fires for
   // an account that already HAS a verified factor, so it cannot collide with the
   // enrolment gate below.
+  //
+  // Unknown is not "nothing owed" (159). Rendering the page while the answer was
+  // in flight flashed it and then yanked the member to the challenge.
+  if (auth.mfaChallengeLoading) {
+    return <RouteSplash />
+  }
   if (auth.mfaChallengeRequired) {
     return <Navigate to="/security/verify" replace state={{ from: location }} />
   }

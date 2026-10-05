@@ -26,6 +26,51 @@ export const EMAIL_CODE_RESEND_SECONDS = 30
 export const EMAIL_STEP_UP_DAYS = 30
 
 /**
+ * Where this browser keeps the token that says it already proved an email
+ * code (159). Keyed per account, so a shared computer never lends one
+ * member's token to another; the server binds it to the account as well.
+ */
+export function deviceTokenKey(userId: string): string {
+  return `ktip-mfa-device:${userId}`
+}
+
+/** The remembered-browser token, or null. Storage can throw (private mode). */
+export function readDeviceToken(userId: string): string | null {
+  try {
+    const value = localStorage.getItem(deviceTokenKey(userId))
+    return value && /^[0-9a-f]{64}$/.test(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+export function saveDeviceToken(userId: string, token: string | null | undefined): void {
+  if (!token) return
+  try {
+    localStorage.setItem(deviceTokenKey(userId), token)
+  } catch {
+    // Not remembered, so the next sign-in here asks for a code. Nothing breaks.
+  }
+}
+
+export function forgetDeviceToken(userId: string): void {
+  try {
+    localStorage.removeItem(deviceTokenKey(userId))
+  } catch {
+    /* nothing to forget */
+  }
+}
+
+/**
+ * Whole minutes to wait out a rate limit, rounded up and never below one, so
+ * "try again in 0 minutes" can't happen.
+ */
+export function minutesToWait(retryAfterSeconds: number | null | undefined): number | null {
+  if (typeof retryAfterSeconds !== 'number' || !Number.isFinite(retryAfterSeconds)) return null
+  return Math.max(1, Math.ceil(retryAfterSeconds / 60))
+}
+
+/**
  * `delon.pierre@oecs.int` -> `d•••@oecs.int`. The member already knows their
  * address; the page only has to confirm which one the code went to without
  * printing it in full on a screen that may be shared.

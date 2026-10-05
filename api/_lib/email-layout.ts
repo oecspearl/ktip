@@ -64,11 +64,22 @@ export async function sendEmail(params: {
   to: string[]
   subject: string
   html: string
+  /**
+   * The plain-text alternative. An HTML-only message is one of the things spam
+   * filters score against, which matters most for mail someone is waiting on.
+   */
+  text?: string
 }): Promise<{ sent: boolean; reason?: string }> {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${params.apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: params.from, to: params.to, subject: params.subject, html: params.html }),
+    body: JSON.stringify({
+      from: params.from,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+      ...(params.text ? { text: params.text } : {}),
+    }),
   }).catch(() => null)
   if (!res) return { sent: false, reason: 'resend_unreachable' }
   if (!res.ok) return { sent: false, reason: `resend_failed ${res.status}` }

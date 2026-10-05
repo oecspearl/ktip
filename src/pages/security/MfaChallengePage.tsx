@@ -35,7 +35,10 @@ export default function MfaChallengePage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [showHelp, setShowHelp] = useState(false)
 
-  if (auth.loading || auth.profileLoading) {
+  // Waits for the challenge answer too (159). Reading its unknown `false` as
+  // "nothing owed" sent a reloaded page to the homepage, and the next
+  // protected page opened this one again and mailed another code.
+  if (auth.loading || auth.profileLoading || auth.mfaChallengeLoading) {
     return <RouteSplash />
   }
 
@@ -43,13 +46,15 @@ export default function MfaChallengePage() {
     return <Navigate to="/login" replace />
   }
 
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
+  const destination = from && from !== '/security/verify' ? from : '/'
+
+  // Also how a second tab leaves once the code is proven in the first.
   if (!auth.mfaChallengeRequired) {
-    return <Navigate to="/" replace />
+    return <Navigate to={destination} replace />
   }
 
   const factorId = factors[0]?.id ?? null
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
-  const destination = from && from !== '/security/verify' ? from : '/'
 
   const handleVerify = async (submitted: string) => {
     if (!factorId || submitted.length !== 6) return

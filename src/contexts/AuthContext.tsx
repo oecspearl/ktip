@@ -17,6 +17,7 @@ import {
   expandRoles,
   VERIFICATION_GATED_PERMISSIONS,
 } from '../lib/permissions'
+import { forgetDeviceToken, readDeviceToken } from '../lib/mfa'
 import type { User, Session } from '@supabase/supabase-js'
 import type {
   AccountStatus,
@@ -105,6 +106,13 @@ interface AuthContextType {
    * collide with the enrolment gate on `profile.requires_mfa_enrollment`.
    */
   mfaChallengeRequired: boolean
+  /**
+   * True while the answer above is not yet known for the signed-in account
+   * (159). Until it is, `mfaChallengeRequired` holds its signed-out default of
+   * false, and anything that gates on it has to wait rather than read that as
+   * "nothing owed".
+   */
+  mfaChallengeLoading: boolean
   /**
    * Which second step the account uses (150), or null for none yet. From the
    * session-status RPC rather than the profile row, so the challenge page can
@@ -359,6 +367,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // which form to show.
   const [mfaChallengeRequired, setMfaChallengeRequired] = useState(false)
   const [mfaEmail, setMfaEmail] = useState<MfaEmailSessionStatus | null>(null)
+  // The account the two values above are actually known for (159). Before the
+  // first answer they hold signed-out defaults, and reading that `false` as
+  // "nothing owed" let a protected page render and then yank the member away —
+  // and sent a reloaded /security/verify to the homepage, so the next protected
+  // page opened the challenge again and mailed another code.
+  const [mfaKnownFor, setMfaKnownFor] = useState<string | null>(null)
+  // Only the newest read may land. An answer that left before a code was
+  // verified and arrived after the recheck would otherwise put the challenge
+  // straight back.
+  const mfaReadSeq = useRef(0)
+  const mfaChannel = useRef<BroadcastChannel | null>(null)
 
   const readAssuranceLevel = useCallback(async () => {
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
@@ -375,29 +394,80 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return data as MfaEmailSessionStatus
   }, [])
 
-  const readChallenge = useCallback(async () => {
-    const [aalOwed, email] = await Promise.all([readAssuranceLevel(), readEmailStepUp()])
-    const emailOwed = email?.method === 'email' && !email.step_up_ok
-    return { required: aalOwed || emailOwed, email }
-  }, [readAssuranceLevel, readEmailStepUp])
+  // A browser that already proved a code trades its token for a step-up on
+  // this new session, so signing out and back in on the same computer does not
+  // owe another code (159). Any failure leaves the challenge standing.
+  const redeemRememberedBrowser = useCallback(async (userId: string) => {
+    const token = readDeviceToken(userId)
+    if (!token) return false
+    const { data, error } = await (supabase as any).rpc('redeem_mfa_email_device', { p_token: token })
+    if (error) return false
+    const result = data as { ok?: boolean; reason?: string } | null
+    if (result?.ok) return true
+    // Dead for good — expired, reset, or the account moved to an authenticator.
+    // Anything else (a rate limit, a session with no id) keeps it for next time.
+    if (['invalid_token', 'not_email', 'totp_enrolled'].includes(result?.reason ?? '')) {
+      forgetDeviceToken(userId)
+    }
+    return false
+  }, [])
+
+  const readChallenge = useCallback(
+    async (userId: string) => {
+      const [aalOwed, firstRead] = await Promise.all([readAssuranceLevel(), readEmailStepUp()])
+      let email = firstRead
+      if (email?.method === 'email' && !email.step_up_ok && (await redeemRememberedBrowser(userId))) {
+        email = await readEmailStepUp()
+      }
+      const emailOwed = email?.method === 'email' && !email.step_up_ok
+      return { required: aalOwed || emailOwed, email }
+    },
+    [readAssuranceLevel, readEmailStepUp, redeemRememberedBrowser],
+  )
+
+  // A read that hangs gives up after eight seconds as "nothing owed", the
+  // answer every other failure here already gives. That opens no write: the
+  // server refuses an unproven session on its own (account_mfa_satisfied).
+  const applyChallenge = useCallback(
+    async (userId: string) => {
+      const seq = ++mfaReadSeq.current
+      const gaveUp = new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 8000))
+      const result = await Promise.race([readChallenge(userId).catch(() => null), gaveUp])
+      if (seq !== mfaReadSeq.current) return
+      setMfaChallengeRequired(result?.required ?? false)
+      setMfaEmail(result?.email ?? null)
+      setMfaKnownFor(userId)
+    },
+    [readChallenge],
+  )
 
   useEffect(() => {
     if (!user?.id) {
+      mfaReadSeq.current++
       setMfaChallengeRequired(false)
       setMfaEmail(null)
+      setMfaKnownFor(null)
       return
     }
-    let cancelled = false
-    void (async () => {
-      const result = await readChallenge()
-      if (cancelled) return
-      setMfaChallengeRequired(result.required)
-      setMfaEmail(result.email)
-    })()
+    void applyChallenge(user.id)
+  }, [user?.id, session?.access_token, applyChallenge])
+
+  // Every tab in this browser shares one session, so a code proven in one tab
+  // steps them all up — but the others never heard. They kept showing "Verify
+  // it's you" until the hourly token refresh, and anything pressed there mailed
+  // another code (159). Posted through the listening channel itself, which
+  // BroadcastChannel never echoes back to, so this tab does not re-read.
+  useEffect(() => {
+    if (!user?.id || typeof BroadcastChannel === 'undefined') return
+    const userId = user.id
+    const channel = new BroadcastChannel('ktip-mfa')
+    channel.onmessage = () => void applyChallenge(userId)
+    mfaChannel.current = channel
     return () => {
-      cancelled = true
+      channel.close()
+      mfaChannel.current = null
     }
-  }, [user?.id, session?.access_token, readChallenge])
+  }, [user?.id, applyChallenge])
 
   // An email step-up lapses on a clock, not on an auth event. Re-ask at the
   // moment it does, so the member is challenged rather than met with a wall
@@ -407,20 +477,22 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (!user?.id || !mfaEmail?.expires_at || !mfaEmail.step_up_ok) return
     const delay = new Date(mfaEmail.expires_at).getTime() - Date.now()
     if (!Number.isFinite(delay) || delay <= 0 || delay > 2_147_000_000) return
-    const timer = window.setTimeout(() => {
-      void readChallenge().then((result) => {
-        setMfaChallengeRequired(result.required)
-        setMfaEmail(result.email)
-      })
-    }, delay + 1000)
+    const userId = user.id
+    const timer = window.setTimeout(() => void applyChallenge(userId), delay + 1000)
     return () => window.clearTimeout(timer)
-  }, [user?.id, mfaEmail?.expires_at, mfaEmail?.step_up_ok, readChallenge])
+  }, [user?.id, mfaEmail?.expires_at, mfaEmail?.step_up_ok, applyChallenge])
 
   const recheckMfaChallenge = useCallback(async () => {
-    const result = await readChallenge()
-    setMfaChallengeRequired(result.required)
-    setMfaEmail(result.email)
-  }, [readChallenge])
+    if (!user?.id) return
+    await applyChallenge(user.id)
+    try {
+      mfaChannel.current?.postMessage('changed')
+    } catch {
+      /* the other tabs catch up on their next token refresh */
+    }
+  }, [user?.id, applyChallenge])
+
+  const mfaChallengeLoading = !!user && mfaKnownFor !== user.id
 
   const mfaMethod: MfaMethod | null =
     mfaEmail?.method ?? (profile?.mfa_method as MfaMethod | null | undefined) ?? null
@@ -861,6 +933,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       isAdmin,
       isSuperAdmin,
       mfaChallengeRequired,
+      mfaChallengeLoading,
       mfaMethod,
       emailStepUpExpiresAt,
       recheckMfaChallenge,
@@ -895,6 +968,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       isAdmin,
       isSuperAdmin,
       mfaChallengeRequired,
+      mfaChallengeLoading,
       mfaMethod,
       emailStepUpExpiresAt,
       recheckMfaChallenge,

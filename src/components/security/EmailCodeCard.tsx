@@ -19,36 +19,51 @@ interface EmailCodeCardProps {
 }
 
 /**
- * Send-and-type for the email second step (150). Sends once on mount, offers
- * a resend after a cooldown, verifies on the sixth digit.
+ * Send-and-type for the email second step (150). Asks for a code on mount,
+ * offers a resend after a cooldown, verifies on the sixth digit.
+ *
+ * The mount request does not force a new email (159): if this session already
+ * has a code on its way, the server says when it was sent and mails nothing.
+ * Before that, every reload, second tab or remount mailed a fresh code and
+ * killed the previous one, so the code the member found first — often late,
+ * in spam — no longer worked. Only "Send a new code" forces.
+ *
+ * The field is never locked by a failed send (159). A refused request (rate
+ * limit, mail outage) mints nothing, so whatever code the member already holds
+ * is still good, and the screen has to let them type it.
  *
  * The same component serves enrolment and the sign-in challenge because they
  * are the same three actions; only the words around them change.
  */
 export function EmailCodeCard({ email, userId, mode, onVerified, onSwitchToApp }: EmailCodeCardProps) {
-  const { t } = useLingui()
+  const { t, i18n } = useLingui()
   const { sendCode, verifyCode, sending, verifying, resendSeconds } = useMfaEmailMutations(userId)
 
   const [code, setCode] = useState('')
-  const [sent, setSent] = useState(false)
+  const [sentAt, setSentAt] = useState<string | null>(null)
+  const [sendFailed, setSendFailed] = useState(false)
   const [resendIn, setResendIn] = useState(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [devCode, setDevCode] = useState<string | null>(null)
 
-  // React 19 StrictMode runs effects twice in dev, and every send spends one
-  // of five codes an hour — so the guard is the difference between one email
-  // and two.
+  // React 19 StrictMode runs effects twice in dev. The server would now reuse
+  // the first code anyway, but there is no reason to ask twice.
   const started = useRef(false)
 
-  const send = async () => {
+  const send = async (force: boolean) => {
     setErrorMessage('')
     try {
-      const result = await sendCode()
-      setSent(true)
-      setResendIn(resendSeconds)
+      const result = await sendCode({ force })
+      setSentAt(result.sent_at)
+      setSendFailed(false)
+      // A reused code counts down from when it was really sent, so a reload
+      // does not hold the resend button back for another full cooldown.
+      const elapsed = Math.floor((Date.now() - new Date(result.sent_at).getTime()) / 1000)
+      setResendIn(Math.max(0, resendSeconds - (Number.isFinite(elapsed) ? elapsed : 0)))
       setDevCode(result.dev_code ?? null)
-      analytics.funnel('mfa', 'email_code_sent', { mode })
+      analytics.funnel('mfa', 'email_code_sent', { mode, reused: !!result.reused, forced: force })
     } catch (error: any) {
+      setSendFailed(true)
       setErrorMessage(error?.message || t`We could not send a code. Try again in a moment.`)
     }
   }
@@ -56,7 +71,7 @@ export function EmailCodeCard({ email, userId, mode, onVerified, onSwitchToApp }
   useEffect(() => {
     if (started.current) return
     started.current = true
-    void send()
+    void send(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -81,19 +96,29 @@ export function EmailCodeCard({ email, userId, mode, onVerified, onSwitchToApp }
     }
   }
 
+  const masked = maskEmail(email)
+  const sentTime = sentAt
+    ? i18n.date(new Date(sentAt), { hour: 'numeric', minute: '2-digit' })
+    : null
+
   return (
     <div className="space-y-5">
       <div className="flex gap-3 rounded-control border border-ktip-ocean-200 bg-ktip-ocean-50/50 p-4">
         <Mail size={20} className="text-ktip-ocean-600 shrink-0 mt-0.5" />
         <p className="text-body-sm text-ktip-sand-700">
-          {sent ? (
+          {sentTime ? (
             <Trans>
-              We sent a 6-digit code to <strong>{maskEmail(email)}</strong>. It works for 10
-              minutes. Check your spam folder if it has not arrived.
+              We sent a 6-digit code to <strong>{masked}</strong> at {sentTime}. It works for 10
+              minutes, in this browser only. Not in your inbox? Check spam.
+            </Trans>
+          ) : sendFailed ? (
+            <Trans>
+              Already have a code from an earlier email to <strong>{masked}</strong>? If it's
+              less than 10 minutes old, it still works. Enter it below.
             </Trans>
           ) : (
             <Trans>
-              Sending a 6-digit code to <strong>{maskEmail(email)}</strong>…
+              Sending a 6-digit code to <strong>{masked}</strong>…
             </Trans>
           )}
         </p>
@@ -117,7 +142,7 @@ export function EmailCodeCard({ email, userId, mode, onVerified, onSwitchToApp }
         value={code}
         onChange={setCode}
         onComplete={handleVerify}
-        disabled={verifying || !sent}
+        disabled={verifying}
         autoFocus
         helperText={
           mode === 'setup'
@@ -130,7 +155,7 @@ export function EmailCodeCard({ email, userId, mode, onVerified, onSwitchToApp }
         type="button"
         fullWidth
         loading={verifying}
-        disabled={code.length !== 6 || !sent}
+        disabled={code.length !== 6}
         onClick={() => handleVerify(code)}
       >
         {mode === 'setup' ? <Trans>Verify and turn on</Trans> : <Trans>Verify</Trans>}
@@ -139,7 +164,7 @@ export function EmailCodeCard({ email, userId, mode, onVerified, onSwitchToApp }
       <div className="flex flex-wrap items-center justify-between gap-2 text-body-sm">
         <button
           type="button"
-          onClick={() => void send()}
+          onClick={() => void send(true)}
           disabled={sending || resendIn > 0}
           className="text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium disabled:text-ktip-sand-400"
         >

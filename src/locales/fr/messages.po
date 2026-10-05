@@ -2494,6 +2494,10 @@ msgstr ""
 msgid "Minimize"
 msgstr "Réduire"
 
+#: src/hooks/useMfa.ts
+msgid "You've asked for the most codes allowed in an hour. Try again in {minutes} min."
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your data is kept for now."
 msgstr ""
@@ -6812,6 +6816,10 @@ msgstr ""
 msgid "Complete your profile →"
 msgstr "Complétez votre profil →"
 
+#: src/components/security/EmailCodeCard.tsx
+msgid "Already have a code from an earlier email to <0>{masked}</0>? If it's less than 10 minutes old, it still works. Enter it below."
+msgstr ""
+
 #: src/components/profile/BannerStudio.tsx
 msgid "Save banner"
 msgstr ""
@@ -7252,6 +7260,7 @@ msgstr "Communauté"
 msgid "Event Archives"
 msgstr "Archives des événements"
 
+#: src/i18n/harvested.ts
 #: src/pages/resources/MySubmissionsPage.tsx
 #: src/pages/resources/ResourcesPage.tsx
 #: src/pages/resources/SubmitResourcePage.tsx
@@ -12686,6 +12695,10 @@ msgstr "Rechercher des ressources..."
 msgid "End your session on this device"
 msgstr "Terminer votre session sur cet appareil"
 
+#: src/hooks/useMfa.ts
+msgid "You've asked for the most codes allowed in an hour. Try again later."
+msgstr ""
+
 #: src/pages/collaborate/DocumentsListPage.tsx
 msgid "Create Document"
 msgstr "Créer un document"
@@ -14130,11 +14143,6 @@ msgstr "Les captures d'écran sont enregistrées sous votre compte et ne peuvent
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Virtual"
 msgstr "Virtuel"
-
-#. placeholder {0}: maskEmail(email)
-#: src/components/security/EmailCodeCard.tsx
-msgid "We sent a 6-digit code to <0>{0}</0>. It works for 10 minutes. Check your spam folder if it has not arrived."
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Why we process it"
@@ -16592,6 +16600,10 @@ msgstr ""
 msgid "Remove connection with {otherName}"
 msgstr "Supprimer la relation avec {otherName}"
 
+#: src/components/security/EmailCodeCard.tsx
+msgid "We sent a 6-digit code to <0>{masked}</0> at {sentTime}. It works for 10 minutes, in this browser only. Not in your inbox? Check spam."
+msgstr ""
+
 #: src/lib/venue-templates.ts
 msgid "Expo Hall"
 msgstr "Hall d'exposition"
@@ -18039,11 +18051,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Other work"
-msgstr ""
-
-#. placeholder {0}: maskEmail(email)
-#: src/components/security/EmailCodeCard.tsx
-msgid "Sending a 6-digit code to <0>{0}</0>…"
 msgstr ""
 
 #: src/pages/auth/SignupPage.tsx
@@ -20918,6 +20925,10 @@ msgstr "Un compte étudiant vérifié conserve un dossier de protection auprès 
 
 #: src/i18n/harvested.ts
 msgid "Your uploads"
+msgstr ""
+
+#: src/components/security/EmailCodeCard.tsx
+msgid "Sending a 6-digit code to <0>{masked}</0>…"
 msgstr ""
 
 #: src/components/messages/MessagingPanel.tsx

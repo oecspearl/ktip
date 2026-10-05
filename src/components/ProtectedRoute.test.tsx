@@ -54,6 +54,13 @@ function renderAt(path = '/dashboard') {
 }
 
 describe('ProtectedRoute gate ordering', () => {
+  it('waits for the challenge answer rather than reading unknown as nothing owed', () => {
+    mockAuth.mockReturnValue(auth({ mfaChallengeLoading: true }))
+    renderAt()
+    expect(screen.getByText('SPLASH')).toBeTruthy()
+    expect(screen.queryByText('DASHBOARD')).toBeNull()
+  })
+
   it('waits for the profile rather than guessing', () => {
     mockAuth.mockReturnValue(auth({ profileLoading: true }))
     renderAt()

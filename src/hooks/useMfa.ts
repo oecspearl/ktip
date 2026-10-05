@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
-import { EMAIL_CODE_RESEND_SECONDS } from '../lib/mfa'
+import { EMAIL_CODE_RESEND_SECONDS, minutesToWait, saveDeviceToken } from '../lib/mfa'
 import type { MfaBackupCodeStatus, MfaEmailSessionStatus, MfaFactorSummary } from '../types'
 
 /**
@@ -225,7 +225,11 @@ export function useMfaEmailStatus(userId: string | undefined) {
 
 export interface EmailCodeSendResult {
   ok: true
+  /** When the code now in flight was mailed — just now, or earlier (159). */
+  sent_at: string
   expires_at: string
+  /** True when no email went out because this session already had a live code. */
+  reused?: boolean
   /** Present only outside production when Resend is unconfigured. */
   dev_code?: string
 }
@@ -249,9 +253,12 @@ export function useMfaEmailMutations(userId?: string) {
    * Ask for a code. Goes through an edge function because the plaintext must
    * never reach the browser that holds the password — the RPC that mints it is
    * service-role only, and the mail goes to the account's own address.
+   *
+   * Without `force` the route reuses a code already on its way to this session
+   * rather than mailing another (159); the resend button passes `force`.
    */
   const sendMutation = useMutation({
-    mutationFn: async (): Promise<EmailCodeSendResult> => {
+    mutationFn: async ({ force = false }: { force?: boolean } = {}): Promise<EmailCodeSendResult> => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error(t`No active session`)
 
@@ -262,10 +269,22 @@ export function useMfaEmailMutations(userId?: string) {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ force }),
       })
       const body = await res.json().catch(() => ({ error: failed }))
-      if (!res.ok) throw new Error(body.error || failed)
-      return body as EmailCodeSendResult
+      if (!res.ok) {
+        if (body?.reason === 'rate_limited') {
+          const minutes = minutesToWait(body.retry_after)
+          throw new Error(
+            minutes === null
+              ? t`You've asked for the most codes allowed in an hour. Try again later.`
+              : t`You've asked for the most codes allowed in an hour. Try again in ${minutes} min.`,
+          )
+        }
+        throw new Error(body.error || failed)
+      }
+      // A route deployed ahead of 159 sends no sent_at. Now is close enough.
+      return { ...body, sent_at: body.sent_at ?? new Date().toISOString() } as EmailCodeSendResult
     },
   })
 
@@ -278,7 +297,13 @@ export function useMfaEmailMutations(userId?: string) {
     mutationFn: async (code: string): Promise<EmailCodeVerifyResult> => {
       const { data, error } = await (supabase as any).rpc('verify_mfa_email_code', { p_code: code })
       if (error) throw error
-      const result = data as { ok: boolean; reason?: string; expires_at?: string; first_time?: boolean }
+      const result = data as {
+        ok: boolean
+        reason?: string
+        expires_at?: string
+        first_time?: boolean
+        device_token?: string
+      }
       if (!result?.ok) {
         if (result?.reason === 'rate_limited') {
           throw new Error(t`Too many attempts. Wait a while and try again.`)
@@ -291,6 +316,9 @@ export function useMfaEmailMutations(userId?: string) {
         }
         throw new Error(t`That code was not accepted. Check the digits, or send a new code.`)
       }
+      // This browser is now remembered: a later sign-in here skips the code
+      // until the thirty days run out (159). Absent on a database without 159.
+      if (userId) saveDeviceToken(userId, result.device_token)
       if (result.first_time) {
         await supabase.auth.signOut({ scope: 'others' }).catch(() => {
           /* best effort */

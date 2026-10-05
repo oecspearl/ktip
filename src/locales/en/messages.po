@@ -2581,6 +2581,10 @@ msgstr "Verification evidence for student, faculty or organisational status"
 msgid "Minimize"
 msgstr "Minimize"
 
+#: src/hooks/useMfa.ts
+msgid "You've asked for the most codes allowed in an hour. Try again in {minutes} min."
+msgstr "You've asked for the most codes allowed in an hour. Try again in {minutes} min."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your data is kept for now."
 msgstr "Your data is kept for now."
@@ -7058,6 +7062,10 @@ msgstr "Repeat"
 msgid "Complete your profile →"
 msgstr "Complete your profile →"
 
+#: src/components/security/EmailCodeCard.tsx
+msgid "Already have a code from an earlier email to <0>{masked}</0>? If it's less than 10 minutes old, it still works. Enter it below."
+msgstr "Already have a code from an earlier email to <0>{masked}</0>? If it's less than 10 minutes old, it still works. Enter it below."
+
 #: src/components/profile/BannerStudio.tsx
 msgid "Save banner"
 msgstr "Save banner"
@@ -7530,6 +7538,7 @@ msgstr "Community"
 msgid "Event Archives"
 msgstr "Event Archives"
 
+#: src/i18n/harvested.ts
 #: src/pages/resources/MySubmissionsPage.tsx
 #: src/pages/resources/ResourcesPage.tsx
 #: src/pages/resources/SubmitResourcePage.tsx
@@ -13168,6 +13177,10 @@ msgstr "Search resources..."
 msgid "End your session on this device"
 msgstr "End your session on this device"
 
+#: src/hooks/useMfa.ts
+msgid "You've asked for the most codes allowed in an hour. Try again later."
+msgstr "You've asked for the most codes allowed in an hour. Try again later."
+
 #: src/pages/collaborate/DocumentsListPage.tsx
 msgid "Create Document"
 msgstr "Create Document"
@@ -14657,11 +14670,6 @@ msgstr "Screenshots are stored under your account, so they cannot be attached to
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Virtual"
 msgstr "Virtual"
-
-#. placeholder {0}: maskEmail(email)
-#: src/components/security/EmailCodeCard.tsx
-msgid "We sent a 6-digit code to <0>{0}</0>. It works for 10 minutes. Check your spam folder if it has not arrived."
-msgstr "We sent a 6-digit code to <0>{0}</0>. It works for 10 minutes. Check your spam folder if it has not arrived."
 
 #: src/i18n/harvested.ts
 msgid "Why we process it"
@@ -17202,6 +17210,10 @@ msgstr "Right"
 msgid "Remove connection with {otherName}"
 msgstr "Remove connection with {otherName}"
 
+#: src/components/security/EmailCodeCard.tsx
+msgid "We sent a 6-digit code to <0>{masked}</0> at {sentTime}. It works for 10 minutes, in this browser only. Not in your inbox? Check spam."
+msgstr "We sent a 6-digit code to <0>{masked}</0> at {sentTime}. It works for 10 minutes, in this browser only. Not in your inbox? Check spam."
+
 #: src/lib/venue-templates.ts
 msgid "Expo Hall"
 msgstr "Expo Hall"
@@ -18677,11 +18689,6 @@ msgstr "Reading the charts"
 #: src/i18n/harvested.ts
 msgid "Other work"
 msgstr "Other work"
-
-#. placeholder {0}: maskEmail(email)
-#: src/components/security/EmailCodeCard.tsx
-msgid "Sending a 6-digit code to <0>{0}</0>…"
-msgstr "Sending a 6-digit code to <0>{0}</0>…"
 
 #: src/pages/auth/SignupPage.tsx
 msgid "An account already exists for this email. Log in instead, or use “Forgot password?” if you have lost access to it."
@@ -21669,6 +21676,10 @@ msgstr "A verified student account keeps a safeguarding record with your institu
 #: src/i18n/harvested.ts
 msgid "Your uploads"
 msgstr "Your uploads"
+
+#: src/components/security/EmailCodeCard.tsx
+msgid "Sending a 6-digit code to <0>{masked}</0>…"
+msgstr "Sending a 6-digit code to <0>{masked}</0>…"
 
 #: src/components/messages/MessagingPanel.tsx
 #: src/components/ui/FloatingActionButton.tsx

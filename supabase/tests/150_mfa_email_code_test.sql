@@ -8,7 +8,7 @@
 --
 -- What is being defended:
 --   1. A new entrepreneur with neither method owes enrolment and cannot write.
---   2. Issuing a code returns six digits; issuing again retires the old one.
+--   2. Issuing a code returns six digits; issuing again leaves it open (159).
 --   3. Wrong code, wrong session and expired code are all `invalid_code`.
 --   4. The right code settles the method, clears the gate, and satisfies the
 --      write check for THIS session only — another session owes its own code,
@@ -78,15 +78,17 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 2. Issue: six digits; re-issue retires the first
+-- 2. Issue: six digits; a second issue leaves the first open
 -- ------------------------------------------------------------
+-- 150 retired the first code here. 159 stopped doing that — it was why codes
+-- found late in a spam folder "did not work" — and 159's own test proves the
+-- older code still verifies.
 DO $$
 DECLARE
   v_member UUID := '00000000-0000-4000-8000-000000001500';
   v_sess   UUID := '00000000-0000-4000-8000-00000000150a';
   v_first  JSONB;
   v_second JSONB;
-  v_result JSONB;
 BEGIN
   v_first := issue_mfa_email_code(v_member, v_sess);
   ASSERT (v_first->>'ok')::BOOLEAN, 'issue must succeed, got ' || v_first::text;
@@ -94,13 +96,8 @@ BEGIN
 
   v_second := issue_mfa_email_code(v_member, v_sess);
   ASSERT (v_second->>'ok')::BOOLEAN, 'a second issue must succeed';
-  ASSERT (SELECT count(*) FROM mfa_email_codes WHERE user_id = v_member AND consumed_at IS NULL) = 1,
-    'only one live code at a time';
-
-  PERFORM set_config('request.jwt.claims',
-    json_build_object('sub', v_member, 'session_id', v_sess)::text, TRUE);
-  v_result := verify_mfa_email_code(v_first->>'code');
-  ASSERT v_result->>'reason' = 'invalid_code', 'the retired first code must be invalid, got ' || v_result::text;
+  ASSERT (SELECT count(*) FROM mfa_email_codes WHERE user_id = v_member AND consumed_at IS NULL) = 2,
+    'both codes stay open until they expire or one is spent (159)';
 END $$;
 
 -- ------------------------------------------------------------
@@ -298,6 +295,9 @@ BEGIN
   v_result := issue_mfa_email_code(v_member, v_sess);
   ASSERT v_result->>'reason' = 'totp_enrolled', 'issue refuses a TOTP account, got ' || v_result::text;
 
+  -- Section 6 left the verify bucket spent, and the limiter runs before the
+  -- factor check, so without this the answer below is rate_limited.
+  DELETE FROM auth_rate_limits WHERE bucket = 'mfa-email-verify:user:' || v_member::TEXT;
   PERFORM set_config('request.jwt.claims',
     json_build_object('sub', v_member, 'session_id', v_sess)::text, TRUE);
   v_result := verify_mfa_email_code('123456');
