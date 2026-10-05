@@ -6,6 +6,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
+import type { VitePluginPWAAPI } from 'vite-plugin-pwa'
 // @ts-expect-error -- plain .mjs plugin, shared verbatim with vitest.config.ts
 import { imageManifestPlugin } from './vite/image-manifest-plugin.mjs'
 
@@ -321,14 +322,19 @@ function routeChunkPreloadPlugin() {
         const map: Record<string, string> = {}
         const catalogs: Record<string, string> = {}
         for (const [fileName, output] of Object.entries(ctx.bundle)) {
-          const chunk = output as { type?: string; facadeModuleId?: string | null }
-          if (chunk.type !== 'chunk' || !chunk.facadeModuleId) continue
-          const id = chunk.facadeModuleId.replace(/\\/g, '/')
-          for (const [pathname, source] of Object.entries(PRELOAD_ROUTES)) {
-            if (id.endsWith(source)) map[pathname] = `/${fileName}`
+          const chunk = output as { type?: string; facadeModuleId?: string | null; moduleIds?: string[] }
+          if (chunk.type !== 'chunk') continue
+          if (chunk.facadeModuleId) {
+            const id = chunk.facadeModuleId.replace(/\\/g, '/')
+            for (const [pathname, source] of Object.entries(PRELOAD_ROUTES)) {
+              if (id.endsWith(source)) map[pathname] = `/${fileName}`
+            }
           }
+          // By module, not facade: a catalog lives in a code-splitting group
+          // chunk, and Rolldown gives those no facadeModuleId.
+          const ids = (chunk.moduleIds ?? []).map((moduleId) => moduleId.replace(/\\/g, '/'))
           for (const locale of PRELOAD_LOCALES) {
-            if (id.endsWith(`src/locales/${locale}/messages.mjs`)) catalogs[locale] = `/${fileName}`
+            if (ids.some((id) => id.endsWith(`src/locales/${locale}/messages.mjs`))) catalogs[locale] = `/${fileName}`
           }
         }
         // A renamed or moved page silently drops out of the map rather than
@@ -357,6 +363,59 @@ function routeChunkPreloadPlugin() {
           },
         ]
       },
+    },
+  }
+}
+
+/** `src/locales/<locale>/messages.mjs`, with either path separator. */
+const LOCALE_CATALOG = /[\\/]src[\\/]locales[\\/]([a-z]+)[\\/]messages\.mjs$/
+
+/**
+ * Precache every chunk the entry imports statically, not just the ones the
+ * globs in the VitePWA config can name.
+ *
+ * Under Rollup the app shell was entry-*.js plus the vendor-* chunks, so two
+ * globs covered it. Rolldown keeps a module the entry shares with a lazy route
+ * out of the entry, in a small common chunk named after the module
+ * (AuthContext-*.js, utils-*.js, one per lucide icon, ~30 in all) plus its own
+ * runtime chunk. None of those match a glob, and without them an offline start
+ * has no shell. Their names are not predictable, so they are read from the
+ * bundle and handed to the service worker through vite-plugin-pwa's API.
+ *
+ * Forcing them back into one chunk with a code-splitting group was tried and
+ * measured: grouping by static reachability also drags in modules the entry
+ * imports but tree-shakes away (badge and category icon maps, ~120 kB raw),
+ * costing 9 kB gzip at first paint. Rolldown's own split costs nothing extra.
+ */
+function precacheFirstPaintPlugin(): Plugin {
+  let pwa: VitePluginPWAAPI | undefined
+  return {
+    name: 'ktip-precache-first-paint',
+    apply: 'build',
+    configResolved(config) {
+      pwa = config.plugins.find((plugin) => plugin.name === 'vite-plugin-pwa')?.api as VitePluginPWAAPI | undefined
+    },
+    generateBundle(_options, bundle) {
+      if (!pwa || pwa.disabled) return
+      const entry = Object.values(bundle).find((output) => output.type === 'chunk' && output.isEntry)
+      if (!entry || entry.type !== 'chunk') return
+      const closure = new Set<string>()
+      const queue = [...entry.imports]
+      while (queue.length > 0) {
+        const fileName = queue.pop() as string
+        if (closure.has(fileName)) continue
+        closure.add(fileName)
+        const output = bundle[fileName]
+        if (output?.type === 'chunk') queue.push(...output.imports)
+      }
+      // entry-* and vendor-* are already matched by globPatterns; listing them
+      // twice would give Workbox two manifest entries for one URL.
+      const extra = [...closure].filter((fileName) => !/^assets\/(entry|vendor)-/.test(fileName))
+      pwa.extendManifestEntries((entries) => [
+        ...entries,
+        // Content-hashed names, so the URL is the revision.
+        ...extra.map((url) => ({ url, revision: null })),
+      ])
     },
   }
 }
@@ -477,15 +536,15 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       sourcemap: uploadSentrySourceMaps ? ('hidden' as const) : false,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           /**
            * `entry-[hash].js`, not the default `index-[hash].js`.
            *
            * Three separate chunks in this build are called `index-*.js` —
-           * tldraw, tiptap and the app entry — because rollup names a chunk
-           * after its facade module and all three are index files. That makes
-           * the entry impossible to identify by glob, which the service
+           * tldraw, tiptap and the app entry — because the bundler names a
+           * chunk after its facade module and all three are index files. That
+           * makes the entry impossible to identify by glob, which the service
            * worker's precache list has to do.
            */
           entryFileNames: 'assets/entry-[hash].js',
@@ -502,20 +561,29 @@ export default defineConfig(({ mode }) => {
            * The locale catalogs get stable names for the same reason the entry
            * does — `messages-[hash].js` carries no locale, so neither the
            * precache list nor the preload script could tell en from fr.
+           *
+           * Rolldown groups, not Rollup's manualChunks. When two groups could
+           * take a module, the higher priority wins; equal priorities go to
+           * the group listed first.
            */
-          manualChunks(id: string) {
-            const path = id.split('\\').join('/')
-            const locale = /\/src\/locales\/([a-z]+)\/messages\.mjs$/.exec(path)
-            if (locale) return `locale-${locale[1]}`
-            if (!path.includes('/node_modules/')) return undefined
-            // react-router does not match the react group: the pattern
-            // requires a path separator directly after the package name.
-            if (/\/node_modules\/(react|react-dom|scheduler)\//.test(path)) return 'vendor-react'
-            if (/\/node_modules\/react-router/.test(path)) return 'vendor-router'
-            if (/\/node_modules\/@supabase\//.test(path)) return 'vendor-supabase'
-            if (/\/node_modules\/@sentry\//.test(path)) return 'vendor-sentry'
-            if (/\/node_modules\/@tanstack\/(react-)?query/.test(path)) return 'vendor-query'
-            return undefined
+          codeSplitting: {
+            groups: [
+              {
+                name: (id: string) => {
+                  const locale = LOCALE_CATALOG.exec(id)
+                  return locale ? `locale-${locale[1]}` : null
+                },
+                test: LOCALE_CATALOG,
+                priority: 30,
+              },
+              // react-router does not match the react group: the pattern
+              // requires a path separator directly after the package name.
+              { name: 'vendor-react', test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 20 },
+              { name: 'vendor-router', test: /[\\/]node_modules[\\/]react-router/, priority: 20 },
+              { name: 'vendor-supabase', test: /[\\/]node_modules[\\/]@supabase[\\/]/, priority: 20 },
+              { name: 'vendor-sentry', test: /[\\/]node_modules[\\/]@sentry[\\/]/, priority: 20 },
+              { name: 'vendor-query', test: /[\\/]node_modules[\\/]@tanstack[\\/](react-)?query/, priority: 20 },
+            ],
           },
         },
       },
@@ -558,6 +626,7 @@ export default defineConfig(({ mode }) => {
       edgeApiPlugin(openaiKey),
       preconnectPlugin(env.VITE_SUPABASE_URL),
       routeChunkPreloadPlugin(),
+      precacheFirstPaintPlugin(),
       heroSeedPlugin(env),
       imageManifestPlugin(resolve(process.cwd(), 'public/_img/manifest.json')),
       // ANALYZE=1 npm run build -> dist/stats.html treemap of the bundle.
@@ -604,6 +673,9 @@ export default defineConfig(({ mode }) => {
             'manifest.json',
             'assets/entry-*.{js,css}',
             'assets/vendor-*.js',
+            // The rest of the entry's static imports are added from the bundle
+            // by precacheFirstPaintPlugin, because Rolldown names them after
+            // modules and no glob can know them in advance.
             // No locale catalog: English has none, and fr/es are runtime-cached
             // on use. Precaching all three put 1.5 MB of catalogs on every
             // device to serve the one its reader needs.
