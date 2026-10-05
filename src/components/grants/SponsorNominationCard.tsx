@@ -53,7 +53,7 @@ export function SponsorNominationCard({
       let request = (supabase as any)
         .from('profiles')
         .select('*')
-        .overlaps('roles', ['faculty', 'educational_partner', 'research_institution'])
+        .overlaps('roles', ['faculty', 'ip_legal', 'educational_partner', 'research_institution'])
         .limit(10)
 
       if (search) request = request.ilike('display_name', `%${search}%`)

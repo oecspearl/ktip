@@ -94,6 +94,7 @@ export const ROLE_COLORS: Record<string, string> = {
   entrepreneur: 'bg-ktip-ocean-50 text-ktip-ocean-600 border-ktip-ocean-100',
   faculty: 'bg-ktip-tropical-50 text-ktip-tropical-800 border-ktip-tropical-100',
   researcher: 'bg-ktip-ocean-50 text-ktip-ocean-800 border-ktip-ocean-200',
+  ip_legal: 'bg-ktip-sand-100 text-ktip-sand-800 border-ktip-sand-300',
 }
 
 /**
@@ -106,9 +107,10 @@ export const ROLE_COLORS: Record<string, string> = {
  * are an NGO" are the truthful answers for much of the intended audience and
  * hiding them would be worse. Picking one routes into review instead of
  * writing the role: a school for student and faculty, a KTIP administrator for
- * every organisation. See RolePicker and OnboardingPage.
+ * every organisation and for IP / Legal Professional (isAdminReviewedRole).
+ * See RolePicker and OnboardingPage.
  *
- * `group` splits the grid in two. Thirteen roles in one run is a wall of
+ * `group` splits the grid in two. Fourteen roles in one run is a wall of
  * text; "am I answering for myself or for a body?" is the question that halves
  * it, and it is the same line the catalogue draws between the individual and
  * organisation tiers.
@@ -117,6 +119,7 @@ export const SELECTABLE_ROLES = [
   { value: USER_ROLES.ENTREPRENEUR, label: ROLE_LABELS.entrepreneur, description: 'Build and launch innovations', requiresVerification: false, group: 'individual' },
   { value: USER_ROLES.STUDENT, label: ROLE_LABELS.student, description: 'Learn and collaborate on projects', requiresVerification: true, group: 'individual' },
   { value: USER_ROLES.FACULTY, label: ROLE_LABELS.faculty, description: 'Research and teach in academia', requiresVerification: true, group: 'individual' },
+  { value: 'ip_legal', label: ROLE_LABELS.ip_legal, description: 'Advise on patents, licensing and contracts', requiresVerification: true, group: 'individual' },
   { value: USER_ROLES.MENTOR, label: ROLE_LABELS.mentor, description: 'Guide and support innovators', requiresVerification: false, group: 'individual' },
   { value: USER_ROLES.INVESTOR, label: ROLE_LABELS.investor, description: 'Discover and fund projects', requiresVerification: false, group: 'organization' },
   { value: USER_ROLES.PRIVATE_SECTOR, label: ROLE_LABELS.private_sector, description: 'Partner with innovators', requiresVerification: false, group: 'organization' },
@@ -737,6 +740,7 @@ export const INTEREST_SUGGESTIONS = [
 export const INTEREST_SUGGESTIONS_BY_ROLE: Partial<Record<string, readonly string[]>> = {
   student: ['Youth Entrepreneurship', 'Artificial Intelligence', 'Creative Industries', 'Digital Transformation'],
   faculty: ['Digital Transformation', 'Health Innovation', 'Climate Adaptation', 'Artificial Intelligence'],
+  ip_legal: ['Intellectual Property', 'Creative Industries', 'Artificial Intelligence', 'Digital Transformation'],
   researcher: ['Climate Adaptation', 'Ocean Conservation', 'Health Innovation', 'Food Security'],
   research_institution: ['Climate Adaptation', 'Blue Economy', 'Renewable Energy', 'Health Innovation'],
   educational_partner: ['Youth Entrepreneurship', 'Digital Transformation', 'Creative Industries'],

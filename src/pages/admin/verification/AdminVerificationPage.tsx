@@ -11,6 +11,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
 import { formatDate } from '../../../lib/utils'
 import { ROLE_COLORS, ROLE_LABELS } from '../../../lib/constants'
+import { ROLE_BY_SLUG } from '../../../lib/permissions'
 import { resolveCopy } from '../../../i18n/copy'
 import { useLingui } from '@lingui/react/macro'
 import type { VerificationRequest } from '../../../types'
@@ -206,10 +207,19 @@ export default function AdminVerificationPage() {
               <div>
                 <p className="text-xs font-medium text-ktip-sand-500 mb-1">Requested role</p>
                 <RoleChip slug={selected.requested_role} />
-                <p className="mt-2 text-sm text-ktip-sand-600">
-                  Approving grants this role to the account. Confirm the member speaks for the
-                  organisation before you do.
-                </p>
+                {/* 158: ip_legal is the one individual-tier role in this
+                    queue, and a person has no organisation to speak for. */}
+                {ROLE_BY_SLUG[selected.requested_role]?.tier === 'individual' ? (
+                  <p className="mt-2 text-sm text-ktip-sand-600">
+                    Approving grants this role to the account. Check their practice (a firm, a bar
+                    or patent-office registration) before you do.
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm text-ktip-sand-600">
+                    Approving grants this role to the account. Confirm the member speaks for the
+                    organisation before you do.
+                  </p>
+                )}
               </div>
             )}
 

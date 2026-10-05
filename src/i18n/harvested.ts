@@ -155,6 +155,8 @@ What you see depends on your seat. Safety administrators see the moderation and 
 
 Actions here apply platform-wide, so they are worth being deliberate about.`,
   msg`Adults outside a shared, supervised context cannot start a direct conversation with a minor. Conversations a minor starts are subject to the same restriction in reverse.`,
+  msg`Advise innovators on patents, licensing and contracts.`,
+  msg`Advise on patents, licensing and contracts`,
   msg`After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.
 
 Step 1 confirms your display name (pre-filled from your provider), asks for your date of birth and asks you to pick a role. This step is required, and the site stays out of reach until it is done.
@@ -1182,6 +1184,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`I cannot log in to my account`,
   msg`I got an invitation by email — how do I use it?`,
   msg`IP`,
+  msg`IP / Legal Professional`,
   msg`IP, Content & Licensing Policy`,
   msg`Identification of the content that was removed and where it was.`,
   msg`Identity assertions, linked catalogue activity`,
@@ -2352,6 +2355,7 @@ If your institution is not yet registered on KTIP, your account cannot be domain
   msg`Sublicense it to another organisation for that organisation’s own purposes.`,
   msg`Submission & Competition IP Terms`,
   msg`Submissions holds your registrations. Projects is the equivalent tab for work you have published.`,
+  msg`Submit a Resource`,
   msg`Submit a resource`,
   msg`Submitting an application grants the funder the right to read, assess and decide on it. It grants no licence to use, build, commercialise or file protection over what it describes — whether or not the application succeeds.`,
   msg`Submitting does not license your idea`,

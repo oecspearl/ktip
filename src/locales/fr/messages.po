@@ -3028,6 +3028,11 @@ msgstr ""
 msgid "Could not hide this right now"
 msgstr ""
 
+#. placeholder {0}: auth.user?.email
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "You asked to join as <0>{orgLabel}</0>. A KTIP administrator checks your practice before turning the role on for <1>{0}</1>. We will email you when it is done."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Four tools, one account"
 msgstr "Quatre outils, un seul compte"
@@ -4136,6 +4141,10 @@ msgid "Snippets autosave to your account and appear in your snippet list next ti
 msgstr "Les extraits sont enregistrés automatiquement dans votre compte et apparaissent dans votre liste d'extraits la prochaine fois.\n"
 ""
 
+#: src/i18n/harvested.ts
+msgid "Advise innovators on patents, licensing and contracts."
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 msgid "Send another code in {resendIn}s"
 msgstr ""
@@ -4779,6 +4788,10 @@ msgstr "Retirer {pname}"
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Remove member"
 msgstr "Retirer le membre"
+
+#: src/lib/permissions.ts
+msgid "Patent agent, IP lawyer or licensing adviser. Runs projects and events, applies for and sponsors funding, mentors innovators. Approved by a KTIP administrator."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Google and Microsoft"
@@ -7984,6 +7997,12 @@ msgstr "Votre propre texte. Si vous n'en écrivez pas, la description de la sall
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Delete snippet"
 msgstr "Supprimer l'extrait"
+
+#: src/hooks/useAIAssistant.ts
+#: src/i18n/harvested.ts
+#: src/lib/permissions.ts
+msgid "IP / Legal Professional"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "A grant or funding application you submit through KTIP is treated as confidential. It is never published, never listed in the directory, never indexed by a search engine, and never shown to other applicants — including applicants to the same call."
@@ -14922,6 +14941,10 @@ msgstr ""
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Upload a document"
 msgstr "Téléverser un document"
+
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Your profile is saved either way. To start using KTIP now, pick a role that needs no approval. We still add this one if the review approves it."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Enter the new email address and save."
@@ -22487,6 +22510,10 @@ msgstr "Redemander"
 #: src/i18n/harvested.ts
 msgid "How do connections work?"
 msgstr "Comment fonctionnent les relations ?"
+
+#: src/i18n/harvested.ts
+msgid "Advise on patents, licensing and contracts"
+msgstr ""
 
 #: src/components/help/HelpSearch.tsx
 #: src/pages/help/HelpCenterPage.tsx

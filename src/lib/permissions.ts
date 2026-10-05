@@ -245,6 +245,17 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     sortOrder: 90,
   },
   {
+    // 158. Faculty's access less the two student-safeguard keys, approved by a
+    // KTIP administrator rather than an institution — see isAdminReviewedRole.
+    slug: 'ip_legal',
+    label: msg`IP / Legal Professional`,
+    tier: 'individual',
+    description: msg`Patent agent, IP lawyer or licensing adviser. Runs projects and events, applies for and sponsors funding, mentors innovators. Approved by a KTIP administrator.`,
+    selfAssignable: false,
+    requiresVerification: true,
+    sortOrder: 95,
+  },
+  {
     slug: 'researcher',
     label: msg`Researcher`,
     tier: 'individual',
@@ -387,6 +398,24 @@ export function isOrganizationAccount(roles: readonly string[] | null | undefine
   const org = new Set<string>(ORGANIZATION_ROLES)
   const individual = new Set<string>(INDIVIDUAL_ROLES)
   return held.some((r) => org.has(r)) && !held.some((r) => individual.has(r))
+}
+
+/**
+ * Review-gated individual roles that a KTIP administrator approves, because
+ * there is no institution to do it. Student and faculty are deliberately not
+ * here: their school approves them.
+ */
+const ADMIN_REVIEWED_INDIVIDUAL_ROLES = new Set<string>(['ip_legal'])
+
+/**
+ * Is a request for this role reviewed at /admin/verification?
+ *
+ * The TS copy of guard_verification_request_role() (158): organisation-tier
+ * roles plus the named individual ones. A role this returns false for is
+ * refused by that trigger if it is put on a verification request.
+ */
+export function isAdminReviewedRole(slug: string): boolean {
+  return ROLE_BY_SLUG[slug]?.tier === 'organization' || ADMIN_REVIEWED_INDIVIDUAL_ROLES.has(slug)
 }
 
 /**
@@ -845,6 +874,25 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:initiate',
     'dm:receive',
     'dm:supervise',
+  ],
+
+  // 158. Faculty's column minus institution:approve_students (no school roster
+  // to approve from) and dm:supervise (no institution has vouched for them as
+  // the supervising adult in a student channel). permissions.test.ts pins the
+  // relationship, so a change to faculty has to be decided here too.
+  ip_legal: [
+    'grant:view',
+    'grant:apply',
+    'grant:sponsor',
+    'project:create',
+    'project:manage',
+    'event:create',
+    'forum:post',
+    'resource:submit',
+    'forum:comment',
+    'mentorship:offer',
+    'dm:initiate',
+    'dm:receive',
   ],
 
   researcher: [

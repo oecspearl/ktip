@@ -94,6 +94,23 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     ],
   },
   {
+    role: 'ip_legal',
+    title: 'IP / Legal Professional',
+    description: 'Advise innovators on patents, licensing and contracts.',
+    steps: [
+      'Sign up and select IP / Legal Professional. A KTIP administrator approves the role',
+      'Add your firm and practice areas to your profile so founders can find you',
+      'Offer mentorship to founders working through IP questions',
+      'Watch your invitations for student sponsor nominations',
+      'Share guides and templates through the resource library',
+    ],
+    quickLinks: [
+      { label: 'Browse Projects', href: '/projects' },
+      { label: 'Submit a Resource', href: '/resources/submit' },
+      { label: 'My Dashboard', href: '/dashboard' },
+    ],
+  },
+  {
     role: 'private_sector',
     title: 'Private Sector',
     description: 'Find partnerships, attend events, and support innovation.',

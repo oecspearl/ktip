@@ -97,7 +97,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
 
   // Role-gated. Panels are stubs for now — the gating is what's wired up.
   { to: 'funding', label: msg`Funding`, icon: Wallet, description: msg`Deal flow and applications`, roles: ['investor'] },
-  { to: 'mentees', label: msg`Mentees`, icon: GraduationCap, description: msg`People you mentor`, roles: ['mentor', 'faculty'] },
+  { to: 'mentees', label: msg`Mentees`, icon: GraduationCap, description: msg`People you mentor`, roles: ['mentor', 'faculty', 'ip_legal'] },
   { to: 'research', label: msg`Research`, icon: FlaskConical, description: msg`Research and publications`, roles: ['faculty', 'researcher'] },
   // A real panel since the move in from /org/edit (which now redirects here).
   // Every organisation role, not just SMEs: an investor or an educational

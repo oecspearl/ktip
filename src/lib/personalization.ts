@@ -31,6 +31,8 @@ export const DEFAULT_MODE_BY_ROLE: Partial<Record<RoleSlug, DiscoverMode>> = {
   faculty: 'events',
   educational_partner: 'events',
   mentor: 'projects',
+  // Advises on what is being built, so it opens on the projects.
+  ip_legal: 'projects',
   researcher: 'projects',
   research_institution: 'projects',
   chamber_admin: 'projects',

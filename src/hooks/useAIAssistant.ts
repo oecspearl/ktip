@@ -48,6 +48,7 @@ const ROLE_LABELS: Partial<Record<UserRole, MessageDescriptor>> = {
   diaspora: msg`Diaspora Association`,
   igo: msg`Inter-governmental Regional Organization`,
   researcher: msg`Researcher`,
+  ip_legal: msg`IP / Legal Professional`,
 }
 
 // The AI system prompt itself is developer/API-facing context, never shown to

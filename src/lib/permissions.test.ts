@@ -1,15 +1,37 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_ROLE_PERMISSIONS,
   ROLE_DEFINITIONS,
   canUseGrantApplications,
   displayRoles,
   effectiveRoles,
+  isAdminReviewedRole,
   isOrganizationAccount,
   primaryProfileLink,
   primaryRole,
   roleRequiresMfa,
   rolesRequireMfa,
 } from './permissions'
+
+describe('ip_legal (158)', () => {
+  // Asked for as "the same accesses as an educator", which on this platform is
+  // faculty. The two keys it does not get are the ones that only make sense
+  // for staff a school has vouched for. If faculty gains or loses a key, this
+  // fails, and someone decides whether ip_legal follows.
+  it('holds exactly faculty’s keys less the two student-safeguard ones', () => {
+    const withheld = new Set(['institution:approve_students', 'dm:supervise'])
+    const expected = DEFAULT_ROLE_PERMISSIONS.faculty.filter((key) => !withheld.has(key))
+    expect([...DEFAULT_ROLE_PERMISSIONS.ip_legal].sort()).toEqual([...expected].sort())
+  })
+
+  it('is approved by a KTIP administrator, unlike the school-approved individual roles', () => {
+    expect(isAdminReviewedRole('ip_legal')).toBe(true)
+    expect(isAdminReviewedRole('ngo')).toBe(true)
+    expect(isAdminReviewedRole('faculty')).toBe(false)
+    expect(isAdminReviewedRole('student')).toBe(false)
+    expect(isAdminReviewedRole('nonsense')).toBe(false)
+  })
+})
 
 describe('roleRequiresMfa', () => {
   it('is on for entrepreneur — the self-assignable role that applies for money', () => {

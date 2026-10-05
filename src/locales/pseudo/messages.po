@@ -2997,6 +2997,11 @@ msgstr ""
 msgid "Could not hide this right now"
 msgstr ""
 
+#. placeholder {0}: auth.user?.email
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "You asked to join as <0>{orgLabel}</0>. A KTIP administrator checks your practice before turning the role on for <1>{0}</1>. We will email you when it is done."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Four tools, one account"
 msgstr ""
@@ -4099,6 +4104,10 @@ msgid "Snippets autosave to your account and appear in your snippet list next ti
 "Share gives someone else the link and decides whether they can edit. Download takes the file out with the right extension for the language."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Advise innovators on patents, licensing and contracts."
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 msgid "Send another code in {resendIn}s"
 msgstr ""
@@ -4738,6 +4747,10 @@ msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Remove member"
+msgstr ""
+
+#: src/lib/permissions.ts
+msgid "Patent agent, IP lawyer or licensing adviser. Runs projects and events, applies for and sponsors funding, mentors innovators. Approved by a KTIP administrator."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7904,6 +7917,12 @@ msgstr ""
 
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Delete snippet"
+msgstr ""
+
+#: src/hooks/useAIAssistant.ts
+#: src/i18n/harvested.ts
+#: src/lib/permissions.ts
+msgid "IP / Legal Professional"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -14793,6 +14812,10 @@ msgstr ""
 
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Upload a document"
+msgstr ""
+
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Your profile is saved either way. To start using KTIP now, pick a role that needs no approval. We still add this one if the review approves it."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22304,6 +22327,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do connections work?"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Advise on patents, licensing and contracts"
 msgstr ""
 
 #: src/components/help/HelpSearch.tsx

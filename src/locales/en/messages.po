@@ -3128,6 +3128,11 @@ msgstr "Opting out"
 msgid "Could not hide this right now"
 msgstr "Could not hide this right now"
 
+#. placeholder {0}: auth.user?.email
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "You asked to join as <0>{orgLabel}</0>. A KTIP administrator checks your practice before turning the role on for <1>{0}</1>. We will email you when it is done."
+msgstr "You asked to join as <0>{orgLabel}</0>. A KTIP administrator checks your practice before turning the role on for <1>{0}</1>. We will email you when it is done."
+
 #: src/i18n/harvested.ts
 msgid "Four tools, one account"
 msgstr "Four tools, one account"
@@ -4260,6 +4265,10 @@ msgstr "Snippets autosave to your account and appear in your snippet list next t
 "\n"
 "Share gives someone else the link and decides whether they can edit. Download takes the file out with the right extension for the language."
 
+#: src/i18n/harvested.ts
+msgid "Advise innovators on patents, licensing and contracts."
+msgstr "Advise innovators on patents, licensing and contracts."
+
 #: src/pages/auth/SignupPage.tsx
 msgid "Send another code in {resendIn}s"
 msgstr "Send another code in {resendIn}s"
@@ -4908,6 +4917,10 @@ msgstr "Remove {pname}"
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Remove member"
 msgstr "Remove member"
+
+#: src/lib/permissions.ts
+msgid "Patent agent, IP lawyer or licensing adviser. Runs projects and events, applies for and sponsors funding, mentors innovators. Approved by a KTIP administrator."
+msgstr "Patent agent, IP lawyer or licensing adviser. Runs projects and events, applies for and sponsors funding, mentors innovators. Approved by a KTIP administrator."
 
 #: src/i18n/harvested.ts
 msgid "Google and Microsoft"
@@ -8289,6 +8302,12 @@ msgstr "Your own text. Falls back to the room description if you write none."
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Delete snippet"
 msgstr "Delete snippet"
+
+#: src/hooks/useAIAssistant.ts
+#: src/i18n/harvested.ts
+#: src/lib/permissions.ts
+msgid "IP / Legal Professional"
+msgstr "IP / Legal Professional"
 
 #: src/i18n/harvested.ts
 msgid "A grant or funding application you submit through KTIP is treated as confidential. It is never published, never listed in the directory, never indexed by a search engine, and never shown to other applicants — including applicants to the same call."
@@ -15485,6 +15504,10 @@ msgstr "What a listing on KTIP is"
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Upload a document"
 msgstr "Upload a document"
+
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Your profile is saved either way. To start using KTIP now, pick a role that needs no approval. We still add this one if the review approves it."
+msgstr "Your profile is saved either way. To start using KTIP now, pick a role that needs no approval. We still add this one if the review approves it."
 
 #: src/i18n/harvested.ts
 msgid "Enter the new email address and save."
@@ -23294,6 +23317,10 @@ msgstr "Ask again"
 #: src/i18n/harvested.ts
 msgid "How do connections work?"
 msgstr "How do connections work?"
+
+#: src/i18n/harvested.ts
+msgid "Advise on patents, licensing and contracts"
+msgstr "Advise on patents, licensing and contracts"
 
 #: src/components/help/HelpSearch.tsx
 #: src/pages/help/HelpCenterPage.tsx

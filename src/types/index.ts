@@ -35,6 +35,7 @@ export type RoleSlug =
   | 'igo'
   // tier 3 — individual
   | 'researcher'
+  | 'ip_legal'
 
 /** Historical name for RoleSlug. Kept so existing imports keep compiling. */
 export type UserRole = RoleSlug

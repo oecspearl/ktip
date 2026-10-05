@@ -9,7 +9,7 @@ import { TagInput } from '../../components/ui/TagInput'
 import { CollabSelect } from '../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../components/ui/IndustrySelect'
 import { CountrySelect } from '../../components/ui/CountrySelect'
-import { User, CheckCircle, ArrowLeft, ArrowRight, Building2, Clock, GraduationCap, Cake } from 'lucide-react'
+import { User, CheckCircle, ArrowLeft, ArrowRight, Building2, Clock, GraduationCap, Cake, Scale } from 'lucide-react'
 import { dateOfBirthSchema, todayIso } from '../../lib/validation'
 import { supabase } from '../../lib/supabase'
 import {
@@ -21,7 +21,7 @@ import {
 } from '../../lib/constants'
 import { seedPersonalizationTopics } from '../../hooks/usePersonalization'
 import { analytics } from '../../hooks/useAnalytics'
-import { ROLE_BY_SLUG, roleRequiresMfa } from '../../lib/permissions'
+import { ROLE_BY_SLUG, isAdminReviewedRole, roleRequiresMfa } from '../../lib/permissions'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -37,9 +37,8 @@ import { Trans, useLingui } from '@lingui/react/macro'
 const TODAY_ISO = todayIso()
 
 /**
- * Whether a picked role is reviewed by a KTIP administrator rather than by a
- * school. Read off the catalogue tier rather than a second list, so adding an
- * organisation role to the grid needs no change here.
+ * Whether a picked role speaks for an organisation. Only decides the wording of
+ * the waiting screen — who reviews the request is isAdminReviewedRole().
  */
 function isOrgRole(slug: string): boolean {
   return ROLE_BY_SLUG[slug]?.tier === 'organization'
@@ -273,8 +272,9 @@ export default function OnboardingPage() {
         //   faculty — assigned by an institution admin from their side, so
         //     there is nothing to call. We say so rather than pretending to
         //     queue it.
-        //   organisation — a verification request carrying the role, which a
-        //     KTIP administrator grants at /admin/verification (migration 125).
+        //   organisation, and IP / legal (158) — a verification request
+        //     carrying the role, which a KTIP administrator grants at
+        //     /admin/verification (migration 125).
         if (selectedRole === 'student') {
           const result = await requestVerification()
           // 145: a roster match, or an institution that opted in, approves on
@@ -287,7 +287,7 @@ export default function OnboardingPage() {
             navigate('/', { replace: true })
             return
           }
-        } else if (isOrgRole(selectedRole) && auth.user) {
+        } else if (isAdminReviewedRole(selectedRole) && auth.user) {
           await requestOrgRole({
             userId: auth.user.id,
             role: selectedRole as RoleSlug,
@@ -348,13 +348,16 @@ export default function OnboardingPage() {
   if (waitingOn) {
     const isStudent = waitingOn === 'student'
     const isOrg = isOrgRole(waitingOn)
-    const orgLabel = isOrg ? resolveCopy(i18n, ROLE_BY_SLUG[waitingOn]?.label ?? waitingOn) : ''
+    // An individual role a KTIP administrator reviews (ip_legal): the KTIP
+    // review screen, worded for a person rather than an organisation.
+    const isAdminReviewed = isAdminReviewedRole(waitingOn)
+    const orgLabel = isAdminReviewed ? resolveCopy(i18n, ROLE_BY_SLUG[waitingOn]?.label ?? waitingOn) : ''
     return (
       <AuthSplitShell
         step={1}
         steps={steps}
         heading={
-          isOrg
+          isAdminReviewed
             ? t`Waiting on KTIP review`
             : isStudent
               ? t`Waiting on your school`
@@ -367,6 +370,8 @@ export default function OnboardingPage() {
           <div className="flex items-start gap-3 rounded-xl border border-ktip-ocean-200 bg-ktip-ocean-50 px-4 py-3">
             {isOrg ? (
               <Building2 size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+            ) : isAdminReviewed ? (
+              <Scale size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
             ) : isStudent ? (
               <Clock size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
             ) : (
@@ -384,6 +389,19 @@ export default function OnboardingPage() {
                       confirms that <strong>{auth.user?.email}</strong> speaks for the organisation,
                       and that approval is what turns on the account. You will get an email when it
                       happens.
+                    </Trans>
+                  </p>
+                </>
+              ) : isAdminReviewed ? (
+                <>
+                  <p className="font-medium text-ktip-sand-900">
+                    <Trans>Your request has been sent.</Trans>
+                  </p>
+                  <p className="mt-1">
+                    <Trans>
+                      You asked to join as <strong>{orgLabel}</strong>. A KTIP administrator
+                      checks your practice before turning the role on for{' '}
+                      <strong>{auth.user?.email}</strong>. We will email you when it is done.
                     </Trans>
                   </p>
                 </>
@@ -418,6 +436,8 @@ export default function OnboardingPage() {
           <p className="text-sm text-ktip-sand-600">
             {isOrg ? (
               <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — the organisation role is still added when the review comes back.</Trans>
+            ) : isAdminReviewed ? (
+              <Trans>Your profile is saved either way. To start using KTIP now, pick a role that needs no approval. We still add this one if the review approves it.</Trans>
             ) : (
               <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — you can still verify with your school later from Settings.</Trans>
             )}

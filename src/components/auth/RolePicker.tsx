@@ -12,13 +12,13 @@ type SelectableRole = (typeof SELECTABLE_ROLES)[number]
 /**
  * Shared "I am..." role grid used by the signup and onboarding wizards.
  *
- * Thirteen roles is too many to read as thirteen paragraphs, so a card shows
+ * Fourteen roles is too many to read as fourteen paragraphs, so a card shows
  * only its name until it is chosen, and opens to its description on selection.
  * Only one is ever open — the one you picked — which is the only one whose
  * description you still need.
  *
  * The cards sit on a two-column grid rather than wrapping to their own widths.
- * Equal cells are what make thirteen of them scan as a list instead of a word
+ * Equal cells are what make fourteen of them scan as a list instead of a word
  * cloud, and they give the chosen card somewhere definite to grow to: the full
  * row. Everything around it slides, and the card itself widens, through
  * useFlipChildren; the description folds open through `.disclosure-collapse`.
@@ -28,7 +28,8 @@ type SelectableRole = (typeof SELECTABLE_ROLES)[number]
  * thirteen cards and read as decoration rather than as a distinction. The note
  * under the grid says the same thing once, for every role. Selecting a gated
  * role still routes into verification rather than writing the role: a school
- * for student and faculty, a KTIP administrator for the organisations.
+ * for student and faculty, a KTIP administrator for the organisations and for
+ * IP / Legal Professional.
  */
 export function RolePicker({
   value,

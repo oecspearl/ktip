@@ -68,7 +68,7 @@ const ROLE_SPECIFIC: KpiTile[] = [
     label: msg`Sponsorships given`,
     icon: FileCheck2,
     value: (s) => s.stats?.sponsorships ?? null,
-    roles: ['faculty', 'educational_partner'],
+    roles: ['faculty', 'ip_legal', 'educational_partner'],
   },
 
   // --- Builders -----------------------------------------------------------
@@ -95,6 +95,7 @@ const ROLE_SPECIFIC: KpiTile[] = [
       'student',
       'mentor',
       'faculty',
+      'ip_legal',
       'private_sector',
       'educational_partner',
       'investor',
@@ -134,14 +135,14 @@ const ROLE_SPECIFIC: KpiTile[] = [
     icon: UserPlus,
     value: (s) => s.stats?.connections_pending ?? null,
     to: '/dashboard/connections',
-    roles: ['mentor', 'faculty'],
+    roles: ['mentor', 'faculty', 'ip_legal'],
   },
   {
     key: 'forum_replies',
     label: msg`Forum replies`,
     icon: Reply,
     value: (s) => s.stats?.forum_replies ?? null,
-    roles: ['mentor', 'faculty'],
+    roles: ['mentor', 'faculty', 'ip_legal'],
   },
   {
     key: 'events_organized',
@@ -225,6 +226,7 @@ const CHART_ROLES: Partial<Record<ChartKey, UserRole[]>> = {
     'student',
     'mentor',
     'faculty',
+    'ip_legal',
     'private_sector',
     'educational_partner',
     'investor',
@@ -232,7 +234,7 @@ const CHART_ROLES: Partial<Record<ChartKey, UserRole[]>> = {
   // The roles that publish to the resource library. A plain count rather than a
   // plot, but it rides in the chart row because the tile block packs in threes
   // and this is the number that broke the count for all four of them.
-  resources: ['mentor', 'faculty', 'researcher', 'educational_partner'],
+  resources: ['mentor', 'faculty', 'ip_legal', 'researcher', 'educational_partner'],
 }
 
 export function visibleCharts(
