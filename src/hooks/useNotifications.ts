@@ -67,25 +67,42 @@ export function useNotifications(userId: string | undefined) {
 }
 
 export function useMarkNotificationRead() {
+  const queryClient = useQueryClient()
+  // Optimistic: the dot clears in the same frame as the click, and there is
+  // no refetch afterwards. On failure the list is refetched, which puts the
+  // dot back.
   const markRead = async (notificationId: string) => {
+    queryClient.setQueriesData<Notification[]>({ queryKey: ['notifications'] }, (prev) =>
+      prev?.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+    )
     const { error } = await (supabase.from('notifications') as any)
       .update({ is_read: true })
       .eq('id', notificationId)
 
-    if (error) throw error
+    if (error) {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      throw error
+    }
   }
 
   return { markRead }
 }
 
 export function useMarkAllRead() {
+  const queryClient = useQueryClient()
   const markAllRead = async (userId: string) => {
+    queryClient.setQueryData<Notification[]>(['notifications', userId], (prev) =>
+      prev?.map((n) => (n.is_read ? n : { ...n, is_read: true }))
+    )
     const { error } = await (supabase.from('notifications') as any)
       .update({ is_read: true })
       .eq('user_id', userId)
       .eq('is_read', false)
 
-    if (error) throw error
+    if (error) {
+      queryClient.invalidateQueries({ queryKey: ['notifications', userId] })
+      throw error
+    }
   }
 
   return { markAllRead }

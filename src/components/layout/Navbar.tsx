@@ -495,7 +495,7 @@ export function Navbar() {
   }, [hidden])
 
   // Notifications
-  const { notifications, unreadCount, refetch: refetchNotifications } = useNotifications(auth.user?.id)
+  const { notifications, unreadCount } = useNotifications(auth.user?.id)
   const { markRead } = useMarkNotificationRead()
   const { markAllRead } = useMarkAllRead()
 
@@ -1170,12 +1170,11 @@ export function Navbar() {
                       <h3 className="text-sm font-semibold text-ktip-sand-800"><Trans>Notifications</Trans></h3>
                       {unreadCount > 0 && (
                         <button
-                          onClick={async () => {
+                          onClick={() => {
                             const uid = auth.user?.id
-                            if (uid) {
-                              await markAllRead(uid)
-                              refetchNotifications()
-                            }
+                            // The cache is updated before the request; a
+                            // failure refetches inside the hook.
+                            if (uid) markAllRead(uid).catch(() => {})
                           }}
                           className="flex items-center gap-1 text-xs text-ktip-ocean-600 hover:text-ktip-ocean-700 font-medium"
                         >
@@ -1192,11 +1191,11 @@ export function Navbar() {
                           <button
                             key={notif.id}
                             type="button"
-                            onClick={async () => {
-                              if (!notif.is_read) {
-                                await markRead(notif.id)
-                                refetchNotifications()
-                              }
+                            onClick={() => {
+                              // Navigate now; the read flag is written behind
+                              // it. Waiting for the write (and a refetch) held
+                              // every notification tap for two round trips.
+                              if (!notif.is_read) markRead(notif.id).catch(() => {})
                               setNotifOpen(false)
                               if (notif.link) navigate(notif.link)
                             }}

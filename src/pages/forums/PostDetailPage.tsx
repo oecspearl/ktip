@@ -40,7 +40,14 @@ export default function PostDetailPage() {
 
   const { post, loading: postLoading } = useForumPost(params.postId)
   useCanonicalSlug(params.postId, post)
-  const { replies, refetch: refetchReplies } = useForumReplies(params.postId)
+  const {
+    replies,
+    total: replyTotal,
+    hasEarlier,
+    loadEarlier,
+    loadingEarlier,
+    refetch: refetchReplies,
+  } = useForumReplies(params.postId)
   const { createReply, loading: replyLoading } = useCreateForumReply()
   const { deletePost } = useDeleteForumPost()
   const { deleteReply } = useDeleteForumReply()
@@ -216,10 +223,22 @@ export default function PostDetailPage() {
             {/* Replies Section */}
             <div id="replies" data-spy="Replies" className="scroll-mt-24 border-t border-ktip-sand-200 pt-8">
               <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                {t`Replies (${replies?.length || 0})`}
+                {t`Replies (${replyTotal})`}
               </h3>
               <p className="text-ktip-ocean-600 text-xs italic mb-6"><Trans>Join the discussion</Trans></p>
 
+              {hasEarlier && (
+                <div className="mb-4 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => void loadEarlier()}
+                    disabled={loadingEarlier}
+                    className="text-xs font-medium text-ktip-ocean-600 hover:underline disabled:opacity-60 disabled:no-underline"
+                  >
+                    {loadingEarlier ? <Trans>Loading earlier replies…</Trans> : <Trans>Show earlier replies</Trans>}
+                  </button>
+                </div>
+              )}
               {replies?.length ? (
                 <div className="mb-6">
                   {replies.map((reply) => (
@@ -308,7 +327,7 @@ export default function PostDetailPage() {
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500"><Trans>Replies</Trans></span>
                   <span className="font-medium text-ktip-sand-900">
-                    {replies?.length || 0}
+                    {replyTotal}
                   </span>
                 </div>
               </div>
