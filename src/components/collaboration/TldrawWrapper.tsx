@@ -41,6 +41,7 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
   const { t } = useLingui()
   const [error, setError] = useState<string | null>(null)
   const [darkMode] = useThemeMode()
+  const [initialColorScheme] = useState<'dark' | 'light'>(() => (darkMode ? 'dark' : 'light'))
   const editorRef = useRef<any>(null)
 
   const handleMount = (editor: any) => {
@@ -61,7 +62,10 @@ export function TldrawWrapper({ snapshot, onEditorReady, readOnly }: TldrawWrapp
   const tldrawProps: Record<string, any> = {
     licenseKey: import.meta.env.VITE_TLDRAW_LICENSE_KEY,
     // The canvas follows the app's own toggle rather than the OS preference.
-    inferDarkMode: false,
+    // tldraw 5 replaced the `inferDarkMode` boolean with this prop. It is the
+    // mode at mount only: tldraw recreates the editor whenever the prop
+    // changes, so toggles go through updateUserPreferences above instead.
+    colorScheme: initialColorScheme,
     onMount: handleMount,
   }
 
