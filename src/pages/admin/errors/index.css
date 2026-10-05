@@ -27,8 +27,9 @@
 /* base-nova runtime: data-* custom variants (data-open, data-closed,
    data-checked, …), accordion keyframes, and the scroll-fade / shimmer /
    no-scrollbar utilities the ReUI data grid compiles against. Contributes only
-   @utility / @custom-variant / @keyframes — no selectors, no token values. */
-@import "shadcn/tailwind.css";
+   @utility / @custom-variant / @keyframes — no selectors, no token values.
+   Vendored from the shadcn package, which is no longer installed. */
+@import "./shadcn-tailwind.css";
 
 /* The other half of what the base-nova style declares (see its registry item's
    `css` field). Provides animate-in / animate-out / fade-in-* / zoom-in-* /
