@@ -171,6 +171,7 @@ describe('scrubTransaction', () => {
         span_id: 'aaa',
         trace_id: 'bbb',
         start_timestamp: 1,
+        status: 'ok',
         description: `select grants where owner = ${UUID} and email = ${EMAIL}`,
         data: { 'db.system': 'postgresql', invited: EMAIL },
       }],

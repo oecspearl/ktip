@@ -125,7 +125,30 @@ export function initializeMonitoring(): void {
     dsn,
     environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
     release: import.meta.env.VITE_SENTRY_RELEASE || undefined,
-    sendDefaultPii: false,
+    // SDK v11 replaced `sendDefaultPii: false` with per-category switches that
+    // default to collecting. This is the v10-equivalent block from Sentry's
+    // migration guide, so nothing new leaves the browser.
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: {
+        request: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+        response: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      },
+      httpBodies: [],
+      urlQueryParams: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      genAI: { inputs: false, outputs: false },
+      databaseQueryData: false,
+      queues: false,
+      graphQL: { document: false, variables: false },
+    },
+    // v11 streams spans by default and skips beforeSendTransaction when it
+    // does, which would send page URLs past scrubTransaction unredacted. The
+    // static lifecycle keeps transactions, and the scrubber with them.
+    traceLifecycle: 'static',
+    // v11 also attaches a synthetic stack to non-Error captures by default.
+    // Off, as in v10, so existing issues keep grouping the way they did.
+    attachStacktrace: false,
     integrations: [
       Sentry.reactRouterBrowserTracingIntegration({
         useEffect,
