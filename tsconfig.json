@@ -9,10 +9,10 @@
    * config and does not follow project references — the shadcn CLI is one.
    * Without it the CLI cannot resolve the "@/..." aliases in components.json
    * and writes files into a literal "@" directory at the repo root.
-   * `files: []` means this block affects no compilation.
+   * `files: []` means this block affects no compilation. No baseUrl: paths
+   * resolve against this file, and TypeScript 7 rejects the option outright.
    */
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

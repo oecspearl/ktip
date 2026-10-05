@@ -25,8 +25,8 @@
     "noUncheckedSideEffectImports": true,
 
     /* Import alias. Mirrored in vite.config.ts AND vitest.config.ts — all three
-       must agree or a module resolves in the editor but not at runtime. */
-    "baseUrl": ".",
+       must agree or a module resolves in the editor but not at runtime.
+       No baseUrl: paths resolve against this file, and TypeScript 7 rejects it. */
     "paths": {
       "@/*": ["./src/*"]
     }
