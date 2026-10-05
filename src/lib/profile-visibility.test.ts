@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { asVisitorView, draftFrom, draftToView, GATED_FIELDS } from './profile-visibility'
+import {
+  asVisitorView,
+  draftFrom,
+  draftToView,
+  GATED_FIELDS,
+  hiddenSections,
+  privateSections,
+  PROFILE_SECTIONS,
+  sectionExceptions,
+  sectionIsPrivate,
+  withSection,
+} from './profile-visibility'
 import type { Profile, ProfileView } from '../types'
 
 const profile = {
@@ -136,5 +147,109 @@ describe('asVisitorView', () => {
     for (const field of teaser) {
       expect(GATED_FIELDS as readonly string[]).not.toContain(field)
     }
+  })
+})
+
+describe('section visibility', () => {
+  it('follows the master switch where there is no override', () => {
+    expect(privateSections('public', {})).toEqual([])
+    expect(privateSections('private', null)).toEqual([...PROFILE_SECTIONS])
+  })
+
+  it('lets an override win in either direction', () => {
+    expect(sectionIsPrivate('skills', 'public', { skills: 'private' })).toBe(true)
+    expect(sectionIsPrivate('achievements', 'private', { achievements: 'public' })).toBe(false)
+  })
+
+  it('fails closed on a value that is not exactly public, like the SQL', () => {
+    const junk = { skills: 'hidden' } as unknown as Parameters<typeof sectionIsPrivate>[2]
+    expect(sectionIsPrivate('skills', 'public', junk)).toBe(true)
+  })
+
+  it('stores only the exceptions to the master switch', () => {
+    const closed = withSection({}, 'public', 'skills', true)
+    expect(closed).toEqual({ skills: 'private' })
+    // Back to what the master says: the entry goes rather than turning 'public'.
+    expect(withSection(closed, 'public', 'skills', false)).toEqual({})
+    expect(withSection({}, 'private', 'achievements', false)).toEqual({ achievements: 'public' })
+  })
+
+  it('counts only overrides that differ from the master', () => {
+    expect(sectionExceptions('public', { skills: 'private', about: 'public' })).toBe(1)
+    expect(sectionExceptions('private', { skills: 'private', cv: 'public' })).toBe(1)
+    expect(sectionExceptions('public', null)).toBe(0)
+  })
+
+  /** Pinned against profile_section_keys() in migration 162. */
+  it('lists the same keys as the SQL, in page order', () => {
+    expect([...PROFILE_SECTIONS]).toEqual([
+      'about',
+      'details',
+      'skills',
+      'interests',
+      'languages',
+      'open_to',
+      'organisation',
+      'cv',
+      'standing',
+      'achievements',
+      'projects',
+      'events',
+    ])
+  })
+})
+
+describe('asVisitorView with sections', () => {
+  it('hides one closed section of a public profile and nothing else', () => {
+    const view = draftToView(profile, draftFrom(profile))
+    const visitor = asVisitorView(view, { skills: 'private', about: 'private' })
+
+    expect(visitor.skills).toBeNull()
+    expect(visitor.bio).toBeNull()
+    expect(visitor.interests).toEqual(['Climate'])
+    expect(visitor.organization).toBe('OECS')
+    expect(visitor.hidden_sections).toEqual(['about', 'skills'])
+    // The master is open, so Message is still on offer.
+    expect(visitor.can_view).toBe(true)
+  })
+
+  it('shows an opened section of a private profile and keeps the master gate', () => {
+    const view = draftToView({ ...profile, profile_visibility: 'private' }, draftFrom(profile))
+    const visitor = asVisitorView(view, { interests: 'public', achievements: 'public' })
+
+    expect(visitor.interests).toEqual(['Climate'])
+    expect(visitor.skills).toBeNull()
+    expect(visitor.hidden_sections).not.toContain('achievements')
+    expect(visitor.hidden_sections).toContain('projects')
+    expect(visitor.can_view).toBe(false)
+  })
+
+  it('nulls every field of the details section together', () => {
+    const view = draftToView(profile, draftFrom(profile))
+    const visitor = asVisitorView(view, { details: 'private' })
+
+    expect(visitor.organization).toBeNull()
+    expect(visitor.industry).toBeNull()
+    expect(visitor.phone).toBeNull()
+    expect(visitor.website).toBeNull()
+    expect(visitor.country).toBe('Saint Lucia')
+  })
+})
+
+describe('hiddenSections', () => {
+  it('reads the RPC list when it is there', () => {
+    expect([...hiddenSections({ can_view: true, hidden_sections: ['cv', 'standing'] })]).toEqual([
+      'cv',
+      'standing',
+    ])
+  })
+
+  it('falls back to the master gate before migration 162', () => {
+    expect(hiddenSections({ can_view: false }).size).toBe(PROFILE_SECTIONS.length)
+    expect(hiddenSections({ can_view: true }).size).toBe(0)
+  })
+
+  it('hides nothing while the view is still loading', () => {
+    expect(hiddenSections(undefined).size).toBe(0)
   })
 })

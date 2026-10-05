@@ -17,6 +17,13 @@ import { useProfileId, useProfileView, useUserProjects, useUserEvents } from '..
 import { useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
 import { useProfileStats } from '../../hooks/useProfileStats'
+import {
+  hiddenSections,
+  privateSections,
+  PROFILE_SECTIONS,
+  sectionExceptions,
+} from '../../lib/profile-visibility'
+import type { ProfileSectionKey } from '../../types'
 import { useTrophyAssets } from '../../hooks/useAchievements'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
@@ -120,17 +127,21 @@ export function MemberPanel() {
   // get_profile_view() has a fixed return signature with no username in it, so
   // the "view full profile" link below gets it from the lookup instead.
   const profile = rawProfile ? { ...rawProfile, username } : rawProfile
-  // Undefined disables the query outright, so a private member costs one
-  // request rather than six that each come back empty.
-  const detailId = canView ? resolvedId : undefined
+  // One section at a time (162). Undefined disables a query outright, so a
+  // closed section costs no request, and nothing is asked until the view has
+  // said what is closed.
+  const hidden = hiddenSections(profile)
+  const everythingHidden = hidden.size === PROFILE_SECTIONS.length
+  const idFor = (...sections: ProfileSectionKey[]) =>
+    profile && sections.some((section) => !hidden.has(section)) ? resolvedId : undefined
 
-  const { projects } = useUserProjects(detailId)
-  const { events } = useUserEvents(detailId)
-  const { badges } = useUserBadges(detailId)
+  const { projects } = useUserProjects(idFor('projects'))
+  const { events } = useUserEvents(idFor('events'))
+  const { badges } = useUserBadges(idFor('achievements'))
   // null when this viewer isn't allowed to see the count (owner's setting)
-  const { count: connectionCount } = useConnectionCount(detailId)
+  const { count: connectionCount } = useConnectionCount(idFor('standing'))
   // null for suspended accounts; the drawer just omits the row in that case
-  const { stats } = useProfileStats(detailId)
+  const { stats } = useProfileStats(idFor('standing'))
   // Trophy artwork, keyed type x tier. Cached under one key for the whole app,
   // so opening a second card costs nothing.
   const { assetMap } = useTrophyAssets()
@@ -214,6 +225,14 @@ export function MemberPanel() {
   if (!show) return null
 
   const isSelf = resolvedId === auth.user?.id
+  // Your own card never hides anything from you, so what you have closed is
+  // read off your own row rather than the view.
+  const selfHasPrivate =
+    isSelf &&
+    privateSections(auth.profile?.profile_visibility, auth.profile?.section_visibility).length > 0
+  const selfExceptions = isSelf
+    ? sectionExceptions(auth.profile?.profile_visibility, auth.profile?.section_visibility)
+    : 0
   // Explains itself rather than silently dropping the button: the panel is
   // where someone goes deliberately to contact a member, and a missing action
   // with no reason reads as a bug.
@@ -428,7 +447,7 @@ export function MemberPanel() {
                   verified={profile?.is_verified}
                   roles={profile?.roles}
                   standing={
-                    stats && stats.badge_count > 0 ? (
+                    stats?.rank && stats.badge_count > 0 && !hidden.has('standing') ? (
                       <StandingMeter
                         rank={stats.rank}
                         points={stats.points}
@@ -472,7 +491,7 @@ export function MemberPanel() {
                   <div className="h-24 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
                   <div className="h-32 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
                 </div>
-              ) : canView === false ? (
+              ) : canView === false && everythingHidden ? (
                 /* Every section below is fed by a query that was never issued.
                    Say why, and leave the Connect button in the footer to act on. */
                 <div className="px-gutter py-12 text-center">
@@ -496,20 +515,46 @@ export function MemberPanel() {
                 </div>
               ) : (
                 <>
+                  {/* A viewer who gets some sections and not others (162):
+                      say so in one line, so the gaps do not read as a member
+                      who never filled them in. */}
+                  {!isSelf && hidden.size > 0 && (
+                    <div className="mx-gutter mb-1 flex items-start gap-2.5 rounded-surface bg-ktip-sand-100 px-4 py-3 shadow-neu-sm-inset">
+                      <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
+                      <p className="text-micro leading-relaxed text-ktip-sand-600">
+                        {canView === false ? (
+                          <Trans>
+                            Only {firstName}'s connections can see their full profile or send them
+                            a message. Send a connection request to ask.
+                          </Trans>
+                        ) : (
+                          <Trans>Some of {firstName}'s profile is for their connections only.</Trans>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
                   {/* The lock never applies to yourself, an admin, or an
                       accepted connection (can_view_profile, 083). Say so —
                       otherwise locking your own profile looks broken when you
                       test it by opening your own card. */}
-                  {isPrivate && (
+                  {(selfHasPrivate || (!isSelf && isPrivate && canView !== false)) && (
                     <div className="mx-gutter mb-1 flex items-start gap-2.5 rounded-surface bg-ktip-sand-100 px-4 py-3 shadow-neu-sm-inset">
                       <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
                       <p className="text-micro leading-relaxed text-ktip-sand-600">
                         {isSelf ? (
-                          <Trans>
-                            Your profile is locked. Other members see only your name, photo and
-                            country until you accept their connection request — you always see
-                            everything here.
-                          </Trans>
+                          isPrivate && selfExceptions === 0 ? (
+                            <Trans>
+                              Your profile is locked. Other members see only your name, photo and
+                              country until you accept their connection request — you always see
+                              everything here.
+                            </Trans>
+                          ) : (
+                            <Trans>
+                              Some of your profile is for connections only. You always see all of
+                              it here.
+                            </Trans>
+                          )
                         ) : auth.isAdmin ? (
                           <Trans>
                             This profile is private. You can see it because administrators
@@ -608,7 +653,9 @@ export function MemberPanel() {
 
                   {/* A profile with nothing under the identity block looks
                       broken, so say why */}
-                  {!hasSections && (
+                  {/* …unless the empty space is closed sections, which the
+                      notice above has already explained. */}
+                  {!hasSections && hidden.size === 0 && (
                     <div className="px-gutter py-10 text-center">
                       <Calendar size={20} className="mx-auto mb-2 text-ktip-sand-300" />
                       <p className="text-caption text-ktip-sand-500">

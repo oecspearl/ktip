@@ -28,11 +28,14 @@ import { ProfileLinkRow } from './ProfileLinkRow'
 import { StandingMeter } from './StandingMeter'
 import { TrophyShelf } from './TrophyShelf'
 import { EditPencil, EditableBlock } from './EditPencil'
+import { SectionPrivacy } from './SectionPrivacy'
 import { cn } from '../../lib/utils'
+import { hiddenSections } from '../../lib/profile-visibility'
 import type {
   BadgeDefinition,
   EmployerPortfolioItem,
   Event,
+  ProfileSectionKey,
   ProfileStats,
   ProfileView,
   Project,
@@ -76,6 +79,16 @@ export type ProfileBlock =
 /** Block → open its editor. A block absent from the map renders with no pencil. */
 export type ProfileEditMap = Partial<Record<ProfileBlock, () => void>>
 
+/**
+ * Who sees each section, and the way to change it (162). The member's own
+ * editor passes this; nothing else does, so a visitor never sees a switch.
+ */
+export interface ProfilePrivacyControls {
+  isPrivate: (section: ProfileSectionKey) => boolean
+  onChange: (section: ProfileSectionKey, makePrivate: boolean) => void
+  disabled?: boolean
+}
+
 /** What an empty block says when the person reading it is the one who can fill it. */
 function EmptyPrompt({ children }: { children: ReactNode }) {
   return <p className="text-caption italic text-ktip-sand-500">{children}</p>
@@ -112,6 +125,11 @@ export interface ProfileCanvasProps {
   achievementsActions?: ReactNode
   /** Copy for the "this profile is private" panel. */
   privateMessage?: string
+  /**
+   * One line for a viewer who can see some sections and not others, on a
+   * profile whose master switch is open. Omit it and nothing is said.
+   */
+  partialMessage?: string
   back: HeroBack
 
   // ----------------------------------------------------------------- editing
@@ -129,6 +147,7 @@ export interface ProfileCanvasProps {
    *            members it most needs to serve.
    */
   emptyBlocks?: 'omit' | 'prompt'
+  privacy?: ProfilePrivacyControls
 
   // ------------------------------------------------------------------ layout
   /**
@@ -177,9 +196,11 @@ export function ProfileCanvas({
   railActions,
   achievementsActions,
   privateMessage,
+  partialMessage,
   back,
   edit,
   emptyBlocks,
+  privacy,
   layout = 'page',
   heroSpy,
   dockRef,
@@ -206,14 +227,49 @@ export function ProfileCanvas({
   const prompting = (emptyBlocks ?? (edit ? 'prompt' : 'omit')) === 'prompt'
 
   /**
-   * A section's pencil, in the `actions` slot its heading already has — no
-   * overlay, no absolute positioning, and the control lands in the tab order
-   * directly after the title it belongs to. Spread onto ProfileSection.
+   * The sections this viewer may not see (162). Fields of a hidden section
+   * already arrive NULL and the earned lists never arrive at all; this is what
+   * keeps the cards around them — Details, which always has a Joined line —
+   * from rendering empty-handed.
    */
-  const editable = (block: ProfileBlock, label: string) => {
-    const onEdit = edit?.[block]
-    if (!onEdit) return {}
-    return { actions: <EditPencil label={label} onClick={onEdit} />, className: 'group' }
+  const hidden = hiddenSections(profile)
+  const shows = (section: ProfileSectionKey) => !hidden.has(section)
+
+  const privacySwitch = (section: ProfileSectionKey, label: string) =>
+    privacy ? (
+      <SectionPrivacy
+        label={label}
+        isPrivate={privacy.isPrivate(section)}
+        onChange={(next) => privacy.onChange(section, next)}
+        disabled={privacy.disabled}
+      />
+    ) : null
+
+  /**
+   * A section's controls — its audience switch and its pencil — in the
+   * `actions` slot its heading already has: no overlay, no absolute
+   * positioning, and the controls land in the tab order directly after the
+   * title they belong to. Spread onto ProfileSection.
+   */
+  const sectionChrome = (
+    section: ProfileSectionKey,
+    label: string,
+    block?: ProfileBlock,
+    extra?: ReactNode
+  ) => {
+    const onEdit = block ? edit?.[block] : undefined
+    const audience = privacySwitch(section, label)
+    if (!onEdit && !audience) return extra ? { actions: extra } : {}
+    return {
+      actions: (
+        <span className="flex items-center gap-1.5">
+          {extra}
+          {audience}
+          {onEdit && <EditPencil label={label} onClick={onEdit} />}
+        </span>
+      ),
+      className: onEdit ? 'group' : undefined,
+    }
   }
 
   const displayName = profile.display_name || t`Member`
@@ -325,8 +381,9 @@ export function ProfileCanvas({
       </>
     ) : null
 
+  const showStanding = shows('standing') && !!stats?.rank && stats.badge_count > 0
   const heroStanding =
-    canView !== false && stats && stats.badge_count > 0 ? (
+    showStanding && stats ? (
       <HeroStanding
         rank={stats.rank}
         points={stats.points}
@@ -424,21 +481,21 @@ export function ProfileCanvas({
               />
             </EditableBlock>
 
-            {/* ---------- Private ----------
-                Everything below this point is driven by queries that were never
-                issued when can_view is false, so they collapse on their own. */}
-            {canView !== false && (<>
+            {/* ---------- Per section (162) ----------
+                Each block below answers to its own section. A hidden one is
+                left out whole, so a visitor never meets a card with its
+                contents taken away. */}
             {/* The member-page tutorial anchors a step on `[data-spy="About"]`,
                 so this marker travels with the bio rather than being dropped
                 when there is none — the section itself still only renders when
                 there is something to read. */}
-            {(profile.bio || prompting) && (
+            {shows('about') && (profile.bio || prompting) && (
               <ProfileSection
                 id="about"
                 spy="About"
                 tone="rail"
                 title={t`About`}
-                {...editable('about', t`your bio`)}
+                {...sectionChrome('about', t`your bio`, 'about')}
               >
                 {profile.bio ? (
                   <p className="whitespace-pre-wrap text-caption leading-relaxed text-ktip-sand-700">
@@ -452,7 +509,8 @@ export function ProfileCanvas({
               </ProfileSection>
             )}
 
-            <ProfileSection tone="rail" title={t`Details`} {...editable('details', t`your details`)}>
+            {shows('details') && (
+            <ProfileSection tone="rail" title={t`Details`} {...sectionChrome('details', t`your details`, 'details')}>
               <ProfileFacts
                 columns={1}
                 items={[
@@ -496,9 +554,10 @@ export function ProfileCanvas({
                 ]}
               />
             </ProfileSection>
+            )}
 
-            {profile.skills?.length || prompting ? (
-              <ProfileSection tone="rail" title={t`Skills`} {...editable('skills', t`your skills`)}>
+            {shows('skills') && (profile.skills?.length || prompting) ? (
+              <ProfileSection tone="rail" title={t`Skills`} {...sectionChrome('skills', t`your skills`, 'skills')}>
                 {profile.skills?.length ? (
                   <ProfileTags values={profile.skills} tone="ocean" />
                 ) : (
@@ -509,11 +568,11 @@ export function ProfileCanvas({
               </ProfileSection>
             ) : null}
 
-            {profile.interests?.length || prompting ? (
+            {shows('interests') && (profile.interests?.length || prompting) ? (
               <ProfileSection
                 tone="rail"
                 title={t`Interests`}
-                {...editable('interests', t`your interests`)}
+                {...sectionChrome('interests', t`your interests`, 'interests')}
               >
                 {profile.interests?.length ? (
                   <ProfileTags values={profile.interests} tone="tropical" />
@@ -527,13 +586,13 @@ export function ProfileCanvas({
 
             {/* Also fetched and never drawn until now. They are on the CV, so a
                 member who set them had no way to check what they said. */}
-            {profile.languages?.length || prompting ? (
+            {shows('languages') && (profile.languages?.length || prompting) ? (
               <ProfileSection
                 id="languages"
                 spy="Languages"
                 tone="rail"
                 title={t`Languages`}
-                {...editable('languages', t`your languages`)}
+                {...sectionChrome('languages', t`your languages`, 'languages')}
               >
                 {profile.languages?.length ? (
                   <ProfileTags values={profile.languages} tone="muted" />
@@ -545,12 +604,12 @@ export function ProfileCanvas({
               </ProfileSection>
             ) : null}
 
-            {profile.open_to?.length || prompting ? (
+            {shows('open_to') && (profile.open_to?.length || prompting) ? (
               <ProfileSection
                 id="collaborate"
                 tone="rail"
                 title={t`Open to`}
-                {...editable('openTo', t`what you are open to`)}
+                {...sectionChrome('open_to', t`what you are open to`, 'openTo')}
               >
                 {profile.open_to?.length ? (
                   <ProfileTags
@@ -573,12 +632,13 @@ export function ProfileCanvas({
                 nowhere. This is the registered entity behind it, with the work
                 it publishes — the business equivalent of the CV an individual
                 member gets. */}
-            {employer && (
+            {employer && shows('organisation') && (
               <ProfileSection
                 id="organisation"
                 spy="Organisation"
                 tone="rail"
                 title={t`Organisation`}
+                {...sectionChrome('organisation', t`your organisation`)}
               >
                 <div className="flex items-start gap-3">
                   {employer.logo_url ? (
@@ -641,14 +701,16 @@ export function ProfileCanvas({
             )}
 
             {/* Only rendered when the CV is actually published — see publicResume. */}
-            {cvHref && (
-              <Link to={cvHref}>
-                <Button variant="outline" fullWidth icon={<FileText size={16} />}>
-                  <Trans>View CV</Trans>
-                </Button>
-              </Link>
+            {cvHref && shows('cv') && (
+              <div className="flex items-center gap-2">
+                <Link to={cvHref} className="min-w-0 flex-1">
+                  <Button variant="outline" fullWidth icon={<FileText size={16} />}>
+                    <Trans>View CV</Trans>
+                  </Button>
+                </Link>
+                {privacySwitch('cv', t`your CV`)}
+              </div>
             )}
-            </>)}
           </div>
 
           {/* ---------- The earned "what" ---------- */}
@@ -672,8 +734,25 @@ export function ProfileCanvas({
               </section>
             )}
 
-            {canView !== false && stats && stats.badge_count > 0 && (
+            {/* The open profile with a closed part or two. One quiet line, not
+                the panel: most of the page is here, and a lock the size of the
+                one above would say the opposite. */}
+            {canView !== false && hidden.size > 0 && partialMessage && (
+              <p className="flex items-start gap-2.5 rounded-surface bg-ktip-sand-100 px-4 py-3 text-micro leading-relaxed text-ktip-sand-600 shadow-neu-sm-inset">
+                <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
+                {partialMessage}
+              </p>
+            )}
+
+            {showStanding && stats && (
               <div id="standing" data-spy="Standing" data-spy-skip className="scroll-mt-24">
+                {/* The meter has no heading to hang a control on, so in the
+                    editor its switch gets a line of its own. */}
+                {privacy && (
+                  <div className="mb-2 flex justify-end">
+                    {privacySwitch('standing', t`your level and points`)}
+                  </div>
+                )}
                 <StandingMeter
                   rank={stats.rank}
                   points={stats.points}
@@ -684,13 +763,13 @@ export function ProfileCanvas({
               </div>
             )}
 
-            {shelfBadges.length > 0 && (
+            {shows('achievements') && shelfBadges.length > 0 && (
               <ProfileSection
                 id="achievements"
                 spy="Achievements"
                 title={t`Achievements`}
                 count={stats?.badge_count ?? shelfBadges.length}
-                actions={achievementsActions}
+                {...sectionChrome('achievements', t`your achievements`, undefined, achievementsActions)}
               >
                 <TrophyShelf
                   badges={shelfBadges}
@@ -701,12 +780,13 @@ export function ProfileCanvas({
               </ProfileSection>
             )}
 
-            {projects?.length ? (
+            {shows('projects') && projects?.length ? (
               <ProfileSection
                 id="projects"
                 spy="Projects"
                 title={t`Projects`}
                 count={projects.length}
+                {...sectionChrome('projects', t`your projects`)}
               >
                 <div className="grid">
                   {projects.map((project) => (
@@ -723,8 +803,14 @@ export function ProfileCanvas({
               </ProfileSection>
             ) : null}
 
-            {events?.length ? (
-              <ProfileSection id="events" spy="Events" title={t`Events`} count={events.length}>
+            {shows('events') && events?.length ? (
+              <ProfileSection
+                id="events"
+                spy="Events"
+                title={t`Events`}
+                count={events.length}
+                {...sectionChrome('events', t`your events`)}
+              >
                 <div className="grid">
                   {events.map((event) => (
                     <ProfileLinkRow

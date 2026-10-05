@@ -2,12 +2,17 @@ import { Link } from 'react-router'
 import { Eye, ExternalLink, Lock, LockOpen } from 'lucide-react'
 import { Card } from '../../../../components/ui/Card'
 import { Switch } from '../../../../components/ui/Toggle'
-import { Trans, useLingui } from '@lingui/react/macro'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 interface ProfilePreviewToolbarProps {
   locked: boolean
   onLockChange: (next: boolean) => void
   savingLock?: boolean
+  /**
+   * How many sections go the other way from the lock (162) — opened on a
+   * locked profile, or closed on an open one. Flipping the lock resets it.
+   */
+  exceptions?: number
   asVisitor: boolean
   onAsVisitorChange: (next: boolean) => void
   /** The member's own public URL. Null until the profile has loaded. */
@@ -29,6 +34,7 @@ export function ProfilePreviewToolbar({
   locked,
   onLockChange,
   savingLock,
+  exceptions = 0,
   asVisitor,
   onAsVisitorChange,
   profileHref,
@@ -55,8 +61,24 @@ export function ProfilePreviewToolbar({
               <Trans>Private profile</Trans>
             </span>
             <span className="mt-0.5 block text-micro text-ktip-sand-500">
+              {/* The count is the only place the exceptions add up; each
+                  section's own switch says which way it went. */}
               {locked ? (
-                <Trans>Name, photo and country only, until you accept a connection.</Trans>
+                exceptions > 0 ? (
+                  <Plural
+                    value={exceptions}
+                    one="Connections only, except # section you opened to everyone."
+                    other="Connections only, except # sections you opened to everyone."
+                  />
+                ) : (
+                  <Trans>Name, photo and country only, until you accept a connection.</Trans>
+                )
+              ) : exceptions > 0 ? (
+                <Plural
+                  value={exceptions}
+                  one="Any member can see your profile, except # section you keep for connections."
+                  other="Any member can see your profile, except # sections you keep for connections."
+                />
               ) : (
                 <Trans>Any member can see your full profile.</Trans>
               )}

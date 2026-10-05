@@ -30,6 +30,8 @@ import { heroButton } from '../../components/profile/PortraitHero'
 import { PageHero } from '../../components/layout/PageHero'
 import { cn } from '../../lib/utils'
 import { ProfileCanvas } from '../../components/profile/ProfileCanvas'
+import { hiddenSections, PROFILE_SECTIONS } from '../../lib/profile-visibility'
+import type { ProfileSectionKey } from '../../types'
 
 /** How many unearned badges the shelf teases under the earned ones. */
 const LOCKED_PREVIEW = 4
@@ -76,15 +78,20 @@ export default function PublicProfilePage() {
 
   const { view: profile, canView, loading: viewLoading } = useProfileView(id)
   const loading = resolvingId || viewLoading
-  // Everything below the teaser hangs off this. Passing undefined disables
-  // the query outright, so a gated page makes one request, not nine.
-  const detailId = canView ? id : undefined
+  // Everything below the teaser hangs off this, one section at a time (162).
+  // Passing undefined disables a query outright, so a closed section costs no
+  // request — and nothing is asked until the view has said what is closed.
+  const hidden = hiddenSections(profile)
+  const idFor = (...sections: ProfileSectionKey[]) =>
+    profile && sections.some((section) => !hidden.has(section)) ? id : undefined
 
-  const { projects } = useUserProjects(detailId)
-  const { events } = useUserEvents(detailId)
-  const { badges } = useUserBadges(detailId)
-  const { count: connectionCount } = useConnectionCount(detailId)
-  const { stats } = useProfileStats(detailId)
+  const { projects } = useUserProjects(idFor('projects'))
+  const { events } = useUserEvents(idFor('events'))
+  const { badges } = useUserBadges(idFor('achievements'))
+  const { count: connectionCount } = useConnectionCount(idFor('standing'))
+  // Feeds both the meter and the shelf's pinned order; the server leaves out
+  // whichever half this viewer may not see.
+  const { stats } = useProfileStats(idFor('standing', 'achievements'))
   const { assetMap } = useTrophyAssets()
   // The whole catalogue, for the "Locked" teaser under the trophy shelf. It is
   // a small, static list cached under one key across the app, so this costs a
@@ -92,12 +99,12 @@ export default function PublicProfilePage() {
   const { badges: allBadges } = useAllBadges()
   // The business this member belongs to, if it has been Chamber-verified.
   // profiles.organization is free text and links nowhere; this is the entity.
-  const { employer } = useEmployerForUser(detailId)
+  const { employer } = useEmployerForUser(idFor('organisation'))
   const { items: portfolio } = useEmployerPortfolio(employer?.id)
   // The published CV was orphaned: /user/:id/cv existed and nothing linked to it.
   // public_resume() returns nothing unless it is published, so this both
   // decides whether to show the link and guarantees it goes somewhere.
-  const { data: publicResume } = usePublicResume(detailId)
+  const { data: publicResume } = usePublicResume(idFor('cv'))
   // Drives the copy on the private panel: "request sent" is a different thing
   // to say than "send a request", and the button already knows which it is.
   const { state: connectionState } = useConnectionStatus(auth.user?.id, id)
@@ -116,10 +123,11 @@ export default function PublicProfilePage() {
 
   // Powers the 'explorer' hidden achievement. Viewing your own page does not
   // count — that would be a free badge for reloading. Neither does bouncing
-  // off a private one: there is nothing there to have explored.
+  // off one with every section closed: there is nothing there to have explored.
+  const anythingToSee = !!profile && hidden.size < PROFILE_SECTIONS.length
   useEffect(() => {
-    if (id && auth.user?.id && id !== auth.user.id && canView) trackFlag('directory_views')
-  }, [id, auth.user?.id, canView, trackFlag])
+    if (id && auth.user?.id && id !== auth.user.id && anythingToSee) trackFlag('directory_views')
+  }, [id, auth.user?.id, anythingToSee, trackFlag])
 
   if (loading) {
     return (
@@ -173,6 +181,10 @@ export default function PublicProfilePage() {
         ? t`${displayName} has asked to connect with you. Accept and you will both see each other's full profile.`
         : t`Only ${displayName}'s connections can see their full profile or send them a message. Send a connection request to ask.`
 
+  const partialProfileMessage = t`Some of ${displayName}'s profile is for their connections only.`
+
+  // canView is still the master switch (083), and so still the messaging
+  // rule: opening a section of a private profile does not open the inbox.
   const canMessage = !isSelf && !!auth.user && canView && canDmAcrossAges(auth.profile, profile)
   const showCv = !isOrgAccount && !!publicResume
 
@@ -272,6 +284,7 @@ export default function PublicProfilePage() {
         ) : null
       }
       privateMessage={privateProfileMessage}
+      partialMessage={partialProfileMessage}
       back={{ label: t`Member Directory`, href: '/directory' }}
       dockRef={dockRef}
       railRef={railRef}
