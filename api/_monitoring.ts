@@ -81,30 +81,7 @@ if (sentryDsn) {
     dsn: sentryDsn,
     environment: process.env.SENTRY_ENVIRONMENT || process.env.VERCEL_ENV,
     release: process.env.SENTRY_RELEASE || process.env.VERCEL_GIT_COMMIT_SHA,
-    // SDK v11 replaced `sendDefaultPii: false` with per-category switches that
-    // default to collecting. This is the v10-equivalent block from Sentry's
-    // migration guide, so nothing new leaves the edge.
-    dataCollection: {
-      userInfo: false,
-      cookies: false,
-      httpHeaders: {
-        request: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
-        response: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
-      },
-      httpBodies: [],
-      urlQueryParams: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
-      genAI: { inputs: false, outputs: false },
-      databaseQueryData: false,
-      queues: false,
-      graphQL: { document: false, variables: false },
-    },
-    // v11 streams spans by default and skips beforeSendTransaction when it
-    // does, which would send every transaction past scrubTransaction. The
-    // static lifecycle keeps transactions, and the scrubber with them.
-    traceLifecycle: 'static',
-    // v11 also attaches a synthetic stack to non-Error captures by default.
-    // Off, as in v10, so existing issues keep grouping the way they did.
-    attachStacktrace: false,
+    sendDefaultPii: false,
     tracesSampleRate: 1,
     beforeSend: (event) => scrubEvent(event),
     beforeSendTransaction: (event) => scrubTransaction(event),
