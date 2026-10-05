@@ -243,8 +243,10 @@ export function PageHero({
         className={`relative w-full ${
           inset
             ? 'px-6 py-6 md:py-8'
-            // pt clears the fixed navbar; pb sets the band height
-            : 'w-full max-w-page mx-auto px-6 md:px-12 pt-[calc(var(--nav-h)+1.5rem)] pb-6 md:pb-8'
+            // pt clears the fixed navbar, and the IP notice band under it on
+            // the pages that have one (--notice-h, 0 elsewhere); pb sets the
+            // band height
+            : 'w-full max-w-page mx-auto px-6 md:px-12 pt-[calc(var(--nav-h)+var(--notice-h)+1.5rem)] pb-6 md:pb-8'
         }`}
       >
         {/* Phones: the back pill and the eyebrow share one line — pill hard

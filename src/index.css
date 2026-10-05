@@ -967,6 +967,12 @@ html.dark {
        merely below where it would be) reads it, so the two move together
        instead of one chasing the other. */
     --nav-offset: var(--nav-h);
+
+    /* Height of the IP notice band fixed under the navbar
+       (components/legal/AgreementBanner). Zero everywhere except inside
+       AgreementRoute, which sets it on its wrapper; PageHero adds it to its top
+       padding so the hero clears both bars. */
+    --notice-h: 0px;
   }
 
   @media (min-width: 64rem) {

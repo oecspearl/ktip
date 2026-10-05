@@ -20,6 +20,7 @@ import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { PermissionRoute } from './components/PermissionRoute'
+import { AgreementRoute } from './components/legal/AgreementRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { InstallPrompt } from './components/InstallPrompt'
@@ -213,7 +214,6 @@ const router = createBrowserRouter([
           // Public browse routes
           { path: '/', lazy: lazyPage(() => import('./pages/discover/DiscoverPage')) },
           { path: '/projects', lazy: lazyPage(() => import('./pages/projects/ProjectsPage')) },
-          { path: '/projects/:id', lazy: lazyPage(() => import('./pages/projects/ProjectDetailPage')) },
           { path: '/events', lazy: lazyPage(() => import('./pages/events/EventsPage')) },
           { path: '/events/:id', lazy: lazyPage(() => import('./pages/events/EventDetailPage')) },
           { path: '/grants', lazy: lazyPage(() => import('./pages/grants/GrantsPage')) },
@@ -331,17 +331,38 @@ const router = createBrowserRouter([
               },
               // Full-page receipt, deliberately outside the tab shell
               { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
+              // The same split as /directory and /user/:id. The list at
+              // /projects and the homepage hero stay open, so a visitor can see
+              // what is being built; opening one takes an account. A shared link
+              // still lands on the project, because LoginPage parks `state.from`
+              // (src/lib/return-to.ts) and the sign-in hands it back.
+              { path: '/projects/:id', lazy: lazyPage(() => import('./pages/projects/ProjectDetailPage')) },
               // Creating a project needs project:create (migration 064 put that
               // check in the INSERT policy). Gated here so a role without it —
               // investor, say — gets told why instead of filling in the whole
               // form and collecting a 403 from RLS on submit.
+              //
+              // AgreementRoute (here and on the create and edit pages below)
+              // shows the IP notice on every visit and pins an "agreed" band
+              // under the navbar once it is accepted. It sits inside the
+              // permission guard so the permission is checked first.
               {
                 element: <PermissionRoute require="project:create" />,
                 children: [
-                  { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="project" leaveTo="/projects" />,
+                    children: [
+                      { path: '/projects/new', lazy: lazyPage(() => import('./pages/projects/CreateProjectPage')) },
+                    ],
+                  },
                 ],
               },
-              { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
+              {
+                element: <AgreementRoute bundle="publishing" context="project" leaveTo="/projects" />,
+                children: [
+                  { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
+                ],
+              },
               // Same treatment as /projects/new: migration 090 put an
               // event:create check on the events INSERT policy, so the guard is
               // here too rather than letting a role without it fill in the
@@ -349,7 +370,12 @@ const router = createBrowserRouter([
               {
                 element: <PermissionRoute require="event:create" />,
                 children: [
-                  { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="event" leaveTo="/events" />,
+                    children: [
+                      { path: '/events/new', lazy: lazyPage(() => import('./pages/events/CreateEventPage')) },
+                    ],
+                  },
                 ],
               },
               // Contributing to the resource library (130). Gated for the same
@@ -365,7 +391,12 @@ const router = createBrowserRouter([
               {
                 element: <PermissionRoute require="resource:submit" />,
                 children: [
-                  { path: '/resources/submit', lazy: lazyPage(() => import('./pages/resources/SubmitResourcePage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="resource_submit" leaveTo="/resources" />,
+                    children: [
+                      { path: '/resources/submit', lazy: lazyPage(() => import('./pages/resources/SubmitResourcePage')) },
+                    ],
+                  },
                 ],
               },
               // The standalone edit page is gone — event fields are edited on
@@ -444,7 +475,14 @@ const router = createBrowserRouter([
                 lazy: lazyPage(() => import('./pages/events/VenueRedirectPage')),
               },
               { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
-              { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
+              // The application bundle, not publishing: what an applicant agrees
+              // to is confidentiality and that applying licenses nothing.
+              {
+                element: <AgreementRoute bundle="application" context="grant_application" leaveTo="/grants" />,
+                children: [
+                  { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
+                ],
+              },
               // The funder's half of /grants. grant:post has been on the grants
               // INSERT policy since 064 with no member-facing form to reach it;
               // 129 is where the form lands. Guarded here for the same reason
@@ -453,21 +491,36 @@ const router = createBrowserRouter([
               {
                 element: <PermissionRoute require="grant:post" />,
                 children: [
-                  { path: '/grants/new', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="grant_post" leaveTo="/grants" />,
+                    children: [
+                      { path: '/grants/new', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                    ],
+                  },
                   { path: '/grants/my-grants', lazy: lazyPage(() => import('./pages/grants/MyGrantsPage')) },
                 ],
               },
               {
                 element: <PermissionRoute require={['grant:post', 'grant:manage']} />,
                 children: [
-                  { path: '/grants/:id/edit', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="grant_post" leaveTo="/grants" />,
+                    children: [
+                      { path: '/grants/:id/edit', lazy: lazyPage(() => import('./pages/grants/GrantFormPage')) },
+                    ],
+                  },
                   // Reading the applications to your own call (130). The route
                   // guard is the coarse one — holding grant:post at all; which
                   // call is yours is decided by RLS and re-checked in the page.
                   { path: '/grants/:id/applications', lazy: lazyPage(() => import('./pages/grants/GrantApplicationsPage')) },
                 ],
               },
-              { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
+              {
+                element: <AgreementRoute bundle="publishing" context="forum_post" leaveTo="/forums" />,
+                children: [
+                  { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
+                ],
+              },
               // Boards, unlike posts, are permission-gated: migration 129 put a
               // forum:board check on the forum_boards INSERT policy, so the
               // guard is here for the same reason it is on /projects/new —
@@ -477,13 +530,23 @@ const router = createBrowserRouter([
               {
                 element: <PermissionRoute require="forum:board" />,
                 children: [
-                  { path: '/forums/new', lazy: lazyPage(() => import('./pages/forums/BoardFormPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="forum_post" leaveTo="/forums" />,
+                    children: [
+                      { path: '/forums/new', lazy: lazyPage(() => import('./pages/forums/BoardFormPage')) },
+                    ],
+                  },
                 ],
               },
               {
                 element: <PermissionRoute require={['forum:board', 'forum:manage']} />,
                 children: [
-                  { path: '/forums/:slug/edit', lazy: lazyPage(() => import('./pages/forums/BoardFormPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="forum_post" leaveTo="/forums" />,
+                    children: [
+                      { path: '/forums/:slug/edit', lazy: lazyPage(() => import('./pages/forums/BoardFormPage')) },
+                    ],
+                  },
                 ],
               },
               // The gallery lives in the dashboard now (AchievementsTab); the

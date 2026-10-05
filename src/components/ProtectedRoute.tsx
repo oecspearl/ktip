@@ -32,7 +32,9 @@ export const ProtectedRoute = () => {
   // requires_consent (115) is the third of the same shape: an OAuth signup never
   // saw the agreements, so it arrives owing them. Only the ACCOUNT bundle sets
   // this — publishing, competition and application agreements gate an action,
-  // not a session, and blocking navigation on those would be hostile. It also
+  // not a session, and blocking every navigation on those would be hostile.
+  // The create and edit pages that publish under them show their own notice
+  // on each visit, through AgreementRoute, which blocks that one page only. It also
   // defaults to false, so existing members are asked by the re-consent banner
   // rather than trapped here.
   if (

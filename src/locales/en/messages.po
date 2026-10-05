@@ -3406,6 +3406,10 @@ msgstr "Words"
 msgid "Next day"
 msgstr "Next day"
 
+#: src/components/legal/AgreementBanner.tsx
+msgid "Agreed {date}"
+msgstr "Agreed {date}"
+
 #: src/components/dashboard/RoleQuickActions.tsx
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
@@ -7585,6 +7589,10 @@ msgstr "Choose “Save as PDF” in the print dialog. Designs with a full-height
 msgid "Recording your acceptance of these policies"
 msgstr "Recording your acceptance of these policies"
 
+#: src/components/legal/AgreementGate.tsx
+msgid "Go back"
+msgstr "Go back"
+
 #: src/i18n/harvested.ts
 msgid "We acknowledge your notice by email and give it a reference."
 msgstr "We acknowledge your notice by email and give it a reference."
@@ -7744,6 +7752,10 @@ msgstr "Send a new code ({resendIn}s)"
 #: src/pages/grants/GrantFormPage.tsx
 msgid "This call sends applicants to an external link, so nothing below is shown to them. Clear the link above to take applications here."
 msgstr "This call sends applicants to an external link, so nothing below is shown to them. Clear the link above to take applications here."
+
+#: src/components/legal/AgreementBanner.tsx
+msgid "Read"
+msgstr "Read"
 
 #: src/i18n/harvested.ts
 msgid "Session"
@@ -8071,6 +8083,10 @@ msgstr "Help article — Events"
 #: src/components/legal/AgreementGate.tsx
 msgid "By continuing you agree to the account documents."
 msgstr "By continuing you agree to the account documents."
+
+#: src/components/legal/AgreementBanner.tsx
+msgid "IP notice"
+msgstr "IP notice"
 
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Created"
@@ -13088,6 +13104,10 @@ msgstr "Add the 2FAS extension to your browser from 2fas.com/browser-extension."
 msgid "Keynote"
 msgstr "Keynote"
 
+#: src/components/legal/AgreementBanner.tsx
+msgid "You agreed to the application terms. Your application stays confidential."
+msgstr "You agreed to the application terms. Your application stays confidential."
+
 #: src/i18n/harvested.ts
 msgid "Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators."
 msgstr "Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators."
@@ -17097,6 +17117,10 @@ msgstr "French"
 msgid "Name the board for the subject, not for a single question — threads go inside it."
 msgstr "Name the board for the subject, not for a single question — threads go inside it."
 
+#: src/components/legal/AgreementGate.tsx
+msgid "Two documents cover everything you publish on KTIP. They open each time you start or edit something here."
+msgstr "Two documents cover everything you publish on KTIP. They open each time you start or edit something here."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
 msgstr "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
@@ -18198,6 +18222,10 @@ msgstr "Loading whiteboard..."
 #: src/components/grants/RequiredDocumentsEditor.tsx
 msgid "Add a document"
 msgstr "Add a document"
+
+#: src/components/legal/AgreementGate.tsx
+msgid "One agreement covers every application you submit. It opens each time you start or return to an application."
+msgstr "One agreement covers every application you submit. It opens each time you start or return to an application."
 
 #: src/i18n/harvested.ts
 msgid "Where an entry is submitted by a team, the member who submits it confirms that every contributor has agreed to it being entered on these terms. Ownership between team members is a matter between you — KTIP records who submitted and who was credited, and takes no view on the shares."
@@ -21721,6 +21749,10 @@ msgstr "Nothing coming up under these filters — past events are below."
 #: src/lib/venue-room-presets.ts
 msgid "A small space for one team to work in."
 msgstr "A small space for one team to work in."
+
+#: src/components/legal/AgreementBanner.tsx
+msgid "You agreed to the publishing terms. You keep ownership of your work."
+msgstr "You agreed to the publishing terms. You keep ownership of your work."
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Failed to save preferences"

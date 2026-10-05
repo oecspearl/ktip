@@ -20,6 +20,13 @@ interface ConsentDocumentProps {
   onAcceptedChange: (accepted: boolean) => void
   /** Tighter spacing and a shorter scroller, for the create-flow modal. */
   dense?: boolean
+  /**
+   * Whether the checkbox waits for the reader to reach the end. Off only for a
+   * member who has already accepted this exact version and is seeing it again
+   * on the way into a create page (AgreementRoute): they still tick, but they
+   * are not made to scroll the same text on every visit.
+   */
+  requireScroll?: boolean
   className?: string
 }
 
@@ -48,6 +55,7 @@ export function ConsentDocument({
   bundle,
   onAcceptedChange,
   dense = false,
+  requireScroll = true,
   className,
 }: ConsentDocumentProps) {
   const { t } = useLingui()
@@ -55,7 +63,7 @@ export function ConsentDocument({
 
   const scrollerRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
-  const [reachedEnd, setReachedEnd] = useState(false)
+  const [reachedEnd, setReachedEnd] = useState(!requireScroll)
   const [checked, setChecked] = useState(false)
   const [nudge, setNudge] = useState('')
   const checkboxId = useId()
@@ -96,19 +104,21 @@ export function ConsentDocument({
           does not move the container — VoiceOver users, most obviously. This
           keeps the gate's intent (a deliberate act at the end of the document)
           without making it a dead end. */}
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-caption text-ktip-sand-500">
-          <Trans>Scroll to the end to continue.</Trans>
-        </p>
-        <button
-          type="button"
-          onClick={jumpToEnd}
-          className="inline-flex shrink-0 items-center gap-1.5 text-caption font-semibold text-ktip-ocean-700 hover:opacity-80"
-        >
-          <ArrowDown size={14} aria-hidden />
-          <Trans>Jump to the end</Trans>
-        </button>
-      </div>
+      {requireScroll && (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-caption text-ktip-sand-500">
+            <Trans>Scroll to the end to continue.</Trans>
+          </p>
+          <button
+            type="button"
+            onClick={jumpToEnd}
+            className="inline-flex shrink-0 items-center gap-1.5 text-caption font-semibold text-ktip-ocean-700 hover:opacity-80"
+          >
+            <ArrowDown size={14} aria-hidden />
+            <Trans>Jump to the end</Trans>
+          </button>
+        </div>
+      )}
 
       <div
         ref={scrollerRef}

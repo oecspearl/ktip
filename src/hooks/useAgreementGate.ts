@@ -162,9 +162,11 @@ export function useAgreementGate(bundle: Exclude<LegalBundle, 'informational'>):
     // Never gate while the answer is unknown. A false positive here blocks a
     // member who has already agreed; a false negative only means the gate fires
     // one submit later, once the query resolves.
-    // DEMO-ONLY (2026-09-10): re-prompt on every gated action. REVERT to:
-    //   needsAgreement: !isPending && outstanding.length > 0,
-    needsAgreement: !isPending,
+    //
+    // The every-visit notice on the create and edit pages is AgreementRoute's
+    // job, not this flag's. Turning this on every time again would show the
+    // notice once on entry and a second time on submit.
+    needsAgreement: !isPending && outstanding.length > 0,
     outstanding,
     accept,
     accepting: record.isPending,

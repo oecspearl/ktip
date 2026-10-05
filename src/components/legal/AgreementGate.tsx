@@ -65,10 +65,19 @@ interface AgreementGateModalProps {
   /** Runs after the acceptance is recorded — resume whatever the member was doing. */
   onAccepted: () => void | Promise<void>
   context: ConsentContext
+  /**
+   * `action` — the default: opened by a submit, once per version.
+   * `entry`  — opened by AgreementRoute every time a gated page is entered,
+   *            whatever the member has accepted before. Closing it leaves the
+   *            page, so the secondary button says "Go back".
+   */
+  mode?: 'action' | 'entry'
 }
 
 /**
- * The blocking modal, shown once per version at the first gated action.
+ * The blocking modal. On a submit (`action`) it shows once per version; on the
+ * way into a create or edit page (`entry`, via AgreementRoute) it shows on
+ * every visit.
  *
  * There is no "remind me later". A member who declines simply closes it and
  * their content is not published — which is the honest outcome, and better than
@@ -82,10 +91,12 @@ export function AgreementGateModal({
   onClose,
   onAccepted,
   context,
+  mode = 'action',
 }: AgreementGateModalProps) {
   const { t } = useLingui()
   const [accepted, setAccepted] = useState(false)
   const [failure, setFailure] = useState('')
+  const entry = mode === 'entry'
 
   const handleAccept = async () => {
     setFailure('')
@@ -115,15 +126,26 @@ export function AgreementGateModal({
             : t`Before you publish`
       }
       description={
-        bundle === 'competition'
-          ? t`One agreement covers every entry you submit. You will not be asked again unless it changes.`
-          : bundle === 'application'
-            ? t`One agreement covers every application you submit. You will not be asked again unless it changes.`
-            : t`Two documents cover everything you publish on KTIP. You will not be asked again unless they change.`
+        entry
+          ? bundle === 'application'
+            ? t`One agreement covers every application you submit. It opens each time you start or return to an application.`
+            : t`Two documents cover everything you publish on KTIP. They open each time you start or edit something here.`
+          : bundle === 'competition'
+            ? t`One agreement covers every entry you submit. You will not be asked again unless it changes.`
+            : bundle === 'application'
+              ? t`One agreement covers every application you submit. You will not be asked again unless it changes.`
+              : t`Two documents cover everything you publish on KTIP. You will not be asked again unless they change.`
       }
     >
       <div className="space-y-4">
-        <ConsentDocument bundle={bundle} onAcceptedChange={setAccepted} dense />
+        {/* On entry, a member who already accepted this version ticks the box
+            again but is not made to scroll the same text on every visit. */}
+        <ConsentDocument
+          bundle={bundle}
+          onAcceptedChange={setAccepted}
+          dense
+          requireScroll={!entry || gate.outstanding.length > 0}
+        />
 
         {failure && (
           <p role="alert" className="text-body text-red-600">
@@ -133,7 +155,7 @@ export function AgreementGateModal({
 
         <div className="flex flex-wrap justify-end gap-3">
           <Button variant="secondary" onClick={onClose} disabled={gate.accepting}>
-            <Trans>Not now</Trans>
+            {entry ? <Trans>Go back</Trans> : <Trans>Not now</Trans>}
           </Button>
           <Button onClick={handleAccept} loading={gate.accepting} disabled={!accepted}>
             <Trans>Agree & continue</Trans>
