@@ -117,6 +117,16 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
       cut.analysis.strayPixels > cut.analysis.width * cut.analysis.height * 0.005)
 
   // ---------------------------------------------------------------- files
+  // Each photo taken gets a number. A cut-out that finishes after a newer
+  // photo was picked belongs to the old one, and is dropped rather than
+  // shown over the new photo.
+  const takeSeqRef = useRef(0)
+  // Mirrors of the two object URLs, for the unmount cleanup. Its closure is
+  // created once, so reading state there would only ever see the first
+  // render's nulls and leak every blob made afterwards.
+  const urlsRef = useRef<{ file: string | null; cut: string | null }>({ file: null, cut: null })
+  urlsRef.current = { file: fileUrl, cut: cut?.url ?? null }
+
   const takeFile = async (f: File) => {
     if (!f.type.startsWith('image/')) {
       toast.error(t`Please select an image file`)
@@ -138,16 +148,19 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
     setCutError(null)
     setSideOverride('auto')
     if (!supported) return
+    const seq = ++takeSeqRef.current
     // Cut straight away so the backdrops tab has something to show by the
     // time the member reaches it. The model download is the slow part, once.
     setCutting(true)
     try {
       const { cutOutPortrait } = await import('../../lib/portrait-cutout')
       const result = await cutOutPortrait(f, { onPhase: setPhase })
+      if (seq !== takeSeqRef.current) return
       setCut({ blob: result.cutout, analysis: result, url: URL.createObjectURL(result.cutout) })
       if (draft.kind === 'photo') setDraft(withCut({ kind: 'backdrop', id: AVATAR_BACKDROPS[0].id }, result.side, result.frame))
       if (tab === 'photo') setTab('designs')
     } catch (err) {
+      if (seq !== takeSeqRef.current) return
       setCutError(
         err instanceof CutoutUnavailableError
           ? err.message
@@ -156,8 +169,10 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
       setDraft(PHOTO_STYLE)
       setTab('photo')
     } finally {
-      setCutting(false)
-      setPhase('idle')
+      if (seq === takeSeqRef.current) {
+        setCutting(false)
+        setPhase('idle')
+      }
     }
   }
 
@@ -169,10 +184,10 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
 
   useEffect(
     () => () => {
-      if (fileUrl) URL.revokeObjectURL(fileUrl)
-      if (cut) URL.revokeObjectURL(cut.url)
+      const { file, cut: cutUrl } = urlsRef.current
+      if (file) URL.revokeObjectURL(file)
+      if (cutUrl) URL.revokeObjectURL(cutUrl)
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 

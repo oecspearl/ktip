@@ -224,7 +224,7 @@ export default function AdminGrievancesPage() {
                           <div className="flex items-center gap-1">
                             {grievance.status === 'pending' && (
                               <button
-                                onClick={() => handleStatusChange(grievance.id, 'under_review')}
+                                disabled={updateLoading} onClick={() => handleStatusChange(grievance.id, 'under_review')}
                                 className="p-1.5 text-ktip-ocean-600 hover:bg-ktip-ocean-50 rounded-lg transition-colors"
                                 title="Mark Under Review"
                               >
@@ -233,7 +233,7 @@ export default function AdminGrievancesPage() {
                             )}
                             {grievance.status !== 'resolved' && (
                               <button
-                                onClick={() => handleStatusChange(grievance.id, 'resolved')}
+                                disabled={updateLoading} onClick={() => handleStatusChange(grievance.id, 'resolved')}
                                 className="p-1.5 text-ktip-tropical-700 hover:bg-ktip-tropical-50 rounded-lg transition-colors"
                                 title="Resolve"
                               >
@@ -242,7 +242,7 @@ export default function AdminGrievancesPage() {
                             )}
                             {grievance.status !== 'dismissed' && (
                               <button
-                                onClick={() => handleStatusChange(grievance.id, 'dismissed')}
+                                disabled={updateLoading} onClick={() => handleStatusChange(grievance.id, 'dismissed')}
                                 className="p-1.5 text-ktip-sand-500 hover:bg-ktip-sand-100 rounded-lg transition-colors"
                                 title="Dismiss"
                               >
@@ -304,12 +304,12 @@ export default function AdminGrievancesPage() {
 
                     <div className="flex items-center gap-2 pt-1">
                       {grievance.status === 'pending' && (
-                        <Button size="sm" variant="outline" onClick={() => handleStatusChange(grievance.id, 'under_review')}>
+                        <Button size="sm" variant="outline" disabled={updateLoading} onClick={() => handleStatusChange(grievance.id, 'under_review')}>
                           Review
                         </Button>
                       )}
                       {grievance.status !== 'resolved' && (
-                        <Button size="sm" variant="outline" onClick={() => handleStatusChange(grievance.id, 'resolved')}>
+                        <Button size="sm" variant="outline" disabled={updateLoading} onClick={() => handleStatusChange(grievance.id, 'resolved')}>
                           Resolve
                         </Button>
                       )}

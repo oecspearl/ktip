@@ -105,6 +105,8 @@ export default function AdminModerationPage() {
   const { moderateReport, loading: actioning } = useModerateReport()
   const { terms, refetch: refetchTerms } = useModerationTerms()
   const { createTerm, updateTerm, deleteTerm } = useManageModerationTerms()
+  // A double click on "Add term" inserted the same pattern twice.
+  const [creatingTerm, setCreatingTerm] = useState(false)
   const { settings, updateSettings, saving } = useModerationSettings()
 
   const [selected, setSelected] = useState<ContentReport | null>(null)
@@ -195,6 +197,8 @@ export default function AdminModerationPage() {
       return
     }
     if (lint.warning) toast.warning(lint.warning)
+    if (creatingTerm) return
+    setCreatingTerm(true)
     try {
       await createTerm({
         pattern: newTerm.pattern.trim(),
@@ -220,6 +224,8 @@ export default function AdminModerationPage() {
       refetchTerms()
     } catch (err: any) {
       toast.error(err.message || 'Failed to add term')
+    } finally {
+      setCreatingTerm(false)
     }
   }
 
@@ -749,7 +755,7 @@ export default function AdminModerationPage() {
             <Button variant="outline" size="sm" onClick={() => setTermModalOpen(false)}>
               Cancel
             </Button>
-            <Button size="sm" onClick={handleCreateTerm}>
+            <Button size="sm" onClick={handleCreateTerm} disabled={creatingTerm}>
               Add term
             </Button>
           </div>

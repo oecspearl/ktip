@@ -74,6 +74,14 @@ function notePayload(patch: StickyNotePatch) {
   return rest
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Everything about a note that an update may carry. */
+function noteFields(note: StickyNoteRecord): StickyNotePatch {
+  const { id: _id, created_at: _created, ...fields } = note
+  return fields
+}
+
 /**
  * Sticky notes and their folders for the signed-in member, or localStorage for
  * everyone else.
@@ -93,6 +101,11 @@ export function useStickyNotes() {
   const queryClient = useQueryClient()
   const queryKey = keys.list(DOMAIN, userId ?? 'local')
   const timers = useRef(new Map<string, number>())
+  /** Inserts still in flight, by note id. A drag or delete issued straight
+   *  after creating a note travels on its own request and can reach Postgres
+   *  before the INSERT commits, where it matches no row and is lost. Writes
+   *  to a note wait for its insert first. */
+  const pendingCreates = useRef(new Map<string, Promise<unknown>>())
 
   useEffect(() => {
     const pending = timers.current
@@ -157,22 +170,40 @@ export function useStickyNotes() {
 
   const createNoteMutation = useMutation({
     mutationFn: async (note: StickyNoteRecord) => {
-      const { id: _id, created_at: _created, ...fields } = note
+      const { id, created_at: _created, ...fields } = note
+      // Insert under the id already on screen, so every edit made while this
+      // is in flight addresses a row that will exist. The old way let the
+      // server pick the id and swapped it in on success, which threw away
+      // anything typed in between and sent those edits to a phantom id.
+      // makeNote only falls back to a non-UUID where crypto.randomUUID is
+      // missing; that path still lets the server choose.
+      const row = UUID_RE.test(id)
+        ? { id, ...fields, user_id: userId }
+        : { ...fields, user_id: userId }
       const { data, error } = await (supabase as any)
         .from('sticky_notes')
-        .insert({ ...fields, user_id: userId })
+        .insert(row)
         .select(NOTE_COLUMNS)
         .single()
       if (error) throw error
       return rowToNote(data)
     },
     onSuccess: (saved, local) => {
-      // Swap the optimistic id for the real one, or later edits address a row
-      // that does not exist.
+      // Take only what the server decided. The local note may have moved on
+      // since the insert was sent, and its content is the newer copy.
+      let current: StickyNoteRecord | undefined
       setState((prev) => ({
         ...prev,
-        notes: prev.notes.map((n) => (n.id === local.id ? saved : n)),
+        notes: prev.notes.map((n) => {
+          if (n.id !== local.id) return n
+          current = { ...n, id: saved.id, created_at: saved.created_at }
+          return current
+        }),
       }))
+      // Fallback path only: edits made before the id was known went nowhere.
+      if (current && saved.id !== local.id) {
+        updateNoteMutation.mutate({ id: saved.id, patch: noteFields(current) })
+      }
     },
     onError: (err, local) => {
       console.error('Could not save sticky note:', err)
@@ -182,6 +213,7 @@ export function useStickyNotes() {
 
   const updateNoteMutation = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: StickyNotePatch }) => {
+      await pendingCreates.current.get(id)
       const { error } = await (supabase as any)
         .from('sticky_notes')
         .update(notePayload(patch))
@@ -193,6 +225,7 @@ export function useStickyNotes() {
 
   const deleteNoteMutation = useMutation({
     mutationFn: async (id: string) => {
+      await pendingCreates.current.get(id)
       const { error } = await (supabase as any).from('sticky_notes').delete().eq('id', id)
       if (error) throw error
     },
@@ -201,10 +234,16 @@ export function useStickyNotes() {
 
   const createGroupMutation = useMutation({
     mutationFn: async ({ group, noteIds }: { group: StickyGroupRecord; noteIds: string[] }) => {
-      const { id: _id, created_at: _created, ...fields } = group
+      const { id, created_at: _created, ...fields } = group
+      // Same reasoning as notes: keep the on-screen id so a rename or drag
+      // made before the insert lands is not addressed to a phantom.
+      const row = UUID_RE.test(id)
+        ? { id, ...fields, user_id: userId }
+        : { ...fields, user_id: userId }
+      await Promise.all(noteIds.map((noteId) => pendingCreates.current.get(noteId)))
       const { data, error } = await (supabase as any)
         .from('sticky_note_groups')
-        .insert({ ...fields, user_id: userId })
+        .insert(row)
         .select(GROUP_COLUMNS)
         .single()
       if (error) throw error
@@ -222,7 +261,9 @@ export function useStickyNotes() {
     },
     onSuccess: ({ saved, noteIds }, { group }) => {
       setState((prev) => ({
-        groups: prev.groups.map((g) => (g.id === group.id ? saved : g)),
+        groups: prev.groups.map((g) =>
+          g.id === group.id ? { ...g, id: saved.id, created_at: saved.created_at } : g
+        ),
         notes: prev.notes.map((n) =>
           noteIds.includes(n.id) || n.group_id === group.id ? { ...n, group_id: saved.id } : n
         ),
@@ -268,7 +309,11 @@ export function useStickyNotes() {
         return { ...prev, notes }
       })
       if (userId) {
-        createNoteMutation.mutate(note)
+        const insert = createNoteMutation
+          .mutateAsync(note)
+          .catch(() => {})
+          .finally(() => pendingCreates.current.delete(note.id))
+        pendingCreates.current.set(note.id, insert)
         if (evicted) deleteNoteMutation.mutate(evicted.id)
       }
       return note

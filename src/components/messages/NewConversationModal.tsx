@@ -56,7 +56,7 @@ export function NewConversationModal({ open, onClose, onCreated, mode = 'auto' }
         }
         try {
           const users = await searchUsers(query.trim(), auth.user.id)
-          setResults(users)
+          if (users) setResults(users)
         } catch {
           setResults([])
         }

@@ -529,7 +529,21 @@ export function useApplyForGrant() {
       if (error) throw error
       return data
     },
-    onSuccess: (_data, variables) => invalidate(variables.user_id),
+    // Autosave runs this every few seconds of typing. A full invalidate()
+    // refetched the draft just written plus every mounted dashboard query each
+    // time. The draft is written back from the response instead, and the
+    // lists are only marked stale, so they reload when next shown.
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        keys.sub('grants', 'application', `${variables.grant_id}:${variables.user_id}`),
+        data
+      )
+      queryClient.invalidateQueries({
+        queryKey: keys.sub('grants', 'applications', variables.user_id),
+        refetchType: 'none',
+      })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard'), refetchType: 'none' })
+    },
   })
 
   const submitMutation = useMutation({

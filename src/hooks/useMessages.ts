@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
+import { insertByCreatedAt, uniqueTopic } from '../lib/realtime'
 import { attachmentUrl } from '../lib/chat-attachments'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -86,7 +87,7 @@ export function useUnreadMessageCount(userId: string | undefined) {
     if (!userId) return
 
     const channel = supabase
-      .channel(`messages:unread:${userId}`)
+      .channel(uniqueTopic(`messages:unread:${userId}`))
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
@@ -144,7 +145,7 @@ export function useRealtimeMessages(
     const threadKey = keys.sub('messages', 'thread', cid)
 
     const channel = supabase
-      .channel(`messages:${cid}`)
+      .channel(uniqueTopic(`messages:${cid}`))
       .on(
         'postgres_changes',
         {
@@ -154,27 +155,36 @@ export function useRealtimeMessages(
           filter: `conversation_id=eq.${cid}`,
         },
         async (payload) => {
-          // Fetch full message with sender profile
-          const { data, error } = await supabase
-            .from('messages')
-            .select('*, sender:profiles(*)')
-            .eq('id', payload.new.id)
-            .single()
-          if (error) {
-            console.error('Error fetching new message:', error)
-            return
+          const row = payload.new as any
+          // The row is already in the payload; only the sender's profile is
+          // missing, and in an ongoing thread it is almost always in the cache
+          // from their last message. Round-trip only for a first message.
+          const known = queryClient
+            .getQueryData<Message[]>(threadKey)
+            ?.find((m) => (m as any).sender_id === row.sender_id && (m as any).sender)
+          let msg: Message
+          if (known) {
+            msg = { ...row, sender: (known as any).sender } as Message
+          } else {
+            const { data, error } = await supabase
+              .from('messages')
+              .select('*, sender:profiles(*)')
+              .eq('id', row.id)
+              .single()
+            if (error) {
+              console.error('Error fetching new message:', error)
+              return
+            }
+            if (!data) return
+            msg = data as any as Message
           }
-          if (!data) return
 
-          const msg = data as any as Message
-
-          // Dedupe by id — StrictMode double-mounts effects in dev, and a
-          // channel resubscribe race could otherwise append the same row twice.
-          queryClient.setQueryData<Message[]>(threadKey, (old) => {
-            if (!old) return [msg]
-            if (old.some((m) => (m as any).id === (msg as any).id)) return old
-            return [...old, msg]
-          })
+          // Deduped by id (StrictMode double mounts, the optimistic append
+          // racing the WAL event) and placed by created_at, since the awaited
+          // branch above lets two arrivals finish out of order.
+          queryClient.setQueryData<Message[]>(threadKey, (old) =>
+            insertByCreatedAt(old as any, msg as any) as any
+          )
 
           onNewMessageRef.current?.(msg)
         }
@@ -438,28 +448,48 @@ export function useGroupConversationMutations() {
   }
 }
 
+/** What a people picker renders: a name, an avatar, a role chip. */
+const SEARCH_COLUMNS = 'id, username, display_name, avatar_url, roles, organization, country'
+
+/**
+ * Search-as-you-type for people pickers.
+ *
+ * Each call aborts the one before it and resolves `null` once superseded, so
+ * a slow response for "ma" can no longer arrive after the one for "mar" and
+ * replace the newer results. Callers skip a `null`.
+ */
 export function useSearchUsers() {
-  const mutation = useMutation({
-    mutationFn: async ({
-      query,
-      excludeId,
-    }: {
-      query: string
-      excludeId: string
-    }): Promise<Profile[]> => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .neq('id', excludeId)
-        .ilike('display_name', `%${escapeIlike(query)}%`)
-        .limit(10)
-      if (error) throw error
-      return (data as Profile[]) || []
+  const [loading, setLoading] = useState(false)
+  const latest = useRef<AbortController | null>(null)
+
+  useEffect(() => () => latest.current?.abort(), [])
+
+  const searchUsers = useCallback(
+    async (query: string, excludeId: string): Promise<Profile[] | null> => {
+      latest.current?.abort()
+      const controller = new AbortController()
+      latest.current = controller
+      setLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(SEARCH_COLUMNS)
+          .neq('id', excludeId)
+          .ilike('display_name', `%${escapeIlike(query)}%`)
+          .limit(10)
+          .abortSignal(controller.signal)
+        if (controller.signal.aborted) return null
+        if (error) throw error
+        return ((data as unknown) as Profile[]) || []
+      } catch (err) {
+        if (controller.signal.aborted) return null
+        throw err
+      } finally {
+        if (latest.current === controller) setLoading(false)
+      }
     },
-  })
+    []
+  )
 
-  const searchUsers = (query: string, excludeId: string) =>
-    mutation.mutateAsync({ query, excludeId })
-
-  return { searchUsers, loading: mutation.isPending }
+  return { searchUsers, loading }
 }

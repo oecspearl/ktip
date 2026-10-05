@@ -112,13 +112,17 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
   const [itemOpen, setItemOpen] = useState(false)
   const [draft, setDraft] = useState<PortfolioItemInput>(EMPTY_ITEM)
 
+  // Fill the form once per organisation. Keyed on the id, not the object:
+  // saving a portfolio item refetches the employer, and the new object reset
+  // every field here, discarding profile edits not yet saved.
   useEffect(() => {
     if (!employer) return
     setDescription(employer.description || '')
     setWebsiteUrl(employer.website_url || '')
     setIndustry(employer.industry || '')
     setLogoUrl(employer.logo_url || '')
-  }, [employer])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employer?.id])
 
   if (!auth.loading && !auth.user) return <Navigate to="/login" replace />
 

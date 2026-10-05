@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Check, Repeat } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -28,11 +29,16 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
   // Every held role, aliases collapsed, never narrowed by the current context —
   // a switcher that only offered the narrowed set would lock the member in.
   const held = displayRoles(auth.profile?.roles, null)
+  // Two quick taps sent two concurrent setActiveRole writes, and whichever
+  // landed last won regardless of which was tapped last.
+  const [switching, setSwitching] = useState(false)
 
   // A single-role account has nothing to switch between.
   if (held.length < 2) return null
 
   const handleSelect = async (role: RoleSlug | null) => {
+    if (switching) return
+    setSwitching(true)
     try {
       await auth.setActiveRole(role)
       // The role label is harvested out of lib/permissions into the catalog, so
@@ -43,6 +49,8 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
     } catch (err: any) {
       // Only the fallback is ours; err.message comes back from Postgres.
       toast.error(err.message || t`Could not switch role`)
+    } finally {
+      setSwitching(false)
     }
   }
 
@@ -56,6 +64,7 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
       <button
         type="button"
         onClick={() => handleSelect(null)}
+        disabled={switching}
         className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
       >
         <span><Trans>All roles</Trans></span>
@@ -67,6 +76,7 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
           key={slug}
           type="button"
           onClick={() => handleSelect(slug)}
+          disabled={switching}
           className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
         >
           {/* The role label is a descriptor now, so it has to be resolved.

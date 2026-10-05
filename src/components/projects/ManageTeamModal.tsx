@@ -32,6 +32,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
     if (!auth.user || !searchQuery.trim()) return
     try {
       const users = await searchUsers(searchQuery.trim(), auth.user.id)
+      if (!users) return
       const memberIds = new Set((members || []).map((m) => m.user_id))
       setResults(users.filter((u) => !memberIds.has(u.id)))
     } catch {

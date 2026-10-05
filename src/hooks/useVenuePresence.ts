@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { freshChannel, releaseChannel } from '../lib/realtime'
 import { keys } from '../queries/keys'
 import { VENUE } from '../lib/constants'
 import {
@@ -164,22 +165,9 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
     //
     // Only CLOSED is terminal to the library, so only CLOSED is restarted
     // here — and only after the dead instance is disposed of COMPLETELY.
-    const dispose = async (ch: ReturnType<typeof supabase.channel>) => {
-      try {
-        await supabase.removeChannel(ch)
-      } catch {
-        // The leave can time out; teardown below still retires the instance.
-      }
-      // removeChannel only delists after a clean leave. teardown() disarms the
-      // rejoin timer and drops the bindings either way, so this instance can
-      // never come back from the dead and unsubscribe its replacement.
-      try {
-        ;(ch as any).teardown?.()
-      } catch {
-        // Internal API; if it ever disappears the removeChannel above is
-        // still the documented path.
-      }
-    }
+    // Full retirement (leave, teardown, delist) lives in lib/realtime, where
+    // freshChannel can wait for it.
+    const dispose = (ch: ReturnType<typeof supabase.channel>) => releaseChannel(ch)
 
     const scheduleRestart = () => {
       if (cancelled || retryTimer) return
@@ -202,7 +190,7 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
     }
 
     const makeChannel = () =>
-      supabase.channel(`venue:${eventId}`, {
+      freshChannel(`venue:${eventId}`, {
         config: { private: true, presence: { key: userId }, broadcast: { self: false } },
       })
 
@@ -216,16 +204,14 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       }
       if (cancelled) return
 
-      let ch = makeChannel()
       // supabase.channel() returns the existing instance when the topic is
       // already known. One that has lived before cannot be subscribed again,
       // and binding presence handlers onto it while joined forces the library
-      // into an unsubscribe/resubscribe cycle. Retire it and take a fresh one.
-      if ((ch as any).joinedOnce) {
-        await dispose(ch)
-        if (cancelled) return
-        ch = makeChannel()
-      }
+      // into an unsubscribe/resubscribe cycle. freshChannel retires it, and
+      // waits out a leave from the previous mount that would otherwise delist
+      // this one when it lands.
+      const ch = await makeChannel()
+      if (cancelled) return
       channel = ch
       channelRef.current = ch
 
@@ -270,7 +256,7 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       if (retryTimer) window.clearTimeout(retryTimer)
       if (channel) {
         void channel.untrack()
-        supabase.removeChannel(channel)
+        void releaseChannel(channel)
       }
       channelRef.current = null
     }

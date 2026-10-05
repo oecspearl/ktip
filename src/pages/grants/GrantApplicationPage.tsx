@@ -169,6 +169,7 @@ export default function GrantApplicationPage() {
   const handleSaveDraft = async () => {
     try {
       autoSave.cancel()
+      await autoSave.settled()
       await persistDraft()
       toast.success(t`Draft saved`)
     } catch {
@@ -180,6 +181,7 @@ export default function GrantApplicationPage() {
     if (!validateCurrentStep()) return
     try {
       autoSave.cancel()
+      await autoSave.settled()
       await persistDraft()
     } catch {
       // keep going; autosave will retry
@@ -228,7 +230,11 @@ export default function GrantApplicationPage() {
 
   const submitApplicationNow = async () => {
     try {
+      // cancel() only stops a save that has not started. One already on the
+      // wire upserts status 'draft' and, landing after the submit, used to
+      // turn the application back into a draft (161 now refuses that).
       autoSave.cancel()
+      await autoSave.settled()
       let id = applicationId
       if (!id) {
         const saved = await saveDraft({

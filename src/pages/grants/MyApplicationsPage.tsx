@@ -38,7 +38,7 @@ export default function MyApplicationsPage() {
   const { applications, loading } = useGrantApplications(auth.user?.id)
   const { receipts } = useSubmissionReceipts(auth.user?.id)
   const { requests: sponsorships, refetch: refetchSponsorships } = useSponsorshipRequests(auth.user?.id)
-  const { reviewSponsorship } = useReviewSponsorship()
+  const { reviewSponsorship, loading: reviewing } = useReviewSponsorship()
   const toast = useToast()
 
   const tallies = useMemo(() => applicationTallies(applications), [applications])
@@ -197,11 +197,16 @@ export default function MyApplicationsPage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        disabled={reviewing}
                         onClick={() => handleSponsorship(request.id, false)}
                       >
                         <Trans>Decline</Trans>
                       </Button>
-                      <Button size="sm" onClick={() => handleSponsorship(request.id, true)}>
+                      <Button
+                        size="sm"
+                        disabled={reviewing}
+                        onClick={() => handleSponsorship(request.id, true)}
+                      >
                         <Trans>Accept</Trans>
                       </Button>
                     </div>

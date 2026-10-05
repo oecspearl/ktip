@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -153,25 +153,37 @@ export default function EventDetailPage() {
     }
   }
 
+  // Set by any RSVP action. The initial check must not overwrite a choice the
+  // member made while it was still in flight.
+  const rsvpTouchedRef = useRef(false)
+
   // Check RSVP status and count
   useEffect(() => {
     if (!event || !auth.user) return
+    // Navigating between events, or signing out, while the check is in flight
+    // used to land the previous event's answer on this one.
+    let ignore = false
+    rsvpTouchedRef.current = false
     setChecking(true)
     Promise.all([
       checkRSVP(event.id, auth.user.id),
       getRSVPCount(event.id),
     ])
       .then(([mine, count]) => {
+        if (ignore || rsvpTouchedRef.current) return
         setMyRsvp(mine)
         if (mine) setAttendanceType(mine.attendance_type)
         setRSVPCount(count)
       })
       .catch((error) => {
-        console.error('Error checking RSVP:', error)
+        if (!ignore) console.error('Error checking RSVP:', error)
       })
       .finally(() => {
-        setChecking(false)
+        if (!ignore) setChecking(false)
       })
+    return () => {
+      ignore = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event?.id, auth.user?.id])
 
@@ -179,6 +191,7 @@ export default function EventDetailPage() {
 
   const handleRSVP = async () => {
     if (!auth.user || !event) return
+    rsvpTouchedRef.current = true
 
     try {
       if (myRsvp?.status === 'declined') {
@@ -210,6 +223,7 @@ export default function EventDetailPage() {
 
   const handleRegistrationSubmit = async (data: Record<string, any>) => {
     if (!auth.user || !event) return
+    rsvpTouchedRef.current = true
     try {
       await submitRegistration(event.id, auth.user.id, data, attendanceType, event, registrantName)
       setMyRsvp({ status: 'pending', attendance_type: attendanceType })

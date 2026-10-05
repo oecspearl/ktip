@@ -109,6 +109,7 @@ export default function VideoConferencePage() {
         }
         try {
           const results = await searchUsersRef.current(query, userId)
+          if (!results) return
           // Filter out already-selected users
           const selectedIds = new Set(selectedUsersRef.current.map((u) => u.id))
           setSearchResults(results.filter((r) => !selectedIds.has(r.id)))

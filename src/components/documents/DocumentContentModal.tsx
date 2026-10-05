@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Download, Save, FileWarning } from 'lucide-react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
@@ -51,9 +51,14 @@ export function DocumentContentModal({
 
   const [html, setHtml] = useState('')
   const [dirty, setDirty] = useState(false)
+  const dirtyRef = useRef(false)
+  dirtyRef.current = dirty
 
+  // Load the server copy, but never over unsaved edits: a reconnect refetch
+  // hands back a new `full` object for the same document, and resetting on
+  // that wiped whatever had been typed since the last save.
   useEffect(() => {
-    if (full) {
+    if (full && !dirtyRef.current) {
       setHtml(full.content_html || '')
       setDirty(false)
     }

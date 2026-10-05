@@ -58,7 +58,7 @@ export default function AdminInstitutionsPage() {
     status: statusFilter || undefined,
   })
   const { reviewInstitution, loading: reviewing } = useReviewInstitution()
-  const { reviewMember } = useReviewInstitutionMember()
+  const { reviewMember, loading: reviewingMember } = useReviewInstitutionMember()
 
   const [selected, setSelected] = useState<Institution | null>(null)
   const [domainsDraft, setDomainsDraft] = useState('')
@@ -443,10 +443,19 @@ export default function AdminInstitutionsPage() {
                   </p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <Button variant="outline" size="sm" onClick={() => handleMemberReview(member.id, false)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={reviewingMember}
+                    onClick={() => handleMemberReview(member.id, false)}
+                  >
                     Do not accept
                   </Button>
-                  <Button size="sm" onClick={() => handleMemberReview(member.id, true)}>
+                  <Button
+                    size="sm"
+                    disabled={reviewingMember}
+                    onClick={() => handleMemberReview(member.id, true)}
+                  >
                     Approve
                   </Button>
                 </div>

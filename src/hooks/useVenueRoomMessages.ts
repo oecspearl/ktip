@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
+import { insertByCreatedAt, uniqueTopic } from '../lib/realtime'
 import { keys } from '../queries/keys'
 import { VENUE } from '../lib/constants'
 import type { VenueRoomMessage } from '../types'
@@ -59,7 +60,7 @@ export function useRealtimeRoomMessages(roomId: string | undefined) {
     const threadKey = keys.sub('venue', 'messages', rid)
 
     const channel = supabase
-      .channel(`venue_room_messages:${rid}`)
+      .channel(uniqueTopic(`venue_room_messages:${rid}`))
       .on(
         'postgres_changes',
         {
@@ -69,22 +70,30 @@ export function useRealtimeRoomMessages(roomId: string | undefined) {
           filter: `room_id=eq.${rid}`,
         },
         async (payload) => {
-          const { data, error } = await (supabase as any)
-            .from('venue_room_messages')
-            .select('*, author:profiles(id, display_name, avatar_url)')
-            .eq('id', (payload.new as any).id)
-            .single()
-          if (error || !data) return
+          const row = payload.new as any
+          // Reuse the author from their earlier messages when the cache has
+          // them; a busy room otherwise pays one SELECT per chat line.
+          const known = queryClient
+            .getQueryData<VenueRoomMessage[]>(threadKey)
+            ?.find((m) => (m as any).author?.id === row.author_id)
+          let msg: VenueRoomMessage
+          if (known && row.author_id) {
+            msg = { ...row, author: (known as any).author } as VenueRoomMessage
+          } else {
+            const { data, error } = await (supabase as any)
+              .from('venue_room_messages')
+              .select('*, author:profiles(id, display_name, avatar_url)')
+              .eq('id', row.id)
+              .single()
+            if (error || !data) return
+            msg = data as VenueRoomMessage
+          }
 
-          const msg = data as VenueRoomMessage
-
-          // Dedupe by id — StrictMode double-mounts effects in dev, and the
-          // optimistic append below can race the WAL event.
-          queryClient.setQueryData<VenueRoomMessage[]>(threadKey, (old) => {
-            if (!old) return [msg]
-            if (old.some((m) => m.id === msg.id)) return old
-            return [...old, msg]
-          })
+          // Deduped by id (StrictMode, the optimistic append racing the WAL
+          // event) and placed by created_at: async arrivals finish in any order.
+          queryClient.setQueryData<VenueRoomMessage[]>(threadKey, (old) =>
+            insertByCreatedAt(old as any, msg as any) as any
+          )
         }
       )
       .subscribe()

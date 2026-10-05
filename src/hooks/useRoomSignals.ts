@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
+import { freshChannel, releaseChannel } from '../lib/realtime'
 
 /**
  * The three things a room needs to say that are not worth a row.
@@ -111,9 +112,14 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
       // self: true — the person who clapped should see their own clap. The
       // move channel deliberately does the opposite, because you already know
       // where you are standing.
-      channel = supabase.channel(`room:${roomId}`, {
+      // freshChannel, not supabase.channel: the topic is shared with everyone
+      // in the room, so it cannot be made unique, and a quick A -> B -> A move
+      // would otherwise get back room A's dying instance.
+      const ch = await freshChannel(`room:${roomId}`, {
         config: { private: true, broadcast: { self: true } },
       })
+      if (cancelled) return
+      channel = ch
       channelRef.current = channel
 
       channel
@@ -189,7 +195,7 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
     return () => {
       cancelled = true
       setConnected(false)
-      if (channel) supabase.removeChannel(channel)
+      if (channel) void releaseChannel(channel)
       channelRef.current = null
     }
   }, [active, roomId])

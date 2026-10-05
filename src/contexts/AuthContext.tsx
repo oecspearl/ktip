@@ -622,8 +622,24 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       }
       cachedUserId = nextUserId
 
-      setSession(newSession)
-      setUser(newSession?.user ?? null)
+      // auth-js re-emits SIGNED_IN on every visibilitychange, with freshly
+      // built objects for the same session. Storing those unconditionally
+      // gave the context a new value on every tab focus and every PWA app
+      // switch, and re-rendered every consumer for nothing. Keep the old
+      // objects unless something in them actually changed.
+      setSession((prev) =>
+        prev && newSession && prev.access_token === newSession.access_token ? prev : newSession
+      )
+      setUser((prev) => {
+        const next = newSession?.user ?? null
+        return prev &&
+          next &&
+          prev.id === next.id &&
+          prev.updated_at === next.updated_at &&
+          prev.email === next.email
+          ? prev
+          : next
+      })
 
       // Set loading false IMMEDIATELY — we now know the auth state.
       // Profile fetch happens separately (via useQuery) and shouldn't block navigation.

@@ -128,6 +128,7 @@ export function ShareEntityModal({
         }
         try {
           const res = await searchUsersRef.current(q, userId)
+          if (!res) return
           const selectedIds = new Set(selectedRef.current.map((u) => u.id))
           setResults(res.filter((r) => !selectedIds.has(r.id)))
           setShowDropdown(true)

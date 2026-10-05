@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { uniqueTopic } from '../lib/realtime'
 import type { Notification } from '../types'
 
 async function fetchNotifications(uid: string): Promise<Notification[]> {
@@ -38,7 +39,7 @@ export function useNotifications(userId: string | undefined) {
     if (!userId) return
 
     const channel = supabase
-      .channel(`notifications:${userId}`)
+      .channel(uniqueTopic(`notifications:${userId}`))
       .on(
         'postgres_changes',
         {

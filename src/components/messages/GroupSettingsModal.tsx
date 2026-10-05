@@ -46,6 +46,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
     if (!auth.user || !searchQuery.trim()) return
     try {
       const users = await searchUsers(searchQuery.trim(), auth.user.id)
+      if (!users) return
       const memberIds = new Set(participants.map((p) => p.user_id))
       setResults(users.filter((u) => !memberIds.has(u.id)))
     } catch {

@@ -60,7 +60,10 @@ export async function runModerationGate(params: GateRequest): Promise<GateVerdic
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS)
-  params.signal?.addEventListener('abort', () => controller.abort())
+  // Removed in finally: a form's signal outlives many submits, and each call
+  // used to leave one more listener (and its controller) attached to it.
+  const onAbort = () => controller.abort()
+  params.signal?.addEventListener('abort', onAbort)
 
   try {
     const res = await fetch('/api/moderate-check', {
@@ -91,6 +94,7 @@ export async function runModerationGate(params: GateRequest): Promise<GateVerdic
     return { ...ALLOW, degraded: 'network' }
   } finally {
     clearTimeout(timeout)
+    params.signal?.removeEventListener('abort', onAbort)
   }
 }
 
