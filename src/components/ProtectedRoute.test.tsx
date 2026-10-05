@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { ProtectedRoute } from './ProtectedRoute'
 
 const mockAuth = vi.fn()
@@ -71,6 +71,27 @@ describe('ProtectedRoute gate ordering', () => {
     mockAuth.mockReturnValue(auth({ user: null }))
     renderAt()
     expect(screen.getByText('LOGIN')).toBeTruthy()
+  })
+
+  // LoginPage parks this (src/lib/return-to.ts). Without it a gated project
+  // link signs the visitor in and drops them on the homepage.
+  it('tells login where the visitor was going', () => {
+    mockAuth.mockReturnValue(auth({ user: null }))
+    function LoginProbe() {
+      const from = (useLocation().state as { from?: { pathname: string; search: string } } | null)?.from
+      return <div>FROM {from ? `${from.pathname}${from.search}` : 'none'}</div>
+    }
+    render(
+      <MemoryRouter initialEntries={['/projects/skillbridge?tab=team']}>
+        <Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/projects/:id" element={<div>PROJECT</div>} />
+          </Route>
+          <Route path="/login" element={<LoginProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('FROM /projects/skillbridge?tab=team')).toBeTruthy()
   })
 
   it('sends a role-less account to onboarding before anything else', () => {

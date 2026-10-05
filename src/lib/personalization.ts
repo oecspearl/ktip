@@ -277,6 +277,19 @@ export async function rankRows<T extends { id: string }>(
   }
 }
 
+/**
+ * The homepage Projects tab: projects whose owner opted in (160) or an admin
+ * starred lead, the rest follow. A stable partition, not a sort — each group
+ * keeps the order it arrived in, so a ranked list stays ranked within both
+ * halves, and the tail is what fills the slots when too few have opted in.
+ */
+export function homepageFirst<T extends { feature_on_homepage?: boolean | null; is_featured?: boolean | null }>(
+  rows: T[]
+): T[] {
+  const lead = (r: T) => !!r.feature_on_homepage || !!r.is_featured
+  return [...rows.filter(lead), ...rows.filter((r) => !lead(r))]
+}
+
 const ENTITY_ROUTES: Record<RankableEntity, string> = {
   project: ROUTES.PROJECTS,
   resource: ROUTES.RESOURCES,

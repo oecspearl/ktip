@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { analytics } from '../../hooks/useAnalytics'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { takeReturnTo } from '../../lib/return-to'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
@@ -147,7 +148,9 @@ export default function AuthCallbackPage() {
 
       analytics.conversion('login_success')
       toast.success(t`Welcome back!`)
-      navigate('/', { replace: true })
+      // LoginPage parked the destination before the provider redirect. The
+      // onboarding and MFA branches above leave it parked for later.
+      navigate(takeReturnTo() ?? '/', { replace: true })
     },
     [navigate, toast]
   )

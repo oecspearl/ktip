@@ -12,6 +12,7 @@ import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields
 import { VideoLinkField } from '../../components/shared/VideoLinkField'
 import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
+import { Toggle } from '../../components/ui/Toggle'
 import { isPermissionDenied, normalizeHashtags } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { projectSchema } from '../../lib/validation'
@@ -41,6 +42,7 @@ export default function CreateProjectPage() {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [featureOnHomepage, setFeatureOnHomepage] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [videoUrl, setVideoUrl] = useState('')
   const [employerId, setEmployerId] = useState<string | null>(null)
@@ -131,6 +133,7 @@ export default function CreateProjectPage() {
         hashtags,
         is_public: isPublic,
         is_climate_action: isClimateAction,
+        feature_on_homepage: isPublic && featureOnHomepage,
         details: cleanDetails(details),
         video_url: videoUrl.trim() || null,
         owner_id: auth.user!.id,
@@ -326,6 +329,16 @@ export default function CreateProjectPage() {
                 </span>
               </label>
             </div>
+
+            {/* Homepage opt-in (160). Reads off while private: the homepage
+                query only ever sees public projects. */}
+            <Toggle
+              checked={isPublic && featureOnHomepage}
+              onChange={setFeatureOnHomepage}
+              disabled={!isPublic}
+              label={t`Feature on the homepage`}
+              description={t`Show this project first in the Projects tab at the top of the homepage. Private projects never appear there.`}
+            />
 
             <OrgEngagementFields
               options={managedEmployers}

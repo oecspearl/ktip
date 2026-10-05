@@ -109,6 +109,7 @@ export interface Database {
           image_url: string | null
           is_public: boolean
           is_featured: boolean
+          feature_on_homepage: boolean
           owner_id: string
           created_at: string
           updated_at: string
@@ -124,6 +125,7 @@ export interface Database {
           image_url?: string | null
           is_public?: boolean
           is_featured?: boolean
+          feature_on_homepage?: boolean
           owner_id: string
           created_at?: string
           updated_at?: string
@@ -139,6 +141,7 @@ export interface Database {
           image_url?: string | null
           is_public?: boolean
           is_featured?: boolean
+          feature_on_homepage?: boolean
           owner_id?: string
           created_at?: string
           updated_at?: string

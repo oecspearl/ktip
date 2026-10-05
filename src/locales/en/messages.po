@@ -14109,6 +14109,11 @@ msgstr "Profile fields that would identify a minor outside the platform are rest
 msgid "Search businesses"
 msgstr "Search businesses"
 
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
+msgid "Feature on the homepage"
+msgstr "Feature on the homepage"
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Last Updated"
 msgstr "Last Updated"
@@ -18641,6 +18646,11 @@ msgstr "The form is replaced by a status card — pending, verified or rejected 
 #: src/components/legal/ConsentDocument.tsx
 msgid "You have reached the end of the agreement."
 msgstr "You have reached the end of the agreement."
+
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
+msgid "Show this project first in the Projects tab at the top of the homepage. Private projects never appear there."
+msgstr "Show this project first in the Projects tab at the top of the homepage. Private projects never appear there."
 
 #: src/i18n/harvested.ts
 msgid "Translate"

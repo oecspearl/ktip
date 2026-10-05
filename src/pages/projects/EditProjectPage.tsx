@@ -15,6 +15,7 @@ import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields
 import { VideoLinkField } from '../../components/shared/VideoLinkField'
 import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
+import { Toggle } from '../../components/ui/Toggle'
 import { normalizeHashtags } from '../../lib/utils'
 import type { DetailEntry } from '../../types'
 import { projectSchema } from '../../lib/validation'
@@ -62,6 +63,7 @@ export default function EditProjectPage() {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
+  const [featureOnHomepage, setFeatureOnHomepage] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [videoUrl, setVideoUrl] = useState('')
   const [employerId, setEmployerId] = useState<string | null>(null)
@@ -81,6 +83,7 @@ export default function EditProjectPage() {
       setHashtags(project.hashtags || [])
       setIsPublic(project.is_public ?? true)
       setIsClimateAction(project.is_climate_action ?? false)
+      setFeatureOnHomepage(project.feature_on_homepage ?? false)
       setDetails(project.details || [])
       setVideoUrl(project.video_url ?? '')
       setEmployerId(project.employer_id ?? null)
@@ -138,6 +141,7 @@ export default function EditProjectPage() {
         hashtags,
         is_public: isPublic,
         is_climate_action: isClimateAction,
+        feature_on_homepage: isPublic && featureOnHomepage,
         details: cleanDetails(details),
         video_url: videoUrl.trim() || null,
         employer_id: employerId,
@@ -332,6 +336,18 @@ export default function EditProjectPage() {
                 </span>
               </label>
             </div>
+
+            {/* Homepage opt-in (160). The owner's call, so owner only; an
+                editor's save sends the seeded value back unchanged. */}
+            {isOwner && (
+              <Toggle
+                checked={isPublic && featureOnHomepage}
+                onChange={setFeatureOnHomepage}
+                disabled={!isPublic}
+                label={t`Feature on the homepage`}
+                description={t`Show this project first in the Projects tab at the top of the homepage. Private projects never appear there.`}
+              />
+            )}
 
             {/* Owner only. An editor member can edit the content but must not
                 reassign who published it — the claim trigger would refuse them

@@ -32,6 +32,7 @@ import type { RoleSlug, UserRole } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { ConsentDocument } from '../../components/legal/ConsentDocument'
 import { CONSENT_BUNDLES, bundleVersion } from '../../lib/legal'
+import { takeReturnTo } from '../../lib/return-to'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 const TODAY_ISO = todayIso()
@@ -284,7 +285,7 @@ export default function OnboardingPage() {
             analytics.conversion('onboarding_complete', { role: selectedRole })
             await auth.refreshProfile()
             toast.success(t`Your institution approved your account. Welcome to KTIP!`)
-            navigate('/', { replace: true })
+            navigate(takeReturnTo() ?? '/', { replace: true })
             return
           }
         } else if (isAdminReviewedRole(selectedRole) && auth.user) {
@@ -316,7 +317,9 @@ export default function OnboardingPage() {
       }
 
       toast.success(t`Welcome to KTIP!`)
-      navigate('/', { replace: true })
+      // A first-time Google or Microsoft account reaches here from a gated page
+      // via /login and /auth/callback, which left the destination parked.
+      navigate(takeReturnTo() ?? '/', { replace: true })
     } catch (error: any) {
       submitted.current = false
       setErrorMessage(error.message || t`Failed to save your profile. Please try again.`)

@@ -401,7 +401,10 @@ export interface Project extends Ranked {
   image_url: string | null
   is_public: boolean
   is_climate_action: boolean
+  /** An admin's star. Since migration 160 only project:manage_all can set it. */
   is_featured: boolean
+  /** Migration 160 — the owner's opt-in to lead the homepage Projects tab. */
+  feature_on_homepage: boolean
   view_count: number
   /** Accepted collaborators, kept in step by a trigger (migration 079).
    *  Denormalised because project_members is unreadable to non-members. */

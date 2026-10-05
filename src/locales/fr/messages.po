@@ -13603,6 +13603,11 @@ msgstr ""
 msgid "Search businesses"
 msgstr "Rechercher des entreprises"
 
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
+msgid "Feature on the homepage"
+msgstr "Mettre en vedette sur la page d'accueil"
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Last Updated"
 msgstr "Dernière mise à jour"
@@ -18009,6 +18014,11 @@ msgstr "Le formulaire est remplacé par une carte de statut — en attente, vér
 #: src/components/legal/ConsentDocument.tsx
 msgid "You have reached the end of the agreement."
 msgstr ""
+
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
+msgid "Show this project first in the Projects tab at the top of the homepage. Private projects never appear there."
+msgstr "Afficher ce projet en premier dans l'onglet Projets, en haut de la page d'accueil. Les projets privés n'y apparaissent jamais."
 
 #: src/i18n/harvested.ts
 msgid "Translate"

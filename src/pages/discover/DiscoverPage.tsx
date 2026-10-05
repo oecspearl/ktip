@@ -450,7 +450,8 @@ export default function DiscoverPage() {
   // other viewer takes the hook's own fallback — deadline, newest, soonest —
   // which is exactly the ordering this page always had.
   const { grants } = useGrants({ active: true, sort: 'for_you' })
-  const { projects } = useProjects({ sort: 'for_you' })
+  // Opted-in projects lead the Projects tab; the rest fill what is left (160).
+  const { projects } = useProjects({ sort: 'for_you', featuredFirst: true })
   const { events } = useEvents({ upcoming: true, sort: 'for_you' })
   const { stats, loading: statsLoading } = usePlatformStats()
 

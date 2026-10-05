@@ -13485,6 +13485,11 @@ msgstr ""
 msgid "Search businesses"
 msgstr ""
 
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
+msgid "Feature on the homepage"
+msgstr ""
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Last Updated"
 msgstr ""
@@ -17865,6 +17870,11 @@ msgstr ""
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "You have reached the end of the agreement."
+msgstr ""
+
+#: src/pages/projects/CreateProjectPage.tsx
+#: src/pages/projects/EditProjectPage.tsx
+msgid "Show this project first in the Projects tab at the top of the homepage. Private projects never appear there."
 msgstr ""
 
 #: src/i18n/harvested.ts

@@ -1,5 +1,5 @@
 import { useActionState, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { Button } from '../../components/ui/Button'
@@ -8,6 +8,7 @@ import { Mail, Lock, LogIn, Trash2 } from 'lucide-react'
 import { loginSchema } from '../../lib/validation'
 import { APP_FULL_NAME } from '../../lib/constants'
 import { clearSupabaseSession } from '../../lib/auth-utils'
+import { rememberReturnTo, takeReturnTo } from '../../lib/return-to'
 import { AuthBackdrop } from '../../components/layout/AuthBackdrop'
 import { OAuthButtons } from '../../components/auth/OAuthButtons'
 import { VirtualCampusButton } from '../../components/auth/VirtualCampusButton'
@@ -57,7 +58,17 @@ export default function LoginPage() {
   usePageTitle(t`Log In`)
   const auth = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const toast = useToast()
+
+  // ProtectedRoute sends `state.from`. Parked in the tab's storage rather than
+  // read at submit time, because the OAuth buttons leave the page and come back
+  // through /auth/callback, where router state no longer exists.
+  useEffect(() => {
+    rememberReturnTo((location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from)
+    // Arrival only — the slot must not be rewritten as the form re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -96,7 +107,7 @@ export default function LoginPage() {
       await Promise.race([auth.signIn(emailValue, passwordValue), timeout])
       analytics.conversion('login_success')
       toast.success(t`Welcome back!`)
-      navigate('/')
+      navigate(takeReturnTo() ?? '/', { replace: true })
       return { errors: {}, errorMessage: '' }
     } catch (error: any) {
       const msg = error.message || ''

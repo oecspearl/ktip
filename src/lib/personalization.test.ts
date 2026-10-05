@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const rpc = vi.fn()
 vi.mock('./supabase', () => ({ supabase: { rpc: (...args: any[]) => rpc(...args) } }))
 
-const { mergeScores, resolveSort, rankRows, personalizedHref, hasSignals } = await import(
+const { mergeScores, resolveSort, rankRows, homepageFirst, personalizedHref, hasSignals } = await import(
   './personalization'
 )
 
@@ -136,6 +136,36 @@ describe('rankRows', () => {
       error: null,
     })
     const out = await rankRows('project', rows('a', 'b'))
+    expect(out.map((r) => r.id)).toEqual(['b', 'a'])
+  })
+})
+
+describe('homepageFirst', () => {
+  const project = (id: string, feature_on_homepage = false, is_featured = false) => ({
+    id,
+    feature_on_homepage,
+    is_featured,
+  })
+
+  it('puts opted-in and admin-starred projects first', () => {
+    const out = homepageFirst([project('a'), project('b', true), project('c'), project('d', false, true)])
+    expect(out.map((r) => r.id)).toEqual(['b', 'd', 'a', 'c'])
+  })
+
+  it('keeps the ranked order inside each group', () => {
+    const out = homepageFirst([project('a', true), project('b'), project('c', true), project('d')])
+    expect(out.map((r) => r.id)).toEqual(['a', 'c', 'b', 'd'])
+  })
+
+  // The tab never runs empty: with nobody opted in, the list is untouched.
+  it('changes nothing when no project has opted in', () => {
+    const out = homepageFirst([project('a'), project('b')])
+    expect(out.map((r) => r.id)).toEqual(['a', 'b'])
+  })
+
+  // A client deployed ahead of migration 160 reads the column as undefined.
+  it('treats a missing column as not opted in', () => {
+    const out = homepageFirst([{ id: 'a' }, { id: 'b', feature_on_homepage: true }])
     expect(out.map((r) => r.id)).toEqual(['b', 'a'])
   })
 })

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
-import { rankRows, type ContentSort } from '../lib/personalization'
+import { homepageFirst, rankRows, type ContentSort } from '../lib/personalization'
 import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
@@ -17,6 +17,8 @@ export function useProjects(filters?: {
   /** Matched against the `hashtags` column — projects' tag field. */
   tags?: string[]
   sort?: ContentSort
+  /** Homepage only: opted-in and admin-starred projects lead (migration 160). */
+  featuredFirst?: boolean
 }) {
   // Sorted so ['ai','climate'] and ['climate','ai'] share one cache entry.
   const tags = filters?.tags?.length
@@ -38,7 +40,15 @@ export function useProjects(filters?: {
         owner:profiles(*)
       `)
       .eq('is_public', true)
-      .order('created_at', { ascending: false })
+
+    // Leading in the candidate set too, so the row cap below can never cut an
+    // opted-in project the homepage would have shown first.
+    if (filters?.featuredFirst) {
+      query = query
+        .order('feature_on_homepage', { ascending: false })
+        .order('is_featured', { ascending: false })
+    }
+    query = query.order('created_at', { ascending: false })
 
     if (filters?.category) {
       query = query.eq('category', filters.category)
@@ -76,7 +86,9 @@ export function useProjects(filters?: {
     if (error) throw error
     const rows = (data as any[]) || []
 
-    return sort === 'for_you' ? rankRows('project', rows) : rows
+    const ordered = sort === 'for_you' ? await rankRows('project', rows) : rows
+    // After the ranker, which reorders everything: it ranks within each half.
+    return filters?.featuredFirst ? homepageFirst(ordered) : ordered
   }
 
   const query = useQuery({
@@ -160,6 +172,7 @@ export function useCreateProject() {
       hashtags?: string[]
       is_public?: boolean
       is_climate_action?: boolean
+      feature_on_homepage?: boolean
       details?: DetailEntry[]
       video_url?: string | null
       owner_id: string
