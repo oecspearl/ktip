@@ -482,10 +482,13 @@ export async function exchangeCode(
   })
   if (cfg.clientSecret) body.set('client_secret', cfg.clientSecret)
 
+  // Bounded so a hung identity provider fails the sign-in with an error page
+  // instead of holding the callback until the platform kills it.
   const res = await fetch(cfg.tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
     body,
+    signal: AbortSignal.timeout(8000),
   })
 
   if (!res.ok) {
@@ -507,6 +510,7 @@ export async function fetchUserinfo(
   try {
     const res = await fetch(cfg.userinfoUrl, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
+      signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return null
     return (await res.json()) as Record<string, unknown>

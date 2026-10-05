@@ -497,7 +497,9 @@ export default async function handler(request: Request): Promise<Response> {
 
   if (ticketError) return fail(origin, 'ticket_failed', ticketError.message)
 
-  console.log(`[vc-callback] signed in user=${userId} new=${isNew}`)
+  // No user id: the line counts sign-ins and new accounts, and a per-person
+  // trail of sign-in times does not belong in platform logs.
+  console.log(`[vc-callback] signed in new=${isNew}`)
 
   return redirect(origin, `/auth/vc/land?t=${ticket}`)
 }

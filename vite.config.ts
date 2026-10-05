@@ -52,7 +52,7 @@ const DEV_REWRITES: Record<string, string> = {
  * Dev-only middleware that runs the real Edge Functions in `api/` (ai-chat,
  * ai-search, …) so `npm run dev` behaves like production without needing
  * `vercel dev`. Each request is turned into a web `Request`, handed to the
- * route's default export, and its `Response` piped back out — so there is one
+ * route's handler, and its `Response` piped back out — so there is one
  * implementation of every endpoint, not a dev copy that can drift.
  */
 function edgeApiPlugin(apiKey: string | undefined): Plugin {
@@ -83,7 +83,10 @@ function edgeApiPlugin(apiKey: string | undefined): Plugin {
 
         try {
           const mod = await server.ssrLoadModule(modulePath)
-          const handler = mod.default
+          // Edge routes export a default handler. Node-runtime routes cannot:
+          // Vercel calls a default-export function with Node's (req, res), so
+          // they export a Web handler per HTTP method (GET, POST) instead.
+          const handler = typeof mod.default === 'function' ? mod.default : mod[req.method || 'GET']
           if (typeof handler !== 'function') return next()
 
           const headers = new Headers()
@@ -387,9 +390,12 @@ export default defineConfig(({ mode }) => {
     'SENTRY_DSN',
     'SENTRY_ENVIRONMENT',
     // Outbound email. Without these, /api/invite/send answers 503 and the
-    // alias flows fall back to logging a dev link instead of mailing one.
+    // MFA, alias and proof flows refuse to send, unless KTIP_DEV_ECHO_CODES=1
+    // asks them to hand the code or link back instead. Set that flag in a
+    // local .env only: production ignores it, and a Preview must not have it.
     'RESEND_API_KEY',
     'EMAIL_FROM',
+    'KTIP_DEV_ECHO_CODES',
     // Deprecated alias of EMAIL_FROM; still promoted for un-migrated .env files.
     'INVITE_FROM_EMAIL',
     // The origin baked into links inside those emails.
@@ -636,8 +642,12 @@ export default defineConfig(({ mode }) => {
                * content-hashed and vercel.json serves /assets as immutable for
                * a year, so a hit can never be stale. A changed file is a
                * different URL and simply misses.
+               *
+               * mjs for the pdf.js worker, which Vite emits as .mjs and which a
+               * js-only pattern skipped. webp and woff2 for the imported images
+               * and fonts Vite hashes into /assets alongside the chunks.
                */
-              urlPattern: /\/assets\/.*\.(?:js|css)$/,
+              urlPattern: /\/assets\/.*\.(?:js|mjs|css|webp|woff2)$/,
               handler: 'CacheFirst',
               options: {
                 cacheName: 'ktip-assets',
@@ -666,8 +676,16 @@ export default defineConfig(({ mode }) => {
               // one slow request could serve the previous user's rows. Nothing
               // RLS-scoped belongs in a worker cache; only objects that are
               // public by definition do.
+              //
+              // StaleWhileRevalidate, not NetworkFirst. NetworkFirst had no
+              // network timeout, so on a weak connection every avatar waited
+              // out the full request before the cached copy was allowed to
+              // show. Serving the cached copy first is safe because a replaced
+              // image gets a new URL: uploadOptimizedImage() appends ?v= to
+              // the stable key (src/lib/storage-upload.ts), and the cache key
+              // includes the query.
               urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
-              handler: 'NetworkFirst',
+              handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'supabase-storage',
                 expiration: { maxEntries: 100, maxAgeSeconds: 86400 },

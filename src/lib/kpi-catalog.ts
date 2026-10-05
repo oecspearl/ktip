@@ -32,7 +32,9 @@ import {
   Users,
   Zap,
 } from 'lucide-react'
-import { ok, unavailable, type Measured } from './measured'
+// '.js' because api/ report routes import this file and run on Node, which
+// resolves ESM imports literally; Vite and tsc map it back to measured.ts.
+import { ok, unavailable, type Measured } from './measured.js'
 
 /**
  * The roadmap's results framework, as code.

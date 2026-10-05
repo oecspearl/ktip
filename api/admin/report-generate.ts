@@ -1,8 +1,13 @@
-import { requirePermission } from '../_lib/require-permission'
-import { siteOrigin } from '../_lib/email'
-import { runReport } from '../_lib/report-run'
+import { requirePermission } from '../_lib/require-permission.js'
+import { siteOrigin } from '../_lib/email.js'
+import { runReport } from '../_lib/report-run.js'
 
-export const config = { runtime: 'edge' }
+// Node, because the model call can outlast the 25 s an edge function gets to
+// start responding. api/cron/monthly-report.ts explains the `.js` extensions
+// and why the handler is exported as POST rather than as the default.
+// 60s is the ceiling on every Vercel plan, Fluid compute or not; report-run
+// caps the model call at 45s so the rest of the run fits inside it.
+export const config = { runtime: 'nodejs', maxDuration: 60 }
 
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -16,9 +21,7 @@ const json = (body: unknown, status: number) =>
  * same pipeline as the cron; the only difference is that nobody is emailed,
  * because the person who pressed the button is looking at the result.
  */
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
-
+export async function POST(request: Request): Promise<Response> {
   const guard = await requirePermission(request, 'org:manage')
   if (!guard.ok) return guard.response
 

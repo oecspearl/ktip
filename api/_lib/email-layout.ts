@@ -80,6 +80,8 @@ export async function sendEmail(params: {
       html: params.html,
       ...(params.text ? { text: params.text } : {}),
     }),
+    // A timeout lands in the catch below and reads as resend_unreachable.
+    signal: AbortSignal.timeout(8000),
   }).catch(() => null)
   if (!res) return { sent: false, reason: 'resend_unreachable' }
   if (!res.ok) return { sent: false, reason: `resend_failed ${res.status}` }

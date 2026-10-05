@@ -5,7 +5,7 @@ import {
   reportOutputSchema,
   type FactPack,
   type ReportOutput,
-} from '../../src/lib/kpi-report-schema'
+} from '../../src/lib/kpi-report-schema.js'
 
 /**
  * The model that drafts a report's commentary, behind one interface.

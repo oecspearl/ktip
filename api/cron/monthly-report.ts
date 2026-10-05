@@ -1,9 +1,25 @@
-import { authorizeCron } from '../_lib/cron-auth'
-import { siteOrigin } from '../_lib/email'
-import { runReport } from '../_lib/report-run'
+import { authorizeCron } from '../_lib/cron-auth.js'
+import { siteOrigin } from '../_lib/email.js'
+import { runReport } from '../_lib/report-run.js'
 import type { ReportPeriodKind } from '../../src/lib/kpi-report-schema'
 
-export const config = { runtime: 'edge' }
+/**
+ * Node, not edge. The model call in runReport may take up to 60 s, and an edge
+ * function that has not started its response by 25 s is cut off, so a slow
+ * draft lost the whole run. Node waits out maxDuration.
+ *
+ * Two things change with the runtime, and both break the route if missed:
+ *   - Node runs each file as its own ES module (package.json is "type":
+ *     "module" and Vercel transpiles without bundling), so every relative
+ *     runtime import in this graph carries its `.js` extension. Type-only
+ *     imports are erased and can stay bare.
+ *   - Node calls a default-export function as (req, res). A Web-standard
+ *     handler has to be exported under its HTTP method instead, which is why
+ *     this file exports GET and has no default.
+ */
+// 60s is the ceiling on every Vercel plan, Fluid compute or not; report-run
+// caps the model call at 45s so the rest of the run fits inside it.
+export const config = { runtime: 'nodejs', maxDuration: 60 }
 
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -74,4 +90,6 @@ export function makeReportCron(fixedKind?: ReportPeriodKind) {
   }
 }
 
-export default makeReportCron()
+// GET is what Vercel Cron sends, and what the backfill curl in MONITORING.md
+// sends. Any other method now gets a 405 from the platform.
+export const GET = makeReportCron()
