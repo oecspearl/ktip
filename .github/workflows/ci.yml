@@ -39,6 +39,13 @@ jobs:
       - name: Test
         run: npx vitest run
 
+      # tsc passing says nothing about Rollup, the PWA plugin or the Lingui
+      # macro, and those only fail at bundle time. Without this the first
+      # place a broken build shows up is the Vercel deploy. tsc -b is
+      # incremental, so the repeat inside `npm run build` is cheap.
+      - name: Build
+        run: npm run build
+
       # Production dependencies only. Dev-only advisories (vitest, sharp, the
       # image pipeline) are real but do not ship to a browser or an edge
       # function; they surface in the weekly Dependabot run instead.
