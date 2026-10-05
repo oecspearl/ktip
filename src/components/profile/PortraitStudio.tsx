@@ -90,6 +90,36 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
   // have no art behind them at all and no way to give it any.
   const savedBanner = useMemo(() => parseBanner(auth.profile?.banner), [auth.profile?.banner])
   const [bannerDraft, setBannerDraft] = useState<BannerSpec | null>(savedBanner)
+  // A photo of the member's own behind them (169's editorial page). Uploaded
+  // the moment it is picked, like BannerStudio does, so the preview is real;
+  // nothing points at it until Save.
+  const [bgUploading, setBgUploading] = useState(false)
+  const uploadBackground = async (f: File) => {
+    const uid = auth.user?.id
+    if (!uid) return
+    if (!f.type.startsWith('image/')) {
+      toast.error(t`Please select an image file`)
+      return
+    }
+    if (f.size > 8 * 1024 * 1024) {
+      toast.error(t`Image must be less than 8MB`)
+      return
+    }
+    setBgUploading(true)
+    try {
+      const url = await uploadOptimizedImage({
+        bucket: 'avatars',
+        basePath: `${uid}/banner`,
+        file: f,
+        preset: IMAGE_PRESETS.BANNER,
+      })
+      setBannerDraft({ kind: 'image', url })
+    } catch (err: any) {
+      toast.error(err?.message || t`Failed to upload the background photo`)
+    } finally {
+      setBgUploading(false)
+    }
+  }
   const [tab, setTab] = useState<Tab>(saved.kind === 'gradient' ? 'gradient' : saved.kind === 'backdrop' ? 'designs' : 'photo')
   const [file, setFile] = useState<File | null>(null)
   const [fileUrl, setFileUrl] = useState<string | null>(null)
@@ -270,13 +300,18 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
     draft.kind === 'photo' ? fileUrl ?? auth.profile?.avatar_url ?? null : preview ?? auth.profile?.avatar_url ?? null
 
   // --------------------------------------------------------------- save
+  // A cut-out stands on its backdrop unless the member uploaded a photo of
+  // their own to stand in front of; then that photo is the banner.
+  const ownBackground = bannerDraft?.kind === 'image' ? bannerDraft : null
   const dirty =
     !!file ||
     JSON.stringify(draft) !== JSON.stringify(saved) ||
-    // Only counts on the plain photo: the cut-out kinds carry their banner in
-    // the style, so a change there is already covered by the line above.
-    (draft.kind === 'photo' && JSON.stringify(bannerDraft) !== JSON.stringify(savedBanner))
-  const busy = cutting || phase !== 'idle'
+    // The cut-out kinds carry their banner in the style, so a change there is
+    // already covered by the line above — except an uploaded background,
+    // which is chosen apart from the backdrop.
+    ((draft.kind === 'photo' || ownBackground || savedBanner?.kind === 'image') &&
+      JSON.stringify(bannerDraft) !== JSON.stringify(savedBanner))
+  const busy = cutting || phase !== 'idle' || bgUploading
 
   const handleSave = async () => {
     const uid = auth.user?.id
@@ -354,9 +389,10 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
       await auth.updateProfile({
         avatar_url: avatarUrl,
         avatar_style: style,
-        // A cut-out's banner IS the backdrop it stands on. A plain photo has no
-        // backdrop, so it keeps a banner of its own — picked below the tabs.
-        banner: isCutoutStyle(style) ? bannerFromAvatarStyle(style) : bannerDraft,
+        // A cut-out's banner IS the backdrop it stands on, unless the member
+        // uploaded a photo to stand in front of. A plain photo has no backdrop,
+        // so it keeps a banner of its own — picked below the tabs.
+        banner: isCutoutStyle(style) ? (ownBackground ?? bannerFromAvatarStyle(style)) : bannerDraft,
       } as any)
       toast.success(t`Photo updated!`)
       onSaved?.()
@@ -377,6 +413,45 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
     composing: t`Composing your avatar…`,
     saving: t`Saving…`,
   }
+
+  /** Upload a background photo — or, once one is uploaded, select it again. */
+  const ownPhotoTile = (
+    <label
+      title={t`Your own photo`}
+      className={cn(
+        'relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-surface border-2 border-dashed bg-ktip-sand-50 px-1 text-center text-micro font-semibold text-ktip-sand-600 transition-all',
+        ownBackground
+          ? 'border-solid border-ktip-ocean-500 ring-2 ring-ktip-ocean-500/30'
+          : 'border-ktip-sand-300 hover:border-ktip-ocean-300',
+        busy && 'pointer-events-none opacity-70'
+      )}
+    >
+      {ownBackground ? (
+        <>
+          <img src={ownBackground.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <span className="relative mt-auto mb-1 rounded-full bg-black/55 px-2 py-0.5 text-white">
+            <Trans>Replace</Trans>
+          </span>
+        </>
+      ) : (
+        <>
+          <Upload size={16} aria-hidden="true" />
+          {bgUploading ? <Trans>Uploading…</Trans> : <Trans>Your own photo</Trans>}
+        </>
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        disabled={busy}
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          e.target.value = ''
+          if (f) void uploadBackground(f)
+        }}
+      />
+    </label>
+  )
 
   const tabs: Array<[Tab, string, boolean]> = [
     ['photo', t`Photo`, true],
@@ -532,9 +607,10 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
                         <img src={b.url} alt={b.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
                       </button>
                     ))}
+                    {ownPhotoTile}
                   </div>
                   <p className="mt-2 text-micro leading-relaxed text-ktip-sand-500">
-                    <Trans>None uses your own photo, blurred. Cut your background out and this is chosen for you — you stand on it.</Trans>
+                    <Trans>None leaves the plain page behind you. Cut your background out and you stand on your backdrop instead, unless you upload a photo of your own.</Trans>
                   </p>
                 </fieldset>
               </>
@@ -605,6 +681,30 @@ export function PortraitStudio({ initialFile, onSaved }: PortraitStudioProps) {
               side by side in a dialog column those two sentences collided. */}
           {isCutoutStyle(draft) && hasCutout && (
             <div className="mt-6 grid gap-5 border-t border-ktip-sand-200 pt-5">
+              {/* What the member page draws behind the cut-out: the backdrop
+                  picked above, or a photo of their own. The diamond avatar
+                  keeps the backdrop either way. */}
+              <fieldset>
+                <legend className="mb-2 text-micro font-bold uppercase tracking-[0.14em] text-ktip-sand-500">
+                  <Trans>Behind you on your member page</Trans>
+                </legend>
+                <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-5">
+                  <button
+                    type="button"
+                    onClick={() => setBannerDraft(null)}
+                    aria-pressed={!ownBackground}
+                    className={cn(
+                      'relative flex aspect-square items-center justify-center overflow-hidden rounded-surface border-2 bg-ktip-sand-50 px-1 text-center text-micro font-semibold text-ktip-sand-600 transition-all',
+                      !ownBackground
+                        ? 'border-ktip-ocean-500 ring-2 ring-ktip-ocean-500/30'
+                        : 'border-ktip-sand-200 hover:border-ktip-ocean-300'
+                    )}
+                  >
+                    <Trans>Your backdrop</Trans>
+                  </button>
+                  {ownPhotoTile}
+                </div>
+              </fieldset>
               <fieldset>
                 <legend className="mb-2 text-micro font-bold uppercase tracking-[0.14em] text-ktip-sand-500">
                   <Trans>You sit on the</Trans>

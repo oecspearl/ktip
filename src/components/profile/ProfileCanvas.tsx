@@ -1,36 +1,32 @@
-import { useEffect, type ReactNode, type RefObject } from 'react'
-import { Link } from 'react-router'
-import {
-  Calendar,
-  Building2,
-  ExternalLink,
-  FileText,
-  FolderKanban,
-  Handshake,
-  Lock,
-} from 'lucide-react'
-import { Button } from '../ui/Button'
-import { CountryFlag } from '../ui/CountryFlag'
-import { COLLABORATION_LABELS, COLLAB_EXCLUSIVE_VALUE, PHASE_LABELS, ROLE_LABELS } from '../../lib/constants'
-import { resolveCopy } from '../../i18n/copy'
-import { formatDate } from '../../lib/utils'
-import { entityPath } from '../../lib/slug'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Link, useSearchParams } from 'react-router'
+import { ArrowLeft, ArrowUpRight, Building2, Link2, Lock, Palette, Plus } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { CountryFlag } from '../ui/CountryFlag'
+import { TrophyImage } from '../achievements/TrophyImage'
+import {
+  COLLABORATION_LABELS,
+  COLLAB_EXCLUSIVE_VALUE,
+  EVENT_TYPE_LABELS,
+  PHASE_LABELS,
+  ROLE_LABELS,
+} from '../../lib/constants'
+import { TIER_LABEL } from '../../lib/achievement-style'
+import { resolveCopy } from '../../i18n/copy'
+import { cn, formatDate } from '../../lib/utils'
+import { entityPath } from '../../lib/slug'
 import { parseBanner } from '../../lib/banner'
 import { parseAvatarStyle } from '../../lib/avatar-backdrop'
-import { PortraitHero, type HeroBack } from './PortraitHero'
-import { HeroStanding } from './HeroStanding'
-import { IdentityPlate, MetaDot } from './IdentityPlate'
-import { ProfileSection } from './ProfileSection'
-import { ProfileFacts } from './ProfileFacts'
-import { ProfileTags } from './ProfileTags'
-import { ProfileLinkRow } from './ProfileLinkRow'
-import { StandingMeter } from './StandingMeter'
-import { TrophyShelf } from './TrophyShelf'
-import { EditPencil, EditableBlock } from './EditPencil'
-import { SectionPrivacy } from './SectionPrivacy'
-import { cn } from '../../lib/utils'
+import { lookAttributes, parseProfileLook, resolveAlign } from '../../lib/profile-look'
+import { parseSocialLinks, socialEntries } from '../../lib/social-links'
 import { hiddenSections } from '../../lib/profile-visibility'
+import { EditPencil } from './EditPencil'
+import { SectionPrivacy } from './SectionPrivacy'
+import { ProfileHero, type HeroStanding, type HeroStat } from './editorial/ProfileHero'
+import { ProfileTabs, type ProfileTab } from './editorial/ProfileTabs'
+import { SkillsStrip } from './editorial/SkillsStrip'
+import { ShareProfileButton } from './editorial/ShareProfileButton'
+import './editorial/editorial.css'
 import type {
   BadgeDefinition,
   EmployerPortfolioItem,
@@ -44,12 +40,9 @@ import type {
   UserBadge,
 } from '../../types'
 
-/** How many skills the hero's meta line names before the rail takes over. */
-const HERO_SKILLS = 3
-
 /**
- * The first sentence of a bio, for the line under the name. Cut at a word
- * once it passes 140 characters; the rail's About card has the whole thing.
+ * The first sentence of a bio, for the line in the hero. Cut at a word once it
+ * passes 140 characters; the About card has the whole thing.
  */
 export function ledeFrom(bio: string | null | undefined): string | null {
   const text = bio?.replace(/\s+/g, ' ').trim()
@@ -58,6 +51,12 @@ export function ledeFrom(bio: string | null | undefined): string | null {
   if (first.length <= 140) return first
   const cut = first.slice(0, 140)
   return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), 80))}…`
+}
+
+/** Where the page's back link goes. */
+export interface HeroBack {
+  label: string
+  href: string
 }
 
 /**
@@ -75,6 +74,7 @@ export type ProfileBlock =
   | 'interests'
   | 'languages'
   | 'openTo'
+  | 'look'
 
 /** Block → open its editor. A block absent from the map renders with no pencil. */
 export type ProfileEditMap = Partial<Record<ProfileBlock, () => void>>
@@ -89,9 +89,23 @@ export interface ProfilePrivacyControls {
   disabled?: boolean
 }
 
-/** What an empty block says when the person reading it is the one who can fill it. */
-function EmptyPrompt({ children }: { children: ReactNode }) {
-  return <p className="text-caption italic text-ktip-sand-500">{children}</p>
+/** One role from the published CV — the Overview's experience list. */
+export interface ExperienceRow {
+  period: string
+  title: string
+  org: string
+  location?: string
+}
+
+type TabKey = 'overview' | 'projects' | 'events' | 'achievements'
+const TAB_KEYS = new Set<string>(['overview', 'projects', 'events', 'achievements'])
+
+const TIER_RANK: Record<string, number> = { diamond: 4, gold: 3, silver: 2, bronze: 1 }
+const TIER_COLOUR: Record<string, string> = {
+  bronze: 'var(--color-metal-bronze, #9a6b3f)',
+  silver: 'var(--color-metal-silver, #7d838a)',
+  gold: 'var(--color-metal-gold, #a8842c)',
+  diamond: 'var(--color-metal-diamond, #4f7d99)',
 }
 
 export interface ProfileCanvasProps {
@@ -108,20 +122,29 @@ export interface ProfileCanvasProps {
   projects?: Project[]
   events?: Event[]
   badges?: UserBadge[]
-  /** Unearned badges the shelf teases under the earned ones. */
+  /** Unearned badges teased under the earned ones. */
   lockedBadges?: BadgeDefinition[]
   trophyAssets: TrophyAssetMap
   stats?: ProfileStats | null
   connectionCount?: number | null
   employer?: PublicEmployer | null
   employerPortfolio?: EmployerPortfolioItem[]
-  /** Where "View CV" goes. Omit and the button is not rendered. */
+  /** Where "View CV" goes. Omit and nothing links to the CV. */
   cvHref?: string | null
+  /** Roles from the published CV, for the Overview's experience list. */
+  experience?: ExperienceRow[]
 
   // ------------------------------------------------------------------ chrome
   heroActions?: ReactNode
-  railActions?: ReactNode
-  /** Trailing control on the Achievements heading — "Manage", on your own page. */
+  /** The footer's buttons. Omit and there is no footer — your own page has none. */
+  ctaActions?: ReactNode
+  /** The phone dock's buttons, page layout only. */
+  dockActions?: ReactNode
+  /** Where Report goes, in the footer. */
+  reportHref?: string | null
+  /** The page's own address, for Share. Omit to leave Share out. */
+  shareUrl?: string | null
+  /** Trailing control on the Achievements tab — "Manage", on your own page. */
   achievementsActions?: ReactNode
   /** Copy for the "this profile is private" panel. */
   privateMessage?: string
@@ -134,50 +157,40 @@ export interface ProfileCanvasProps {
 
   // ----------------------------------------------------------------- editing
   /**
-   * Omit it entirely and this renders exactly what the member page has always
-   * rendered — every affordance is gated on a handler being present, in one
-   * place, so there is no second code path to keep honest.
+   * Omit it entirely and this renders exactly what a visitor gets — every
+   * affordance is gated on a handler being present, in one place.
    */
   edit?: ProfileEditMap
   /**
    * `omit`   — a block with nothing in it is not rendered. What a visitor gets.
    * `prompt` — it renders an invitation instead, so a member with no skills yet
-   *            has something to click. Defaults to `prompt` when `edit` is
-   *            present: without it the feature is unusable for exactly the new
-   *            members it most needs to serve.
+   *            has something to click. Defaults to `prompt` when `edit` is set.
    */
   emptyBlocks?: 'omit' | 'prompt'
   privacy?: ProfilePrivacyControls
 
   // ------------------------------------------------------------------ layout
   /**
-   * `page` — a full-bleed opener under the navbar; the rail splits at `lg`.
-   * `pane` — a band inside a dashboard column: no nav-height padding, no
-   *          portrait flight, and the split waits for `xl` because the pane is
-   *          only about 712px wide at `lg`.
+   * `page` — the member page under the navbar, with the footer and the dock.
+   * `pane` — inside the dashboard column: no nav offset, no footer, no dock.
    */
   layout?: 'page' | 'pane'
-  /** Passed through to PortraitHero. `null` on a surface that already has a hero. */
+  /** `null` on a surface that already has a page-top marker. */
   heroSpy?: string | null
-  dockRef?: RefObject<HTMLDivElement | null>
-  railRef?: RefObject<HTMLDivElement | null>
 }
 
 /**
- * A member, rendered.
+ * A member, rendered — the editorial member page.
  *
- * Extracted from PublicProfilePage so the member's own editor can show the
- * same thing rather than a second interpretation of it. The chrome was never
- * the part worth sharing — the derived copy is: which sentence of the bio
- * becomes the lede, that the lead role goes in the eyebrow and the chips
- * therefore start from the second, that the meta line is joined plus three
- * skills, and the nine rules about which sections a member has earned the
- * right to have on the page at all. A preview that re-derives those is a
- * preview that quietly stops being true.
+ * Shared by the member page and the member's own editor so the preview is the
+ * page rather than a second interpretation of it. Data fetching stays with the
+ * caller: this takes one `ProfileView` — the shape the privacy gate is written
+ * in — plus the earned content, and decides only how it reads.
  *
- * Data fetching stays with the caller. This takes one `ProfileView` — the
- * shape the privacy gate is written in — plus the earned content, and decides
- * only how it reads.
+ * The page is a hero (the person) over four tabs (what they do, what they
+ * make, where they show up, what they have earned). Each block answers to its
+ * own section (162): a hidden one is left out whole, and the tabs that would
+ * be empty for this viewer are not offered.
  */
 export function ProfileCanvas({
   view: profile,
@@ -192,8 +205,12 @@ export function ProfileCanvas({
   employer,
   employerPortfolio,
   cvHref,
+  experience,
   heroActions,
-  railActions,
+  ctaActions,
+  dockActions,
+  reportHref,
+  shareUrl,
   achievementsActions,
   privateMessage,
   partialMessage,
@@ -202,39 +219,98 @@ export function ProfileCanvas({
   emptyBlocks,
   privacy,
   layout = 'page',
-  heroSpy,
-  dockRef,
-  railRef,
+  heroSpy = 'Top',
 }: ProfileCanvasProps) {
   const { t, i18n } = useLingui()
   const pane = layout === 'pane'
-
-  // The snap container has to be the scrolling element, which is <html> — so
-  // the page marks it while it is mounted and clears it on the way out rather
-  // than leaving every other route inside a snap container. Page layout only:
-  // a pane scrolls inside the dashboard, and snapping it would drag the rail
-  // beside it around.
-  useEffect(() => {
-    if (pane) return
-    const root = document.documentElement
-    // nav-auto-hide: the navbar stays out of the way while the band is on
-    // screen and comes back on a scroll up or a hover at the top edge. Read by
-    // Navbar; the band is the one screen where the bar over it is chrome over
-    // a portrait rather than a way to get somewhere.
-    root.classList.add('snap-profile', 'nav-auto-hide')
-    return () => root.classList.remove('snap-profile', 'nav-auto-hide')
-  }, [pane])
   const prompting = (emptyBlocks ?? (edit ? 'prompt' : 'omit')) === 'prompt'
-
-  /**
-   * The sections this viewer may not see (162). Fields of a hidden section
-   * already arrive NULL and the earned lists never arrive at all; this is what
-   * keeps the cards around them — Details, which always has a Joined line —
-   * from rendering empty-handed.
-   */
   const hidden = hiddenSections(profile)
   const shows = (section: ProfileSectionKey) => !hidden.has(section)
 
+  const displayName = profile.display_name || t`Member`
+  const firstName = displayName.split(' ')[0]
+  const joined = new Date(profile.created_at)
+  const joinedYear = String(joined.getFullYear())
+  const joinedMonth = formatDate(profile.created_at, 'MMMM yyyy')
+  const look = parseProfileLook(profile.profile_look)
+  const avatarStyle = parseAvatarStyle(profile.avatar_style)
+  const banner = parseBanner(profile.banner)
+  const align = resolveAlign(look, avatarStyle)
+  const lookAttrs = lookAttributes(look)
+
+  /**
+   * Where this member works, as the page should say it. The Chamber-verified
+   * employer wins over the free text typed at signup wherever both exist: it
+   * is the one the platform can vouch for.
+   */
+  const orgName = employer?.trading_name || employer?.legal_name || profile.organization
+  const roleLabels = (profile.roles ?? []).map((role) => resolveCopy(i18n, ROLE_LABELS[role] || role))
+  const openTo = (profile.open_to ?? []).filter((v) => v !== COLLAB_EXCLUSIVE_VALUE)
+  const notSeeking = (profile.open_to ?? []).includes(COLLAB_EXCLUSIVE_VALUE)
+  const tagline =
+    profile.tagline?.trim() || [orgName, profile.industry].filter(Boolean).join(' · ') || null
+  const links = [
+    ...(profile.website
+      ? [{ key: 'website', label: profile.website.replace(/^https?:\/\//, '').replace(/\/$/, ''), url: profile.website }]
+      : []),
+    ...socialEntries(parseSocialLinks(profile.social_links)),
+  ]
+
+  // ------------------------------------------------------------- standing
+  const showcase = stats?.showcase || []
+  const pinnedIds = new Set(showcase.map((pin) => pin.badge.id))
+  const shelfBadges = badges
+    ? [...badges.filter((b) => pinnedIds.has(b.badge_id)), ...badges.filter((b) => !pinnedIds.has(b.badge_id))]
+    : []
+  const showStanding = shows('standing') && !!stats?.rank && stats.badge_count > 0
+  const standing: HeroStanding | null =
+    showStanding && stats?.rank
+      ? {
+          level: stats.rank.level,
+          name: stats.rank.name,
+          earned: stats.rank.earned,
+          nextRequired: stats.rank.next_required,
+          nextName: stats.rank.next_name,
+          streak: stats.streak_days,
+        }
+      : null
+  const heroStats: HeroStat[] = []
+  if (showStanding && stats?.points != null) heroStats.push({ key: 'points', label: t`Points`, value: stats.points })
+  if (shows('achievements') && stats && stats.badge_count > 0)
+    heroStats.push({ key: 'achievements', label: t`Achievements`, value: stats.badge_count })
+  if (connectionCount != null) heroStats.push({ key: 'connections', label: t`Connections`, value: connectionCount })
+
+  // ------------------------------------------------------------------ tabs
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // The phone dock repeats the hero's buttons, so it stays down while those
+  // are on screen and slides up once they have scrolled away.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [heroButtonsShown, setHeroButtonsShown] = useState(true)
+  useEffect(() => {
+    const target = rootRef.current?.querySelector('.pf-hero .pf-actions')
+    if (!target) return
+    const observer = new IntersectionObserver(([entry]) => setHeroButtonsShown(entry.isIntersecting))
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [])
+  const hasAchievements = (shows('achievements') && shelfBadges.length > 0) || showStanding
+  const tabs: ProfileTab<TabKey>[] = [{ key: 'overview', label: t`Overview` }]
+  if (shows('projects') && (projects?.length || prompting)) tabs.push({ key: 'projects', label: t`Projects` })
+  if (shows('events') && (events?.length || prompting)) tabs.push({ key: 'events', label: t`Events` })
+  if (hasAchievements || (prompting && shows('achievements')))
+    tabs.push({ key: 'achievements', label: t`Achievements` })
+  const requested = searchParams.get('tab')
+  const tab: TabKey =
+    requested && TAB_KEYS.has(requested) && tabs.some((x) => x.key === requested) ? (requested as TabKey) : 'overview'
+  const setTab = (next: TabKey) => {
+    const params = new URLSearchParams(searchParams)
+    if (next === 'overview') params.delete('tab')
+    else params.set('tab', next)
+    setSearchParams(params, { replace: true, preventScrollReset: true })
+  }
+
+  // ------------------------------------------------------- owner controls
   const privacySwitch = (section: ProfileSectionKey, label: string) =>
     privacy ? (
       <SectionPrivacy
@@ -245,589 +321,674 @@ export function ProfileCanvas({
       />
     ) : null
 
-  /**
-   * A section's controls — its audience switch and its pencil — in the
-   * `actions` slot its heading already has: no overlay, no absolute
-   * positioning, and the controls land in the tab order directly after the
-   * title they belong to. Spread onto ProfileSection.
-   */
-  const sectionChrome = (
-    section: ProfileSectionKey,
-    label: string,
-    block?: ProfileBlock,
-    extra?: ReactNode
-  ) => {
+  /** A card's audience switch and pencil, side by side in its heading. */
+  const tools = (section: ProfileSectionKey | null, label: string, block?: ProfileBlock) => {
     const onEdit = block ? edit?.[block] : undefined
-    const audience = privacySwitch(section, label)
-    if (!onEdit && !audience) return extra ? { actions: extra } : {}
-    return {
-      actions: (
-        <span className="flex items-center gap-1.5">
-          {extra}
-          {audience}
-          {onEdit && <EditPencil label={label} onClick={onEdit} />}
-        </span>
-      ),
-      className: onEdit ? 'group' : undefined,
-    }
+    const audience = section ? privacySwitch(section, label) : null
+    if (!onEdit && !audience) return null
+    return (
+      <span className="pf-tools">
+        {audience}
+        {onEdit && <EditPencil label={label} onClick={onEdit} />}
+      </span>
+    )
   }
 
-  const displayName = profile.display_name || t`Member`
-  const joinedDate = formatDate(profile.created_at)
-  const showcase = stats?.showcase || []
+  const cardHead = (title: ReactNode, toolset: ReactNode) => (
+    <div className="pf-cardhead">
+      <p className="pf-eyebrow">{title}</p>
+      {toolset}
+    </div>
+  )
 
-  const pageBanner = parseBanner(profile.banner)
-  const avatarStyle = parseAvatarStyle(profile.avatar_style)
+  const photoTools =
+    edit?.photo || edit?.look ? (
+      <>
+        {edit.photo && (
+          <button type="button" className="pf-btn pf-btn--soft pf-btn--sm" onClick={edit.photo}>
+            <Plus size={16} aria-hidden="true" />
+            <Trans>Photo and backdrop</Trans>
+          </button>
+        )}
+        {edit.look && (
+          <button type="button" className="pf-btn pf-btn--soft pf-btn--sm" onClick={edit.look}>
+            <Palette size={16} aria-hidden="true" />
+            <Trans>Look</Trans>
+          </button>
+        )}
+      </>
+    ) : null
 
-  // Pinned trophies lead the shelf; the rest follow in the order they were
-  // earned. A member who has chosen a showcase has said which ones matter.
-  const pinnedIds = new Set(showcase.map((pin) => pin.badge.id))
-  const shelfBadges = badges
-    ? [
-        ...badges.filter((b) => pinnedIds.has(b.badge_id)),
-        ...badges.filter((b) => !pinnedIds.has(b.badge_id)),
-      ]
-    : []
+  const actions =
+    heroActions || shareUrl ? (
+      <>
+        {heroActions}
+        {shareUrl && <ShareProfileButton url={shareUrl} name={displayName} />}
+      </>
+    ) : null
 
-  /**
-   * Where this member works, as the page should say it.
-   *
-   * Two fields have always answered that question. `profiles.organization` is
-   * free text typed at signup and checked by nobody; `employer` is the entity
-   * a Chamber verified, with a slug and a page of its own. The band was reading
-   * the first while the rail showed the second, so a member could see their own
-   * page name their employer two different ways a few hundred pixels apart.
-   *
-   * The verified name wins wherever both exist: it is the one the platform can
-   * vouch for, and putting the unchecked claim in the largest type on the page
-   * while the checked fact sits in a small card is the trust ordering upside
-   * down. The free text stays the fallback, so the majority — who have no
-   * verified employer — are unaffected.
-   */
-  const orgName = employer?.trading_name || employer?.legal_name || profile.organization
+  // --------------------------------------------------------------- overview
+  let rise = 0
+  const r = () => ({ className: 'pf-rise', style: { '--d': rise++ } as CSSProperties })
+  const riseClass = (extra: string) => {
+    const props = r()
+    // `group`: an owner's pencil fades in on hover of the card it edits.
+    return { className: cn(extra, 'group', props.className), style: props.style }
+  }
 
-  // The rail plate's lines: the full record — country, employer, joined —
-  // one per line. The plate's words column is about 170px wide beside the
-  // diamond, and a dotted run wraps there with the dots orphaned at line
-  // starts.
-  const railMeta = (
+  const aboutCard =
+    shows('about') && (profile.bio || prompting) ? (
+      <article id="about" data-spy="About" {...riseClass('pf-card pf-about')}>
+        {cardHead(<Trans>About</Trans>, tools('about', t`your bio`, 'about'))}
+        {profile.bio ? (
+          <p className="pf-about-text">{profile.bio}</p>
+        ) : (
+          <p className="pf-empty">
+            <Trans>Say what you do and what you are working on. It is the first thing members read here.</Trans>
+          </p>
+        )}
+      </article>
+    ) : null
+
+  const openToCard =
+    shows('open_to') && (openTo.length || notSeeking || prompting) ? (
+      <article id="collaborate" {...riseClass('pf-card pf-card--dark pf-opento pf-lift')}>
+        {cardHead(<Trans>Open to</Trans>, tools('open_to', t`what you are open to`, 'openTo'))}
+        {openTo.length ? (
+          <ol>
+            {openTo.map((value, i) => (
+              <li key={value}>
+                <span className="pf-num">{String(i + 1).padStart(2, '0')}</span>
+                {COLLABORATION_LABELS[value] || value}
+              </li>
+            ))}
+          </ol>
+        ) : notSeeking ? (
+          <p className="pf-empty">
+            <Trans>Not looking for collaborators right now.</Trans>
+          </p>
+        ) : (
+          <p className="pf-empty">
+            <Trans>What kinds of collaboration you would say yes to.</Trans>
+          </p>
+        )}
+      </article>
+    ) : null
+
+  const orgCard =
+    employer && shows('organisation') ? (
+      <article id="organisation" data-spy="Organisation" {...riseClass('pf-card pf-focus pf-lift')}>
+        {cardHead(<Trans>Organisation</Trans>, tools('organisation', t`your organisation`))}
+        <h3>
+          {employer.logo_url ? (
+            <img src={employer.logo_url} alt="" className="pf-logo" loading="lazy" />
+          ) : (
+            <Building2 size={22} strokeWidth={1.7} aria-hidden="true" />
+          )}
+          <Link to={`/org/${employer.slug}`}>{employer.trading_name || employer.legal_name}</Link>
+        </h3>
+        {employer.industry && <p>{employer.industry}</p>}
+        {employerPortfolio && employerPortfolio.length > 0 && (
+          <p>
+            <Trans>{employerPortfolio.length} pieces of published work</Trans>
+          </p>
+        )}
+        <ArrowUpRight size={20} strokeWidth={1.7} className="pf-go pf-arrow" aria-hidden="true" />
+      </article>
+    ) : shows('details') && (profile.organization || prompting) ? (
+      <article {...riseClass('pf-card pf-focus')}>
+        {cardHead(<Trans>Organisation</Trans>, tools('details', t`your details`, 'details'))}
+        {profile.organization ? (
+          <>
+            <h3>{profile.organization}</h3>
+            {profile.industry && <p>{profile.industry}</p>}
+          </>
+        ) : (
+          <p className="pf-empty">
+            <Trans>Where you work or study.</Trans>
+          </p>
+        )}
+      </article>
+    ) : null
+
+  const basedCard = profile.country ? (
+    <article {...riseClass('pf-card pf-focus')}>
+      {cardHead(<Trans>Based in</Trans>, tools(null, t`your details`, 'details'))}
+      <h3>
+        <CountryFlag country={profile.country} />
+        {profile.country}
+      </h3>
+      <p>
+        <Trans>Member since {joinedMonth}</Trans>
+      </p>
+    </article>
+  ) : null
+
+  const linksCard =
+    shows('details') && (links.length || prompting) ? (
+      <article {...riseClass('pf-card pf-focus')}>
+        {cardHead(<Trans>Online</Trans>, tools('details', t`your links`, 'details'))}
+        {links.length ? (
+          <>
+            <h3>
+              <Trans>Find {firstName}</Trans>
+            </h3>
+            <div className="pf-links">
+              {links.map((link) => (
+                <a key={link.key} className="pf-chipl" href={link.url} target="_blank" rel="noopener noreferrer">
+                  <Link2 size={14} aria-hidden="true" />
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="pf-empty">
+            <Trans>Add your website, LinkedIn or X so members can find you elsewhere.</Trans>
+          </p>
+        )}
+      </article>
+    ) : null
+
+  const chipsCard = (
+    section: ProfileSectionKey,
+    block: ProfileBlock,
+    title: ReactNode,
+    label: string,
+    values: string[] | null | undefined,
+    empty: ReactNode,
+    spy?: string
+  ) =>
+    shows(section) && (values?.length || prompting) ? (
+      <article id={spy?.toLowerCase()} data-spy={spy} {...riseClass('pf-card pf-focus')}>
+        {cardHead(title, tools(section, label, block))}
+        {values?.length ? (
+          <div className="pf-chips">
+            {values.map((value) => (
+              <span key={value} className="pf-chipl">
+                {value}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="pf-empty">{empty}</p>
+        )}
+      </article>
+    ) : null
+
+  const experienceList =
+    shows('cv') && cvHref ? (
+      <section {...riseClass('pf-exp')}>
+        <div className="pf-exphead">
+          <h2>
+            <Trans>Experience</Trans>
+          </h2>
+          <span className="pf-sub">
+            <Trans>From {firstName}'s CV</Trans>
+          </span>
+          {privacySwitch('cv', t`your CV`)}
+          <Link to={cvHref}>
+            <Trans>View CV</Trans>
+            <ArrowUpRight size={16} className="pf-arrow" aria-hidden="true" />
+          </Link>
+        </div>
+        {experience?.map((row, i) => (
+          <div key={`${row.org}-${i}`} className="pf-row">
+            <span className="yrs">{row.period}</span>
+            <span>
+              <span className="role">{row.title}</span>
+              {row.org && <> · {row.org}</>}
+            </span>
+            <span className="note">{row.location}</span>
+          </div>
+        ))}
+      </section>
+    ) : null
+
+  const overview = (
     <>
-      {profile.country && (
-        <span className="inline-flex basis-full items-center gap-2">
-          <CountryFlag country={profile.country} />
-          {profile.country}
-        </span>
-      )}
-      {(orgName || profile.industry) && (
-        <span className="basis-full">
-          {[orgName, profile.industry].filter(Boolean).join(' · ')}
-        </span>
-      )}
-      <span className="basis-full">
-        <Trans>Joined {joinedDate}</Trans>
-      </span>
+      <div className="pf-ov">
+        {aboutCard}
+        <div className="pf-ov-scroll">
+          {openToCard}
+          {orgCard}
+          {basedCard}
+          {linksCard}
+        </div>
+        {chipsCard('skills', 'skills', <Trans>Skills</Trans>, t`your skills`, profile.skills, <Trans>Skills are how the directory finds you.</Trans>)}
+        {chipsCard('interests', 'interests', <Trans>Interests</Trans>, t`your interests`, profile.interests, <Trans>Topics you care about, so the right things reach you.</Trans>, 'Interests')}
+        {chipsCard('languages', 'languages', <Trans>Languages</Trans>, t`your languages`, profile.languages, <Trans>The languages you speak. These appear on your CV.</Trans>, 'Languages')}
+      </div>
+      {experienceList}
     </>
   )
-  // The band says each thing once: the country is in the eyebrow, the
-  // employer in the lede, so the meta line is joined + what they work in.
-  const heroSkills = profile.skills?.slice(0, HERO_SKILLS) ?? []
-  const heroMeta = (
-    <>
-      <span>
-        <Trans>Joined {joinedDate}</Trans>
+
+  // --------------------------------------------------------------- projects
+  const sectionHeader = (title: ReactNode, section: ProfileSectionKey, label: string, extra?: ReactNode) => (
+    <div {...riseClass('pf-sechead')}>
+      <h2>{title}</h2>
+      <span className="pf-tools">
+        {extra}
+        {privacySwitch(section, label)}
       </span>
-      {heroSkills.length > 0 && (
+    </div>
+  )
+
+  rise = 0
+  const projectsPanel = (
+    <>
+      {sectionHeader(<Trans>Projects</Trans>, 'projects', t`your projects`)}
+      {projects?.length ? (
+        <div id="projects" data-spy="Projects" className="pf-grid">
+          {projects.map((project, i) => (
+            <Link key={project.id} to={entityPath('project', project)} {...riseClass('pf-card pf-proj pf-lift')}>
+              <div className="pf-cover">
+                {project.image_url ? (
+                  <img src={project.image_url} alt="" loading="lazy" decoding="async" />
+                ) : (
+                  <svg className="band" viewBox="0 0 300 150" preserveAspectRatio="none" aria-hidden="true">
+                    <path d={`M-10 ${110 - (i % 3) * 14} H${110 + (i % 3) * 30} L${160 + (i % 3) * 30} ${50 + (i % 3) * 6} H310`} />
+                  </svg>
+                )}
+              </div>
+              <div className="pf-projbody">
+                <span className="pf-tag">{resolveCopy(i18n, PHASE_LABELS[project.phase] || project.phase)}</span>
+                <h3>{project.title}</h3>
+                <div className="pf-projmeta">
+                  <span>{project.summary ? project.summary.slice(0, 80) : ''}</span>
+                  <ArrowUpRight size={18} strokeWidth={1.7} className="pf-arrow" aria-hidden="true" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div {...riseClass('pf-card')}>
+          <p className="pf-empty">
+            {edit ? <Trans>Your public projects show here.</Trans> : <Trans>{firstName} has no public projects yet.</Trans>}
+          </p>
+        </div>
+      )}
+    </>
+  )
+
+  // ----------------------------------------------------------------- events
+  const now = Date.now()
+  const upcoming = (events ?? [])
+    .filter((e) => new Date(e.end_date || e.start_date).getTime() >= now)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date))
+  const past = (events ?? [])
+    .filter((e) => new Date(e.end_date || e.start_date).getTime() < now)
+    .sort((a, b) => b.start_date.localeCompare(a.start_date))
+  const where = (e: Event) => (e.is_virtual ? t`Online` : e.location || '')
+  rise = 0
+  const eventsPanel = (
+    <>
+      {sectionHeader(<Trans>Upcoming</Trans>, 'events', t`your events`)}
+      <section id="events" data-spy="Events" {...riseClass('pf-card')}>
+        {upcoming.length ? (
+          upcoming.map((event) => {
+            const d = new Date(event.start_date)
+            return (
+              <div key={event.id} className="pf-ev">
+                <div className="pf-date">
+                  <span className="m">{formatDate(d, 'MMM')}</span>
+                  <span className="d">{formatDate(d, 'd')}</span>
+                </div>
+                <div>
+                  <span className="pf-tag">
+                    <Trans>Host</Trans>
+                  </span>
+                  <h3>{event.title}</h3>
+                  <p className="meta">
+                    {[where(event), formatDate(d, 'p'), resolveCopy(i18n, EVENT_TYPE_LABELS[event.event_type] || event.event_type)]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                </div>
+                <div className="act">
+                  <Link to={entityPath('event', event)} className="pf-btn pf-btn--soft pf-btn--sm">
+                    <Trans>Details</Trans>
+                    <ArrowUpRight size={16} className="pf-arrow" aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            )
+          })
+        ) : (
+          <p className="pf-empty">
+            <Trans>No upcoming events.</Trans>
+          </p>
+        )}
+      </section>
+      {past.length > 0 && (
         <>
-          <MetaDot />
-          <span>{heroSkills.join(' · ')}</span>
+          <div {...riseClass('pf-sechead')}>
+            <h2>
+              <Trans>Past events</Trans>
+            </h2>
+          </div>
+          <div className="pf-grid">
+            {past.map((event) => {
+              const d = new Date(event.start_date)
+              return (
+                <Link key={event.id} to={entityPath('event', event)} {...riseClass('pf-card pf-card--dark pf-past pf-lift')}>
+                  <svg className="pf-rings" viewBox="0 0 200 200" aria-hidden="true">
+                    <circle cx="200" cy="0" r="50" />
+                    <circle cx="200" cy="0" r="90" />
+                    <circle cx="200" cy="0" r="130" />
+                    <circle cx="200" cy="0" r="170" />
+                  </svg>
+                  <p className="pf-eyebrow">
+                    <Trans>{formatDate(d, 'yyyy')} · Hosted</Trans>
+                  </p>
+                  <h3>{event.title}</h3>
+                  <p className="place">{[formatDate(d, 'MMM d'), where(event)].filter(Boolean).join(' · ')}</p>
+                </Link>
+              )
+            })}
+          </div>
         </>
       )}
     </>
   )
-  // The line above the name. NOT the word "Member": everyone here is one, so
-  // it is a label that costs a line and distinguishes nobody. What does
-  // distinguish someone is where they are and what they are here as, so this
-  // is their country and their leading role — and the role chips below then
-  // start from the second one rather than repeating it.
-  const leadRole = profile.roles?.[0]
-  const leadRoleLabel = leadRole ? resolveCopy(i18n, ROLE_LABELS[leadRole] || leadRole) : null
-  // A size up in the band: the eyebrow is set in caps with wide tracking, and
-  // a 16px flag beside 15px capitals reads as a smudge.
-  const countryWithFlag = profile.country ? (
-    <span className="inline-flex items-center gap-2.5">
-      <CountryFlag country={profile.country} className="h-4 w-[21px] rounded-[3px]" />
-      {profile.country}
-    </span>
-  ) : null
-  const heroEyebrow =
-    countryWithFlag && leadRoleLabel ? (
-      <>
-        {countryWithFlag}
-        <span aria-hidden className="text-white/40">·</span>
-        <span>{leadRoleLabel}</span>
-      </>
-    ) : (
-      countryWithFlag || leadRoleLabel || null
-    )
-  const bioLede = ledeFrom(profile.bio)
-  const heroLede =
-    orgName || profile.industry || bioLede ? (
-      <>
-        {orgName && <em className="not-italic font-semibold text-white">{orgName}</em>}
-        {orgName && profile.industry && <span className="text-white/60">, </span>}
-        {profile.industry && <span>{profile.industry}</span>}
-        {(orgName || profile.industry) && bioLede && <span className="text-white/60">. </span>}
-        {bioLede}
-      </>
+
+  // ----------------------------------------------------------- achievements
+  const featured = shelfBadges.length
+    ? (showcase[0] && shelfBadges.find((b) => b.badge_id === showcase[0].badge.id)) ||
+      shelfBadges.slice().sort((a, b) => (TIER_RANK[b.badge?.tier ?? ''] ?? 0) - (TIER_RANK[a.badge?.tier ?? ''] ?? 0))[0]
+    : null
+  const rest = shelfBadges.filter((b) => b !== featured)
+  const pct = standing?.nextRequired ? Math.min(100, (standing.earned / standing.nextRequired) * 100) : 100
+  const tierLabel = (tier?: string | null) =>
+    tier && TIER_LABEL[tier as keyof typeof TIER_LABEL] ? resolveCopy(i18n, TIER_LABEL[tier as keyof typeof TIER_LABEL]) : null
+
+  rise = 0
+  const achievementsPanel = (
+    <>
+      <div className="pf-ach-top">
+        {featured?.badge && shows('achievements') && (
+          <article {...riseClass('pf-card pf-card--dark pf-feat')}>
+            <svg className="fband" viewBox="0 0 600 320" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M-20 250 H260 L360 120 H640" />
+            </svg>
+            <div className="top">
+              <TrophyImage
+                icon={featured.badge.icon}
+                trophyType={featured.badge.trophy_type}
+                tier={featured.badge.tier}
+                imageUrl={featured.badge.image_url}
+                rarity={featured.badge.rarity}
+                assetMap={trophyAssets}
+                name={featured.badge.name}
+                size={88}
+              />
+              <p className="pf-eyebrow">
+                {showcase.length ? <Trans>Pinned</Trans> : <Trans>Top achievement</Trans>}
+              </p>
+            </div>
+            <div>
+              <p className="yr">{formatDate(featured.awarded_at, 'yyyy')}</p>
+              <h3>{featured.badge.name}</h3>
+              <p className="fmeta">
+                {[tierLabel(featured.badge.tier), featured.badge.description].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+          </article>
+        )}
+        {standing && (
+          <article id="standing-card" {...riseClass('pf-card pf-stand')}>
+            <div className="pf-cardhead">
+              <p className="pf-eyebrow">
+                <Trans>Level {standing.level}</Trans>
+              </p>
+              {privacySwitch('standing', t`your level and points`)}
+            </div>
+            <h3>{standing.name}</h3>
+            <div className="pf-bar">
+              <i style={{ '--w': `${pct}%` } as CSSProperties} />
+            </div>
+            <p className="note">
+              {standing.nextRequired && standing.nextName ? (
+                <Trans>
+                  {standing.earned} of {standing.nextRequired} achievements toward {standing.nextName}.
+                </Trans>
+              ) : (
+                <Trans>Highest rank reached.</Trans>
+              )}{' '}
+              {stats?.points != null && <Trans>{stats.points} points so far.</Trans>}{' '}
+              {standing.streak ? <Trans>{standing.streak}-day streak.</Trans> : null}
+            </p>
+          </article>
+        )}
+      </div>
+
+      {shows('achievements') && (
+        <>
+          {sectionHeader(<Trans>Earned</Trans>, 'achievements', t`your achievements`, achievementsActions)}
+          {rest.length ? (
+            <div id="achievements" data-spy="Achievements" className="pf-bgrid">
+              {rest.map((ub) =>
+                ub.badge ? (
+                  <article key={ub.id} {...riseClass('pf-card pf-badge pf-lift')}>
+                    <div className="top">
+                      <TrophyImage
+                        icon={ub.badge.icon}
+                        trophyType={ub.badge.trophy_type}
+                        tier={ub.badge.tier}
+                        imageUrl={ub.badge.image_url}
+                        rarity={ub.badge.rarity}
+                        assetMap={trophyAssets}
+                        name={ub.badge.name}
+                        size={56}
+                      />
+                      {ub.badge.tier && (
+                        <span className="pf-tier" style={{ color: TIER_COLOUR[ub.badge.tier] }}>
+                          {tierLabel(ub.badge.tier)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="txt">
+                      <h3>{ub.badge.name}</h3>
+                      <p>{ub.badge.description}</p>
+                      <p className="yr">{formatDate(ub.awarded_at, 'yyyy')}</p>
+                    </div>
+                  </article>
+                ) : null
+              )}
+            </div>
+          ) : (
+            !featured && (
+              <div {...riseClass('pf-card')}>
+                <p className="pf-empty">
+                  <Trans>Achievements you earn on the platform show here.</Trans>
+                </p>
+              </div>
+            )
+          )}
+          {lockedBadges && lockedBadges.length > 0 && (
+            <>
+              <div {...riseClass('pf-sechead')}>
+                <h2>
+                  <Trans>Locked</Trans>
+                </h2>
+                <span className="pf-eyebrow">
+                  <Trans>Next up</Trans>
+                </span>
+              </div>
+              <div className="pf-bgrid">
+                {lockedBadges.map((badge) => (
+                  <article key={badge.id} {...riseClass('pf-card pf-badge is-locked')}>
+                    <div className="top">
+                      <TrophyImage
+                        icon={badge.icon}
+                        trophyType={badge.trophy_type}
+                        tier={badge.tier}
+                        imageUrl={badge.image_url}
+                        rarity={badge.rarity}
+                        assetMap={trophyAssets}
+                        name={badge.name}
+                        size={56}
+                        locked
+                      />
+                      {badge.tier && <span className="pf-tier">{tierLabel(badge.tier)}</span>}
+                    </div>
+                    <div className="txt">
+                      <h3>{badge.name}</h3>
+                      <p>{badge.description}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </>
+  )
+
+  const panel =
+    tab === 'projects' ? projectsPanel : tab === 'events' ? eventsPanel : tab === 'achievements' ? achievementsPanel : overview
+
+  // ----------------------------------------------------------------- footer
+  const industryWord = profile.industry?.toLocaleLowerCase(i18n.locale)
+  const cta =
+    !pane && ctaActions ? (
+      <section className="pf-cta" aria-label={t`Get in touch`}>
+        <div className="pf-cta-in">
+          <h2>
+            {industryWord ? (
+              <Trans>
+                Working on something in <em>{industryWord}</em>? Talk to {firstName}.
+              </Trans>
+            ) : (
+              <Trans>Working on something? Talk to {firstName}.</Trans>
+            )}
+          </h2>
+          <div className="acts">{ctaActions}</div>
+          <div className="foot">
+            {links.map((link) => (
+              <a key={link.key} href={link.url} target="_blank" rel="noopener noreferrer">
+                {link.label}
+                <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
+            ))}
+            {reportHref && (
+              <Link to={reportHref}>
+                <Trans>Report profile</Trans>
+              </Link>
+            )}
+            <span className="end">
+              {profile.is_verified ? <Trans>OECS KTIP · Verified member</Trans> : <Trans>OECS KTIP</Trans>}
+            </span>
+          </div>
+        </div>
+      </section>
     ) : null
 
-  const showStanding = shows('standing') && !!stats?.rank && stats.badge_count > 0
-  const heroStanding =
-    showStanding && stats ? (
-      <HeroStanding
-        rank={stats.rank}
-        points={stats.points}
-        badgeCount={stats.badge_count}
-        connectionCount={connectionCount}
-        align={avatarStyle.kind !== 'photo' && avatarStyle.side === 'center' ? 'end' : 'start'}
-      />
+  const dock =
+    !pane && dockActions ? (
+      <div className="pf-dock" role="region" aria-label={t`Quick actions`} data-hidden={heroButtonsShown} inert={heroButtonsShown}>
+        <div>
+          <p className="k">{openTo.length ? <Trans>Open to</Trans> : standing ? <Trans>Level {standing.level}</Trans> : displayName}</p>
+          <p className="v">
+            {openTo.length
+              ? openTo
+                  .slice(0, 2)
+                  .map((v) => COLLABORATION_LABELS[v] || v)
+                  .join(' · ')
+              : standing?.name ?? roleLabels[0] ?? ''}
+          </p>
+        </div>
+        <div className="row">{dockActions}</div>
+      </div>
     ) : null
 
   return (
-    <>
-      {/* Panel one. A plain wrapper so the band has something to snap to —
-          PortraitHero renders a section AND its fixed flyer, and the flyer is
-          positioned in viewport coordinates, so this must never gain a
-          transform of its own. */}
-      <div data-snap={pane ? undefined : 'hero'}>
-      <PortraitHero
-        name={displayName}
-        verified={profile.is_verified}
-        // The lead role is already in the eyebrow; the chips carry the rest.
-        roles={profile.roles?.slice(1)}
-        eyebrow={heroEyebrow}
-        lede={heroLede}
-        meta={heroMeta}
-        actions={heroActions}
-        // Not in a pane. On the member page the portrait's flight fades these
-        // words out as the rail's plate and meter wake up, so the two never
-        // read at once — but a pane has no flight, so the band and the column
-        // below it would both stand there showing the same level, the same
-        // points and the same three figures.
-        standing={pane ? undefined : heroStanding}
-        avatarUrl={profile.avatar_url}
-        style={avatarStyle}
-        banner={pageBanner}
-        imageSeed={profile.id}
-        back={back}
-        dockRef={dockRef}
-        railRef={railRef}
-        spy={heroSpy}
-        flight={!pane}
-        compact={pane}
-        overlay={
-          // One pencil for the whole band, because the band is one picture: the
-          // portrait is composited against the backdrop and the banner sits
-          // behind both, so choosing them apart is how you end up with a face
-          // that disappears into its own cover. Two pencils in one corner also
-          // asked the reader to tell a 16px pencil from a 16px pencil.
-          edit?.photo && (
-            <div className="absolute right-4 top-4">
-              <EditPencil label={t`photo and banner`} onClick={edit.photo} tone="onDark" />
-            </div>
-          )
-        }
-      />
+    <div
+      ref={rootRef}
+      className="pf"
+      data-layout={layout}
+      data-photo={lookAttrs['data-photo']}
+      data-tone={lookAttrs['data-tone']}
+      style={lookAttrs.style as CSSProperties}
+      // The tabs replace the scroll-spy rail; the markers stay for the tutorials.
+      data-spy-off
+    >
+      <div className="pf-wrap">
+        {!pane && (
+          <Link to={back.href} className="pf-back">
+            <ArrowLeft size={18} aria-hidden="true" />
+            {back.label}
+          </Link>
+        )}
 
-      </div>
+        <ProfileHero
+          name={displayName}
+          verified={profile.is_verified}
+          roleLabels={roleLabels}
+          tagline={tagline}
+          bio={ledeFrom(profile.bio)}
+          country={profile.country}
+          orgName={orgName}
+          openTo={openTo[0] ? (COLLABORATION_LABELS[openTo[0]] || openTo[0]).toLocaleLowerCase(i18n.locale) : null}
+          joinedYear={joinedYear}
+          joinedLabel={t`Joined ${joinedMonth}`}
+          avatarUrl={profile.avatar_url}
+          style={avatarStyle}
+          banner={banner}
+          align={align}
+          stats={heroStats}
+          standing={standing}
+          onStanding={tabs.some((x) => x.key === 'achievements') ? () => setTab('achievements') : undefined}
+          actions={actions}
+          photoTools={photoTools}
+          nameTools={edit?.identity ? <EditPencil label={t`name and roles`} onClick={edit.identity} /> : undefined}
+          variant={pane ? 'pane' : 'page'}
+          spy={heroSpy}
+        />
 
-      {/* Panel two: everything the band is not. */}
-      <div
-        data-snap={pane ? undefined : 'content'}
-        className={cn(pane ? 'w-full' : 'mx-auto max-w-page-mid px-4 pb-gutter-lg')}
-      >
-        <div
-          className={cn(
-            'mt-8 grid items-start gap-gutter',
-            // The pane is roughly 712px wide at lg once the dashboard rail and
-            // the gutters are taken out, which is not enough for a 340px rail
-            // plus content. It waits for xl.
-            pane ? 'xl:grid-cols-[21.25rem_1fr]' : 'lg:grid-cols-[21.25rem_1fr]'
-          )}
+        {shows('skills') || shows('interests') ? (
+          <SkillsStrip items={[...(profile.skills ?? []), ...(profile.interests ?? [])]} />
+        ) : null}
+
+        {canView === false && (
+          <section className="pf-card pf-lock" style={{ marginTop: 40 }}>
+            <Lock size={22} aria-hidden="true" />
+            <h2>
+              <Trans>This profile is private</Trans>
+            </h2>
+            {privateMessage && <p>{privateMessage}</p>}
+          </section>
+        )}
+        {canView !== false && hidden.size > 0 && partialMessage && (
+          <p className="pf-notice" style={{ marginTop: 40 }}>
+            <Lock size={16} aria-hidden="true" />
+            {partialMessage}
+          </p>
+        )}
+
+        <ProfileTabs
+          tabs={tabs}
+          active={tab}
+          onChange={setTab}
+          idBase={pane ? 'my-profile' : 'member'}
+          status={
+            profile.country ? (
+              <>
+                <CountryFlag country={profile.country} />
+                {profile.country} · <Trans>Joined {joinedMonth}</Trans>
+              </>
+            ) : (
+              <Trans>Joined {joinedMonth}</Trans>
+            )
+          }
         >
-          {/* ---------- The static "who" ----------
-              Sticks while the column beside it scrolls, so the person stays on
-              screen next to whatever you are reading about them. The identity
-              plate leads it; the hero's portrait lands in its diamond. */}
-          <div
-            ref={railRef}
-            className={cn('grid gap-card-gap', pane ? 'xl:sticky xl:top-24' : 'lg:sticky lg:top-24')}
-          >
-            {/* An overlay rather than the plate's own `actions` slot: the rail
-                variant styles that slot full-width for the Connect and Message
-                buttons, and a pencil stretched across the card is not a pencil. */}
-            <EditableBlock label={t`name and roles`} onEdit={edit?.identity}>
-              <IdentityPlate
-                id="profile"
-                spy="Profile"
-                variant="rail"
-                name={displayName}
-                avatarUrl={profile.avatar_url}
-                avatarRef={dockRef}
-                verified={profile.is_verified}
-                roles={profile.roles}
-                meta={railMeta}
-                actions={railActions}
-              />
-            </EditableBlock>
-
-            {/* ---------- Per section (162) ----------
-                Each block below answers to its own section. A hidden one is
-                left out whole, so a visitor never meets a card with its
-                contents taken away. */}
-            {/* The member-page tutorial anchors a step on `[data-spy="About"]`,
-                so this marker travels with the bio rather than being dropped
-                when there is none — the section itself still only renders when
-                there is something to read. */}
-            {shows('about') && (profile.bio || prompting) && (
-              <ProfileSection
-                id="about"
-                spy="About"
-                tone="rail"
-                title={t`About`}
-                {...sectionChrome('about', t`your bio`, 'about')}
-              >
-                {profile.bio ? (
-                  <p className="whitespace-pre-wrap text-caption leading-relaxed text-ktip-sand-700">
-                    {profile.bio}
-                  </p>
-                ) : (
-                  <EmptyPrompt>
-                    <Trans>Say what you do and what you are working on.</Trans>
-                  </EmptyPrompt>
-                )}
-              </ProfileSection>
-            )}
-
-            {shows('details') && (
-            <ProfileSection tone="rail" title={t`Details`} {...sectionChrome('details', t`your details`, 'details')}>
-              <ProfileFacts
-                columns={1}
-                items={[
-                  !!profile.country && {
-                    label: t`Location`,
-                    value: (
-                      <span className="inline-flex items-center gap-2">
-                        <CountryFlag country={profile.country} />
-                        {profile.country}
-                      </span>
-                    ),
-                  },
-                  // Only when there is no verified employer below. Otherwise the
-                  // rail says "Organisation" twice a few hundred pixels apart —
-                  // once as free text the member typed, once as the registered
-                  // entity with its logo and its work — and the second one is
-                  // strictly the better answer to the same question.
-                  !employer && !!profile.organization && {
-                    label: t`Organisation`,
-                    value: profile.organization,
-                  },
-                  !!profile.industry && { label: t`Industry`, value: profile.industry },
-                  // Fetched by get_profile_view() since 083 and rendered by
-                  // nothing until now. A field a member can edit and never see
-                  // is a field they cannot tell is wrong.
-                  !!profile.website && {
-                    label: t`Website`,
-                    value: (
-                      <a
-                        href={profile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-ktip-ocean-600 hover:underline"
-                      >
-                        {profile.website.replace(/^https?:\/\//, '')}
-                        <ExternalLink size={12} aria-hidden="true" />
-                      </a>
-                    ),
-                  },
-                  { label: t`Joined`, value: joinedDate },
-                ]}
-              />
-            </ProfileSection>
-            )}
-
-            {shows('skills') && (profile.skills?.length || prompting) ? (
-              <ProfileSection tone="rail" title={t`Skills`} {...sectionChrome('skills', t`your skills`, 'skills')}>
-                {profile.skills?.length ? (
-                  <ProfileTags values={profile.skills} tone="ocean" />
-                ) : (
-                  <EmptyPrompt>
-                    <Trans>Skills are how the directory finds you.</Trans>
-                  </EmptyPrompt>
-                )}
-              </ProfileSection>
-            ) : null}
-
-            {shows('interests') && (profile.interests?.length || prompting) ? (
-              <ProfileSection
-                tone="rail"
-                title={t`Interests`}
-                {...sectionChrome('interests', t`your interests`, 'interests')}
-              >
-                {profile.interests?.length ? (
-                  <ProfileTags values={profile.interests} tone="tropical" />
-                ) : (
-                  <EmptyPrompt>
-                    <Trans>Topics you care about, so the right things reach you.</Trans>
-                  </EmptyPrompt>
-                )}
-              </ProfileSection>
-            ) : null}
-
-            {/* Also fetched and never drawn until now. They are on the CV, so a
-                member who set them had no way to check what they said. */}
-            {shows('languages') && (profile.languages?.length || prompting) ? (
-              <ProfileSection
-                id="languages"
-                spy="Languages"
-                tone="rail"
-                title={t`Languages`}
-                {...sectionChrome('languages', t`your languages`, 'languages')}
-              >
-                {profile.languages?.length ? (
-                  <ProfileTags values={profile.languages} tone="muted" />
-                ) : (
-                  <EmptyPrompt>
-                    <Trans>The languages you speak. These appear on your CV.</Trans>
-                  </EmptyPrompt>
-                )}
-              </ProfileSection>
-            ) : null}
-
-            {shows('open_to') && (profile.open_to?.length || prompting) ? (
-              <ProfileSection
-                id="collaborate"
-                tone="rail"
-                title={t`Open to`}
-                {...sectionChrome('open_to', t`what you are open to`, 'openTo')}
-              >
-                {profile.open_to?.length ? (
-                  <ProfileTags
-                    values={profile.open_to}
-                    tone="sun"
-                    toneFor={(value) => (value === COLLAB_EXCLUSIVE_VALUE ? 'muted' : 'sun')}
-                    labelFor={(value) => COLLABORATION_LABELS[value] || value}
-                    icon={<Handshake size={12} aria-hidden="true" />}
-                  />
-                ) : (
-                  <EmptyPrompt>
-                    <Trans>What kinds of collaboration you would say yes to.</Trans>
-                  </EmptyPrompt>
-                )}
-              </ProfileSection>
-            ) : null}
-
-            {/* ---------- Organisation ----------
-                profiles.organization has always been free text that links
-                nowhere. This is the registered entity behind it, with the work
-                it publishes — the business equivalent of the CV an individual
-                member gets. */}
-            {employer && shows('organisation') && (
-              <ProfileSection
-                id="organisation"
-                spy="Organisation"
-                tone="rail"
-                title={t`Organisation`}
-                {...sectionChrome('organisation', t`your organisation`)}
-              >
-                <div className="flex items-start gap-3">
-                  {employer.logo_url ? (
-                    <img
-                      src={employer.logo_url}
-                      alt=""
-                      className="h-10 w-10 shrink-0 rounded-control object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-ktip-ocean-100">
-                      <Building2 size={20} className="text-ktip-ocean-600" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      to={`/org/${employer.slug}`}
-                      className="flex items-center gap-1.5 font-display text-body font-bold text-ktip-sand-900 hover:text-ktip-ocean-600"
-                    >
-                      {employer.trading_name || employer.legal_name}
-                      <ExternalLink size={13} aria-hidden="true" />
-                    </Link>
-                    {employer.industry && (
-                      <p className="text-micro text-ktip-sand-500">{employer.industry}</p>
-                    )}
-                    {employer.description && (
-                      <p className="mt-1.5 line-clamp-3 text-micro leading-relaxed text-ktip-sand-700">
-                        {employer.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {employerPortfolio && employerPortfolio.length > 0 && (
-                  <div className="mt-4 border-t border-ktip-sand-200 pt-3">
-                    <p className="mb-1.5 text-micro font-semibold uppercase tracking-[0.12em] text-ktip-sand-500">
-                      <Trans>Portfolio</Trans>
-                    </p>
-                    <ul className="space-y-1">
-                      {employerPortfolio.slice(0, 4).map((item) => (
-                        <li key={item.id} className="text-micro text-ktip-sand-700">
-                          <span className="font-semibold">{item.title}</span>
-                          {item.summary && (
-                            <span className="text-ktip-sand-500"> — {item.summary}</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                    {employerPortfolio.length > 4 && (
-                      <Link
-                        to={`/org/${employer.slug}`}
-                        className="mt-2 inline-block text-micro font-semibold text-ktip-ocean-600 hover:underline"
-                      >
-                        <Trans>All {employerPortfolio.length} pieces of work</Trans>
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </ProfileSection>
-            )}
-
-            {/* Only rendered when the CV is actually published — see publicResume. */}
-            {cvHref && shows('cv') && (
-              <div className="flex items-center gap-2">
-                <Link to={cvHref} className="min-w-0 flex-1">
-                  <Button variant="outline" fullWidth icon={<FileText size={16} />}>
-                    <Trans>View CV</Trans>
-                  </Button>
-                </Link>
-                {privacySwitch('cv', t`your CV`)}
-              </div>
-            )}
-          </div>
-
-          {/* ---------- The earned "what" ---------- */}
-          <div className="grid gap-card-gap">
-            {/* This panel exists so a private page says why rather than looking
-                broken. No Connect button here: the plate beside it has one. */}
-            {canView === false && (
-              <section className="neu-surface rounded-surface bg-ktip-cream p-card-pad-lg text-center shadow-neu">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ktip-sand-100 shadow-neu-sm-inset">
-                  <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
-                </div>
-                <h2 className="mt-4 font-display text-title-sm font-bold text-ktip-sand-900">
-                  <Trans>This profile is private</Trans>
-                </h2>
-                <p className="mx-auto mt-2 max-w-md text-caption text-ktip-sand-600">
-                  {privateMessage}
-                </p>
-                {/* No Connect button here. The plate directly above already carries
-                    one, and two of the same control a few hundred pixels apart reads
-                    as a rendering bug rather than as emphasis. */}
-              </section>
-            )}
-
-            {/* The open profile with a closed part or two. One quiet line, not
-                the panel: most of the page is here, and a lock the size of the
-                one above would say the opposite. */}
-            {canView !== false && hidden.size > 0 && partialMessage && (
-              <p className="flex items-start gap-2.5 rounded-surface bg-ktip-sand-100 px-4 py-3 text-micro leading-relaxed text-ktip-sand-600 shadow-neu-sm-inset">
-                <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
-                {partialMessage}
-              </p>
-            )}
-
-            {showStanding && stats && (
-              <div id="standing" data-spy="Standing" data-spy-skip className="scroll-mt-24">
-                {/* The meter has no heading to hang a control on, so in the
-                    editor its switch gets a line of its own. */}
-                {privacy && (
-                  <div className="mb-2 flex justify-end">
-                    {privacySwitch('standing', t`your level and points`)}
-                  </div>
-                )}
-                <StandingMeter
-                  rank={stats.rank}
-                  points={stats.points}
-                  badgeCount={stats.badge_count}
-                  connectionCount={connectionCount}
-                  streakDays={stats.streak_days}
-                />
-              </div>
-            )}
-
-            {shows('achievements') && shelfBadges.length > 0 && (
-              <ProfileSection
-                id="achievements"
-                spy="Achievements"
-                title={t`Achievements`}
-                count={stats?.badge_count ?? shelfBadges.length}
-                {...sectionChrome('achievements', t`your achievements`, undefined, achievementsActions)}
-              >
-                <TrophyShelf
-                  badges={shelfBadges}
-                  assetMap={trophyAssets}
-                  locked={lockedBadges}
-                  moreHref="/achievements"
-                />
-              </ProfileSection>
-            )}
-
-            {shows('projects') && projects?.length ? (
-              <ProfileSection
-                id="projects"
-                spy="Projects"
-                title={t`Projects`}
-                count={projects.length}
-                {...sectionChrome('projects', t`your projects`)}
-              >
-                <div className="grid">
-                  {projects.map((project) => (
-                    <ProfileLinkRow
-                      key={project.id}
-                      to={entityPath('project', project)}
-                      label={project.title}
-                      image={project.image_url}
-                      icon={<FolderKanban size={16} aria-hidden="true" />}
-                      meta={resolveCopy(i18n, PHASE_LABELS[project.phase])}
-                    />
-                  ))}
-                </div>
-              </ProfileSection>
-            ) : null}
-
-            {shows('events') && events?.length ? (
-              <ProfileSection
-                id="events"
-                spy="Events"
-                title={t`Events`}
-                count={events.length}
-                {...sectionChrome('events', t`your events`)}
-              >
-                <div className="grid">
-                  {events.map((event) => (
-                    <ProfileLinkRow
-                      key={event.id}
-                      to={entityPath('event', event)}
-                      label={event.title}
-                      image={event.image_url}
-                      icon={<Calendar size={16} aria-hidden="true" />}
-                      meta={event.start_date ? formatDate(event.start_date) : undefined}
-                    />
-                  ))}
-                </div>
-              </ProfileSection>
-            ) : null}
-          </div>
-        </div>
+          {panel}
+        </ProfileTabs>
       </div>
-    </>
+      {cta}
+      {dock}
+    </div>
   )
 }

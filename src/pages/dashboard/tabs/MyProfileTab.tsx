@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { FileText, MessageSquare, UserPlus } from 'lucide-react'
+import { FileText, Mail, UserPlus } from 'lucide-react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
 import { usePageTitle } from '../../../hooks/usePageTitle'
@@ -13,7 +13,6 @@ import { useEmployerForUser, useEmployerPortfolio } from '../../../hooks/useEmpl
 import { usePublicResume } from '../../../hooks/useResume'
 import { isOrganizationAccount } from '../../../lib/permissions'
 import { memberPath } from '../../../lib/slug'
-import { cn } from '../../../lib/utils'
 import {
   asVisitorView,
   draftToView,
@@ -23,9 +22,9 @@ import {
   withSection,
 } from '../../../lib/profile-visibility'
 import type { ProfileSectionKey, ProfileView, SectionVisibility } from '../../../types'
-import { heroButton } from '../../../components/profile/PortraitHero'
 import {
   ProfileCanvas,
+  type ExperienceRow,
   type ProfileBlock,
   type ProfileEditMap,
 } from '../../../components/profile/ProfileCanvas'
@@ -48,6 +47,7 @@ const BLOCKS = new Set<ProfileBlock>([
   'interests',
   'languages',
   'openTo',
+  'look',
 ])
 
 /**
@@ -231,31 +231,37 @@ export default function MyProfileTab() {
         interests: () => setBlock('interests'),
         languages: () => setBlock('languages'),
         openTo: () => setBlock('openTo'),
+        look: () => setBlock('look'),
       }
 
   // A visitor's buttons, drawn and inert. Rendering the live controls would
   // point Connect and Message at yourself, and both would issue a real request.
   const visitorActions = asVisitor ? (
     <>
-      <span aria-disabled className={cn(heroButton.base, heroButton.light, 'pointer-events-none opacity-80')}>
+      <span aria-disabled="true" className="pf-btn pf-btn--primary">
         <UserPlus size={17} aria-hidden="true" />
         <Trans>Connect</Trans>
       </span>
       {/* The lock, not the sections, decides Message — as can_dm() does. */}
       {canView !== false && (
-        <span aria-disabled className={cn(heroButton.base, heroButton.ghost, 'pointer-events-none opacity-80')}>
-          <MessageSquare size={17} aria-hidden="true" />
+        <span aria-disabled="true" className="pf-btn pf-btn--soft">
+          <Mail size={17} aria-hidden="true" />
           <Trans>Message</Trans>
         </span>
       )}
       {shows('cv') && cvHref && (
-        <span aria-disabled className={cn(heroButton.base, heroButton.ghost, 'pointer-events-none opacity-80')}>
+        <span aria-disabled="true" className="pf-btn pf-btn--soft">
           <FileText size={17} aria-hidden="true" />
           <Trans>CV</Trans>
         </span>
       )}
     </>
   ) : undefined
+
+  const experience: ExperienceRow[] = (publicResume?.data.roles ?? [])
+    .filter((role) => role.title || role.org)
+    .slice(0, 6)
+    .map((role) => ({ period: role.period, title: role.title, org: role.org, location: role.location }))
 
   return (
     <div className="grid gap-card-gap">
@@ -285,6 +291,7 @@ export default function MyProfileTab() {
         employer={shows('organisation') ? employer : undefined}
         employerPortfolio={shows('organisation') ? portfolio : undefined}
         cvHref={shows('cv') ? cvHref : null}
+        experience={shows('cv') && cvHref ? experience : undefined}
         heroActions={visitorActions}
         // No rail actions on either side of the toggle: your own plate has
         // nobody to connect to, and repeating the inert visitor cluster a few
@@ -311,7 +318,7 @@ export default function MyProfileTab() {
         heroSpy={null}
       />
 
-      <ProfileBlockModal block={block} onClose={closeBlock} draft={draft} />
+      <ProfileBlockModal block={block} onClose={closeBlock} draft={draft} onSwitch={setBlock} />
     </div>
   )
 }

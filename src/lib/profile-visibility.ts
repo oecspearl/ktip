@@ -51,6 +51,9 @@ export type ProfileDraft = Pick<
   | 'phone'
   | 'website'
   | 'languages'
+  | 'tagline'
+  | 'social_links'
+  | 'profile_look'
 >
 
 /** Every key of a draft, for the callers that need to commit or snapshot all of it. */
@@ -67,14 +70,16 @@ export const DRAFT_KEYS = [
   'phone',
   'website',
   'languages',
+  'tagline',
+  'social_links',
+  'profile_look',
 ] as const satisfies readonly (keyof ProfileDraft)[]
 
 /**
- * The nine fields `get_profile_view()` returns as NULL when the viewer may not
- * see their section (083, 148, 162 — see FIELD_SECTION). Everything else it
- * returns is a teaser and
- * shows to anyone: the name, the photo, the banner, the roles, the country,
- * the tick, and when they joined.
+ * The eleven fields `get_profile_view()` returns as NULL when the viewer may
+ * not see their section (083, 148, 162, 169 — see FIELD_SECTION). Everything
+ * else it returns is a teaser and shows to anyone: the name, the photo, the
+ * banner, the look, the roles, the country, the tick, and when they joined.
  *
  * If a column is ever added to the RPC's gated set, add it here in the same
  * change — profile-visibility.test.ts pins this list precisely so that a
@@ -90,11 +95,15 @@ export const GATED_FIELDS = [
   'phone',
   'website',
   'languages',
+  'tagline',
+  'social_links',
 ] as const satisfies readonly (keyof ProfileView)[]
 
-/** The section each gated field belongs to — the CASEs in get_profile_view() (162). */
+/** The section each gated field belongs to — the CASEs in get_profile_view() (162, 169). */
 export const FIELD_SECTION = {
   bio: 'about',
+  tagline: 'about',
+  social_links: 'details',
   organization: 'details',
   industry: 'details',
   phone: 'details',
@@ -195,6 +204,9 @@ export function draftFrom(profile: Profile | null | undefined): ProfileDraft {
     phone: profile?.phone || '',
     website: profile?.website || '',
     languages: profile?.languages || [],
+    tagline: profile?.tagline || '',
+    social_links: profile?.social_links || {},
+    profile_look: profile?.profile_look ?? null,
   }
 }
 
@@ -233,6 +245,9 @@ export function draftToView(profile: Profile, draft: ProfileDraft): ProfileView 
     languages: draft.languages ?? null,
     is_minor: profile.is_minor,
     hidden_sections: [],
+    tagline: draft.tagline || null,
+    social_links: draft.social_links ?? null,
+    profile_look: draft.profile_look ?? null,
   }
 }
 

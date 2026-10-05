@@ -1,15 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, useLocation } from 'react-router'
-import {
-  Calendar,
-  ChevronRight,
-  Flag,
-  FolderKanban,
-  Handshake,
-  Lock,
-  MessageSquare,
-  X,
-} from 'lucide-react'
+import { ArrowUpRight, ChevronRight, Flag, Lock, Mail, X } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { VerifiedBadge } from '../ui/VerifiedBadge'
 import { ConnectButton } from './ConnectButton'
@@ -29,35 +20,27 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { dmBlockedReason } from '../../lib/minor-safety'
-import { heroImageFor, gradientFor } from '../../lib/hero-images'
-import { BANNER_WASH, bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
-import {
-  avatarBackdropImage,
-  avatarGradientSpec,
-  isCutoutStyle,
-  parseAvatarStyle,
-} from '../../lib/avatar-backdrop'
-import { BannerAurora } from '../profile/BannerAurora'
-import { IdentityPlate } from '../profile/IdentityPlate'
-import { ProfileSection } from '../profile/ProfileSection'
-import { ProfileFacts } from '../profile/ProfileFacts'
-import { ProfileTags } from '../profile/ProfileTags'
-import { ProfileLinkRow } from '../profile/ProfileLinkRow'
-import { StandingMeter } from '../profile/StandingMeter'
-import { TrophyShelf } from '../profile/TrophyShelf'
+import { parseBanner } from '../../lib/banner'
+import { parseAvatarStyle } from '../../lib/avatar-backdrop'
+import { lookAttributes, parseProfileLook, resolveAlign } from '../../lib/profile-look'
+import { TIER_LABEL } from '../../lib/achievement-style'
 import {
   COLLABORATION_LABELS,
   COLLAB_EXCLUSIVE_VALUE,
   PHASE_LABELS,
+  ROLE_LABELS,
 } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { entityPath, memberPath } from '../../lib/slug'
-import { CountryFlag } from '../ui/CountryFlag'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+import { TrophyImage } from '../achievements/TrophyImage'
+import { ProfileHero, type HeroStat } from '../profile/editorial/ProfileHero'
+import { ledeFrom } from '../profile/ProfileCanvas'
+import '../profile/editorial/editorial.css'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
-/** Trophies shown before the shelf collapses into a "+N" tile. */
+/** Trophies shown before the row collapses into a "+N" tile. */
 const SHELF_MAX = 5
 
 /**
@@ -68,11 +51,10 @@ const SHELF_MAX = 5
  * z-drawer sits above the navbar but under Modal and the FAB
  * so a dialog opened from the drawer still layers on top.
  *
- * One column at every width. It used to split into an identity rail beside a
- * narrative column above a `@[46rem]` container query — but the drawer is
- * `45vw`, so that threshold needed a 1636px viewport and never fired on a
- * laptop. The drawer had two layouts and nearly everyone only ever saw the
- * fallback; one column that is actually designed beats two where one is dead.
+ * The member page at drawer size: the same editorial island (editorial.css)
+ * in its phone layout — the portrait in its own card, the identity card over
+ * it — wearing the member's own look (169), so opening a card and opening the
+ * page show one person, not two designs.
  *
  * The actions are pinned to the bottom instead of sitting mid-scroll. Connect
  * and Message are the two things this surface exists to offer, and they were
@@ -140,16 +122,15 @@ export function MemberPanel() {
   const { badges } = useUserBadges(idFor('achievements'))
   // null when this viewer isn't allowed to see the count (owner's setting)
   const { count: connectionCount } = useConnectionCount(idFor('standing'))
-  // null for suspended accounts; the drawer just omits the row in that case
+  // null for suspended accounts; the drawer just omits the figures then
   const { stats } = useProfileStats(idFor('standing'))
   // Trophy artwork, keyed type x tier. Cached under one key for the whole app,
   // so opening a second card costs nothing.
   const { assetMap } = useTrophyAssets()
 
-  // Condensed header handoff: a 1px sentinel sits under the name, and the
-  // header fades in once it scrolls out. Same trick DashboardLayout uses to
-  // hand off to DashboardTopBar. An observer rather than a scroll listener so
-  // nothing runs per frame while the drawer is being flung.
+  // Condensed header handoff: a 1px sentinel sits under the identity card, and
+  // the header fades in once it scrolls out. An observer rather than a scroll
+  // listener so nothing runs per frame while the drawer is being flung.
   const sentinelRef = useRef<HTMLDivElement>(null)
   const [condensed, setCondensed] = useState(false)
   useEffect(() => {
@@ -239,17 +220,21 @@ export function MemberPanel() {
   const dmBlocked = dmBlockedReason(auth.profile, profile)
   const displayName = profile?.display_name || 'Unknown User'
   const firstName = displayName.split(' ')[0]
-  // Same seeded photo the member's directory card uses, so opening a card feels
-  // like the card expanding rather than a jump to an unrelated screen.
-  // Seeded off the id, not the URL segment: the same member must get the same
-  // cover whether they were opened by username or by uuid.
-  const coverSeed = resolvedId ?? 'member'
-  const coverBanner = parseBanner(profile?.banner)
-  // The same portrait the member page opens with, at panel size: their cut-out
-  // standing on their own backdrop. The summary and the page are the same face
-  // seen twice, so they should not be two different designs.
-  const coverStyle = parseAvatarStyle(profile?.avatar_style)
-  const coverCutout = isCutoutStyle(coverStyle) ? coverStyle : null
+
+  // The member's look and portrait — teaser fields, so a private member's card
+  // still wears them.
+  const look = parseProfileLook(profile?.profile_look)
+  const style = parseAvatarStyle(profile?.avatar_style)
+  const lookAttrs = lookAttributes(look)
+  const openTo = (profile?.open_to ?? []).filter((v) => v !== COLLAB_EXCLUSIVE_VALUE)
+  const showStanding = !!stats?.rank && stats.badge_count > 0 && !hidden.has('standing')
+  const heroStats: HeroStat[] = []
+  if (showStanding && stats?.points != null) heroStats.push({ key: 'points', label: t`Points`, value: stats.points })
+  if (stats && stats.badge_count > 0 && !hidden.has('achievements'))
+    heroStats.push({ key: 'achievements', label: t`Achievements`, value: stats.badge_count })
+  if (connectionCount != null) heroStats.push({ key: 'connections', label: t`Connections`, value: connectionCount })
+  const joinedMonth = profile ? formatDate(profile.created_at, 'MMMM yyyy') : ''
+
   const hasSections = !!(
     profile?.bio ||
     badges?.length ||
@@ -261,6 +246,8 @@ export function MemberPanel() {
   )
   // The pinned footer only makes sense once there is a member behind it.
   const showFooter = signedIn && !!profile && !loading
+  const shown = (badges ?? []).slice(0, SHELF_MAX)
+  const overflow = (badges?.length ?? 0) - shown.length
 
   return (
     <>
@@ -287,9 +274,8 @@ export function MemberPanel() {
         aria-label={t`Member preview`}
         className={
           // 50vw with no ceiling: on a 2560px screen that is a 1280px drawer
-          // holding one person's card, and the facts grid inside it stretches
-          // to two columns half a metre apart. It is a preview, so it is capped
-          // at a reading width and stops growing.
+          // holding one person's card. It is a preview, so it is capped at a
+          // reading width and stops growing.
           // The bottom padding keeps the pinned footer off the home indicator
           // in an installed app; the cover is allowed under the status bar,
           // and the two close buttons below step down past it themselves.
@@ -327,406 +313,364 @@ export function MemberPanel() {
           </button>
         </div>
 
-        {/* Floats over the cover while the condensed header is hidden. */}
+        {/* Floats over the photo card while the condensed header is hidden.
+            Frosted light glass, the same as the card's own pills. */}
         <button
           onClick={closeMember}
           aria-label={t`Close member preview`}
-          className={`icon-hit absolute right-4 top-[calc(var(--spacing)*4+env(safe-area-inset-top,0px))] z-raised rounded-control bg-brand-navy/25 p-2 text-white backdrop-blur-sm transition-opacity hover:bg-brand-navy/45 ${
+          className={`icon-hit absolute right-7 top-[calc(var(--spacing)*7+env(safe-area-inset-top,0px))] z-raised rounded-full bg-white/75 p-2.5 text-ktip-ink shadow-sm backdrop-blur-md transition-opacity hover:bg-white ${
             condensed ? 'pointer-events-none opacity-0' : 'opacity-100'
           }`}
         >
-          <X size={16} />
+          <X size={18} />
         </button>
 
-        <div className="@container min-h-0 flex-1 overflow-y-auto">
-          {/* Cover: a texture band, not a subject — the wash keeps type legible.
-              The member's own banner (a teaser field, so it survives the
-              privacy lock) replaces the seeded art when they have set one.
-              Taller than it was, and faded into the surface at the bottom, so
-              the avatar sits on a gradient rather than across a hard seam. */}
-          <div className={`relative shrink-0 overflow-hidden ${coverCutout ? 'h-64' : 'h-40'}`}>
-            {isGradientBanner(coverBanner) ? (
-              <BannerAurora spec={coverBanner} />
-            ) : bannerImage(coverBanner) ? (
-              <img
-                src={bannerImage(coverBanner) as string}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{ objectPosition: bannerPosition(coverBanner, 'panel') }}
-              />
-            ) : coverCutout?.kind === 'gradient' ? (
-              <BannerAurora spec={avatarGradientSpec(coverCutout)} animated={false} />
-            ) : coverCutout?.kind === 'backdrop' ? (
-              <img
-                src={avatarBackdropImage(coverCutout) ?? undefined}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <img
-                src={heroImageFor(coverSeed)}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            )}
-            {/* Same rule as BentoCard: no wash over anything DRAWN — the aurora
-                and the backdrop art are born dark and the wash crushes them —
-                a neutral scrim over chosen banner art, the seeded brand wash
-                only over seeded stock photos. */}
-            {!isGradientBanner(coverBanner) && !(coverCutout && !bannerImage(coverBanner)) && (
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${
-                  bannerImage(coverBanner) ? BANNER_WASH : gradientFor(coverSeed)
-                }`}
-              />
-            )}
-            {/* The member, standing on the bottom edge — the member page's hero
-                at panel scale. The glow is what keeps a soft matte edge from
-                reading as a cut-out sticker. */}
-            {coverCutout && (
-              <>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute bottom-0 left-1/2 h-40 w-56 -translate-x-1/2 translate-y-1/4 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.3),transparent_62%)] blur-2xl"
-                />
-                <img
-                  src={coverCutout.cutout}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="absolute inset-x-0 bottom-0 mx-auto h-[92%] w-auto max-w-[78%] object-contain object-bottom [mask-image:linear-gradient(to_bottom,#000_72%,transparent)]"
-                />
-              </>
-            )}
-            <p className="absolute left-gutter top-4 text-micro font-semibold uppercase tracking-[0.2em] text-white/75">
-              <Trans>Member</Trans>
-            </p>
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-ktip-cream" />
-          </div>
-
-          {/* A signed-out visitor gets the list, not the people in it. The
-              prompt carries `from` so signing in returns to this card. */}
-          {!signedIn ? (
-            <div className="px-gutter py-12 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ktip-sand-100 shadow-neu-sm-inset">
-                <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
-              </div>
-              <h2 className="mt-4 font-display text-title-sm font-bold text-ktip-sand-900">
-                <Trans>Sign in to view this member</Trans>
-              </h2>
-              <p className="mx-auto mt-2 max-w-sm text-caption text-ktip-sand-600">
-                <Trans>Member profiles and messages are for members of the network. Joining takes a minute.</Trans>
-              </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                <Link to="/login" state={{ from: { pathname, search: window.location.search } }}>
-                  <Button size="sm"><Trans>Sign in</Trans></Button>
-                </Link>
-                <Link to="/register">
-                  <Button variant="outline" size="sm">
-                    <Trans>Create an account</Trans>
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* ---------- Identity ---------- */}
-              <div className="px-gutter pb-5">
-                <IdentityPlate
-                  variant="panel"
-                  hideAvatar={!!coverCutout}
-                  loading={loading || !profile}
-                  name={displayName}
-                  avatarUrl={profile?.avatar_url}
-                  verified={profile?.is_verified}
-                  roles={profile?.roles}
-                  standing={
-                    stats?.rank && stats.badge_count > 0 && !hidden.has('standing') ? (
-                      <StandingMeter
-                        rank={stats.rank}
-                        points={stats.points}
-                        badgeCount={stats.badge_count}
-                        connectionCount={connectionCount}
-                        streakDays={stats.streak_days}
-                      />
-                    ) : null
-                  }
-                />
-
-                {profile && (
-                  <ProfileFacts
-                    className="mt-5"
-                    items={[
-                      !!profile.country && {
-                        label: t`Location`,
-                        value: (
-                          <span className="inline-flex items-center gap-2">
-                            <CountryFlag country={profile.country} />
-                            {profile.country}
-                          </span>
-                        ),
-                      },
-                      !!profile.organization && {
-                        label: t`Organization`,
-                        value: profile.organization,
-                      },
-                      !!profile.industry && { label: t`Industry`, value: profile.industry },
-                      { label: t`Joined`, value: formatDate(profile.created_at) },
-                    ]}
-                  />
-                )}
-              </div>
-
-              {/* Handoff marker for the condensed header. */}
-              <div ref={sentinelRef} aria-hidden className="h-px" />
-
-              {loading || !profile ? (
-                <div className="space-y-3 p-gutter">
-                  <div className="h-24 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
-                  <div className="h-32 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
-                </div>
-              ) : canView === false && everythingHidden ? (
-                /* Every section below is fed by a query that was never issued.
-                   Say why, and leave the Connect button in the footer to act on. */
-                <div className="px-gutter py-12 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ktip-sand-100 shadow-neu-sm-inset">
-                    <Lock size={22} className="text-ktip-sand-500" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-4 font-display text-title-sm font-bold text-ktip-sand-900">
-                    <Trans>This profile is private</Trans>
-                  </h3>
-                  <p className="mx-auto mt-2 max-w-sm text-caption text-ktip-sand-600">
-                    <Trans>
-                      Only {firstName}'s connections can see their full profile or send them a
-                      message. Send a connection request to ask.
-                    </Trans>
+        <div
+          className="pf flex min-h-0 flex-1 flex-col"
+          data-layout="panel"
+          data-photo={lookAttrs['data-photo']}
+          data-tone={lookAttrs['data-tone']}
+          style={lookAttrs.style as CSSProperties}
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto pt-[env(safe-area-inset-top,0px)]">
+            <div className="pf-wrap pt-3.5">
+              {/* A signed-out visitor gets the list, not the people in it. The
+                  prompt carries `from` so signing in returns to this card. */}
+              {!signedIn ? (
+                <div className="pf-card pf-lock">
+                  <Lock size={22} aria-hidden="true" />
+                  <h2>
+                    <Trans>Sign in to view this member</Trans>
+                  </h2>
+                  <p>
+                    <Trans>Member profiles and messages are for members of the network. Joining takes a minute.</Trans>
                   </p>
-                  <Link to={memberPath(profile)} onClick={closeMember} className="mt-4 inline-block">
-                    <Button variant="ghost" size="sm">
-                      <Trans>Open member page</Trans>
-                    </Button>
-                  </Link>
+                  <div className="mt-2 flex flex-wrap justify-center gap-2">
+                    <Link to="/login" state={{ from: { pathname, search: window.location.search } }}>
+                      <Button size="sm">
+                        <Trans>Sign in</Trans>
+                      </Button>
+                    </Link>
+                    <Link to="/register">
+                      <Button variant="outline" size="sm">
+                        <Trans>Create an account</Trans>
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ) : loading || !profile ? (
+                <div className="space-y-3">
+                  <div className="h-[26rem] animate-pulse-soft rounded-surface-lg bg-ktip-sand-100" />
+                  <div className="h-32 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
                 </div>
               ) : (
                 <>
-                  {/* A viewer who gets some sections and not others (162):
-                      say so in one line, so the gaps do not read as a member
-                      who never filled them in. */}
-                  {!isSelf && hidden.size > 0 && (
-                    <div className="mx-gutter mb-1 flex items-start gap-2.5 rounded-surface bg-ktip-sand-100 px-4 py-3 shadow-neu-sm-inset">
-                      <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
-                      <p className="text-micro leading-relaxed text-ktip-sand-600">
-                        {canView === false ? (
-                          <Trans>
-                            Only {firstName}'s connections can see their full profile or send them
-                            a message. Send a connection request to ask.
-                          </Trans>
-                        ) : (
-                          <Trans>Some of {firstName}'s profile is for their connections only.</Trans>
-                        )}
+                  {/* ---------- Identity: photo card + identity card ---------- */}
+                  <ProfileHero
+                    name={displayName}
+                    verified={profile.is_verified}
+                    roleLabels={(profile.roles ?? []).map((role) => resolveCopy(i18n, ROLE_LABELS[role] || role))}
+                    tagline={profile.tagline?.trim() || [profile.organization, profile.industry].filter(Boolean).join(' · ') || null}
+                    bio={ledeFrom(profile.bio)}
+                    country={profile.country}
+                    orgName={profile.organization}
+                    openTo={null}
+                    joinedYear={String(new Date(profile.created_at).getFullYear())}
+                    joinedLabel={t`Joined ${joinedMonth}`}
+                    avatarUrl={profile.avatar_url}
+                    style={style}
+                    banner={parseBanner(profile.banner)}
+                    align={resolveAlign(look, style)}
+                    stats={heroStats}
+                    standing={
+                      showStanding && stats?.rank
+                        ? {
+                            level: stats.rank.level,
+                            name: stats.rank.name,
+                            earned: stats.rank.earned,
+                            nextRequired: stats.rank.next_required,
+                            nextName: stats.rank.next_name,
+                          }
+                        : null
+                    }
+                    variant="panel"
+                  />
+
+                  {/* Handoff marker for the condensed header. */}
+                  <div ref={sentinelRef} aria-hidden className="h-px" />
+
+                  {canView === false && everythingHidden ? (
+                    /* Every section below is fed by a query that was never issued.
+                       Say why, and leave the Connect button in the footer to act on. */
+                    <div className="pf-card pf-lock mt-3.5">
+                      <Lock size={22} aria-hidden="true" />
+                      <h2>
+                        <Trans>This profile is private</Trans>
+                      </h2>
+                      <p>
+                        <Trans>
+                          Only {firstName}'s connections can see their full profile or send them a
+                          message. Send a connection request to ask.
+                        </Trans>
                       </p>
                     </div>
-                  )}
-
-                  {/* The lock never applies to yourself, an admin, or an
-                      accepted connection (can_view_profile, 083). Say so —
-                      otherwise locking your own profile looks broken when you
-                      test it by opening your own card. */}
-                  {(selfHasPrivate || (!isSelf && isPrivate && canView !== false)) && (
-                    <div className="mx-gutter mb-1 flex items-start gap-2.5 rounded-surface bg-ktip-sand-100 px-4 py-3 shadow-neu-sm-inset">
-                      <Lock size={15} className="mt-0.5 shrink-0 text-ktip-sand-500" aria-hidden="true" />
-                      <p className="text-micro leading-relaxed text-ktip-sand-600">
-                        {isSelf ? (
-                          isPrivate && selfExceptions === 0 ? (
+                  ) : (
+                    <>
+                      {/* A viewer who gets some sections and not others (162):
+                          say so in one line, so the gaps do not read as a member
+                          who never filled them in. */}
+                      {!isSelf && hidden.size > 0 && (
+                        <p className="pf-notice mt-3.5">
+                          <Lock size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+                          {canView === false ? (
                             <Trans>
-                              Your profile is locked. Other members see only your name, photo and
-                              country until you accept their connection request — you always see
-                              everything here.
+                              Only {firstName}'s connections can see their full profile or send them
+                              a message. Send a connection request to ask.
+                            </Trans>
+                          ) : (
+                            <Trans>Some of {firstName}'s profile is for their connections only.</Trans>
+                          )}
+                        </p>
+                      )}
+
+                      {/* The lock never applies to yourself, an admin, or an
+                          accepted connection (can_view_profile, 083). Say so —
+                          otherwise locking your own profile looks broken when you
+                          test it by opening your own card. */}
+                      {(selfHasPrivate || (!isSelf && isPrivate && canView !== false)) && (
+                        <p className="pf-notice mt-3.5">
+                          <Lock size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+                          {isSelf ? (
+                            isPrivate && selfExceptions === 0 ? (
+                              <Trans>
+                                Your profile is locked. Other members see only your name, photo and
+                                country until you accept their connection request — you always see
+                                everything here.
+                              </Trans>
+                            ) : (
+                              <Trans>
+                                Some of your profile is for connections only. You always see all of
+                                it here.
+                              </Trans>
+                            )
+                          ) : auth.isAdmin ? (
+                            <Trans>
+                              This profile is private. You can see it because administrators
+                              bypass the lock.
                             </Trans>
                           ) : (
                             <Trans>
-                              Some of your profile is for connections only. You always see all of
-                              it here.
+                              This profile is private. You can see it because you are connected.
                             </Trans>
-                          )
-                        ) : auth.isAdmin ? (
-                          <Trans>
-                            This profile is private. You can see it because administrators
-                            bypass the lock.
-                          </Trans>
-                        ) : (
-                          <Trans>
-                            This profile is private. You can see it because you are connected.
-                          </Trans>
-                        )}
-                      </p>
-                    </div>
-                  )}
+                          )}
+                        </p>
+                      )}
 
-                  {profile.bio && (
-                    <ProfileSection tone="flush" title={t`About`}>
-                      <p className="whitespace-pre-wrap text-caption leading-relaxed text-ktip-sand-700">
-                        {profile.bio}
-                      </p>
-                    </ProfileSection>
-                  )}
+                      {profile.bio && (
+                        <article className="pf-card mt-3.5">
+                          <p className="pf-eyebrow">
+                            <Trans>About</Trans>
+                          </p>
+                          <p className="pf-about-text">{profile.bio}</p>
+                        </article>
+                      )}
 
-                  {badges?.length ? (
-                    <ProfileSection
-                      tone="flush"
-                      title={t`Achievements`}
-                      count={badges.length}
-                    >
-                      <TrophyShelf
-                        badges={badges}
-                        assetMap={assetMap}
-                        max={SHELF_MAX}
-                        moreHref={memberPath(profile)}
-                        size={48}
-                      />
-                    </ProfileSection>
-                  ) : null}
+                      {openTo.length > 0 && (
+                        <article className="pf-card pf-card--dark pf-opento mt-3.5">
+                          <p className="pf-eyebrow">
+                            <Trans>Open to</Trans>
+                          </p>
+                          <ol className="mb-0!">
+                            {openTo.map((value, i) => (
+                              <li key={value}>
+                                <span className="pf-num">{String(i + 1).padStart(2, '0')}</span>
+                                {COLLABORATION_LABELS[value] || value}
+                              </li>
+                            ))}
+                          </ol>
+                        </article>
+                      )}
 
-                  {profile.skills?.length ? (
-                    <ProfileSection tone="flush" title={t`Skills`}>
-                      <ProfileTags values={profile.skills} tone="ocean" />
-                    </ProfileSection>
-                  ) : null}
+                      {badges?.length ? (
+                        <section className="pf-dsec">
+                          <div className="pf-sechead">
+                            <h2>
+                              <Trans>Achievements</Trans>
+                            </h2>
+                            <span className="pf-eyebrow">{badges.length}</span>
+                          </div>
+                          <div className="pf-dach">
+                            {shown.map((ub) =>
+                              ub.badge ? (
+                                <div key={ub.id} className="pf-dtile">
+                                  <TrophyImage
+                                    icon={ub.badge.icon}
+                                    trophyType={ub.badge.trophy_type}
+                                    tier={ub.badge.tier}
+                                    imageUrl={ub.badge.image_url}
+                                    rarity={ub.badge.rarity}
+                                    assetMap={assetMap}
+                                    name={ub.badge.name}
+                                    size={44}
+                                  />
+                                  <span>{ub.badge.name}</span>
+                                  {ub.badge.tier && <small>{resolveCopy(i18n, TIER_LABEL[ub.badge.tier])}</small>}
+                                </div>
+                              ) : null
+                            )}
+                            {overflow > 0 && (
+                              <Link to={`${memberPath(profile)}?tab=achievements`} className="pf-dtile pf-dmore">
+                                <b>+{overflow}</b>
+                                <Trans>View all</Trans>
+                              </Link>
+                            )}
+                          </div>
+                        </section>
+                      ) : null}
 
-                  {profile.interests?.length ? (
-                    <ProfileSection tone="flush" title={t`Interests`}>
-                      <ProfileTags values={profile.interests} tone="tropical" />
-                    </ProfileSection>
-                  ) : null}
+                      {profile.skills?.length ? (
+                        <section className="pf-dsec">
+                          <div className="pf-sechead">
+                            <h2>
+                              <Trans>Skills</Trans>
+                            </h2>
+                          </div>
+                          <div className="pf-chips">
+                            {profile.skills.map((skill) => (
+                              <span key={skill} className="pf-chipl">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </section>
+                      ) : null}
 
-                  {profile.open_to?.length ? (
-                    <ProfileSection tone="flush" title={t`Open to`}>
-                      <ProfileTags
-                        values={profile.open_to}
-                        tone="sun"
-                        toneFor={(value) => (value === COLLAB_EXCLUSIVE_VALUE ? 'muted' : 'sun')}
-                        labelFor={(value) => COLLABORATION_LABELS[value] || value}
-                        icon={<Handshake size={12} aria-hidden="true" />}
-                      />
-                    </ProfileSection>
-                  ) : null}
+                      {profile.interests?.length ? (
+                        <section className="pf-dsec">
+                          <div className="pf-sechead">
+                            <h2>
+                              <Trans>Interests</Trans>
+                            </h2>
+                          </div>
+                          <div className="pf-chips">
+                            {profile.interests.map((interest) => (
+                              <span key={interest} className="pf-chipl">
+                                {interest}
+                              </span>
+                            ))}
+                          </div>
+                        </section>
+                      ) : null}
 
-                  {projects?.length ? (
-                    <ProfileSection tone="flush" title={t`Projects`} count={projects.length}>
-                      <div className="grid">
-                        {projects.map((project) => (
-                          <ProfileLinkRow
-                            key={project.id}
-                            to={entityPath('project', project)}
-                            label={project.title}
-                            image={project.image_url}
-                            icon={<FolderKanban size={16} aria-hidden="true" />}
-                            meta={resolveCopy(i18n, PHASE_LABELS[project.phase])}
-                          />
-                        ))}
-                      </div>
-                    </ProfileSection>
-                  ) : null}
+                      {projects?.length ? (
+                        <section className="pf-dsec">
+                          <div className="pf-sechead">
+                            <h2>
+                              <Trans>Projects</Trans>
+                            </h2>
+                            <span className="pf-eyebrow">{projects.length}</span>
+                          </div>
+                          <div>
+                            {projects.map((project) => (
+                              <Link key={project.id} to={entityPath('project', project)} className="pf-dlink">
+                                <span className="t">{project.title}</span>
+                                <span className="s">{resolveCopy(i18n, PHASE_LABELS[project.phase] || project.phase)}</span>
+                                <ChevronRight size={16} aria-hidden="true" />
+                              </Link>
+                            ))}
+                          </div>
+                        </section>
+                      ) : null}
 
-                  {events?.length ? (
-                    <ProfileSection tone="flush" title={t`Events`} count={events.length}>
-                      <div className="grid">
-                        {events.map((event) => (
-                          <ProfileLinkRow
-                            key={event.id}
-                            to={entityPath('event', event)}
-                            label={event.title}
-                            image={event.image_url}
-                            icon={<Calendar size={16} aria-hidden="true" />}
-                            meta={event.start_date ? formatDate(event.start_date) : undefined}
-                          />
-                        ))}
-                      </div>
-                    </ProfileSection>
-                  ) : null}
+                      {events?.length ? (
+                        <section className="pf-dsec">
+                          <div className="pf-sechead">
+                            <h2>
+                              <Trans>Events</Trans>
+                            </h2>
+                            <span className="pf-eyebrow">{events.length}</span>
+                          </div>
+                          <div>
+                            {events.map((event) => (
+                              <Link key={event.id} to={entityPath('event', event)} className="pf-dlink">
+                                <span className="t">{event.title}</span>
+                                {event.start_date && <span className="s">{formatDate(event.start_date, 'MMM d, yyyy')}</span>}
+                                <ChevronRight size={16} aria-hidden="true" />
+                              </Link>
+                            ))}
+                          </div>
+                        </section>
+                      ) : null}
 
-                  {/* A profile with nothing under the identity block looks
-                      broken, so say why */}
-                  {/* …unless the empty space is closed sections, which the
-                      notice above has already explained. */}
-                  {!hasSections && hidden.size === 0 && (
-                    <div className="px-gutter py-10 text-center">
-                      <Calendar size={20} className="mx-auto mb-2 text-ktip-sand-300" />
-                      <p className="text-caption text-ktip-sand-500">
-                        <Trans>{firstName} hasn't filled out a profile yet.</Trans>
-                      </p>
-                    </div>
+                      {/* A profile with nothing under the identity card looks
+                          broken, so say why — unless the empty space is closed
+                          sections, which the notice above has already explained. */}
+                      {!hasSections && hidden.size === 0 && (
+                        <p className="pf-empty mx-auto py-8 text-center">
+                          <Trans>{firstName} hasn't filled out a profile yet.</Trans>
+                        </p>
+                      )}
+                    </>
                   )}
                 </>
               )}
-            </>
+            </div>
+          </div>
+
+          {/* ---------- Pinned actions ----------
+              Always reachable, however far the content has scrolled. The right
+              margin is not decoration: the floating action button is z-fab,
+              deliberately above z-drawer, and parks exactly where this row's
+              last control would sit. */}
+          {showFooter && profile && (
+            <div className="pf-dfoot mr-[5.5rem]">
+              {!isSelf && (
+                <>
+                  <ConnectButton otherUserId={profile.id} size="sm" tone="editorial-light" />
+                  {/* A private member is unreachable until they accept —
+                      offering the button would only produce an RLS error.
+                      Same reasoning for dm:initiate, which students never
+                      hold: 064 blocks the insert inside has_permission()
+                      before the matrix is read, so the button could only
+                      ever fail. See src/lib/venue-actions.ts, which makes
+                      the same call for the venue surfaces. */}
+                  {canView && auth.can('dm:initiate') && !dmBlocked && (
+                    <button
+                      type="button"
+                      onClick={() => openPanel({ userId: profile.id })}
+                      aria-label={t`Message ${displayName}`}
+                      title={t`Message`}
+                      className="pf-btn pf-btn--ghost-dark pf-btn--sm"
+                    >
+                      <Mail size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                  <Link
+                    to={`/grievances/report/${profile.id}`}
+                    aria-label={t`Report`}
+                    title={t`Report`}
+                    className="pf-btn pf-btn--sm flag"
+                  >
+                    <Flag size={15} aria-hidden="true" />
+                  </Link>
+                </>
+              )}
+
+              {/* The drawer stays the in-app default; this is the way out
+                  to a URL that can be shared. */}
+              <Link to={memberPath(profile)} className="grow">
+                <Trans>View full profile</Trans>
+                <ArrowUpRight size={15} className="pf-arrow" aria-hidden="true" />
+              </Link>
+            </div>
+          )}
+
+          {/* The DM block is an explanation, not a control, so it sits under the
+              action row rather than replacing a button inside it. */}
+          {showFooter && !isSelf && canView && dmBlocked && (
+            <p className="px-gutter pb-3 text-micro text-ktip-sand-500">{dmBlocked}</p>
           )}
         </div>
-
-        {/* ---------- Pinned actions ----------
-            Always reachable, however far the content has scrolled. */}
-        {showFooter && profile && (
-          // Extra right padding, not decoration: the floating action button is
-          // z-fab, which is deliberately above z-drawer, and it parks exactly
-          // where this row's last control sits. Without the gap "View full
-          // profile" is behind it and unclickable.
-          <div className="flex items-center gap-2 border-t border-ktip-sand-200 bg-ktip-cream py-3 pl-gutter pr-[5.5rem]">
-            {!isSelf && (
-              <>
-                <ConnectButton otherUserId={profile.id} size="sm" />
-                {/* A private member is unreachable until they accept —
-                    offering the button would only produce an RLS error.
-                    Same reasoning for dm:initiate, which students never
-                    hold: 064 blocks the insert inside has_permission()
-                    before the matrix is read, so the button could only
-                    ever fail. See src/lib/venue-actions.ts, which makes
-                    the same call for the venue surfaces. */}
-                {canView && auth.can('dm:initiate') && !dmBlocked && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    icon={<MessageSquare size={14} />}
-                    onClick={() => openPanel({ userId: profile.id })}
-                  >
-                    <Trans>Message</Trans>
-                  </Button>
-                )}
-                <Link
-                  to={`/grievances/report/${profile.id}`}
-                  aria-label={t`Report`}
-                  title={t`Report`}
-                  className="rounded-control p-2 text-ktip-sand-400 transition-colors hover:text-red-600"
-                >
-                  <Flag size={14} />
-                </Link>
-              </>
-            )}
-
-            {/* The drawer stays the in-app default; this is the way out
-                to a URL that can be shared. */}
-            <Link
-              to={memberPath(profile)}
-              className="ml-auto inline-flex items-center gap-1 text-micro font-bold text-ktip-ocean-600 transition-all hover:gap-1.5 hover:text-ktip-ocean-700"
-            >
-              <Trans>View full profile</Trans>
-              <ChevronRight size={13} />
-            </Link>
-          </div>
-        )}
-
-        {/* The DM block is an explanation, not a control, so it sits under the
-            action row rather than replacing a button inside it. */}
-        {showFooter && !isSelf && canView && dmBlocked && (
-          <p className="border-t border-ktip-sand-200 bg-ktip-sand-50 px-gutter py-2 text-micro text-ktip-sand-500">
-            {dmBlocked}
-          </p>
-        )}
       </section>
     </>
   )

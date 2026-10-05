@@ -149,9 +149,9 @@ msgstr "Create or use an account to evade a block, a suspension or a restriction
 msgid "Application submitted! A copy is saved in your dashboard."
 msgstr "Application submitted! A copy is saved in your dashboard."
 
-#. placeholder {0}: rank.level
-#: src/components/profile/HeroStanding.tsx
-#: src/components/profile/StandingMeter.tsx
+#. placeholder {0}: standing.level
+#: src/components/profile/editorial/ProfileHero.tsx
+#: src/components/profile/ProfileCanvas.tsx
 msgid "Level {0}"
 msgstr "Level {0}"
 
@@ -549,10 +549,9 @@ msgstr "Global settings, policy and system configuration."
 msgid "Policy enabler and programme administrator. Publishes public funding calls, administers awards, verifies institutions and businesses."
 msgstr "Policy enabler and programme administrator. Publishes public funding calls, administers awards, verifies institutions and businesses."
 
-#. placeholder {0}: employerPortfolio.length
-#: src/components/profile/ProfileCanvas.tsx
-msgid "All {0} pieces of work"
-msgstr "All {0} pieces of work"
+#: src/components/messages/ChatWindow.tsx
+msgid "Show earlier messages"
+msgstr "Show earlier messages"
 
 #: src/pages/cv/CvEditPage.tsx
 msgid "Badges you have earned on KTIP. Remove one and it stays off your CV."
@@ -1254,6 +1253,10 @@ msgstr "This profile is private"
 msgid "Company registration number"
 msgstr "Company registration number"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Working on something? Talk to {firstName}."
+msgstr "Working on something? Talk to {firstName}."
+
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Read the policy first"
 msgstr "Read the policy first"
@@ -1636,7 +1639,7 @@ msgstr "Start Time"
 msgid "My Reports"
 msgstr "My Reports"
 
-#: src/components/InstallPrompt.tsx
+#: src/components/InstallPromptSheet.tsx
 #: src/components/personalization/ForYouRail.tsx
 #: src/components/venue/VenueAwayBanner.tsx
 #: src/pages/collaborate/SnippetsListPage.tsx
@@ -1680,6 +1683,10 @@ msgstr "Entrepreneurs"
 msgid "Your draft is saved automatically the first time you upload."
 msgstr "Your draft is saved automatically the first time you upload."
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Not looking for collaborators right now."
+msgstr "Not looking for collaborators right now."
+
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/components/layout/NavbarSearchPanel.tsx
 #: src/components/notes/StickyNoteGroup.tsx
@@ -1715,6 +1722,10 @@ msgid "Pin a post to hold it at the top of its board regardless of age — annou
 msgstr "Pin a post to hold it at the top of its board regardless of age — announcements, rules, a call for participants. Lock to keep it readable but closed to replies.\n"
 "\n"
 "Removing a post takes it away for everyone, including the author. Locking is usually the proportionate move for a thread that has simply run its course."
+
+#: src/components/profile/editorial/ProfileHero.tsx
+msgid "See achievements"
+msgstr "See achievements"
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Secondary Email"
@@ -1983,11 +1994,6 @@ msgstr "File this notice"
 #: src/i18n/harvested.ts
 msgid "You can delete a draft at any time. Once submitted, an application can be withdrawn, but the funder will already have received it."
 msgstr "You can delete a draft at any time. Once submitted, an application can be withdrawn, but the funder will already have received it."
-
-#: src/components/directory/MemberPanel.tsx
-#: src/components/profile/ProfileCanvas.tsx
-msgid "Joined"
-msgstr "Joined"
 
 #: src/i18n/harvested.ts
 msgid "The knowledge base and publishing."
@@ -2343,6 +2349,10 @@ msgstr "Rank"
 msgid "Record this room"
 msgstr "Record this room"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Portrait"
+msgstr "Portrait"
+
 #: src/i18n/harvested.ts
 msgid "If you are worried about a young member"
 msgstr "If you are worried about a young member"
@@ -2617,6 +2627,10 @@ msgstr "Uploaded"
 msgid "Report a member, track your reports, and what happens next."
 msgstr "Report a member, track your reports, and what happens next."
 
+#: src/components/profile/SectionPrivacy.tsx
+msgid "Every member sees {label}. Select to keep it for your connections."
+msgstr "Every member sees {label}. Select to keep it for your connections."
+
 #: src/pages/grievances/MyGrievancesPage.tsx
 msgid "You haven't submitted any reports yet. If you encounter inappropriate behavior, you can report a user from their profile page."
 msgstr "You haven't submitted any reports yet. If you encounter inappropriate behavior, you can report a user from their profile page."
@@ -2810,6 +2824,10 @@ msgstr "Getting Started"
 #: src/pages/events/EventDetailPage.tsx
 msgid "Virtual Event"
 msgstr "Virtual Event"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Highest rank reached."
+msgstr "Highest rank reached."
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Funding Archives"
@@ -3507,6 +3525,7 @@ msgid "Acting as"
 msgstr "Acting as"
 
 #: src/components/dashboard/stats/OverviewStats.tsx
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Overview"
 msgstr "Overview"
@@ -3745,6 +3764,10 @@ msgstr "Failed to cancel"
 msgid "Apply for Grant"
 msgstr "Apply for Grant"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Add your website, LinkedIn or X so members can find you elsewhere."
+msgstr "Add your website, LinkedIn or X so members can find you elsewhere."
+
 #. placeholder {0}: app.name
 #: src/components/security/AuthenticatorAppGuide.tsx
 msgid "Get {0}"
@@ -3762,6 +3785,7 @@ msgstr "Rename this board, change what it is for, or retire it."
 msgid "e.g. blue economy"
 msgstr "e.g. blue economy"
 
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Photo and backdrop"
 msgstr "Photo and backdrop"
@@ -3835,6 +3859,10 @@ msgstr "Suspend accounts and escalate to safety admins and school administrators
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Startup"
 msgstr "Startup"
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Your own photo"
+msgstr "Your own photo"
 
 #: src/i18n/harvested.ts
 msgid "Offers your last few searches back to you."
@@ -3923,6 +3951,10 @@ msgstr "Post one and it appears on the Grants page straight away."
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Everything you need to innovate"
 msgstr "Everything you need to innovate"
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Page"
+msgstr "Page"
 
 #: src/i18n/harvested.ts
 msgid "Single sign-on and catalogue integration"
@@ -4160,6 +4192,13 @@ msgstr "The AI features are optional. The assistant, AI search, extraction and a
 msgid "A page is not loading properly"
 msgstr "A page is not loading properly"
 
+#. placeholder {0}: standing.earned
+#. placeholder {1}: standing.nextRequired
+#. placeholder {2}: standing.nextName
+#: src/components/profile/ProfileCanvas.tsx
+msgid "{0} of {1} achievements toward {2}."
+msgstr "{0} of {1} achievements toward {2}."
+
 #: src/components/venue/room/RoomArrivalPanels.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Getting started"
@@ -4190,6 +4229,7 @@ msgstr "Hosted by <0>{0}</0>"
 msgid "OECS Admin"
 msgstr "OECS Admin"
 
+#: src/components/profile/ProfileCanvas.tsx
 #: src/components/ui/FloatingActionButton.tsx
 msgid "Quick actions"
 msgstr "Quick actions"
@@ -4591,10 +4631,6 @@ msgstr "Aggregate platform figures only — counts, percentages, targets and the
 msgid "Could not remove your authenticator."
 msgstr "Could not remove your authenticator."
 
-#: src/components/profile/ProfileCanvas.tsx
-msgid "photo and banner"
-msgstr "photo and banner"
-
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "e.g. Flood early-warning alerts over SMS"
 msgstr "e.g. Flood early-warning alerts over SMS"
@@ -4775,6 +4811,10 @@ msgstr "Technical Support"
 msgid "We've sent a 6-digit code to <0>{email}</0>. Enter it below to finish creating your account."
 msgstr "We've sent a 6-digit code to <0>{email}</0>. Enter it below to finish creating your account."
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Custom"
+msgstr "Custom"
+
 #: src/components/layout/Footer.tsx
 #: src/pages/discover/DiscoverPage.tsx
 #: src/pages/resources/ResourceDetailPage.tsx
@@ -4854,6 +4894,10 @@ msgstr "Responses to the usefulness and experience questions, collected during u
 #: src/components/collaboration/OutputPanel.tsx
 msgid "Console Output"
 msgstr "Console Output"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your organisation"
+msgstr "your organisation"
 
 #: src/components/personalization/NotInterestedButton.tsx
 msgid "Hidden. You can bring it back under Settings › Personalization."
@@ -5007,6 +5051,10 @@ msgstr "The opening message"
 msgid "{0} contents"
 msgstr "{0} contents"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "On dark cards this shows lighter so it stays readable."
+msgstr "On dark cards this shows lighter so it stays readable."
+
 #: src/i18n/harvested.ts
 msgid "Parents and guardians"
 msgstr "Parents and guardians"
@@ -5063,6 +5111,10 @@ msgstr "Turn on the brain icon for AI-guided navigation when you are not sure wh
 #: src/i18n/harvested.ts
 msgid "Asking for permission"
 msgstr "Asking for permission"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your projects"
+msgstr "your projects"
 
 #: src/components/settings/VerificationTab.tsx
 msgid "Your profile shows the verified badge."
@@ -5721,6 +5773,10 @@ msgstr "Chat"
 msgid "What is it, who is it for, and what will they get out of it?"
 msgstr "What is it, who is it for, and what will they get out of it?"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Host"
+msgstr "Host"
+
 #: src/i18n/harvested.ts
 msgid "The names KTIP and Knowledge, Technology and Innovation Platform, the name and emblem of the Organisation of Eastern Caribbean States, and the logos and visual identity of both, belong to %entity%. Publishing on the platform gives you no licence to them."
 msgstr "The names KTIP and Knowledge, Technology and Innovation Platform, the name and emblem of the Organisation of Eastern Caribbean States, and the logos and visual identity of both, belong to %entity%. Publishing on the platform gives you no licence to them."
@@ -5765,6 +5821,10 @@ msgstr "Rename note"
 #: src/pages/events/EventsPage.tsx
 msgid "Calendar"
 msgstr "Calendar"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Next up"
+msgstr "Next up"
 
 #: src/lib/grant-application-template.ts
 msgid "Supporting documents"
@@ -5883,8 +5943,7 @@ msgid "This needs another look before it goes up."
 msgstr "This needs another look before it goes up."
 
 #: src/components/dashboard/stats/RankProgress.tsx
-#: src/components/profile/HeroStanding.tsx
-#: src/components/profile/StandingMeter.tsx
+#: src/components/profile/editorial/ProfileHero.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Highest rank reached"
 msgstr "Highest rank reached"
@@ -6254,6 +6313,10 @@ msgstr "Clear conversation"
 #: src/components/collaboration/PreviewPanel.tsx
 msgid "List item three"
 msgstr "List item three"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Member since {joinedMonth}"
+msgstr "Member since {joinedMonth}"
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Knowledge base sections"
@@ -6707,10 +6770,15 @@ msgstr "Business Support Organisation Administrator"
 msgid "No integrations found"
 msgstr "No integrations found"
 
+#: src/components/profile/editorial/ProfileTabs.tsx
+msgid "Profile sections"
+msgstr "Profile sections"
+
 #: src/lib/permissions.ts
 msgid "Browse public grant opportunities."
 msgstr "Browse public grant opportunities."
 
+#: src/components/profile/ProfileCanvas.tsx
 #: src/components/resume/ResumeOutline.tsx
 #: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
@@ -7280,6 +7348,10 @@ msgstr "Can you refuse it?"
 msgid "Narrowing the library"
 msgstr "Narrowing the library"
 
+#: src/components/profile/PortraitStudio.tsx
+msgid "Failed to upload the background photo"
+msgstr "Failed to upload the background photo"
+
 #: src/pages/collaborate/WhiteboardsListPage.tsx
 msgid "Search whiteboards..."
 msgstr "Search whiteboards..."
@@ -7699,8 +7771,8 @@ msgstr "Guide and support innovators"
 
 #: src/components/achievements/TrophyCard.tsx
 #: src/components/dashboard/stats/RankProgress.tsx
-#: src/components/profile/HeroStanding.tsx
-#: src/components/profile/StandingMeter.tsx
+#: src/components/directory/MemberPanel.tsx
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Points"
@@ -7934,6 +8006,10 @@ msgstr "Administrators reach the console from the Admin entry on the dashboard r
 #: src/lib/venue-room-presets.ts
 msgid "Place it beside the entrance corner."
 msgstr "Place it beside the entrance corner."
+
+#: src/components/profile/editorial/ProfileHero.tsx
+msgid "Member since {joinedYear}"
+msgstr "Member since {joinedYear}"
 
 #: src/i18n/harvested.ts
 msgid "How do I create a new project?"
@@ -8487,6 +8563,7 @@ msgid "A Button"
 msgstr "A Button"
 
 #: src/components/profile/PortraitStudio.tsx
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Centre"
 msgstr "Centre"
 
@@ -8522,6 +8599,10 @@ msgid "Each tile is a board with its own topic. The tile shows how many discussi
 msgstr "Each tile is a board with its own topic. The tile shows how many discussions it holds and when it was last active, so you can tell a busy board from a quiet one at a glance.\n"
 "\n"
 "Open a board to see its discussions — newest first, pinned announcements on top — and to start one of your own."
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Links on your profile"
+msgstr "Links on your profile"
 
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Switch off anything you would rather we ignored"
@@ -9116,8 +9197,6 @@ msgstr "AI features"
 #. placeholder {1}: rank.next_required
 #. placeholder {2}: rank.next_name
 #: src/components/dashboard/stats/RankProgress.tsx
-#: src/components/profile/HeroStanding.tsx
-#: src/components/profile/StandingMeter.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "{0} / {1} toward {2}"
 msgstr "{0} / {1} toward {2}"
@@ -9186,6 +9265,10 @@ msgstr "How do I share my CV publicly?"
 msgid "Judging Criterion"
 msgstr "Judging Criterion"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your CV"
+msgstr "your CV"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Event created, but some attachments failed: {failedNames}. You can add them from the event page."
 msgstr "Event created, but some attachments failed: {failedNames}. You can add them from the event page."
@@ -9202,6 +9285,10 @@ msgstr "How are you attending?"
 #: src/components/ui/EmojiPicker.tsx
 msgid "Search emoji"
 msgstr "Search emoji"
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Accent"
+msgstr "Accent"
 
 #: src/lib/venue-room-presets.ts
 msgid "Drop several. Rename them per team."
@@ -9573,6 +9660,7 @@ msgstr "Session cleared. Please try signing in again."
 #: src/pages/forums/BoardFormPage.tsx
 #: src/pages/grants/GrantFormPage.tsx
 #: src/pages/grants/MyGrantsPage.tsx
+#: src/pages/profile/PublicProfilePage.tsx
 #: src/pages/projects/EditProjectPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Edit"
@@ -10013,6 +10101,10 @@ msgstr "Declaring a licence"
 msgid "Event registrations and forum posts"
 msgstr "Event registrations and forum posts"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Colour tints the page and its cards with your accent."
+msgstr "Colour tints the page and its cards with your accent."
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Documents (Optional)"
 msgstr "Documents (Optional)"
@@ -10028,6 +10120,10 @@ msgstr "HTML"
 #: src/i18n/harvested.ts
 msgid "How entries are scored"
 msgstr "How entries are scored"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "OECS KTIP"
+msgstr "OECS KTIP"
 
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Your account does not have permission to apply for grants."
@@ -10271,10 +10367,6 @@ msgstr "Every member has a public page that works for people who are not signed 
 "\n"
 "You can copy the link from your own page."
 
-#: src/components/profile/ProfileCanvas.tsx
-msgid "Say what you do and what you are working on."
-msgstr "Say what you do and what you are working on."
-
 #: src/components/forums/ReplyItem.tsx
 msgid "Delete reply"
 msgstr "Delete reply"
@@ -10393,6 +10485,10 @@ msgstr "Failed to load whiteboard"
 msgid "Not your board"
 msgstr "Not your board"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Achievements you earn on the platform show here."
+msgstr "Achievements you earn on the platform show here."
+
 #: src/lib/authenticator-apps.ts
 msgid "Tap the + button in the bottom corner."
 msgstr "Tap the + button in the bottom corner."
@@ -10458,6 +10554,10 @@ msgstr "Preview the video"
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Confirm Your Report"
 msgstr "Confirm Your Report"
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Replace"
+msgstr "Replace"
 
 #: src/components/venue/VenueTopBar.tsx
 #: src/pages/events/EventVenueRoomPage.tsx
@@ -10564,11 +10664,6 @@ msgstr "Use \"Mark all read\" at the top of the panel to clear the unread count.
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Back to Grant"
 msgstr "Back to Grant"
-
-#. placeholder {0}: replies?.length || 0
-#: src/pages/forums/PostDetailPage.tsx
-msgid "Replies ({0})"
-msgstr "Replies ({0})"
 
 #: src/i18n/harvested.ts
 msgid "What it does"
@@ -10696,6 +10791,10 @@ msgstr "Discussion Details"
 msgid "Your activity timeline"
 msgstr "Your activity timeline"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Your page's look"
+msgstr "Your page's look"
+
 #: src/components/directory/MemberPanel.tsx
 #: src/components/profile/ProfileCanvas.tsx
 msgid "Open to"
@@ -10706,7 +10805,7 @@ msgid "Preferences saved!"
 msgstr "Preferences saved!"
 
 #: src/components/achievements/TrophyCard.tsx
-#: src/components/profile/TrophyShelf.tsx
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Locked"
 msgstr "Locked"
@@ -10840,6 +10939,7 @@ msgid "Languages"
 msgstr "Languages"
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Uploading…"
 msgstr "Uploading…"
 
@@ -11032,7 +11132,6 @@ msgstr "Resource information"
 
 #: src/components/directory/MemberPanel.tsx
 #: src/components/moderation/ReportButton.tsx
-#: src/pages/profile/PublicProfilePage.tsx
 msgid "Report"
 msgstr "Report"
 
@@ -11110,6 +11209,12 @@ msgstr "Registered legal name"
 msgid "Review and rosters"
 msgstr "Review and rosters"
 
+#. placeholder {0}: standing.level
+#. placeholder {1}: standing.name
+#: src/components/profile/editorial/ProfileHero.tsx
+msgid "Level {0} · <0>{1}</0>"
+msgstr "Level {0} · <0>{1}</0>"
+
 #: src/i18n/harvested.ts
 msgid "Zero tolerance, acted on immediately, reported where required."
 msgstr "Zero tolerance, acted on immediately, reported where required."
@@ -11173,6 +11278,11 @@ msgstr "Organisations"
 #: src/i18n/harvested.ts
 msgid "New whiteboard"
 msgstr "New whiteboard"
+
+#. placeholder {0}: stats.points
+#: src/components/profile/ProfileCanvas.tsx
+msgid "{0} points so far."
+msgstr "{0} points so far."
 
 #: src/i18n/harvested.ts
 msgid "Help article — Forums"
@@ -11321,10 +11431,6 @@ msgstr "How do I apply for a grant?"
 msgid "The updated documents are now in force. Please read and accept them — it takes a minute."
 msgstr "The updated documents are now in force. Please read and accept them — it takes a minute."
 
-#: src/components/profile/PortraitStudio.tsx
-msgid "None uses your own photo, blurred. Cut your background out and this is chosen for you — you stand on it."
-msgstr "None uses your own photo, blurred. Cut your background out and this is chosen for you — you stand on it."
-
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/components/venue/room/RoomContentPanels.tsx
 #: src/lib/venue-room-sections.ts
@@ -11421,7 +11527,7 @@ msgstr "Follow the defaults again"
 msgid "AI features — search, chat assistance, field extraction, CV parsing, moderation assistance"
 msgstr "AI features — search, chat assistance, field extraction, CV parsing, moderation assistance"
 
-#: src/components/InstallPrompt.tsx
+#: src/components/InstallPromptSheet.tsx
 msgid "Install KTIP"
 msgstr "Install KTIP"
 
@@ -12027,6 +12133,10 @@ msgstr "What are pinned posts?"
 msgid "Choose what you want to be notified about"
 msgstr "Choose what you want to be notified about"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Say what you do and what you are working on. It is the first thing members read here."
+msgstr "Say what you do and what you are working on. It is the first thing members read here."
+
 #: src/i18n/harvested.ts
 msgid "Each card carries the project’s title, summary, category and phase, plus the team behind it.\n"
 "\n"
@@ -12291,10 +12401,6 @@ msgstr "Access the full resource file"
 msgid "Your profile is locked. Other members see only your name, photo and country until you accept their connection request — you always see everything here."
 msgstr "Your profile is locked. Other members see only your name, photo and country until you accept their connection request — you always see everything here."
 
-#: src/components/directory/MemberPanel.tsx
-msgid "Open member page"
-msgstr "Open member page"
-
 #: src/pages/events/CreateEventPage.tsx
 msgid "Sign-ups are refused after this. Leave empty to stay open until it starts."
 msgstr "Sign-ups are refused after this. Leave empty to stay open until it starts."
@@ -12436,6 +12542,10 @@ msgstr "Enter the awarded amount as a number, or leave it blank."
 msgid "Analytics consent can be changed at any time in Settings, on each device."
 msgstr "Analytics consent can be changed at any time in Settings, on each device."
 
+#: src/components/profile/editorial/SkillsStrip.tsx
+msgid "Skills & interests"
+msgstr "Skills & interests"
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "That application is not to one of your funding calls."
 msgstr "That application is not to one of your funding calls."
@@ -12516,6 +12626,10 @@ msgstr "Help article — Achievements & Leaderboard"
 msgid "Fill in the title, what the fund is for, the amount range and the deadline."
 msgstr "Fill in the title, what the fund is for, the amount range and the deadline."
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Upcoming"
+msgstr "Upcoming"
+
 #: src/components/collaboration/editor/LinkModal.tsx
 msgid "URL"
 msgstr "URL"
@@ -12548,6 +12662,10 @@ msgstr "Schools, universities and Chambers"
 msgid "A first standing notice is a warning, with an explanation of what was removed and why."
 msgstr "A first standing notice is a warning, with an explanation of what was removed and why."
 
+#: src/pages/profile/PublicProfilePage.tsx
+msgid "Some of {displayName}'s profile is for their connections only."
+msgstr "Some of {displayName}'s profile is for their connections only."
+
 #: src/components/venue/VenueAwayBanner.tsx
 msgid "I’m back"
 msgstr "I’m back"
@@ -12579,6 +12697,10 @@ msgstr "Published events can carry a lot more than a description.\n"
 "Articles — recaps, resource round-ups, summaries and blog posts published after the event, so the material outlives the day.\n"
 "\n"
 "Organisers manage all four from the event workspace in the admin console."
+
+#: src/components/profile/editorial/ShareProfileButton.tsx
+msgid "Could not copy the link. Copy it from the address bar instead."
+msgstr "Could not copy the link. Copy it from the address bar instead."
 
 #: src/components/documents/DocumentContentModal.tsx
 #: src/components/grants/application/SaveStatusBadge.tsx
@@ -13277,6 +13399,10 @@ msgstr "Pick a design"
 msgid "Show me on the leaderboard"
 msgstr "Show me on the leaderboard"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Working on something in <0>{industryWord}</0>? Talk to {firstName}."
+msgstr "Working on something in <0>{industryWord}</0>? Talk to {firstName}."
+
 #: src/i18n/harvested.ts
 msgid "Moderation and enforcement"
 msgstr "Moderation and enforcement"
@@ -13662,6 +13788,10 @@ msgstr "Your email address"
 msgid "Event Detail"
 msgstr "Event Detail"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "The page behind this changes as you pick. Members see it once you save."
+msgstr "The page behind this changes as you pick. Members see it once you save."
+
 #: src/i18n/harvested.ts
 msgid "Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent."
 msgstr "Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent."
@@ -13906,6 +14036,10 @@ msgstr "Introduce yourself the first time you message someone. A name with no co
 "\n"
 "Use the forums for questions anyone could answer, and save direct messages for things that are genuinely specific to one person."
 
+#: src/components/profile/editorial/ProfileHero.tsx
+msgid "Open to {openTo}"
+msgstr "Open to {openTo}"
+
 #. placeholder {0}: room.name
 #. placeholder {1}: floorBadge(room.floor)
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -14010,6 +14144,10 @@ msgstr "A second code at sign-in, on top of your password"
 #: src/pages/cv/CvPage.tsx
 msgid "Color"
 msgstr "Color"
+
+#: src/pages/dashboard/tabs/MyProfileTab.tsx
+msgid "The parts you keep for connections are left out. This is what a member who has not connected with you sees."
+msgstr "The parts you keep for connections are left out. This is what a member who has not connected with you sees."
 
 #: src/i18n/harvested.ts
 msgid "Row actions, and what they mean to the member"
@@ -14477,10 +14615,6 @@ msgstr "Publishing your CV gives it a public address that works for people who a
 "\n"
 "A published CV is also linked from your public member page."
 
-#: src/components/profile/ProfileCanvas.tsx
-msgid "Joined {joinedDate}"
-msgstr "Joined {joinedDate}"
-
 #: src/hooks/useGrants.ts
 msgid "You are not permitted to sponsor this application."
 msgstr "You are not permitted to sponsor this application."
@@ -14579,10 +14713,12 @@ msgstr "Report a User"
 #: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/notes/StickyNote.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Colour"
 msgstr "Colour"
 
 #: src/components/forums/PostCard.tsx
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Pinned"
 msgstr "Pinned"
@@ -14652,7 +14788,7 @@ msgstr "Member profiles and messages are for members of the network. Joining tak
 msgid "Filter {heading}…"
 msgstr "Filter {heading}…"
 
-#: src/components/InstallPrompt.tsx
+#: src/components/InstallPromptSheet.tsx
 msgid "Opens full screen and loads faster on repeat visits."
 msgstr "Opens full screen and loads faster on repeat visits."
 
@@ -14714,6 +14850,10 @@ msgstr "KTIP - Knowledge, Technology and Innovation Platform for Caribbean innov
 #: src/i18n/harvested.ts
 msgid "Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list."
 msgstr "Leave the deadline empty for a rolling call; a passed deadline moves the grant to the closed list."
+
+#: src/pages/dashboard/tabs/my-profile/ProfilePreviewToolbar.tsx
+msgid "{exceptions, plural, one {Connections only, except # section you opened to everyone.} other {Connections only, except # sections you opened to everyone.}}"
+msgstr "{exceptions, plural, one {Connections only, except # section you opened to everyone.} other {Connections only, except # sections you opened to everyone.}}"
 
 #: src/lib/personalization.ts
 msgid "Happening soon"
@@ -14939,6 +15079,10 @@ msgstr "Open for applications"
 msgid "How do I report inappropriate behaviour?"
 msgstr "How do I report inappropriate behaviour?"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Leave it empty and your organisation and industry show instead."
+msgstr "Leave it empty and your organisation and industry show instead."
+
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Organisation (optional)"
 msgstr "Organisation (optional)"
@@ -15091,6 +15235,10 @@ msgstr "A notice names you and describes your claim, and both are passed to the 
 msgid "Open-source licences follow the code into KTIP."
 msgstr "Open-source licences follow the code into KTIP."
 
+#: src/components/profile/editorial/ShareProfileButton.tsx
+msgid "Share profile"
+msgstr "Share profile"
+
 #: src/components/layout/Footer.tsx
 #: src/i18n/harvested.ts
 msgid "Privacy Policy"
@@ -15213,6 +15361,7 @@ msgstr "Soonest"
 msgid "Save your recovery codes"
 msgstr "Save your recovery codes"
 
+#: src/components/profile/editorial/ProfileHero.tsx
 #: src/components/ui/VerifiedBadge.tsx
 msgid "Verified member"
 msgstr "Verified member"
@@ -15642,6 +15791,10 @@ msgstr "this reply"
 msgid "A declared licence cannot be withdrawn from copies already made under it. That is what makes it a licence rather than a preference."
 msgstr "A declared licence cannot be withdrawn from copies already made under it. That is what makes it a licence rather than a preference."
 
+#: src/components/profile/editorial/ShareProfileButton.tsx
+msgid "Share {name}'s profile"
+msgstr "Share {name}'s profile"
+
 #: src/i18n/harvested.ts
 msgid "Verification, badges and points"
 msgstr "Verification, badges and points"
@@ -15669,6 +15822,11 @@ msgstr "The funding calls you posted, and the applications to them"
 #: src/i18n/harvested.ts
 msgid "Why is my content hidden or quarantined?"
 msgstr "Why is my content hidden or quarantined?"
+
+#. placeholder {0}: employerPortfolio.length
+#: src/components/profile/ProfileCanvas.tsx
+msgid "{0} pieces of published work"
+msgstr "{0} pieces of published work"
 
 #: src/i18n/harvested.ts
 msgid "Grant & Funding Disclaimer"
@@ -15700,6 +15858,11 @@ msgstr "Availability"
 #: src/components/grants/application/RichTextField.tsx
 msgid "Heading 1"
 msgstr "Heading 1"
+
+#. placeholder {0}: standing.streak
+#: src/components/profile/editorial/ProfileHero.tsx
+msgid "{0}-day streak"
+msgstr "{0}-day streak"
 
 #: src/i18n/harvested.ts
 msgid "Describe what happened and submit — the OECS team sees it in the admin dashboard."
@@ -15756,6 +15919,13 @@ msgstr "Your solution"
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Funding call updated"
 msgstr "Funding call updated"
+
+#. placeholder {0}: standing.earned
+#. placeholder {1}: standing.nextRequired
+#. placeholder {2}: standing.nextName
+#: src/components/profile/editorial/ProfileHero.tsx
+msgid "{0} of {1} achievements toward {2}"
+msgstr "{0} of {1} achievements toward {2}"
 
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/projects/ManageTeamModal.tsx
@@ -16314,6 +16484,10 @@ msgstr "Changes how your CV is drawn and printed. Your content never changes."
 msgid "Agree in writing who owns what before you enter, not after you win. A one-paragraph note between the team is enough, and it is by far the most common thing teams regret not having done."
 msgstr "Agree in writing who owns what before you enter, not after you win. A one-paragraph note between the team is enough, and it is by far the most common thing teams regret not having done."
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "One line under your name, e.g. Building climate tools for Caribbean schools"
+msgstr "One line under your name, e.g. Building climate tools for Caribbean schools"
+
 #: src/lib/grant-application-template.ts
 msgid "Organization / Team"
 msgstr "Organization / Team"
@@ -16383,7 +16557,6 @@ msgstr "What belongs on this board, and who it is for."
 msgid "Engagement received"
 msgstr "Engagement received"
 
-#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 #: src/pages/sme/OrgProfilePage.tsx
 msgid "Portfolio"
@@ -16633,6 +16806,10 @@ msgstr "Message {0}…"
 msgid "Failed to send the invitation."
 msgstr "Failed to send the invitation."
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your achievements"
+msgstr "your achievements"
+
 #. placeholder {0}: openNoteIds.length
 #: src/components/notes/StickyNoteFabPanel.tsx
 msgid "{0, plural, one {# note on screen} other {# notes on screen}}"
@@ -16697,6 +16874,10 @@ msgstr "Code Block"
 #: src/components/venue/RoomZone.tsx
 msgid "Empty"
 msgstr "Empty"
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Your photo and what stands behind it are set in the photo studio."
+msgstr "Your photo and what stands behind it are set in the photo studio."
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Your National Chamber of Commerce is checking your submission against the corporate registry. You will be notified when a decision is made."
@@ -16778,8 +16959,8 @@ msgid "Search snippets..."
 msgstr "Search snippets..."
 
 #: src/components/achievements/AchievementUnlockModal.tsx
+#: src/components/directory/MemberPanel.tsx
 #: src/components/personalization/ForYouRail.tsx
-#: src/components/profile/TrophyShelf.tsx
 msgid "View all"
 msgstr "View all"
 
@@ -16933,6 +17114,10 @@ msgstr "Smallest team"
 #: src/i18n/harvested.ts
 msgid "Your CV"
 msgstr "Your CV"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your events"
+msgstr "your events"
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "On, any signed-in member can see your full profile and message you. Off, only your connections can — everyone still sees your name, role and country in the directory, so they can send you a connection request."
@@ -17208,6 +17393,7 @@ msgid "Inactive"
 msgstr "Inactive"
 
 #: src/components/profile/PortraitStudio.tsx
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Right"
 msgstr "Right"
 
@@ -17448,6 +17634,7 @@ msgstr "Assistant chat"
 msgid "Evidence"
 msgstr "Evidence"
 
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/events/EventsPage.tsx
 msgid "Past events"
 msgstr "Past events"
@@ -17504,6 +17691,7 @@ msgid "Select..."
 msgstr "Select..."
 
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/PortraitStudio.tsx
 msgid "Image must be less than 8MB"
 msgstr "Image must be less than 8MB"
 
@@ -17620,6 +17808,10 @@ msgstr "A shared document"
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Sponsor"
 msgstr "Sponsor"
+
+#: src/pages/forums/PostDetailPage.tsx
+msgid "Show earlier replies"
+msgstr "Show earlier replies"
 
 #: src/i18n/harvested.ts
 msgid "What each entry has to hand in"
@@ -17893,8 +18085,6 @@ msgid "Where it happens"
 msgstr "Where it happens"
 
 #: src/components/dashboard/stats/RankProgress.tsx
-#: src/components/profile/HeroStanding.tsx
-#: src/components/profile/StandingMeter.tsx
 msgid "Progress toward the next rank"
 msgstr "Progress toward the next rank"
 
@@ -17974,7 +18164,6 @@ msgid "Manage a project team"
 msgstr "Manage a project team"
 
 #: src/components/events/EventSpeakerGrid.tsx
-#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 #: src/pages/sme/ChamberOnboardingPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -18046,6 +18235,10 @@ msgstr "Leave Call"
 msgid "{0} — {total} here, closed"
 msgstr "{0} — {total} here, closed"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Where you work or study."
+msgstr "Where you work or study."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Update Email"
 msgstr "Update Email"
@@ -18077,6 +18270,7 @@ msgid "What is two-step verification?"
 msgstr "What is two-step verification?"
 
 #: src/components/achievements/TrophyCard.tsx
+#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Earned"
 msgstr "Earned"
@@ -18142,10 +18336,10 @@ msgstr "Start a Discussion"
 msgid "Registration closes"
 msgstr "Registration closes"
 
-#: src/components/directory/MemberPanel.tsx
 #: src/components/directory/PeopleLikeYouRail.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/profile/BannerStudio.tsx
+#: src/components/profile/editorial/ProfileHero.tsx
 #: src/components/profile/ProfileCanvas.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/components/venue/AvatarCluster.tsx
@@ -18219,6 +18413,10 @@ msgstr "Topics people can filter and search the library by."
 msgid "Inline code"
 msgstr "Inline code"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Online"
+msgstr "Online"
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Unpin panel"
 msgstr "Unpin panel"
@@ -18231,6 +18429,10 @@ msgstr "{0, plural, one {Invite # person} other {Invite # people}}"
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Failed to reset personalization"
 msgstr "Failed to reset personalization"
+
+#: src/components/directory/MemberPanel.tsx
+msgid "Some of {firstName}'s profile is for their connections only."
+msgstr "Some of {firstName}'s profile is for their connections only."
 
 #: src/components/collaboration/TldrawWrapper.tsx
 msgid "Loading whiteboard..."
@@ -18275,9 +18477,17 @@ msgstr "Super Admin"
 msgid "Tap + and choose “Scan QR Code”, then point the camera at the code KTIP shows. Or choose “Enter Setup Key” and type the key from under “Can't scan the code?”."
 msgstr "Tap + and choose “Scan QR Code”, then point the camera at the code KTIP shows. Or choose “Enter Setup Key” and type the key from under “Can't scan the code?”."
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Top achievement"
+msgstr "Top achievement"
+
 #: src/pages/auth/SignupPage.tsx
 msgid "Tell us a bit about yourself. These details are optional — you can add or change them later in Settings."
 msgstr "Tell us a bit about yourself. These details are optional — you can add or change them later in Settings."
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "OECS KTIP · Verified member"
+msgstr "OECS KTIP · Verified member"
 
 #: src/i18n/harvested.ts
 msgid "Build and launch innovations"
@@ -18529,6 +18739,10 @@ msgstr "Skills"
 msgid "Go to Events."
 msgstr "Go to Events."
 
+#: src/components/profile/editorial/ShareProfileButton.tsx
+msgid "Profile link copied"
+msgstr "Profile link copied"
+
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Align right"
@@ -18731,6 +18945,10 @@ msgstr "KTIP — the Knowledge, Technology and Innovation Platform — is operat
 msgid "Start community discussions"
 msgstr "Start community discussions"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Get in touch"
+msgstr "Get in touch"
+
 #. placeholder {0}: document.title
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Delete \"{0}\"? This cannot be undone."
@@ -18795,6 +19013,10 @@ msgstr "Keep partner keys secret, server-side, and out of client applications an
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Help us understand how valuable the platform is for your work."
 msgstr "Help us understand how valuable the platform is for your work."
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Find {firstName}"
+msgstr "Find {firstName}"
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Link to a screenshot, post, or other evidence supporting your report"
@@ -18869,6 +19091,11 @@ msgstr "AI search"
 msgid "Give it a title first."
 msgstr "Give it a title first."
 
+#: src/components/directory/MemberPanel.tsx
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Joined {joinedMonth}"
+msgstr "Joined {joinedMonth}"
+
 #: src/components/personalization/SignalSummary.tsx
 msgid "Badges earned"
 msgstr "Badges earned"
@@ -18905,6 +19132,7 @@ msgstr "Worth"
 msgid "Give your group a name"
 msgstr "Give your group a name"
 
+#: src/components/profile/SectionPrivacy.tsx
 #: src/i18n/harvested.ts
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Everyone"
@@ -18933,6 +19161,11 @@ msgstr "That code was not accepted. Check the digits and try again."
 #: src/i18n/harvested.ts
 msgid "To show your work to other members, you grant %entity% a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, translate, adapt for display and distribute your content — solely to operate and promote KTIP and its programme objectives."
 msgstr "To show your work to other members, you grant %entity% a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, translate, adapt for display and distribute your content — solely to operate and promote KTIP and its programme objectives."
+
+#: src/components/directory/MemberPanel.tsx
+#: src/pages/profile/PublicProfilePage.tsx
+msgid "Message {displayName}"
+msgstr "Message {displayName}"
 
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "{myDisplayName} (you)"
@@ -19251,6 +19484,7 @@ msgid "Please confirm your email address first. Check your inbox for a confirmat
 msgstr "Please confirm your email address first. Check your inbox for a confirmation link."
 
 #: src/components/profile/PortraitStudio.tsx
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Photo"
 msgstr "Photo"
 
@@ -19361,6 +19595,10 @@ msgstr "Filters sit above the events list.\n"
 msgid "Starting a discussion in <0>{0}</0>"
 msgstr "Starting a discussion in <0>{0}</0>"
 
+#: src/components/profile/SectionPrivacy.tsx
+msgid "Only your connections see {label}. Select to show everyone."
+msgstr "Only your connections see {label}. Select to show everyone."
+
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Board"
 msgstr "Board"
@@ -19373,6 +19611,7 @@ msgstr "You wrote down what you know. Published resources outlast the conversati
 msgid "Whether you are the owner of the right, or an agent authorised to act for the owner."
 msgstr "Whether you are the owner of the right, or an agent authorised to act for the owner."
 
+#: src/components/profile/editorial/ProfileHero.tsx
 #: src/components/resume/sheets/SheetFrame.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "Verified"
@@ -19562,6 +19801,10 @@ msgstr "Applications are retained while the call is live and afterwards for the 
 #: src/i18n/harvested.ts
 msgid "Pass it to a third party outside the judging process."
 msgstr "Pass it to a third party outside the judging process."
+
+#: src/components/directory/MemberPanel.tsx
+msgid "Some of your profile is for connections only. You always see all of it here."
+msgstr "Some of your profile is for connections only. You always see all of it here."
 
 #: src/components/ErrorBoundary.tsx
 msgid "Try Again"
@@ -19768,6 +20011,10 @@ msgstr "You are filing as"
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Unhide"
 msgstr "Unhide"
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Page colour"
+msgstr "Page colour"
 
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "Show the room list"
@@ -20221,6 +20468,7 @@ msgstr "We replied to your feedback"
 
 #: src/components/calendar/CalendarAccentPicker.tsx
 #: src/components/profile/PortraitStudio.tsx
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Auto"
 msgstr "Auto"
 
@@ -20563,6 +20811,10 @@ msgstr "How to check a funding offer, and the signs of a scam"
 #: src/i18n/harvested.ts
 msgid "Registration cancelled"
 msgstr "Registration cancelled"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Based in"
+msgstr "Based in"
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Application deadline"
@@ -20954,6 +21206,11 @@ msgstr "Display Text"
 msgid "Grant view"
 msgstr "Grant view"
 
+#. placeholder {0}: formatDate(d, 'yyyy')
+#: src/components/profile/ProfileCanvas.tsx
+msgid "{0} · Hosted"
+msgstr "{0} · Hosted"
+
 #: src/components/notes/StickyNote.tsx
 msgid "Move note with the arrow keys"
 msgstr "Move note with the arrow keys"
@@ -20970,8 +21227,6 @@ msgstr "View grant"
 msgid "Share Document"
 msgstr "Share Document"
 
-#: src/components/directory/MemberPanel.tsx
-#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/sme/ChamberOnboardingPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Industry"
@@ -21492,9 +21747,7 @@ msgid "Where to send a notice"
 msgstr "Where to send a notice"
 
 #: src/components/directory/MemberPanel.tsx
-#: src/components/profile/HeroStanding.tsx
 #: src/components/profile/ProfileCanvas.tsx
-#: src/components/profile/StandingMeter.tsx
 #: src/components/settings/PreferencesTab.tsx
 #: src/i18n/harvested.ts
 #: src/pages/achievements/AchievementsPage.tsx
@@ -21933,6 +22186,10 @@ msgstr "Leaderboard"
 msgid "Like things you have been reading"
 msgstr "Like things you have been reading"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your links"
+msgstr "your links"
+
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Review your application before submitting. You can go back to edit any section."
 msgstr "Review your application before submitting. You can go back to edit any section."
@@ -22006,9 +22263,13 @@ msgstr "Proposed Solution"
 msgid "Emoji"
 msgstr "Emoji"
 
-#: src/components/InstallPrompt.tsx
+#: src/components/InstallPromptSheet.tsx
 msgid "Install"
 msgstr "Install"
+
+#: src/components/messages/ChatWindow.tsx
+msgid "Loading earlier messages…"
+msgstr "Loading earlier messages…"
 
 #. placeholder {0}: auth.user?.email
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -22019,6 +22280,10 @@ msgstr "You asked to join as <0>{orgLabel}</0>. A KTIP administrator confirms th
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 msgid " · closed"
 msgstr " · closed"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Report profile"
+msgstr "Report profile"
 
 #: src/components/shared/VideoViewer.tsx
 msgid "This link can't play here. It may point to a folder or a page rather than one video. Open it in a new tab to watch."
@@ -22111,6 +22376,10 @@ msgstr "Guides and supports innovators."
 #: src/pages/forums/BoardPage.tsx
 msgid "This forum board doesn't exist."
 msgstr "This forum board doesn't exist."
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "Your backdrop"
+msgstr "Your backdrop"
 
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Failed to save draft"
@@ -22635,6 +22904,10 @@ msgstr "Very difficult"
 msgid "Your session may have expired. Profile data couldn't be loaded."
 msgstr "Your session may have expired. Profile data couldn't be loaded."
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "your level and points"
+msgstr "your level and points"
+
 #: src/components/settings/VerificationTab.tsx
 msgid "Verification request submitted"
 msgstr "Verification request submitted"
@@ -22697,10 +22970,6 @@ msgstr "Password needs: {requirement}"
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Launch and collaborate on innovative projects with creators across the Caribbean."
 msgstr "Launch and collaborate on innovative projects with creators across the Caribbean."
-
-#: src/components/directory/MemberPanel.tsx
-msgid "Organization"
-msgstr "Organization"
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 msgid "Ordered List"
@@ -22963,6 +23232,7 @@ msgid "They will get a notification and can accept your request."
 msgstr "They will get a notification and can accept your request."
 
 #: src/components/profile/PortraitStudio.tsx
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Left"
 msgstr "Left"
 
@@ -23321,6 +23591,10 @@ msgstr "Indemnity"
 #: src/lib/venue-room-presets.ts
 msgid "Add the sponsor name and link after placing it."
 msgstr "Add the sponsor name and link after placing it."
+
+#: src/hooks/useMessages.ts
+msgid "Could not start the conversation."
+msgstr "Could not start the conversation."
 
 #: src/i18n/harvested.ts
 msgid "Success Story"
@@ -23777,7 +24051,7 @@ msgstr "An authenticator app is the stronger option: it works offline, and a sto
 msgid "Prototype - Building MVP"
 msgstr "Prototype - Building MVP"
 
-#: src/components/InstallPrompt.tsx
+#: src/components/InstallPromptSheet.tsx
 msgid "Tap <0/> then<1/> Add to Home Screen."
 msgstr "Tap <0/> then<1/> Add to Home Screen."
 
@@ -23792,6 +24066,10 @@ msgstr "You have not sent us any feedback yet"
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Show them again"
 msgstr "Show them again"
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "{firstName} has no public projects yet."
+msgstr "{firstName} has no public projects yet."
 
 #: src/components/legal/ReconsentBanner.tsx
 msgid "Dismiss for now"
@@ -23820,6 +24098,10 @@ msgstr "Create a snippet to write, run and share code with your collaborators."
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Loading post..."
 msgstr "Loading post..."
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Centre puts your name on one side of the portrait and your details on the other."
+msgstr "Centre puts your name on one side of the portrait and your details on the other."
 
 #: src/pages/forums/BoardFormPage.tsx
 msgid "New Board"
@@ -23912,6 +24194,10 @@ msgstr "Suggests improvements to your application text and gives an indicative r
 msgid "Read the application"
 msgstr "Read the application"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Your public projects show here."
+msgstr "Your public projects show here."
+
 #: src/components/shared/VideoViewer.tsx
 #: src/components/ui/ToolPanelShell.tsx
 #: src/i18n/harvested.ts
@@ -23949,6 +24235,11 @@ msgstr "Access Denied"
 msgid "Time left to submit. Hidden if the event has no submission deadline."
 msgstr "Time left to submit. Hidden if the event has no submission deadline."
 
+#. placeholder {0}: SOCIAL_LABELS[bad]
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "That {0} link is not a web address."
+msgstr "That {0} link is not a web address."
+
 #: src/i18n/harvested.ts
 msgid "Messaging"
 msgstr "Messaging"
@@ -23984,6 +24275,10 @@ msgstr "Cancelled"
 #: src/lib/venue-room-presets.ts
 msgid "Scheduled sessions from mentors and sponsors."
 msgstr "Scheduled sessions from mentors and sponsors."
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Monochrome"
+msgstr "Monochrome"
 
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
@@ -24035,6 +24330,11 @@ msgstr "Climate Innovation"
 #: src/lib/permissions.ts
 msgid "Edit, feature, archive and delete any project, not only owned ones."
 msgstr "Edit, feature, archive and delete any project, not only owned ones."
+
+#. placeholder {0}: standing.streak
+#: src/components/profile/ProfileCanvas.tsx
+msgid "{0}-day streak."
+msgstr "{0}-day streak."
 
 #: src/components/WelcomePanel.tsx
 msgid "Discover funding opportunities and events, publish and access knowledge resources, match with mentors, investors and other innovators to collaborate on projects in dedicated shared workspaces."
@@ -24106,6 +24406,10 @@ msgstr "Grant applications, event registrations, forms — a record of each, as 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Delete Account"
 msgstr "Delete Account"
+
+#: src/components/profile/SectionPrivacy.tsx
+msgid "Keep {label} for connections only"
+msgstr "Keep {label} for connections only"
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Submit anonymously"
@@ -24353,6 +24657,10 @@ msgstr "Declaration"
 msgid "We also disclose data where the law requires it, to protect the rights and safety of members — particularly minors — and to programme funders in aggregate or de-identified form."
 msgstr "We also disclose data where the law requires it, to protect the rights and safety of members — particularly minors — and to programme funders in aggregate or de-identified form."
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Black & white"
+msgstr "Black & white"
+
 #: src/components/layout/MainLayout.tsx
 msgid "Skip to main content"
 msgstr "Skip to main content"
@@ -24462,6 +24770,10 @@ msgstr "I am the owner of the right, or I am authorised to act on the owner's be
 msgid "Rules and limits entries must respect"
 msgstr "Rules and limits entries must respect"
 
+#: src/pages/dashboard/tabs/my-profile/ProfilePreviewToolbar.tsx
+msgid "{exceptions, plural, one {Any member can see your profile, except # section you keep for connections.} other {Any member can see your profile, except # sections you keep for connections.}}"
+msgstr "{exceptions, plural, one {Any member can see your profile, except # section you keep for connections.} other {Any member can see your profile, except # sections you keep for connections.}}"
+
 #: src/i18n/harvested.ts
 msgid "Sponsor student applications and supervise student channels."
 msgstr "Sponsor student applications and supervise student channels."
@@ -24507,9 +24819,7 @@ msgstr "Leave both empty if people can enter on their own."
 msgid "What it is"
 msgstr "What it is"
 
-#: src/components/directory/MemberPanel.tsx
 #: src/components/events/EventDetailsForm.tsx
-#: src/components/profile/ProfileCanvas.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/events/CreateEventPage.tsx
 #: src/pages/events/EventDetailPage.tsx
@@ -24695,6 +25005,7 @@ msgstr "Control what others can see about you"
 msgid "List item two"
 msgstr "List item two"
 
+#. placeholder {0}: entry.badge_count
 #. placeholder {0}: myRank.badge_count
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "{0, plural, one {# badge} other {# badges}}"
@@ -24836,7 +25147,6 @@ msgstr "You can withdraw an entry before judging closes, and we will remove it f
 msgid "This determines which Chamber reviews you. It cannot be changed later."
 msgstr "This determines which Chamber reviews you. It cannot be changed later."
 
-#: src/components/profile/StandingMeter.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Streak"
 msgstr "Streak"
@@ -25195,6 +25505,10 @@ msgstr "Where do I find my code?"
 msgid "Sponsor removed"
 msgstr "Sponsor removed"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "No upcoming events."
+msgstr "No upcoming events."
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Very likely"
 msgstr "Very likely"
@@ -25310,6 +25624,10 @@ msgstr "write the brief"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "document"
 msgstr "document"
+
+#: src/components/profile/PortraitStudio.tsx
+msgid "None leaves the plain page behind you. Cut your background out and you stand on your backdrop instead, unless you upload a photo of your own."
+msgstr "None leaves the plain page behind you. Cut your background out and you stand on your backdrop instead, unless you upload a photo of your own."
 
 #: src/i18n/harvested.ts
 msgid "A verification badge reflects a check made at a point in time. It can be revoked if the underlying status changes or if the check turns out to have been wrong, and it is not a warranty by %entityShort% about the member who holds it."
@@ -25649,6 +25967,10 @@ msgstr "Saving..."
 msgid "Event Title"
 msgstr "Event Title"
 
+#: src/pages/forums/PostDetailPage.tsx
+msgid "Loading earlier replies…"
+msgstr "Loading earlier replies…"
+
 #: src/i18n/harvested.ts
 msgid "Sign-up or onboarding age declaration"
 msgstr "Sign-up or onboarding age declaration"
@@ -25796,7 +26118,7 @@ msgstr "Sponsor links"
 msgid "Account deleted successfully"
 msgstr "Account deleted successfully"
 
-#: src/components/InstallPrompt.tsx
+#: src/components/InstallPromptSheet.tsx
 msgid "Add KTIP to your home screen"
 msgstr "Add KTIP to your home screen"
 
@@ -26008,6 +26330,10 @@ msgstr "People the funder appoints to assess applications, which may include ext
 msgid "Failed to update email"
 msgstr "Failed to update email"
 
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Portrait position"
+msgstr "Portrait position"
+
 #: src/i18n/harvested.ts
 msgid "Report anything matching these through the in-app report control, and tell us at %supportEmail%. Reporting one attempt protects everyone else the same sender contacted."
 msgstr "Report anything matching these through the in-app report control, and tell us at %supportEmail%. Reporting one attempt protects everyone else the same sender contacted."
@@ -26068,6 +26394,10 @@ msgstr "Open the event and use the button in the details panel.\n"
 "If the event has a capacity and it is full, you are told so up front. You can cancel an RSVP from the same place you made it.\n"
 "\n"
 "Submitting a registration form also files a permanent copy under Submissions on your Dashboard."
+
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+msgid "Tagline"
+msgstr "Tagline"
 
 #: src/components/legal/ReconsentBanner.tsx
 msgid "These replace the versions you accepted previously."
@@ -26402,6 +26732,10 @@ msgstr "Build, publish and download your CV."
 msgid "Invite others to view or edit your work"
 msgstr "Invite others to view or edit your work"
 
+#: src/components/profile/ProfileCanvas.tsx
+msgid "From {firstName}'s CV"
+msgstr "From {firstName}'s CV"
+
 #: src/i18n/harvested.ts
 msgid "Organisations recorded on the platform, with their verification state and whether the partner API may publish them.\n"
 "\n"
@@ -26496,6 +26830,10 @@ msgstr "when publishing an event"
 #: src/components/security/AuthenticatorAppGuide.tsx
 msgid "KTIP not in the list? The app was set up on another device. Use a recovery code below instead."
 msgstr "KTIP not in the list? The app was set up on another device. Use a recovery code below instead."
+
+#: src/components/profile/ProfileCanvas.tsx
+msgid "Look"
+msgstr "Look"
 
 #: src/i18n/harvested.ts
 msgid "Forum posts, forum replies and chat messages each carry a report control.\n"
@@ -26679,9 +27017,10 @@ msgstr "Access to open collaboration surfaces is narrowed to contexts a minor ha
 msgid "Go to Grants and open the opportunity you want."
 msgstr "Go to Grants and open the opportunity you want."
 
+#: src/components/directory/MemberPanel.tsx
 #: src/components/layout/Navbar.tsx
-#: src/components/profile/HeroStanding.tsx
-#: src/components/profile/StandingMeter.tsx
+#: src/components/profile/ProfileCanvas.tsx
+#: src/components/profile/SectionPrivacy.tsx
 #: src/components/settings/PreferencesTab.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Connections"
@@ -26948,6 +27287,10 @@ msgstr "How points and ranks work."
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Uploading the file…"
 msgstr "Uploading the file…"
+
+#: src/pages/forums/PostDetailPage.tsx
+msgid "Replies ({replyTotal})"
+msgstr "Replies ({replyTotal})"
 
 #: src/i18n/harvested.ts
 msgid "Controlled by your settings"

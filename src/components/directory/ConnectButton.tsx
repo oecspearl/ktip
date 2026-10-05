@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useLingui } from '@lingui/react/macro'
+import { cn } from '../../lib/utils'
 
 interface ConnectButtonProps {
   otherUserId: string
@@ -20,7 +21,7 @@ interface ConnectButtonProps {
    * the one action, frosted glass for the rest. The brand-navy fill of the
    * default reads as a hole on a navy backdrop.
    */
-  tone?: 'default' | 'hero'
+  tone?: 'default' | 'hero' | 'editorial' | 'editorial-light'
 }
 
 /**
@@ -42,19 +43,36 @@ export function ConnectButton({ otherUserId, size = 'md', status, statusPending,
   if (!myId || myId === otherUserId) return null
 
   const hero = tone === 'hero'
-  const base = hero
-    ? 'inline-flex items-center justify-center gap-2 rounded-neu px-5 py-3 text-label font-bold transition-colors disabled:opacity-60'
-    : size === 'sm'
-      ? 'px-3 py-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50'
-      : 'px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50'
+  // The member page's own buttons (editorial.css): ink on the light hero, or
+  // the light fill on the dark dock and footer.
+  const editorial = tone === 'editorial' || tone === 'editorial-light'
+  const base = editorial
+    ? cn('pf-btn', size === 'sm' && 'pf-btn--sm')
+    : hero
+      ? 'inline-flex items-center justify-center gap-2 rounded-neu px-5 py-3 text-label font-bold transition-colors disabled:opacity-60'
+      : size === 'sm'
+        ? 'px-3 py-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50'
+        : 'px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50'
   // The primary fill and the quiet fill, per tone.
-  const primary = hero ? 'bg-white text-brand-navy hover:bg-ktip-sand-100' : 'btn-brand'
-  const quiet = hero
-    ? 'border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
-    : 'bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200'
-  const done = hero
-    ? 'border border-white/30 bg-white/10 text-white backdrop-blur-sm cursor-default'
-    : 'bg-ktip-tropical-100 text-ktip-tropical-700 cursor-default'
+  const primary = editorial
+    ? tone === 'editorial-light'
+      ? 'pf-btn--light'
+      : 'pf-btn--primary'
+    : hero
+      ? 'bg-white text-brand-navy hover:bg-ktip-sand-100'
+      : 'btn-brand'
+  const quiet = editorial
+    ? tone === 'editorial-light'
+      ? 'pf-btn--ghost-dark'
+      : 'pf-btn--soft'
+    : hero
+      ? 'border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
+      : 'bg-ktip-sand-100 text-gray-600 hover:bg-ktip-sand-200'
+  const done = editorial
+    ? 'pf-btn--sent cursor-default'
+    : hero
+      ? 'border border-white/30 bg-white/10 text-white backdrop-blur-sm cursor-default'
+      : 'bg-ktip-tropical-100 text-ktip-tropical-700 cursor-default'
   const iconSize = size === 'sm' ? 14 : 16
   const busy = loading || statusLoading
 

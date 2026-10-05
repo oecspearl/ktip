@@ -114,7 +114,7 @@ describe('asVisitorView', () => {
    * the RPC's gated set without a matching change here has to fail loudly,
    * rather than quietly showing a private field in the member's own preview.
    */
-  it('gates exactly the nine fields the RPC nulls', () => {
+  it('gates exactly the eleven fields the RPC nulls', () => {
     expect([...GATED_FIELDS].sort()).toEqual(
       [
         'bio',
@@ -125,6 +125,8 @@ describe('asVisitorView', () => {
         'organization',
         'phone',
         'skills',
+        'social_links',
+        'tagline',
         'website',
       ].sort()
     )
@@ -143,6 +145,7 @@ describe('asVisitorView', () => {
       'created_at',
       'profile_visibility',
       'is_minor',
+      'profile_look',
     ]
     for (const field of teaser) {
       expect(GATED_FIELDS as readonly string[]).not.toContain(field)

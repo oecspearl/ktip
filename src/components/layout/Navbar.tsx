@@ -671,10 +671,12 @@ export function Navbar() {
   // the venue pages, which render straight onto the canvas with no hero at all.
   // And once any page is scrolled past its hero the bar is over body content.
   // All of those get the same dark backdrop the open mobile menu already uses.
+  // The member page (/user/:id and its CV) is light from the top — the
+  // editorial hero sits on the page ground, not behind this bar.
   const noHeroBehindBar =
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/cv') ||
-    /^\/user\/[^/]+\/cv$/.test(location.pathname) ||
+    location.pathname.startsWith('/user/') ||
     location.pathname.startsWith('/events/virtual-hackathon/') ||
     location.pathname.startsWith('/events/virtual-conference/') ||
     /^\/events\/[^/]+\/venue/.test(location.pathname)

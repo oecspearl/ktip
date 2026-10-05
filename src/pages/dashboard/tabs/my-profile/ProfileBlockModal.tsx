@@ -1,19 +1,37 @@
 import { useState } from 'react'
-import { Save, X, Plus, ShieldCheck } from 'lucide-react'
+import { Save, X, Plus, ShieldCheck, ImageIcon } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Modal } from '../../../../components/ui/Modal'
 import { Button } from '../../../../components/ui/Button'
 import { Input } from '../../../../components/ui/Input'
+import { Segmented } from '../../../../components/ui/Segmented'
 import { TagInput } from '../../../../components/ui/TagInput'
 import { CollabSelect } from '../../../../components/ui/CollabSelect'
 import { IndustrySelect } from '../../../../components/ui/IndustrySelect'
 import { CountrySelect } from '../../../../components/ui/CountrySelect'
-import { ModeratedTextarea } from '../../../../components/moderation/ModeratedField'
+import { ModeratedInput, ModeratedTextarea } from '../../../../components/moderation/ModeratedField'
 import { ContentWarningModal } from '../../../../components/moderation/ContentWarningModal'
 import { useContentModeration } from '../../../../hooks/useContentModeration'
 import { PortraitStudio } from '../../../../components/profile/PortraitStudio'
 import type { ProfileBlock } from '../../../../components/profile/ProfileCanvas'
 import type { ProfileDraft } from '../../../../lib/profile-visibility'
+import {
+  ACCENT_PRESETS,
+  accentOnDark,
+  parseProfileLook,
+  type LookAlign,
+  type PageTone,
+  type PhotoStyle,
+  type ProfileLook,
+} from '../../../../lib/profile-look'
+import {
+  SOCIAL_KEYS,
+  SOCIAL_LABELS,
+  SOCIAL_PLACEHOLDERS,
+  normaliseSocialUrl,
+  type SocialKey,
+} from '../../../../lib/social-links'
+import { cn } from '../../../../lib/utils'
 import type { ProfileDraftApi } from './useProfileDraft'
 import {
   SELECTABLE_ROLES,
@@ -33,12 +51,13 @@ const SELF_ASSIGNABLE_SLUGS = new Set<string>(
 /** What each block writes. Nothing else is sent, so nothing else can fail. */
 const KEYS: Record<Exclude<ProfileBlock, 'banner' | 'photo'>, readonly (keyof ProfileDraft)[]> = {
   identity: ['display_name', 'roles'],
-  about: ['bio'],
-  details: ['organization', 'industry', 'country', 'phone', 'website'],
+  about: ['bio', 'tagline'],
+  details: ['organization', 'industry', 'country', 'phone', 'website', 'social_links'],
   skills: ['skills'],
   interests: ['interests'],
   languages: ['languages'],
   openTo: ['open_to'],
+  look: ['profile_look'],
 }
 
 interface ProfileBlockModalProps {
@@ -46,6 +65,8 @@ interface ProfileBlockModalProps {
   block: ProfileBlock | null
   onClose: () => void
   draft: ProfileDraftApi
+  /** Hand over to another block's editor — the Look dialog opens the photo studio. */
+  onSwitch?: (block: ProfileBlock) => void
 }
 
 /**
@@ -62,7 +83,7 @@ interface ProfileBlockModalProps {
  * they are not part of the draft. Their edits therefore appear in the preview
  * after that save rather than as you go.
  */
-export function ProfileBlockModal({ block, onClose, draft }: ProfileBlockModalProps) {
+export function ProfileBlockModal({ block, onClose, draft, onSwitch }: ProfileBlockModalProps) {
   if (!block) return null
 
   if (block === 'photo' || block === 'banner') {
@@ -70,6 +91,9 @@ export function ProfileBlockModal({ block, onClose, draft }: ProfileBlockModalPr
   }
 
   if (block === 'about') return <AboutModal onClose={onClose} draft={draft} />
+  if (block === 'look') {
+    return <LookModal onClose={onClose} draft={draft} onOpenPhoto={() => onSwitch?.('photo')} />
+  }
 
   return <FieldModal block={block} onClose={onClose} draft={draft} />
 }
@@ -140,9 +164,17 @@ function AboutModal({ onClose, draft }: EditorProps) {
   const [snap] = useState(() => draft.snapshot(KEYS.about))
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // The tagline is written by the member and printed under their name in the
+  // largest type on the page, so it is checked exactly like the bio.
   const moderation = useContentModeration(
-    [{ name: 'bio', value: draft.draft.bio || '', label: t`Bio`, ai: true }],
-    { surface: 'profile', onChange: (_field, next) => draft.set('bio', next) }
+    [
+      { name: 'tagline', value: draft.draft.tagline || '', label: t`Tagline`, ai: true },
+      { name: 'bio', value: draft.draft.bio || '', label: t`Bio`, ai: true },
+    ],
+    {
+      surface: 'profile',
+      onChange: (field, next) => draft.set(field === 'tagline' ? 'tagline' : 'bio', next),
+    }
   )
 
   const cancel = () => {
@@ -164,6 +196,18 @@ function AboutModal({ onClose, draft }: EditorProps) {
 
   return (
     <Modal open onClose={cancel} scrim="sheer" size="lg" title={t`About you`}>
+      <ModeratedInput
+        label={t`Tagline`}
+        value={draft.draft.tagline || ''}
+        onChange={(e) => draft.set('tagline', e.target.value)}
+        error={errors.tagline}
+        maxLength={120}
+        placeholder={t`One line under your name, e.g. Building climate tools for Caribbean schools`}
+        helperText={t`Leave it empty and your organisation and industry show instead.`}
+        moderation={moderation.fields.tagline}
+        fullWidth
+      />
+      <div className="mt-4" />
       <ModeratedTextarea
         label={t`Bio`}
         value={draft.draft.bio || ''}
@@ -185,11 +229,172 @@ function AboutModal({ onClose, draft }: EditorProps) {
   )
 }
 
+/**
+ * The links as the draft holds them: whatever was typed, under a known key.
+ * Lenient on purpose — parseSocialLinks() drops anything not yet https, which
+ * would eat a field while it is being typed.
+ */
+function parseSocialLinksDraft(value: unknown): Partial<Record<SocialKey, string>> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const v = value as Record<string, unknown>
+  const out: Partial<Record<SocialKey, string>> = {}
+  for (const key of SOCIAL_KEYS) if (typeof v[key] === 'string') out[key] = v[key] as string
+  return out
+}
+
+/**
+ * How the page is dressed: the photo in colour or black & white, the page in
+ * greys or tinted with the accent, the accent itself, and where the portrait
+ * stands. Every change lands in the preview behind the sheer scrim as it is
+ * made; Cancel puts the saved look back.
+ *
+ * What stands behind the portrait is the photo studio's job (the backdrop IS
+ * the banner — see AppearanceModal), so this hands over to it rather than
+ * growing a second picker for the same ten designs.
+ */
+function LookModal({ onClose, draft, onOpenPhoto }: EditorProps & { onOpenPhoto: () => void }) {
+  const { t } = useLingui()
+  const [snap] = useState(() => draft.snapshot(KEYS.look))
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const look = parseProfileLook(draft.draft.profile_look)
+  const setLook = (patch: Partial<ProfileLook>) => draft.set('profile_look', { ...look, ...patch })
+  const lifted = accentOnDark(look.accent)
+
+  const cancel = () => {
+    draft.restore(snap)
+    onClose()
+  }
+
+  const save = async () => {
+    setErrors({})
+    const result = await draft.commit(KEYS.look)
+    if (result.ok) onClose()
+    else setErrors(result.errors)
+  }
+
+  return (
+    <Modal open onClose={cancel} scrim="sheer" size="md" title={t`Your page's look`}>
+      <div className="grid gap-5">
+        <p className="text-caption text-ktip-sand-600">
+          <Trans>The page behind this changes as you pick. Members see it once you save.</Trans>
+        </p>
+
+        <div className="grid gap-2">
+          <p className="text-caption font-semibold text-ktip-sand-800">
+            <Trans>Photo</Trans>
+          </p>
+          <Segmented<PhotoStyle>
+            label={t`Photo`}
+            value={look.photo}
+            onChange={(photo) => setLook({ photo })}
+            options={[
+              { value: 'color', label: t`Colour` },
+              { value: 'bw', label: t`Black & white` },
+            ]}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <p className="text-caption font-semibold text-ktip-sand-800">
+            <Trans>Page</Trans>
+          </p>
+          <Segmented<PageTone>
+            label={t`Page colour`}
+            value={look.tone}
+            onChange={(tone) => setLook({ tone })}
+            options={[
+              { value: 'mono', label: t`Monochrome` },
+              { value: 'colour', label: t`Colour` },
+            ]}
+          />
+          <p className="text-micro text-ktip-sand-500">
+            <Trans>Colour tints the page and its cards with your accent.</Trans>
+          </p>
+        </div>
+
+        <div className="grid gap-2">
+          <p className="text-caption font-semibold text-ktip-sand-800">
+            <Trans>Accent</Trans>
+          </p>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {ACCENT_PRESETS.map((preset) => (
+              <button
+                key={preset.hex}
+                type="button"
+                title={preset.name}
+                aria-label={preset.name}
+                aria-pressed={look.accent === preset.hex}
+                onClick={() => setLook({ accent: preset.hex })}
+                className={cn(
+                  'size-10 rounded-full border-[3px] border-ktip-cream shadow-[0_0_0_1px_rgb(0_0_0/0.15)] transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2',
+                  look.accent === preset.hex && 'shadow-[0_0_0_2px_var(--color-ktip-ink)]'
+                )}
+                style={{ backgroundColor: preset.hex }}
+              />
+            ))}
+            <label className="inline-flex items-center gap-2 text-caption text-ktip-sand-600">
+              <Trans>Custom</Trans>
+              <input
+                type="color"
+                value={look.accent.toLowerCase()}
+                onChange={(e) => setLook({ accent: e.target.value.toUpperCase() })}
+                className="size-10 cursor-pointer rounded-control border border-ktip-sand-200 bg-ktip-cream p-0.5"
+              />
+            </label>
+          </div>
+          {lifted !== look.accent && (
+            <p className="flex items-center gap-2 text-micro text-ktip-sand-500">
+              <span className="inline-block size-3.5 rounded-sm" style={{ backgroundColor: lifted }} aria-hidden="true" />
+              <Trans>On dark cards this shows lighter so it stays readable.</Trans>
+            </p>
+          )}
+        </div>
+
+        <div className="grid gap-2">
+          <p className="text-caption font-semibold text-ktip-sand-800">
+            <Trans>Portrait</Trans>
+          </p>
+          <Segmented<LookAlign>
+            label={t`Portrait position`}
+            value={look.align}
+            onChange={(align) => setLook({ align })}
+            options={[
+              { value: 'auto', label: t`Auto` },
+              { value: 'left', label: t`Left` },
+              { value: 'center', label: t`Centre` },
+              { value: 'right', label: t`Right` },
+            ]}
+          />
+          <p className="text-micro text-ktip-sand-500">
+            <Trans>Centre puts your name on one side of the portrait and your details on the other.</Trans>
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-ktip-sand-200 px-4 py-3">
+          <p className="text-caption text-ktip-sand-700">
+            <Trans>Your photo and what stands behind it are set in the photo studio.</Trans>
+          </p>
+          <Button variant="outline" size="sm" icon={<ImageIcon size={16} />} onClick={onOpenPhoto}>
+            <Trans>Photo and backdrop</Trans>
+          </Button>
+        </div>
+
+        {errors.profile_look && (
+          <p role="alert" className="text-caption text-red-600">
+            {errors.profile_look}
+          </p>
+        )}
+      </div>
+      <EditorFooter onCancel={cancel} onSave={save} saving={draft.saving} />
+    </Modal>
+  )
+}
+
 function FieldModal({
   block,
   onClose,
   draft,
-}: EditorProps & { block: Exclude<ProfileBlock, 'banner' | 'photo' | 'about'> }) {
+}: EditorProps & { block: Exclude<ProfileBlock, 'banner' | 'photo' | 'about' | 'look'> }) {
   const { t, i18n } = useLingui()
   const keys = KEYS[block]
   const [snap] = useState(() => draft.snapshot(keys))
@@ -200,8 +405,26 @@ function FieldModal({
     onClose()
   }
 
+  const links = parseSocialLinksDraft(draft.draft.social_links)
+
+  /** Store what was typed; tidy it (https://, trailing slash) when the field is left. */
+  const setLink = (key: SocialKey, value: string, tidy = false) => {
+    const next = { ...links }
+    const cleaned = tidy ? normaliseSocialUrl(value) : value
+    if (cleaned === '' || (tidy && !value.trim())) delete next[key]
+    else next[key] = cleaned ?? value
+    draft.set('social_links', next)
+  }
+
   const save = async () => {
     setErrors({})
+    if (block === 'details') {
+      const bad = SOCIAL_KEYS.find((key) => links[key] && normaliseSocialUrl(links[key]!) === null)
+      if (bad) {
+        setErrors({ social_links: t`That ${SOCIAL_LABELS[bad]} link is not a web address.` })
+        return
+      }
+    }
     const result = await draft.commit(keys)
     if (result.ok) onClose()
     else setErrors(result.errors)
@@ -338,6 +561,29 @@ function FieldModal({
               fullWidth
             />
           </div>
+          <fieldset className="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+            <legend className="mb-2 text-caption font-semibold text-ktip-sand-800">
+              <Trans>Links on your profile</Trans>
+            </legend>
+            {SOCIAL_KEYS.map((key) => (
+              <Input
+                key={key}
+                label={SOCIAL_LABELS[key]}
+                type="url"
+                inputMode="url"
+                value={links[key] || ''}
+                onChange={(e) => setLink(key, e.target.value)}
+                onBlur={(e) => setLink(key, e.target.value, true)}
+                placeholder={SOCIAL_PLACEHOLDERS[key]}
+                fullWidth
+              />
+            ))}
+            {errors.social_links && (
+              <p role="alert" className="text-caption text-red-600 sm:col-span-2">
+                {errors.social_links}
+              </p>
+            )}
+          </fieldset>
         </div>
       )}
 
