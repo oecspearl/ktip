@@ -9,8 +9,8 @@ import {
 /**
  * Recording a venue room, via LiveKit Egress.
  *
- * NOTE THE RUNTIME. Every other route in api/ is edge; this one is Node, and it
- * is the only one. Egress is exactly the case the comment in
+ * NOTE THE RUNTIME. Most routes in api/ are edge; this one is Node (so are the
+ * report routes, for their running time). Egress is exactly the case the comment in
  * api/_lib/livekit-token.ts anticipated: signing a join token is forty lines of
  * Web Crypto, but starting an egress is a protobuf-over-twirp call whose wire
  * format is not something to hand-roll from memory. `livekit-server-sdk` owns
@@ -47,8 +47,12 @@ function apiHost(url: string): string {
   return url.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://').replace(/\/+$/, '')
 }
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
+// Exported as POST, not as the default. On the Node runtime Vercel calls a
+// default-export function as (req, res) with Node's request object, which has
+// no headers.get() or json(); only a method-named export (or a default object
+// with a fetch method) is handed a Web Request. Other methods get a 405 from
+// the platform.
+export async function POST(request: Request): Promise<Response> {
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL
   const anonKey =

@@ -141,7 +141,7 @@ export default function AdminForumsPage() {
                 return (
                   <div key={board.id} className="border border-ktip-sand-200 p-4 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-ktip-ocean-100 flex items-center justify-center shrink-0">
                         <IconComp size={20} className="text-ktip-ocean-600" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -193,13 +193,13 @@ export default function AdminForumsPage() {
                     setSearchQuery(e.currentTarget.value)
                     debouncedSetSearch(e.currentTarget.value)
                   }}
-                  className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
                 />
               </div>
               <select
                 value={boardFilter}
                 onChange={(e) => setBoardFilter(e.currentTarget.value)}
-                className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+                className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
               >
                 <option value="">All Boards</option>
                 {(boards || []).map((board) => (
@@ -235,7 +235,7 @@ export default function AdminForumsPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scroll-cue-x">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-ktip-sand-200">

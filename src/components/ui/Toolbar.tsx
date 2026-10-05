@@ -111,7 +111,7 @@ export function ToolbarSelect({ className, ...rest }: SelectHTMLAttributes<HTMLS
       className={cn(
         'px-2.5 py-1.5 rounded-md text-sm bg-ktip-cream text-ktip-sand-800',
         'border border-ktip-sand-200 focus:border-ktip-ocean-500',
-        'focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20',
+        'focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20',
         className
       )}
       {...rest}

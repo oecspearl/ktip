@@ -88,14 +88,15 @@ export function VenueTemplatePicker({
 
   return (
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-ktip-sand-900/40 p-4 backdrop-blur-sm"
+      data-lite-solid
+      className="fixed inset-0 z-modal flex items-center justify-center bg-ktip-sand-900/40 p-4 backdrop-blur-sm [--lite-solid:color-mix(in_srgb,var(--color-ktip-sand-900)_50%,transparent)]"
       role="dialog"
       aria-modal="true"
       aria-label={t`Venue templates`}
       onClick={onClose}
     >
       <div
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-5 shadow-xl"
+        className="max-h-[85dvh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-3">

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { insertByCreatedAt, uniqueTopic } from '../lib/realtime'
+import { callOptionalRpc } from '../lib/optional-rpc'
 import { attachmentUrl } from '../lib/chat-attachments'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -41,24 +42,92 @@ export function useConversations(userId: string | undefined) {
   return { conversations: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-async function fetchMessages(cid: string): Promise<Message[]> {
+/** Messages per page of a thread. */
+export const MESSAGE_PAGE = 50
+
+/** A bubble shows the sender's name and avatar; nothing else of the profile. */
+const MESSAGE_SELECT = '*, sender:profiles(id, username, display_name, avatar_url)'
+
+/**
+ * The newest page of a thread, oldest first. Opening a long thread used to
+ * fetch and render every message it ever had, each with its sender's whole
+ * profile row embedded.
+ */
+async function fetchLatestMessages(cid: string): Promise<Message[]> {
   const { data, error } = await supabase
     .from('messages')
-    .select('*, sender:profiles(*)')
+    .select(MESSAGE_SELECT)
     .eq('conversation_id', cid)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
+    .limit(MESSAGE_PAGE)
   if (error) throw error
-  return (data as any[]) || []
+  return (((data as any[]) || []) as Message[]).reverse()
 }
 
+/**
+ * One thread, newest page first, with older pages prepended on request.
+ *
+ * The cache stays a plain oldest-first Message[] so the realtime handler and
+ * useSendMessage keep appending to it unchanged. A refetch resets it to the
+ * newest page; older pages come back as the reader scrolls up again.
+ */
 export function useMessages(conversationId: string | undefined) {
+  const queryClient = useQueryClient()
+  const threadKey = keys.sub('messages', 'thread', conversationId)
   const query = useQuery({
-    queryKey: keys.sub('messages', 'thread', conversationId),
-    queryFn: () => fetchMessages(conversationId as string),
+    queryKey: threadKey,
+    queryFn: () => fetchLatestMessages(conversationId as string),
     enabled: !!conversationId,
   })
 
-  return { messages: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+  // Per thread. A short final page means the start of the thread is loaded.
+  const [exhausted, setExhausted] = useState<Record<string, boolean>>({})
+  const [loadingOlder, setLoadingOlder] = useState(false)
+  const loadingOlderRef = useRef(false)
+
+  const messages = query.data
+  const hasOlder =
+    !!conversationId &&
+    !exhausted[conversationId] &&
+    (messages?.length ?? 0) >= MESSAGE_PAGE
+
+  const loadOlder = useCallback(async () => {
+    const cid = conversationId
+    const oldest = messages?.[0]
+    if (!cid || !oldest || loadingOlderRef.current) return
+    loadingOlderRef.current = true
+    setLoadingOlder(true)
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select(MESSAGE_SELECT)
+        .eq('conversation_id', cid)
+        .lt('created_at', (oldest as any).created_at)
+        .order('created_at', { ascending: false })
+        .limit(MESSAGE_PAGE)
+      if (error) throw error
+      const page = (((data as any[]) || []) as Message[]).reverse()
+      if (page.length < MESSAGE_PAGE) setExhausted((prev) => ({ ...prev, [cid]: true }))
+      queryClient.setQueryData<Message[]>(keys.sub('messages', 'thread', cid), (old) => {
+        if (!old) return page
+        const seen = new Set(old.map((m) => (m as any).id))
+        return [...page.filter((m) => !seen.has((m as any).id)), ...old]
+      })
+    } finally {
+      loadingOlderRef.current = false
+      setLoadingOlder(false)
+    }
+  }, [conversationId, messages, queryClient])
+
+  return {
+    messages,
+    loading: query.isPending,
+    error: query.error,
+    refetch: query.refetch,
+    hasOlder,
+    loadOlder,
+    loadingOlder,
+  }
 }
 
 /**
@@ -168,7 +237,7 @@ export function useRealtimeMessages(
           } else {
             const { data, error } = await supabase
               .from('messages')
-              .select('*, sender:profiles(*)')
+              .select(MESSAGE_SELECT)
               .eq('id', row.id)
               .single()
             if (error) {
@@ -220,7 +289,7 @@ export function useSendMessage() {
       const { data: message, error } = await (supabase as any)
         .from('messages')
         .insert(row)
-        .select('*, sender:profiles(*)')
+        .select(MESSAGE_SELECT)
         .single()
       if (error) throw error
       return message
@@ -279,6 +348,23 @@ export function useCreateConversation() {
       currentUserId: string
       otherUserId: string
     }): Promise<string> => {
+      const studentMessage = t`Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.`
+      const privateMessage = t`This member only accepts messages from their connections. Send them a connection request first.`
+
+      // 165: the whole sequence below in one round trip and one transaction.
+      // The path after it stays as the fallback for a database without it.
+      const started = await callOptionalRpc<{
+        ok: boolean
+        conversation_id?: string
+        reason?: string
+      }>('start_direct_conversation', { p_other: otherUserId })
+      if (started) {
+        if (started.ok && started.conversation_id) return started.conversation_id
+        if (started.reason === 'student') throw new Error(studentMessage)
+        if (started.reason === 'private') throw new Error(privateMessage)
+        throw new Error(t`Could not start the conversation.`)
+      }
+
       // Check for existing conversation
       const { data: existingId } = await supabase.rpc(
         'find_conversation_between',
@@ -297,9 +383,7 @@ export function useCreateConversation() {
 
       const studentInvolved = (parties || []).some((p: any) => (p.roles || []).includes('student'))
       if (studentInvolved) {
-        throw new Error(
-          t`Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.`
-        )
+        throw new Error(studentMessage)
       }
 
       // Privacy (083). Same reasoning as the student check above: the
@@ -319,9 +403,7 @@ export function useCreateConversation() {
           .limit(1)
 
         if (!accepted?.length) {
-          throw new Error(
-            t`This member only accepts messages from their connections. Send them a connection request first.`
-          )
+          throw new Error(privateMessage)
         }
       }
 

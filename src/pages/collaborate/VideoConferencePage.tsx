@@ -232,7 +232,7 @@ export default function VideoConferencePage() {
                   placeholder={t`e.g. ktip-team-standup`}
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                 />
               </div>
               <button
@@ -308,7 +308,7 @@ export default function VideoConferencePage() {
                   // Delay to allow click on dropdown item
                   setTimeout(() => setShowDropdown(false), 200)
                 }}
-                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors text-sm"
               />
               {searchLoading && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">

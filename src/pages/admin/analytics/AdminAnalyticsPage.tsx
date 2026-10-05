@@ -179,7 +179,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 overflow-x-auto border-b border-ktip-sand-200">
+      <div className="mb-6 overflow-x-auto scroll-cue-x border-b border-ktip-sand-200">
         <div role="tablist" aria-label="Analytics sections" className="flex min-w-max gap-1">
           {HUB_TABS.map((tab) => (
             <button

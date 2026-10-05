@@ -6,6 +6,7 @@ import { ResponsiveImage } from '../ui/ResponsiveImage'
 import { cn } from '../../lib/utils'
 import { Stepper } from '../ui/Stepper'
 import { useDeckFlip } from '../ui/useDeckFlip'
+import { useIsMobile } from '../../hooks/useMediaQuery'
 
 export interface AuthStep {
   title: string
@@ -78,14 +79,20 @@ export function AuthSplitShell({
   )
   const hero = heroAt(face)
   const current = steps[Math.min(face, n - 1)]
+  // The photo panel is display:none below md, but an <img> inside a hidden box
+  // still downloads — at high priority, on the login and signup pages, for a
+  // phone that never shows it. Below md neither the photo nor its preloads
+  // exist; the panel's markup is untouched, so desktop renders as before.
+  const isMobile = useIsMobile()
 
   // Preload the target step's photo so the midpoint face swap never shows a blank panel
   useEffect(() => {
+    if (isMobile) return
     const img = new Image()
     img.src = heroAt(step - 1)
     const next = new Image()
     next.src = heroAt(step)
-  }, [step, heroAt])
+  }, [step, heroAt, isMobile])
 
   // Move focus to the new step's content for keyboard/SR users (skip initial mount)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -99,7 +106,7 @@ export function AuthSplitShell({
   }, [step])
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-ktip-cream p-3 md:p-4">
+    <div className="h-dvh w-full overflow-hidden bg-ktip-cream p-3 md:p-4">
       {/* Stage: perspective lives here so the panel (its direct child) renders in 3D */}
       <div className="relative h-full" style={{ perspective: '1200px' }}>
         {/* Image panel — travels across the stage while flipping. Hidden on mobile. */}
@@ -110,15 +117,17 @@ export function AuthSplitShell({
         >
           {/* Odd faces land at 180deg (mirrored) — undo it so content reads correctly */}
           <div className="absolute inset-0" style={{ transform: `scaleX(${mirrored ? -1 : 1})` }}>
-            <ResponsiveImage
-              src={hero}
-              alt=""
-              // The panel is hidden below md and 45% of the viewport above it.
-              sizes="(min-width: 768px) 45vw, 100vw"
-              loading="eager" fetchPriority="high"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            {!isMobile && (
+              <ResponsiveImage
+                src={hero}
+                alt=""
+                // The panel is hidden below md and 45% of the viewport above it.
+                sizes="(min-width: 768px) 45vw, 100vw"
+                loading="eager" fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/75 via-brand-navy/10 to-brand-navy/35" />
             <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5">
               {/* ktip-logo.webp already has an alpha channel, so the separate
@@ -167,7 +176,7 @@ export function AuthSplitShell({
                 key={step}
                 ref={contentRef}
                 tabIndex={-1}
-                className="animate-tab-enter motion-reduce:animate-none outline-none mt-4"
+                className="animate-tab-enter motion-reduce:animate-none outline-hidden mt-4"
               >
                 {children}
               </div>

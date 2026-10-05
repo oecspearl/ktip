@@ -176,7 +176,7 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
                 value={alt}
                 onChange={(e) => setAlt(e.target.value)}
                 placeholder={t`Describe the image`}
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
               />
             </div>
           </div>
@@ -192,7 +192,7 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
                 required
               />
             </div>
@@ -205,7 +205,7 @@ export function ImageModal({ open, onClose, editor }: ImageModalProps) {
                 value={alt}
                 onChange={(e) => setAlt(e.target.value)}
                 placeholder={t`Describe the image`}
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
               />
             </div>
           </form>

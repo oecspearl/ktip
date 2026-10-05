@@ -43,7 +43,7 @@ export function ContentWarningModal({ state, onClose }: ContentWarningModalProps
         >
           <ShieldAlert
             size={16}
-            className={hard ? 'mt-0.5 flex-shrink-0 text-red-600' : 'mt-0.5 flex-shrink-0 text-ktip-sun-700'}
+            className={hard ? 'mt-0.5 shrink-0 text-red-600' : 'mt-0.5 shrink-0 text-ktip-sun-700'}
           />
           <div className={hard ? 'text-xs text-red-800' : 'text-xs text-ktip-sun-800'}>
             {state.reason === 'submit' && (

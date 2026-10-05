@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { focalFor, heroImageFor, gradientFor } from '../../lib/hero-images'
 import { ResponsiveImage } from './ResponsiveImage'
 import { cn } from '../../lib/utils'
+import type { UploadVariantOptions } from '../../hooks/useUploadVariant'
 
 /** The tile is a fixed min-height, so tags have to stay a single short row. */
 const MAX_CARD_TAGS = 3
@@ -12,6 +13,11 @@ interface BentoCardProps {
   to: string
   /** Entity image; falls back to a seeded stock photo. */
   image?: string | null
+  /**
+   * The upload-time sibling to draw `image` from, when `image` is a member's
+   * upload that has one (a profile banner). See hooks/useUploadVariant.
+   */
+  imageVariant?: UploadVariantOptions
   /** object-position for the image (a banner's drag-set focal point). */
   imagePosition?: string
   /**
@@ -51,6 +57,7 @@ interface BentoCardProps {
 export function BentoCard({
   to,
   image,
+  imageVariant,
   imagePosition,
   background,
   wash,
@@ -76,8 +83,9 @@ export function BentoCard({
       onClick={onClick}
       className={cn(
         // @container: the tag rail only splits off once the tile itself is wide
-        // enough, so a 4-per-row grid keeps the full width for the text
-        '@container group relative rounded-surface p-card-pad flex flex-col justify-between gap-6 overflow-hidden shadow-medium hover:shadow-hard hover:-translate-y-0.5 transition-all duration-300 h-full min-h-tile-min',
+        // enough, so a 4-per-row grid keeps the full width for the text.
+        // Only the lift is timed; see Card for why `all` went.
+        '@container group relative rounded-surface p-card-pad flex flex-col justify-between gap-6 overflow-hidden shadow-medium hover:shadow-hard hover:-translate-y-0.5 transition-[translate] duration-300 h-full min-h-tile-min',
         className
       )}
     >
@@ -94,6 +102,8 @@ export function BentoCard({
           style={{ objectPosition: imagePosition ?? focalFor(src) }}
           loading="lazy"
           decoding="async"
+          // Never for the seeded stock photo, which has the build ladder.
+          uploadVariant={image ? imageVariant : undefined}
         />
       )}
       {/* The brand wash tames a bright photo; a drawn background (aurora) is

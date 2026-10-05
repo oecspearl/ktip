@@ -33,7 +33,7 @@ export function IndustrySelect({ value, onChange, label = 'Industry' }: Industry
       <select
         value={otherMode ? INDUSTRY_OTHER : value}
         onChange={(e) => handleSelect(e.target.value)}
-        className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
+        className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
       >
         <option value=""><Trans>Select an industry</Trans></option>
         {[...INDUSTRIES].map((industry) => (

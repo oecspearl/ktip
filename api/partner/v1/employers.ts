@@ -22,7 +22,10 @@ export const config = { runtime: 'edge' }
  * browser must never hold this credential.
  *
  * GET rather than the POST-only convention elsewhere in api/, because this is a
- * cacheable read with no side effect beyond its own audit row.
+ * read with no side effect beyond its own audit row. Read, not cacheable: every
+ * response is `private, no-store`. The body carries contact PII released to
+ * one key, and a withdrawn consent has to stop shipping on the next pull, not
+ * when some cache along the way expires.
  *
  * Two gates decide what ships, and a row must pass both: OECS verified it as an
  * employer, and it consented to external sharing. Verification alone is not
@@ -44,7 +47,7 @@ const RATE_LIMIT = 600
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' },
   })
 
 /** Vercel's proxy overwrites all three, so none of them is client-controlled. */

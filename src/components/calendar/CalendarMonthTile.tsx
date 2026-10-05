@@ -62,7 +62,7 @@ export function CalendarMonthTile({
         <button
           type="button"
           onClick={() => onSelectMonth(anchor)}
-          className="mb-2 block w-full truncate text-left font-display text-caption font-bold text-ktip-sand-800 transition-colors hover:text-ktip-ocean-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+          className="mb-2 block w-full truncate text-left font-display text-caption font-bold text-ktip-sand-800 transition-colors hover:text-ktip-ocean-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
         >
           {heading}
         </button>
@@ -96,7 +96,7 @@ export function CalendarMonthTile({
               aria-label={format(day, 'EEEE, MMMM d, yyyy')}
               aria-pressed={selected}
               className={cn(
-                'relative flex aspect-square items-center justify-center rounded-cal-sm font-mono text-micro transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+                'relative flex aspect-square items-center justify-center rounded-cal-sm font-mono text-micro transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
                 today
                   ? 'bg-ktip-ocean-600 font-bold text-white dark:bg-ktip-ocean-200'
                   : selected

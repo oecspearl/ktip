@@ -160,11 +160,11 @@ export default function ChamberOnboardingPage() {
         <Card className="mb-6">
           <div className={`flex items-start gap-3 p-4 rounded-xl border ${statusCopy.tone}`}>
             {status === 'verified' ? (
-              <BadgeCheck size={20} className="mt-0.5 flex-shrink-0" />
+              <BadgeCheck size={20} className="mt-0.5 shrink-0" />
             ) : status === 'pending' ? (
-              <Clock size={20} className="mt-0.5 flex-shrink-0" />
+              <Clock size={20} className="mt-0.5 shrink-0" />
             ) : (
-              <ShieldX size={20} className="mt-0.5 flex-shrink-0" />
+              <ShieldX size={20} className="mt-0.5 shrink-0" />
             )}
             <div>
               <p className="font-medium">{i18n._(statusCopy.title)}</p>
@@ -227,7 +227,7 @@ export default function ChamberOnboardingPage() {
               <select
                 value={form.country_code}
                 onChange={(e) => setForm({ ...form, country_code: e.target.value })}
-                className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
                 <option value=""><Trans>Select a member state</Trans></option>
                 {countries?.map((country) => (

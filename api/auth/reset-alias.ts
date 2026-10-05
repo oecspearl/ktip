@@ -180,8 +180,10 @@ export default async function handler(request: Request) {
   const apiKey = resendKey()
   const fromEmail = emailFrom()
   if (!apiKey || !fromEmail) {
-    // Dev only — never log a live recovery link from production.
-    if (process.env.VERCEL_ENV !== 'production') {
+    // Local dev only, and only on an explicit KTIP_DEV_ECHO_CODES=1: Preview
+    // deploys are not production either, and their logs must not carry a live
+    // recovery link. Production refuses even with the flag set.
+    if (process.env.VERCEL_ENV !== 'production' && process.env.KTIP_DEV_ECHO_CODES === '1') {
       console.log(`[reset-alias] recovery link (dev only): ${actionLink}`)
     } else {
       console.error('[reset-alias] RESEND_API_KEY/EMAIL_FROM unset; recovery mail not sent')

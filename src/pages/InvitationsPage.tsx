@@ -189,7 +189,7 @@ export default function InvitationsPage() {
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Invitations` }]}
       />
 
-      <div className="bg-ktip-sand-50 py-8 min-h-[50vh]">
+      <div className="bg-ktip-sand-50 py-8 min-h-[50svh]">
         <div className="max-w-page-narrow mx-auto px-4">
           {loading ? (
             <div className="space-y-3">

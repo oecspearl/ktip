@@ -33,7 +33,7 @@ function CheckRow({
       role="menuitemcheckbox"
       aria-checked={checked}
       onClick={onChange}
-      className="flex w-full items-center gap-2.5 rounded-neu-sm px-2 py-1.5 text-left text-sm transition-all hover:text-ktip-ocean-700 hover:shadow-neu-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+      className="flex w-full items-center gap-2.5 rounded-neu-sm px-2 py-1.5 text-left text-sm transition-all hover:text-ktip-ocean-700 hover:shadow-neu-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
     >
       <span
         aria-hidden="true"
@@ -100,7 +100,7 @@ export function CalendarFilterMenu({
         aria-expanded={open}
         aria-haspopup="true"
         className={cn(
-          'inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-caption font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+          'inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-caption font-semibold transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
           open || hidden > 0 || onlyMine
             ? 'text-ktip-ocean-700 shadow-neu-sm-inset'
             : 'text-ktip-sand-600 hover:text-ktip-ocean-700 hover:shadow-neu-sm'

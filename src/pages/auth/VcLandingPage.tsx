@@ -102,7 +102,7 @@ export default function VcLandingPage() {
   }, [navigate, toast])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
+    <div className="min-h-svh flex items-center justify-center bg-ktip-canvas">
       <div className="text-center">
         <img
           src="/ktip-logo-128.webp"

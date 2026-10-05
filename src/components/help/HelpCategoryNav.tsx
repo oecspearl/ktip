@@ -43,7 +43,7 @@ export function HelpCategoryNav({
         </p>
 
         <nav
-          className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible"
+          className="flex flex-row lg:flex-col gap-1 overflow-x-auto max-lg:scroll-cue-x lg:overflow-x-visible"
           aria-label={t`Help categories`}
         >
           <button

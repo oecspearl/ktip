@@ -56,8 +56,10 @@ export function useRoomRecording(roomId: string | undefined, isHost: boolean) {
     // recorded from `recording_enabled` and the consent gate, not from polling.
     enabled: Boolean(roomId) && isHost,
     // Egress takes a few seconds to come up, and a host who pressed Record wants
-    // the button to stop lying reasonably soon.
-    refetchInterval: 15_000,
+    // the button to stop lying reasonably soon — so 15s while something is
+    // recording. With nothing recording the only news is another host
+    // starting one, and Start/Stop here refetch on their own.
+    refetchInterval: (query) => ((query.state.data?.length ?? 0) > 0 ? 15_000 : 60_000),
     retry: false,
   })
 

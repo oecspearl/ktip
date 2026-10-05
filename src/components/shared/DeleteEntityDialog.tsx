@@ -81,7 +81,7 @@ export function DeleteEntityDialog({
 
         {impact.warning && (
           <div className="flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
-            <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-red-600" />
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-red-600" />
             <p className="text-sm text-red-700">{impact.warning}</p>
           </div>
         )}

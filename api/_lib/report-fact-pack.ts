@@ -4,7 +4,7 @@ import {
   kpiStatus,
   type KpiStatus,
   type PlatformPulse,
-} from '../../src/lib/kpi-catalog'
+} from '../../src/lib/kpi-catalog.js'
 import type { FactPack, FactPackKpi, ReportOutput, ReportPeriodKind } from '../../src/lib/kpi-report-schema'
 
 /**

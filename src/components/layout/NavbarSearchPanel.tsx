@@ -13,6 +13,7 @@ import { DropdownPanel } from '../ui/DropdownPanel'
 import { resolveIcon } from '../../lib/icon-map'
 import type { SearchGroup, SearchRow } from '../../lib/site-search'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { SEARCH_PANEL_WIDTH } from './search-panel-width'
 
 /**
  * The results panel that drops below the navbar search box.
@@ -24,15 +25,8 @@ import { Trans, useLingui } from '@lingui/react/macro'
  * expands it in place to explain how to get there or do the thing yourself.
  */
 
-/**
- * Width of the desktop search surface — the input AND this panel.
- *
- * Exported because Navbar sets it on the input container. The input used to be
- * `max-w-md` (448px) against this panel's 544px, so the panel hung out past the
- * left edge of the box that opened it and the two read as unrelated objects.
- * One constant is the only way two elements in different files stay flush.
- */
-export const SEARCH_PANEL_WIDTH = 'w-[min(34rem,calc(100vw-2rem))]'
+// Shared with Navbar's input container; see the module for why it is separate.
+export { SEARCH_PANEL_WIDTH }
 
 export interface NavbarSearchPanelProps {
   query: string
@@ -168,7 +162,7 @@ export function NavbarSearchPanel({
         </p>
       )}
 
-      <div className="max-h-[60vh] overflow-y-auto">
+      <div className="max-h-[60dvh] overflow-y-auto">
         {/* Empty query: recent searches + curated starting points */}
         {showEmptyState && (
           <>

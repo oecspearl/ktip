@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
@@ -135,15 +136,32 @@ export function useForumPost(postId: string | undefined) {
   return { post: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/** Replies per page of a thread. */
+const REPLY_PAGE = 50
+
+/** A reply shows its author's name and avatar; nothing else of the profile. */
+const REPLY_SELECT = '*, author:profiles(id, username, display_name, avatar_url)'
+
+/**
+ * A thread's replies: the newest page, with earlier pages prepended on
+ * request. A busy thread used to fetch and render every reply it had, each
+ * with its author's full profile row. Newest page first so a reply just
+ * posted is on screen however long the thread is; `total` comes from the
+ * same request, so counts stay right while only a page is loaded.
+ */
 export function useForumReplies(postId: string | undefined) {
-  const fetchReplies = async (pid: string): Promise<ForumReply[]> => {
-    const { data, error } = await supabase
+  const queryClient = useQueryClient()
+
+  const fetchReplies = async (pid: string): Promise<{ items: ForumReply[]; total: number }> => {
+    const { data, error, count } = await supabase
       .from('forum_replies')
-      .select('*, author:profiles(*)')
+      .select(REPLY_SELECT, { count: 'exact' })
       .eq('post_id', pid)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(REPLY_PAGE)
     if (error) throw error
-    return (data as any[]) || []
+    const items = (((data as any[]) || []) as ForumReply[]).reverse()
+    return { items, total: count ?? items.length }
   }
 
   const query = useQuery({
@@ -152,7 +170,49 @@ export function useForumReplies(postId: string | undefined) {
     enabled: !!postId,
   })
 
-  return { replies: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+  const [loadingEarlier, setLoadingEarlier] = useState(false)
+  const items = query.data?.items
+  const total = query.data?.total ?? 0
+  const hasEarlier = (items?.length ?? 0) < total
+
+  const loadEarlier = useCallback(async () => {
+    const pid = postId
+    const oldest = items?.[0]
+    if (!pid || !oldest || loadingEarlier) return
+    setLoadingEarlier(true)
+    try {
+      const { data, error } = await supabase
+        .from('forum_replies')
+        .select(REPLY_SELECT)
+        .eq('post_id', pid)
+        .lt('created_at', (oldest as any).created_at)
+        .order('created_at', { ascending: false })
+        .limit(REPLY_PAGE)
+      if (error) throw error
+      const page = (((data as any[]) || []) as ForumReply[]).reverse()
+      queryClient.setQueryData<{ items: ForumReply[]; total: number }>(
+        keys.sub('forum_posts', 'replies', pid),
+        (old) => {
+          if (!old) return old
+          const seen = new Set(old.items.map((r) => r.id))
+          return { ...old, items: [...page.filter((r) => !seen.has(r.id)), ...old.items] }
+        }
+      )
+    } finally {
+      setLoadingEarlier(false)
+    }
+  }, [postId, items, loadingEarlier, queryClient])
+
+  return {
+    replies: items,
+    total,
+    hasEarlier,
+    loadEarlier,
+    loadingEarlier,
+    loading: query.isPending,
+    error: query.error,
+    refetch: query.refetch,
+  }
 }
 
 export function useCreateForumBoard() {

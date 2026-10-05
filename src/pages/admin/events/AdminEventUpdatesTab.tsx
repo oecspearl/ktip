@@ -169,7 +169,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
               type="text"
               value={title}
               onChange={(e) => setTitle(e.currentTarget.value)}
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               placeholder="Update title..."
             />
             {errors.title && (
@@ -183,7 +183,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
               value={content}
               onChange={(e) => setContent(e.currentTarget.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none resize-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden resize-none"
               placeholder="Write your update..."
             />
             {errors.content && (
@@ -197,7 +197,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
               <select
                 value={updateType}
                 onChange={(e) => setUpdateType(e.currentTarget.value)}
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:outline-hidden"
               >
                 <option value="announcement">Announcement</option>
                 <option value="schedule_change">Schedule Change</option>
@@ -259,7 +259,7 @@ export default function AdminEventUpdatesTab({ eventId }: AdminEventUpdatesTabPr
                     {update.author?.display_name && ` by ${update.author.display_name}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <button
                     type="button"
                     onClick={() => togglePublished(update)}

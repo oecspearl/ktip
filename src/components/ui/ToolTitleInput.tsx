@@ -37,7 +37,7 @@ export function ToolTitleInput({
       readOnly={readOnly}
       aria-label={t`Title`}
       placeholder={placeholder}
-      className="font-display font-bold text-white bg-transparent border-none focus:outline-none w-full placeholder-white/40 read-only:cursor-default"
+      className="font-display font-bold text-white bg-transparent border-none focus:outline-hidden w-full placeholder-white/40 read-only:cursor-default"
     />
   )
 }

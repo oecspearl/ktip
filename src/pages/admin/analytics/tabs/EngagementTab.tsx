@@ -201,7 +201,7 @@ export default function EngagementTab({ filters, period, trend, country }: HubPr
         emptyText="No sessions in this period"
       >
         {(sessions) => (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-cue-x">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ktip-sand-200 text-left text-xs text-ktip-sand-500">

@@ -44,7 +44,7 @@ export function EditPencil({ label, onClick, tone = 'rail', className }: EditPen
         // it is. Idle flat, lifting on hover: the house language for a control
         // that is available rather than active.
         'inline-flex shrink-0 items-center justify-center rounded-neu-sm transition-all',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+        'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
         tone === 'onDark'
           ? 'neu-on-dark border border-white/30 bg-white/10 p-2.5 text-white backdrop-blur-sm hover:bg-white/20'
           : cn(

@@ -45,7 +45,7 @@ export function useVenueSession(eventId: string | undefined) {
  * presence entry, and for the directory-style panels (who is here, who is
  * looking for a team).
  */
-export function useVenueRoster(eventId: string | undefined) {
+export function useVenueRoster(eventId: string | undefined, options?: { live?: boolean }) {
   const fetchRoster = async (id: string): Promise<EventVenueMember[]> => {
     const { data, error } = await (supabase as any)
       .from('event_venue_members')
@@ -63,7 +63,9 @@ export function useVenueRoster(eventId: string | undefined) {
     enabled: !!eventId,
     // Deliberately not realtime: event_venue_members is not in the publication,
     // because publishing it would fan out a WAL event per heartbeat per member.
-    refetchInterval: 60_000,
+    // With the presence channel live it only fills in people who are not
+    // here, so every five minutes is plenty; every minute without it.
+    refetchInterval: options?.live ? 300_000 : 60_000,
   })
 
   return { roster: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
@@ -129,32 +131,6 @@ export function useUpdateVenueProfile() {
   ) => mutation.mutateAsync({ eventId, updates })
 
   return { updateVenueProfile, loading: mutation.isPending, error: mutation.error }
-}
-
-/**
- * Cold-path occupancy, for first paint before the presence channel syncs and
- * for the organizer view. Live occupancy is a client-side groupBy over presence
- * state and does not come from here.
- */
-export function useVenueOccupancyFallback(eventId: string | undefined) {
-  const fetchOccupancy = async (id: string): Promise<Record<string, number>> => {
-    const { data, error } = await (supabase as any).rpc('venue_room_occupancy', {
-      p_event_id: id,
-    })
-    if (error) throw error
-    const out: Record<string, number> = {}
-    for (const row of (data as any[]) || []) out[row.room_id] = row.occupants
-    return out
-  }
-
-  const query = useQuery({
-    queryKey: keys.sub('venue', 'occupancy', eventId),
-    queryFn: () => fetchOccupancy(eventId as string),
-    enabled: !!eventId,
-    refetchInterval: 60_000,
-  })
-
-  return { occupancy: query.data, loading: query.isPending, error: query.error }
 }
 
 /**

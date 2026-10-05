@@ -48,7 +48,7 @@ export function PortraitTile({ className }: { className?: string }) {
             type="button"
             onClick={() => openWith(null)}
             aria-label={t`Edit profile photo`}
-            className="shrink-0 rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+            className="shrink-0 rounded-control focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
           >
             <DiamondAvatar
               src={auth.profile?.avatar_url}

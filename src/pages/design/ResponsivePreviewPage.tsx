@@ -575,7 +575,7 @@ export default function ResponsivePreviewPage() {
     setGroups((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]))
 
   return (
-    <div className="min-h-screen bg-ktip-canvas p-card-pad-lg">
+    <div className="min-h-svh bg-ktip-canvas p-card-pad-lg">
       <header className="mb-6">
         <h1 className="text-title-lg font-display font-extrabold text-ktip-sand-900">
           Responsive preview

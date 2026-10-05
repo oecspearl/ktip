@@ -125,7 +125,7 @@ export function AssistantChatWindow() {
             placeholder={t`Ask a question, or say where you want to go...`}
             aria-label={t`Message ${ASSISTANT_NAME}`}
             rows={1}
-            className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
+            className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
           />
           <Button
             type="submit"

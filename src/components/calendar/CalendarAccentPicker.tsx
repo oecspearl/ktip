@@ -39,7 +39,7 @@ export function CalendarAccentPicker({
           onClick={() => onChange(null)}
           title={t`Match the event type`}
           className={cn(
-            'flex h-8 items-center gap-1.5 rounded-neu-sm px-2.5 text-caption font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+            'flex h-8 items-center gap-1.5 rounded-neu-sm px-2.5 text-caption font-semibold transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
             value === null
               ? 'bg-ktip-sand-100 text-ktip-ocean-700 shadow-neu-sm-inset'
               : 'text-ktip-sand-600 hover:text-ktip-ocean-700 hover:shadow-neu-sm'
@@ -62,7 +62,7 @@ export function CalendarAccentPicker({
             title={label}
             aria-label={label}
             className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-neu-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+              'flex h-8 w-8 items-center justify-center rounded-neu-sm transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
               active
                 ? 'bg-ktip-sand-100 shadow-neu-sm-inset'
                 : 'hover:shadow-neu-sm'

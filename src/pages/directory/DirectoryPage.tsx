@@ -24,6 +24,7 @@ import {
   SKILL_SUGGESTIONS,
 } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { COVER_VARIANT_WIDTH } from '../../lib/upload-variants'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { debounce } from '../../lib/utils'
@@ -202,6 +203,8 @@ export default function DirectoryPage() {
             ))}
           </div>
 
+          {/* The fields below go to 16px on a touch screen (pointer-coarse:
+              text-body): iOS zooms the page into anything smaller on focus. */}
           <div
             className={`grid grid-cols-1 gap-4 mb-3 ${
               tab === 'businesses' ? '' : 'md:grid-cols-3 lg:grid-cols-6'
@@ -219,7 +222,7 @@ export default function DirectoryPage() {
                 aria-label={tab === 'businesses' ? t`Search businesses` : t`Search members`}
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.currentTarget.value); debouncedSetSearch(e.currentTarget.value) }}
-                className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+                className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
               />
             </div>
 
@@ -231,7 +234,7 @@ export default function DirectoryPage() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
             >
               <option value=""><Trans>All Roles</Trans></option>
               {/* Non-admin roles only — see DIRECTORY_ROLE_LABELS. */}
@@ -247,7 +250,7 @@ export default function DirectoryPage() {
             <select
               value={selectedSkill}
               onChange={(e) => setSelectedSkill(e.currentTarget.value)}
-              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
             >
               <option value=""><Trans>All Skills</Trans></option>
               {SKILL_SUGGESTIONS.map((skill) => (
@@ -260,7 +263,7 @@ export default function DirectoryPage() {
               value={selectedBadge}
               onChange={(e) => setSelectedBadge(e.currentTarget.value)}
               aria-label={t`Filter by badge`}
-              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
             >
               <option value=""><Trans>All Badges</Trans></option>
               {(allBadges || []).map((badge) => (
@@ -275,7 +278,7 @@ export default function DirectoryPage() {
               value={selectedOpenTo}
               onChange={(e) => setSelectedOpenTo(e.currentTarget.value)}
               aria-label={t`Filter by what members are open to`}
-              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm"
+              className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
             >
               <option value=""><Trans>Open to anything</Trans></option>
               {COLLABORATION_OPTIONS.filter((o) => o.value !== COLLAB_EXCLUSIVE_VALUE).map((option) => (
@@ -304,14 +307,14 @@ export default function DirectoryPage() {
             {employersLoading || !employers ? (
               <SkeletonGrid
                 count={6}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-fr"
               />
             ) : employers.length > 0 ? (
               <div>
                 <p className="text-sm text-gray-500 mb-6">
                   <Plural value={employers.length} one="Found # business" other="Found # businesses" />
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-fr stagger-children">
                   {employers.map((employer) => (
                     <BentoCard
                       key={employer.id}
@@ -363,14 +366,14 @@ export default function DirectoryPage() {
               a member who asked for Grenadian mentors wants that list, not ours. */}
           {!hasActiveFilters && <PeopleLikeYouRail className="mb-8" />}
           {loading || !members ? (
-            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr" />
+            <SkeletonGrid count={6} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-fr" />
           ) : members.length > 0 ? (
             <div>
               <p className="text-sm text-gray-500 mb-6">
                 <Plural value={members.length} one="Found # member" other="Found # members" />
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr stagger-children">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-fr stagger-children">
                 {members.map((member) => {
                   // Locked profiles get the 083 teaser on the card too — name,
                   // photo, country — not just behind the click. The columns
@@ -386,6 +389,10 @@ export default function DirectoryPage() {
                     to={`/directory?member=${member.username || member.id}`}
                     imageSeed={member.id}
                     image={bannerImage(banner)}
+                    // The 640 sibling outright, not a srcset: under BANNER_WASH
+                    // a card shows no detail the 1920 original adds, and a
+                    // srcset would still pick the original on a DPR-3 phone.
+                    imageVariant={{ width: COVER_VARIANT_WIDTH }}
                     imagePosition={bannerPosition(banner, 'card')}
                     wash={bannerImage(banner) ? BANNER_WASH : undefined}
                     background={

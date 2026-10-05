@@ -339,7 +339,7 @@ export function StickyNote({
           onPointerMove={onDrag}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          className="ghost-live-row flex items-center gap-2 px-3 cursor-grab active:cursor-grabbing touch-none"
+          className="ghost-live-row flex items-center gap-2 pointer-coarse:gap-3 px-3 cursor-grab active:cursor-grabbing touch-none"
           style={{ background: head, color: NOTE_TEXT_COLOR, height: NOTE_MINIMIZED_HEIGHT }}
         >
           <span className="flex-1 truncate text-sm font-semibold">{note.title}</span>
@@ -351,7 +351,7 @@ export function StickyNote({
               aria-label={t`Wake note`}
               title={t`Wake — brings the note back without unpinning it`}
               onClick={ghost.wake}
-              className="ghost-live no-drag rounded bg-ktip-ocean-600 p-1 text-white shadow-fab"
+              className="ghost-live icon-hit no-drag rounded bg-ktip-ocean-600 p-1 text-white shadow-fab"
             >
               <MousePointerClick size={14} />
             </button>
@@ -360,7 +360,7 @@ export function StickyNote({
             type="button"
             aria-label={t`Expand note`}
             onClick={() => onCommit({ minimized: false })}
-            className="no-drag p-1 rounded hover:bg-black/10"
+            className="icon-hit no-drag p-1 rounded hover:bg-black/10"
           >
             <MoreHorizontal size={14} />
           </button>
@@ -368,7 +368,7 @@ export function StickyNote({
             type="button"
             aria-label={t`Close note`}
             onClick={handleClose}
-            className="no-drag p-1 rounded hover:bg-black/10"
+            className="icon-hit no-drag p-1 rounded hover:bg-black/10"
           >
             <X size={14} />
           </button>
@@ -432,8 +432,9 @@ export function StickyNote({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         // ghost-live-row keeps the pin reachable while the note is ghosted —
-        // everything else in the header fades with the paper.
-        className="ghost-live-row group/head flex items-center gap-1 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-none"
+        // everything else in the header fades with the paper. Wider gaps on
+        // touch keep each button's 44px hit area (icon-hit) off its neighbour.
+        className="ghost-live-row group/head flex items-center gap-1 pointer-coarse:gap-3 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-none"
         style={{ background: head }}
       >
         {/* The title is text until you ask for it. An always-live input meant
@@ -453,7 +454,7 @@ export function StickyNote({
               }
             }}
             aria-label={t`Note title`}
-            className="no-drag min-w-0 flex-1 rounded bg-black/5 px-1 text-sm font-bold outline-none"
+            className="no-drag min-w-0 flex-1 rounded bg-black/5 px-1 text-sm font-bold outline-hidden"
           />
         ) : (
           <>
@@ -465,7 +466,8 @@ export function StickyNote({
               aria-label={t`Rename note`}
               title={t`Rename`}
               onClick={startTitleEdit}
-              className="no-drag rounded p-1 opacity-0 transition-opacity hover:bg-black/10 focus-visible:opacity-100 group-hover/head:opacity-100"
+              // no-hover: the hover reveal never fires on a touch screen.
+              className="icon-hit no-drag rounded p-1 opacity-0 transition-opacity hover:bg-black/10 focus-visible:opacity-100 group-hover/head:opacity-100 no-hover:opacity-100"
             >
               <Pencil size={13} />
             </button>
@@ -478,7 +480,7 @@ export function StickyNote({
             aria-label={t`Note options`}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className="no-drag p-1 rounded hover:bg-black/10"
+            className="icon-hit no-drag p-1 rounded hover:bg-black/10"
           >
             <MoreHorizontal size={16} />
           </button>
@@ -548,7 +550,7 @@ export function StickyNote({
           }
           onClick={() => (ghost.ghosted ? ghost.wake() : note.pinned ? unpin() : pin())}
           className={cn(
-            'ghost-live no-drag p-1 rounded transition-colors hover:bg-black/10',
+            'ghost-live icon-hit no-drag p-1 rounded transition-colors hover:bg-black/10',
             note.pinned && 'bg-black/10',
             // Alone on a see-through note, the control brings its own backing.
             ghost.ghosted && 'bg-ktip-ocean-600 text-white shadow-fab hover:bg-ktip-ocean-600'
@@ -571,7 +573,7 @@ export function StickyNote({
           type="button"
           aria-label={t`Minimize note`}
           onClick={() => onCommit({ minimized: true })}
-          className="no-drag p-1 rounded hover:bg-black/10"
+          className="icon-hit no-drag p-1 rounded hover:bg-black/10"
         >
           <Minus size={16} />
         </button>
@@ -580,7 +582,7 @@ export function StickyNote({
           aria-label={t`Close note`}
           title={t`Closing keeps the note in your saved list`}
           onClick={handleClose}
-          className="no-drag p-1 rounded hover:bg-black/10"
+          className="icon-hit no-drag p-1 rounded hover:bg-black/10"
         >
           <X size={16} />
         </button>
@@ -607,13 +609,13 @@ export function StickyNote({
         data-placeholder={t`Write anything…`}
         onInput={(e) => onChange({ content: clean(e.currentTarget.innerHTML) })}
         onBlur={(e) => onCommit({ content: clean(e.currentTarget.innerHTML) })}
-        className="sn-body no-drag flex-1 overflow-y-auto px-3 py-2 text-sm leading-relaxed outline-none"
+        className="sn-body no-drag flex-1 overflow-y-auto px-3 py-2 text-sm leading-relaxed outline-hidden"
       />
 
       {/* Toolbar — horizontally scrollable, because a narrow note cannot fit
           nine buttons and hiding them would be worse than scrolling. */}
       <div
-        className="no-drag flex items-center gap-0.5 overflow-x-auto px-2 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="no-drag flex items-center gap-0.5 pointer-coarse:gap-3 overflow-x-auto px-2 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ background: head }}
       >
         {TOOLBAR.map(({ label, icon: Icon, command, value }) => (
@@ -624,7 +626,7 @@ export function StickyNote({
             title={i18n._(label)}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => applyCommand(command, value)}
-            className="shrink-0 p-1.5 rounded hover:bg-black/10"
+            className="icon-hit shrink-0 p-1.5 rounded hover:bg-black/10"
           >
             <Icon size={14} />
           </button>
@@ -635,7 +637,7 @@ export function StickyNote({
           title={t`Insert link`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={insertLink}
-          className="shrink-0 p-1.5 rounded hover:bg-black/10"
+          className="icon-hit shrink-0 p-1.5 rounded hover:bg-black/10"
         >
           <Link2 size={14} />
         </button>
@@ -645,7 +647,7 @@ export function StickyNote({
           title={t`Divider`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => applyCommand('insertHorizontalRule')}
-          className="shrink-0 p-1.5 rounded hover:bg-black/10"
+          className="icon-hit shrink-0 p-1.5 rounded hover:bg-black/10"
         >
           <Minus size={14} />
         </button>

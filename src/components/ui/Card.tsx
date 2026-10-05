@@ -28,7 +28,10 @@ export function Card({ className, hover, padding, children, ...others }: CardPro
         // inside the card sculpts out of the CARD rather than out of the page
         // ground — without it the soft-UI shadow pair halos. See index.css.
         'neu-surface bg-ktip-cream rounded-surface shadow-medium',
-        hover && 'hover:shadow-hard hover:-translate-y-0.5 transition-all duration-300 cursor-pointer',
+        // Only the lift is timed. `all` also tweened the shadow (a repaint of
+        // its blur every frame) and, on a ramp step such as rotating a phone,
+        // the padding and radius of every card on the page at once.
+        hover && 'hover:shadow-hard hover:-translate-y-0.5 transition-[translate] duration-300 cursor-pointer',
         paddingStyles[padding || 'md'],
         className
       )}

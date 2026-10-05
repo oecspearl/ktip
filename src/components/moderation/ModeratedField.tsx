@@ -221,7 +221,7 @@ function ModeratedField({
 
   const fieldClasses = cn(
     surface,
-    'transition-all focus:outline-none focus:ring-2',
+    'transition-all focus:outline-hidden focus:ring-2',
     active ? 'bg-transparent' : 'bg-ktip-sand-50/50 focus:bg-ktip-cream',
     error || blocked
       ? 'border-red-400/70 focus:border-red-400 focus:ring-red-400/15'

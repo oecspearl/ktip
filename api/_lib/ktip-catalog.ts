@@ -78,7 +78,9 @@ const MAX_PAGES = 10 // backstop; 2000 courses is far beyond the real catalogue
 
 async function fetchCatalogPage(offset: number): Promise<{ items: KtipCourse[]; total: number }> {
   const url = `${catalogBaseUrl()}/api/external/ktip/catalog?limit=${PAGE_SIZE}&offset=${offset}`
-  const res = await fetch(url, { headers: { Accept: 'application/json' } })
+  // Every call to the Virtual Campus is bounded at 8 s. A timeout throws like
+  // any network failure, and the routes already turn that into an error.
+  const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) })
   if (!res.ok) throw new Error(`ktip catalog ${res.status}`)
   const body = (await res.json()) as { items?: KtipCourse[]; total?: number }
   return { items: Array.isArray(body.items) ? body.items : [], total: body.total ?? 0 }
@@ -154,6 +156,7 @@ export async function loadKtipEnrollments(email: string): Promise<KtipEnrollment
   const url = `${catalogBaseUrl()}/api/external/ktip/enrollments?email=${encodeURIComponent(email)}`
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+    signal: AbortSignal.timeout(8000),
   })
 
   if (res.status === 404) return []
@@ -201,6 +204,7 @@ export async function enrollInKtipCourse(input: {
       course_id: input.course_id,
       ...(input.name ? { name: input.name } : {}),
     }),
+    signal: AbortSignal.timeout(8000),
   })
 
   if (!res.ok) {

@@ -162,7 +162,7 @@ export function WeekView({
         aria-pressed={selected}
         aria-label={t`${dayLabel}, ${countLabel}`}
         className={cn(
-          'group min-w-0 flex-1 border-l border-cal-line px-2 py-2 text-left transition-colors first:border-l-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
+          'group min-w-0 flex-1 border-l border-cal-line px-2 py-2 text-left transition-colors first:border-l-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
           selected ? 'bg-ktip-ocean-50/40' : 'hover:bg-ktip-sand-50'
         )}
       >

@@ -85,7 +85,7 @@ export function ReportView({ report, editable = false, onSummaryChange, onSectio
             onChange={(e) => onSummaryChange?.(e.currentTarget.value)}
             rows={8}
             placeholder="No commentary was generated for this period. Write the summary here."
-            className="w-full rounded-lg border border-ktip-sand-300 bg-ktip-cream p-3 text-sm leading-relaxed text-ktip-sand-900 focus:border-ktip-ocean-500 focus:outline-none"
+            className="w-full rounded-lg border border-ktip-sand-300 bg-ktip-cream p-3 text-sm leading-relaxed text-ktip-sand-900 focus:border-ktip-ocean-500 focus:outline-hidden"
           />
         ) : report.summary_md ? (
           <div className="text-sm leading-relaxed sm:text-base">{renderMarkdown(report.summary_md)}</div>
@@ -145,12 +145,12 @@ export function ReportView({ report, editable = false, onSummaryChange, onSectio
                 onChange={(e) => onSectionChange?.(table, e.currentTarget.value)}
                 rows={3}
                 placeholder={`Commentary on ${KPI_TABLE_TITLES[table].toLowerCase()} (optional)`}
-                className="mb-3 w-full rounded-lg border border-ktip-sand-300 bg-ktip-cream p-3 text-sm leading-relaxed text-ktip-sand-900 focus:border-ktip-ocean-500 focus:outline-none"
+                className="mb-3 w-full rounded-lg border border-ktip-sand-300 bg-ktip-cream p-3 text-sm leading-relaxed text-ktip-sand-900 focus:border-ktip-ocean-500 focus:outline-hidden"
               />
             ) : (
               section?.commentary_md && <div className="mb-3 text-sm leading-relaxed">{renderMarkdown(section.commentary_md)}</div>
             )}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scroll-cue-x">
               <table className="w-full text-sm tabular-nums">
                 <thead>
                   <tr className="border-b border-ktip-sand-200 text-left text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">

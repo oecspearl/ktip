@@ -152,7 +152,7 @@ function GroupRow({ row }: { row: GanttRow }) {
         type="button"
         aria-expanded={!row.collapsed}
         onClick={() => toggleCollapse(row.id)}
-        className="sticky start-0 z-10 shrink-0 flex items-center gap-1.5 px-3 text-start bg-ktip-canvas border-e border-ktip-sand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400 focus-visible:ring-inset"
+        className="sticky start-0 z-10 shrink-0 flex items-center gap-1.5 px-3 text-start bg-ktip-canvas border-e border-ktip-sand-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400 focus-visible:ring-inset"
         style={{ width: 'var(--gantt-tree-w)' }}
       >
         <ChevronRight
@@ -218,7 +218,7 @@ function LeafRow({ row }: { row: GanttRow }) {
         }
       }}
       className={cn(
-        'flex items-stretch cursor-pointer transition-colors border-b border-ktip-sand-100 last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400 focus-visible:ring-inset',
+        'flex items-stretch cursor-pointer transition-colors border-b border-ktip-sand-100 last:border-b-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400 focus-visible:ring-inset',
         isSelected ? 'bg-ktip-ocean-50/60' : 'hover:bg-ktip-sand-50/60'
       )}
       style={{ height: row.height }}
@@ -334,7 +334,7 @@ export function GanttView({ className }: { className?: string }) {
         tabIndex={0}
         onScroll={syncEdges}
         onKeyDown={onKeyDown}
-        className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400 focus-visible:ring-inset"
+        className="overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400 focus-visible:ring-inset"
       >
         <div
           // The tree column narrows on small screens; every px offset below is

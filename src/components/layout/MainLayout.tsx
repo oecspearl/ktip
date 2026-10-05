@@ -34,7 +34,7 @@ const StickyNoteOverlay = lazyOverlay(
   () => import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay })),
   'sticky-notes'
 )
-import { StickyNotesProvider, useStickyNotesPanel } from '../../contexts/StickyNotesContext'
+import { StickyNotesProvider, useStickyNotesSummary } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useOrientationTransition } from '../../hooks/useOrientationTransition'
@@ -63,7 +63,7 @@ function OverlayPanels() {
   const memberOpen = useEverTrue(useMemberPanel().isOpen)
   // Notes have no open/closed flag of their own — the layer draws whatever the
   // account has, so having any at all is the trigger.
-  const hasNotes = useEverTrue(useStickyNotesPanel().notes.length > 0)
+  const hasNotes = useEverTrue(useStickyNotesSummary().noteCount > 0)
 
   if (!messagingOpen && !memberOpen && !hasNotes) return null
 
@@ -125,7 +125,7 @@ export function MainLayout() {
     <TutorialProvider>
     {/* Holds the notes, so the FAB can create one and the layer can draw it */}
     <StickyNotesProvider>
-    <div className="min-h-screen flex flex-col bg-ktip-canvas">
+    <div className="min-h-svh flex flex-col bg-ktip-canvas">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-max focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 dark:focus:bg-ktip-ocean-200 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"

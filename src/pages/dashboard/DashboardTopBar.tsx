@@ -41,6 +41,8 @@ export function DashboardTopBar({
   return (
     <div
       aria-hidden={!shown}
+      // Solid ink instead of blurred glass on mobile-lite (index.css).
+      data-lite-solid
       className={cn(
         // --nav-offset, not --nav-h: the navbar auto-hides, and holding its full
         // height while it is off screen leaves this band floating mid-page.
@@ -48,8 +50,10 @@ export function DashboardTopBar({
         // ktip-ink is navy by day and black-black at night, ktip-line is the
         // hairline that turns green in the dark. A literal brand-navy fill
         // here left a navy band hanging under a black navbar.
-        'fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-ktip-line/60 bg-ktip-ink/95 backdrop-blur-md',
-        'transition-[top,opacity,transform] duration-300',
+        'fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-ktip-line/60 bg-ktip-ink/95 backdrop-blur-md [--lite-solid:var(--color-ktip-ink)]',
+        // `translate`, not `transform`: Tailwind's translate-y-* set the
+        // standalone property, so naming transform left the slide untimed.
+        'transition-[top,opacity,translate] duration-300',
         shown ? 'opacity-100 translate-y-0' : 'pointer-events-none -translate-y-2 opacity-0'
       )}
       style={{ height: DASH_BAR_H }}

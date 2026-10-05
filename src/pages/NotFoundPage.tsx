@@ -15,7 +15,7 @@ export default function NotFoundPage() {
         compact
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: '404' }]}
       />
-      <div className="min-h-[40vh] flex items-center justify-center p-4">
+      <div className="min-h-[40svh] flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <div className="w-20 h-20 bg-ktip-ocean-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <MapPinOff size={40} className="text-ktip-ocean-500" />

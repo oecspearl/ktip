@@ -192,7 +192,9 @@ export function ShareEntityModal({
       const titleText = resourceTitle || i18n._(A_LABEL[resourceType])
       const inviterName = displayName()
 
-      for (const user of selected) {
+      // One invitee's steps depend on each other; different invitees' do not.
+      // Run serially, three invitees cost three times the round trips.
+      const inviteOne = async (user: (typeof selected)[number]) => {
         const perm = permissions[user.id] || 'view'
         const permissionLabel = perm === 'edit' ? t`can edit` : t`view only`
 
@@ -235,6 +237,10 @@ export function ShareEntityModal({
           link: '/invitations',
         })
       }
+
+      const results = await Promise.allSettled(selected.map(inviteOne))
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected')
+      if (failed) throw failed.reason
 
       queryClient.invalidateQueries({ queryKey: keys.all('collab-invites') })
       setSuccess(
@@ -361,7 +367,7 @@ export function ShareEntityModal({
               onChange={(e) => handleInput(e.target.value)}
               onFocus={() => { if (results.length > 0) setShowDropdown(true) }}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-              className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+              className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
             />
             {searchLoading && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -390,7 +396,7 @@ export function ShareEntityModal({
                 placeholder="partner@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-3 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="flex-1 px-3 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
               />
               <button
                 type="button"

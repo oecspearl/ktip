@@ -417,12 +417,20 @@ export default function EventDetailPage() {
             )}
 
             {/* Event Image */}
+            {/* Eager, not lazy: it is the same URL the PageHero above
+                requests eagerly at high priority, so this joins that request
+                instead of waiting for a scroll to ask the cache. No 640
+                sibling srcset here on purpose — a narrow DPR-1 screen would
+                pick the sibling and fetch it on top of the original the hero
+                has already downloaded. */}
             {event.image_url && (
               <img
                 src={event.image_url}
                 alt={event.title}
                 className="w-full max-h-96 object-cover rounded mb-6"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 width={800}
                 height={384}
               />

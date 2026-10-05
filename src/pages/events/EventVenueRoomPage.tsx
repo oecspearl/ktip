@@ -170,7 +170,7 @@ export default function EventVenueRoomPage() {
 
   return (
     // pt clears the fixed navbar — see the note on EventVenuePage.
-    <div className="min-h-screen bg-ktip-canvas pb-12 pt-[var(--nav-h)]">
+    <div className="min-h-svh bg-ktip-canvas pb-12 pt-[var(--nav-h)]">
       <VenueTopBar
         eventId={event.id}
         eventSlug={event.slug}

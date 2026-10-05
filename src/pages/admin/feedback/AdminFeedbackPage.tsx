@@ -395,7 +395,7 @@ export default function AdminFeedbackPage() {
   }
 
   const selectClasses =
-    'border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500'
+    'border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500'
 
   return (
     <>
@@ -583,7 +583,7 @@ export default function AdminFeedbackPage() {
               <select
                 value={detailStatus}
                 onChange={(e) => handleStatusChange(e.currentTarget.value as FeedbackStatus)}
-                className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
                 {Object.keys(FEEDBACK_STATUS_LABELS).map((value) => (
                   <option value={value} key={value}>

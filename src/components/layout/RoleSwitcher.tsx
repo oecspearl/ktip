@@ -83,7 +83,7 @@ export function RoleSwitcher({ onSwitch }: RoleSwitcherProps) {
               Falling back to the raw slug when a role is unknown is deliberate:
               a slug on screen is a visible bug, and silently blank is not. */}
           <span className="truncate">{i18n._(ROLE_BY_SLUG[slug]?.label ?? slug)}</span>
-          {auth.activeRole === slug && <Check size={15} className="text-ktip-ocean-600 flex-shrink-0" />}
+          {auth.activeRole === slug && <Check size={15} className="text-ktip-ocean-600 shrink-0" />}
         </button>
       ))}
 

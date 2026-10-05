@@ -88,7 +88,7 @@ export default function MyGrantsPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         <Badge size="sm" variant={isClosed ? 'default' : 'primary'}>
           {isClosed ? t`Closed` : t`Open`}
         </Badge>

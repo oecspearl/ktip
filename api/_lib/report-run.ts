@@ -1,7 +1,9 @@
-import { emailFrom, resendKey } from './email'
-import { escapeHtml, renderEmail, sendEmail } from './email-layout'
-import { composeFactPack, deterministicOutput, fetchRawFactPack } from './report-fact-pack'
-import { REPORT_PROMPT_VERSION, ReportProviderRateLimited, getReportProvider } from './report-provider'
+// `.js` on the relative imports: the report routes run on Node as plain ES
+// modules, which do not guess extensions (see api/cron/monthly-report.ts).
+import { emailFrom, resendKey } from './email.js'
+import { escapeHtml, renderEmail, sendEmail } from './email-layout.js'
+import { composeFactPack, deterministicOutput, fetchRawFactPack } from './report-fact-pack.js'
+import { REPORT_PROMPT_VERSION, ReportProviderRateLimited, getReportProvider } from './report-provider.js'
 import type { KpiReportRow, ReportOutput, ReportPeriodKind } from '../../src/lib/kpi-report-schema'
 
 /**
@@ -70,7 +72,10 @@ export async function runReport(params: RunReportParams): Promise<RunReportResul
   const provider = getReportProvider()
   if (provider) {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 60_000)
+    // Under the routes' 60s maxDuration, with room for the fact pack before
+    // and the upsert after. A slower model falls back to the deterministic
+    // draft below, which a person edits anyway.
+    const timer = setTimeout(() => controller.abort(), 45_000)
     try {
       const draft = await provider.draft(pack, controller.signal)
       output = draft.output
@@ -139,13 +144,19 @@ async function adminEmails(supabaseUrl: string, serviceKey: string): Promise<str
     { headers: rest(serviceKey) }
   ).then((r) => (r.ok ? (r.json() as Promise<Array<{ id: string }>>) : []))
 
+  // In parallel: the lookups are independent, and one slow seat should not
+  // hold up the others. Each failure is caught on its own and drops that seat.
+  const users = await Promise.all(
+    profiles.map(({ id }) =>
+      fetch(`${supabaseUrl}/auth/v1/admin/users/${id}`, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+      })
+        .then((r) => (r.ok ? (r.json() as Promise<any>) : null))
+        .catch(() => null)
+    )
+  )
   const emails: string[] = []
-  for (const { id } of profiles) {
-    const user = await fetch(`${supabaseUrl}/auth/v1/admin/users/${id}`, {
-      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
-    })
-      .then((r) => (r.ok ? (r.json() as Promise<any>) : null))
-      .catch(() => null)
+  for (const user of users) {
     const email = user?.email ?? user?.user?.email
     if (typeof email === 'string' && email.includes('@')) emails.push(email)
   }

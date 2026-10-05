@@ -951,7 +951,7 @@ export function SecuritySettingsTab() {
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder={DELETE_CONFIRMATION_TEXT}
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-none focus:ring-2 focus:border-red-500 focus:ring-red-500/20 focus:bg-ktip-cream"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 transition-all focus:outline-hidden focus:ring-2 focus:border-red-500 focus:ring-red-500/20 focus:bg-ktip-cream"
             />
           </div>
 

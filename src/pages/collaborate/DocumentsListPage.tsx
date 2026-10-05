@@ -56,7 +56,7 @@ export default function DocumentsListPage() {
                 type="text"
                 placeholder={t`Search documents...`}
                 onChange={(e) => debouncedSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 rounded-lg bg-ktip-sand-50/50 focus:bg-ktip-cream focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
               />
             </div>
             <button
@@ -98,7 +98,7 @@ export default function DocumentsListPage() {
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, doc.id)}
-                    className="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    className="icon-hit p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 no-hover:opacity-100"
                     title={t`Delete document`}
                   >
                     <Trash2 size={16} />

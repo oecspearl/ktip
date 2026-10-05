@@ -1,7 +1,15 @@
 import { supabase } from './supabase'
 import { IMAGE_PRESETS } from './constants'
-import { extensionOf, optimizeImage } from './image-optimize'
+import { extensionOf, optimizeImage, resizeToWidth, type OptimizeOptions } from './image-optimize'
 import { checkImage, shouldScanImage } from './moderation/image-gate'
+import { variantKey } from './upload-variants'
+
+/**
+ * An upload preset: how to optimize the original, and which small siblings to
+ * write beside it (widths; see lib/upload-variants.ts). IMAGE_PRESETS in
+ * constants.ts are the instances.
+ */
+export type UploadPreset = OptimizeOptions & { variants?: readonly number[] }
 
 /**
  * Shared Supabase Storage upload helpers.
@@ -52,6 +60,41 @@ export function cacheBust(url: string): string {
 }
 
 /**
+ * Write the preset's small siblings next to an uploaded original.
+ *
+ * Made from the optimized bytes, which have already passed the safety check
+ * by the time this runs, so a sibling can never show what the original was
+ * refused for. Best effort and in parallel: a sibling that fails to write is a
+ * 404 that every consumer falls back from (useUploadVariant), which is no worse
+ * than the image before siblings existed — not a reason to fail an upload that
+ * otherwise landed.
+ *
+ * Same upload options as the original (upsert, default cache-control), so a
+ * replaced avatar replaces its sibling and the shared `?v=` busts both.
+ */
+async function writeVariants(
+  bucket: string,
+  basePath: string,
+  optimized: File,
+  widths: readonly number[],
+  quality: number
+): Promise<void> {
+  await Promise.all(
+    widths.map(async (width) => {
+      try {
+        const sibling = await resizeToWidth(optimized, width, quality)
+        if (!sibling) return
+        await supabase.storage
+          .from(bucket)
+          .upload(variantKey(basePath, width), sibling, { upsert: true, contentType: sibling.type })
+      } catch {
+        // See above: the consumers' fallback covers a missing sibling.
+      }
+    })
+  )
+}
+
+/**
  * Optimize and upload an image to a bucket at a key derived from `basePath`,
  * cleaning up any previous object stored under a different extension.
  * Returns a cache-busted public URL.
@@ -61,7 +104,7 @@ export async function uploadOptimizedImage(params: {
   /** Object key without extension. */
   basePath: string
   file: File
-  preset: { maxDim: number; quality: number; maxBytes?: number }
+  preset: UploadPreset
   /** Run the image safety check. Default on for the buckets it covers. */
   moderate?: boolean
   /** Notified when the upload finishes and the check begins. */
@@ -123,6 +166,12 @@ export async function uploadOptimizedImage(params: {
   }
 
   await removeStaleVariants(bucket, basePath, extension)
+
+  // Awaited, though best effort: the URL returned below is rendered at once,
+  // and a sibling still in flight would be a 404 the fallback has to absorb.
+  if (preset.variants?.length) {
+    await writeVariants(bucket, basePath, optimized, preset.variants, preset.quality)
+  }
 
   const {
     data: { publicUrl },

@@ -117,6 +117,7 @@ async function sentryFetch<T>(
         ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
       },
       body: init?.body ? JSON.stringify(init.body) : undefined,
+      signal: AbortSignal.timeout(8000),
     })
   } catch {
     return { ok: false, status: 502, error: 'Could not reach the Sentry API.' }

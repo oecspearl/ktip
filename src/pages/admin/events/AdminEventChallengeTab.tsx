@@ -250,7 +250,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
               type="datetime-local"
               value={deadline}
               onChange={(e) => setDeadline(e.currentTarget.value)}
-              className="px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+              className="px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
             />
             {deadline && (
               <button
@@ -327,7 +327,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                 <select
                   value={kind}
                   onChange={(e) => setKind(e.currentTarget.value as EventCriterionKind)}
-                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                 >
                   {offeredKinds.map((k) => (
                     <option key={k} value={k}>
@@ -350,7 +350,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                 placeholder={
                   isJudging
                     ? 'e.g. Technical execution'
@@ -373,7 +373,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                 value={description}
                 onChange={(e) => setDescription(e.currentTarget.value)}
                 rows={3}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors resize-none"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors resize-none"
                 placeholder="Detail participants need in order to act on this..."
               />
             </div>
@@ -390,7 +390,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                   step="0.5"
                   value={weight}
                   onChange={(e) => setWeight(e.currentTarget.value)}
-                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                   placeholder="e.g. 30"
                 />
                 <p className="text-xs text-ktip-sand-500 mt-1">
@@ -464,7 +464,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                   >
                     <div className="flex items-start gap-3">
                       {/* Reorder */}
-                      <div className="flex flex-col flex-shrink-0 -my-1">
+                      <div className="flex flex-col shrink-0 -my-1">
                         <button
                           type="button"
                           disabled={index === 0 || reordering}
@@ -509,7 +509,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 no-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
                           onClick={() => startEdit(item)}

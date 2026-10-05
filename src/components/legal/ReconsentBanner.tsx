@@ -1,13 +1,18 @@
-import { useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useState, useSyncExternalStore } from 'react'
 import { ScrollText, X } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
-import { ConsentDocument } from './ConsentDocument'
+// Lazy: this banner is mounted on every page, and ConsentDocument carries the
+// full text of every legal document. It is needed only once the banner is opened.
+const ConsentDocument = lazy(() =>
+  import('./ConsentDocument').then((m) => ({ default: m.ConsentDocument }))
+)
 import { useToast } from '../../contexts/ToastContext'
 import { useConsents, useRecordConsent } from '../../hooks/useAgreementGate'
 import { useAnalyticsConsent } from '../../lib/analytics-consent'
-import { CONSENT_BUNDLES, bundleVersion, type LegalBundle, type LegalDocumentKey } from '../../lib/legal'
+import { CONSENT_BUNDLES, bundleVersion } from '../../lib/legal/manifest'
+import type { LegalBundle, LegalDocumentKey } from '../../lib/legal/types'
 
 /**
  * Tells a member a document they accepted has been re-issued.
@@ -171,7 +176,9 @@ export function ReconsentBanner() {
         description={t`These replace the versions you accepted previously.`}
       >
         <div className="space-y-4">
-          <ConsentDocument bundle="account" onAcceptedChange={setAccepted} dense />
+          <Suspense fallback={<div className="h-40" aria-busy="true" />}>
+            <ConsentDocument bundle="account" onAcceptedChange={setAccepted} dense />
+          </Suspense>
           <div className="flex justify-end gap-3">
             <Button
               variant="secondary"

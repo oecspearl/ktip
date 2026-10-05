@@ -24,6 +24,12 @@ const LIST_KEYS = new Set<keyof ProfileDraft>([
   'languages',
 ])
 
+/**
+ * Which keys hold a JSON object (169). Written through as-is: social_links is
+ * NOT NULL in the database, so "no links" is `{}`, never NULL.
+ */
+const OBJECT_KEYS = new Set<keyof ProfileDraft>(['social_links', 'profile_look'])
+
 export type CommitResult = { ok: true } | { ok: false; errors: Record<string, string> }
 
 export interface ProfileDraftApi {
@@ -123,6 +129,10 @@ export function useProfileDraft(paused: boolean): ProfileDraftApi {
           ] as UserRole[]
         } else if (LIST_KEYS.has(key)) {
           Object.assign(patch, { [key]: draft[key] })
+        } else if (key === 'social_links') {
+          patch.social_links = draft.social_links ?? {}
+        } else if (OBJECT_KEYS.has(key)) {
+          Object.assign(patch, { [key]: draft[key] ?? null })
         } else {
           Object.assign(patch, { [key]: draft[key] || null })
         }

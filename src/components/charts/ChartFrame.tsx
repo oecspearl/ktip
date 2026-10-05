@@ -119,7 +119,7 @@ export function ChartFrame<T>({
       )}
 
       {readable && items.length > 0 && view === 'table' && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scroll-cue-x">
           <table className="w-full text-xs tabular-nums">
             <thead>
               <tr>

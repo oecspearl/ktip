@@ -179,7 +179,9 @@ export default async function handler(request: Request) {
     return settle({ error: 'unverified_alias' }, 403)
   }
 
-  console.log(`[login-alias] success ip=${ip}`)
+  // No IP on a success line: tying a named sign-in to an address is personal
+  // data the logs have no use for. The count of successes is what matters.
+  console.log('[login-alias] success')
 
   return settle(
     {

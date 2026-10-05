@@ -3,6 +3,7 @@ import { i18n, type MessageDescriptor } from '@lingui/core'
 import { msg, t } from '@lingui/core/macro'
 import { COLLABORATION_LEGACY_LABELS, COLLABORATION_OPTIONS, SELECTABLE_ROLES } from './constants'
 import { isSupportedVideoLink, VIDEO_LINK_ERROR } from './video-embed'
+import { SOCIAL_KEYS } from './social-links'
 
 // User Authentication Schemas
 export const loginSchema = z.object({
@@ -340,6 +341,25 @@ export const profileUpdateSchema = z.object({
     .or(z.literal(''))
     .optional(),
   languages: z.array(z.string()).max(12, 'Maximum 12 languages').optional(),
+  // 169. The database holds the same limits (profiles_tagline_length,
+  // profile_social_links_valid); these say which field is wrong before a save
+  // is refused whole.
+  tagline: z.string().max(120, 'Keep the tagline to 120 characters').optional(),
+  social_links: z
+    .partialRecord(
+      z.enum(SOCIAL_KEYS),
+      z.string().max(300).startsWith('https://', 'Links must start with https://')
+    )
+    .optional(),
+  profile_look: z
+    .object({
+      photo: z.enum(['color', 'bw']),
+      tone: z.enum(['mono', 'colour']),
+      accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      align: z.enum(['auto', 'left', 'center', 'right']),
+    })
+    .nullable()
+    .optional(),
 })
 
 // Change Password Schema

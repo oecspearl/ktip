@@ -155,13 +155,18 @@ export function useReorderCriteria() {
         .map((c, index) => ({ c, index }))
         .filter(({ c, index }) => c.sort_order !== index)
 
-      for (const { c, index } of changed) {
-        const { error } = await supabase
-          .from('event_criteria')
-          .update({ sort_order: index } as any)
-          .eq('id', c.id)
-        if (error) throw error
-      }
+      // Each row's write is independent, so they go out together rather than
+      // paying one round trip per row moved.
+      const results = await Promise.all(
+        changed.map(({ c, index }) =>
+          supabase
+            .from('event_criteria')
+            .update({ sort_order: index } as any)
+            .eq('id', c.id)
+        )
+      )
+      const failed = results.find((r) => r.error)
+      if (failed?.error) throw failed.error
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({

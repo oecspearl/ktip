@@ -1,6 +1,7 @@
 import {
   useState,
   useEffect,
+  useLayoutEffect,
   useRef,
   type ClipboardEvent,
   type DragEvent,
@@ -44,7 +45,7 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   // The query cache is the single source of truth: realtime INSERTs and our
   // own sends both land there (useRealtimeMessages / useSendMessage), so a
   // local mirror only produced duplicate state updates per incoming message.
-  const { messages } = useMessages(conversationId)
+  const { messages, hasOlder, loadOlder, loadingOlder } = useMessages(conversationId)
   const { sendMessage, loading } = useSendMessage()
   const { markRead } = useMarkConversationRead(auth.user?.id)
 
@@ -58,6 +59,15 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   // parent, and a boolean flickers the overlay off on every inner element.
   const [dragDepth, setDragDepth] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const topSentinelRef = useRef<HTMLDivElement | null>(null)
+  // Whether the reader is at (or near) the newest message. Only then does a
+  // new arrival scroll the thread; someone reading back stays where they are.
+  const atBottomRef = useRef(true)
+  // Set while an older page is being prepended, so the reader's place can be
+  // held instead of the content jumping down by a page.
+  const restoreRef = useRef<{ height: number; top: number } | null>(null)
+  const lastIdRef = useRef<{ conversationId: string; id: string } | null>(null)
   // Held so the emoji picker can insert at the caret rather than on the end.
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -66,23 +76,84 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
   useRealtimeMessages(conversationId)
 
   // Looking at the thread is what clears its share of the FAB dot. Keyed on the
-  // message count as well as the id, so a message that lands while the thread is
-  // already open does not relight the dot behind the panel.
+  // newest message from someone else, so a message that lands while the thread
+  // is open does not relight the dot behind the panel — and neither our own
+  // sends nor loading older pages costs another mark-read round trip.
+  const lastIncomingId = (() => {
+    if (!messages) return undefined
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender_id !== auth.user?.id) return messages[i].id
+    }
+    return undefined
+  })()
   useEffect(() => {
     if (!auth.user) return
     markRead(conversationId).catch((err) => {
       console.error('Failed to mark conversation read:', err)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId, messages?.length, auth.user?.id])
+  }, [conversationId, lastIncomingId, auth.user?.id])
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, 50)
-    return () => clearTimeout(timeout)
+  const onScroll = () => {
+    const el = scrollRef.current
+    if (!el) return
+    atBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80
+  }
+
+  const showOlder = () => {
+    const el = scrollRef.current
+    if (!el || !hasOlder || loadingOlder) return
+    restoreRef.current = { height: el.scrollHeight, top: el.scrollTop }
+    loadOlder().catch(() => {
+      restoreRef.current = null
+    })
+  }
+
+  // Holds the reader's place when an older page lands above them. Before
+  // paint, so the jump is never visible.
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    const restore = restoreRef.current
+    if (!el || !restore) return
+    restoreRef.current = null
+    el.scrollTop = el.scrollHeight - restore.height + restore.top
   }, [messages])
+
+  // Follow new messages. Keyed on the newest message rather than the whole
+  // list, so prepending an older page never scrolls. Opening a thread jumps
+  // straight to the end; after that a new message scrolls smoothly, and only
+  // if the reader was already at the bottom or sent it themselves.
+  const newest = messages?.[messages.length - 1]
+  useEffect(() => {
+    if (!newest) return
+    const previous = lastIdRef.current
+    lastIdRef.current = { conversationId, id: newest.id }
+    if (previous?.conversationId === conversationId && previous.id === newest.id) return
+    const opening = previous?.conversationId !== conversationId
+    if (!opening && !atBottomRef.current && newest.sender_id !== auth.user?.id) return
+    const frame = requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: opening ? 'auto' : 'smooth', block: 'end' })
+      atBottomRef.current = true
+    })
+    return () => cancelAnimationFrame(frame)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, newest?.id])
+
+  // Scrolling up to the top sentinel fetches the page before it.
+  useEffect(() => {
+    const root = scrollRef.current
+    const target = topSentinelRef.current
+    if (!root || !target || !hasOlder || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) showOlder()
+      },
+      { root, rootMargin: '200px 0px 0px 0px' }
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasOlder, loadingOlder, conversationId])
 
   // Switching threads must not carry a staged file into a different
   // conversation — the note it belonged to is no longer on screen.
@@ -250,7 +321,19 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-ktip-canvas">
+      <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto p-4 bg-ktip-canvas">
+        {hasOlder && (
+          <div ref={topSentinelRef} className="flex justify-center pb-3">
+            <button
+              type="button"
+              onClick={showOlder}
+              disabled={loadingOlder}
+              className="text-xs font-medium text-ktip-ocean-600 hover:underline disabled:opacity-60 disabled:no-underline"
+            >
+              {loadingOlder ? <Trans>Loading earlier messages…</Trans> : <Trans>Show earlier messages</Trans>}
+            </button>
+          </div>
+        )}
         {messages?.length ? (
           messages.map((message) => (
             <MessageBubble
@@ -333,7 +416,8 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
             onPaste={handlePaste}
             placeholder={staged.length > 0 ? t`Add a note to these files…` : t`Type a message...`}
             rows={1}
-            className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
+            // 16px on touch: iOS zooms the page into any smaller field on focus.
+            className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm pointer-coarse:text-body"
           />
           <Button
             type="submit"

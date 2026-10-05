@@ -42,9 +42,9 @@ export function StudentVerificationCard() {
         }`}
       >
         {isStudent ? (
-          <BadgeCheck size={20} className="mt-0.5 flex-shrink-0" />
+          <BadgeCheck size={20} className="mt-0.5 shrink-0" />
         ) : (
-          <Clock size={20} className="mt-0.5 flex-shrink-0" />
+          <Clock size={20} className="mt-0.5 shrink-0" />
         )}
         <div>
           <p className="font-medium">
@@ -60,7 +60,7 @@ export function StudentVerificationCard() {
 
       {isStudent && (
         <div className="mt-4 flex items-start gap-2.5 p-3 rounded-xl bg-ktip-sand-50 border border-ktip-sand-200">
-          <ShieldCheck size={16} className="text-ktip-tropical-600 mt-0.5 flex-shrink-0" />
+          <ShieldCheck size={16} className="text-ktip-tropical-600 mt-0.5 shrink-0" />
           <p className="text-xs text-ktip-sand-700">
             <Trans>Student accounts have safeguards that cannot be turned off: direct messages are limited to supervised group channels with a designated educator, and awarded funds are administered by your institution rather than by you.</Trans>
           </p>

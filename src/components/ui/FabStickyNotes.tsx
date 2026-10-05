@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { StickyNote } from 'lucide-react'
-import { useStickyNotesPanel } from '../../contexts/StickyNotesContext'
+import { useStickyNotesSummary } from '../../contexts/StickyNotesContext'
 import { GhostOpacityControl } from './GhostOpacityControl'
 import type { FabAction } from './FabCluster'
 import { lazyOverlay } from '../../lib/lazy-overlay'
@@ -36,7 +36,7 @@ const StickyNoteOverlay = lazyOverlay(
  * Mount exactly once. Two instances would draw every note twice.
  */
 export function FabStickyNotes() {
-  const { fabPanelOpen } = useStickyNotesPanel()
+  const { fabPanelOpen } = useStickyNotesSummary()
 
   return (
     <Suspense fallback={null}>
@@ -58,7 +58,7 @@ export function useStickyNoteFabAction({
   onActivate,
 }: { iconSize?: number; onActivate?: () => void } = {}): FabAction {
   const { t } = useLingui()
-  const { notes, fabPanelOpen, setFabPanelOpen } = useStickyNotesPanel()
+  const { noteCount, fabPanelOpen, setFabPanelOpen } = useStickyNotesSummary()
 
   return {
     id: 'note',
@@ -69,8 +69,8 @@ export function useStickyNoteFabAction({
       setFabPanelOpen(!fabPanelOpen)
       onActivate?.()
     },
-    badge: notes.length > 0,
-    count: notes.length,
+    badge: noteCount > 0,
+    count: noteCount,
   }
 }
 

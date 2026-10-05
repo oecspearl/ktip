@@ -330,13 +330,13 @@ export default function AdminUsersPage() {
                 setSearchQuery(e.currentTarget.value)
                 debouncedSetSearch(e.currentTarget.value)
               }}
-              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
           >
             <option value="">All Roles</option>
             {ALL_ROLES.map((role) => (
@@ -346,7 +346,7 @@ export default function AdminUsersPage() {
           <select
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
           >
             <option value="">All Status</option>
             <option value="true">Verified</option>
@@ -392,7 +392,7 @@ export default function AdminUsersPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-cue-x">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ktip-sand-200">
@@ -462,14 +462,15 @@ export default function AdminUsersPage() {
                       )}
                     </td>
 
-                    {/* Actions */}
+                    {/* Actions. Spaced out on touch so the 44px hit areas
+                        (icon-hit) do not reach over each other's icons. */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1 pointer-coarse:gap-3">
                         {canEditRolesOf(user) && (
                           <button
                             type="button"
                             onClick={() => openEditRoles(user)}
-                            className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-ocean-600 transition-colors"
                             title="Edit roles"
                           >
                             <Edit size={16} />
@@ -482,7 +483,7 @@ export default function AdminUsersPage() {
                               id: user.id,
                               name: user.display_name || 'this user',
                             })}
-                            className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-sun-600 transition-colors"
                             title="Reset password"
                           >
                             <KeyRound size={16} />
@@ -495,7 +496,7 @@ export default function AdminUsersPage() {
                               userId: user.id,
                               userName: user.display_name || 'this user',
                             })}
-                            className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-sun-600 transition-colors"
                             title="Reset two-step verification"
                           >
                             <SmartphoneNfc size={16} />
@@ -509,7 +510,7 @@ export default function AdminUsersPage() {
                               userName: user.display_name || 'this user',
                               newVerified: false,
                             })}
-                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-red-600 transition-colors"
                             title="Unverify user"
                           >
                             <ShieldX size={16} />
@@ -522,7 +523,7 @@ export default function AdminUsersPage() {
                               userName: user.display_name || 'this user',
                               newVerified: true,
                             })}
-                            className="p-1.5 text-gray-400 hover:text-ktip-tropical-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-tropical-600 transition-colors"
                             title="Verify user"
                           >
                             <ShieldCheck size={16} />
@@ -539,7 +540,7 @@ export default function AdminUsersPage() {
                                 suspend: !user.is_suspended,
                               })
                             }}
-                            className={`p-1.5 text-gray-400 transition-colors ${
+                            className={`icon-hit p-1.5 text-gray-400 transition-colors ${
                               user.is_suspended ? 'hover:text-ktip-tropical-600' : 'hover:text-red-600'
                             }`}
                             title={user.is_suspended ? 'Reinstate user' : 'Suspend user'}
@@ -554,7 +555,7 @@ export default function AdminUsersPage() {
                               userId: user.id,
                               userName: user.display_name || 'this user',
                             })}
-                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-red-600 transition-colors"
                             title="Delete user"
                           >
                             <Trash2 size={16} />
@@ -592,7 +593,7 @@ export default function AdminUsersPage() {
               value={newEmail}
               onChange={(e) => setNewEmail(e.currentTarget.value)}
               placeholder="user@example.com"
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <div>
@@ -602,7 +603,7 @@ export default function AdminUsersPage() {
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.currentTarget.value)}
               placeholder="John Doe"
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <div>
@@ -613,7 +614,7 @@ export default function AdminUsersPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.currentTarget.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
               <button
                 type="button"
@@ -695,7 +696,7 @@ export default function AdminUsersPage() {
                 value={resetNewPassword}
                 onChange={(e) => setResetNewPassword(e.currentTarget.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
               <button
                 type="button"
@@ -832,7 +833,7 @@ export default function AdminUsersPage() {
                 rows={3}
                 maxLength={500}
                 placeholder="Recorded on the account for other administrators"
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
             </div>
           )}

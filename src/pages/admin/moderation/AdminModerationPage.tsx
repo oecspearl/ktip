@@ -253,7 +253,7 @@ export default function AdminModerationPage() {
       />
 
       <div className="relative border-b border-ktip-sand-200 mb-6" role="tablist" aria-label="Moderation">
-        <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
+        <nav className="flex gap-1 -mb-px overflow-x-auto scroll-cue-x scrollbar-hide">
           {tabs.map((tab) => (
             <button
               type="button"
@@ -261,7 +261,7 @@ export default function AdminModerationPage() {
               aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
+                'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0',
                 activeTab === tab.id
                   ? 'border-ktip-ocean-500 text-ktip-ocean-600'
                   : 'border-transparent text-ktip-sand-500 hover:text-ktip-sand-700 hover:border-ktip-sand-300'
@@ -284,7 +284,7 @@ export default function AdminModerationPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                  className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
                 >
                   <option value="">All statuses</option>
                   <option value="open">Open</option>
@@ -295,7 +295,7 @@ export default function AdminModerationPage() {
                 <select
                   value={severityFilter}
                   onChange={(e) => setSeverityFilter(e.target.value)}
-                  className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                  className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
                 >
                   <option value="">All severities</option>
                   <option value="high">High</option>
@@ -385,7 +385,7 @@ export default function AdminModerationPage() {
                 the content after the fact instead of preventing it. */}
             {browserBlindTerms > 0 && (
               <div className="px-4 py-3 border-b border-ktip-sand-100 bg-ktip-sun-50 flex items-start gap-2.5">
-                <ShieldAlert size={16} className="text-ktip-sun-700 mt-0.5 flex-shrink-0" />
+                <ShieldAlert size={16} className="text-ktip-sun-700 mt-0.5 shrink-0" />
                 <p className="text-xs text-ktip-sun-800">
                   {browserBlindTerms} {browserBlindTerms === 1 ? 'rule uses' : 'rules use'} syntax the
                   browser cannot run. They still quarantine on posting, but they are not highlighted
@@ -394,7 +394,7 @@ export default function AdminModerationPage() {
               </div>
             )}
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scroll-cue-x">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-ktip-sand-100">
@@ -555,7 +555,7 @@ export default function AdminModerationPage() {
             {saving && <p className="text-xs text-ktip-sand-500">Saving…</p>}
 
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-ktip-sand-50 border border-ktip-sand-200">
-              <AlertOctagon size={16} className="text-ktip-sand-500 mt-0.5 flex-shrink-0" />
+              <AlertOctagon size={16} className="text-ktip-sand-500 mt-0.5 shrink-0" />
               <p className="text-xs text-ktip-sand-700">
                 The severity matrix itself is fixed: low warns the author, medium quarantines the
                 content, and high also suspends the account and escalates to safety administrators
@@ -696,7 +696,7 @@ export default function AdminModerationPage() {
               <select
                 value={newTerm.kind}
                 onChange={(e) => setNewTerm({ ...newTerm, kind: e.target.value as 'term' | 'regex' })}
-                className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
                 <option value="term">Term</option>
                 <option value="regex">Regex</option>
@@ -707,7 +707,7 @@ export default function AdminModerationPage() {
               <select
                 value={newTerm.severity}
                 onChange={(e) => setNewTerm({ ...newTerm, severity: e.target.value as ModerationSeverity })}
-                className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
               >
                 <option value="low">Low — warn the author</option>
                 <option value="medium">Medium — quarantine</option>
@@ -721,7 +721,7 @@ export default function AdminModerationPage() {
             <select
               value={newTerm.category}
               onChange={(e) => setNewTerm({ ...newTerm, category: e.target.value })}
-              className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+              className="w-full border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
             >
               <option value="">Unspecified</option>
               {REPORT_CATEGORIES.map((c) => (

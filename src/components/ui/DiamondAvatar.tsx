@@ -1,5 +1,15 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { cn, generateAvatarColor, getInitials } from '../../lib/utils'
+import { useUploadVariant } from '../../hooks/useUploadVariant'
+import { AVATAR_VARIANT_WIDTH } from '../../lib/upload-variants'
+
+/**
+ * Largest footprint that draws from the 128px sibling instead of the 512px
+ * original. The photo paints at ~1.03× the footprint (the inner layer is
+ * overscanned, see `.dm-*` in index.css), so 48 asks ~148 device px of a DPR-3
+ * phone — near enough to 128 that a face holds. Above it, the original.
+ */
+const VARIANT_MAX_SIZE = 48
 
 interface DiamondAvatarProps {
   /** Photo URL. Falls back to initials when absent. */
@@ -59,6 +69,9 @@ export function DiamondAvatar({
   const side = size / 1.414
   const style = { '--s': `${side}px` } as CSSProperties
   const interactive = !!onClick || !!overlay
+  // Lists of 20–50 avatars each fetched the full 512px upload. Uploads without
+  // a sibling yet fall back to the original on their first 404.
+  const photo = useUploadVariant(src, size <= VARIANT_MAX_SIZE ? { width: AVATAR_VARIANT_WIDTH } : null)
 
   const frame = (
     <div
@@ -73,10 +86,11 @@ export function DiamondAvatar({
       {src ? (
         <img
           className="dm-inner"
-          src={src}
+          src={photo.src}
           alt={name}
           loading="lazy"
           decoding="async"
+          onError={photo.onError}
         />
       ) : icon ? (
         <span className="dm-inner text-white" aria-hidden="true">

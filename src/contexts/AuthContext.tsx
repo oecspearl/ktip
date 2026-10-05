@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { callOptionalRpc, isRpcAbsent } from '../lib/optional-rpc'
 import { purgeSupabaseResponseCache } from '../lib/service-worker'
 import { keys } from '../queries/keys'
 import {
@@ -206,11 +207,54 @@ async function fetchProfileQuery(userId: string, userData?: User | null): Promis
   return data as Profile
 }
 
+/** What get_session_bootstrap (164) returns. */
+interface SessionBootstrap {
+  profile: Profile | null
+  permissions: PermissionKey[]
+  consents: unknown[]
+}
+
+const BOOTSTRAP_RPC = 'get_session_bootstrap'
+
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const queryClient = useQueryClient()
+
+  // The housekeeping effects below (minor, consent, MFA enrolment) run once
+  // per account. When the bootstrap has already run them server-side, they
+  // are marked done here before they get the chance.
+  const minorCheckedFor = useRef<string | null>(null)
+  const consentCheckedFor = useRef<string | null>(null)
+  const mfaCheckedFor = useRef<string | null>(null)
+
+  // With 164 applied the profile query is the whole session bootstrap: one
+  // call returns the profile (already corrected by the housekeeping RPCs),
+  // the permission set and the consents, and the other two query keys are
+  // seeded from it. Without 164 it is the old select, and the permission and
+  // consent queries fetch for themselves.
+  const fetchProfileOrBootstrap = async (uid: string): Promise<Profile | null> => {
+    let boot: SessionBootstrap | null | undefined
+    try {
+      boot = await callOptionalRpc<SessionBootstrap | null>(BOOTSTRAP_RPC)
+    } catch {
+      boot = undefined
+    }
+    if (boot?.profile) {
+      queryClient.setQueryData(['permissions', uid], boot.permissions ?? [])
+      queryClient.setQueryData(['consents', uid], boot.consents ?? [])
+      minorCheckedFor.current = uid
+      consentCheckedFor.current = uid
+      mfaCheckedFor.current = uid
+      return boot.profile
+    }
+    return fetchProfileQuery(uid, user)
+  }
+
+  // Until the bootstrap has answered (or is known not to exist here), the two
+  // seeded queries wait for it instead of racing it with requests of their own.
+  const bootstrapExpected = !isRpcAbsent(BOOTSTRAP_RPC)
 
   const {
     data: profileData,
@@ -218,7 +262,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     isPending: profilePending,
   } = useQuery({
     queryKey: ['profile', user?.id],
-    queryFn: () => fetchProfileQuery(user!.id, user),
+    queryFn: () => fetchProfileOrBootstrap(user!.id),
     enabled: !!user?.id,
     // One retry, not three.
     //
@@ -252,7 +296,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       if (error) throw error
       return (data as PermissionKey[]) || []
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !(bootstrapExpected && profilePending),
     retry: 1,
   })
 
@@ -264,7 +308,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   //
   // Failure is ignored on purpose. This is a UI hint; every check that has to be
   // right calls account_is_minor() server-side and never reads this column.
-  const minorCheckedFor = useRef<string | null>(null)
   useEffect(() => {
     const id = user?.id
     if (!id || profileLoading || minorCheckedFor.current === id) return
@@ -296,7 +339,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       if (error) throw error
       return data ?? []
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !(bootstrapExpected && profilePending),
     staleTime: Infinity,
     retry: 1,
   })
@@ -306,7 +349,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // recomputes profiles.requires_consent against whatever is currently in
   // force. Failure is ignored — the gate is enforced by RLS and by the
   // publishing check, never by this cached flag alone.
-  const consentCheckedFor = useRef<string | null>(null)
   useEffect(() => {
     const id = user?.id
     if (!id || profileLoading || consentCheckedFor.current === id) return
@@ -337,7 +379,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Failure is ignored on purpose, exactly as the minor check above: the column
   // is a UI hint, and everything that has to be right calls
   // account_mfa_satisfied() server-side.
-  const mfaCheckedFor = useRef<string | null>(null)
   useEffect(() => {
     const id = user?.id
     if (!id || profileLoading || mfaCheckedFor.current === id) return

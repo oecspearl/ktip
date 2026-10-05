@@ -3,12 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../i18n/LanguageContext'
-import {
-  CONSENT_BUNDLES,
-  bundleVersion,
-  type LegalBundle,
-  type LegalDocumentKey,
-} from '../lib/legal'
+// The manifest, not the index: this hook runs on every page, and the index
+// carries every document's full text.
+import { CONSENT_BUNDLES, bundleVersion } from '../lib/legal/manifest'
+import type { LegalBundle, LegalDocumentKey } from '../lib/legal/types'
 
 /** One row of get_my_consents() — the register joined against what you accepted. */
 export interface ConsentRow {

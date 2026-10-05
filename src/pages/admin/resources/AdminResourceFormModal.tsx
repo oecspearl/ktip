@@ -156,7 +156,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
           fullWidth
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Type */}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-ktip-sand-700">Type</label>
@@ -196,7 +196,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
           max={10}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="Download URL"
             value={downloadUrl}

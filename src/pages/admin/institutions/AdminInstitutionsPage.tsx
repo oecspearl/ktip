@@ -165,7 +165,7 @@ export default function AdminInstitutionsPage() {
           <select
             value={kindFilter}
             onChange={(e) => setKindFilter(e.target.value as InstitutionKind | '')}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All kinds</option>
             {Object.entries(KIND_LABELS).map(([value, label]) => (
@@ -177,7 +177,7 @@ export default function AdminInstitutionsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as InstitutionStatus | '')}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
@@ -242,7 +242,7 @@ export default function AdminInstitutionsPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2 shrink-0">
                   {institution.status === 'verified' && institution.kind !== 'chamber' && (
                     <>
                       <Button
@@ -374,7 +374,7 @@ export default function AdminInstitutionsPage() {
                 <select
                   value={rosterRole}
                   onChange={(e) => setRosterRole(e.target.value as 'student' | 'educator')}
-                  className="border border-ktip-sand-200 rounded-lg px-3 py-1.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                  className="border border-ktip-sand-200 rounded-lg px-3 py-1.5 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
                 >
                   <option value="student">students</option>
                   <option value="educator">educators (Faculty role)</option>
@@ -442,7 +442,7 @@ export default function AdminInstitutionsPage() {
                     Requested {member.role} · {formatDate(member.created_at)}
                   </p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="sm"

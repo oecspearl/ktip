@@ -130,7 +130,7 @@ export function ConsentDocument({
         aria-label={t`Agreement text`}
         className={cn(
           'overflow-y-auto rounded-surface border border-ktip-sand-200 bg-ktip-cream p-5',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500/40',
+          'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500/40',
           dense ? 'max-h-[48svh]' : 'max-h-[60svh]'
         )}
       >
@@ -147,7 +147,7 @@ export function ConsentDocument({
           ref={sentinelRef}
           tabIndex={-1}
           onFocus={() => setReachedEnd(true)}
-          className="mt-8 border-t border-ktip-sand-200 pt-4 focus:outline-none"
+          className="mt-8 border-t border-ktip-sand-200 pt-4 focus:outline-hidden"
         >
           <p className="text-caption text-ktip-sand-500">
             <Trans>You have reached the end of the agreement.</Trans>

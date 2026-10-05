@@ -198,7 +198,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
               type="text"
               value={title}
               onChange={(e) => setTitle(e.currentTarget.value)}
-              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               placeholder="e.g. Opening Keynote, Lunch Break..."
             />
             {errors.title && (
@@ -213,7 +213,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
               value={description}
               onChange={(e) => setDescription(e.currentTarget.value)}
               rows={3}
-              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors resize-none"
+              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors resize-none"
               placeholder="Optional description or details..."
             />
           </div>
@@ -228,7 +228,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                 type="datetime-local"
                 value={startTime}
                 onChange={(e) => setStartTime(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               />
               {errors.start_time && (
                 <p className="text-xs text-red-500 mt-1">{errors.start_time}</p>
@@ -240,7 +240,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                 type="datetime-local"
                 value={endTime}
                 onChange={(e) => setEndTime(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               />
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                 <select
                   value={roomId}
                   onChange={(e) => setRoomId(e.currentTarget.value)}
-                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                 >
                   <option value="">No room</option>
                   {rooms.map((room) => (
@@ -275,7 +275,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.currentTarget.value)}
-                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                   placeholder="e.g. Main Hall, Room A..."
                 />
               </div>
@@ -285,7 +285,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
               <select
                 value={speakerId}
                 onChange={(e) => setSpeakerId(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               >
                 <option value="">No speaker</option>
                 {(speakers || []).map((speaker) => (
@@ -298,7 +298,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
               <select
                 value={scheduleType}
                 onChange={(e) => setScheduleType(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               >
                 <option value="session">Session</option>
                 <option value="break">Break</option>
@@ -350,7 +350,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                   }`}
                 >
                   {/* Time column */}
-                  <div className="sm:w-[6.5rem] flex-shrink-0 flex flex-col items-start sm:items-end sm:text-right">
+                  <div className="sm:w-[6.5rem] shrink-0 flex flex-col items-start sm:items-end sm:text-right">
                     <span className="text-sm font-semibold text-ktip-sand-900">
                       {formatTime(item.start_time)}
                     </span>
@@ -367,7 +367,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                   {/* Timeline dot */}
                   <div className="hidden sm:flex items-start pt-1.5">
                     <div
-                      className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${
+                      className={`w-3 h-3 rounded-full border-2 shrink-0 ${
                         isBreak
                           ? 'bg-ktip-sand-300 border-ktip-sand-400'
                           : 'bg-ktip-ocean-500 border-ktip-ocean-600'
@@ -420,7 +420,7 @@ export default function AdminEventScheduleTab({ eventId }: AdminEventScheduleTab
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           type="button"
                           onClick={() => startEdit(item)}

@@ -172,7 +172,7 @@ export function ChatSidebar({
             onChange={(e) => setSearch(e.currentTarget.value)}
             placeholder={tab === 'chats' ? t`Search chats...` : t`Search contacts...`}
             aria-label={tab === 'chats' ? t`Search chats` : t`Search contacts`}
-            className="w-full pl-8 pr-3 py-1.5 text-sm border border-ktip-sand-200 bg-ktip-sand-50 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            className="w-full pl-8 pr-3 py-1.5 text-sm border border-ktip-sand-200 bg-ktip-sand-50 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
           />
         </div>
       </div>

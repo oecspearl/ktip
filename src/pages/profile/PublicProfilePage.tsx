@@ -1,13 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
-import {
-  Camera,
-  FileText,
-  Flag,
-  MessageSquare,
-  Pencil,
-  Trophy,
-} from 'lucide-react'
+import { Camera, FileText, Mail, Pencil, Trophy } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { ConnectButton } from '../../components/directory/ConnectButton'
 import { useProfileId, useProfileView, useUserProjects, useUserEvents } from '../../hooks/useProfile'
@@ -25,11 +18,11 @@ import { isOrganizationAccount } from '../../lib/permissions'
 import { canDmAcrossAges } from '../../lib/minor-safety'
 import { useEmployerForUser, useEmployerPortfolio } from '../../hooks/useEmployerProfile'
 import { Trans, useLingui } from '@lingui/react/macro'
-import { heroButton } from '../../components/profile/PortraitHero'
-// Still the opener for the not-found branch; the member page itself uses PortraitHero.
+// Still the opener for the not-found branch; the member page itself is ProfileCanvas.
 import { PageHero } from '../../components/layout/PageHero'
-import { cn } from '../../lib/utils'
-import { ProfileCanvas } from '../../components/profile/ProfileCanvas'
+import { ProfileCanvas, type ExperienceRow } from '../../components/profile/ProfileCanvas'
+import { hiddenSections, PROFILE_SECTIONS } from '../../lib/profile-visibility'
+import type { ProfileSectionKey } from '../../types'
 
 /** How many unearned badges the shelf teases under the earned ones. */
 const LOCKED_PREVIEW = 4
@@ -48,14 +41,10 @@ const LOCKED_PREVIEW = 4
  * Points and rank come from get_profile_stats(), which returns nothing for a
  * suspended account and hides the streak from everyone but its owner.
  *
- * Layout is two columns above `lg`: a sticky rail holding the static "who"
- * (the identity plate, bio, details, skills, employer) and a scrolling column
- * holding the earned "what" (standing, trophies, projects, events). Above both,
- * PortraitHero opens with the member's cut-out portrait (148) — or their photo
- * in a diamond — and on desktop that portrait settles into the rail's diamond
- * as the page scrolls. Below `lg` the rail stacks above the
- * content. The single narrow column it replaced left half of a widescreen
- * empty and gave six identical bordered cards nothing to be measured against.
+ * The layout is ProfileCanvas's editorial page: the member's portrait (their
+ * cut-out on the backdrop they chose, 148) beside their name, then Overview,
+ * Projects, Events and Achievements tabs. The member picks the look —
+ * colour or black & white, an accent, where the portrait stands (169).
  */
 export default function PublicProfilePage() {
     const { t } = useLingui()
@@ -68,23 +57,24 @@ export default function PublicProfilePage() {
   useCanonicalSlug(routeParam, id ? { id, slug: username } : null)
   const auth = useAuth()
   const { openPanel } = useMessagingPanel()
-  // The hero's portrait flies into the rail's diamond on scroll; both ends are
-  // measured live, so the hero only needs the elements.
-  const railRef = useRef<HTMLDivElement>(null)
-  const dockRef = useRef<HTMLDivElement>(null)
   const trackFlag = useTrackFlag()
 
   const { view: profile, canView, loading: viewLoading } = useProfileView(id)
   const loading = resolvingId || viewLoading
-  // Everything below the teaser hangs off this. Passing undefined disables
-  // the query outright, so a gated page makes one request, not nine.
-  const detailId = canView ? id : undefined
+  // Everything below the teaser hangs off this, one section at a time (162).
+  // Passing undefined disables a query outright, so a closed section costs no
+  // request — and nothing is asked until the view has said what is closed.
+  const hidden = hiddenSections(profile)
+  const idFor = (...sections: ProfileSectionKey[]) =>
+    profile && sections.some((section) => !hidden.has(section)) ? id : undefined
 
-  const { projects } = useUserProjects(detailId)
-  const { events } = useUserEvents(detailId)
-  const { badges } = useUserBadges(detailId)
-  const { count: connectionCount } = useConnectionCount(detailId)
-  const { stats } = useProfileStats(detailId)
+  const { projects } = useUserProjects(idFor('projects'))
+  const { events } = useUserEvents(idFor('events'))
+  const { badges } = useUserBadges(idFor('achievements'))
+  const { count: connectionCount } = useConnectionCount(idFor('standing'))
+  // Feeds both the meter and the shelf's pinned order; the server leaves out
+  // whichever half this viewer may not see.
+  const { stats } = useProfileStats(idFor('standing', 'achievements'))
   const { assetMap } = useTrophyAssets()
   // The whole catalogue, for the "Locked" teaser under the trophy shelf. It is
   // a small, static list cached under one key across the app, so this costs a
@@ -92,12 +82,12 @@ export default function PublicProfilePage() {
   const { badges: allBadges } = useAllBadges()
   // The business this member belongs to, if it has been Chamber-verified.
   // profiles.organization is free text and links nowhere; this is the entity.
-  const { employer } = useEmployerForUser(detailId)
+  const { employer } = useEmployerForUser(idFor('organisation'))
   const { items: portfolio } = useEmployerPortfolio(employer?.id)
   // The published CV was orphaned: /user/:id/cv existed and nothing linked to it.
   // public_resume() returns nothing unless it is published, so this both
   // decides whether to show the link and guarantees it goes somewhere.
-  const { data: publicResume } = usePublicResume(detailId)
+  const { data: publicResume } = usePublicResume(idFor('cv'))
   // Drives the copy on the private panel: "request sent" is a different thing
   // to say than "send a request", and the button already knows which it is.
   const { state: connectionState } = useConnectionStatus(auth.user?.id, id)
@@ -116,22 +106,20 @@ export default function PublicProfilePage() {
 
   // Powers the 'explorer' hidden achievement. Viewing your own page does not
   // count — that would be a free badge for reloading. Neither does bouncing
-  // off a private one: there is nothing there to have explored.
+  // off one with every section closed: there is nothing there to have explored.
+  const anythingToSee = !!profile && hidden.size < PROFILE_SECTIONS.length
   useEffect(() => {
-    if (id && auth.user?.id && id !== auth.user.id && canView) trackFlag('directory_views')
-  }, [id, auth.user?.id, canView, trackFlag])
+    if (id && auth.user?.id && id !== auth.user.id && anythingToSee) trackFlag('directory_views')
+  }, [id, auth.user?.id, anythingToSee, trackFlag])
 
   if (loading) {
     return (
-      <>
-        {/* Hero-band placeholder so the fixed white-text navbar has a dark
-            band under it while the profile loads (same fix as the hero). */}
-        <div className="bg-hero-base min-h-hero-band-compact" />
-        <div className="mx-auto max-w-page-mid space-y-4 px-4 py-8">
-          <div className="h-40 animate-pulse-soft rounded-surface-lg bg-ktip-sand-100" />
-          <div className="h-64 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
-        </div>
-      </>
+      // The navbar is solid over member pages, so the placeholder is the page's
+      // own shape: the hero panel, then the tab row.
+      <div className="mx-auto max-w-page-mid space-y-4 px-4 pb-8 pt-[calc(var(--nav-h)+1.5rem)]">
+        <div className="h-[32rem] animate-pulse-soft rounded-surface-lg bg-ktip-sand-100" />
+        <div className="h-14 w-80 max-w-full animate-pulse-soft rounded-surface bg-ktip-sand-100" />
+      </div>
     )
   }
 
@@ -173,41 +161,43 @@ export default function PublicProfilePage() {
         ? t`${displayName} has asked to connect with you. Accept and you will both see each other's full profile.`
         : t`Only ${displayName}'s connections can see their full profile or send them a message. Send a connection request to ask.`
 
+  const partialProfileMessage = t`Some of ${displayName}'s profile is for their connections only.`
+
+  // canView is still the master switch (083), and so still the messaging
+  // rule: opening a section of a private profile does not open the inbox.
   const canMessage = !isSelf && !!auth.user && canView && canDmAcrossAges(auth.profile, profile)
   const showCv = !isOrgAccount && !!publicResume
 
-  // On the band: the same two actions in the band's materials, plus the CV
-  // when it is published — and, on your own page, the two edits you came for.
+  const pagePath = `/user/${username || routeParam}`
+  const message = () => openPanel({ userId: profile.id })
+
+  // In the hero: Connect and Message (Message only where the server would let
+  // it through — a private member until they accept, and never across the
+  // adult/minor line, 091), the CV when it is published — and, on your own
+  // page, the two edits you came for. The profile tab IS the profile, so
+  // "edit" is the same page with its pencils showing.
   const heroActions = isSelf ? (
     <>
-      {/* The profile tab IS the profile now, so "edit" is the same page with
-          its pencils showing rather than a form somewhere else. `?edit=photo`
-          replaces the old `#photo`, which anchored to a Card that no longer
-          exists. */}
-      <Link to="/dashboard/my-profile" className={cn(heroButton.base, heroButton.light)}>
+      <Link to="/dashboard/my-profile" className="pf-btn pf-btn--primary">
         <Pencil size={17} aria-hidden="true" />
         <Trans>Edit profile</Trans>
       </Link>
-      <Link to="/dashboard/my-profile?edit=photo" className={cn(heroButton.base, heroButton.ghost)}>
+      <Link to="/dashboard/my-profile?edit=photo" className="pf-btn pf-btn--soft">
         <Camera size={17} aria-hidden="true" />
         <Trans>Change photo</Trans>
       </Link>
     </>
   ) : auth.user ? (
     <>
-      <ConnectButton otherUserId={profile.id} tone="hero" />
+      <ConnectButton otherUserId={profile.id} tone="editorial" />
       {canMessage && (
-        <button
-          type="button"
-          onClick={() => openPanel({ userId: profile.id })}
-          className={cn(heroButton.base, heroButton.ghost)}
-        >
-          <MessageSquare size={17} aria-hidden="true" />
+        <button type="button" onClick={message} className="pf-btn pf-btn--soft">
+          <Mail size={17} aria-hidden="true" />
           <Trans>Message</Trans>
         </button>
       )}
       {showCv && (
-        <Link to={`/user/${routeParam}/cv`} className={cn(heroButton.base, heroButton.ghost)}>
+        <Link to={`${pagePath}/cv`} className="pf-btn pf-btn--soft">
           <FileText size={17} aria-hidden="true" />
           <Trans>CV</Trans>
         </Link>
@@ -215,36 +205,47 @@ export default function PublicProfilePage() {
     </>
   ) : null
 
-  const railActions =
+  // The footer and the phone dock: the same two actions again, at the end of
+  // the page and always in reach on a phone. Not on your own page.
+  const ctaActions =
     !isSelf && auth.user ? (
       <>
-        <ConnectButton otherUserId={profile.id} />
-        {/* A private member is unreachable until they accept. Showing the
-            button anyway would only produce a permission error from RLS. */}
-        {/* And a 1:1 DM across the adult/minor line is refused by the
-            server (091), so the same reasoning applies. */}
+        <ConnectButton otherUserId={profile.id} tone="editorial-light" />
         {canMessage && (
-          <Button
-            variant="outline"
-            icon={<MessageSquare size={16} />}
-            onClick={() => openPanel({ userId: profile.id })}
-          >
+          <button type="button" onClick={message} className="pf-btn pf-btn--ghost-dark">
+            <Mail size={17} aria-hidden="true" />
             <Trans>Message</Trans>
-          </Button>
+          </button>
         )}
-        {/* Icon-only: reporting a member is a rare, sober action and does
-            not deserve the same width as the two things this page is for. */}
-        <Link to={`/grievances/report/${profile.id}`} aria-label={t`Report`}>
-          <Button
-            variant="ghost"
-            title={t`Report`}
-            className="text-ktip-sand-500 hover:text-red-600"
-          >
-            <Flag size={16} aria-hidden="true" />
-          </Button>
-        </Link>
       </>
     ) : null
+
+  const dockActions = isSelf ? (
+    <Link to="/dashboard/my-profile" className="pf-btn pf-btn--light pf-btn--sm">
+      <Pencil size={16} aria-hidden="true" />
+      <Trans>Edit</Trans>
+    </Link>
+  ) : auth.user ? (
+    <>
+      <ConnectButton otherUserId={profile.id} tone="editorial-light" size="sm" />
+      {canMessage && (
+        <button
+          type="button"
+          onClick={message}
+          aria-label={t`Message ${displayName}`}
+          className="pf-btn pf-btn--ghost-dark pf-btn--sm"
+        >
+          <Mail size={16} aria-hidden="true" />
+        </button>
+      )}
+    </>
+  ) : null
+
+  // The roles off the published CV, for the Overview's experience list.
+  const experience: ExperienceRow[] = (publicResume?.data.roles ?? [])
+    .filter((role) => role.title || role.org)
+    .slice(0, 6)
+    .map((role) => ({ period: role.period, title: role.title, org: role.org, location: role.location }))
 
   return (
     <ProfileCanvas
@@ -259,22 +260,24 @@ export default function PublicProfilePage() {
       connectionCount={connectionCount}
       employer={employer}
       employerPortfolio={portfolio}
-      cvHref={showCv ? `/user/${routeParam}/cv` : null}
+      cvHref={showCv ? `${pagePath}/cv` : null}
+      experience={showCv ? experience : undefined}
       heroActions={heroActions}
-      railActions={railActions}
+      ctaActions={ctaActions}
+      dockActions={dockActions}
+      reportHref={!isSelf && auth.user ? `/grievances/report/${profile.id}` : null}
+      shareUrl={pagePath}
       achievementsActions={
         isSelf ? (
-          <Link to="/dashboard/achievements">
-            <Button variant="ghost" size="sm" icon={<Trophy size={14} />}>
-              <Trans>Manage your achievements</Trans>
-            </Button>
+          <Link to="/dashboard/achievements" className="pf-chipl">
+            <Trophy size={14} aria-hidden="true" />
+            <Trans>Manage your achievements</Trans>
           </Link>
         ) : null
       }
       privateMessage={privateProfileMessage}
+      partialMessage={partialProfileMessage}
       back={{ label: t`Member Directory`, href: '/directory' }}
-      dockRef={dockRef}
-      railRef={railRef}
     />
   )
 }

@@ -33,7 +33,7 @@ function ScaleSwitcher() {
           aria-pressed={scale === option}
           onClick={() => setScale(option)}
           className={cn(
-            'px-2.5 py-1 rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400',
+            'px-2.5 py-1 rounded-md text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400',
             scale === option
               ? 'bg-ktip-cream text-ktip-sand-900 shadow-card'
               : 'text-ktip-sand-500 hover:text-ktip-sand-700'
@@ -68,14 +68,14 @@ export function GanttNav({ className, children }: GanttNavProps) {
           type="button"
           onClick={goPrev}
           aria-label={prevLabel}
-          className="p-1.5 rounded-lg text-ktip-sand-500 hover:bg-ktip-sand-100 hover:text-ktip-sand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400"
+          className="p-1.5 rounded-lg text-ktip-sand-500 hover:bg-ktip-sand-100 hover:text-ktip-sand-700 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400"
         >
           <ChevronLeft size={16} />
         </button>
         <button
           type="button"
           onClick={goToday}
-          className="px-2.5 py-1 rounded-lg text-xs font-medium text-ktip-sand-600 hover:bg-ktip-sand-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400"
+          className="px-2.5 py-1 rounded-lg text-xs font-medium text-ktip-sand-600 hover:bg-ktip-sand-100 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400"
         >
           <Trans>Today</Trans>
         </button>
@@ -83,7 +83,7 @@ export function GanttNav({ className, children }: GanttNavProps) {
           type="button"
           onClick={goNext}
           aria-label={nextLabel}
-          className="p-1.5 rounded-lg text-ktip-sand-500 hover:bg-ktip-sand-100 hover:text-ktip-sand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-400"
+          className="p-1.5 rounded-lg text-ktip-sand-500 hover:bg-ktip-sand-100 hover:text-ktip-sand-700 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-400"
         >
           <ChevronRight size={16} />
         </button>

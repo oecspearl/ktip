@@ -67,6 +67,16 @@ const FEATHER_PX = 0.75
 type Segmenter = import('@mediapipe/tasks-vision').ImageSegmenter
 
 /**
+ * Where the WASM runtime is served, named for the @mediapipe/tasks-vision
+ * release it was copied from. vercel.json serves /vision/wasm/<version>/
+ * immutable for a year, so an upgrade has to move this path, or returning
+ * browsers would pair the new JS with the old cached runtime. It must equal the
+ * installed package version: scripts/copy-vision-wasm.mjs reads this line and
+ * stops `dev` and the build when the two disagree.
+ */
+const VISION_WASM_BASE = '/vision/wasm/1.0.1'
+
+/**
  * One segmenter per page. Creating a second wastes ~2 s and a few MB, and the
  * WASM runtime cannot be unloaded anyway. A failed load is not cached, so a
  * flaky network gets another go on the next upload.
@@ -85,7 +95,7 @@ async function getSegmenter(): Promise<Segmenter> {
 
 async function createSegmenter(): Promise<Segmenter> {
   const { FilesetResolver, ImageSegmenter } = await import('@mediapipe/tasks-vision')
-  const vision = await FilesetResolver.forVisionTasks('/vision/wasm')
+  const vision = await FilesetResolver.forVisionTasks(VISION_WASM_BASE)
   const options = (delegate: 'GPU' | 'CPU') => ({
     baseOptions: { modelAssetPath: '/vision/selfie_segmenter.tflite', delegate },
     runningMode: 'IMAGE' as const,

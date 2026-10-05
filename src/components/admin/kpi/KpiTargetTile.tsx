@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { AlertTriangle, Info } from 'lucide-react'
 import type { Measured } from '../../../lib/measured'
 import {
@@ -7,7 +8,22 @@ import {
   type KpiStatus,
   type PlatformKpi,
 } from '../../../lib/kpi-catalog'
-import { Sparkline } from '../../charts/Sparkline'
+import { lazyOverlay } from '../../../lib/lazy-overlay'
+
+// The sparkline is the only recharts on the console landing page, and recharts
+// is most of the weight of any chart. Lazy, so the landing page's own chunk
+// carries the numbers and the chart library follows them in. lazyOverlay
+// because a missing glance-chart must not take the tile, or the page, with it.
+const Sparkline = lazyOverlay(
+  () => import('../../charts/Sparkline').then((m) => ({ default: m.Sparkline })),
+  'kpi-sparkline'
+)
+
+/**
+ * Sparkline's own default box (88 × 32). Holding it while the chunk arrives
+ * keeps the value beside it from shifting left and back.
+ */
+const SPARKLINE_BOX = { width: 88, height: 32 }
 
 interface KpiTargetTileProps {
   kpi: PlatformKpi
@@ -118,7 +134,16 @@ export function KpiTargetTile({ kpi, measured, target, periodLabel, history }: K
             </span>
           )}
         </div>
-        {hasHistory && <Sparkline values={history} label={`${kpi.label}, recent readings`} />}
+        {hasHistory && (
+          <Suspense fallback={<div aria-hidden="true" className="shrink-0" style={SPARKLINE_BOX} />}>
+            <Sparkline
+              values={history}
+              label={`${kpi.label}, recent readings`}
+              width={SPARKLINE_BOX.width}
+              height={SPARKLINE_BOX.height}
+            />
+          </Suspense>
+        )}
       </div>
 
       {progress !== null && (

@@ -134,7 +134,7 @@ function DefinitionsTab() {
         </span>
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream">
+      <div className="overflow-x-auto scroll-cue-x rounded-2xl border border-ktip-sand-200 bg-ktip-cream">
         <table className="w-full min-w-[52rem] text-sm">
           <thead>
             <tr className="border-b border-ktip-sand-200 text-left text-xs uppercase tracking-wider text-ktip-sand-500">
@@ -178,7 +178,7 @@ function DefinitionsTab() {
                         value={draft.description}
                         onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
                         aria-label={`${badge.name} description`}
-                        className="mt-1 w-full rounded-lg border border-ktip-sand-300 px-2 py-1 text-xs focus:border-ktip-ocean-500 focus:outline-none"
+                        className="mt-1 w-full rounded-lg border border-ktip-sand-300 px-2 py-1 text-xs focus:border-ktip-ocean-500 focus:outline-hidden"
                       />
                     ) : (
                       <p className="text-xs text-ktip-sand-600">{badge.description}</p>
@@ -205,7 +205,7 @@ function DefinitionsTab() {
                               setDraft((d) => ({ ...d, check_value: e.target.value }))
                             }
                             aria-label={`${badge.name} threshold`}
-                            className="w-20 rounded border border-ktip-sand-300 px-1.5 py-0.5 focus:border-ktip-ocean-500 focus:outline-none"
+                            className="w-20 rounded border border-ktip-sand-300 px-1.5 py-0.5 focus:border-ktip-ocean-500 focus:outline-hidden"
                           />
                         ) : (
                           badge.check_value
@@ -358,7 +358,7 @@ function TrophyArtTab() {
                     onBlur={(e) => handleAltText(type, tier, e.target.value)}
                     placeholder="Alt text"
                     aria-label={`Alt text for ${tier} ${type} trophy`}
-                    className="w-full rounded-lg border border-ktip-sand-300 px-2 py-1 text-xs focus:border-ktip-ocean-500 focus:outline-none"
+                    className="w-full rounded-lg border border-ktip-sand-300 px-2 py-1 text-xs focus:border-ktip-ocean-500 focus:outline-hidden"
                   />
                 </div>
               )

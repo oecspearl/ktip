@@ -268,10 +268,13 @@ export default async function handler(request: Request) {
         joinUrl,
       }),
     }),
-  })
+    // Bounded, and a timeout or network failure resolves to null rather than
+    // throwing, so it reaches the withdrawal below like any other failed send.
+    signal: AbortSignal.timeout(8000),
+  }).catch(() => null)
 
-  if (!resendResponse.ok) {
-    const detail = await resendResponse.text().catch(() => '')
+  if (!resendResponse?.ok) {
+    const detail = resendResponse ? await resendResponse.text().catch(() => '') : ''
     // Withdraw the invite rather than leaving a live token nobody received.
     await admin.from('email_invites').update({ status: 'revoked' }).eq('token', token)
     return json({ error: `Failed to send the invitation email. ${detail}`.trim() }, 502)

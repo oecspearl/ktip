@@ -157,7 +157,7 @@ function FeedCard({
           entity={item.entity}
           id={item.id}
           onHidden={onHidden}
-          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+          className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 no-hover:opacity-100"
         />
       )}
     </div>

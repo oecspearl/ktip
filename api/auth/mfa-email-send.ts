@@ -141,10 +141,12 @@ export default async function handler(request: Request) {
   }
 
   if (!apiKey || !fromEmail) {
-    // Outside production, hand the code back so the flow is testable without
-    // Resend. Gated on VERCEL_ENV so a production misconfiguration can never
-    // emit a live code into a response body or the logs.
-    if (process.env.VERCEL_ENV !== 'production') {
+    // On a local machine that opted in, hand the code back so the flow is
+    // testable without Resend. The opt-in is explicit (KTIP_DEV_ECHO_CODES=1)
+    // because "not production" also covers Preview deploys, which are public
+    // URLs: a preview with Resend unset used to return a live second factor to
+    // anyone holding the password. Production refuses even with the flag set.
+    if (process.env.VERCEL_ENV !== 'production' && process.env.KTIP_DEV_ECHO_CODES === '1') {
       console.log(`[mfa-email-send] code (dev only): ${result.code}`)
       return json(
         { ok: true, sent_at: new Date().toISOString(), expires_at: result.expires_at, dev_code: result.code },

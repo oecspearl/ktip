@@ -193,7 +193,7 @@ export default function MyApplicationsPage() {
                     </p>
                   </div>
                   {!request.sponsor_approved_at && (
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex gap-2 shrink-0">
                       <Button
                         variant="outline"
                         size="sm"

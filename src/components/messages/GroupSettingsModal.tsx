@@ -113,7 +113,7 @@ export function GroupSettingsModal({ open, onClose, conversation, onLeft }: Grou
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
             </div>
             <button

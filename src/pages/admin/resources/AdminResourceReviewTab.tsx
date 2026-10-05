@@ -201,7 +201,7 @@ function SubmissionCard({
             onChange={(e) => onNote(e.target.value)}
             rows={3}
             placeholder="Shown to the author, so say what would make it publishable."
-            className="w-full rounded-lg border-2 border-ktip-sand-200 px-3 py-2 text-sm focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
+            className="w-full rounded-lg border-2 border-ktip-sand-200 px-3 py-2 text-sm focus:border-ktip-ocean-500 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20"
           />
           <div className="flex items-center gap-2">
             <Button size="sm" variant="danger" loading={deciding} onClick={() => onDecide(false)}>

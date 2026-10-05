@@ -28,7 +28,8 @@ export function ConfirmModal({
     <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        data-lite-solid
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm [--lite-solid:rgb(0_0_0/0.6)]"
         onClick={onCancel}
       />
 
@@ -44,7 +45,7 @@ export function ConfirmModal({
         </button>
 
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-ktip-sun-100 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-ktip-sun-100 flex items-center justify-center shrink-0">
             <AlertTriangle size={20} className="text-ktip-sun-600" />
           </div>
           <div className="flex-1 min-w-0">

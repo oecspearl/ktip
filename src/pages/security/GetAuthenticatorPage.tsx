@@ -26,7 +26,7 @@ export default function GetAuthenticatorPage() {
   const onPhone = isMobilePlatform(platform)
 
   return (
-    <div className="min-h-screen bg-ktip-cream px-4 py-8">
+    <div className="min-h-svh bg-ktip-cream px-4 py-8">
       <div className="mx-auto w-full max-w-md space-y-6">
         <header className="space-y-3">
           <img src="/ktip-logo-128.webp" alt="KTiP" className="h-9 w-auto" />

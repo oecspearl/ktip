@@ -11,6 +11,7 @@ import {
   type LegalBlock,
   type LegalDocument,
 } from './index'
+import { LEGAL_MANIFEST } from './manifest'
 import { shouldTranslate, MAX_TRANSLATABLE } from '../i18n/should-translate'
 
 /** Every translatable string in a document, in render order. */
@@ -216,6 +217,17 @@ describe('consent bundles', () => {
   it('requires the core four at sign-up', () => {
     expect(CONSENT_BUNDLES.account.sort()).toEqual(
       ['acceptable-use', 'privacy', 'safeguarding', 'terms'].sort()
+    )
+  })
+})
+
+describe('the text-free manifest', () => {
+  // The consent code on every page reads versions from the manifest so the
+  // documents stay out of the entry chunk. A version bumped in a document but
+  // not here would send record_consent the old expected version.
+  it('lists every document, in order, with its bundle and version', () => {
+    expect(LEGAL_MANIFEST.map((m) => ({ ...m }))).toEqual(
+      LEGAL_DOCUMENTS.map((doc) => ({ key: doc.key, bundle: doc.bundle, version: doc.version }))
     )
   })
 })

@@ -142,7 +142,7 @@ export default function AdminResourcesPage() {
             </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-cue-x">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50">

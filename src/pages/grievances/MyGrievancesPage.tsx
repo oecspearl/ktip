@@ -43,7 +43,9 @@ export default function MyGrievancesPage() {
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`My Reports` }]}
       />
 
-      <div className="w-full max-w-page mx-auto px-4 py-8">
+      {/* One column of reports: the single-column reading width, not the full
+          page container that stretched each row across a large screen. */}
+      <div className="w-full max-w-page-tight mx-auto px-4 py-8">
         {/* Copyright notices filed against this member's content. Renders
             nothing when there are none, and sits above the grievance list
             because it is the one thing here that needs an answer from them. */}

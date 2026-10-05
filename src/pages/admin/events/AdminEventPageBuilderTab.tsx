@@ -58,7 +58,7 @@ const SECTION_TYPE_BADGE_VARIANTS: Record<EventSectionType, string> = {
 }
 
 const INPUT_CLASS =
-  'w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
+  'w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
 
 function getDefaultContent(type: EventSectionType): Record<string, any> {
   switch (type) {
@@ -156,7 +156,7 @@ function FaqEditor({ content, setContent }: ContentEditorProps) {
           <button
             type="button"
             onClick={() => removeItem(index)}
-            className="absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
+            className="icon-hit absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
             title="Remove Q&A"
           >
             <X size={14} />
@@ -285,7 +285,7 @@ function SponsorsEditor({ content, setContent }: ContentEditorProps) {
           <button
             type="button"
             onClick={() => removeItem(index)}
-            className="absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
+            className="icon-hit absolute top-2 right-2 p-1 text-ktip-sand-400 hover:text-red-500 transition-colors"
             title="Remove sponsor"
           >
             <X size={14} />
@@ -549,7 +549,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
             <button
               type="button"
               onClick={() => setShowTypeSelector(false)}
-              className="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
+              className="icon-hit p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
             >
               <X size={18} />
             </button>
@@ -592,7 +592,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
             <button
               type="button"
               onClick={cancelAdd}
-              className="p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
+              className="icon-hit p-1 text-ktip-sand-400 hover:text-ktip-sand-600 transition-colors"
             >
               <X size={18} />
             </button>
@@ -651,7 +651,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                   {/* Icon */}
                   <div
                     className={cn(
-                      'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                      'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
                       section.is_visible ? 'bg-ktip-ocean-100' : 'bg-ktip-sand-100'
                     )}
                   >
@@ -686,13 +686,14 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                     </p>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                  {/* Action Buttons. Spaced out on touch so the 44px hit areas
+                      (icon-hit) do not reach over each other's icons. */}
+                  <div className="flex items-center gap-0.5 pointer-coarse:gap-3 shrink-0">
                     {/* Visibility Toggle */}
                     <button
                       type="button"
                       onClick={() => toggleVisibility(section)}
-                      className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
+                      className="icon-hit p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
                       title={section.is_visible ? 'Hide section' : 'Show section'}
                     >
                       {section.is_visible ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -703,7 +704,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                       type="button"
                       onClick={() => handleMoveUp(index)}
                       disabled={index === 0 || reordering}
-                      className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="icon-hit p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Move up"
                     >
                       <ChevronUp size={16} />
@@ -714,7 +715,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                       type="button"
                       onClick={() => handleMoveDown(index)}
                       disabled={index === (sections?.length || 0) - 1 || reordering}
-                      className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="icon-hit p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Move down"
                     >
                       <ChevronDown size={16} />
@@ -725,7 +726,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                       <button
                         type="button"
                         onClick={() => startEdit(section)}
-                        className="p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
+                        className="icon-hit p-1.5 text-ktip-sand-400 hover:text-ktip-ocean-600 transition-colors"
                         title="Edit"
                       >
                         <FileText size={16} />
@@ -734,7 +735,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                       <button
                         type="button"
                         onClick={cancelEdit}
-                        className="p-1.5 text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
+                        className="icon-hit p-1.5 text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
                         title="Close editor"
                       >
                         <X size={16} />
@@ -745,7 +746,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                     <button
                       type="button"
                       onClick={() => setDeleteTarget(section.id)}
-                      className="p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
+                      className="icon-hit p-1.5 text-ktip-sand-400 hover:text-red-600 transition-colors"
                       title="Delete"
                     >
                       <Trash2 size={16} />

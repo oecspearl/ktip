@@ -165,13 +165,18 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
         <div
           id="rankings"
           data-spy="Rankings"
-          className="scroll-mt-24 overflow-x-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream"
+          className="scroll-mt-24 overflow-x-auto scroll-cue-x rounded-2xl border border-ktip-sand-200 bg-ktip-cream"
         >
-          <table className="w-full min-w-[34rem] text-sm">
+          {/* Below sm each row stacks into a two-line card (rank, member and
+              points on top; level and badges under the name) instead of a
+              34rem table scrolled sideways inside a phone. The table markup
+              stays, so a screen reader still gets rows and headers; the header
+              row is only hidden visually. */}
+          <table className="w-full max-sm:block sm:min-w-[34rem] text-sm">
             <caption className="sr-only">
               {t`Top members by achievement points, ${activeWindowLabel}, ${activeScopeLabel}`}
             </caption>
-            <thead>
+            <thead className="max-sm:sr-only">
               <tr className="border-b border-ktip-sand-200 text-left text-xs uppercase tracking-wider text-ktip-sand-500">
                 <th scope="col" className="px-4 py-3 w-16"><Trans>Rank</Trans></th>
                 <th scope="col" className="px-4 py-3"><Trans>Member</Trans></th>
@@ -180,7 +185,7 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
                 <th scope="col" className="px-4 py-3 text-right"><Trans>Points</Trans></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="max-sm:block">
               {top.map((entry) => {
                 const isMe = entry.user_id === auth.user?.id
                 return (
@@ -188,10 +193,11 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
                     key={entry.user_id}
                     className={cn(
                       'border-b border-ktip-sand-100 last:border-0',
+                      'max-sm:grid max-sm:grid-cols-[auto_minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-x-3 max-sm:gap-y-0.5 max-sm:px-4 max-sm:py-3',
                       isMe && 'bg-ktip-ocean-50/60'
                     )}
                   >
-                    <td className="px-4 py-3 font-display font-bold tabular-nums text-ktip-sand-700">
+                    <td className="px-4 py-3 font-display font-bold tabular-nums text-ktip-sand-700 max-sm:col-start-1 max-sm:row-span-2 max-sm:row-start-1 max-sm:p-0">
                       {/* Medal styling for the top three, with the number kept
                           so rank is never conveyed by colour alone. */}
                       <span
@@ -205,17 +211,17 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
                         {entry.rank}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 max-sm:col-start-2 max-sm:row-start-1 max-sm:min-w-0 max-sm:p-0">
                       <Link
                         to={`/user/${entry.user_id}`}
-                        className="flex items-center gap-2 hover:underline"
+                        className="flex items-center gap-2 hover:underline max-sm:min-w-0"
                       >
                         <DiamondAvatar
                           src={entry.avatar_url}
                           name={entry.display_name || t`Member`}
                           size={28}
                         />
-                        <span className="font-medium text-ktip-sand-900">
+                        <span className="font-medium text-ktip-sand-900 max-sm:truncate">
                           {entry.display_name || t`Member`}
                         </span>
                         <VerifiedBadge verified={entry.is_verified} size={14} />
@@ -224,13 +230,18 @@ export default function LeaderboardPage({ embedded = false }: { embedded?: boole
                         )}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-ktip-sand-600">
+                    <td className="px-4 py-3 text-ktip-sand-600 max-sm:col-start-2 max-sm:row-start-2 max-sm:truncate max-sm:p-0 max-sm:text-xs">
                       {entry.rank_name}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-ktip-sand-600">
-                      {entry.badge_count}
+                    <td className="px-4 py-3 text-right tabular-nums text-ktip-sand-600 max-sm:col-start-3 max-sm:row-start-2 max-sm:p-0 max-sm:text-xs">
+                      {/* No column header on a phone to say what the number
+                          counts, so it carries its own noun there. */}
+                      <span className="sm:hidden">
+                        <Plural value={entry.badge_count} one="# badge" other="# badges" />
+                      </span>
+                      <span className="max-sm:hidden">{entry.badge_count}</span>
                     </td>
-                    <td className="px-4 py-3 text-right font-display font-bold tabular-nums text-ktip-ocean-700">
+                    <td className="px-4 py-3 text-right font-display font-bold tabular-nums text-ktip-ocean-700 max-sm:col-start-3 max-sm:row-start-1 max-sm:p-0">
                       {entry.points}
                     </td>
                   </tr>

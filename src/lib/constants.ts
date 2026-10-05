@@ -1,6 +1,7 @@
 // Application Constants
 
 import { ROLE_DEFINITIONS } from './permissions'
+import { AVATAR_VARIANT_WIDTH, COVER_VARIANT_WIDTH } from './upload-variants'
 import type { Copy } from '../i18n/copy'
 
 export const APP_NAME = 'KTIP'
@@ -992,7 +993,11 @@ export const IMAGE_PRESETS = {
   // 400 KB, not 300: since 148 the avatar may be a cut-out composite, and
   // the quality ladder would otherwise grind a feathered edge to mush chasing
   // a budget set for a flat JPEG.
-  AVATAR: { maxDim: 512, quality: 0.85, maxBytes: 400 * 1024 },
+  //
+  // `variants`: small siblings written beside the original at upload (see
+  // lib/upload-variants.ts). Nearly every avatar on screen is 48px or less, and
+  // used to download all 512.
+  AVATAR: { maxDim: 512, quality: 0.85, maxBytes: 400 * 1024, variants: [AVATAR_VARIANT_WIDTH] },
   // The transparent cut-out the member page hero draws at ~560 CSS px on a 2×
   // screen. Alpha WebP; the budget is loose because it loads on one page only.
   PORTRAIT: { maxDim: 1024, quality: 0.9, maxBytes: 700 * 1024 },
@@ -1003,7 +1008,8 @@ export const IMAGE_PRESETS = {
   TROPHY: { maxDim: 512, quality: 0.85, maxBytes: 200 * 1024 },
   // Profile banners span the full member-page hero, so the longest edge stays
   // large; quality matches DOCUMENT since gradient-heavy photos band easily.
-  BANNER: { maxDim: 1920, quality: 0.82, maxBytes: 700 * 1024 },
+  // The 640 sibling is what a directory card shows (48 of them a page).
+  BANNER: { maxDim: 1920, quality: 0.82, maxBytes: 700 * 1024, variants: [COVER_VARIANT_WIDTH] },
 } as const
 
 // Date Formats

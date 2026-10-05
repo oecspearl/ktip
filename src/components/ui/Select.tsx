@@ -246,7 +246,7 @@ export function Select<T extends string = string>({
         onKeyDown={onTriggerKeyDown}
         className={cn(
           'flex items-center justify-between gap-2 px-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-control text-label text-left text-ktip-sand-800 transition-colors',
-          'focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none',
+          'focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden',
           open && 'border-ktip-ocean-500 ring-2 ring-ktip-ocean-500/20',
           disabled && 'opacity-50 cursor-not-allowed',
           className
@@ -281,7 +281,7 @@ export function Select<T extends string = string>({
           aria-labelledby={ariaLabelledBy}
           aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
           onKeyDown={onListKeyDown}
-          className="max-h-60 overflow-y-auto focus:outline-none"
+          className="max-h-60 overflow-y-auto focus:outline-hidden"
         >
           {options.map((option, index) => (
             <li

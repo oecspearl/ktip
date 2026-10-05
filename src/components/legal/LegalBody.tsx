@@ -113,7 +113,7 @@ export function LegalBody({ blocks }: { blocks: LegalBlock[] }) {
               // of prose on a phone.
               <div
                 key={index}
-                className="overflow-x-auto rounded-surface border border-ktip-sand-200"
+                className="overflow-x-auto scroll-cue-x rounded-surface border border-ktip-sand-200"
                 tabIndex={0}
                 role="region"
                 aria-label={r(block.columns[0] ?? '')}

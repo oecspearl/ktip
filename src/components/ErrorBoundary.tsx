@@ -48,7 +48,7 @@ export class AppErrorBoundary extends Component<PropsWithChildren, State> {
     if (this.state.hasError) {
       const err = this.state.error
       return (
-        <div className="min-h-screen bg-ktip-canvas flex items-center justify-center p-4">
+        <div className="min-h-svh bg-ktip-canvas flex items-center justify-center p-4">
           <div className="max-w-md w-full text-center">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertTriangle size={40} className="text-red-500" />

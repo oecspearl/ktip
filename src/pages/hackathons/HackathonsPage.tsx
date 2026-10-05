@@ -50,7 +50,7 @@ export default function HackathonsPage() {
     // No scrollspy rail: the three sections are card grids that are usually a
     // screen between them, and two of the three are empty most of the year.
     // The markers stay — the tour in data/tutorials/listings.ts anchors to them.
-    <div data-spy-off className="min-h-screen bg-ktip-canvas">
+    <div data-spy-off className="min-h-svh bg-ktip-canvas">
       <PageHero
         eyebrow={t`Virtual Hackathon`}
         title={t`Build something in a weekend`}

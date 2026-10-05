@@ -69,11 +69,11 @@ function weekRangeLabel(start: Date, end: Date): string {
 }
 
 const STEP_BUTTON =
-  'flex h-9 w-9 items-center justify-center rounded-full text-ktip-sand-700 shadow-neu-sm transition-all hover:text-ktip-ocean-700 active:translate-y-px active:shadow-neu-sm-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500'
+  'flex h-9 w-9 items-center justify-center rounded-full text-ktip-sand-700 shadow-neu-sm transition-all hover:text-ktip-ocean-700 active:translate-y-px active:shadow-neu-sm-inset focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500'
 
 /** Open panes read as pressed-in, the same idiom as the dashboard tab rail. */
 const PANE_TOGGLE =
-  'h-8 w-8 shrink-0 items-center justify-center rounded-neu-sm text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 shadow-neu-sm aria-pressed:shadow-neu-sm-inset aria-pressed:text-ktip-ocean-700'
+  'h-8 w-8 shrink-0 items-center justify-center rounded-neu-sm text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 shadow-neu-sm aria-pressed:shadow-neu-sm-inset aria-pressed:text-ktip-ocean-700'
 
 function CalendarShellInner({
   view,
@@ -244,7 +244,7 @@ function CalendarShellInner({
             <button
               type="button"
               onClick={onToday}
-              className="rounded-neu-sm px-3 py-1.5 text-micro font-bold uppercase tracking-wider text-ktip-ocean-700 shadow-neu-sm transition-all active:translate-y-px active:shadow-neu-sm-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+              className="rounded-neu-sm px-3 py-1.5 text-micro font-bold uppercase tracking-wider text-ktip-ocean-700 shadow-neu-sm transition-all active:translate-y-px active:shadow-neu-sm-inset focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
             >
               <Trans>Today</Trans>
             </button>

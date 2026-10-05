@@ -54,7 +54,7 @@ export function CalendarYearPicker({ year, onChange, triggerClassName }: Calenda
         aria-haspopup="true"
         aria-label={t`Change year`}
         className={cn(
-          'inline-flex items-center gap-1 rounded-neu-sm px-1.5 py-0.5 transition-all hover:text-ktip-ocean-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+          'inline-flex items-center gap-1 rounded-neu-sm px-1.5 py-0.5 transition-all hover:text-ktip-ocean-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
           open ? 'shadow-neu-sm-inset text-ktip-ocean-700' : 'hover:shadow-neu-sm',
           triggerClassName
         )}
@@ -82,7 +82,7 @@ export function CalendarYearPicker({ year, onChange, triggerClassName }: Calenda
               }}
               aria-pressed={option === year}
               className={cn(
-                'rounded-neu-sm px-2 py-1.5 font-mono text-micro transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+                'rounded-neu-sm px-2 py-1.5 font-mono text-micro transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
                 option === year
                   ? 'bg-ktip-sand-100 font-bold text-ktip-ocean-700 shadow-neu-sm-inset'
                   : 'text-ktip-sand-700 hover:text-ktip-ocean-700 hover:shadow-neu-sm'

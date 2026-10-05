@@ -77,6 +77,27 @@ export function fitDimensions(
   }
 }
 
+/**
+ * Scale so the width is at most `maxWidth`, preserving aspect ratio. Never
+ * upscales.
+ *
+ * Width, not longest edge, for the upload-time siblings: they are offered with
+ * `w` descriptors and swapped into boxes sized by width, so a sibling's width
+ * has to be the number its name promises.
+ */
+export function fitWidth(
+  width: number,
+  height: number,
+  maxWidth: number
+): { width: number; height: number } {
+  if (width <= 0 || height <= 0) return { width: 0, height: 0 }
+  const scale = Math.min(1, maxWidth / width)
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  }
+}
+
 /** Replace the trailing extension with `.webp` (appends if there is none). */
 export function renameToWebp(fileName: string): string {
   const base = fileName.replace(/\.[^./\\]+$/, '')
@@ -192,6 +213,35 @@ export async function optimizeImage(file: File, opts: OptimizeOptions): Promise<
     if (!best || best.size >= file.size) return file
 
     return new File([best], renameToWebp(file.name), {
+      type: 'image/webp',
+      lastModified: file.lastModified,
+    })
+  } finally {
+    if (!(source instanceof HTMLImageElement)) source.close()
+  }
+}
+
+/**
+ * A WebP copy no wider than `maxWidth` — an upload's small sibling (see
+ * lib/upload-variants.ts).
+ *
+ * Unlike optimizeImage this always produces a file when it can, even one no
+ * smaller than its input: a sibling's job is to exist at the name consumers
+ * derive, and a missing one costs every viewer a 404 before the fallback.
+ * Returns null only when the browser cannot make one at all (SVG, GIF, no WebP
+ * encoder), which the consumers' fallback already covers.
+ */
+export async function resizeToWidth(file: File, maxWidth: number, quality: number): Promise<File | null> {
+  if (shouldSkipOptimization(file) || !canEncodeWebp()) return null
+
+  const source = await decodeImage(file)
+  try {
+    const { width: srcW, height: srcH } = sizeOf(source)
+    if (!srcW || !srcH) return null
+    const { width, height } = fitWidth(srcW, srcH, maxWidth)
+    const blob = await encode(source, width, height, quality)
+    if (!blob) return null
+    return new File([blob], `${renameToWebp(file.name).replace(/\.webp$/, '')}-${maxWidth}.webp`, {
       type: 'image/webp',
       lastModified: file.lastModified,
     })

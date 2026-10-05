@@ -109,7 +109,9 @@ const MAX_PAGES = 10 // backstop; 2000 courses is far beyond the real catalogue
 
 async function fetchCatalogPage(base: string, offset: number): Promise<CatalogItem[]> {
   const url = `${base}/api/external/catalog?limit=${PAGE_SIZE}&offset=${offset}`
-  const res = await fetch(url, { headers: { Accept: 'application/json' } })
+  // Bounded at 8 s, so a campus that hangs is skipped like one that is down,
+  // rather than stalling the sign-in or sync that asked.
+  const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) })
   if (!res.ok) throw new Error(`catalog ${res.status} from ${base}`)
   const body = (await res.json()) as { items?: CatalogItem[] }
   return Array.isArray(body.items) ? body.items : []
@@ -186,6 +188,7 @@ export async function loadEnrollments(email: string): Promise<EnrollmentsResult>
         const url = `${base}/api/external/enrollments?email=${encodeURIComponent(email)}`
         const res = await fetch(url, {
           headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+          signal: AbortSignal.timeout(8000),
         })
         // 404 is the ordinary "this learner has no account on this host"
         // answer when a learner exists on only one of the two campuses.

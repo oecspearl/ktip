@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useParams, Link, useLocation, useSearchParams } from 'react-router'
 import { useEvent, useIsEventHost } from '../../../hooks/useEvents'
 import { useEventStatusUpdate } from '../../../hooks/useAdminEvents'
@@ -45,16 +45,20 @@ import { entityPath } from '../../../lib/slug'
 import { venuePath } from '../../../lib/event-slug'
 import type { EventStatus } from '../../../types'
 
-import AdminEventRegistrationsTab from './AdminEventRegistrationsTab'
-import AdminEventUpdatesTab from './AdminEventUpdatesTab'
-import AdminEventArticlesTab from './AdminEventArticlesTab'
-import AdminEventFormBuilderTab from './AdminEventFormBuilderTab'
-import AdminEventPageBuilderTab from './AdminEventPageBuilderTab'
-import AdminEventScheduleTab from './AdminEventScheduleTab'
-import AdminEventSpeakersTab from './AdminEventSpeakersTab'
-import AdminEventChallengeTab from './AdminEventChallengeTab'
-import AdminEventVenueTab from './AdminEventVenueTab'
 import { EventDetailsForm } from '../../../components/events/EventDetailsForm'
+
+// One chunk per tab, fetched when the tab is opened. Statically imported, every
+// visit to the workspace paid for all nine — the venue tab's floor-plan editor
+// alone is over 2,000 lines — while an organizer touches one or two per visit.
+const AdminEventRegistrationsTab = lazy(() => import('./AdminEventRegistrationsTab'))
+const AdminEventUpdatesTab = lazy(() => import('./AdminEventUpdatesTab'))
+const AdminEventArticlesTab = lazy(() => import('./AdminEventArticlesTab'))
+const AdminEventFormBuilderTab = lazy(() => import('./AdminEventFormBuilderTab'))
+const AdminEventPageBuilderTab = lazy(() => import('./AdminEventPageBuilderTab'))
+const AdminEventScheduleTab = lazy(() => import('./AdminEventScheduleTab'))
+const AdminEventSpeakersTab = lazy(() => import('./AdminEventSpeakersTab'))
+const AdminEventChallengeTab = lazy(() => import('./AdminEventChallengeTab'))
+const AdminEventVenueTab = lazy(() => import('./AdminEventVenueTab'))
 
 type TabId =
   | 'overview'
@@ -350,7 +354,7 @@ export default function AdminEventDetailPage() {
       ) : (
         /* Flat Tab Navigation */
         <div className="relative border-b border-ktip-sand-200 mb-6" role="tablist" aria-label="Event management">
-          <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
+          <nav className="flex gap-1 -mb-px overflow-x-auto scroll-cue-x scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 type="button"
@@ -358,7 +362,7 @@ export default function AdminEventDetailPage() {
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
+                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0',
                   activeTab === tab.id
                     ? 'border-ktip-ocean-500 text-ktip-ocean-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'
@@ -422,6 +426,12 @@ export default function AdminEventDetailPage() {
         </div>
       )}
 
+      {/* The tabs below are lazy. The fallback holds roughly a tab's height so
+          the setup footer under it does not jump up and back while a chunk
+          arrives. */}
+      <Suspense
+        fallback={<div className="h-64 rounded-lg border border-ktip-sand-200 animate-pulse-soft" />}
+      >
       {activeTab === 'registrations' && (
         <div className="animate-tab-enter">
           <AdminEventRegistrationsTab
@@ -494,6 +504,7 @@ export default function AdminEventDetailPage() {
           <AdminEventArticlesTab eventId={event.id} />
         </div>
       )}
+      </Suspense>
 
       {/* Each tab saves its own editor, so every step but the last is only
           ever "take me to the next thing". The last one is where the run ends

@@ -2,6 +2,8 @@
 
 import type { BannerSpec } from '../lib/banner'
 import type { AvatarStyle } from '../lib/avatar-backdrop'
+import type { ProfileLook } from '../lib/profile-look'
+import type { SocialLinks } from '../lib/social-links'
 import type { CalendarAccent, CalendarNoteKind } from '../lib/constants'
 
 /**
@@ -160,6 +162,28 @@ export type AccountStatus = 'active' | 'deactivated' | 'pending_deletion'
  */
 export type ProfileVisibility = 'public' | 'private'
 
+/**
+ * A part of a profile that can be shown to everyone or kept for connections
+ * on its own (162). Stable English keys: they are stored in
+ * `profiles.section_visibility` and tested by name in SQL.
+ */
+export type ProfileSectionKey =
+  | 'about'
+  | 'details'
+  | 'skills'
+  | 'interests'
+  | 'languages'
+  | 'open_to'
+  | 'organisation'
+  | 'cv'
+  | 'standing'
+  | 'achievements'
+  | 'projects'
+  | 'events'
+
+/** Per-section overrides of `profile_visibility`. An absent key follows it. */
+export type SectionVisibility = Partial<Record<ProfileSectionKey, ProfileVisibility>>
+
 export interface Profile {
   id: string
   /**
@@ -211,6 +235,15 @@ export interface Profile {
   phone?: string | null
   website?: string | null
   languages?: string[]
+  /**
+   * Migration 169 — the line under the name, the member's links, and how their
+   * page is dressed. Optional for the same deploy-ahead-of-migration reason as
+   * the contact fields. Read the JSON ones through parseSocialLinks() and
+   * parseProfileLook().
+   */
+  tagline?: string | null
+  social_links?: SocialLinks | null
+  profile_look?: Partial<ProfileLook> | null
   is_verified: boolean
   /**
    * Migration 145 — why is_verified is TRUE. Optional because a deploy can run
@@ -240,6 +273,11 @@ export interface Profile {
    * has to read as 'public' rather than crash the directory.
    */
   profile_visibility?: ProfileVisibility
+  /**
+   * Per-section overrides (162). Optional for the same reason: absent reads as
+   * "every section follows profile_visibility", which is what it was before.
+   */
+  section_visibility?: SectionVisibility | null
   /**
    * Age state (091). Derived from the declared date of birth, never written
    * directly — the 063 guard trigger rejects an attempt.
@@ -348,6 +386,21 @@ export interface ProfileView {
    * value has to read as "adult" rather than hide every button on the page.
    */
   is_minor?: boolean
+  /**
+   * The sections this viewer may not see (162) — empty for the member, an
+   * admin or an accepted connection. Absent before 162, when `can_view` was
+   * the whole answer; read it through hiddenSections(), which covers both.
+   */
+  hidden_sections?: ProfileSectionKey[] | null
+  /**
+   * Migration 169. `tagline` follows 'about' and `social_links` follows
+   * 'details', so both arrive NULL when those sections are closed to the
+   * viewer. `profile_look` is a teaser field like avatar_style. All optional:
+   * a deploy can run ahead of the migration.
+   */
+  tagline?: string | null
+  social_links?: SocialLinks | null
+  profile_look?: Partial<ProfileLook> | null
 }
 
 /**
@@ -1867,7 +1920,11 @@ export interface ShowcaseEntry {
   badge: BadgeDefinition
 }
 
-/** Public-profile stats. `streak_days` is null unless viewing your own. */
+/**
+ * Public-profile stats. `streak_days` is null unless viewing your own. Since
+ * 162 `points` and `rank` also come back null when the viewer may not see the
+ * member's standing — check the section before reading them.
+ */
 export interface ProfileStats {
   user_id: string
   points: number
