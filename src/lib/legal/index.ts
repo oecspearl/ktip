@@ -25,6 +25,17 @@ import { PARTNER_API } from './partner-api'
 
 export * from './types'
 export { LEGAL_TOKENS, fillTokens, extractTokens } from './parties'
+// The text-free half lives in manifest.ts so the consent code that runs on
+// every page can import it without pulling in the documents themselves.
+export {
+  LEGAL_MANIFEST,
+  CONSENT_BUNDLES,
+  PROMPTED_BUNDLES,
+  bundleVersion,
+  isPromptedBundle,
+  legalPath,
+} from './manifest'
+export type { PromptedBundle } from './manifest'
 export type { LegalToken } from './parties'
 
 /**
@@ -56,57 +67,6 @@ export function getLegalDocument(key: LegalDocumentKey): LegalDocument | undefin
   return BY_KEY.get(key)
 }
 
-/** Route for a document page. One place, so the footer, site map and See-also cannot drift apart. */
-export function legalPath(key: LegalDocumentKey): string {
-  return `/legal/${key}`
-}
-
-/**
- * Which documents each consent bundle covers — the answer to "what does Accept
- * All accept". Derived from the documents themselves so a document cannot be in
- * a bundle here and a different one in its own definition.
- *
- * The DB is still the authority on the VERSION accepted (see `record_consent` in
- * migration 115, which reads the version server-side rather than taking it from
- * the client). This map only says which keys to name.
- */
-export const CONSENT_BUNDLES: Record<LegalBundle, LegalDocumentKey[]> = {
-  account: [],
-  publishing: [],
-  competition: [],
-  application: [],
-  informational: [],
-}
-for (const doc of LEGAL_DOCUMENTS) CONSENT_BUNDLES[doc.bundle].push(doc.key)
-
-/** Bundles a member is asked to accept. `informational` is published, never prompted. */
-export const PROMPTED_BUNDLES = [
-  'account',
-  'publishing',
-  'competition',
-  'application',
-] as const satisfies readonly LegalBundle[]
-
-export type PromptedBundle = (typeof PROMPTED_BUNDLES)[number]
-
-export function isPromptedBundle(bundle: LegalBundle): bundle is PromptedBundle {
-  return (PROMPTED_BUNDLES as readonly LegalBundle[]).includes(bundle)
-}
-
 export function documentsInBundle(bundle: LegalBundle): LegalDocument[] {
   return LEGAL_DOCUMENTS.filter((doc) => doc.bundle === bundle)
-}
-
-/**
- * The version the client believes is current for a bundle, sent to
- * `record_consent` as `p_expected_version` so that a client running against a
- * database that has already moved on fails loudly instead of recording consent
- * to text nobody was shown.
- *
- * Every document in a bundle is expected to share a version — they are revised
- * and re-accepted together. `legal-content.test.ts` enforces that.
- */
-export function bundleVersion(bundle: LegalBundle): number {
-  const docs = documentsInBundle(bundle)
-  return docs.length > 0 ? Math.max(...docs.map((d) => d.version)) : 0
 }

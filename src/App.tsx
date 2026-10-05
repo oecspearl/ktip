@@ -11,7 +11,7 @@ import {
 import { RouterProvider } from 'react-router/dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
-import { Suspense } from 'react'
+import { Suspense, lazy, type ComponentProps } from 'react'
 import { AchievementProvider, useAchievementContext } from './contexts/AchievementContext'
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { LanguageProfileSync } from './i18n/LanguageProfileSync'
@@ -20,7 +20,7 @@ import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { PermissionRoute } from './components/PermissionRoute'
-import { AgreementRoute } from './components/legal/AgreementRoute'
+import type { AgreementRoute as AgreementRouteType } from './components/legal/AgreementRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { InstallPrompt } from './components/InstallPrompt'
@@ -180,6 +180,19 @@ function SettingsRedirect() {
   // No tab named, or one that never existed: the profile is what /settings
   // opened on, so that is what it still opens on.
   return <Navigate to={(tab && SETTINGS_TAB_ROUTES[tab]) || '/dashboard/my-profile'} replace />
+}
+
+// The agreement guard renders the consent dialog, and the dialog renders the
+// legal documents themselves: about 100 kB of text that, imported eagerly here,
+// sat in the entry chunk for every visitor. Only the create and edit routes
+// use it, so it loads when one of them is opened.
+const AgreementRouteLazy = lazy(() => import('./components/legal/AgreementRoute'))
+function AgreementRoute(props: ComponentProps<typeof AgreementRouteType>) {
+  return (
+    <Suspense fallback={<RouteSplash />}>
+      <AgreementRouteLazy {...props} />
+    </Suspense>
+  )
 }
 
 function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
