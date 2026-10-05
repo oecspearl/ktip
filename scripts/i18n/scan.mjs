@@ -19,7 +19,9 @@
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { resolve, relative, join, sep } from 'node:path'
-import ts from 'typescript'
+// ts-morph's bundled compiler, not the `typescript` package: TypeScript 7 is
+// the native port and ships no JavaScript API to parse with.
+import { ts } from 'ts-morph'
 import {
   COPY_ATTRS,
   COPY_CALLEES,
