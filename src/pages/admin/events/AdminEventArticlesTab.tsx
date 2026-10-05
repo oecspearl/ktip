@@ -166,7 +166,7 @@ export default function AdminEventArticlesTab({ eventId }: AdminEventArticlesTab
               type="text"
               value={title}
               onChange={(e) => setTitle(e.currentTarget.value)}
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               placeholder="Article title..."
             />
             {errors.title && (
@@ -180,7 +180,7 @@ export default function AdminEventArticlesTab({ eventId }: AdminEventArticlesTab
               value={content}
               onChange={(e) => setContent(e.currentTarget.value)}
               rows={8}
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none resize-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden resize-none"
               placeholder="Write your article content..."
             />
             {errors.content && (
@@ -194,7 +194,7 @@ export default function AdminEventArticlesTab({ eventId }: AdminEventArticlesTab
               <select
                 value={articleType}
                 onChange={(e) => setArticleType(e.currentTarget.value)}
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:outline-hidden"
               >
                 <option value="recap">Event Recap</option>
                 <option value="resources">Resources</option>
@@ -257,7 +257,7 @@ export default function AdminEventArticlesTab({ eventId }: AdminEventArticlesTab
                     {article.author?.display_name && ` by ${article.author.display_name}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <button
                     type="button"
                     onClick={() => togglePublished(article)}

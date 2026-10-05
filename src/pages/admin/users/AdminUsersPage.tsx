@@ -330,13 +330,13 @@ export default function AdminUsersPage() {
                 setSearchQuery(e.currentTarget.value)
                 debouncedSetSearch(e.currentTarget.value)
               }}
-              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
           >
             <option value="">All Roles</option>
             {ALL_ROLES.map((role) => (
@@ -346,7 +346,7 @@ export default function AdminUsersPage() {
           <select
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.currentTarget.value)}
-            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+            className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
           >
             <option value="">All Status</option>
             <option value="true">Verified</option>
@@ -593,7 +593,7 @@ export default function AdminUsersPage() {
               value={newEmail}
               onChange={(e) => setNewEmail(e.currentTarget.value)}
               placeholder="user@example.com"
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <div>
@@ -603,7 +603,7 @@ export default function AdminUsersPage() {
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.currentTarget.value)}
               placeholder="John Doe"
-              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <div>
@@ -614,7 +614,7 @@ export default function AdminUsersPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.currentTarget.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
               <button
                 type="button"
@@ -696,7 +696,7 @@ export default function AdminUsersPage() {
                 value={resetNewPassword}
                 onChange={(e) => setResetNewPassword(e.currentTarget.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 pr-10 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
               <button
                 type="button"
@@ -833,7 +833,7 @@ export default function AdminUsersPage() {
                 rows={3}
                 maxLength={500}
                 placeholder="Recorded on the account for other administrators"
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
               />
             </div>
           )}

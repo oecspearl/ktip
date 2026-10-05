@@ -352,7 +352,7 @@ export default function AdminRolesPage() {
                           <div className="flex items-center gap-2">
                             <code className="text-xs font-mono text-ktip-sand-800">{permission.key}</code>
                             {permission.safeguard && (
-                              <ShieldCheck size={13} className="text-ktip-tropical-600 flex-shrink-0" />
+                              <ShieldCheck size={13} className="text-ktip-tropical-600 shrink-0" />
                             )}
                           </div>
                           <p className="text-xs text-ktip-sand-500 mt-0.5">{i18n._(permission.description)}</p>
@@ -469,7 +469,7 @@ export default function AdminRolesPage() {
                   </p>
                 </div>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${
                     event.to_allowed
                       ? 'bg-ktip-tropical-100 text-ktip-tropical-800'
                       : 'bg-red-100 text-red-700'

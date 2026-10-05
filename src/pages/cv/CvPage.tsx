@@ -236,7 +236,7 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
               type="button"
               aria-pressed={sheetTheme === ink}
               onClick={() => setSheetTheme(ink)}
-              className="flex items-center gap-1.5 rounded-neu-sm px-3 py-1.5 text-caption font-semibold text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 aria-pressed:bg-ktip-cream aria-pressed:text-ktip-ocean-700 aria-pressed:shadow-neu-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+              className="flex items-center gap-1.5 rounded-neu-sm px-3 py-1.5 text-caption font-semibold text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 aria-pressed:bg-ktip-cream aria-pressed:text-ktip-ocean-700 aria-pressed:shadow-neu-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
             >
               {ink === 'color' ? <Palette size={14} /> : <Contrast size={14} />}
               {ink === 'color' ? t`Color` : t`B&W`}

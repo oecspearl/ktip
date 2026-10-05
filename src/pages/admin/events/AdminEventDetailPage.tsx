@@ -362,7 +362,7 @@ export default function AdminEventDetailPage() {
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0',
+                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0',
                   activeTab === tab.id
                     ? 'border-ktip-ocean-500 text-ktip-ocean-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-ktip-sand-300'

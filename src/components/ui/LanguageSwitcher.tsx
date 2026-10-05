@@ -63,7 +63,7 @@ export function LanguageSwitcher({
         aria-label={t`Change language`}
         title={LANGUAGE_NAMES[uiLang]}
         className={cn(
-          'flex items-center gap-2 rounded-lg text-white/80 transition-all duration-200 hover:text-ktip-nav-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+          'flex items-center gap-2 rounded-lg text-white/80 transition-all duration-200 hover:text-ktip-nav-accent focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60',
           compact ? 'p-2 hover:scale-125' : 'px-2.5 py-1.5 text-sm hover:bg-white/10 hover:text-white'
         )}
       >

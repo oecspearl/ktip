@@ -278,7 +278,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
                   type: e.currentTarget.value as RegistrationFieldType,
                 })
               }
-              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 text-ktip-sand-900 transition-all focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
+              className="w-full border border-ktip-sand-200 rounded-xl px-4 py-3 bg-ktip-sand-50/50 text-ktip-sand-900 transition-all focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
             >
               {FIELD_TYPES.map((ft) => (
                 <option key={ft} value={ft}>{FIELD_TYPE_LABELS[ft]}</option>
@@ -348,7 +348,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
                       <button
                         type="button"
                         onClick={() => removeOption(index)}
-                        className="p-2 text-ktip-sand-400 hover:text-red-600 transition-colors flex-shrink-0"
+                        className="p-2 text-ktip-sand-400 hover:text-red-600 transition-colors shrink-0"
                         aria-label="Remove option"
                       >
                         <Trash2 size={16} />
@@ -380,7 +380,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
           {fields.map((field, index) => (
             <div key={field.id} className="bg-ktip-cream rounded-xl border border-ktip-sand-200 shadow-soft p-4 flex items-center gap-4 group hover:shadow-card transition-shadow">
               {/* Drag handle indicator */}
-              <div className="text-ktip-sand-300 flex-shrink-0">
+              <div className="text-ktip-sand-300 shrink-0">
                 <GripVertical size={18} />
               </div>
 
@@ -401,7 +401,7 @@ export default function AdminEventFormBuilderTab({ eventId }: AdminEventFormBuil
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 no-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 no-hover:opacity-100 transition-opacity">
                 <button
                   type="button"
                   onClick={() => moveField(index, 'up')}

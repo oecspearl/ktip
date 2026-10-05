@@ -14,7 +14,7 @@ interface EventRegistrationFormProps {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const inputBase =
-  'w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
+  'w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
 const inputNormal = `${inputBase} border-ktip-sand-200`
 const inputError = `${inputBase} border-red-300`
 

@@ -98,7 +98,7 @@ export function StickyNoteGroupExpanded({
                 }
               }}
               aria-label={t`Folder name`}
-              className="flex-1 rounded bg-white/60 px-2 py-1 text-base font-bold outline-none"
+              className="flex-1 rounded bg-white/60 px-2 py-1 text-base font-bold outline-hidden"
             />
           ) : (
             <button

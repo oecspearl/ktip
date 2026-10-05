@@ -18,7 +18,7 @@ interface CalendarNoteComposerProps {
 }
 
 const FIELD =
-  'w-full rounded-control bg-ktip-sand-50 px-3 py-2 text-caption text-ktip-sand-900 shadow-neu-sm-inset placeholder:text-ktip-sand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500'
+  'w-full rounded-control bg-ktip-sand-50 px-3 py-2 text-caption text-ktip-sand-900 shadow-neu-sm-inset placeholder:text-ktip-sand-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500'
 
 /**
  * The panel's second face: write a note, task or reminder onto the selected day.
@@ -92,7 +92,7 @@ export function CalendarNoteComposer({
               aria-checked={kind === option}
               onClick={() => setKind(option)}
               className={cn(
-                'flex-1 rounded-neu-sm px-2 py-1 text-micro font-bold uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+                'flex-1 rounded-neu-sm px-2 py-1 text-micro font-bold uppercase tracking-wider transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
                 kind === option
                   ? 'bg-ktip-cream text-ktip-ocean-700 shadow-neu-sm'
                   : 'text-ktip-sand-600 hover:text-ktip-ocean-700'
@@ -139,7 +139,7 @@ export function CalendarNoteComposer({
               onClick={() => setAllDay((on) => !on)}
               aria-pressed={allDay}
               className={cn(
-                'rounded-neu-sm px-2.5 py-2 text-micro font-bold uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+                'rounded-neu-sm px-2.5 py-2 text-micro font-bold uppercase tracking-wider transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
                 allDay
                   ? 'bg-ktip-sand-100 text-ktip-ocean-700 shadow-neu-sm-inset'
                   : 'text-ktip-sand-600 shadow-neu-sm hover:text-ktip-ocean-700'
@@ -187,7 +187,7 @@ export function CalendarNoteComposer({
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center gap-1.5 rounded-neu-sm px-3 py-2 text-micro font-bold uppercase tracking-wider text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 hover:shadow-neu-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+          className="flex items-center gap-1.5 rounded-neu-sm px-3 py-2 text-micro font-bold uppercase tracking-wider text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 hover:shadow-neu-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
         >
           <ArrowLeft size={14} />
           <Trans>Cancel</Trans>

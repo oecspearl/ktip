@@ -289,7 +289,7 @@ export function WelcomePanel() {
                 className="welcome-slide flex min-h-full flex-col justify-center py-6"
                 data-leaving={swapping || undefined}
               >
-                <div ref={contentRef} tabIndex={-1} className="w-full max-w-xl mx-auto outline-none">
+                <div ref={contentRef} tabIndex={-1} className="w-full max-w-xl mx-auto outline-hidden">
                   <p
                     className="welcome-line text-xs font-semibold uppercase tracking-[0.3em] text-ktip-tropical-700"
                     style={line(0)}

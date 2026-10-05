@@ -370,7 +370,7 @@ export function StaggeredMobileMenu({
             // dark-backdrop one. The light pair paints a near-white highlight,
             // which on navy is the white bloom that was blowing out from under
             // the Log In / Sign Up buttons. Same fix the navbar itself uses.
-            'neu-on-dark absolute inset-0 flex flex-col bg-ktip-ink shadow-hard outline-none',
+            'neu-on-dark absolute inset-0 flex flex-col bg-ktip-ink shadow-hard outline-hidden',
             // An installed app paints under the status bar and the home
             // indicator. The top matches the bar's own inset exactly, so the
             // close button lands on the hamburger it covers; the sides only

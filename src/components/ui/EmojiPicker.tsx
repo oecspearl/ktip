@@ -136,7 +136,7 @@ function EmojiPanel({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t`Search emoji`}
             aria-label={t`Search emoji`}
-            className="w-full rounded-lg border border-ktip-sand-200 bg-ktip-cream py-1.5 pl-8 pr-2 text-sm focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
+            className="w-full rounded-lg border border-ktip-sand-200 bg-ktip-cream py-1.5 pl-8 pr-2 text-sm focus:border-ktip-ocean-400 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-200"
           />
         </label>
       </div>
@@ -197,7 +197,7 @@ function Grid({ emoji, onPick }: { emoji: EmojiEntry[]; onPick: (emoji: string) 
           type="button"
           onClick={() => onPick(entry.e)}
           aria-label={entry.k.split(' ')[0] || entry.e}
-          className="emoji-font rounded-lg py-1 text-xl leading-none transition-transform duration-100 hover:scale-125 hover:bg-ktip-sand-100 focus-visible:scale-125 focus-visible:bg-ktip-sand-100 focus-visible:outline-none"
+          className="emoji-font rounded-lg py-1 text-xl leading-none transition-transform duration-100 hover:scale-125 hover:bg-ktip-sand-100 focus-visible:scale-125 focus-visible:bg-ktip-sand-100 focus-visible:outline-hidden"
         >
           {entry.e}
         </button>

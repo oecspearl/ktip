@@ -70,7 +70,7 @@ export default function ConnectionsTab() {
               }
             }}
             aria-label={otherName}
-            className="group flex cursor-pointer items-center justify-between gap-3 rounded-surface bg-ktip-cream p-4 shadow-neu transition-shadow hover:shadow-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+            className="group flex cursor-pointer items-center justify-between gap-3 rounded-surface bg-ktip-cream p-4 shadow-neu transition-shadow hover:shadow-medium focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
           >
             <span className="flex min-w-0 items-center gap-3 text-left">
               <DiamondAvatar src={other?.avatar_url} name={otherName} size={44} />

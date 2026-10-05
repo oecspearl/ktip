@@ -342,7 +342,7 @@ export default function AdminGrantsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.currentTarget.value)}
-                className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-none"
+                className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>

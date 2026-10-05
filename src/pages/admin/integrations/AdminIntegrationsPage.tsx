@@ -255,7 +255,7 @@ export default function AdminIntegrationsPage() {
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
+                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 focus:bg-ktip-cream"
               >
                 {Object.entries(INTEGRATION_CATEGORY_LABELS).map(([value, label]) => (
                   <option value={value} key={value}>{label}</option>

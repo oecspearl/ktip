@@ -26,7 +26,7 @@ import { Trans, Plural, useLingui } from '@lingui/react/macro'
 type Decision = 'under_review' | 'approved' | 'rejected'
 
 const inputClass =
-  'w-full px-3 py-2.5 border border-ktip-sand-200 bg-ktip-cream rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
+  'w-full px-3 py-2.5 border border-ktip-sand-200 bg-ktip-cream rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
 
 const labelClass = 'block text-sm font-medium text-ktip-sand-700 mb-1'
 
@@ -268,7 +268,7 @@ export default function GrantApplicationsPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Badge size="sm" className={GRANT_APPLICATION_STATUS_COLORS[application.status]}>
                       {GRANT_APPLICATION_STATUS_LABELS[application.status] || application.status}
                     </Badge>

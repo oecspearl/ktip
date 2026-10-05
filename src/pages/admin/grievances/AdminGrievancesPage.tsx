@@ -126,7 +126,7 @@ export default function AdminGrievancesPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Statuses</option>
             {Object.entries(GRIEVANCE_STATUS_LABELS).map(([value, label]) => (
@@ -137,7 +137,7 @@ export default function AdminGrievancesPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.currentTarget.value)}
-            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+            className="border border-ktip-sand-200 rounded-lg px-3 py-2 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
           >
             <option value="">All Categories</option>
             {Object.entries(GRIEVANCE_CATEGORY_LABELS).map(([value, label]) => (
@@ -421,7 +421,7 @@ export default function AdminGrievancesPage() {
                   <select
                     value={detailStatus}
                     onChange={(e) => setDetailStatus(e.currentTarget.value as GrievanceStatus)}
-                    className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
+                    className="w-full border border-ktip-sand-200 rounded-xl px-3 py-2.5 text-sm bg-ktip-cream focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500"
                   >
                     {Object.entries(GRIEVANCE_STATUS_LABELS).map(([value, label]) => (
                       <option value={value} key={value}>{label}</option>

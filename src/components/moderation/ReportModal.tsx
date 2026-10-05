@@ -141,9 +141,9 @@ export function ReportModal({
               >
                 <div className="flex items-start gap-2.5">
                   {option.urgent ? (
-                    <ShieldAlert size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                    <ShieldAlert size={16} className="text-red-500 mt-0.5 shrink-0" />
                   ) : (
-                    <Flag size={16} className="text-ktip-sand-400 mt-0.5 flex-shrink-0" />
+                    <Flag size={16} className="text-ktip-sand-400 mt-0.5 shrink-0" />
                   )}
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-ktip-sand-900">{i18n._(option.label)}</p>
@@ -157,7 +157,7 @@ export function ReportModal({
 
         {selected?.urgent && (
           <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 border border-red-200">
-            <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+            <AlertTriangle size={16} className="text-red-500 mt-0.5 shrink-0" />
             <p className="text-xs text-red-700">
               <Trans>This report is treated as high priority. It is sent to our safety administrators and, if a school-verified student is involved, to their institution.</Trans>
             </p>

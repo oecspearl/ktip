@@ -309,7 +309,7 @@ export function RichTextField({
                     onChange={(e) => setLinkUrl(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && insertLink()}
                     placeholder="https://..."
-                    className="flex-1 px-2 py-1 rounded border border-ktip-sand-300 bg-ktip-cream text-sm focus:outline-none focus:border-ktip-ocean-600"
+                    className="flex-1 px-2 py-1 rounded border border-ktip-sand-300 bg-ktip-cream text-sm focus:outline-hidden focus:border-ktip-ocean-600"
                   />
                   <button type="button" className="px-2 py-1 rounded bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white text-sm" onClick={insertLink}>Add</button>
                 </div>
@@ -327,7 +327,7 @@ export function RichTextField({
                     onChange={(e) => setImageUrl(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && insertImage()}
                     placeholder={t`Image URL...`}
-                    className="flex-1 px-2 py-1 rounded border border-ktip-sand-300 bg-ktip-cream text-sm focus:outline-none focus:border-ktip-ocean-600"
+                    className="flex-1 px-2 py-1 rounded border border-ktip-sand-300 bg-ktip-cream text-sm focus:outline-hidden focus:border-ktip-ocean-600"
                   />
                   <button type="button" className="px-2 py-1 rounded bg-ktip-ocean-600 dark:bg-ktip-ocean-200 text-white text-sm" onClick={insertImage}>Add</button>
                 </div>

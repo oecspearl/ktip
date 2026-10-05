@@ -193,7 +193,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
             placeholder="Search attendees..."
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+            className="w-full pl-9 pr-4 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
                               value={reg.status}
                               onChange={(e) => handleStatusChange(reg.id, e.currentTarget.value as RSVPStatus)}
                               disabled={actionLoading}
-                              className="text-xs bg-ktip-sand-50 border border-ktip-sand-200 rounded-lg px-2 py-1 focus:border-ktip-ocean-500 focus:outline-none"
+                              className="text-xs bg-ktip-sand-50 border border-ktip-sand-200 rounded-lg px-2 py-1 focus:border-ktip-ocean-500 focus:outline-hidden"
                             >
                               <option value="confirmed">Confirmed</option>
                               <option value="waitlisted">Waitlisted</option>

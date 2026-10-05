@@ -75,7 +75,11 @@ export function enableCardShuffle(router: DataRouter) {
   // Version beacon for stale-tab debugging: an SPA tab keeps navigating on old
   // JS long after the dev server restarts, which makes "the fix didn't work"
   // reports ambiguous. Bump the number when the shuffle behaviour changes.
-  console.info('[route-shuffle] v16 — search-only navigations (drawer close) stay still')
+  // Dev only: production consoles are for errors, and every member's tab
+  // printed this on load.
+  if (import.meta.env.DEV) {
+    console.info('[route-shuffle] v16 — search-only navigations (drawer close) stay still')
+  }
 
   // Debug flags, read once from the URL that opened the tab:
   //   ?noshuffle — disable transitions entirely (is an artifact even ours?)

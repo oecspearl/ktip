@@ -176,7 +176,7 @@ export function AuthSplitShell({
                 key={step}
                 ref={contentRef}
                 tabIndex={-1}
-                className="animate-tab-enter motion-reduce:animate-none outline-none mt-4"
+                className="animate-tab-enter motion-reduce:animate-none outline-hidden mt-4"
               >
                 {children}
               </div>

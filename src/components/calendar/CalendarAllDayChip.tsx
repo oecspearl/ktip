@@ -28,7 +28,7 @@ export function CalendarAllDayChip({
       aria-pressed={selected}
       aria-label={calendarItemLabel(item)}
       className={cn(
-        'group relative flex items-center overflow-hidden rounded-cal-sm border pl-2 pr-1.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+        'group relative flex items-center overflow-hidden rounded-cal-sm border pl-2 pr-1.5 text-left transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
         item.gradientClass ?? CALENDAR_FALLBACK_GRADIENT,
         selected && 'ring-1 ring-inset ring-ktip-ocean-500',
         item.dimmed && 'opacity-60 saturate-50',

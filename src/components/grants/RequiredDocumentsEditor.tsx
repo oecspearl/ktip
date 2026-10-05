@@ -9,7 +9,7 @@ interface RequiredDocumentsEditorProps {
 }
 
 const inputClass =
-  'w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
+  'w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
 
 const iconButtonClass =
   'p-1.5 text-ktip-sand-400 hover:text-ktip-sand-700 hover:bg-ktip-sand-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed'

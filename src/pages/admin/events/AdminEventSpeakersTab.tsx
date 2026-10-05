@@ -171,7 +171,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
               type="text"
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
-              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               placeholder="Speaker name..."
             />
             {errors.name && (
@@ -188,7 +188,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
               type="text"
               value={speakerTitle}
               onChange={(e) => setSpeakerTitle(e.currentTarget.value)}
-              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
               placeholder="e.g. CEO at Acme Corp"
             />
           </div>
@@ -202,7 +202,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
               value={bio}
               onChange={(e) => setBio(e.currentTarget.value)}
               rows={3}
-              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors resize-none"
+              className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors resize-none"
               placeholder="Brief speaker biography..."
             />
           </div>
@@ -225,7 +225,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
                 type="url"
                 value={photoUrl}
                 onChange={(e) => setPhotoUrl(e.currentTarget.value)}
-                className="w-full mt-2 px-3 py-2 border border-ktip-sand-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full mt-2 px-3 py-2 border border-ktip-sand-200 rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                 placeholder="...or paste image URL"
               />
             </div>
@@ -237,7 +237,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
                 type="url"
                 value={website}
                 onChange={(e) => setWebsite(e.currentTarget.value)}
-                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
+                className="w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors"
                 placeholder="https://example.com"
               />
             </div>
@@ -292,7 +292,7 @@ export default function AdminEventSpeakersTab(props: AdminEventSpeakersTabProps)
                 </div>
 
                 {/* Actions (visible on hover) */}
-                <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 no-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 no-hover:opacity-100 transition-opacity">
                   <button
                     type="button"
                     onClick={() => startEdit(speaker)}

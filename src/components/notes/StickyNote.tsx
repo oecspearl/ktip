@@ -454,7 +454,7 @@ export function StickyNote({
               }
             }}
             aria-label={t`Note title`}
-            className="no-drag min-w-0 flex-1 rounded bg-black/5 px-1 text-sm font-bold outline-none"
+            className="no-drag min-w-0 flex-1 rounded bg-black/5 px-1 text-sm font-bold outline-hidden"
           />
         ) : (
           <>
@@ -609,7 +609,7 @@ export function StickyNote({
         data-placeholder={t`Write anything…`}
         onInput={(e) => onChange({ content: clean(e.currentTarget.innerHTML) })}
         onBlur={(e) => onCommit({ content: clean(e.currentTarget.innerHTML) })}
-        className="sn-body no-drag flex-1 overflow-y-auto px-3 py-2 text-sm leading-relaxed outline-none"
+        className="sn-body no-drag flex-1 overflow-y-auto px-3 py-2 text-sm leading-relaxed outline-hidden"
       />
 
       {/* Toolbar — horizontally scrollable, because a narrow note cannot fit

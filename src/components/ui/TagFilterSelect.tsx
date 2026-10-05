@@ -72,7 +72,7 @@ export function TagFilterSelect({
         aria-expanded={open}
         aria-haspopup="listbox"
         className={cn(
-          'flex items-center gap-2 px-3 py-2 border rounded-lg bg-ktip-cream text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500',
+          'flex items-center gap-2 px-3 py-2 border rounded-lg bg-ktip-cream text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500',
           count > 0 ? 'border-ktip-ocean-400 text-ktip-ocean-700' : 'border-ktip-sand-300 text-ktip-sand-700'
         )}
       >
@@ -97,7 +97,7 @@ export function TagFilterSelect({
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t`Filter ${heading}…`}
               aria-label={t`Filter ${heading}`}
-              className="mb-2 w-full rounded-lg border border-ktip-sand-300 bg-ktip-canvas px-2.5 py-1.5 text-sm focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
+              className="mb-2 w-full rounded-lg border border-ktip-sand-300 bg-ktip-canvas px-2.5 py-1.5 text-sm focus:border-ktip-ocean-500 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20"
             />
           )}
 

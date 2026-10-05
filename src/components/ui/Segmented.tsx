@@ -57,7 +57,7 @@ export function Segmented<T extends string>({
             onClick={() => onChange(option.value)}
             aria-pressed={active}
             className={cn(
-              'px-2.5 py-1 text-micro font-bold uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+              'px-2.5 py-1 text-micro font-bold uppercase tracking-wider transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
               corner.item,
               active
                 ? 'bg-ktip-cream text-ktip-ocean-700 shadow-neu-sm'

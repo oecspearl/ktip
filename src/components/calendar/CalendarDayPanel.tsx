@@ -71,7 +71,7 @@ function CalendarItemRow({
       onClick={() => onSelect(item)}
       aria-pressed={selected}
       className={cn(
-        'group flex w-full gap-3 rounded-surface p-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
+        'group flex w-full gap-3 rounded-surface p-3 text-left transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500',
         selected
           ? 'bg-ktip-ocean-50 ring-1 ring-ktip-ocean-300'
           : 'bg-ktip-sand-50 shadow-neu-sm-inset hover:bg-ktip-sand-100',
@@ -169,7 +169,7 @@ function ItemDetail({
           type="button"
           onClick={onBack}
           aria-label={t`Close details`}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ktip-sand-600 shadow-neu-sm transition-all hover:text-ktip-ocean-700 active:shadow-neu-sm-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ktip-sand-600 shadow-neu-sm transition-all hover:text-ktip-ocean-700 active:shadow-neu-sm-inset focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
         >
           <X size={13} />
         </button>
@@ -261,7 +261,7 @@ function ItemDetail({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 rounded-neu-sm px-3 py-2 text-micro font-bold uppercase tracking-wider text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 hover:shadow-neu-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+          className="flex items-center gap-1.5 rounded-neu-sm px-3 py-2 text-micro font-bold uppercase tracking-wider text-ktip-sand-600 transition-all hover:text-ktip-ocean-700 hover:shadow-neu-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
         >
           <ArrowLeft size={14} />
           <Trans>Day</Trans>
@@ -385,7 +385,7 @@ export function CalendarDayPanel({
           <button
             type="button"
             onClick={onAddNote}
-            className="flex w-full items-center justify-center gap-1.5 rounded-neu-sm px-3 py-2 text-micro font-bold uppercase tracking-wider text-ktip-ocean-700 shadow-neu-sm transition-all hover:text-ktip-ocean-700 active:translate-y-px active:shadow-neu-sm-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+            className="flex w-full items-center justify-center gap-1.5 rounded-neu-sm px-3 py-2 text-micro font-bold uppercase tracking-wider text-ktip-ocean-700 shadow-neu-sm transition-all hover:text-ktip-ocean-700 active:translate-y-px active:shadow-neu-sm-inset focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
           >
             <Plus size={14} />
             <Trans>Note, task or reminder</Trans>

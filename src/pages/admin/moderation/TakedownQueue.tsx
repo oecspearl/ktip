@@ -95,7 +95,7 @@ export function TakedownQueue() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TakedownStatus | 'all')}
-            className="rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm focus:border-ktip-ocean-500 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20"
+            className="rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm focus:border-ktip-ocean-500 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20"
           >
             <option value="all">All statuses</option>
             <option value="received">Received</option>

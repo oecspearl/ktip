@@ -47,7 +47,7 @@ function ClusterRowButton({
         backgroundImage: selected ? undefined : accentWash(row.item.dotClass, row.past),
       }}
       className={cn(
-        'relative w-full shrink-0 overflow-hidden pl-2 pr-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
+        'relative w-full shrink-0 overflow-hidden pl-2 pr-1.5 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
         tiny ? 'flex items-center gap-2 py-0.5' : 'py-1',
         selected ? 'bg-ktip-ocean-50 ring-1 ring-inset ring-ktip-ocean-500' : 'hover:bg-ktip-sand-100'
       )}

@@ -66,7 +66,7 @@ export function EventScheduleTimeline({ items }: EventScheduleTimelineProps) {
                   item.schedule_type === 'break' && 'bg-ktip-sand-50 rounded-lg px-4 -mx-2'
                 )}
               >
-                <div className="w-32 flex-shrink-0 text-sm font-medium text-ktip-ocean-600">
+                <div className="w-32 shrink-0 text-sm font-medium text-ktip-ocean-600">
                   {formatTimeRange(item.start_time, item.end_time)}
                 </div>
 

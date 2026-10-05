@@ -74,7 +74,7 @@ export function RolePicker({
       </div>
 
       <p className="mt-3 flex items-start gap-2 rounded-xl border border-ktip-ocean-100 bg-ktip-ocean-50/60 px-3 py-2.5 text-sm font-semibold text-ktip-ocean-800">
-        <ShieldCheck size={16} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" aria-hidden="true" />
+        <ShieldCheck size={16} className="mt-0.5 shrink-0 text-ktip-ocean-600" aria-hidden="true" />
         <span>
           <Trans>Every role is verified before an account gets full access to KTIP.</Trans>
         </span>

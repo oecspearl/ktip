@@ -78,7 +78,7 @@ export function LinkModal({ open, onClose, editor }: LinkModalProps) {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com"
-            className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+            className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
           />
         </div>
         <div>
@@ -90,7 +90,7 @@ export function LinkModal({ open, onClose, editor }: LinkModalProps) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={t`Link text`}
-            className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+            className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
           />
         </div>
         <div className="flex items-center gap-2 pt-2">

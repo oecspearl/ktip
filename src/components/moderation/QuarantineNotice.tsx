@@ -19,7 +19,7 @@ export function QuarantineNotice({ isAuthor, isModerator, className = '' }: Quar
     <div
       className={`flex items-start gap-2.5 p-3 rounded-xl bg-ktip-sun-50 border border-ktip-sun-200 ${className}`}
     >
-      <ShieldAlert size={16} className="text-ktip-sun-700 mt-0.5 flex-shrink-0" />
+      <ShieldAlert size={16} className="text-ktip-sun-700 mt-0.5 shrink-0" />
       <p className="text-xs text-ktip-sun-800">
         {isModerator
           ? t`Quarantined pending review. Only you and the author can see it.`

@@ -268,7 +268,7 @@ export default function AdminEventVenueTab({
             onFocus={() => setResultsOpen(true)}
             placeholder="Search people by name…"
             aria-label={`Search people to give a role in ${room.name}`}
-            className="w-full rounded-lg border border-ktip-sand-200 py-2 pl-3 pr-9 text-sm focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
+            className="w-full rounded-lg border border-ktip-sand-200 py-2 pl-3 pr-9 text-sm focus:border-ktip-ocean-400 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-200"
           />
           {inviteSearch && (
             <button
@@ -492,7 +492,7 @@ export default function AdminEventVenueTab({
               value={floorplan}
               onChange={(e) => setFloorplan(e.target.value)}
               placeholder="https://…/floorplan.svg"
-              className="min-w-0 flex-1 rounded-lg border border-ktip-sand-200 px-3 py-2 text-sm focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
+              className="min-w-0 flex-1 rounded-lg border border-ktip-sand-200 px-3 py-2 text-sm focus:border-ktip-ocean-400 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-200"
             />
             <Button size="sm" icon={<Save size={14} />} onClick={saveFloorplan}>
               Save

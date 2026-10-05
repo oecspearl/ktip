@@ -58,7 +58,7 @@ const SECTION_TYPE_BADGE_VARIANTS: Record<EventSectionType, string> = {
 }
 
 const INPUT_CLASS =
-  'w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
+  'w-full px-3 py-2.5 border border-ktip-sand-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-500/20 focus:border-ktip-ocean-500 transition-colors'
 
 function getDefaultContent(type: EventSectionType): Record<string, any> {
   switch (type) {
@@ -651,7 +651,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
                   {/* Icon */}
                   <div
                     className={cn(
-                      'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                      'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
                       section.is_visible ? 'bg-ktip-ocean-100' : 'bg-ktip-sand-100'
                     )}
                   >
@@ -688,7 +688,7 @@ export default function AdminEventPageBuilderTab(props: AdminEventPageBuilderTab
 
                   {/* Action Buttons. Spaced out on touch so the 44px hit areas
                       (icon-hit) do not reach over each other's icons. */}
-                  <div className="flex items-center gap-0.5 pointer-coarse:gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-0.5 pointer-coarse:gap-3 shrink-0">
                     {/* Visibility Toggle */}
                     <button
                       type="button"

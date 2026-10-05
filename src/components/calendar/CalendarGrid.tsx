@@ -87,7 +87,7 @@ function CalendarDayCell({
       aria-pressed={selected}
       aria-label={t`${dayLabel}, ${countLabel}`}
       className={cn(
-        'flex min-h-14 cursor-pointer flex-col gap-1 border-b border-l border-cal-line p-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500 md:min-h-28 md:p-1.5',
+        'flex min-h-14 cursor-pointer flex-col gap-1 border-b border-l border-cal-line p-1 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500 md:min-h-28 md:p-1.5',
         selected
           ? 'bg-ktip-ocean-50/60'
           : isWeekend(day)
@@ -145,7 +145,7 @@ function CalendarDayCell({
                     item.id === selectedItemId ? undefined : accentWash(item.dotClass, past),
                 }}
                 className={cn(
-                  'relative w-full overflow-hidden py-0.5 pl-2 pr-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
+                  'relative w-full overflow-hidden py-0.5 pl-2 pr-1 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
                   item.id === selectedItemId
                     ? 'bg-ktip-ocean-50 ring-1 ring-inset ring-ktip-ocean-500'
                     : 'hover:bg-ktip-sand-100/80'

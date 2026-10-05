@@ -89,7 +89,7 @@ export default function AdminProjectsPage() {
             placeholder="Search projects..."
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:outline-none text-sm"
+            className="w-full pl-10 pr-4 py-2.5 border border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:outline-hidden text-sm"
           />
         </div>
       </div>

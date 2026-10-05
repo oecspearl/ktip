@@ -55,7 +55,7 @@ export function FormSection({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-ktip-sand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500/30"
+        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-ktip-sand-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500/30"
       >
         <span
           className={cn(

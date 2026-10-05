@@ -265,7 +265,7 @@ export default function AdminEmployersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-ktip-sand-200 rounded-xl px-3 py-2.5 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
+          className="border border-ktip-sand-200 rounded-xl px-3 py-2.5 bg-ktip-sand-50/50 text-sm focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
         >
           <option value="">All statuses</option>
           {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -465,7 +465,7 @@ export default function AdminEmployersPage() {
               <select
                 value={form.industry ?? ''}
                 onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
-                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
+                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
               >
                 <option value="">Not specified</option>
                 {industryOptions.map((industry) => (
@@ -500,7 +500,7 @@ export default function AdminEmployersPage() {
                 <select
                   value={form.country_code}
                   onChange={(e) => setForm((f) => ({ ...f, country_code: e.target.value }))}
-                  className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
+                  className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
                 >
                   <option value="">Select a country</option>
                   {countries?.map((c) => (
@@ -597,7 +597,7 @@ export default function AdminEmployersPage() {
               <select
                 value={reviewMethod}
                 onChange={(e) => setReviewMethod(e.target.value as EmployerVerificationMethod)}
-                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
+                className="border border-ktip-sand-200 rounded-xl px-3 py-3 bg-ktip-sand-50/50 text-sm focus:outline-hidden focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20"
               >
                 {Object.entries(METHOD_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>

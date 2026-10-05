@@ -89,13 +89,13 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none"
+              className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
             />
           </div>
           <select
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value as ProjectMemberRole)}
-            className="px-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:outline-none"
+            className="px-3 py-2 border border-ktip-sand-300 rounded-lg text-sm focus:outline-hidden"
           >
             <option value="viewer"><Trans>Viewer</Trans></option>
             <option value="editor"><Trans>Editor</Trans></option>
@@ -164,7 +164,7 @@ export function ManageTeamModal({ open, onClose, projectId, projectTitle }: Mana
                     value={member.role}
                     onChange={(e) => handleRoleChange(member.id, e.target.value as ProjectMemberRole)}
                     disabled={loading}
-                    className="px-2 py-1 border border-ktip-sand-300 rounded text-xs focus:outline-none"
+                    className="px-2 py-1 border border-ktip-sand-300 rounded text-xs focus:outline-hidden"
                   >
                     <option value="viewer"><Trans>Viewer</Trans></option>
                     <option value="editor"><Trans>Editor</Trans></option>

@@ -165,7 +165,7 @@ export function StickyNoteGroup({
         onPointerMove={onDrag}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
-        className="relative block w-full cursor-grab active:cursor-grabbing touch-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 rounded-lg"
+        className="relative block w-full cursor-grab active:cursor-grabbing touch-none focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500 rounded-lg"
         style={{
           transform: hovered && !dragPx ? 'translateY(-8px)' : 'translateY(0)',
           transition: dragPx ? 'none' : 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1)',

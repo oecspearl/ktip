@@ -42,9 +42,9 @@ export function EventPageSectionRenderer({ section }: EventPageSectionRendererPr
                 >
                   <span>{item.question}</span>
                   {openIndex === index ? (
-                    <ChevronUp className="w-5 h-5 text-ktip-sand-400 flex-shrink-0 ml-2" />
+                    <ChevronUp className="w-5 h-5 text-ktip-sand-400 shrink-0 ml-2" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-ktip-sand-400 flex-shrink-0 ml-2" />
+                    <ChevronDown className="w-5 h-5 text-ktip-sand-400 shrink-0 ml-2" />
                   )}
                 </button>
                 {openIndex === index && (
@@ -69,7 +69,7 @@ export function EventPageSectionRenderer({ section }: EventPageSectionRendererPr
             )}
             {section.content.address && (
               <p className="text-ktip-sand-700 flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-ktip-sand-400" />
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-ktip-sand-400" />
                 <span>{section.content.address}</span>
               </p>
             )}

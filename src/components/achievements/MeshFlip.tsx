@@ -282,7 +282,7 @@ export function MeshFlipCell({
           'relative block h-full w-full text-left',
           'transition-transform motion-safe:hover:scale-[1.02]',
           // Inset ring: an outset one is swallowed by flush neighbours.
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
+          'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ktip-ocean-500',
           'disabled:cursor-not-allowed disabled:opacity-60',
           showPortal && 'invisible pointer-events-none'
         )}
@@ -336,7 +336,7 @@ export function MeshFlipCell({
                 // sm+ stays overflow-visible on purpose: the showcase artwork
                 // deliberately breaks the panel's edges (the same rule the bare
                 // Modal followed). Phones scroll inside the card instead.
-                className="mesh-back absolute left-1/2 top-1/2 w-[var(--back-w,64rem)] max-h-[92svh] overflow-y-auto focus:outline-none sm:max-h-none sm:overflow-visible"
+                className="mesh-back absolute left-1/2 top-1/2 w-[var(--back-w,64rem)] max-h-[92svh] overflow-y-auto focus:outline-hidden sm:max-h-none sm:overflow-visible"
               >
                 {back()}
               </div>

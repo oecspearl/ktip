@@ -372,13 +372,13 @@ export default function OnboardingPage() {
         <div className="space-y-4">
           <div className="flex items-start gap-3 rounded-xl border border-ktip-ocean-200 bg-ktip-ocean-50 px-4 py-3">
             {isOrg ? (
-              <Building2 size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+              <Building2 size={18} className="mt-0.5 shrink-0 text-ktip-ocean-600" />
             ) : isAdminReviewed ? (
-              <Scale size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+              <Scale size={18} className="mt-0.5 shrink-0 text-ktip-ocean-600" />
             ) : isStudent ? (
-              <Clock size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+              <Clock size={18} className="mt-0.5 shrink-0 text-ktip-ocean-600" />
             ) : (
-              <GraduationCap size={18} className="mt-0.5 flex-shrink-0 text-ktip-ocean-600" />
+              <GraduationCap size={18} className="mt-0.5 shrink-0 text-ktip-ocean-600" />
             )}
             <div className="text-sm text-ktip-sand-700">
               {isOrg ? (

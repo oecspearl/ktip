@@ -420,7 +420,7 @@ export default function ProjectDetailPage() {
                         navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
                       }
                     }}
-                    className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                   />
                 </div>
                 <button

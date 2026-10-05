@@ -54,7 +54,7 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
               : 'bg-ktip-sun-100 text-ktip-sun-800 border-ktip-sun-200')
           }
         >
-          <Clock size={16} className="flex-shrink-0" />
+          <Clock size={16} className="shrink-0" />
           <span>
             {deadlinePassed ? t`Submissions closed ` : t`Submissions close `}
             {format(new Date(submissionDeadline), 'MMM d, yyyy · h:mm a')}
@@ -78,7 +78,7 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
               <ul className="space-y-3">
                 {group.items.map((item, index) => (
                   <li key={item.id} className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 text-xs font-semibold flex items-center justify-center mt-0.5">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 text-xs font-semibold flex items-center justify-center mt-0.5">
                       {index + 1}
                     </span>
                     <div className="min-w-0">

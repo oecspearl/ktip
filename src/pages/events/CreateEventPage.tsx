@@ -692,7 +692,7 @@ export default function CreateEventPage() {
                 <select
                   value={eventStatus}
                   onChange={(e) => setEventStatus(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                 >
                   <option value="draft"><Trans>Draft - Not visible to public</Trans></option>
                   <option value="published"><Trans>Published - Visible to everyone</Trans></option>
@@ -765,7 +765,7 @@ export default function CreateEventPage() {
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     min={today}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                     required
                   />
                 </div>
@@ -807,7 +807,7 @@ export default function CreateEventPage() {
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       min={startDate || today}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                     />
                   </div>
                   {errors.end_date && (
@@ -843,7 +843,7 @@ export default function CreateEventPage() {
                       onChange={(e) => setRegCloseDate(e.target.value)}
                       min={today}
                       max={startDate || undefined}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                     />
                   </div>
                   {errors.registration_closes_at && (
@@ -952,7 +952,7 @@ export default function CreateEventPage() {
                         value={submissionDate}
                         onChange={(e) => setSubmissionDate(e.target.value)}
                         min={today}
-                        className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-ktip-sand-200 rounded-xl focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
                       />
                     </div>
                   </div>
@@ -1002,11 +1002,11 @@ export default function CreateEventPage() {
                       key={`${file.name}-${file.size}`}
                       className="flex items-center gap-3 border border-ktip-sand-200 rounded-xl px-3 py-2"
                     >
-                      <FileText size={18} className="flex-shrink-0 text-ktip-sand-500" />
+                      <FileText size={18} className="shrink-0 text-ktip-sand-500" />
                       <span className="flex-1 min-w-0 truncate text-sm text-ktip-sand-800">
                         {file.name}
                       </span>
-                      <span className="flex-shrink-0 text-xs text-ktip-sand-500">
+                      <span className="shrink-0 text-xs text-ktip-sand-500">
                         {t`${sizeMb} MB`}
                       </span>
                       <button

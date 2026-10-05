@@ -50,7 +50,7 @@ export default function FAQPage() {
             placeholder={t`Search questions...`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 border border-ktip-sand-300 bg-ktip-cream rounded-xl text-sm pointer-coarse:text-body focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            className="w-full pl-11 pr-4 py-3 border border-ktip-sand-300 bg-ktip-cream rounded-xl text-sm pointer-coarse:text-body focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
           />
         </div>
 

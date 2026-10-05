@@ -1083,7 +1083,7 @@ export function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.currentTarget.value)}
                     onKeyDown={handleSearch}
-                    className="w-full pl-10 pr-16 py-2 rounded-lg focus:outline-none transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white"
+                    className="w-full pl-10 pr-16 py-2 rounded-lg focus:outline-hidden transition-colors border border-white/20 bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-brand-navy focus:placeholder-ktip-sand-400 focus:border-white"
                   />
                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold tracking-wide text-ktip-sand-400">
                     {SHORTCUT_HINT}
@@ -1515,7 +1515,7 @@ export function Navbar() {
           onFocus={() => setMobileSearchFocused(true)}
           // text-body: iOS zooms into any field under 16px on focus, and this
           // one only ever renders on a phone or tablet.
-          className="w-full rounded-2xl border border-white/10 bg-white/[0.05] py-3 pl-11 pr-4 text-body text-white placeholder-white/40 transition-colors focus:border-ktip-nav-accent/50 focus:bg-white/[0.09] focus:outline-none"
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.05] py-3 pl-11 pr-4 text-body text-white placeholder-white/40 transition-colors focus:border-ktip-nav-accent/50 focus:bg-white/[0.09] focus:outline-hidden"
         />
       </div>
       {/* Its own boundary: inside the drawer's, a first keystroke that

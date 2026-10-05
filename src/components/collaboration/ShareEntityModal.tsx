@@ -367,7 +367,7 @@ export function ShareEntityModal({
               onChange={(e) => handleInput(e.target.value)}
               onFocus={() => { if (results.length > 0) setShowDropdown(true) }}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-              className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+              className="w-full pl-9 pr-4 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
             />
             {searchLoading && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -396,7 +396,7 @@ export function ShareEntityModal({
                 placeholder="partner@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-3 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none text-sm"
+                className="flex-1 px-3 py-2.5 border border-ktip-sand-200 bg-ktip-sand-50/50 focus:bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden text-sm"
               />
               <button
                 type="button"

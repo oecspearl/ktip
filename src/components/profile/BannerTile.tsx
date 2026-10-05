@@ -47,7 +47,7 @@ export function BannerTile({ className }: { className?: string }) {
             type="button"
             onClick={() => setOpen(true)}
             aria-label={t`Banner`}
-            className="group relative h-16 w-40 shrink-0 overflow-hidden rounded-control bg-ktip-sand-100 shadow-neu-sm-inset transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
+            className="group relative h-16 w-40 shrink-0 overflow-hidden rounded-control bg-ktip-sand-100 shadow-neu-sm-inset transition-shadow focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ktip-ocean-500"
           >
             {isGradientBanner(banner) ? (
               <BannerAurora spec={banner} animated={false} />
