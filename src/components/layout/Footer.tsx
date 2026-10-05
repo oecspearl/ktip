@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { Instagram, Linkedin, Facebook, Youtube } from 'lucide-react'
+import { Instagram, Linkedin, Facebook, Youtube } from '../ui/BrandIcons'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'

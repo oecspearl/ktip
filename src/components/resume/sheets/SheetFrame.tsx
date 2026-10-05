@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Github, Globe, Linkedin, Mail, MapPin, Phone } from 'lucide-react'
+import { Globe, Mail, MapPin, Phone } from 'lucide-react'
+import { Github, Linkedin } from '../../ui/BrandIcons'
 import type { ResumeData, ResumeTheme } from '../../../types/resume'
 import type { ResumeDesign } from '../../../lib/resume-designs'
 import { cn } from '../../../lib/utils'
