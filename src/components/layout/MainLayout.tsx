@@ -34,7 +34,7 @@ const StickyNoteOverlay = lazyOverlay(
   () => import('../notes/StickyNoteOverlay').then((m) => ({ default: m.StickyNoteOverlay })),
   'sticky-notes'
 )
-import { StickyNotesProvider, useStickyNotesPanel } from '../../contexts/StickyNotesContext'
+import { StickyNotesProvider, useStickyNotesSummary } from '../../contexts/StickyNotesContext'
 import { TutorialProvider } from '../../contexts/TutorialContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useOrientationTransition } from '../../hooks/useOrientationTransition'
@@ -63,7 +63,7 @@ function OverlayPanels() {
   const memberOpen = useEverTrue(useMemberPanel().isOpen)
   // Notes have no open/closed flag of their own — the layer draws whatever the
   // account has, so having any at all is the trigger.
-  const hasNotes = useEverTrue(useStickyNotesPanel().notes.length > 0)
+  const hasNotes = useEverTrue(useStickyNotesSummary().noteCount > 0)
 
   if (!messagingOpen && !memberOpen && !hasNotes) return null
 

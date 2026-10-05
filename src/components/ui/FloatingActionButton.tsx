@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
-import { useStickyNotesPanel } from '../../contexts/StickyNotesContext'
+import { useStickyNotesSummary } from '../../contexts/StickyNotesContext'
 import { useTutorials } from '../../contexts/TutorialContext'
 import { useUnreadMessageCount } from '../../hooks/useMessages'
 import { useThemeMode } from '../../hooks/useThemeMode'
@@ -102,7 +102,7 @@ export function FloatingActionButton() {
   const { t } = useLingui()
   const auth = useAuth()
   const { togglePanel } = useMessagingPanel()
-  const { notes, fabPanelOpen, setFabPanelOpen } = useStickyNotesPanel()
+  const { noteCount, fabPanelOpen, setFabPanelOpen } = useStickyNotesSummary()
   const { startTutorial, isTutorialCompleted } = useTutorials()
   const { unreadCount } = useUnreadMessageCount(auth.user?.id)
   const { pathname } = useLocation()
@@ -139,7 +139,6 @@ export function FloatingActionButton() {
   const pageTutorialId = resolvedTour?.path === pathname ? resolvedTour.id : null
   // The one page whose tour is not in the registry: see the tutorial action.
   const isHome = pathname === '/'
-  const noteCount = notes.length
 
   useEffect(() => {
     // Home is skipped outright: its tour is the welcome panel, so pulling the

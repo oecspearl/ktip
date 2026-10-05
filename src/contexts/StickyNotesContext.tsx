@@ -56,6 +56,19 @@ interface StickyNotesContextValue {
 
 const StickyNotesContext = createContext<StickyNotesContextValue | null>(null)
 
+interface StickyNotesSummary {
+  noteCount: number
+  fabPanelOpen: boolean
+  setFabPanelOpen: (open: boolean) => void
+}
+
+/**
+ * The slice the always-mounted chrome needs: how many notes, and whether the
+ * panel is open. Separate because the full value changes on every keystroke
+ * typed into a note, and the FAB and MainLayout read it only for a count.
+ */
+const StickyNotesSummaryContext = createContext<StickyNotesSummary | null>(null)
+
 /**
  * Holds the notes so the FAB can create one without owning the overlay that
  * draws them — the two live at opposite ends of the layout.
@@ -259,7 +272,24 @@ export function StickyNotesProvider({ children }: { children: ReactNode }) {
     ]
   )
 
-  return <StickyNotesContext.Provider value={value}>{children}</StickyNotesContext.Provider>
+  const noteCount = notes.length
+  const summary = useMemo(
+    () => ({ noteCount, fabPanelOpen, setFabPanelOpen }),
+    [noteCount, fabPanelOpen, setFabPanelOpen]
+  )
+
+  return (
+    <StickyNotesSummaryContext.Provider value={summary}>
+      <StickyNotesContext.Provider value={value}>{children}</StickyNotesContext.Provider>
+    </StickyNotesSummaryContext.Provider>
+  )
+}
+
+/** Count and panel state only. Prefer this outside the notes themselves. */
+export function useStickyNotesSummary() {
+  const ctx = useContext(StickyNotesSummaryContext)
+  if (!ctx) throw new Error('useStickyNotesSummary must be used within StickyNotesProvider')
+  return ctx
 }
 
 export function useStickyNotesPanel() {

@@ -33,10 +33,12 @@ export function useExternalCourses(filters?: {
     queryFn: fetchCourses,
     // The proxy itself is uncached (see api/_lib/ktip-catalog.ts) — a course
     // removed on the campus side should disappear on the next fetch, not
-    // linger because the browser held onto an old response. staleTime: 0
-    // (React Query's default, spelled out for clarity) means every mount and
-    // window focus revalidates.
-    staleTime: 0,
+    // linger because the browser held onto an old response. Coming back to
+    // the tab revalidates; App.tsx turns focus refetching off globally, so it
+    // is switched back on here, where the data really does change elsewhere.
+    // The short staleTime only stops a remount seconds later asking again.
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   })
 
   const courses = useMemo(() => {

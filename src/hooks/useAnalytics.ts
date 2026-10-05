@@ -19,6 +19,81 @@ function getSessionId(): string {
   return id
 }
 
+// ── Batching ──
+//
+// One INSERT per event was one request (plus its CORS preflight) per page
+// view, click and heartbeat, on the connections this app most needs to spare.
+// Events now wait up to FLUSH_MS, or until BATCH_MAX have queued, and go up as
+// one multi-row insert. Leaving the tab flushes with `keepalive`, which lets
+// the request outlive the page; sendBeacon would too, but cannot carry the
+// auth header that RLS reads user_id against.
+const FLUSH_MS = 5_000
+const BATCH_MAX = 20
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+const SUPABASE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY) as string
+
+const queue: Record<string, unknown>[] = []
+let flushTimer = 0
+// The page is going away by the time the keepalive flush runs, so there is no
+// awaiting getSession() there; each track() leaves the latest token here.
+let lastAccessToken: string | null = null
+
+function reportFailure(error: unknown) {
+  // Still non-fatal for the user, but no longer silent for us: a failing
+  // ingestion pipeline used to look identical to no traffic at all.
+  if (!analyticsFailureReported) {
+    analyticsFailureReported = true
+    captureException(
+      new AppError({
+        code: 'ANALYTICS_INGESTION_FAILED',
+        area: 'analytics',
+        operation: 'event-ingestion',
+        cause: error,
+      })
+    )
+  }
+}
+
+async function flush(opts?: { keepalive?: boolean }) {
+  window.clearTimeout(flushTimer)
+  flushTimer = 0
+  if (!queue.length) return
+  const rows = queue.splice(0)
+  try {
+    if (opts?.keepalive) {
+      const headers: Record<string, string> = {
+        apikey: SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      }
+      if (lastAccessToken) headers.Authorization = `Bearer ${lastAccessToken}`
+      void fetch(`${SUPABASE_URL}/rest/v1/analytics_events`, {
+        method: 'POST',
+        keepalive: true,
+        headers,
+        body: JSON.stringify(rows),
+      }).catch(() => {})
+      return
+    }
+    const { error } = await (supabase as any).from('analytics_events').insert(rows)
+    if (error) throw error
+  } catch (error) {
+    reportFailure(error)
+  }
+}
+
+if (typeof window !== 'undefined') {
+  // pagehide alone misses a phone switching apps and never coming back;
+  // visibilitychange to hidden is the last event a mobile tab reliably gets.
+  const leave = () => void flush({ keepalive: true })
+  window.addEventListener('pagehide', leave)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') leave()
+  })
+}
+
 // ── Core track function (fire-and-forget) ──
 async function track(
   eventType: 'page_view' | 'feature_use' | 'funnel_step' | 'click' | 'conversion',
@@ -30,35 +105,27 @@ async function track(
   // analytics.feature() call cannot forget it.
   if (!hasAnalyticsConsent()) return
 
+  // Read now, not at flush time: the path and referrer belong to this event.
+  const page_path = pagePath ?? window.location.pathname
   try {
     const {
       data: { session },
     } = await supabase.auth.getSession()
-    const { error } = await (supabase as any).from('analytics_events').insert({
+    lastAccessToken = session?.access_token ?? null
+    queue.push({
       session_id: getSessionId(),
       user_id: session?.user?.id ?? null,
       event_type: eventType,
       event_name: eventName,
       properties,
-      page_path: pagePath ?? window.location.pathname,
+      page_path,
       referrer: document.referrer || null,
       user_agent: navigator.userAgent,
     })
-    if (error) throw error
+    if (queue.length >= BATCH_MAX) void flush()
+    else if (!flushTimer) flushTimer = window.setTimeout(() => void flush(), FLUSH_MS)
   } catch (error) {
-    // Still non-fatal for the user, but no longer silent for us: a failing
-    // ingestion pipeline used to look identical to no traffic at all.
-    if (!analyticsFailureReported) {
-      analyticsFailureReported = true
-      captureException(
-        new AppError({
-          code: 'ANALYTICS_INGESTION_FAILED',
-          area: 'analytics',
-          operation: 'event-ingestion',
-          cause: error,
-        })
-      )
-    }
+    reportFailure(error)
   }
 }
 

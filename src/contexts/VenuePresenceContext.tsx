@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useMatch, useParams } from 'react-router'
 import { useAuth } from './AuthContext'
 import { useEvent } from '../hooks/useEvents'
@@ -43,7 +43,10 @@ export function VenuePresenceProvider({ children }: { children: ReactNode }) {
 
   const { membership, loading: joinPending, error: joinError } = useVenueSession(eventId)
   const joining = !!eventId && joinPending
-  const { roster } = useVenueRoster(eventId)
+  // While the live channel is up it carries everyone who is actually here, so
+  // the roster poll can slow right down; it speeds back up if the channel drops.
+  const [presenceLive, setPresenceLive] = useState(false)
+  const { roster } = useVenueRoster(eventId, { live: presenceLive })
   const { rooms } = useVenueRooms(eventId)
 
   // The provider sits above the :roomKey route, so useParams cannot see the
@@ -73,12 +76,12 @@ export function VenuePresenceProvider({ children }: { children: ReactNode }) {
   )
 
   const presence = useVenuePresence({ eventId, me, roomId, roster })
+  useEffect(() => setPresenceLive(presence.connected), [presence.connected])
 
   const value = useMemo(
     () => ({ eventId, membership, joining, joinError, roster, presence }),
-    // presence is a fresh object every render, so this memo keys on the
-    // provider's own render — it exists to keep the value's shape stable for
-    // TypeScript, not to skip renders.
+    // useVenuePresence memoizes its result, so this changes only when
+    // something in it does.
     [eventId, membership, joining, joinError, roster, presence]
   )
 

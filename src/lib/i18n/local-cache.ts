@@ -105,10 +105,34 @@ export function writeLocal(text: string, translated: string, format: TextFormat,
 }
 
 /**
+ * Keys written since the index was last saved. A translated page caches its
+ * strings in a burst, and saving the index per string meant parsing and
+ * rewriting a ~2,000-entry JSON array per string, on the main thread. The
+ * burst is folded into one write instead.
+ */
+const pendingKeys: string[] = []
+let pendingStore: Storage | null = null
+let indexFlushTimer: ReturnType<typeof setTimeout> | null = null
+
+/**
  * Insertion order, kept separately so eviction does not have to read and parse
  * every entry to find out which are oldest.
  */
 function trackKey(store: Storage, key: string): void {
+  if (pendingStore && pendingStore !== store) flushIndex()
+  pendingStore = store
+  pendingKeys.push(key)
+  if (!indexFlushTimer) indexFlushTimer = setTimeout(flushIndex, 250)
+}
+
+function flushIndex(): void {
+  if (indexFlushTimer) clearTimeout(indexFlushTimer)
+  indexFlushTimer = null
+  const store = pendingStore
+  const keys = pendingKeys.splice(0)
+  pendingStore = null
+  if (!store || keys.length === 0) return
+
   let index: string[]
   try {
     index = JSON.parse(store.getItem(INDEX_KEY) || '[]') as string[]
@@ -119,9 +143,9 @@ function trackKey(store: Storage, key: string): void {
 
   // Re-writing an existing key must not add a second index entry, or the index
   // grows without bound while the store stays the same size.
-  const at = index.indexOf(key)
-  if (at !== -1) index.splice(at, 1)
-  index.push(key)
+  const fresh = new Set(keys)
+  index = index.filter((k) => !fresh.has(k))
+  index.push(...fresh)
 
   if (index.length > MAX_ENTRIES) {
     for (const stale of index.splice(0, index.length - MAX_ENTRIES)) {
@@ -137,6 +161,8 @@ function trackKey(store: Storage, key: string): void {
 }
 
 function evictOldest(store: Storage, fraction: number): void {
+  // Evicting by a stale index would spare the newest entries' predecessors.
+  flushIndex()
   try {
     const index = JSON.parse(store.getItem(INDEX_KEY) || '[]') as string[]
     if (!Array.isArray(index) || index.length === 0) return
@@ -152,6 +178,8 @@ function evictOldest(store: Storage, fraction: number): void {
 export function clearLocal(): void {
   const store = storage()
   if (!store) return
+  // Entries written in the last 250ms are not in the stored index yet.
+  flushIndex()
   try {
     const index = JSON.parse(store.getItem(INDEX_KEY) || '[]') as string[]
     if (Array.isArray(index)) for (const key of index) store.removeItem(PREFIX + key)

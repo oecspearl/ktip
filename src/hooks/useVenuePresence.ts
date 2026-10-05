@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { freshChannel, releaseChannel } from '../lib/realtime'
-import { keys } from '../queries/keys'
 import { VENUE } from '../lib/constants'
 import {
   mergeRoster,
@@ -20,6 +18,16 @@ import type {
   VenuePosition,
   VenuePresencePayload,
 } from '../types'
+
+/**
+ * Floor between presence re-tracks while walking. Every track() is replicated
+ * to every client in the venue, each of which re-renders it; at one track per
+ * cell crossed that was one venue-wide render per walker per second. Movement
+ * itself rides broadcast (POS_BROADCAST_MS); the tracked position only has to
+ * be good enough for someone joining mid-walk, and a trailing track lands the
+ * final spot once the walker stops.
+ */
+const POS_TRACK_MIN_MS = 5_000
 
 /** A peer's last movement packet, with the arrival time used for staleness. */
 export type PeerPosition = VenuePosition & { at: number }
@@ -71,8 +79,6 @@ interface UseVenuePresenceArgs {
  * src/lib/venue-presence.ts, which is where it can be tested.
  */
 export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresenceArgs) {
-  const queryClient = useQueryClient()
-
   const [raw, setRaw] = useState<RawPresenceState>({})
   const [connected, setConnected] = useState(false)
   const [manual, setManual] = useState<ManualAvailability | null>(null)
@@ -97,6 +103,13 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
   const payloadRef = useRef<VenuePresencePayload | null>(null)
   const lastBroadcastRef = useRef(0)
   const lastCellRef = useRef('')
+  const lastPosTrackRef = useRef(0)
+  const posTrackTimerRef = useRef(0)
+  // An availability change the mirror has not been told about yet, because it
+  // came inside the heartbeat throttle. The keep-alive below delivers it.
+  const mirrorPendingRef = useRef(false)
+
+  useEffect(() => () => window.clearTimeout(posTrackTimerRef.current), [])
 
   // Resolved from the manual choice plus idle state. A manual 'busy' or
   // 'help_wanted' is sticky; only the default 'working' may be auto-downgraded.
@@ -147,9 +160,17 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
     let retryTimer = 0
     let attempt = 0
 
+    // A single change arrives as sync plus join (or leave), and a crowded
+    // room delivers several per frame. One state update per frame is all the
+    // screen can show; each extra one re-rendered the whole venue.
+    let syncFrame = 0
     const sync = () => {
-      if (!channel || cancelled) return
-      setRaw(channel.presenceState() as RawPresenceState)
+      if (!channel || cancelled || syncFrame) return
+      syncFrame = window.requestAnimationFrame(() => {
+        syncFrame = 0
+        if (!channel || cancelled) return
+        setRaw(channel.presenceState() as RawPresenceState)
+      })
     }
 
     // Recovery, and the one rule that keeps it from oscillating: NEVER fight
@@ -254,6 +275,7 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       cancelled = true
       setConnected(false)
       if (retryTimer) window.clearTimeout(retryTimer)
+      if (syncFrame) window.cancelAnimationFrame(syncFrame)
       if (channel) {
         void channel.untrack()
         void releaseChannel(channel)
@@ -290,11 +312,16 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
 
     void channelRef.current?.track(payload)
 
-    // Cold mirror. Throttled, because 100 participants writing a row on every
-    // tick is 100 pointless UPDATEs a second.
+    // Cold mirror. Throttled even for a change: an idle or hidden-tab flip is
+    // a change too, and each one used to cost an RPC plus a roster refetch.
+    // The live path above is what everyone on the channel sees; the mirror
+    // may lag by one throttle window, and the keep-alive delivers the change.
     const nowMs = Date.now()
-    if (shouldHeartbeat({ lastWriteMs: lastHeartbeatRef.current, nowMs, changed: true })) {
+    if (!shouldHeartbeat({ lastWriteMs: lastHeartbeatRef.current, nowMs, changed: false })) {
+      mirrorPendingRef.current = true
+    } else {
       lastHeartbeatRef.current = nowMs
+      mirrorPendingRef.current = false
       void (supabase as any)
         .rpc('venue_heartbeat', {
           p_event_id: eventId,
@@ -305,15 +332,12 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
           // it is what puts a disconnected member's dot back where they left it.
           p_meta: posRef.current ? { pos: posRef.current } : null,
         })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: keys.sub('venue', 'roster', eventId) })
-        })
         .catch(() => {
           // A missed mirror write costs a stale dot for someone not on this
           // channel. Never worth surfacing an error over.
         })
     }
-  }, [connected, eventId, me, availability, statusNote, roomId, queryClient])
+  }, [connected, eventId, me, availability, statusNote, roomId])
 
   // Keep-alive for the mirror while nothing changes, so `last_seen_at` does not
   // age past the staleness cutoff and make an active member render offline.
@@ -324,10 +348,16 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       const nowMs = Date.now()
       if (!shouldHeartbeat({ lastWriteMs: lastHeartbeatRef.current, nowMs, changed: false })) return
       lastHeartbeatRef.current = nowMs
+      // A change that arrived inside the throttle rides this write.
+      const pending = mirrorPendingRef.current ? payloadRef.current : null
+      mirrorPendingRef.current = false
       void (supabase as any)
         .rpc('venue_heartbeat', {
           p_event_id: eventId,
           p_room_id: roomId,
+          ...(pending
+            ? { p_availability: pending.availability, p_status_note: pending.status_note }
+            : {}),
           p_meta: posRef.current ? { pos: posRef.current } : null,
         })
         .catch(() => {})
@@ -383,7 +413,15 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       const cell = `${Math.floor(next.x)},${Math.floor(next.y)},${next.f ?? 0}`
       if (cell !== lastCellRef.current && payloadRef.current) {
         lastCellRef.current = cell
-        void channel.track({ ...payloadRef.current, pos: next })
+        const flush = () => {
+          posTrackTimerRef.current = 0
+          lastPosTrackRef.current = Date.now()
+          const ch = channelRef.current
+          if (ch && payloadRef.current) void ch.track({ ...payloadRef.current, pos: posRef.current })
+        }
+        const wait = POS_TRACK_MIN_MS - (nowMs - lastPosTrackRef.current)
+        if (wait <= 0) flush()
+        else if (!posTrackTimerRef.current) posTrackTimerRef.current = window.setTimeout(flush, wait)
       }
     },
     [userId]
@@ -402,18 +440,23 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
     []
   )
 
-  return {
-    occupants,
-    occupancy,
-    connected,
-    setPosition,
-    positions,
-    /** What this client is reporting right now, idle rules applied. */
-    availability,
-    /** What the member explicitly chose, or null if they never chose. */
-    manual,
-    setAvailability,
-    statusNote,
-    setStatusNote,
-  }
+  // Stable while nothing in it changed, so VenuePresenceProvider's memo, and
+  // every consumer under it, can skip renders that change nothing here.
+  return useMemo(
+    () => ({
+      occupants,
+      occupancy,
+      connected,
+      setPosition,
+      positions,
+      /** What this client is reporting right now, idle rules applied. */
+      availability,
+      /** What the member explicitly chose, or null if they never chose. */
+      manual,
+      setAvailability,
+      statusNote,
+      setStatusNote,
+    }),
+    [occupants, occupancy, connected, setPosition, positions, availability, manual, setAvailability, statusNote]
+  )
 }

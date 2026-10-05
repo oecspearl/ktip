@@ -27,7 +27,11 @@ export function useMyKtipEnrollments() {
       return (body.enrollments as KtipEnrollment[]) ?? []
     },
     enabled: !!user,
-    staleTime: 0,
+    // Members enrol on the campus site in another tab and come back here, so
+    // returning to the tab revalidates (focus refetching is off app-wide in
+    // App.tsx). A remount within 30s reuses the answer.
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   })
 
   const enrollmentsByCourseId = useMemo(() => {
