@@ -213,7 +213,7 @@ export default function AdminRolesPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scroll-cue-x">
           <table className="w-full">
             <thead>
               <tr className="border-b border-ktip-sand-100">
@@ -298,7 +298,7 @@ export default function AdminRolesPage() {
           </p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scroll-cue-x">
           <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-ktip-sand-100">

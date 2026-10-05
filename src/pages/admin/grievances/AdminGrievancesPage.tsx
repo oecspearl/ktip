@@ -168,7 +168,7 @@ export default function AdminGrievancesPage() {
         ) : grievances && grievances.length > 0 ? (
           <>
             {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto scroll-cue-x">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-ktip-sand-100 text-left">

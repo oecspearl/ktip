@@ -28,7 +28,8 @@ export function ConfirmModal({
     <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        data-lite-solid
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm [--lite-solid:rgb(0_0_0/0.6)]"
         onClick={onCancel}
       />
 

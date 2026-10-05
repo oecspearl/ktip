@@ -53,7 +53,9 @@ export function AgreementBanner({ bundle }: { bundle: PageGatedBundle }) {
   return (
     <aside
       aria-label={t`IP notice`}
-      className="fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-ktip-line/60 bg-ktip-ink/95 backdrop-blur-md transition-[top] duration-300"
+      // Solid ink instead of blurred glass on mobile-lite (index.css).
+      data-lite-solid
+      className="fixed inset-x-0 top-[var(--nav-offset)] z-rail border-b border-ktip-line/60 bg-ktip-ink/95 backdrop-blur-md transition-[top] duration-300 [--lite-solid:var(--color-ktip-ink)]"
       style={{ height: NOTICE_BAR_H }}
     >
       <div className="mx-auto flex h-full w-full max-w-page items-center gap-3 px-6 text-label text-white/85 md:px-12">

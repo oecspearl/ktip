@@ -249,13 +249,14 @@ export function MemberPanel() {
       <div
         aria-hidden
         data-member-scrim
+        data-lite-solid
         onClick={closeMember}
         className={
           // Stays clickable while closing on purpose: the mousedown that
           // closed the drawer is followed by a click at mouseup, and with the
           // scrim gone (or pointer-inert) that click lands on whatever card
           // sits under the cursor and re-opens the drawer.
-          `fixed inset-0 z-scrim bg-brand-navy/45 backdrop-blur-[3px] ${
+          `fixed inset-0 z-scrim bg-brand-navy/45 backdrop-blur-[3px] [--lite-solid:color-mix(in_srgb,var(--color-brand-navy)_55%,transparent)] ${
             closing ? 'animate-fade-out' : 'animate-fade-in'
           }`
         }
@@ -270,7 +271,10 @@ export function MemberPanel() {
           // holding one person's card, and the facts grid inside it stretches
           // to two columns half a metre apart. It is a preview, so it is capped
           // at a reading width and stops growing.
-          `fixed inset-y-0 right-0 z-drawer flex w-full flex-col overflow-hidden border-l border-ktip-sand-200 bg-ktip-cream shadow-hard sm:w-[50vw] sm:min-w-[30rem] sm:max-w-[40rem] sm:rounded-l-surface-lg ${
+          // The bottom padding keeps the pinned footer off the home indicator
+          // in an installed app; the cover is allowed under the status bar,
+          // and the two close buttons below step down past it themselves.
+          `fixed inset-y-0 right-0 z-drawer flex w-full flex-col overflow-hidden border-l border-ktip-sand-200 bg-ktip-cream shadow-hard pb-[env(safe-area-inset-bottom,0px)] sm:w-[50vw] sm:min-w-[30rem] sm:max-w-[40rem] sm:rounded-l-surface-lg ${
             closing ? 'animate-slide-out-right pointer-events-none' : 'animate-slide-in-right'
           }`
         }
@@ -279,7 +283,8 @@ export function MemberPanel() {
             rather than pop, and inert until the name has scrolled away. */}
         <div
           aria-hidden={!condensed}
-          className={`neu-surface absolute inset-x-0 top-0 z-sticky flex items-center gap-3 border-b border-ktip-sand-200 bg-ktip-cream/90 px-gutter py-2 backdrop-blur-md transition-opacity duration-200 ${
+          data-lite-solid
+          className={`neu-surface absolute inset-x-0 top-0 z-sticky flex items-center gap-3 border-b border-ktip-sand-200 bg-ktip-cream/90 px-gutter pb-2 pt-[calc(var(--spacing)*2+env(safe-area-inset-top,0px))] backdrop-blur-md transition-opacity duration-200 [--lite-solid:var(--color-ktip-cream)] ${
             condensed ? 'opacity-100' : 'pointer-events-none opacity-0'
           }`}
         >
@@ -297,7 +302,7 @@ export function MemberPanel() {
           <button
             onClick={closeMember}
             aria-label={t`Close member preview`}
-            className="ml-auto rounded-control p-1.5 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-sand-800"
+            className="icon-hit ml-auto rounded-control p-1.5 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-sand-800"
           >
             <X size={16} />
           </button>
@@ -307,7 +312,7 @@ export function MemberPanel() {
         <button
           onClick={closeMember}
           aria-label={t`Close member preview`}
-          className={`absolute right-4 top-4 z-raised rounded-control bg-brand-navy/25 p-2 text-white backdrop-blur-sm transition-opacity hover:bg-brand-navy/45 ${
+          className={`icon-hit absolute right-4 top-[calc(var(--spacing)*4+env(safe-area-inset-top,0px))] z-raised rounded-control bg-brand-navy/25 p-2 text-white backdrop-blur-sm transition-opacity hover:bg-brand-navy/45 ${
             condensed ? 'pointer-events-none opacity-0' : 'opacity-100'
           }`}
         >

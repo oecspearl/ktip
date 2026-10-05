@@ -157,8 +157,12 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
         } as CSSProperties
       }
       className={cn(
-        'fixed z-drawer inset-x-2 top-20 bottom-24',
-        'lg:inset-auto lg:right-6 lg:bottom-24 lg:w-[min(900px,calc(100vw-3rem))] lg:h-[min(70vh,44rem)]',
+        // Below lg the panel fills the screen between the navbar and the dock.
+        // The top follows the bar's live edge, which already accounts for the
+        // status bar of an installed app (see --nav-offset); the bottom rises
+        // with the dock, which lifts itself off the home indicator.
+        'fixed z-drawer inset-x-2 top-[calc(var(--nav-offset)+0.5rem)] bottom-[calc(var(--spacing)*24+env(safe-area-inset-bottom,0px))]',
+        'lg:inset-auto lg:right-6 lg:bottom-[calc(var(--spacing)*24+env(safe-area-inset-bottom,0px))] lg:w-[min(900px,calc(100vw-3rem))] lg:h-[min(70dvh,44rem)]',
         'bg-ktip-cream rounded-2xl shadow-hard border border-ktip-sand-200',
         // Transition-driven, not @keyframes: a keyframe cannot run backwards,
         // which is why closing used to be a hard cut while opening eased in.
@@ -192,7 +196,9 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
             </span>
           )}
         </div>
-        <div className="ghost-live-row flex items-center gap-1">
+        {/* Wider apart on touch so each button's 44px hit area (icon-hit)
+            does not reach over its neighbour's icon. */}
+        <div className="ghost-live-row flex items-center gap-1 pointer-coarse:gap-4">
           {/* One control, three states: pin it, wake it, unpin it. While the
               panel is ghosted this is the only thing on it still taking
               clicks, so it is also the only way back in. */}
@@ -210,7 +216,7 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
                   : t`Pin — stays open, and fades out of the way until you need it`
             }
             className={cn(
-              'ghost-live p-1.5 rounded-lg transition-colors',
+              'ghost-live icon-hit p-1.5 rounded-lg transition-colors',
               pinned
                 ? 'bg-ktip-ocean-50 text-ktip-ocean-600 hover:bg-ktip-ocean-100'
                 : 'hover:bg-ktip-sand-100 text-ktip-sand-500',
@@ -235,7 +241,7 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
               aria-label={t`Fade settings`}
               aria-expanded={ghostMenuOpen}
               title={t`How a pinned panel fades`}
-              className="p-1.5 rounded-lg transition-colors hover:bg-ktip-sand-100 text-ktip-sand-500"
+              className="icon-hit p-1.5 rounded-lg transition-colors hover:bg-ktip-sand-100 text-ktip-sand-500"
             >
               <ChevronDown
                 size={14}
@@ -253,7 +259,7 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
           <button
             onClick={closePanel}
             aria-label={t`Close messages`}
-            className="p-1.5 rounded-lg hover:bg-ktip-sand-100 text-ktip-sand-500 transition-colors"
+            className="icon-hit p-1.5 rounded-lg hover:bg-ktip-sand-100 text-ktip-sand-500 transition-colors"
           >
             <X size={18} />
           </button>

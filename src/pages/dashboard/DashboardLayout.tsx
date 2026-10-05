@@ -184,7 +184,7 @@ export default function DashboardLayout() {
                 // clips the soft-UI shadow into a straight line at its edge.
                 // Padding gives the shadow room inside the scroll box; from lg
                 // the rail is a column and needs no clipping at all.
-                className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible p-1.5 -m-1.5"
+                className="flex flex-row lg:flex-col gap-1 overflow-x-auto max-lg:scroll-cue-x lg:overflow-visible p-1.5 -m-1.5"
                 aria-label={t`Dashboard sections`}
               >
                 {tabs.map((tab) => {

@@ -4,8 +4,9 @@ import { useSnippets, useSharedSnippets, useDeleteSnippet, useCreateSnippet } fr
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { formatRelativeTime, debounce } from '../../lib/utils'
 import { clearCode, loadCode } from '../../lib/code-sandbox-utils'
-import type { Language } from '../../components/collaboration/CodeMirrorEditor'
-import { defaultCode } from '../../components/collaboration/CodeMirrorEditor'
+// The templates module, not the editor: the list never shows an editor, and
+// importing one for its templates put CodeMirror in this page's chunk.
+import { defaultCode, type Language } from '../../components/collaboration/code-templates'
 import { Plus, Search, Code2, Trash2, Users, HardDriveDownload, X } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import type { SnippetLanguage } from '../../types'
@@ -200,7 +201,7 @@ export default function SnippetsListPage() {
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, snippet.id)}
-                    className="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    className="icon-hit p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 no-hover:opacity-100"
                     title={t`Delete snippet`}
                   >
                     <Trash2 size={16} />

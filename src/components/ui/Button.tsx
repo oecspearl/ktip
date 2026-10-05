@@ -117,7 +117,10 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200',
+        // Named properties, not `all`: the shadow swaps to its pressed pair in
+        // one step rather than repainting the blur on every frame, and a ramp
+        // step (rotating a phone) no longer tweens every button's padding.
+        'inline-flex items-center justify-center gap-2 font-medium transition-[color,background-color,translate] duration-200',
         // Shadows are invisible to a keyboard user, so the focus ring is the
         // only thing telling them where they are. It was missing before.
         'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ktip-sand-700',

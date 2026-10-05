@@ -416,7 +416,8 @@ export function ChatWindow({ conversationId, otherUserName, conversation, onLeft
             onPaste={handlePaste}
             placeholder={staged.length > 0 ? t`Add a note to these files…` : t`Type a message...`}
             rows={1}
-            className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm"
+            // 16px on touch: iOS zooms the page into any smaller field on focus.
+            className="flex-1 border-2 border-ktip-sand-200 rounded-xl px-4 py-2.5 resize-none transition-colors focus:outline-none focus:ring-2 focus:border-ktip-ocean-500 focus:ring-ktip-ocean-500/20 text-sm pointer-coarse:text-body"
           />
           <Button
             type="submit"

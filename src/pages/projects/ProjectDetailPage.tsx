@@ -247,12 +247,18 @@ export default function ProjectDetailPage() {
             </p>
 
             {/* Project image */}
+            {/* Eager for the reason given on EventDetailPage's cover: the
+                PageHero above already requests this URL eagerly, and a 640
+                sibling srcset here would be a second download, not a smaller
+                first one. */}
             {project.image_url ? (
               <img
                 src={project.image_url}
                 alt={project.title}
                 className="w-full max-h-96 object-cover rounded mb-6"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 width={800}
                 height={384}
               />

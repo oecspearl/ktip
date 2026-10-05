@@ -1,6 +1,7 @@
 import type { ComponentPropsWithRef } from 'react'
 import { IMAGE_MANIFEST, lookupManifest } from '../../lib/image-manifest'
 import { variantPath, srcKeyParts } from '../../lib/image-variants'
+import { useUploadVariant, type UploadVariantOptions } from '../../hooks/useUploadVariant'
 
 /**
  * An <img> that actually uses the variants `scripts/optimize-images.mjs` builds.
@@ -48,6 +49,13 @@ export interface ResponsiveImageProps extends Omit<ComponentPropsWithRef<'img'>,
    * whatever is done to the pixels.
    */
   maxWidth?: number
+  /**
+   * For a member's upload rather than bundled photography: the upload-time
+   * sibling to use (see hooks/useUploadVariant). Ignored when `src` is in the
+   * manifest, and harmless for any URL that has no sibling — a seeded or
+   * external image renders exactly as before.
+   */
+  uploadVariant?: UploadVariantOptions
 }
 
 export function ResponsiveImage({
@@ -56,14 +64,30 @@ export function ResponsiveImage({
   sizes,
   pictureClassName = 'contents',
   maxWidth,
+  uploadVariant,
   width,
   height,
   ...img
 }: ResponsiveImageProps) {
   const entry = lookupManifest(IMAGE_MANIFEST.images, src)
+  const upload = useUploadVariant(src, entry ? null : uploadVariant)
 
   if (!entry) {
-    return <img src={src} alt={alt} width={width} height={height} {...img} />
+    return (
+      <img
+        src={upload.src}
+        srcSet={upload.srcSet}
+        // Only meaningful beside a srcset; on a bare src it is just noise.
+        sizes={upload.srcSet ? sizes : undefined}
+        alt={alt}
+        width={width}
+        height={height}
+        {...img}
+        // After the spread so it cannot be overwritten: a failing sibling is
+        // retired here, and the caller's own handler hears about the original.
+        onError={upload.onError ?? img.onError}
+      />
+    )
   }
 
   const { dir, name } = srcKeyParts(src)

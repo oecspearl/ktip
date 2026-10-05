@@ -221,7 +221,7 @@ export default function AdminEventsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-cue-x">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ktip-sand-200">

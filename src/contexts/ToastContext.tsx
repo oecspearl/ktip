@@ -87,7 +87,14 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
           // Hidden while a screenshot frame is grabbed (index.css,
           // data-capturing) — a toast is app chrome, not part of the bug
           data-capture-hide
-          className="fixed bottom-4 right-4 z-toast flex flex-col gap-2 max-w-sm w-full pointer-events-none"
+          // Same placement contract as the consent and install sheets:
+          // bottom-fab-clear stacks the toasts above the floating dock instead
+          // of over the button they are usually reporting on, and
+          // data-bottom-sheet lifts them off the home indicator when
+          // installed. On a phone they span the screen inside the gutters; a
+          // fixed w-full beside right-4 ran 16px off the left edge.
+          data-bottom-sheet
+          className="fixed inset-x-4 bottom-fab-clear z-toast mx-auto flex flex-col gap-2 max-w-sm pointer-events-none sm:left-auto sm:w-full"
         >
           {toasts.map((toast) => {
             const Icon = iconMap[toast.type]
@@ -103,7 +110,7 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
                 <p className="text-sm font-medium flex-1">{toast.message}</p>
                 <button
                   onClick={() => removeToast(toast.id)}
-                  className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+                  className="icon-hit shrink-0 opacity-60 hover:opacity-100 transition-opacity"
                 >
                   <X size={16} />
                 </button>

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { Trans } from '@lingui/react/macro'
 import { ResponsiveImage } from '../ui/ResponsiveImage'
+import { useMobileLite } from '../../hooks/useMediaQuery'
 
 /**
  * The auth photo. Its own frame rather than the shared FALLBACK_IMAGE: this is
@@ -16,16 +17,43 @@ const AUTH_PHOTO = '/photos/auth-backdrop.webp'
 // The base fill is brand-navy rather than gray-900 — the gray scale inverts
 // under html.dark, which turned this whole backdrop white at night.
 export function AuthBackdrop({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+  const lite = useMobileLite()
   return (
-    <div className="relative bg-brand-navy min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div className="relative bg-brand-navy min-h-svh flex items-center justify-center p-4 overflow-hidden">
       <ResponsiveImage
         src={AUTH_PHOTO}
         alt=""
         sizes="100vw"
+        // Phones take the 640 rung. Under these washes and the tint below,
+        // and behind the card, the 1280 rung a DPR-3 phone would otherwise
+        // pick shows nothing more — on the first page a new member loads.
+        maxWidth={lite ? 640 : undefined}
         className="absolute inset-0 w-full h-full object-cover"
         loading="eager" fetchPriority="high" decoding="async"
       />
-      <div className="absolute inset-y-0 right-0 w-full md:w-[80%] backdrop-blur-2xl bg-black/10 [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
+      {/* The frost, done the way PageHero does it: a blurred COPY of the
+          photo rather than backdrop-blur over it. A backdrop filter re-samples
+          the full-width photo whenever anything above it repaints; a filter on
+          the copy's own content is rastered with it. The copy is capped at the
+          smallest rung, because under blur(40px) 640px and 1920px are the same
+          picture. The 1.08 scale overfills the box because blur() samples past
+          the edges. The mask restates the old panel's (80% wide, fading from 55%
+          across itself) in full-width terms: 44% and 80%.
+
+          Not on phones, as in PageHero: one photo layer there, and the tint
+          below turns opaque enough on its own (see data-lite-solid). */}
+      {!lite && (
+        <ResponsiveImage
+          src={AUTH_PHOTO}
+          alt=""
+          aria-hidden="true"
+          sizes="100vw"
+          maxWidth={640}
+          className="absolute inset-0 w-full h-full object-cover [filter:blur(40px)] [transform:scale(1.08)] [mask-image:linear-gradient(to_left,black_55%,transparent_100%)] md:[mask-image:linear-gradient(to_left,black_44%,transparent_80%)]"
+          loading="eager" decoding="async"
+        />
+      )}
+      <div data-lite-solid className="absolute inset-y-0 right-0 w-full md:w-[80%] bg-black/10 [--lite-solid:rgb(0_0_0/0.35)] [mask-image:linear-gradient(to_left,black_55%,transparent_100%)]" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/30" />
       <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 to-transparent" />
       {/* Same pill the split shell wears on its photo panel, so the two auth

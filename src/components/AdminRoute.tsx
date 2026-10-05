@@ -24,7 +24,7 @@ export const AdminRoute = () => {
   // itself is still loading. Waiting keeps that from flashing a denial.
   if (auth.loading || auth.profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
+      <div className="min-h-svh flex items-center justify-center bg-ktip-canvas">
         <div className="text-center">
           <img
             src="/ktip-logo-128.webp"
@@ -43,7 +43,7 @@ export const AdminRoute = () => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
+      <div className="min-h-svh flex items-center justify-center bg-ktip-canvas">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ShieldX size={32} className="text-red-500" />

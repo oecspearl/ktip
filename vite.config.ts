@@ -129,16 +129,25 @@ function edgeApiPlugin(apiKey: string | undefined): Plugin {
 }
 
 /**
- * Warm the TCP+TLS handshake to the two image origins the app fetches from.
+ * Warm the TCP+TLS handshake to Supabase before any script runs.
  *
- * These belong in the HTML rather than a component: the whole value of a
+ * This belongs in the HTML rather than a component: the whole value of a
  * preconnect is that the browser's preload scanner sees it before any script
  * runs, and this is a client-rendered SPA, so anything React emits arrives too
  * late to help. Supabase's origin is injected rather than hardcoded so a
  * staging project doesn't warm production's host.
+ *
+ * `crossorigin` is right for this origin: the connection it opens is the one
+ * supabase-js's CORS fetches use, which is what the first screen waits on.
+ *
+ * images.unsplash.com used to be warmed here too. No app code points at it —
+ * only rows from the seed SQL can — and with `crossorigin` the warmed
+ * connection could not serve those rows' <img> requests anyway: an image
+ * without a crossorigin attribute opens a separate, credentialed connection.
+ * Every page load paid a DNS, TCP and TLS handshake that nothing used.
  */
 function preconnectPlugin(supabaseUrl: string | undefined) {
-  const origins = ['https://images.unsplash.com']
+  const origins: string[] = []
   try {
     if (supabaseUrl) origins.push(new URL(supabaseUrl).origin)
   } catch {

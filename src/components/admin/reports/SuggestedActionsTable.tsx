@@ -23,7 +23,7 @@ export function SuggestedActionsTable({ actions }: { actions: ReadonlyArray<Sugg
   const sorted = [...actions].sort((a, b) => ORDER[a.priority] - ORDER[b.priority])
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto scroll-cue-x">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-ktip-sand-200 text-left text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">

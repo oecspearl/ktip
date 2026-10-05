@@ -71,6 +71,8 @@ export function VenueTopBar({
 
   return (
     <div
+      // Solid cream instead of blurred glass on mobile-lite (index.css).
+      data-lite-solid
       className={cn(
         // Sticks to the navbar's bottom edge, not under it. At top-0 the bar's
         // own ~88px covered this whole row, so "Event page" was unclickable
@@ -78,7 +80,7 @@ export function VenueTopBar({
         // to /. --nav-offset rather than --nav-h because the navbar auto-hides:
         // holding its full height while it is off screen leaves this bar
         // floating mid-page. The transition matches the navbar's own slide.
-        'sticky top-[var(--nav-offset)] z-rail flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm transition-[top] duration-300',
+        'sticky top-[var(--nav-offset)] z-rail flex flex-wrap items-center gap-3 border-b border-ktip-sand-100 bg-ktip-cream/95 px-4 py-3 backdrop-blur-sm transition-[top] duration-300 [--lite-solid:var(--color-ktip-cream)]',
         className
       )}
     >

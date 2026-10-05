@@ -224,7 +224,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
         </div>
 
         {/* Type of funding — the instrument (137), not the focus area */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
               Type of Funding
@@ -264,7 +264,7 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
         </div>
 
         {/* Amount Min / Amount Max */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
               Amount Min

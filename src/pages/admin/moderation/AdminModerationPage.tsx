@@ -253,7 +253,7 @@ export default function AdminModerationPage() {
       />
 
       <div className="relative border-b border-ktip-sand-200 mb-6" role="tablist" aria-label="Moderation">
-        <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
+        <nav className="flex gap-1 -mb-px overflow-x-auto scroll-cue-x scrollbar-hide">
           {tabs.map((tab) => (
             <button
               type="button"
@@ -394,7 +394,7 @@ export default function AdminModerationPage() {
               </div>
             )}
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scroll-cue-x">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-ktip-sand-100">

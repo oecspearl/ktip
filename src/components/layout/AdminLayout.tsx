@@ -179,7 +179,7 @@ export function AdminLayout() {
         </div>
 
         {/* Mobile nav */}
-        <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
+        <div className="lg:hidden overflow-x-auto scroll-cue-x scrollbar-hide -mx-4 px-4">
           <nav
             data-tutorial="admin-sidebar"
             className="flex gap-1 min-w-max neu-surface bg-ktip-cream border border-ktip-sand-200 rounded-2xl p-2 shadow-neu-sm"

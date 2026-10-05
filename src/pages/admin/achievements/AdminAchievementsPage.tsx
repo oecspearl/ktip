@@ -134,7 +134,7 @@ function DefinitionsTab() {
         </span>
       </p>
 
-      <div className="overflow-x-auto rounded-2xl border border-ktip-sand-200 bg-ktip-cream">
+      <div className="overflow-x-auto scroll-cue-x rounded-2xl border border-ktip-sand-200 bg-ktip-cream">
         <table className="w-full min-w-[52rem] text-sm">
           <thead>
             <tr className="border-b border-ktip-sand-200 text-left text-xs uppercase tracking-wider text-ktip-sand-500">

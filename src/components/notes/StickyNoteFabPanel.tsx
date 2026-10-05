@@ -45,7 +45,7 @@ export function StickyNoteFabPanel() {
     setCollapsed((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
 
   return createPortal(
-    <div className="fixed bottom-24 right-4 z-fab w-72 max-h-[60vh] flex flex-col rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-fab-hover animate-slide-up">
+    <div className="fixed bottom-24 right-4 z-fab w-72 max-h-[60dvh] flex flex-col rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-fab-hover animate-slide-up">
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-ktip-sand-100">
         <p className="text-sm font-semibold text-ktip-sand-900"><Trans>Sticky notes</Trans></p>
         <button
@@ -167,7 +167,7 @@ export function StickyNoteFabPanel() {
                   type="button"
                   aria-label={t`Delete ${note.title}`}
                   onClick={() => deleteNote(note.id)}
-                  className="rounded p-1 text-ktip-sand-400 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100 focus:opacity-100"
+                  className="icon-hit rounded p-1 text-ktip-sand-400 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100 focus:opacity-100 no-hover:opacity-100"
                 >
                   <Trash2 size={13} />
                 </button>

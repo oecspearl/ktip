@@ -222,7 +222,7 @@ export function Coachmark({
 
       <div
         ref={cardRef}
-        className="absolute z-30 pointer-events-auto w-[calc(100vw-2.5rem)] max-w-md max-h-[80vh] overflow-y-auto bg-ktip-cream rounded-2xl border border-ktip-line shadow-hard p-5 animate-scale-in"
+        className="absolute z-30 pointer-events-auto w-[calc(100vw-2.5rem)] max-w-md max-h-[80dvh] overflow-y-auto bg-ktip-cream rounded-2xl border border-ktip-line shadow-hard p-5 animate-scale-in"
         style={{ top: placement.top, left: placement.left }}
       >
         {(title || headerActions || onClose) && (

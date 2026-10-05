@@ -528,6 +528,8 @@
      `both` holds the final frame so it cannot flash back between animation
      end and unmount. */
   --animate-slide-out-right: slideOutRight 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Bottom sheets (Modal below sm) — rise from the screen edge they sit on */
+  --animate-sheet-up: sheetUp 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   --animate-fade-out: fadeOut 0.32s ease-in-out both;
   --animate-char-flip: charFlip 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-reveal-up: revealUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -565,6 +567,11 @@
   @keyframes slideOutRight {
     0% { transform: translateX(0); opacity: 1; }
     100% { transform: translateX(100%); opacity: 0.4; }
+  }
+
+  @keyframes sheetUp {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(0); }
   }
 
   @keyframes fadeOut {
@@ -686,6 +693,12 @@ html.readable {
    default — a drawer header, a tile that is two rows tall — has to give some
    of it back here or the content below the fold becomes unreachable. */
 @custom-variant landscape-short (@media (orientation: landscape) and (max-height: 32rem));
+
+/* A device that cannot hover. Tailwind already wraps hover: and group-hover:
+   in @media (hover: hover), so a row action written `opacity-0
+   group-hover:opacity-100` never appears on a phone at all — the delete button
+   exists but cannot be found. `no-hover:opacity-100` beside it shows it there. */
+@custom-variant no-hover (@media (hover: none));
 
 html.dark {
   color-scheme: dark;
@@ -958,14 +971,22 @@ html.dark {
        viewport lands underneath it and is not clickable. Every surface that
        must clear the bar reads this one value instead of guessing:
        pt-[var(--nav-h)] to clear it, top-[var(--nav-h)] to stick below it.
-       Tracks the logo, which is w-10 h-10 below lg and w-14 h-14 at lg+. */
-    --nav-h: 4.5rem;
+       Tracks the logo, which is w-10 h-10 below lg and w-14 h-14 at lg+.
+
+       Split in two because an installed app pads the bar down past the status
+       bar (see STANDALONE below). --nav-bar-h is the row the logo sits in and
+       only the bar itself reads it; --nav-h is the whole bar including that
+       inset, so a page that clears the bar still clears it under a notch. */
+    --nav-bar-h: 4.5rem;
+    --nav-safe-top: 0px;
+    --nav-h: calc(var(--nav-bar-h) + var(--nav-safe-top));
 
     /* How far down the navbar's bottom edge currently sits.
-       Same as --nav-h while the bar is showing, 0 once it has auto-hidden on
-       scroll. Navbar writes it; anything that sticks *to the bar* (rather than
-       merely below where it would be) reads it, so the two move together
-       instead of one chasing the other. */
+       Same as --nav-h while the bar is showing, --nav-safe-top (0 outside an
+       installed app) once it has auto-hidden on scroll. Navbar writes it;
+       anything that sticks *to the bar* (rather than merely below where it
+       would be) reads it, so the two move together instead of one chasing
+       the other. */
     --nav-offset: var(--nav-h);
 
     /* Height of the IP notice band fixed under the navbar
@@ -977,7 +998,7 @@ html.dark {
 
   @media (min-width: 64rem) {
     :root {
-      --nav-h: 5.5rem;
+      --nav-bar-h: 5.5rem;
     }
   }
 
@@ -1079,6 +1100,22 @@ html.dark {
     :root {
       --spacing-control-sm: 2.75rem;
       --spacing-control-md: 2.75rem;
+    }
+  }
+
+  /* iOS Safari zooms the page into any field under 16px when it takes focus,
+     and does not zoom back out. This half only reaches fields that state no
+     size of their own and inherit a small one from their container; max(…,
+     1em) lets a field inside larger type keep it. It has to live in base:
+     unlayered, it would also override every deliberately LARGE field (a
+     title input set in text-title would drop to 16px). Fields that carry a
+     small size utility themselves are floored by the matching rule in the
+     PHONE AND TOUCH section, which has to sit in the utilities layer. */
+  @media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+      font-size: max(16px, 1em);
     }
   }
 
@@ -1939,27 +1976,43 @@ html[data-capturing] [data-fab] {
    Scoped to display-mode: standalone. In a normal browser tab the OS chrome
    already reserves this space and the insets resolve to 0, but scoping it
    keeps the intent legible and costs nothing.
+
+   In the base layer so a utility on the element can still override it. This
+   block used to be unlayered, which outranks every utility in the app.
    ------------------------------------------------------------------------ */
-@media (display-mode: standalone) {
-  /* The bar is `fixed` at the top, so its own padding is the only thing
-     between the nav links and the clock. */
-  [data-app-navbar] {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
+@layer base {
+  @media (display-mode: standalone) {
+    /* The bar is `fixed` at the top, so its own padding is the only thing
+       between the nav links and the clock. --nav-h adds the same inset, so
+       every page that clears the bar clears the taller bar. */
+    :root {
+      --nav-safe-top: env(safe-area-inset-top, 0px);
+    }
+    [data-app-navbar] {
+      padding-top: var(--nav-safe-top);
+    }
 
-  /* The dock and any bottom-anchored sheet clear the home indicator, which is
-     a live gesture target — content underneath it is not just clipped, it is
-     unusable. */
-  [data-fab],
-  [data-bottom-sheet] {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
+    /* The dock and the sheets that float above it clear the home indicator,
+       which is a live gesture target — a control underneath it is not just
+       clipped, it is unusable.
 
-  /* Landscape on a notched phone loses horizontal space on one side only,
-     depending on which way it was rotated. */
-  body {
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
+       Lifted by margin, not padded. Every one of these is a floating box
+       placed by `bottom`, and a margin there raises the whole box by exactly
+       the inset. padding-bottom replaced the sheet's own p-4/p-5 instead of
+       adding to it, so on a phone with no home bar the buttons sat flush on
+       the sheet's bottom edge. A sheet attached to the screen edge pads
+       itself (Modal's phone sheet does) rather than using this. */
+    [data-fab],
+    [data-bottom-sheet] {
+      margin-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Landscape on a notched phone loses horizontal space on one side only,
+       depending on which way it was rotated. */
+    body {
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
   }
 }
 
@@ -2000,6 +2053,23 @@ html[data-capturing] [data-fab] {
 .mobile-lite .stagger-rows > :nth-child(2) { animation-delay: 80ms; }
 .mobile-lite .stagger-children > :nth-child(3),
 .mobile-lite .stagger-rows > :nth-child(3) { animation-delay: 160ms; }
+
+/* Frosted glass over a large area. A backdrop blur re-samples everything
+   behind the layer on every frame that anything under it moves, so a blurred
+   navbar over a scrolling page is one full-width blur per scroll frame. Each
+   site marks itself with data-lite-solid and names its own replacement in
+   --lite-solid, because the tints differ: the navbar is ink, a top bar over a
+   form is cream. Glass that carries text gets an opaque fill, so the text is
+   never left over a moving page with nothing behind it. A scrim carries no
+   text and keeps a see-through tint; it only loses the blur.
+
+   The cream fallback is for a site that forgets to set the variable: opaque
+   and readable is the safe wrong answer. */
+.mobile-lite [data-lite-solid] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: var(--lite-solid, var(--color-ktip-cream));
+}
 @keyframes auroraDriftA {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(6%, -4%) scale(1.08); }
@@ -2036,6 +2106,104 @@ html[data-capturing] [data-fab] {
   0%, 100% { transform: translate(0, 0) scale(1); }
   30% { transform: translate(5%, 6%) scale(0.94); }
   65% { transform: translate(-6%, -5%) scale(1.06); }
+}
+
+/* ---------------------------------------------------------------------------
+   PHONE AND TOUCH
+   ------------------------------------------------------------------------ */
+
+/* The second half of the 16px field floor; the first is in @layer base. A
+   field that carries text-sm or smaller itself is sized by a utility, and no
+   base-layer rule can outrank a utility. This one sits in the utilities layer
+   one element more specific than the size class — (0,1,1) against (0,1,0) —
+   so it wins whatever the source order, and it names only the sizes that
+   trigger the zoom: a field set in anything larger matches nothing here and
+   keeps its size. 1rem rather than a flat 16px so a reader with the text-size
+   preference above 100% does not get fields smaller than the body copy. */
+@layer utilities {
+  @media (pointer: coarse) {
+    :is(input, select, textarea):is(.text-xs, .text-sm, .text-micro, .text-caption, .text-label) {
+      font-size: max(16px, 1rem);
+    }
+  }
+}
+
+/* A 44px touch target on an icon button without changing what it looks like.
+   The visible control keeps its size; an invisible ::after centred on it is
+   what the finger lands on. Coarse pointers only: with a mouse the bigger box
+   would just take clicks meant for whatever sits beside it.
+
+   In the components layer on purpose. `position: relative` is only there to
+   anchor the ::after, and a button that is already `absolute` (a close button
+   pinned to a corner) has to stay that way; its utility outranks this layer.
+
+   Two of these closer than 44px centre to centre overlap, and the later one in
+   the DOM takes the overlap, so keep clustered icon buttons spaced. A button
+   with overflow-hidden clips its own ::after and gets nothing from this. */
+@layer components {
+  @media (pointer: coarse) {
+    .icon-hit {
+      position: relative;
+    }
+    .icon-hit::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: max(100%, 2.75rem);
+      height: max(100%, 2.75rem);
+      translate: -50% -50%;
+    }
+  }
+}
+
+/* Scrollbars are hidden app-wide (@layer base), so a table or a tab rail that
+   scrolls sideways gives no sign there is more of it. This fades whichever
+   edge has more content behind it.
+
+   Driven by the element's own scroll position: no fade at the leading edge
+   until the reader has scrolled, none at the trailing edge once they reach
+   it, and none at all when the content fits, because an inactive scroll
+   timeline leaves both lengths at their 0px initial value. A browser without
+   scroll-driven animations gets what it had before: no cue, and nothing
+   faded that should not be.
+
+   Not named scroll-fade-x: shadcn's runtime, imported for the admin error
+   console, already registers a utility by that name, and two @utility blocks
+   with one name both emit onto the same element. The error console's
+   stylesheet also promises nothing outside it depends on it, so the app does
+   not borrow that one either. */
+@property --scroll-cue-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-cue-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scrollCueX {
+  0% { --scroll-cue-start: 0px; --scroll-cue-end: 1.5rem; }
+  8%, 92% { --scroll-cue-start: 1.5rem; --scroll-cue-end: 1.5rem; }
+  100% { --scroll-cue-start: 1.5rem; --scroll-cue-end: 0px; }
+}
+
+@utility scroll-cue-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--scroll-cue-start), #000 calc(100% - var(--scroll-cue-end)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--scroll-cue-start), #000 calc(100% - var(--scroll-cue-end)), transparent);
+
+  /* Longhands, not the shorthand: an engine that cannot parse `auto` as a
+     duration drops that one line and keeps the rest, where a shorthand would
+     lose the whole declaration. */
+  @supports (animation-timeline: scroll()) {
+    animation-name: scrollCueX;
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(self inline);
+  }
 }
 
 /* ---------------------------------------------------------------------------

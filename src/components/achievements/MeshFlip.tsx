@@ -370,9 +370,10 @@ export function MeshVeil({
       // Same screenshot-capture contract as the Modal backdrop.
       data-capture-hide
       aria-hidden="true"
+      data-lite-solid
       onClick={onClose}
       className={cn(
-        'fixed inset-0 z-modal bg-black/40 backdrop-blur-md transition-opacity duration-300',
+        'fixed inset-0 z-modal bg-black/40 backdrop-blur-md transition-opacity duration-300 [--lite-solid:rgb(0_0_0/0.5)]',
         shown ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
     />,

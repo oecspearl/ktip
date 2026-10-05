@@ -105,7 +105,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           {!isOwn && (
             <div className="flex items-center gap-1 mb-1 ml-1">
               <p className="text-xs text-ktip-sand-500">{senderName}</p>
-              <span className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <span className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 no-hover:opacity-100 transition-opacity">
                 <ReportButton
                   targetType="message"
                   targetId={message.id}

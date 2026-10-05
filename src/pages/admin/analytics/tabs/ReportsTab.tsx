@@ -325,7 +325,7 @@ function PulseMatrix() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm">
+        <div className="overflow-x-auto scroll-cue-x neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm">
           <table className="w-full">
             <thead>
               <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50">

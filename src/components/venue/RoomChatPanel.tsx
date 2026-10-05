@@ -142,7 +142,7 @@ function RoomChatMessage({
           onClick={onRemove}
           aria-label={t`Remove message`}
           title={t`Remove`}
-          className="shrink-0 rounded-lg p-1 text-ktip-sand-400 opacity-0 transition-opacity hover:bg-ktip-sand-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
+          className="icon-hit shrink-0 rounded-lg p-1 text-ktip-sand-400 opacity-0 transition-opacity hover:bg-ktip-sand-100 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 no-hover:opacity-100"
         >
           <Trash2 size={13} aria-hidden="true" />
         </button>
@@ -269,7 +269,8 @@ export function RoomChatPanel({
             onChange={(e) => setDraft(e.target.value)}
             placeholder={t`Message ${room.name}…`}
             maxLength={4000}
-            className="flex-1 rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
+            // 16px on touch: iOS zooms the page into any smaller field on focus.
+            className="flex-1 rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm pointer-coarse:text-body text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-400 focus:outline-none focus:ring-2 focus:ring-ktip-ocean-200"
           />
           <button
             type="submit"

@@ -111,7 +111,7 @@ export function ReportList({ reports, onOpen }: ReportListProps) {
           <p className="text-sm text-ktip-sand-600">No reports yet. The first monthly draft arrives on the 1st; or generate one above.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm">
+        <div className="overflow-x-auto scroll-cue-x neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50 text-left text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">

@@ -128,9 +128,17 @@ export function Modal({ open, onClose, title, description, children, size, bare,
       // the blur are as much a part of "the app on top of the page" as the
       // dialog is.
       data-capture-hide
+      // The blur is the expensive half of the scrim; mobile-lite drops it and
+      // keeps a slightly deeper tint in its place (index.css, MOBILE-LITE).
+      data-lite-solid={scrim === 'sheer' ? undefined : ''}
       className={cn(
-        'fixed inset-0 z-modal flex items-center justify-center animate-fade-in',
-        scrim === 'sheer' ? 'bg-black/20' : 'bg-black/50 backdrop-blur-sm'
+        'fixed inset-0 z-modal flex justify-center animate-fade-in',
+        // Below sm a framed dialog is a bottom sheet. Centred, a tall form put
+        // its buttons in the lower half of the screen, which is exactly where
+        // the keyboard opens. A bare dialog brings its own frame and stays
+        // centred at every width.
+        bare ? 'items-center' : 'items-end sm:items-center',
+        scrim === 'sheer' ? 'bg-black/20' : 'bg-black/50 backdrop-blur-sm [--lite-solid:rgb(0_0_0/0.6)]'
       )}
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
@@ -141,15 +149,22 @@ export function Modal({ open, onClose, title, description, children, size, bare,
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative w-full mx-4 animate-scale-in max-h-[90vh]',
+          // dvh: the visible viewport, so the cap shrinks with the browser's
+          // toolbars instead of running underneath them.
+          'relative w-full max-h-[90dvh]',
           // Bare keeps overflow visible on purpose: its content brings its own
           // frame and may deliberately extend past it.
           bare
-            ? 'overflow-visible'
+            ? 'mx-4 animate-scale-in overflow-visible'
             // neu-surface: buttons in the dialog sculpt out of the dialog fill,
             // not out of the page ground behind the scrim. See index.css.
-            : 'neu-surface bg-ktip-cream rounded-surface-lg shadow-hard overflow-y-auto',
+            // A column with only the content scrolling, so the title and the
+            // close button stay put while a long form moves under them.
+            : 'neu-surface bg-ktip-cream shadow-hard flex flex-col overflow-hidden rounded-t-surface-lg animate-sheet-up sm:mx-4 sm:rounded-surface-lg sm:animate-scale-in',
           sizeStyles[size || 'md'],
+          // A phone sheet spans the screen edge to edge; a size cap a few
+          // pixels under the phone's width would leave slivers either side.
+          !bare && 'max-sm:max-w-none',
           className
         )}
         {...others}
@@ -157,7 +172,7 @@ export function Modal({ open, onClose, title, description, children, size, bare,
         {!bare && (
           <>
             {/* Header */}
-            <div className="flex items-start justify-between p-card-pad border-b border-ktip-sand-100">
+            <div className="flex shrink-0 items-start justify-between p-card-pad border-b border-ktip-sand-100">
               <div className="flex-1">
                 {title && (
                   <h2 className="text-title font-display font-bold text-ktip-sand-900">{title}</h2>
@@ -166,7 +181,7 @@ export function Modal({ open, onClose, title, description, children, size, bare,
               </div>
               <button
                 onClick={onClose}
-                className="ml-4 p-1 rounded-control hover:bg-ktip-sand-100 transition-colors"
+                className="icon-hit ml-4 p-1 rounded-control hover:bg-ktip-sand-100 transition-colors"
                 aria-label={t`Close modal`}
               >
                 <X size={24} className="text-ktip-sand-400" />
@@ -175,8 +190,17 @@ export function Modal({ open, onClose, title, description, children, size, bare,
           </>
         )}
 
-        {/* Content */}
-        <div className={bare ? undefined : 'p-card-pad'}>{children}</div>
+        {/* Content. On the phone sheet the last row clears the home indicator,
+            which the sheet's bottom edge sits directly on. */}
+        <div
+          className={
+            bare
+              ? undefined
+              : 'min-h-0 overflow-y-auto overscroll-contain p-card-pad pb-[calc(var(--spacing-card-pad)+env(safe-area-inset-bottom,0px))] sm:pb-card-pad'
+          }
+        >
+          {children}
+        </div>
       </div>
     </div>,
     document.body

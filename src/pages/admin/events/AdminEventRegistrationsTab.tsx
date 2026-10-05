@@ -223,7 +223,7 @@ export default function AdminEventRegistrationsTab(props: AdminEventRegistration
         {registrationsLoading ? (
           <div className="p-12 text-center text-ktip-sand-500">Loading registrations...</div>
         ) : filteredRegistrations.length ? (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-cue-x">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ktip-sand-200 bg-ktip-sand-50">

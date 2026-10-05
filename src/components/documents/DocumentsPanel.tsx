@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { FolderOpen, Upload } from 'lucide-react'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 import { DocumentCard } from './DocumentCard'
 import { DocumentUploadModal } from './DocumentUploadModal'
-import { DocumentContentModal } from './DocumentContentModal'
 import { DocumentAccessModal } from './DocumentAccessModal'
 import { RequestAccessModal } from './RequestAccessModal'
 import { useAuth } from '../../contexts/AuthContext'
@@ -16,6 +15,18 @@ import {
 } from '../../hooks/useEntityDocuments'
 import type { DocumentEntityType, EntityDocumentSummary } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { lazyOverlay } from '../../lib/lazy-overlay'
+
+// The content editor carries RichTextField, and with it the whole tiptap
+// editor. Imported statically it rode along on every event, project and grant
+// detail page and the venue room, for a modal only an owner opens. It is
+// already rendered only once opened, so lazy() fetches it on that click.
+// lazyOverlay rather than lazy: a chunk that fails to arrive must cost the
+// modal, not the detail page around it.
+const DocumentContentModal = lazyOverlay(
+  () => import('./DocumentContentModal').then((m) => ({ default: m.DocumentContentModal })),
+  'document-content-modal'
+)
 
 interface DocumentsPanelProps {
   entityType: DocumentEntityType
@@ -147,15 +158,17 @@ export function DocumentsPanel({ entityType, entityId, canEditEntity, entity }: 
       )}
 
       {selected && modal === 'content' && (
-        <DocumentContentModal
-          open
-          onClose={closeModal}
-          document={selected}
-          entityType={entityType}
-          entityId={entityId}
-          entity={entity}
-          canEditEntity={canEditEntity}
-        />
+        <Suspense fallback={null}>
+          <DocumentContentModal
+            open
+            onClose={closeModal}
+            document={selected}
+            entityType={entityType}
+            entityId={entityId}
+            entity={entity}
+            canEditEntity={canEditEntity}
+          />
+        </Suspense>
       )}
 
       {selected && modal === 'access' && (

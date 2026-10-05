@@ -39,7 +39,9 @@ export default function FAQPage() {
         ]}
       />
 
-      <div className="w-full max-w-page mx-auto px-4 py-10">
+      {/* page-tight, the single-column reading width: at max-w-page an answer
+          ran the full width of a laptop screen. */}
+      <div className="w-full max-w-page-tight mx-auto px-4 py-10">
         {/* Search */}
         <div className="relative mb-8">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -48,7 +50,7 @@ export default function FAQPage() {
             placeholder={t`Search questions...`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 border border-ktip-sand-300 bg-ktip-cream rounded-xl text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
+            className="w-full pl-11 pr-4 py-3 border border-ktip-sand-300 bg-ktip-cream rounded-xl text-sm pointer-coarse:text-body focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors"
           />
         </div>
 

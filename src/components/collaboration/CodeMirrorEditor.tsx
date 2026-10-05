@@ -2,18 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { EditorView } from '@codemirror/view'
 import type { ViewUpdate } from '@codemirror/view'
-import { javascript } from '@codemirror/lang-javascript'
-import { python } from '@codemirror/lang-python'
-import { html } from '@codemirror/lang-html'
-import { css } from '@codemirror/lang-css'
-import { json } from '@codemirror/lang-json'
-import { markdown } from '@codemirror/lang-markdown'
-import { oneDark } from '@codemirror/theme-one-dark'
 import type { Extension } from '@codemirror/state'
 import { loadCode, saveCode } from '../../lib/code-sandbox-utils'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import { defaultCode, type Language } from './code-templates'
 
-export type Language = 'javascript' | 'python' | 'html' | 'css' | 'json' | 'markdown'
+// Re-exported so existing imports of the editor keep working. Anything that
+// only needs the templates should import code-templates directly, or it pulls
+// the editor in with them.
+export { defaultCode, type Language }
 
 export interface EditorMetrics {
   lineCount: number
@@ -22,72 +19,60 @@ export interface EditorMetrics {
   cursorCol: number
 }
 
-const languageExtensions: Record<Language, () => Extension> = {
-  javascript: () => javascript({ jsx: true, typescript: true }),
-  python: () => python(),
-  html: () => html(),
-  css: () => css(),
-  json: () => json(),
-  markdown: () => markdown(),
+/**
+ * One dynamic import per language pack, fetched when that language is first
+ * shown.
+ *
+ * Imported statically, all six packs rode in this chunk whatever was being
+ * edited — lang-html alone drags in the CSS and JavaScript parsers, and a
+ * Python snippet needed none of it. A switch now costs one small fetch the
+ * first time; the editor shows plain text for that moment, then highlights.
+ */
+const languageLoaders: Record<Language, () => Promise<Extension>> = {
+  javascript: () =>
+    import('@codemirror/lang-javascript').then((m) => m.javascript({ jsx: true, typescript: true })),
+  python: () => import('@codemirror/lang-python').then((m) => m.python()),
+  html: () => import('@codemirror/lang-html').then((m) => m.html()),
+  css: () => import('@codemirror/lang-css').then((m) => m.css()),
+  json: () => import('@codemirror/lang-json').then((m) => m.json()),
+  markdown: () => import('@codemirror/lang-markdown').then((m) => m.markdown()),
 }
 
-export const defaultCode: Record<Language, string> = {
-  javascript: `// JavaScript / TypeScript
-function greet(name) {
-  console.log(\`Hello, \${name}!\`);
-}
+/**
+ * Packs already built, so switching back to a language is synchronous rather
+ * than a flash of plain text while an already-settled promise resolves. An
+ * extension is a value, not editor state, so one instance serves every editor.
+ */
+const loadedLanguages = new Map<Language, Extension>()
 
-greet("Caribbean Innovator");
-`,
-  python: `# Python
-def greet(name):
-    print(f"Hello, {name}!")
+/**
+ * The active language's extension, or null while its pack is on the wire.
+ *
+ * A failed import is not cached — the next switch to that language tries again
+ * — and leaves the editor as plain text, which is still a working editor.
+ */
+function useLanguageExtension(language: Language): Extension | null {
+  const [, setLoaded] = useState(0)
 
-greet("Caribbean Innovator")
-`,
-  html: `<!-- HTML -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>KTIP Project</title>
-</head>
-<body>
-  <h1>Hello, Caribbean!</h1>
-</body>
-</html>
-`,
-  css: `/* CSS */
-body {
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #041E42, #97D700);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100svh;
-}
-`,
-  json: `{
-  "name": "KTIP Project",
-  "version": "1.0.0",
-  "description": "Caribbean innovation platform",
-  "tags": ["education", "collaboration", "caribbean"]
-}
-`,
-  markdown: `# Welcome to KTIP
+  useEffect(() => {
+    if (loadedLanguages.has(language)) return
+    let cancelled = false
+    languageLoaders[language]()
+      .then((extension) => {
+        loadedLanguages.set(language, extension)
+        // Only a re-render is needed: the value is read from the map below,
+        // so a late arrival for a language no longer shown changes nothing.
+        if (!cancelled) setLoaded((n) => n + 1)
+      })
+      .catch(() => {
+        // Plain text until the next attempt.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [language])
 
-## About
-KTIP connects Caribbean innovators, educators, and students.
-
-### Features
-- Real-time collaboration
-- Interactive code sandbox
-- Project management
-- Community forums
-
-> Building the future of Caribbean innovation together!
-`,
+  return loadedLanguages.get(language) ?? null
 }
 
 interface CodeMirrorEditorProps {
@@ -159,16 +144,18 @@ export function CodeMirrorEditor({
     }
   }
 
+  const languageExtension = useLanguageExtension(language)
+
   // Memoized so identical language/fontSize renders don't force CodeMirror to
   // reconfigure its extensions compartment on every unrelated re-render.
   const extensions = useMemo(
     () => [
-      languageExtensions[language](),
+      ...(languageExtension ? [languageExtension] : []),
       EditorView.lineWrapping,
       fontSizeTheme(fontSize),
       EditorView.editable.of(!readOnly),
     ],
-    [language, fontSize, readOnly]
+    [languageExtension, fontSize, readOnly]
   )
 
   return (
@@ -177,7 +164,11 @@ export function CodeMirrorEditor({
         value={code}
         onChange={handleChange}
         onUpdate={handleUpdate}
-        theme={darkMode ? oneDark : 'light'}
+        // 'dark' is the library's own One Dark. @uiw/react-codemirror imports
+        // @codemirror/theme-one-dark itself for exactly this option, so the
+        // theme ships with the editor whatever this file does; importing it
+        // here too only added a second reference to the same module.
+        theme={darkMode ? 'dark' : 'light'}
         extensions={extensions}
         readOnly={readOnly}
         height={height || 'calc(100svh - 16rem)'}

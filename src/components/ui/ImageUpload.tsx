@@ -2,8 +2,7 @@ import { useCallback, useRef, useState, type ChangeEvent } from 'react'
 import { useToast } from '../../contexts/ToastContext'
 import { useFileDrop } from '../../hooks/useFileDrop'
 import { IMAGE_PRESETS } from '../../lib/constants'
-import { uploadOptimizedImage } from '../../lib/storage-upload'
-import type { OptimizeOptions } from '../../lib/image-optimize'
+import { uploadOptimizedImage, type UploadPreset } from '../../lib/storage-upload'
 import { cn } from '../../lib/utils'
 import { Camera, X, Loader2 } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
@@ -17,8 +16,8 @@ interface ImageUploadProps {
   placeholder?: string
   className?: string
   maxSizeMB?: number
-  /** Downscale/encode settings applied before upload. */
-  preset?: OptimizeOptions
+  /** Downscale/encode settings applied before upload, and any small siblings to write. */
+  preset?: UploadPreset
 }
 
 const ACCEPT = ['image/*'] as const
@@ -126,12 +125,14 @@ export function ImageUpload({
               isDragging ? 'border-ktip-ocean-400 ring-2 ring-ktip-ocean-300' : 'border-ktip-sand-200'
             )}
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-xl transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+          {/* no-hover: a touch screen never fires the hover that reveals
+              these, so there they are always shown. */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-xl transition-colors flex items-center justify-center gap-2 pointer-coarse:gap-4 opacity-0 group-hover:opacity-100 no-hover:opacity-100">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-ktip-ocean-600 transition-colors"
+              className="icon-hit p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-ktip-ocean-600 transition-colors"
               title={t`Change image`}
             >
               <Camera size={16} />
@@ -140,7 +141,7 @@ export function ImageUpload({
               <button
                 type="button"
                 onClick={handleRemove}
-                className="p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-red-500 transition-colors"
+                className="icon-hit p-2 bg-ktip-cream rounded-full shadow-soft text-ktip-sand-700 hover:text-red-500 transition-colors"
                 title={t`Remove image`}
               >
                 <X size={16} />

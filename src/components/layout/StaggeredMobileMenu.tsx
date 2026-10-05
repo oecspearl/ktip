@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { cn } from '../../lib/utils'
+import { EASE_IN, EASE_OUT, StaggeredMenuIcon } from './StaggeredMenuIcon'
 
 /**
  * Direct children, with fragments opened up.
@@ -71,10 +72,8 @@ interface StaggeredMobileMenuProps {
  */
 const PRELAYERS = ['bg-ktip-tropical-500', 'bg-ktip-ocean-500']
 
-// power4.out — the ease every stage of the open sequence shares
-const EASE_OUT = 'ease-[cubic-bezier(0.16,1,0.3,1)]'
-// power3.in — closing is one motion, faster and accelerating away
-const EASE_IN = 'ease-[cubic-bezier(0.55,0,1,0.45)]'
+// EASE_OUT (power4.out) and EASE_IN (power3.in) are shared with the hamburger,
+// so they live beside it; the drawer and the icon must move as one gesture.
 
 const PANEL_DELAY = 140 // ms; after the last slab has started
 const ROWS_START = 260 // ms; a beat into the panel's own slide
@@ -115,6 +114,9 @@ export function StaggeredMobileMenu({
   const wasExpanded = useRef(expanded)
   // Layout-viewport height at the last measurement. See the FLIP below.
   const viewportHeight = useRef(0)
+  // The sliding frame and where its left edge last settled. See its FLIP.
+  const frameRef = useRef<HTMLDivElement>(null)
+  const frameLeft = useRef<number | null>(null)
 
   useEffect(() => {
     if (open) {
@@ -215,10 +217,10 @@ export function StaggeredMobileMenu({
     const previous = tileRects.current
     const reduced =
       typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
-    // The panel's own width is mid-transition on the commit that flips
-    // `expanded`, so every offset measured here is stale by the full width
-    // delta. That reflow is already smooth — the grid tracks the animating
-    // width — so this pass only re-seeds the map and animates nothing.
+    // The panel's width changes on the commit that flips `expanded`, so every
+    // offset measured here is stale by the full width delta. The frame slides
+    // to its new edge on its own (the FLIP after this one) and the grid moves
+    // with it, so this pass only re-seeds the map and animates nothing.
     const resizing = wasExpanded.current !== expanded
     wasExpanded.current = expanded
 
@@ -251,6 +253,35 @@ export function StaggeredMobileMenu({
     }
   }, [layoutKey, expanded])
 
+  /**
+   * FLIP the frame when it widens or narrows.
+   *
+   * The width used to be a CSS transition, which re-laid-out the whole mosaic
+   * on every frame for half a second: on a phone GPU the drawer visibly
+   * stuttered open. The width now changes in one step and the frame slides
+   * from where its left edge was to where it is, which is a transform and
+   * never touches layout. Narrowing starts the frame shifted left of its
+   * resting place, and the ::before cover on its right (see the frame below)
+   * fills the gap that would otherwise open up behind it.
+   *
+   * offsetLeft rather than a rect so a slide still in flight is not measured
+   * as part of the layout. The ref is cleared while the drawer is unmounted, so
+   * reopening is a fresh measurement rather than a slide from a stale edge.
+   */
+  useLayoutEffect(() => {
+    const frame = frameRef.current
+    const last = frameLeft.current
+    frameLeft.current = frame ? frame.offsetLeft : null
+    if (!frame || last === null) return
+    const dx = last - frame.offsetLeft
+    if (Math.abs(dx) < 1) return
+    if (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    frame.animate(
+      [{ transform: `translateX(${dx}px)` }, { transform: 'translateX(0)' }],
+      { duration: 520, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+    )
+  }, [expanded, rendered])
+
   if (!rendered) return null
 
   const rows = flattenRows(children)
@@ -269,8 +300,9 @@ export function StaggeredMobileMenu({
         type="button"
         aria-label={closeLabel}
         onClick={onClose}
+        data-lite-solid
         className={cn(
-          'absolute inset-0 w-full cursor-default bg-ktip-ink/60 backdrop-blur-[2px] transition-opacity duration-300',
+          'absolute inset-0 w-full cursor-default bg-ktip-ink/60 backdrop-blur-[2px] transition-opacity duration-300 [--lite-solid:color-mix(in_srgb,var(--color-ktip-ink)_70%,transparent)]',
           shown ? 'opacity-100' : 'opacity-0'
         )}
       />
@@ -295,11 +327,18 @@ export function StaggeredMobileMenu({
           toolbar in the frames before the scroll lock landed. That race is
           gone: the lock pins the body on the commit that mounts the drawer,
           before the entrance transition starts, and a pinned body cannot
-          scroll — so the toolbars cannot move while the panel is open. */}
+          scroll — so the toolbars cannot move while the panel is open.
+
+          The width changes in one step and the frame slides to its new edge
+          with a transform (see the frame FLIP above). The ::before is an ink
+          cover hanging off the right edge, off screen at rest; it is what
+          fills the screen behind the frame while a narrowing slide starts it
+          left of where it ends up. */}
       <div
+        ref={frameRef}
         className={cn(
-          'fixed inset-y-0 right-0 transition-[width] duration-[520ms]',
-          EASE_OUT,
+          'fixed inset-y-0 right-0',
+          'before:absolute before:inset-y-0 before:left-full before:w-screen before:bg-ktip-ink',
           expanded
             ? 'w-screen'
             : 'w-[min(26rem,100vw)] landscape-short:w-[min(34rem,100vw)]'
@@ -332,6 +371,12 @@ export function StaggeredMobileMenu({
             // which on navy is the white bloom that was blowing out from under
             // the Log In / Sign Up buttons. Same fix the navbar itself uses.
             'neu-on-dark absolute inset-0 flex flex-col bg-ktip-ink shadow-hard outline-none',
+            // An installed app paints under the status bar and the home
+            // indicator. The top matches the bar's own inset exactly, so the
+            // close button lands on the hamburger it covers; the sides only
+            // matter in landscape, and the left only once the panel reaches it.
+            'pt-[var(--nav-safe-top)] pb-[env(safe-area-inset-bottom,0px)] pr-[env(safe-area-inset-right,0px)]',
+            expanded && 'pl-[env(safe-area-inset-left,0px)]',
             'transition-transform',
             shown
               ? `translate-x-0 duration-[650ms] ${EASE_OUT}`
@@ -353,7 +398,7 @@ export function StaggeredMobileMenu({
               type="button"
               onClick={onClose}
               aria-label={closeLabel}
-              className="flex items-center gap-2 rounded-lg p-2 text-white transition-colors hover:bg-white/10"
+              className="icon-hit flex items-center gap-2 rounded-lg p-2 text-white transition-colors hover:bg-white/10"
             >
               <StaggeredMenuIcon open={shown} />
             </button>
@@ -382,47 +427,7 @@ export function StaggeredMobileMenu({
   )
 }
 
-/**
- * The bar's hamburger, in three beats rather than an icon swap: the middle
- * rule slides out to the right, the outer two converge into a cross, and only
- * then does the whole glyph spin. Closing runs the same beats in reverse —
- * every delay below is mirrored, which is why they are written out per state
- * instead of being shared.
- */
-export function StaggeredMenuIcon({ open }: { open: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'relative block h-4 w-5 transition-transform',
-        open
-          ? `rotate-180 duration-[550ms] delay-[280ms] ${EASE_OUT}`
-          : `rotate-0 duration-[350ms] delay-0 ${EASE_IN}`
-      )}
-    >
-      {/* Top rule → the "\" of the cross */}
-      <span
-        className={cn(
-          'absolute left-0 h-[2px] w-5 rounded-full bg-current transition-all duration-300',
-          open ? `top-1/2 -translate-y-1/2 rotate-45 delay-[150ms] ${EASE_OUT}` : `top-0 rotate-0 delay-[120ms] ${EASE_IN}`
-        )}
-      />
-      {/* Middle rule — leaves first, comes back last */}
-      <span
-        className={cn(
-          'absolute left-0 top-1/2 h-[2px] w-5 -translate-y-1/2 rounded-full bg-current transition-all duration-200',
-          open ? 'translate-x-6 opacity-0 delay-0' : 'translate-x-0 opacity-100 delay-[280ms]'
-        )}
-      />
-      {/* Bottom rule → the "/" of the cross */}
-      <span
-        className={cn(
-          'absolute left-0 h-[2px] w-5 rounded-full bg-current transition-all duration-300',
-          open
-            ? `top-1/2 -translate-y-1/2 -rotate-45 delay-[150ms] ${EASE_OUT}`
-            : `top-full -translate-y-full rotate-0 delay-[120ms] ${EASE_IN}`
-        )}
-      />
-    </span>
-  )
-}
+// The hamburger lives in its own module so Navbar can draw it on first paint
+// without pulling this drawer into the entry chunk. Re-exported for anything
+// that already imports it from here.
+export { StaggeredMenuIcon }

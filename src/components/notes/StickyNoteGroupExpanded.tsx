@@ -67,7 +67,8 @@ export function StickyNoteGroupExpanded({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in"
+      data-lite-solid
+      className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in [--lite-solid:rgb(0_0_0/0.5)]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -76,7 +77,7 @@ export function StickyNoteGroupExpanded({
         role="dialog"
         aria-modal="true"
         aria-label={t`${group.title} folder`}
-        className="w-full max-w-lg max-h-[70vh] overflow-hidden rounded-2xl shadow-hard animate-scale-in flex flex-col"
+        className="w-full max-w-lg max-h-[70dvh] overflow-hidden rounded-2xl shadow-hard animate-scale-in flex flex-col"
         style={{ background: group.color, color: NOTE_TEXT_COLOR }}
       >
         <div

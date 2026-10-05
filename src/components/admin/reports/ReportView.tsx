@@ -150,7 +150,7 @@ export function ReportView({ report, editable = false, onSummaryChange, onSectio
             ) : (
               section?.commentary_md && <div className="mb-3 text-sm leading-relaxed">{renderMarkdown(section.commentary_md)}</div>
             )}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scroll-cue-x">
               <table className="w-full text-sm tabular-nums">
                 <thead>
                   <tr className="border-b border-ktip-sand-200 text-left text-xs font-semibold uppercase tracking-wider text-ktip-sand-500">

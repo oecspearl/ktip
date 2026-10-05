@@ -215,7 +215,7 @@ export default function AdminGrantsPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scroll-cue-x">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-ktip-sand-200">
@@ -379,7 +379,7 @@ export default function AdminGrantsPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scroll-cue-x">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-ktip-sand-200">
@@ -494,7 +494,7 @@ export default function AdminGrantsPage() {
         size="lg"
       >
         {viewingApplication && (
-          <div className="max-h-[70vh] overflow-y-auto">
+          <div className="max-h-[70dvh] overflow-y-auto">
             {isWizardApplication(viewingApplication.application_data) ? (
               <ApplicationPreview
                 title={viewingApplication.application_data.title || 'Untitled Application'}

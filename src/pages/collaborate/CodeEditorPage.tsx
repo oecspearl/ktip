@@ -389,7 +389,9 @@ export default function CodeEditorPage() {
           readOnly={!canEdit}
           onValueChange={handleCodeChange}
           onMetricsChange={setMetrics}
-          height={hasPanel ? 'calc(100svh - 32rem)' : 'calc(100svh - 22rem)'}
+          // Floored: on a phone 100svh minus 32rem left the editor about
+          // nine lines tall, and the page scrolls anyway.
+          height={hasPanel ? 'max(calc(100svh - 32rem), 18rem)' : 'max(calc(100svh - 22rem), 18rem)'}
         />
 
         {outputVisible && language === 'javascript' && (

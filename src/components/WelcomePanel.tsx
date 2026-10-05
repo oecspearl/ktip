@@ -8,6 +8,7 @@ import { Stepper } from './ui/Stepper'
 import { useDeckFlip } from './ui/useDeckFlip'
 import { PHOTO_SETS } from '../lib/hero-images'
 import { markWelcomeSeen, useHasSeenWelcome } from '../lib/welcome-panel'
+import { useIsMobile } from '../hooks/useMediaQuery'
 
 /**
  * The first thing a device ever sees.
@@ -129,16 +130,22 @@ export function WelcomePanel() {
     }
   }, [open])
 
+  // The photo panel is display:none below md, and an <img> in a hidden box
+  // still downloads. A first visit on a phone was fetching three full-width
+  // photos — eager, high priority, competing with the app it was introducing —
+  // for a panel it never paints. Below md they are not mounted or preloaded.
+  const isMobile = useIsMobile()
+
   // Photos are fetched a step ahead — and the first one during the title card
   // — so the swap at the flip's midpoint, the moment the card is edge-on, never
   // lands on a blank panel.
   useEffect(() => {
-    if (!open) return
+    if (!open || isMobile) return
     for (const offset of [step - 1, step]) {
       const img = new Image()
       img.src = SLIDE_PHOTOS[offset % SLIDE_PHOTOS.length]
     }
-  }, [open, step])
+  }, [open, step, isMobile])
 
   const advance = useCallback((to: number) => {
     setSwapping(true)
@@ -236,17 +243,19 @@ export function WelcomePanel() {
               {/* Odd faces land at 180deg (mirrored) — undo it so the content
                   on the photo reads the right way round. */}
               <div className="absolute inset-0" style={{ transform: `scaleX(${mirrored ? -1 : 1})` }}>
-                <ResponsiveImage
-                  // Keyed per face so the push-in restarts with each photo.
-                  key={face}
-                  src={SLIDE_PHOTOS[face % SLIDE_PHOTOS.length]}
-                  alt=""
-                  sizes="(min-width: 768px) 45vw, 100vw"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="welcome-photo absolute inset-0 h-full w-full object-cover"
-                />
+                {!isMobile && (
+                  <ResponsiveImage
+                    // Keyed per face so the push-in restarts with each photo.
+                    key={face}
+                    src={SLIDE_PHOTOS[face % SLIDE_PHOTOS.length]}
+                    alt=""
+                    sizes="(min-width: 768px) 45vw, 100vw"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="welcome-photo absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/85 via-brand-navy/20 to-brand-navy/45" />
                 <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
                   <img src="/ktip-logo-128.webp" alt="KTiP" className="h-9 w-auto drop-shadow" />

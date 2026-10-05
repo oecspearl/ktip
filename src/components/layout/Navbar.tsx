@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type KeyboardEvent } from 'react'
+import { Suspense, useEffect, useLayoutEffect, useRef, useState, type ComponentType, type KeyboardEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -42,8 +42,10 @@ import {
 import { Button } from '../ui/Button'
 import { FlowingMenuItem } from '../ui/FlowingMenuItem'
 import { DropdownPanel } from '../ui/DropdownPanel'
-import { NavbarSearchPanel, SEARCH_PANEL_WIDTH } from './NavbarSearchPanel'
-import { StaggeredMobileMenu, StaggeredMenuIcon } from './StaggeredMobileMenu'
+import { SEARCH_PANEL_WIDTH } from './search-panel-width'
+import { StaggeredMenuIcon } from './StaggeredMenuIcon'
+import { useEverTrue } from '../../hooks/useEverTrue'
+import { lazyOverlay } from '../../lib/lazy-overlay'
 import { RoleSwitcher } from './RoleSwitcher'
 import { CircularScroll } from '../ui/CircularScroll'
 import { ROLE_LABELS } from '../../lib/constants'
@@ -58,6 +60,21 @@ import { useGlobalSearch } from '../../hooks/useGlobalSearch'
 import type { SearchRow } from '../../lib/site-search'
 import type { PermissionKey } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
+
+// The search results panel and the mobile drawer are closed on first paint and
+// most visits never open them, yet both sat in the entry chunk — the panel
+// with the ~60 icons it resolves rows to (lib/icon-map). Each now loads on the
+// first open and stays mounted after, latched the way MainLayout's overlay
+// panels are. lazyOverlay rather than lazy: this is the site shell, and a
+// chunk that fails to arrive must cost the panel, not the page.
+const NavbarSearchPanel = lazyOverlay(
+  () => import('./NavbarSearchPanel').then((m) => ({ default: m.NavbarSearchPanel })),
+  'navbar-search'
+)
+const StaggeredMobileMenu = lazyOverlay(
+  () => import('./StaggeredMobileMenu').then((m) => ({ default: m.StaggeredMobileMenu })),
+  'mobile-menu'
+)
 
 interface DropdownItem {
   name: MessageDescriptor
@@ -464,10 +481,14 @@ export function Navbar() {
    * that does — cannot read `--nav-h`, because that is the bar's height whether
    * or not the bar is on screen. When it slides away, anything holding that
    * offset is left floating in the middle of the page.
+   *
+   * Hidden is the status-bar inset rather than 0: in an installed app the
+   * page paints under the clock, and a bar stuck at 0 would sit beneath it.
+   * The inset is 0 in a browser tab, so there it is the same as before.
    */
   useEffect(() => {
     const root = document.documentElement
-    root.style.setProperty('--nav-offset', hidden ? '0px' : 'var(--nav-h)')
+    root.style.setProperty('--nav-offset', hidden ? 'var(--nav-safe-top)' : 'var(--nav-h)')
     return () => {
       root.style.removeProperty('--nav-offset')
     }
@@ -496,6 +517,14 @@ export function Navbar() {
   )
   // The trailing "see all results" row sits one past the last result
   const optionCount = search.rows.length + 1
+
+  // Lazy panels mount on the first open — the same trigger that wakes the
+  // site map above — and stay mounted, so later opens animate exactly as
+  // before. Only the very first open skips the panel's entrance.
+  const searchPanelLoaded = useEverTrue(
+    searchOpen || mobileSearchFocused || Boolean(searchQuery.trim())
+  )
+  const mobileMenuLoaded = useEverTrue(mobileMenuOpen)
 
   const closeSearch = () => {
     setSearchQuery('')
@@ -788,15 +817,22 @@ export function Navbar() {
          remaining trade-off is that during the slide the glass bar sits over
          the transition backdrop rather than live hero pixels. */
       data-app-navbar
+      // Solid ink instead of blurred glass on mobile-lite (index.css). Only
+      // while the glass is showing: over a hero the bar is transparent.
+      data-lite-solid={mobileMenuOpen || needsBackdrop ? '' : undefined}
       className={cn(
-        // The bar row is exactly --nav-h (set on the row below, so the mobile
-        // menu can still expand past it). Height used to be whatever the logo
-        // plus inline padding happened to add up to, which meant every page
-        // guessed its own clearance — see the token's note in index.css.
+        // The bar row is exactly --nav-bar-h (set on the row below, so the
+        // mobile menu can still expand past it); --nav-h adds the status-bar
+        // inset an installed app pads the bar by. Height used to be whatever
+        // the logo plus inline padding happened to add up to, which meant every
+        // page guessed its own clearance — see the token's note in index.css.
         // neu-on-dark: the bar is navy glass over hero photography, so every
         // control in it needs the dark-backdrop soft-UI pair — the light one
         // paints a white ring instead of a highlight. See index.css.
-        'neu-on-dark top-0 z-nav transition-all duration-300 fixed inset-x-0',
+        // The transition names its properties: `all` also tweened the
+        // backdrop blur in and out on every scroll toggle, a full-width
+        // re-blur per frame for 300ms.
+        'neu-on-dark top-0 z-nav transition-[translate,background-color,border-color] duration-300 fixed inset-x-0 [--lite-solid:var(--color-ktip-ink)]',
         hidden ? '-translate-y-full' : 'translate-y-0',
         mobileMenuOpen || needsBackdrop
           ? 'bg-ktip-ink/85 backdrop-blur-lg border-b border-ktip-line/60'
@@ -804,7 +840,7 @@ export function Navbar() {
       )}
     >
       <div className="w-full px-4">
-        <div className="flex items-center h-[var(--nav-h)]">
+        <div className="flex items-center h-[var(--nav-bar-h)]">
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link to="/" className="flex items-center gap-3 group">
@@ -1058,36 +1094,40 @@ export function Navbar() {
                   onClick={() => setSearchOpen(true)}
                   aria-label={t`Open search`}
                   title={t`Search (${SHORTCUT_HINT})`}
-                  className="p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
+                  className="p-2 transition-[color,scale] duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
                   <Search size={20} />
                 </button>
               )}
             </div>
 
-            <NavbarSearchPanel
-              open={searchOpen}
-              query={searchQuery}
-              groups={search.groups}
-              rows={search.rows}
-              activeIndex={activeIndex}
-              onHover={setActiveIndex}
-              expandedId={expandedRowId}
-              onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
-              onSelect={selectRow}
-              onSeeAll={seeAllResults}
-              aiMode={aiMode}
-              onToggleAiMode={() => setAiMode((v) => !v)}
-              aiAnswer={search.aiAnswer}
-              aiSteps={search.aiSteps}
-              aiLoading={search.aiLoading}
-              aiError={search.aiError}
-              contentLoading={search.contentLoading}
-              suggestions={search.suggestions}
-              recent={search.recent}
-              onPickRecent={setSearchQuery}
-              onClearRecent={search.clearRecent}
-            />
+            {searchPanelLoaded && (
+              <Suspense fallback={null}>
+                <NavbarSearchPanel
+                  open={searchOpen}
+                  query={searchQuery}
+                  groups={search.groups}
+                  rows={search.rows}
+                  activeIndex={activeIndex}
+                  onHover={setActiveIndex}
+                  expandedId={expandedRowId}
+                  onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
+                  onSelect={selectRow}
+                  onSeeAll={seeAllResults}
+                  aiMode={aiMode}
+                  onToggleAiMode={() => setAiMode((v) => !v)}
+                  aiAnswer={search.aiAnswer}
+                  aiSteps={search.aiSteps}
+                  aiLoading={search.aiLoading}
+                  aiError={search.aiError}
+                  contentLoading={search.contentLoading}
+                  suggestions={search.suggestions}
+                  recent={search.recent}
+                  onPickRecent={setSearchQuery}
+                  onClearRecent={search.clearRecent}
+                />
+              </Suspense>
+            )}
           </div>
 
           {/* User Menu / Auth Buttons.
@@ -1108,7 +1148,7 @@ export function Navbar() {
                 <button
                   onClick={() => setNotifOpen(!notifOpen)}
                   aria-label={t`Notifications`}
-                  className="relative p-2 transition-all duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
+                  className="icon-hit relative p-2 transition-[color,scale] duration-200 text-white/80 hover:text-ktip-nav-accent hover:scale-125"
                 >
                   <Bell size={20} />
                   {unreadCount > 0 && (
@@ -1118,9 +1158,12 @@ export function Navbar() {
                   )}
                 </button>
 
+                {/* Hung off the bell's right edge, the panel ran off the left of
+                    a phone: the bell sits an avatar's width in from the edge.
+                    Below sm it spans the bar instead, just under it. */}
                 <DropdownPanel
                   open={notifOpen}
-                  className="absolute right-0 mt-2 w-80 origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 z-dropdown max-h-96 flex flex-col"
+                  className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-1rem)] origin-top-right bg-ktip-cream rounded-xl shadow-hard border border-ktip-sand-100 z-dropdown max-h-96 flex flex-col max-sm:fixed max-sm:inset-x-2 max-sm:top-[var(--nav-h)] max-sm:w-auto"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-ktip-sand-100">
@@ -1271,7 +1314,7 @@ export function Navbar() {
                         a screen too short even for that. Dropping the 28rem half would
                         leave the menu full height on a tall screen — correct, but then
                         it only ever loops for the people who cannot see it working. */}
-                    <CircularScroll className="max-h-[min(calc(100vh-var(--nav-h)-2.5rem),28rem)]">
+                    <CircularScroll className="max-h-[min(calc(100dvh-var(--nav-h)-2.5rem),28rem)]">
                       <RoleSwitcher onSwitch={() => setUserMenuOpen(false)} />
                       <Link
                         to="/dashboard"
@@ -1409,7 +1452,7 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? t`Close menu` : t`Open menu`}
               aria-expanded={mobileMenuOpen}
-              className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10"
+              className="icon-hit lg:hidden p-2 rounded-lg text-white hover:bg-white/10"
             >
               <StaggeredMenuIcon open={mobileMenuOpen} />
             </button>
@@ -1424,7 +1467,11 @@ export function Navbar() {
         bar's translucency (hero photography read straight through the rows),
         and being inside a position:fixed bar it had no height of its own to
         scroll against. It is an off-canvas drawer now — opaque, scroll-locked,
-        and staggered in. Each direct child below is one stagger unit. */}
+        and staggered in. Each direct child below is one stagger unit.
+        Loaded on the first tap of the hamburger (which is not lazy — it is
+        in the bar above, from first paint) and kept mounted from then on. */}
+    {mobileMenuLoaded && (
+    <Suspense fallback={null}>
     <StaggeredMobileMenu
       open={mobileMenuOpen}
       onClose={() => setMobileMenuOpen(false)}
@@ -1467,33 +1514,41 @@ export function Navbar() {
           onChange={(e) => setSearchQuery(e.currentTarget.value)}
           onKeyDown={handleSearch}
           onFocus={() => setMobileSearchFocused(true)}
-          className="w-full rounded-2xl border border-white/10 bg-white/[0.05] py-3 pl-11 pr-4 text-sm text-white placeholder-white/40 transition-colors focus:border-ktip-nav-accent/50 focus:bg-white/[0.09] focus:outline-none"
+          // text-body: iOS zooms into any field under 16px on focus, and this
+          // one only ever renders on a phone or tablet.
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.05] py-3 pl-11 pr-4 text-body text-white placeholder-white/40 transition-colors focus:border-ktip-nav-accent/50 focus:bg-white/[0.09] focus:outline-none"
         />
       </div>
-      <NavbarSearchPanel
-        open={Boolean(mobileSearchFocused || searchQuery.trim())}
-        variant="mobile"
-        query={searchQuery}
-        groups={search.groups}
-        rows={search.rows}
-        activeIndex={activeIndex}
-        onHover={setActiveIndex}
-        expandedId={expandedRowId}
-        onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
-        onSelect={selectRow}
-        onSeeAll={seeAllResults}
-        aiMode={aiMode}
-        onToggleAiMode={() => setAiMode((v) => !v)}
-        aiAnswer={search.aiAnswer}
-        aiSteps={search.aiSteps}
-        aiLoading={search.aiLoading}
-        aiError={search.aiError}
-        contentLoading={search.contentLoading}
-        suggestions={search.suggestions}
-        recent={search.recent}
-        onPickRecent={setSearchQuery}
-        onClearRecent={search.clearRecent}
-      />
+      {/* Its own boundary: inside the drawer's, a first keystroke that
+          suspended this panel would blank the whole open drawer instead. */}
+      {searchPanelLoaded && (
+        <Suspense fallback={null}>
+          <NavbarSearchPanel
+            open={Boolean(mobileSearchFocused || searchQuery.trim())}
+            variant="mobile"
+            query={searchQuery}
+            groups={search.groups}
+            rows={search.rows}
+            activeIndex={activeIndex}
+            onHover={setActiveIndex}
+            expandedId={expandedRowId}
+            onToggleExpand={(id) => setExpandedRowId((prev) => (prev === id ? null : id))}
+            onSelect={selectRow}
+            onSeeAll={seeAllResults}
+            aiMode={aiMode}
+            onToggleAiMode={() => setAiMode((v) => !v)}
+            aiAnswer={search.aiAnswer}
+            aiSteps={search.aiSteps}
+            aiLoading={search.aiLoading}
+            aiError={search.aiError}
+            contentLoading={search.contentLoading}
+            suggestions={search.suggestions}
+            recent={search.recent}
+            onPickRecent={setSearchQuery}
+            onClearRecent={search.clearRecent}
+          />
+        </Suspense>
+      )}
     </div>
 
     {/* The two destinations that are not a category — half-tiles, so the eye
@@ -1790,6 +1845,8 @@ export function Navbar() {
       </div>
     )}
     </StaggeredMobileMenu>
+    </Suspense>
+    )}
     </>
   )
 }

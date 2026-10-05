@@ -628,6 +628,10 @@ export default function DiscoverPage() {
   // 8em at design scale; the ResizeObserver below replaces this with the real
   // measurement on mount, so it only has to be right for the first frame
   const [cardW, setCardW] = useState(() => 128 * scale)
+  // Strip photos already asked for at the hero's rung (see the strip <img>).
+  // Per URL, not per index, so switching between grants, projects and events
+  // cannot hand one item's latch to another's photo.
+  const heroRungSrcs = useRef(new Set<string>())
   // 12px at design scale — matches the strip's gap-[0.75em]. Scales with the
   // cards so the measured step stays exact and rotation lands on slot bounds.
   const GAP = 12 * scale
@@ -1519,10 +1523,11 @@ export default function DiscoverPage() {
                         pointerEvents: hidden ? 'none' : undefined,
                       }}
                       onClick={() => select(itemIdx)}
+                      data-lite-solid={isActive ? undefined : ''}
                       className={`group text-left shrink-0 w-[8.6em] rounded-[0.5em] overflow-hidden transition-[transform,background-color,box-shadow,opacity] duration-200 ease-out motion-reduce:transition-none ${
                         isActive
                           ? 'bg-ktip-cream shadow-hard -translate-y-[0.25em]'
-                          : 'bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:-translate-y-[0.25em] hover:scale-[1.03] hover:shadow-hard'
+                          : 'bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:-translate-y-[0.25em] hover:scale-[1.03] hover:shadow-hard [--lite-solid:color-mix(in_srgb,var(--color-hero-base)_85%,white)]'
                       }`}
                     >
                       <div
@@ -1531,27 +1536,50 @@ export default function DiscoverPage() {
                         }`}
                       >
                         {item.image ? (
-                          <ResponsiveImage
-                            src={item.image}
-                            alt=""
-                            // 100vw, even though a strip card is a fraction of
-                            // that. These are the same photos the hero shows,
-                            // and the note below depends on the hero having
-                            // already fetched them — describing the card's real
-                            // box would resolve to a smaller rung, a different
-                            // URL, and a second download of every image on the
-                            // page. Matching the hero keeps it to one fetch per
-                            // photo while still dropping the full-size original.
-                            sizes="100vw"
-                            className="w-full h-full object-cover photo-dimmable"
-                            // NOT lazy. There are at most MAX_ITEMS distinct
-                            // images and the hero has already fetched them, but
-                            // the track is tripled and clipped, so lazy copies
-                            // decode only as rotation reveals them — cards
-                            // visibly popping in mid-slide, which reads as the
-                            // strip reloading itself.
-                            decoding="sync"
-                          />
+                          (() => {
+                            // Two rungs, chosen per photo.
+                            //
+                            // The active item and the on-deck one (index + 1,
+                            // which the next auto-advance promotes) ask for the
+                            // HERO's rung, sizes=100vw: the active one is
+                            // already cached by the hero, and the on-deck one
+                            // is then fetched ahead, so the ghost expands onto
+                            // a photo that is already there. Latched per URL —
+                            // stepping a card back down would re-select the
+                            // small rung and download it fresh for a card that
+                            // already holds the large one.
+                            //
+                            // Every other card asks for its own box. It used to
+                            // be 100vw for all six, which put six hero-sized
+                            // photos (~1280px on a phone) on the landing page to
+                            // fill ~130px cards. A card clicked out of order
+                            // now loads its hero rung as the ghost grows.
+                            const onDeck = itemIdx === (index + 1) % count
+                            if (isActive || onDeck) heroRungSrcs.current.add(item.image)
+                            const heroRung = heroRungSrcs.current.has(item.image)
+                            // The track is tripled. One copy of each photo —
+                            // the middle one, where rotation re-centres — loads
+                            // up front; the other two are lazy and find it
+                            // cached when rotation brings them in, so no card
+                            // pops in mid-slide and the duplicates cost no
+                            // decode until they are near view.
+                            const primaryCopy = !ring || (t >= count && t < 2 * count)
+                            return (
+                              <ResponsiveImage
+                                src={item.image}
+                                alt=""
+                                sizes={heroRung ? '100vw' : `${Math.round(cardW)}px`}
+                                className="w-full h-full object-cover photo-dimmable"
+                                loading={primaryCopy ? 'eager' : 'lazy'}
+                                // The hero is the LCP; small cards must not
+                                // compete with it for the first connection.
+                                fetchPriority={heroRung ? 'auto' : 'low'}
+                                // Async: up to 18 copies, and a sync decode
+                                // blocks the main thread for every one of them.
+                                decoding="async"
+                              />
+                            )
+                          })()
                         ) : (
                           <activeMode.icon
                             size={px(30)}

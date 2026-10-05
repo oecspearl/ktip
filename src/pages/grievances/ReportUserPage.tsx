@@ -106,7 +106,8 @@ export default function ReportUserPage() {
         breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Report User` }]}
       />
 
-      <div className="w-full max-w-page mx-auto px-4 py-8">
+      {/* A form, so the form width rather than the full page container. */}
+      <div className="w-full max-w-page-tight mx-auto px-4 py-8">
         {/* Submitted confirmation — visible fallback in case redirect is delayed/blocked */}
         {submitted && (
           <div className="flex items-start gap-3 p-4 bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl mb-6">

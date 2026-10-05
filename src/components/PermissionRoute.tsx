@@ -38,7 +38,7 @@ export const PermissionRoute = ({ require, children }: PermissionRouteProps) => 
   if (!allowed) {
     const permissionLabel = i18n._(PERMISSION_BY_KEY[required[0]]?.label ?? required[0])
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ktip-canvas">
+      <div className="min-h-svh flex items-center justify-center bg-ktip-canvas">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ShieldX size={32} className="text-red-500" />

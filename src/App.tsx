@@ -11,11 +11,11 @@ import {
 import { RouterProvider } from 'react-router/dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
-import { AchievementProvider } from './contexts/AchievementContext'
+import { Suspense } from 'react'
+import { AchievementProvider, useAchievementContext } from './contexts/AchievementContext'
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { LanguageProfileSync } from './i18n/LanguageProfileSync'
 import { DisplayPrefsSync } from './components/DisplayPrefsSync'
-import { AchievementUnlockModal } from './components/achievements/AchievementUnlockModal'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
@@ -24,12 +24,68 @@ import { AgreementRoute } from './components/legal/AgreementRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { InstallPrompt } from './components/InstallPrompt'
-import { WelcomePanel } from './components/WelcomePanel'
 import { MainLayout } from './components/layout/MainLayout'
 import { RouteSplash } from './components/RouteSplash'
 import { AppError } from './lib/app-error'
 import { captureException } from './lib/monitoring'
 import { enableCardShuffle } from './lib/routeTransitions'
+import { lazyOverlay } from './lib/lazy-overlay'
+import { useHasSeenWelcome } from './lib/welcome-panel'
+import { useEverTrue } from './hooks/useEverTrue'
+
+// Two always-mounted layers that almost never draw anything: the welcome panel
+// (once per device) and the achievement popup (once per unlock). Each rendered
+// null on nearly every load while its code — the deck, the trophy showcase,
+// the fireworks — sat in the entry chunk. Each is now fetched on the first
+// occasion to show it and kept mounted after, the latch MainLayout's overlay
+// panels use. lazyOverlay, not lazy: both sit above everything, and a chunk
+// that fails to arrive must cost the layer, never the app.
+const WelcomePanel = lazyOverlay(
+  () => import('./components/WelcomePanel').then((m) => ({ default: m.WelcomePanel })),
+  'welcome-panel'
+)
+const AchievementUnlockModal = lazyOverlay(
+  () =>
+    import('./components/achievements/AchievementUnlockModal').then((m) => ({
+      default: m.AchievementUnlockModal,
+    })),
+  'achievement-unlock'
+)
+
+/**
+ * Mounts the welcome panel on a device that has not seen it — a first visit,
+ * or the home page's replay — and only then fetches it.
+ *
+ * The fallback is the panel's own navy ground, drawn by the same CSS the
+ * title card stands on, so a first visit opens on navy exactly as before
+ * rather than showing the app for the moment the chunk is in flight.
+ */
+function WelcomePanelGate() {
+  const due = useEverTrue(!useHasSeenWelcome())
+  if (!due) return null
+  return (
+    <Suspense
+      fallback={
+        <div className="welcome-panel fixed inset-0 z-max" data-phase="title" aria-hidden="true">
+          <div className="welcome-panel-iris" />
+        </div>
+      }
+    >
+      <WelcomePanel />
+    </Suspense>
+  )
+}
+
+/** Mounts the unlock popup once there is a first unlock to show. */
+function AchievementUnlockGate() {
+  const due = useEverTrue(useAchievementContext().pendingUnlocks.length > 0)
+  if (!due) return null
+  return (
+    <Suspense fallback={null}>
+      <AchievementUnlockModal />
+    </Suspense>
+  )
+}
 
 // Wrapped so Sentry names transactions after the matched route pattern
 // (/projects/:id) instead of the literal URL, which would otherwise create one
@@ -153,7 +209,7 @@ function AnalyticsRoot() {
       {/* Rendered inside the router, not beside it: the popup links to the
           gallery, so it needs router context. AchievementProvider itself sits
           outside, since it only needs auth and the query client. */}
-      <AchievementUnlockModal />
+      <AchievementUnlockGate />
     </AnalyticsProvider>
   )
 }
@@ -783,7 +839,7 @@ function App() {
               touch <Link> or any router hook — that is the bug the banner's
               comment above describes, and it reproduced on a first visit,
               which is the only visit this panel ever has. */}
-          <WelcomePanel />
+          <WelcomePanelGate />
           <ToastProvider>
             <AuthProvider>
               {/* Renders nothing. Carries the language choice between this

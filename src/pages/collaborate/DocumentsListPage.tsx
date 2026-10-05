@@ -98,7 +98,7 @@ export default function DocumentsListPage() {
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, doc.id)}
-                    className="p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    className="icon-hit p-2 rounded-lg text-ktip-sand-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 no-hover:opacity-100"
                     title={t`Delete document`}
                   >
                     <Trash2 size={16} />

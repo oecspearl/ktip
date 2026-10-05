@@ -509,7 +509,7 @@ export default function AdminEventChallengeTab(props: AdminEventChallengeTabProp
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 no-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
                           onClick={() => startEdit(item)}

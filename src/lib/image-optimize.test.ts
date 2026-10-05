@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fitDimensions, renameToWebp, extensionOf, shouldSkipOptimization } from './image-optimize'
+import { fitDimensions, fitWidth, renameToWebp, extensionOf, shouldSkipOptimization } from './image-optimize'
 
 function fileOf(name: string, type: string): File {
   return new File([new Uint8Array([1, 2, 3])], name, { type })
@@ -28,6 +28,23 @@ describe('fitDimensions', () => {
 
   it('handles zero dimensions without dividing by zero', () => {
     expect(fitDimensions(0, 0, 512)).toEqual({ width: 0, height: 0 })
+  })
+})
+
+describe('fitWidth', () => {
+  it('caps the width, not the longest edge', () => {
+    // A sibling named -640 is offered as `640w`; a portrait cover capped by
+    // its height would be narrower than its name says.
+    expect(fitWidth(1920, 640, 640)).toEqual({ width: 640, height: 213 })
+    expect(fitWidth(1200, 1600, 640)).toEqual({ width: 640, height: 853 })
+  })
+
+  it('never upscales', () => {
+    expect(fitWidth(500, 500, 640)).toEqual({ width: 500, height: 500 })
+  })
+
+  it('handles zero dimensions without dividing by zero', () => {
+    expect(fitWidth(0, 100, 128)).toEqual({ width: 0, height: 0 })
   })
 })
 

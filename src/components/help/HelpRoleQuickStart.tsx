@@ -74,7 +74,7 @@ export function HelpRoleQuickStart() {
       <div
         role="tablist"
         aria-label={t`Choose a role`}
-        className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1"
+        className="flex gap-2 overflow-x-auto scroll-cue-x pb-2 -mx-1 px-1"
       >
         {GETTING_STARTED_GUIDES.map((g) => {
           const active = g.role === guide.role

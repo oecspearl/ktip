@@ -392,7 +392,7 @@ export default function AdminUsersPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-cue-x">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ktip-sand-200">
@@ -462,14 +462,15 @@ export default function AdminUsersPage() {
                       )}
                     </td>
 
-                    {/* Actions */}
+                    {/* Actions. Spaced out on touch so the 44px hit areas
+                        (icon-hit) do not reach over each other's icons. */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1 pointer-coarse:gap-3">
                         {canEditRolesOf(user) && (
                           <button
                             type="button"
                             onClick={() => openEditRoles(user)}
-                            className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-ocean-600 transition-colors"
                             title="Edit roles"
                           >
                             <Edit size={16} />
@@ -482,7 +483,7 @@ export default function AdminUsersPage() {
                               id: user.id,
                               name: user.display_name || 'this user',
                             })}
-                            className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-sun-600 transition-colors"
                             title="Reset password"
                           >
                             <KeyRound size={16} />
@@ -495,7 +496,7 @@ export default function AdminUsersPage() {
                               userId: user.id,
                               userName: user.display_name || 'this user',
                             })}
-                            className="p-1.5 text-gray-400 hover:text-ktip-sun-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-sun-600 transition-colors"
                             title="Reset two-step verification"
                           >
                             <SmartphoneNfc size={16} />
@@ -509,7 +510,7 @@ export default function AdminUsersPage() {
                               userName: user.display_name || 'this user',
                               newVerified: false,
                             })}
-                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-red-600 transition-colors"
                             title="Unverify user"
                           >
                             <ShieldX size={16} />
@@ -522,7 +523,7 @@ export default function AdminUsersPage() {
                               userName: user.display_name || 'this user',
                               newVerified: true,
                             })}
-                            className="p-1.5 text-gray-400 hover:text-ktip-tropical-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-ktip-tropical-600 transition-colors"
                             title="Verify user"
                           >
                             <ShieldCheck size={16} />
@@ -539,7 +540,7 @@ export default function AdminUsersPage() {
                                 suspend: !user.is_suspended,
                               })
                             }}
-                            className={`p-1.5 text-gray-400 transition-colors ${
+                            className={`icon-hit p-1.5 text-gray-400 transition-colors ${
                               user.is_suspended ? 'hover:text-ktip-tropical-600' : 'hover:text-red-600'
                             }`}
                             title={user.is_suspended ? 'Reinstate user' : 'Suspend user'}
@@ -554,7 +555,7 @@ export default function AdminUsersPage() {
                               userId: user.id,
                               userName: user.display_name || 'this user',
                             })}
-                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            className="icon-hit p-1.5 text-gray-400hover:text-red-600 transition-colors"
                             title="Delete user"
                           >
                             <Trash2 size={16} />

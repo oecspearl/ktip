@@ -13,7 +13,8 @@ import {
 } from '../../lib/avatar-backdrop'
 import { bannerImage, bannerPosition, isGradientBanner, type BannerSpec } from '../../lib/banner'
 import { pageHeroFor } from '../../lib/hero-images'
-import { ROLE_LABELS } from '../../lib/constants'
+import { IMAGE_PRESETS, ROLE_LABELS } from '../../lib/constants'
+import { COVER_VARIANT_WIDTH } from '../../lib/upload-variants'
 import { resolveCopy } from '../../i18n/copy'
 import { cn } from '../../lib/utils'
 import type { PortraitFrame, SubjectSide } from '../../lib/portrait-mask'
@@ -341,6 +342,10 @@ export function PortraitHero({
       loading="eager"
       fetchPriority="high"
       decoding="sync"
+      // An uploaded banner offers its 640 sibling beside the 1920 original
+      // and the browser picks by width and DPR. Full-bleed and the LCP, so
+      // the original stays a candidate rather than being replaced.
+      uploadVariant={{ width: COVER_VARIANT_WIDTH, originalWidth: IMAGE_PRESETS.BANNER.maxDim }}
     />
   ) : cutout?.kind === 'gradient' ? (
     <BannerAurora spec={avatarGradientSpec(cutout)} animated={animated} />
