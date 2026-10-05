@@ -1,5 +1,5 @@
 import { ReceiptDocument } from '../../shared/ReceiptDocument'
-import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
+import { GRANT_APPLICATION_STEPS, VIDEO_URL_FIELD } from '../../../lib/grant-application-template'
 import type { StepConfig } from '../../../lib/grant-application-template'
 import { useLingui } from '@lingui/react/macro'
 
@@ -26,7 +26,7 @@ export function ApplicationPreview({
     fields: step.fields.flatMap((field) => {
       const raw = data[field.name]
       const value = raw && String(raw).trim() ? String(raw) : null
-      return value ? [{ label: i18n._(field.label), value }] : []
+      return value ? [{ label: i18n._(field.label), value, video: field.name === VIDEO_URL_FIELD }] : []
     }),
   }))
 

@@ -67,6 +67,10 @@ export function Modal({ open, onClose, title, description, children, size, bare,
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Escape') {
       onClose()
+      // React bubbles events through portals along the component tree, so a
+      // modal opened from inside another (the video player over a grant
+      // application) would otherwise hand this Escape to the outer one too.
+      e.stopPropagation()
       return
     }
     if (e.key !== 'Tab' || !dialogRef.current) return
@@ -103,15 +107,15 @@ export function Modal({ open, onClose, title, description, children, size, bare,
     }
   }, [open])
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open. Restores whatever was there before
+  // rather than clearing it: when a modal stacks on another, the inner one
+  // closing must leave the outer one's lock in place.
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
+    if (!open) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = previous
     }
   }, [open])
 

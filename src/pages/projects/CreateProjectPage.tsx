@@ -9,6 +9,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useCreateProject } from '../../hooks/useProjects'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
+import { VideoLinkField } from '../../components/shared/VideoLinkField'
 import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
 import { isPermissionDenied, normalizeHashtags } from '../../lib/utils'
@@ -41,6 +42,7 @@ export default function CreateProjectPage() {
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
+  const [videoUrl, setVideoUrl] = useState('')
   const [employerId, setEmployerId] = useState<string | null>(null)
   const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -84,6 +86,7 @@ export default function CreateProjectPage() {
       phase,
       hashtags,
       is_public: isPublic,
+      video_url: videoUrl,
     })
 
     if (!result.success) {
@@ -129,6 +132,7 @@ export default function CreateProjectPage() {
         is_public: isPublic,
         is_climate_action: isClimateAction,
         details: cleanDetails(details),
+        video_url: videoUrl.trim() || null,
         owner_id: auth.user!.id,
         employer_id: employerId,
         allow_member_engagement: employerId ? allowMemberEngagement : null,
@@ -216,6 +220,14 @@ export default function CreateProjectPage() {
               rows={6}
               moderation={moderation.fields.description}
               fullWidth
+            />
+
+            {/* Video link */}
+            <VideoLinkField
+              value={videoUrl}
+              onChange={setVideoUrl}
+              error={errors.video_url}
+              title={title.trim() || undefined}
             />
 
             {/* Additional Details */}

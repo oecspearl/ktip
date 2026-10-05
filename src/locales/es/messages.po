@@ -3252,10 +3252,6 @@ msgstr "Código en línea"
 msgid "The licence ends when you delete the content or your account — with two exceptions, both of which are about other people rather than about us:"
 msgstr ""
 
-#: src/lib/grant-application-template.ts
-msgid "https://drive.google.com/..."
-msgstr ""
-
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "Back to KTIP"
 msgstr ""
@@ -6103,6 +6099,10 @@ msgstr "Fragmento sin título"
 
 #: src/components/moderation/ContentWarningModal.tsx
 msgid "Submission stopped."
+msgstr ""
+
+#: src/components/shared/VideoViewer.tsx
+msgid "Watch the video"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10030,6 +10030,10 @@ msgstr "Todos los talleres, seminarios web, conferencias, capacitaciones y activ
 #: src/components/grants/application/RichTextField.tsx
 msgid "Align Center"
 msgstr "Centrar"
+
+#: src/components/shared/VideoLinkField.tsx
+msgid "Preview the video"
+msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Confirm Your Report"
@@ -16659,6 +16663,10 @@ msgstr "p. ej., USD 50.000"
 msgid "Description"
 msgstr "Descripción"
 
+#: src/lib/video-embed.ts
+msgid "Use a Loom, Google Drive, YouTube or Vimeo link, starting with https://"
+msgstr ""
+
 #: src/components/legal/ConsentDocument.tsx
 msgid "I have read and agree to the documents above, and I confirm the details I have given are accurate."
 msgstr ""
@@ -18520,6 +18528,10 @@ msgstr "• Descargar en B/N o en color: abre el cuadro de diálogo de impresió
 msgid "Innovation"
 msgstr "Innovación"
 
+#: src/lib/grant-application-template.ts
+msgid "A short pitch or demonstration video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to \"Anyone with the link can view\". A Google Drive folder link works too. Check the link in a private browser window first — an assessor who cannot open it will move on."
+msgstr ""
+
 #: src/pages/auth/LoginPage.tsx
 msgid "Please confirm your email address first. Check your inbox for a confirmation link."
 msgstr "Primero confirme su dirección de correo electrónico. Revise su bandeja de entrada para ver el enlace de confirmación."
@@ -19171,6 +19183,11 @@ msgstr ""
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Faculty accounts are set up by your institution."
 msgstr "Las cuentas de docentes las configura su institución."
+
+#: src/components/shared/VideoLinkField.tsx
+#: src/lib/grant-application-template.ts
+msgid "https://www.loom.com/share/..."
+msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Legacy admin slug. Resolves to Super Admin."
@@ -21172,6 +21189,10 @@ msgstr ""
 msgid " · closed"
 msgstr " · cerrado"
 
+#: src/components/shared/VideoViewer.tsx
+msgid "This link can't play here. It may point to a folder or a page rather than one video. Open it in a new tab to watch."
+msgstr ""
+
 #: src/lib/event-registration.ts
 msgid "Registration approved"
 msgstr "Inscripción aprobada"
@@ -21435,10 +21456,6 @@ msgstr ""
 #: src/components/settings/PreferencesTab.tsx
 msgid "Team invitations, follows, and updates on your projects"
 msgstr "Invitaciones de equipo, seguimientos y novedades sobre sus proyectos"
-
-#: src/lib/grant-application-template.ts
-msgid "A short pitch or demonstration video, if you have one. Upload it to Google Drive, YouTube or similar, set sharing to \"Anyone with the link can view\", and paste the link to the video or the folder holding it here. Check the link in a private browser window first — an assessor who cannot open it will move on."
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The builders"
@@ -22920,6 +22937,10 @@ msgstr ""
 msgid "What a partner may never do"
 msgstr ""
 
+#: src/pages/projects/ProjectDetailPage.tsx
+msgid "Watch the project video"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Enter new password"
@@ -22979,8 +23000,10 @@ msgstr ""
 msgid "Read the application"
 msgstr ""
 
+#: src/components/shared/VideoViewer.tsx
 #: src/components/ui/ToolPanelShell.tsx
 #: src/i18n/harvested.ts
+#: src/pages/projects/ProjectDetailPage.tsx
 msgid "Video"
 msgstr "Vídeo"
 
@@ -23255,6 +23278,10 @@ msgstr "Bienvenido a Eventos"
 #: src/components/venue/room/RoomSections.tsx
 msgid "You are the first one here."
 msgstr "Usted es el primero en llegar."
+
+#: src/components/shared/VideoLinkField.tsx
+msgid "A short demo or pitch video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to \"Anyone with the link can view\"."
+msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Approve application"
@@ -24314,6 +24341,7 @@ msgid "No events on this day"
 msgstr "No hay eventos este día"
 
 #: src/components/legal/ConsentDocument.tsx
+#: src/components/shared/VideoViewer.tsx
 msgid "Open in a new tab"
 msgstr ""
 
@@ -25048,6 +25076,7 @@ msgstr "La mensajería es un panel que se acopla al costado de la página en la 
 msgid "Add context that would help a reviewer."
 msgstr "Añada contexto que pueda ayudar a un revisor."
 
+#: src/components/shared/VideoLinkField.tsx
 #: src/lib/grant-application-template.ts
 msgid "Video link (optional)"
 msgstr ""

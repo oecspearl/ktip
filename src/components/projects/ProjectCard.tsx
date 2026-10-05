@@ -5,6 +5,7 @@ import type { Project } from '../../types'
 import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { NotInterestedButton } from '../personalization/NotInterestedButton'
+import { VideoLinkButton } from '../shared/VideoViewer'
 import { PHASE_LABELS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
@@ -39,12 +40,24 @@ export function ProjectCard({ project, dismissible }: ProjectCardProps) {
   const rawCategoryLabel = PROJECT_CATEGORIES.find((c) => c.value === project.category)?.label
   const categoryLabel = rawCategoryLabel ? resolveCopy(i18n, rawCategoryLabel) : null
 
+  // Play, not an eye: under "For You" the same corner holds the eye-off
+  // "not interested" button, and the two would read as opposites.
+  const action =
+    project.video_url || dismissible ? (
+      <div className="flex items-center gap-1.5">
+        {project.video_url && (
+          <VideoLinkButton url={project.video_url} title={project.title} icon="play" tone="dark" />
+        )}
+        {dismissible && <NotInterestedButton entity="project" id={project.id} tone="dark" />}
+      </div>
+    ) : undefined
+
   return (
     <BentoCard
       to={entityPath('project', project)}
       image={project.image_url}
       imageSeed={project.id}
-      action={dismissible ? <NotInterestedButton entity="project" id={project.id} tone="dark" /> : undefined}
+      action={action}
       eyebrow={categoryLabel || t`Project`}
       title={shown.title}
       description={shown.summary || shown.description}

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { i18n, type MessageDescriptor } from '@lingui/core'
 import { msg, t } from '@lingui/core/macro'
 import { COLLABORATION_LEGACY_LABELS, COLLABORATION_OPTIONS, SELECTABLE_ROLES } from './constants'
+import { isSupportedVideoLink, VIDEO_LINK_ERROR } from './video-embed'
 
 // User Authentication Schemas
 export const loginSchema = z.object({
@@ -256,6 +257,17 @@ export const projectSchema = z.object({
   phase: z.enum(['concept', 'prototype', 'funding', 'launch']),
   hashtags: z.array(z.string()).max(10, 'Maximum 10 hashtags allowed'),
   is_public: z.boolean(),
+  // Same rule and message as the grant wizard's video field. Resolved inside
+  // superRefine so the message is in the reader's language at parse time.
+  video_url: z
+    .string()
+    .optional()
+    .superRefine((value, ctx) => {
+      const trimmed = value?.trim()
+      if (trimmed && !isSupportedVideoLink(trimmed)) {
+        ctx.addIssue({ code: 'custom', message: i18n._(VIDEO_LINK_ERROR) })
+      }
+    }),
 })
 
 // Event Schemas

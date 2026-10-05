@@ -184,4 +184,35 @@ describe('projectSchema', () => {
     })
     expect(result.success).toBe(false)
   })
+
+  const base = {
+    title: 'My Project',
+    category: 'technology',
+    phase: 'concept',
+    hashtags: [],
+    is_public: true,
+  }
+
+  it('treats the video link as optional', () => {
+    expect(projectSchema.safeParse(base).success).toBe(true)
+    expect(projectSchema.safeParse({ ...base, video_url: '' }).success).toBe(true)
+    expect(projectSchema.safeParse({ ...base, video_url: '   ' }).success).toBe(true)
+  })
+
+  it('accepts a video link from a supported source', () => {
+    const result = projectSchema.safeParse({
+      ...base,
+      video_url: 'https://www.loom.com/share/0281766fa2d04bb788eaf19e65135184',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a video link from any other host, on the video_url path', () => {
+    const result = projectSchema.safeParse({
+      ...base,
+      video_url: 'https://www.dropbox.com/s/abc/demo.mp4',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0].path).toEqual(['video_url'])
+  })
 })

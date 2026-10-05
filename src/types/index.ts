@@ -419,6 +419,8 @@ export interface Project extends Ranked {
    * `resolveEngagement` in src/lib/engagement.ts.
    */
   allow_member_engagement: boolean | null
+  /** Migration 157 — optional pitch or demo video; see src/lib/video-embed.ts. */
+  video_url: string | null
   created_at: string
   updated_at: string
   owner?: Profile

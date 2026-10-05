@@ -12,6 +12,7 @@ import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
 import { OrgEngagementFields } from '../../components/shared/OrgEngagementFields'
+import { VideoLinkField } from '../../components/shared/VideoLinkField'
 import { useManagedEmployers } from '../../hooks/useEngagement'
 import { TagInput } from '../../components/ui/TagInput'
 import { normalizeHashtags } from '../../lib/utils'
@@ -62,6 +63,7 @@ export default function EditProjectPage() {
   const [isPublic, setIsPublic] = useState(true)
   const [isClimateAction, setIsClimateAction] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
+  const [videoUrl, setVideoUrl] = useState('')
   const [employerId, setEmployerId] = useState<string | null>(null)
   const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -80,6 +82,7 @@ export default function EditProjectPage() {
       setIsPublic(project.is_public ?? true)
       setIsClimateAction(project.is_climate_action ?? false)
       setDetails(project.details || [])
+      setVideoUrl(project.video_url ?? '')
       setEmployerId(project.employer_id ?? null)
       setAllowMemberEngagement(project.allow_member_engagement ?? null)
       setInitialized(true)
@@ -105,6 +108,7 @@ export default function EditProjectPage() {
       phase,
       hashtags,
       is_public: isPublic,
+      video_url: videoUrl,
     })
 
     if (!result.success) {
@@ -135,6 +139,7 @@ export default function EditProjectPage() {
         is_public: isPublic,
         is_climate_action: isClimateAction,
         details: cleanDetails(details),
+        video_url: videoUrl.trim() || null,
         employer_id: employerId,
         allow_member_engagement: employerId ? allowMemberEngagement : null,
       } as any)
@@ -223,6 +228,14 @@ export default function EditProjectPage() {
               rows={6}
               moderation={moderation.fields.description}
               fullWidth
+            />
+
+            {/* Video link */}
+            <VideoLinkField
+              value={videoUrl}
+              onChange={setVideoUrl}
+              error={errors.video_url}
+              title={title.trim() || undefined}
             />
 
             <ContentWarningModal state={moderation.warning} onClose={moderation.dismissWarning} />

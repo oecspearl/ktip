@@ -3221,10 +3221,6 @@ msgstr ""
 msgid "The licence ends when you delete the content or your account — with two exceptions, both of which are about other people rather than about us:"
 msgstr ""
 
-#: src/lib/grant-application-template.ts
-msgid "https://drive.google.com/..."
-msgstr ""
-
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "Back to KTIP"
 msgstr ""
@@ -6040,6 +6036,10 @@ msgstr ""
 
 #: src/components/moderation/ContentWarningModal.tsx
 msgid "Submission stopped."
+msgstr ""
+
+#: src/components/shared/VideoViewer.tsx
+msgid "Watch the video"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -9933,6 +9933,10 @@ msgstr ""
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Align Center"
+msgstr ""
+
+#: src/components/shared/VideoLinkField.tsx
+msgid "Preview the video"
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -16522,6 +16526,10 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
+#: src/lib/video-embed.ts
+msgid "Use a Loom, Google Drive, YouTube or Vimeo link, starting with https://"
+msgstr ""
+
 #: src/components/legal/ConsentDocument.tsx
 msgid "I have read and agree to the documents above, and I confirm the details I have given are accurate."
 msgstr ""
@@ -18373,6 +18381,10 @@ msgstr ""
 msgid "Innovation"
 msgstr ""
 
+#: src/lib/grant-application-template.ts
+msgid "A short pitch or demonstration video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to \"Anyone with the link can view\". A Google Drive folder link works too. Check the link in a private browser window first — an assessor who cannot open it will move on."
+msgstr ""
+
 #: src/pages/auth/LoginPage.tsx
 msgid "Please confirm your email address first. Check your inbox for a confirmation link."
 msgstr ""
@@ -19013,6 +19025,11 @@ msgstr ""
 
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Faculty accounts are set up by your institution."
+msgstr ""
+
+#: src/components/shared/VideoLinkField.tsx
+#: src/lib/grant-application-template.ts
+msgid "https://www.loom.com/share/..."
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -21000,6 +21017,10 @@ msgstr ""
 msgid " · closed"
 msgstr ""
 
+#: src/components/shared/VideoViewer.tsx
+msgid "This link can't play here. It may point to a folder or a page rather than one video. Open it in a new tab to watch."
+msgstr ""
+
 #: src/lib/event-registration.ts
 msgid "Registration approved"
 msgstr ""
@@ -21261,10 +21282,6 @@ msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Team invitations, follows, and updates on your projects"
-msgstr ""
-
-#: src/lib/grant-application-template.ts
-msgid "A short pitch or demonstration video, if you have one. Upload it to Google Drive, YouTube or similar, set sharing to \"Anyone with the link can view\", and paste the link to the video or the folder holding it here. Check the link in a private browser window first — an assessor who cannot open it will move on."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22735,6 +22752,10 @@ msgstr ""
 msgid "What a partner may never do"
 msgstr ""
 
+#: src/pages/projects/ProjectDetailPage.tsx
+msgid "Watch the project video"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Enter new password"
@@ -22794,8 +22815,10 @@ msgstr ""
 msgid "Read the application"
 msgstr ""
 
+#: src/components/shared/VideoViewer.tsx
 #: src/components/ui/ToolPanelShell.tsx
 #: src/i18n/harvested.ts
+#: src/pages/projects/ProjectDetailPage.tsx
 msgid "Video"
 msgstr ""
 
@@ -23067,6 +23090,10 @@ msgstr ""
 
 #: src/components/venue/room/RoomSections.tsx
 msgid "You are the first one here."
+msgstr ""
+
+#: src/components/shared/VideoLinkField.tsx
+msgid "A short demo or pitch video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to \"Anyone with the link can view\"."
 msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
@@ -24121,6 +24148,7 @@ msgid "No events on this day"
 msgstr ""
 
 #: src/components/legal/ConsentDocument.tsx
+#: src/components/shared/VideoViewer.tsx
 msgid "Open in a new tab"
 msgstr ""
 
@@ -24850,6 +24878,7 @@ msgstr ""
 msgid "Add context that would help a reviewer."
 msgstr ""
 
+#: src/components/shared/VideoLinkField.tsx
 #: src/lib/grant-application-template.ts
 msgid "Video link (optional)"
 msgstr ""

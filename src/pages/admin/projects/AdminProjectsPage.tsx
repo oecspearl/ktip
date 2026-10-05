@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import type { Project } from '../../../types'
 import { PageHero } from '../../../components/layout/PageHero'
+import { VideoLinkButton } from '../../../components/shared/VideoViewer'
 
 const PHASE_COLORS: Record<string, string> = {
   concept: 'bg-ktip-ocean-100 text-ktip-ocean-700',
@@ -110,7 +111,7 @@ export default function AdminProjectsPage() {
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Owner</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden sm:table-cell">Phase</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden lg:table-cell">Created</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-700">Featured</th>
+                <th className="text-center px-4 py-3 font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody className="stagger-rows">
@@ -150,21 +151,31 @@ export default function AdminProjectsPage() {
                   <td className="px-4 py-3 hidden lg:table-cell">
                     <span className="text-gray-500 text-xs">{formatDate(project.created_at, 'PP')}</span>
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => toggleFeatured(project)}
-                      disabled={toggling === project.id}
-                      className={cn(
-                        'p-2 rounded-lg transition-all',
-                        project.is_featured
-                          ? 'bg-ktip-sun-100 text-ktip-sun-600 hover:bg-ktip-sun-200'
-                          : 'bg-ktip-sand-100 text-gray-400 hover:bg-ktip-sand-200 hover:text-gray-600',
-                        toggling === project.id && 'opacity-50 cursor-not-allowed'
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-center gap-1">
+                      {project.video_url && (
+                        <VideoLinkButton
+                          url={project.video_url}
+                          title={project.title}
+                          iconSize={18}
+                          className="h-auto w-auto p-2 rounded-lg border-0 bg-ktip-sand-100 text-gray-500 hover:bg-ktip-sand-200 hover:text-ktip-ocean-600"
+                        />
                       )}
-                      title={project.is_featured ? 'Remove from featured' : 'Add to featured'}
-                    >
-                      {project.is_featured ? <Star size={18} className="fill-current" /> : <StarOff size={18} />}
-                    </button>
+                      <button
+                        onClick={() => toggleFeatured(project)}
+                        disabled={toggling === project.id}
+                        className={cn(
+                          'p-2 rounded-lg transition-all',
+                          project.is_featured
+                            ? 'bg-ktip-sun-100 text-ktip-sun-600 hover:bg-ktip-sun-200'
+                            : 'bg-ktip-sand-100 text-gray-400 hover:bg-ktip-sand-200 hover:text-gray-600',
+                          toggling === project.id && 'opacity-50 cursor-not-allowed'
+                        )}
+                        title={project.is_featured ? 'Remove from featured' : 'Add to featured'}
+                      >
+                        {project.is_featured ? <Star size={18} className="fill-current" /> : <StarOff size={18} />}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

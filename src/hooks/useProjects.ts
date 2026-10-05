@@ -161,6 +161,7 @@ export function useCreateProject() {
       is_public?: boolean
       is_climate_action?: boolean
       details?: DetailEntry[]
+      video_url?: string | null
       owner_id: string
     }) => {
       const { data, error } = await supabase

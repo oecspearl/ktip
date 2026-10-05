@@ -2,7 +2,8 @@ import DOMPurify from 'dompurify'
 import { i18n } from '@lingui/core'
 import { msg } from '@lingui/core/macro'
 import { Trans, useLingui } from '@lingui/react/macro'
-import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
+import { GRANT_APPLICATION_STEPS, VIDEO_URL_FIELD } from '../../lib/grant-application-template'
+import { VideoLinkButton } from './VideoViewer'
 import { GRIEVANCE_CATEGORY_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import type { SubmissionReceipt } from '../../types'
@@ -27,6 +28,8 @@ function isBareUrl(str: string): boolean {
 export interface ReceiptField {
   label: string
   value: string
+  /** A video link: gets a button that plays it in a pop-up beside the link. */
+  video?: boolean
 }
 
 export interface ReceiptSection {
@@ -101,14 +104,19 @@ export function ReceiptDocument({
                     }}
                   />
                 ) : isBareUrl(field.value) ? (
-                  <a
-                    href={field.value.trim()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 underline break-all leading-relaxed"
-                  >
-                    {field.value.trim()}
-                  </a>
+                  <div className="flex items-start gap-2">
+                    <a
+                      href={field.value.trim()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 underline break-all leading-relaxed"
+                    >
+                      {field.value.trim()}
+                    </a>
+                    {field.video && (
+                      <VideoLinkButton url={field.value} title={title} className="print:hidden" />
+                    )}
+                  </div>
                 ) : (
                   <div className="text-sm text-ktip-sand-800 whitespace-pre-wrap leading-relaxed">
                     {field.value}
@@ -160,7 +168,7 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
     fields: entries.flatMap(({ key, label }) => {
       used.add(key)
       const value = toDisplayValue(data[key])
-      return value ? [{ label, value }] : []
+      return value ? [{ label, value, video: key === VIDEO_URL_FIELD }] : []
     }),
   })
 

@@ -40,6 +40,7 @@ import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
 import { entityPath, memberPath } from '../../lib/slug'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { VideoLinkButton } from '../../components/shared/VideoViewer'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 export default function ProjectDetailPage() {
@@ -253,6 +254,17 @@ export default function ProjectDetailPage() {
               <div className="w-full max-h-96 h-64 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center mb-6">
                 <CategoryIcon size={64} className="text-ktip-ocean-500" />
               </div>
+            )}
+
+            {/* Project video — plays in a pop-up, so the page keeps its place */}
+            {project.video_url && (
+              <VideoLinkButton
+                url={project.video_url}
+                title={project.title}
+                icon="play"
+                label={<Trans>Watch the project video</Trans>}
+                className="mb-6 rounded-lg border border-ktip-ocean-600 px-3 py-1.5 font-bold hover:bg-ktip-ocean-50"
+              />
             )}
 
             {/* Hashtags */}
@@ -510,6 +522,12 @@ export default function ProjectDetailPage() {
                     {project.is_public ? t`Public` : t`Private`}
                   </span>
                 </div>
+                {project.video_url && (
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-gray-500"><Trans>Video</Trans></span>
+                    <VideoLinkButton url={project.video_url} title={project.title} />
+                  </div>
+                )}
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-gray-500"><Trans>Views</Trans></span>
                   <span className="font-medium text-ktip-sand-900">

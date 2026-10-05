@@ -13,8 +13,12 @@ import type { RequiredDocument } from '../types'
  *
  * `url` is a plain text input the wizard validates as an http(s) address when
  * it is filled in. Videos are too large to upload, so the applicant hosts the
- * file themselves and pastes the shared link.
+ * file themselves and pastes the shared link. The video field
+ * (VIDEO_URL_FIELD) is held to the stricter rule projects use: a Loom, Google
+ * Drive, YouTube or Vimeo link (src/lib/video-embed.ts).
  */
+export const VIDEO_URL_FIELD = 'video_url'
+
 export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'url' | 'documents'
 
 export interface FieldConfig {
@@ -101,12 +105,12 @@ export const GRANT_APPLICATION_STEPS: StepConfig[] = [
           msg`PDF, Word, Excel, CSV, Markdown, plain text or an image, up to 25MB each. Name each file for what it is, so an assessor can tell them apart without opening them.`,
       },
       {
-        name: 'video_url',
+        name: VIDEO_URL_FIELD,
         label: msg`Video link (optional)`,
         type: 'url',
-        placeholder: msg`https://drive.google.com/...`,
+        placeholder: msg`https://www.loom.com/share/...`,
         helpText:
-          msg`A short pitch or demonstration video, if you have one. Upload it to Google Drive, YouTube or similar, set sharing to "Anyone with the link can view", and paste the link to the video or the folder holding it here. Check the link in a private browser window first — an assessor who cannot open it will move on.`,
+          msg`A short pitch or demonstration video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to "Anyone with the link can view". A Google Drive folder link works too. Check the link in a private browser window first — an assessor who cannot open it will move on.`,
       },
     ],
   },

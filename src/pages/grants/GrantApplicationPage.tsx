@@ -18,7 +18,8 @@ import { EngagementNotice } from '../../components/shared/EngagementNotice'
 import { useEngagementGate } from '../../hooks/useEngagement'
 import { useAgreementGate } from '../../hooks/useAgreementGate'
 import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
-import { GRANT_APPLICATION_STEPS } from '../../lib/grant-application-template'
+import { GRANT_APPLICATION_STEPS, VIDEO_URL_FIELD } from '../../lib/grant-application-template'
+import { isSupportedVideoLink, VIDEO_LINK_ERROR } from '../../lib/video-embed'
 import { truncate } from '../../lib/utils'
 import {
   ArrowLeft,
@@ -148,8 +149,11 @@ export default function GrantApplicationPage() {
         continue
       }
       // Optional links are only checked when filled in: an assessor cannot
-      // open "drive.google.com/..." pasted without its scheme.
-      if (field.type === 'url' && trimmed && !isHttpUrl(trimmed)) {
+      // open "drive.google.com/..." pasted without its scheme. The video link
+      // takes the same sources as a project's, with the same message.
+      if (field.name === VIDEO_URL_FIELD && trimmed && !isSupportedVideoLink(trimmed)) {
+        stepErrors[field.name] = i18n._(VIDEO_LINK_ERROR)
+      } else if (field.type === 'url' && trimmed && !isHttpUrl(trimmed)) {
         stepErrors[field.name] = t`Paste the full link, starting with https://`
       }
     }
