@@ -4,6 +4,7 @@ import { keys } from '../queries/keys'
 import { useAuth } from '../contexts/AuthContext'
 import { usePersonalizationActive } from './usePersonalization'
 import { grantImageFor, heroImageFor } from '../lib/hero-images'
+import { callOptionalRpc, isRpcAbsent } from '../lib/optional-rpc'
 import type { MatchReason } from '../types'
 import type { RankableEntity } from '../lib/personalization'
 
@@ -19,7 +20,12 @@ export interface FeedItem {
   deadline_at: string | null
   score: number
   reasons: MatchReason[]
+  /** Present only from get_personalized_feed_v2 (163). Its presence is what
+   *  tells useFeedImages it has nothing left to fetch. */
+  image_url?: string | null
 }
+
+const FEED_V2 = 'get_personalized_feed_v2'
 
 const DEFAULT_ENTITIES: RankableEntity[] = ['project', 'resource', 'event', 'grant']
 
@@ -33,6 +39,12 @@ const DEFAULT_ENTITIES: RankableEntity[] = ['project', 'resource', 'event', 'gra
  *
  * Returns an empty list rather than an error when the migration is missing or
  * personalization is off, so the rail simply does not render.
+ *
+ * With 163 applied this is one request, issued as soon as the member is
+ * known: v2 returns no rows for someone who switched personalization off, so
+ * there is no need to read their settings first, and it carries the image
+ * columns, so useFeedImages has nothing to look up. Without 163 it is the old
+ * three-step path.
  */
 export function usePersonalizedFeed(options?: {
   limit?: number
@@ -43,29 +55,51 @@ export function usePersonalizedFeed(options?: {
   const limit = options?.limit ?? 12
   const entities = options?.entities ?? DEFAULT_ENTITIES
 
+  const normalize = (data: unknown): FeedItem[] =>
+    ((data as any[]) || []).map((row) => ({
+      ...row,
+      tags: row.tags ?? [],
+      reasons: row.reasons ?? [],
+    }))
+
   const fetchFeed = async (): Promise<FeedItem[]> => {
+    try {
+      const v2 = await callOptionalRpc<unknown[]>(FEED_V2, { p_limit: limit, p_entities: entities })
+      if (v2 !== undefined) return normalize(v2)
+    } catch {
+      return []
+    }
+    // 163 not applied. v1 does not decide on its own whether the member wants
+    // a feed at all, so the old path stays gated on their settings.
+    if (!active) return []
     const { data, error } = await (supabase as any).rpc('get_personalized_feed', {
       p_limit: limit,
       p_entities: entities,
     })
     if (error) return []
-    return ((data as any[]) || []).map((row) => ({
-      ...row,
-      tags: row.tags ?? [],
-      reasons: row.reasons ?? [],
-    }))
+    return normalize(data)
   }
 
+  // Once v2 is known to be missing, the query has to wait for the settings
+  // row again, and `active` joins the key so the answer it gave before the
+  // settings arrived is not kept for the session.
+  const legacy = isRpcAbsent(FEED_V2)
+
   const query = useQuery({
-    queryKey: keys.sub('personalization', 'feed', `${auth.user?.id}:${limit}:${entities.join(',')}`),
+    queryKey: keys.sub(
+      'personalization',
+      'feed',
+      `${auth.user?.id}:${limit}:${entities.join(',')}${legacy ? `:legacy:${active}` : ''}`
+    ),
     queryFn: fetchFeed,
-    enabled: active,
+    enabled: legacy ? active : !!auth.user,
     staleTime: 60_000,
   })
 
+  const enabled = legacy ? active : !!auth.user
   return {
     items: query.data ?? [],
-    loading: query.isPending && active,
+    loading: query.isPending && enabled,
     error: query.error,
     refetch: query.refetch,
   }
@@ -92,6 +126,9 @@ export type FeedImageMap = Record<string, string>
  *               type pool and the feed does not carry it, so it is read here
  */
 export function useFeedImages(items: FeedItem[]) {
+  // v2 rows already carry what the card rules need; resolve them in place.
+  const resolved = items.length > 0 && items.every((i) => i.image_url !== undefined)
+
   // Sorted so a reordered feed with the same contents stays one cache entry
   const cacheKey = items
     .map((i) => `${i.entity}:${i.id}`)
@@ -131,11 +168,24 @@ export function useFeedImages(items: FeedItem[]) {
   const query = useQuery({
     queryKey: keys.sub('personalization', 'feed-images', cacheKey),
     queryFn: fetchImages,
-    enabled: items.length > 0,
+    enabled: items.length > 0 && !resolved,
     staleTime: 5 * 60_000,
   })
 
+  if (resolved) return imagesFromRows(items)
   return query.data ?? {}
+}
+
+/** The same card rules as fetchImages, applied to v2 rows. */
+function imagesFromRows(items: FeedItem[]): FeedImageMap {
+  const map: FeedImageMap = {}
+  for (const item of items) {
+    map[`${item.entity}:${item.id}`] =
+      item.entity === 'grant'
+        ? grantImageFor(item.id, item.type_key)
+        : item.image_url || heroImageFor(item.id)
+  }
+  return map
 }
 
 /**

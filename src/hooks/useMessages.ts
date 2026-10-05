@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { insertByCreatedAt, uniqueTopic } from '../lib/realtime'
+import { callOptionalRpc } from '../lib/optional-rpc'
 import { attachmentUrl } from '../lib/chat-attachments'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
@@ -279,6 +280,23 @@ export function useCreateConversation() {
       currentUserId: string
       otherUserId: string
     }): Promise<string> => {
+      const studentMessage = t`Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.`
+      const privateMessage = t`This member only accepts messages from their connections. Send them a connection request first.`
+
+      // 165: the whole sequence below in one round trip and one transaction.
+      // The path after it stays as the fallback for a database without it.
+      const started = await callOptionalRpc<{
+        ok: boolean
+        conversation_id?: string
+        reason?: string
+      }>('start_direct_conversation', { p_other: otherUserId })
+      if (started) {
+        if (started.ok && started.conversation_id) return started.conversation_id
+        if (started.reason === 'student') throw new Error(studentMessage)
+        if (started.reason === 'private') throw new Error(privateMessage)
+        throw new Error(t`Could not start the conversation.`)
+      }
+
       // Check for existing conversation
       const { data: existingId } = await supabase.rpc(
         'find_conversation_between',
@@ -297,9 +315,7 @@ export function useCreateConversation() {
 
       const studentInvolved = (parties || []).some((p: any) => (p.roles || []).includes('student'))
       if (studentInvolved) {
-        throw new Error(
-          t`Direct messages with student accounts are not available. Use a supervised group channel with a designated educator instead.`
-        )
+        throw new Error(studentMessage)
       }
 
       // Privacy (083). Same reasoning as the student check above: the
@@ -319,9 +335,7 @@ export function useCreateConversation() {
           .limit(1)
 
         if (!accepted?.length) {
-          throw new Error(
-            t`This member only accepts messages from their connections. Send them a connection request first.`
-          )
+          throw new Error(privateMessage)
         }
       }
 

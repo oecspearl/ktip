@@ -69,27 +69,33 @@ export function useConnectionStatuses(myId: string | undefined, otherIds: string
 
   const fetchStatuses = async (): Promise<Record<string, ConnectionStatus>> => {
     const map: Record<string, ConnectionStatus> = {}
-    for (let i = 0; i < ids.length; i += 50) {
-      const inList = `(${ids.slice(i, i + 50).join(',')})`
-      const { data, error } = await (supabase as any)
-        .from('connections')
-        .select('*')
-        .or(
-          `and(requester_id.eq.${myId},addressee_id.in.${inList}),and(addressee_id.eq.${myId},requester_id.in.${inList})`
-        )
-        .neq('status', 'declined')
-      if (error) throw error
-      for (const row of ((data as Connection[]) || [])) {
-        const otherId = row.requester_id === myId ? row.addressee_id : row.requester_id
-        map[otherId] = {
-          state:
-            row.status === 'accepted'
-              ? 'connected'
-              : row.requester_id === myId
-                ? 'pending_sent'
-                : 'pending_received',
-          connection: row,
-        }
+    // Chunks are independent; a 144-card directory was three serial trips.
+    const chunks: string[][] = []
+    for (let i = 0; i < ids.length; i += 50) chunks.push(ids.slice(i, i + 50))
+    const pages = await Promise.all(
+      chunks.map(async (chunk) => {
+        const inList = `(${chunk.join(',')})`
+        const { data, error } = await (supabase as any)
+          .from('connections')
+          .select('*')
+          .or(
+            `and(requester_id.eq.${myId},addressee_id.in.${inList}),and(addressee_id.eq.${myId},requester_id.in.${inList})`
+          )
+          .neq('status', 'declined')
+        if (error) throw error
+        return (data as Connection[]) || []
+      })
+    )
+    for (const row of pages.flat()) {
+      const otherId = row.requester_id === myId ? row.addressee_id : row.requester_id
+      map[otherId] = {
+        state:
+          row.status === 'accepted'
+            ? 'connected'
+            : row.requester_id === myId
+              ? 'pending_sent'
+              : 'pending_received',
+        connection: row,
       }
     }
     return map

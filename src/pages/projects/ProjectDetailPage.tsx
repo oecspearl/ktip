@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { keys } from '../../queries/keys'
 import { Badge } from '../../components/ui/Badge'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { LikeButton } from '../../components/projects/LikeButton'
@@ -7,7 +9,8 @@ import { FollowButton } from '../../components/projects/FollowButton'
 import { CommentSection } from '../../components/projects/CommentSection'
 import { TeamWidget } from '../../components/projects/TeamWidget'
 import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
-import { useProject, useProjects, useDeleteProject, trackProjectView } from '../../hooks/useProjects'
+import { useProject, useDeleteProject, trackProjectView } from '../../hooks/useProjects'
+import { useRecentProjects } from '../../hooks/useRecentProjects'
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeProjectDeletion } from '../../lib/delete-guard'
 import { useProjectMembers } from '../../hooks/useProjectMembers'
@@ -49,12 +52,13 @@ export default function ProjectDetailPage() {
   const navigate = useNavigate()
   const auth = useAuth()
   const toast = useToast()
+  const queryClient = useQueryClient()
   const { openMember } = useMemberPanel()
 
   const { project, loading: projectLoading } = useProject(params.id)
   useCanonicalSlug(params.id, project)
   useRecordView('project', project?.id)
-  const { projects: recentProjects } = useProjects()
+  const { projects: recentProjects } = useRecentProjects(3)
   usePageTitle(project?.title)
 
   const { members } = useProjectMembers(params.id)
@@ -107,7 +111,9 @@ export default function ProjectDetailPage() {
         .eq('id', p.id)
       if (error) throw error
       toast.success(p.is_featured ? 'Removed from featured' : 'Added to featured')
-      window.location.reload()
+      // Refetch what shows the star, instead of reloading the whole app (and
+      // re-running auth, the bootstrap and every query) to flip one icon.
+      await queryClient.invalidateQueries({ queryKey: keys.all('projects') })
     } catch (err: any) {
       toast.error(err.message || t`Failed to update`)
     } finally {

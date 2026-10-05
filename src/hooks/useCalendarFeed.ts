@@ -135,10 +135,15 @@ export function useCalendarFeed({
 
       wants('rsvp') && userId
         ? (async () => {
-            const { data, error } = await supabase
+            // Windowed on the server. Every RSVP the member ever made, each with
+            // its full event, used to come back so the filter below could drop
+            // all but this month's.
+            const { data, error } = await (supabase as any)
               .from('event_rsvps')
-              .select('*, event:events(*)')
+              .select('*, event:events!inner(*)')
               .eq('user_id', userId)
+              .gte('event.start_date', eventsFrom)
+              .lte('event.start_date', end)
             if (error) throw error
             return (data as any[]) || []
           })()
@@ -148,7 +153,10 @@ export function useCalendarFeed({
         ? (async () => {
             let query = supabase
               .from('grant_applications')
-              .select('*, grant:grants(*)')
+              // Only what the calendar entry shows. '*' shipped every
+              // application's full form answers (application_data) and the
+              // whole grant row to draw a title and a status.
+              .select('id, status, updated_at, grant:grants(title)')
               .gte('updated_at', start)
               .lte('updated_at', end)
               .order('updated_at', { ascending: true })

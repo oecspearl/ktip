@@ -192,7 +192,9 @@ export function ShareEntityModal({
       const titleText = resourceTitle || i18n._(A_LABEL[resourceType])
       const inviterName = displayName()
 
-      for (const user of selected) {
+      // One invitee's steps depend on each other; different invitees' do not.
+      // Run serially, three invitees cost three times the round trips.
+      const inviteOne = async (user: (typeof selected)[number]) => {
         const perm = permissions[user.id] || 'view'
         const permissionLabel = perm === 'edit' ? t`can edit` : t`view only`
 
@@ -235,6 +237,10 @@ export function ShareEntityModal({
           link: '/invitations',
         })
       }
+
+      const results = await Promise.allSettled(selected.map(inviteOne))
+      const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected')
+      if (failed) throw failed.reason
 
       queryClient.invalidateQueries({ queryKey: keys.all('collab-invites') })
       setSuccess(
