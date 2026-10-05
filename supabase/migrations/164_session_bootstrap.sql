@@ -22,8 +22,11 @@
 --
 -- SECURITY INVOKER on purpose: every function it calls is already scoped to
 -- auth.uid() and carries its own privileges (the ensure_* functions are
--- SECURITY DEFINER), and the profile read goes through the ordinary RLS on
--- profiles. Nothing here widens what the caller could already read.
+-- SECURITY DEFINER). Nothing here widens what the caller could already read.
+--
+-- The profile comes from 167's get_my_profile(), not the table. 168 revokes
+-- table-wide SELECT on profiles, and a whole-row read of the table as the
+-- caller (to_jsonb(p) over profiles) then fails with 42501. Apply after 167.
 --
 -- `profile` is null when the row does not exist yet. The client then takes
 -- its old path, which creates the row (the pre-trigger accounts case).
@@ -55,7 +58,7 @@ BEGIN
   BEGIN PERFORM ensure_my_mfa_status();    EXCEPTION WHEN OTHERS THEN NULL; END;
 
   RETURN jsonb_build_object(
-    'profile',     (SELECT to_jsonb(p) FROM profiles p WHERE p.id = v_uid),
+    'profile',     (SELECT to_jsonb(p) FROM get_my_profile() p),
     'permissions', to_jsonb(coalesce(get_my_permissions(), ARRAY[]::TEXT[])),
     'consents',    coalesce((SELECT jsonb_agg(to_jsonb(c)) FROM get_my_consents() c), '[]'::JSONB)
   );
