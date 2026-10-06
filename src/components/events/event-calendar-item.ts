@@ -1,4 +1,3 @@
-import { createElement } from 'react'
 import { MapPin, Video } from 'lucide-react'
 import {
   CALENDAR_ACCENT_COLORS,
@@ -10,7 +9,6 @@ import {
   EVENT_TYPE_GRADIENTS,
   EVENT_TYPE_LABELS,
 } from '../../lib/constants'
-import { ClimateBadge } from '../ui/ClimateBadge'
 import type { CalendarItem } from '../../lib/calendar'
 import { entityPath } from '../../lib/slug'
 import type { Event } from '../../types'
@@ -50,7 +48,6 @@ export function eventToCalendarItem(event: Event): CalendarItem {
     description: event.summary || event.description,
     locationLabel: event.is_virtual ? 'Virtual event' : event.location,
     icon: event.is_virtual ? Video : MapPin,
-    badges: event.is_climate_action ? createElement(ClimateBadge) : undefined,
     avatarUrl: event.organizer?.avatar_url,
     avatarName: event.organizer?.display_name,
     statusLabel: statusLabel(event),

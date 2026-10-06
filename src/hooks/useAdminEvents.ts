@@ -4,6 +4,7 @@ import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { measuredCount, unavailable, type Measured } from '../lib/measured'
 import type { Event, EventRSVP, EventStatus, RSVPStatus } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export function useAdminEvents(filters?: {
   status?: string
@@ -15,7 +16,7 @@ export function useAdminEvents(filters?: {
       .from('events')
       .select(`
         *,
-        organizer:profiles(*)
+        organizer:profiles!organizer_id(${PROFILE_CHIP})
       `)
       .order('start_date', { ascending: false })
 
@@ -130,7 +131,7 @@ export function useEventRegistrations(eventId: string | undefined) {
       .from('event_rsvps')
       .select(`
         *,
-        user:profiles(*)
+        user:profiles!user_id(${PROFILE_CHIP})
       `)
       .eq('event_id', id)
       .order('created_at', { ascending: false })

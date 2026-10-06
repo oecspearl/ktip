@@ -10,6 +10,7 @@ import type {
   RolePermissionRow,
   RoleSlug,
 } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /** Role catalog. Public read, so this also drives role labels elsewhere. */
 export function useRoleDefinitions() {
@@ -132,7 +133,7 @@ export function useRolePermissionEvents(limit = 50) {
     queryFn: async (): Promise<RolePermissionEvent[]> => {
       const { data, error } = await (supabase as any)
         .from('role_permission_events')
-        .select('*, actor:profiles!actor_id(*)')
+        .select(`*, actor:profiles!actor_id(${PROFILE_CHIP})`)
         .order('created_at', { ascending: false })
         .limit(limit)
 
@@ -144,14 +145,18 @@ export function useRolePermissionEvents(limit = 50) {
   return { events: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-/** Members list for the role-assignment table above the matrix. */
+/**
+ * Members list for the role-assignment table above the matrix, and the venue
+ * tab's staff picker. member_profiles (167) because the picker shows the
+ * organisation, which follows the member's 'details' section.
+ */
 export function useRoleMembers(search?: string) {
   const query = useQuery({
     queryKey: keys.list('role-members', { search }),
     queryFn: async (): Promise<Profile[]> => {
       let request = (supabase as any)
-        .from('profiles')
-        .select('*')
+        .from('member_profiles')
+        .select('id, username, display_name, avatar_url, roles, is_suspended, organization, created_at')
         .order('created_at', { ascending: false })
         .limit(100)
 

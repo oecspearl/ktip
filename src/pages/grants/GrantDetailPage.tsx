@@ -136,7 +136,7 @@ export default function GrantDetailPage() {
       <PageHero
         eyebrow={t`Funding Detail`}
         title={grant.title}
-        image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
+        image={grantImageFor(grant.id, grant.grant_type)}
         imageSeed={grant.id}
         breadcrumb={[
           { label: t`Home`, href: '/' },

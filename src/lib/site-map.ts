@@ -133,20 +133,6 @@ export const SITE_MAP: SiteEntry[] = [
       'Search for a member by name and add them, or remove an existing member.',
     ],
   },
-  {
-    id: 'projects.filter-climate',
-    title: 'Find climate-action projects',
-    category: 'Projects',
-    description: 'Filter listings down to climate and environment work',
-    keywords: ['climate', 'environment', 'green', 'sustainability', 'filter'],
-    href: '/projects',
-    icon: 'Leaf',
-    howTo: [
-      'Go to Projects.',
-      'Turn on the "Climate Action" filter above the project grid.',
-      'The same filter exists on the Events, Grants and Resources pages.',
-    ],
-  },
 
   // ------------------------------------------------------------------ Events
   {

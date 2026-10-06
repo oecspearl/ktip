@@ -168,43 +168,43 @@ function isAbortError(err: any): boolean {
   return false
 }
 
+// The member's whole row. get_my_profile() (167) rather than select('*'):
+// since 168 the table answers only the teaser columns, to the member as well,
+// so every own-row read goes through the RPC. Apply 167 before this ships.
+async function readOwnProfile(): Promise<Profile | null> {
+  const { data, error } = await (supabase as any).rpc('get_my_profile').maybeSingle()
+  if (error) throw error
+  return (data as Profile | null) ?? null
+}
+
 // Fetch (and auto-create if missing) a user's profile from the database.
 async function fetchProfileQuery(userId: string, userData?: User | null): Promise<Profile | null> {
-  const { data, error } = await supabase
+  const existing = await readOwnProfile()
+  if (existing) return existing
+
+  // Profile doesn't exist yet — create it (handles users created before trigger was installed)
+  // OAuth providers (Google/Microsoft) supply full_name/name/picture instead of our keys
+  const meta = userData?.user_metadata
+  const { error: insertError } = await supabase
     .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single()
+    .insert({
+      id: userId,
+      display_name:
+        meta?.display_name || meta?.full_name || meta?.name || userData?.email || null,
+      avatar_url: meta?.avatar_url || meta?.picture || null,
+      roles: meta?.role ? [meta.role] : [],
+      bio: meta?.bio || null,
+      country: meta?.country || null,
+      organization: meta?.organization || null,
+      industry: meta?.industry || null,
+      skills: Array.isArray(meta?.skills) ? meta.skills : [],
+      interests: Array.isArray(meta?.interests) ? meta.interests : [],
+      open_to: Array.isArray(meta?.open_to) ? meta.open_to : [],
+    })
 
-  if (error && error.code === 'PGRST116') {
-    // Profile doesn't exist yet — create it (handles users created before trigger was installed)
-    // OAuth providers (Google/Microsoft) supply full_name/name/picture instead of our keys
-    const meta = userData?.user_metadata
-    const { data: newProfile, error: insertError } = await supabase
-      .from('profiles')
-      .insert({
-        id: userId,
-        display_name:
-          meta?.display_name || meta?.full_name || meta?.name || userData?.email || null,
-        avatar_url: meta?.avatar_url || meta?.picture || null,
-        roles: meta?.role ? [meta.role] : [],
-        bio: meta?.bio || null,
-        country: meta?.country || null,
-        organization: meta?.organization || null,
-        industry: meta?.industry || null,
-        skills: Array.isArray(meta?.skills) ? meta.skills : [],
-        interests: Array.isArray(meta?.interests) ? meta.interests : [],
-        open_to: Array.isArray(meta?.open_to) ? meta.open_to : [],
-      })
-      .select()
-      .single()
-
-    if (insertError) throw insertError
-    return newProfile as Profile
-  }
-
-  if (error) throw error
-  return data as Profile
+  if (insertError) throw insertError
+  // Read back through the RPC: a RETURNING of the whole row fails after 168.
+  return readOwnProfile()
 }
 
 /** What get_session_bootstrap (164) returns. */

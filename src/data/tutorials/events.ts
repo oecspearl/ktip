@@ -28,7 +28,7 @@ export const eventsTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="events-filters"]',
     title: 'One bar, every filter',
     description:
-      'Everything here narrows the events below, and the filters stack — combine as many as you need.\n\n• Event type — workshops, conferences, webinars, training, meetings\n• Climate Action — only events tied to the region’s resilience agenda\n• Search — click the magnifier to open it, then type a title, topic or venue\n• Topic chips appear under the bar when the current events carry tags\n\nOnce anything is active, a Clear all filters link appears underneath to reset in one click.',
+      'Everything here narrows the events below, and the filters stack — combine as many as you need.\n\n• Event type — workshops, conferences, webinars, training, meetings\n• Search — click the magnifier to open it, then type a title, topic or venue\n• Topic chips appear under the bar when the current events carry tags\n\nOnce anything is active, a Clear all filters link appears underneath to reset in one click.',
     position: 'bottom',
     scrollMode: 'top',
   },
@@ -49,7 +49,7 @@ export const eventsTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="events-results"]',
     title: 'Grid view',
     description:
-      'The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.\n\nUpcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n\nGrid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile.',
+      'The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled and past events. The count above tells you how many matched your filters.\n\nUpcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n\nGrid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile.',
     position: 'top',
     scrollMode: 'top',
     secondaryTarget: '[data-tutorial="events-filters"]',

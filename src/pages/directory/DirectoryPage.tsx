@@ -24,14 +24,16 @@ import {
   SKILL_SUGGESTIONS,
 } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { COVER_VARIANT_WIDTH } from '../../lib/upload-variants'
 import { useTutorialAutoStart } from '../../hooks/useTutorialAutoStart'
 import { TUTORIAL_IDS } from '../../data/tutorials'
 import { debounce } from '../../lib/utils'
+import { sectionIsPrivate } from '../../lib/profile-visibility'
+import type { ProfileSectionKey } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 import { BANNER_WASH, bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
+import { COVER_VARIANT_WIDTH } from '../../lib/upload-variants'
 import { BannerAurora } from '../../components/profile/BannerAurora'
 
 export default function DirectoryPage() {
@@ -381,6 +383,15 @@ export default function DirectoryPage() {
                   // skills and standing on a card whose profile is closed
                   // would make the lock look decorative.
                   const isLocked = member.profile_visibility === 'private'
+                  // …and per section since 162: each figure on the card
+                  // answers to the section it comes from. The card is the
+                  // same for every viewer, so it shows what a stranger may.
+                  const closed = (section: ProfileSectionKey) =>
+                    sectionIsPrivate(section, member.profile_visibility, member.section_visibility)
+                  const organization = closed('details') ? null : member.organization
+                  const firstSkill = closed('skills') ? null : member.skills?.[0]
+                  const showStanding = !closed('standing')
+                  const showBadges = !closed('achievements')
                   // Banner is a teaser like the avatar: locked members keep it.
                   const banner = parseBanner(member.banner)
                   return (
@@ -419,11 +430,11 @@ export default function DirectoryPage() {
                     }
                     meta={
                       <>
-                        {member.organization && <>{member.organization}</>}
-                        {member.organization && member.country && <> · </>}
+                        {organization && <>{organization}</>}
+                        {organization && member.country && <> · </>}
                         {member.country && <>{member.country}</>}
-                        {!isLocked && member.country && member.skills?.length > 0 && <> · </>}
-                        {!isLocked && member.skills?.length > 0 && <>{member.skills[0]}</>}
+                        {member.country && firstSkill && <> · </>}
+                        {firstSkill && <>{firstSkill}</>}
                         {/* Said on the card, so the closed profile behind it
                             is not a surprise after the click. */}
                         {isLocked && (
@@ -432,7 +443,7 @@ export default function DirectoryPage() {
                             <Trans>Private profile</Trans>
                           </span>
                         )}
-                        {!isLocked && connectionCounts?.[member.id] !== undefined && (
+                        {showStanding && connectionCounts?.[member.id] !== undefined && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Users size={13} className="shrink-0" />
                             {connectionCounts[member.id]}{' '}
@@ -442,13 +453,13 @@ export default function DirectoryPage() {
                         {/* Only once there is something to show — "Newcomer,
                             0 pts" on every new member turns the directory
                             into a scoreboard of who has not started. */}
-                        {!isLocked && statsById[member.id]?.badge_count > 0 && (
+                        {showStanding && statsById[member.id]?.badge_count > 0 && (
                           <span className="flex items-center gap-1.5 mt-1">
                             <Trophy size={13} className="shrink-0" />
                             <Trans>{statsById[member.id].rank_name} · {statsById[member.id].points} pts</Trans>
                           </span>
                         )}
-                        {!isLocked && (member.user_badges?.length ?? 0) > 0 && (
+                        {showBadges && (member.user_badges?.length ?? 0) > 0 && (
                           <span className="flex flex-wrap gap-1.5 mt-2">
                             {member.user_badges!.slice(0, 3).map((ub) => (
                               <AchievementBadge key={ub.id} userBadge={ub} />

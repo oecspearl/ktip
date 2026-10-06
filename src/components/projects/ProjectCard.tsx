@@ -1,8 +1,7 @@
-import { Users } from 'lucide-react'
+import { EyeOff, Users } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
 import { Badge } from '../ui/Badge'
 import type { Project } from '../../types'
-import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { VideoLinkButton } from '../shared/VideoViewer'
@@ -69,7 +68,14 @@ export function ProjectCard({ project, dismissible }: ProjectCardProps) {
         <Badge className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent">
           {resolveCopy(i18n, PHASE_LABELS[project.phase])}
         </Badge>
-        {project.is_climate_action && <ClimateBadge />}
+        {/* Only the owner and members can load a private project, so like the
+            Draft badge on EventCard this answers "why isn't this listed?" */}
+        {!project.is_public && (
+          <Badge className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent inline-flex items-center gap-1">
+            <EyeOff size={12} aria-hidden="true" />
+            {t`Private`}
+          </Badge>
+        )}
         {/* No source passed: a card is too small to expand the original into,
             and the detail page offers it. The mark is still worth having here —
             it is the first place a French reader meets translated copy. */}

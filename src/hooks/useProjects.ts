@@ -7,13 +7,16 @@ import { usePersonalizationActive } from './usePersonalization'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import { isUuid } from '../lib/slug'
+import { settleEach, splitReturned, type SettleOptions } from '../lib/bulk'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { DetailEntry, Project, ProjectComment } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export function useProjects(filters?: {
   category?: string
   phase?: string
   search?: string
-  climateAction?: boolean
   /** Matched against the `hashtags` column — projects' tag field. */
   tags?: string[]
   sort?: ContentSort
@@ -37,7 +40,7 @@ export function useProjects(filters?: {
       .from('projects')
       .select(`
         *,
-        owner:profiles(*)
+        owner:profiles!owner_id(${PROFILE_CHIP})
       `)
       .eq('is_public', true)
 
@@ -56,10 +59,6 @@ export function useProjects(filters?: {
 
     if (filters?.phase) {
       query = query.eq('phase', filters.phase as any)
-    }
-
-    if (filters?.climateAction) {
-      query = query.eq('is_climate_action', true)
     }
 
     // "any of" — AND semantics would empty the list on the second chip click
@@ -113,7 +112,7 @@ export function useAdminProjects() {
       .from('projects')
       .select(`
         *,
-        owner:profiles(*)
+        owner:profiles!owner_id(${PROFILE_CHIP})
       `)
       .order('created_at', { ascending: false })
 
@@ -140,7 +139,7 @@ export function useProject(id: string | undefined) {
       .from('projects')
       .select(`
         *,
-        owner:profiles(*)
+        owner:profiles!owner_id(${PROFILE_CHIP})
       `)
       .eq(isUuid(projectId) ? 'id' : 'slug', projectId)
       .single()
@@ -171,7 +170,6 @@ export function useCreateProject() {
       phase?: string
       hashtags?: string[]
       is_public?: boolean
-      is_climate_action?: boolean
       feature_on_homepage?: boolean
       details?: DetailEntry[]
       video_url?: string | null
@@ -267,6 +265,79 @@ export function useDeleteProject() {
   })
 
   return { deleteProject: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
+}
+
+/**
+ * The dashboard's bulk delete — useDeleteProject's three steps once per
+ * project. See useBulkDeleteEvents for why it is not one `.in()` delete and
+ * why the `.select('id')` is there.
+ */
+export function useBulkDeleteProjects() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: ({ ids, onProgress }: { ids: string[]; onProgress?: SettleOptions['onProgress'] }) =>
+      settleEach(
+        ids,
+        async (projectId) => {
+          const uploadPaths = await listEntityUploadPaths('project', projectId)
+          const { data, error } = await supabase.from('projects').delete().eq('id', projectId).select('id')
+          if (error) throw error
+          if (!data?.length) {
+            throw new Error(i18n._(msg`Not deleted. It may already be gone, or you no longer own it.`))
+          }
+          await removeEntityUploads(uploadPaths)
+        },
+        { onProgress }
+      ),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+      queryClient.invalidateQueries({ queryKey: keys.all('entity-documents') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'projects') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'owned-projects') })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
+    },
+  })
+
+  const deleteProjects = (ids: string[], onProgress?: SettleOptions['onProgress']) =>
+    mutation.mutateAsync({ ids, onProgress })
+
+  return { deleteProjects, loading: mutation.isPending }
+}
+
+/**
+ * Make several projects public or private. Going private also withdraws the
+ * homepage opt-in (160), the same pairing EditProjectPage writes on save, so a
+ * project made public again later does not reappear on the homepage unasked.
+ */
+export function useBulkSetProjectVisibility() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async ({ ids, isPublic }: { ids: string[]; isPublic: boolean }) => {
+      const { data, error } = await supabase
+        .from('projects')
+        .update({
+          is_public: isPublic,
+          ...(isPublic ? {} : { feature_on_homepage: false }),
+          updated_at: new Date().toISOString(),
+        } as any)
+        .in('id', ids)
+        .select('id')
+      if (error) throw error
+      return splitReturned(ids, data, i18n._(msg`Not changed. You may no longer own it.`))
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('projects') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'projects') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'owned-projects') })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
+    },
+  })
+
+  const setVisibility = (ids: string[], isPublic: boolean) => mutation.mutateAsync({ ids, isPublic })
+
+  return { setVisibility, loading: mutation.isPending }
 }
 
 // Like / Unlike hooks
@@ -501,7 +572,7 @@ export function useProjectComments(projectId: string | undefined) {
   const fetchComments = async (pid: string): Promise<ProjectComment[]> => {
     const { data, error } = await supabase
       .from('project_comments')
-      .select('*, author:profiles(*)')
+      .select(`*, author:profiles!user_id(${PROFILE_CHIP})`)
       .eq('project_id', pid)
       .order('created_at', { ascending: true })
     if (error) throw error
@@ -530,7 +601,7 @@ export function useCreateProjectComment() {
       const { data: comment, error } = await supabase
         .from('project_comments')
         .insert(data)
-        .select('*, author:profiles(*)')
+        .select(`*, author:profiles!user_id(${PROFILE_CHIP})`)
         .single()
       if (error) throw error
       return comment

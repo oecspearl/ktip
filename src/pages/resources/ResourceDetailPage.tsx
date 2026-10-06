@@ -2,7 +2,6 @@ import { useParams, Link } from 'react-router'
 import { Disclaimer } from '../../components/legal/Disclaimer'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { ClimateBadge } from '../../components/ui/ClimateBadge'
 import { useResource } from '../../hooks/useResources'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -98,7 +97,6 @@ export default function ResourceDetailPage() {
               {RESOURCE_CATEGORY_LABELS[resource.category!] || resource.category}
             </Badge>
           )}
-          {resource.is_climate_action && <ClimateBadge size="md" />}
         </div>
       </PageHero>
 

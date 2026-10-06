@@ -3,8 +3,8 @@ import { useLingui } from '@lingui/react/macro'
 import { PersonalizationTab as PersonalizationPanel } from '../../../components/settings/PersonalizationTab'
 
 /**
- * The signals behind "For You" — topics, categories, content types, the
- * climate boost, and the opt-outs.
+ * The signals behind "For You" — topics, categories, content types and the
+ * opt-outs.
  *
  * Was /settings?tab=personalization; ForYouRail's "Tune this" links here.
  */

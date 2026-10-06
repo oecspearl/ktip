@@ -49,7 +49,7 @@ export function useVenueRoster(eventId: string | undefined, options?: { live?: b
   const fetchRoster = async (id: string): Promise<EventVenueMember[]> => {
     const { data, error } = await (supabase as any)
       .from('event_venue_members')
-      .select('*, user:profiles(id, display_name, avatar_url, roles, organization, skills)')
+      .select('*, user:profiles!user_id(id, display_name, avatar_url)')
       .eq('event_id', id)
       .order('last_seen_at', { ascending: false })
 

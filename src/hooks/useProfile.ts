@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import { isUuid } from '../lib/slug'
 import type { Profile, Project, Event, ProfileView } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /**
  * A /u/<segment> route param resolved to both spellings of the same person.
@@ -41,7 +42,7 @@ export function useProfileId(param: string | undefined) {
 /** Accepts either a uuid or a username — see src/lib/slug.ts. */
 export function useProfile(id: string | undefined) {
   const fetchProfile = async (profileId: string): Promise<Profile | null> => {
-    const query = supabase.from('profiles').select('*')
+    const query = supabase.from('profiles').select(PROFILE_CHIP)
     const { data, error } = await (isUuid(profileId)
       ? query.eq('id', profileId)
       : // ilike with no wildcards is case-insensitive equality, which matches
@@ -105,7 +106,7 @@ export function useUserProjects(userId: string | undefined) {
   const fetchProjects = async (uid: string): Promise<Project[]> => {
     const { data, error } = await supabase
       .from('projects')
-      .select('*, owner:profiles(*)')
+      .select(`*, owner:profiles!owner_id(${PROFILE_CHIP})`)
       .eq('owner_id', uid)
       .eq('is_public', true)
       .order('created_at', { ascending: false })
@@ -122,11 +123,36 @@ export function useUserProjects(userId: string | undefined) {
   return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
+/**
+ * Every project the member owns, private ones included — the dashboard's
+ * Projects tab, where a private project is still yours to manage. Profiles
+ * keep useUserProjects, which shows a visitor only the public ones.
+ */
+export function useOwnedProjects(userId: string | undefined) {
+  const fetchProjects = async (uid: string): Promise<Project[]> => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`*, owner:profiles!owner_id(${PROFILE_CHIP})`)
+      .eq('owner_id', uid)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data as any[]) || []
+  }
+
+  const query = useQuery({
+    queryKey: keys.sub('profiles', 'owned-projects', userId),
+    queryFn: () => fetchProjects(userId as string),
+    enabled: !!userId,
+  })
+
+  return { projects: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
 export function useUserEvents(userId: string | undefined) {
   const fetchEvents = async (uid: string): Promise<Event[]> => {
     const { data, error } = await supabase
       .from('events')
-      .select('*, organizer:profiles(*)')
+      .select(`*, organizer:profiles!organizer_id(${PROFILE_CHIP})`)
       .eq('organizer_id', uid)
       .order('start_date', { ascending: false })
     if (error) throw error

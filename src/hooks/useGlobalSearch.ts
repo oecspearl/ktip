@@ -145,8 +145,11 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
     .or(`name.ilike.%${q}%,summary.ilike.%${q}%,description.ilike.%${q}%,tags_text.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
 
+  // member_profiles (167) returns bio only where this viewer may read the
+  // member's 'about' section, so matching and quoting it needs no further
+  // check here; a name is a teaser and always matches.
   const members = db
-    .from('profiles')
+    .from('member_profiles')
     .select('id, display_name, bio, country')
     .or(`display_name.ilike.%${q}%,bio.ilike.%${q}%`)
     .limit(PER_TABLE_LIMIT)
@@ -245,7 +248,12 @@ async function searchContent(rawQuery: string): Promise<SearchRow[]> {
       id: `member:${m.id}`,
       kind: 'member',
       title: m.display_name || i18n._(msg`Member`),
-      description: truncate(plainText(m.bio) || m.country || '', 100),
+      description: truncate(
+        plainText(m.bio) ||
+          m.country ||
+          '',
+        100
+      ),
       category: i18n._(msg`Directory`),
       href: `/directory?member=${m.id}`,
       icon: 'User',

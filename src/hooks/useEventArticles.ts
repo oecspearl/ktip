@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type { EventArticle } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export function useEventArticles(eventId: string | undefined) {
   const fetchArticles = async (id: string): Promise<EventArticle[]> => {
@@ -9,7 +10,7 @@ export function useEventArticles(eventId: string | undefined) {
       .from('event_articles')
       .select(`
         *,
-        author:profiles(*)
+        author:profiles!author_id(${PROFILE_CHIP})
       `)
       .eq('event_id', id)
       .order('created_at', { ascending: false })
@@ -33,7 +34,7 @@ export function usePublishedEventArticles(eventId: string | undefined) {
       .from('event_articles')
       .select(`
         *,
-        author:profiles(*)
+        author:profiles!author_id(${PROFILE_CHIP})
       `)
       .eq('event_id', id)
       .eq('is_published', true)

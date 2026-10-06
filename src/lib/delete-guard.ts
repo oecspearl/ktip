@@ -249,3 +249,65 @@ export function isDeleteConfirmed(
   if (expected.length === 0) return false
   return normalizeTitle(typed) === expected
 }
+
+export interface BulkDeleteItem {
+  id: string
+  title: string
+  /** The same impact the row's own delete button would have shown. */
+  impact: DeleteImpact
+}
+
+export interface BulkDeleteImpact {
+  count: number
+  /** Every distinct cascade line across the selection, in first-seen order. */
+  cascades: string[]
+  /** Rows whose own delete would have asked for a typed title. */
+  flagged: BulkDeleteItem[]
+  affectsOthers: boolean
+  /**
+   * True when any single row would have needed typing on its own. Selecting a
+   * public event alongside nine drafts must not make it cheaper to destroy.
+   */
+  requiresConfirmation: boolean
+  /**
+   * What the box must hold. One row: its title, exactly as the single delete
+   * asks. Several: the count, because nobody types six titles and a fixed word
+   * would need translating into every catalog.
+   */
+  confirmPhrase: string
+}
+
+/**
+ * The dashboard's bulk delete reuses each row's own impact rather than inventing
+ * a second rule, so a row is never easier to delete in a batch than alone.
+ */
+export function describeBulkDeletion(items: BulkDeleteItem[]): BulkDeleteImpact {
+  const cascades: string[] = []
+  for (const item of items) {
+    for (const line of item.impact.cascades) {
+      if (!cascades.includes(line)) cascades.push(line)
+    }
+  }
+  const flagged = items.filter((item) => item.impact.requiresTitleConfirmation)
+
+  return {
+    count: items.length,
+    cascades,
+    flagged,
+    affectsOthers: items.some((item) => item.impact.affectsOthers),
+    requiresConfirmation: flagged.length > 0,
+    confirmPhrase: items.length === 1 ? items[0].title : String(items.length),
+  }
+}
+
+export function isBulkDeleteConfirmed(
+  impact: Pick<BulkDeleteImpact, 'count' | 'requiresConfirmation' | 'confirmPhrase'>,
+  typed: string
+): boolean {
+  if (impact.count === 0) return false
+  if (!impact.requiresConfirmation) return true
+  if (impact.count === 1) {
+    return isDeleteConfirmed({ requiresTitleConfirmation: true }, typed, impact.confirmPhrase)
+  }
+  return typed.trim() === impact.confirmPhrase
+}

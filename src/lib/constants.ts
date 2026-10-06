@@ -911,9 +911,6 @@ export const CONTENT_TAG_SUGGESTIONS = [
   'community',
 ] as const
 
-// Climate Action
-export const CLIMATE_ACTION_BADGE_CLASS = 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200'
-
 // Grievance Categories
 export const GRIEVANCE_CATEGORIES = {
   SOLICITING: 'soliciting',

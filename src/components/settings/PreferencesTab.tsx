@@ -61,12 +61,14 @@ export function PreferencesTab() {
   const [profilePublic, setProfilePublic] = useState(true)
 
   // Connection-count audience — persisted on the profile row and
-  // enforced by the get_connection_count* RPCs (migration 049).
+  // enforced by the get_connection_count* RPCs (migration 049). The
+  // profile's 'standing' section narrows it further (166).
   const [connVisibility, setConnVisibility] = useState<ConnectionCountVisibility>('public')
 
   // Leaderboard opt-out — persisted on the profile row and enforced by
   // get_leaderboard() (migration 066). Default is visible; students are
-  // excluded server-side regardless of this setting.
+  // excluded server-side regardless of this setting, and a private
+  // 'standing' section hides the member from non-connections (166).
   const [onLeaderboard, setOnLeaderboard] = useState(true)
 
   // Language of OTHER members' writing — persisted on the profile row (100) and
@@ -263,7 +265,7 @@ export function PreferencesTab() {
             checked={onLeaderboard}
             onChange={setOnLeaderboard}
             label={t`Show me on the leaderboard`}
-            description={t`Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can.`}
+            description={t`Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections.`}
           />
 
           {/* Connection count audience */}
@@ -273,7 +275,7 @@ export function PreferencesTab() {
               <Trans>Who can see my connection count</Trans>
             </div>
             <p className="text-xs text-ktip-sand-500 mt-0.5 mb-3">
-              <Trans>Controls the number shown on your profile and in the member directory. You can always see your own count.</Trans>
+              <Trans>Controls the number shown on your profile and in the member directory. You can always see your own count. If your level and points are private on your profile, only your connections see it, even if you pick Everyone.</Trans>
             </p>
             <div
               className="flex flex-col sm:flex-row gap-2"

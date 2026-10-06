@@ -27,9 +27,9 @@ export const projectFormTutorialSteps: TutorialStep[] = [
   },
   {
     target: '[data-tutorial="project-form-tags"]',
-    title: 'Hashtags and climate action',
+    title: 'Hashtags',
     description:
-      'Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.\n\nThe climate-action checkbox underneath is not decorative — it puts the project in the region’s resilience agenda, where funders and the OECS Commission look first.',
+      'Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.',
     position: 'right',
   },
   {

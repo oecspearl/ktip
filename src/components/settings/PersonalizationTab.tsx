@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Sparkles, Save, Layers, FileType, Leaf, SlidersHorizontal, RotateCcw, EyeOff, Undo2 } from 'lucide-react'
+import { Sparkles, Save, Layers, FileType, SlidersHorizontal, RotateCcw, EyeOff, Undo2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { cn } from '../../lib/utils'
 import { useMySuppressions, useUnsuppressContent } from '../../hooks/useSuppressions'
@@ -310,22 +310,6 @@ export function PersonalizationTab() {
               </div>
             </div>
           ))}
-        </div>
-      </Section>
-
-      <Section
-        icon={<Leaf size={20} className="text-ktip-tropical-600" />}
-        iconClass="bg-ktip-tropical-100"
-        title={t`Climate focus`}
-        subtitle={t`Boost climate action work across every list`}
-      >
-        <div className="divide-y divide-ktip-sand-100">
-          <Toggle
-            checked={form.climate_focus}
-            onChange={(v) => set('climate_focus', v)}
-            label={t`Prioritise climate action content`}
-            description={t`Anything flagged as climate action ranks higher for you.`}
-          />
         </div>
       </Section>
       </fieldset>

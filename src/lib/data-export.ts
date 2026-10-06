@@ -73,10 +73,10 @@ export async function buildDataExport(userId: string): Promise<DataExport> {
     data: {},
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
+  // The whole row, which since 168 only get_my_profile() (167) returns. The
+  // export is the member's own data, so it keeps every column.
+  const { data: profile, error: profileError } = await (supabase as any)
+    .rpc('get_my_profile')
     .maybeSingle()
 
   if (profileError) {

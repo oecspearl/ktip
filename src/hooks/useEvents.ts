@@ -10,8 +10,12 @@ import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import { isUuid } from '../lib/slug'
 import { announceRegistration } from '../lib/event-registration'
+import { settleEach, splitReturned, type SettleOptions } from '../lib/bulk'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { CalendarAccent } from '../lib/constants'
-import type { AttendanceType, DetailEntry, Event, RSVPStatus } from '../types'
+import type { AttendanceType, DetailEntry, Event, EventStatus, RSVPStatus } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export function useEvents(
   filters?: {
@@ -21,7 +25,6 @@ export function useEvents(
     past?: boolean
     search?: string
     status?: string
-    climateAction?: boolean
     dateRange?: { start: string; end: string }
     tags?: string[]
     sort?: ContentSort
@@ -46,7 +49,7 @@ export function useEvents(
       .from('events')
       .select(`
         *,
-        organizer:profiles(*)
+        organizer:profiles!organizer_id(${PROFILE_CHIP})
       `)
       .order('start_date', { ascending: !(filters?.past && !filters?.upcoming && !filters?.dateRange) })
 
@@ -74,11 +77,6 @@ export function useEvents(
     // Filter by event type
     if (filters?.type) {
       query = query.eq('event_type', filters.type as any)
-    }
-
-    // Climate action filter
-    if (filters?.climateAction) {
-      query = query.eq('is_climate_action', true)
     }
 
     // Tag filter — "any of"; AND semantics would empty the list on the second chip
@@ -126,7 +124,7 @@ export function useEvent(id: string | undefined) {
       .from('events')
       .select(`
         *,
-        organizer:profiles(*)
+        organizer:profiles!organizer_id(${PROFILE_CHIP})
       `)
       .eq(isUuid(eventId) ? 'id' : 'slug', eventId)
       .single()
@@ -164,7 +162,6 @@ export function useCreateEvent() {
       end_date?: string
       capacity?: number
       organizer_id: string
-      is_climate_action?: boolean
       has_challenge?: boolean
       submission_deadline?: string | null
       details?: DetailEntry[]
@@ -261,6 +258,96 @@ export function useDeleteEvent() {
   })
 
   return { deleteEvent: mutation.mutateAsync, loading: mutation.isPending, error: mutation.error }
+}
+
+/**
+ * The dashboard's bulk delete. Each event takes the same three steps as
+ * useDeleteEvent, one event at a time rather than as a single `.in()` delete,
+ * because the upload list has to be read while the row still exists.
+ *
+ * `.select('id')` is what makes a refusal visible: RLS drops a row it will not
+ * let you delete from the statement, so deleting an event you no longer
+ * organise "succeeds" with zero rows instead of failing.
+ */
+export function useBulkDeleteEvents() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: ({ ids, onProgress }: { ids: string[]; onProgress?: SettleOptions['onProgress'] }) =>
+      settleEach(
+        ids,
+        async (eventId) => {
+          const uploadPaths = await listEntityUploadPaths('event', eventId)
+          const { data, error } = await supabase.from('events').delete().eq('id', eventId).select('id')
+          if (error) throw error
+          if (!data?.length) {
+            throw new Error(i18n._(msg`Not deleted. It may already be gone, or you no longer organize it.`))
+          }
+          await removeEntityUploads(uploadPaths)
+        },
+        { onProgress }
+      ),
+    // Settled, not success: a batch that half-failed still removed rows.
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('events') })
+      queryClient.invalidateQueries({ queryKey: keys.all('entity-documents') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'events') })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
+    },
+  })
+
+  const deleteEvents = (ids: string[], onProgress?: SettleOptions['onProgress']) =>
+    mutation.mutateAsync({ ids, onProgress })
+
+  return { deleteEvents, loading: mutation.isPending }
+}
+
+/**
+ * Publish, unpublish or cancel several events at once. Status is the admin's
+ * lever — CreateEventPage only offers it to event:manage holders, and an
+ * organizer's event waits as a draft for one of them — so the dashboard shows
+ * these actions to the same people and nobody else. RLS would let an organizer
+ * write the column; this is the UI keeping the review step it already has.
+ */
+export function useBulkSetEventStatus() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: EventStatus }) => {
+      const { data, error } = await supabase
+        .from('events')
+        .update({ status: status as any })
+        .in('id', ids)
+        .select('id')
+      if (error) throw error
+      return splitReturned(ids, data, i18n._(msg`Not changed. You may no longer be able to edit it.`))
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('events') })
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-events') })
+      queryClient.invalidateQueries({ queryKey: keys.sub('profiles', 'events') })
+      queryClient.invalidateQueries({ queryKey: keys.all('dashboard') })
+    },
+  })
+
+  const setStatus = (ids: string[], status: EventStatus) => mutation.mutateAsync({ ids, status })
+
+  return { setStatus, loading: mutation.isPending }
+}
+
+/**
+ * Registrations per event, for the bulk delete warning. A count that fails to
+ * load comes back as null, which delete-guard reads as "might not be zero".
+ */
+export async function fetchRsvpCounts(eventIds: string[]): Promise<Map<string, number> | null> {
+  if (eventIds.length === 0) return new Map()
+  const { data, error } = await supabase.from('event_rsvps').select('event_id').in('event_id', eventIds)
+  if (error) return null
+  const counts = new Map<string, number>(eventIds.map((id) => [id, 0]))
+  for (const row of (data as { event_id: string }[]) ?? []) {
+    counts.set(row.event_id, (counts.get(row.event_id) ?? 0) + 1)
+  }
+  return counts
 }
 
 /**

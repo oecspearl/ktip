@@ -15,8 +15,8 @@ export const EVENTS_CATEGORY: HelpCategory = {
     {
       id: 'filter-events',
       title: 'How do I filter the events list?',
-      content: `Filters sit above the events list.\n\nSearch matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day. The Climate Action toggle shows only events flagged as climate work.\n\nTopic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.\n\n"Clear all filters" resets everything at once.`,
-      tags: ['filter', 'events', 'search', 'type', 'climate', 'tags'],
+      content: `Filters sit above the events list.\n\nSearch matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day.\n\nTopic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.\n\n"Clear all filters" resets everything at once.`,
+      tags: ['filter', 'events', 'search', 'type', 'tags'],
     },
     {
       id: 'event-register',
@@ -27,7 +27,7 @@ export const EVENTS_CATEGORY: HelpCategory = {
     {
       id: 'create-event',
       title: 'How do I create an event?',
-      content: `Go to the Events page and click "Create Event".\n\nRequired: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.\n\nOptional: a description, a short summary, an end date and time, tags, a Climate Action flag, a registration deadline, and a capacity.\n\nChoose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later.`,
+      content: `Go to the Events page and click "Create Event".\n\nRequired: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.\n\nOptional: a description, a short summary, an end date and time, tags, a registration deadline, and a capacity.\n\nChoose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later.`,
       tags: ['create', 'event', 'organize', 'new', 'host', 'draft'],
     },
     {

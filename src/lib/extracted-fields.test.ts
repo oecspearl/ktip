@@ -57,7 +57,7 @@ describe('sanitizeFields', () => {
   it('drops proposals whose value fails coercion', () => {
     const result = sanitizeFields(grant, {
       amount_max: { value: 'lots', confidence: 0.9 },
-      is_climate_action: { value: 'yes', confidence: 0.9 },
+      deadline: { value: 'next Friday', confidence: 0.9 },
     })
     expect(result).toEqual({})
   })

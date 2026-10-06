@@ -10,6 +10,7 @@ import type {
   InstitutionStatus,
   StudentSafeguarding,
 } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /** OECS member states sort first — 058 seeds them with sort_order 10. */
 export function useCountries(oecsOnly = false) {
@@ -162,7 +163,7 @@ export function useInstitutionMembers(institutionId: string | undefined, status?
     queryFn: async (): Promise<InstitutionMember[]> => {
       let request = (supabase as any)
         .from('institution_members')
-        .select('*, user:profiles!user_id(*)')
+        .select(`*, user:profiles!user_id(${PROFILE_CHIP})`)
         .eq('institution_id', institutionId)
         .order('created_at', { ascending: false })
 

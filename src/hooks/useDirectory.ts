@@ -2,23 +2,23 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
-import type { DirectoryMember } from '../types'
+import type { DirectoryMember, UserBadge } from '../types'
 
-// Badges always ride along for the member cards. The badge filter uses a
-// second aliased embed with !inner so it restricts which profiles match
-// without hiding the member's other badges from the display embed.
-const BADGE_EMBED =
-  'user_badges(id, user_id, badge_id, awarded_at, badge:badges(id, slug, name, description, icon, color))'
-const BADGE_FILTER_EMBED = 'badge_filter:user_badges!inner(badge:badges!inner(slug))'
+// The cards' badges, fetched by member id after the page of members. RLS on
+// user_badges (167) leaves out the rows of anyone whose achievements section
+// this viewer may not see, so a closed shelf arrives empty.
+const BADGE_COLUMNS =
+  'id, user_id, badge_id, awarded_at, badge:badges(id, slug, name, description, icon, color)'
 
 // The directory is open to signed-out visitors, so it asks for the card, not
-// the row. `select('*')` handed anonymous clients every column a profile has —
-// phone, website, suspension_reason — for a grid that renders six of them.
-// bio is here only because the search filter matches on it.
-// Unlike `*`, a named list breaks if the deploy runs ahead of the migration:
-// apply 083 before shipping this.
+// the row — and asks member_profiles (167), not profiles. The view hands back
+// each section field only where this viewer may see it, so the filters below
+// match what the viewer could read on the member's page and nothing more: a
+// connection finds a member by a skill kept for connections, a stranger does
+// not. Since 168 the table itself answers none of these columns.
+// Apply 167 before shipping this.
 const MEMBER_COLUMNS =
-  'id, username, display_name, avatar_url, banner, bio, country, organization, industry, roles, skills, interests, open_to, is_verified, created_at, profile_visibility'
+  'id, username, display_name, avatar_url, banner, country, organization, roles, skills, is_verified, created_at, profile_visibility, section_visibility'
 
 export function useDirectoryMembers(filters?: {
   search?: string
@@ -32,13 +32,9 @@ export function useDirectoryMembers(filters?: {
   limit?: number
 }) {
   const fetchMembers = async (): Promise<DirectoryMember[]> => {
-    const select = filters?.badge
-      ? `${MEMBER_COLUMNS}, ${BADGE_EMBED}, ${BADGE_FILTER_EMBED}`
-      : `${MEMBER_COLUMNS}, ${BADGE_EMBED}`
-
-    let query = supabase
-      .from('profiles')
-      .select(select)
+    let query = (supabase as any)
+      .from('member_profiles')
+      .select(MEMBER_COLUMNS)
       // Migration 140: a deactivated member is hidden from the surfaces that
       // list PEOPLE. Their contributions keep their author — this is the
       // directory, not authorship — and NULL covers a deploy that has run ahead
@@ -49,9 +45,8 @@ export function useDirectoryMembers(filters?: {
     if (filters?.search) {
       const sanitized = escapeIlike(filters.search)
       if (sanitized) {
-        query = query.or(
-          `display_name.ilike.%${sanitized}%,bio.ilike.%${sanitized}%`
-        )
+        // bio is NULL in the view wherever this viewer may not read it.
+        query = query.or(`display_name.ilike.%${sanitized}%,bio.ilike.%${sanitized}%`)
       }
     }
 
@@ -68,7 +63,8 @@ export function useDirectoryMembers(filters?: {
     }
 
     if (filters?.badge) {
-      query = query.eq('badge_filter.badge.slug', filters.badge)
+      // NULL when the member's achievements are closed to this viewer.
+      query = query.contains('badge_slugs', [filters.badge])
     }
 
     if (filters?.openTo) {
@@ -82,7 +78,26 @@ export function useDirectoryMembers(filters?: {
     const { data, error } = await query
 
     if (error) throw error
-    return (data as any[]) || []
+    const members = (data as DirectoryMember[]) || []
+    if (members.length === 0) return members
+
+    const { data: badges, error: badgeError } = await (supabase as any)
+      .from('user_badges')
+      .select(BADGE_COLUMNS)
+      .in(
+        'user_id',
+        members.map((m) => m.id)
+      )
+    // The cards still render without badges; a failed shelf is not a failed page.
+    if (badgeError) return members
+
+    const byMember = new Map<string, UserBadge[]>()
+    for (const badge of (badges as UserBadge[]) || []) {
+      const list = byMember.get(badge.user_id) ?? []
+      list.push(badge)
+      byMember.set(badge.user_id, list)
+    }
+    return members.map((m) => ({ ...m, user_badges: byMember.get(m.id) ?? [] }))
   }
 
   const query = useQuery({

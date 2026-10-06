@@ -8,6 +8,7 @@ import { attachmentUrl } from '../lib/chat-attachments'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
 import type { Conversation, Message, MessageAttachment, Profile } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 async function fetchConversations(uid: string): Promise<Conversation[]> {
   // Get conversation IDs for user
@@ -24,7 +25,7 @@ async function fetchConversations(uid: string): Promise<Conversation[]> {
   // Get conversations with participants and their profiles
   const { data, error } = await supabase
     .from('conversations')
-    .select('*, participants:conversation_participants(*, user:profiles(*))')
+    .select(`*, participants:conversation_participants(*, user:profiles!user_id(${PROFILE_CHIP}))`)
     .in('id', conversationIds)
     .order('updated_at', { ascending: false })
 
@@ -531,7 +532,7 @@ export function useGroupConversationMutations() {
 }
 
 /** What a people picker renders: a name, an avatar, a role chip. */
-const SEARCH_COLUMNS = 'id, username, display_name, avatar_url, roles, organization, country'
+const SEARCH_COLUMNS = 'id, username, display_name, avatar_url, roles, country'
 
 /**
  * Search-as-you-type for people pickers.

@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import { listEntityUploadPaths, removeEntityUploads } from '../lib/entity-uploads'
 import type { EventSolution } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /**
  * Solutions submitted to an event challenge (migration 085).
@@ -16,7 +17,7 @@ export function useEventSolutions(eventId: string | undefined) {
   const fetchSolutions = async (id: string): Promise<EventSolution[]> => {
     const { data, error } = await supabase
       .from('event_solutions')
-      .select('*, author:profiles!author_id(*)')
+      .select(`*, author:profiles!author_id(${PROFILE_CHIP})`)
       .eq('event_id', id)
       .order('created_at', { ascending: false })
 

@@ -86,11 +86,6 @@ export const FIELD_SPECS: Record<string, Record<string, FieldSpec>> = {
       describe: 'Closest category for what the money is for',
       values: GRANT_TYPES,
     },
-    is_climate_action: {
-      kind: 'boolean',
-      label: msg`Climate action`,
-      describe: 'True only if climate, resilience or environment is a stated focus',
-    },
   },
   project: {
     title: { kind: 'string', label: msg`Title`, describe: 'Name of the project', maxLength: 200 },

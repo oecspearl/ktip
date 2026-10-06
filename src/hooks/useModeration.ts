@@ -9,6 +9,7 @@ import type {
   ModerationTerm,
   ReportCategory,
 } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /** File a report. One per person per item — the DB enforces it. */
 export function useReportContent() {
@@ -51,7 +52,7 @@ export function useModerationQueue(filters?: { status?: string; severity?: strin
     queryFn: async (): Promise<ContentReport[]> => {
       let request = (supabase as any)
         .from('content_reports')
-        .select('*, reporter:profiles!reporter_id(*), target_author:profiles!target_author_id(*)')
+        .select(`*, reporter:profiles!reporter_id(${PROFILE_CHIP}), target_author:profiles!target_author_id(${PROFILE_CHIP})`)
         .order('created_at', { ascending: false })
         .limit(200)
 
@@ -214,7 +215,7 @@ export function useModerationLog(limit = 100) {
     queryFn: async (): Promise<ModerationLogEntry[]> => {
       const { data, error } = await (supabase as any)
         .from('moderation_log')
-        .select('*, actor:profiles!actor_id(*), user:profiles!user_id(*)')
+        .select(`*, actor:profiles!actor_id(${PROFILE_CHIP}), user:profiles!user_id(${PROFILE_CHIP})`)
         .order('created_at', { ascending: false })
         .limit(limit)
 

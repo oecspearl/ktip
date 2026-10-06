@@ -36,9 +36,8 @@ export const adminTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="admin-stats"]',
     title: 'What the numbers count',
     description:
-      'Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n\nThe second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n\nA figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.\n\nThe Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.',
+      'Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n\nThe second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n\nA figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.',
     position: 'bottom',
-    secondaryTarget: '[data-tutorial="admin-climate"]',
     scrollMode: 'top',
   },
   {

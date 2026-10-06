@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type { Profile } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export type MentorshipStatus = 'requested' | 'active' | 'completed' | 'declined'
 
@@ -33,7 +34,7 @@ export function useMyMentorships(userId: string | undefined) {
     queryFn: async (): Promise<Mentorship[]> => {
       const { data, error } = await (supabase as any)
         .from('mentorships')
-        .select('*, mentor:profiles!mentorships_mentor_id_fkey(*), mentee:profiles!mentorships_mentee_id_fkey(*)')
+        .select(`*, mentor:profiles!mentorships_mentor_id_fkey(${PROFILE_CHIP}), mentee:profiles!mentorships_mentee_id_fkey(${PROFILE_CHIP})`)
         .or(`mentor_id.eq.${userId},mentee_id.eq.${userId}`)
         .order('created_at', { ascending: false })
 

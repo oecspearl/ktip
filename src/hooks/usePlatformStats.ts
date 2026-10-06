@@ -14,7 +14,7 @@ export function usePlatformStats() {
     queryKey: keys.list('platform-stats'),
     queryFn: async (): Promise<PlatformStats> => {
       const [members, projects, grants, events] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('projects').select('*', { count: 'exact', head: true }),
         supabase.from('grants').select('*', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('events').select('*', { count: 'exact', head: true }),

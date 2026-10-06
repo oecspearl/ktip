@@ -80,7 +80,6 @@ export default function GrantFormPage() {
   const [deadline, setDeadline] = useState('')
   const [eligibility, setEligibility] = useState('')
   const [applicationUrl, setApplicationUrl] = useState('')
-  const [isClimateAction, setIsClimateAction] = useState(false)
   const [isActive, setIsActive] = useState(true)
   const [tags, setTags] = useState<string[]>([])
   const [details, setDetails] = useState<DetailEntry[]>([])
@@ -115,7 +114,6 @@ export default function GrantFormPage() {
     setDeadline(grant.deadline ? grant.deadline.split('T')[0] : '')
     setEligibility(grant.eligibility || '')
     setApplicationUrl(grant.application_url || '')
-    setIsClimateAction(grant.is_climate_action ?? false)
     setIsActive(grant.is_active ?? true)
     setTags(grant.tags || [])
     setDetails(grant.details || [])
@@ -191,7 +189,6 @@ export default function GrantFormPage() {
       deadline: deadline || null,
       eligibility: eligibility.trim() || null,
       application_url: applicationUrl.trim() || null,
-      is_climate_action: isClimateAction,
       tags: tags.map(sanitizeTag).filter(Boolean),
       details: cleanDetails(details),
       required_documents: cleanRequiredDocuments(requiredDocuments),
@@ -461,16 +458,6 @@ export default function GrantFormPage() {
               suggestions={CONTENT_TAG_SUGGESTIONS}
               max={10}
             />
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isClimateAction}
-                onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
-                className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
-              />
-              <span className="text-sm text-ktip-sand-700"><Trans>Climate action funding</Trans></span>
-            </label>
 
             {/* Closing a call is the reversible alternative to deleting it, so
                 it sits in the form rather than beside the delete zone. */}

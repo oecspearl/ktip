@@ -41,7 +41,6 @@ export default function CreateProjectPage() {
   const [phase, setPhase] = useState('concept')
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
-  const [isClimateAction, setIsClimateAction] = useState(false)
   const [featureOnHomepage, setFeatureOnHomepage] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [videoUrl, setVideoUrl] = useState('')
@@ -132,7 +131,6 @@ export default function CreateProjectPage() {
         phase: phase as any,
         hashtags,
         is_public: isPublic,
-        is_climate_action: isClimateAction,
         feature_on_homepage: isPublic && featureOnHomepage,
         details: cleanDetails(details),
         video_url: videoUrl.trim() || null,
@@ -298,21 +296,6 @@ export default function CreateProjectPage() {
               {errors.hashtags && (
                 <p className="mt-1 text-sm text-red-600">{errors.hashtags}</p>
               )}
-            </div>
-
-            {/* Climate Action */}
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isClimateAction}
-                  onChange={(e) => setIsClimateAction(e.target.checked)}
-                  className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
-                />
-                <span className="text-sm text-ktip-sand-700">
-                  <Trans>This project addresses climate change solutions</Trans>
-                </span>
-              </label>
             </div>
 
             {/* Visibility */}

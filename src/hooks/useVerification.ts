@@ -6,6 +6,7 @@ import { keys } from '../queries/keys'
 import { ROLE_BY_SLUG } from '../lib/permissions'
 import { resolveCopy } from '../i18n/copy'
 import type { RoleSlug, VerificationRequest } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 const BUCKET = 'verification-documents'
 
@@ -113,7 +114,7 @@ export function useAdminVerificationRequests(filters?: { status?: string }) {
   const fetchRequests = async (): Promise<VerificationRequest[]> => {
     let query = (supabase as any)
       .from('verification_requests')
-      .select('*, user:profiles!user_id(*)')
+      .select(`*, user:profiles!user_id(${PROFILE_CHIP})`)
       .order('created_at', { ascending: false })
 
     if (filters?.status) {

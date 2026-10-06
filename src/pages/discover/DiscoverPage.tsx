@@ -484,7 +484,7 @@ export default function DiscoverPage() {
         // columns the record already has, so no hero item reads bare
         details: g.details?.length ? g.details : grantHeroDetails(g),
         href: entityPath('grant', g),
-        image: grantImageFor(g.id, g.grant_type, g.is_climate_action),
+        image: grantImageFor(g.id, g.grant_type),
       }))
     }
     if (mode === 'projects') {

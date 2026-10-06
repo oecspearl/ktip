@@ -4,13 +4,14 @@ import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
 import type { ProjectMember, ProjectMemberRole } from '../types'
 import { useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // Team roster for a project (pending + accepted; declined rows are hidden)
 export function useProjectMembers(projectId: string | undefined) {
   const fetchMembers = async (pid: string): Promise<ProjectMember[]> => {
     const { data, error } = await (supabase as any)
       .from('project_members')
-      .select('*, user:profiles!user_id(*)')
+      .select(`*, user:profiles!user_id(${PROFILE_CHIP})`)
       .eq('project_id', pid)
       .neq('status', 'declined')
       .order('created_at', { ascending: true })

@@ -9,6 +9,7 @@ import type {
   DocumentVisibility,
 } from '../types'
 import { useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 const DOMAIN = 'document-access'
 const DOCUMENTS_DOMAIN = 'entity-documents'
@@ -23,7 +24,7 @@ export function useDocumentGrants(documentId: string | undefined, enabled = true
   const fetchGrants = async (): Promise<DocumentAccessGrant[]> => {
     const { data, error } = await (supabase as any)
       .from('document_access')
-      .select('*, user:profiles!user_id(*)')
+      .select(`*, user:profiles!user_id(${PROFILE_CHIP})`)
       .eq('document_id', documentId)
       .order('created_at', { ascending: false })
     if (error) throw error
@@ -44,7 +45,7 @@ export function useDocumentAccessRequests(documentId: string | undefined, enable
   const fetchRequests = async (): Promise<DocumentAccessRequest[]> => {
     const { data, error } = await (supabase as any)
       .from('document_access_requests')
-      .select('*, requester:profiles!requester_id(*)')
+      .select(`*, requester:profiles!requester_id(${PROFILE_CHIP})`)
       .eq('document_id', documentId)
       .order('created_at', { ascending: false })
     if (error) throw error

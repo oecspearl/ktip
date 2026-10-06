@@ -42,33 +42,28 @@ const json = (body: unknown, status: number) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
 
-const BASE_PROFILE_COLUMNS = 'display_name, bio, country, organization, industry, skills, interests, open_to'
-const CONTACT_COLUMNS = 'phone, website, languages'
+const PROFILE_FIELDS = [
+  'display_name', 'bio', 'country', 'organization', 'industry', 'skills', 'interests', 'open_to',
+  'phone', 'website', 'languages',
+] as const
 
 /**
- * The caller's profile, tolerating a deploy that predates migration 082.
+ * The caller's profile, through get_my_profile() (167).
  *
- * Selecting a column PostgREST has never seen fails the whole statement, so a
- * route that assumed 082 would 500 for everybody the moment it shipped ahead of
- * the migration. One retry without the contact columns is cheaper than
- * discovering that in production.
+ * Not a select: since 168 the profiles table answers none of these columns to
+ * any client, the member included. The RPC returns the whole row, so a column
+ * a deploy has not migrated yet is absent rather than a failed statement —
+ * the job the old retry-without-contact-columns did for 082. Only the CV's
+ * fields are passed on.
  */
-async function loadProfile(client: SupabaseClient, userId: string) {
-  const full = await client
-    .from('profiles')
-    .select(`${BASE_PROFILE_COLUMNS}, ${CONTACT_COLUMNS}`)
-    .eq('id', userId)
-    .maybeSingle()
+async function loadProfile(client: SupabaseClient) {
+  const { data, error } = await client.rpc('get_my_profile').maybeSingle()
+  if (error || !data) return null
 
-  if (!full.error) return full.data as KtipCvInput['profile'] | null
-
-  const base = await client
-    .from('profiles')
-    .select(BASE_PROFILE_COLUMNS)
-    .eq('id', userId)
-    .maybeSingle()
-
-  return (base.data as KtipCvInput['profile'] | null) ?? null
+  const row = data as Record<string, unknown>
+  return Object.fromEntries(
+    PROFILE_FIELDS.filter((field) => field in row).map((field) => [field, row[field]])
+  ) as KtipCvInput['profile']
 }
 
 export default async function handler(request: Request): Promise<Response> {
@@ -105,7 +100,7 @@ export default async function handler(request: Request): Promise<Response> {
 
   const [profile, projectRows, badgeRows, institutionRows, employerRows, existing] =
     await Promise.all([
-      loadProfile(callerClient, caller.id),
+      loadProfile(callerClient),
       callerClient
         .from('projects')
         .select('title, summary, description, category, phase')

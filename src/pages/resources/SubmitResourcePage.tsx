@@ -55,7 +55,6 @@ export default function SubmitResourcePage() {
   const [tags, setTags] = useState<string[]>([])
   const [downloadUrl, setDownloadUrl] = useState('')
   const [file, setFile] = useState<File | null>(null)
-  const [isClimateAction, setIsClimateAction] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -136,7 +135,6 @@ export default function SubmitResourcePage() {
         category,
         tags,
         download_url: downloadUrl.trim() || null,
-        is_climate_action: isClimateAction,
         file,
       })
 
@@ -279,18 +277,6 @@ export default function SubmitResourcePage() {
               onChange={setTags}
               suggestions={CONTENT_TAG_SUGGESTIONS}
             />
-
-            <label className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                checked={isClimateAction}
-                onChange={(e) => setIsClimateAction(e.target.checked)}
-                className="mt-1"
-              />
-              <span className="text-label text-ktip-sand-700">
-                <Trans>This resource supports climate action</Trans>
-              </span>
-            </label>
 
             <div className="space-y-3">
               <AgreementNotice bundle="publishing" />

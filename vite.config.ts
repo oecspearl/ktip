@@ -244,7 +244,6 @@ const HERO_SEED_COLUMNS = [
   'deadline',
   'eligibility',
   'details',
-  'is_climate_action',
 ].join(',')
 /** MAX_ITEMS in DiscoverPage — the strip never shows more than six. */
 const HERO_SEED_LIMIT = 6

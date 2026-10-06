@@ -30,9 +30,9 @@ export const eventFormTutorialSteps: TutorialStep[] = [
   },
   {
     target: '[data-tutorial="event-form-challenge"]',
-    title: 'Challenges and climate action',
+    title: 'Challenge events',
     description:
-      'A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.\n\nUnder it, the climate-action flag puts the event in the region’s resilience agenda, where it can be filtered for on the events page.',
+      'A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.',
     position: 'right',
   },
   replayStep,

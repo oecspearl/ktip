@@ -38,7 +38,6 @@ export type HeroSeedGrant = Pick<
   | 'deadline'
   | 'eligibility'
   | 'details'
-  | 'is_climate_action'
 >
 
 /** `undefined` = not read yet; `null` = read, nothing there. */

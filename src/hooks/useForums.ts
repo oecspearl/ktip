@@ -7,6 +7,7 @@ import { useAchievementTrigger } from '../contexts/AchievementContext'
 import { isUuid } from '../lib/slug'
 import { useLingui } from '@lingui/react/macro'
 import type { ForumBoard, ForumPost, ForumReply } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export function useForumBoards() {
   const fetchBoards = async (): Promise<ForumBoard[]> => {
@@ -80,7 +81,7 @@ export function useForumPosts(
     // it as `forum_replies: [{ count }]`, flattened into reply_count below.
     let query = supabase
       .from('forum_posts')
-      .select('*, author:profiles(*), forum_replies(count)')
+      .select(`*, author:profiles!author_id(${PROFILE_CHIP}), forum_replies(count)`)
       .eq('board_id', bid)
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
@@ -117,7 +118,7 @@ export function useForumPost(postId: string | undefined) {
   const fetchPost = async (pid: string): Promise<ForumPost | null> => {
     const { data, error } = await supabase
       .from('forum_posts')
-      .select('*, author:profiles(*), board:forum_boards(*)')
+      .select(`*, author:profiles!author_id(${PROFILE_CHIP}), board:forum_boards(*)`)
       // Post slugs are unique per board, not globally — but the board segment
       // is already in the route, and a duplicate across boards would need both
       // boards to have the same title, so the slug alone is specific enough.
@@ -314,7 +315,7 @@ export function useCreateForumPost() {
       const { data: post, error } = await supabase
         .from('forum_posts')
         .insert(data)
-        .select('*, author:profiles(*)')
+        .select(`*, author:profiles!author_id(${PROFILE_CHIP})`)
         .single()
       if (error) throw error
       return post
@@ -342,7 +343,7 @@ export function useCreateForumReply() {
       const { data: reply, error } = await supabase
         .from('forum_replies')
         .insert(data)
-        .select('*, author:profiles(*)')
+        .select(`*, author:profiles!author_id(${PROFILE_CHIP})`)
         .single()
       if (error) throw error
       return reply

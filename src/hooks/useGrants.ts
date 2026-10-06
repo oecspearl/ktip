@@ -15,6 +15,7 @@ import type {
   GrantApplicationStatus,
   RequiredDocument,
 } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export function useGrants(filters?: {
   /** Focus area — grants.grant_type (003). */
@@ -23,7 +24,6 @@ export function useGrants(filters?: {
   fundingType?: string
   active?: boolean
   search?: string
-  climateAction?: boolean
   tags?: string[]
   sort?: ContentSort
   /** Only the calls this member posted — what /grants/my-grants lists. */
@@ -65,11 +65,6 @@ export function useGrants(filters?: {
     // deliberately does not touch is_active.
     if (filters?.createdBy) {
       query = query.eq('created_by', filters.createdBy)
-    }
-
-    // Climate action filter
-    if (filters?.climateAction) {
-      query = query.eq('is_climate_action', true)
     }
 
     // "any of" — AND semantics would empty the list on the second chip click
@@ -149,7 +144,6 @@ export function useCreateGrant() {
       grant_type?: string
       funding_type?: string
       required_documents?: RequiredDocument[]
-      is_climate_action?: boolean
       details?: DetailEntry[]
     }) => {
       // Migration 077's INSERT policy requires created_by = auth.uid(): a grant
@@ -244,7 +238,7 @@ export function useFunderApplications(grantId: string | undefined) {
   const fetchApplications = async (gid: string): Promise<GrantApplication[]> => {
     const { data, error } = await supabase
       .from('grant_applications')
-      .select('*, applicant:profiles!user_id(*)')
+      .select(`*, applicant:profiles!user_id(${PROFILE_CHIP})`)
       .eq('grant_id', gid)
       .order('created_at', { ascending: false })
     if (error) throw error
@@ -447,7 +441,7 @@ export function useSponsorshipRequests(userId: string | undefined) {
     queryFn: async (): Promise<any[]> => {
       const { data, error } = await (supabase as any)
         .from('grant_applications')
-        .select('*, grant:grants!grant_id(*), applicant:profiles!user_id(*)')
+        .select(`*, grant:grants!grant_id(*), applicant:profiles!user_id(${PROFILE_CHIP})`)
         .eq('sponsor_id', userId)
         .order('created_at', { ascending: false })
 

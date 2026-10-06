@@ -4,6 +4,7 @@ import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { measuredCount, type Measured } from '../lib/measured'
 import type { Profile, GrantApplication, GrantApplicationStatus, UserRole } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // ============================================================
 // Dashboard Stats
@@ -13,9 +14,8 @@ import type { Profile, GrantApplication, GrantApplicationStatus, UserRole } from
  * Every tile is a Measured, not a number.
  *
  * The page's own comment says it best: "A tile reading 0 is a claim about the
- * platform." It was true of the climate strip, which hard-fell-back to 0 on any
- * failure, and quietly true of the five head counts as well, where `count || 0`
- * turned a refused query into a confident zero.
+ * platform." It was quietly true of the head counts, where `count || 0` turned
+ * a refused query into a confident zero.
  */
 export interface AdminStats {
   userCount: Measured
@@ -29,9 +29,6 @@ export interface AdminStats {
   newApplicationCount: Measured
   postCount: Measured
   newPostCount: Measured
-  climateProjectCount: Measured
-  climateEventCount: Measured
-  climateGrantCount: Measured
 }
 
 /**
@@ -46,8 +43,7 @@ export const TREND_WINDOW_DAYS = 30
 
 export function useAdminStats() {
   const fetchStats = async (): Promise<AdminStats> => {
-    // A rejected promise (the 400 the climate columns used to throw) has to
-    // become a *failed* result, not a zero one.
+    // A rejected promise has to become a *failed* result, not a zero one.
     const failed = (message: string) => ({ count: null, error: { message } })
     const guarded = <T extends { count: number | null; error: unknown }>(
       promise: PromiseLike<T>,
@@ -71,21 +67,18 @@ export function useAdminStats() {
       newApplications,
       posts,
       newPosts,
-      climateProjects,
-      climateEvents,
-      climateGrants,
     ] =
       await Promise.all([
-        guarded(supabase.from('profiles').select('*', { count: 'exact', head: true }), 'profiles'),
+        guarded(supabase.from('profiles').select('id', { count: 'exact', head: true }), 'profiles'),
         // 139 makes verification the gate on publishing and applying, so the
         // share of the membership that has passed it is the difference between
         // a roster and a working platform.
         guarded(
-          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_verified', true),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true),
           'verified profiles'
         ),
         guarded(
-          supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', since),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', since),
           'new profiles'
         ),
         // Drafts and cancellations are not events the platform hosted. The
@@ -149,18 +142,6 @@ export function useAdminStats() {
             .gte('created_at', since),
           'new forum posts'
         ),
-        guarded(
-          supabase.from('projects').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
-          'climate projects'
-        ),
-        guarded(
-          supabase.from('events').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
-          'climate events'
-        ),
-        guarded(
-          supabase.from('grants').select('*', { count: 'exact', head: true }).eq('is_climate_action', true),
-          'climate grants'
-        ),
       ])
 
     return {
@@ -175,9 +156,6 @@ export function useAdminStats() {
       newApplicationCount: measuredCount(newApplications, 'Could not read recent applications'),
       postCount: measuredCount(posts, 'Could not read the discussion count'),
       newPostCount: measuredCount(newPosts, 'Could not read recent discussions'),
-      climateProjectCount: measuredCount(climateProjects, 'Could not read climate projects'),
-      climateEventCount: measuredCount(climateEvents, 'Could not read climate events'),
-      climateGrantCount: measuredCount(climateGrants, 'Could not read climate grants'),
     }
   }
 
@@ -351,30 +329,17 @@ export function useAdminUsers(filters?: {
   role?: string
   verified?: string
 }) {
+  // admin_member_rows() (167): the list shows suspension details, which the
+  // profiles table no longer hands to any client (168). Same filters and
+  // order as the select it replaces; refused without members:view.
   const fetchUsers = async (): Promise<Profile[]> => {
-    let query = supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (filters?.search) {
-      const sanitized = escapeIlike(filters.search)
-      if (sanitized) {
-        query = query.ilike('display_name', `%${sanitized}%`)
-      }
-    }
-
-    if (filters?.role) {
-      query = query.contains('roles', [filters.role])
-    }
-
-    if (filters?.verified === 'true') {
-      query = query.eq('is_verified', true)
-    } else if (filters?.verified === 'false') {
-      query = query.eq('is_verified', false)
-    }
-
-    const { data, error } = await query
+    const sanitized = filters?.search ? escapeIlike(filters.search) : ''
+    const { data, error } = await (supabase as any).rpc('admin_member_rows', {
+      p_search: sanitized || null,
+      p_role: filters?.role || null,
+      p_verified:
+        filters?.verified === 'true' ? true : filters?.verified === 'false' ? false : null,
+    })
 
     if (error) throw error
     return (data as Profile[]) || []
@@ -622,7 +587,7 @@ export function useAdminGrantApplications(filters?: {
       .select(`
         *,
         grant:grants(*),
-        applicant:profiles(*)
+        applicant:profiles!user_id(${PROFILE_CHIP})
       `)
       .order('created_at', { ascending: false })
 
@@ -717,7 +682,7 @@ export function useAdminAllPosts(filters?: {
   const fetchPosts = async () => {
     let query = supabase
       .from('forum_posts')
-      .select('*, author:profiles(*), board:forum_boards(*)')
+      .select(`*, author:profiles!author_id(${PROFILE_CHIP}), board:forum_boards(*)`)
       .order('created_at', { ascending: false })
       .limit(100)
 

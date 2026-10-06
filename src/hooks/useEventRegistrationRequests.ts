@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import { announceRegistrationDecision } from '../lib/event-registration'
 import type { EventRSVP } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /**
  * The organizer's side of a registration (096).
@@ -20,7 +21,7 @@ import type { EventRSVP } from '../types'
 
 const DOMAIN = 'events'
 
-const SELECT_WITH_CONTEXT = '*, user:profiles!user_id(*), event:events!inner(*)'
+const SELECT_WITH_CONTEXT = `*, user:profiles!user_id(${PROFILE_CHIP}), event:events!inner(*)`
 
 /** Pending registrations on one event — the Registrations tab. */
 export function usePendingEventRegistrations(eventId: string | undefined) {

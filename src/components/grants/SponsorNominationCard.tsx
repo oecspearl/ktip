@@ -11,6 +11,7 @@ import { useApplyForGrant } from '../../hooks/useGrants'
 import type { Profile } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../../lib/profile-columns'
 
 interface SponsorNominationCardProps {
   applicationId: string | undefined
@@ -52,7 +53,7 @@ export function SponsorNominationCard({
     queryFn: async (): Promise<Profile[]> => {
       let request = (supabase as any)
         .from('profiles')
-        .select('*')
+        .select(PROFILE_CHIP)
         .overlaps('roles', ['faculty', 'ip_legal', 'educational_partner', 'research_institution'])
         .limit(10)
 
@@ -70,7 +71,7 @@ export function SponsorNominationCard({
     queryFn: async (): Promise<Profile | null> => {
       const { data, error } = await (supabase as any)
         .from('profiles')
-        .select('*')
+        .select(PROFILE_CHIP)
         .eq('id', sponsorId)
         .maybeSingle()
 

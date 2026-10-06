@@ -87,7 +87,6 @@ export function projectHeroDetails(p: Project): DetailEntry[] {
       items([
         ['Category', category],
         ['Phase', p.phase ? PHASE_LABELS[p.phase] || p.phase : null],
-        ['Focus', p.is_climate_action ? 'Climate action' : null],
       ])
     ),
     ...flat('d-lead', 'Lead', p.owner?.display_name),

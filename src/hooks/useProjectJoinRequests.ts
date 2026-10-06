@@ -4,6 +4,7 @@ import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
 import type { ProjectJoinRequest, ProjectTeamMember } from '../types'
 import { useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /**
  * "Request to collaborate" — the requester-initiated half of project
@@ -23,7 +24,7 @@ export function useProjectJoinRequests(projectId: string | undefined, enabled = 
     queryFn: async (): Promise<ProjectJoinRequest[]> => {
       const { data, error } = await (supabase as any)
         .from('project_join_requests')
-        .select('*, requester:profiles!requester_id(*)')
+        .select(`*, requester:profiles!requester_id(${PROFILE_CHIP})`)
         .eq('project_id', projectId)
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
@@ -46,7 +47,7 @@ export function useIncomingJoinRequests(userId: string | undefined) {
       // any on a project they own. Filtering out their own leaves the inbox.
       const { data, error } = await (supabase as any)
         .from('project_join_requests')
-        .select('*, requester:profiles!requester_id(*), project:projects!project_id(*)')
+        .select(`*, requester:profiles!requester_id(${PROFILE_CHIP}), project:projects!project_id(*)`)
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
 

@@ -1,6 +1,5 @@
 import { Badge } from '../ui/Badge'
 import type { Event } from '../../types'
-import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { EVENT_TYPE_LABELS, EVENT_STATUS_COLORS } from '../../lib/constants'
@@ -61,7 +60,6 @@ export function EventCard({ event: source, dismissible }: EventCardProps) {
             <Trans>Past Event</Trans>
           </Badge>
         )}
-        {event.is_climate_action && <ClimateBadge />}
         {isMachineTranslated(source, translated) && <TranslatedMark />}
       </div>
     </BentoCard>

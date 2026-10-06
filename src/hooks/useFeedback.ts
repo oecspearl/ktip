@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type { Feedback, FeedbackStatus } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // User: own submitted feedback
 //
@@ -76,7 +77,7 @@ export function useAdminFeedback() {
   const fetchFeedback = async (): Promise<Feedback[]> => {
     const { data, error } = await (supabase as any)
       .from('feedback')
-      .select('*, user:profiles!user_id(*)')
+      .select(`*, user:profiles!user_id(${PROFILE_CHIP})`)
       .order('created_at', { ascending: false })
 
     if (error) throw error

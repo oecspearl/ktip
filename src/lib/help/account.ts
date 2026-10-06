@@ -174,8 +174,8 @@ export const SETTINGS_CATEGORY: HelpCategory = {
     {
       id: 'personalization',
       title: 'How do I personalize what I see?',
-      content: `Dashboard, Personalization.\n\nPick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.\n\nOnce set, the "For You" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n\nEverything else stays browsable — personalization changes the order, not what exists.`,
-      tags: ['personalization', 'for you', 'topics', 'interests', 'recommendations', 'climate'],
+      content: `Dashboard, Personalization.\n\nPick the topics and categories you care about, and the content types you want to see. You can also opt out of specific items you never want surfaced again.\n\nOnce set, the "For You" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n\nEverything else stays browsable — personalization changes the order, not what exists.`,
+      tags: ['personalization', 'for you', 'topics', 'interests', 'recommendations'],
     },
     {
       id: 'delete-account',

@@ -45,7 +45,6 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
   const [deadline, setDeadline] = useState('')
   const [eligibility, setEligibility] = useState('')
   const [applicationUrl, setApplicationUrl] = useState('')
-  const [isClimateAction, setIsClimateAction] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [details, setDetails] = useState<DetailEntry[]>([])
   // Migration 080 gave the column a '[]' default, so a call created without
@@ -78,7 +77,6 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
     setDeadline('')
     setEligibility('')
     setApplicationUrl('')
-    setIsClimateAction(false)
     setTags([])
     setDetails([])
     setRequiredDocuments(DEFAULT_REQUIRED_DOCUMENTS.map((d) => ({ ...d })))
@@ -99,7 +97,6 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       setDeadline(grant.deadline ? grant.deadline.split('T')[0] : '')
       setEligibility(grant.eligibility || '')
       setApplicationUrl(grant.application_url || '')
-      setIsClimateAction(grant.is_climate_action ?? false)
       setTags(grant.tags || [])
       setDetails(grant.details || [])
       setRequiredDocuments(grant.required_documents || [])
@@ -124,7 +121,6 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
       // NOT NULL in 137, so it is always sent rather than sent when truthy.
       funding_type: fundingType || 'grant',
       required_documents: cleanRequiredDocuments(requiredDocuments),
-      is_climate_action: isClimateAction,
       employer_id: employerId,
       // A CHECK constraint refuses an override that names no organisation.
       allow_member_engagement: employerId ? allowMemberEngagement : null,
@@ -381,21 +377,6 @@ export default function AdminGrantFormModal({ open, grant, onClose, onSaved }: A
           suggestions={CONTENT_TAG_SUGGESTIONS}
           max={10}
         />
-
-        {/* Climate Action */}
-        <div>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isClimateAction}
-              onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
-              className="w-5 h-5 text-ktip-tropical-700 border-ktip-sand-300 rounded focus:ring-ktip-tropical-500"
-            />
-            <span className="text-sm text-ktip-sand-700">
-              Climate Action funding
-            </span>
-          </label>
-        </div>
 
         <OrgEngagementFields
           options={employerOptions}

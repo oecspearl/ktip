@@ -20,8 +20,10 @@ import { resolveCopy } from '../../i18n/copy'
  * Public board. Everything about who appears is decided in SQL by
  * get_leaderboard(): students are excluded for safeguarding, members who set
  * leaderboard_visibility to 'private' are excluded, and so are suspended
- * accounts. None of that is re-implemented here — a client-side filter would
- * only be a second, weaker copy of the rule.
+ * accounts. A member whose 'standing' section this viewer may not see is left
+ * out too, and the ranks close up around them (166). None of that is
+ * re-implemented here — a client-side filter would only be a second, weaker
+ * copy of the rule.
  */
 
 const WINDOWS: { value: LeaderboardWindow; label: MessageDescriptor }[] = [

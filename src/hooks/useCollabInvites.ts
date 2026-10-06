@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import { sendNotification } from '../lib/notify'
 import { keys } from '../queries/keys'
 import type { CollabInvite, CollabResourceType, EmailInvite } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 /**
  * The three share tables are structurally identical apart from their names,
@@ -74,7 +75,7 @@ async function fetchInvitesFor(
 ): Promise<CollabInvite[]> {
   const otherParty = column === 'shared_with' ? 'shared_by' : 'shared_with'
   const { data, error } = await (supabase.from(spec.shareTable) as any)
-    .select(`*, party:profiles!${otherParty}(*)`)
+    .select(`*, party:profiles!${otherParty}(${PROFILE_CHIP})`)
     .eq(column, userId)
     .eq('status', status)
     .order('created_at', { ascending: false })

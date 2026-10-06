@@ -1,6 +1,5 @@
 import { Badge } from '../ui/Badge'
 import type { Grant } from '../../types'
-import { ClimateBadge } from '../ui/ClimateBadge'
 import { BentoCard } from '../ui/BentoCard'
 import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { formatCurrency, formatDate } from '../../lib/utils'
@@ -39,7 +38,7 @@ export function GrantCard({ grant, dismissible }: GrantCardProps) {
   return (
     <BentoCard
       to={entityPath('grant', grant)}
-      image={grantImageFor(grant.id, grant.grant_type, grant.is_climate_action)}
+      image={grantImageFor(grant.id, grant.grant_type)}
       imageSeed={grant.id}
       action={dismissible ? <NotInterestedButton entity="grant" id={grant.id} tone="dark" /> : undefined}
       eyebrow={fundingType ? i18n._(fundingType) : t`Funding`}
@@ -61,7 +60,6 @@ export function GrantCard({ grant, dismissible }: GrantCardProps) {
           </Badge>
         )}
         {!grant.is_active && !isExpired && <Badge variant="default"><Trans>Inactive</Trans></Badge>}
-        {grant.is_climate_action && <ClimateBadge />}
       </div>
     </BentoCard>
   )

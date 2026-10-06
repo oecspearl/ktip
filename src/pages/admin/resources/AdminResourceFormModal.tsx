@@ -10,7 +10,6 @@ import { TagInput } from '../../../components/ui/TagInput'
 import { sanitizeTag } from '../../../lib/utils'
 import {
   Save,
-  Leaf,
 } from 'lucide-react'
 import {
   RESOURCE_TYPE_LABELS,
@@ -41,7 +40,6 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
   const [tags, setTags] = useState<string[]>([])
   const [downloadUrl, setDownloadUrl] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
-  const [isClimateAction, setIsClimateAction] = useState(false)
   const [isPublished, setIsPublished] = useState(false)
 
   const isEditing = !!resource
@@ -56,7 +54,6 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
     setTags([])
     setDownloadUrl('')
     setThumbnailUrl('')
-    setIsClimateAction(false)
     setIsPublished(false)
   }
 
@@ -71,7 +68,6 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
       setTags(resource.tags || [])
       setDownloadUrl(resource.download_url || '')
       setThumbnailUrl(resource.thumbnail_url || '')
-      setIsClimateAction(resource.is_climate_action)
       setIsPublished(resource.is_published)
     } else if (open) {
       resetForm()
@@ -93,7 +89,6 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
       tags: tags.map(sanitizeTag).filter(Boolean),
       download_url: downloadUrl.trim() || null,
       thumbnail_url: thumbnailUrl.trim() || null,
-      is_climate_action: isClimateAction,
       is_published: isPublished,
     }
 
@@ -223,17 +218,6 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
               className="w-4 h-4 rounded border-ktip-sand-300 text-ktip-ocean-600 focus:ring-ktip-ocean-500"
             />
             <span className="text-sm text-ktip-sand-700 font-medium">Published</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isClimateAction}
-              onChange={(e) => setIsClimateAction(e.currentTarget.checked)}
-              className="w-4 h-4 rounded border-ktip-sand-300 text-ktip-tropical-700 focus:ring-ktip-tropical-500"
-            />
-            <Leaf size={14} className="text-ktip-tropical-700" />
-            <span className="text-sm text-ktip-sand-700 font-medium">Climate Action</span>
           </label>
         </div>
 

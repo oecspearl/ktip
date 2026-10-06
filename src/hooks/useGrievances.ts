@@ -2,13 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 import type { Grievance, GrievanceStatus } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // User: fetch own submitted grievances
 export function useMyGrievances(userId: string | undefined) {
   const fetchGrievances = async (uid: string): Promise<Grievance[]> => {
     const { data, error } = await (supabase as any)
       .from('grievances')
-      .select('*, reported_user:profiles!reported_user_id(*)')
+      .select(`*, reported_user:profiles!reported_user_id(${PROFILE_CHIP})`)
       .eq('reporter_id', uid)
       .order('created_at', { ascending: false })
 
@@ -77,8 +78,8 @@ export function useAdminGrievances(filters?: { status?: string; category?: strin
       .from('grievances')
       .select(`
         *,
-        reporter:profiles!reporter_id(*),
-        reported_user:profiles!reported_user_id(*)
+        reporter:profiles!reporter_id(${PROFILE_CHIP}),
+        reported_user:profiles!reported_user_id(${PROFILE_CHIP})
       `)
       .order('created_at', { ascending: false })
 

@@ -1,5 +1,4 @@
 import { Badge } from '../ui/Badge'
-import { ClimateBadge } from '../ui/ClimateBadge'
 import { NotInterestedButton } from '../personalization/NotInterestedButton'
 import { BentoCard } from '../ui/BentoCard'
 import {
@@ -47,7 +46,6 @@ export function ResourceCard({ resource, dismissible }: ResourceCardProps) {
               : resource.category}
           </Badge>
         )}
-        {resource.is_climate_action && <ClimateBadge />}
       </div>
     </BentoCard>
   )

@@ -22,6 +22,7 @@ import type { CalendarItem, CalendarItemKind } from '../lib/calendar'
 import { entityPath } from '../lib/slug'
 import type { Event, Grant } from '../types'
 import { useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export type CalendarScope = 'platform' | 'personal'
 
@@ -104,7 +105,7 @@ export function useCalendarFeed({
             let query = supabase
               .from('events')
               // organizer joined for the week view's avatar chips
-              .select('*, organizer:profiles(*)')
+              .select(`*, organizer:profiles!organizer_id(${PROFILE_CHIP})`)
               .gte('start_date', eventsFrom)
               .lte('start_date', end)
               .order('start_date', { ascending: true })

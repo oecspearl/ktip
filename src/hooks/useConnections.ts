@@ -5,6 +5,7 @@ import { keys } from '../queries/keys'
 import { useAchievementTrigger } from '../contexts/AchievementContext'
 import type { Connection } from '../types'
 import { useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 export type ConnectionState =
   | 'none'
@@ -115,7 +116,7 @@ export function useMyConnections(userId: string | undefined) {
   const fetchConnections = async (uid: string): Promise<Connection[]> => {
     const { data, error } = await (supabase as any)
       .from('connections')
-      .select('*, requester:profiles!requester_id(*), addressee:profiles!addressee_id(*)')
+      .select(`*, requester:profiles!requester_id(${PROFILE_CHIP}), addressee:profiles!addressee_id(${PROFILE_CHIP})`)
       .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`)
       .eq('status', 'accepted')
       .order('updated_at', { ascending: false })
@@ -201,7 +202,7 @@ export function usePendingRequests(userId: string | undefined) {
   const fetchPending = async (uid: string): Promise<Connection[]> => {
     const { data, error } = await (supabase as any)
       .from('connections')
-      .select('*, requester:profiles!requester_id(*)')
+      .select(`*, requester:profiles!requester_id(${PROFILE_CHIP})`)
       .eq('addressee_id', uid)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })

@@ -4,7 +4,10 @@ import {
   describeForumBoardDeletion,
   describeGrantDeletion,
   describeProjectDeletion,
+  describeBulkDeletion,
+  isBulkDeleteConfirmed,
   isDeleteConfirmed,
+  type BulkDeleteItem,
   type EventDeleteFacts,
   type GrantDeleteFacts,
   type ProjectDeleteFacts,
@@ -246,5 +249,57 @@ describe('isDeleteConfirmed', () => {
   it('refuses to confirm when the stored title is blank', () => {
     expect(isDeleteConfirmed(strict, '', '')).toBe(false)
     expect(isDeleteConfirmed(strict, '   ', '   ')).toBe(false)
+  })
+})
+
+describe('describeBulkDeletion', () => {
+  const item = (id: string, facts: Partial<ProjectDeleteFacts> = {}): BulkDeleteItem => ({
+    id,
+    title: `Project ${id}`,
+    impact: describeProjectDeletion(project(facts)),
+  })
+
+  it('lets a batch of private, solo projects through on a plain confirm', () => {
+    const bulk = describeBulkDeletion([item('a'), item('b')])
+    expect(bulk.count).toBe(2)
+    expect(bulk.requiresConfirmation).toBe(false)
+    expect(bulk.flagged).toEqual([])
+    expect(isBulkDeleteConfirmed(bulk, '')).toBe(true)
+  })
+
+  it('is never cheaper than the riskiest row in it', () => {
+    const bulk = describeBulkDeletion([item('a'), item('b', { isPublic: true }), item('c')])
+    expect(bulk.requiresConfirmation).toBe(true)
+    expect(bulk.flagged.map((f) => f.id)).toEqual(['b'])
+  })
+
+  it('reports others affected when any row has collaborators', () => {
+    const bulk = describeBulkDeletion([item('a'), item('b', { memberCount: 2 })])
+    expect(bulk.affectsOthers).toBe(true)
+  })
+
+  it('merges cascade lines without repeating them', () => {
+    const bulk = describeBulkDeletion([item('a', { memberCount: 1 }), item('b'), item('c', { memberCount: 3 })])
+    expect(new Set(bulk.cascades).size).toBe(bulk.cascades.length)
+    expect(bulk.cascades).toEqual(describeProjectDeletion(project({ memberCount: 1 })).cascades)
+  })
+
+  it('asks for the count when several rows need confirming', () => {
+    const bulk = describeBulkDeletion([item('a', { isPublic: true }), item('b'), item('c')])
+    expect(bulk.confirmPhrase).toBe('3')
+    expect(isBulkDeleteConfirmed(bulk, '')).toBe(false)
+    expect(isBulkDeleteConfirmed(bulk, '2')).toBe(false)
+    expect(isBulkDeleteConfirmed(bulk, ' 3 ')).toBe(true)
+  })
+
+  it('asks for the title, as the single delete would, when one row is selected', () => {
+    const bulk = describeBulkDeletion([item('a', { isPublic: true })])
+    expect(bulk.confirmPhrase).toBe('Project a')
+    expect(isBulkDeleteConfirmed(bulk, '1')).toBe(false)
+    expect(isBulkDeleteConfirmed(bulk, 'project a')).toBe(true)
+  })
+
+  it('confirms nothing when nothing is selected', () => {
+    expect(isBulkDeleteConfirmed(describeBulkDeletion([]), '0')).toBe(false)
   })
 })

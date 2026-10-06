@@ -23,7 +23,6 @@ import {
   BookOpen,
   Plus,
   ArrowRight,
-  Leaf,
   BarChart3,
   FileText,
   Target,
@@ -72,24 +71,6 @@ function hintOf(...parts: (string | null)[]): string | undefined {
   return real.length ? real.join(' · ') : undefined
 }
 
-function ClimateFigure({ label, measured }: { label: string; measured: Measured }) {
-  return (
-    <div title={measured.state === 'unavailable' ? measured.reason : undefined}>
-      <p
-        className={`text-2xl font-bold ${
-          measured.state === 'ok' ? 'text-ktip-tropical-800' : 'text-ktip-sand-400'
-        }`}
-      >
-        {measured.state === 'ok' ? measured.value.toLocaleString() : '—'}
-      </p>
-      <p className="text-xs text-ktip-tropical-700">{label}</p>
-      {measured.state === 'unavailable' && (
-        <p className="text-xs text-ktip-sun-700">Couldn't load</p>
-      )}
-    </div>
-  )
-}
-
 export default function AdminDashboardPage() {
   const auth = useAuth()
   const { stats, loading: statsLoading } = useAdminStats()
@@ -115,7 +96,6 @@ export default function AdminDashboardPage() {
   const canSeeForums = auth.can('forum:manage')
   const canSeeResources = auth.can('resource:manage')
   const canSeeProjects = auth.can('project:manage_all')
-  const canSeeClimate = canSeeProjects || canSeeEvents || canSeeGrants
   // The analytics block reads across every table at once, so it belongs to the
   // one key that still means "the whole platform".
   const canSeeAnalytics = auth.can('org:manage')
@@ -371,24 +351,6 @@ export default function AdminDashboardPage() {
               measured={analytics.resourceCount}
             />
           )}
-        </div>
-      )}
-
-      {/* Climate Action Stats */}
-      {stats && canSeeClimate && (
-        <div data-tutorial="admin-climate" className="neu-surface rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-neu-sm p-5 mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <Leaf size={18} className="text-ktip-tropical-700" />
-            <h2 className="text-sm font-semibold text-ktip-tropical-900">Climate Action</h2>
-          </div>
-          {/* These three used to hard-fall-back to 0 whenever the
-              is_climate_action query failed, which is the failure mode this
-              page's own comment above calls unacceptable. */}
-          <div className="grid grid-cols-3 gap-4">
-            <ClimateFigure label="Projects" measured={stats.climateProjectCount} />
-            <ClimateFigure label="Events" measured={stats.climateEventCount} />
-            <ClimateFigure label="Grants" measured={stats.climateGrantCount} />
-          </div>
         </div>
       )}
 

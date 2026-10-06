@@ -12,17 +12,17 @@ import {
   signResourceFileUrl,
 } from '../lib/resource-uploads'
 import type { Resource } from '../types'
+import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // 135 added reviewed_by → profiles alongside author_id → profiles, so a bare
 // `profiles(*)` embed is ambiguous (PGRST201, HTTP 300) and every read below
 // would fail. The FK name pins it to the author.
-const RESOURCE_SELECT = '*, author:profiles!resources_author_id_fkey(*)'
+const RESOURCE_SELECT = `*, author:profiles!resources_author_id_fkey(${PROFILE_CHIP})`
 
 export function useResources(filters?: {
   type?: string
   category?: string
   search?: string
-  climateAction?: boolean
   tags?: string[]
   sort?: ContentSort
 }) {
@@ -56,10 +56,6 @@ export function useResources(filters?: {
 
     if (filters?.category) {
       query = query.eq('category', filters.category)
-    }
-
-    if (filters?.climateAction) {
-      query = query.eq('is_climate_action', true)
     }
 
     // "any of" — AND semantics would empty the list on the second chip click
@@ -153,7 +149,6 @@ export function useCreateResource() {
       tags?: string[]
       download_url?: string
       thumbnail_url?: string
-      is_climate_action?: boolean
       is_published?: boolean
     }) => {
       const { data, error } = await (supabase as any)
@@ -283,7 +278,6 @@ export function useSubmitResource() {
       tags?: string[]
       download_url?: string | null
       thumbnail_url?: string | null
-      is_climate_action?: boolean
       file?: File | null
     }) => {
       const { authorId, file, ...fields } = input

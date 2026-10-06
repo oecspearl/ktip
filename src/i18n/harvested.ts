@@ -29,9 +29,7 @@ You are notified when a state changes, so you do not need to keep checking.`,
 The Hackathons page is the front door. It splits into what is live now, what is coming up, and what has already happened.
 
 Live hackathons show an "Enter the venue" action. Upcoming ones show the event page so you can register in advance; past ones keep their recap articles and schedule.`,
-  msg`A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.
-
-Under it, the climate-action flag puts the event in the region’s resilience agenda, where it can be filtered for on the events page.`,
+  msg`A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.`,
   msg`A child at risk`,
   msg`A counter-notice needs:`,
   msg`A declared licence cannot be withdrawn from copies already made under it. That is what makes it a licence rather than a preference.`,
@@ -298,7 +296,7 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Case Study`,
   msg`Category and phase`,
   msg`Challenge`,
-  msg`Challenges and climate action`,
+  msg`Challenge events`,
   msg`Chamber SME review`,
   msg`Chamber verification`,
   msg`Change it`,
@@ -542,7 +540,7 @@ You can edit or unpublish it afterwards, so nothing here is one-way. Signed out,
   msg`Dark mode, reduced motion, text scale.`,
   msg`Dashboard, Personalization.
 
-Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.
+Pick the topics and categories you care about, and the content types you want to see. You can also opt out of specific items you never want surfaced again.
 
 Once set, the "For You" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.
 
@@ -849,7 +847,6 @@ Removing a connection is silent — the other member is not notified — and you
   msg`Everything here narrows the events below, and the filters stack — combine as many as you need.
 
 • Event type — workshops, conferences, webinars, training, meetings
-• Climate Action — only events tied to the region’s resilience agenda
 • Search — click the magnifier to open it, then type a title, topic or venue
 • Topic chips appear under the bar when the current events carry tags
 
@@ -910,10 +907,9 @@ Your own standing is pinned in its own row further down, so you never have to sc
   msg`Filter by resource type, search the text, and sort by newest or Top Picks.
 
 The count updates as you filter, and the grid below groups by type when your results span several.`,
-  msg`Filter listings down to climate and environment work`,
   msg`Filters sit above the events list.
 
-Search matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day. The Climate Action toggle shows only events flagged as climate work.
+Search matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day.
 
 Topic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.
 
@@ -924,7 +920,6 @@ Topic chips below the filters come from the tags organisers actually used, so a 
   msg`Find and connect with members across the region.`,
   msg`Find any page, feature or record from the navbar search box`,
   msg`Find anything with global search`,
-  msg`Find climate-action projects`,
   msg`Find funding that fits your work, and check what you qualify for.`,
   msg`Find partnerships, attend events, and support innovation.`,
   msg`Find the Team panel in the sidebar and click "Manage Team".`,
@@ -994,14 +989,13 @@ Applications you submitted on a funder's external site will not appear here — 
   msg`Go to Grants and open the opportunity you want.`,
   msg`Go to Projects and click "Create Project". Give it a title, description, category, and phase (concept, prototype, funding, or launch). You can keep it private until you are ready to share it publicly.`,
   msg`Go to Projects in the top navigation bar.`,
-  msg`Go to Projects.`,
   msg`Go to Settings → Preferences. You can switch categories (messages, events, projects, forums, collaboration, connections) on or off — switched-off categories stop generating notifications entirely.`,
   msg`Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators.`,
   msg`Go to the Events page and click "Create Event".
 
 Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.
 
-Optional: a description, a short summary, an end date and time, tags, a Climate Action flag, a registration deadline, and a capacity.
+Optional: a description, a short summary, an end date and time, tags, a registration deadline, and a capacity.
 
 Choose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later.`,
   msg`Go to the Member Directory, or open someone's profile.`,
@@ -1009,9 +1003,7 @@ Choose whether the event is virtual or in person; in-person events take a locati
 
 Required: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.
 
-Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, a Climate Action flag, and whether the project is public or private.
-
-Climate Action projects surface in climate filters and get a boost for members who turned on the climate preference.`,
+Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, and whether the project is public or private.`,
   msg`Go to the final step, "Impact & Review".`,
   msg`Go to your Dashboard, open Preferences and turn off "Show me on the leaderboard".
 
@@ -1069,7 +1061,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`Harass, bully, threaten, intimidate or stalk another member, on or off the platform.`,
   msg`Harassment`,
   msg`Hashed rate-limit records`,
-  msg`Hashtags and climate action`,
+  msg`Hashtags`,
   msg`Hate Speech`,
   msg`Healthcare`,
   msg`Help Center`,
@@ -1746,7 +1738,7 @@ You can also start a conversation straight from someone's profile or from the me
 
 The owner can always edit. Team members added with the editor scope can edit too — viewers cannot.
 
-You can change the title, summary, description, category, phase, details, hashtags, the Climate Action flag and visibility. Click "Save Changes" when you are done.
+You can change the title, summary, description, category, phase, details, hashtags and visibility. Click "Save Changes" when you are done.
 
 OECS administrators can edit any project from the admin console.`,
   msg`Open the quick-actions button in the corner and choose Page tour to run this walkthrough again — here, or on any other page that has one.`,
@@ -2612,12 +2604,11 @@ Tiles report the selected period; the trend charts look back further, so the sha
   msg`The rules for using KTIP — accounts, conduct, liability`,
   msg`The rules for what you may post and how you may treat other members are set out in full in the Acceptable Use & Community Guidelines. Breaching them is breaching these Terms.`,
   msg`The rules live in the Acceptable Use & Community Guidelines.`,
-  msg`The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.
+  msg`The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled and past events. The count above tells you how many matched your filters.
 
 Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.
 
 Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile.`,
-  msg`The same filter exists on the Events, Grants and Resources pages.`,
   msg`The search box filters this board’s discussions as you type — titles and bodies both.
 
 New Discussion opens the editor. A discussion takes a title, a body with formatting, and lands in this board; you can edit yours afterwards.`,
@@ -2737,9 +2728,7 @@ Removing a project here removes it for its owner too. Prefer talking to them fir
 
 The second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.
 
-A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.
-
-The Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish.`,
+A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.`,
   msg`Track drafts, submissions and sponsorships.`,
   msg`Track grievances you have submitted`,
   msg`Track your funding applications and resume drafts`,
@@ -2757,7 +2746,6 @@ The Climate Action strip underneath is the same three content types filtered to 
   msg`Tropical`,
   msg`Troubleshooting`,
   msg`Tune what it matches on in Dashboard › Personalization.`,
-  msg`Turn on the "Climate Action" filter above the project grid.`,
   msg`Turn on the brain icon for AI-guided navigation when you are not sure what something is called.`,
   msg`Turn the venue on, create rooms, and upload a floorplan`,
   msg`Turn the venue on.`,
@@ -2773,9 +2761,7 @@ Each entry links to the thing itself, so you can read it in context before decid
   msg`Under Privacy, switch off "Show me on the leaderboard".`,
   msg`Under Review`,
   msg`Unsuccessful`,
-  msg`Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.
-
-The climate-action checkbox underneath is not decorative — it puts the project in the region’s resilience agenda, where funders and the OECS Commission look first.`,
+  msg`Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.`,
   msg`Upcoming hackathons you can register for, then a Past section underneath.
 
 Past events keep their pages — the brief, the schedule and the submissions stay readable, which is the easiest way to see what a KTIP hackathon actually involves before entering one.`,

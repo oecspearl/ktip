@@ -308,9 +308,8 @@ export const pageHeroFor = (...seeds: Array<string | null | undefined>) => {
 }
 
 // Grants have no image column of their own, so they draw from the same
-// photography as everything else, narrowed by grant_type (and by the climate
-// flag, which wins) so a startup fund and a research fellowship do not sit on
-// the same frame in a carousel.
+// photography as everything else, narrowed by grant_type so a startup fund and
+// a research fellowship do not sit on the same frame in a carousel.
 export const GRANT_IMAGES = HERO_IMAGES
 
 // Four to six deep per type, not two: a two-image pool puts a pair of same-type
@@ -324,19 +323,8 @@ const GRANT_TYPE_IMAGES: Record<string, readonly string[]> = {
   education: [...PHOTO_SETS.keynote, ...PHOTO_SETS.discussion.slice(0, 2)],
 }
 
-// No climate-specific photography in the set, so a climate grant gets the
-// widest, most outward-looking frames we have — the full cohort and the room at
-// work — rather than a close-up of one laptop.
-const CLIMATE_GRANT_IMAGES = [...PHOTO_SETS.cohort, ...PHOTO_SETS.workshop]
-
-export const grantImageFor = (
-  seed: string,
-  grantType?: string | null,
-  isClimateAction?: boolean | null,
-) => {
-  const pool = isClimateAction
-    ? CLIMATE_GRANT_IMAGES
-    : (grantType && GRANT_TYPE_IMAGES[grantType]) || GRANT_IMAGES
+export const grantImageFor = (seed: string, grantType?: string | null) => {
+  const pool = (grantType && GRANT_TYPE_IMAGES[grantType]) || GRANT_IMAGES
   return pick(pool, seed)
 }
 

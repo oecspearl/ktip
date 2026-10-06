@@ -121,9 +121,8 @@ export type FeedImageMap = Record<string, string>
  *   project  -> image_url,      else heroImageFor(id)
  *   event    -> image_url,      else heroImageFor(id)
  *   resource -> thumbnail_url,  else heroImageFor(id)
- *   grant    -> grantImageFor(id, grant_type, is_climate_action); grants have
- *               no image column at all, but the climate flag overrides the
- *               type pool and the feed does not carry it, so it is read here
+ *   grant    -> grantImageFor(id, grant_type); grants have no image column at
+ *               all, and the feed does not carry grant_type, so it is read here
  */
 export function useFeedImages(items: FeedItem[]) {
   // v2 rows already carry what the card rules need; resolve them in place.
@@ -150,7 +149,7 @@ export function useFeedImages(items: FeedItem[]) {
       rows('projects', 'id, image_url', idsOf('project')),
       rows('events', 'id, image_url', idsOf('event')),
       rows('resources', 'id, thumbnail_url', idsOf('resource')),
-      rows('grants', 'id, grant_type, is_climate_action', idsOf('grant')),
+      rows('grants', 'id, grant_type', idsOf('grant')),
     ])
 
     const map: FeedImageMap = {}
@@ -160,7 +159,7 @@ export function useFeedImages(items: FeedItem[]) {
       map[`resource:${row.id}`] = row.thumbnail_url || heroImageFor(row.id)
     }
     for (const row of grants) {
-      map[`grant:${row.id}`] = grantImageFor(row.id, row.grant_type, row.is_climate_action)
+      map[`grant:${row.id}`] = grantImageFor(row.id, row.grant_type)
     }
     return map
   }
@@ -194,6 +193,6 @@ function imagesFromRows(items: FeedItem[]): FeedImageMap {
  */
 export function fallbackFeedImage(item: FeedItem): string {
   return item.entity === 'grant'
-    ? grantImageFor(item.id, item.type_key, false)
+    ? grantImageFor(item.id, item.type_key)
     : heroImageFor(item.id)
 }

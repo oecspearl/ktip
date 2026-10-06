@@ -98,7 +98,6 @@ describe('projectHeroDetails', () => {
     title: 'AgriSense',
     category: 'agriculture',
     phase: 'prototype',
-    is_climate_action: true,
     owner: { display_name: 'Tariq Joseph' },
   } as unknown as Project
 
@@ -107,15 +106,13 @@ describe('projectHeroDetails', () => {
     expect(group.items?.map((i) => [i.label, i.value])).toEqual([
       ['Category', 'Agriculture'],
       ['Phase', 'Prototype'],
-      ['Focus', 'Climate action'],
     ])
     expect(lead.value).toBe('Tariq Joseph')
   })
 
-  it('drops Focus for non-climate projects and Lead when the owner is not joined', () => {
+  it('drops Lead when the owner is not joined', () => {
     const rows = projectHeroDetails({
       ...project,
-      is_climate_action: false,
       owner: undefined,
     } as Project)
     expect(rows.map((r) => r.label)).toEqual(['Project'])

@@ -17,6 +17,7 @@ import { useMyEmployer, useEmployerProfileMutations } from '../../hooks/useEmplo
 import { useEmployerRoster, useEmployerMemberMutations } from '../../hooks/useEmployerMembers'
 import type { EmployerMemberRole, Profile } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { PROFILE_CHIP } from '../../lib/profile-columns'
 
 const ROLE_OPTIONS: EmployerMemberRole[] = ['owner', 'admin', 'recruiter']
 
@@ -67,7 +68,7 @@ export default function OrgMembersPage({ embedded = false }: { embedded?: boolea
     queryFn: async (): Promise<Profile[]> => {
       const { data, error } = await (supabase as any)
         .from('profiles')
-        .select('*')
+        .select(PROFILE_CHIP)
         .ilike('display_name', `%${search}%`)
         .limit(10)
       if (error) throw error

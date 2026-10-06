@@ -15,8 +15,8 @@ export const PROJECTS_CATEGORY: HelpCategory = {
     {
       id: 'create-project',
       title: 'How do I create a new project?',
-      content: `Go to the Projects page and click "Create Project".\n\nRequired: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n\nOptional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, a Climate Action flag, and whether the project is public or private.\n\nClimate Action projects surface in climate filters and get a boost for members who turned on the climate preference.`,
-      tags: ['create', 'project', 'new', 'start', 'build', 'climate'],
+      content: `Go to the Projects page and click "Create Project".\n\nRequired: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n\nOptional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, and whether the project is public or private.`,
+      tags: ['create', 'project', 'new', 'start', 'build'],
     },
     {
       id: 'project-create-permission',
@@ -27,7 +27,7 @@ export const PROJECTS_CATEGORY: HelpCategory = {
     {
       id: 'edit-project',
       title: 'How do I edit my project?',
-      content: `Open the project and click "Edit" near the top.\n\nThe owner can always edit. Team members added with the editor scope can edit too — viewers cannot.\n\nYou can change the title, summary, description, category, phase, details, hashtags, the Climate Action flag and visibility. Click "Save Changes" when you are done.\n\nOECS administrators can edit any project from the admin console.`,
+      content: `Open the project and click "Edit" near the top.\n\nThe owner can always edit. Team members added with the editor scope can edit too — viewers cannot.\n\nYou can change the title, summary, description, category, phase, details, hashtags and visibility. Click "Save Changes" when you are done.\n\nOECS administrators can edit any project from the admin console.`,
       tags: ['edit', 'update', 'modify', 'change', 'project', 'editor'],
     },
     {

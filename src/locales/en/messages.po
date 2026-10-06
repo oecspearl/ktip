@@ -379,6 +379,10 @@ msgstr "Browse All Resources"
 msgid "Show it to other entrants and attendees, where the competition’s format is a public showcase, demo day or open vote."
 msgstr "Show it to other entrants and attendees, where the competition’s format is a public showcase, demo day or open vote."
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {Publish # event?} other {Publish # events?}}"
+msgstr "{n, plural, one {Publish # event?} other {Publish # events?}}"
+
 #: src/i18n/harvested.ts
 msgid "Do not misrepresent a grant, project, event or organisation — including its funding, its outcomes, its partners or its endorsements."
 msgstr "Do not misrepresent a grant, project, event or organisation — including its funding, its outcomes, its partners or its endorsements."
@@ -497,6 +501,10 @@ msgstr "Pick members from the invite panel and KTIP sends each of them the room 
 msgid "Reviewers appointed for that call"
 msgstr "Reviewers appointed for that call"
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {# event published} other {# events published}}"
+msgstr "{n, plural, one {# event published} other {# events published}}"
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your account is active again. Nothing was deleted."
 msgstr "Your account is active again. Nothing was deleted."
@@ -576,10 +584,6 @@ msgstr "How do I earn achievement badges?"
 #: src/i18n/harvested.ts
 msgid "The licence above is limited to running and promoting KTIP. It specifically does not permit %entityShort% to:"
 msgstr "The licence above is limited to running and promoting KTIP. It specifically does not permit %entityShort% to:"
-
-#: src/i18n/harvested.ts
-msgid "Go to Projects."
-msgstr "Go to Projects."
 
 #: src/i18n/harvested.ts
 msgid "Overview is the summary. Under it: My Profile, then the things you use day to day — Connections, Projects, Events and Submissions — and finally Progress and Achievements.\n"
@@ -860,6 +864,13 @@ msgstr "How do I connect with a member?"
 #: src/i18n/harvested.ts
 msgid "Material changes are announced in the application and by email at least %noticePeriod% before they take effect. The version number and effective date at the top of this page always reflect what is currently in force, and every version you have accepted is listed in your settings."
 msgstr "Material changes are announced in the application and by email at least %noticePeriod% before they take effect. The version number and effective date at the top of this page always reflect what is currently in force, and every version you have accepted is listed in your settings."
+
+#. placeholder {0}: event.title
+#. placeholder {0}: project.title
+#: src/pages/dashboard/tabs/EventsTab.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "Select {0}"
+msgstr "Select {0}"
 
 #. placeholder {0}: confirmed.institution
 #. placeholder {1}: confirmed.email ?? 'this address'
@@ -1260,6 +1271,10 @@ msgstr "Working on something? Talk to {firstName}."
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Read the policy first"
 msgstr "Read the policy first"
+
+#: src/hooks/useProjects.ts
+msgid "Not deleted. It may already be gone, or you no longer own it."
+msgstr "Not deleted. It may already be gone, or you no longer own it."
 
 #: src/components/directory/MemberPanel.tsx
 msgid "This profile is private. You can see it because you are connected."
@@ -1821,22 +1836,6 @@ msgstr "Nice"
 msgid "Lower my hand"
 msgstr "Lower my hand"
 
-#: src/i18n/harvested.ts
-msgid "Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n"
-"\n"
-"The second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n"
-"\n"
-"A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.\n"
-"\n"
-"The Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish."
-msgstr "Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n"
-"\n"
-"The second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n"
-"\n"
-"A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting.\n"
-"\n"
-"The Climate Action strip underneath is the same three content types filtered to the region’s resilience agenda — the flag members set when they publish."
-
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Who can apply"
 msgstr "Who can apply"
@@ -1979,10 +1978,6 @@ msgstr "No solutions were submitted."
 msgid "More"
 msgstr "More"
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Controls the number shown on your profile and in the member directory. You can always see your own count."
-msgstr "Controls the number shown on your profile and in the member directory. You can always see your own count."
-
 #: src/components/messages/GroupSettingsModal.tsx
 msgid "Leave group"
 msgstr "Leave group"
@@ -2006,6 +2001,10 @@ msgstr "Create your first whiteboard to start brainstorming."
 #: src/i18n/harvested.ts
 msgid "A verification badge reflects a check made at a point in time and can be revoked. Treat it as one signal among several, not as a guarantee."
 msgstr "A verification badge reflects a check made at a point in time and can be revoked. Treat it as one signal among several, not as a guarantee."
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{n, plural, one {# project deleted} other {# projects deleted}}"
+msgstr "{n, plural, one {# project deleted} other {# projects deleted}}"
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "Rooms, open audio and everyone who is online right now. Registered attendees can walk straight in."
@@ -2510,22 +2509,6 @@ msgstr "Set your status from the pill in the top bar — green for working, \"Do
 msgid "Board created"
 msgstr "Board created"
 
-#: src/i18n/harvested.ts
-msgid "Dashboard, Personalization.\n"
-"\n"
-"Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.\n"
-"\n"
-"Once set, the \"For You\" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n"
-"\n"
-"Everything else stays browsable — personalization changes the order, not what exists."
-msgstr "Dashboard, Personalization.\n"
-"\n"
-"Pick the topics and categories you care about, the content types you want to see, and whether to boost Climate Action work. You can also opt out of specific items you never want surfaced again.\n"
-"\n"
-"Once set, the \"For You\" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n"
-"\n"
-"Everything else stays browsable — personalization changes the order, not what exists."
-
 #: src/components/legal/ConsentDocument.tsx
 msgid "Jump to the end"
 msgstr "Jump to the end"
@@ -3015,6 +2998,10 @@ msgstr "Leaving KTIP"
 msgid "How do comments, likes and follows work?"
 msgstr "How do comments, likes and follows work?"
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "Published events show up in public listings."
+msgstr "Published events show up in public listings."
+
 #: src/components/layout/Footer.tsx
 msgid "Innovation Platform"
 msgstr "Innovation Platform"
@@ -3267,6 +3254,11 @@ msgstr "{0, plural, one {# event} other {# events}}"
 msgid "Grid view"
 msgstr "Grid view"
 
+#. placeholder {0}: bulk.count
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Type {0} to confirm"
+msgstr "Type {0} to confirm"
+
 #: src/i18n/harvested.ts
 msgid "How do I browse the forums?"
 msgstr "How do I browse the forums?"
@@ -3463,6 +3455,10 @@ msgstr "Please select an image file."
 #: src/components/ErrorBoundary.tsx
 msgid "Error details"
 msgstr "Error details"
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Some could not be deleted"
+msgstr "Some could not be deleted"
 
 #: src/i18n/harvested.ts
 msgid "Your shared rich-text documents"
@@ -4153,6 +4149,7 @@ msgstr "Back to Events"
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/i18n/harvested.ts
 #: src/pages/cv/CvPage.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Public"
 msgstr "Public"
@@ -4541,6 +4538,22 @@ msgid "Event description"
 msgstr "Event description"
 
 #: src/i18n/harvested.ts
+msgid "Go to the Events page and click \"Create Event\".\n"
+"\n"
+"Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.\n"
+"\n"
+"Optional: a description, a short summary, an end date and time, tags, a registration deadline, and a capacity.\n"
+"\n"
+"Choose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later."
+msgstr "Go to the Events page and click \"Create Event\".\n"
+"\n"
+"Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.\n"
+"\n"
+"Optional: a description, a short summary, an end date and time, tags, a registration deadline, and a capacity.\n"
+"\n"
+"Choose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later."
+
+#: src/i18n/harvested.ts
 msgid "These guidelines apply everywhere on the platform, including private messages, collaborative documents and video rooms — private does not mean unregulated."
 msgstr "These guidelines apply everywhere on the platform, including private messages, collaborative documents and video rooms — private does not mean unregulated."
 
@@ -4626,6 +4639,22 @@ msgstr "What is on my dashboard?"
 #: src/i18n/harvested.ts
 msgid "Aggregate platform figures only — counts, percentages, targets and the titles of already-public projects, events and resources. Never a member record, message or document"
 msgstr "Aggregate platform figures only — counts, percentages, targets and the titles of already-public projects, events and resources. Never a member record, message or document"
+
+#: src/i18n/harvested.ts
+msgid "Dashboard, Personalization.\n"
+"\n"
+"Pick the topics and categories you care about, and the content types you want to see. You can also opt out of specific items you never want surfaced again.\n"
+"\n"
+"Once set, the \"For You\" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n"
+"\n"
+"Everything else stays browsable — personalization changes the order, not what exists."
+msgstr "Dashboard, Personalization.\n"
+"\n"
+"Pick the topics and categories you care about, and the content types you want to see. You can also opt out of specific items you never want surfaced again.\n"
+"\n"
+"Once set, the \"For You\" sort option on the Projects, Events, Funding and Resources lists ranks against these choices instead of sorting by date.\n"
+"\n"
+"Everything else stays browsable — personalization changes the order, not what exists."
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Could not remove your authenticator."
@@ -4788,6 +4817,10 @@ msgstr "Reporting to programme funders and regional partners"
 #: src/components/messages/ChatSidebar.tsx
 msgid "Chats"
 msgstr "Chats"
+
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "No projects match this filter."
+msgstr "No projects match this filter."
 
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/collaborate/DocumentEditorPage.tsx
@@ -5611,10 +5644,6 @@ msgstr "Manage resources"
 msgid "None yet"
 msgstr "None yet"
 
-#: src/components/settings/PersonalizationTab.tsx
-msgid "Anything flagged as climate action ranks higher for you."
-msgstr "Anything flagged as climate action ranks higher for you."
-
 #: src/components/security/EmailCodeCard.tsx
 msgid "Code from your email"
 msgstr "Code from your email"
@@ -6001,6 +6030,10 @@ msgstr "Checklist"
 msgid "Publishing is not reversible in the way deleting is. We can stop serving your content; we cannot remove it from a search engine’s index, a web archive or somebody’s screenshot. Think about that before publishing anything commercially sensitive, and use a private project until you are ready."
 msgstr "Publishing is not reversible in the way deleting is. We can stop serving your content; we cannot remove it from a search engine’s index, a web archive or somebody’s screenshot. Think about that before publishing anything commercially sensitive, and use a private project until you are ready."
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {Cancel # event?} other {Cancel # events?}}"
+msgstr "{n, plural, one {Cancel # event?} other {Cancel # events?}}"
+
 #: src/components/events/EventChallengeBrief.tsx
 msgid "Submissions close "
 msgstr "Submissions close "
@@ -6128,22 +6161,6 @@ msgstr "Escalate & suspend"
 msgid "Untitled Whiteboard"
 msgstr "Untitled Whiteboard"
 
-#: src/i18n/harvested.ts
-msgid "Open the project and click \"Edit\" near the top.\n"
-"\n"
-"The owner can always edit. Team members added with the editor scope can edit too — viewers cannot.\n"
-"\n"
-"You can change the title, summary, description, category, phase, details, hashtags, the Climate Action flag and visibility. Click \"Save Changes\" when you are done.\n"
-"\n"
-"OECS administrators can edit any project from the admin console."
-msgstr "Open the project and click \"Edit\" near the top.\n"
-"\n"
-"The owner can always edit. Team members added with the editor scope can edit too — viewers cannot.\n"
-"\n"
-"You can change the title, summary, description, category, phase, details, hashtags, the Climate Action flag and visibility. Click \"Save Changes\" when you are done.\n"
-"\n"
-"OECS administrators can edit any project from the admin console."
-
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Attach screenshot"
 msgstr "Attach screenshot"
@@ -6184,6 +6201,10 @@ msgstr "Pick a skill, or type a name."
 #: src/pages/events/CreateEventPage.tsx
 msgid "This is a virtual event"
 msgstr "This is a virtual event"
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "Drafts are hidden from public listings. Existing registrations are kept."
+msgstr "Drafts are hidden from public listings. Existing registrations are kept."
 
 #: src/components/events/EventCard.tsx
 #: src/pages/events/EventDetailPage.tsx
@@ -6325,6 +6346,18 @@ msgstr "Knowledge base sections"
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Application approved"
 msgstr "Application approved"
+
+#: src/i18n/harvested.ts
+msgid "The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled and past events. The count above tells you how many matched your filters.\n"
+"\n"
+"Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n"
+"\n"
+"Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile."
+msgstr "The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled and past events. The count above tells you how many matched your filters.\n"
+"\n"
+"Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n"
+"\n"
+"Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile."
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Event created successfully!"
@@ -7537,22 +7570,6 @@ msgstr "Reset to defaults"
 msgid "KTIP submission copy · Reference {0}"
 msgstr "KTIP submission copy · Reference {0}"
 
-#: src/i18n/harvested.ts
-msgid "Go to the Projects page and click \"Create Project\".\n"
-"\n"
-"Required: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n"
-"\n"
-"Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, a Climate Action flag, and whether the project is public or private.\n"
-"\n"
-"Climate Action projects surface in climate filters and get a boost for members who turned on the climate preference."
-msgstr "Go to the Projects page and click \"Create Project\".\n"
-"\n"
-"Required: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n"
-"\n"
-"Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, a Climate Action flag, and whether the project is public or private.\n"
-"\n"
-"Climate Action projects surface in climate filters and get a boost for members who turned on the climate preference."
-
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Lines"
 msgstr "Lines"
@@ -7650,10 +7667,6 @@ msgstr "Failed to reset password. Please try again."
 msgid "Two-step verification is on."
 msgstr "Two-step verification is on."
 
-#: src/pages/grants/GrantFormPage.tsx
-msgid "Climate action funding"
-msgstr "Climate action funding"
-
 #: src/components/gantt/gantt.tsx
 msgid "Timeline"
 msgstr "Timeline"
@@ -7671,6 +7684,7 @@ msgid "Recording your acceptance of these policies"
 msgstr "Recording your acceptance of these policies"
 
 #: src/components/legal/AgreementGate.tsx
+#: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "Go back"
 msgstr "Go back"
 
@@ -7682,6 +7696,22 @@ msgstr "We acknowledge your notice by email and give it a reference."
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "Entering {0}…"
 msgstr "Entering {0}…"
+
+#: src/i18n/harvested.ts
+msgid "Open the project and click \"Edit\" near the top.\n"
+"\n"
+"The owner can always edit. Team members added with the editor scope can edit too — viewers cannot.\n"
+"\n"
+"You can change the title, summary, description, category, phase, details, hashtags and visibility. Click \"Save Changes\" when you are done.\n"
+"\n"
+"OECS administrators can edit any project from the admin console."
+msgstr "Open the project and click \"Edit\" near the top.\n"
+"\n"
+"The owner can always edit. Team members added with the editor scope can edit too — viewers cannot.\n"
+"\n"
+"You can change the title, summary, description, category, phase, details, hashtags and visibility. Click \"Save Changes\" when you are done.\n"
+"\n"
+"OECS administrators can edit any project from the admin console."
 
 #: src/components/messages/GroupSettingsModal.tsx
 #: src/components/projects/ManageTeamModal.tsx
@@ -7740,6 +7770,8 @@ msgstr "50 min"
 #: src/components/documents/DocumentCard.tsx
 #: src/components/shared/DeleteEntityControl.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/pages/dashboard/tabs/EventsTab.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Delete"
 msgstr "Delete"
@@ -8181,6 +8213,10 @@ msgstr "Created"
 msgid "Share a guide, template or case study with the KTIP community. A reviewer publishes it."
 msgstr "Share a guide, template or case study with the KTIP community. A reviewer publishes it."
 
+#: src/i18n/harvested.ts
+msgid "Challenge events"
+msgstr "Challenge events"
+
 #: src/components/shared/OrgEngagementFields.tsx
 msgid "Closed to our team"
 msgstr "Closed to our team"
@@ -8196,6 +8232,10 @@ msgstr "Delete this {noun}?"
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Accepted {approvedDate}"
 msgstr "Accepted {approvedDate}"
+
+#: src/hooks/useProjects.ts
+msgid "Not changed. You may no longer own it."
+msgstr "Not changed. You may no longer own it."
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Your Chamber did not accept this submission. Contact them directly to resolve it before resubmitting."
@@ -8781,6 +8821,7 @@ msgstr "No achievements match these filters."
 
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/components/settings/SecuritySettingsTab.tsx
+#: src/components/shared/BulkActionBar.tsx
 #: src/lib/calendar-note-item.ts
 msgid "Done"
 msgstr "Done"
@@ -8945,10 +8986,6 @@ msgstr "e.g. Solar microgrid for Dennery Village"
 msgid "Tick “looking for a team” to appear on the discovery panel."
 msgstr "Tick “looking for a team” to appear on the discovery panel."
 
-#: src/components/settings/PreferencesTab.tsx
-msgid "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can."
-msgstr "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can."
-
 #: src/hooks/useDocuments.ts
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Untitled Document"
@@ -8981,10 +9018,6 @@ msgstr "Share a guide, template or case study and a reviewer will publish it."
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Could not remove that person"
 msgstr "Could not remove that person"
-
-#: src/i18n/harvested.ts
-msgid "Filter listings down to climate and environment work"
-msgstr "Filter listings down to climate and environment work"
 
 #: src/components/help/HelpRoleQuickStart.tsx
 msgid "Choose a role"
@@ -9395,9 +9428,14 @@ msgstr "Enter a room name or generate one. Anyone with the same room name joins 
 msgid "Featuring is the main lever"
 msgstr "Featuring is the main lever"
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Publish"
 msgstr "Publish"
+
+#: src/components/shared/BulkActionBar.tsx
+msgid "{count, plural, one {# selected} other {# selected}}"
+msgstr "{count, plural, one {# selected} other {# selected}}"
 
 #: src/lib/venue-room-sections.ts
 msgid "Entries"
@@ -9528,14 +9566,6 @@ msgstr "Held by"
 #: src/i18n/harvested.ts
 msgid "Open Messages from the chat button at the bottom-right."
 msgstr "Open Messages from the chat button at the bottom-right."
-
-#: src/i18n/harvested.ts
-msgid "A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.\n"
-"\n"
-"Under it, the climate-action flag puts the event in the region’s resilience agenda, where it can be filtered for on the events page."
-msgstr "A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards.\n"
-"\n"
-"Under it, the climate-action flag puts the event in the region’s resilience agenda, where it can be filtered for on the events page."
 
 #: src/pages/events/EventVenuePage.tsx
 msgid "Event not found"
@@ -9729,6 +9759,10 @@ msgstr "add the facilitator"
 #: src/i18n/harvested.ts
 msgid "File a copyright or trade mark notice — no account needed"
 msgstr "File a copyright or trade mark notice — no account needed"
+
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "Show projects"
+msgstr "Show projects"
 
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Loading grant..."
@@ -10105,6 +10139,10 @@ msgstr "Event registrations and forum posts"
 msgid "Colour tints the page and its cards with your accent."
 msgstr "Colour tints the page and its cards with your accent."
 
+#: src/components/shared/BulkActionBar.tsx
+msgid "Clear selection"
+msgstr "Clear selection"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Documents (Optional)"
 msgstr "Documents (Optional)"
@@ -10239,6 +10277,7 @@ msgstr "Join the conversation"
 msgid "Improve"
 msgstr "Improve"
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Past"
 msgstr "Past"
@@ -10573,6 +10612,10 @@ msgstr "Correcting your date of birth requires contacting support, by design."
 msgid "{0} in portfolio"
 msgstr "{0} in portfolio"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Controls the number shown on your profile and in the member directory. You can always see your own count. If your level and points are private on your profile, only your connections see it, even if you pick Everyone."
+msgstr "Controls the number shown on your profile and in the member directory. You can always see your own count. If your level and points are private on your profile, only your connections see it, even if you pick Everyone."
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Loading applications..."
@@ -10664,6 +10707,10 @@ msgstr "Use \"Mark all read\" at the top of the panel to clear the unread count.
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Back to Grant"
 msgstr "Back to Grant"
+
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "{n, plural, one {# project is now public} other {# projects are now public}}"
+msgstr "{n, plural, one {# project is now public} other {# projects are now public}}"
 
 #: src/i18n/harvested.ts
 msgid "What it does"
@@ -11777,6 +11824,10 @@ msgstr "No sale, no onward licensing, no unrelated advertising, no AI training o
 msgid "Counts as the designated educator that makes a student channel monitored."
 msgstr "Counts as the designated educator that makes a student channel monitored."
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "Cancelled events stay listed with a Cancelled badge. People who registered are not notified."
+msgstr "Cancelled events stay listed with a Cancelled badge. People who registered are not notified."
+
 #: src/i18n/harvested.ts
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/ProjectsPage.tsx
@@ -12320,10 +12371,6 @@ msgstr "Enter new email address"
 msgid "Original"
 msgstr "Original"
 
-#: src/i18n/harvested.ts
-msgid "Hashtags and climate action"
-msgstr "Hashtags and climate action"
-
 #: src/pages/forums/ForumsPage.tsx
 msgid "Open the first one and give the community somewhere to talk."
 msgstr "Open the first one and give the community somewhere to talk."
@@ -12364,6 +12411,10 @@ msgstr "Virtual Campus sign-in is not switched on yet. Please use another method
 #: src/i18n/harvested.ts
 msgid "The IP, Content & Licensing Policy and the Copyright & Takedown Policy apply the first time you publish a project, event, forum post, CV or organisation profile."
 msgstr "The IP, Content & Licensing Policy and the Copyright & Takedown Policy apply the first time you publish a project, event, forum post, CV or organisation profile."
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "No events match this filter."
+msgstr "No events match this filter."
 
 #: src/i18n/harvested.ts
 msgid "What we do and do not check"
@@ -12627,6 +12678,7 @@ msgid "Fill in the title, what the fund is for, the amount range and the deadlin
 msgstr "Fill in the title, what the fund is for, the amount range and the deadline."
 
 #: src/components/profile/ProfileCanvas.tsx
+#: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "Upcoming"
 msgstr "Upcoming"
 
@@ -12697,6 +12749,10 @@ msgstr "Published events can carry a lot more than a description.\n"
 "Articles — recaps, resource round-ups, summaries and blog posts published after the event, so the material outlives the day.\n"
 "\n"
 "Organisers manage all four from the event workspace in the admin console."
+
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "Make private"
+msgstr "Make private"
 
 #: src/components/profile/editorial/ShareProfileButton.tsx
 msgid "Could not copy the link. Copy it from the address bar instead."
@@ -12954,7 +13010,6 @@ msgstr "Stop keeping this large"
 msgid "{0} accepted your invitation to \"{1}\""
 msgstr "{0} accepted your invitation to \"{1}\""
 
-#: src/components/ui/ClimateBadge.tsx
 #: src/i18n/harvested.ts
 msgid "Climate Action"
 msgstr "Climate Action"
@@ -12962,6 +13017,10 @@ msgstr "Climate Action"
 #: src/components/layout/Navbar.tsx
 msgid "Failed to sign out"
 msgstr "Failed to sign out"
+
+#: src/hooks/useEvents.ts
+msgid "Not changed. You may no longer be able to edit it."
+msgstr "Not changed. You may no longer be able to edit it."
 
 #: src/components/safeguarding/StudentVerificationCard.tsx
 msgid "Your institution's designated staff can see the year you were born, taken from the date of birth on your account. They see the year only — never the full date. To correct it, contact support."
@@ -13082,6 +13141,10 @@ msgstr "To make judging and announcement possible, you grant %entity% and the or
 #: src/components/legal/ConsentDocument.tsx
 msgid "Agreement text"
 msgstr "Agreement text"
+
+#: src/i18n/harvested.ts
+msgid "A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards."
+msgstr "A challenge event gives attendees a goal and a submission deadline. Ticking it here only turns the feature on — the objectives, constraints, deliverables and judging criteria are added from the event’s Challenge tab afterwards."
 
 #: src/pages/auth/VerifyEmailAliasPage.tsx
 #: src/pages/auth/VerifyEmailProofPage.tsx
@@ -13217,10 +13280,6 @@ msgstr "Every KTIP account declares a date of birth when it is created — on th
 "You must be at least 13 to hold a KTIP account.\n"
 "\n"
 "It cannot be edited afterwards. If you entered it wrong, contact support and a member of staff will correct it."
-
-#: src/i18n/harvested.ts
-msgid "Challenges and climate action"
-msgstr "Challenges and climate action"
 
 #: src/components/calendar/CalendarShell.tsx
 #: src/components/gantt/gantt-nav.tsx
@@ -13635,6 +13694,10 @@ msgstr "What you may and may not post or do on KTIP, how we enforce it, and how 
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Started"
 msgstr "Started"
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "Show events"
+msgstr "Show events"
 
 #: src/i18n/harvested.ts
 msgid "Keeping and sharing it"
@@ -14744,6 +14807,22 @@ msgid "All Subjects"
 msgstr "All Subjects"
 
 #: src/i18n/harvested.ts
+msgid "Filters sit above the events list.\n"
+"\n"
+"Search matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day.\n"
+"\n"
+"Topic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.\n"
+"\n"
+"\"Clear all filters\" resets everything at once."
+msgstr "Filters sit above the events list.\n"
+"\n"
+"Search matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day.\n"
+"\n"
+"Topic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.\n"
+"\n"
+"\"Clear all filters\" resets everything at once."
+
+#: src/i18n/harvested.ts
 msgid "Other people’s marks in your content"
 msgstr "Other people’s marks in your content"
 
@@ -15256,6 +15335,10 @@ msgstr "Join discussions, share knowledge, and engage with the community."
 msgid "Search help articles..."
 msgstr "Search help articles..."
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {Cancel event} other {Cancel events}}"
+msgstr "{n, plural, one {Cancel event} other {Cancel events}}"
+
 #: src/components/collaboration/editor/ImageModal.tsx
 msgid "From URL"
 msgstr "From URL"
@@ -15613,6 +15696,10 @@ msgstr "The text of the document you uploaded"
 #: src/pages/auth/SignupPage.tsx
 msgid "Passwords do not match"
 msgstr "Passwords do not match"
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Type the event title to confirm"
+msgstr "Type the event title to confirm"
 
 #: src/i18n/harvested.ts
 msgid "Inviting people"
@@ -16084,6 +16171,7 @@ msgid "What participants must achieve"
 msgstr "What participants must achieve"
 
 #: src/i18n/harvested.ts
+#: src/pages/dashboard/tabs/EventsTab.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Drafts"
 msgstr "Drafts"
@@ -16301,6 +16389,10 @@ msgstr "Bugs and suggestions submitted by users"
 #: src/i18n/harvested.ts
 msgid "Write, submit and track an application — and run a call of your own."
 msgstr "Write, submit and track an application — and run a call of your own."
+
+#: src/hooks/useEvents.ts
+msgid "Not deleted. It may already be gone, or you no longer organize it."
+msgstr "Not deleted. It may already be gone, or you no longer organize it."
 
 #: src/lib/permissions.ts
 msgid "Read permission-change and moderation audit trails."
@@ -16889,6 +16981,8 @@ msgstr "This browser cannot capture the screen — describe what you saw instead
 
 #: src/components/personalization/ForYouRail.tsx
 #: src/pages/achievements/AchievementsPage.tsx
+#: src/pages/dashboard/tabs/EventsTab.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
 msgid "All"
 msgstr "All"
 
@@ -17418,6 +17512,10 @@ msgstr "Counted on outcomes, not on filings. %strikeLimit% standing notices ends
 msgid "<0>{0}</0> is verified — you can sign in with it."
 msgstr "<0>{0}</0> is verified — you can sign in with it."
 
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Deleting removes, for each one:"
+msgstr "Deleting removes, for each one:"
+
 #: src/i18n/harvested.ts
 msgid "Business Verification"
 msgstr "Business Verification"
@@ -17858,6 +17956,7 @@ msgstr "My Applications is where every grant you have applied for lives — draf
 msgid "Click any cell on the edge of the floor. Each floor has its own entrance."
 msgstr "Click any cell on the edge of the floor. Each floor has its own entrance."
 
+#: src/components/shared/BulkDeleteDialog.tsx
 #: src/components/shared/DeleteEntityDialog.tsx
 msgid "This cannot be undone."
 msgstr "This cannot be undone."
@@ -18034,6 +18133,11 @@ msgstr "Everything that follows, oldest first, so the thread reads top to bottom
 msgid "Backdrops"
 msgstr "Backdrops"
 
+#. placeholder {0}: bulk.count
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{0, plural, one {Delete # project} other {Delete # projects}}"
+msgstr "{0, plural, one {Delete # project} other {Delete # projects}}"
+
 #: src/i18n/harvested.ts
 msgid "If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and \"you\" in this document means both you and that organisation."
 msgstr "If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and \"you\" in this document means both you and that organisation."
@@ -18192,6 +18296,13 @@ msgstr "Upload"
 #: src/i18n/harvested.ts
 msgid "Where is the copy of what I submitted?"
 msgstr "Where is the copy of what I submitted?"
+
+#. placeholder {0}: result.done.length
+#. placeholder {1}: ids.length
+#: src/pages/dashboard/tabs/EventsTab.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "{0} of {1} changed. The rest may no longer be yours to edit."
+msgstr "{0} of {1} changed. The rest may no longer be yours to edit."
 
 #: src/components/profile/PortraitStudio.tsx
 msgid "Use the plain photo"
@@ -18837,6 +18948,11 @@ msgstr "My Snippets"
 msgid "Document uploaded"
 msgstr "Document uploaded"
 
+#. placeholder {0}: bulk.count
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{0, plural, one {Delete # event} other {Delete # events}}"
+msgstr "{0, plural, one {Delete # event} other {Delete # events}}"
+
 #: src/components/directory/MemberPanel.tsx
 msgid "{firstName} hasn't filled out a profile yet."
 msgstr "{firstName} hasn't filled out a profile yet."
@@ -19001,6 +19117,10 @@ msgstr "Previous year"
 #: src/components/settings/PreferencesTab.tsx
 msgid "Project Updates"
 msgstr "Project Updates"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections."
+msgstr "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections."
 
 #: src/i18n/harvested.ts
 msgid "It does not guarantee that a listed grant exists, that funds will be disbursed, or that the funder will behave well. %entityShort% is not a party to your agreement with a funder unless it is expressly the named funder. Read the Grant & Funding Disclaimer before you send anyone money or documents."
@@ -19167,6 +19287,12 @@ msgstr "To show your work to other members, you grant %entity% a non-exclusive, 
 msgid "Message {displayName}"
 msgstr "Message {displayName}"
 
+#. placeholder {0}: progress.finished
+#. placeholder {1}: progress.total
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Deleting {0} of {1}…"
+msgstr "Deleting {0} of {1}…"
+
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "{myDisplayName} (you)"
 msgstr "{myDisplayName} (you)"
@@ -19236,6 +19362,10 @@ msgstr "A lot of KTIP is public. Without signing in you can browse Discover, Pro
 #: src/hooks/useMfa.ts
 msgid "Could not switch off email codes."
 msgstr "Could not switch off email codes."
+
+#: src/components/shared/BulkActionBar.tsx
+msgid "Bulk actions"
+msgstr "Bulk actions"
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "I have read and agree to the documents above."
@@ -19402,6 +19532,10 @@ msgid "Questions and comments, in the open, attached to the project rather than 
 msgstr "Questions and comments, in the open, attached to the project rather than to a forum thread that drifts away from it.\n"
 "\n"
 "The team is notified when you post, so this is a reasonable place to ask before sending a collaboration request."
+
+#: src/components/shared/BulkActionBar.tsx
+msgid "Select all {total}"
+msgstr "Select all {total}"
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "Event Not Found"
@@ -19574,22 +19708,6 @@ msgstr "When one is announced it will show up here, along with a way into the li
 msgid "Event Details"
 msgstr "Event Details"
 
-#: src/i18n/harvested.ts
-msgid "Filters sit above the events list.\n"
-"\n"
-"Search matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day. The Climate Action toggle shows only events flagged as climate work.\n"
-"\n"
-"Topic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.\n"
-"\n"
-"\"Clear all filters\" resets everything at once."
-msgstr "Filters sit above the events list.\n"
-"\n"
-"Search matches titles and descriptions. The type filter narrows to Hackathon, Workshop, Meetup, Conference or Demo Day. The Climate Action toggle shows only events flagged as climate work.\n"
-"\n"
-"Topic chips below the filters come from the tags organisers actually used, so a chip never returns an empty list.\n"
-"\n"
-"\"Clear all filters\" resets everything at once."
-
 #. placeholder {0}: board.name
 #: src/pages/forums/CreatePostPage.tsx
 msgid "Starting a discussion in <0>{0}</0>"
@@ -19645,6 +19763,10 @@ msgstr "Back to Forums"
 #: src/components/documents/DocumentCard.tsx
 msgid "Open document"
 msgstr "Open document"
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{doneCount} of {total} deleted. These are still here:"
+msgstr "{doneCount} of {total} deleted. These are still here:"
 
 #: src/pages/cv/PublicCvPage.tsx
 msgid "The member may have unpublished it, or the link may be wrong."
@@ -19737,10 +19859,6 @@ msgstr "Connected"
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Tune what you see"
 msgstr "Tune what you see"
-
-#: src/components/settings/PersonalizationTab.tsx
-msgid "Boost climate action work across every list"
-msgstr "Boost climate action work across every list"
 
 #: src/i18n/harvested.ts
 msgid "Integrations are partner tools and services connected to or recommended for KTIP work, on the second tab of the Resources page. The /integrations address goes straight there.\n"
@@ -20061,6 +20179,10 @@ msgstr "Verify your authenticator app before generating recovery codes."
 #: src/i18n/harvested.ts
 msgid "Find and connect with members across the region."
 msgstr "Find and connect with members across the region."
+
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "Make public"
+msgstr "Make public"
 
 #: src/i18n/harvested.ts
 msgid "Open your event and click \"Edit\". The organiser can edit their own event; OECS administrators can edit any event from the admin console, which also gives them the registration list, speakers, schedule, updates, articles, the challenge brief, form and page builders and the venue.\n"
@@ -20624,6 +20746,11 @@ msgstr "Open the Funding menu in the navigation bar and choose \"Funding Opportu
 "\n"
 "Open a listing for the full detail, including how to apply and who to contact. Deadlines you are tracking also appear on your Dashboard calendar, so they are harder to miss."
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "Select"
+msgstr "Select"
+
 #: src/components/messages/GroupSettingsModal.tsx
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Search failed"
@@ -20828,6 +20955,10 @@ msgstr "Shared with no declared licence means: readable, not reusable."
 #: src/pages/directory/DirectoryPage.tsx
 msgid "{0, plural, one {Found # business} other {Found # businesses}}"
 msgstr "{0, plural, one {Found # business} other {Found # businesses}}"
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {# event cancelled} other {# events cancelled}}"
+msgstr "{n, plural, one {# event cancelled} other {# events cancelled}}"
 
 #: src/components/grants/RequiredDocumentsEditor.tsx
 msgid "No documents asked for. Applicants will see an upload step with nothing on the checklist."
@@ -21120,10 +21251,6 @@ msgstr "Output may be wrong. It is not advice. You remain responsible."
 msgid "Light mode"
 msgstr "Light mode"
 
-#: src/i18n/harvested.ts
-msgid "The same filter exists on the Events, Grants and Resources pages."
-msgstr "The same filter exists on the Events, Grants and Resources pages."
-
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "A look inside"
 msgstr "A look inside"
@@ -21382,10 +21509,6 @@ msgstr "Heading 3"
 msgid "Your shareable member page"
 msgstr "Your shareable member page"
 
-#: src/components/settings/PersonalizationTab.tsx
-msgid "Climate focus"
-msgstr "Climate focus"
-
 #: src/components/venue/VenueAwayBanner.tsx
 msgid "This tab sat in the background for {minutes} minutes, so your dot went grey automatically. <0>Click here</0> to go back to Working — or pick a status in the bar above. “Do not disturb” never gets downgraded."
 msgstr "This tab sat in the background for {minutes} minutes, so your dot went grey automatically. <0>Click here</0> to go back to Working — or pick a status in the bar above. “Do not disturb” never gets downgraded."
@@ -21398,6 +21521,10 @@ msgstr "All rights reserved"
 #: src/i18n/harvested.ts
 msgid "Hackathon"
 msgstr "Hackathon"
+
+#: src/i18n/harvested.ts
+msgid "Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for."
+msgstr "Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for."
 
 #: src/lib/validation.ts
 msgid "A recovery code is 10 characters"
@@ -21652,14 +21779,6 @@ msgstr "What is the floating button in the corner?"
 #: src/pages/NotFoundPage.tsx
 msgid "Go Back"
 msgstr "Go Back"
-
-#: src/i18n/harvested.ts
-msgid "Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.\n"
-"\n"
-"The climate-action checkbox underneath is not decorative — it puts the project in the region’s resilience agenda, where funders and the OECS Commission look first."
-msgstr "Up to ten hashtags. They drive the topic chips on the listing page and feed the Top Picks ranking, so pick words someone would actually search for.\n"
-"\n"
-"The climate-action checkbox underneath is not decorative — it puts the project in the region’s resilience agenda, where funders and the OECS Commission look first."
 
 #: src/components/grants/application/RichTextField.tsx
 msgid "Insert Table (3x3)"
@@ -22614,18 +22733,6 @@ msgid "board"
 msgstr "board"
 
 #: src/i18n/harvested.ts
-msgid "The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.\n"
-"\n"
-"Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n"
-"\n"
-"Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile."
-msgstr "The same events as cards — type, title, summary, date and location at a glance, plus badges for cancelled, past and climate-action events. The count above tells you how many matched your filters.\n"
-"\n"
-"Upcoming events are grouped by type — fold a section shut to get it out of the way. Everything that has already happened sits in a Past events section at the bottom, folded up until you want it.\n"
-"\n"
-"Grid view also unlocks a sort order back in the filter bar: what is coming up next, newest, or For You once you have set your interests in your profile."
-
-#: src/i18n/harvested.ts
 msgid "Yes, and it is optional. Students submit their own funding applications — a sponsor is an endorsement, not a permission.\n"
 "\n"
 "On the review step of the wizard you can nominate one: a member holding the Faculty, Educational Partner or Research Institution role. They receive the nomination and can accept or decline. If they accept, their name appears on the application.\n"
@@ -22652,6 +22759,10 @@ msgstr "Start"
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "We will review the notice and tell you the outcome. If we act on it, the member who posted the content is told what was removed, why, and who filed the notice — they cannot answer a complaint they cannot see."
 msgstr "We will review the notice and tell you the outcome. If we act on it, the member who posted the content is told what was removed, why, and who filed the notice — they cannot answer a complaint they cannot see."
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Type the project title to confirm"
+msgstr "Type the project title to confirm"
 
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/ui/ImageUpload.tsx
@@ -23267,6 +23378,11 @@ msgstr "Create Event"
 msgid "A member can withdraw at any time in their settings. Withdrawal removes them from subsequent responses immediately, and the partner must delete previously received records for that member within 30 days."
 msgstr "A member can withdraw at any time in their settings. Withdrawal removes them from subsequent responses immediately, and the partner must delete previously received records for that member within 30 days."
 
+#. placeholder {0}: bulk.count
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{0, plural, one {Delete # project?} other {Delete # projects?}}"
+msgstr "{0, plural, one {Delete # project?} other {Delete # projects?}}"
+
 #: src/i18n/harvested.ts
 msgid "Remembers which non-essential notices you have closed."
 msgstr "Remembers which non-essential notices you have closed."
@@ -23402,22 +23518,6 @@ msgstr "Failed to save your profile. Please try again."
 msgid "Nothing scheduled yet — check back soon."
 msgstr "Nothing scheduled yet — check back soon."
 
-#: src/i18n/harvested.ts
-msgid "Go to the Events page and click \"Create Event\".\n"
-"\n"
-"Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.\n"
-"\n"
-"Optional: a description, a short summary, an end date and time, tags, a Climate Action flag, a registration deadline, and a capacity.\n"
-"\n"
-"Choose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later."
-msgstr "Go to the Events page and click \"Create Event\".\n"
-"\n"
-"Required: a title of at least 3 characters, a type (Hackathon, Workshop, Meetup, Conference or Demo Day) and a start date and time.\n"
-"\n"
-"Optional: a description, a short summary, an end date and time, tags, a Climate Action flag, a registration deadline, and a capacity.\n"
-"\n"
-"Choose whether the event is virtual or in person; in-person events take a location. Administrators can additionally save an event as a draft and publish it later."
-
 #: src/pages/projects/CreateProjectPage.tsx
 msgid "Project created successfully!"
 msgstr "Project created successfully!"
@@ -23468,6 +23568,10 @@ msgstr "All team memberships and pending invitations"
 #: src/i18n/harvested.ts
 msgid "Personalize my platform"
 msgstr "Personalize my platform"
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {# event moved to draft} other {# events moved to draft}}"
+msgstr "{n, plural, one {# event moved to draft} other {# events moved to draft}}"
 
 #: src/lib/resume-designs.ts
 msgid "Dense two-column at 9pt with a narrow facts column. Fits a long history onto one page."
@@ -23706,6 +23810,10 @@ msgstr "Open the confirmation email KTIP sent when you signed up, then try again
 msgid "New Funding Call"
 msgstr "New Funding Call"
 
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
+msgid "{n, plural, one {# project is now private} other {# projects are now private}}"
+msgstr "{n, plural, one {# project is now private} other {# projects are now private}}"
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Save your changes first — filling from your profile reloads the document."
 msgstr "Save your changes first — filling from your profile reloads the document."
@@ -23813,6 +23921,10 @@ msgstr "Anything not listed above. Matches content tagged with the same word."
 #: src/components/profile/BannerStudio.tsx
 msgid "Banner updated!"
 msgstr "Banner updated!"
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "Mark cancelled"
+msgstr "Mark cancelled"
 
 #: src/lib/authenticator-apps.ts
 msgid "Already on every iPhone, iPad and Mac. Nothing to install."
@@ -24331,6 +24443,10 @@ msgstr "Climate Innovation"
 msgid "Edit, feature, archive and delete any project, not only owned ones."
 msgstr "Edit, feature, archive and delete any project, not only owned ones."
 
+#: src/i18n/harvested.ts
+msgid "Hashtags"
+msgstr "Hashtags"
+
 #. placeholder {0}: standing.streak
 #: src/components/profile/ProfileCanvas.tsx
 msgid "{0}-day streak."
@@ -24478,10 +24594,6 @@ msgstr "weight {0}"
 #: src/components/verification/InstitutionalEmailCard.tsx
 msgid "If your organisation or school should be recognised, ask them to register on KTIP. Otherwise, upload an identity document below."
 msgstr "If your organisation or school should be recognised, ask them to register on KTIP. Otherwise, upload an identity document below."
-
-#: src/i18n/harvested.ts
-msgid "Find climate-action projects"
-msgstr "Find climate-action projects"
 
 #: src/i18n/harvested.ts
 msgid "The thread list"
@@ -24811,6 +24923,10 @@ msgstr "Relevant to your role"
 msgid "Chamber SME review"
 msgstr "Chamber SME review"
 
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Untitled"
+msgstr "Untitled"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Leave both empty if people can enter on their own."
 msgstr "Leave both empty if people can enter on their own."
@@ -24973,10 +25089,6 @@ msgstr "{0} event RSVPs"
 msgid "Sections, prefill, and what saving marks as yours."
 msgstr "Sections, prefill, and what saving marks as yours."
 
-#: src/pages/resources/SubmitResourcePage.tsx
-msgid "This resource supports climate action"
-msgstr "This resource supports climate action"
-
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Doors & stairs"
 msgstr "Doors & stairs"
@@ -25075,24 +25187,6 @@ msgstr "Open Security on your Dashboard and choose the authenticator app method.
 "Codes change every 30 seconds and are generated on the device itself, so this method works on a plane or with no signal.\n"
 "\n"
 "If a code is refused even though it looks right, check that your phone's clock is set automatically. A drifting clock is the usual cause."
-
-#: src/i18n/harvested.ts
-msgid "Everything here narrows the events below, and the filters stack — combine as many as you need.\n"
-"\n"
-"• Event type — workshops, conferences, webinars, training, meetings\n"
-"• Climate Action — only events tied to the region’s resilience agenda\n"
-"• Search — click the magnifier to open it, then type a title, topic or venue\n"
-"• Topic chips appear under the bar when the current events carry tags\n"
-"\n"
-"Once anything is active, a Clear all filters link appears underneath to reset in one click."
-msgstr "Everything here narrows the events below, and the filters stack — combine as many as you need.\n"
-"\n"
-"• Event type — workshops, conferences, webinars, training, meetings\n"
-"• Climate Action — only events tied to the region’s resilience agenda\n"
-"• Search — click the magnifier to open it, then type a title, topic or venue\n"
-"• Topic chips appear under the bar when the current events carry tags\n"
-"\n"
-"Once anything is active, a Clear all filters link appears underneath to reset in one click."
 
 #: src/i18n/harvested.ts
 msgid "The month grid shows what is happening on each day; multi-day events span across the dates they cover. Use the arrows to change month, or Today to jump back.\n"
@@ -25235,6 +25329,10 @@ msgstr "Filter by phase"
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "application"
 msgstr "application"
+
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "{n, plural, one {Move # event back to draft?} other {Move # events back to draft?}}"
+msgstr "{n, plural, one {Move # event back to draft?} other {Move # events back to draft?}}"
 
 #: src/pages/projects/CreateProjectPage.tsx
 #: src/pages/projects/EditProjectPage.tsx
@@ -25393,10 +25491,6 @@ msgstr "Present the data as endorsed, verified or warranted by %entityShort% bey
 #: src/i18n/harvested.ts
 msgid "The Grant Application Confidentiality & IP Terms apply the first time you submit an application to a funder."
 msgstr "The Grant Application Confidentiality & IP Terms apply the first time you submit an application to a funder."
-
-#: src/components/settings/PersonalizationTab.tsx
-msgid "Prioritise climate action content"
-msgstr "Prioritise climate action content"
 
 #: src/i18n/harvested.ts
 msgid "Everyone on the platform"
@@ -25784,11 +25878,6 @@ msgstr "Do not manipulate points, badges, leaderboards, reactions or view counts
 msgid "Agree the licensing of a jointly authored work with your collaborators before publishing it, not after."
 msgstr "Agree the licensing of a jointly authored work with your collaborators before publishing it, not after."
 
-#: src/pages/projects/CreateProjectPage.tsx
-#: src/pages/projects/EditProjectPage.tsx
-msgid "This project addresses climate change solutions"
-msgstr "This project addresses climate change solutions"
-
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Untitled Application"
 msgstr "Untitled Application"
@@ -25871,6 +25960,10 @@ msgstr "Budget & Team"
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Listen only — no mics"
 msgstr "Listen only — no mics"
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{n, plural, one {# event deleted} other {# events deleted}}"
+msgstr "{n, plural, one {# event deleted} other {# events deleted}}"
 
 #: src/i18n/harvested.ts
 msgid "This fills empty fields from your KTIP record — profile, public projects, badges, institution. It never overwrites something you have written.\n"
@@ -26014,6 +26107,18 @@ msgstr "Review verification requests"
 #: src/components/ui/ToolPanelShell.tsx
 msgid "Collaborate Hub"
 msgstr "Collaborate Hub"
+
+#: src/i18n/harvested.ts
+msgid "Go to the Projects page and click \"Create Project\".\n"
+"\n"
+"Required: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n"
+"\n"
+"Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, and whether the project is public or private."
+msgstr "Go to the Projects page and click \"Create Project\".\n"
+"\n"
+"Required: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n"
+"\n"
+"Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, and whether the project is public or private."
 
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "You can pin up to {MAX_SHOWCASE} trophies"
@@ -26395,6 +26500,18 @@ msgstr "Open the event and use the button in the details panel.\n"
 "\n"
 "Submitting a registration form also files a permanent copy under Submissions on your Dashboard."
 
+#: src/i18n/harvested.ts
+msgid "Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n"
+"\n"
+"The second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n"
+"\n"
+"A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting."
+msgstr "Total Users is every account, including unverified and suspended ones. Events Hosted counts published and completed events, not drafts or cancellations. Active Grants excludes anything past its deadline or switched off; a grant with no deadline stays active. Grant Applications counts every application in any state. Discussions counts threads, not replies.\n"
+"\n"
+"The second line is the part that moves: how many joined, were filed or were posted in the last 30 days, how many events are still to come, how many grants close within the month.\n"
+"\n"
+"A figure shown as an em dash could not be read — that is a failed query, not a zero, and it is worth reporting."
+
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Tagline"
 msgstr "Tagline"
@@ -26520,6 +26637,22 @@ msgstr "Feedback"
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Open — everyone can speak"
 msgstr "Open — everyone can speak"
+
+#: src/i18n/harvested.ts
+msgid "Everything here narrows the events below, and the filters stack — combine as many as you need.\n"
+"\n"
+"• Event type — workshops, conferences, webinars, training, meetings\n"
+"• Search — click the magnifier to open it, then type a title, topic or venue\n"
+"• Topic chips appear under the bar when the current events carry tags\n"
+"\n"
+"Once anything is active, a Clear all filters link appears underneath to reset in one click."
+msgstr "Everything here narrows the events below, and the filters stack — combine as many as you need.\n"
+"\n"
+"• Event type — workshops, conferences, webinars, training, meetings\n"
+"• Search — click the magnifier to open it, then type a title, topic or venue\n"
+"• Topic chips appear under the bar when the current events carry tags\n"
+"\n"
+"Once anything is active, a Clear all filters link appears underneath to reset in one click."
 
 #: src/i18n/harvested.ts
 msgid "Tracking what you sent"
@@ -26744,6 +26877,11 @@ msgstr "Organisations recorded on the platform, with their verification state an
 "\n"
 "Those are two separate switches, and the second is the one with reach outside KTIP."
 
+#. placeholder {0}: bulk.count
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "{0, plural, one {Delete # event?} other {Delete # events?}}"
+msgstr "{0, plural, one {Delete # event?} other {Delete # events?}}"
+
 #: src/components/profile/BannerStudio.tsx
 #: src/pages/directory/DirectoryPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
@@ -26911,6 +27049,7 @@ msgstr "Help and feedback forms"
 #: src/components/achievements/TrophyCard.tsx
 #: src/components/documents/DocumentContentModal.tsx
 #: src/components/moderation/ContentWarningModal.tsx
+#: src/components/shared/BulkDeleteDialog.tsx
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "Close"
 msgstr "Close"
@@ -26975,6 +27114,10 @@ msgstr "What other people can see"
 #: src/i18n/harvested.ts
 msgid "Tune what it matches on in Dashboard › Personalization."
 msgstr "Tune what it matches on in Dashboard › Personalization."
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Keep them"
+msgstr "Keep them"
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Cameras"
@@ -27064,10 +27207,6 @@ msgstr "Approve"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Share"
 msgstr "Share"
-
-#: src/i18n/harvested.ts
-msgid "Turn on the \"Climate Action\" filter above the project grid."
-msgstr "Turn on the \"Climate Action\" filter above the project grid."
 
 #: src/components/legal/ReconsentBanner.tsx
 msgid "Thank you. Recorded."
@@ -27318,6 +27457,10 @@ msgstr "Meetup"
 msgid "Failed to upload the document"
 msgstr "Failed to upload the document"
 
+#: src/pages/dashboard/tabs/EventsTab.tsx
+msgid "Move to draft"
+msgstr "Move to draft"
+
 #: src/i18n/harvested.ts
 msgid "Signing in from the OECS Virtual Campus"
 msgstr "Signing in from the OECS Virtual Campus"
@@ -27416,6 +27559,10 @@ msgstr "Remaining"
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "{0, plural, one {Applied # field} other {Applied # fields}}"
 msgstr "{0, plural, one {Applied # field} other {Applied # fields}}"
+
+#: src/components/shared/BulkDeleteDialog.tsx
+msgid "Checking what each one holds…"
+msgstr "Checking what each one holds…"
 
 #: src/i18n/harvested.ts
 msgid "Optional email notifications and digests"
@@ -27609,7 +27756,6 @@ msgstr "Likes received"
 msgid "What we know about you"
 msgstr "What we know about you"
 
-#: src/lib/extracted-fields.ts
 #: src/lib/personalization.ts
 msgid "Climate action"
 msgstr "Climate action"
@@ -27661,8 +27807,10 @@ msgstr "Or continue with"
 
 #: src/components/documents/DocumentCard.tsx
 #: src/components/documents/DocumentUploadModal.tsx
+#: src/components/projects/ProjectCard.tsx
 #: src/i18n/harvested.ts
 #: src/pages/cv/CvPage.tsx
+#: src/pages/dashboard/tabs/ProjectsTab.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Private"
 msgstr "Private"
