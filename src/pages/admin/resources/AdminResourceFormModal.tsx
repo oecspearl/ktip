@@ -16,7 +16,8 @@ import {
   RESOURCE_CATEGORY_LABELS,
   CONTENT_TAG_SUGGESTIONS,
 } from '../../../lib/constants'
-import type { Resource } from '../../../types'
+import type { AiUse, Resource } from '../../../types'
+import { AiDeclarationField } from '../../../components/legal/AiDeclaration'
 
 interface AdminResourceFormModalProps {
   open: boolean
@@ -41,6 +42,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
   const [downloadUrl, setDownloadUrl] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [isPublished, setIsPublished] = useState(false)
+  const [aiUse, setAiUse] = useState<AiUse>('none')
 
   const isEditing = !!resource
 
@@ -55,6 +57,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
     setDownloadUrl('')
     setThumbnailUrl('')
     setIsPublished(false)
+    setAiUse('none')
   }
 
   useEffect(() => {
@@ -69,6 +72,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
       setDownloadUrl(resource.download_url || '')
       setThumbnailUrl(resource.thumbnail_url || '')
       setIsPublished(resource.is_published)
+      setAiUse(resource.ai_use ?? 'none')
     } else if (open) {
       resetForm()
     }
@@ -90,6 +94,7 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
       download_url: downloadUrl.trim() || null,
       thumbnail_url: thumbnailUrl.trim() || null,
       is_published: isPublished,
+      ai_use: aiUse,
     }
 
     try {
@@ -207,6 +212,8 @@ export function AdminResourceFormModal({ open, onClose, resource, onSaved }: Adm
             fullWidth
           />
         </div>
+
+        <AiDeclarationField value={aiUse} onChange={setAiUse} />
 
         {/* Toggles */}
         <div className="flex flex-wrap gap-6 py-2">

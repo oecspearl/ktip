@@ -290,9 +290,16 @@ const router = createBrowserRouter([
           { path: '/events/:id', lazy: lazyPage(() => import('./pages/events/EventDetailPage')) },
           { path: '/grants', lazy: lazyPage(() => import('./pages/grants/GrantsPage')) },
           { path: '/grants/:id', lazy: lazyPage(() => import('./pages/grants/GrantDetailPage')) },
-          { path: '/forums', lazy: lazyPage(() => import('./pages/forums/ForumsPage')) },
-          { path: '/forums/:slug', lazy: lazyPage(() => import('./pages/forums/BoardPage')) },
-          { path: '/forums/:slug/:postId', lazy: lazyPage(() => import('./pages/forums/PostDetailPage')) },
+          // Pathless layout (171): the community notice once per member, and
+          // the guidelines line under every public forum page.
+          {
+            lazy: lazyPage(() => import('./components/legal/SectionNotice')),
+            children: [
+              { path: '/forums', lazy: lazyPage(() => import('./pages/forums/ForumsPage')) },
+              { path: '/forums/:slug', lazy: lazyPage(() => import('./pages/forums/BoardPage')) },
+              { path: '/forums/:slug/:postId', lazy: lazyPage(() => import('./pages/forums/PostDetailPage')) },
+            ],
+          },
           // The list stays open — being findable is the point of a directory,
           // and it is how a signed-out visitor decides the platform is worth
           // joining. The member behind a card is not: /user/:id and the drawer

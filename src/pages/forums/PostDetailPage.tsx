@@ -19,6 +19,7 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { forumReplySchema } from '../../lib/validation'
 import { truncate } from '../../lib/utils'
 import { PageHero } from '../../components/layout/PageHero'
+import { ReportInfringementLink } from '../../components/legal/ReportInfringementLink'
 import { ReportButton } from '../../components/moderation/ReportButton'
 import {
   Trash2,
@@ -332,6 +333,8 @@ export default function PostDetailPage() {
                 </div>
               </div>
             </div>
+
+            <ReportInfringementLink targetType="forum_post" targetId={post.id} />
           </div>
         </div>
       </div>

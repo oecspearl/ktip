@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate } from 'react-router'
 import {
   BadgeCheck,
@@ -17,6 +17,9 @@ import { Textarea } from '../../components/ui/Textarea'
 import { Modal } from '../../components/ui/Modal'
 import { ImageUpload } from '../../components/ui/ImageUpload'
 import { PageHero } from '../../components/layout/PageHero'
+import { AgreementGateModal } from '../../components/legal/AgreementGate'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { legalPath } from '../../lib/legal/manifest'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useToast } from '../../contexts/ToastContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -112,6 +115,21 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
   const [itemOpen, setItemOpen] = useState(false)
   const [draft, setDraft] = useState<PortfolioItemInput>(EMPTY_ITEM)
 
+  // Terms: the publishing terms apply the first time you publish an
+  // organisation profile. Saving the profile or a portfolio item is that
+  // moment; the save waits for the agreement and then goes ahead.
+  const publishGate = useAgreementGate('publishing')
+  const [publishGateOpen, setPublishGateOpen] = useState(false)
+  const afterAgreement = useRef<(() => Promise<void>) | null>(null)
+  const withPublishAgreement = (action: () => Promise<void>) => {
+    if (publishGate.needsAgreement) {
+      afterAgreement.current = action
+      setPublishGateOpen(true)
+      return
+    }
+    return action()
+  }
+
   // Fill the form once per organisation. Keyed on the id, not the object:
   // saving a portfolio item refetches the employer, and the new object reset
   // every field here, discarding profile edits not yet saved.
@@ -126,7 +144,9 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
 
   if (!auth.loading && !auth.user) return <Navigate to="/login" replace />
 
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = () => withPublishAgreement(saveProfile)
+
+  const saveProfile = async () => {
     if (!employer) return
     try {
       await updateProfile({
@@ -161,7 +181,9 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
     setItemOpen(true)
   }
 
-  const handleSaveItem = async () => {
+  const handleSaveItem = () => withPublishAgreement(saveItem)
+
+  const saveItem = async () => {
     if (!employer || !draft.title.trim()) return
     try {
       await savePortfolioItem({ employerId: employer.id, id: editing?.id, item: draft })
@@ -284,6 +306,18 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
                     preset={IMAGE_PRESETS.AVATAR}
                     placeholder={t`Upload your logo`}
                   />
+                  <p className="mt-2 text-caption leading-relaxed text-ktip-sand-500">
+                    <Trans>
+                      Upload a logo only if your organisation owns it or is authorised to use it.
+                      Uploading one confirms that.
+                    </Trans>{' '}
+                    <Link
+                      to={legalPath('trademark') + '#your-marks'}
+                      className="font-semibold text-ktip-ocean-700 hover:underline underline-offset-2"
+                    >
+                      <Trans>Trademark & Brand Use</Trans>
+                    </Link>
+                  </p>
                 </div>
 
                 <Input
@@ -472,6 +506,23 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
           </div>
         </div>
       </Modal>
+
+      <AgreementGateModal
+        gate={publishGate}
+        bundle="publishing"
+        open={publishGateOpen}
+        context="org_publish"
+        onClose={() => {
+          setPublishGateOpen(false)
+          afterAgreement.current = null
+        }}
+        onAccepted={async () => {
+          setPublishGateOpen(false)
+          const action = afterAgreement.current
+          afterAgreement.current = null
+          await action?.()
+        }}
+      />
     </>
   )
 }

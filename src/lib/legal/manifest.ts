@@ -27,7 +27,7 @@ export const LEGAL_MANIFEST: ReadonlyArray<{
   { key: 'competition-ip', bundle: 'competition', version: 1 },
   { key: 'application-confidentiality', bundle: 'application', version: 1 },
   { key: 'cookies', bundle: 'informational', version: 1 },
-  { key: 'ai-disclosure', bundle: 'informational', version: 1 },
+  { key: 'ai-disclosure', bundle: 'informational', version: 2 },
   { key: 'funding-disclaimer', bundle: 'informational', version: 1 },
   { key: 'trademark', bundle: 'informational', version: 1 },
   { key: 'code-contribution', bundle: 'informational', version: 1 },

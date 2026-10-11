@@ -39,6 +39,8 @@ const CONTEXT_LABEL: Record<string, MessageDescriptor> = {
   event_solution: msg`when submitting a competition entry`,
   grant_application: msg`when submitting a grant application`,
   grant_post: msg`when posting a funding call`,
+  resource_submit: msg`when submitting a resource`,
+  event_entry: msg`when entering a competition`,
 }
 
 const LOCALE_LABEL: Record<string, MessageDescriptor> = {

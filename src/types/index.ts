@@ -1153,10 +1153,15 @@ export interface Resource extends Ranked {
   file_name: string | null
   file_size: number | null
   file_mime: string | null
+  /** AI declaration made at upload (migration 170). 'none' on rows written before it. */
+  ai_use: AiUse
   created_at: string
   updated_at: string
   author?: Profile
 }
+
+/** What the author declared about AI help (migration 170). */
+export type AiUse = 'none' | 'assisted' | 'drafted'
 
 export interface Document {
   id: string

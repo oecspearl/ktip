@@ -8,8 +8,8 @@ import type { LegalDocument } from './types'
  */
 export const AI_DISCLOSURE: LegalDocument = {
   key: 'ai-disclosure',
-  version: 1,
-  effectiveDate: '2026-09-01',
+  version: 2,
+  effectiveDate: '2026-10-11',
   bundle: 'informational',
   title: 'AI Use Disclosure',
   summary:
@@ -184,10 +184,27 @@ export const AI_DISCLOSURE: LegalDocument = {
         },
         {
           kind: 'para',
-          text: 'You do not have to disclose that you used AI to help write something. You do have to stand behind what you publish.',
+          text: 'Where AI tools materially helped create something you publish on KTIP, you must say so when you publish it.',
+        },
+        {
+          kind: 'list',
+          ordered: true,
+          items: [
+            'Tick the AI declaration at upload.',
+            'Review the result yourself before it goes up. You are its author, and you stand behind it.',
+            'If AI wrote a full first draft, say that. Fixing your spelling or grammar does not count as material help.',
+            'Check that what you fed the tool was yours to use. AI output can reproduce other people’s protected work.',
+          ],
+        },
+        {
+          kind: 'para',
+          text: 'What you declare is shown with the item as a label, so readers know how it was made.',
         },
       ],
-      actions: [{ label: 'Acceptable Use & Community Guidelines', href: '/legal/acceptable-use' }],
+      actions: [
+        { label: 'Acceptable Use & Community Guidelines', href: '/legal/acceptable-use' },
+        { label: 'Copyright & Takedown Policy', href: '/legal/copyright' },
+      ],
     },
     {
       id: 'turning-it-off',

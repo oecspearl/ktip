@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { SectionNoticeBanner, SectionNoticeCard } from '../legal/SectionNotice'
 import { ArrowLeft, ChevronDown, MessageSquare, MousePointerClick, Pin, X } from 'lucide-react'
 import { ChatSidebar } from './ChatSidebar'
 import { ChatWindow } from './ChatWindow'
@@ -267,7 +268,10 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
       </div>
 
       {/* Body: sidebar 20% / chat 80% */}
-      <div className="flex flex-1 min-h-0">
+      <div className="relative flex flex-1 min-h-0">
+        {/* First open only (171): the rules that apply in private, over the
+            body so the header's close and pin stay usable. */}
+        <SectionNoticeCard section="messaging" />
         <div
           className={cn(
             'w-full lg:w-[20%] lg:min-w-[210px] lg:border-r border-ktip-sand-200 lg:block',
@@ -323,6 +327,8 @@ function MessagingPanelContent({ state }: { state: DisclosureState }) {
           )}
         </div>
       </div>
+
+      <SectionNoticeBanner section="messaging" compact className="shrink-0" />
 
       <NewConversationModal
         open={showNewModal}

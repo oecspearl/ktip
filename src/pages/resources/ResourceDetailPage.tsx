@@ -1,5 +1,7 @@
 import { useParams, Link } from 'react-router'
 import { Disclaimer } from '../../components/legal/Disclaimer'
+import { AiUseBadge } from '../../components/legal/AiDeclaration'
+import { ReportInfringementLink } from '../../components/legal/ReportInfringementLink'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useResource } from '../../hooks/useResources'
@@ -97,6 +99,7 @@ export default function ResourceDetailPage() {
               {RESOURCE_CATEGORY_LABELS[resource.category!] || resource.category}
             </Badge>
           )}
+          <AiUseBadge value={resource.ai_use} />
         </div>
       </PageHero>
 
@@ -270,6 +273,7 @@ export default function ResourceDetailPage() {
           </div>
 
           <Disclaimer variant="advice" placement="footer" />
+          <ReportInfringementLink targetType="resource" targetId={resource.id} className="lg:col-span-3" />
         </div>
       </div>
     </>

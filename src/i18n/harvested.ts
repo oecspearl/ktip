@@ -323,6 +323,7 @@ For missing email specifically, check your spam folder and, if you added a secon
 
 In-app notifications appear on the bell in the navigation bar rather than as browser pop-ups.`,
   msg`Check for a declared licence before you use anything. No licence means no permission.`,
+  msg`Check that what you fed the tool was yours to use. AI output can reproduce other people’s protected work.`,
   msg`Check the legal entity’s name and registration, not just its brand.`,
   msg`Check the legal name and registration number against the national corporate registry — that check is the entire value of the badge you are about to grant.
 
@@ -1181,6 +1182,7 @@ This section is empty between events, which is normal rather than broken.`,
   msg`Identification of the content that was removed and where it was.`,
   msg`Identity assertions, linked catalogue activity`,
   msg`Identity requests`,
+  msg`If AI wrote a full first draft, say that. Fixing your spelling or grammar does not count as material help.`,
   msg`If a child is in immediate danger, contact your local emergency services first. Then tell us, so we can act on the account.`,
   msg`If a funder is awarded the right to use your work, that comes from the funding agreement you sign with them afterwards — a separate document, negotiated separately, that you are free not to sign. It never comes from the act of applying.`,
   msg`If a recovery banner appears at the top of the page, click "Retry" — that reloads your profile without a full sign-in.
@@ -2103,6 +2105,7 @@ Unlike the free-text feedback queue, these are comparable across members — whi
   msg`Review and rosters`,
   msg`Review feedback`,
   msg`Review grievances`,
+  msg`Review the result yourself before it goes up. You are its author, and you stand behind it.`,
   msg`Review, then submit`,
   msg`Reviewers`,
   msg`Reviewers appointed for that call`,
@@ -2700,6 +2703,7 @@ Business profile is a real tab in the same rail. Admin is the only entry that le
 You can point attendees at KTIP's own Video Conference tool, add a link to your preferred platform in the description, or — for larger events — set up a full virtual venue with rooms.
 
 Virtual events are the practical way to bring in participants from across all the member states at once.`,
+  msg`Tick the AI declaration at upload.`,
   msg`Tick “virtual” and the location field disappears; leave it off and you are asked for a physical address.
 
 Start date and time are required, end date and time optional — a multi-day event spans those dates across the calendar grid. Capacity is optional too; leave it empty for unlimited.`,
@@ -2943,6 +2947,7 @@ To report one post or message rather than a person, use the report control on th
   msg`What we receive from other services`,
   msg`What we store`,
   msg`What we store on your device`,
+  msg`What you declare is shown with the item as a label, so readers know how it was made.`,
   msg`What you give us directly`,
   msg`What you have agreed to`,
   msg`What you have made, and what was shared with you.`,
@@ -2967,6 +2972,7 @@ Any member of the group can post, and everyone sees the full history from when t
 Group settings let you rename the group, add and remove members, and leave it. Groups are useful for project teams and hackathon teams that need something more durable than a venue room.`,
   msg`When you upload a logo, brand or mark to a profile, an organisation page, an event or a project, you confirm that you own it or are authorised to use it in that way, and you accept responsibility for that use.`,
   msg`Where`,
+  msg`Where AI tools materially helped create something you publish on KTIP, you must say so when you publish it.`,
   msg`Where KTIP uses AI, and what it does with your text`,
   msg`Where an entry is submitted by a team, the member who submits it confirms that every contributor has agreed to it being entered on these terms. Ownership between team members is a matter between you — KTIP records who submitted and who was credited, and takes no view on the shares.`,
   msg`Where are my messages?`,
@@ -3080,7 +3086,6 @@ Every report you have made is listed under My Reports, with its status as the te
   msg`You can withdraw an entry before judging closes, and we will remove it from the competition. After results are announced, the record that you entered and what you were awarded remains — a competition result that can be edited afterwards is not a result.`,
   msg`You confirm that your entry is your own work, or that you are licensed to use everything in it. Open-source libraries, stock images, datasets, fonts and pre-trained models all come with terms — follow them and credit them in your entry.`,
   msg`You control whether you appear in the partner feed, in your settings. You can ask which partners currently hold your data at %privacyEmail%, and you can require deletion.`,
-  msg`You do not have to disclose that you used AI to help write something. You do have to stand behind what you publish.`,
   msg`You give us`,
   msg`You keep ownership of every project, event listing, forum post, comment, document, whiteboard, code snippet, CV and organisation profile you publish on KTIP. Nothing on this platform transfers copyright, assigns a patent, or hands over a trade mark or design right.`,
   msg`You keep ownership of everything in the application: the proposal, the budget, the technical description, the attachments, and any work already done that you describe in it.`,

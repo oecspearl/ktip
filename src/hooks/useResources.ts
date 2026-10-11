@@ -11,7 +11,7 @@ import {
   removeResourceUploads,
   signResourceFileUrl,
 } from '../lib/resource-uploads'
-import type { Resource } from '../types'
+import type { AiUse, Resource } from '../types'
 import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // 135 added reviewed_by → profiles alongside author_id → profiles, so a bare
@@ -279,6 +279,7 @@ export function useSubmitResource() {
       download_url?: string | null
       thumbnail_url?: string | null
       file?: File | null
+      ai_use?: AiUse
     }) => {
       const { authorId, file, ...fields } = input
 

@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
+import { ReportInfringementLink } from '../../components/legal/ReportInfringementLink'
 import { Button } from '../../components/ui/Button'
 import { useEvent, useRSVP, useDeleteEvent } from '../../hooks/useEvents'
 // Lives in the admin hook file but the RLS policy is organizer-scoped, so an
 // event's own host can flip it out of draft from here.
 import { useEventStatusUpdate } from '../../hooks/useAdminEvents'
 import { useSubmitRegistration } from '../../hooks/useEventRegistrationForm'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal } from '../../components/legal/AgreementGate'
 import { usePublishedEventUpdates } from '../../hooks/useEventUpdates'
 import { usePublishedEventArticles } from '../../hooks/useEventArticles'
 import { usePublicEventSections } from '../../hooks/useEventPageSections'
@@ -118,6 +121,11 @@ export default function EventDetailPage() {
   const [checking, setChecking] = useState(true)
   const [showRegForm, setShowRegForm] = useState(false)
   const [attendanceType, setAttendanceType] = useState<AttendanceType>('participant')
+  // Competition IP applies the first time a member enters a hackathon, not
+  // only when they submit a solution. Registering to compete in an event with
+  // a challenge is entering; registering to watch is not.
+  const entryGate = useAgreementGate('competition')
+  const [entryGateOpen, setEntryGateOpen] = useState(false)
 
   const hasCustomFields = (event?.registration_fields || []).length > 0
 
@@ -190,6 +198,19 @@ export default function EventDetailPage() {
   const registrantName = auth.profile?.display_name || t`Someone`
 
   const handleRSVP = async () => {
+    if (!auth.user || !event) return
+    const entering =
+      (!myRsvp || myRsvp.status === 'declined') &&
+      !!event.has_challenge &&
+      attendanceType === 'participant'
+    if (entering && entryGate.needsAgreement) {
+      setEntryGateOpen(true)
+      return
+    }
+    await proceedRSVP()
+  }
+
+  const proceedRSVP = async () => {
     if (!auth.user || !event) return
     rsvpTouchedRef.current = true
 
@@ -919,9 +940,23 @@ export default function EventDetailPage() {
                 <Trans>Copy Link</Trans>
               </Button>
             </div>
+
+            <ReportInfringementLink targetType="event" targetId={event.id} />
           </div>
         </div>
       </div>
+
+      <AgreementGateModal
+        gate={entryGate}
+        bundle="competition"
+        open={entryGateOpen}
+        context="event_entry"
+        onClose={() => setEntryGateOpen(false)}
+        onAccepted={async () => {
+          setEntryGateOpen(false)
+          await proceedRSVP()
+        }}
+      />
     </>
   )
 }

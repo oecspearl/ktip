@@ -39,6 +39,8 @@ export type ConsentContext =
   | 'grant_post'
   /** Contributing to the resource library (130). */
   | 'resource_submit'
+  /** Registering to compete in an event with a challenge (171). */
+  | 'event_entry'
 
 export const consentsQueryKey = (userId: string | undefined) => ['consents', userId] as const
 

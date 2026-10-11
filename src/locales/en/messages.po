@@ -505,6 +505,10 @@ msgstr "Reviewers appointed for that call"
 msgid "{n, plural, one {# event published} other {# events published}}"
 msgstr "{n, plural, one {# event published} other {# events published}}"
 
+#: src/components/legal/AiDeclaration.tsx
+msgid "The author declared that AI tools materially helped create this."
+msgstr "The author declared that AI tools materially helped create this."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your account is active again. Nothing was deleted."
 msgstr "Your account is active again. Nothing was deleted."
@@ -966,6 +970,10 @@ msgstr "Every submitted application and every completed registration form files 
 "\n"
 "That matters when a form changes after you filled it in, or when a funder asks what you actually claimed. The receipt is your evidence."
 
+#: src/components/legal/SectionNotice.tsx
+msgid "Messages follow the Community Guidelines and the Safeguarding rules."
+msgstr "Messages follow the Community Guidelines and the Safeguarding rules."
+
 #: src/i18n/harvested.ts
 msgid "Embedded content — a video, a map, a slide deck someone linked — can set storage under its own provider’s terms once you play or open it."
 msgstr "Embedded content — a video, a map, a slide deck someone linked — can set storage under its own provider’s terms once you play or open it."
@@ -1384,6 +1392,10 @@ msgstr "Acceptable Use & Community Guidelines"
 #: src/lib/grant-application-template.ts
 msgid "Summarize your application and the problem it addresses."
 msgstr "Summarize your application and the problem it addresses."
+
+#: src/pages/sme/OrgProfileEditPage.tsx
+msgid "Upload a logo only if your organisation owns it or is authorised to use it. Uploading one confirms that."
+msgstr "Upload a logo only if your organisation owns it or is authorised to use it. Uploading one confirms that."
 
 #. placeholder {0}: saved.length
 #: src/components/notes/StickyNoteFabPanel.tsx
@@ -3277,6 +3289,10 @@ msgstr "{0}, Col {1}"
 msgid "All Focus Areas"
 msgstr "All Focus Areas"
 
+#: src/components/legal/AiDeclaration.tsx
+msgid "AI tools materially helped create this"
+msgstr "AI tools materially helped create this"
+
 #: src/i18n/harvested.ts
 msgid "Constraint"
 msgstr "Constraint"
@@ -3507,6 +3523,10 @@ msgstr "Remove image"
 #: src/i18n/harvested.ts
 msgid "OECS Administrators"
 msgstr "OECS Administrators"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "I understand"
+msgstr "I understand"
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "See how they are earned"
@@ -3819,6 +3839,10 @@ msgstr "New Event"
 msgid "If you believe an automated process has affected you unfairly, write to %privacyEmail%. You are entitled to a human review of it."
 msgstr "If you believe an automated process has affected you unfairly, write to %privacyEmail%. You are entitled to a human review of it."
 
+#: src/i18n/harvested.ts
+msgid "Where AI tools materially helped create something you publish on KTIP, you must say so when you publish it."
+msgstr "Where AI tools materially helped create something you publish on KTIP, you must say so when you publish it."
+
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Individuals"
 msgstr "Individuals"
@@ -4054,6 +4078,10 @@ msgstr "View profile"
 msgid "Interests do real work"
 msgstr "Interests do real work"
 
+#: src/components/legal/SectionNotice.tsx
+msgid "Argue with the idea, not the person. Harassment and hate speech are taken down."
+msgstr "Argue with the idea, not the person. Harassment and hate speech are taken down."
+
 #: src/components/settings/FeedbackTab.tsx
 msgid "Everything you have sent us, and what came of it."
 msgstr "Everything you have sent us, and what came of it."
@@ -4094,6 +4122,10 @@ msgstr "Content written by members is machine-translated and marked as such."
 #: src/lib/grant-application-template.ts
 msgid "Outline key phases, activities, and timeline milestones."
 msgstr "Outline key phases, activities, and timeline milestones."
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Before you join the discussion"
+msgstr "Before you join the discussion"
 
 #: src/i18n/harvested.ts
 msgid "If your content was removed"
@@ -5165,6 +5197,10 @@ msgstr "Startup funding, research grants, innovation awards, development funds a
 "\n"
 "A grant is “closed” once its deadline passes or the funder marks it inactive. Closed grants stay on the page, folded away at the bottom, so you can see what tends to come round again."
 
+#: src/components/legal/SectionNotice.tsx
+msgid "Don't post anyone's private details."
+msgstr "Don't post anyone's private details."
+
 #: src/lib/countries.ts
 msgid "All other countries"
 msgstr "All other countries"
@@ -5208,6 +5244,10 @@ msgstr "Filter by type of funding"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "a snippet"
 msgstr "a snippet"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Private messages follow the rules too"
+msgstr "Private messages follow the rules too"
 
 #: src/i18n/harvested.ts
 msgid "Business"
@@ -5971,6 +6011,10 @@ msgstr "Switch between light and dark mode"
 msgid "This needs another look before it goes up."
 msgstr "This needs another look before it goes up."
 
+#: src/components/legal/SectionNotice.tsx
+msgid "If a message breaks the rules, report it from the message."
+msgstr "If a message breaks the rules, report it from the message."
+
 #: src/components/dashboard/stats/RankProgress.tsx
 #: src/components/profile/editorial/ProfileHero.tsx
 #: src/pages/achievements/AchievementsPage.tsx
@@ -6713,6 +6757,10 @@ msgstr "Your dashboard"
 #: src/i18n/harvested.ts
 msgid "Describe the problem and submit — the OECS team reviews every grievance."
 msgstr "Describe the problem and submit — the OECS team reviews every grievance."
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Keep conversations on KTIP. Don't ask a member under 18 to move to another app."
+msgstr "Keep conversations on KTIP. Don't ask a member under 18 to move to another app."
 
 #: src/i18n/harvested.ts
 msgid "If something goes wrong"
@@ -7759,6 +7807,10 @@ msgstr "Nobody else. Not other funders, not partners, not the public, and not ot
 msgid "You can now open \"{0}\"."
 msgstr "You can now open \"{0}\"."
 
+#: src/i18n/harvested.ts
+msgid "If AI wrote a full first draft, say that. Fixing your spelling or grammar does not count as material help."
+msgstr "If AI wrote a full first draft, say that. Fixing your spelling or grammar does not count as material help."
+
 #: src/components/venue/room/AvStage.tsx
 msgid "You are listening. A host can give you the floor."
 msgstr "You are listening. A host can give you the floor."
@@ -8130,6 +8182,7 @@ msgid "Grid"
 msgstr "Grid"
 
 #: src/i18n/harvested.ts
+#: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Trademark & Brand Use"
 msgstr "Trademark & Brand Use"
 
@@ -8379,6 +8432,10 @@ msgstr "Open search"
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Document Editor"
 msgstr "Document Editor"
+
+#: src/components/legal/AiDeclaration.tsx
+msgid "The author declared that AI wrote the full first draft."
+msgstr "The author declared that AI wrote the full first draft."
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Turn it off"
@@ -9360,6 +9417,10 @@ msgstr "Quarantine, restore or remove content and issue warnings."
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Development"
 msgstr "Development"
+
+#: src/i18n/harvested.ts
+msgid "What you declare is shown with the item as a label, so readers know how it was made."
+msgstr "What you declare is shown with the item as a label, so readers know how it was made."
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Your profile is private until a Chamber of Commerce verifies the business."
@@ -11879,10 +11940,6 @@ msgstr "Pinned windows go see-through and let clicks pass through"
 msgid "Education Grants"
 msgstr "Education Grants"
 
-#: src/i18n/harvested.ts
-msgid "You do not have to disclose that you used AI to help write something. You do have to stand behind what you publish."
-msgstr "You do not have to disclose that you used AI to help write something. You do have to stand behind what you publish."
-
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Resources could not be loaded"
 msgstr "Resources could not be loaded"
@@ -12702,6 +12759,7 @@ msgstr "Additional context"
 msgid "Click \"New Conversation\"."
 msgstr "Click \"New Conversation\"."
 
+#: src/components/legal/AiDeclaration.tsx
 #: src/i18n/harvested.ts
 msgid "AI Use Disclosure"
 msgstr "AI Use Disclosure"
@@ -13798,6 +13856,10 @@ msgstr "Aim for 200-400 words. This is often the first section reviewers read."
 msgid "Adapt for display"
 msgstr "Adapt for display"
 
+#: src/components/legal/AiDeclaration.tsx
+msgid "AI-drafted"
+msgstr "AI-drafted"
+
 #: src/i18n/harvested.ts
 msgid "Minors"
 msgstr "Minors"
@@ -14608,6 +14670,10 @@ msgstr "Project Archives"
 msgid "Next: {0}"
 msgstr "Next: {0}"
 
+#: src/components/legal/SectionNotice.tsx
+msgid "Community Guidelines"
+msgstr "Community Guidelines"
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Format"
@@ -14912,6 +14978,10 @@ msgstr "{0} is required for a {1}"
 #: src/i18n/harvested.ts
 msgid "The line that matters most: describing what you did is fine, implying who backs you is not. \"Winner, KTIP Climate Challenge 2026\" is fine. \"An OECS-accredited programme\" is not, unless you actually are one."
 msgstr "The line that matters most: describing what you did is fine, implying who backs you is not. \"Winner, KTIP Climate Challenge 2026\" is fine. \"An OECS-accredited programme\" is not, unless you actually are one."
+
+#: src/components/legal/SectionNotice.tsx
+msgid "The rules you agreed to at sign-up apply to every post and reply here."
+msgstr "The rules you agreed to at sign-up apply to every post and reply here."
 
 #: src/pages/sme/ChamberOnboardingPage.tsx
 msgid "Legal name"
@@ -15713,6 +15783,10 @@ msgstr "We use one analytics identifier to see which pages and features help peo
 msgid "No businesses found"
 msgstr "No businesses found"
 
+#: src/i18n/harvested.ts
+msgid "Review the result yourself before it goes up. You are its author, and you stand behind it."
+msgstr "Review the result yourself before it goes up. You are its author, and you stand behind it."
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Nothing to copy — your profile has nothing these blanks can use."
 msgstr "Nothing to copy — your profile has nothing these blanks can use."
@@ -15753,6 +15827,10 @@ msgstr "What are the different user roles?"
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Back to Project"
 msgstr "Back to Project"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "No harassment, threats or unsolicited promotion."
+msgstr "No harassment, threats or unsolicited promotion."
 
 #: src/i18n/harvested.ts
 msgid "Your work in this tool"
@@ -16728,6 +16806,10 @@ msgstr "Popular right now"
 #: src/components/shared/ReceiptDocument.tsx
 msgid "Report Details"
 msgstr "Report Details"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Posts here follow the Community Guidelines and the Safeguarding rules. If something breaks them, report it from the post."
+msgstr "Posts here follow the Community Guidelines and the Safeguarding rules. If something breaks them, report it from the post."
 
 #: src/i18n/harvested.ts
 msgid "We log partner access and may ask a partner to demonstrate compliance, including how records are stored and deleted. Access can be suspended immediately where we reasonably believe these terms have been breached or member data is at risk, and we will explain why."
@@ -18297,6 +18379,10 @@ msgstr "Upload"
 msgid "Where is the copy of what I submitted?"
 msgstr "Where is the copy of what I submitted?"
 
+#: src/components/settings/LegalSettingsTab.tsx
+msgid "when submitting a resource"
+msgstr "when submitting a resource"
+
 #. placeholder {0}: result.done.length
 #. placeholder {1}: ids.length
 #: src/pages/dashboard/tabs/EventsTab.tsx
@@ -18442,6 +18528,10 @@ msgstr "Recruiter"
 #: src/pages/forums/CreatePostPage.tsx
 msgid "Start a Discussion"
 msgstr "Start a Discussion"
+
+#: src/i18n/harvested.ts
+msgid "Tick the AI declaration at upload."
+msgstr "Tick the AI declaration at upload."
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Registration closes"
@@ -18718,6 +18808,10 @@ msgstr "Document access declined"
 #: src/i18n/harvested.ts
 msgid "Do not paste another person’s confidential information into an AI feature. What you submit is processed by the providers listed in the Privacy Policy."
 msgstr "Do not paste another person’s confidential information into an AI feature. What you submit is processed by the providers listed in the Privacy Policy."
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Safeguarding"
+msgstr "Safeguarding"
 
 #: src/i18n/harvested.ts
 msgid "Your visual brainstorming boards"
@@ -19923,6 +20017,10 @@ msgstr "Pass it to a third party outside the judging process."
 #: src/components/directory/MemberPanel.tsx
 msgid "Some of your profile is for connections only. You always see all of it here."
 msgstr "Some of your profile is for connections only. You always see all of it here."
+
+#: src/components/settings/LegalSettingsTab.tsx
+msgid "when entering a competition"
+msgstr "when entering a competition"
 
 #: src/components/ErrorBoundary.tsx
 msgid "Try Again"
@@ -22119,6 +22217,10 @@ msgstr "Failed to submit the solution"
 msgid "Soliciting"
 msgstr "Soliciting"
 
+#: src/components/legal/AiDeclaration.tsx
+msgid "AI-assisted"
+msgstr "AI-assisted"
+
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "People with access"
 msgstr "People with access"
@@ -22308,6 +22410,10 @@ msgstr "Like things you have been reading"
 #: src/components/profile/ProfileCanvas.tsx
 msgid "your links"
 msgstr "your links"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Only post work you own or have permission to use."
+msgstr "Only post work you own or have permission to use."
 
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Review your application before submitting. You can go back to edit any section."
@@ -23116,6 +23222,10 @@ msgstr "Public by default"
 msgid "What does the business do?"
 msgstr "What does the business do?"
 
+#: src/components/legal/AiDeclaration.tsx
+msgid "AI declaration"
+msgstr "AI declaration"
+
 #: src/components/settings/PreferencesTab.tsx
 msgid "Get notified when someone sends you a message"
 msgstr "Get notified when someone sends you a message"
@@ -23711,6 +23821,10 @@ msgstr "We are hiring"
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "Can edit — click for view only"
 msgstr "Can edit — click for view only"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "Never ask a member to pay a fee for a grant, a placement or an opportunity."
+msgstr "Never ask a member to pay a fee for a grant, a placement or an opportunity."
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Refocus"
@@ -24773,6 +24887,10 @@ msgstr "We also disclose data where the law requires it, to protect the rights a
 msgid "Black & white"
 msgstr "Black & white"
 
+#: src/components/legal/AiDeclaration.tsx
+msgid "AI wrote the full first draft"
+msgstr "AI wrote the full first draft"
+
 #: src/components/layout/MainLayout.tsx
 msgid "Skip to main content"
 msgstr "Skip to main content"
@@ -25020,6 +25138,10 @@ msgstr "You already have a pending request for this document."
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Solution submitted, but these files failed: {failedNames}. Add them again from your entry."
 msgstr "Solution submitted, but these files failed: {failedNames}. Add them again from your entry."
+
+#: src/components/legal/AiDeclaration.tsx
+msgid "Fixing spelling or grammar doesn't count. Your answer is shown as a label on the resource."
+msgstr "Fixing spelling or grammar doesn't count. Your answer is shown as a label on the resource."
 
 #: src/pages/collaborate/WhiteboardPage.tsx
 msgid "Export as SVG"
@@ -25376,6 +25498,10 @@ msgstr "(Optional)"
 #: src/components/messages/ChatWindow.tsx
 msgid "That message could not be sent."
 msgstr "That message could not be sent."
+
+#: src/i18n/harvested.ts
+msgid "Check that what you fed the tool was yours to use. AI output can reproduce other people’s protected work."
+msgstr "Check that what you fed the tool was yours to use. AI output can reproduce other people’s protected work."
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Largest team"
@@ -26021,6 +26147,10 @@ msgstr "Posts grant opportunities, views vetted projects, connects with regional
 #: src/components/messages/MessagingPanel.tsx
 msgid "Pin — stays open, and fades out of the way until you need it"
 msgstr "Pin — stays open, and fades out of the way until you need it"
+
+#: src/components/legal/SectionNotice.tsx
+msgid "The Community Guidelines apply in direct and group messages. Private doesn't mean unregulated."
+msgstr "The Community Guidelines apply in direct and group messages. Private doesn't mean unregulated."
 
 #: src/pages/help/FAQPage.tsx
 msgid "Quick answers about projects, teams, connections, messaging, grants, and your account."

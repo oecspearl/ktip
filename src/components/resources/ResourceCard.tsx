@@ -10,6 +10,7 @@ import type { Resource } from '../../types'
 import { entityPath } from '../../lib/slug'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { AiUseBadge } from '../legal/AiDeclaration'
 
 interface ResourceCardProps {
   resource: Resource
@@ -46,6 +47,7 @@ export function ResourceCard({ resource, dismissible }: ResourceCardProps) {
               : resource.category}
           </Badge>
         )}
+        <AiUseBadge value={resource.ai_use} size="sm" />
       </div>
     </BentoCard>
   )

@@ -10,6 +10,7 @@ import { ModeratedInput, ModeratedTextarea } from '../../components/moderation/M
 import { ContentWarningModal } from '../../components/moderation/ContentWarningModal'
 import { ResourceFileField } from '../../components/resources/ResourceFileField'
 import { AgreementGateModal, AgreementNotice } from '../../components/legal/AgreementGate'
+import { AiDeclarationField } from '../../components/legal/AiDeclaration'
 import { useAgreementGate } from '../../hooks/useAgreementGate'
 import { useContentModeration } from '../../hooks/useContentModeration'
 import { useSubmitResource } from '../../hooks/useResources'
@@ -24,6 +25,7 @@ import {
   RESOURCE_CATEGORY_LABELS,
 } from '../../lib/constants'
 import { resolveCopy } from '../../i18n/copy'
+import type { AiUse } from '../../types'
 
 /**
  * Member-facing resource submission (migration 135).
@@ -55,6 +57,7 @@ export default function SubmitResourcePage() {
   const [tags, setTags] = useState<string[]>([])
   const [downloadUrl, setDownloadUrl] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [aiUse, setAiUse] = useState<AiUse>('none')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -136,9 +139,10 @@ export default function SubmitResourcePage() {
         tags,
         download_url: downloadUrl.trim() || null,
         file,
+        ai_use: aiUse,
       })
 
-      analytics.feature('resource', 'submitted', { resourceType, hasFile: !!file })
+      analytics.feature('resource', 'submitted', { resourceType, hasFile: !!file, aiUse })
       toast.success(t`Thanks — your resource is with the reviewers.`)
       navigate('/resources/my-submissions')
     } catch (error: any) {
@@ -277,6 +281,8 @@ export default function SubmitResourcePage() {
               onChange={setTags}
               suggestions={CONTENT_TAG_SUGGESTIONS}
             />
+
+            <AiDeclarationField value={aiUse} onChange={setAiUse} disabled={loading} />
 
             <div className="space-y-3">
               <AgreementNotice bundle="publishing" />

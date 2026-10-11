@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys } from '../../queries/keys'
 import { Badge } from '../../components/ui/Badge'
+import { ReportInfringementLink } from '../../components/legal/ReportInfringementLink'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { LikeButton } from '../../components/projects/LikeButton'
 import { FollowButton } from '../../components/projects/FollowButton'
@@ -548,6 +549,8 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             </div>
+
+            <ReportInfringementLink targetType="project" targetId={project.id} />
           </div>
         </div>
       </div>

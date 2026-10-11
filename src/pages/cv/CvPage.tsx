@@ -17,6 +17,8 @@ import { ResumeOutline } from '../../components/resume/ResumeOutline'
 import { DesignPicker } from '../../components/resume/DesignPicker'
 import { sheetFor } from '../../components/resume/sheets'
 import { useResume } from '../../hooks/useResume'
+import { useAgreementGate } from '../../hooks/useAgreementGate'
+import { AgreementGateModal } from '../../components/legal/AgreementGate'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -60,6 +62,10 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
   // therefore what everyone looked at without meaning to.
   const [sheetTheme, setSheetTheme] = useState<ResumeTheme>('color')
   const [pendingPrint, setPendingPrint] = useState(false)
+  // Terms: the publishing terms apply the first time you publish a CV. Going
+  // public is that moment; going private again asks nothing.
+  const publishGate = useAgreementGate('publishing')
+  const [publishGateOpen, setPublishGateOpen] = useState(false)
   const [asText, setAsText] = useState(
     () => typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches
   )
@@ -148,8 +154,16 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
   }
 
   const togglePublic = async () => {
+    const next = !resume?.is_public
+    if (next && publishGate.needsAgreement) {
+      setPublishGateOpen(true)
+      return
+    }
+    await applyPublic(next)
+  }
+
+  const applyPublic = async (next: boolean) => {
     try {
-      const next = !resume?.is_public
       await setPublic.mutateAsync(next)
       toast.success(next ? t`Your CV is now public.` : t`Your CV is private again.`)
     } catch (err) {
@@ -332,6 +346,18 @@ export default function CvPage({ embedded = false }: { embedded?: boolean }) {
           />
         </aside>
       </div>
+
+      <AgreementGateModal
+        gate={publishGate}
+        bundle="publishing"
+        open={publishGateOpen}
+        context="cv_publish"
+        onClose={() => setPublishGateOpen(false)}
+        onAccepted={async () => {
+          setPublishGateOpen(false)
+          await applyPublic(true)
+        }}
+      />
     </div>
   )
 }
