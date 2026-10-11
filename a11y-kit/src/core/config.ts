@@ -145,12 +145,20 @@ export interface A11yClasses {
   cursorLarge: string
   focusStrong: string
   reduceMotion: string
+  /** Set while a font with a `family` is chosen; the kit CSS applies it */
+  fontCustom: string
 }
 
 export interface FontDef {
   id: string
   /** Shown in the font picker. Use the font's own name; it is not translated */
   label: string
+  /**
+   * CSS font-family value. With it, the kit applies the font everywhere
+   * itself (--a11y-font-family). Without it, style `className` yourself, e.g.
+   * by re-pointing your own font tokens.
+   */
+  family?: string
   /** Class toggled on <html> while this font is chosen */
   className?: string
   /** Stylesheet loaded the first time the font is chosen, never before */
@@ -208,6 +216,7 @@ export function resolveConfig(config: A11yKitConfig = {}): ResolvedConfig {
       cursorLarge: `${prefix}cursor`,
       focusStrong: `${prefix}focus`,
       reduceMotion: `${prefix}reduce-motion`,
+      fontCustom: `${prefix}font-custom`,
       ...config.classes,
     },
     spacingAttr: `data-${prefix}spacing`,

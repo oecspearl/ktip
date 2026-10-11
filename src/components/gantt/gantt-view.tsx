@@ -326,7 +326,8 @@ export function GanttView({ className }: { className?: string }) {
     today >= win.start && today < win.end ? pxForDate(today, win) : null
 
   return (
-    <div className={cn('relative', className)}>
+    // Bars are positioned and sized by date; bigger-targets would distort them
+    <div data-a11y-compact className={cn('relative', className)}>
       <div
         ref={scrollRef}
         role="region"

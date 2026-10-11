@@ -177,10 +177,12 @@ export function paint(s, cfg, root, win) {
   else root.removeAttribute(cfg.spacingAttr)
 
   var doc = root.ownerDocument
+  var family = ''
   for (var i = 0; i < cfg.fonts.length; i++) {
     var font = cfg.fonts[i]
     var on = s.font === font.id
     list.toggle(font.className, on)
+    if (on && font.family) family = font.family
     // Fetched the first time a font is chosen and never before: nobody who
     // reads in the default font pays for a webfont they will not see
     if (on && font.href && doc.head && !doc.querySelector('link[data-a11y-font="' + font.id + '"]')) {
@@ -199,4 +201,7 @@ export function paint(s, cfg, root, win) {
       doc.head.appendChild(link)
     }
   }
+  list.toggle(c.fontCustom, !!family)
+  if (family) root.style.setProperty('--a11y-font-family', family)
+  else root.style.removeProperty('--a11y-font-family')
 }

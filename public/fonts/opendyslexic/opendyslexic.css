@@ -1,0 +1,24 @@
+/* OpenDyslexic, Latin subset (covers French and Spanish accents). SIL Open
+   Font License 1.1, see OFL.txt beside this file. Files from @fontsource/opendyslexic 5.3.0.
+   Loaded only when a member chooses the font (src/a11y/config.ts). */
+@font-face {
+  font-family: 'OpenDyslexic';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(./opendyslexic-latin-400-normal.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'OpenDyslexic';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url(./opendyslexic-latin-400-italic.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'OpenDyslexic';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(./opendyslexic-latin-700-normal.woff2) format('woff2');
+}

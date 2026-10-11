@@ -230,7 +230,9 @@ export function CalendarGrid({
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd })
 
   return (
-    <div className={cn('border-r border-t border-cal-line', className)}>
+    // data-a11y-compact: the cells are sized to the grid, and the
+    // bigger-targets mode would blow every chip up to 44px
+    <div data-a11y-compact className={cn('border-r border-t border-cal-line', className)}>
       {/* Weekday labels */}
       <div className="grid grid-cols-7 border-b border-cal-line">
         {Array.from({ length: 7 }, (_, i) => (

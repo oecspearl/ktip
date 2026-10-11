@@ -208,6 +208,9 @@ export function WeekView({
   return (
     <div
       key={format(gridStart, 'yyyy-MM-dd')}
+      // Event blocks are as tall as their duration; a minimum height would
+      // put them at the wrong times
+      data-a11y-compact
       className={cn(direction === 'left' ? 'animate-cal-left' : 'animate-cal-right', className)}
     >
       {/* Day headers */}

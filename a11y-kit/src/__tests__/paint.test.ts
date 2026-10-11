@@ -116,6 +116,17 @@ describe('paint', () => {
     expect(root.hasAttribute('data-a11y-spacing')).toBe(false)
   })
 
+  it('applies a font with a family itself, and clears it again', () => {
+    const withFamily = resolveConfig({ fonts: [{ id: 'lexend', label: 'Lexend', family: "'Lexend', sans-serif" }] })
+    const root = document.createElement('html')
+    paint(sanitize({ font: 'lexend' }, withFamily), withFamily, root, noMedia)
+    expect(root.classList.contains('a11y-font-custom')).toBe(true)
+    expect(root.style.getPropertyValue('--a11y-font-family')).toBe("'Lexend', sans-serif")
+    paint(DEFAULT_SETTINGS, withFamily, root, noMedia)
+    expect(root.classList.contains('a11y-font-custom')).toBe(false)
+    expect(root.style.getPropertyValue('--a11y-font-family')).toBe('')
+  })
+
   it('follows the OS contrast setting only in auto', () => {
     const root = document.createElement('html')
     const osMore = { matchMedia: () => ({ matches: true }) } as unknown as Window

@@ -22,6 +22,19 @@ export const A11Y_CONFIG: A11yKitConfig = {
       href: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap',
       preconnect: [{ href: 'https://fonts.googleapis.com' }, { href: 'https://fonts.gstatic.com', cors: true }],
     },
+    {
+      id: 'lexend',
+      label: 'Lexend',
+      // Styled in src/a11y/a11y.css by re-pointing the font tokens
+      href: 'https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap',
+      preconnect: [{ href: 'https://fonts.googleapis.com' }, { href: 'https://fonts.gstatic.com', cors: true }],
+    },
+    {
+      id: 'opendyslexic',
+      label: 'OpenDyslexic',
+      // Self-hosted (OFL): no third-party request for the readers who choose it
+      href: '/fonts/opendyslexic/opendyslexic.css',
+    },
   ],
   legacy: {
     // ktip_a11y used to hold { fontScale, brightness }; brightness was photo-only

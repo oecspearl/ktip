@@ -38,6 +38,8 @@ export function YearView({
   return (
     <div
       key={format(anchorDate, 'yyyy')}
+      // Twelve month tiles of day buttons; 44px days would not fit a tile
+      data-a11y-compact
       className={cn(
         'grid grid-cols-1 gap-x-6 gap-y-5 border-t border-cal-line p-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4',
         direction === 'left' ? 'animate-cal-left' : 'animate-cal-right',

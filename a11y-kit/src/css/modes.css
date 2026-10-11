@@ -1,0 +1,160 @@
+/*
+ * a11y-kit display modes. Import once, after your own global stylesheet.
+ *
+ * Every rule hangs off a class or attribute the kit puts on <html>, so with
+ * every setting at its default this file changes nothing. The selectors use
+ * the default `a11y-` prefix; a host that changes the prefix copies this file
+ * and renames them.
+ *
+ * Rules are unlayered on purpose: unlayered CSS beats every @layer, including
+ * Tailwind's utilities, without a specificity fight. Where a host's own
+ * unlayered CSS could still win, the rule carries !important. These are a
+ * reader's overrides, which is exactly what !important is for.
+ */
+
+/* ---- Text spacing (WCAG 1.4.12 at level 2) ----------------------------- */
+html[data-a11y-spacing='1'] {
+  --a11y-lh: 1.65;
+  --a11y-ls: 0.04em;
+  --a11y-ws: 0.08em;
+}
+html[data-a11y-spacing='2'] {
+  --a11y-lh: 1.8;
+  --a11y-ls: 0.12em;
+  --a11y-ws: 0.16em;
+}
+html[data-a11y-spacing]
+  :where(p, li, dd, dt, blockquote, figcaption, label, td, th, summary, textarea, [data-read-block]) {
+  line-height: var(--a11y-lh) !important;
+  letter-spacing: var(--a11y-ls) !important;
+  word-spacing: var(--a11y-ws) !important;
+}
+/* Headings get the letter and word spacing but keep their own leading, which
+   is tight on purpose and wraps badly when opened up */
+html[data-a11y-spacing] :where(h1, h2, h3, h4, h5, h6) {
+  letter-spacing: var(--a11y-ls) !important;
+  word-spacing: var(--a11y-ws) !important;
+}
+
+/* ---- A font with a family, applied by the kit itself ------------------- */
+html.a11y-font-custom :where(*):not(pre, code, kbd, samp, pre *, code *) {
+  font-family: var(--a11y-font-family) !important;
+}
+
+/* ---- Underline links ---------------------------------------------------- */
+/* Text links only. A link wrapping a card or an image would underline every
+   line inside it, which is noise, not a cue */
+html.a11y-underline a[href]:not([data-no-underline], :has(img, picture, video, div, h2, h3, h4)) {
+  text-decoration-line: underline !important;
+  text-decoration-thickness: max(1px, 0.08em);
+  text-underline-offset: 0.18em;
+}
+
+/* ---- Highlight headings ------------------------------------------------- */
+/* Inset bar and tint, so nothing moves and nothing is clipped */
+html.a11y-headings :is(h1, h2, h3, h4, h5, h6) {
+  background-color: color-mix(in srgb, var(--a11y-heading-tint, #ffc72c) 18%, transparent) !important;
+  box-shadow: inset 0.22em 0 0 0 var(--a11y-heading-bar, #ffc72c) !important;
+  padding-inline-start: 0.4em !important;
+  border-radius: 0.15em;
+}
+
+/* ---- Bigger targets (WCAG 2.5.5, 44px) ---------------------------------- */
+/* [data-a11y-compact] opts a dense view out: calendars, charts, maps */
+html.a11y-targets
+  :is(
+    button,
+    [role='button'],
+    [role='tab'],
+    [role='switch'],
+    [role='menuitem'],
+    [role='option'],
+    select,
+    summary,
+    input:not([type='hidden'], [type='checkbox'], [type='radio'], [type='range'], [type='color'])
+  ):not([data-a11y-compact], [data-a11y-compact] *) {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+html.a11y-targets :is(input[type='checkbox'], input[type='radio']):not([data-a11y-compact] *) {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+/* ---- Large cursor ------------------------------------------------------- */
+/* 48px SVGs, outlined so they read on light and dark. Inherited from <html>;
+   only the elements that set their own cursor need restating */
+html.a11y-cursor {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 11.5-6.6.9 3.9 7.6-2.9 1.5-3.9-7.7L4 20z' fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 8 4, auto;
+}
+html.a11y-cursor
+  :is(a[href], button, [role='button'], [role='tab'], [role='switch'], [role='menuitem'], [role='option'], summary, label, select, [class*='cursor-pointer']),
+html.a11y-cursor :is(a[href], button) * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='white' stroke-width='4.5'%3E%3Cpath d='M22 14a8 8 0 0 1-8 8'/%3E%3Cpath d='M18 11v-1a2 2 0 0 0-4 0'/%3E%3Cpath d='M14 10V9a2 2 0 0 0-4 0v1'/%3E%3Cpath d='M10 9.5V4a2 2 0 0 0-4 0v10'/%3E%3Cpath d='M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/%3E%3C/g%3E%3Cg stroke='black' stroke-width='2'%3E%3Cpath d='M22 14a8 8 0 0 1-8 8'/%3E%3Cpath d='M18 11v-1a2 2 0 0 0-4 0'/%3E%3Cpath d='M14 10V9a2 2 0 0 0-4 0v1'/%3E%3Cpath d='M10 9.5V4a2 2 0 0 0-4 0v10'/%3E%3Cpath d='M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/%3E%3C/g%3E%3C/svg%3E") 16 4, pointer;
+}
+html.a11y-cursor
+  :is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='button'], [type='submit'], [type='color']), textarea, [contenteditable='true']) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke-linecap='round'%3E%3Cpath d='M9 3h6M9 21h6M12 3v18' stroke='white' stroke-width='4.5'/%3E%3Cpath d='M9 3h6M9 21h6M12 3v18' stroke='black' stroke-width='2'/%3E%3C/svg%3E") 24 24, text;
+}
+
+/* ---- Focus ring --------------------------------------------------------- */
+/* Only the strong ring. Without it the browser's own ring and each
+   component's focus style stand as they are. Two colours, so it reads on any
+   background, and it overrides components that turned the outline off */
+html.a11y-focus :focus-visible {
+  outline: 3px solid var(--a11y-focus-ring, #ffc72c) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 6px var(--a11y-focus-halo, #041e42) !important;
+}
+
+/* ---- Contrast: the generic part ---------------------------------------- */
+/* Hosts re-point their own colour tokens for the rest (see the KTIP example) */
+html.a11y-contrast-more ::placeholder {
+  color: inherit !important;
+  opacity: 0.75 !important;
+}
+html.a11y-contrast-more * {
+  text-shadow: none !important;
+}
+
+/* ---- Reduced motion ----------------------------------------------------- */
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---- Windows High Contrast and other forced-colour modes --------------- */
+/* The OS owns colour here; the kit's own colours would only fight it */
+@media (forced-colors: active) {
+  :focus-visible,
+  html.a11y-focus :focus-visible {
+    outline-color: Highlight !important;
+    box-shadow: none !important;
+  }
+  html.a11y-headings :is(h1, h2, h3, h4, h5, h6) {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-inline-start: 0.22em solid CanvasText;
+  }
+}
+
+/* ---- Print ------------------------------------------------------------- */
+/* Screen settings stay on screen: a printout gets the document's own sizes */
+@media print {
+  html {
+    filter: none !important;
+    font-size: 100% !important;
+  }
+  html.a11y-headings :is(h1, h2, h3, h4, h5, h6) {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding-inline-start: 0 !important;
+  }
+  html.a11y-underline a[href] {
+    text-decoration-line: none !important;
+  }
+}

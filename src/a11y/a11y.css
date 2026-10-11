@@ -1,0 +1,206 @@
+/*
+ * KTIP's half of the accessibility display modes. The kit's modes.css does the
+ * generic part; this file re-points KTIP's own tokens, the way html.dark does,
+ * so every component follows without a per-file edit.
+ */
+
+/* ---- Fonts --------------------------------------------------------------- */
+/* Same mechanism as html.readable (index.css): re-point the two font tokens.
+   The webfont itself is loaded by the kit the first time a font is chosen */
+html.a11y-font-lexend {
+  --font-sans: 'Lexend', system-ui, sans-serif;
+  --font-display: 'Lexend', system-ui, sans-serif;
+}
+html.a11y-font-opendyslexic {
+  --font-sans: 'OpenDyslexic', system-ui, sans-serif;
+  --font-display: 'OpenDyslexic', system-ui, sans-serif;
+}
+
+/* ---- Focus ring and heading highlight in brand colours ------------------- */
+html {
+  --a11y-focus-ring: #ffc72c;
+  --a11y-focus-halo: #041e42;
+  --a11y-heading-tint: #ffc72c;
+  --a11y-heading-bar: #ffc72c;
+}
+
+/* ---- Higher contrast, light ---------------------------------------------- */
+/* Ground and cards go white, text steps reach 7:1, hairlines reach 3:1, and the
+   soft-UI light-and-shadow pairs become plain outlines: a highlight on a
+   near-white surface is exactly the low-contrast edge this mode removes */
+html.a11y-contrast-more:not(.dark) {
+  --a11y-hc-line: #6e6e6e;
+
+  --color-ktip-canvas: #ffffff;
+  --color-ktip-cream: #ffffff;
+
+  --color-ktip-sand-50: #ffffff;
+  --color-ktip-sand-100: #f0f0f0;
+  --color-ktip-sand-200: #8c8c8c;
+  --color-ktip-sand-300: #6e6e6e;
+  --color-ktip-sand-400: #595959;
+  --color-ktip-sand-500: #474747;
+  --color-ktip-sand-600: #333333;
+  --color-ktip-sand-700: #1f1f1f;
+  --color-ktip-sand-800: #0f0f0f;
+  --color-ktip-sand-900: #000000;
+
+  --color-gray-50: #ffffff;
+  --color-gray-100: #f0f0f0;
+  --color-gray-200: #8c8c8c;
+  --color-gray-300: #6e6e6e;
+  --color-gray-400: #595959;
+  --color-gray-500: #474747;
+  --color-gray-600: #333333;
+  --color-gray-700: #1f1f1f;
+  --color-gray-800: #0f0f0f;
+  --color-gray-900: #000000;
+
+  --color-ktip-ocean-300: #4f7aae;
+  --color-ktip-ocean-400: #2a5788;
+  --color-ktip-ocean-500: #163a63;
+  --color-ktip-ocean-600: #0b2a52;
+
+  --color-ktip-tropical-600: #3b5700;
+  --color-ktip-tropical-700: #2c4100;
+  --color-ktip-tropical-800: #223300;
+  --color-ktip-tropical-900: #172200;
+
+  --color-ktip-sun-600: #806000;
+  --color-ktip-sun-700: #5c4500;
+  --color-ktip-sun-800: #3d2e00;
+  --color-ktip-sun-900: #2b2000;
+
+  --color-red-600: #b91c1c;
+  --color-red-700: #991b1b;
+  --color-amber-600: #b45309;
+  --color-amber-700: #92400e;
+  --color-orange-600: #c2410c;
+  --color-orange-700: #9a3412;
+  --color-yellow-600: #a16207;
+  --color-yellow-700: #854d0e;
+  --color-green-600: #15803d;
+  --color-green-700: #166534;
+  --color-emerald-600: #047857;
+  --color-emerald-700: #065f46;
+  --color-blue-600: #1d4ed8;
+  --color-blue-700: #1e40af;
+
+  --color-cal-line: rgba(0, 0, 0, 0.35);
+  --color-chart-grid: #767676;
+  --color-chart-axis: #4d4d4d;
+  --color-chart-label: #262626;
+
+  --color-neu-hi: transparent;
+  --color-neu-lo: transparent;
+  --shadow-neu-sm: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-lg: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-flat: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-sm-inset: inset 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-inset: inset 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-lg-inset: inset 0 0 0 1px var(--a11y-hc-line);
+
+  --shadow-soft: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-medium: 0 0 0 1px #1f1f1f;
+  --shadow-hard: 0 0 0 1px #1f1f1f;
+  --shadow-card: 0 0 0 1px #1f1f1f;
+  --shadow-card-hover: 0 0 0 2px #000000;
+  --shadow-fab: 0 0 0 2px #000000;
+  --shadow-fab-hover: 0 0 0 3px #000000;
+}
+
+/* ---- Higher contrast, dark ----------------------------------------------- */
+html.dark.a11y-contrast-more {
+  --a11y-hc-line: #8f8f8f;
+  --a11y-focus-halo: #000000;
+
+  --color-ktip-canvas: #000000;
+  --color-ktip-cream: #0a0a0a;
+  --color-hero-base: #000000;
+
+  --color-ktip-sand-50: #0a0a0a;
+  --color-ktip-sand-100: #141414;
+  --color-ktip-sand-200: #757575;
+  --color-ktip-sand-300: #8f8f8f;
+  --color-ktip-sand-400: #bdbdbd;
+  --color-ktip-sand-500: #cccccc;
+  --color-ktip-sand-600: #dedede;
+  --color-ktip-sand-700: #ebebeb;
+  --color-ktip-sand-800: #f5f5f5;
+  --color-ktip-sand-900: #ffffff;
+
+  --color-gray-50: #0a0a0a;
+  --color-gray-100: #141414;
+  --color-gray-200: #757575;
+  --color-gray-300: #8f8f8f;
+  --color-gray-400: #bdbdbd;
+  --color-gray-500: #cccccc;
+  --color-gray-600: #dedede;
+  --color-gray-700: #ebebeb;
+  --color-gray-800: #f5f5f5;
+  --color-gray-900: #ffffff;
+
+  --color-ktip-ocean-300: #7ba1cb;
+  --color-ktip-ocean-400: #9dbbdc;
+  --color-ktip-ocean-500: #bfd4ea;
+  --color-ktip-ocean-600: #d9e5f3;
+  --color-ktip-ocean-700: #ecf2f9;
+  --color-ktip-ocean-800: #ffffff;
+  --color-ktip-ocean-900: #ffffff;
+
+  --color-ktip-tropical-600: #c6ea5c;
+  --color-ktip-tropical-700: #ddf39b;
+  --color-ktip-tropical-800: #edf9cc;
+  --color-ktip-tropical-900: #f7fce8;
+
+  --color-ktip-sun-600: #ffe48a;
+  --color-ktip-sun-700: #fff1c4;
+  --color-ktip-sun-800: #fff9e6;
+  --color-ktip-sun-900: #ffffff;
+
+  --color-cal-line: rgba(255, 255, 255, 0.35);
+  --color-chart-grid: #5c5c5c;
+  --color-chart-axis: #8f8f8f;
+  --color-chart-label: #dedede;
+
+  --color-neu-hi: transparent;
+  --color-neu-lo: transparent;
+  --shadow-neu-sm: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-lg: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-flat: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-sm-inset: inset 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-inset: inset 0 0 0 1px var(--a11y-hc-line);
+  --shadow-neu-lg-inset: inset 0 0 0 1px var(--a11y-hc-line);
+
+  --shadow-soft: 0 0 0 1px var(--a11y-hc-line);
+  --shadow-medium: 0 0 0 1px #bdbdbd;
+  --shadow-hard: 0 0 0 1px #bdbdbd;
+  --shadow-card: 0 0 0 1px #bdbdbd;
+  --shadow-card-hover: 0 0 0 2px #ffffff;
+  --shadow-fab: 0 0 0 2px #ffffff;
+  --shadow-fab-hover: 0 0 0 3px #ffffff;
+}
+
+/* The faint borders that share a token with backgrounds. sand-100 and the two
+   lightest navies are mostly fills, so re-pointing the token would darken
+   every chip and panel; these hairlines are fixed where they are drawn */
+html.a11y-contrast-more
+  :is([class*='border-ktip-sand-100'], [class*='border-ktip-ocean-100'], [class*='border-ktip-ocean-200']) {
+  border-color: var(--a11y-hc-line) !important;
+}
+html.a11y-contrast-more [class*='divide-ktip-sand-100'] > * + * {
+  border-color: var(--a11y-hc-line) !important;
+}
+
+/* ---- Forced colours (Windows High Contrast) ------------------------------ */
+/* The OS drops box-shadow, and the soft-UI controls are drawn with nothing
+   else, so they would vanish. An inset outline keeps the edge without moving
+   anything */
+@media (forced-colors: active) {
+  [class*='shadow-neu'] {
+    outline: 1px solid ButtonText;
+    outline-offset: -1px;
+  }
+}
