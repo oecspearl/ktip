@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { onRequest } from '../core/events'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { onRequest, type ReaderCommand } from '../core/events'
 import { speechSupported } from '../core/speech/speak'
 import { useA11yContext } from './context'
 import { useA11ySettings } from './hooks'
@@ -15,25 +15,31 @@ export function ReaderHost() {
   const { store } = useA11yContext()
   const { readerBar } = useA11ySettings(store)
   const [summoned, setSummoned] = useState(false)
-  const [signal, setSignal] = useState(0)
+  const [command, setCommand] = useState<{ n: number; cmd: ReaderCommand }>({ n: 0, cmd: 'toggle' })
   const supported = speechSupported()
+  const mountedRef = useRef(false)
 
   useEffect(() => {
     if (!supported) return
-    return onRequest('read', () => {
+    return onRequest('read', (detail) => {
+      const cmd = (detail as ReaderCommand | undefined) ?? 'toggle'
+      // Stopping a reader that is not there needs no reader
+      if ((cmd === 'stop' || cmd === 'pause') && !mountedRef.current) return
       setSummoned(true)
-      setSignal((n) => n + 1)
+      setCommand((c) => ({ n: c.n + 1, cmd }))
     })
   }, [supported])
 
-  if (!supported || (!readerBar && !summoned)) return null
+  const shown = supported && (readerBar || summoned)
+  mountedRef.current = shown
+  if (!shown) return null
   return (
     <Suspense fallback={null}>
       <ReaderBar
-        toggleSignal={signal}
+        command={command}
         onClose={() => {
           setSummoned(false)
-          setSignal(0)
+          setCommand({ n: 0, cmd: 'toggle' })
           if (store.getSettings().readerBar) store.patch({ readerBar: false })
         }}
       />

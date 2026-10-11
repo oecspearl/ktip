@@ -26,7 +26,7 @@ export function SkipLinks({ linkClassName }: { linkClassName?: string }) {
   const links = [
     { label: m.skipToMain, onClick: jump(options.targets.main, false), href: '#main-content' },
     { label: m.skipToNav, onClick: jump(options.targets.nav, true), href: '#' },
-    ...(options.onSearch ? [{ label: m.skipToSearch, onClick: act(options.onSearch), href: '#' }] : []),
+    ...(options.onSearch ? [{ label: m.skipToSearch, onClick: act(() => options.onSearch?.()), href: '#' }] : []),
     { label: m.skipToSettings, onClick: act(openAccessibilityPanel), href: '#' },
   ]
 

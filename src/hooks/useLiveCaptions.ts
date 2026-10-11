@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { acquireMic } from '@a11y-kit'
 import { useDataChannel, useLocalParticipant } from '@livekit/components-react'
 import { useContentLanguage } from '../i18n/useContentLanguage'
 import { request } from '../lib/i18n/batcher'
@@ -203,10 +204,15 @@ export function useLiveCaptions(enabled: boolean): LiveCaptions {
     })
 
     recognizerRef.current = recognizer
+    // Captions outrank voice commands for the microphone: Chrome allows one
+    // recognition session per page, and a second start would silently end
+    // this one. Voice commands are told why and step aside.
+    const releaseMic = acquireMic('captions', 10)
     recognizer.start()
 
     return () => {
       recognizer.stop()
+      releaseMic?.()
       recognizerRef.current = null
       setInterim('')
     }

@@ -54,6 +54,20 @@ export type { A11yRequest } from './core/events'
 export { BASE_RATE, loadVoices, speakText, speechSupported } from './core/speech/speak'
 export type { SpeakOptions } from './core/speech/speak'
 export { chunkText, langPrefix, pickVoice, resolveSpeechLang, scoreVoice, speaks, toSpokenText } from './core/speech/voices'
+export {
+  acquireMic,
+  continuousSupported,
+  listen,
+  micHolder,
+  recognitionSupported,
+} from './core/speech/recognizer'
+export type { ListenOptions, Listener, RecognitionError } from './core/speech/recognizer'
+export { matchRoute, normalize, parseNumber, parseVoiceCommand } from './core/voice/grammar'
+export type { ParseOptions, VoiceCommand, VoiceRouteLike } from './core/voice/grammar'
+export { PHRASES } from './core/voice/phrases'
+export type { PhraseTable } from './core/voice/phrases'
+export { accessibleName, activate, collectClickables, matchByLabel } from './core/voice/targets'
+export type { ReaderCommand } from './core/events'
 export { blockText, collectReadableBlocks } from './core/reader/blocks'
 export { createReader } from './core/reader/engine'
 export type { PageReader, ReaderOptions, ReaderProblem, ReaderState, ReaderStatus } from './core/reader/engine'

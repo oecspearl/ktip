@@ -597,9 +597,12 @@ export function Navbar() {
     }
     // The same, asked for by the a11y kit: its Alt+Shift+F, skip link and
     // voice command (OPEN_SEARCH_EVENT in src/a11y/A11yHost.tsx)
-    const onOpenSearch = () => {
+    const onOpenSearch = (e: Event) => {
+      const query = (e as CustomEvent<{ query?: string } | undefined>).detail?.query
       setOpenDropdownId(null)
       setSearchOpen(true)
+      // A spoken "search for mentors" arrives with its words
+      if (query) setSearchQuery(query)
       searchInputRef.current?.focus()
     }
     window.addEventListener('keydown', onKeyDown)

@@ -45,7 +45,7 @@ export const COOKIES: LegalDocument = {
             {
               cells: [
                 'Theme and accessibility preferences',
-                'Dark mode, reduced motion, text scale.',
+                'Dark mode, text size, contrast, reading font and spacing, read-aloud and voice settings, and whether you have agreed to voice commands on this device.',
                 'No — but you can change the value',
               ],
             },

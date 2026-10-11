@@ -6,13 +6,16 @@
  */
 export type A11yRequest = 'panel' | 'help' | 'setup' | 'read' | 'voice'
 
-const listeners = new Map<A11yRequest, Set<() => void>>()
+/** What the reader is asked to do. Bare 'read' requests mean toggle */
+export type ReaderCommand = 'toggle' | 'start' | 'selection' | 'stop' | 'pause' | 'resume' | 'next' | 'prev'
 
-export function request(kind: A11yRequest) {
-  listeners.get(kind)?.forEach((l) => l())
+const listeners = new Map<A11yRequest, Set<(detail?: string) => void>>()
+
+export function request(kind: A11yRequest, detail?: string) {
+  listeners.get(kind)?.forEach((l) => l(detail))
 }
 
-export function onRequest(kind: A11yRequest, listener: () => void): () => void {
+export function onRequest(kind: A11yRequest, listener: (detail?: string) => void): () => void {
   let set = listeners.get(kind)
   if (!set) listeners.set(kind, (set = new Set()))
   set.add(listener)

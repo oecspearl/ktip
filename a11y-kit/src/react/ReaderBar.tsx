@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from 'react'
 import { announce } from '../core/announce'
+import type { ReaderCommand } from '../core/events'
 import { createReader, type PageReader } from '../core/reader/engine'
 import { langPrefix, resolveSpeechLang } from '../core/speech/voices'
 import { prefersReducedMotionNow, type A11yStore } from '../core/store'
@@ -42,8 +43,8 @@ const ICONS = {
 
 export interface ReaderBarProps {
   onClose: () => void
-  /** Increments each time the read shortcut or voice command fires */
-  toggleSignal: number
+  /** From the read shortcut or a voice command; n increments on each */
+  command: { n: number; cmd: ReaderCommand }
 }
 
 /**
@@ -51,7 +52,7 @@ export interface ReaderBarProps {
  * button in the other corner. One tab stop; the arrow keys move between
  * buttons, per the ARIA toolbar pattern.
  */
-export function ReaderBar({ onClose, toggleSignal }: ReaderBarProps) {
+export function ReaderBar({ onClose, command }: ReaderBarProps) {
   const { store, messages: m, options } = useA11yContext()
   const { ttsRate } = useA11ySettings(store)
   const reader = getReader(store, options.targets.main)
@@ -63,8 +64,19 @@ export function ReaderBar({ onClose, toggleSignal }: ReaderBarProps) {
   // No 'already handled' ref: under StrictMode the unmount below stops the
   // reader between the two mounts, and the second toggle has to restart it
   useEffect(() => {
-    if (toggleSignal > 0) reader.toggle()
-  }, [toggleSignal, reader])
+    if (command.n === 0) return
+    switch (command.cmd) {
+      case 'toggle':
+        return reader.toggle()
+      case 'start':
+        return reader.readPage()
+      case 'selection':
+        return readSelection()
+      default:
+        return reader[command.cmd]()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [command.n, reader])
 
   // Progress for screen readers, and the reasons reading cannot start
   useEffect(() => {

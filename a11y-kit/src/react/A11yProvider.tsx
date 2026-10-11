@@ -6,6 +6,7 @@ import { A11yContext, DEFAULT_OPTIONS, type ThemeAdapter } from './context'
 import { DEFAULT_MESSAGES, type A11yMessages } from './messages'
 import type { A11yFeatures, A11yOptions, A11yRoute, NavigationAdapter } from './options'
 import { ReaderHost } from './ReaderHost'
+import { VoiceHost } from './voice/VoiceHost'
 import { Runtime } from './Runtime'
 import { useRemoteSync } from './useRemoteSync'
 
@@ -22,9 +23,10 @@ export interface A11yProviderProps {
   /** The host router; without it the kit navigates with full page loads */
   navigation?: NavigationAdapter
   targets?: Partial<A11yOptions['targets']>
-  onSearch?: () => void
+  onSearch?: (query?: string) => void
   extraShortcuts?: A11yOptions['extraShortcuts']
   isBlocked?: () => boolean
+  voiceRestricted?: () => boolean
   /** Remap any chord, e.g. to dodge a host shortcut */
   chords?: Partial<Record<ShortcutAction, Chord>>
   features?: Partial<A11yFeatures>
@@ -44,6 +46,7 @@ export function A11yProvider({
   onSearch,
   extraShortcuts,
   isBlocked,
+  voiceRestricted,
   chords,
   features,
   children,
@@ -60,10 +63,11 @@ export function A11yProvider({
       onSearch,
       extraShortcuts: extraShortcuts ?? DEFAULT_OPTIONS.extraShortcuts,
       isBlocked,
+      voiceRestricted,
       chords: { ...DEFAULT_OPTIONS.chords, ...chords },
       features: { ...DEFAULT_OPTIONS.features, ...features },
     }),
-    [routes, navigation, targets, onSearch, extraShortcuts, isBlocked, chords, features]
+    [routes, navigation, targets, onSearch, extraShortcuts, isBlocked, voiceRestricted, chords, features]
   )
   const value = useMemo(
     () => ({ store, theme: theme ?? null, syncHeld, holdSync, messages: merged, options }),
@@ -74,6 +78,7 @@ export function A11yProvider({
       {children}
       {options.features.shortcuts && <Runtime />}
       {options.features.reader && <ReaderHost />}
+      {options.features.voice && <VoiceHost />}
     </A11yContext.Provider>
   )
 }

@@ -13,9 +13,12 @@ import { ktipTheme } from './theme'
 export const OPEN_SEARCH_EVENT = 'ktip:open-search'
 
 const TARGETS = { main: '#main-content', nav: '#site-nav' }
-const openSearch = () => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))
+const openSearch = (query?: string) => window.dispatchEvent(new CustomEvent(OPEN_SEARCH_EVENT, { detail: { query } }))
 // A tour owns the plain keys while it runs; single-key shortcuts wait for it
 const tourRunning = () => !!document.querySelector('[data-tutorial-overlay]')
+// A venue call is on screen (LiveKitRoom's container): other people's voices
+// would be heard as commands, so voice listens only on a press
+const inLiveCall = () => !!document.querySelector('.lk-room-container, [data-live-call]')
 
 /**
  * KTIP's mount of the accessibility kit. Inside AuthProvider to see the
@@ -49,6 +52,7 @@ export function A11yHost({ children }: { children: ReactNode }) {
       onSearch={openSearch}
       extraShortcuts={extraShortcuts}
       isBlocked={tourRunning}
+      voiceRestricted={inLiveCall}
     >
       {children}
       {/* Outside the router on purpose: it only shows where there is no FAB,

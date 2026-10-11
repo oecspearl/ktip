@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
-import type { A11ySettings, ContrastMode, NumericKey, ShortcutMode, SpacingLevel, ThemeMode } from '../core/config'
-import { openShortcutHelp } from '../core/events'
+import type { A11ySettings, ContrastMode, NumericKey, ShortcutMode, SpacingLevel, ThemeMode, VoiceMode } from '../core/config'
+import { openShortcutHelp, request } from '../core/events'
+import { continuousSupported, recognitionSupported } from '../core/speech/recognizer'
 import { speechSupported } from '../core/speech/speak'
 import { langPrefix, scoreVoice, speaks } from '../core/speech/voices'
 import type { A11yStore } from '../core/store'
@@ -31,6 +32,8 @@ export type ControlId =
   | 'readerBar'
   | 'ttsRate'
   | 'ttsVoice'
+  | 'voiceNav'
+  | 'voiceMode'
 
 export type SectionId = 'text' | 'colour' | 'reading' | 'navigation' | 'motion'
 
@@ -42,7 +45,7 @@ export const SECTIONS: { id: SectionId; title: A11yTextKey; controls: ControlId[
     controls: ['theme', 'contrast', 'pageBrightness', 'pageContrast', 'saturation', 'photoBrightness'],
   },
   { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings', 'readerBar', 'ttsRate', 'ttsVoice'] },
-  { id: 'navigation', title: 'sectionNavigation', controls: ['bigTargets', 'cursor', 'focusRing', 'shortcuts', 'focusOnNavigate'] },
+  { id: 'navigation', title: 'sectionNavigation', controls: ['bigTargets', 'cursor', 'focusRing', 'shortcuts', 'focusOnNavigate', 'voiceNav', 'voiceMode'] },
   { id: 'motion', title: 'sectionMotion', controls: ['reduceMotion'] },
 ]
 
@@ -129,7 +132,9 @@ export function AccessibilityControls({ variant = 'settings', only, exclude, foo
     (id !== 'theme' || !!theme) &&
     (id !== 'shortcuts' || options.features.shortcuts) &&
     (!SPEECH_CONTROLS.includes(id) || (options.features.reader && speechSupported())) &&
-    (id !== 'ttsVoice' || voices.length > 1)
+    (id !== 'ttsVoice' || voices.length > 1) &&
+    ((id !== 'voiceNav' && id !== 'voiceMode') || options.features.voice) &&
+    (id !== 'voiceMode' || (s.voiceNav && recognitionSupported() && continuousSupported()))
 
   const set = (patch: Partial<A11ySettings>) => store.patch(patch)
   // From the store, not this render: four quick presses are four steps
@@ -355,6 +360,29 @@ export function AccessibilityControls({ variant = 'settings', only, exclude, foo
         </label>
       )
     },
+    voiceNav: () =>
+      recognitionSupported() ? (
+        <SwitchRow
+          label={m.voiceNav}
+          hint={variant === 'compact' ? undefined : m.voiceNavHint}
+          checked={s.voiceNav && !!device.voiceConsentAt}
+          // Switching on asks for this device's consent first, once
+          onChange={(v) => (v ? request('voice', 'enable') : set({ voiceNav: false }))}
+        />
+      ) : (
+        <p className="ak-note">{m.voiceUnsupported}</p>
+      ),
+    voiceMode: () => (
+      <ChoiceRow<VoiceMode>
+        label={m.voiceMode}
+        value={s.voiceMode}
+        options={[
+          { value: 'push', label: m.voiceModePush },
+          { value: 'continuous', label: m.voiceModeContinuous },
+        ]}
+        onChange={(v) => set({ voiceMode: v })}
+      />
+    ),
     reduceMotion: () => (
       <SwitchRow
         label={m.reduceMotion}

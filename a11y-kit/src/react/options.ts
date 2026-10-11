@@ -25,6 +25,8 @@ export interface A11yFeatures {
   skipLinks: boolean
   /** The read-aloud bar, its shortcut and its controls */
   reader: boolean
+  /** Voice commands, where the browser can recognise speech */
+  voice: boolean
 }
 
 export interface A11yOptions {
@@ -32,14 +34,20 @@ export interface A11yOptions {
   navigation: NavigationAdapter | null
   /** Selectors for the main content and the site menu */
   targets: { main: string; nav: string }
-  /** Open the host's own search, if it has one */
-  onSearch?: () => void
+  /** Open the host's own search, if it has one, optionally with a spoken query */
+  onSearch?: (query?: string) => void
   /** Shortcuts the host already had, listed in the help dialog */
   extraShortcuts: { keys: string; label: string }[]
   /** True while something else owns the plain keys, e.g. a guided tour. Single-key shortcuts pause; Alt+Shift ones keep working */
   isBlocked?: () => boolean
   chords: Record<ShortcutAction, Chord>
   features: A11yFeatures
+  /**
+   * True while always-on listening would be unsafe, e.g. during a live call,
+   * where other people's voices would be taken as commands. Push-to-talk
+   * still works.
+   */
+  voiceRestricted?: () => boolean
 }
 
 /** Without a router the kit falls back to a full page load. */
