@@ -16,6 +16,28 @@ html.a11y-font-opendyslexic {
   --font-display: 'OpenDyslexic', system-ui, sans-serif;
 }
 
+/* ---- The kit's panel in KTIP's palette ----------------------------------- */
+/* References, not copies: html.dark and higher contrast re-point the tokens,
+   and the panel follows them */
+:root {
+  --ak-surface: var(--color-ktip-cream);
+  --ak-surface-2: var(--color-ktip-sand-100);
+  --ak-text: var(--color-ktip-sand-900);
+  --ak-muted: var(--color-ktip-sand-600);
+  --ak-border: var(--color-ktip-sand-200);
+  --ak-accent: var(--color-ktip-ocean-700);
+  --ak-accent-text: #ffffff;
+  --ak-focus: var(--color-ktip-ocean-500);
+  --ak-radius: 0.75rem;
+  --ak-shadow: var(--shadow-fab-hover);
+}
+/* Navy inverts to a pale blue at night, so the accent moves to brand green */
+html.dark {
+  --ak-accent: var(--color-ktip-tropical-500);
+  --ak-accent-text: #041e42;
+  --ak-focus: var(--color-ktip-tropical-500);
+}
+
 /* ---- Focus ring and heading highlight in brand colours ------------------- */
 html {
   --a11y-focus-ring: #ffc72c;

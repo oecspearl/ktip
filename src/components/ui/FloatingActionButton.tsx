@@ -1,16 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
-import { useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import {
   Accessibility,
   GraduationCap,
   Megaphone,
   MessageSquare,
   Moon,
-  RotateCcw,
   StickyNote,
   Sun,
-  SunMedium,
-  Type,
   X,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -20,23 +17,22 @@ import { useTutorials } from '../../contexts/TutorialContext'
 import { useUnreadMessageCount } from '../../hooks/useMessages'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import { useBackdropTone } from '../../hooks/useBackdropTone'
-import {
-  A11Y_DEFAULTS,
-  A11Y_RANGE,
-  useAccessibilityPrefs,
-} from '../../hooks/useAccessibilityPrefs'
 import { useViewportScale } from '../../hooks/useViewportScale'
-import { NumberStepper } from './NumberStepper'
 import { cn } from '../../lib/utils'
 import { replayWelcome } from '../../lib/welcome-panel'
 import { useDisclosureAnimation } from './useDisclosureAnimation'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { prefersReducedMotionNow } from '../../a11y/store'
+import { useRegisterFab } from '../../a11y/fab-presence'
 
 // The feedback modal is a canvas annotator behind a button almost nobody
 // presses on any given page — it has no business in the entry chunk.
 const FeedbackModal = lazy(() =>
   import('../feedback/FeedbackModal').then((m) => ({ default: m.FeedbackModal }))
+)
+// The shared accessibility controls, fetched the first time the panel opens
+const AccessibilityPanel = lazy(() =>
+  import('../../a11y/ui').then((m) => ({ default: m.AccessibilityPanel }))
 )
 const StickyNoteFabPanel = lazy(() =>
   import('../notes/StickyNoteFabPanel').then((m) => ({ default: m.StickyNoteFabPanel }))
@@ -108,11 +104,12 @@ export function FloatingActionButton() {
   const { unreadCount } = useUnreadMessageCount(auth.user?.id)
   const { pathname } = useLocation()
   const [dark, setDark] = useThemeMode()
-  const [a11y, setA11y] = useAccessibilityPrefs()
   const [open, setOpen] = useState(false)
   const [a11yOpen, setA11yOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  // Tells A11yQuickButton the panel is reachable from here
+  useRegisterFab()
   const triggerRef = useRef<HTMLButtonElement>(null)
   // The trigger is a pale tile that vanishes on the app's white pages and a
   // white blob on the dark venue/hero bands. Read what is actually underneath
@@ -291,9 +288,6 @@ export function FloatingActionButton() {
 
   const showClose = open || collapsing
 
-  const atDefaults =
-    a11y.fontScale === A11Y_DEFAULTS.fontScale && a11y.brightness === A11Y_DEFAULTS.brightness
-
   return (
     <>
     <div
@@ -302,48 +296,35 @@ export function FloatingActionButton() {
       className="fixed bottom-[1.5em] right-[1.5em] z-fab flex flex-col items-center gap-[0.75em]"
       style={{ fontSize: `${16 * scale}px` }}
     >
-      {/* Accessibility panel — anchored above the cluster, inside containerRef
-          so the outside-click handler treats it as part of the FAB */}
+      {/* Accessibility panel, inside containerRef so the outside-click handler
+          treats it as part of the FAB. Beside the cluster from sm up: the open
+          column is ~28em tall, and stacked above it the panel would run off a
+          laptop screen. A bottom sheet on phones, over the cluster but clear
+          of its close button. */}
       {a11yPanel.mounted && (
         <div
-          role="group"
-          aria-label={t`Accessibility settings`}
           data-state={a11yPanel.state}
-          className="fab-panel origin-bottom-right absolute bottom-full right-0 mb-[0.75em] w-[15em] rounded-[0.75em] border border-ktip-sand-200 bg-ktip-cream p-[1em] shadow-fab-hover"
+          className="fab-panel origin-bottom-right max-sm:fixed max-sm:inset-x-4 max-sm:bottom-[6.5em] sm:absolute sm:bottom-0 sm:right-full sm:mr-[0.75em]"
         >
-          <div className="flex items-center justify-between mb-[0.75em]">
-            <p className="text-[0.8125em] font-semibold text-ktip-sand-900"><Trans>Accessibility</Trans></p>
-            <button
-              onClick={() => setA11y(A11Y_DEFAULTS)}
-              disabled={atDefaults}
-              className="flex items-center gap-[0.25em] text-[0.6875em] text-ktip-sand-500 hover:text-ktip-ocean-600 disabled:opacity-40 disabled:hover:text-ktip-sand-500 transition-colors"
-            >
-              <RotateCcw size={px(11)} />
-              <Trans>Reset</Trans>
-            </button>
-          </div>
-
-          <NumberStepper
-            icon={<Type size={px(14)} />}
-            label={t`Text size`}
-            value={`${Math.round(a11y.fontScale * 100)}%`}
-            onDecrease={() => setA11y({ fontScale: a11y.fontScale - A11Y_RANGE.fontScale.step })}
-            onIncrease={() => setA11y({ fontScale: a11y.fontScale + A11Y_RANGE.fontScale.step })}
-            atMin={a11y.fontScale <= A11Y_RANGE.fontScale.min}
-            atMax={a11y.fontScale >= A11Y_RANGE.fontScale.max}
-            iconSize={px(13)}
-          />
-
-          <NumberStepper
-            icon={<SunMedium size={px(14)} />}
-            label={t`Photo brightness`}
-            value={`${Math.round(a11y.brightness * 100)}%`}
-            onDecrease={() => setA11y({ brightness: a11y.brightness - A11Y_RANGE.brightness.step })}
-            onIncrease={() => setA11y({ brightness: a11y.brightness + A11Y_RANGE.brightness.step })}
-            atMin={a11y.brightness <= A11Y_RANGE.brightness.min}
-            atMax={a11y.brightness >= A11Y_RANGE.brightness.max}
-            iconSize={px(13)}
-          />
+          <Suspense fallback={null}>
+            <AccessibilityPanel
+              onClose={() => setA11yOpen(false)}
+              actions={
+                auth.user && (
+                  <Link
+                    to="/dashboard/preferences#accessibility"
+                    className="ak-link-btn"
+                    onClick={() => {
+                      setA11yOpen(false)
+                      setOpen(false)
+                    }}
+                  >
+                    <Trans>All settings</Trans>
+                  </Link>
+                )
+              }
+            />
+          </Suspense>
         </div>
       )}
 

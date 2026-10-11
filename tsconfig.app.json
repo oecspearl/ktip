@@ -29,7 +29,8 @@
        No baseUrl: paths resolve against this file, and TypeScript 7 rejects it. */
     "paths": {
       "@/*": ["./src/*"],
-      "@a11y-kit": ["./a11y-kit/src/index.ts"]
+      "@a11y-kit": ["./a11y-kit/src/index.ts"],
+      "@a11y-kit/*": ["./a11y-kit/src/*"]
     }
   },
   "include": ["src", "a11y-kit/src"],

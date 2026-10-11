@@ -2,14 +2,11 @@ import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Toggle } from '../../components/ui/Toggle'
-import { NumberStepper } from '../../components/ui/NumberStepper'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
-import { useReadableMode } from '../../hooks/useReadableMode'
 import { useThemeMode } from '../../hooks/useThemeMode'
-import { useReducedMotionPref } from '../../hooks/useReducedMotion'
-import { A11Y_DEFAULTS, A11Y_RANGE, useAccessibilityPrefs } from '../../hooks/useAccessibilityPrefs'
+import { AccessibilityControls } from '../../a11y/ui'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { CONNECTION_VISIBILITY_OPTIONS } from '../../lib/constants'
 import { LANGUAGE_NAMES, SELECTABLE_LANGS } from '../../i18n/language'
@@ -21,11 +18,9 @@ import {
   Globe,
   Languages,
   Save,
-  SunMedium,
   Type,
   Moon,
   Users,
-  Wind,
 } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
@@ -45,10 +40,7 @@ export function PreferencesTab() {
   const toast = useToast()
   const { preferences, loading } = useMyPreferences(auth.user?.id)
   const { savePreferences, loading: saving } = useSavePreferences()
-  const [readable, setReadable] = useReadableMode()
   const [darkMode, setDarkMode] = useThemeMode()
-  const [reducedMotion, setReducedMotion] = useReducedMotionPref()
-  const [a11y, setA11y] = useAccessibilityPrefs()
   const { lang: uiLang, setLang } = useLanguage()
 
   // Notification preferences — persisted in notification_preferences
@@ -408,60 +400,13 @@ export function PreferencesTab() {
           </div>
           <div>
             <h2 className="text-lg font-display font-bold text-ktip-sand-900"><Trans>Accessibility</Trans></h2>
-            <p className="text-sm text-ktip-sand-600"><Trans>Make the site easier to read. Applies immediately and follows you to your other devices.</Trans></p>
+            <p className="text-sm text-ktip-sand-600"><Trans>Make the site easier to read and use. Changes apply straight away and follow you to your other devices.</Trans></p>
           </div>
         </div>
 
-        <div className="divide-y divide-ktip-sand-100">
-          <Toggle
-            checked={readable}
-            onChange={setReadable}
-            label={t`Readable font mode`}
-            description={t`Use Atkinson Hyperlegible across the site for easier reading.`}
-          />
-          <Toggle
-            checked={reducedMotion}
-            onChange={setReducedMotion}
-            label={t`Reduce motion`}
-            description={t`Stops the scrolling rails, the rotating home page hero and page transitions. Your device's own setting is always honoured too.`}
-          />
-          <div className="py-3 text-base">
-            <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800 mb-2">
-              <Wind size={16} className="text-ktip-sand-500" />
-              <Trans>Text size and photos</Trans>
-              <button
-                type="button"
-                onClick={() => setA11y(A11Y_DEFAULTS)}
-                disabled={a11y.fontScale === A11Y_DEFAULTS.fontScale && a11y.brightness === A11Y_DEFAULTS.brightness}
-                className="ml-auto text-xs text-ktip-sand-500 hover:text-ktip-ocean-600 disabled:opacity-40"
-              >
-                <Trans>Reset</Trans>
-              </button>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4 max-w-md">
-              <NumberStepper
-                icon={<Type size={14} />}
-                label={t`Text size`}
-                value={`${Math.round(a11y.fontScale * 100)}%`}
-                onDecrease={() => setA11y({ fontScale: a11y.fontScale - A11Y_RANGE.fontScale.step })}
-                onIncrease={() => setA11y({ fontScale: a11y.fontScale + A11Y_RANGE.fontScale.step })}
-                atMin={a11y.fontScale <= A11Y_RANGE.fontScale.min}
-                atMax={a11y.fontScale >= A11Y_RANGE.fontScale.max}
-                iconSize={13}
-              />
-              <NumberStepper
-                icon={<SunMedium size={14} />}
-                label={t`Photo brightness`}
-                value={`${Math.round(a11y.brightness * 100)}%`}
-                onDecrease={() => setA11y({ brightness: a11y.brightness - A11Y_RANGE.brightness.step })}
-                onIncrease={() => setA11y({ brightness: a11y.brightness + A11Y_RANGE.brightness.step })}
-                atMin={a11y.brightness <= A11Y_RANGE.brightness.min}
-                atMax={a11y.brightness >= A11Y_RANGE.brightness.max}
-                iconSize={13}
-              />
-            </div>
-          </div>
-        </div>
+        {/* The same controls as the floating panel (a11y kit). Dark mode keeps
+            its own card below, so it is left out here */}
+        <AccessibilityControls variant="settings" exclude={['theme']} />
       </Card>
 
       {/* Appearance — applies instantly and follows the member across devices (155) */}

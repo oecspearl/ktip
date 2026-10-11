@@ -16,7 +16,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@a11y-kit": ["./a11y-kit/src/index.ts"]
+      "@a11y-kit": ["./a11y-kit/src/index.ts"],
+      "@a11y-kit/*": ["./a11y-kit/src/*"]
     }
   }
 }

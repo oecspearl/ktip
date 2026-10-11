@@ -36,7 +36,9 @@ export type { SyncAdapter, SyncedBlob, SyncDecision } from './core/sync'
 // React
 export { A11yProvider } from './react/A11yProvider'
 export type { A11yProviderProps } from './react/A11yProvider'
-export { useA11yContext } from './react/context'
+export { useA11yContext, useA11yMessages } from './react/context'
+export { DEFAULT_MESSAGES } from './react/messages'
+export type { A11yMessages, A11yMessageKey, A11yTextKey } from './react/messages'
 export type { A11yContextValue, ThemeAdapter } from './react/context'
 export {
   useA11yState,

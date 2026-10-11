@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { ThemeMode } from '../core/config'
 import type { A11yStore } from '../core/store'
+import { DEFAULT_MESSAGES, type A11yMessages } from './messages'
 
 /** The host's light/dark switch. The kit reads and sets it, never owns it. */
 export interface ThemeAdapter {
@@ -15,6 +16,7 @@ export interface A11yContextValue {
   /** True while remote writes are held, e.g. during a setup trial run */
   syncHeld: boolean
   holdSync(held: boolean): void
+  messages: A11yMessages
 }
 
 export const A11yContext = createContext<A11yContextValue | null>(null)
@@ -23,6 +25,11 @@ export function useA11yContext(): A11yContextValue {
   const ctx = useContext(A11yContext)
   if (!ctx) throw new Error('a11y-kit: wrap the app in <A11yProvider>')
   return ctx
+}
+
+/** The UI strings: the host's translations over the English defaults. */
+export function useA11yMessages(): A11yMessages {
+  return useContext(A11yContext)?.messages ?? DEFAULT_MESSAGES
 }
 
 /** The store passed in, else the provider's. Lets hooks work outside a provider. */
