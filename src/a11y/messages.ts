@@ -89,6 +89,25 @@ const TEXT: Record<A11yTextKey, MessageDescriptor> = {
   singleHelp: msg`Show this list`,
   noMoreHeadings: msg`No more headings`,
 
+  readerBar: msg`Reading bar`,
+  readerBarHint: msg`Play, pause and skip controls for having pages read aloud.`,
+  readingSpeed: msg`Reading speed`,
+  ttsVoice: msg`Voice`,
+  ttsVoiceAuto: msg`Best available`,
+  readerTitle: msg`Read aloud`,
+  readPage: msg`Read this page aloud`,
+  pause: msg`Pause`,
+  resume: msg`Carry on reading`,
+  stop: msg`Stop`,
+  prevBlock: msg`Previous paragraph`,
+  nextBlock: msg`Next paragraph`,
+  clickToRead: msg`Click a paragraph to read from there`,
+  clickToReadOn: msg`Click any paragraph to hear it. Press Escape to stop.`,
+  readSelection: msg`Read the selected text`,
+  closeReader: msg`Close the reading bar`,
+  readingNow: msg`Reading`,
+  nothingToRead: msg`There is nothing to read on this page.`,
+
   skipToMain: msg`Skip to main content`,
   skipToNav: msg`Skip to the site menu`,
   skipToSearch: msg`Skip to search`,
@@ -109,6 +128,10 @@ export function useKtipA11yMessages(): A11yMessages {
       increase: (label: string) => i18n._(msg`Increase ${label}`),
       singleGo: (page: string) => i18n._(msg`Go to ${page}`),
       textSizeIs: (percent: string) => i18n._(msg`Text size ${percent}`),
+      readingProgress: (n: number, total: number) => i18n._(msg`Reading ${n} of ${total}`),
+      readingSpeedIs: (speed: string) => i18n._(msg`Reading speed ${speed}. Change speed`),
+      noVoice: (language: string) =>
+        i18n._(msg`This device has no ${language} voice. Add one in your system's speech settings.`),
     }
     // i18n is a stable singleton; the locale is what changes
     // eslint-disable-next-line react-hooks/exhaustive-deps

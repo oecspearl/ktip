@@ -18,7 +18,7 @@ export function isVisible(el: Element): boolean {
 export function focusElement(el: HTMLElement, { scroll = true, smooth = false } = {}) {
   if (!el.matches(FOCUSABLE) && !el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
   el.focus({ preventScroll: true })
-  if (scroll) el.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' })
+  if (scroll) el.scrollIntoView?.({ block: 'start', behavior: smooth ? 'smooth' : 'auto' })
 }
 
 /** h1 to h3 under root, in document order, visible only. */

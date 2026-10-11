@@ -1,9 +1,11 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import type { A11ySettings, ContrastMode, NumericKey, ShortcutMode, SpacingLevel, ThemeMode } from '../core/config'
 import { openShortcutHelp } from '../core/events'
+import { speechSupported } from '../core/speech/speak'
+import { langPrefix, scoreVoice, speaks } from '../core/speech/voices'
 import type { A11yStore } from '../core/store'
 import { useA11yContext } from './context'
-import { useA11ySettings } from './hooks'
+import { useA11yDevice, useA11ySettings } from './hooks'
 import type { A11yTextKey } from './messages'
 import { ChoiceRow, Section, StepperRow, SwitchRow } from './primitives'
 import type { ThemeAdapter } from './context'
@@ -26,6 +28,9 @@ export type ControlId =
   | 'reduceMotion'
   | 'shortcuts'
   | 'focusOnNavigate'
+  | 'readerBar'
+  | 'ttsRate'
+  | 'ttsVoice'
 
 export type SectionId = 'text' | 'colour' | 'reading' | 'navigation' | 'motion'
 
@@ -36,7 +41,7 @@ export const SECTIONS: { id: SectionId; title: A11yTextKey; controls: ControlId[
     title: 'sectionColour',
     controls: ['theme', 'contrast', 'pageBrightness', 'pageContrast', 'saturation', 'photoBrightness'],
   },
-  { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings'] },
+  { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings', 'readerBar', 'ttsRate', 'ttsVoice'] },
   { id: 'navigation', title: 'sectionNavigation', controls: ['bigTargets', 'cursor', 'focusRing', 'shortcuts', 'focusOnNavigate'] },
   { id: 'motion', title: 'sectionMotion', controls: ['reduceMotion'] },
 ]
@@ -46,8 +51,27 @@ const OWNS: Partial<Record<ControlId, (keyof A11ySettings)[]>> = {
   cursor: ['cursor'],
   focusRing: ['focusRing'],
 }
+// theme belongs to the host; the voice choice is device state, not a setting
 const ownedKeys = (id: ControlId): (keyof A11ySettings)[] =>
-  OWNS[id] ?? (id === 'theme' ? [] : [id as keyof A11ySettings])
+  OWNS[id] ?? (id === 'theme' || id === 'ttsVoice' ? [] : [id as keyof A11ySettings])
+
+const SPEECH_CONTROLS: ControlId[] = ['readerBar', 'ttsRate', 'ttsVoice']
+
+/** Voices that speak a language, best first. Loads late in Chrome. */
+function useVoicesFor(lang: string) {
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>(() =>
+    speechSupported() ? window.speechSynthesis.getVoices() : []
+  )
+  useEffect(() => {
+    if (!speechSupported()) return
+    const load = () => setVoices(window.speechSynthesis.getVoices())
+    window.speechSynthesis.addEventListener('voiceschanged', load)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
+  }, [])
+  return voices
+    .filter((v) => speaks(v, lang))
+    .sort((a, b) => scoreVoice(b, lang) - scoreVoice(a, lang))
+}
 
 const FILTER_CONTROLS: ControlId[] = ['contrast', 'pageBrightness', 'pageContrast', 'saturation']
 
@@ -92,6 +116,9 @@ export interface AccessibilityControlsProps {
 export function AccessibilityControls({ variant = 'settings', only, exclude, footer }: AccessibilityControlsProps) {
   const { store, theme, messages: m, options } = useA11yContext()
   const s = useA11ySettings(store)
+  const device = useA11yDevice(store)
+  const pageLang = typeof document !== 'undefined' ? document.documentElement.lang || 'en' : 'en'
+  const voices = useVoicesFor(pageLang)
   const mode = useTheme(theme)
   const forced = useMedia('(forced-colors: active)')
   const r = store.config.ranges
@@ -100,7 +127,9 @@ export function AccessibilityControls({ variant = 'settings', only, exclude, foo
     (!only || only.includes(id)) &&
     !exclude?.includes(id) &&
     (id !== 'theme' || !!theme) &&
-    (id !== 'shortcuts' || options.features.shortcuts)
+    (id !== 'shortcuts' || options.features.shortcuts) &&
+    (!SPEECH_CONTROLS.includes(id) || (options.features.reader && speechSupported())) &&
+    (id !== 'ttsVoice' || voices.length > 1)
 
   const set = (patch: Partial<A11ySettings>) => store.patch(patch)
   // From the store, not this render: four quick presses are four steps
@@ -282,6 +311,50 @@ export function AccessibilityControls({ variant = 'settings', only, exclude, foo
         onChange={(v) => set({ focusOnNavigate: v })}
       />
     ),
+    readerBar: () => (
+      <SwitchRow
+        label={m.readerBar}
+        hint={variant === 'compact' ? undefined : m.readerBarHint}
+        checked={s.readerBar}
+        onChange={(v) => set({ readerBar: v })}
+      />
+    ),
+    ttsRate: () => (
+      <StepperRow
+        label={m.readingSpeed}
+        value={s.ttsRate}
+        display={`${s.ttsRate}×`}
+        min={r.ttsRate.min}
+        max={r.ttsRate.max}
+        messages={m}
+        onStep={(d) => bump('ttsRate', d)}
+      />
+    ),
+    ttsVoice: () => {
+      const key = langPrefix(pageLang)
+      return (
+        <label className="ak-row ak-row-stack">
+          <span className="ak-row-label">{m.ttsVoice}</span>
+          <select
+            className="ak-select"
+            value={device.ttsVoice[key] ?? ''}
+            onChange={(e) => {
+              const next = { ...device.ttsVoice }
+              if (e.target.value) next[key] = e.target.value
+              else delete next[key]
+              store.patchDevice({ ttsVoice: next })
+            }}
+          >
+            <option value="">{m.ttsVoiceAuto}</option>
+            {voices.map((v) => (
+              <option key={v.voiceURI} value={v.voiceURI}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )
+    },
     reduceMotion: () => (
       <SwitchRow
         label={m.reduceMotion}

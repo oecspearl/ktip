@@ -158,3 +158,30 @@ html.a11y-reduce-motion *::after {
     text-decoration-line: none !important;
   }
 }
+
+/* ---- Reading aloud ------------------------------------------------------ */
+/* The block being read. The Highlight API paints text without touching the
+   DOM; the attribute is the fallback where that API is missing */
+::highlight(a11y-reading) {
+  background-color: var(--a11y-reading-bg, #fff1a8);
+  color: var(--a11y-reading-text, #111111);
+}
+[data-a11y-reading] {
+  background-color: var(--a11y-reading-bg, #fff1a8) !important;
+  color: var(--a11y-reading-text, #111111) !important;
+  box-shadow: 0 0 0 0.2em var(--a11y-reading-bg, #fff1a8) !important;
+  border-radius: 0.15em;
+}
+/* Click-to-read: the paragraph under the pointer shows it can be read */
+html.a11y-click-read main :is(h1, h2, h3, h4, h5, h6, p, li, blockquote, figcaption, td, th, dd, [data-read-block]):hover {
+  outline: 2px dashed var(--a11y-reading-outline, #2a5788);
+  outline-offset: 2px;
+  cursor: pointer;
+}
+@media (forced-colors: active) {
+  [data-a11y-reading] {
+    forced-color-adjust: none;
+    background-color: Highlight !important;
+    color: HighlightText !important;
+  }
+}

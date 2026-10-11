@@ -51,6 +51,13 @@ export { announce } from './core/announce'
 export { onRequest, openAccessibilityPanel, openShortcutHelp, request } from './core/events'
 export type { A11yRequest } from './core/events'
 
+export { BASE_RATE, loadVoices, speakText, speechSupported } from './core/speech/speak'
+export type { SpeakOptions } from './core/speech/speak'
+export { chunkText, langPrefix, pickVoice, resolveSpeechLang, scoreVoice, speaks, toSpokenText } from './core/speech/voices'
+export { blockText, collectReadableBlocks } from './core/reader/blocks'
+export { createReader } from './core/reader/engine'
+export type { PageReader, ReaderOptions, ReaderProblem, ReaderState, ReaderStatus } from './core/reader/engine'
+
 // React
 export { SkipLinks } from './react/SkipLinks'
 export type { A11yFeatures, A11yOptions, A11yRoute, NavigationAdapter } from './react/options'

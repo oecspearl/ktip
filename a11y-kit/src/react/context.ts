@@ -28,7 +28,7 @@ export const DEFAULT_OPTIONS: A11yOptions = {
   targets: { main: 'main, [role="main"]', nav: 'nav, [role="navigation"]' },
   extraShortcuts: [],
   chords: DEFAULT_CHORDS,
-  features: { shortcuts: true, skipLinks: true },
+  features: { shortcuts: true, skipLinks: true, reader: true },
 }
 
 export const A11yContext = createContext<A11yContextValue | null>(null)

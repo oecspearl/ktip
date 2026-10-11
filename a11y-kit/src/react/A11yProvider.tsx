@@ -5,6 +5,7 @@ import type { SyncAdapter } from '../core/sync'
 import { A11yContext, DEFAULT_OPTIONS, type ThemeAdapter } from './context'
 import { DEFAULT_MESSAGES, type A11yMessages } from './messages'
 import type { A11yFeatures, A11yOptions, A11yRoute, NavigationAdapter } from './options'
+import { ReaderHost } from './ReaderHost'
 import { Runtime } from './Runtime'
 import { useRemoteSync } from './useRemoteSync'
 
@@ -72,6 +73,7 @@ export function A11yProvider({
     <A11yContext.Provider value={value}>
       {children}
       {options.features.shortcuts && <Runtime />}
+      {options.features.reader && <ReaderHost />}
     </A11yContext.Provider>
   )
 }

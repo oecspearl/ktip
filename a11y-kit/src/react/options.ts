@@ -23,6 +23,8 @@ export interface NavigationAdapter {
 export interface A11yFeatures {
   shortcuts: boolean
   skipLinks: boolean
+  /** The read-aloud bar, its shortcut and its controls */
+  reader: boolean
 }
 
 export interface A11yOptions {
