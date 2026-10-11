@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useTutorials } from '../contexts/TutorialContext'
 import { getTutorialById } from '../data/tutorials'
 import { hasAutoStarted, markAutoStarted } from '../lib/tutorialStorage'
+import { isSetupActive } from '@a11y-kit'
 
 /** Let entrance animations and the first data render settle before spotlighting */
 const SETTLE_MS = 500
@@ -28,6 +29,12 @@ export function useTutorialAutoStart(id: string, ready: boolean) {
     firedRef.current = true
 
     const timer = window.setTimeout(() => {
+      // The accessibility setup tour is running: a page tour over it would
+      // fight it for the screen. Not marked as started, so it gets its turn
+      if (isSetupActive()) {
+        firedRef.current = false
+        return
+      }
       markAutoStarted(id)
       startTutorial(id)
     }, SETTLE_MS)

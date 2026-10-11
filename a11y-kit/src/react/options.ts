@@ -1,3 +1,4 @@
+import type { NeedDef } from '../core/setup/presets'
 import type { Chord, ShortcutAction } from '../core/shortcuts'
 
 /** A page the shortcuts, voice commands and setup tour can take someone to. */
@@ -19,6 +20,29 @@ export interface NavigationAdapter {
   navigate(path: string): void
   location: { get(): string; subscribe(listener: () => void): () => void }
 }
+
+/** One stop on the setup walkthrough. Strings in the reader's language */
+export interface JourneyStop {
+  id: string
+  path: string
+  title: string
+  body: string
+  /** Element to ring; the card centres itself when it is missing */
+  target?: string
+  /** Controls shown on the card, by id (see ControlId) */
+  tryIt?: string[]
+}
+
+export interface SetupGate {
+  /** Off: never offered unasked, still available from the panel */
+  enabled: boolean
+  /** The host's own conditions: signed in, onboarding done, nothing else on screen */
+  ready: boolean
+  /** Pages it may open on by itself */
+  entryPaths: string[]
+}
+
+export type A11yEvent = 'setup_kept' | 'setup_reverted' | 'setup_skipped'
 
 export interface A11yFeatures {
   shortcuts: boolean
@@ -48,6 +72,11 @@ export interface A11yOptions {
    * still works.
    */
   voiceRestricted?: () => boolean
+  setup: SetupGate
+  journey: JourneyStop[]
+  needs: NeedDef[]
+  /** Outcomes only, for counting. Never the needs, which are health information */
+  onEvent?: (event: A11yEvent, props: { stops: number; source: 'auto' | 'panel' }) => void
 }
 
 /** Without a router the kit falls back to a full page load. */

@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { ThemeMode } from '../core/config'
+import { DEFAULT_NEEDS } from '../core/setup/presets'
 import { DEFAULT_CHORDS } from '../core/shortcuts'
 import type { A11yStore } from '../core/store'
 import { DEFAULT_MESSAGES, type A11yMessages } from './messages'
@@ -29,6 +30,9 @@ export const DEFAULT_OPTIONS: A11yOptions = {
   extraShortcuts: [],
   chords: DEFAULT_CHORDS,
   features: { shortcuts: true, skipLinks: true, reader: true, voice: true },
+  setup: { enabled: false, ready: false, entryPaths: ['/'] },
+  journey: [],
+  needs: DEFAULT_NEEDS,
 }
 
 export const A11yContext = createContext<A11yContextValue | null>(null)

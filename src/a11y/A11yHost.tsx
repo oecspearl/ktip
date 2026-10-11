@@ -1,10 +1,12 @@
 import { useMemo, type ReactNode } from 'react'
 import { useLingui } from '@lingui/react/macro'
-import { A11yProvider } from '@a11y-kit'
+import { A11yProvider, type A11yOptions } from '@a11y-kit'
+import { analytics } from '../hooks/useAnalytics'
 import { A11yQuickButton } from './A11yQuickButton'
 import { useKtipA11yMessages } from './messages'
 import { ktipNavigation } from './navigation'
 import { useKtipRoutes } from './routes'
+import { useKtipJourney, useKtipSetupGate } from './setup'
 import { a11yStore } from './store'
 import { useKtipA11ySync } from './sync'
 import { ktipTheme } from './theme'
@@ -19,6 +21,9 @@ const tourRunning = () => !!document.querySelector('[data-tutorial-overlay]')
 // A venue call is on screen (LiveKitRoom's container): other people's voices
 // would be heard as commands, so voice listens only on a press
 const inLiveCall = () => !!document.querySelector('.lk-room-container, [data-live-call]')
+// How setup ended and how far the tour got, behind the analytics consent
+// (analytics.feature checks it). Never the needs: they are health information
+const reportSetup: A11yOptions['onEvent'] = (event, props) => analytics.feature('accessibility', event, props)
 
 /**
  * KTIP's mount of the accessibility kit. Inside AuthProvider to see the
@@ -31,6 +36,8 @@ export function A11yHost({ children }: { children: ReactNode }) {
   const sync = useKtipA11ySync()
   const messages = useKtipA11yMessages()
   const routes = useKtipRoutes()
+  const journey = useKtipJourney()
+  const setup = useKtipSetupGate()
   // The shortcuts KTIP had before the kit, listed in its help dialog
   const extraShortcuts = useMemo(
     () => [
@@ -53,6 +60,9 @@ export function A11yHost({ children }: { children: ReactNode }) {
       extraShortcuts={extraShortcuts}
       isBlocked={tourRunning}
       voiceRestricted={inLiveCall}
+      setup={setup}
+      journey={journey}
+      onEvent={reportSetup}
     >
       {children}
       {/* Outside the router on purpose: it only shows where there is no FAB,

@@ -40,7 +40,8 @@ export function useRemoteSync({ store, adapter, theme, held, debounceMs = 600 }:
     const a = adapterRef.current
     if (!a.identity || settled.current !== a.identity || heldRef.current) return
     const state = store.getState()
-    if (state.updatedAt <= written.current) return
+    // 0 is a device that has never changed anything: nothing to push
+    if (state.updatedAt === 0 || state.updatedAt <= written.current) return
     const stamp = state.updatedAt
     a.write(toBlob(state, themeRef.current?.get())).then(
       () => {

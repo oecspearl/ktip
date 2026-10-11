@@ -24,7 +24,7 @@ import { useDisclosureAnimation } from './useDisclosureAnimation'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { prefersReducedMotionNow } from '../../a11y/store'
 import { useRegisterFab } from '../../a11y/fab-presence'
-import { onRequest } from '@a11y-kit'
+import { onRequest, useSetupActive } from '@a11y-kit'
 
 // The feedback modal is a canvas annotator behind a button almost nobody
 // presses on any given page — it has no business in the entry chunk.
@@ -111,6 +111,7 @@ export function FloatingActionButton() {
   const containerRef = useRef<HTMLDivElement>(null)
   // Tells A11yQuickButton the panel is reachable from here
   useRegisterFab()
+  const setupActive = useSetupActive()
   // Alt+Shift+A, the skip link and voice all ask for the panel the same way
   useEffect(
     () =>
@@ -228,7 +229,8 @@ export function FloatingActionButton() {
         else if (pageTutorialId) startTutorial(pageTutorialId)
         setOpen(false)
       },
-      show: isHome || !!pageTutorialId,
+      // Hidden while the accessibility setup tour runs, so two tours never overlap
+      show: (isHome || !!pageTutorialId) && !setupActive,
       badge: !!pageTutorialId && !isTutorialCompleted(pageTutorialId),
     },
     {

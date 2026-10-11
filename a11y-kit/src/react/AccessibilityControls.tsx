@@ -424,6 +424,13 @@ export function AccessibilityControls({ variant = 'settings', only, exclude, foo
           </Section>
         )
       })}
+      {variant === 'settings' && (
+        <div className="ak-controls-foot">
+          <button type="button" className="ak-btn" onClick={() => request('setup')}>
+            {m.runAgain}
+          </button>
+        </div>
+      )}
       {footer}
     </div>
   )

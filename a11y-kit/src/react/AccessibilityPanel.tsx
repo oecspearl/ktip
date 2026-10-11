@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { AccessibilityControls, resetAllSettings, type ControlId } from './AccessibilityControls'
 import { useA11yContext } from './context'
+import { request } from '../core/events'
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex="0"]'
 
@@ -64,6 +65,16 @@ export function AccessibilityPanel({ onClose, actions, exclude, className }: Acc
       <div className="ak-panel-foot">
         <button type="button" className="ak-btn" onClick={() => resetAllSettings(store)}>
           {m.resetAll}
+        </button>
+        <button
+          type="button"
+          className="ak-link-btn"
+          onClick={() => {
+            onClose()
+            request('setup')
+          }}
+        >
+          {m.runAgain}
         </button>
         {actions}
       </div>

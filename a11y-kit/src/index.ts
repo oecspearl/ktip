@@ -68,13 +68,17 @@ export { PHRASES } from './core/voice/phrases'
 export type { PhraseTable } from './core/voice/phrases'
 export { accessibleName, activate, collectClickables, matchByLabel } from './core/voice/targets'
 export type { ReaderCommand } from './core/events'
+export { DEFAULT_NEEDS, NO_NEEDS, applyPreset, changedKeys } from './core/setup/presets'
+export type { NeedDef, PresetResult } from './core/setup/presets'
+export { isSetupActive, shouldOfferSetup, subscribeSetupActive } from './core/setup/flow'
+export type { GateState, SetupRun, SetupStage } from './core/setup/flow'
 export { blockText, collectReadableBlocks } from './core/reader/blocks'
 export { createReader } from './core/reader/engine'
 export type { PageReader, ReaderOptions, ReaderProblem, ReaderState, ReaderStatus } from './core/reader/engine'
 
 // React
 export { SkipLinks } from './react/SkipLinks'
-export type { A11yFeatures, A11yOptions, A11yRoute, NavigationAdapter } from './react/options'
+export type { A11yEvent, A11yFeatures, A11yOptions, A11yRoute, JourneyStop, NavigationAdapter, SetupGate } from './react/options'
 export { BROWSER_NAVIGATION } from './react/options'
 export { A11yProvider } from './react/A11yProvider'
 export type { A11yProviderProps } from './react/A11yProvider'
@@ -88,4 +92,5 @@ export {
   useA11yDevice,
   useA11ySetting,
   useReducedMotion,
+  useSetupActive,
 } from './react/hooks'

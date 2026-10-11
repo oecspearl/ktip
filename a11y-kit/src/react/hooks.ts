@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import type { A11ySettings, DeviceState, StoredState } from '../core/config'
+import { isSetupActive, subscribeSetupActive } from '../core/setup/flow'
 import type { A11yStore } from '../core/store'
 import { useResolvedStore } from './context'
 
@@ -25,6 +26,11 @@ export function useA11ySetting<K extends keyof A11ySettings>(
   const value = useA11ySettings(s)[key]
   const set = useCallback((next: A11ySettings[K]) => s.patch({ [key]: next } as Partial<A11ySettings>), [s, key])
   return [value, set]
+}
+
+/** True while a setup run is open. A host's own tours check this and wait. */
+export function useSetupActive(): boolean {
+  return useSyncExternalStore(subscribeSetupActive, isSetupActive, isSetupActive)
 }
 
 const MOTION_QUERY = '(prefers-reduced-motion: reduce)'

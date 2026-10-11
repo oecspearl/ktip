@@ -4,7 +4,9 @@ import type { A11yStore } from '../core/store'
 import type { SyncAdapter } from '../core/sync'
 import { A11yContext, DEFAULT_OPTIONS, type ThemeAdapter } from './context'
 import { DEFAULT_MESSAGES, type A11yMessages } from './messages'
-import type { A11yFeatures, A11yOptions, A11yRoute, NavigationAdapter } from './options'
+import type { NeedDef } from '../core/setup/presets'
+import type { A11yFeatures, A11yOptions, A11yRoute, JourneyStop, NavigationAdapter, SetupGate } from './options'
+import { SetupHost } from './setup/SetupHost'
 import { ReaderHost } from './ReaderHost'
 import { VoiceHost } from './voice/VoiceHost'
 import { Runtime } from './Runtime'
@@ -27,6 +29,11 @@ export interface A11yProviderProps {
   extraShortcuts?: A11yOptions['extraShortcuts']
   isBlocked?: () => boolean
   voiceRestricted?: () => boolean
+  /** When the setup flow may open by itself */
+  setup?: SetupGate
+  journey?: JourneyStop[]
+  needs?: NeedDef[]
+  onEvent?: A11yOptions['onEvent']
   /** Remap any chord, e.g. to dodge a host shortcut */
   chords?: Partial<Record<ShortcutAction, Chord>>
   features?: Partial<A11yFeatures>
@@ -47,6 +54,10 @@ export function A11yProvider({
   extraShortcuts,
   isBlocked,
   voiceRestricted,
+  setup,
+  journey,
+  needs,
+  onEvent,
   chords,
   features,
   children,
@@ -64,10 +75,14 @@ export function A11yProvider({
       extraShortcuts: extraShortcuts ?? DEFAULT_OPTIONS.extraShortcuts,
       isBlocked,
       voiceRestricted,
+      setup: setup ?? DEFAULT_OPTIONS.setup,
+      journey: journey ?? DEFAULT_OPTIONS.journey,
+      needs: needs ?? DEFAULT_OPTIONS.needs,
+      onEvent,
       chords: { ...DEFAULT_OPTIONS.chords, ...chords },
       features: { ...DEFAULT_OPTIONS.features, ...features },
     }),
-    [routes, navigation, targets, onSearch, extraShortcuts, isBlocked, voiceRestricted, chords, features]
+    [routes, navigation, targets, onSearch, extraShortcuts, isBlocked, voiceRestricted, setup, journey, needs, onEvent, chords, features]
   )
   const value = useMemo(
     () => ({ store, theme: theme ?? null, syncHeld, holdSync, messages: merged, options }),
@@ -79,6 +94,7 @@ export function A11yProvider({
       {options.features.shortcuts && <Runtime />}
       {options.features.reader && <ReaderHost />}
       {options.features.voice && <VoiceHost />}
+      <SetupHost />
     </A11yContext.Provider>
   )
 }

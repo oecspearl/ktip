@@ -1,3 +1,5 @@
+import { SETUP_MESSAGES } from './setup/setupMessages'
+
 /**
  * Every string the kit's UI shows, in English. A host passes translations to
  * <A11yProvider messages={...}>; anything it leaves out falls back to these.
@@ -7,6 +9,7 @@
  * names are not here: they are proper names, shown as the host wrote them.
  */
 export const DEFAULT_MESSAGES = {
+  ...SETUP_MESSAGES,
   panelTitle: 'Accessibility',
   close: 'Close',
   resetAll: 'Reset all',
