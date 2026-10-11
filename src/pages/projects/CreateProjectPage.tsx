@@ -42,6 +42,7 @@ export default function CreateProjectPage() {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [featureOnHomepage, setFeatureOnHomepage] = useState(false)
+  const [isInnovation, setIsInnovation] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [videoUrl, setVideoUrl] = useState('')
   const [employerId, setEmployerId] = useState<string | null>(null)
@@ -132,6 +133,9 @@ export default function CreateProjectPage() {
         hashtags,
         is_public: isPublic,
         feature_on_homepage: isPublic && featureOnHomepage,
+        // Sent only when ticked, so creating a project still works on a
+        // database that has not had migration 172 yet.
+        ...(isInnovation ? { is_innovation: true } : {}),
         details: cleanDetails(details),
         video_url: videoUrl.trim() || null,
         owner_id: auth.user!.id,
@@ -312,6 +316,14 @@ export default function CreateProjectPage() {
                 </span>
               </label>
             </div>
+
+            {/* Innovation flag (172): a badge on the card, a banner on the page. */}
+            <Toggle
+              checked={isInnovation}
+              onChange={setIsInnovation}
+              label={t`Innovation project`}
+              description={t`Adds an Innovation badge to the project card and a banner to the project page.`}
+            />
 
             {/* Homepage opt-in (160). Reads off while private: the homepage
                 query only ever sees public projects. */}

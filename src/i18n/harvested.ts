@@ -538,7 +538,7 @@ You can edit or unpublish it afterwards, so nothing here is one-way. Signed out,
   msg`Custom Section`,
   msg`Cutting the background out of your photo`,
   msg`Dark mode and readable text`,
-  msg`Dark mode, reduced motion, text scale.`,
+  msg`Dark mode, text size, contrast, reading font and spacing, read-aloud and voice settings, and whether you have agreed to voice commands on this device.`,
   msg`Dashboard, Personalization.
 
 Pick the topics and categories you care about, and the content types you want to see. You can also opt out of specific items you never want surfaced again.

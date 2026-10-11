@@ -63,6 +63,7 @@ export default function EditProjectPage() {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [isPublic, setIsPublic] = useState(true)
   const [featureOnHomepage, setFeatureOnHomepage] = useState(false)
+  const [isInnovation, setIsInnovation] = useState(false)
   const [details, setDetails] = useState<DetailEntry[]>([])
   const [videoUrl, setVideoUrl] = useState('')
   const [employerId, setEmployerId] = useState<string | null>(null)
@@ -82,6 +83,7 @@ export default function EditProjectPage() {
       setHashtags(project.hashtags || [])
       setIsPublic(project.is_public ?? true)
       setFeatureOnHomepage(project.feature_on_homepage ?? false)
+      setIsInnovation(project.is_innovation ?? false)
       setDetails(project.details || [])
       setVideoUrl(project.video_url ?? '')
       setEmployerId(project.employer_id ?? null)
@@ -139,6 +141,9 @@ export default function EditProjectPage() {
         hashtags,
         is_public: isPublic,
         feature_on_homepage: isPublic && featureOnHomepage,
+        // Sent only when the owner changed it, so an edit still saves on a
+        // database that has not had migration 172 yet.
+        ...(isInnovation !== (project?.is_innovation ?? false) ? { is_innovation: isInnovation } : {}),
         details: cleanDetails(details),
         video_url: videoUrl.trim() || null,
         employer_id: employerId,
@@ -318,6 +323,17 @@ export default function EditProjectPage() {
                 </span>
               </label>
             </div>
+
+            {/* Innovation flag (172). The owner's declaration, so owner only;
+                an editor's save leaves the column alone. */}
+            {isOwner && (
+              <Toggle
+                checked={isInnovation}
+                onChange={setIsInnovation}
+                label={t`Innovation project`}
+                description={t`Adds an Innovation badge to the project card and a banner to the project page.`}
+              />
+            )}
 
             {/* Homepage opt-in (160). The owner's call, so owner only; an
                 editor's save sends the seeded value back unchanged. */}

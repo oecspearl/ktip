@@ -110,6 +110,7 @@ export interface Database {
           is_public: boolean
           is_featured: boolean
           feature_on_homepage: boolean
+          is_innovation: boolean
           owner_id: string
           created_at: string
           updated_at: string
@@ -126,6 +127,7 @@ export interface Database {
           is_public?: boolean
           is_featured?: boolean
           feature_on_homepage?: boolean
+          is_innovation?: boolean
           owner_id: string
           created_at?: string
           updated_at?: string
@@ -142,6 +144,7 @@ export interface Database {
           is_public?: boolean
           is_featured?: boolean
           feature_on_homepage?: boolean
+          is_innovation?: boolean
           owner_id?: string
           created_at?: string
           updated_at?: string

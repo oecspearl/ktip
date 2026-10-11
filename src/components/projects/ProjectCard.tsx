@@ -1,4 +1,4 @@
-import { EyeOff, Users } from 'lucide-react'
+import { EyeOff, Lightbulb, Users } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
 import { Badge } from '../ui/Badge'
 import type { Project } from '../../types'
@@ -65,6 +65,15 @@ export function ProjectCard({ project, dismissible }: ProjectCardProps) {
       cta={t`View Project`}
     >
       <div className="flex flex-wrap items-center gap-2">
+        {/* Migration 172. Sun, not the white of the pills beside it, so it
+            reads as a different kind of thing from the phase. Yellow takes
+            ink, never white. */}
+        {project.is_innovation && (
+          <Badge className="bg-ktip-sun-500 text-ktip-ink border-transparent inline-flex items-center gap-1">
+            <Lightbulb size={12} aria-hidden="true" />
+            {t`Innovation`}
+          </Badge>
+        )}
         <Badge className="bg-white/90 text-ktip-ocean-700 dark:text-ktip-ocean-50 border-transparent">
           {resolveCopy(i18n, PHASE_LABELS[project.phase])}
         </Badge>

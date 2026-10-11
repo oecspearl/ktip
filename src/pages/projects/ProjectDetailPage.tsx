@@ -34,6 +34,7 @@ import {
   Users,
   UserPlus,
   Clock,
+  Lightbulb,
 } from 'lucide-react'
 import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/constants'
 import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
@@ -216,6 +217,12 @@ export default function ProjectDetailPage() {
         }
       >
         <div className="flex flex-wrap items-center gap-2">
+          {project.is_innovation && (
+            <Badge className="bg-ktip-sun-500 text-ktip-ink border-transparent">
+              <Lightbulb size={14} aria-hidden="true" />
+              <Trans>Innovation</Trans>
+            </Badge>
+          )}
           <Badge className={PHASE_COLORS[project.phase]}>
             {PHASE_LABELS[project.phase]}
           </Badge>
@@ -233,6 +240,22 @@ export default function ProjectDetailPage() {
 
           {/* === Main Column === */}
           <div className="lg:col-span-2">
+            {/* Innovation banner (172). The owner's own declaration, and the
+                copy says so: nothing on the platform vets the claim. */}
+            {project.is_innovation && (
+              <aside className="flex items-start gap-3 rounded-lg border-l-4 border-ktip-sun-500 bg-ktip-sun-50 px-4 py-3 mb-8">
+                <Lightbulb size={20} aria-hidden="true" className="text-ktip-sun-700 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-ktip-sand-900">
+                    <Trans>Innovation project</Trans>
+                  </p>
+                  <p className="text-sm text-ktip-sand-700">
+                    <Trans>The team behind this project says it is new work: a product, service or way of working the region doesn't have yet.</Trans>
+                  </p>
+                </div>
+              </aside>
+            )}
+
             {/* Post title repeat */}
             <h2
               id="overview"

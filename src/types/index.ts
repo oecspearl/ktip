@@ -468,6 +468,9 @@ export interface Project extends Ranked {
   is_featured: boolean
   /** Migration 160 — the owner's opt-in to lead the homepage Projects tab. */
   feature_on_homepage: boolean
+  /** Migration 172 — the owner says this is an innovation project. Optional
+   *  because a deploy can run ahead of the migration. */
+  is_innovation?: boolean
   view_count: number
   /** Accepted collaborators, kept in step by a trigger (migration 079).
    *  Denormalised because project_members is unreadable to non-members. */
