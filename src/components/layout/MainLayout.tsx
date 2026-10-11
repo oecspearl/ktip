@@ -1,5 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { Outlet, useLocation } from 'react-router'
+import { Navigate, Outlet, useLocation } from 'react-router'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { SessionRecoveryBanner } from '../SessionRecoveryBanner'
@@ -78,7 +78,8 @@ function OverlayPanels() {
 
 export function MainLayout() {
   const auth = useAuth()
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
 
   // The venue floorplan is a full-viewport map; a footer below it would make
   // the page scrollable, so wheel-over-map would scroll the page instead of
@@ -115,6 +116,15 @@ export function MainLayout() {
   // a round trip; the result is shared through React Query, so this is one
   // request per page load no matter how many fields end up scanning.
   useModerationRules()
+
+  // The sign-in challenge applies to public pages as well. ProtectedRoute owns
+  // it for members-only routes, but sign-in lands on the homepage, which is
+  // public, so a member who owed a code was left browsing signed in until they
+  // opened a protected page. Not blocking while the answer is in flight: public
+  // pages must not wait on it, and the redirect follows as soon as it lands.
+  if (auth.user && !auth.mfaChallengeLoading && auth.mfaChallengeRequired) {
+    return <Navigate to="/security/verify" replace state={{ from: location }} />
+  }
 
   return (
     <MessagingPanelProvider>
