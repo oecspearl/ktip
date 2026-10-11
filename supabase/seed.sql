@@ -50,14 +50,14 @@ UPDATE profiles SET display_name = 'Andre Williams', bio = 'CTO at CaribbeanClou
 -- 2. PROJECTS  (8 projects across categories & phases)
 -- ============================================================
 
-INSERT INTO projects (id, title, description, category, phase, hashtags, image_url, is_public, is_climate_action, owner_id, created_at) VALUES
+INSERT INTO projects (id, title, description, category, phase, hashtags, image_url, is_public, is_climate_action, is_innovation, owner_id, created_at) VALUES
   ('b0000000-0000-0000-0000-000000000001',
    'AgriSense SVG',
    'IoT soil-moisture and weather sensors for smallholder farmers in the Grenadines. The system sends SMS alerts and yield predictions via a simple dashboard, reducing crop loss by up to 30%.',
    'agriculture', 'prototype',
    ARRAY['iot','agriculture','climate','grenadines'],
    'https://images.unsplash.com/photo-1762337547936-9b92844d7e44?w=800&h=600&fit=crop',
-   true, true,
+   true, true, true,
    'a0000000-0000-0000-0000-000000000005',
    NOW() - INTERVAL '115 days'),
 
@@ -67,7 +67,7 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'education', 'funding',
    ARRAY['edtech','elearning','caribbean','offline'],
    'https://images.unsplash.com/photo-1693302981072-0d72e90623b3?w=800&h=600&fit=crop',
-   true, false,
+   true, false, true,
    'a0000000-0000-0000-0000-000000000006',
    NOW() - INTERVAL '105 days'),
 
@@ -77,7 +77,7 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'technology', 'concept',
    ARRAY['ar','tourism','heritage','dominica'],
    'https://images.unsplash.com/photo-1536069221282-d877868cad6b?w=800&h=600&fit=crop',
-   true, false,
+   true, false, false,
    'a0000000-0000-0000-0000-000000000007',
    NOW() - INTERVAL '95 days'),
 
@@ -87,7 +87,7 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'environment', 'funding',
    ARRAY['solar','energy','resilience','microgrid'],
    'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&h=600&fit=crop',
-   true, true,
+   true, true, false,
    'a0000000-0000-0000-0000-000000000008',
    NOW() - INTERVAL '85 days'),
 
@@ -97,7 +97,7 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'environment', 'prototype',
    ARRAY['ai','marine','coral','conservation'],
    'https://images.unsplash.com/photo-1708649290066-5f617003b93f?w=800&h=600&fit=crop',
-   true, true,
+   true, true, true,
    'a0000000-0000-0000-0000-000000000009',
    NOW() - INTERVAL '75 days'),
 
@@ -107,7 +107,7 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'technology', 'launch',
    ARRAY['govtech','opendata','cloud','oecs'],
    'https://images.unsplash.com/photo-1772602666529-80b72786bca6?w=800&h=600&fit=crop',
-   true, false,
+   true, false, false,
    'a0000000-0000-0000-0000-000000000012',
    NOW() - INTERVAL '55 days'),
 
@@ -117,7 +117,7 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'healthcare', 'concept',
    ARRAY['telehealth','healthcare','rural','telemedicine'],
    'https://images.unsplash.com/photo-1758691461932-d0aa0ebf6b31?w=800&h=600&fit=crop',
-   true, false,
+   true, false, false,
    'a0000000-0000-0000-0000-000000000012',
    NOW() - INTERVAL '45 days'),
 
@@ -127,11 +127,13 @@ INSERT INTO projects (id, title, description, category, phase, hashtags, image_u
    'environment', 'prototype',
    ARRAY['water','iot','monitoring','climate'],
    'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=800&h=600&fit=crop',
-   true, true,
+   true, true, true,
    'a0000000-0000-0000-0000-000000000012',
    NOW() - INTERVAL '35 days')
 
 ON CONFLICT (id) DO UPDATE SET
+  -- 172. Refreshed on re-run so an existing demo database picks up the flag.
+  is_innovation = EXCLUDED.is_innovation,
   image_url = EXCLUDED.image_url,
   title = EXCLUDED.title,
   description = EXCLUDED.description;

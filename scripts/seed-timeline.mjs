@@ -167,6 +167,7 @@ const PROJECTS = [
       'Reef Guard pairs solar buoys with a shore-side gateway so fisheries officers can spot bleaching conditions days earlier. Piloting in Soufrière Bay.',
     category: 'environment',
     phase: 'launch',
+    is_innovation: true,
     createdDays: 165,
     updatedDays: 18,
     events: [
@@ -198,6 +199,7 @@ const PROJECTS = [
       'A sync-on-reconnect learning client so students keep progressing through modules during outages, then reconcile with the campus LMS.',
     category: 'education',
     phase: 'prototype',
+    is_innovation: true,
     createdDays: 54,
     updatedDays: 9,
     events: [
