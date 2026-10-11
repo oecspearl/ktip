@@ -60,6 +60,7 @@ const footerColumns: FooterColumn[] = [
       // In the footer because a rightsholder with no KTIP account has nowhere
       // else to look, and they are exactly who needs to find it.
       { label: msg`Report infringement`, href: '/legal/copyright/report' },
+      { label: msg`Accessibility`, href: '/accessibility' },
       { label: msg`All policies`, href: '/legal' },
     ],
   },

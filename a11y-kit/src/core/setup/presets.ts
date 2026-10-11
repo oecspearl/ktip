@@ -50,7 +50,10 @@ export const DEFAULT_NEEDS: NeedDef[] = [
     // Voice is offered on its own switch, never turned on for someone
     set: { bigTargets: true, cursor: 'large', focusRing: 'strong', shortcuts: 'all', focusOnNavigate: true },
   },
-  { id: 'hearing', set: { captions: 'on' } },
+  // Nothing to switch: captions in a live room are each speaker's own choice,
+  // so no setting on this device can turn them on. The answer still shapes
+  // the tour, and says so rather than pretending
+  { id: 'hearing', set: {} },
   {
     id: 'cognitive',
     set: { reduceMotion: true, highlightHeadings: true, underlineLinks: true, spacing: 1, readerBar: true, focusRing: 'strong' },

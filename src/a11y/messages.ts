@@ -168,7 +168,7 @@ const TEXT: Record<A11yTextKey, MessageDescriptor> = {
   needMotor: msg`Using a mouse is hard`,
   needMotorHint: msg`Bigger buttons, keyboard shortcuts, a clear focus outline.`,
   needHearing: msg`Deaf or hard of hearing`,
-  needHearingHint: msg`Captions on by default in live rooms.`,
+  needHearingHint: msg`Nothing changes: KTIP is mostly text. In live rooms, captions appear when a speaker turns them on.`,
   needCognitive: msg`Concentration or memory`,
   needCognitiveHint: msg`Calmer pages: no motion, clearer structure, read aloud.`,
   needMotionSensitive: msg`Motion makes me feel unwell`,

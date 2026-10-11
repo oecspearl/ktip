@@ -26,7 +26,7 @@ export const SETUP_MESSAGES = {
   needMotor: 'Using a mouse is hard',
   needMotorHint: 'Bigger buttons, keyboard shortcuts, a clear focus outline.',
   needHearing: 'Deaf or hard of hearing',
-  needHearingHint: 'Captions on by default in live rooms.',
+  needHearingHint: 'Nothing changes: the site is mostly text. In live rooms, captions appear when a speaker turns them on.',
   needCognitive: 'Concentration or memory',
   needCognitiveHint: 'Calmer pages: no motion, clearer structure, read aloud.',
   needMotionSensitive: 'Motion makes me feel unwell',

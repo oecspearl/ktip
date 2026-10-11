@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Toggle } from '../../components/ui/Toggle'
@@ -407,6 +408,15 @@ export function PreferencesTab() {
         {/* The same controls as the floating panel (a11y kit). Dark mode keeps
             its own card below, so it is left out here */}
         <AccessibilityControls variant="settings" exclude={['theme']} />
+        <p className="mt-4 text-sm text-ktip-sand-600">
+          <Trans>
+            What each setting does, and what KTIP still gets wrong, is in the{' '}
+            <Link to="/accessibility" className="font-medium text-ktip-ocean-600 underline underline-offset-2">
+              accessibility statement
+            </Link>
+            .
+          </Trans>
+        </p>
       </Card>
 
       {/* Appearance — applies instantly and follows the member across devices (155) */}

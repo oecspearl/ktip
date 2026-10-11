@@ -13,6 +13,8 @@ import { ktipTheme } from './theme'
 
 /** Navbar's search box opens on this event (Navbar.tsx, beside its Ctrl+K handler) */
 export const OPEN_SEARCH_EVENT = 'ktip:open-search'
+/** The FAB opens its feedback form on this event (the accessibility statement's report link) */
+export const OPEN_FEEDBACK_EVENT = 'ktip:open-feedback'
 
 const TARGETS = { main: '#main-content', nav: '#site-nav' }
 const openSearch = (query?: string) => window.dispatchEvent(new CustomEvent(OPEN_SEARCH_EVENT, { detail: { query } }))

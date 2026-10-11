@@ -318,6 +318,7 @@ const router = createBrowserRouter([
           { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
           { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
+          { path: '/accessibility', lazy: lazyPage(() => import('./pages/AccessibilityStatementPage')) },
           { path: '/help/faq', lazy: lazyPage(() => import('./pages/help/FAQPage')) },
           { path: '/integrations', element: <Navigate to="/resources?tab=integrations" replace /> },
 

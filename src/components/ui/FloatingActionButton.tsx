@@ -121,6 +121,12 @@ export function FloatingActionButton() {
       }),
     []
   )
+  // The accessibility statement's "send feedback" (OPEN_FEEDBACK_EVENT)
+  useEffect(() => {
+    const open = () => setFeedbackOpen(true)
+    window.addEventListener('ktip:open-feedback', open)
+    return () => window.removeEventListener('ktip:open-feedback', open)
+  }, [])
   const triggerRef = useRef<HTMLButtonElement>(null)
   // The trigger is a pale tile that vanishes on the app's white pages and a
   // white blob on the dark venue/hero bands. Read what is actually underneath
