@@ -21,7 +21,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(process.cwd(), 'src'),
-      '@a11y-kit': resolve(process.cwd(), 'a11y-kit/src'),
     },
   },
   test: {
@@ -35,6 +34,6 @@ export default defineConfig({
     // friends are undefined, which is why the existing component tests assert
     // with bare `expect`.
     setupFiles: ['src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}', 'a11y-kit/src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 })

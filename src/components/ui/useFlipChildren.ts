@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, type RefObject } from 'react'
 import { DISCLOSURE_ENTER_MS } from './useDisclosureAnimation'
-import { prefersReducedMotionNow } from '../../a11y/store'
+import { prefersReducedMotionNow } from '../../a11y/viridion'
 
 interface Box {
   left: number

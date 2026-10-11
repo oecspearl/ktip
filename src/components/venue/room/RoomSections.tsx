@@ -50,7 +50,7 @@ import type {
   VenueRoom,
 } from '../../../types'
 import { useLingui } from '@lingui/react/macro'
-import { prefersReducedMotionNow } from '../../../a11y/store'
+import { prefersReducedMotionNow } from '../../../a11y/viridion'
 
 /**
  * Everything one section needs, gathered once by the page.

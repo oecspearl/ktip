@@ -1,22 +1,22 @@
 import { useCallback, useMemo } from 'react'
-import type { SyncAdapter, SyncedBlob } from '@a11y-kit'
 import { useAuth } from '../contexts/AuthContext'
 import { blobFromDisplayPrefs, displayPrefsFromBlob } from './display-prefs'
+import type { ConfigureInput, SyncedBlob } from './viridion'
 
-/** The kit's SyncAdapter over the signed-in member's profiles.display_prefs. */
-export function useKtipA11ySync(): SyncAdapter {
+/** The signed-in member's settings, carried in profiles.display_prefs (155) */
+export function useKtipA11ySync(): NonNullable<ConfigureInput['sync']> {
   const { user, profile, updateProfile } = useAuth()
-  const identity = user?.id ?? null
-  // undefined while the profile is loading: the kit waits rather than
+  const prefs = profile && user && profile.id === user.id ? profile.display_prefs : undefined
+  // undefined while the profile is loading: the service waits rather than
   // mistaking "not loaded yet" for "never saved"
-  const remote = !user ? null : profile && profile.id === user.id ? blobFromDisplayPrefs(profile.display_prefs) : undefined
-
-  // Fire-and-forget by design; the kit swallows a failure and retries on the
-  // next change, so a dropped write never toasts
-  const write = useCallback(
+  const remote = useMemo(
+    () => (!user ? null : prefs === undefined ? undefined : blobFromDisplayPrefs(prefs)),
+    [user, prefs]
+  )
+  // Fire-and-forget; the service retries on the next change, so a dropped write never toasts
+  const save = useCallback(
     (blob: SyncedBlob) => updateProfile({ display_prefs: displayPrefsFromBlob(blob) }),
     [updateProfile]
   )
-
-  return useMemo(() => ({ identity, remote, write }), [identity, remote, write])
+  return useMemo(() => ({ userId: user?.id ?? null, remote, save }), [user?.id, remote, save])
 }

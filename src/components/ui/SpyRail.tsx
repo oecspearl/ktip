@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils'
 import { useSpySteps } from '../../hooks/useSpySteps'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useLingui } from '@lingui/react/macro'
-import { prefersReducedMotionNow } from '../../a11y/store'
+import { prefersReducedMotionNow } from '../../a11y/viridion'
 
 /**
  * Scrollspy rail — the page-scroll affordance that replaced the old

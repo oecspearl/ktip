@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_SETTINGS, type SyncedBlob } from '@a11y-kit'
+import type { SyncedBlob } from './viridion'
 import { blobFromDisplayPrefs, displayPrefsFromBlob } from './display-prefs'
 
-describe('display_prefs <-> kit blob', () => {
+describe('display_prefs <-> service blob', () => {
   it('reads nothing from an empty column', () => {
     expect(blobFromDisplayPrefs(null)).toBeNull()
     expect(blobFromDisplayPrefs({})).toBeNull()
@@ -18,7 +18,7 @@ describe('display_prefs <-> kit blob', () => {
     })
   })
 
-  it('prefers the kit blob, with the top-level theme', () => {
+  it('prefers the service blob, with the top-level theme', () => {
     const a11y: SyncedBlob = { v: 2, updatedAt: 500, settings: { fontScale: 1.4 } }
     expect(blobFromDisplayPrefs({ theme: 'light', fontScale: 1, a11y })).toEqual({ ...a11y, theme: 'light' })
   })
@@ -28,7 +28,7 @@ describe('display_prefs <-> kit blob', () => {
       v: 2,
       updatedAt: 9,
       theme: 'dark',
-      settings: { ...DEFAULT_SETTINGS, font: 'atkinson', fontScale: 1.3, photoBrightness: 0.9, reduceMotion: true },
+      settings: { font: 'atkinson', fontScale: 1.3, photoBrightness: 0.9, reduceMotion: true },
     }
     const prefs = displayPrefsFromBlob(blob)
     expect(prefs).toMatchObject({ theme: 'dark', readable: true, fontScale: 1.3, brightness: 0.9, reducedMotion: true })

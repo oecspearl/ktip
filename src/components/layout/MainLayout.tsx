@@ -22,7 +22,7 @@ const MessagingPanel = lazyOverlay(
   'messaging-panel'
 )
 
-import { SkipLinks } from '@a11y-kit'
+import { SkipLinks } from './SkipLinks'
 
 const MemberPanel = lazyOverlay(
   () => import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel })),
@@ -136,8 +136,8 @@ export function MainLayout() {
     {/* Holds the notes, so the FAB can create one and the layer can draw it */}
     <StickyNotesProvider>
     <div className="min-h-svh flex flex-col bg-ktip-canvas">
-      {/* Content, menu, search, accessibility settings: the a11y kit's skip
-          links, styled as the single link here always was */}
+      {/* Content, menu, search, accessibility settings, styled as the single
+          link here always was */}
       <SkipLinks linkClassName="sr-only focus:not-sr-only focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 dark:focus:bg-ktip-ocean-200 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium" />
       <Navbar />
       {/* profileLoading has to be in the guard: auth.loading flips false as soon

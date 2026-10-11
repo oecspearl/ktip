@@ -219,7 +219,7 @@ function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
 function AnalyticsRoot() {
   return (
     <AnalyticsProvider>
-      {/* Hands the router to the a11y kit, which sits outside it */}
+      {/* Hands the router to the accessibility service, which sits outside it */}
       <A11yRouterBridge />
       <Outlet />
       {/* Rendered inside the router, not beside it: the popup links to the
@@ -872,8 +872,8 @@ function App() {
                   AuthProvider itself because LanguageProvider is above it. */}
               <LanguageProfileSync />
               {/* Same job for theme and every accessibility setting (155),
-                  through the a11y kit. Around the router, not inside a layout,
-                  so the auth pages have it too. */}
+                  through the hosted accessibility service. Around the router,
+                  not inside a layout, so the auth pages have it too. */}
               <A11yHost>
                 <AchievementProvider>
                   <RouterProvider router={router} />

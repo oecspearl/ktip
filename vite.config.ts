@@ -9,8 +9,40 @@ import type { Plugin } from 'vite'
 import type { VitePluginPWAAPI } from 'vite-plugin-pwa'
 // @ts-expect-error -- plain .mjs plugin, shared verbatim with vitest.config.ts
 import { imageManifestPlugin } from './vite/image-manifest-plugin.mjs'
-import { a11yPrepaint } from './a11y-kit/src/vite/prepaint-plugin'
 import { A11Y_CONFIG } from './src/a11y/config'
+
+/**
+ * The hosted accessibility service (Viridion Accessibility) in index.html:
+ * KTIP's settings block, the first-paint script (no defer: it paints the
+ * member's text size, contrast and fonts before the first frame), the display
+ * modes, and the page runtime. From VITE_A11Y_ORIGIN with KTIP's key,
+ * VITE_A11Y_KEY. A development server falls back to the service running
+ * locally; a production build without them stops, so KTIP never ships with
+ * its accessibility controls missing.
+ */
+const A11Y_DEV_ORIGIN = 'http://127.0.0.1:4200'
+const A11Y_DEV_KEY = 'pk_test_KtipLocalhostDevKey001'
+
+function a11yServicePlugin(env: Record<string, string>, command: 'build' | 'serve') {
+  const origin = (env.VITE_A11Y_ORIGIN || (command === 'serve' ? A11Y_DEV_ORIGIN : '')).replace(/\/$/, '')
+  const key = env.VITE_A11Y_KEY || (command === 'serve' ? A11Y_DEV_KEY : '')
+  if (!origin || !key) {
+    throw new Error('VITE_A11Y_ORIGIN and VITE_A11Y_KEY must be set to build KTIP: they load the accessibility service')
+  }
+  const block = JSON.stringify({ ...A11Y_CONFIG, key }).replace(/</g, '\\u003c')
+  return {
+    name: 'ktip-a11y-service',
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler: () => [
+        { tag: 'script', attrs: { type: 'application/json', id: 'viridion-a11y' }, children: block, injectTo: 'head' as const },
+        { tag: 'script', attrs: { src: `${origin}/v1/boot.js` }, injectTo: 'head' as const },
+        { tag: 'link', attrs: { rel: 'stylesheet', href: `${origin}/v1/modes.css` }, injectTo: 'head' as const },
+        { tag: 'script', attrs: { type: 'module', src: `${origin}/v1/connect.js` }, injectTo: 'head' as const },
+      ],
+    },
+  }
+}
 
 /**
  * Read OPENAI_API_KEY directly from .env file as a fallback,
@@ -421,7 +453,7 @@ function precacheFirstPaintPlugin(): Plugin {
   }
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const openaiKey = getOpenAIKey(env)
   // The api/ handlers read process.env, exactly as they do on Vercel
@@ -625,9 +657,8 @@ export default defineConfig(({ mode }) => {
         },
       }),
       edgeApiPlugin(openaiKey),
-      // Text size, contrast and fonts painted before the first frame, from the
-      // same config the runtime store uses (a11y-kit)
-      a11yPrepaint(A11Y_CONFIG),
+      // The accessibility service, with KTIP's settings block (src/a11y/config.ts)
+      a11yServicePlugin(env, command),
       preconnectPlugin(env.VITE_SUPABASE_URL),
       routeChunkPreloadPlugin(),
       precacheFirstPaintPlugin(),
@@ -786,7 +817,6 @@ export default defineConfig(({ mode }) => {
         // process.cwd(), not __dirname: this config is ESM, where __dirname is
         // undefined. Matches how loadEnv and the api/ loader above resolve.
         '@': resolve(process.cwd(), 'src'),
-        '@a11y-kit': resolve(process.cwd(), 'a11y-kit/src'),
       },
       dedupe: ['react', 'react-dom', '@codemirror/state', '@codemirror/view', '@codemirror/language'],
     },

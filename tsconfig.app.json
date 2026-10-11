@@ -28,13 +28,10 @@
        must agree or a module resolves in the editor but not at runtime.
        No baseUrl: paths resolve against this file, and TypeScript 7 rejects it. */
     "paths": {
-      "@/*": ["./src/*"],
-      "@a11y-kit": ["./a11y-kit/src/index.ts"],
-      "@a11y-kit/*": ["./a11y-kit/src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "a11y-kit/src"],
-  /* Server-side tests — typechecked by tsconfig.node.json instead. The kit's
-     Vite plugin and tests need Node types; a11y-kit/tsconfig.json checks them. */
-  "exclude": ["src/lib/__tests__", "a11y-kit/src/vite", "a11y-kit/src/__tests__"]
+  "include": ["src"],
+  /* Server-side tests — typechecked by tsconfig.node.json instead. */
+  "exclude": ["src/lib/__tests__"]
 }

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 import {
   Accessibility,
   GraduationCap,
@@ -20,20 +20,14 @@ import { useBackdropTone } from '../../hooks/useBackdropTone'
 import { useViewportScale } from '../../hooks/useViewportScale'
 import { cn } from '../../lib/utils'
 import { replayWelcome } from '../../lib/welcome-panel'
-import { useDisclosureAnimation } from './useDisclosureAnimation'
-import { Trans, useLingui } from '@lingui/react/macro'
-import { prefersReducedMotionNow } from '../../a11y/store'
+import { useLingui } from '@lingui/react/macro'
 import { useRegisterFab } from '../../a11y/fab-presence'
-import { onRequest, useSetupActive } from '@a11y-kit'
+import { prefersReducedMotionNow, useSetupActive } from '../../a11y/viridion'
 
 // The feedback modal is a canvas annotator behind a button almost nobody
 // presses on any given page — it has no business in the entry chunk.
 const FeedbackModal = lazy(() =>
   import('../feedback/FeedbackModal').then((m) => ({ default: m.FeedbackModal }))
-)
-// The shared accessibility controls, fetched the first time the panel opens
-const AccessibilityPanel = lazy(() =>
-  import('../../a11y/ui').then((m) => ({ default: m.AccessibilityPanel }))
 )
 const StickyNoteFabPanel = lazy(() =>
   import('../notes/StickyNoteFabPanel').then((m) => ({ default: m.StickyNoteFabPanel }))
@@ -106,21 +100,11 @@ export function FloatingActionButton() {
   const { pathname } = useLocation()
   const [dark, setDark] = useThemeMode()
   const [open, setOpen] = useState(false)
-  const [a11yOpen, setA11yOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  // Tells A11yQuickButton the panel is reachable from here
+  // Tells A11yQuickButton the Accessibility button is reachable from here
   useRegisterFab()
   const setupActive = useSetupActive()
-  // Alt+Shift+A, the skip link and voice all ask for the panel the same way
-  useEffect(
-    () =>
-      onRequest('panel', () => {
-        setOpen(true)
-        setA11yOpen(true)
-      }),
-    []
-  )
   // The accessibility statement's "send feedback" (OPEN_FEEDBACK_EVENT)
   useEffect(() => {
     const open = () => setFeedbackOpen(true)
@@ -134,9 +118,6 @@ export function FloatingActionButton() {
   // expanded, the trigger is the slate close button and owns its own colour.
   const backdrop = useBackdropTone(triggerRef, !open, pathname)
   const onLightBackdrop = backdrop === 'light'
-  // Kept mounted through its exit so the panel can fall back into the cluster;
-  // timings must match .fab-panel in index.css.
-  const a11yPanel = useDisclosureAnimation(open && a11yOpen, { enterMs: 220, exitMs: 180 })
   // Every length below is `em` against this, so the cluster keeps its authored
   // proportions instead of looking oversized on a smaller CSS viewport
   const scale = useViewportScale(FAB_DESIGN)
@@ -173,14 +154,11 @@ export function FloatingActionButton() {
     const onMouseDown = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false)
-        setA11yOpen(false)
       }
     }
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      // Escape backs out one level at a time: panel first, then the cluster
-      if (a11yOpen) setA11yOpen(false)
-      else setOpen(false)
+      setOpen(false)
     }
     document.addEventListener('mousedown', onMouseDown)
     document.addEventListener('keydown', onKeyDown)
@@ -188,7 +166,7 @@ export function FloatingActionButton() {
       document.removeEventListener('mousedown', onMouseDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [open, a11yOpen])
+  }, [open])
 
   const actions: FabAction[] = [
     {
@@ -210,8 +188,9 @@ export function FloatingActionButton() {
       label: t`Accessibility`,
       icon: <Accessibility size={px(23)} />,
       tone: 'blue',
-      // Opens a panel rather than acting directly, so the cluster stays open
-      onClick: () => setA11yOpen((v) => !v),
+      // The hosted service opens its pop-up beside this button (data-viridion-a11y
+      // below), so the cluster stays open behind it
+      onClick: () => {},
     },
     {
       id: 'feedback',
@@ -314,42 +293,11 @@ export function FloatingActionButton() {
       className="fixed bottom-[1.5em] right-[1.5em] z-fab flex flex-col items-center gap-[0.75em]"
       style={{ fontSize: `${16 * scale}px` }}
     >
-      {/* Accessibility panel, inside containerRef so the outside-click handler
-          treats it as part of the FAB. Beside the cluster from sm up: the open
-          column is ~28em tall, and stacked above it the panel would run off a
-          laptop screen. A bottom sheet on phones, over the cluster but clear
-          of its close button. */}
-      {a11yPanel.mounted && (
-        <div
-          data-state={a11yPanel.state}
-          className="fab-panel origin-bottom-right max-sm:fixed max-sm:inset-x-4 max-sm:bottom-[6.5em] sm:absolute sm:bottom-0 sm:right-full sm:mr-[0.75em]"
-        >
-          <Suspense fallback={null}>
-            <AccessibilityPanel
-              onClose={() => setA11yOpen(false)}
-              actions={
-                auth.user && (
-                  <Link
-                    to="/dashboard/preferences#accessibility"
-                    className="ak-link-btn"
-                    onClick={() => {
-                      setA11yOpen(false)
-                      setOpen(false)
-                    }}
-                  >
-                    <Trans>All settings</Trans>
-                  </Link>
-                )
-              }
-            />
-          </Suspense>
-        </div>
-      )}
-
       {visible.map((action, index) => (
         <button
           key={action.id}
           onClick={action.onClick}
+          data-viridion-a11y={action.id === 'accessibility' ? 'open' : undefined}
           aria-label={action.label}
           tabIndex={open ? 0 : -1}
           className={cn(

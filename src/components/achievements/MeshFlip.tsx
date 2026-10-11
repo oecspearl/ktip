@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '../../lib/utils'
-import { prefersReducedMotionNow } from '../../a11y/store'
+import { prefersReducedMotionNow } from '../../a11y/viridion'
 
 /**
  * Mesh flip: the achievements gallery's detail view.

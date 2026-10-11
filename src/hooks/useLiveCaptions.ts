@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { acquireMic } from '@a11y-kit'
+import { acquireMic } from '../a11y/viridion'
 import { useDataChannel, useLocalParticipant } from '@livekit/components-react'
 import { useContentLanguage } from '../i18n/useContentLanguage'
 import { request } from '../lib/i18n/batcher'

@@ -1,15 +1,14 @@
-import { useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, type ReactNode } from 'react'
 import { useLingui } from '@lingui/react/macro'
-import { A11yProvider, type A11yOptions } from '@a11y-kit'
+import { useAuth } from '../contexts/AuthContext'
 import { analytics } from '../hooks/useAnalytics'
 import { A11yQuickButton } from './A11yQuickButton'
-import { useKtipA11yMessages } from './messages'
 import { ktipNavigation } from './navigation'
 import { useKtipRoutes } from './routes'
 import { useKtipJourney, useKtipSetupGate } from './setup'
-import { a11yStore } from './store'
 import { useKtipA11ySync } from './sync'
 import { ktipTheme } from './theme'
+import { configureA11y, type ConfigureInput } from './viridion'
 
 /** Navbar's search box opens on this event (Navbar.tsx, beside its Ctrl+K handler) */
 export const OPEN_SEARCH_EVENT = 'ktip:open-search'
@@ -25,22 +24,40 @@ const tourRunning = () => !!document.querySelector('[data-tutorial-overlay]')
 const inLiveCall = () => !!document.querySelector('.lk-room-container, [data-live-call]')
 // How setup ended and how far the tour got, behind the analytics consent
 // (analytics.feature checks it). Never the needs: they are health information
-const reportSetup: A11yOptions['onEvent'] = (event, props) => analytics.feature('accessibility', event, props)
+const reportSetup: ConfigureInput['onEvent'] = (event, props) => analytics.feature('accessibility', event, props)
+const SETTINGS_PATH = '/dashboard/preferences#accessibility'
 
 /**
- * KTIP's mount of the accessibility kit. Inside AuthProvider to see the
- * profile, and around the router so every route has it, auth pages included.
- * Theme, text size, fonts and every other display setting travel between the
- * device and profiles.display_prefs (155) as one blob.
+ * KTIP as a customer of the hosted accessibility service (Viridion
+ * Accessibility). index.html loads the service; this tells it about KTIP:
+ * the router, the theme, the pages, the setup tour, the member's saved
+ * settings (profiles.display_prefs, 155) and the language. Around the router,
+ * inside AuthProvider, so it sees the profile and covers the auth pages.
  */
 export function A11yHost({ children }: { children: ReactNode }) {
-  const { t } = useLingui()
+  const { t, i18n } = useLingui()
+  const { user } = useAuth()
   const sync = useKtipA11ySync()
-  const messages = useKtipA11yMessages()
   const routes = useKtipRoutes()
   const journey = useKtipJourney()
   const setup = useKtipSetupGate()
-  // The shortcuts KTIP had before the kit, listed in its help dialog
+  const locale = i18n.locale.split('-')[0]
+
+  // What never changes for the life of the page
+  useEffect(() => {
+    configureA11y({
+      ...ktipNavigation,
+      theme: ktipTheme,
+      targets: TARGETS,
+      onSearch: openSearch,
+      isBlocked: tourRunning,
+      voiceRestricted: inLiveCall,
+      onEvent: reportSetup,
+      onAction: (id) => id === 'all-settings' && ktipNavigation.navigate(SETTINGS_PATH),
+    })
+  }, [])
+
+  // The shortcuts KTIP had before the service, listed in its help dialog
   const extraShortcuts = useMemo(
     () => [
       { keys: 'Ctrl+K', label: t`Search the site` },
@@ -48,28 +65,22 @@ export function A11yHost({ children }: { children: ReactNode }) {
     ],
     [t]
   )
+  const panelActions = useMemo(() => (user ? [{ id: 'all-settings', label: t`All settings` }] : []), [user, t])
+
+  useEffect(() => {
+    configureA11y({ routes, journey, setup, extraShortcuts, panelActions, locale })
+  }, [routes, journey, setup, extraShortcuts, panelActions, locale])
+
+  useEffect(() => {
+    configureA11y({ sync })
+  }, [sync])
 
   return (
-    <A11yProvider
-      store={a11yStore}
-      theme={ktipTheme}
-      sync={sync}
-      messages={messages}
-      routes={routes}
-      navigation={ktipNavigation}
-      targets={TARGETS}
-      onSearch={openSearch}
-      extraShortcuts={extraShortcuts}
-      isBlocked={tourRunning}
-      voiceRestricted={inLiveCall}
-      setup={setup}
-      journey={journey}
-      onEvent={reportSetup}
-    >
+    <>
       {children}
       {/* Outside the router on purpose: it only shows where there is no FAB,
           which is every page that is not inside MainLayout */}
       <A11yQuickButton />
-    </A11yProvider>
+    </>
   )
 }

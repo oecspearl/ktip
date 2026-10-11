@@ -1,4 +1,4 @@
-import type { ThemeAdapter } from '@a11y-kit'
+import type { ThemeAdapter } from './viridion'
 
 const STORAGE_KEY = 'ktip_theme'
 export const THEME_SYNC_EVENT = 'ktip-theme-change'
@@ -17,7 +17,7 @@ export function setThemeMode(dark: boolean) {
   window.dispatchEvent(new CustomEvent(THEME_SYNC_EVENT, { detail: dark }))
 }
 
-/** KTIP's theme as the kit sees it, so sync and presets can carry it. */
+/** KTIP's theme as the accessibility service sees it, so sync and presets can carry it. */
 export const ktipTheme: ThemeAdapter = {
   get: () => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
   set: (mode) => setThemeMode(mode === 'dark'),
