@@ -15,7 +15,7 @@ import { Suspense, lazy, type ComponentProps } from 'react'
 import { AchievementProvider, useAchievementContext } from './contexts/AchievementContext'
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { LanguageProfileSync } from './i18n/LanguageProfileSync'
-import { DisplayPrefsSync } from './components/DisplayPrefsSync'
+import { A11yHost } from './a11y/A11yHost'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
@@ -860,12 +860,14 @@ function App() {
                   AuthProvider to see the profile, and it cannot live inside
                   AuthProvider itself because LanguageProvider is above it. */}
               <LanguageProfileSync />
-              {/* Same job for theme, readable font, text size, brightness and
-                  reduced motion (155). */}
-              <DisplayPrefsSync />
-              <AchievementProvider>
-                <RouterProvider router={router} />
-              </AchievementProvider>
+              {/* Same job for theme and every accessibility setting (155),
+                  through the a11y kit. Around the router, not inside a layout,
+                  so the auth pages have it too. */}
+              <A11yHost>
+                <AchievementProvider>
+                  <RouterProvider router={router} />
+                </AchievementProvider>
+              </A11yHost>
             </AuthProvider>
           </ToastProvider>
         </LanguageProvider>

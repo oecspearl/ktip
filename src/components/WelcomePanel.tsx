@@ -9,6 +9,7 @@ import { useDeckFlip } from './ui/useDeckFlip'
 import { PHOTO_SETS } from '../lib/hero-images'
 import { markWelcomeSeen, useHasSeenWelcome } from '../lib/welcome-panel'
 import { useIsMobile } from '../hooks/useMediaQuery'
+import { prefersReducedMotionNow } from '../a11y/store'
 
 /**
  * The first thing a device ever sees.
@@ -75,13 +76,8 @@ const SLIDES = [
   },
 ]
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 /** Where a fresh run starts: the title card, unless motion is unwelcome. */
-const openingPhase = (): Phase => (prefersReducedMotion() ? 'reading' : 'title')
+const openingPhase = (): Phase => (prefersReducedMotionNow() ? 'reading' : 'title')
 
 export function WelcomePanel() {
   const { t, i18n } = useLingui()

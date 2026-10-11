@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '../../lib/utils'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 /**
  * Mesh flip: the achievements gallery's detail view.
@@ -44,10 +45,6 @@ const FOCUSABLE =
 /** Past the 550ms transform transition; catches a swallowed transitionend. */
 const SETTLE_FALLBACK_MS = 700
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
 export interface MeshFlipController {
   /** Cell currently flipped open; drives .mesh-open and the veil. */
   activeId: string | null
@@ -75,7 +72,7 @@ export function useMeshFlip(): MeshFlipController {
     setActiveId(null)
     // No transition under reduced motion, so no transitionend will ever
     // report the landing — unmount in the same breath.
-    if (prefersReducedMotion()) setMountedId(null)
+    if (prefersReducedMotionNow()) setMountedId(null)
   }, [])
 
   const settle = useCallback(() => setMountedId(null), [])

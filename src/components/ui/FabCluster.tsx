@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { cn } from '../../lib/utils'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 // Opt-in, and lazy on top of that: a cluster without `stickyNotes` never loads
 // the notes module, and one with it does not pay for the editor up front.
@@ -187,7 +188,7 @@ export function FabCluster({
       return
     }
     if (!closing) return
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    if (prefersReducedMotionNow()) return
     setCollapsing(true)
   }, [open])
 

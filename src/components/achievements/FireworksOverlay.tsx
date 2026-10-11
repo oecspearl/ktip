@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 /**
  * Celebration particles behind the unlock popup.
@@ -24,17 +25,9 @@ interface FireworksOverlayProps {
 }
 
 export function FireworksOverlay({ runKey, durationMs = 1600 }: FireworksOverlayProps) {
-  const [reduced, setReduced] = useState(true)
+  // The OS setting or the member's own switch, live
+  const reduced = useReducedMotion()
   const [done, setDone] = useState(false)
-
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setReduced(query.matches)
-
-    const onChange = (event: MediaQueryListEvent) => setReduced(event.matches)
-    query.addEventListener('change', onChange)
-    return () => query.removeEventListener('change', onChange)
-  }, [])
 
   useEffect(() => {
     setDone(false)

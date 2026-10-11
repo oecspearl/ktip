@@ -5,6 +5,9 @@ import type { AvatarStyle } from '../lib/avatar-backdrop'
 import type { ProfileLook } from '../lib/profile-look'
 import type { SocialLinks } from '../lib/social-links'
 import type { CalendarAccent, CalendarNoteKind } from '../lib/constants'
+// Relative and to the DOM-free module: the server project (tsconfig.node.json)
+// reaches this file through api/ tests and has neither the alias nor DOM types
+import type { SyncedBlob } from '../../a11y-kit/src/core/sync'
 
 /**
  * Every platform role. The first seven predate the tiered hierarchy and are
@@ -409,13 +412,20 @@ export interface ProfileView {
  * from the same contribution array server-side, so the chip on a card can
  * never disagree with the ordering it produced.
  */
-/** Migration 155 — what profiles.display_prefs may hold. All optional. */
+/**
+ * Migration 155 — what profiles.display_prefs may hold. All optional.
+ *
+ * `a11y` is the accessibility kit's blob and the source of truth. The flat
+ * keys are still written beside it for builds from before the kit, and read
+ * only when `a11y` is absent (src/a11y/sync.ts).
+ */
 export interface DisplayPrefs {
   theme?: 'dark' | 'light'
   readable?: boolean
   fontScale?: number
   brightness?: number
   reducedMotion?: boolean
+  a11y?: SyncedBlob
 }
 
 export interface MatchReason {

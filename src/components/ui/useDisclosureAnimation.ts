@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 export type DisclosureState = 'open' | 'closed'
 
@@ -64,9 +65,7 @@ export function useDisclosureAnimation(
       return
     }
 
-    const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const reduced = prefersReducedMotionNow()
 
     if (open) {
       setMounted(true)

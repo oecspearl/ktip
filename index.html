@@ -59,39 +59,11 @@
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
     <script>
-      // Readable mode, and the only thing that still needs Google Fonts.
-      //
-      // The <link> tags used to sit statically in this head, which meant every
-      // visitor paid a blocking third-party stylesheet for Atkinson
-      // Hyperlegible whether or not they had readable mode on — and the app
-      // otherwise renders system Arial/Helvetica, so almost nobody did.
-      // Injected here instead: same first-paint timing for the readers who need
-      // it (this script runs during head parsing, ahead of the entry module),
-      // and no request at all for everyone else.
-      try {
-        if (localStorage.getItem('ktip_readable') === 'true') {
-          document.documentElement.classList.add('readable')
-          var add = function (rel, href, cors) {
-            var el = document.createElement('link')
-            el.rel = rel
-            el.href = href
-            if (cors) el.crossOrigin = ''
-            document.head.appendChild(el)
-          }
-          add('preconnect', 'https://fonts.googleapis.com')
-          add('preconnect', 'https://fonts.gstatic.com', true)
-          add(
-            'stylesheet',
-            'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap'
-          )
-        }
-      } catch (e) {}
-      try {
-        // The member's own reduced-motion switch (155) — same first-paint
-        // timing as the theme, for the same reason.
-        if (localStorage.getItem('ktip_motion') === 'true')
-          document.documentElement.classList.add('reduce-motion')
-      } catch (e) {}
+      // Text size, readable font, reduced motion and every other accessibility
+      // setting are painted by a script the a11y-kit Vite plugin injects at the
+      // end of this head, built from src/a11y/config.ts — the same config the
+      // runtime store reads, so the first frame and the settled page agree.
+      // Webfonts load only for readers who chose one.
       try {
         var t = localStorage.getItem('ktip_theme');
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches))

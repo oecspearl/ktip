@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-
-const STORAGE_KEY = 'ktip_theme';
-const SYNC_EVENT = 'ktip-theme-change';
+import { THEME_SYNC_EVENT, setThemeMode } from '../a11y/theme';
 
 /**
  * Light/dark theme mode: toggles the `dark` class on <html>, which flips the
  * ktip color variables (see html.dark in index.css). The class is applied
  * pre-render by an inline script in index.html (saved preference, else OS
  * prefers-color-scheme), so initial state reads from the DOM.
+ *
+ * The setter is setThemeMode (src/a11y/theme.ts), shared with the
+ * accessibility kit so presets and sync flip the same switch.
  */
 export function useThemeMode(): [boolean, (dark: boolean) => void] {
   const [dark, setDarkState] = useState(() =>
@@ -17,20 +18,9 @@ export function useThemeMode(): [boolean, (dark: boolean) => void] {
   // Keep every mounted instance in sync (e.g. FAB toggle + Settings toggle)
   useEffect(() => {
     const onSync = (e: Event) => setDarkState((e as CustomEvent<boolean>).detail);
-    window.addEventListener(SYNC_EVENT, onSync);
-    return () => window.removeEventListener(SYNC_EVENT, onSync);
+    window.addEventListener(THEME_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(THEME_SYNC_EVENT, onSync);
   }, []);
 
-  const setDark = (on: boolean) => {
-    document.documentElement.classList.toggle('dark', on);
-    try {
-      localStorage.setItem(STORAGE_KEY, on ? 'dark' : 'light');
-    } catch {
-      // localStorage unavailable — mode still applies for this session
-    }
-    setDarkState(on);
-    window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: on }));
-  };
-
-  return [dark, setDark];
+  return [dark, setThemeMode];
 }

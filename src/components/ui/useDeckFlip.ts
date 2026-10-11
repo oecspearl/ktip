@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 /**
  * Deck-style flip: one card, cumulative rotation.
@@ -59,7 +60,7 @@ export function useDeckFlip(step: number, n: number, panelPct = 45) {
     const target = (step - 1) * 180
     if (!el || s.rot === target) return
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = prefersReducedMotionNow()
     if (reduced || !el.offsetParent) {
       // Instant swap: reduced motion, or panel hidden (mobile)
       s.rot = target

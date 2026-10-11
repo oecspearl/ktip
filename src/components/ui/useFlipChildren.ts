@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, type RefObject } from 'react'
 import { DISCLOSURE_ENTER_MS } from './useDisclosureAnimation'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 interface Box {
   left: number
@@ -49,10 +50,7 @@ export function useFlipChildren(
     const host = ref.current
     if (!host) return
 
-    const reduced =
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = prefersReducedMotionNow()
 
     const next = new Map<string, Box>()
     const timers: ReturnType<typeof setTimeout>[] = []

@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { cn } from '../../lib/utils'
 import { EASE_IN, EASE_OUT, StaggeredMenuIcon } from './StaggeredMenuIcon'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 /**
  * Direct children, with fragments opened up.
@@ -215,8 +216,7 @@ export function StaggeredMobileMenu({
     const body = bodyRef.current
     if (!body) return
     const previous = tileRects.current
-    const reduced =
-      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = prefersReducedMotionNow()
     // The panel's width changes on the commit that flips `expanded`, so every
     // offset measured here is stale by the full width delta. The frame slides
     // to its new edge on its own (the FLIP after this one) and the grid moves
@@ -275,7 +275,7 @@ export function StaggeredMobileMenu({
     if (!frame || last === null) return
     const dx = last - frame.offsetLeft
     if (Math.abs(dx) < 1) return
-    if (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (prefersReducedMotionNow()) return
     frame.animate(
       [{ transform: `translateX(${dx}px)` }, { transform: 'translateX(0)' }],
       { duration: 520, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }

@@ -31,6 +31,7 @@ import { cn } from '../../lib/utils'
 import { replayWelcome } from '../../lib/welcome-panel'
 import { useDisclosureAnimation } from './useDisclosureAnimation'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 // The feedback modal is a canvas annotator behind a button almost nobody
 // presses on any given page — it has no business in the entry chunk.
@@ -271,7 +272,7 @@ export function FloatingActionButton() {
       return
     }
     if (!closing) return
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    if (prefersReducedMotionNow()) return
     setCollapsing(true)
   }, [open])
 

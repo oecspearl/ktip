@@ -1,38 +1,16 @@
-import { useEffect, useState } from 'react';
-
-const STORAGE_KEY = 'ktip_readable';
-const SYNC_EVENT = 'ktip-readable-change';
+import { useCallback } from 'react';
+import { useA11ySettings } from '@a11y-kit';
+import { a11yStore } from '../a11y/store';
 
 /**
- * Accessibility "readable font" mode: toggles the `readable` class on <html>,
- * which swaps all fonts to Atkinson Hyperlegible (see index.css).
- * The class is applied pre-render by an inline script in index.html,
- * so initial state reads from the DOM rather than localStorage.
- *
- * Same CustomEvent sync as useThemeMode, so the Settings toggle, the FAB and
- * DisplayPrefsSync (155) all agree without a shared store.
+ * Accessibility "readable font" mode: Atkinson Hyperlegible across the site
+ * (html.readable, see index.css). A view over the accessibility kit's `font`
+ * setting, which also loads the webfont the first time it is chosen.
  */
 export function useReadableMode(): [boolean, (on: boolean) => void] {
-  const [enabled, setEnabled] = useState(() =>
-    document.documentElement.classList.contains('readable')
-  );
-
-  useEffect(() => {
-    const onSync = (e: Event) => setEnabled((e as CustomEvent<boolean>).detail);
-    window.addEventListener(SYNC_EVENT, onSync);
-    return () => window.removeEventListener(SYNC_EVENT, onSync);
+  const enabled = useA11ySettings(a11yStore).font === 'atkinson';
+  const setReadable = useCallback((on: boolean) => {
+    a11yStore.patch({ font: on ? 'atkinson' : 'default' });
   }, []);
-
-  const setReadable = (on: boolean) => {
-    document.documentElement.classList.toggle('readable', on);
-    try {
-      localStorage.setItem(STORAGE_KEY, String(on));
-    } catch {
-      // localStorage unavailable — mode still applies for this session
-    }
-    setEnabled(on);
-    window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: on }));
-  };
-
   return [enabled, setReadable];
 }

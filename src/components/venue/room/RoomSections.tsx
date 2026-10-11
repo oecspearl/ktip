@@ -50,6 +50,7 @@ import type {
   VenueRoom,
 } from '../../../types'
 import { useLingui } from '@lingui/react/macro'
+import { prefersReducedMotionNow } from '../../../a11y/store'
 
 /**
  * Everything one section needs, gathered once by the page.
@@ -254,7 +255,7 @@ function startBentoTransition(apply: () => void) {
 
   if (
     typeof start !== 'function' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    prefersReducedMotionNow()
   ) {
     apply()
     return

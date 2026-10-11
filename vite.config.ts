@@ -9,6 +9,8 @@ import type { Plugin } from 'vite'
 import type { VitePluginPWAAPI } from 'vite-plugin-pwa'
 // @ts-expect-error -- plain .mjs plugin, shared verbatim with vitest.config.ts
 import { imageManifestPlugin } from './vite/image-manifest-plugin.mjs'
+import { a11yPrepaint } from './a11y-kit/src/vite/prepaint-plugin'
+import { A11Y_CONFIG } from './src/a11y/config'
 
 /**
  * Read OPENAI_API_KEY directly from .env file as a fallback,
@@ -623,6 +625,9 @@ export default defineConfig(({ mode }) => {
         },
       }),
       edgeApiPlugin(openaiKey),
+      // Text size, contrast and fonts painted before the first frame, from the
+      // same config the runtime store uses (a11y-kit)
+      a11yPrepaint(A11Y_CONFIG),
       preconnectPlugin(env.VITE_SUPABASE_URL),
       routeChunkPreloadPlugin(),
       precacheFirstPaintPlugin(),
@@ -781,6 +786,7 @@ export default defineConfig(({ mode }) => {
         // process.cwd(), not __dirname: this config is ESM, where __dirname is
         // undefined. Matches how loadEnv and the api/ loader above resolve.
         '@': resolve(process.cwd(), 'src'),
+        '@a11y-kit': resolve(process.cwd(), 'a11y-kit/src'),
       },
       dedupe: ['react', 'react-dom', '@codemirror/state', '@codemirror/view', '@codemirror/language'],
     },

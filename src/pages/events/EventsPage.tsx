@@ -42,6 +42,7 @@ import type { Event } from '../../types'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 type EventsView = 'calendar' | 'grid'
 
@@ -115,7 +116,7 @@ export default function EventsPage() {
     const node = calendarRef.current
     if (!node) return
     scrolledToCalendarRef.current = true
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = prefersReducedMotionNow()
     // One frame's grace so the grid has laid out and the target is where the
     // scroll expects it
     requestAnimationFrame(() => {

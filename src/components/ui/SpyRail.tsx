@@ -3,6 +3,7 @@ import { cn } from '../../lib/utils'
 import { useSpySteps } from '../../hooks/useSpySteps'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useLingui } from '@lingui/react/macro'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 /**
  * Scrollspy rail — the page-scroll affordance that replaced the old
@@ -111,7 +112,7 @@ export function SpyRail({
   const hidden = (steps.find((s) => s.id === active) ?? steps[0]).hide
 
   const jump = (id: string) => {
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const reduce = prefersReducedMotionNow()
     document
       .getElementById(id)
       ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })

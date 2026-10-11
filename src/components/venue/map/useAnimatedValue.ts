@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { prefersReducedMotionNow } from '../../../a11y/store'
 
 /**
  * Ease a number towards a target on animation frames.
@@ -16,9 +17,7 @@ export function useAnimatedValue(target: number, speed = 7): number {
   const valueRef = useRef(target)
 
   useEffect(() => {
-    const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const reduced = prefersReducedMotionNow()
 
     if (reduced) {
       valueRef.current = target
