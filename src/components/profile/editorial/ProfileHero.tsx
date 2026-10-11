@@ -132,8 +132,13 @@ function Portrait({ name, avatarUrl, style }: { name: string; avatarUrl: string 
   const [ratio, setRatio] = useState<number | null>(null)
 
   if (cutout) {
+    // Hidden until the ratio is known, and the reveal starts then: a box that
+    // reshapes mid-reveal makes the figure jump across the panel.
     return (
-      <div className="pf-cutbox pf-a-reveal" style={ratio ? ({ '--ar': ratio } as CSSProperties) : undefined}>
+      <div
+        className={cn('pf-cutbox', ratio ? 'pf-a-reveal' : 'pf-cutbox--wait')}
+        style={ratio ? ({ '--ar': ratio } as CSSProperties) : undefined}
+      >
         <img
           className="pf-portrait"
           src={cutout.cutout}
@@ -141,8 +146,9 @@ function Portrait({ name, avatarUrl, style }: { name: string; avatarUrl: string 
           decoding="async"
           onLoad={(e) => {
             const el = e.currentTarget
-            if (el.naturalWidth && el.naturalHeight) setRatio(el.naturalWidth / el.naturalHeight)
+            setRatio(el.naturalWidth && el.naturalHeight ? el.naturalWidth / el.naturalHeight : 0.85)
           }}
+          onError={() => setRatio(0.85)}
         />
       </div>
     )
@@ -164,10 +170,18 @@ function Portrait({ name, avatarUrl, style }: { name: string; avatarUrl: string 
 function Stat({ stat }: { stat: HeroStat }) {
   const { i18n } = useLingui()
   const shown = useCountUp(stat.value)
+  const format = new Intl.NumberFormat(i18n.locale, { maximumFractionDigits: 0 })
   return (
     <div className={cn('pf-stat', `pf-stat--${stat.key}`)}>
       <dt>{stat.label}</dt>
-      <dd>{new Intl.NumberFormat(i18n.locale, { maximumFractionDigits: 0 }).format(Math.round(shown ?? 0))}</dd>
+      {/* The final figure, invisible, holds the width while the count climbs
+          through it — otherwise each new digit nudges the row sideways. */}
+      <dd>
+        <span className="pf-stat-hold" aria-hidden="true">
+          {format.format(stat.value)}
+        </span>
+        <span>{format.format(Math.round(shown ?? 0))}</span>
+      </dd>
     </div>
   )
 }

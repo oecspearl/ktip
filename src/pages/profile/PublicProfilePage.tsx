@@ -9,6 +9,7 @@ import { useAllBadges, useUserBadges } from '../../hooks/useBadges'
 import { useConnectionCount } from '../../hooks/useConnections'
 import { usePublicResume } from '../../hooks/useResume'
 import { useProfileStats } from '../../hooks/useProfileStats'
+import { useHeroHold } from '../../components/profile/editorial/useHeroHold'
 import { useTrophyAssets, useTrackFlag } from '../../hooks/useAchievements'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
@@ -71,10 +72,15 @@ export default function PublicProfilePage() {
   const { projects } = useUserProjects(idFor('projects'))
   const { events } = useUserEvents(idFor('events'))
   const { badges } = useUserBadges(idFor('achievements'))
-  const { count: connectionCount } = useConnectionCount(idFor('standing'))
+  const { count: connectionCount, loading: countLoading } = useConnectionCount(idFor('standing'))
   // Feeds both the meter and the shelf's pinned order; the server leaves out
   // whichever half this viewer may not see.
-  const { stats } = useProfileStats(idFor('standing', 'achievements'))
+  const { stats, loading: statsLoading } = useProfileStats(idFor('standing', 'achievements'))
+  // isPending is also true for a disabled query, hence the idFor checks.
+  const holdHero = useHeroHold(
+    (!!idFor('standing') && countLoading) || (!!idFor('standing', 'achievements') && statsLoading),
+    id
+  )
   const { assetMap } = useTrophyAssets()
   // The whole catalogue, for the "Locked" teaser under the trophy shelf. It is
   // a small, static list cached under one key across the app, so this costs a
@@ -112,7 +118,7 @@ export default function PublicProfilePage() {
     if (id && auth.user?.id && id !== auth.user.id && anythingToSee) trackFlag('directory_views')
   }, [id, auth.user?.id, anythingToSee, trackFlag])
 
-  if (loading) {
+  if (loading || holdHero) {
     return (
       // The navbar is solid over member pages, so the placeholder is the page's
       // own shape: the hero panel, then the tab row.

@@ -326,6 +326,9 @@ html.dark .pf {
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
 }
+.pf-cutbox--wait {
+  visibility: hidden;
+}
 .pf-hero[data-align='left'] .pf-cutbox {
   right: auto;
   left: 0;
@@ -683,6 +686,13 @@ a:hover > .pf-arrow {
   line-height: 1;
   letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
+  display: grid;
+}
+.pf-stat dd > span {
+  grid-area: 1 / 1;
+}
+.pf-stat-hold {
+  visibility: hidden;
 }
 .pf-stat dt {
   margin-top: 8px;

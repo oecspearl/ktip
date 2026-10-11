@@ -35,6 +35,7 @@ import { entityPath, memberPath } from '../../lib/slug'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { TrophyImage } from '../achievements/TrophyImage'
 import { ProfileHero, type HeroStat } from '../profile/editorial/ProfileHero'
+import { useHeroHold } from '../profile/editorial/useHeroHold'
 import { ledeFrom } from '../profile/ProfileCanvas'
 import '../profile/editorial/editorial.css'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -121,9 +122,11 @@ export function MemberPanel() {
   const { events } = useUserEvents(idFor('events'))
   const { badges } = useUserBadges(idFor('achievements'))
   // null when this viewer isn't allowed to see the count (owner's setting)
-  const { count: connectionCount } = useConnectionCount(idFor('standing'))
+  const { count: connectionCount, loading: countLoading } = useConnectionCount(idFor('standing'))
   // null for suspended accounts; the drawer just omits the figures then
-  const { stats } = useProfileStats(idFor('standing'))
+  const { stats, loading: statsLoading } = useProfileStats(idFor('standing'))
+  // isPending is also true for a disabled query, hence the idFor check.
+  const holdHero = useHeroHold(!!idFor('standing') && (countLoading || statsLoading), resolvedId)
   // Trophy artwork, keyed type x tier. Cached under one key for the whole app,
   // so opening a second card costs nothing.
   const { assetMap } = useTrophyAssets()
@@ -144,7 +147,7 @@ export function MemberPanel() {
     return () => observer.disconnect()
     // Re-attaches when the body swaps between the gate, the private panel and
     // the full profile, since the sentinel only exists in the last of those.
-  }, [show, canView, signedIn, loading])
+  }, [show, canView, signedIn, loading, holdHero])
 
   // Escape closes the drawer — unless an open Modal (role="dialog") owns the key.
   useEffect(() => {
@@ -358,7 +361,7 @@ export function MemberPanel() {
                     </Link>
                   </div>
                 </div>
-              ) : loading || !profile ? (
+              ) : loading || holdHero || !profile ? (
                 <div className="space-y-3">
                   <div className="h-[26rem] animate-pulse-soft rounded-surface-lg bg-ktip-sand-100" />
                   <div className="h-32 animate-pulse-soft rounded-surface bg-ktip-sand-100" />
