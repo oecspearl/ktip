@@ -24,6 +24,7 @@ import { useDisclosureAnimation } from './useDisclosureAnimation'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { prefersReducedMotionNow } from '../../a11y/store'
 import { useRegisterFab } from '../../a11y/fab-presence'
+import { onRequest } from '@a11y-kit'
 
 // The feedback modal is a canvas annotator behind a button almost nobody
 // presses on any given page — it has no business in the entry chunk.
@@ -110,6 +111,15 @@ export function FloatingActionButton() {
   const containerRef = useRef<HTMLDivElement>(null)
   // Tells A11yQuickButton the panel is reachable from here
   useRegisterFab()
+  // Alt+Shift+A, the skip link and voice all ask for the panel the same way
+  useEffect(
+    () =>
+      onRequest('panel', () => {
+        setOpen(true)
+        setA11yOpen(true)
+      }),
+    []
+  )
   const triggerRef = useRef<HTMLButtonElement>(null)
   // The trigger is a pale tile that vanishes on the app's white pages and a
   // white blob on the dark venue/hero bands. Read what is actually underneath

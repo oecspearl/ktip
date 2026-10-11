@@ -595,8 +595,19 @@ export function Navbar() {
         searchInputRef.current?.focus()
       }
     }
+    // The same, asked for by the a11y kit: its Alt+Shift+F, skip link and
+    // voice command (OPEN_SEARCH_EVENT in src/a11y/A11yHost.tsx)
+    const onOpenSearch = () => {
+      setOpenDropdownId(null)
+      setSearchOpen(true)
+      searchInputRef.current?.focus()
+    }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('ktip:open-search', onOpenSearch)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('ktip:open-search', onOpenSearch)
+    }
   }, [])
 
   // Collapsible desktop search: focus on expand, collapse on outside click / Escape
@@ -808,6 +819,8 @@ export function Navbar() {
       />
     )}
     <nav
+      // The a11y kit's skip link and Alt+Shift+G land here
+      id="site-nav"
       onMouseEnter={() => setNavHidden(false)}
       /* data-app-navbar: pinned outside the route card shuffle via a
          view-transition-name in index.css, alongside the FAB and panels. An

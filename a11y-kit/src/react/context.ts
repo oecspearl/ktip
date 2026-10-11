@@ -1,7 +1,9 @@
 import { createContext, useContext } from 'react'
 import type { ThemeMode } from '../core/config'
+import { DEFAULT_CHORDS } from '../core/shortcuts'
 import type { A11yStore } from '../core/store'
 import { DEFAULT_MESSAGES, type A11yMessages } from './messages'
+import type { A11yOptions } from './options'
 
 /** The host's light/dark switch. The kit reads and sets it, never owns it. */
 export interface ThemeAdapter {
@@ -17,6 +19,16 @@ export interface A11yContextValue {
   syncHeld: boolean
   holdSync(held: boolean): void
   messages: A11yMessages
+  options: A11yOptions
+}
+
+export const DEFAULT_OPTIONS: A11yOptions = {
+  routes: [],
+  navigation: null,
+  targets: { main: 'main, [role="main"]', nav: 'nav, [role="navigation"]' },
+  extraShortcuts: [],
+  chords: DEFAULT_CHORDS,
+  features: { shortcuts: true, skipLinks: true },
 }
 
 export const A11yContext = createContext<A11yContextValue | null>(null)

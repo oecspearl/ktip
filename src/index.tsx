@@ -7,6 +7,7 @@ import * as Sentry from '@sentry/react'
 import './index.css'
 // After index.css: both are unlayered overrides of what it sets
 import '@a11y-kit/css/modes.css'
+import '@a11y-kit/css/ui.css'
 import './a11y/a11y.css'
 import App from './App.tsx'
 import type { ErrorCode } from './lib/app-error'

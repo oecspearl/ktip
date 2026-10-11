@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Accessibility } from 'lucide-react'
-import { useA11yMessages } from '@a11y-kit'
+import { onRequest, useA11yMessages } from '@a11y-kit'
 import { useFabPresent } from './fab-presence'
 
 const AccessibilityPanel = lazy(() => import('./ui').then((m) => ({ default: m.AccessibilityPanel })))
@@ -31,6 +31,12 @@ export function A11yQuickButton() {
     const t = setTimeout(() => setSettled(true), SETTLE_MS)
     return () => clearTimeout(t)
   }, [fab])
+
+  // The panel shortcut and skip link, on the pages where this is the panel
+  useEffect(() => {
+    if (fab || !settled) return
+    return onRequest('panel', () => setOpen(true))
+  }, [fab, settled])
 
   if (fab || !settled) return null
 

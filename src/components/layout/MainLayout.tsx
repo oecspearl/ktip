@@ -22,7 +22,7 @@ const MessagingPanel = lazyOverlay(
   'messaging-panel'
 )
 
-import { Trans } from '@lingui/react/macro'
+import { SkipLinks } from '@a11y-kit'
 
 const MemberPanel = lazyOverlay(
   () => import('../directory/MemberPanel').then((m) => ({ default: m.MemberPanel })),
@@ -136,12 +136,9 @@ export function MainLayout() {
     {/* Holds the notes, so the FAB can create one and the layer can draw it */}
     <StickyNotesProvider>
     <div className="min-h-svh flex flex-col bg-ktip-canvas">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-max focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 dark:focus:bg-ktip-ocean-200 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
-      >
-        <Trans>Skip to main content</Trans>
-      </a>
+      {/* Content, menu, search, accessibility settings: the a11y kit's skip
+          links, styled as the single link here always was */}
+      <SkipLinks linkClassName="sr-only focus:not-sr-only focus:px-4 focus:py-2 focus:bg-ktip-ocean-600 dark:focus:bg-ktip-ocean-200 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium" />
       <Navbar />
       {/* profileLoading has to be in the guard: auth.loading flips false as soon
           as Supabase reports the session, while the profile query is still in

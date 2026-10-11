@@ -55,6 +55,44 @@ const TEXT: Record<A11yTextKey, MessageDescriptor> = {
 
   reduceMotion: msg`Reduce motion`,
   reduceMotionHint: msg`Stops animations and page transitions. Your device setting is always respected too.`,
+
+  shortcuts: msg`Keyboard shortcuts`,
+  shortcutsOff: msg`Off`,
+  shortcutsModifier: msg`With Alt+Shift`,
+  shortcutsAll: msg`Also single keys`,
+  shortcutsHint: msg`Single-key shortcuts can clash with a screen reader. Leave them off if you use one.`,
+  viewShortcuts: msg`Show all shortcuts`,
+  focusOnNavigate: msg`Focus the page title after moving page`,
+  focusOnNavigateHint: msg`Keyboard and screen reader users start at the top of each new page.`,
+
+  shortcutsTitle: msg`Keyboard shortcuts`,
+  shortcutsIntro: msg`Hold Alt and Shift (Option and Shift on a Mac) and press a key.`,
+  groupPages: msg`Go to a page`,
+  groupPage: msg`On this page`,
+  groupSettings: msg`Settings`,
+  groupSingle: msg`Single keys`,
+  groupSite: msg`Also on this site`,
+  headingsHere: msg`Headings on this page`,
+  noHeadings: msg`This page has no headings.`,
+  actionMain: msg`Jump to the main content`,
+  actionNav: msg`Jump to the site menu`,
+  actionSearch: msg`Search`,
+  actionPanel: msg`Open accessibility settings`,
+  actionRead: msg`Read the page aloud, or pause`,
+  actionVoice: msg`Listen for a voice command`,
+  actionHelp: msg`Show this list`,
+  actionTextUp: msg`Larger text`,
+  actionTextDown: msg`Smaller text`,
+  actionTextReset: msg`Text back to normal size`,
+  actionNextHeading: msg`Next heading`,
+  actionPrevHeading: msg`Previous heading`,
+  singleHelp: msg`Show this list`,
+  noMoreHeadings: msg`No more headings`,
+
+  skipToMain: msg`Skip to main content`,
+  skipToNav: msg`Skip to the site menu`,
+  skipToSearch: msg`Skip to search`,
+  skipToSettings: msg`Accessibility settings`,
 }
 
 /** The kit's messages in the reader's language. Rebuilt when the language changes. */
@@ -69,6 +107,8 @@ export function useKtipA11yMessages(): A11yMessages {
       resetSectionLabel: (section: string) => i18n._(msg`Reset ${section}`),
       decrease: (label: string) => i18n._(msg`Decrease ${label}`),
       increase: (label: string) => i18n._(msg`Increase ${label}`),
+      singleGo: (page: string) => i18n._(msg`Go to ${page}`),
+      textSizeIs: (percent: string) => i18n._(msg`Text size ${percent}`),
     }
     // i18n is a stable singleton; the locale is what changes
     // eslint-disable-next-line react-hooks/exhaustive-deps

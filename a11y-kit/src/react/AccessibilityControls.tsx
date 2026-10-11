@@ -1,5 +1,6 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
-import type { A11ySettings, ContrastMode, NumericKey, SpacingLevel, ThemeMode } from '../core/config'
+import type { A11ySettings, ContrastMode, NumericKey, ShortcutMode, SpacingLevel, ThemeMode } from '../core/config'
+import { openShortcutHelp } from '../core/events'
 import type { A11yStore } from '../core/store'
 import { useA11yContext } from './context'
 import { useA11ySettings } from './hooks'
@@ -23,6 +24,8 @@ export type ControlId =
   | 'cursor'
   | 'focusRing'
   | 'reduceMotion'
+  | 'shortcuts'
+  | 'focusOnNavigate'
 
 export type SectionId = 'text' | 'colour' | 'reading' | 'navigation' | 'motion'
 
@@ -34,7 +37,7 @@ export const SECTIONS: { id: SectionId; title: A11yTextKey; controls: ControlId[
     controls: ['theme', 'contrast', 'pageBrightness', 'pageContrast', 'saturation', 'photoBrightness'],
   },
   { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings'] },
-  { id: 'navigation', title: 'sectionNavigation', controls: ['bigTargets', 'cursor', 'focusRing'] },
+  { id: 'navigation', title: 'sectionNavigation', controls: ['bigTargets', 'cursor', 'focusRing', 'shortcuts', 'focusOnNavigate'] },
   { id: 'motion', title: 'sectionMotion', controls: ['reduceMotion'] },
 ]
 
@@ -87,14 +90,17 @@ export interface AccessibilityControlsProps {
  * Changes apply instantly; there is nothing to save.
  */
 export function AccessibilityControls({ variant = 'settings', only, exclude, footer }: AccessibilityControlsProps) {
-  const { store, theme, messages: m } = useA11yContext()
+  const { store, theme, messages: m, options } = useA11yContext()
   const s = useA11ySettings(store)
   const mode = useTheme(theme)
   const forced = useMedia('(forced-colors: active)')
   const r = store.config.ranges
 
   const shown = (id: ControlId) =>
-    (!only || only.includes(id)) && !exclude?.includes(id) && (id !== 'theme' || !!theme)
+    (!only || only.includes(id)) &&
+    !exclude?.includes(id) &&
+    (id !== 'theme' || !!theme) &&
+    (id !== 'shortcuts' || options.features.shortcuts)
 
   const set = (patch: Partial<A11ySettings>) => store.patch(patch)
   // From the store, not this render: four quick presses are four steps
@@ -246,6 +252,34 @@ export function AccessibilityControls({ variant = 'settings', only, exclude, foo
         hint={variant === 'compact' ? undefined : m.strongFocusHint}
         checked={s.focusRing === 'strong'}
         onChange={(v) => set({ focusRing: v ? 'strong' : 'default' })}
+      />
+    ),
+    shortcuts: () => (
+      <>
+        <ChoiceRow<ShortcutMode>
+          label={m.shortcuts}
+          hint={variant === 'compact' ? undefined : m.shortcutsHint}
+          value={s.shortcuts}
+          options={[
+            { value: 'off', label: m.shortcutsOff },
+            { value: 'modifier', label: m.shortcutsModifier },
+            { value: 'all', label: m.shortcutsAll },
+          ]}
+          onChange={(v) => set({ shortcuts: v })}
+        />
+        {s.shortcuts !== 'off' && (
+          <button type="button" className="ak-link-btn ak-inline-action" onClick={openShortcutHelp}>
+            {m.viewShortcuts}
+          </button>
+        )}
+      </>
+    ),
+    focusOnNavigate: () => (
+      <SwitchRow
+        label={m.focusOnNavigate}
+        hint={variant === 'compact' ? undefined : m.focusOnNavigateHint}
+        checked={s.focusOnNavigate}
+        onChange={(v) => set({ focusOnNavigate: v })}
       />
     ),
     reduceMotion: () => (

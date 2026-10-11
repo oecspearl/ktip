@@ -16,6 +16,7 @@ import { AchievementProvider, useAchievementContext } from './contexts/Achieveme
 import { LanguageProvider } from './i18n/LanguageProvider'
 import { LanguageProfileSync } from './i18n/LanguageProfileSync'
 import { A11yHost } from './a11y/A11yHost'
+import { A11yRouterBridge } from './a11y/navigation'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
@@ -218,6 +219,8 @@ function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
 function AnalyticsRoot() {
   return (
     <AnalyticsProvider>
+      {/* Hands the router to the a11y kit, which sits outside it */}
+      <A11yRouterBridge />
       <Outlet />
       {/* Rendered inside the router, not beside it: the popup links to the
           gallery, so it needs router context. AchievementProvider itself sits

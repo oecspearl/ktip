@@ -33,7 +33,28 @@ export type { A11yStore, StoreEnv } from './core/store'
 export { decideSync, toBlob, isSyncedBlob } from './core/sync'
 export type { SyncAdapter, SyncedBlob, SyncDecision } from './core/sync'
 
+export {
+  DEFAULT_CHORDS,
+  RESERVED_CHORDS,
+  chordLabel,
+  createSequence,
+  isEditableTarget,
+  matchChord,
+  routeChord,
+  sameChord,
+  shouldIgnoreSingleKey,
+} from './core/shortcuts'
+export type { Chord, ShortcutAction } from './core/shortcuts'
+export { focusElement, headingsIn, landmarksIn, stepHeading } from './core/focus'
+export type { Landmark } from './core/focus'
+export { announce } from './core/announce'
+export { onRequest, openAccessibilityPanel, openShortcutHelp, request } from './core/events'
+export type { A11yRequest } from './core/events'
+
 // React
+export { SkipLinks } from './react/SkipLinks'
+export type { A11yFeatures, A11yOptions, A11yRoute, NavigationAdapter } from './react/options'
+export { BROWSER_NAVIGATION } from './react/options'
 export { A11yProvider } from './react/A11yProvider'
 export type { A11yProviderProps } from './react/A11yProvider'
 export { useA11yContext, useA11yMessages } from './react/context'

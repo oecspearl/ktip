@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { shouldIgnoreSingleKey as shouldIgnore } from '@a11y-kit'
 
 interface CalendarShortcutOptions {
   onPrev: () => void
@@ -8,16 +9,6 @@ interface CalendarShortcutOptions {
   /** Omitted where there is nothing to create — the key is then inert */
   onNew?: () => void
   enabled?: boolean
-}
-
-/** Typing in a field, or inside an open dialog, is never a shortcut. */
-function shouldIgnore(event: KeyboardEvent): boolean {
-  if (event.metaKey || event.ctrlKey || event.altKey) return true
-  const target = event.target as HTMLElement | null
-  if (!target) return false
-  if (target.isContentEditable) return true
-  if (target.closest('input, textarea, select, [contenteditable="true"]')) return true
-  return Boolean(target.closest('[role="dialog"]'))
 }
 
 /**
