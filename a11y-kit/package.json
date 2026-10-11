@@ -6,10 +6,18 @@
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./vite": "./src/vite/prepaint-plugin.ts"
+    "./ui": "./src/ui.ts",
+    "./vite": "./src/vite/prepaint-plugin.ts",
+    "./css/modes.css": "./src/css/modes.css",
+    "./css/ui.css": "./src/css/ui.css"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
     "react": ">=18",
+    "react-dom": ">=18",
     "vite": ">=5"
   },
   "peerDependenciesMeta": {
@@ -18,6 +26,11 @@
     }
   },
   "devDependencies": {
+    "@testing-library/react": ">=16",
+    "@types/node": ">=20",
+    "@types/react": ">=18",
+    "jsdom": ">=24",
+    "typescript": ">=5.6",
     "vitest": ">=1"
   }
 }
