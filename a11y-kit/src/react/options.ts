@@ -51,6 +51,8 @@ export interface A11yFeatures {
   reader: boolean
   /** Voice commands, where the browser can recognise speech */
   voice: boolean
+  /** Scroll to a link's #fragment once it renders, which a single-page router does not do */
+  hashLanding: boolean
 }
 
 export interface A11yOptions {

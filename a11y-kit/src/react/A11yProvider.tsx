@@ -91,7 +91,7 @@ export function A11yProvider({
   return (
     <A11yContext.Provider value={value}>
       {children}
-      {options.features.shortcuts && <Runtime />}
+      {(options.features.shortcuts || options.features.hashLanding) && <Runtime />}
       {options.features.reader && <ReaderHost />}
       {options.features.voice && <VoiceHost />}
       <SetupHost />

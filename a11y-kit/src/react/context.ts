@@ -29,7 +29,7 @@ export const DEFAULT_OPTIONS: A11yOptions = {
   targets: { main: 'main, [role="main"]', nav: 'nav, [role="navigation"]' },
   extraShortcuts: [],
   chords: DEFAULT_CHORDS,
-  features: { shortcuts: true, skipLinks: true, reader: true, voice: true },
+  features: { shortcuts: true, skipLinks: true, reader: true, voice: true, hashLanding: true },
   setup: { enabled: false, ready: false, entryPaths: ['/'] },
   journey: [],
   needs: DEFAULT_NEEDS,

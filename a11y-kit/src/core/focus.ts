@@ -81,3 +81,90 @@ export function landmarksIn(root: ParentNode = document): Landmark[] {
       return { el, role: el.getAttribute('role') ?? ROLE_OF[el.tagName] ?? 'region', name }
     })
 }
+
+export interface LandOptions {
+  smooth?: boolean
+  /** Move keyboard focus to the target too */
+  focus?: boolean
+  /** How long to wait for the target to render, in ms */
+  timeout?: number
+  /** How long to keep it in place while content above it loads, in ms */
+  settle?: number
+}
+
+const TAKEOVER_EVENTS = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
+
+/**
+ * Land on a #fragment the way a full page load would. A single-page router
+ * does not, and the target often sits in a lazy chunk that renders after the
+ * route does. Waits for the element, scrolls to it (its scroll-margin clears a
+ * sticky header) and can focus it. Then, while content above it is still
+ * arriving, it keeps the target in place, until the person scrolls, taps or
+ * types. Returns a cancel function.
+ */
+export function landOnHash(
+  hash: string,
+  { smooth = false, focus = false, timeout = 5000, settle = 1500 }: LandOptions = {}
+): () => void {
+  let id = ''
+  try {
+    id = decodeURIComponent(hash.replace(/^#/, ''))
+  } catch {
+    // a malformed fragment names nothing
+  }
+  if (!id) return () => {}
+
+  const cleanups: (() => void)[] = []
+  const cancel = () => cleanups.splice(0).forEach((fn) => fn())
+
+  const hold = (el: HTMLElement) => {
+    const reland = () => {
+      if (el.isConnected) el.scrollIntoView?.({ block: 'start' })
+    }
+    // A layout that scrolls to the top on every route change can run after
+    // the landing; nobody scrolls themselves to exactly 0 without the input
+    // that ends the hold first
+    const onScroll = () => {
+      if (window.scrollY === 0 && el.getBoundingClientRect().top > window.innerHeight / 2) reland()
+    }
+    let first = true
+    const ro =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => {
+            // The first call is the observe itself, and would cut a smooth scroll short
+            if (first) return void (first = false)
+            reland()
+          })
+    ro?.observe(document.body)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    TAKEOVER_EVENTS.forEach((type) => window.addEventListener(type, cancel, { passive: true }))
+    const timer = window.setTimeout(cancel, settle)
+    cleanups.push(() => {
+      ro?.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      TAKEOVER_EVENTS.forEach((type) => window.removeEventListener(type, cancel))
+      clearTimeout(timer)
+    })
+  }
+
+  const land = () => {
+    const el = document.getElementById(id)
+    if (!el) return false
+    cancel()
+    if (focus) focusElement(el, { scroll: false })
+    el.scrollIntoView?.({ block: 'start', behavior: smooth ? 'smooth' : 'auto' })
+    hold(el)
+    return true
+  }
+
+  if (land()) return cancel
+  const mo = new MutationObserver(() => void land())
+  mo.observe(document.body, { childList: true, subtree: true })
+  const timer = window.setTimeout(cancel, timeout)
+  cleanups.push(() => {
+    mo.disconnect()
+    clearTimeout(timer)
+  })
+  return cancel
+}

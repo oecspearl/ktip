@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { announce } from '../core/announce'
 import { onRequest, openAccessibilityPanel, request } from '../core/events'
-import { focusElement, stepHeading } from '../core/focus'
+import { focusElement, landOnHash, stepHeading } from '../core/focus'
 import {
   createSequence,
   matchChord,
@@ -29,6 +29,7 @@ export function Runtime() {
   const ctx = useA11yContext()
   const { store, options } = ctx
   const { shortcuts } = useA11ySettings(store)
+  const keysOn = options.features.shortcuts && shortcuts !== 'off'
   const [helpOpen, setHelpOpen] = useState(false)
 
   // Read through refs so the listener is bound once per mode, not per render
@@ -38,7 +39,7 @@ export function Runtime() {
   useEffect(() => onRequest('help', () => setHelpOpen(true)), [])
 
   useEffect(() => {
-    if (shortcuts === 'off') return
+    if (!keysOn) return
     const seq = createSequence()
 
     const run = (action: ShortcutAction) => {
@@ -132,7 +133,7 @@ export function Runtime() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [shortcuts])
+  }, [shortcuts, keysOn])
 
   // After a route change, put keyboard focus at the top of the new page, as a
   // full page load would. Only when focus would otherwise be lost (on <body>,
@@ -159,6 +160,38 @@ export function Runtime() {
       }, 120)
     })
   }, [options.navigation])
+
+  // A #fragment, on a link or in the address bar. A full page load would scroll
+  // to it; here the router does not, and the target is often in a lazy chunk
+  // that renders later. Focus follows only for those who asked for it.
+  useEffect(() => {
+    if (!options.features.hashLanding) return
+    const nav = options.navigation ?? BROWSER_NAVIGATION
+    let cancel = () => {}
+    const land = (loc: string, smooth: boolean) => {
+      cancel()
+      const at = loc.indexOf('#')
+      if (at < 0) return
+      const s = live.current.store
+      cancel = landOnHash(loc.slice(at), {
+        smooth: smooth && !prefersReducedMotionNow(s),
+        focus: s.getSettings().focusOnNavigate,
+      })
+    }
+    let last = nav.location.get()
+    // The page opened on a fragment the browser looked for before the app drew it
+    land(last, false)
+    const unsubscribe = nav.location.subscribe(() => {
+      const now = nav.location.get()
+      if (now === last) return
+      last = now
+      land(now, true)
+    })
+    return () => {
+      unsubscribe()
+      cancel()
+    }
+  }, [options.navigation, options.features.hashLanding])
 
   if (!helpOpen) return null
   return (

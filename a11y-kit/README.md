@@ -117,6 +117,11 @@ them out and that feature falls back or switches off.
 | `onEvent` | Setup outcomes, for counting | No events |
 | `chords`, `features` | Remap shortcuts; switch whole features off | Defaults |
 
+Single-page routers do not scroll to a link's `#fragment`, so the kit does: after
+each route change, and on first load, it waits for the target to render and
+scrolls to it, moving focus too when focus-on-navigate is on. Turn it off with
+`features: { hashLanding: false }`.
+
 `src/a11y/` in KTIP is a full reference: Supabase sync over a JSONB column
 (`sync.ts`, `display-prefs.ts`), Lingui messages (`messages.ts`), a React Router
 bridge mounted outside the provider (`navigation.ts`), translated routes, the
