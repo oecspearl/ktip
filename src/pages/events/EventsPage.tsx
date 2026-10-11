@@ -27,6 +27,7 @@ import { PageHero } from '../../components/layout/PageHero'
 import { SkeletonGrid } from '../../components/ui/SkeletonCard'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { PreviewGrid } from '../../components/ui/PreviewGrid'
 import { FilterBar } from '../../components/ui/FilterBar'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useGridColumns } from '../../hooks/useGridColumns'
@@ -492,11 +493,15 @@ export default function EventsPage() {
                       count={group.items.length}
                       className="first:border-t-0 first:pt-0"
                     >
-                      <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
-                        {group.items.map((event) => (
-                          <EventCard key={event.id} event={event} dismissible={sort === 'for_you'} />
-                        ))}
-                      </div>
+                      <PreviewGrid
+                        items={group.items}
+                        columns={columns}
+                        className={cn(gridClass, 'gap-4 auto-rows-fr')}
+                        getKey={(event) => event.id}
+                        renderItem={(event) => (
+                          <EventCard event={event} dismissible={sort === 'for_you'} />
+                        )}
+                      />
                     </CollapsibleSection>
                   ))}
                 </div>

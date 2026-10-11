@@ -10,6 +10,7 @@ import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { Plus, Inbox } from 'lucide-react'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { PreviewGrid } from '../../components/ui/PreviewGrid'
 import { FilterBar } from '../../components/ui/FilterBar'
 import { PageHero } from '../../components/layout/PageHero'
 import { projectCategoryIcon } from '../../lib/category-icons'
@@ -257,11 +258,15 @@ export default function ProjectsPage() {
                           icon={<Icon size={16} className="text-ktip-sand-400" />}
                           className="first:border-t-0 first:pt-0"
                         >
-                          <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
-                            {group.items.map((project) => (
-                              <ProjectCard key={project.id} project={project} dismissible={sort === 'for_you'} />
-                            ))}
-                          </div>
+                          <PreviewGrid
+                            items={group.items}
+                            columns={columns}
+                            className={cn(gridClass, 'gap-4 auto-rows-fr')}
+                            getKey={(project) => project.id}
+                            renderItem={(project) => (
+                              <ProjectCard project={project} dismissible={sort === 'for_you'} />
+                            )}
+                          />
                         </CollapsibleSection>
                       )
                     })}

@@ -15,6 +15,7 @@ import { Select } from '../../components/ui/Select'
 import { ColumnToggle } from '../../components/ui/ColumnToggle'
 import { CollapsibleSearch } from '../../components/ui/CollapsibleSearch'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { PreviewGrid } from '../../components/ui/PreviewGrid'
 import { FilterBar } from '../../components/ui/FilterBar'
 import { VerificationNotice } from '../../components/verification/VerificationNotice'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -310,9 +311,13 @@ export default function GrantsPage() {
                         icon={<Icon size={16} className="text-ktip-sand-400" />}
                         className="first:border-t-0 first:pt-0"
                       >
-                        <div className={cn(gridClass, 'gap-4 auto-rows-fr')}>
-                          {group.items.map((grant) => <GrantCard key={grant.id} grant={grant} dismissible={sort === 'for_you'} />)}
-                        </div>
+                        <PreviewGrid
+                          items={group.items}
+                          columns={columns}
+                          className={cn(gridClass, 'gap-4 auto-rows-fr')}
+                          getKey={(grant) => grant.id}
+                          renderItem={(grant) => <GrantCard grant={grant} dismissible={sort === 'for_you'} />}
+                        />
                       </CollapsibleSection>
                     )
                   })}
