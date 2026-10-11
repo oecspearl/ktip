@@ -734,16 +734,25 @@ export default function DiscoverPage() {
   }, [pendingIndex, targetPos, pos, trackAnimating, count])
 
   // Keep the measured card width in sync — the cards are 8em, so this tracks
-  // the hero scale without having to recompute it here
+  // the hero scale without having to recompute it here.
+  //
+  // Keyed on `items`, not just the count: grants open on the build-time seed,
+  // and the live query swaps in different rows at the same count, which
+  // re-keys every card. An observer left on the old card 0 reads 0 once it
+  // detaches, and the strip collapsed to the width of its gaps. A zero is never
+  // a real card width, so it is ignored either way.
   const cardRefs = useRef(new Map<number, HTMLElement>())
   useEffect(() => {
     const el = cardRefs.current.get(0)
     if (!el) return
-    setCardW(el.offsetWidth)
-    const ro = new ResizeObserver(() => setCardW(el.offsetWidth))
+    const measure = () => {
+      if (el.offsetWidth > 0) setCardW(el.offsetWidth)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [count, mode])
+  }, [count, mode, items])
 
   // Keyboard arrows navigate the cards
   useEffect(() => {
