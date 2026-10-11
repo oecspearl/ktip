@@ -151,6 +151,7 @@ export function ChoiceRow<T extends string | number>({
       </div>
       <div
         className="ak-choice"
+        data-count={options.length}
         role="radiogroup"
         aria-labelledby={`${id}-l`}
         aria-describedby={hint ? `${id}-h` : undefined}

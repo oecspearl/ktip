@@ -19,8 +19,9 @@ const TEXT: Record<A11yTextKey, MessageDescriptor> = {
   sectionText: msg`Text`,
   sectionColour: msg`Colour and light`,
   sectionReading: msg`Reading`,
-  sectionNavigation: msg`Navigation`,
   sectionMotion: msg`Motion`,
+  sectionKeyboard: msg`Keyboard and voice`,
+  sectionPointer: msg`Buttons and pointer`,
 
   textSize: msg`Text size`,
   font: msg`Font`,

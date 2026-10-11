@@ -35,18 +35,24 @@ export type ControlId =
   | 'voiceNav'
   | 'voiceMode'
 
-export type SectionId = 'text' | 'colour' | 'reading' | 'navigation' | 'motion'
+export type SectionId = 'text' | 'reading' | 'colour' | 'motion' | 'keyboard' | 'pointer'
 
+/**
+ * What a page is made of, then how it looks, then how you move through it.
+ * On the settings page the sections flow down three columns in this order,
+ * so it is also the order that keeps those columns about the same height.
+ */
 export const SECTIONS: { id: SectionId; title: A11yTextKey; controls: ControlId[] }[] = [
   { id: 'text', title: 'sectionText', controls: ['fontScale', 'font', 'spacing'] },
+  { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings', 'readerBar', 'ttsRate', 'ttsVoice'] },
   {
     id: 'colour',
     title: 'sectionColour',
     controls: ['theme', 'contrast', 'pageBrightness', 'pageContrast', 'saturation', 'photoBrightness'],
   },
-  { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings', 'readerBar', 'ttsRate', 'ttsVoice'] },
-  { id: 'navigation', title: 'sectionNavigation', controls: ['bigTargets', 'cursor', 'focusRing', 'shortcuts', 'focusOnNavigate', 'voiceNav', 'voiceMode'] },
   { id: 'motion', title: 'sectionMotion', controls: ['reduceMotion'] },
+  { id: 'keyboard', title: 'sectionKeyboard', controls: ['focusRing', 'shortcuts', 'focusOnNavigate', 'voiceNav', 'voiceMode'] },
+  { id: 'pointer', title: 'sectionPointer', controls: ['bigTargets', 'cursor'] },
 ]
 
 /** Settings each control owns, so a section can reset exactly its own. */

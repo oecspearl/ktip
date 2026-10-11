@@ -25,10 +25,28 @@
   color: var(--ak-text);
   min-width: 0;
 }
+/* Columns, not a grid: sections differ a lot in height, and grid rows left a
+   hole under every short one. Up to three columns, each at least 18rem, filled
+   top to bottom in SECTIONS order and balanced by the browser. */
 .ak-controls[data-variant='settings'] {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: 1.5rem 2.5rem;
-  align-items: start;
+  display: block;
+  columns: 3 18rem;
+  column-gap: 2.5rem;
+}
+.ak-controls[data-variant='settings'] > .ak-section {
+  break-inside: avoid;
+  margin-bottom: 1.75rem;
+}
+.ak-controls[data-variant='settings'] > .ak-note,
+.ak-controls[data-variant='settings'] > .ak-controls-foot {
+  column-span: all;
+  margin-bottom: 1.25rem;
+}
+/* Under all three columns, so it reads as the page's action, not Voice's */
+.ak-controls[data-variant='settings'] > .ak-controls-foot {
+  margin: 0.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ak-border);
 }
 .ak-controls[data-variant='compact'] {
   gap: 0.25rem;
@@ -36,6 +54,9 @@
 
 .ak-section {
   display: grid;
+  /* minmax(0, …): a wide child, such as a long voice name, wraps or clips
+     inside the column instead of stretching the section past it */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.25rem;
   min-width: 0;
 }
@@ -55,6 +76,7 @@
 }
 .ak-section-body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.125rem;
 }
 
@@ -161,6 +183,11 @@
   border: 1px solid var(--ak-border);
   border-radius: var(--ak-radius);
   background: var(--ak-surface-2);
+}
+/* Four options wrapped three and one; two by two reads as a set */
+.ak-choice[data-count='4'] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .ak-choice [role='radio'] {
   flex: 1 1 auto;
@@ -501,6 +528,8 @@
   margin-top: -0.125rem;
 }
 .ak-select {
+  width: 100%;
+  min-width: 0;
   min-height: 2.5rem;
   max-width: 100%;
   padding: 0.375rem 0.5rem;
@@ -773,7 +802,6 @@
   }
 }
 .ak-controls-foot {
-  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-start;
 }

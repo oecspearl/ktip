@@ -19,8 +19,9 @@ export const DEFAULT_MESSAGES = {
   sectionText: 'Text',
   sectionColour: 'Colour and light',
   sectionReading: 'Reading',
-  sectionNavigation: 'Navigation',
   sectionMotion: 'Motion',
+  sectionKeyboard: 'Keyboard and voice',
+  sectionPointer: 'Buttons and pointer',
 
   textSize: 'Text size',
   font: 'Font',
