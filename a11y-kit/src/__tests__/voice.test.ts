@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalize, parseVoiceCommand } from '../core/voice/grammar'
 import { accessibleName, matchByLabel } from '../core/voice/targets'
-import { acquireMic, listen, micHolder } from '../core/speech/recognizer'
+import { acquireMic, listen, micHolder, recognitionLang } from '../core/speech/recognizer'
 
 const routes = [
   { path: '/', label: 'Home' },
@@ -146,6 +146,25 @@ describe('microphone lock', () => {
     expect(micHolder()).toBe('captions')
     releaseCaptions!()
     expect(micHolder()).toBeNull()
+  })
+})
+
+describe('recognitionLang', () => {
+  it('turns a bare language into a full tag, which Edge needs', () => {
+    expect(recognitionLang('en', [])).toBe('en-US')
+    expect(recognitionLang('fr', [])).toBe('fr-FR')
+    expect(recognitionLang('es', [])).toBe('es-ES')
+  })
+  it("prefers the browser's own regional variant", () => {
+    expect(recognitionLang('en', ['fr-FR', 'en-GB', 'en'])).toBe('en-GB')
+    expect(recognitionLang('EN', ['en-gb'])).toBe('en-gb')
+  })
+  it('keeps a tag that already has a region, and falls back to English when empty', () => {
+    expect(recognitionLang('en-TT', ['en-GB'])).toBe('en-TT')
+    expect(recognitionLang('', [])).toBe('en-US')
+  })
+  it('passes an unknown bare language through', () => {
+    expect(recognitionLang('xx', [])).toBe('xx')
   })
 })
 

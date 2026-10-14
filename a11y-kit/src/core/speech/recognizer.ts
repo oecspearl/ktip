@@ -42,6 +42,30 @@ export const recognitionSupported = () => recognitionCtor() !== null
 export const continuousSupported = () =>
   recognitionSupported() && !(typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent))
 
+// Edge's speech service answers a bare language ("en") with a 'network'
+// error; Chrome accepts it. Both take a full tag, so always send one.
+const DEFAULT_REGION: Record<string, string> = {
+  en: 'en-US',
+  fr: 'fr-FR',
+  es: 'es-ES',
+  pt: 'pt-BR',
+  de: 'de-DE',
+  it: 'it-IT',
+  nl: 'nl-NL',
+}
+
+/** A full language tag for recognition: the browser's own regional variant first, so en-GB stays en-GB. */
+export function recognitionLang(
+  lang: string,
+  preferred: readonly string[] = typeof navigator !== 'undefined' ? (navigator.languages ?? []) : []
+): string {
+  const tag = (lang || 'en').trim()
+  if (tag.includes('-')) return tag
+  const base = tag.toLowerCase()
+  const regional = preferred.find((p) => p.includes('-') && p.split('-')[0].toLowerCase() === base)
+  return regional ?? DEFAULT_REGION[base] ?? tag
+}
+
 export type RecognitionError = 'not-allowed' | 'unavailable' | 'no-speech' | 'other'
 
 export interface ListenOptions {
@@ -66,7 +90,7 @@ export function listen(opts: ListenOptions, Ctor: RecognitionCtor | null = recog
 
   const build = () => {
     const r = new Ctor()
-    r.lang = opts.lang
+    r.lang = recognitionLang(opts.lang)
     r.continuous = !!opts.continuous
     r.interimResults = true
     r.maxAlternatives = 1
