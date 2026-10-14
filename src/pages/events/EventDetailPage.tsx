@@ -105,13 +105,15 @@ export default function EventDetailPage() {
   const { submitRegistration, loading: regLoading } = useSubmitRegistration()
   const { deleteEvent } = useDeleteEvent()
   const { updateStatus, loading: publishing } = useEventStatusUpdate()
-  const { updates: eventUpdates } = usePublishedEventUpdates(params.id)
-  const { articles: eventArticles } = usePublishedEventArticles(params.id)
-  const { sections: pageSections } = usePublicEventSections(params.id)
-  const { schedule: scheduleItems } = useEventSchedule(params.id)
-  const { speakers: eventSpeakers } = useEventSpeakers(params.id)
-  const { criteria: eventCriteria } = useEventCriteria(params.id)
-  const { documents: eventDocuments } = useEntityDocuments('event', params.id)
+  // Keyed on the resolved row's uuid, never the route param: the URL carries
+  // the slug, and every one of these tables has a uuid event_id.
+  const { updates: eventUpdates } = usePublishedEventUpdates(event?.id)
+  const { articles: eventArticles } = usePublishedEventArticles(event?.id)
+  const { sections: pageSections } = usePublicEventSections(event?.id)
+  const { schedule: scheduleItems } = useEventSchedule(event?.id)
+  const { speakers: eventSpeakers } = useEventSpeakers(event?.id)
+  const { criteria: eventCriteria } = useEventCriteria(event?.id)
+  const { documents: eventDocuments } = useEntityDocuments('event', event?.id)
 
   const [myRsvp, setMyRsvp] = useState<{
     status: RSVPStatus

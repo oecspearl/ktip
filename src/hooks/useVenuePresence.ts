@@ -332,7 +332,9 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
           // it is what puts a disconnected member's dot back where they left it.
           p_meta: posRef.current ? { pos: posRef.current } : null,
         })
-        .catch(() => {
+        // The query builder is a thenable with no .catch, so the rejection
+        // handler goes through .then.
+        .then(undefined, () => {
           // A missed mirror write costs a stale dot for someone not on this
           // channel. Never worth surfacing an error over.
         })
@@ -360,7 +362,7 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
             : {}),
           p_meta: posRef.current ? { pos: posRef.current } : null,
         })
-        .catch(() => {})
+        .then(undefined, () => {})
     }, VENUE.HEARTBEAT_THROTTLE_MS)
 
     return () => window.clearInterval(interval)
