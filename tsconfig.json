@@ -2,7 +2,8 @@
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.node.json" },
+    { "path": "./a11y-kit/tsconfig.json" }
   ],
   /*
    * Duplicated from tsconfig.app.json purely for tooling that reads the root
@@ -14,7 +15,9 @@
    */
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@a11y-kit": ["./a11y-kit/src/index.ts"],
+      "@a11y-kit/*": ["./a11y-kit/src/*"]
     }
   }
 }

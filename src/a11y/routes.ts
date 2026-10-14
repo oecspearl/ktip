@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { msg } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react'
 import type { MessageDescriptor } from '@lingui/core'
-import type { A11yRoute } from './viridion'
+import type { A11yRoute } from '@a11y-kit'
 
 interface RouteDef {
   id: string

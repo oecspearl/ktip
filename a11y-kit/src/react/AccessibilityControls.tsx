@@ -1,0 +1,453 @@
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
+import type { A11ySettings, ContrastMode, NumericKey, ShortcutMode, SpacingLevel, ThemeMode, VoiceMode } from '../core/config'
+import { openShortcutHelp, request } from '../core/events'
+import { continuousSupported, recognitionSupported } from '../core/speech/recognizer'
+import { speechSupported } from '../core/speech/speak'
+import { langPrefix, scoreVoice, speaks } from '../core/speech/voices'
+import type { A11yStore } from '../core/store'
+import { useA11yContext } from './context'
+import { useA11yDevice, useA11ySettings } from './hooks'
+import type { A11yTextKey } from './messages'
+import { ChoiceRow, Section, StepperRow, SwitchRow } from './primitives'
+import type { ThemeAdapter } from './context'
+
+export type ControlId =
+  | 'fontScale'
+  | 'font'
+  | 'spacing'
+  | 'theme'
+  | 'contrast'
+  | 'pageBrightness'
+  | 'pageContrast'
+  | 'saturation'
+  | 'photoBrightness'
+  | 'underlineLinks'
+  | 'highlightHeadings'
+  | 'bigTargets'
+  | 'cursor'
+  | 'focusRing'
+  | 'reduceMotion'
+  | 'shortcuts'
+  | 'focusOnNavigate'
+  | 'readerBar'
+  | 'ttsRate'
+  | 'ttsVoice'
+  | 'voiceNav'
+  | 'voiceMode'
+
+export type SectionId = 'text' | 'reading' | 'colour' | 'motion' | 'keyboard' | 'pointer'
+
+/**
+ * What a page is made of, then how it looks, then how you move through it.
+ * On the settings page the sections flow down three columns in this order,
+ * so it is also the order that keeps those columns about the same height.
+ */
+export const SECTIONS: { id: SectionId; title: A11yTextKey; controls: ControlId[] }[] = [
+  { id: 'text', title: 'sectionText', controls: ['fontScale', 'font', 'spacing'] },
+  { id: 'reading', title: 'sectionReading', controls: ['underlineLinks', 'highlightHeadings', 'readerBar', 'ttsRate', 'ttsVoice'] },
+  {
+    id: 'colour',
+    title: 'sectionColour',
+    controls: ['theme', 'contrast', 'pageBrightness', 'pageContrast', 'saturation', 'photoBrightness'],
+  },
+  { id: 'motion', title: 'sectionMotion', controls: ['reduceMotion'] },
+  { id: 'keyboard', title: 'sectionKeyboard', controls: ['focusRing', 'shortcuts', 'focusOnNavigate', 'voiceNav', 'voiceMode'] },
+  { id: 'pointer', title: 'sectionPointer', controls: ['bigTargets', 'cursor'] },
+]
+
+/** Settings each control owns, so a section can reset exactly its own. */
+const OWNS: Partial<Record<ControlId, (keyof A11ySettings)[]>> = {
+  cursor: ['cursor'],
+  focusRing: ['focusRing'],
+}
+// theme belongs to the host; the voice choice is device state, not a setting
+const ownedKeys = (id: ControlId): (keyof A11ySettings)[] =>
+  OWNS[id] ?? (id === 'theme' || id === 'ttsVoice' ? [] : [id as keyof A11ySettings])
+
+const SPEECH_CONTROLS: ControlId[] = ['readerBar', 'ttsRate', 'ttsVoice']
+
+/** Voices that speak a language, best first. Loads late in Chrome. */
+function useVoicesFor(lang: string) {
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>(() =>
+    speechSupported() ? window.speechSynthesis.getVoices() : []
+  )
+  useEffect(() => {
+    if (!speechSupported()) return
+    const load = () => setVoices(window.speechSynthesis.getVoices())
+    window.speechSynthesis.addEventListener('voiceschanged', load)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
+  }, [])
+  return voices
+    .filter((v) => speaks(v, lang))
+    .sort((a, b) => scoreVoice(b, lang) - scoreVoice(a, lang))
+}
+
+const FILTER_CONTROLS: ControlId[] = ['contrast', 'pageBrightness', 'pageContrast', 'saturation']
+
+const pct = (v: number) => `${Math.round(v * 100)}%`
+
+function useMedia(query: string): boolean {
+  const [on, setOn] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia?.(query)
+    if (!mq) return
+    const update = () => setOn(mq.matches)
+    update()
+    mq.addEventListener?.('change', update)
+    return () => mq.removeEventListener?.('change', update)
+  }, [query])
+  return on
+}
+
+const noTheme = { get: () => 'light' as const, set: () => {}, subscribe: () => () => {} }
+
+function useTheme(theme: ThemeAdapter | null) {
+  const t = theme ?? noTheme
+  return useSyncExternalStore(t.subscribe, t.get, t.get)
+}
+
+export interface AccessibilityControlsProps {
+  /** settings: page-width grid. panel: one column, for a popover. compact: one column, no section resets */
+  variant?: 'settings' | 'panel' | 'compact'
+  /** Show only these controls */
+  only?: ControlId[]
+  /** Leave these controls out, e.g. a theme switch the page already has */
+  exclude?: ControlId[]
+  /** Extra content under the controls, e.g. a "run setup again" button */
+  footer?: ReactNode
+}
+
+/**
+ * Every display control, grouped. One component for the settings page, the
+ * floating panel and the setup walkthrough, so the three can never drift.
+ * Changes apply instantly; there is nothing to save.
+ */
+export function AccessibilityControls({ variant = 'settings', only, exclude, footer }: AccessibilityControlsProps) {
+  const { store, theme, messages: m, options } = useA11yContext()
+  const s = useA11ySettings(store)
+  const device = useA11yDevice(store)
+  const pageLang = typeof document !== 'undefined' ? document.documentElement.lang || 'en' : 'en'
+  const voices = useVoicesFor(pageLang)
+  const mode = useTheme(theme)
+  const forced = useMedia('(forced-colors: active)')
+  const r = store.config.ranges
+
+  const shown = (id: ControlId) =>
+    (!only || only.includes(id)) &&
+    !exclude?.includes(id) &&
+    (id !== 'theme' || !!theme) &&
+    (id !== 'shortcuts' || options.features.shortcuts) &&
+    (!SPEECH_CONTROLS.includes(id) || (options.features.reader && speechSupported())) &&
+    (id !== 'ttsVoice' || voices.length > 1) &&
+    ((id !== 'voiceNav' && id !== 'voiceMode') || options.features.voice) &&
+    (id !== 'voiceMode' || (s.voiceNav && recognitionSupported() && continuousSupported()))
+
+  const set = (patch: Partial<A11ySettings>) => store.patch(patch)
+  // From the store, not this render: four quick presses are four steps
+  const bump = (key: NumericKey, direction: 1 | -1) =>
+    store.patch({ [key]: store.getSettings()[key] + direction * r[key].step })
+
+  const render: Record<ControlId, () => ReactNode> = {
+    fontScale: () => (
+      <StepperRow
+        label={m.textSize}
+        value={s.fontScale}
+        display={pct(s.fontScale)}
+        min={r.fontScale.min}
+        max={r.fontScale.max}
+        messages={m}
+        onStep={(d) => bump('fontScale', d)}
+      />
+    ),
+    font: () =>
+      store.config.fonts.length > 0 && (
+        <ChoiceRow
+          label={m.font}
+          value={s.font}
+          options={[
+            { value: 'default', label: m.fontDefault },
+            ...store.config.fonts.map((f) => ({
+              value: f.id,
+              label: f.label,
+              // Each name previews itself once its font has been loaded
+              style: f.family ? { fontFamily: f.family } : undefined,
+            })),
+          ]}
+          onChange={(v) => set({ font: v })}
+        />
+      ),
+    spacing: () => (
+      <ChoiceRow<SpacingLevel>
+        label={m.spacing}
+        value={s.spacing}
+        options={[
+          { value: 0, label: m.spacingNormal },
+          { value: 1, label: m.spacingWider },
+          { value: 2, label: m.spacingWidest },
+        ]}
+        onChange={(v) => set({ spacing: v })}
+      />
+    ),
+    theme: () =>
+      theme && (
+        <ChoiceRow<ThemeMode>
+          label={m.theme}
+          value={mode}
+          options={[
+            { value: 'light', label: m.themeLight },
+            { value: 'dark', label: m.themeDark },
+          ]}
+          onChange={(v) => theme.set(v)}
+        />
+      ),
+    contrast: () => (
+      <ChoiceRow<ContrastMode>
+        label={m.contrast}
+        hint={variant === 'compact' ? undefined : m.contrastHint}
+        value={s.contrast}
+        disabled={forced}
+        options={[
+          { value: 'auto', label: m.contrastAuto },
+          { value: 'standard', label: m.contrastStandard },
+          { value: 'more', label: m.contrastMore },
+        ]}
+        onChange={(v) => set({ contrast: v })}
+      />
+    ),
+    pageBrightness: () => (
+      <StepperRow
+        label={m.pageBrightness}
+        value={s.pageBrightness}
+        display={pct(s.pageBrightness)}
+        min={r.pageBrightness.min}
+        max={r.pageBrightness.max}
+        disabled={forced}
+        messages={m}
+        onStep={(d) => bump('pageBrightness', d)}
+      />
+    ),
+    pageContrast: () => (
+      <StepperRow
+        label={m.pageContrast}
+        value={s.pageContrast}
+        display={pct(s.pageContrast)}
+        min={r.pageContrast.min}
+        max={r.pageContrast.max}
+        disabled={forced}
+        messages={m}
+        onStep={(d) => bump('pageContrast', d)}
+      />
+    ),
+    saturation: () => (
+      <StepperRow
+        label={m.saturation}
+        value={s.saturation}
+        display={pct(s.saturation)}
+        min={r.saturation.min}
+        max={r.saturation.max}
+        disabled={forced}
+        messages={m}
+        onStep={(d) => bump('saturation', d)}
+      />
+    ),
+    photoBrightness: () => (
+      <StepperRow
+        label={m.photoBrightness}
+        value={s.photoBrightness}
+        display={pct(s.photoBrightness)}
+        min={r.photoBrightness.min}
+        max={r.photoBrightness.max}
+        messages={m}
+        onStep={(d) => bump('photoBrightness', d)}
+      />
+    ),
+    underlineLinks: () => (
+      <SwitchRow label={m.underlineLinks} checked={s.underlineLinks} onChange={(v) => set({ underlineLinks: v })} />
+    ),
+    highlightHeadings: () => (
+      <SwitchRow
+        label={m.highlightHeadings}
+        checked={s.highlightHeadings}
+        onChange={(v) => set({ highlightHeadings: v })}
+      />
+    ),
+    bigTargets: () => (
+      <SwitchRow
+        label={m.bigTargets}
+        hint={variant === 'compact' ? undefined : m.bigTargetsHint}
+        checked={s.bigTargets}
+        onChange={(v) => set({ bigTargets: v })}
+      />
+    ),
+    cursor: () => (
+      <SwitchRow
+        label={m.largeCursor}
+        checked={s.cursor === 'large'}
+        onChange={(v) => set({ cursor: v ? 'large' : 'default' })}
+      />
+    ),
+    focusRing: () => (
+      <SwitchRow
+        label={m.strongFocus}
+        hint={variant === 'compact' ? undefined : m.strongFocusHint}
+        checked={s.focusRing === 'strong'}
+        onChange={(v) => set({ focusRing: v ? 'strong' : 'default' })}
+      />
+    ),
+    shortcuts: () => (
+      <>
+        <ChoiceRow<ShortcutMode>
+          label={m.shortcuts}
+          hint={variant === 'compact' ? undefined : m.shortcutsHint}
+          value={s.shortcuts}
+          options={[
+            { value: 'off', label: m.shortcutsOff },
+            { value: 'modifier', label: m.shortcutsModifier },
+            { value: 'all', label: m.shortcutsAll },
+          ]}
+          onChange={(v) => set({ shortcuts: v })}
+        />
+        {s.shortcuts !== 'off' && (
+          <button type="button" className="ak-link-btn ak-inline-action" onClick={openShortcutHelp}>
+            {m.viewShortcuts}
+          </button>
+        )}
+      </>
+    ),
+    focusOnNavigate: () => (
+      <SwitchRow
+        label={m.focusOnNavigate}
+        hint={variant === 'compact' ? undefined : m.focusOnNavigateHint}
+        checked={s.focusOnNavigate}
+        onChange={(v) => set({ focusOnNavigate: v })}
+      />
+    ),
+    readerBar: () => (
+      <SwitchRow
+        label={m.readerBar}
+        hint={variant === 'compact' ? undefined : m.readerBarHint}
+        checked={s.readerBar}
+        onChange={(v) => set({ readerBar: v })}
+      />
+    ),
+    ttsRate: () => (
+      <StepperRow
+        label={m.readingSpeed}
+        value={s.ttsRate}
+        display={`${s.ttsRate}×`}
+        min={r.ttsRate.min}
+        max={r.ttsRate.max}
+        messages={m}
+        onStep={(d) => bump('ttsRate', d)}
+      />
+    ),
+    ttsVoice: () => {
+      const key = langPrefix(pageLang)
+      return (
+        <label className="ak-row ak-row-stack">
+          <span className="ak-row-label">{m.ttsVoice}</span>
+          <select
+            className="ak-select"
+            value={device.ttsVoice[key] ?? ''}
+            onChange={(e) => {
+              const next = { ...device.ttsVoice }
+              if (e.target.value) next[key] = e.target.value
+              else delete next[key]
+              store.patchDevice({ ttsVoice: next })
+            }}
+          >
+            <option value="">{m.ttsVoiceAuto}</option>
+            {voices.map((v) => (
+              <option key={v.voiceURI} value={v.voiceURI}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )
+    },
+    voiceNav: () =>
+      recognitionSupported() ? (
+        <SwitchRow
+          label={m.voiceNav}
+          hint={variant === 'compact' ? undefined : m.voiceNavHint}
+          checked={s.voiceNav && !!device.voiceConsentAt}
+          // Switching on asks for this device's consent first, once
+          onChange={(v) => (v ? request('voice', 'enable') : set({ voiceNav: false }))}
+        />
+      ) : (
+        <p className="ak-note">{m.voiceUnsupported}</p>
+      ),
+    voiceMode: () => (
+      <ChoiceRow<VoiceMode>
+        label={m.voiceMode}
+        value={s.voiceMode}
+        options={[
+          { value: 'push', label: m.voiceModePush },
+          { value: 'continuous', label: m.voiceModeContinuous },
+        ]}
+        onChange={(v) => set({ voiceMode: v })}
+      />
+    ),
+    reduceMotion: () => (
+      <SwitchRow
+        label={m.reduceMotion}
+        hint={variant === 'compact' ? undefined : m.reduceMotionHint}
+        checked={s.reduceMotion}
+        onChange={(v) => set({ reduceMotion: v })}
+      />
+    ),
+  }
+
+  const sections = SECTIONS.map((sec) => ({ ...sec, controls: sec.controls.filter(shown) })).filter(
+    (sec) => sec.controls.length > 0
+  )
+  const showsFilters = sections.some((sec) => sec.controls.some((c) => FILTER_CONTROLS.includes(c)))
+
+  return (
+    <div className="ak-controls" data-variant={variant}>
+      {forced && showsFilters && (
+        <p className="ak-note" role="note">
+          {m.forcedColors}
+        </p>
+      )}
+      {sections.map((sec) => {
+        const keys = sec.controls.flatMap(ownedKeys)
+        const dirty = keys.some((k) => s[k] !== store.config.defaults[k])
+        const title = m[sec.title]
+        const body = sec.controls.map((id) => <div key={id}>{render[id]()}</div>)
+        if (variant === 'compact') return <div key={sec.id} className="ak-section-body">{body}</div>
+        return (
+          <Section
+            key={sec.id}
+            title={title}
+            resetText={m.resetSection}
+            resetLabel={m.resetSectionLabel(title)}
+            canReset={dirty}
+            onReset={() => resetKeys(store, keys)}
+          >
+            {body}
+          </Section>
+        )
+      })}
+      {variant === 'settings' && (
+        <div className="ak-controls-foot">
+          <button type="button" className="ak-btn" onClick={() => request('setup')}>
+            {m.runAgain}
+          </button>
+        </div>
+      )}
+      {footer}
+    </div>
+  )
+}
+
+function resetKeys(store: A11yStore, keys: (keyof A11ySettings)[]) {
+  const defaults = store.config.defaults
+  store.patch(Object.fromEntries(keys.map((k) => [k, defaults[k]])) as Partial<A11ySettings>)
+}
+
+/** Back to every default, keeping the record of how setup ended. */
+export function resetAllSettings(store: A11yStore) {
+  store.replace({ ...store.config.defaults, setup: store.getSettings().setup })
+}

@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import { AccessibilityControls } from '../../a11y/ui'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { CONNECTION_VISIBILITY_OPTIONS } from '../../lib/constants'
 import { LANGUAGE_NAMES, SELECTABLE_LANGS } from '../../i18n/language'
@@ -406,9 +407,7 @@ export function PreferencesTab() {
 
         {/* The same controls as the floating panel (a11y kit). Dark mode keeps
             its own card below, so it is left out here */}
-        {/* The hosted service fills this with its settings grid. Dark mode
-            keeps its own card below, so it is left out here */}
-        <div data-viridion-a11y="settings" data-viridion-exclude="theme" />
+        <AccessibilityControls variant="settings" exclude={['theme']} />
         <p className="mt-4 text-sm text-ktip-sand-600">
           <Trans>
             What each setting does, and what KTIP still gets wrong, is in the{' '}

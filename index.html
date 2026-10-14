@@ -60,9 +60,10 @@
     <meta name="twitter:card" content="summary" />
     <script>
       // Text size, readable font, reduced motion and every other accessibility
-      // setting are painted by the accessibility service's first-paint script,
-      // which vite.config.ts adds at the end of this head with KTIP's settings
-      // block (src/a11y/config.ts). Webfonts load only for readers who chose one.
+      // setting are painted by a script the a11y-kit Vite plugin injects at the
+      // end of this head, built from src/a11y/config.ts — the same config the
+      // runtime store reads, so the first frame and the settled page agree.
+      // Webfonts load only for readers who chose one.
       try {
         var t = localStorage.getItem('ktip_theme');
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches))

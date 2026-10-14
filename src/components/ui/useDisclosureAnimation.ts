@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { prefersReducedMotionNow } from '../../a11y/viridion'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 export type DisclosureState = 'open' | 'closed'
 

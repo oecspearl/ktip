@@ -1,0 +1,36 @@
+{
+  "name": "a11y-kit",
+  "version": "0.1.0",
+  "description": "Drop-in accessibility for React apps: text size, contrast and brightness, reading fonts, page reader, keyboard shortcuts, voice navigation, and a guided first-run setup.",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ui": "./src/ui.ts",
+    "./vite": "./src/vite/prepaint-plugin.ts",
+    "./css/modes.css": "./src/css/modes.css",
+    "./css/ui.css": "./src/css/ui.css"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "vite": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@testing-library/react": ">=16",
+    "@types/node": ">=20",
+    "@types/react": ">=18",
+    "jsdom": ">=24",
+    "typescript": ">=5.6",
+    "vitest": ">=1"
+  }
+}

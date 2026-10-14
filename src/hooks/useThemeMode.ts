@@ -8,7 +8,7 @@ import { THEME_SYNC_EVENT, setThemeMode } from '../a11y/theme';
  * prefers-color-scheme), so initial state reads from the DOM.
  *
  * The setter is setThemeMode (src/a11y/theme.ts), shared with the
- * accessibility service so presets and sync flip the same switch.
+ * accessibility kit so presets and sync flip the same switch.
  */
 export function useThemeMode(): [boolean, (dark: boolean) => void] {
   const [dark, setDarkState] = useState(() =>

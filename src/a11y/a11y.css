@@ -1,12 +1,12 @@
 /*
- * KTIP's half of the accessibility display modes. The service's modes.css does the
+ * KTIP's half of the accessibility display modes. The kit's modes.css does the
  * generic part; this file re-points KTIP's own tokens, the way html.dark does,
  * so every component follows without a per-file edit.
  */
 
 /* ---- Fonts --------------------------------------------------------------- */
 /* Same mechanism as html.readable (index.css): re-point the two font tokens.
-   The webfont itself is loaded by the service the first time a font is chosen */
+   The webfont itself is loaded by the kit the first time a font is chosen */
 html.a11y-font-lexend {
   --font-sans: 'Lexend', system-ui, sans-serif;
   --font-display: 'Lexend', system-ui, sans-serif;
@@ -16,7 +16,7 @@ html.a11y-font-opendyslexic {
   --font-display: 'OpenDyslexic', system-ui, sans-serif;
 }
 
-/* ---- The service's controls in KTIP's palette --------------------------- */
+/* ---- The kit's panel in KTIP's palette ----------------------------------- */
 /* References, not copies: html.dark and higher contrast re-point the tokens,
    and the panel follows them */
 :root {

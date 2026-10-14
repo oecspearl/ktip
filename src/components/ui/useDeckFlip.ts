@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { prefersReducedMotionNow } from '../../a11y/viridion'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 /**
  * Deck-style flip: one card, cumulative rotation.

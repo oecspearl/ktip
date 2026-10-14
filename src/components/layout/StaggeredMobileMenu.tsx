@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { cn } from '../../lib/utils'
 import { EASE_IN, EASE_OUT, StaggeredMenuIcon } from './StaggeredMenuIcon'
-import { prefersReducedMotionNow } from '../../a11y/viridion'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 /**
  * Direct children, with fragments opened up.

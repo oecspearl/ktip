@@ -266,9 +266,17 @@ msgstr "In progress"
 msgid "FAQ"
 msgstr "FAQ"
 
+#: src/a11y/messages.ts
+msgid "Listen"
+msgstr "Listen"
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Business profile updated"
 msgstr "Business profile updated"
+
+#: src/a11y/messages.ts
+msgid "Reset {section}"
+msgstr "Reset {section}"
 
 #: src/hooks/useVerification.ts
 msgid "Only a Super Admin can review an administrator's account."
@@ -749,6 +757,10 @@ msgstr "Turn the venue on, create rooms, and upload a floorplan"
 msgid "The address on KTIP of the content you say infringes it. One notice per item."
 msgstr "The address on KTIP of the content you say infringes it. One notice per item."
 
+#: src/a11y/messages.ts
+msgid "Motion makes me feel unwell"
+msgstr "Motion makes me feel unwell"
+
 #: src/i18n/harvested.ts
 msgid "Account and profile"
 msgstr "Account and profile"
@@ -805,6 +817,10 @@ msgstr "Organisation, industry, country, biography"
 #: src/a11y/setup.ts
 msgid "Calm the page down"
 msgstr "Calm the page down"
+
+#: src/a11y/messages.ts
+msgid "Keep these settings?"
+msgstr "Keep these settings?"
 
 #: src/pages/projects/CreateProjectPage.tsx
 msgid "New Project"
@@ -978,6 +994,10 @@ msgstr "Every submitted application and every completed registration form files 
 "Open one to see exactly what you sent and when — not the current state of the record, but the snapshot at the moment of submission.\n"
 "\n"
 "That matters when a form changes after you filled it in, or when a funder asks what you actually claimed. The receipt is your evidence."
+
+#: src/a11y/messages.ts
+msgid "Read the page aloud, then pause or stop"
+msgstr "Read the page aloud, then pause or stop"
 
 #: src/components/legal/SectionNotice.tsx
 msgid "Messages follow the Community Guidelines and the Safeguarding rules."
@@ -1199,6 +1219,10 @@ msgstr "Name, roles, country and a short bio, with the buttons to act on it: Con
 "\n"
 "This page is public, so the link works for anyone you send it to — including someone without a KTIP account."
 
+#: src/a11y/messages.ts
+msgid "Reading {n} of {total}"
+msgstr "Reading {n} of {total}"
+
 #: src/i18n/harvested.ts
 msgid "Termination"
 msgstr "Termination"
@@ -1404,8 +1428,13 @@ msgid "Summarize your application and the problem it addresses."
 msgstr "Summarize your application and the problem it addresses."
 
 #: src/a11y/A11yHost.tsx
+#: src/a11y/messages.ts
 msgid "Search the site"
 msgstr "Search the site"
+
+#: src/a11y/messages.ts
+msgid "Page brightness"
+msgstr "Page brightness"
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Upload a logo only if your organisation owns it or is authorised to use it. Uploading one confirms that."
@@ -1489,6 +1518,10 @@ msgstr "A child at risk"
 #: src/i18n/harvested.ts
 msgid "Process"
 msgstr "Process"
+
+#: src/a11y/messages.ts
+msgid "Play, pause and skip controls for having pages read aloud."
+msgstr "Play, pause and skip controls for having pages read aloud."
 
 #: src/components/documents/DocumentCard.tsx
 msgid "Waiting on the owner"
@@ -1648,6 +1681,10 @@ msgstr "Implementation Plan"
 msgid "3. Does the platform help you connect with other innovators across the OECS?"
 msgstr "3. Does the platform help you connect with other innovators across the OECS?"
 
+#: src/a11y/messages.ts
+msgid "Light"
+msgstr "Light"
+
 #: src/lib/permissions.ts
 msgid "Start discussions on forum boards."
 msgstr "Start discussions on forum boards."
@@ -1778,6 +1815,10 @@ msgstr "Secondary Email"
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "No"
 msgstr "No"
+
+#: src/a11y/messages.ts
+msgid "More than one thing matches. Say the number of the one you want."
+msgstr "More than one thing matches. Say the number of the one you want."
 
 #: src/i18n/harvested.ts
 msgid "Accounts, roles and permissions"
@@ -1948,6 +1989,10 @@ msgstr "Content involving minors"
 msgid "Create Snippet"
 msgstr "Create Snippet"
 
+#: src/a11y/messages.ts
+msgid "I didn't hear anything."
+msgstr "I didn't hear anything."
+
 #: src/hooks/useVerification.ts
 msgid "Your identity verification was approved. Your profile now shows a verified badge."
 msgstr "Your identity verification was approved. Your profile now shows a verified badge."
@@ -2098,7 +2143,7 @@ msgstr "About Me"
 msgid "Nominate"
 msgstr "Nominate"
 
-#: src/a11y/A11yHost.tsx
+#: src/components/ui/FloatingActionButton.tsx
 msgid "All settings"
 msgstr "All settings"
 
@@ -2372,6 +2417,10 @@ msgstr "What do the project phases mean?"
 #: src/components/legal/MyTakedownNotices.tsx
 msgid "Your name and contact details are passed to the person who filed the notice — they cannot answer a counter-notice they cannot see. Do not file one in bad faith."
 msgstr "Your name and contact details are passed to the person who filed the notice — they cannot answer a counter-notice they cannot see. Do not file one in bad faith."
+
+#: src/a11y/messages.ts
+msgid "Voice commands stopped listening after five minutes without a command."
+msgstr "Voice commands stopped listening after five minutes without a command."
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Rank"
@@ -2683,6 +2732,10 @@ msgstr "New Snippet"
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Search for a member to connect with"
 msgstr "Search for a member to connect with"
+
+#: src/a11y/messages.ts
+msgid "This page has no headings."
+msgstr "This page has no headings."
 
 #: src/components/layout/Navbar.tsx
 msgid "Search the whole platform"
@@ -3126,6 +3179,10 @@ msgstr "Links and buttons"
 msgid "Profile unlocked. Any member can view your full profile."
 msgstr "Profile unlocked. Any member can view your full profile."
 
+#: src/a11y/messages.ts
+msgid "Colour and light"
+msgstr "Colour and light"
+
 #: src/i18n/harvested.ts
 msgid "Copyright"
 msgstr "Copyright"
@@ -3145,6 +3202,10 @@ msgstr "Delete this snippet? This cannot be undone."
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 msgid "This room is full. Nobody else can enter until someone leaves."
 msgstr "This room is full. Nobody else can enter until someone leaves."
+
+#: src/a11y/messages.ts
+msgid "Bigger buttons, keyboard shortcuts, a clear focus outline."
+msgstr "Bigger buttons, keyboard shortcuts, a clear focus outline."
 
 #: src/i18n/harvested.ts
 msgid "You control whether you appear in the partner feed, in your settings. You can ask which partners currently hold your data at %privacyEmail%, and you can require deletion."
@@ -3170,6 +3231,10 @@ msgstr "How do I create an event?"
 #: src/pages/events/EventsPage.tsx
 msgid "Create First Event"
 msgstr "Create First Event"
+
+#: src/a11y/messages.ts
+msgid "Put a number on everything you can click, then say the number"
+msgstr "Put a number on everything you can click, then say the number"
 
 #: src/i18n/harvested.ts
 msgid "Opting out"
@@ -3226,6 +3291,10 @@ msgstr "Edited {0}"
 msgid "Empty note"
 msgstr "Empty note"
 
+#: src/a11y/messages.ts
+msgid "Font"
+msgstr "Font"
+
 #: src/components/resume/ResumeOutline.tsx
 #: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
@@ -3266,6 +3335,10 @@ msgstr "Join Video Call"
 #: src/lib/grant-application-template.ts
 msgid "Define the expected outcomes, then review and submit your application."
 msgstr "Define the expected outcomes, then review and submit your application."
+
+#: src/a11y/messages.ts
+msgid "Reset all"
+msgstr "Reset all"
 
 #. placeholder {0}: integrations.length
 #: src/pages/resources/ResourcesPage.tsx
@@ -3505,6 +3578,10 @@ msgstr "Error details"
 #: src/components/shared/BulkDeleteDialog.tsx
 msgid "Some could not be deleted"
 msgstr "Some could not be deleted"
+
+#: src/a11y/messages.ts
+msgid "Your answers stay on this device. Only the settings themselves are saved to your account."
+msgstr "Your answers stay on this device. Only the settings themselves are saved to your account."
 
 #: src/i18n/harvested.ts
 msgid "Your shared rich-text documents"
@@ -3971,6 +4048,10 @@ msgstr "Answer the challenge and attach your supporting files"
 msgid "The Partner API Terms apply to any organisation reading platform data through our partner API."
 msgstr "The Partner API Terms apply to any organisation reading platform data through our partner API."
 
+#: src/a11y/messages.ts
+msgid "Contrast"
+msgstr "Contrast"
+
 #: src/components/WelcomePanel.tsx
 msgid "Skip"
 msgstr "Skip"
@@ -4132,6 +4213,10 @@ msgstr "Milestones"
 #: src/pages/cv/CvEditPage.tsx
 msgid "School"
 msgstr "School"
+
+#: src/a11y/messages.ts
+msgid "Keyboard shortcuts"
+msgstr "Keyboard shortcuts"
 
 #: src/i18n/harvested.ts
 msgid "Only publish material you own or are licensed to publish. That includes text, images, logos, video, audio, datasets, slide decks and code. If you use someone else’s work under a licence, follow its attribution terms."
@@ -4353,6 +4438,10 @@ msgstr "Enter a catchy title for your project"
 msgid "Member state"
 msgstr "Member state"
 
+#: src/a11y/messages.ts
+msgid "Live captions are using the microphone, so voice commands are paused."
+msgstr "Live captions are using the microphone, so voice commands are paused."
+
 #: src/components/resources/ResourceCard.tsx
 msgid "View Resource"
 msgstr "View Resource"
@@ -4417,6 +4506,11 @@ msgstr "User"
 msgid "Policy"
 msgstr "Policy"
 
+#: src/a11y/messages.ts
+msgid "Wider"
+msgstr "Wider"
+
+#: src/a11y/messages.ts
 #: src/a11y/setup.ts
 msgid "Text size"
 msgstr "Text size"
@@ -4487,6 +4581,10 @@ msgstr "Competitions and submissions"
 #: src/i18n/harvested.ts
 msgid "Disagreement is fine and criticism of an idea is welcome. The line is at the person."
 msgstr "Disagreement is fine and criticism of an idea is welcome. The line is at the person."
+
+#: src/a11y/messages.ts
+msgid "Run setup again"
+msgstr "Run setup again"
 
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -4767,6 +4865,10 @@ msgstr "For Administrators"
 msgid "Community discussion boards"
 msgstr "Community discussion boards"
 
+#: src/a11y/messages.ts
+msgid "Also on this site"
+msgstr "Also on this site"
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Personalization saved!"
 msgstr "Personalization saved!"
@@ -4820,9 +4922,17 @@ msgstr "Hi there!"
 msgid "Confirm this email address"
 msgstr "Confirm this email address"
 
+#: src/a11y/messages.ts
+msgid "Tour, stop {n} of {total}"
+msgstr "Tour, stop {n} of {total}"
+
 #: src/i18n/harvested.ts
 msgid "Contact you outside the platform using details taken from your entry, other than about the competition."
 msgstr "Contact you outside the platform using details taken from your entry, other than about the competition."
+
+#: src/a11y/messages.ts
+msgid "Hold Alt and Shift (Option and Shift on a Mac) and press a key."
+msgstr "Hold Alt and Shift (Option and Shift on a Mac) and press a key."
 
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "No one is waiting on access."
@@ -4839,6 +4949,14 @@ msgstr "Invalid email or password. Please try again."
 #: src/components/security/BackupCodesSheet.tsx
 msgid "Save these now — this is the only time they are shown. Each code works once, and they are how you get back in if you lose your phone."
 msgstr "Save these now — this is the only time they are shown. Each code works once, and they are how you get back in if you lose your phone."
+
+#: src/a11y/messages.ts
+msgid "This browser has no speech recognition. Voice commands work in Chrome, Edge and Safari."
+msgstr "This browser has no speech recognition. Voice commands work in Chrome, Edge and Safari."
+
+#: src/a11y/messages.ts
+msgid "Nothing changed."
+msgstr "Nothing changed."
 
 #: src/components/grants/SponsorNominationCard.tsx
 msgid "Faculty sponsor (optional)"
@@ -4969,6 +5087,10 @@ msgstr "Match the event type"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Show"
 msgstr "Show"
+
+#: src/a11y/messages.ts
+msgid "During a live call, voice commands listen only when you press the microphone."
+msgstr "During a live call, voice commands listen only when you press the microphone."
 
 #: src/lib/permissions.ts
 msgid "Administer all events"
@@ -5137,6 +5259,10 @@ msgstr "Your page · a directory row"
 #: src/components/messages/GroupSettingsModal.tsx
 msgid "Failed to add member"
 msgstr "Failed to add member"
+
+#: src/a11y/messages.ts
+msgid "Listen for a voice command"
+msgstr "Listen for a voice command"
 
 #: src/i18n/harvested.ts
 msgid "The last step shows the whole application back to you as the funder will see it, with an AI review panel that flags thin or missing answers before a human reads it.\n"
@@ -5398,6 +5524,10 @@ msgstr "Symbols"
 msgid "Whiteboard"
 msgstr "Whiteboard"
 
+#: src/a11y/messages.ts
+msgid "What can I say?"
+msgstr "What can I say?"
+
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Show translation"
 msgstr "Show translation"
@@ -5577,6 +5707,7 @@ msgstr "Your earned badges, the ones still locked with what unlocks them, and th
 "\n"
 "This is the same gallery as the standalone Achievements page, embedded so you keep the rail. Pinned badges show on your public profile — the pin controls are on each badge."
 
+#: src/a11y/messages.ts
 #: src/components/layout/Navbar.tsx
 #: src/components/messages/GroupSettingsModal.tsx
 #: src/components/projects/ManageTeamModal.tsx
@@ -5589,6 +5720,10 @@ msgstr "Search"
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Topics people can filter and search projects by."
 msgstr "Topics people can filter and search projects by."
+
+#: src/a11y/messages.ts
+msgid "Click any paragraph to hear it. Press Escape to stop."
+msgstr "Click any paragraph to hear it. Press Escape to stop."
 
 #: src/components/venue/room/LookingForTeamPanel.tsx
 #: src/components/venue/RoomOccupantList.tsx
@@ -5644,6 +5779,10 @@ msgstr "Failed to apply the fields"
 #: src/components/profile/PortraitTile.tsx
 msgid "Cut out, on a backdrop"
 msgstr "Cut out, on a backdrop"
+
+#: src/a11y/messages.ts
+msgid "Everything is back as it was."
+msgstr "Everything is back as it was."
 
 #: src/components/collaboration/OutputPanel.tsx
 msgid "Clear output"
@@ -5869,6 +6008,10 @@ msgstr "Demos and pitches."
 msgid "These agreements have been updated. Please reload the page and read the current version."
 msgstr "These agreements have been updated. Please reload the page and read the current version."
 
+#: src/a11y/messages.ts
+msgid "Headings on this page"
+msgstr "Headings on this page"
+
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "{displayName} has your connection request. Once they accept it you will see their full profile and be able to message them."
 msgstr "{displayName} has your connection request. Once they accept it you will see their full profile and be able to message them."
@@ -6046,6 +6189,10 @@ msgstr "Add files"
 msgid "Underline (Ctrl+U)"
 msgstr "Underline (Ctrl+U)"
 
+#: src/a11y/messages.ts
+msgid "Focus the page title after moving page"
+msgstr "Focus the page title after moving page"
+
 #: src/i18n/harvested.ts
 msgid "Publish and unpublish control visibility without deleting the entry, so a tool that goes down temporarily can be pulled and restored.\n"
 "\n"
@@ -6065,6 +6212,10 @@ msgstr "Switch between light and dark mode"
 #: src/hooks/useContentModeration.ts
 msgid "This needs another look before it goes up."
 msgstr "This needs another look before it goes up."
+
+#: src/a11y/messages.ts
+msgid "There is no number {n} on screen."
+msgstr "There is no number {n} on screen."
 
 #: src/components/legal/SectionNotice.tsx
 msgid "If a message breaks the rules, report it from the message."
@@ -6116,7 +6267,7 @@ msgstr "Say whether you need a team"
 msgid "{itemCount} events"
 msgstr "{itemCount} events"
 
-#: src/a11y/A11yQuickButton.tsx
+#: src/a11y/messages.ts
 #: src/components/layout/Footer.tsx
 #: src/components/settings/PreferencesTab.tsx
 #: src/components/ui/FloatingActionButton.tsx
@@ -6345,6 +6496,7 @@ msgstr "The Leaderboard ranks members by points and shows the top fifty.\n"
 msgid "Wake panel"
 msgstr "Wake panel"
 
+#: src/a11y/messages.ts
 #: src/components/ui/NumberStepper.tsx
 msgid "Decrease {label}"
 msgstr "Decrease {label}"
@@ -6495,6 +6647,10 @@ msgstr "Copies already made by others under the public-content rule above, inclu
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Students who have nominated you as their faculty sponsor."
 msgstr "Students who have nominated you as their faculty sponsor."
+
+#: src/a11y/messages.ts
+msgid "Off"
+msgstr "Off"
 
 #: src/components/grants/application/AIFieldActions.tsx
 msgid "Concise"
@@ -6917,6 +7073,10 @@ msgstr "No integrations found"
 msgid "Profile sections"
 msgstr "Profile sections"
 
+#: src/a11y/messages.ts
+msgid "Resume the tour"
+msgstr "Resume the tour"
+
 #: src/lib/permissions.ts
 msgid "Browse public grant opportunities."
 msgstr "Browse public grant opportunities."
@@ -6979,6 +7139,10 @@ msgstr "Draft saved"
 msgid "Submissions holds your registrations. Projects is the equivalent tab for work you have published."
 msgstr "Submissions holds your registrations. Projects is the equivalent tab for work you have published."
 
+#: src/a11y/messages.ts
+msgid "What would help you?"
+msgstr "What would help you?"
+
 #: src/hooks/useEnrollInCourse.ts
 msgid "Enrollment failed"
 msgstr "Enrollment failed"
@@ -7011,6 +7175,10 @@ msgstr "Judges and organisers"
 #: src/components/courses/CourseCard.tsx
 msgid "Enrolling…"
 msgstr "Enrolling…"
+
+#: src/a11y/messages.ts
+msgid "Focus moves to each new page's title. Nothing changes on screen."
+msgstr "Focus moves to each new page's title. Nothing changes on screen."
 
 #: src/pages/security/MfaChallengePage.tsx
 #: src/pages/security/MfaRecoverPage.tsx
@@ -7075,6 +7243,10 @@ msgstr "{name} has been asked to sponsor this application"
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "What happened and where..."
 msgstr "What happened and where..."
+
+#: src/a11y/messages.ts
+msgid "There is nothing to read on this page."
+msgstr "There is nothing to read on this page."
 
 #: src/pages/NotFoundPage.tsx
 msgid "Page Not Found"
@@ -7236,6 +7408,10 @@ msgstr "Hackathons currently running, with a door straight into the virtual venu
 #: src/i18n/harvested.ts
 msgid "Not permitted"
 msgstr "Not permitted"
+
+#: src/a11y/messages.ts
+msgid "Previous paragraph"
+msgstr "Previous paragraph"
 
 #: src/lib/permissions.ts
 msgid "Content moderator. Owns flagged-content queues, automated moderation logs and escalations."
@@ -7489,6 +7665,10 @@ msgstr "Administer disbursement and award records. Never available to students."
 msgid "Can you refuse it?"
 msgstr "Can you refuse it?"
 
+#: src/a11y/messages.ts
+msgid "Strong focus outline"
+msgstr "Strong focus outline"
+
 #: src/i18n/harvested.ts
 msgid "Narrowing the library"
 msgstr "Narrowing the library"
@@ -7628,13 +7808,17 @@ msgstr "Competition events carry a challenge brief on the event page.\n"
 msgid "Download Resource"
 msgstr "Download Resource"
 
-#: src/components/layout/SkipLinks.tsx
-msgid "Skip links"
-msgstr "Skip links"
-
 #: src/components/collaboration/editor/ImageModal.tsx
 msgid "Choose a different image"
 msgstr "Choose a different image"
+
+#: src/a11y/messages.ts
+msgid "Concentration or memory"
+msgstr "Concentration or memory"
+
+#: src/a11y/messages.ts
+msgid "Keyboard and voice"
+msgstr "Keyboard and voice"
 
 #: src/i18n/harvested.ts
 msgid "What is the KTIP Assistant?"
@@ -7949,6 +8133,10 @@ msgstr "your project"
 msgid "An email address or a domain that is nearly but not quite the organisation it claims to be."
 msgstr "An email address or a domain that is nearly but not quite the organisation it claims to be."
 
+#: src/a11y/messages.ts
+msgid "Buttons and pointer"
+msgstr "Buttons and pointer"
+
 #: src/components/achievements/TrophyCard.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Progress"
@@ -8042,6 +8230,10 @@ msgstr "Bronze"
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Your data"
 msgstr "Your data"
+
+#: src/a11y/messages.ts
+msgid "Normal"
+msgstr "Normal"
 
 #: src/components/ui/FilterBar.tsx
 msgid "Filters"
@@ -8325,6 +8517,10 @@ msgstr "Help article — Events"
 #: src/components/legal/AgreementGate.tsx
 msgid "By continuing you agree to the account documents."
 msgstr "By continuing you agree to the account documents."
+
+#: src/a11y/messages.ts
+msgid "Reading speed {speed}. Change speed"
+msgstr "Reading speed {speed}. Change speed"
 
 #: src/components/legal/AgreementBanner.tsx
 msgid "IP notice"
@@ -8627,6 +8823,7 @@ msgstr "The messaging panel lists every conversation you are part of, most recen
 "\n"
 "New messages arrive live, so you never need to refresh."
 
+#: src/a11y/messages.ts
 #: src/components/ui/NumberStepper.tsx
 msgid "Increase {label}"
 msgstr "Increase {label}"
@@ -8772,6 +8969,10 @@ msgstr "Each tile is a board with its own topic. The tile shows how many discuss
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Links on your profile"
 msgstr "Links on your profile"
+
+#: src/a11y/messages.ts
+msgid "Carry on reading"
+msgstr "Carry on reading"
 
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Switch off anything you would rather we ignored"
@@ -9407,6 +9608,10 @@ msgstr "Be as specific as possible. Reviewers look for realistic and justified b
 msgid "Please do not interrupt"
 msgstr "Please do not interrupt"
 
+#: src/a11y/messages.ts
+msgid "Open accessibility settings"
+msgstr "Open accessibility settings"
+
 #: src/i18n/harvested.ts
 msgid "We do not knowingly maintain accounts for children below that age. If you believe one exists, tell us at %privacyEmail% and it will be removed."
 msgstr "We do not knowingly maintain accounts for children below that age. If you believe one exists, tell us at %privacyEmail% and it will be removed."
@@ -9587,6 +9792,10 @@ msgstr "If you believe a partner has used your data outside these terms, tell us
 msgid "Impact & Review"
 msgstr "Impact & Review"
 
+#: src/a11y/messages.ts
+msgid "No more headings"
+msgstr "No more headings"
+
 #: src/i18n/harvested.ts
 msgid "KTIP includes AI-assisted search, chat, field extraction, CV parsing, machine translation and moderation support. Output may be inaccurate or incomplete, it is not professional, legal, financial or academic advice, and you remain responsible for anything you publish or act on because of it. What each feature does and where your text goes is set out in the AI Use Disclosure."
 msgstr "KTIP includes AI-assisted search, chat, field extraction, CV parsing, machine translation and moderation support. Output may be inaccurate or incomplete, it is not professional, legal, financial or academic advice, and you remain responsible for anything you publish or act on because of it. What each feature does and where your text goes is set out in the AI Use Disclosure."
@@ -9655,6 +9864,10 @@ msgstr "Post a funding call"
 msgid "Applause"
 msgstr "Applause"
 
+#: src/a11y/messages.ts
+msgid "Read this page aloud"
+msgstr "Read this page aloud"
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Where did this happen? (optional)"
 msgstr "Where did this happen? (optional)"
@@ -9678,6 +9891,10 @@ msgstr "Re-enter your password"
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "An applicant"
 msgstr "An applicant"
+
+#: src/a11y/messages.ts
+msgid "Spacing"
+msgstr "Spacing"
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
@@ -9744,6 +9961,10 @@ msgstr "My templates"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Feature"
 msgstr "Feature"
+
+#: src/a11y/messages.ts
+msgid "Go back a page"
+msgstr "Go back a page"
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "Copy Link"
@@ -10038,6 +10259,10 @@ msgstr "Keep licence headers and attribution comments intact."
 msgid "{0} folder"
 msgstr "{0} folder"
 
+#: src/a11y/messages.ts
+msgid "Read the selected text"
+msgstr "Read the selected text"
+
 #: src/i18n/harvested.ts
 msgid "Each key lets an outside system pull verified employer data. Issue one per partner, never one shared between them — a shared key cannot be revoked without cutting off everyone using it."
 msgstr "Each key lets an outside system pull verified employer data. Issue one per partner, never one shared between them — a shared key cannot be revoked without cutting off everyone using it."
@@ -10073,6 +10298,10 @@ msgstr "Most of what is listed is not a grant, which is why the section is calle
 #: src/i18n/harvested.ts
 msgid "Harassment"
 msgstr "Harassment"
+
+#: src/a11y/messages.ts
+msgid "You have left this stop."
+msgstr "You have left this stop."
 
 #: src/i18n/harvested.ts
 msgid "If you believe an entry of yours has been used in breach of this, contact %legalEmail%. We can act on the organiser’s access to the platform; whether to pursue the organiser directly is your decision."
@@ -10190,6 +10419,10 @@ msgstr "Active"
 msgid "Frequently Asked Questions"
 msgstr "Frequently Asked Questions"
 
+#: src/a11y/messages.ts
+msgid "Keep things as they are and just take the tour."
+msgstr "Keep things as they are and just take the tour."
+
 #: src/lib/resume-designs.ts
 msgid "Atlas"
 msgstr "Atlas"
@@ -10227,6 +10460,10 @@ msgstr "New Whiteboard"
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Innovate. Collaborate."
 msgstr "Innovate. Collaborate."
+
+#: src/a11y/messages.ts
+msgid "Deaf or hard of hearing"
+msgstr "Deaf or hard of hearing"
 
 #: src/i18n/harvested.ts
 msgid "Confirm the change from the verification email that is sent to the new address."
@@ -10397,6 +10634,10 @@ msgid "Six languages, picked from the dropdown in the toolbar — changing it re
 msgstr "Six languages, picked from the dropdown in the toolbar — changing it re-highlights what you have already written rather than clearing it.\n"
 "\n"
 "Run executes the snippet and prints to the output panel underneath, including errors. Nothing leaves your browser to do it."
+
+#: src/a11y/messages.ts
+msgid "Theme"
+msgstr "Theme"
 
 #: src/i18n/harvested.ts
 msgid "Changing your mind"
@@ -10629,6 +10870,10 @@ msgstr "Closes {closesDate}"
 msgid "Registered"
 msgstr "Registered"
 
+#: src/a11y/messages.ts
+msgid "Click a paragraph to read from there"
+msgstr "Click a paragraph to read from there"
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Help us understand how easy and pleasant the platform is to use."
 msgstr "Help us understand how easy and pleasant the platform is to use."
@@ -10809,6 +11054,10 @@ msgstr "Every code from before now stops working."
 msgid "Heads down, but reachable"
 msgstr "Heads down, but reachable"
 
+#: src/a11y/messages.ts
+msgid "Reading bar"
+msgstr "Reading bar"
+
 #: src/i18n/harvested.ts
 msgid "The project"
 msgstr "The project"
@@ -10836,6 +11085,10 @@ msgstr "Register your business with your National Chamber of Commerce for verifi
 #: src/i18n/harvested.ts
 msgid "Use \"Mark all read\" at the top of the panel to clear the unread count."
 msgstr "Use \"Mark all read\" at the top of the panel to clear the unread count."
+
+#: src/a11y/messages.ts
+msgid "Read the page aloud, or pause"
+msgstr "Read the page aloud, or pause"
 
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Back to Grant"
@@ -11063,11 +11316,19 @@ msgstr "The floating button in the bottom right corner opens a stack of six shor
 "\n"
 "It stays available on every page inside the app, so none of the six needs a trip back to the navigation bar."
 
+#: src/a11y/messages.ts
+msgid "Low vision"
+msgstr "Low vision"
+
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/i18n/harvested.ts
 #: src/pages/events/EventDetailPage.tsx
 msgid "Organizer"
 msgstr "Organizer"
+
+#: src/a11y/messages.ts
+msgid "Go to a page"
+msgstr "Go to a page"
 
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "No smartphone? Ente Auth, Proton Authenticator and the 2FAS browser extension all run on a computer. Or, when KTIP asks how you want your code, choose “Email code” instead."
@@ -11106,6 +11367,10 @@ msgstr "Camera off"
 #: src/lib/authenticator-apps.ts
 msgid "Free, simple, and the one most people have heard of."
 msgstr "Free, simple, and the one most people have heard of."
+
+#: src/a11y/messages.ts
+msgid "Animations and page transitions stop."
+msgstr "Animations and page transitions stop."
 
 #. placeholder {0}: alias.email
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -11160,9 +11425,13 @@ msgstr "Go to the final step, \"Impact & Review\"."
 msgid "Display name, avatar, declared roles, organisation, country, biography, skills, interests, badges, published projects, public events and forum posts."
 msgstr "Display name, avatar, declared roles, organisation, country, biography, skills, interests, badges, published projects, public events and forum posts."
 
-#: src/components/layout/SkipLinks.tsx
+#: src/a11y/messages.ts
 msgid "Accessibility settings"
 msgstr "Accessibility settings"
+
+#: src/a11y/messages.ts
+msgid "Show all shortcuts"
+msgstr "Show all shortcuts"
 
 #: src/i18n/harvested.ts
 msgid "Use this route for copyright, and for trade mark or design-right complaints. For harassment, impersonation, fraud or content involving a minor, use the in-app report control instead — those reach a different queue that is triaged faster."
@@ -11203,6 +11472,10 @@ msgstr "AI use"
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Plan"
 msgstr "Plan"
+
+#: src/a11y/messages.ts
+msgid "Calmer pages: no motion, clearer structure, read aloud."
+msgstr "Calmer pages: no motion, clearer structure, read aloud."
 
 #: src/i18n/harvested.ts
 #: src/pages/auth/SignupPage.tsx
@@ -11290,6 +11563,10 @@ msgstr "when you completed your profile"
 msgid "Using email codes instead of an app"
 msgstr "Using email codes instead of an app"
 
+#: src/a11y/messages.ts
+msgid "Using a mouse is hard"
+msgstr "Using a mouse is hard"
+
 #: src/a11y/routes.ts
 #: src/components/layout/Footer.tsx
 #: src/components/layout/Navbar.tsx
@@ -11314,6 +11591,10 @@ msgstr "An upcoming event for the OECS community."
 #: src/components/profile/BannerStudio.tsx
 msgid "Failed to update banner"
 msgstr "Failed to update banner"
+
+#: src/a11y/messages.ts
+msgid "Captions in live rooms"
+msgstr "Captions in live rooms"
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Could not save the profile"
@@ -11779,6 +12060,10 @@ msgstr "Code you did not write"
 #: src/lib/venue-room-sections.ts
 msgid "Room log"
 msgstr "Room log"
+
+#: src/a11y/messages.ts
+msgid "Choose any that apply"
+msgstr "Choose any that apply"
 
 #: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
@@ -12370,6 +12655,10 @@ msgstr "View all invitations"
 msgid "What do I upload on the Supporting documents step?"
 msgstr "What do I upload on the Supporting documents step?"
 
+#: src/a11y/messages.ts
+msgid "Keep them, skip the tour"
+msgstr "Keep them, skip the tour"
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Failed to submit the resource"
 msgstr "Failed to submit the resource"
@@ -12529,6 +12818,7 @@ msgstr "Original"
 msgid "Open the first one and give the community somewhere to talk."
 msgstr "Open the first one and give the community somewhere to talk."
 
+#: src/a11y/messages.ts
 #: src/components/achievements/AchievementUnlockModal.tsx
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/uat/UATFeedbackForm.tsx
@@ -12540,7 +12830,7 @@ msgstr "Open the first one and give the community somewhere to talk."
 msgid "Next"
 msgstr "Next"
 
-#: src/components/layout/SkipLinks.tsx
+#: src/a11y/messages.ts
 msgid "Skip to the site menu"
 msgstr "Skip to the site menu"
 
@@ -12773,6 +13063,10 @@ msgstr "Businesses waiting on your Chamber"
 msgid "Where necessary to operate the platform or investigate a report. Those accesses are logged."
 msgstr "Where necessary to operate the platform or investigate a report. Those accesses are logged."
 
+#: src/a11y/messages.ts
+msgid "Smaller text"
+msgstr "Smaller text"
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Could not build your data export"
 msgstr "Could not build your data export"
@@ -12870,6 +13164,10 @@ msgstr "AI Use Disclosure"
 #: src/i18n/harvested.ts
 msgid "Schools, universities and Chambers"
 msgstr "Schools, universities and Chambers"
+
+#: src/a11y/messages.ts
+msgid "Links and headings marked by more than colour."
+msgstr "Links and headings marked by more than colour."
 
 #: src/i18n/harvested.ts
 msgid "A first standing notice is a warning, with an explanation of what was removed and why."
@@ -13029,6 +13327,7 @@ msgstr "Decision"
 msgid "KTIP serves the OECS region and its members live in several countries, so this policy is written to the stricter of the applicable national data-protection acts and the GDPR standard rather than to the lowest common bar."
 msgstr "KTIP serves the OECS region and its members live in several countries, so this policy is written to the stricter of the applicable national data-protection acts and the GDPR standard rather than to the lowest common bar."
 
+#: src/a11y/messages.ts
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Pause"
 msgstr "Pause"
@@ -13041,6 +13340,7 @@ msgstr "Conference Center"
 msgid "On your member page the colours drift slowly behind you. Still everywhere else."
 msgstr "On your member page the colours drift slowly behind you. Still everywhere else."
 
+#: src/a11y/messages.ts
 #: src/components/messages/MessagingPanel.tsx
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/uat/UATFeedbackForm.tsx
@@ -13186,6 +13486,10 @@ msgstr "Climate Action"
 #: src/components/layout/Navbar.tsx
 msgid "Failed to sign out"
 msgstr "Failed to sign out"
+
+#: src/a11y/messages.ts
+msgid "Turn on"
+msgstr "Turn on"
 
 #: src/hooks/useEvents.ts
 msgid "Not changed. You may no longer be able to edit it."
@@ -13459,6 +13763,10 @@ msgstr "Next week"
 msgid "Add the 2FAS extension to your browser from 2fas.com/browser-extension."
 msgstr "Add the 2FAS extension to your browser from 2fas.com/browser-extension."
 
+#: src/a11y/messages.ts
+msgid "Motion"
+msgstr "Motion"
+
 #: src/i18n/harvested.ts
 msgid "Keynote"
 msgstr "Keynote"
@@ -13479,6 +13787,10 @@ msgstr "Only an owner or admin of your organisation can change this."
 #: src/pages/dashboard/DashboardTopBar.tsx
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
+
+#: src/a11y/messages.ts
+msgid "Speech recognition is not available in this browser right now."
+msgstr "Speech recognition is not available in this browser right now."
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Two-step verification is off."
@@ -13510,6 +13822,10 @@ msgstr "Save Changes"
 #: src/i18n/harvested.ts
 msgid "Publish a new event and open registrations"
 msgstr "Publish a new event and open registrations"
+
+#: src/a11y/messages.ts
+msgid "Press the microphone, or Alt+Shift+V, then speak."
+msgstr "Press the microphone, or Alt+Shift+V, then speak."
 
 #: src/i18n/harvested.ts
 msgid "Help article — Collaboration Tools"
@@ -13559,9 +13875,17 @@ msgstr "Evidence URL (optional)"
 msgid "No — refusing it means no account"
 msgstr "No — refusing it means no account"
 
+#: src/a11y/messages.ts
+msgid "mentors"
+msgstr "mentors"
+
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Submit Application"
 msgstr "Submit Application"
+
+#: src/a11y/messages.ts
+msgid "Also single keys"
+msgstr "Also single keys"
 
 #: src/i18n/harvested.ts
 msgid "Content moderation, abuse and fraud prevention, security logging"
@@ -14032,6 +14356,10 @@ msgstr "The page behind this changes as you pick. Members see it once you save."
 msgid "Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent."
 msgstr "Publish another person’s private information — home address, phone number, identity documents, private messages — without their consent."
 
+#: src/a11y/messages.ts
+msgid "Go to {page}"
+msgstr "Go to {page}"
+
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Annotation tool"
 msgstr "Annotation tool"
@@ -14098,6 +14426,7 @@ msgstr "Awards and recognition"
 msgid "Original file"
 msgstr "Original file"
 
+#: src/a11y/messages.ts
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Finish"
@@ -14473,6 +14802,10 @@ msgstr "Turn on the reading bar, then press play. Each paragraph lights up as it
 msgid "Sponsor link"
 msgstr "Sponsor link"
 
+#: src/a11y/messages.ts
+msgid "Larger buttons"
+msgstr "Larger buttons"
+
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 msgid "My Dashboard"
@@ -14486,6 +14819,10 @@ msgstr "These terms bind any organisation granted programmatic access to KTIP da
 #: src/components/grants/application/RichTextField.tsx
 msgid "Insert table"
 msgstr "Insert table"
+
+#: src/a11y/messages.ts
+msgid "Numbers are showing. Say a number to click it."
+msgstr "Numbers are showing. Say a number to click it."
 
 #: src/i18n/harvested.ts
 msgid "Profile fields that would identify a minor outside the platform are restricted, and directory exposure is reduced."
@@ -14584,6 +14921,10 @@ msgstr "The KTIP Assistant is an AI thread pinned to the top of your conversatio
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Only you, unless the general access setting says otherwise."
 msgstr "Only you, unless the general access setting says otherwise."
+
+#: src/a11y/messages.ts
+msgid "Voice"
+msgstr "Voice"
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 msgid "Redo (Ctrl+Shift+Z)"
@@ -14745,6 +15086,10 @@ msgstr "My CV"
 #: src/components/directory/MemberPanel.tsx
 msgid "Close member preview"
 msgstr "Close member preview"
+
+#: src/a11y/messages.ts
+msgid "Best available"
+msgstr "Best available"
 
 #. placeholder {0}: formatDate(resource.created_at)
 #: src/pages/resources/ResourceDetailPage.tsx
@@ -14930,6 +15275,10 @@ msgstr "Team"
 #: src/i18n/harvested.ts
 msgid "Working through them"
 msgstr "Working through them"
+
+#: src/a11y/messages.ts
+msgid "Settings saved. Change them any time from the accessibility button."
+msgstr "Settings saved. Change them any time from the accessibility button."
 
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Download PDF"
@@ -15138,6 +15487,10 @@ msgstr "Write a reply..."
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Back to Resources"
 msgstr "Back to Resources"
+
+#: src/a11y/messages.ts
+msgid "Try this"
+msgstr "Try this"
 
 #: src/components/profile/BannerStudio.tsx
 msgid "Click or drop a wide photo — it is resized and optimized automatically"
@@ -15379,6 +15732,10 @@ msgstr "Start Conversation"
 msgid "What reaches them"
 msgstr "What reaches them"
 
+#: src/a11y/messages.ts
+msgid "Your device is showing its own high-contrast colours, so the contrast and brightness settings here are paused."
+msgstr "Your device is showing its own high-contrast colours, so the contrast and brightness settings here are paused."
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Credential"
 msgstr "Credential"
@@ -15431,6 +15788,10 @@ msgstr "Where are my settings?"
 #: src/i18n/harvested.ts
 msgid "Category and phase"
 msgstr "Category and phase"
+
+#: src/a11y/messages.ts
+msgid "Reading"
+msgstr "Reading"
 
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Could not post the announcement"
@@ -15594,6 +15955,10 @@ msgstr "Go to your Dashboard, open Preferences and turn off \"Show me on the lea
 #: src/i18n/harvested.ts
 msgid "A request to move the conversation off the platform immediately, to a personal email address or a messaging app."
 msgstr "A request to move the conversation off the platform immediately, to a personal email address or a messaging app."
+
+#: src/a11y/messages.ts
+msgid "Next heading"
+msgstr "Next heading"
 
 #: src/i18n/harvested.ts
 msgid "What is KTIP?"
@@ -15854,6 +16219,10 @@ msgstr "What applies when you publish"
 msgid "Waiting for confirmation of <0>{0}</0>. Check that inbox — the link expires 24 hours after it was sent."
 msgstr "Waiting for confirmation of <0>{0}</0>. Check that inbox — the link expires 24 hours after it was sent."
 
+#: src/a11y/messages.ts
+msgid "Larger text"
+msgstr "Larger text"
+
 #: src/lib/venue-room-sections.ts
 msgid "Focus timer"
 msgstr "Focus timer"
@@ -15888,6 +16257,10 @@ msgstr "Two-step verification is on, using your authenticator app."
 #: src/i18n/harvested.ts
 msgid "The text of the document you uploaded"
 msgstr "The text of the document you uploaded"
+
+#: src/a11y/messages.ts
+msgid "All the time"
+msgstr "All the time"
 
 #: src/lib/validation.ts
 #: src/pages/auth/SignupPage.tsx
@@ -15958,6 +16331,10 @@ msgstr "What are the different user roles?"
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Back to Project"
 msgstr "Back to Project"
+
+#: src/a11y/messages.ts
+msgid "Scroll the page"
+msgstr "Scroll the page"
 
 #: src/components/legal/SectionNotice.tsx
 msgid "No harassment, threats or unsolicited promotion."
@@ -16211,6 +16588,10 @@ msgstr "All three are required. Each is a separate statement."
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Your solution"
 msgstr "Your solution"
+
+#: src/a11y/messages.ts
+msgid "With Alt+Shift"
+msgstr "With Alt+Shift"
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Funding call updated"
@@ -16525,6 +16906,10 @@ msgstr "Find an organisation to work with"
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Necessary storage"
 msgstr "Necessary storage"
+
+#: src/a11y/messages.ts
+msgid "Compared with before you started:"
+msgstr "Compared with before you started:"
 
 #: src/i18n/harvested.ts
 msgid "Help Desk"
@@ -16982,6 +17367,10 @@ msgstr "The key is shown once, at the moment it is issued. It is not recoverable
 "\n"
 "Revoking takes effect immediately and breaks whatever is using it. That is the intended behaviour for a leaked key."
 
+#: src/a11y/messages.ts
+msgid "A clearer font, wider spacing, and pages read aloud."
+msgstr "A clearer font, wider spacing, and pages read aloud."
+
 #: src/lib/achievement-copy.ts
 msgid "You built reach across the region. The connections you make are how opportunities travel between islands rather than staying on one."
 msgstr "You built reach across the region. The connections you make are how opportunities travel between islands rather than staying on one."
@@ -17015,6 +17404,10 @@ msgstr "The agreement between you and %entityShort% for using KTIP — who may h
 msgid "Record the award"
 msgstr "Record the award"
 
+#: src/a11y/messages.ts
+msgid "Turn on voice commands?"
+msgstr "Turn on voice commands?"
+
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Deal flow and applications"
 msgstr "Deal flow and applications"
@@ -17034,6 +17427,10 @@ msgstr "Share anything else on your mind..."
 #: src/lib/venue-room-presets.ts
 msgid "Opening remarks, announcements and the closing ceremony."
 msgstr "Opening remarks, announcements and the closing ceremony."
+
+#: src/a11y/messages.ts
+msgid "Make the text bigger or smaller"
+msgstr "Make the text bigger or smaller"
 
 #: src/components/calendar/CalendarShell.tsx
 msgid "Hide the day panel"
@@ -17073,6 +17470,10 @@ msgstr "Download"
 #: src/components/notes/StickyNoteGroupExpanded.tsx
 msgid "Delete all"
 msgstr "Delete all"
+
+#: src/a11y/messages.ts
+msgid "Make KTIP work for you"
+msgstr "Make KTIP work for you"
 
 #: src/pages/InvitationsPage.tsx
 msgid "a project"
@@ -17165,6 +17566,10 @@ msgstr "Every RSVP and registration response"
 #: src/i18n/harvested.ts
 msgid "Where we use AI"
 msgstr "Where we use AI"
+
+#: src/a11y/messages.ts
+msgid "Jump to the main content"
+msgstr "Jump to the main content"
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Main column"
@@ -17486,6 +17891,10 @@ msgstr "Start here"
 msgid "Your record of something you submitted."
 msgstr "Your record of something you submitted."
 
+#: src/a11y/messages.ts
+msgid "Dyslexia or difficulty reading"
+msgstr "Dyslexia or difficulty reading"
+
 #: src/i18n/harvested.ts
 msgid "Manage events (admin)"
 msgstr "Manage events (admin)"
@@ -17509,6 +17918,10 @@ msgstr "The project page and everything on it"
 #: src/i18n/harvested.ts
 msgid "Competitions"
 msgstr "Competitions"
+
+#: src/a11y/messages.ts
+msgid "The microphone is blocked. Allow it in your browser's site settings, then try again."
+msgstr "The microphone is blocked. Allow it in your browser's site settings, then try again."
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Link (Optional)"
@@ -17590,6 +18003,10 @@ msgstr "Nothing scheduled on this day"
 msgid "Platform statistics"
 msgstr "Platform statistics"
 
+#: src/a11y/messages.ts
+msgid "Reduce motion"
+msgstr "Reduce motion"
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Attach a file or give a link to where the resource lives."
 msgstr "Attach a file or give a link to where the resource lives."
@@ -17633,6 +18050,10 @@ msgstr "Two documents cover everything you publish on KTIP. They open each time 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
 msgstr "Type <0>{DELETE_CONFIRMATION_TEXT}</0> to confirm"
+
+#: src/a11y/messages.ts
+msgid "Colour blindness"
+msgstr "Colour blindness"
 
 #: src/components/profile/PortraitStudio.tsx
 msgid "Save photo"
@@ -17689,6 +18110,10 @@ msgstr "Add to this day"
 #: src/i18n/harvested.ts
 msgid "What this is for"
 msgstr "What this is for"
+
+#: src/a11y/messages.ts
+msgid "Say any of these, in the language the site is showing."
+msgstr "Say any of these, in the language the site is showing."
 
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "You administer this funding call."
@@ -17752,6 +18177,10 @@ msgstr "Add item"
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Type a language and press Enter..."
 msgstr "Type a language and press Enter..."
+
+#: src/a11y/messages.ts
+msgid "Dark theme, a dimmer page and photos, softer colours."
+msgstr "Dark theme, a dimmer page and photos, softer colours."
 
 #: src/components/events/EventDetailsForm.tsx
 msgid "End Date (Optional)"
@@ -17997,6 +18426,10 @@ msgstr "OpenRouter and Azure AI Translator"
 msgid "{holders} of {eligible} members"
 msgstr "{holders} of {eligible} members"
 
+#: src/a11y/messages.ts
+msgid "Ask me later"
+msgstr "Ask me later"
+
 #: src/components/grants/application/StepForm.tsx
 msgid "Select..."
 msgstr "Select..."
@@ -18041,6 +18474,10 @@ msgstr "Choose a file, or drag one here"
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Maximum amount"
 msgstr "Maximum amount"
+
+#: src/a11y/messages.ts
+msgid "Voice commands use the speech recognition built into your browser. To turn speech into text, Chrome sends your voice to Google, Edge to Microsoft and Safari to Apple. KTIP never receives the recording."
+msgstr "Voice commands use the speech recognition built into your browser. To turn speech into text, Chrome sends your voice to Google, Edge to Microsoft and Safari to Apple. KTIP never receives the recording."
 
 #: src/i18n/harvested.ts
 msgid "Sign-up, onboarding, publishing and settings"
@@ -18355,6 +18792,11 @@ msgstr "{0, plural, one {Delete # project} other {Delete # projects}}"
 msgid "If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and \"you\" in this document means both you and that organisation."
 msgstr "If you use KTIP on behalf of an organisation — an employer, an institution, a chamber, a funder — you confirm that you are authorised to accept these Terms on its behalf, and \"you\" in this document means both you and that organisation."
 
+#: src/a11y/messages.ts
+msgid "Here is what will change"
+msgstr "Here is what will change"
+
+#: src/a11y/messages.ts
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Reset"
 msgstr "Reset"
@@ -18402,6 +18844,10 @@ msgstr "Where it happens"
 #: src/components/dashboard/stats/RankProgress.tsx
 msgid "Progress toward the next rank"
 msgstr "Progress toward the next rank"
+
+#: src/a11y/messages.ts
+msgid "Jump to the site menu"
+msgstr "Jump to the site menu"
 
 #: src/hooks/useInstitutions.ts
 msgid "Confirm your email address first — open the link KTIP sent when you signed up."
@@ -18527,6 +18973,10 @@ msgstr "Use the plain photo"
 msgid "Professional"
 msgstr "Professional"
 
+#: src/a11y/messages.ts
+msgid "When I press the microphone"
+msgstr "When I press the microphone"
+
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Undo last mark"
 msgstr "Undo last mark"
@@ -18564,6 +19014,10 @@ msgstr "{0} — {total} here, closed"
 #: src/components/profile/ProfileCanvas.tsx
 msgid "Where you work or study."
 msgstr "Where you work or study."
+
+#: src/a11y/messages.ts
+msgid "No thanks, don't ask again"
+msgstr "No thanks, don't ask again"
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Update Email"
@@ -18614,6 +19068,10 @@ msgstr "Clear all filters"
 msgid "Please enter a valid email address"
 msgstr "Please enter a valid email address"
 
+#: src/a11y/messages.ts
+msgid "Close the reading bar"
+msgstr "Close the reading bar"
+
 #: src/components/profile/PortraitTile.tsx
 msgid "Profile Photo"
 msgstr "Profile Photo"
@@ -18642,6 +19100,7 @@ msgstr "Explore the latest work"
 msgid "Back to Settings"
 msgstr "Back to Settings"
 
+#: src/a11y/messages.ts
 #: src/i18n/harvested.ts
 msgid "Default"
 msgstr "Default"
@@ -18900,6 +19359,10 @@ msgstr "Grant Deadline"
 msgid "Help us improve KTIP by sharing your experience with the platform. It only takes a few minutes."
 msgstr "Help us improve KTIP by sharing your experience with the platform. It only takes a few minutes."
 
+#: src/a11y/messages.ts
+msgid "Tell us what makes reading or using a website hard for you, and KTIP's text, colours, motion and controls will change to match. Then take a short tour to try the changes on real pages. Nothing is kept unless you say so."
+msgstr "Tell us what makes reading or using a website hard for you, and KTIP's text, colours, motion and controls will change to match. Then take a short tour to try the changes on real pages. Nothing is kept unless you say so."
+
 #: src/components/profile/ProfileCanvas.tsx
 msgid "your bio"
 msgstr "your bio"
@@ -18937,6 +19400,10 @@ msgstr "Document access declined"
 #: src/i18n/harvested.ts
 msgid "Do not paste another person’s confidential information into an AI feature. What you submit is processed by the providers listed in the Privacy Policy."
 msgstr "Do not paste another person’s confidential information into an AI feature. What you submit is processed by the providers listed in the Privacy Policy."
+
+#: src/a11y/messages.ts
+msgid "This device has no {language} voice. Add one in your system's speech settings."
+msgstr "This device has no {language} voice. Add one in your system's speech settings."
 
 #: src/components/legal/SectionNotice.tsx
 msgid "Safeguarding"
@@ -19006,6 +19473,10 @@ msgstr "Sign-in providers, the OECS Virtual Campus and Commons, video collaborat
 msgid "Stack"
 msgstr "Stack"
 
+#: src/a11y/messages.ts
+msgid "Nothing on this page is called “{label}”."
+msgstr "Nothing on this page is called “{label}”."
+
 #: src/pages/security/MfaRecoverPage.tsx
 msgid "Recovery"
 msgstr "Recovery"
@@ -19046,6 +19517,7 @@ msgstr "On your device"
 msgid "Reset links work once, expire after an hour, and only open in the browser that requested them — a link opened inside a mail app, or on a different device, lands here. Request a fresh one and open it in this browser."
 msgstr "Reset links work once, expire after an hour, and only open in the browser that requested them — a link opened inside a mail app, or on a different device, lands here. Request a fresh one and open it in this browser."
 
+#: src/a11y/messages.ts
 #: src/components/legal/AgreementGate.tsx
 #: src/components/legal/ReconsentBanner.tsx
 #: src/pages/collaborate/SnippetsListPage.tsx
@@ -19118,6 +19590,10 @@ msgstr "Use the feedback button in the corner of any page to report a bug, ask f
 msgid "Cookie & Storage Notice"
 msgstr "Cookie & Storage Notice"
 
+#: src/a11y/messages.ts
+msgid "Device"
+msgstr "Device"
+
 #: src/components/security/TotpEnrollCard.tsx
 msgid "Copy setup key"
 msgstr "Copy setup key"
@@ -19183,6 +19659,10 @@ msgstr "{firstName} hasn't filled out a profile yet."
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Rating out of five"
 msgstr "Rating out of five"
+
+#: src/a11y/messages.ts
+msgid "None of these"
+msgstr "None of these"
 
 #: src/i18n/harvested.ts
 msgid "The form is replaced by a status card — pending, verified or rejected — showing what you sent.\n"
@@ -19315,6 +19795,10 @@ msgstr "Logos and brands you upload"
 msgid "Liability"
 msgstr "Liability"
 
+#: src/a11y/messages.ts
+msgid "Undo all of it"
+msgstr "Undo all of it"
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Work updated"
 msgstr "Work updated"
@@ -19348,6 +19832,10 @@ msgstr "Turn this off and your points stay yours alone — you keep earning and 
 #: src/i18n/harvested.ts
 msgid "It does not guarantee that a listed grant exists, that funds will be disbursed, or that the funder will behave well. %entityShort% is not a party to your agreement with a funder unless it is expressly the named funder. Read the Grant & Funding Disclaimer before you send anyone money or documents."
 msgstr "It does not guarantee that a listed grant exists, that funds will be disbursed, or that the funder will behave well. %entityShort% is not a party to your agreement with a funder unless it is expressly the named funder. Read the Grant & Funding Disclaimer before you send anyone money or documents."
+
+#: src/a11y/messages.ts
+msgid "Speak a command"
+msgstr "Speak a command"
 
 #: src/i18n/harvested.ts
 msgid "Keep partner keys secret, server-side, and out of client applications and source control."
@@ -19442,6 +19930,10 @@ msgstr "Joined {joinedMonth}"
 #: src/components/personalization/SignalSummary.tsx
 msgid "Badges earned"
 msgstr "Badges earned"
+
+#: src/a11y/messages.ts
+msgid "I use a screen reader"
+msgstr "I use a screen reader"
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Neutral"
@@ -19561,6 +20053,10 @@ msgstr "Reset to the language template"
 msgid "Translate messages into"
 msgstr "Translate messages into"
 
+#: src/a11y/messages.ts
+msgid "Dark"
+msgstr "Dark"
+
 #: src/components/profile/PortraitTile.tsx
 msgid "Edit profile photo"
 msgstr "Edit profile photo"
@@ -19658,6 +20154,10 @@ msgstr "Wake — brings the panel back without unpinning it"
 msgid "A published CV"
 msgstr "A published CV"
 
+#: src/a11y/messages.ts
+msgid "Keep"
+msgstr "Keep"
+
 #: src/i18n/harvested.ts
 msgid "Rate limits and fair use"
 msgstr "Rate limits and fair use"
@@ -19751,6 +20251,10 @@ msgstr "Reading a project, and joining one."
 #: src/components/verification/InstitutionalEmailCard.tsx
 msgid "Your account is verified."
 msgstr "Your account is verified."
+
+#: src/a11y/messages.ts
+msgid "Colour strength"
+msgstr "Colour strength"
 
 #: src/i18n/harvested.ts
 msgid "Questions and comments, in the open, attached to the project rather than to a forum thread that drifts away from it.\n"
@@ -19936,6 +20440,10 @@ msgstr "When one is announced it will show up here, along with a way into the li
 #: src/pages/events/EventDetailPage.tsx
 msgid "Event Details"
 msgstr "Event Details"
+
+#: src/a11y/messages.ts
+msgid "Back to this stop"
+msgstr "Back to this stop"
 
 #. placeholder {0}: board.name
 #: src/pages/forums/CreatePostPage.tsx
@@ -20569,6 +21077,10 @@ msgstr "Faculty accounts are set up by your institution."
 msgid "https://www.loom.com/share/..."
 msgstr "https://www.loom.com/share/..."
 
+#: src/a11y/messages.ts
+msgid "Adjust"
+msgstr "Adjust"
+
 #: src/lib/permissions.ts
 msgid "Legacy admin slug. Resolves to Super Admin."
 msgstr "Legacy admin slug. Resolves to Super Admin."
@@ -20777,6 +21289,10 @@ msgstr "Sections"
 msgid "Failed to update profile privacy"
 msgstr "Failed to update profile privacy"
 
+#: src/a11y/messages.ts
+msgid "Your browser will ask to use the microphone the first time."
+msgstr "Your browser will ask to use the microphone the first time."
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Nothing ticked means everyone in the venue. Organizers always get in."
 msgstr "Nothing ticked means everyone in the venue. Organizers always get in."
@@ -20976,6 +21492,10 @@ msgstr "Go to Dashboard › Security."
 #: src/lib/achievement-style.ts
 msgid "Legendary"
 msgstr "Legendary"
+
+#: src/a11y/messages.ts
+msgid "Page contrast"
+msgstr "Page contrast"
 
 #: src/components/profile/ProfileCanvas.tsx
 msgid "your interests"
@@ -21568,6 +22088,10 @@ msgstr "Participants submit their work — with their own supporting files — f
 msgid "Search KTIP members by name. They join as an ordinary member; change the role afterwards."
 msgstr "Search KTIP members by name. They join as an ordinary member; change the role afterwards."
 
+#: src/a11y/messages.ts
+msgid "sign up"
+msgstr "sign up"
+
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Could not record your decision"
 msgstr "Could not record your decision"
@@ -21687,6 +22211,10 @@ msgstr "Your solution and its files go in the Solutions section below."
 #: src/components/AnalyticsConsentBanner.tsx
 msgid "Privacy policy"
 msgstr "Privacy policy"
+
+#: src/a11y/messages.ts
+msgid "Reading speed"
+msgstr "Reading speed"
 
 #: src/i18n/harvested.ts
 msgid "Go to Projects and click \"Create Project\". Give it a title, description, category, and phase (concept, prototype, funding, or launch). You can keep it private until you are ready to share it publicly."
@@ -22057,6 +22585,10 @@ msgstr "Event announcements"
 msgid "Page sections"
 msgstr "Page sections"
 
+#: src/a11y/messages.ts
+msgid "Going to {page}"
+msgstr "Going to {page}"
+
 #: src/components/notes/StickyNote.tsx
 msgid "Unpin from other pages"
 msgstr "Unpin from other pages"
@@ -22240,7 +22772,7 @@ msgstr "Your code"
 msgid "Enter KTIP"
 msgstr "Enter KTIP"
 
-#: src/components/layout/SkipLinks.tsx
+#: src/a11y/messages.ts
 msgid "Skip to search"
 msgstr "Skip to search"
 
@@ -22439,6 +22971,10 @@ msgstr "My badges"
 msgid "A business profile hangs off a registered organisation, so your Chamber of Commerce has something to verify. Registration takes a few minutes."
 msgstr "A business profile hangs off a registered organisation, so your Chamber of Commerce has something to verify. Registration takes a few minutes."
 
+#: src/a11y/messages.ts
+msgid "Bright screens are hard to look at"
+msgstr "Bright screens are hard to look at"
+
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Capture screen"
 msgstr "Capture screen"
@@ -22488,6 +23024,10 @@ msgstr "No one has scored on this board yet."
 msgid "e.g., KTIP Innovation Lab"
 msgstr "e.g., KTIP Innovation Lab"
 
+#: src/a11y/messages.ts
+msgid "Widest"
+msgstr "Widest"
+
 #. placeholder {0}: bundle.unavailable.length
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your data was downloaded. {0} section(s) could not be read — see \"unavailable\" in the file."
@@ -22496,6 +23036,10 @@ msgstr "Your data was downloaded. {0} section(s) could not be read — see \"una
 #: src/i18n/harvested.ts
 msgid "Waitlisted"
 msgstr "Waitlisted"
+
+#: src/a11y/messages.ts
+msgid "Heard “{text}”"
+msgstr "Heard “{text}”"
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/messages/GroupSettingsModal.tsx
@@ -22528,6 +23072,10 @@ msgstr "What each field on the project form does."
 #: src/i18n/harvested.ts
 msgid "No warranty"
 msgstr "No warranty"
+
+#: src/a11y/messages.ts
+msgid "Highlight headings"
+msgstr "Highlight headings"
 
 #: src/i18n/harvested.ts
 msgid "You confirm that your entry is your own work, or that you are licensed to use everything in it. Open-source libraries, stock images, datasets, fonts and pre-trained models all come with terms — follow them and credit them in your entry."
@@ -22629,6 +23177,10 @@ msgstr "Supervise student channels"
 #: src/components/shared/DeleteEntityControl.tsx
 msgid "Could not delete this {noun}. You may no longer own it."
 msgstr "Could not delete this {noun}. You may no longer own it."
+
+#: src/a11y/messages.ts
+msgid "Standard"
+msgstr "Standard"
 
 #: src/lib/personalization.ts
 msgid "Related to your profile"
@@ -22733,6 +23285,10 @@ msgstr "Reading a profile and connecting."
 msgid "Can I log in with Google or Microsoft?"
 msgstr "Can I log in with Google or Microsoft?"
 
+#: src/a11y/messages.ts
+msgid "Underline links"
+msgstr "Underline links"
+
 #: src/lib/achievement-style.ts
 msgid "Epic"
 msgstr "Epic"
@@ -22792,6 +23348,10 @@ msgstr "Loading event..."
 #: src/components/moderation/ContentWarningModal.tsx
 msgid "This can't be posted"
 msgstr "This can't be posted"
+
+#: src/a11y/messages.ts
+msgid "{label}: {before} → {after}"
+msgstr "{label}: {before} → {after}"
 
 #. placeholder {0}: checkedKeys.length
 #: src/components/documents/ExtractionReviewPanel.tsx
@@ -22944,6 +23504,10 @@ msgstr "Mentors on duty"
 msgid "Quarantined pending review. Only you and the author can see it."
 msgstr "Quarantined pending review. Only you and the author can see it."
 
+#: src/a11y/messages.ts
+msgid "Next paragraph"
+msgstr "Next paragraph"
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "This project doesn't exist or you don't have access to it."
 msgstr "This project doesn't exist or you don't have access to it."
@@ -23033,6 +23597,7 @@ msgstr "Yes, and it is optional. Students submit their own funding applications 
 msgid "Safety Administrator"
 msgstr "Safety Administrator"
 
+#: src/a11y/messages.ts
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Start"
 msgstr "Start"
@@ -23090,6 +23655,7 @@ msgstr "Print / Save as PDF gives you a clean document — the page chrome is st
 msgid "Finishing this signs you out anywhere else you are logged in."
 msgstr "Finishing this signs you out anywhere else you are logged in."
 
+#: src/a11y/messages.ts
 #: src/components/layout/Navbar.tsx
 msgid "Settings"
 msgstr "Settings"
@@ -23193,6 +23759,10 @@ msgstr "Rooms <0>{0}</0>"
 msgid "Close room settings"
 msgstr "Close room settings"
 
+#: src/a11y/messages.ts
+msgid "Try them on real pages"
+msgstr "Try them on real pages"
+
 #: src/pages/help/HelpCenterPage.tsx
 msgid "We could not find any articles matching your search. Try different keywords, or ask the {ASSISTANT_NAME} in Messages."
 msgstr "We could not find any articles matching your search. Try different keywords, or ask the {ASSISTANT_NAME} in Messages."
@@ -23276,6 +23846,10 @@ msgstr "For anything outside the permitted list — a logo on an event backdrop,
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Markdown"
 msgstr "Markdown"
+
+#: src/a11y/messages.ts
+msgid "A thick yellow and navy ring shows where the keyboard is."
+msgstr "A thick yellow and navy ring shows where the keyboard is."
 
 #. placeholder {0}: event.title
 #. placeholder {0}: room.name
@@ -23465,6 +24039,10 @@ msgstr "Repeated intimidation, humiliation or threats."
 msgid "By submitting this report, you confirm that:"
 msgstr "By submitting this report, you confirm that:"
 
+#: src/a11y/messages.ts
+msgid "These are on now, so you can see them. Switch off anything you do not want."
+msgstr "These are on now, so you can see them. Switch off anything you do not want."
+
 #: src/pages/forums/BoardFormPage.tsx
 #: src/pages/forums/BoardPage.tsx
 msgid "Edit Board"
@@ -23602,6 +24180,10 @@ msgstr "Too many attempts"
 msgid "Scan this with your authenticator app — Apple Passwords, Google Authenticator, Microsoft Authenticator or any other — then enter the 6-digit code it shows."
 msgstr "Scan this with your authenticator app — Apple Passwords, Google Authenticator, Microsoft Authenticator or any other — then enter the 6-digit code it shows."
 
+#: src/a11y/messages.ts
+msgid "Stops animations and page transitions. Your device setting is always respected too."
+msgstr "Stops animations and page transitions. Your device setting is always respected too."
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "This event type runs to a finish — say when"
 msgstr "This event type runs to a finish — say when"
@@ -23725,6 +24307,10 @@ msgstr "Numbered List"
 msgid "Search all members..."
 msgstr "Search all members..."
 
+#: src/a11y/messages.ts
+msgid "Larger text, stronger contrast and outlines, a bigger pointer."
+msgstr "Larger text, stronger contrast and outlines, a bigger pointer."
+
 #: src/components/profile/PortraitTile.tsx
 msgid "Profile photo"
 msgstr "Profile photo"
@@ -23799,6 +24385,10 @@ msgstr "This resource doesn't exist or hasn't been published yet."
 msgid "Failed to save your profile. Please try again."
 msgstr "Failed to save your profile. Please try again."
 
+#: src/a11y/messages.ts
+msgid "Minimise"
+msgstr "Minimise"
+
 #: src/pages/events/EventsPage.tsx
 msgid "Nothing scheduled yet — check back soon."
 msgstr "Nothing scheduled yet — check back soon."
@@ -23870,6 +24460,10 @@ msgstr "Use this form for copyright, trade mark and design-right complaints. For
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "read in {0}"
 msgstr "read in {0}"
+
+#: src/a11y/messages.ts
+msgid "Click a button or link by its name"
+msgstr "Click a button or link by its name"
 
 #: src/i18n/harvested.ts
 msgid "Refusal to put terms in writing, or a written agreement with no named legal entity in it."
@@ -24288,6 +24882,10 @@ msgstr "A ring is one value against its target and its colour is a status — gr
 msgid "Search for a member, or select several to create a group chat."
 msgstr "Search for a member, or select several to create a group chat."
 
+#: src/a11y/messages.ts
+msgid "Keyboard and screen reader users start at the top of each new page."
+msgstr "Keyboard and screen reader users start at the top of each new page."
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Project Owner"
 msgstr "Project Owner"
@@ -24414,6 +25012,10 @@ msgstr "Ask a question, or say where you want to go..."
 #: src/components/auth/RolePicker.tsx
 msgid "Every role is verified before an account gets full access to KTIP."
 msgstr "Every role is verified before an account gets full access to KTIP."
+
+#: src/a11y/messages.ts
+msgid "Nothing needs to change. You can still take the tour."
+msgstr "Nothing needs to change. You can still take the tour."
 
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Your password has been updated. You'll be redirected shortly."
@@ -24842,6 +25444,10 @@ msgstr "Your request to collaborate on \"{0}\" was declined."
 msgid "Back to Sign In"
 msgstr "Back to Sign In"
 
+#: src/a11y/messages.ts
+msgid "Text back to normal size"
+msgstr "Text back to normal size"
+
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Leaderboard scope"
 msgstr "Leaderboard scope"
@@ -24874,6 +25480,10 @@ msgstr "Drafts the commentary and suggested actions of the monthly and quarterly
 #: src/components/calendar/CalendarShell.tsx
 msgid "24h"
 msgstr "24h"
+
+#: src/a11y/messages.ts
+msgid "Turn off voice commands"
+msgstr "Turn off voice commands"
 
 #: src/components/grants/GrantCard.tsx
 msgid "View Funding"
@@ -25078,7 +25688,7 @@ msgstr "Black & white"
 msgid "AI wrote the full first draft"
 msgstr "AI wrote the full first draft"
 
-#: src/components/layout/SkipLinks.tsx
+#: src/a11y/messages.ts
 msgid "Skip to main content"
 msgstr "Skip to main content"
 
@@ -25171,6 +25781,10 @@ msgstr "Combine it with other datasets to re-identify a member who is present in
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "Funding You Posted"
 msgstr "Funding You Posted"
+
+#: src/a11y/messages.ts
+msgid "Text size {percent}"
+msgstr "Text size {percent}"
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
@@ -25402,6 +26016,7 @@ msgstr "Sections, prefill, and what saving marks as yours."
 msgid "Doors & stairs"
 msgstr "Doors & stairs"
 
+#: src/a11y/messages.ts
 #: src/a11y/setup.ts
 #: src/pages/AccessibilityStatementPage.tsx
 msgid "Voice commands"
@@ -25547,6 +26162,10 @@ msgstr "AI navigation is on — ask in your own words"
 msgid "Password, two-step and your addresses"
 msgstr "Password, two-step and your addresses"
 
+#: src/a11y/messages.ts
+msgid "Buttons and form fields grow to at least 44 pixels."
+msgstr "Buttons and form fields grow to at least 44 pixels."
+
 #: src/i18n/harvested.ts
 msgid "You can withdraw an entry before judging closes, and we will remove it from the competition. After results are announced, the record that you entered and what you were awarded remains — a competition result that can be edited afterwards is not a result."
 msgstr "You can withdraw an entry before judging closes, and we will remove it from the competition. After results are announced, the record that you entered and what you were awarded remains — a competition result that can be edited afterwards is not a result."
@@ -25578,6 +26197,10 @@ msgstr "Mirror of Signature: navy rail down the right, monogram mark, date-left 
 #: src/i18n/harvested.ts
 msgid "Where the competition rules say so. Sponsors are bound by the restrictions in the next section."
 msgstr "Where the competition rules say so. Sponsors are bound by the restrictions in the next section."
+
+#: src/a11y/messages.ts
+msgid "Single keys"
+msgstr "Single keys"
 
 #: src/i18n/harvested.ts
 msgid "The amount, the funder, the deadline and the grant type, all in one block.\n"
@@ -25683,6 +26306,10 @@ msgstr "The message that started the discussion, its author and when it was writ
 msgid "Effective {0}"
 msgstr "Effective {0}"
 
+#: src/a11y/messages.ts
+msgid "Previous heading"
+msgstr "Previous heading"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "(Optional)"
 msgstr "(Optional)"
@@ -25723,6 +26350,10 @@ msgstr "Resources published"
 msgid "Check that inbox for a confirmation link."
 msgstr "Check that inbox for a confirmation link."
 
+#: src/a11y/messages.ts
+msgid "“{text}” is not a command I know. Say “help” for the list."
+msgstr "“{text}” is not a command I know. Say “help” for the list."
+
 #: src/i18n/harvested.ts
 msgid "Open Security on your Dashboard, under Account.\n"
 "\n"
@@ -25739,6 +26370,7 @@ msgstr "Open Security on your Dashboard, under Account.\n"
 "\n"
 "If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
 
+#: src/a11y/messages.ts
 #: src/components/tutorial/TutorialOverlay.tsx
 msgid "Read aloud"
 msgstr "Read aloud"
@@ -25817,6 +26449,10 @@ msgstr "Everyone on the platform"
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Video Conference Invitation"
 msgstr "Video Conference Invitation"
+
+#: src/a11y/messages.ts
+msgid "Device follows the high-contrast setting on your computer or phone."
+msgstr "Device follows the high-contrast setting on your computer or phone."
 
 #: src/i18n/harvested.ts
 msgid "Uploading someone else’s logo or brand to a profile or an event asserts that you have the right to use it. The Trademark & Brand Use policy covers that in detail."
@@ -25995,6 +26631,10 @@ msgstr "Its summary, category and phase — concept, prototype, pilot or scaling
 "\n"
 "The column on the right carries the owner, the team, and a block of key facts, plus other recent projects if this one is not what you were after."
 
+#: src/a11y/messages.ts
+msgid "Text"
+msgstr "Text"
+
 #: src/i18n/harvested.ts
 msgid "Where several people edit a document or whiteboard, each keeps ownership of their own contribution, and the result is jointly authored. Deleting your account does not remove your contributions from a shared surface — that is the \"already shared into another member’s context\" exception in the IP, Content & Licensing Policy."
 msgstr "Where several people edit a document or whiteboard, each keeps ownership of their own contribution, and the result is jointly authored. Deleting your account does not remove your contributions from a shared surface — that is the \"already shared into another member’s context\" exception in the IP, Content & Licensing Policy."
@@ -26014,6 +26654,10 @@ msgstr "Request sent to your institution."
 #: src/components/events/EventCalendar.tsx
 msgid "No events on this day"
 msgstr "No events on this day"
+
+#: src/a11y/messages.ts
+msgid "Stop listening"
+msgstr "Stop listening"
 
 #: src/components/legal/ConsentDocument.tsx
 #: src/components/shared/VideoViewer.tsx
@@ -26053,6 +26697,7 @@ msgstr "A verification badge reflects a check made at a point in time. It can be
 msgid "Business support organisation — a chamber of commerce, incubator, accelerator or MSME agency — that verifies local businesses and supports the cohort it works with."
 msgstr "Business support organisation — a chamber of commerce, incubator, accelerator or MSME agency — that verifies local businesses and supports the cohort it works with."
 
+#: src/a11y/messages.ts
 #: src/pages/legal/LegalDocumentPage.tsx
 msgid "On this page"
 msgstr "On this page"
@@ -26110,6 +26755,10 @@ msgstr "Drop to open the photo studio"
 msgid "Activity"
 msgstr "Activity"
 
+#: src/a11y/messages.ts
+msgid "Control the site by speaking. Works in Chrome, Edge and Safari."
+msgstr "Control the site by speaking. Works in Chrome, Edge and Safari."
+
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "grant"
 msgstr "grant"
@@ -26141,6 +26790,10 @@ msgstr "Listed to everyone; people ask you for access."
 #: src/pages/cv/CvPage.tsx
 msgid "Preview ink"
 msgstr "Preview ink"
+
+#: src/a11y/messages.ts
+msgid "End the tour"
+msgstr "End the tour"
 
 #: src/components/events/EventSpeakerGrid.tsx
 msgid "Speakers"
@@ -26730,6 +27383,10 @@ msgstr "Verify the institution before adding a roster."
 msgid "Replies to what you sent us"
 msgstr "Replies to what you sent us"
 
+#: src/a11y/messages.ts
+msgid "Large pointer"
+msgstr "Large pointer"
+
 #: src/i18n/harvested.ts
 msgid "The API is provided as is. Endpoints and fields may change with notice; breaking changes are versioned."
 msgstr "The API is provided as is. Endpoints and fields may change with notice; breaking changes are versioned."
@@ -26898,6 +27555,10 @@ msgstr "Identification of the content that was removed and where it was."
 msgid "Retake"
 msgstr "Retake"
 
+#: src/a11y/messages.ts
+msgid "Stop"
+msgstr "Stop"
+
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "↵ open"
 msgstr "↵ open"
@@ -26996,6 +27657,10 @@ msgstr "Not authorized"
 #: src/i18n/harvested.ts
 msgid "Sign-up step 2"
 msgstr "Sign-up step 2"
+
+#: src/a11y/messages.ts
+msgid "Single-key shortcuts can clash with a screen reader. Leave them off if you use one."
+msgstr "Single-key shortcuts can clash with a screen reader. Leave them off if you use one."
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Your verified status has been withdrawn and this profile is no longer public."
@@ -27292,6 +27957,10 @@ msgstr "Knowledge Base"
 msgid "No funding found"
 msgstr "No funding found"
 
+#: src/a11y/messages.ts
+msgid "High"
+msgstr "High"
+
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# day active in a row} other {# days active in a row}}"
 msgstr "{n, plural, one {# day active in a row} other {# days active in a row}}"
@@ -27385,6 +28054,7 @@ msgstr "Underline"
 msgid "Help and feedback forms"
 msgstr "Help and feedback forms"
 
+#: src/a11y/messages.ts
 #: src/components/achievements/TrophyCard.tsx
 #: src/components/documents/DocumentContentModal.tsx
 #: src/components/moderation/ContentWarningModal.tsx
@@ -27499,6 +28169,10 @@ msgstr "Access to open collaboration surfaces is narrowed to contexts a minor ha
 msgid "Go to Grants and open the opportunity you want."
 msgstr "Go to Grants and open the opportunity you want."
 
+#: src/a11y/messages.ts
+msgid "On"
+msgstr "On"
+
 #: src/components/directory/MemberPanel.tsx
 #: src/components/layout/Navbar.tsx
 #: src/components/profile/ProfileCanvas.tsx
@@ -27515,6 +28189,10 @@ msgstr "Project team invitations"
 #: src/lib/reaction-emoji.ts
 msgid "Love it"
 msgstr "Love it"
+
+#: src/a11y/messages.ts
+msgid "Photo brightness"
+msgstr "Photo brightness"
 
 #: src/i18n/harvested.ts
 msgid "What we store on your device"
@@ -27804,6 +28482,10 @@ msgstr "Signing in from the OECS Virtual Campus"
 msgid "Topics attendees can filter and search by."
 msgstr "Topics attendees can filter and search by."
 
+#: src/a11y/messages.ts
+msgid "Nothing changes: KTIP is mostly text. In live rooms, captions appear when a speaker turns them on."
+msgstr "Nothing changes: KTIP is mostly text. In live rooms, captions appear when a speaker turns them on."
+
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Document deleted"
 msgstr "Document deleted"
@@ -27897,6 +28579,10 @@ msgstr "{0, plural, one {Applied # field} other {Applied # fields}}"
 #: src/components/shared/BulkDeleteDialog.tsx
 msgid "Checking what each one holds…"
 msgstr "Checking what each one holds…"
+
+#: src/a11y/messages.ts
+msgid "Show this list"
+msgstr "Show this list"
 
 #: src/i18n/harvested.ts
 msgid "Optional email notifications and digests"
@@ -28135,6 +28821,10 @@ msgstr "Rare"
 msgid "Addresses you have confirmed"
 msgstr "Addresses you have confirmed"
 
+#: src/a11y/messages.ts
+msgid "Listening…"
+msgstr "Listening…"
+
 #: src/pages/auth/LoginPage.tsx
 msgid "Or continue with"
 msgstr "Or continue with"
@@ -28212,6 +28902,10 @@ msgstr "Change year"
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Collections & filters"
 msgstr "Collections & filters"
+
+#: src/a11y/messages.ts
+msgid "Next stop"
+msgstr "Next stop"
 
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/documents/DocumentCard.tsx

@@ -43,14 +43,8 @@ jobs:
       # macro, and those only fail at bundle time. Without this the first
       # place a broken build shows up is the Vercel deploy. tsc -b is
       # incremental, so the repeat inside `npm run build` is cheap.
-      # The accessibility service's address and KTIP's key, from the repo's
-      # Actions variables. The build stops without them, on purpose: KTIP must
-      # never ship with its accessibility controls missing.
       - name: Build
         run: npm run build
-        env:
-          VITE_A11Y_ORIGIN: ${{ vars.VITE_A11Y_ORIGIN }}
-          VITE_A11Y_KEY: ${{ vars.VITE_A11Y_KEY }}
 
       # Production dependencies only. Dev-only advisories (vitest, sharp, the
       # image pipeline) are real but do not ship to a browser or an edge

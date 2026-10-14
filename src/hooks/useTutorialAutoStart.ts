@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useTutorials } from '../contexts/TutorialContext'
 import { getTutorialById } from '../data/tutorials'
 import { hasAutoStarted, markAutoStarted } from '../lib/tutorialStorage'
-import { isSetupActive } from '../a11y/viridion'
+import { isSetupActive } from '@a11y-kit'
 
 /** Let entrance animations and the first data render settle before spotlighting */
 const SETTLE_MS = 500

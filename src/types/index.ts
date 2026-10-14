@@ -7,7 +7,7 @@ import type { SocialLinks } from '../lib/social-links'
 import type { CalendarAccent, CalendarNoteKind } from '../lib/constants'
 // Relative and to the DOM-free module: the server project (tsconfig.node.json)
 // reaches this file through api/ tests and has neither the alias nor DOM types
-import type { SyncedBlob } from '../a11y/types'
+import type { SyncedBlob } from '../../a11y-kit/src/core/sync'
 
 /**
  * Every platform role. The first seven predate the tiered hierarchy and are
@@ -415,7 +415,7 @@ export interface ProfileView {
 /**
  * Migration 155 — what profiles.display_prefs may hold. All optional.
  *
- * `a11y` is the accessibility service's blob and the source of truth. The flat
+ * `a11y` is the accessibility kit's blob and the source of truth. The flat
  * keys are still written beside it for builds from before the kit, and read
  * only when `a11y` is absent (src/a11y/sync.ts).
  */

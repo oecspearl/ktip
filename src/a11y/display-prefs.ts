@@ -1,15 +1,8 @@
-import type { A11ySettings, SyncedBlob } from './viridion'
-
-/** A saved copy the service wrote: a version, a timestamp and the settings */
-function isSyncedBlob(value: unknown): value is SyncedBlob {
-  if (!value || typeof value !== 'object') return false
-  const v = value as Partial<SyncedBlob>
-  return v.v === 2 && typeof v.updatedAt === 'number' && !!v.settings && typeof v.settings === 'object'
-}
+import { isSyncedBlob, type A11ySettings, type SyncedBlob } from '@a11y-kit'
 import type { DisplayPrefs } from '../types'
 
 /**
- * profiles.display_prefs (155) as the accessibility service's synced blob.
+ * profiles.display_prefs (155) as the kit's synced blob.
  *
  * Builds from before the kit wrote five flat keys and nothing else. Those are
  * read as a blob older than any change a device has made since, which is what

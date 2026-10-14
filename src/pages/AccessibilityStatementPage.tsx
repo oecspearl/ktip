@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import { Trans, useLingui } from '@lingui/react/macro'
-import { openA11y } from '../a11y/viridion'
+import { openAccessibilityPanel, openShortcutHelp } from '@a11y-kit'
 import { PageHero } from '../components/layout/PageHero'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { OPEN_FEEDBACK_EVENT } from '../a11y/A11yHost'
@@ -51,7 +51,7 @@ export default function AccessibilityStatementPage() {
           <Trans>
             Every page has an accessibility button. On most pages it is in the round button at the bottom right; on
             the sign-in pages it stands on its own.{' '}
-            <button type="button" className={button} onClick={(e) => openA11y('panel', e.currentTarget)}>
+            <button type="button" className={button} onClick={openAccessibilityPanel}>
               Open accessibility settings
             </button>
             .
@@ -102,7 +102,7 @@ export default function AccessibilityStatementPage() {
             Most of KTIP can be used with the keyboard alone. Hold Alt and Shift (Option and Shift on a Mac) and press a
             number from 1 to 9 to go to a main page, C for the main content, F to search, A for accessibility
             settings, or K for{' '}
-            <button type="button" className={button} onClick={() => openA11y('help')}>
+            <button type="button" className={button} onClick={openShortcutHelp}>
               the full list
             </button>
             . These keys do not clash with screen readers. Single-key shortcuts are off unless you switch them on.

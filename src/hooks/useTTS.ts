@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { speak as serviceSpeak, speechSupported } from '../a11y/viridion'
+import { langPrefix, speakText, speechSupported } from '@a11y-kit'
+import { a11yStore } from '../a11y/store'
 
 /**
- * Read-aloud for the tutorial overlay, through the accessibility service: a
- * voice that matches the page's language, the member's reading speed and
+ * Read-aloud for the tutorial overlay, on the accessibility kit's speech
+ * layer: a voice that matches the page's language (French and Spanish pages
+ * used to get an English voice or none), the member's reading speed and
  * chosen voice, and long steps split so Chrome does not cut them off.
  * Feature-detected — callers hide the control when `supported` is false.
  */
@@ -22,9 +24,13 @@ export function useTTS() {
 
   const speak = useCallback((text: string, onEnd?: () => void) => {
     cancelRef.current?.()
+    const lang = document.documentElement.lang || 'en'
+    const { settings, device } = a11yStore.getState()
     setSpeaking(true)
-    cancelRef.current = serviceSpeak(text, {
-      lang: document.documentElement.lang || 'en',
+    cancelRef.current = speakText(text, {
+      lang,
+      rate: settings.ttsRate,
+      voiceURI: device.ttsVoice[langPrefix(lang)],
       onEnd: () => {
         cancelRef.current = null
         setSpeaking(false)

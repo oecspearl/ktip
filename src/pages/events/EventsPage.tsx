@@ -43,7 +43,7 @@ import type { Event } from '../../types'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import { resolveCopy } from '../../i18n/copy'
-import { prefersReducedMotionNow } from '../../a11y/viridion'
+import { prefersReducedMotionNow } from '../../a11y/store'
 
 type EventsView = 'calendar' | 'grid'
 

@@ -1,14 +1,12 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
-import type { ConfigureInput } from './viridion'
-
-type NavigationAdapter = Required<Pick<ConfigureInput, 'navigate' | 'location'>>
+import type { NavigationAdapter } from '@a11y-kit'
 
 /**
- * The router as the accessibility service sees it. A11yHost sits outside
- * RouterProvider (it has to cover the auth pages), so the router reaches it
- * through this bridge, mounted once at the router's root. Until the bridge
- * mounts, navigation falls back to a full page load.
+ * The router as the a11y kit sees it. A11yHost sits outside RouterProvider
+ * (it has to cover the auth pages and the floating panels), so the router
+ * reaches it through this bridge, mounted once at the router's root.
+ * Until the bridge mounts, navigation falls back to a full page load.
  */
 let navigateFn: ((path: string) => void) | null = null
 let current = typeof window !== 'undefined' ? window.location.pathname + window.location.hash : '/'

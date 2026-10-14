@@ -9,7 +9,7 @@ import { useDeckFlip } from './ui/useDeckFlip'
 import { PHOTO_SETS } from '../lib/hero-images'
 import { markWelcomeSeen, useHasSeenWelcome } from '../lib/welcome-panel'
 import { useIsMobile } from '../hooks/useMediaQuery'
-import { prefersReducedMotionNow } from '../a11y/viridion'
+import { prefersReducedMotionNow } from '../a11y/store'
 
 /**
  * The first thing a device ever sees.
