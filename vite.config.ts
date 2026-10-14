@@ -747,7 +747,10 @@ export default defineConfig(({ mode, command }) => {
           // cleanupOutdatedCaches has already deleted. The sign-in then
           // dead-ends on a blank page or a stuck spinner. Going to the network
           // here costs one request and guarantees the current build.
-          navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
+          //
+          // /test-creds is a standalone page in public/, not an SPA route. The
+          // fallback would answer it with index.html and the router's 404.
+          navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/test-creds/],
           runtimeCaching: [
             {
               /**
