@@ -149,7 +149,12 @@ export function VenueMapExplorer({
   const wrapRef = useRef<HTMLDivElement>(null)
   const size = useElementSize(wrapRef)
 
-  const [floor, setFloor] = useState(0)
+  // Coming back out of a room starts on that room's level, not the ground:
+  // the floor, the fade, the chips and the rooms rail all key off this.
+  const [startFloor] = useState(
+    () => Number(rooms.find((r) => r.id === arriveFromRoomId)?.floor) || 0
+  )
+  const [floor, setFloor] = useState(startFloor)
   const [zoom, setZoom] = useState({ k: 1, px: 0, py: 0 })
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   /** Hover in the rooms rail. Kept apart from the map's own hover so pointing
@@ -166,7 +171,7 @@ export function VenueMapExplorer({
    * drives every level's opacity, so the floor you left dissolves as the one
    * you arrived on solidifies.
    */
-  const [fade, setFade] = useState({ from: 0, to: 0, mix: 1 })
+  const [fade, setFade] = useState({ from: startFloor, to: startFloor, mix: 1 })
   const [phase, setPhase] = useState<EnterPhase>('idle')
   const [enteringRoomId, setEnteringRoomId] = useState<string | null>(null)
   const [veil, setVeil] = useState(0)
@@ -199,7 +204,7 @@ export function VenueMapExplorer({
   const phaseRef = useRef<EnterPhase>('idle')
   const enteredRef = useRef(false)
   const veilRef = useRef(0)
-  const fadeRef = useRef({ from: 0, to: 0, mix: 1 })
+  const fadeRef = useRef({ from: startFloor, to: startFloor, mix: 1 })
 
   // Both eased on animation frames rather than by CSS: the projection is
   // recomputed from them every frame, so the map tips and lifts instead of
@@ -753,6 +758,7 @@ export function VenueMapExplorer({
               rooms={rooms}
               occupancy={occupancy}
               activeRoomId={standingRoom?.id ?? null}
+              currentFloor={floor}
               lockedIds={mutedIds}
               onPick={(room) => {
                 const geo = geometry[room.id]
@@ -764,7 +770,7 @@ export function VenueMapExplorer({
         )}
       </div>
 
-      <div ref={wrapRef} className="relative min-w-0 flex-1 bg-ktip-canvas">
+      <div ref={wrapRef} data-venue-map-view className="relative min-w-0 flex-1 bg-ktip-canvas">
       <svg
         width="100%"
         height="100%"

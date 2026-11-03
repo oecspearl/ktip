@@ -12,6 +12,11 @@ interface VenueRoomListProps {
   occupancy: Record<string, number>
   /** Room currently underfoot, highlighted so the list and map agree. */
   activeRoomId?: string | null
+  /**
+   * The level being stood on. Its group is the one open; every other level is
+   * folded away, and a floor change moves the open group with it.
+   */
+  currentFloor?: number
   lockedIds?: Set<string>
   /** Drops the card chrome, for when this is a rail inside the map itself. */
   bare?: boolean
@@ -30,21 +35,35 @@ interface VenueRoomListProps {
  * which is the question someone has when the room they want is on another
  * level or behind a wall. Picking one walks you there — it is the same action
  * as clicking the room on the map, not a second way of doing things.
+ *
+ * Laid out as a tree: each floor is a header, its rooms hang off a guide line
+ * under it. Only one floor is open at a time, and it follows the floor you are
+ * on, so the list never shows a level you are not looking at unless you ask.
  */
 export function VenueRoomList({
   config,
   rooms,
   occupancy,
   activeRoomId,
+  currentFloor = 0,
   lockedIds,
   bare = false,
   onPick,
   onHover,
 }: VenueRoomListProps) {
   const { t } = useLingui()
-  // Floors other than the ground one start collapsed: a six-room venue should
-  // not push the presence list off the screen.
-  const [collapsed, setCollapsed] = useState<Record<number, boolean>>({})
+  // The open group. null is "all folded", which a click on the open header
+  // gives you. Clicking another header peeks at that floor instead.
+  const [openFloor, setOpenFloor] = useState<number | null>(currentFloor)
+  // Re-synced during render rather than in an effect, so a floor change never
+  // paints one frame with the old level still open.
+  const [syncedFloor, setSyncedFloor] = useState(currentFloor)
+  if (syncedFloor !== currentFloor) {
+    setSyncedFloor(currentFloor)
+    setOpenFloor(currentFloor)
+  }
+
+  const multiFloor = config.floors.length > 1
 
   const byFloor = config.floors.map((floor, index) => ({
     floor,
@@ -63,39 +82,63 @@ export function VenueRoomList({
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         {byFloor.map(({ floor, index, rooms: floorRooms }) => {
-          const open = !collapsed[index]
+          const open = !multiFloor || openFloor === index
+          const here = index === currentFloor
+          const groupId = `venue-floor-${floor.key}`
           return (
             <div key={floor.key}>
-              {config.floors.length > 1 && (
+              {multiFloor && (
                 <button
                   type="button"
-                  onClick={() => setCollapsed((c) => ({ ...c, [index]: open }))}
+                  onClick={() => setOpenFloor(open ? null : index)}
                   aria-expanded={open}
-                  className="flex w-full items-center gap-2 rounded-lg px-1 py-1 text-xs font-semibold text-ktip-sand-700 hover:bg-ktip-sand-50"
+                  aria-controls={groupId}
+                  className="flex w-full items-start gap-2 rounded-lg px-1 py-1.5 text-left hover:bg-ktip-sand-50"
                 >
-                  <span className="rounded border border-ktip-sand-200 px-1.5 py-0.5 font-mono text-[9px] text-ktip-sand-500">
+                  {/* The floor you are on gets a filled badge, the rest an
+                      outline: the same "you are here" the floor chips show. */}
+                  <span
+                    className={`mt-px shrink-0 rounded border px-1 py-0.5 font-mono text-[9px] font-semibold leading-none ${
+                      here
+                        ? 'border-ktip-ocean-600 bg-ktip-ocean-600 text-white'
+                        : 'border-ktip-sand-300 text-ktip-sand-600'
+                    }`}
+                  >
                     {floorBadge(index)}
                   </span>
-                  {floor.name}
-                  <span className="font-mono text-[10px] text-ktip-sand-400">{floorRooms.length}</span>
+                  <span className="min-w-0 flex-1 text-xs font-bold leading-snug text-ktip-sand-900">
+                    {floor.name}
+                  </span>
+                  <span className="mt-px shrink-0 font-mono text-[10px] text-ktip-sand-500">
+                    {floorRooms.length}
+                  </span>
                   <ChevronRight
                     size={13}
-                    className={`ml-auto text-ktip-sand-400 transition-transform ${open ? 'rotate-90' : ''}`}
+                    className={`mt-px shrink-0 text-ktip-sand-500 transition-transform ${open ? 'rotate-90' : ''}`}
                     aria-hidden="true"
                   />
                 </button>
               )}
 
               {open && (
-                <ul className="mt-1 space-y-1">
+                <ul
+                  id={groupId}
+                  // The guide line runs down from under the floor badge, so the
+                  // rooms read as that floor's children.
+                  className={
+                    multiFloor
+                      ? 'mb-1 ml-[0.8rem] mt-0.5 space-y-0.5 border-l border-ktip-sand-300 pl-1.5'
+                      : 'space-y-0.5'
+                  }
+                >
                   {floorRooms.length === 0 && (
-                    <li className="px-2 py-1 text-[11px] text-ktip-sand-400"><Trans>Nothing on this floor</Trans></li>
+                    <li className="px-2 py-1 text-[11px] text-ktip-sand-500"><Trans>Nothing on this floor</Trans></li>
                   )}
                   {floorRooms.map((room) => {
                     const color = colorForRoom(room)
-                    const here = occupancy[room.id] || 0
+                    const count = occupancy[room.id] || 0
                     const locked = lockedIds?.has(room.id)
                     const active = room.id === activeRoomId
                     const Icon = venueRoomIcon(room.kind)
@@ -116,14 +159,15 @@ export function VenueRoomList({
                           onMouseLeave={() => onHover?.(null)}
                           onFocus={() => onHover?.(room)}
                           onBlur={() => onHover?.(null)}
-                          className={`grid w-full grid-cols-[1.1rem_1fr_auto] items-center gap-x-2 rounded-xl border px-2.5 py-2 text-left transition-colors ${
+                          aria-current={active ? 'location' : undefined}
+                          className={`grid w-full grid-cols-[1rem_1fr_auto] items-center gap-x-1.5 rounded-lg border px-1.5 py-1 text-left transition-colors ${
                             active
                               ? 'bg-ktip-sand-50'
-                              : 'border-ktip-sand-100 hover:border-ktip-sand-300 hover:bg-ktip-sand-50'
+                              : 'border-transparent hover:border-ktip-sand-200 hover:bg-ktip-sand-50'
                           }`}
                           style={active ? { borderColor: color } : undefined}
                         >
-                          <Icon size={14} style={{ color }} aria-hidden="true" />
+                          <Icon size={13} style={{ color }} aria-hidden="true" />
                           <span
                             className={`flex min-w-0 items-center gap-1 text-xs font-semibold ${
                               locked ? 'text-ktip-sand-500' : 'text-ktip-sand-900'
@@ -136,10 +180,10 @@ export function VenueRoomList({
                           </span>
                           <span className="flex shrink-0 items-center gap-0.5 font-mono text-[10px] text-ktip-sand-500">
                             <Users size={9} aria-hidden="true" />
-                            {here}
+                            {count}
                           </span>
 
-                          <span className="col-start-2 col-end-4 mt-0.5 truncate text-[10px] text-ktip-sand-500">
+                          <span className="col-start-2 col-end-4 truncate text-[10px] leading-tight text-ktip-sand-500">
                             {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
                             {room.capacity != null ? t` · cap ${room.capacity}` : ''}
                             {!room.is_open ? t` · closed` : ''}
