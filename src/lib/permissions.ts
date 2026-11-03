@@ -88,7 +88,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   // promote themselves and cannot promote each other.
   {
     slug: 'people_supervisor',
-    label: msg`People & Trust Supervisor (Marvin)`,
+    label: msg`People & Trust Supervisor`,
     tier: 'admin',
     description: msg`Owns who people are and how they behave: member records (read-only), verification, institutions, chamber review, moderation and grievances.`,
     selfAssignable: false,
@@ -97,7 +97,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   },
   {
     slug: 'programme_supervisor',
-    label: msg`Programmes Supervisor (Royston)`,
+    label: msg`Programmes Supervisor`,
     tier: 'admin',
     description: msg`Owns what the platform publishes: projects, grants, forums, resources, achievements and employers. Events and the venue stay with the Super Admin.`,
     selfAssignable: false,
@@ -115,7 +115,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   },
   {
     slug: 'oecs',
-    label: msg`OECS Admin (legacy)`,
+    label: msg`OECS Admin`,
     tier: 'admin',
     description: msg`Legacy admin slug. Resolves to Super Admin.`,
     selfAssignable: false,
@@ -154,7 +154,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   },
   {
     slug: 'chamber_admin',
-    label: msg`Business Support Organisation`,
+    label: msg`Business Association`,
     tier: 'organization',
     description: msg`Business support organisation — a chamber of commerce, incubator, accelerator or MSME agency — that verifies local businesses and supports the cohort it works with.`,
     selfAssignable: false,
@@ -275,7 +275,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
   },
   {
     slug: 'student',
-    label: msg`Student (school-verified)`,
+    label: msg`Student`,
     tier: 'individual',
     description:
       msg`Verified via an approved institutional email domain. Read-only on grants, no unmonitored direct messaging.`,

@@ -30,18 +30,18 @@ const STORAGE_PREFIX = 'ktip_assistant_thread_'
 // message shows this to the member, so it resolves through i18n._() at the
 // two call sites below rather than shipping English into every locale.
 const ROLE_LABELS: Partial<Record<UserRole, MessageDescriptor>> = {
-  student: msg`Student/Youth Innovator`,
+  student: msg`Student`,
   mentor: msg`Mentor`,
-  investor: msg`Investor/Funding Agency`,
+  investor: msg`Investor / Funding Agency`,
   entrepreneur: msg`Entrepreneur`,
   private_sector: msg`Private Sector`,
-  faculty: msg`Faculty/Researcher`,
+  faculty: msg`Faculty`,
   oecs: msg`OECS Administrator`,
   super_admin: msg`OECS Administrator`,
   admin: msg`OECS Administrator`,
   safety_admin: msg`Safety Administrator`,
   educational_partner: msg`Post-Secondary Institution`,
-  chamber_admin: msg`Business Support Organisation Administrator`,
+  chamber_admin: msg`Business Association`,
   ngo: msg`Non-Governmental Organization`,
   research_institution: msg`Research Institution`,
   government: msg`Government Ministry or Agency`,

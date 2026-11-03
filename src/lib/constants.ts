@@ -19,33 +19,15 @@ export const USER_ROLES = {
   OECS: 'oecs',
 } as const
 
-// The seven original roles keep their hand-written labels — they are the ones
-// already on live profile cards, and "Student/Youth Innovator" is the platform's
-// own language for the audience rather than a description of the permission.
-// The six added by 063 fall back to the catalog, so a member holding one is
-// never rendered as a bare slug.
-const LEGACY_ROLE_LABELS: Record<string, string> = {
-  student: 'Student/Youth Innovator',
-  mentor: 'Mentor',
-  investor: 'Investor/Funding Agency',
-  entrepreneur: 'Entrepreneur',
-  private_sector: 'Private Sector',
-  faculty: 'Faculty/Researcher',
-  oecs: 'OECS Admin',
-}
-
-// `Copy`, not `string`: the labels spread in from ROLE_DEFINITIONS are msg
-// descriptors, while LEGACY_ROLE_LABELS below are still plain source strings.
-// Both resolve through resolveCopy(i18n, …) at the render site.
-export const ROLE_LABELS: Record<string, Copy> = {
-  // The legacy spread deliberately WINS for slugs present in both: the
-  // definitions carry admin-console wording — "Student (school-verified)",
-  // "OECS Admin (legacy)" — while these are the public-facing names. The
-  // legacy values are plain strings, which translate through the harvested
-  // source-text aliases the compile step writes into the catalogs.
-  ...Object.fromEntries(ROLE_DEFINITIONS.map((r) => [r.slug, r.label])),
-  ...LEGACY_ROLE_LABELS,
-}
+// One label set for every surface: the navbar trigger, the role switcher, the
+// signup picker, the admin console and the directory filter all read the
+// catalog. A second hand-written set used to override seven of these
+// ("Faculty/Researcher", "Student/Youth Innovator"), so the same member showed
+// two names depending on where you looked. `Copy` so render sites keep going
+// through resolveCopy(i18n, …).
+export const ROLE_LABELS: Record<string, Copy> = Object.fromEntries(
+  ROLE_DEFINITIONS.map((r) => [r.slug, r.label])
+)
 
 /**
  * Roles worth offering as a filter on the public member directory.

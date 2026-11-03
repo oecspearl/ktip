@@ -225,7 +225,7 @@ export const VERIFICATION_CATEGORY: HelpCategory = {
     {
       id: 'sme-verification',
       title: 'How do I get my business verified?',
-      content: `Business verification is done by a Business Support Organisation, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.\n\nOpen the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.\n\nThe reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.\n\nA Private Sector account is the unverified state of the same thing — everything keeps working while you wait.`,
+      content: `Business verification is done by a business association, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.\n\nOpen the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.\n\nThe reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.\n\nA Private Sector account is the unverified state of the same thing — everything keeps working while you wait.`,
       tags: ['sme', 'business', 'chamber', 'verification', 'registration', 'private sector'],
     },
   ],

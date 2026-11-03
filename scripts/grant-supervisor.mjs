@@ -52,7 +52,7 @@ const seatArg = (process.argv[3] || '').toLowerCase()
 const SEATS = {
   people: {
     slug: 'people_supervisor',
-    label: 'People & Trust Supervisor (Marvin)',
+    label: 'People & Trust Supervisor',
     owns: 'users (read-only), verification, institutions, chamber review, moderation, grievances',
     expect: [
       ['members:view', '/admin/users, read-only'],
@@ -75,7 +75,7 @@ const SEATS = {
   },
   programmes: {
     slug: 'programme_supervisor',
-    label: 'Programmes Supervisor (Royston)',
+    label: 'Programmes Supervisor',
     owns: 'projects, grants, forums, resources, achievements, employers',
     expect: [
       ['project:manage_all', '/admin/projects'],

@@ -146,10 +146,10 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
   },
   {
     role: 'chamber_admin',
-    title: 'Business Support Organisations',
+    title: 'Business Associations',
     description: 'Vet and support the businesses in your member state.',
     steps: [
-      'Get your business support organisation account granted by OECS',
+      'Get your business association account granted by OECS',
       'Work through the business submissions queued for your member state',
       'Check each legal name and registration number against your own records',
       'Approve to mark the business verified, or decline with a reason',
