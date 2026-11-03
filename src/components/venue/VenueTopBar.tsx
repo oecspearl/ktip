@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { ArrowLeft, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
+import { IrisLink } from '../ui/IrisTransition'
 import { AvailabilityPicker } from './AvailabilityPicker'
 import type { VenueAvailability } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -54,6 +55,8 @@ export function VenueTopBar({
 }: VenueTopBarProps) {
   const { t } = useLingui()
   const TitleTag = titleAs ?? 'p'
+  // Back to the map goes through the iris, the same door the room was entered by.
+  const BackLink = backToMap ? IrisLink : Link
 
   // The presence channel lives in the venue layout and survives page swaps,
   // so `connected` is only false on first entry and on a genuine socket drop.
@@ -84,7 +87,7 @@ export function VenueTopBar({
         className
       )}
     >
-      <Link
+      <BackLink
         to={
           backToMap
             ? venuePath({ id: eventId, slug: eventSlug, event_type: eventType })
@@ -94,7 +97,7 @@ export function VenueTopBar({
       >
         <ArrowLeft size={15} aria-hidden="true" />
         {backToMap ? t`Back to the map` : t`Event page`}
-      </Link>
+      </BackLink>
 
       <span className="hidden h-4 w-px bg-ktip-sand-200 sm:block" aria-hidden="true" />
 

@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Map as MapIcon, Users } from 'lucide-react'
 import { occupancyByRoom } from '../../../lib/venue-presence'
 import { venuePath, venueRoomPath } from '../../../lib/event-slug'
+import { IrisLink } from '../../ui/IrisTransition'
 import { VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
 import { venueRoomIcon } from '../../../lib/category-icons'
 import { colorForRoom, floorBadge, floorLabel } from '../../../lib/venue-map'
@@ -140,13 +141,13 @@ export function WayfindingPanel({
           ))}
         </div>
       )}
-      <Link
+      <IrisLink
         to={venuePath(event)}
         className="flex items-center justify-center gap-1.5 border-t border-ktip-sand-100 px-4 py-2 text-xs font-semibold text-ktip-ocean-600 hover:bg-ktip-sand-50"
       >
         <MapIcon size={13} aria-hidden="true" />
         <Trans>Open the map</Trans>
-      </Link>
+      </IrisLink>
     </RoomPanel>
   )
 }

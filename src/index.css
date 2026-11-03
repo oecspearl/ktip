@@ -2264,6 +2264,59 @@ html[data-capturing] [data-fab] {
   pointer-events: none;
 }
 
+/* ---------------------------------------------------------------------------
+   The iris as a page transition (IrisTransitionProvider): entering and leaving
+   a venue room. Same ground, same trick and same curve as the welcome panel's
+   iris above — a circle whose box-shadow spread is the ground — but it can sit
+   off-centre (on the room being entered), and it runs both ways: shut on the
+   page being left, open on the page arrived at.
+
+   Off-centre, the farthest corner can be a full diagonal away (~141vmax), so
+   the spread is 150vmax rather than 100. The open diameter is computed in JS
+   (--iris-d) to just clear that corner, so the ring is off screen on the last
+   frame and not a moment before.
+   --------------------------------------------------------------------------- */
+.iris-cutout {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-toast);
+  overflow: hidden;
+}
+
+.iris-cutout[data-phase='opening'] {
+  /* The new page is live as soon as the hole opens. */
+  pointer-events: none;
+}
+
+.iris-cutout-hole {
+  position: absolute;
+  top: var(--iris-y, 50%);
+  left: var(--iris-x, 50%);
+  width: 0;
+  height: 0;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 150vmax var(--color-hero-base);
+}
+
+.iris-cutout[data-phase='closing'] .iris-cutout-hole {
+  animation: irisShut 380ms cubic-bezier(0.5, 0, 0.35, 1) forwards;
+}
+
+.iris-cutout[data-phase='opening'] .iris-cutout-hole {
+  animation: irisOpen 460ms cubic-bezier(0.5, 0, 0.35, 1) forwards;
+}
+
+@keyframes irisShut {
+  0% { width: var(--iris-d); height: var(--iris-d); }
+  100% { width: 0; height: 0; }
+}
+
+@keyframes irisOpen {
+  0% { width: 0; height: 0; }
+  100% { width: var(--iris-d); height: var(--iris-d); }
+}
+
 /* A line of copy. The stagger is an inline animation-delay per line, so one
    class covers the eyebrow, the heading, the body and the controls. */
 .welcome-line {

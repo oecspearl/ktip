@@ -23,7 +23,20 @@ import { mapConfigOf } from '../../hooks/useVenueMap'
 import { autoLayout, isPlaced } from '../../lib/venue-map'
 import type { VenueRoom } from '../../types'
 import { entityPath } from '../../lib/slug'
+import { forgetVenueRoom, lastVenueRoom } from '../../lib/venue-last-room'
+import { useIrisTransition, type IrisOrigin } from '../../components/ui/IrisTransition'
 import { Trans, useLingui } from '@lingui/react/macro'
+
+/**
+ * Where the map shows on screen. By the time the map hands a room over, its
+ * camera has centred that room in this box, so the iris shuts on the room.
+ */
+function mapViewCentre(): IrisOrigin | null {
+  const el = document.querySelector('[data-venue-map-view]')
+  if (!el) return null
+  const r = el.getBoundingClientRect()
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 }
+}
 
 /**
  * The venue floorplan — the front door of a virtual hackathon.
@@ -50,6 +63,15 @@ export default function EventVenuePage() {
   const { membership, joining, joinError, presence } = useVenuePresenceContext()
   const { rooms, loading: roomsLoading } = useVenueRooms(eventId)
   const { enterRoom } = useEnterVenueRoom()
+  const iris = useIrisTransition()
+
+  // The room this member just walked out of, if they did, so the map puts them
+  // back on its floor. Read once per visit, then forgotten, so the next visit
+  // starts at the front door. The session row is the fallback after a reload.
+  const cameFromRoomId = useMemo(() => lastVenueRoom(eventId), [eventId])
+  useEffect(() => {
+    if (cameFromRoomId) forgetVenueRoom(eventId)
+  }, [cameFromRoomId, eventId])
 
   const lobby = useMemo(() => occupantsUnassigned(presence.occupants), [presence.occupants])
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
@@ -133,15 +155,23 @@ export default function EventVenuePage() {
 
   // Returns whether entry went through, so the map can pull its camera back
   // out on a refusal instead of staying behind the entry veil.
-  const handleEnter = async (room: VenueRoom) => {
+  //
+  // The iris shuts while the request is in flight, the route changes once both
+  // are done, and it opens on the room. On a refusal it opens on the map again.
+  const handleEnter = async (room: VenueRoom, fromMap = false) => {
     if (!eventId || !event) return false
+    const shut = iris.close(fromMap ? mapViewCentre() : null)
     try {
       await enterRoom(eventId, room.id)
-      navigate(venueRoomPath(event, room.key))
+      await shut
+      await navigate(venueRoomPath(event, room.key))
       return true
     } catch (err: any) {
       toast.error(err?.message || t`Could not enter that room`)
+      await shut
       return false
+    } finally {
+      iris.open()
     }
   }
 
@@ -293,11 +323,11 @@ export default function EventVenuePage() {
               peers={presence.positions.peers}
               // Set only when this member was inside a room a moment ago,
               // which is what plays the entry animation in reverse.
-              arriveFromRoomId={membership.current_room_id}
+              arriveFromRoomId={cameFromRoomId ?? membership.current_room_id}
               onPositionChange={presence.setPosition}
               onStandingRoomChange={handleStandingRoom}
               onPreviewRoomChange={handlePreviewRoom}
-              onEnter={handleEnter}
+              onEnter={(room) => handleEnter(room, true)}
             />
 
             <VenuePresencePanel occupants={lobby}>

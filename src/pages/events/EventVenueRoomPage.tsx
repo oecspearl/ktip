@@ -1,9 +1,11 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { Lock } from 'lucide-react'
 import { useEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { venuePath } from '../../lib/event-slug'
+import { rememberVenueRoom } from '../../lib/venue-last-room'
+import { IrisLink } from '../../components/ui/IrisTransition'
 import { useVenuePresenceContext } from '../../contexts/VenuePresenceContext'
 import { useRoomSignals } from '../../hooks/useRoomSignals'
 import { useAuth } from '../../contexts/AuthContext'
@@ -61,6 +63,11 @@ export default function EventVenueRoomPage() {
     [rooms, params.roomKey]
   )
   const roomId = room?.id
+  // So the map, when this member walks back out, stands them where this room
+  // is, on its floor, rather than at the front entrance on the ground.
+  useEffect(() => {
+    if (eventId && roomId) rememberVenueRoom(eventId, roomId)
+  }, [eventId, roomId])
   // Already on the event row (089) and already fetched — the floors are what
   // let every panel that names another room say which level it is on.
   const mapConfig = useMemo(() => mapConfigOf(event), [event])
@@ -191,9 +198,9 @@ export default function EventVenueRoomPage() {
             <BridgeRequestCard eventId={event.id} hostTeam={homebase.team} myTeam={myTeam} />
           </div>
         )}
-        <Link to={venuePath(event)} className="mt-5 inline-block">
+        <IrisLink to={venuePath(event)} className="mt-5 inline-block">
           <Button variant="secondary"><Trans>Back to the map</Trans></Button>
-        </Link>
+        </IrisLink>
       </div>
     )
   }
