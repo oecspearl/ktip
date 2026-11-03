@@ -39,6 +39,7 @@ export type RoomSectionId =
   | 'team_workspace'
   | 'team_finder'
   | 'quest_board'
+  | 'collab_commons'
   | 'announcement_feed'
   | 'faq'
   | 'rules'
@@ -206,6 +207,14 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: ['team'],
     order: 45,
+  },
+  {
+    id: 'collab_commons',
+    label: msg`Collab Commons`,
+    blurb: msg`A public board where teams post what they offer and what they need. Shows the bridges open between teams.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 57,
   },
   {
     id: 'quest_board',

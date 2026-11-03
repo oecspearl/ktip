@@ -13,6 +13,7 @@ import { VenueAwayBanner } from '../../components/venue/VenueAwayBanner'
 import { VenueFloorplan } from '../../components/venue/VenueFloorplan'
 import { VenueMapExplorer, canEnterRoom } from '../../components/venue/map/VenueMapExplorer'
 import { homebaseAccess, useEventTeams } from '../../hooks/useEventTeams'
+import { guestOf, useBridges } from '../../hooks/useBridges'
 import { VenueRoomBrief } from '../../components/venue/map/VenueRoomBrief'
 import { RoomOccupantList } from '../../components/venue/RoomOccupantList'
 import { VenuePresencePanel } from '../../components/venue/VenuePresencePanel'
@@ -59,15 +60,18 @@ export default function EventVenuePage() {
   const mapConfig = useMemo(() => mapConfigOf(event), [event])
   // Other teams' Homebases are locked on the map (190), unless you host.
   const { teams } = useEventTeams(eventId)
+  const { bridges } = useBridges(eventId)
   const lockedRoomIds = useMemo(() => {
     const out = new Set<string>()
     if (!membership || membership.role === 'organizer') return out
+    const myTeam = teams.find((x) => x.members.some((m) => m.user_id === auth.user?.id))
+    const visits = guestOf(bridges, myTeam?.id)
     for (const room of rooms || []) {
       if (room.kind !== 'team') continue
-      if (!homebaseAccess(teams, room.id, auth.user?.id, false).canUse) out.add(room.id)
+      if (!homebaseAccess(teams, room.id, auth.user?.id, false, visits).canUse) out.add(room.id)
     }
     return out
-  }, [rooms, teams, membership, auth.user?.id])
+  }, [rooms, teams, bridges, membership, auth.user?.id])
   const canEnterHere = (room: VenueRoom) =>
     !!membership && canEnterRoom(room, membership.role) && !lockedRoomIds.has(room.id)
 

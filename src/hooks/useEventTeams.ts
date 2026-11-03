@@ -66,12 +66,15 @@ export function homebaseAccess(
   teams: EventTeam[],
   roomId: string,
   userId: string | undefined,
-  isHost: boolean
-): { team: EventTeam | null; mine: boolean; canUse: boolean } {
+  isHost: boolean,
+  /** Teams whose Homebase the viewer's team may visit over an open bridge (197). */
+  guestOf?: Set<string>
+): { team: EventTeam | null; mine: boolean; guest: boolean; canUse: boolean } {
   const team = teams.find((t) => t.homebase_room_id === roomId) ?? null
   const mine = !!team && !!userId && team.members.some((m) => m.user_id === userId)
-  // Mirrors can_access_venue_room() (190): an unclaimed room is open.
-  return { team, mine, canUse: !team || mine || isHost }
+  const guest = !!team && !mine && !!guestOf?.has(team.id)
+  // Mirrors can_access_venue_room() (190, 197): an unclaimed room is open.
+  return { team, mine, guest, canUse: !team || mine || isHost || guest }
 }
 
 export function useCreateTeam(eventId: string | undefined) {

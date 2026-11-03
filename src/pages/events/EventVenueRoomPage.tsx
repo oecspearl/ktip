@@ -12,6 +12,8 @@ import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { RoomSections } from '../../components/venue/room/RoomSections'
 import { HomebaseLookPanel } from '../../components/venue/room/HomebaseLookPanel'
 import { homebaseAccess, useEventTeams } from '../../hooks/useEventTeams'
+import { guestOf, useBridges } from '../../hooks/useBridges'
+import { BridgeRequestCard } from '../../components/venue/room/homebase/Bridges'
 import type { RoomSectionContext } from '../../components/venue/room/RoomSections'
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
@@ -88,12 +90,17 @@ export default function EventVenueRoomPage() {
   // on the call and on the chat, and this page says so instead of rendering
   // panels that would all fail.
   const { teams } = useEventTeams(eventId)
+  const { bridges } = useBridges(eventId)
+  const myTeam = useMemo(
+    () => teams.find((x) => x.members.some((m) => m.user_id === auth.user?.id)) ?? null,
+    [teams, auth.user?.id]
+  )
   const homebase = useMemo(
     () =>
       room && room.kind === 'team'
-        ? homebaseAccess(teams, room.id, auth.user?.id, membership?.role === 'organizer')
+        ? homebaseAccess(teams, room.id, auth.user?.id, membership?.role === 'organizer', guestOf(bridges, myTeam?.id))
         : null,
-    [room, teams, auth.user?.id, membership?.role]
+    [room, teams, bridges, myTeam, auth.user?.id, membership?.role]
   )
 
   const inRoom = useMemo(
@@ -170,8 +177,13 @@ export default function EventVenueRoomPage() {
           <Trans>{homebase.team?.name}'s Homebase is private</Trans>
         </h1>
         <p className="mt-2 text-ktip-sand-600">
-          <Trans>Only the team and the organisers can come in. Find them in the Collab Commons or message a member.</Trans>
+          <Trans>Only the team and the organisers can come in. You can ask to join their call for a while.</Trans>
         </p>
+        {homebase.team && (
+          <div className="mt-5 rounded-2xl border border-ktip-sand-200 bg-white p-4">
+            <BridgeRequestCard eventId={event.id} hostTeam={homebase.team} myTeam={myTeam} />
+          </div>
+        )}
         <Link to={venuePath(event)} className="mt-5 inline-block">
           <Button variant="secondary"><Trans>Back to the map</Trans></Button>
         </Link>

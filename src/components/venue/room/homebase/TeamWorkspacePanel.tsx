@@ -17,6 +17,7 @@ import { TeamCalendar } from './TeamCalendar'
 import { TeamMilestones } from './TeamMilestones'
 import { TeamTimer, type TimerState } from './TeamTimer'
 import { TeamIntegrations } from './TeamIntegrations'
+import { IncomingBridges } from './Bridges'
 
 type Tab = 'board' | 'whiteboard' | 'docs' | 'calendar' | 'milestones' | 'files' | 'links'
 
@@ -164,6 +165,8 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
           </span>
         </div>
       </header>
+
+      <IncomingBridges eventId={eventId} team={team} teams={teams} />
 
       <div role="tablist" aria-label={t`Workspace`} className="flex gap-1 overflow-x-auto border-b border-ktip-sand-200">
         {tabs.map(({ id, label, icon: Icon }) => (

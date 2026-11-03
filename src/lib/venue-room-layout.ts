@@ -199,6 +199,7 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
       host_controls: 'wide',
       av_placeholder: 'wide',
       team_finder: 'band',
+      collab_commons: 'wide',
       skill_finder: 'third',
       occupants: 'third',
       wayfinding: 'third',
