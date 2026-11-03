@@ -5,7 +5,10 @@
  * furniture, team Homebases, calls and captions can be tried end to end.
  *
  * Usage, from the repo root:
- *   node --env-file=.env scripts/seed-hackathon-venue.mjs [--domain ktip.test] [--dry-run]
+ *   node --env-file=.env scripts/seed-hackathon-venue.mjs [--domain ktip.test] [--organiser you@oecs.int] [--dry-run]
+ *
+ * --organiser names a real account as the event's host (organizer_id and the
+ * organiser venue role). Without it the host is test.programme-supervisor.
  *
  * Requires VITE_SUPABASE_URL and SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY).
  * Run seed-test-accounts.mjs first: every person here is one of those logins.
@@ -43,6 +46,7 @@ const arg = (name) => {
 }
 const domain = (arg('domain') || 'ktip.test').toLowerCase()
 const dryRun = process.argv.includes('--dry-run')
+const organiserEmail = arg('organiser')
 
 const admin = createClient(url, secret, { auth: { autoRefreshToken: false, persistSession: false } })
 
@@ -82,7 +86,9 @@ const PEOPLE = [
   { slug: 'research_institution', role: 'participant', note: 'Sargassum Squad: model validation', skills: ['oceanography'], team: 3, room: 12 },
   { slug: 'educational_partner', role: 'participant', note: 'Pitons Collective: need a frontend dev!', skills: ['tourism', 'ops'], team: 4, captain: true, room: 13 },
   { slug: 'government', role: 'participant', note: 'Lambi Works: booking flow', skills: ['go', 'apis'], team: 5, captain: true, room: 14 },
-  { slug: 'chamber_admin', role: 'participant', note: 'Looking for a team: business and pitch side', skills: ['strategy', 'pitching'], lft: true, room: 3 },
+  // Left out of the event on purpose, and removed again on every run, so
+  // there is always one login that can try registering and being approved.
+  { slug: 'chamber_admin', applicant: true },
   { slug: 'ip_legal', role: 'spectator', note: 'Watching the demos', skills: [], room: 41 },
 ]
 
@@ -193,9 +199,17 @@ const isMissingTable = (e) => e && (e.code === '42P01' || e.code === 'PGRST205' 
 async function main() {
   console.log(`Seeding the five-floor test hackathon (${EVENT_ID})${dryRun ? ' [dry run]' : ''}`)
 
+  const SEEDED = PEOPLE.filter((p) => !p.applicant)
   const ids = {}
   for (const p of PEOPLE) ids[p.slug] = await findUserId(p.slug)
   console.log(`  found ${PEOPLE.length} test logins`)
+  let hostId = ids.programme_supervisor
+  if (organiserEmail) {
+    const { data, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email: organiserEmail })
+    if (error) throw new Error(`${organiserEmail}: ${error.message}`)
+    hostId = data.user.id
+    console.log(`  host: ${organiserEmail}`)
+  }
   if (dryRun) {
     console.log(`  would write 1 event, ${ROOMS.length} rooms, ${TEAMS.length} teams, ${PEOPLE.length} venue members`)
     return
@@ -214,7 +228,7 @@ async function main() {
     start_date: hours(-24),
     end_date: hours(24 * 5),
     capacity: 200,
-    organizer_id: ids.programme_supervisor,
+    organizer_id: hostId,
     tags: ['test', 'hackathon', 'virtual', 'blue-economy'],
     has_challenge: true,
     submission_deadline: hours(24 * 3),
@@ -254,7 +268,14 @@ async function main() {
 
   // ---- registrations + venue members
   {
-    const rsvps = PEOPLE.filter((p) => p.role !== 'spectator').map((p) => ({
+    // Reset the applicant so registering can be tried again from scratch.
+    for (const p of PEOPLE.filter((x) => x.applicant)) {
+      await admin.from('event_team_members').delete().eq('event_id', EVENT_ID).eq('user_id', ids[p.slug])
+      await admin.from('event_venue_members').delete().eq('event_id', EVENT_ID).eq('user_id', ids[p.slug])
+      await admin.from('event_rsvps').delete().eq('event_id', EVENT_ID).eq('user_id', ids[p.slug])
+    }
+
+    const rsvps = SEEDED.filter((p) => p.role !== 'spectator').map((p) => ({
       event_id: EVENT_ID,
       user_id: ids[p.slug],
       status: 'confirmed',
@@ -262,7 +283,7 @@ async function main() {
     const { error } = await admin.from('event_rsvps').upsert(rsvps, { onConflict: 'event_id,user_id' })
     if (error) console.log(`  (registrations skipped: ${error.message})`)
 
-    const members = PEOPLE.map((p, i) => ({
+    const members = SEEDED.map((p, i) => ({
       event_id: EVENT_ID,
       user_id: ids[p.slug],
       role: p.role,
@@ -273,10 +294,24 @@ async function main() {
       looking_for_team: !!p.lft,
       last_seen_at: new Date().toISOString(),
     }))
+    if (organiserEmail && !PEOPLE.some((p) => ids[p.slug] === hostId)) {
+      members.push({
+        event_id: EVENT_ID,
+        user_id: hostId,
+        role: 'organizer',
+        availability: 'working',
+        status_note: 'Host',
+        current_room_id: roomId(33),
+        skills: [],
+        looking_for_team: false,
+        last_seen_at: new Date().toISOString(),
+      })
+    }
     const { error: mErr } = await admin.from('event_venue_members').upsert(members, { onConflict: 'event_id,user_id' })
     if (mErr) throw new Error(`venue members: ${mErr.message}`)
   }
-  console.log(`  ${PEOPLE.length} venue members (organiser, 2 judges, 2 mentors, 10 participants, 1 spectator)`)
+  console.log(`  ${SEEDED.length} venue members (organiser, 2 judges, 2 mentors, 9 participants, 1 spectator)`)
+  console.log('  test.chamber-admin left unregistered, to try applying')
 
   // ---- teams (188)
   if (has188) {

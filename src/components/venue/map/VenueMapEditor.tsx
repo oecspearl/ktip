@@ -74,6 +74,13 @@ import {
 } from '../../../lib/venue-room-layout'
 import { VENUE_ROLE_LABELS, VENUE_ROOM_KIND_LABELS } from '../../../lib/constants'
 import type { VenueMapRoomInput } from '../../../hooks/useVenueMap'
+import {
+  FURNITURE_LABELS,
+  FURNITURE_PRESETS,
+  furnitureFor,
+  parseFurniture,
+  type FurniturePreset,
+} from '../../../lib/venue-furniture'
 import type { VenueAudioMode, VenueRole, VenueRoom, VenueRoomKind } from '../../../types'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
@@ -106,6 +113,8 @@ interface DraftRoom {
   sponsor_url: string | null
   /** Panels the room page renders (091). Empty = this kind's defaults. */
   sections: RoomSectionSetting[]
+  /** Furniture on the 2.5D map (188). Null = whatever the kind gets. */
+  furniture: FurniturePreset | null
 }
 
 interface EditorState {
@@ -456,6 +465,8 @@ export function VenueMapEditor({
       // follows its kind's defaults for ever, so changing those later fixes
       // rooms rather than leaving a frozen copy on every venue ever drawn.
       sections: presetSections(preset),
+      // The room arrives furnished: the preset says what stands in it.
+      furniture: preset.furniture,
     }
     commit((prev) => ({ ...prev, rooms: [...prev.rooms, draft] }))
     setSelectedId(id)
@@ -506,6 +517,7 @@ export function VenueMapEditor({
         sponsor_name: null,
         sponsor_url: null,
         sections: presetSections(preset),
+        furniture: preset.furniture,
       })
     }
 
@@ -577,6 +589,7 @@ export function VenueMapEditor({
         sponsor_name: null,
         sponsor_url: null,
         sections: parseSections(row.sections),
+        furniture: parseFurniture(row.furniture),
       })
     }
 
@@ -1055,6 +1068,7 @@ export function VenueMapEditor({
       sponsor_name: room.sponsor_name,
       sponsor_url: room.sponsor_url,
       sections: room.sections,
+      furniture: room.furniture,
     }))
 
     await onSave(state.config, payload)
@@ -1681,6 +1695,26 @@ export function VenueMapEditor({
               </label>
 
               <label className="mt-2 block text-xs">
+                <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Furniture</Trans></span>
+                <select
+                  value={selected.furniture ?? ''}
+                  onChange={(e) =>
+                    patchRoom(selected.id, { furniture: parseFurniture(e.target.value) })
+                  }
+                  className="w-full rounded-lg border border-ktip-sand-200 px-2 py-1.5 text-xs"
+                >
+                  <option value="">
+                    {t`Match the room type`} ({i18n._(FURNITURE_LABELS[furnitureFor({ kind: selected.kind })])})
+                  </option>
+                  {FURNITURE_PRESETS.map((p) => (
+                    <option key={p} value={p}>
+                      {i18n._(FURNITURE_LABELS[p])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="mt-2 block text-xs">
                 <span className="mb-1 block font-medium text-ktip-sand-700"><Trans>Capacity</Trans></span>
                 <input
                   type="number"
@@ -2050,6 +2084,7 @@ function toDraft(room: VenueRoom): DraftRoom | null {
     sponsor_name: room.sponsor_name,
     sponsor_url: room.sponsor_url,
     sections: parseSections(room.sections),
+    furniture: parseFurniture((room as { furniture?: unknown }).furniture),
   }
 }
 

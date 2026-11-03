@@ -28,6 +28,8 @@ export interface VenueMapRoomInput {
    * already has — the RPC only writes it when the payload carries it.
    */
   sections?: RoomSectionSetting[]
+  /** Furniture preset (188). Omit to leave the stored one alone. */
+  furniture?: string | null
 }
 
 /**

@@ -525,8 +525,10 @@ export function VenueMapStage({
       const drawStairs = () => {
         if (!config.stairs) return
         const { x, y, w, h } = config.stairs
-        const treads = 5
-        const rise = VENUE_MAP.LEVEL_H * (stacked ? stack : 0.25) * 0.55
+        const treads = 6
+        // Climbs most of a storey even in the flat view, so the stairs read as
+        // a way up from across the map rather than as a doormat.
+        const rise = VENUE_MAP.LEVEL_H * 0.55 * Math.max(0.65, stacked ? stack : 0.65)
         const o = stacked ? Math.max(0.06, dim) : dim
         for (let i = 0; i < treads; i++) {
           const t0 = y + (h * i) / treads

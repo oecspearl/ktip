@@ -19,6 +19,8 @@
  * things go.
  */
 
+import { msg } from '@lingui/core/macro'
+import type { MessageDescriptor } from '@lingui/core'
 import type { VenueRoomKind } from '../types'
 import { VENUE_MAP, cellKey, type MapCell } from './venue-map'
 
@@ -40,6 +42,29 @@ export const FURNITURE_PRESETS = [
 ] as const
 
 export type FurniturePreset = (typeof FURNITURE_PRESETS)[number]
+
+/** What the host sees in the editor's Furniture picker. */
+export const FURNITURE_LABELS: Record<FurniturePreset, MessageDescriptor> = {
+  theatre: msg`Stage and screen facing rows of seats`,
+  stage: msg`Demo stage with a big screen and risers`,
+  cafe: msg`Café tables and a coffee bar`,
+  classroom: msg`Chalkboard and desks`,
+  counter: msg`Service counter`,
+  booth: msg`Sponsor banner and counter`,
+  homebase: msg`Team Homebase with a video wall and boards`,
+  panel: msg`Judges' panel desk and screens`,
+  lounge: msg`Sofas and beanbags`,
+  podium: msg`Leaderboard and podium`,
+  ops: msg`Ops desks and a dashboard`,
+  library: msg`Bookshelves and a reading table`,
+  bench: msg`Workbenches`,
+  none: msg`Empty room`,
+}
+
+/** A stored preset, or null for "follow the room's type". */
+export function parseFurniture(raw: unknown): FurniturePreset | null {
+  return isFurniturePreset(raw) ? raw : null
+}
 
 /** What each kind gets when the host has not picked a preset. */
 const KIND_DEFAULT: Record<VenueRoomKind, FurniturePreset> = {

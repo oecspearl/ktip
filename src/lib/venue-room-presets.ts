@@ -15,6 +15,7 @@
 import type { VenueAudioMode, VenueRole, VenueRoomKind } from '../types'
 import { VENUE_PALETTE } from './venue-map'
 import type { RoomSectionId } from './venue-room-sections'
+import type { FurniturePreset } from './venue-furniture'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
 
@@ -39,6 +40,13 @@ export interface VenueRoomPreset {
    * help desk as a help desk, so it follows the purpose rather than a slider.
    */
   wall_height: number
+  /**
+   * What stands in the room on the 2.5D map (venue-furniture.ts, 188). It
+   * comes with the room when the room is placed, so a Registration Desk gets
+   * a counter and an Organiser HQ gets ops desks even though each shares a
+   * kind with rooms that look nothing like it.
+   */
+  furniture: FurniturePreset
   /** Footprint dropped on the grid, in cells. */
   size: { w: number; h: number }
   /** lucide-react icon name, resolved by the picker. */
@@ -60,6 +68,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'main-hall',
     name: 'Main Hall',
     kind: 'main_hall',
+    furniture: 'theatre',
     description: msg`Opening remarks, announcements and the closing ceremony.`,
     hint: msg`Everyone at once. Hosts hold the mic.`,
     color: VENUE_PALETTE[0],
@@ -75,6 +84,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'networking',
     name: 'Networking Area',
     kind: 'networking',
+    furniture: 'cafe',
     description: msg`Open mics. See who is here and talk freely.`,
     hint: msg`The room people idle in between sessions.`,
     color: VENUE_PALETTE[1],
@@ -90,6 +100,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'workshop',
     name: 'Workshop Room',
     kind: 'workshop',
+    furniture: 'classroom',
     description: msg`Scheduled sessions from mentors and sponsors.`,
     hint: msg`A speaker up front, hands raised to talk.`,
     color: VENUE_PALETTE[2],
@@ -105,6 +116,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'help-desk',
     name: 'Help Desk',
     kind: 'help_desk',
+    furniture: 'counter',
     description: msg`Stuck? A mentor is here.`,
     hint: msg`Small and always open. Put it near the entrance.`,
     color: VENUE_PALETTE[3],
@@ -120,6 +132,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'showcase',
     name: 'Showcase Stage',
     kind: 'stage',
+    furniture: 'stage',
     description: msg`Demos and pitches.`,
     hint: msg`Audience listens; presenters are granted the mic.`,
     color: VENUE_PALETTE[4],
@@ -148,6 +161,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'judging',
     name: 'Judging Room',
     kind: 'judging',
+    furniture: 'panel',
     description: msg`Scoring and deliberation.`,
     hint: msg`Judges and organizers only — participants cannot enter.`,
     color: VENUE_PALETTE[4],
@@ -163,6 +177,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'mentor-lounge',
     name: 'Mentor Lounge',
     kind: 'help_desk',
+    furniture: 'lounge',
     description: msg`Where mentors regroup between sessions.`,
     hint: msg`Mentors, judges and organizers only.`,
     color: VENUE_PALETTE[5],
@@ -188,6 +203,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'sponsor-booth',
     name: 'Sponsor Booth',
     kind: 'sponsor_booth',
+    furniture: 'booth',
     description: msg`Meet the sponsor. Roles, prizes and questions.`,
     hint: msg`Add the sponsor name and link after placing it.`,
     color: VENUE_PALETTE[6],
@@ -203,6 +219,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'team-pod',
     name: 'Team Pod',
     kind: 'breakout',
+    furniture: 'homebase',
     description: msg`A small space for one team to work in.`,
     hint: msg`Drop several. Rename them per team.`,
     color: VENUE_PALETTE[5],
@@ -226,6 +243,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'quiet-room',
     name: 'Quiet Room',
     kind: 'breakout',
+    furniture: 'lounge',
     description: msg`Heads-down focus. No audio.`,
     hint: msg`Nobody can speak here, on purpose.`,
     color: VENUE_PALETTE[7],
@@ -244,6 +262,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'registration',
     name: 'Registration Desk',
     kind: 'help_desk',
+    furniture: 'counter',
     description: msg`First stop. Check in and find your way around.`,
     hint: msg`Place it beside the entrance corner.`,
     color: VENUE_PALETTE[3],
@@ -270,6 +289,7 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     key: 'green-room',
     name: 'Green Room',
     kind: 'breakout',
+    furniture: 'lounge',
     description: msg`Speakers prepare here before going on stage.`,
     hint: msg`Speakers, organizers, mentors and judges only.`,
     color: VENUE_PALETTE[1],
@@ -290,6 +310,86 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
       'countdown',
       'activity_log',
     ],
+  },
+  {
+    key: 'homebase',
+    name: 'Team Homebase',
+    kind: 'team',
+    furniture: 'homebase',
+    description: msg`A team's own room. The team that claims it picks its colour, what goes in it and its logo.`,
+    hint: msg`Drop one for every team you expect.`,
+    color: VENUE_PALETTE[5],
+    audio_mode: 'open',
+    capacity: 8,
+    recording_enabled: false,
+    allowed_roles: [],
+    wall_height: 1.13,
+    size: { w: 5, h: 4 },
+    icon: 'Home',
+  },
+  {
+    key: 'organiser-hq',
+    name: 'Organiser HQ',
+    kind: 'breakout',
+    furniture: 'ops',
+    description: msg`Where the organising team runs the event.`,
+    hint: msg`Organisers only.`,
+    color: VENUE_PALETTE[0],
+    audio_mode: 'open',
+    capacity: 12,
+    recording_enabled: false,
+    allowed_roles: ['organizer'],
+    wall_height: 1.25,
+    size: { w: 5, h: 4 },
+    icon: 'LayoutDashboard',
+  },
+  {
+    key: 'library',
+    name: 'Resource Library',
+    kind: 'breakout',
+    furniture: 'library',
+    description: msg`Datasets and APIs to build on, plus past winning entries.`,
+    hint: msg`A quiet corner to read the brief.`,
+    color: VENUE_PALETTE[6],
+    audio_mode: 'open',
+    capacity: 20,
+    recording_enabled: false,
+    allowed_roles: [],
+    wall_height: 1.25,
+    size: { w: 5, h: 4 },
+    icon: 'BookOpen',
+  },
+  {
+    key: 'hardware-bench',
+    name: 'Hardware Bench',
+    kind: 'breakout',
+    furniture: 'bench',
+    description: msg`Sensors and boards to borrow. Someone here can help with wiring.`,
+    hint: msg`For events with a hardware track.`,
+    color: VENUE_PALETTE[7],
+    audio_mode: 'open',
+    capacity: 12,
+    recording_enabled: false,
+    allowed_roles: [],
+    wall_height: 1.13,
+    size: { w: 5, h: 4 },
+    icon: 'Wrench',
+  },
+  {
+    key: 'quest-board',
+    name: 'Quest Board',
+    kind: 'breakout',
+    furniture: 'podium',
+    description: msg`Team points, side quests and who is in the lead.`,
+    hint: msg`Put it where people pass on the way to the stage.`,
+    color: VENUE_PALETTE[2],
+    audio_mode: 'open',
+    capacity: null,
+    recording_enabled: false,
+    allowed_roles: [],
+    wall_height: 1.25,
+    size: { w: 4, h: 4 },
+    icon: 'Trophy',
   },
 ]
 
