@@ -95,13 +95,6 @@ export function buildDecor(
     .join('|')
   const rng = mulberry32(fnv(`${cfg.cols}x${cfg.rows}:${door?.side}${door?.at}:${roomSig}`))
 
-  // Cells nothing may be planted on or paved over. All floors count for
-  // planting — in the stacked view an upper room hangs over its footprint and
-  // a palm poking through Level 2 reads as a mistake.
-  const planted = new Set<string>()
-  for (const g of Object.values(geometry)) for (const [x, y] of g.cells) planted.add(cellKey(x, y))
-  if (cfg.stairs) for (const [x, y] of stairsCells(cfg.stairs)) planted.add(cellKey(x, y))
-
   // ---- pavement -----------------------------------------------------------
   // Computed floor by floor: each level has its own door and its own rooms,
   // and — stacked — its own slab height, so a level's pavers must belong to
@@ -304,8 +297,6 @@ export function buildDecor(
     paveByFloor.push(cells)
   }
 
-  const paveSet = new Set(paveByFloor[0]?.map(([x, y]) => cellKey(x, y)) ?? [])
-
   // ---- planting -----------------------------------------------------------
 
   const trees: DecorTree[] = []
@@ -360,38 +351,8 @@ export function buildDecor(
     i++
   }
 
-  // On the slab: a handful of planters in the border band, on free cells only,
-  // so the middle of the floor stays walkable and readable.
-  const innerCandidates: MapCell[] = []
-  for (let y = 0; y < cfg.rows; y++) {
-    for (let x = 0; x < cfg.cols; x++) {
-      const band = x < 2 || y < 2 || x >= cfg.cols - 2 || y >= cfg.rows - 2
-      if (!band) continue
-      const k = cellKey(x, y)
-      if (planted.has(k) || paveSet.has(k)) continue
-      innerCandidates.push([x, y])
-    }
-  }
-  // Fisher–Yates with the seeded rng, so "random" is the same for everyone.
-  for (let i = innerCandidates.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1))
-    ;[innerCandidates[i], innerCandidates[j]] = [innerCandidates[j], innerCandidates[i]]
-  }
-  let innerLeft = 5
-  for (const [cx, cy] of innerCandidates) {
-    if (!innerLeft) break
-    const x = cx + 0.5
-    const y = cy + 0.5
-    if (nearDoorFront(x, y) || !farEnough(x, y, 3)) continue
-    trees.push({
-      x,
-      y,
-      s: 0.65 + rng() * 0.35,
-      kind: rng() < 0.45 ? 'palm' : 'bush',
-      sway: 4.5 + rng() * 2.5,
-    })
-    innerLeft--
-  }
+  // Nothing grows on the floor itself. Trees stand outside on the lawn; the
+  // slab is for rooms, stairs and walking.
 
   return { margin, paveByFloor, openings, trees }
 }

@@ -16,6 +16,7 @@ import {
   Trash2,
   Undo2,
   X,
+  Shuffle,
 } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -29,7 +30,7 @@ import {
   cellKey,
   clampHeight,
   defaultDoor,
-  defaultStairs,
+  resolveFlights,
   floorBadge,
   floorLabel,
   loopPath,
@@ -49,6 +50,14 @@ import {
   type VenueRoomPreset,
 } from '../../../lib/venue-room-presets'
 import type { VenueTemplate } from '../../../lib/venue-templates'
+import {
+  FLIGHT_H,
+  FLIGHT_W,
+  floorBlocked,
+  flightsOn,
+  packFloor,
+  type VenueFlight,
+} from '../../../lib/venue-layout'
 import { VenueTemplatePicker, type SavedVenueTemplate } from './VenueTemplatePicker'
 import {
   MAX_SPONSOR_LINKS,
@@ -612,9 +621,6 @@ export function VenueMapEditor({
           // room nobody can get into.
           { key: `floor-${index}`, name: floorLabel(index), door: defaultDoor(prev.config) },
         ],
-        // The moment a venue has a second level it needs stairs; putting them
-        // in here means a host never discovers the omission from an attendee.
-        stairs: prev.config.stairs ?? defaultStairs(prev.config, buildGeometry(prev.rooms)),
       },
     }))
     setFloor(index)
@@ -644,37 +650,99 @@ export function VenueMapEditor({
     }))
 
   /**
-   * Stairs may only land where *every* floor is clear.
-   *
-   * They are one block shared by the whole building — the thing that makes them
-   * stairs rather than four disconnected platforms — so a spot that is free
-   * here but under a room upstairs is not a spot.
+   * Stairs are flights, one per pair of floors (venue-layout.ts). The tool
+   * places the flight going up from the floor being edited; it arrives in the
+   * same spot on the floor above, so it must be clear on both.
    */
+  const flights = useMemo(
+    () => resolveFlights(state.config, buildGeometry(state.rooms)),
+    [state.config, state.rooms]
+  )
+  const isTopFloor = floor >= state.config.floors.length - 1
+
   const stairsBlocker = (x: number, y: number): string | null => {
-    const w = state.config.stairs?.w ?? 2
-    const h = state.config.stairs?.h ?? 2
-    for (let dy = 0; dy < h; dy++)
-      for (let dx = 0; dx < w; dx++) {
+    if (isTopFloor) return t`The top floor has no stairs up. Its stairs come up from the floor below.`
+    for (let dy = 0; dy < FLIGHT_H; dy++)
+      for (let dx = 0; dx < FLIGHT_W; dx++) {
         if (!inGrid(x + dx, y + dy)) return t`The stairs would hang off the edge of the floor.`
       }
+    const r = { x, y, w: FLIGHT_W, h: FLIGHT_H }
     for (const room of state.rooms) {
+      if (room.floor !== floor && room.floor !== floor + 1) continue
       for (const [cx, cy] of room.cells) {
-        if (cx >= x && cx < x + w && cy >= y && cy < y + h) {
+        if (cx >= x && cx < x + FLIGHT_W && cy >= y && cy < y + FLIGHT_H) {
           return t`${room.name} on ${floorBadge(room.floor)} is in the way.`
         }
+      }
+    }
+    // The way down on this floor and the way up on the next stay separate.
+    for (const other of [flightsOn(flights, floor).down, flightsOn(flights, floor + 1).up]) {
+      if (
+        other &&
+        r.x < other.x + other.w + 1 &&
+        other.x < r.x + r.w + 1 &&
+        r.y < other.y + other.h + 1 &&
+        other.y < r.y + r.h + 1
+      ) {
+        return t`Too close to the other stairs on this floor.`
       }
     }
     return null
   }
 
   const setStairs = (x: number, y: number) =>
+    commit((prev) => {
+      const current = resolveFlights(prev.config, buildGeometry(prev.rooms))
+      const next: VenueFlight[] = [
+        ...current.filter((fl) => fl.from !== floor),
+        { from: floor, x, y, w: FLIGHT_W, h: FLIGHT_H },
+      ].sort((p, q) => p.from - q.from)
+      return { ...prev, config: { ...prev.config, stairs: undefined, flights: next } }
+    })
+
+  /**
+   * Repack this floor's rectangular rooms tightly around its stairs and door,
+   * keeping each room's size. Shaped rooms stay where they are. Random each
+   * press, so a host can keep pressing until they like one.
+   */
+  const rearrangeFloor = () => {
+    const onFloor = state.rooms.filter((r) => r.floor === floor)
+    const boxes = onFloor.map((r) => {
+      const xs = r.cells.map((c) => c[0])
+      const ys = r.cells.map((c) => c[1])
+      const x0 = Math.min(...xs)
+      const y0 = Math.min(...ys)
+      const w = Math.max(...xs) - x0 + 1
+      const h = Math.max(...ys) - y0 + 1
+      return { room: r, w, h, rect: r.cells.length === w * h }
+    })
+    const movable = boxes.filter((b) => b.rect)
+    if (!movable.length) return
+    const door = state.config.floors[floor]?.door
+    const blocked = floorBlocked(state.config.cols, state.config.rows, floor, flights, door)
+    for (const b of boxes) if (!b.rect) for (const [cx, cy] of b.room.cells) blocked.add(`${cx},${cy}`)
+    const here = flightsOn(flights, floor)
+    const result = packFloor({
+      cols: state.config.cols,
+      rows: state.config.rows,
+      rooms: movable.map((b) => ({ key: b.room.id, w: b.w, h: b.h })),
+      blocked,
+      reach: [here.up, here.down].filter(Boolean) as VenueFlight[],
+      door,
+    })
+    if (result.missing.length) {
+      setToolError(t`Those rooms do not all fit with corridors between them. Make one smaller, or the floor bigger.`)
+      return
+    }
+    setToolError(null)
     commit((prev) => ({
       ...prev,
-      config: {
-        ...prev.config,
-        stairs: { x, y, w: prev.config.stairs?.w ?? 2, h: prev.config.stairs?.h ?? 2 },
-      },
+      rooms: prev.rooms.map((r) => {
+        const p = result.placed[r.id]
+        return p ? { ...r, cells: rectCells(p.x, p.y, p.x + p.w - 1, p.y + p.h - 1) } : r
+      }),
     }))
+  }
 
   const renameFloor = (index: number, name: string) =>
     commit((prev) => ({
@@ -911,8 +979,8 @@ export function VenueMapEditor({
   // Stairs preview: green where it can land, red where something is under it.
   if (!preview && tool === 'stairs' && hoverCell && !drag) {
     const [hx, hy] = hoverCell
-    const w = state.config.stairs?.w ?? 2
-    const h = state.config.stairs?.h ?? 2
+    const w = FLIGHT_W
+    const h = FLIGHT_H
     const blocked = !!stairsBlocker(hx, hy)
     overlays.push(
       <path
@@ -1161,6 +1229,15 @@ export function VenueMapEditor({
             <Plus size={12} className="mr-1 inline" aria-hidden="true" />
             <Trans>Floor</Trans>
           </button>
+          <button
+            type="button"
+            onClick={rearrangeFloor}
+            title={t`Pack this floor's rooms tightly around its stairs and door. Press again for another layout.`}
+            className="rounded-lg border border-ktip-sand-200 px-2.5 py-1 text-xs font-semibold text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-600"
+          >
+            <Shuffle size={12} className="mr-1 inline" aria-hidden="true" />
+            <Trans>Rearrange rooms</Trans>
+          </button>
         </div>
 
         <div className="ml-auto flex items-center gap-1.5">
@@ -1312,12 +1389,16 @@ export function VenueMapEditor({
             {tool === 'door'
               ? t`Click any cell on the edge of the floor. Each floor has its own entrance.`
               : tool === 'stairs'
-                ? t`Click where the stairs go. They sit in the same place on every floor, so the spot has to be clear on all of them.`
+                ? isTopFloor
+                  ? t`This is the top floor, so it only has the stairs coming up from below. Pick a lower floor to move a flight.`
+                  : t`Click where the stairs up from this floor go. They arrive in the same spot on the floor above, so it has to be clear on both.`
                 : (() => {
                     const doorSide = i18n._(sideLabel(state.config.floors[floor]?.door?.side))
-                    return state.config.stairs
-                      ? t`Entrance: ${doorSide} · Stairs at ${state.config.stairs.x},${state.config.stairs.y}`
-                      : t`Entrance: ${doorSide} · No stairs yet`
+                    const { up, down } = flightsOn(flights, floor)
+                    const parts = [t`Entrance: ${doorSide}`]
+                    if (up) parts.push(t`Up at ${up.x},${up.y}`)
+                    if (down) parts.push(t`Down at ${down.x},${down.y}`)
+                    return parts.join(' · ')
                   })()}
           </p>
           {toolError && (

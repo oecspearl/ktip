@@ -11,6 +11,9 @@
  */
 
 import type { VenueRoom } from '../types'
+import { planFlights, seededRandom, type VenueFlight } from './venue-layout'
+
+export type { VenueFlight } from './venue-layout'
 
 /** Fixed drawing constants. Grid size is per event; these are not. */
 export const VENUE_MAP = {
@@ -76,7 +79,13 @@ export interface VenueMapConfig {
   cols: number
   rows: number
   floors: VenueMapFloor[]
+  /** Legacy: one block shared by every floor. Read only when flights are absent. */
   stairs?: VenueStairs
+  /**
+   * One staircase per pair of floors (venue-layout.ts). A flight from floor n
+   * is the way up on n and the way down on n + 1, in the same spot.
+   */
+  flights?: VenueFlight[]
 }
 
 export const DEFAULT_MAP_CONFIG: VenueMapConfig = {
@@ -186,7 +195,73 @@ export function parseMapConfig(raw: unknown): VenueMapConfig {
         }))
       : DEFAULT_MAP_CONFIG.floors.map((f) => ({ ...f, door: defaultDoor({ cols, rows }) }))
 
-  return { v: 1, cols, rows, floors, stairs: parseStairs(obj.stairs, cols, rows) }
+  const flights = parseFlights((obj as { flights?: unknown }).flights, cols, rows, floors.length)
+  return {
+    v: 1,
+    cols,
+    rows,
+    floors,
+    stairs: parseStairs(obj.stairs, cols, rows),
+    ...(flights.length ? { flights } : {}),
+  }
+}
+
+/** Flights off the wire: one per floor pair, inside the grid, junk dropped. */
+function parseFlights(raw: unknown, cols: number, rows: number, floors: number): VenueFlight[] {
+  if (!Array.isArray(raw)) return []
+  const out: VenueFlight[] = []
+  for (const item of raw) {
+    const f = item as Partial<VenueFlight> | null
+    if (!f || typeof f !== 'object') continue
+    const from = Math.trunc(Number(f.from))
+    if (!Number.isFinite(from) || from < 0 || from >= floors - 1) continue
+    if (out.some((o) => o.from === from)) continue
+    const w = clampInt(f.w, 1, 6, 2)
+    const h = clampInt(f.h, 1, 6, 3)
+    out.push({
+      from,
+      w,
+      h,
+      x: clampInt(f.x, 0, Math.max(0, cols - w), 0),
+      y: clampInt(f.y, 0, Math.max(0, rows - h), 0),
+    })
+  }
+  return out.sort((a, b) => a.from - b.from)
+}
+
+/**
+ * Every flight the building needs, one per pair of floors.
+ *
+ * Saved flights are kept as they are. A venue drawn before flights existed has
+ * one shared stair block: it becomes the flight out of the ground floor, and
+ * the rest are planned clear of each floor's rooms. Seeded from the grid, so
+ * the map, the walker and the editor all get the same answer.
+ */
+export function resolveFlights(
+  cfg: VenueMapConfig,
+  geometry: Record<string, RoomGeometry<any>>
+): VenueFlight[] {
+  const need = Math.max(0, cfg.floors.length - 1)
+  if (!need) return []
+  // A deleted floor takes its flight with it.
+  const keep: VenueFlight[] = (cfg.flights ?? []).filter((f) => f.from < need)
+  if (!cfg.flights?.length && cfg.stairs) keep.push({ from: 0, ...cfg.stairs })
+  if (keep.length >= need) return keep.slice(0, need)
+
+  const taken = cfg.floors.map(() => new Set<string>())
+  for (const g of Object.values(geometry)) {
+    const set = taken[g.floor]
+    if (set) for (const [x, y] of g.cells) set.add(cellKey(x, y))
+  }
+  return planFlights({
+    cols: cfg.cols,
+    rows: cfg.rows,
+    floors: cfg.floors.length,
+    doors: cfg.floors.map((f) => f.door),
+    taken,
+    keep,
+    rng: seededRandom(cfg.cols * 1000 + cfg.rows),
+  })
 }
 
 /** A door off the wire. Anything unusable falls back to the default entrance. */

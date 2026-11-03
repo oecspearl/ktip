@@ -3,13 +3,14 @@ import {
   DOOR_WIDTH,
   VENUE_MAP,
   loopPath,
+  resolveFlights,
   shade,
-  stairsCells,
   type Projection,
   type RoomGeometry,
   type VenueMapConfig,
 } from '../../../lib/venue-map'
 import { buildDecor, type DecorTree } from '../../../lib/venue-decor'
+import { flightsOn, rectKeys, type VenueFlight } from '../../../lib/venue-layout'
 import { furnish, furnitureFor, parseDecor, type FurniturePiece } from '../../../lib/venue-furniture'
 import { renderFurniture } from './venueFurnitureArt'
 
@@ -93,6 +94,10 @@ export function VenueMapStage({
   roomArtUrl,
 }: VenueMapStageProps) {
   const floorCount = config.floors.length
+
+  // One flight per pair of floors (venue-layout.ts): the way up on the lower
+  // floor, the way down on the upper one.
+  const flights = useMemo(() => resolveFlights(config, geometry), [config, geometry])
 
   const decorData = useMemo(
     () => (decor ? buildDecor(config, geometry) : null),
@@ -255,6 +260,43 @@ export function VenueMapStage({
       const dim = stacked ? presence * (ghost ? stack : 1) : presence
 
       // ---- the slab ----
+      // A floor is a slab, not a sheet: its two edges facing the camera are
+      // drawn as solid faces under the top, so a level reads as something you
+      // could stand on, stacked or flat.
+      {
+        const T = 0.32
+        const slabO = stacked ? Math.max(0.06, dim) : dim
+        const face = (pts: [number, number, number][], fill: string, k: string) => {
+          const d =
+            pts
+              .map(([px, py, pz], i) => {
+                const [sx, sy] = P(px, py, pz)
+                return `${i ? 'L' : 'M'}${sx.toFixed(1)} ${sy.toFixed(1)}`
+              })
+              .join(' ') + ' Z'
+          out.push(<path key={k} d={d} fill={fill} opacity={slabO} />)
+        }
+        face(
+          [
+            [0, config.rows, zBase],
+            [config.cols, config.rows, zBase],
+            [config.cols, config.rows, zBase - T],
+            [0, config.rows, zBase - T],
+          ],
+          'rgba(4,30,66,0.30)',
+          `slab-edge-s-${level}`
+        )
+        face(
+          [
+            [config.cols, 0, zBase],
+            [config.cols, config.rows, zBase],
+            [config.cols, config.rows, zBase - T],
+            [config.cols, 0, zBase - T],
+          ],
+          'rgba(4,30,66,0.42)',
+          `slab-edge-e-${level}`
+        )
+      }
       out.push(
         <path
           key={`slab-${level}`}
@@ -267,7 +309,7 @@ export function VenueMapStage({
             ],
             zBase
           )}
-          fill={`rgba(4,30,66,${(0.045 * dim).toFixed(3)})`}
+          fill={`rgba(4,30,66,${(0.1 * dim).toFixed(3)})`}
           stroke="var(--color-ktip-sand-300)"
           strokeWidth={ghost ? 0.75 : 1.25}
           opacity={stacked ? Math.max(0.06, dim) : dim}
@@ -517,38 +559,37 @@ export function VenueMapStage({
       }
 
       // ---- stairs ----
-      // The same block on every level — that is what makes them connect. Each
-      // tread is a solid step with a front and a side face, rising towards the
-      // level above, and the top step is lit so the way up reads at a glance.
-      // Drawn later, in the depth-sorted pass with the rooms, so a room south
-      // of the stairs stands in front of them and one north of them behind.
-      const drawStairs = () => {
-        if (!config.stairs) return
-        const { x, y, w, h } = config.stairs
-        const treads = 6
+      // A flight from this floor rises towards the level above; the flight from
+      // the level below arrives here as a stairwell going down. Both are drawn
+      // in the depth-sorted pass with the rooms, so a room south of a flight
+      // stands in front of it and one north of it behind.
+      const treads = 6
+      const o = stacked ? Math.max(0.06, dim) : dim
+      const quad = (pts: [number, number, number][]) =>
+        pts
+          .map(([px, py, pz], k) => {
+            const [sx, sy] = P(px, py, pz)
+            return `${k ? 'L' : 'M'}${sx.toFixed(1)} ${sy.toFixed(1)}`
+          })
+          .join(' ') + ' Z'
+
+      const drawUp = (fl: VenueFlight) => {
+        const { x, y, w, h } = fl
         // Climbs most of a storey even in the flat view, so the stairs read as
         // a way up from across the map rather than as a doormat.
         const rise = VENUE_MAP.LEVEL_H * 0.55 * Math.max(0.65, stacked ? stack : 0.65)
-        const o = stacked ? Math.max(0.06, dim) : dim
         for (let i = 0; i < treads; i++) {
-          const t0 = y + (h * i) / treads
-          const t1 = y + (h * (i + 1)) / treads
+          // Lowest step at the south end, where you walk on; top step north.
+          const t1 = y + h - (h * i) / treads
+          const t0 = y + h - (h * (i + 1)) / treads
           const zTop = zBase + (rise * (i + 1)) / treads
           const top = i === treads - 1
           const base = top ? '#97D700' : '#2A5788'
-          const q = (pts: [number, number, number][]) =>
-            pts
-              .map(([px, py, pz], k) => {
-                const [sx, sy] = P(px, py, pz)
-                return `${k ? 'L' : 'M'}${sx.toFixed(1)} ${sy.toFixed(1)}`
-              })
-              .join(' ') + ' Z'
           if (tilt > 0.01) {
-            // Front (south) face of this step, from the floor up to its tread.
             out.push(
               <path
-                key={`stair-front-${level}-${i}`}
-                d={q([
+                key={`up-front-${level}-${i}`}
+                d={quad([
                   [x, t1, zBase],
                   [x + w, t1, zBase],
                   [x + w, t1, zTop],
@@ -558,8 +599,8 @@ export function VenueMapStage({
                 opacity={o}
               />,
               <path
-                key={`stair-side-${level}-${i}`}
-                d={q([
+                key={`up-side-${level}-${i}`}
+                d={quad([
                   [x + w, t0, zBase],
                   [x + w, t1, zBase],
                   [x + w, t1, zTop],
@@ -572,7 +613,7 @@ export function VenueMapStage({
           }
           out.push(
             <path
-              key={`stair-${level}-${i}`}
+              key={`up-${level}-${i}`}
               d={path(
                 [
                   [x, t0],
@@ -590,9 +631,130 @@ export function VenueMapStage({
           )
         }
       }
-      if (config.stairs) {
-        // Cells the block covers, so it is obvious where to stand.
-        for (const [sx, sy] of stairsCells(config.stairs)) {
+
+      const drawDown = (fl: VenueFlight) => {
+        const { x, y, w, h } = fl
+        const drop = VENUE_MAP.LEVEL_H * 0.5
+        // The opening in the floor.
+        out.push(
+          <path
+            key={`down-well-${level}`}
+            d={path(
+              [
+                [x, y],
+                [x + w, y],
+                [x + w, y + h],
+                [x, y + h],
+              ],
+              zBase
+            )}
+            fill="rgba(4,30,66,0.55)"
+            opacity={o}
+          />
+        )
+        if (tilt > 0.01) {
+          // The two inner walls the camera can see: the far (north) one and the
+          // left (west) one, going down into the floor below.
+          out.push(
+            <path
+              key={`down-wall-n-${level}`}
+              d={quad([
+                [x, y, zBase],
+                [x + w, y, zBase],
+                [x + w, y, zBase - drop],
+                [x, y, zBase - drop],
+              ])}
+              fill={shade('#2A5788', 0.55, 1)}
+              opacity={o}
+            />,
+            <path
+              key={`down-wall-w-${level}`}
+              d={quad([
+                [x, y, zBase],
+                [x, y + h, zBase],
+                [x, y + h, zBase - drop],
+                [x, y, zBase - drop],
+              ])}
+              fill={shade('#2A5788', 0.42, 1)}
+              opacity={o}
+            />
+          )
+        }
+        // Treads sinking northwards, deepest first so the shallow ones cover it.
+        for (let i = 0; i < treads; i++) {
+          const t0 = y + (h * i) / treads
+          const t1 = y + (h * (i + 1)) / treads
+          const z = zBase - (drop * (treads - i)) / (treads + 1)
+          const first = i === treads - 1
+          const base = first ? '#97D700' : '#7E9EC7'
+          out.push(
+            <path
+              key={`down-${level}-${i}`}
+              d={path(
+                [
+                  [x, t0],
+                  [x + w, t0],
+                  [x + w, t1],
+                  [x, t1],
+                ],
+                z
+              )}
+              fill={shade(base, 0.7 + (0.5 * i) / treads, 1)}
+              stroke={shade(base, 0.45, 0.8)}
+              strokeWidth={0.5}
+              opacity={o}
+            />
+          )
+        }
+        // A rail round the three closed sides, so the hole reads as stairs
+        // and not as a gap in the floor.
+        const railZ = zBase + 0.22
+        const pts: [number, number][] = [
+          [x, y + h],
+          [x, y],
+          [x + w, y],
+          [x + w, y + h],
+        ]
+        out.push(
+          <path
+            key={`down-rail-${level}`}
+            d={pts
+              .map(([px, py], k) => {
+                const [sx, sy] = P(px, py, railZ)
+                return `${k ? 'L' : 'M'}${sx.toFixed(1)} ${sy.toFixed(1)}`
+              })
+              .join(' ')}
+            fill="none"
+            stroke={shade('#97D700', 0.85, 1)}
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+            opacity={o}
+          />
+        )
+        for (const [px, py] of pts) {
+          const [x1, y1] = P(px, py, zBase)
+          const [x2, y2] = P(px, py, railZ)
+          out.push(
+            <line
+              key={`down-post-${level}-${px}-${py}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke={shade('#97D700', 0.7, 1)}
+              strokeWidth={1.4}
+              opacity={o}
+            />
+          )
+        }
+      }
+
+      const here = flightsOn(flights, level)
+      for (const fl of [here.up, here.down]) {
+        if (!fl) continue
+        // Cells the flight covers, so it is obvious where to stand.
+        for (const c of rectKeys(fl)) {
+          const [sx, sy] = c.split(',').map(Number)
           out.push(
             <path
               key={`stair-cell-${level}-${sx}-${sy}`}
@@ -610,7 +772,6 @@ export function VenueMapStage({
           )
         }
       }
-
 
       // ---- rooms & trees, back to front ----
       // One depth-sorted pass for everything standing on this floor: a palm
@@ -874,73 +1035,178 @@ export function VenueMapStage({
           return
         }
 
-        const h = 1.55 * t.s
-        const [tx, ty] = P(t.x, t.y, zBase + h)
+        // ---- palm ----
+        // A tapered, ringed trunk with a lit side, a crown of solid feathered
+        // fronds shaded by how far they face the camera, and a coconut
+        // cluster. Everything is projected point by point, so the crown lies
+        // flat in plan view and droops in 2.5D.
+        const h = 1.6 * t.s
+        const lean = ((ti * 37) % 7) / 7 - 0.5
+        const [tx, ty] = P(t.x + lean * 0.18 * t.s, t.y - 0.08 * t.s, zBase + h)
+        const cx = (bx + tx) / 2 + (0.2 + lean * 0.15) * t.s * S
+        const cy = (by + ty) / 2
+
+        // Shadow: a soft outer pool and a darker core under the crown.
         out.push(
           <ellipse
             key={`palm-sh-${level}-${ti}`}
-            cx={bx + 0.08 * t.s * S}
-            cy={by + 0.04 * t.s * S}
-            rx={0.5 * t.s * S}
-            ry={0.2 * t.s * S}
-            fill="rgba(4,30,66,0.1)"
+            cx={bx + 0.22 * t.s * S}
+            cy={by + 0.08 * t.s * S}
+            rx={0.75 * t.s * S}
+            ry={0.26 * t.s * S}
+            fill="rgba(4,30,66,0.07)"
             opacity={o}
           />,
-          <path
-            key={`palm-trunk-${level}-${ti}`}
-            d={`M${bx.toFixed(1)} ${by.toFixed(1)} Q${((bx + tx) / 2 + 0.16 * t.s * S).toFixed(1)} ${((by + ty) / 2).toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)}`}
-            fill="none"
-            stroke={shade('#78716c', 0.8)}
-            strokeWidth={Math.max(1.2, 0.09 * t.s * S)}
-            strokeLinecap="round"
+          <ellipse
+            key={`palm-sh2-${level}-${ti}`}
+            cx={bx + 0.12 * t.s * S}
+            cy={by + 0.05 * t.s * S}
+            rx={0.38 * t.s * S}
+            ry={0.13 * t.s * S}
+            fill="rgba(4,30,66,0.12)"
             opacity={o}
           />
         )
 
-        // Fronds radiate in grid directions and are projected point-by-point,
-        // so the crown spreads flat in plan view and drapes in 2.5D.
-        const fronds: React.ReactNode[] = []
-        const dirs: Array<[number, number]> = [
-          [1, 0],
-          [0.7, 0.7],
-          [0, 1],
-          [-0.7, 0.7],
-          [-1, 0],
-          [-0.7, -0.7],
-          [0, -1],
-          [0.7, -0.7],
+        // Trunk: sampled along the curve, wide at the base, narrow at the top.
+        const N = 9
+        const along = (u: number): [number, number] => [
+          (1 - u) * (1 - u) * bx + 2 * (1 - u) * u * cx + u * u * tx,
+          (1 - u) * (1 - u) * by + 2 * (1 - u) * u * cy + u * u * ty,
         ]
-        for (const [fi, [dx, dy]] of dirs.entries()) {
-          const r = 0.8 * t.s
-          const [ex, ey] = P(t.x + dx * r, t.y + dy * r, zBase + h - 0.5 * t.s)
-          const [qx, qy] = P(t.x + dx * r * 0.45, t.y + dy * r * 0.45, zBase + h + 0.3 * t.s)
-          fronds.push(
+        const left: string[] = []
+        const right: string[] = []
+        const lit: string[] = []
+        const rings: React.ReactNode[] = []
+        for (let k = 0; k <= N; k++) {
+          const u = k / N
+          const [px, py] = along(u)
+          const [qx, qy] = along(Math.min(1, u + 0.02))
+          const [rx0, ry0] = along(Math.max(0, u - 0.02))
+          let nx = -(qy - ry0)
+          let ny = qx - rx0
+          const len = Math.hypot(nx, ny) || 1
+          nx /= len
+          ny /= len
+          const half = (0.075 - 0.035 * u) * t.s * S
+          left.push(`${(px + nx * half).toFixed(1)} ${(py + ny * half).toFixed(1)}`)
+          right.push(`${(px - nx * half).toFixed(1)} ${(py - ny * half).toFixed(1)}`)
+          lit.push(`${(px + nx * half * 0.15).toFixed(1)} ${(py + ny * half * 0.15).toFixed(1)}`)
+          if (k > 0 && k < N) {
+            rings.push(
+              <line
+                key={`palm-ring-${level}-${ti}-${k}`}
+                x1={px + nx * half}
+                y1={py + ny * half}
+                x2={px - nx * half}
+                y2={py - ny * half}
+                stroke={shade('#5C4630', 1, 0.55)}
+                strokeWidth={Math.max(0.6, 0.018 * t.s * S)}
+              />
+            )
+          }
+        }
+        out.push(
+          <g key={`palm-trunk-${level}-${ti}`} opacity={o}>
             <path
-              key={`palm-frond-${level}-${ti}-${fi}`}
-              d={`M${tx.toFixed(1)} ${ty.toFixed(1)} Q${qx.toFixed(1)} ${qy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`}
-              fill="none"
-              stroke={shade(fi % 2 ? '#AEE12B' : '#7AB000', 1, 0.95)}
-              strokeWidth={Math.max(1.2, 0.11 * t.s * S)}
-              strokeLinecap="round"
+              d={`M${left.join(' L')} L${right.reverse().join(' L')} Z`}
+              fill={shade('#8C6A43', 0.92, 1)}
+            />
+            <path
+              d={`M${left.join(' L')} L${lit.reverse().join(' L')} Z`}
+              fill={shade('#B8915E', 1.05, 0.9)}
+            />
+            {rings}
+          </g>
+        )
+
+        // Fronds: eleven, alternating long and short, drawn back to front.
+        const fronds: Array<{ depth: number; node: React.ReactNode }> = []
+        const count = 11
+        for (let fi = 0; fi < count; fi++) {
+          const ang = (fi / count) * Math.PI * 2 + ti * 0.7
+          const dx = Math.cos(ang)
+          const dy = Math.sin(ang)
+          const long = fi % 2 === 0
+          const r = (long ? 0.95 : 0.72) * t.s
+          const droop = (long ? 0.62 : 0.42) * t.s
+          const [ex, ey] = P(t.x + dx * r, t.y + dy * r, zBase + h - droop)
+          const [qx, qy] = P(t.x + dx * r * 0.42, t.y + dy * r * 0.42, zBase + h + 0.28 * t.s)
+          // Facing the camera (south and east) catches the light.
+          const facing = (dx + dy) / Math.SQRT2
+          const tone = facing > 0.3 ? '#97D700' : facing < -0.3 ? '#5E8A00' : '#7AB000'
+          const lift = 0.85 + 0.3 * Math.max(0, facing)
+          const pts: string[] = []
+          const back: string[] = []
+          const M = 10
+          const bez = (u: number): [number, number] => [
+            (1 - u) * (1 - u) * tx + 2 * (1 - u) * u * qx + u * u * ex,
+            (1 - u) * (1 - u) * ty + 2 * (1 - u) * u * qy + u * u * ey,
+          ]
+          for (let k = 0; k <= M; k++) {
+            const u = k / M
+            const [px, py] = bez(u)
+            const [ax, ay] = bez(Math.min(1, u + 0.03))
+            const [zx, zy] = bez(Math.max(0, u - 0.03))
+            let nx = -(ay - zy)
+            let ny = ax - zx
+            const len = Math.hypot(nx, ny) || 1
+            nx /= len
+            ny /= len
+            // Leaflets: the edge steps in and out, so a frond reads feathered.
+            const notch = k % 2 ? 0.7 : 1
+            const half = Math.sin(Math.PI * Math.min(1, u * 1.05)) * 0.13 * t.s * S * notch * (1 - 0.35 * u)
+            pts.push(`${(px + nx * half).toFixed(1)} ${(py + ny * half).toFixed(1)}`)
+            back.push(`${(px - nx * half).toFixed(1)} ${(py - ny * half).toFixed(1)}`)
+          }
+          fronds.push({
+            depth: ey,
+            node: (
+              <g key={`palm-frond-${level}-${ti}-${fi}`}>
+                <path
+                  d={`M${pts.join(' L')} L${back.reverse().join(' L')} Z`}
+                  fill={shade(tone, lift, 0.97)}
+                  stroke={shade(tone, 0.7, 0.5)}
+                  strokeWidth={0.5}
+                  strokeLinejoin="round"
+                />
+                <path
+                  d={`M${tx.toFixed(1)} ${ty.toFixed(1)} Q${qx.toFixed(1)} ${qy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`}
+                  fill="none"
+                  stroke={shade(tone, 0.62, 0.8)}
+                  strokeWidth={Math.max(0.6, 0.02 * t.s * S)}
+                  strokeLinecap="round"
+                />
+              </g>
+            ),
+          })
+        }
+        fronds.sort((a, b) => a.depth - b.depth)
+
+        // Coconuts: a cluster of three under the crown, each with a highlight.
+        const nuts: React.ReactNode[] = []
+        for (const [ni, [ox, oy, rr]] of (
+          [
+            [-0.05, 0.07, 0.06],
+            [0.06, 0.06, 0.055],
+            [0.005, 0.11, 0.052],
+          ] as Array<[number, number, number]>
+        ).entries()) {
+          const ncx = tx + ox * t.s * S
+          const ncy = ty + oy * t.s * S
+          const nr = Math.max(1.1, rr * t.s * S)
+          nuts.push(
+            <circle key={`palm-nut-${level}-${ti}-${ni}`} cx={ncx} cy={ncy} r={nr} fill={shade('#7A5A1E', 1)} />,
+            <circle
+              key={`palm-nut-hi-${level}-${ti}-${ni}`}
+              cx={ncx - nr * 0.3}
+              cy={ncy - nr * 0.35}
+              r={nr * 0.35}
+              fill="rgba(255,255,255,0.35)"
             />
           )
         }
-        fronds.push(
-          <circle
-            key={`palm-nut-${level}-${ti}-a`}
-            cx={tx - 0.05 * t.s * S}
-            cy={ty + 0.06 * t.s * S}
-            r={Math.max(1, 0.055 * t.s * S)}
-            fill={shade('#B38500', 0.95)}
-          />,
-          <circle
-            key={`palm-nut-${level}-${ti}-b`}
-            cx={tx + 0.06 * t.s * S}
-            cy={ty + 0.05 * t.s * S}
-            r={Math.max(1, 0.05 * t.s * S)}
-            fill={shade('#B38500', 0.8)}
-          />
-        )
+
         out.push(
           <g
             key={`palm-top-${level}-${ti}`}
@@ -952,7 +1218,9 @@ export function VenueMapStage({
             }}
             opacity={o}
           >
-            {fronds}
+            {fronds.filter((fr) => fr.depth <= ty).map((fr) => fr.node)}
+            {nuts}
+            {fronds.filter((fr) => fr.depth > ty).map((fr) => fr.node)}
           </g>
         )
       }
@@ -960,9 +1228,14 @@ export function VenueMapStage({
       const items: Array<{ depth: number; draw: () => void }> = Object.values(geometry)
         .filter((g) => g.floor === level)
         .map((g) => ({ depth: g.bbox.maxX + g.bbox.maxY, draw: () => drawRoom(g) }))
-      if (config.stairs) {
-        const s = config.stairs
-        items.push({ depth: s.x + s.w - 1 + s.y + s.h - 1, draw: drawStairs })
+      if (here.up) {
+        const fl = here.up
+        items.push({ depth: fl.x + fl.w - 1 + fl.y + fl.h - 1, draw: () => drawUp(fl) })
+      }
+      if (here.down) {
+        const fl = here.down
+        // A hole in the floor: drawn before anything standing near it.
+        items.push({ depth: fl.x + fl.y - 1, draw: () => drawDown(fl) })
       }
       if (decorData && level === 0) {
         for (const [ti, t] of decorData.trees.entries()) {
@@ -991,6 +1264,7 @@ export function VenueMapStage({
     elevate,
     furnitureByRoom,
     roomArtUrl,
+    flights,
   ])
 
   return <g>{elements}</g>

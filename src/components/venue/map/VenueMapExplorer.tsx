@@ -20,15 +20,15 @@ import {
   contrastInk,
   floorAlpha as floorAlphaAt,
   floorBadge,
-  isOnStairs,
+  resolveFlights,
   makeProjection,
   roomAt,
   spawnAtDoor,
-  stairsCentre,
   stepTowards,
   type RoomGeometry,
   type VenueMapConfig,
 } from '../../../lib/venue-map'
+import { flightCentre, flightsOn, onFlight } from '../../../lib/venue-layout'
 import { VENUE } from '../../../lib/constants'
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { PeerPosition } from '../../../hooks/useVenuePresence'
@@ -245,6 +245,9 @@ export function VenueMapExplorer({
    * cross-fade identically and all three land you somewhere sensible: on the
    * stairs if that is how you travelled, at the door otherwise.
    */
+  // One staircase per pair of floors (venue-layout.ts).
+  const flights = useMemo(() => resolveFlights(config, geometry), [config, geometry])
+
   const goToFloor = useCallback(
     (level: number, viaStairs = false) => {
       if (level < 0 || level >= config.floors.length) return
@@ -256,16 +259,17 @@ export function VenueMapExplorer({
       setFloor(level)
       setHoveredId(null)
 
-      const landing =
-        viaStairs && config.stairs
-          ? stairsCentre(config.stairs)
-          : spawnAtDoor(config, geometry, level)
+      // By stairs you arrive on the same flight you climbed, one floor on.
+      const flight = viaStairs
+        ? flights.find((x) => x.from === Math.min(current, level) && Math.abs(level - current) === 1)
+        : undefined
+      const landing = flight ? flightCentre(flight) : spawnAtDoor(config, geometry, level)
       posRef.current = landing
       targetRef.current = null
       pendingRoomRef.current = null
       onPositionChange({ ...landing, f: level })
     },
-    [config, geometry, onPositionChange]
+    [config, geometry, flights, onPositionChange]
   )
 
   // ---- spawn --------------------------------------------------------------
@@ -608,7 +612,10 @@ export function VenueMapExplorer({
   )
 
   const me = posRef.current
-  const onStairs = isOnStairs(config.stairs, me)
+  const here = flightsOn(flights, floor)
+  const onUp = onFlight(here.up, me)
+  const onDown = onFlight(here.down, me)
+  const onStairs = onUp || onDown
   const standingIn = me ? roomAt(geometry, floor, me.x, me.y) : null
   const standingRoom = standingIn ? roomsById.get(standingIn.room.id) || null : null
 
@@ -986,12 +993,12 @@ export function VenueMapExplorer({
 
       {/* ---- standing-in prompt ---- */}
       {/* ---- stairs ----
-          Standing on the block offers the levels either side of this one. The
+          The way up offers the level above, the way down the level below. The
           floor chips do the same thing; this is the version you find by
           walking, which is the point of drawing stairs at all. */}
       {onStairs && phase === 'idle' && config.floors.length > 1 && (
         <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-          {floor + 1 < config.floors.length && (
+          {onUp && floor + 1 < config.floors.length && (
             <button
               type="button"
               onClick={() => goToFloor(floor + 1, true)}
@@ -1001,7 +1008,7 @@ export function VenueMapExplorer({
               {config.floors[floor + 1].name}
             </button>
           )}
-          {floor > 0 && (
+          {onDown && floor > 0 && (
             <button
               type="button"
               onClick={() => goToFloor(floor - 1, true)}
