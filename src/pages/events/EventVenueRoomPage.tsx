@@ -17,7 +17,8 @@ import { BridgeRequestCard } from '../../components/venue/room/homebase/Bridges'
 import type { RoomSectionContext } from '../../components/venue/room/RoomSections'
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
-import { roomUsesSignals } from '../../lib/venue-room-sections'
+import { roomUsesSignals, roomViewerRole } from '../../lib/venue-room-sections'
+import { useVenueRoomRoles } from '../../hooks/useVenue'
 import { roomUsesStage } from '../../lib/venue-room-layout'
 import { mapConfigOf } from '../../hooks/useVenueMap'
 import { floorLabel } from '../../lib/venue-map'
@@ -67,6 +68,12 @@ export default function EventVenueRoomPage() {
   // already joined on the floorplan, and it derives this room from the URL,
   // so entering here is one track() rather than a fresh subscription.
   const { membership, joining, joinError, presence } = useVenuePresenceContext()
+  // Per-room roles (109): a judge for one room sees the judging console there.
+  const { roomRoles } = useVenueRoomRoles(membership ? eventId : undefined)
+  const viewerRole = useMemo(
+    () => (room ? roomViewerRole(membership?.role, roomRoles, room, auth.user?.id) : membership?.role ?? null),
+    [room, roomRoles, membership?.role, auth.user?.id]
+  )
 
   const venueFallbackTitle = t`Venue`
   usePageTitle(room ? t`${room.name} | ${event?.title ?? venueFallbackTitle}` : t`Venue room`)
@@ -126,8 +133,8 @@ export default function EventVenueRoomPage() {
       room.is_open &&
       (room.kind !== 'team' || !!homebase?.canUse) &&
       !!membership &&
-      (roomUsesSignals(room, membership.role, event?.event_type) ||
-        roomUsesStage(room, membership.role)),
+      (roomUsesSignals(room, viewerRole, event?.event_type) ||
+        roomUsesStage(room, viewerRole)),
   })
 
   if (eventLoading || roomLoading || joining) {
@@ -201,7 +208,7 @@ export default function EventVenueRoomPage() {
     rooms,
     occupants: presence.occupants,
     inRoom,
-    viewerRole: membership.role,
+    viewerRole: viewerRole ?? membership.role,
     isHost,
     membership,
     mapConfig,

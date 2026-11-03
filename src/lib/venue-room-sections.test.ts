@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  roomViewerRole,
   MAX_SPONSOR_LINKS,
   SECTIONS,
   defaultSectionIds,
@@ -325,3 +326,27 @@ function inRegistryOrder(a: string, b: string): number {
   const slot = (s: (typeof SECTIONS)[number]) => (s.slot === 'main' ? 0 : 1)
   return slot(sa) - slot(sb) || sa.order - sb.order
 }
+
+describe('roomViewerRole', () => {
+  const judging = { id: 'r-judge', kind: 'judging' as VenueRoomKind }
+  const stage = { id: 'r-stage', kind: 'stage' as VenueRoomKind }
+  const roles = [{ room_id: 'r-other', user_id: 'u1', role: 'judge' as const }]
+
+  it('uses the venue role when there is no override', () => {
+    expect(roomViewerRole('participant', [], stage, 'u1')).toBe('participant')
+  })
+  it('uses the room override in that room', () => {
+    expect(roomViewerRole('participant', [{ room_id: 'r-stage', user_id: 'u1', role: 'speaker' }], stage, 'u1')).toBe('speaker')
+  })
+  it('lets a judge for any room see the console in a judging room', () => {
+    expect(roomViewerRole('participant', roles, judging, 'u1')).toBe('judge')
+    expect(roomViewerRole('participant', roles, stage, 'u1')).toBe('participant')
+  })
+  it('ignores somebody else’s rows and keeps organisers as organisers', () => {
+    expect(roomViewerRole('participant', roles, judging, 'u2')).toBe('participant')
+    expect(roomViewerRole('organizer', [{ room_id: 'r-judge', user_id: 'u1', role: 'judge' }], judging, 'u1')).toBe('organizer')
+  })
+  it('returns null outside the venue', () => {
+    expect(roomViewerRole(null, roles, judging, 'u1')).toBeNull()
+  })
+})

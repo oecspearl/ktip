@@ -540,6 +540,29 @@ export function sectionsForRoom(
     .map(({ setting, def }) => ({ def, config: setting.config ?? {} }))
 }
 
+/**
+ * The role a viewer holds in one room, for deciding which sections they see.
+ *
+ * Mirrors venue_effective_role() (109): a per-room override wins, else the
+ * venue-wide role. One addition for judging rooms: somebody made a judge in
+ * any room may score the whole event (is_event_judge, 192), so every judging
+ * room shows them the console. A venue organiser stays an organiser.
+ */
+export function roomViewerRole(
+  venueRole: VenueRole | null | undefined,
+  roomRoles: { room_id: string; user_id: string; role: VenueRole }[] | undefined,
+  room: Pick<VenueRoom, 'id' | 'kind'>,
+  userId: string | undefined
+): VenueRole | null {
+  if (!venueRole) return null
+  if (venueRole === 'organizer' || !userId) return venueRole
+  const mine = (roomRoles ?? []).filter((r) => r.user_id === userId)
+  const here = mine.find((r) => r.room_id === room.id)
+  if (here) return here.role
+  if (room.kind === 'judging' && mine.some((r) => r.role === 'judge')) return 'judge'
+  return venueRole
+}
+
 export function canSeeSection(def: RoomSectionDef, viewerRole: VenueRole | null | undefined): boolean {
   if (!def.roles || !def.roles.length) return true
   return !!viewerRole && def.roles.includes(viewerRole)
