@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { RoomSections } from '../../components/venue/room/RoomSections'
+import { HomebaseLookPanel } from '../../components/venue/room/HomebaseLookPanel'
 import type { RoomSectionContext } from '../../components/venue/room/RoomSections'
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
@@ -213,6 +214,8 @@ export default function EventVenueRoomPage() {
           out by the kind's bento (src/lib/venue-room-layout.ts). Adding a panel
           is a registry entry plus a case in RoomSections — never a branch here.
         */}
+        {/* A team's own room: its members (and hosts) can restyle it (188). */}
+        {room.kind === 'team' && <HomebaseLookPanel room={room} />}
         <RoomSections context={sectionContext} />
       </div>
     </div>

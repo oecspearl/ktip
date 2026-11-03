@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react'
 import { VenueMapStage } from './VenueMapStage'
+import { roomArtUrl } from '../../../lib/venue-room-art'
 import { VenueRoomList } from './VenueRoomList'
 import { useAnimatedValue, useElementSize } from './useAnimatedValue'
 import {
@@ -771,6 +772,7 @@ export function VenueMapExplorer({
           showGrid
           decor
           elevate
+          roomArtUrl={roomArtUrl}
         />
       </svg>
 

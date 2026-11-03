@@ -114,7 +114,13 @@ const KIND_COLOR: Record<string, string> = {
   breakout: '#78716c',
 }
 
-export function colorForRoom(room: Pick<VenueRoom, 'kind'> & { color?: string | null }): string {
+export function colorForRoom(
+  room: Pick<VenueRoom, 'kind'> & { color?: string | null; decor?: unknown }
+): string {
+  // A team's own colour (venue_rooms.decor, 188) wins over the host's pick, so
+  // a Homebase keeps the look its team gave it whatever the floorplan says.
+  const own = (room.decor as { color?: unknown } | null | undefined)?.color
+  if (typeof own === 'string' && /^#[0-9A-Fa-f]{6}$/.test(own)) return own
   return room.color || KIND_COLOR[room.kind] || VENUE_PALETTE[0]
 }
 
@@ -489,6 +495,10 @@ export interface PlacedRoom {
   color?: string | null
   wall_height?: number | null
   floor?: number | null
+  /** Furniture preset (188). Absent or null = the kind's default. */
+  furniture?: string | null
+  /** The room's own look (188): colour, items, logo, mural. */
+  decor?: unknown
 }
 
 export interface RoomGeometry<T extends PlacedRoom = PlacedRoom> {

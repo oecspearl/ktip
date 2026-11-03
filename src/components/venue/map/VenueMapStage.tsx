@@ -10,6 +10,15 @@ import {
   type VenueMapConfig,
 } from '../../../lib/venue-map'
 import { buildDecor, type DecorTree } from '../../../lib/venue-decor'
+import { furnish, furnitureFor, parseDecor, type FurniturePiece } from '../../../lib/venue-furniture'
+import { renderFurniture } from './venueFurnitureArt'
+
+/**
+ * How tall a front wall stands, in wall-height units. Front walls are cut down
+ * to a kerb (the "cutaway" every isometric game uses) so the furniture inside
+ * a room is visible; back walls keep their full height and carry the boards.
+ */
+const CUTAWAY_H = 0.3
 
 interface VenueMapStageProps {
   config: VenueMapConfig
@@ -45,6 +54,13 @@ interface VenueMapStageProps {
    * overlays are drawn against a ground-level slab.
    */
   elevate?: boolean
+  /**
+   * Draws furniture in each room (venue-furniture.ts). On by default; the
+   * editor's flat view still shows it, as a floor plan.
+   */
+  furniture?: boolean
+  /** Public URL for a path in the venue-room-art bucket (logos, murals). */
+  roomArtUrl?: (path: string) => string
 }
 
 /**
@@ -73,6 +89,8 @@ export function VenueMapStage({
   showGrid = false,
   decor = false,
   elevate = false,
+  furniture = true,
+  roomArtUrl,
 }: VenueMapStageProps) {
   const floorCount = config.floors.length
 
@@ -80,6 +98,22 @@ export function VenueMapStage({
     () => (decor ? buildDecor(config, geometry) : null),
     [decor, config, geometry]
   )
+
+  // Furniture depends only on each room's shape and look, not on tilt, zoom or
+  // hover, so it is laid out once per geometry change rather than per frame.
+  const furnitureByRoom = useMemo(() => {
+    const out: Record<string, { pieces: FurniturePiece[]; logo?: string; mural?: string }> = {}
+    if (!furniture) return out
+    for (const g of Object.values(geometry)) {
+      const look = parseDecor(g.room.decor)
+      out[g.room.id] = {
+        pieces: furnish({ cells: g.cells, height: g.height }, furnitureFor(g.room), look),
+        logo: look.logo_path,
+        mural: look.mural_path,
+      }
+    }
+    return out
+  }, [geometry, furniture])
 
   const elements = useMemo(() => {
     const out: React.ReactNode[] = []
@@ -483,16 +517,57 @@ export function VenueMapStage({
       }
 
       // ---- stairs ----
-      // The same block on every level — that is what makes them connect. Treads
-      // step towards the level above so the direction reads without a caption.
-      if (config.stairs) {
+      // The same block on every level — that is what makes them connect. Each
+      // tread is a solid step with a front and a side face, rising towards the
+      // level above, and the top step is lit so the way up reads at a glance.
+      // Drawn later, in the depth-sorted pass with the rooms, so a room south
+      // of the stairs stands in front of them and one north of them behind.
+      const drawStairs = () => {
+        if (!config.stairs) return
         const { x, y, w, h } = config.stairs
         const treads = 5
         const rise = VENUE_MAP.LEVEL_H * (stacked ? stack : 0.25) * 0.55
+        const o = stacked ? Math.max(0.06, dim) : dim
         for (let i = 0; i < treads; i++) {
           const t0 = y + (h * i) / treads
           const t1 = y + (h * (i + 1)) / treads
-          const z = zBase + (rise * (i + 1)) / treads
+          const zTop = zBase + (rise * (i + 1)) / treads
+          const top = i === treads - 1
+          const base = top ? '#97D700' : '#2A5788'
+          const q = (pts: [number, number, number][]) =>
+            pts
+              .map(([px, py, pz], k) => {
+                const [sx, sy] = P(px, py, pz)
+                return `${k ? 'L' : 'M'}${sx.toFixed(1)} ${sy.toFixed(1)}`
+              })
+              .join(' ') + ' Z'
+          if (tilt > 0.01) {
+            // Front (south) face of this step, from the floor up to its tread.
+            out.push(
+              <path
+                key={`stair-front-${level}-${i}`}
+                d={q([
+                  [x, t1, zBase],
+                  [x + w, t1, zBase],
+                  [x + w, t1, zTop],
+                  [x, t1, zTop],
+                ])}
+                fill={shade(base, 0.78, 1)}
+                opacity={o}
+              />,
+              <path
+                key={`stair-side-${level}-${i}`}
+                d={q([
+                  [x + w, t0, zBase],
+                  [x + w, t1, zBase],
+                  [x + w, t1, zTop],
+                  [x + w, t0, zTop],
+                ])}
+                fill={shade(base, 0.6, 1)}
+                opacity={o}
+              />
+            )
+          }
           out.push(
             <path
               key={`stair-${level}-${i}`}
@@ -503,15 +578,17 @@ export function VenueMapStage({
                   [x + w, t1],
                   [x, t1],
                 ],
-                z
+                zTop
               )}
-              fill={`rgba(4,30,66,${(0.1 + 0.05 * i).toFixed(3)})`}
-              stroke="var(--color-ktip-sand-400)"
+              fill={shade(base, top ? 1 : 1.25, 1)}
+              stroke={shade(base, 0.6, 0.8)}
               strokeWidth={0.6}
-              opacity={stacked ? Math.max(0.06, dim) : dim}
+              opacity={o}
             />
           )
         }
+      }
+      if (config.stairs) {
         // Cells the block covers, so it is obvious where to stand.
         for (const [sx, sy] of stairsCells(config.stairs)) {
           out.push(
@@ -579,6 +656,10 @@ export function VenueMapStage({
             p2: [number, number]
             f: number
             depth: number
+            /** Inner-loop face = the inside of a back wall. Outer = a front wall. */
+            inner: boolean
+            nx: number
+            ny: number
           }> = []
 
           for (const lp of g.loops) {
@@ -597,7 +678,7 @@ export function VenueMapStage({
                 if (!(nx > 0 || ny > 0)) continue
                 const lit = ny > 0 ? (inner ? 0.62 : 0.95) : inner ? 0.5 : 0.74
                 const push = (a: [number, number], b: [number, number]) =>
-                  faces.push({ p1: a, p2: b, f: lit, depth: (a[0] + a[1] + b[0] + b[1]) / 2 })
+                  faces.push({ p1: a, p2: b, f: lit, depth: (a[0] + a[1] + b[0] + b[1]) / 2, inner, nx, ny })
 
                 if (!openSet) {
                   push(p1, p2)
@@ -645,32 +726,90 @@ export function VenueMapStage({
           }
 
           faces.sort((a, b) => a.depth - b.depth)
-          faces.forEach(({ p1, p2, f }, i) => {
+          const T = VENUE_MAP.WALL_T
+          const cut = Math.min(g.height, CUTAWAY_H)
+          // One wall face plus the strip of cap on top of it. The cap runs from
+          // the face back into the wall's thickness, so every wall reads as a
+          // solid slab at whatever height it is drawn to.
+          const drawFace = (fc: (typeof faces)[number], i: number, top: number, tag: string) => {
+            const { p1, p2, f, nx, ny } = fc
             const a = P(p1[0], p1[1], zBase)
             const b = P(p2[0], p2[1], zBase)
-            const c = P(p2[0], p2[1], zBase + g.height)
-            const d = P(p1[0], p1[1], zBase + g.height)
+            const c = P(p2[0], p2[1], zBase + top)
+            const d = P(p1[0], p1[1], zBase + top)
+            const back1: [number, number] = [p1[0] - nx * T, p1[1] - ny * T]
+            const back2: [number, number] = [p2[0] - nx * T, p2[1] - ny * T]
             out.push(
               <path
-                key={`w-${level}-${id}-${i}`}
+                key={`w${tag}-${level}-${id}-${i}`}
                 d={`M${a[0]} ${a[1]} L${b[0]} ${b[1]} L${c[0]} ${c[1]} L${d[0]} ${d[1]} Z`}
                 fill={shade(color, f, 0.92 * alpha)}
+              />,
+              <path
+                key={`c${tag}-${level}-${id}-${i}`}
+                d={path([p1, p2, back2, back1], zBase + top)}
+                fill={shade(color, active ? 1.05 : 1, dim * (muted ? 0.5 : 1))}
+                stroke={shade(color, 0.7, dim)}
+                strokeWidth={0.5}
               />
             )
-          })
+          }
+
+          // Back walls first, at full height: they are behind everything in
+          // the room, and they are where the boards and screens hang.
+          faces.forEach((fc, i) => fc.inner && drawFace(fc, i, g.height, 'b'))
+
+          // Furniture between the back walls and the front kerb.
+          const furn = furnitureByRoom[id]
+          if (furn?.pieces.length) {
+            out.push(
+              ...renderFurniture({
+                pieces: furn.pieces,
+                project: P,
+                zBase,
+                color,
+                alpha: alpha * (ghost ? 0.6 : 1),
+                tilt,
+                keyPrefix: `fu-${level}-${id}`,
+                logoUrl: furn.logo && roomArtUrl ? roomArtUrl(furn.logo) : null,
+                muralUrl: furn.mural && roomArtUrl ? roomArtUrl(furn.mural) : null,
+              })
+            )
+          }
+
+          // Front walls cut down to a kerb so the room can be seen into.
+          faces.forEach((fc, i) => !fc.inner && drawFace(fc, i, cut, 'f'))
+        } else {
+          // Flat plan: no walls, but the furniture still reads as a layout.
+          const furn = furnitureByRoom[id]
+          if (furn?.pieces.length) {
+            out.push(
+              ...renderFurniture({
+                pieces: furn.pieces,
+                project: P,
+                zBase,
+                color,
+                alpha: alpha * 0.8,
+                tilt,
+                keyPrefix: `fu-${level}-${id}`,
+              })
+            )
+          }
         }
 
-        // ---- wall caps ----
+        // ---- outline ----
+        // The footprint, traced at floor level: always visible, even in the
+        // flat plan where there are no walls to show where a room ends. When
+        // hovered or selected it glows.
         g.loops.forEach((lp, i) => {
-          const capPath = `${path(lp.outer, zBase + g.height)} ${path(lp.inner, zBase + g.height)}`
+          const floorPath = path(lp.outer, zBase)
           if (!ghost && active) {
             out.push(
               <path
                 key={`glow-${level}-${id}-${i}`}
-                d={capPath}
-                fillRule="evenodd"
+                d={floorPath}
                 fill="none"
-                stroke={shade(color, 1, 0.35)}
+                stroke={shade(color, 1, 0.45)}
                 strokeWidth={5}
                 strokeLinejoin="round"
               />
@@ -679,11 +818,10 @@ export function VenueMapStage({
           out.push(
             <path
               key={`cap-${level}-${id}-${i}`}
-              d={capPath}
-              fillRule="evenodd"
-              fill={shade(color, active ? 1.05 : 1, dim * (muted ? 0.5 : 1))}
-              stroke={shade(color, 0.7, dim)}
-              strokeWidth={0.75}
+              d={floorPath}
+              fill="none"
+              stroke={shade(color, 0.7, dim * (muted ? 0.5 : 1))}
+              strokeWidth={tilt > 0.01 ? 0.75 : 1.5}
             />
           )
         })
@@ -820,6 +958,10 @@ export function VenueMapStage({
       const items: Array<{ depth: number; draw: () => void }> = Object.values(geometry)
         .filter((g) => g.floor === level)
         .map((g) => ({ depth: g.bbox.maxX + g.bbox.maxY, draw: () => drawRoom(g) }))
+      if (config.stairs) {
+        const s = config.stairs
+        items.push({ depth: s.x + s.w - 1 + s.y + s.h - 1, draw: drawStairs })
+      }
       if (decorData && level === 0) {
         for (const [ti, t] of decorData.trees.entries()) {
           items.push({ depth: t.x + t.y, draw: () => drawTree(t, ti) })
@@ -845,6 +987,8 @@ export function VenueMapStage({
     floorCount,
     decorData,
     elevate,
+    furnitureByRoom,
+    roomArtUrl,
   ])
 
   return <g>{elements}</g>
