@@ -121,7 +121,7 @@ const R = (n, floor, key, name, kind, furniture, cells, color, wall_height, extr
   recording_enabled: false,
   is_open: extra.is_open ?? true,
   allowed_roles: extra.allowed_roles ?? [],
-  sections: [],
+  sections: extra.sections ?? [],
   decor: extra.decor ?? {},
 })
 
@@ -150,7 +150,10 @@ const ROOMS = [
   }),
   R(14, 1, 'hb-lambi', 'Lambi Works', 'team', 'homebase', rect(10, 9, 15, 13), '#7AB000', 1.2),
   R(15, 1, 'hb-free-1', 'Team room 6', 'team', 'homebase', rect(17, 9, 22, 13), '#AEE12B', 1.2, { description: 'Free. Form a team to claim it.' }),
-  R(16, 1, 'collab-commons', 'Collab Commons', 'networking', 'cafe', rect(24, 2, 27, 13), '#041E42', 1.3, { description: 'Cross-team board and drop-in sessions.' }),
+  R(16, 1, 'collab-commons', 'Collab Commons', 'networking', 'cafe', rect(24, 2, 27, 13), '#041E42', 1.3, {
+    description: 'Cross-team board and the bridges open between teams.',
+    sections: [{ id: 'collab_commons' }],
+  }),
 
   // ---- level 2: Homebase wing B + build spaces
   R(20, 2, 'workshop', 'Workshop Room', 'workshop', 'classroom', rect(3, 2, 10, 7), '#E6AC09', 1.4, { description: 'Mentor sessions. Chalkboard included.', audio_mode: 'moderated' }),
@@ -163,14 +166,27 @@ const ROOMS = [
 
   // ---- level 3: demos
   R(40, 3, 'showcase', 'Showcase Stage', 'stage', 'stage', rect(3, 2, 14, 9), '#041E42', 2, { description: 'Demos and pitches. Captions on.', audio_mode: 'listen_only', max_publishers: 6 }),
-  R(41, 3, 'gallery', 'Spectator Gallery', 'main_hall', 'theatre', rect(16, 9, 26, 15), '#2A5788', 1.5, { description: 'Watch the demos, cheer, vote.' }),
-  R(42, 3, 'submission-desk', 'Submission Desk', 'help_desk', 'counter', rect(16, 2, 21, 6), '#7AB000', 1.1, { description: 'Hand in your project before the deadline.' }),
-  R(43, 3, 'quest-board', 'Quest Board', 'breakout', 'podium', rect(23, 2, 27, 7), '#E6AC09', 1.2, { description: 'Leaderboard and side quests.' }),
+  R(41, 3, 'gallery', 'Spectator Gallery', 'main_hall', 'theatre', rect(16, 9, 26, 15), '#2A5788', 1.5, {
+    description: 'Watch the demos, cheer, vote.',
+    sections: [{ id: 'peoples_choice' }],
+  }),
+  R(42, 3, 'submission-desk', 'Submission Desk', 'help_desk', 'counter', rect(16, 2, 21, 6), '#7AB000', 1.1, {
+    description: 'Hand in your project before the deadline.',
+    sections: [{ id: 'submission_desk' }],
+  }),
+  R(43, 3, 'quest-board', 'Quest Board', 'breakout', 'podium', rect(23, 2, 27, 7), '#E6AC09', 1.2, {
+    description: 'Leaderboard and side quests.',
+    sections: [{ id: 'quest_board' }],
+  }),
 
   // ---- level 4: judging and HQ
   R(30, 4, 'judging', 'Judging Room', 'judging', 'panel', rect(3, 2, 10, 8), '#041E42', 1.4, { description: 'Judges only.', allowed_roles: ['judge', 'organizer'] }),
   R(31, 4, 'deliberation', 'Deliberation Room', 'judging', 'panel', rect(12, 2, 17, 6), '#041E42', 1.2, { description: 'Opens on the last day.', is_open: false, allowed_roles: ['judge', 'organizer'] }),
-  R(33, 4, 'organiser-hq', 'Organiser HQ', 'breakout', 'ops', rect(19, 2, 26, 8), '#2F8FD6', 1.2, { description: 'Organisers only.', allowed_roles: ['organizer'] }),
+  R(33, 4, 'organiser-hq', 'Organiser HQ', 'breakout', 'ops', rect(19, 2, 26, 8), '#2F8FD6', 1.2, {
+    description: 'Organisers only.',
+    allowed_roles: ['organizer'],
+    sections: [{ id: 'organiser_ops' }],
+  }),
   R(34, 4, 'green-room', 'Green Room', 'breakout', 'lounge', rect(3, 11, 9, 15), '#7AB000', 1, { description: 'Pitchers wait here before going on stage.' }),
 ]
 
@@ -180,6 +196,19 @@ const TEAMS = [
   { n: 3, name: 'Sargassum Squad', tagline: 'Forecasting sargassum landings from satellite data', room: 12 },
   { n: 4, name: 'Pitons Collective', tagline: 'Reef tourism bookings that respect carrying capacity', room: 13 },
   { n: 5, name: 'Lambi Works', tagline: 'Conch season tracking for co-ops', room: 14 },
+]
+
+const QUESTS = [
+  ['Ship a README a stranger can follow', 'Link the README. A mentor will try to run it.', 30],
+  ['Help another team', 'Spend 30 minutes unblocking another team. Name them in your claim.', 50],
+  ['Use an OECS open dataset', 'Tell us which dataset and where it shows up in your demo.', 40],
+  ['Pitch in two languages', 'Give your demo once in English and once in French or Spanish.', 40],
+]
+
+const COMMONS = [
+  [1, 'offers', 'Our landing-site data for Saint Lucia is clean. Happy to share.'],
+  [2, 'needs', 'Anyone know LoRa range near reefs?'],
+  [3, 'data', 'Satellite tiles for the Grenadines at 10 m, ask us for the bucket.'],
 ]
 
 const CRITERIA = [
@@ -355,6 +384,36 @@ async function main() {
     }))
     const { error } = await admin.from('event_criteria').insert(rows)
     if (error) console.log(`  (challenge brief skipped: ${error.message})`)
+  }
+
+  // ---- quests (196) and commons notes (197), when those tables exist ----
+  {
+    await admin.from('event_quests').delete().eq('event_id', EVENT_ID)
+    const { error } = await admin.from('event_quests').insert(
+      QUESTS.map(([title, description, points], i) => ({
+        event_id: EVENT_ID,
+        title,
+        description,
+        points,
+        sort_order: (i + 1) * 10,
+        created_by: hostId,
+      }))
+    )
+    console.log(error ? `  (quests skipped: ${error.message})` : `  ${QUESTS.length} side quests`)
+  }
+  if (has188) {
+    await admin.from('event_commons_notes').delete().eq('event_id', EVENT_ID)
+    const captainOf = (n) => ids[PEOPLE.find((p) => p.team === n && p.captain).slug]
+    const { error } = await admin.from('event_commons_notes').insert(
+      COMMONS.map(([team, column_key, body]) => ({
+        event_id: EVENT_ID,
+        team_id: teamId(team),
+        author_id: captainOf(team),
+        column_key,
+        body,
+      }))
+    )
+    console.log(error ? `  (commons notes skipped: ${error.message})` : `  ${COMMONS.length} Collab Commons notes`)
   }
 
   const { data: ev } = await admin.from('events').select('slug').eq('id', EVENT_ID).single()
