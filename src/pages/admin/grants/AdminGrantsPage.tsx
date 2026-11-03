@@ -1,13 +1,20 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
-import { ConfirmModal } from '../../../components/admin/ConfirmModal'
+import { AdminNoteModal } from '../../../components/admin/AdminNoteModal'
 import { ApplicationPreview } from '../../../components/grants/application/ApplicationPreview'
 import { GRANT_APPLICATION_STEPS } from '../../../lib/grant-application-template'
-import { useGrants, useUpdateGrant, useDeleteGrant } from '../../../hooks/useGrants'
-import { useAdminGrantApplications, useAdminApplicationActions } from '../../../hooks/useAdminDashboard'
+import { useUpdateGrant, useDeleteGrant } from '../../../hooks/useGrants'
+import {
+  useAdminGrants,
+  grantOrganisationName,
+  grantOwnerHref,
+  type AdminGrantRow,
+} from '../../../hooks/useGrantModeration'
+import { useAdminGrantApplications } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
 import { useAuth } from '../../../contexts/AuthContext'
 import { DeleteEntityControl } from '../../../components/shared/DeleteEntityControl'
@@ -22,22 +29,47 @@ import { FUNDING_TYPE_COLORS, fundingTypeLabel } from '../../../lib/funding-type
 import { format } from 'date-fns'
 import { cn } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
-import type { Grant, GrantApplication, GrantApplicationStatus } from '../../../types'
+import type { Grant, GrantApplication } from '../../../types'
 import {
   DollarSign,
   Plus,
   Eye,
   EyeOff,
-  CheckCircle,
-  XCircle,
-  Clock,
   FileText,
+  Ban,
+  RotateCcw,
+  MessageSquare,
 } from 'lucide-react'
 import AdminGrantFormModal from './AdminGrantFormModal'
+import { GrantSuspensionModal } from './GrantSuspensionModal'
 
 type TabId = 'grants' | 'applications'
 
+/** The organisation a call was posted for, linked, or failing that its poster. */
+function OwnerCell({ row }: { row: Partial<AdminGrantRow> | undefined }) {
+  const href = row ? grantOwnerHref(row) : null
+  const name = grantOrganisationName(row?.employer) || row?.poster?.display_name || null
+  if (!name) return <span className="text-sm text-gray-400">-</span>
+  return href ? (
+    <Link to={href} className="text-sm text-ktip-ocean-600 hover:underline">
+      {name}
+    </Link>
+  ) : (
+    <span className="text-sm text-gray-700">{name}</span>
+  )
+}
+
+/**
+ * /admin/grants. Since 181 an administrator polices funding calls but does not
+ * run them: switch one off, suspend it with a reason, send the poster a note,
+ * delete it. Editing a call and deciding its applications belong to the
+ * organisation that posted it, so neither is offered here.
+ *
+ * "Add Funding" stays: it creates a call in the administrator's own name,
+ * which makes them its poster, so the call is theirs to edit and decide.
+ */
 export default function AdminGrantsPage() {
+  const { t } = useLingui()
   const toast = useToast()
   const auth = useAuth()
   // ?tab=applications so the dashboard's "awaiting review" tile can land on the
@@ -49,11 +81,12 @@ export default function AdminGrantsPage() {
     searchParams.get('tab') === 'applications' ? 'applications' : 'grants'
   )
   const [showGrantModal, setShowGrantModal] = useState(false)
-  const [editingGrant, setEditingGrant] = useState<Grant | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
+  const [suspending, setSuspending] = useState<AdminGrantRow | null>(null)
+  const [noting, setNoting] = useState<AdminGrantRow | null>(null)
 
   // Grants data
-  const { grants, loading: grantsLoading, refetch: refetchGrants } = useGrants()
+  const { grants, loading: grantsLoading, refetch: refetchGrants } = useAdminGrants()
   const { updateGrant, loading: updateLoading } = useUpdateGrant()
   const { deleteGrant } = useDeleteGrant()
 
@@ -65,17 +98,9 @@ export default function AdminGrantsPage() {
     isOecs || (!!grant.created_by && grant.created_by === auth.user?.id)
 
   // Applications data
-  const { applications, loading: applicationsLoading, refetch: refetchApplications } = useAdminGrantApplications({
+  const { applications, loading: applicationsLoading } = useAdminGrantApplications({
     status: statusFilter || undefined,
   })
-  const { updateApplicationStatus, loading: actionLoading } = useAdminApplicationActions()
-
-  // Confirm modal state for application actions
-  const [confirmAction, setConfirmAction] = useState<{
-    applicationId: string
-    status: GrantApplicationStatus
-    applicantName: string
-  } | null>(null)
 
   // Application detail viewer
   const [viewingApplication, setViewingApplication] = useState<GrantApplication | null>(null)
@@ -84,16 +109,6 @@ export default function AdminGrantsPage() {
   const isWizardApplication = (data: Record<string, any>) =>
     GRANT_APPLICATION_STEPS.some((step) => step.fields.some((f) => data[f.name]))
 
-  const handleOpenCreate = () => {
-    setEditingGrant(null)
-    setShowGrantModal(true)
-  }
-
-  const handleOpenEdit = (grant: Grant) => {
-    setEditingGrant(grant)
-    setShowGrantModal(true)
-  }
-
   const handleToggleActive = async (grant: Grant) => {
     try {
       await updateGrant(grant.id, { is_active: !grant.is_active } as any)
@@ -101,32 +116,6 @@ export default function AdminGrantsPage() {
       refetchGrants()
     } catch (err: any) {
       toast.error(err.message || 'Failed to update grant')
-    }
-  }
-
-  const handleApplicationAction = async () => {
-    const action = confirmAction
-    if (!action) return
-
-    try {
-      await updateApplicationStatus(action.applicationId, action.status)
-      toast.success(
-        `Application marked ${GRANT_APPLICATION_STATUS_LABELS[action.status].toLowerCase()} — the applicant has been notified`
-      )
-      setConfirmAction(null)
-      refetchApplications()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update application status')
-    }
-  }
-
-  const handleMarkUnderReview = async (applicationId: string) => {
-    try {
-      await updateApplicationStatus(applicationId, 'under_review')
-      toast.success('Application marked as under review')
-      refetchApplications()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update application status')
     }
   }
 
@@ -143,9 +132,7 @@ export default function AdminGrantsPage() {
     return '-'
   }
 
-  const handleGrantSaved = () => {
-    refetchGrants()
-  }
+  const isSuspended = (grant: Partial<Grant> | undefined) => grant?.moderation_status === 'suspended'
 
   return (
     <div>
@@ -154,7 +141,7 @@ export default function AdminGrantsPage() {
         compact
         eyebrow="Administration"
         title="Funding Management"
-        subtitle="Manage funding calls and review applications"
+        subtitle={t`Oversee funding calls and see where applications stand`}
         imageSeed="admin-grants"
       />
 
@@ -193,9 +180,11 @@ export default function AdminGrantsPage() {
       {/* Grants Tab */}
       {activeTab === 'grants' && (
         <div className="animate-tab-enter">
-          {/* Add Funding Button */}
-          <div className="flex justify-end mb-4">
-            <Button size="sm" icon={<Plus size={16} />} onClick={handleOpenCreate}>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <p className="text-sm text-ktip-sand-600">
+              <Trans>Only the organisation that posted a call can edit it. You can switch a call off, suspend it, or send the poster a note.</Trans>
+            </p>
+            <Button size="sm" icon={<Plus size={16} />} onClick={() => setShowGrantModal(true)}>
               Add Funding
             </Button>
           </div>
@@ -220,11 +209,13 @@ export default function AdminGrantsPage() {
                   <thead>
                     <tr className="border-b border-ktip-sand-200">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"><Trans>Posted by</Trans></th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"><Trans>Organisation</Trans></th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Funding Type</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Focus</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount Range</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Active</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"><Trans>Status</Trans></th>
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -232,7 +223,26 @@ export default function AdminGrantsPage() {
                     {grants.map((grant) => (
                       <tr className="hover:bg-ktip-sand-50 transition-colors" key={grant.id}>
                         <td className="px-4 py-3">
-                          <span className="font-medium text-gray-900">{grant.title}</span>
+                          <Link
+                            to={`/grants/${grant.slug || grant.id}`}
+                            className="font-medium text-gray-900 hover:text-ktip-ocean-600"
+                          >
+                            {grant.title}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-gray-700">
+                            {grant.poster?.display_name || <span className="text-gray-400">-</span>}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {grant.employer ? (
+                            <Link to={`/org/${grant.employer.slug}`} className="text-sm text-ktip-ocean-600 hover:underline">
+                              {grantOrganisationName(grant.employer)}
+                            </Link>
+                          ) : (
+                            <span className="text-sm text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           {grant.funding_type ? (
@@ -273,27 +283,26 @@ export default function AdminGrantsPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <Badge
-                            size="sm"
-                            className={
-                              grant.is_active
-                                ? 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200'
-                                : 'bg-ktip-sand-100 text-gray-500 border-ktip-sand-200'
-                            }
-                          >
-                            {grant.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
+                          <div className="flex flex-wrap gap-1">
+                            <Badge
+                              size="sm"
+                              className={
+                                grant.is_active
+                                  ? 'bg-ktip-tropical-100 text-ktip-tropical-700 border-ktip-tropical-200'
+                                  : 'bg-ktip-sand-100 text-gray-500 border-ktip-sand-200'
+                              }
+                            >
+                              {grant.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                            {isSuspended(grant) && (
+                              <Badge size="sm" className="bg-red-50 text-red-700 border-red-200">
+                                <Trans>Suspended</Trans>
+                              </Badge>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEdit(grant)}
-                              className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
-                              title="Edit funding call"
-                            >
-                              <FileText size={16} />
-                            </button>
                             <button
                               type="button"
                               onClick={() => handleToggleActive(grant)}
@@ -302,6 +311,25 @@ export default function AdminGrantsPage() {
                               title={grant.is_active ? 'Deactivate' : 'Activate'}
                             >
                               {grant.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSuspending(grant)}
+                              className={cn(
+                                'p-1.5 text-gray-400 transition-colors',
+                                isSuspended(grant) ? 'hover:text-ktip-tropical-600' : 'hover:text-red-600'
+                              )}
+                              title={isSuspended(grant) ? t`Restore` : t`Suspend`}
+                            >
+                              {isSuspended(grant) ? <RotateCcw size={16} /> : <Ban size={16} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setNoting(grant)}
+                              className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors"
+                              title={t`Send feedback`}
+                            >
+                              <MessageSquare size={16} />
                             </button>
                             {canDeleteGrant(grant) && (
                               // applicationCount is null on purpose: the
@@ -333,9 +361,13 @@ export default function AdminGrantsPage() {
         </div>
       )}
 
-      {/* Applications Tab */}
+      {/* Applications Tab — read-only since 181 */}
       {activeTab === 'applications' && (
         <div className="animate-tab-enter">
+          <p className="mb-4 text-sm text-ktip-sand-600">
+            <Trans>The organisation that posted a call decides its applications. This list is read-only.</Trans>
+          </p>
+
           {/* Inline Status Filter */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -385,6 +417,7 @@ export default function AdminGrantsPage() {
                     <tr className="border-b border-ktip-sand-200">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Applicant</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Grant Title</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"><Trans>Decided by</Trans></th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
@@ -402,6 +435,9 @@ export default function AdminGrantsPage() {
                           <span className="text-sm text-gray-700">
                             {application.grant?.title || 'Unknown Grant'}
                           </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <OwnerCell row={application.grant as Partial<AdminGrantRow> | undefined} />
                         </td>
                         <td className="px-4 py-3">
                           <Badge
@@ -426,49 +462,6 @@ export default function AdminGrantsPage() {
                             >
                               <Eye size={16} />
                             </button>
-                            {application.status !== 'approved' && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setConfirmAction({
-                                    applicationId: application.id,
-                                    status: 'approved',
-                                    applicantName: application.applicant?.display_name || 'this applicant',
-                                  })
-                                }
-                                className="p-1.5 text-gray-400 hover:text-ktip-tropical-600 transition-colors"
-                                title="Approve"
-                              >
-                                <CheckCircle size={16} />
-                              </button>
-                            )}
-                            {application.status !== 'rejected' && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setConfirmAction({
-                                    applicationId: application.id,
-                                    status: 'rejected',
-                                    applicantName: application.applicant?.display_name || 'this applicant',
-                                  })
-                                }
-                                className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
-                                title="Do not accept"
-                              >
-                                <XCircle size={16} />
-                              </button>
-                            )}
-                            {application.status === 'pending' && (
-                              <button
-                                type="button"
-                                onClick={() => handleMarkUnderReview(application.id)}
-                                disabled={actionLoading}
-                                className="p-1.5 text-gray-400 hover:text-ktip-ocean-600 transition-colors disabled:opacity-50"
-                                title="Mark Under Review"
-                              >
-                                <Clock size={16} />
-                              </button>
-                            )}
                           </div>
                         </td>
                       </tr>
@@ -495,6 +488,10 @@ export default function AdminGrantsPage() {
       >
         {viewingApplication && (
           <div className="max-h-[70dvh] overflow-y-auto">
+            <div className="mb-4 rounded-lg bg-ktip-sand-50 px-3 py-2 text-sm text-ktip-sand-600">
+              <Trans>Decided by the posting organisation:</Trans>{' '}
+              <OwnerCell row={viewingApplication.grant as Partial<AdminGrantRow> | undefined} />
+            </div>
             {isWizardApplication(viewingApplication.application_data) ? (
               <ApplicationPreview
                 title={viewingApplication.application_data.title || 'Untitled Application'}
@@ -520,37 +517,26 @@ export default function AdminGrantsPage() {
         )}
       </Modal>
 
-      {/* Grant Form Modal */}
+      {/* Create only. Editing a call is the poster's (181). */}
       <AdminGrantFormModal
         open={showGrantModal}
-        grant={editingGrant}
-        onClose={() => {
-          setShowGrantModal(false)
-          setEditingGrant(null)
-        }}
-        onSaved={handleGrantSaved}
+        grant={null}
+        onClose={() => setShowGrantModal(false)}
+        onSaved={() => refetchGrants()}
       />
 
-      {/* Confirm Modal for Application Actions */}
-      <ConfirmModal
-        open={!!confirmAction}
-        title={
-          confirmAction?.status === 'approved'
-            ? 'Approve Application'
-            : 'Do not accept application'
-        }
-        message={
-          confirmAction?.status === 'approved'
-            ? `Are you sure you want to approve the application from "${confirmAction?.applicantName}"?`
-            : `Are you sure you do not want to accept the application from "${confirmAction?.applicantName}"? This action cannot be easily undone.`
-        }
-        confirmLabel={
-          confirmAction?.status === 'approved' ? 'Approve' : 'Do not accept'
-        }
-        confirmVariant={confirmAction?.status === 'rejected' ? 'danger' : 'primary'}
-        loading={actionLoading}
-        onConfirm={handleApplicationAction}
-        onCancel={() => setConfirmAction(null)}
+      <GrantSuspensionModal
+        grant={suspending}
+        onClose={() => setSuspending(null)}
+        onDone={() => refetchGrants()}
+      />
+
+      <AdminNoteModal
+        open={!!noting}
+        onClose={() => setNoting(null)}
+        targetType="grant"
+        targetId={noting?.id ?? null}
+        targetTitle={noting?.title ?? ''}
       />
     </div>
   )

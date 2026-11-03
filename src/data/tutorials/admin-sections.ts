@@ -136,11 +136,11 @@ export const adminChamberTutorialSteps: TutorialStep[] = [
 export const adminGrantsTutorialSteps: TutorialStep[] = [
   section(
     'Grants and their applications',
-    'The top half is the grants themselves — create one, edit it, or deactivate it. Deactivating closes a grant without deleting it, so its page and everyone’s applications survive.\n\nThe lower half is the application queue.'
+    'The first tab lists every funding call, with who posted it and for which organisation. Only the poster can edit a call. You can deactivate it, suspend it with a reason, or send the poster a note.\n\nDeactivating closes a call without deleting it, so its page and everyone’s applications survive. Suspending hides it from members until you restore it, and the poster sees your reason.'
   ),
   section(
-    'Reviewing applications',
-    'Open one to read it as submitted. Approve, reject, or mark under review — the applicant sees the status change on My Applications, so “under review” is worth setting rather than leaving them at “submitted” for weeks.\n\nStudent applications need a sponsor’s approval before they reach you.'
+    'Applications',
+    'The second tab shows every submitted application and where it stands. It is read-only: the organisation that posted a call decides its applications.\n\nIf a decision is stuck, send the poster a note from the first tab.'
   ),
   replayStep,
 ]

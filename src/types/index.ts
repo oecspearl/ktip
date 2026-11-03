@@ -491,6 +491,9 @@ export interface Project extends Ranked {
   allow_member_engagement: boolean | null
   /** Migration 157 — optional pitch or demo video; see src/lib/video-embed.ts. */
   video_url: string | null
+  /** Moderation verdict (122). 'quarantined' is what the console calls
+   *  Suspended (183). Optional: most selects never asked for it by name. */
+  status?: 'active' | 'quarantined' | 'removed'
   created_at: string
   updated_at: string
   owner?: Profile
@@ -506,6 +509,11 @@ export interface Event extends Ranked {
   tags: string[]
   event_type: EventType
   status: EventStatus
+  /**
+   * Migration 183 — an admin's suspension, separate from the lifecycle in
+   * `status`. Optional because a deploy can run ahead of the migration.
+   */
+  moderation_status?: 'active' | 'quarantined' | 'removed'
   location: string | null
   /**
    * Migration 153 — ISO alpha-2, FK to countries. NULL for virtual events or
@@ -935,7 +943,43 @@ export interface Grant extends Ranked {
    * TRUE/FALSE override it, for members of employer_id only.
    */
   allow_member_engagement: boolean | null
+  /**
+   * Migration 181 — set by an administrator through set_grant_suspension().
+   * Optional because rows read before 181 is applied do not carry it; treat
+   * a missing value as 'active'.
+   */
+  moderation_status?: GrantModerationStatus
+  suspension_reason?: string | null
+  suspended_at?: string | null
   created_at: string
+}
+
+export type GrantModerationStatus = 'active' | 'suspended'
+
+/** What an admin_notes thread is about (migration 182). */
+export type AdminNoteTargetType = 'grant' | 'project' | 'event' | 'resource' | 'account' | 'employer'
+
+/**
+ * One message in a thread between KTIP and the owner of a piece of content
+ * (migration 182). A thread is its first note plus the notes whose parent_id
+ * points at it.
+ */
+export interface AdminNote {
+  id: string
+  target_type: AdminNoteTargetType
+  target_id: string
+  /** What the target was called when the thread started. */
+  subject: string | null
+  recipient_user_id: string | null
+  employer_id: string | null
+  parent_id: string | null
+  kind: 'note' | 'suspension' | 'restoration'
+  body: string
+  /** TRUE when written from the platform side. */
+  from_admin: boolean
+  created_by: string | null
+  created_at: string
+  read_at: string | null
 }
 
 /** One row of a grant's supporting-documents checklist. */
@@ -1708,7 +1752,8 @@ export interface UserPersonalization {
 // Feedback types
 // 093 added 'praise': a channel that only accepts complaints under-reports how
 // the site is actually doing.
-export type FeedbackCategory = 'bug' | 'feature_request' | 'general' | 'content' | 'praise'
+/** 'appeal' (184) is filed from /account/suspended, not from the feedback form. */
+export type FeedbackCategory = 'bug' | 'feature_request' | 'general' | 'content' | 'praise' | 'appeal'
 export type FeedbackStatus = 'new' | 'in_review' | 'resolved' | 'dismissed'
 
 export interface Feedback {

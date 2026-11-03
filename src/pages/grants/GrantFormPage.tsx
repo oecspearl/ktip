@@ -138,11 +138,11 @@ export default function GrantFormPage() {
     }
   )
 
-  // Mirrors 077's owner arm, kept by 116: the creator edits their own call, and
-  // grant:manage covers the rest — including rows posted before 077, which have
-  // no creator to match.
+  // Mirrors 077's owner arm. Since 181 the owner is the only one who edits a
+  // call: an administrator holding grant:manage may switch it off or suspend
+  // it, and the guard trigger refuses every other column.
   const ownsGrant = !!grant && !!auth.user && grant.created_by === auth.user.id
-  const canEditThisGrant = ownsGrant ? auth.can('grant:post') : auth.can('grant:manage')
+  const canEditThisGrant = ownsGrant && auth.can('grant:post')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -237,7 +237,7 @@ export default function GrantFormPage() {
           <Trans>Not your funding call</Trans>
         </h2>
         <p className="text-gray-500 mb-6">
-          <Trans>Only the organisation that posted this funding call, or a funding administrator, can edit it.</Trans>
+          <Trans>Only the organisation that posted this funding call can edit it.</Trans>
         </p>
         <Button onClick={() => navigate('/grants')}>
           <Trans>Back to funding</Trans>

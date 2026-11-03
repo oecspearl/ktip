@@ -134,6 +134,13 @@ describe('the default permission matrix', () => {
     expect(Object.keys(DEFAULT_ROLE_PERMISSIONS).sort()).toEqual(catalog)
   })
 
+  it('keeps private sector accounts from posting funding calls (180)', () => {
+    // A business account partners and runs projects; funding calls are posted
+    // by the funder roles. 136 had added this key and 180 took it back off.
+    expect(DEFAULT_ROLE_PERMISSIONS.private_sector).not.toContain('grant:post')
+    expect(fromSql.private_sector).not.toContain('grant:post')
+  })
+
   it('withholds the platform keys from every role but the two administrators', () => {
     // The six organisation roles added by 110 exist to participate in the
     // ecosystem, not to run it. igo is the one to watch: its real-world

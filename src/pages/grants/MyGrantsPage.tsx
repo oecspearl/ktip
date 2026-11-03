@@ -86,9 +86,24 @@ export default function MyGrantsPage() {
             </span>
           )}
         </div>
+        {/* 181: only the poster still sees a suspended call, so say why here. */}
+        {grant.moderation_status === 'suspended' && (
+          <p className="mt-1 text-xs text-red-700">
+            {grant.suspension_reason ? (
+              <Trans>Suspended by KTIP: {grant.suspension_reason}</Trans>
+            ) : (
+              <Trans>Suspended by KTIP</Trans>
+            )}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-3 shrink-0">
+        {grant.moderation_status === 'suspended' && (
+          <Badge size="sm" variant="danger">
+            <Trans>Suspended</Trans>
+          </Badge>
+        )}
         <Badge size="sm" variant={isClosed ? 'default' : 'primary'}>
           {isClosed ? t`Closed` : t`Open`}
         </Badge>

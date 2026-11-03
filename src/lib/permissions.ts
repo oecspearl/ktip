@@ -685,9 +685,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     'dm:receive',
   ],
 
+  // 180 took grant:post back off: a business account does not publish
+  // funding calls. The funder roles do.
   private_sector: [
     'grant:view',
-    'grant:post',
     'project:create',
     'project:manage',
     'event:create',

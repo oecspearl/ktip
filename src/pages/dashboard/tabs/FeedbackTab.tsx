@@ -1,6 +1,7 @@
 import { usePageTitle } from '../../../hooks/usePageTitle'
 import { useLingui } from '@lingui/react/macro'
 import { FeedbackTab as FeedbackList } from '../../../components/settings/FeedbackTab'
+import { AdminNotesSection } from '../../../components/feedback/AdminNotesSection'
 
 /**
  * Replies to the feedback you sent, on the rail rather than buried in Settings.
@@ -12,10 +13,19 @@ import { FeedbackTab as FeedbackList } from '../../../components/settings/Feedba
  * feedback is the address stored in every notification sent by 127 (see
  * lib/feedback-reply.ts) and in mail already delivered, so it has to keep
  * working. This is a second door onto one room.
+ *
+ * Notes from KTIP (182) sit above it, on this mount only: they are where an
+ * administrator's note and its email link to. The section renders nothing
+ * when there are none.
  */
 export default function DashboardFeedbackTab() {
   const { t } = useLingui()
   usePageTitle(t`My Feedback`)
 
-  return <FeedbackList />
+  return (
+    <div className="space-y-8">
+      <AdminNotesSection />
+      <FeedbackList />
+    </div>
+  )
 }

@@ -67,13 +67,17 @@ export default function GrantApplicationsPage() {
   // the page rendering an empty list to somebody who should not be here.
   const ownsGrant = !!grant && !!auth.user && grant.created_by === auth.user.id
   const canReview = ownsGrant ? auth.can('grant:post') : auth.can('grant:manage')
+  // 181: an administrator still reads the list, but only the poster decides.
+  // decide_grant_application() and record_grant_award() lost their
+  // grant:manage arm, so the buttons would only produce a refusal.
+  const canDecide = ownsGrant && auth.can('grant:post')
 
   /**
    * Whether this reviewer may put a figure on the decision.
    *
    * Approving and awarding are two permissions on purpose, and they do not
-   * overlap neatly: 136 gave `grant:post` to ngo, research_institution,
-   * educational_partner and private_sector, while `grant:manage_funds` sits
+   * overlap neatly: 136 gave `grant:post` to ngo, research_institution and
+   * educational_partner (and private_sector, until 180), while `grant:manage_funds` sits
    * with investor, government, diaspora, igo, mentor and programme_supervisor.
    * An NGO funder therefore approves without recording an amount, and their
    * "Awarded" total stays an em dash. That is the permission catalog working —
@@ -282,7 +286,7 @@ export default function GrantApplicationsPage() {
                       <Eye size={16} />
                     </button>
 
-                    {application.status === 'pending' && (
+                    {canDecide && application.status === 'pending' && (
                       <button
                         type="button"
                         onClick={() => record(application, 'under_review')}
@@ -297,7 +301,7 @@ export default function GrantApplicationsPage() {
                     {/* Still offered on an approved row when the reviewer can
                         award: the figure is often settled after the decision,
                         and correcting it should not mean un-approving first. */}
-                    {(application.status !== 'approved' || canAward) && (
+                    {canDecide && (application.status !== 'approved' || canAward) && (
                       <button
                         type="button"
                         onClick={() => openApproval(application)}
@@ -314,7 +318,7 @@ export default function GrantApplicationsPage() {
                       </button>
                     )}
 
-                    {application.status !== 'rejected' && (
+                    {canDecide && application.status !== 'rejected' && (
                       <button
                         type="button"
                         onClick={() => setRejecting(application)}
@@ -355,6 +359,7 @@ export default function GrantApplicationsPage() {
               canEditEntity={false}
             />
 
+            {canDecide ? (
             <div className="flex flex-wrap justify-end gap-2 pt-4 border-t border-ktip-sand-100">
               {viewing.status !== 'rejected' && (
                 <Button
@@ -382,6 +387,11 @@ export default function GrantApplicationsPage() {
                 </Button>
               )}
             </div>
+            ) : (
+              <p className="pt-4 border-t border-ktip-sand-100 text-sm text-ktip-sand-600">
+                <Trans>The organisation that posted this call decides its applications.</Trans>
+              </p>
+            )}
           </div>
         )}
       </Modal>

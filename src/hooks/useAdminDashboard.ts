@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { escapeIlike } from '../lib/utils'
 import { keys } from '../queries/keys'
 import { measuredCount, type Measured } from '../lib/measured'
-import type { Profile, GrantApplication, GrantApplicationStatus, UserRole } from '../types'
+import type { Profile, GrantApplication, UserRole } from '../types'
 import { PROFILE_CHIP } from '../lib/profile-columns'
 
 // ============================================================
@@ -479,23 +479,27 @@ export function useAdminUserActions() {
   })
 
   // 124. Suspends the profile row through set_user_suspension() — where the
-  // Super Admin ceiling lives — and then bans the auth user so the account
-  // cannot sign in. Reinstating reverses both. See api/admin/suspend-user.ts.
+  // Super Admin ceiling lives. Since 184 the member can still sign in and is
+  // held on /account/suspended; reinstating clears any old sign-in ban. See
+  // api/admin/suspend-user.ts. `until` is an ISO timestamp, or omitted for
+  // "until further notice".
   const setSuspensionMutation = useMutation({
     mutationFn: async ({
       userId,
       suspended,
       reason,
+      until,
     }: {
       userId: string
       suspended: boolean
       reason?: string
+      until?: string
     }) => {
       const auth = await getAuthHeader()
       const res = await fetch('/api/admin/suspend-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: auth },
-        body: JSON.stringify({ user_id: userId, suspended, reason }),
+        body: JSON.stringify({ user_id: userId, suspended, reason, until }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to update the suspension')
@@ -543,8 +547,8 @@ export function useAdminUserActions() {
 
   const resetMfa = (userId: string) => resetMfaMutation.mutateAsync(userId)
 
-  const setSuspension = (userId: string, suspended: boolean, reason?: string) =>
-    setSuspensionMutation.mutateAsync({ userId, suspended, reason })
+  const setSuspension = (userId: string, suspended: boolean, reason?: string, until?: string) =>
+    setSuspensionMutation.mutateAsync({ userId, suspended, reason, until })
 
   return {
     updateRoles,
@@ -584,9 +588,12 @@ export function useAdminGrantApplications(filters?: {
   const fetchApplications = async (): Promise<GrantApplication[]> => {
     let query = supabase
       .from('grant_applications')
+      // The call carries who posted it and for which organisation: since 181
+      // this tab is read-only and says who decides instead. FK-hinted embeds,
+      // so a second FK from grants to profiles cannot make them ambiguous.
       .select(`
         *,
-        grant:grants(*),
+        grant:grants(*, poster:profiles!created_by(${PROFILE_CHIP}), employer:employers!employer_id(id, slug, legal_name, trading_name)),
         applicant:profiles!user_id(${PROFILE_CHIP})
       `)
       .order('created_at', { ascending: false })
@@ -616,34 +623,10 @@ export function useAdminGrantApplications(filters?: {
   return { applications: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
 
-export function useAdminApplicationActions() {
-  const queryClient = useQueryClient()
-
-  const mutation = useMutation({
-    mutationFn: async ({
-      applicationId,
-      status,
-    }: {
-      applicationId: string
-      status: GrantApplicationStatus
-    }) => {
-      const { error } = await supabase
-        .from('grant_applications')
-        .update({ status: status as any })
-        .eq('id', applicationId)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: keys.all('admin-grant-applications') })
-    },
-  })
-
-  const updateApplicationStatus = (applicationId: string, status: GrantApplicationStatus) =>
-    mutation.mutateAsync({ applicationId, status })
-
-  return { updateApplicationStatus, loading: mutation.isPending, error: mutation.error }
-}
+// useAdminApplicationActions() was here: a direct UPDATE of
+// grant_applications.status from the console. 181 dropped the admin UPDATE
+// policy it relied on. Applications are decided by the organisation that
+// posted the call, through decide_grant_application() (useDecideApplication).
 
 // ============================================================
 // Forum Moderation Actions
