@@ -200,12 +200,13 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     camera: 'huddle',
     // The Team Finder sits under them: eight columns, with the skill search
     // filling the four beside it.
-    order: ['host_controls', 'av_placeholder', 'chat', 'looking_for_team', 'team_finder', 'skill_finder'],
+    order: ['host_controls', 'av_placeholder', 'coffee_tables', 'chat', 'looking_for_team', 'team_finder', 'skill_finder'],
     spans: {
       host_controls: 'wide',
       av_placeholder: 'wide',
       team_finder: 'band',
       collab_commons: 'wide',
+      coffee_tables: 'wide',
       skill_finder: 'third',
       occupants: 'third',
       wayfinding: 'third',

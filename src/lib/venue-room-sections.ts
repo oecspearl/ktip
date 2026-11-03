@@ -41,6 +41,7 @@ export type RoomSectionId =
   | 'team_finder'
   | 'quest_board'
   | 'collab_commons'
+  | 'coffee_tables'
   | 'submission_desk'
   | 'judging_console'
   | 'results_board'
@@ -265,6 +266,14 @@ export const SECTIONS: RoomSectionDef[] = [
     defaultFor: ['stage'],
     order: 44,
     hiddenForEventTypes: ['conference'],
+  },
+  {
+    id: 'coffee_tables',
+    label: msg`Coffee tables`,
+    blurb: msg`Ten minutes of video with three or four people from other teams. Never one-to-one, and organisers can drop in.`,
+    slot: 'main',
+    defaultFor: ['networking'],
+    order: 56,
   },
   {
     id: 'collab_commons',

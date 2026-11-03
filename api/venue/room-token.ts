@@ -76,15 +76,19 @@ export default async function handler(request: Request): Promise<Response> {
   const authHeader = request.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401)
 
-  let body: { roomId?: unknown }
+  let body: { roomId?: unknown; coffeeTableId?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
 
+  // A coffee table (migration 200) is its own LiveKit room, granted by its
+  // own function. Exactly one of the two ids.
   const roomId = body.roomId
-  if (typeof roomId !== 'string' || !roomId) {
+  const tableId = body.coffeeTableId
+  const isTable = typeof tableId === 'string' && tableId.length > 0
+  if (!isTable && (typeof roomId !== 'string' || !roomId)) {
     return json({ error: 'roomId is required' }, 400)
   }
 
@@ -99,7 +103,9 @@ export default async function handler(request: Request): Promise<Response> {
   } = await caller.auth.getUser()
   if (!user) return json({ error: 'Unauthorized' }, 401)
 
-  const { data, error } = await caller.rpc('venue_room_grant', { p_room_id: roomId })
+  const { data, error } = isTable
+    ? await caller.rpc('coffee_table_grant', { p_table_id: tableId })
+    : await caller.rpc('venue_room_grant', { p_room_id: roomId })
 
   if (error) {
     // Every message the RPC raises is one of the room's real rules — "this room

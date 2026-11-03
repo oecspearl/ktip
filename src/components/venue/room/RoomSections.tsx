@@ -54,6 +54,7 @@ import { prefersReducedMotionNow } from '../../../a11y/store'
 import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
+import { CoffeeTablesPanel } from './CoffeeTablesPanel'
 import { TeamFinderPanel } from './TeamFinderPanel'
 import { OrganiserOpsPanel } from './OrganiserOpsPanel'
 import { SubmissionDeskPanel } from './judging/SubmissionDeskPanel'
@@ -370,6 +371,9 @@ function RoomSection({
 
     case 'team_workspace':
       return <TeamWorkspacePanel eventId={event.id} room={room} isHost={isHost} />
+
+    case 'coffee_tables':
+      return <CoffeeTablesPanel room={room} />
 
     case 'collab_commons':
       return <CollabCommonsPanel eventId={event.id} isHost={isHost} />
