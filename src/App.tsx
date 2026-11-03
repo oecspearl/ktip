@@ -812,6 +812,14 @@ const router = createBrowserRouter([
                     ],
                   },
                   {
+                    // Deleted records kept 3 years for legal claims (187).
+                    // RLS reads the same key.
+                    element: <PermissionRoute require="audit:view" />,
+                    children: [
+                      { path: '/admin/legal-archive', lazy: lazyPage(() => import('./pages/admin/legal-archive/AdminLegalArchivePage')) },
+                    ],
+                  },
+                  {
                     // The residual operator surface. org:manage stopped being
                     // "runs the platform" in 116 and became exactly this list.
                     element: <PermissionRoute require="org:manage" />,

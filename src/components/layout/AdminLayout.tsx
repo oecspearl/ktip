@@ -22,6 +22,7 @@ import {
   Trophy,
   Bug,
   FlaskConical,
+  Archive,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { cn } from '../../lib/utils'
@@ -99,6 +100,8 @@ const adminNavItems: {
   { href: '/admin/verification', label: 'Verification', icon: BadgeCheck, requires: 'verification:review' },
   { href: '/admin/integrations', label: 'Integrations', icon: Puzzle, requires: 'org:manage' },
   { href: '/admin/employers', label: 'Employers', icon: Building2, requires: 'employer:manage' },
+  // Deleted records, kept 3 years (187). Same key as the RLS policy.
+  { href: '/admin/legal-archive', label: 'Legal Archive', icon: Archive, requires: 'audit:view' },
   { href: '/admin/partner-api', label: 'Partner API', icon: KeyRound, requires: 'org:manage' },
   // Usage, the §14 results framework and the reporting pulse were three
   // entries and three pages; they are tabs of one hub now, with one period
