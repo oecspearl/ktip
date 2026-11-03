@@ -41,6 +41,10 @@ export type RoomSectionId =
   | 'team_finder'
   | 'quest_board'
   | 'collab_commons'
+  | 'submission_desk'
+  | 'judging_console'
+  | 'results_board'
+  | 'peoples_choice'
   | 'announcement_feed'
   | 'faq'
   | 'rules'
@@ -218,6 +222,49 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: ['team'],
     order: 45,
+  },
+  // Migration 192. Who may read or write what is decided in the database; the
+  // roles below only keep a panel off screens it has nothing to offer.
+  {
+    id: 'submission_desk',
+    label: msg`Submission Desk`,
+    blurb: msg`Where a team hands in its entry, with a countdown to the deadline. Teams only.`,
+    slot: 'main',
+    roles: ['participant', 'organizer'],
+    // Off by default on purpose. Hosts add it to the rooms where teams should
+    // submit, usually their Homebase or the help desk.
+    defaultFor: [],
+    order: 41,
+    hiddenForEventTypes: ['conference'],
+  },
+  {
+    id: 'judging_console',
+    label: msg`Judging console`,
+    blurb: msg`Judges declare conflicts, then score each entry. Only judges and organisers see it.`,
+    slot: 'main',
+    roles: ['judge', 'organizer'],
+    defaultFor: ['judging'],
+    order: 42,
+    hiddenForEventTypes: ['conference'],
+  },
+  {
+    id: 'results_board',
+    label: msg`Results board`,
+    blurb: msg`Every score and average, with the switch that publishes them. Organisers only.`,
+    slot: 'main',
+    roles: ['organizer'],
+    defaultFor: ['judging'],
+    order: 43,
+    hiddenForEventTypes: ['conference'],
+  },
+  {
+    id: 'peoples_choice',
+    label: msg`People's Choice`,
+    blurb: msg`One vote each for a favourite entry once entries close. Results show when you publish them.`,
+    slot: 'main',
+    defaultFor: ['stage'],
+    order: 44,
+    hiddenForEventTypes: ['conference'],
   },
   {
     id: 'collab_commons',

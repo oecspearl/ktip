@@ -221,6 +221,57 @@ export function receiptToSections(receipt: SubmissionReceipt): ReceiptSection[] 
       break
     }
 
+    // A hackathon entry from the Submission Desk (migration 192).
+    case 'event_submission_v1': {
+      // team_id is there for the receipt's own RLS policy, not for reading.
+      used.add('team_id')
+      used.add('ai_use')
+      used.add('evidence')
+      const aiUse = typeof data.ai_use === 'string' ? data.ai_use : null
+      const aiLabel =
+        aiUse === 'drafted'
+          ? i18n._(msg`AI wrote the full first draft`)
+          : aiUse === 'assisted'
+            ? i18n._(msg`AI tools materially helped`)
+            : aiUse === 'none'
+              ? i18n._(msg`No material AI help`)
+              : null
+
+      const evidence = Array.isArray(data.evidence) ? data.evidence : []
+
+      sections = [
+        build(i18n._(msg`Entry`), [
+          { key: 'team', label: i18n._(msg`Team`) },
+          { key: 'members', label: i18n._(msg`Members`) },
+          { key: 'summary', label: i18n._(msg`Summary`) },
+        ]),
+        build(i18n._(msg`Links`), [
+          { key: 'repo_url', label: i18n._(msg`Code repository`) },
+          { key: VIDEO_URL_FIELD, label: i18n._(msg`Demo video`) },
+          { key: 'video_length', label: i18n._(msg`Video length`) },
+          { key: 'pitch_deck', label: i18n._(msg`Pitch deck`) },
+        ]),
+        {
+          title: i18n._(msg`AI declaration`),
+          fields: [
+            ...(aiLabel ? [{ label: i18n._(msg`Declaration`), value: aiLabel }] : []),
+            ...build('', [{ key: 'ai_tools', label: i18n._(msg`Tools and how they were used`) }]).fields,
+          ],
+        },
+        {
+          title: i18n._(msg`Evidence`),
+          fields: evidence.flatMap((item: any) => {
+            const value = [toDisplayValue(item?.note), toDisplayValue(item?.url)]
+              .filter(Boolean)
+              .join('\n')
+            const label = toDisplayValue(item?.criterion)
+            return label && value ? [{ label, value }] : []
+          }),
+        },
+      ]
+      break
+    }
+
     default:
       break
   }

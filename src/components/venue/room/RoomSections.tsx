@@ -56,6 +56,10 @@ import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { TeamFinderPanel } from './TeamFinderPanel'
 import { OrganiserOpsPanel } from './OrganiserOpsPanel'
+import { SubmissionDeskPanel } from './judging/SubmissionDeskPanel'
+import { JudgingConsolePanel } from './judging/JudgingConsolePanel'
+import { ResultsBoardPanel } from './judging/ResultsBoardPanel'
+import { PeoplesChoicePanel } from './judging/PeoplesChoicePanel'
 
 /**
  * Everything one section needs, gathered once by the page.
@@ -383,6 +387,19 @@ function RoomSection({
           fill={fill}
         />
       )
+    // Migration 192. Each panel asks one SECURITY DEFINER function what this
+    // viewer may see, and renders nothing when the answer is nothing.
+    case 'submission_desk':
+      return <SubmissionDeskPanel event={event} isHost={isHost} />
+
+    case 'judging_console':
+      return <JudgingConsolePanel event={event} />
+
+    case 'results_board':
+      return <ResultsBoardPanel event={event} />
+
+    case 'peoples_choice':
+      return <PeoplesChoicePanel event={event} />
 
     // The same panel with posting closed to everyone but the host. A separate
     // id rather than a flag on `chat` so the host's picker offers the two as

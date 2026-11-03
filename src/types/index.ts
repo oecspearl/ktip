@@ -1054,7 +1054,12 @@ export interface Notification {
 
 // Submission receipts — the applicant's frozen copy of a submitted
 // grant application, event registration or grievance report.
-export type SubmissionKind = 'grant_application' | 'event_registration' | 'grievance'
+export type SubmissionKind =
+  | 'grant_application'
+  | 'event_registration'
+  | 'grievance'
+  /** A hackathon team's entry, from the Submission Desk (migration 192). */
+  | 'event_submission'
 
 export interface SubmissionReceipt {
   id: string

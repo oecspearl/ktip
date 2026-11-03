@@ -19,6 +19,7 @@ const SOURCE_LINK_LABELS: Record<string, MessageDescriptor> = {
   grant_application: msg`View grant`,
   event_registration: msg`View event`,
   grievance: msg`View report status`,
+  event_submission: msg`View event`,
 }
 
 export default function SubmissionReceiptPage() {
@@ -77,7 +78,7 @@ export default function SubmissionReceiptPage() {
     <>
       <div className="print:hidden">
         <PageHero
-          eyebrow={SUBMISSION_KIND_LABELS[receipt.kind]}
+          eyebrow={SUBMISSION_KIND_LABELS[receipt.kind] ? i18n._(SUBMISSION_KIND_LABELS[receipt.kind]) : undefined}
           title={truncate(receipt.title, 60)}
           subtitle={t`Your copy of this submission`}
           imageSeed="dashboard"

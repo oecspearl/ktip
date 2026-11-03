@@ -107,6 +107,7 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
       sponsor_hero: 'wide',
       check_in: 'wide',
       host_controls: 'wide',
+      submission_desk: 'wide',
       reactions: 'band',
       challenge_brief: 'half',
       announcements: 'third',
@@ -130,6 +131,7 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
       reactions: 'band',
       hand_queue: 'third',
       showcase_gallery: 'wide',
+      peoples_choice: 'wide',
       occupants: 'third',
       countdown: 'tile',
       capacity: 'tile',
@@ -159,12 +161,16 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     hero: 'av_placeholder',
     rail: 'judges_present',
     camera: 'grid',
-    order: ['host_controls', 'av_placeholder', 'judges_present', 'challenge_brief'],
+    // The console straight after the call: scoring is what a judge came for.
+    order: ['host_controls', 'av_placeholder', 'judges_present', 'judging_console', 'challenge_brief'],
     spans: {
       host_controls: 'wide',
+      judging_console: 'wide',
+      results_board: 'wide',
       challenge_brief: 'half',
       chat: 'half',
       showcase_gallery: 'wide',
+      peoples_choice: 'wide',
       occupants: 'third',
       countdown: 'tile',
     },
@@ -216,6 +222,7 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     order: ['host_controls', 'av_placeholder', 'chat', 'mentors_on_duty', 'help_nudge'],
     spans: {
       host_controls: 'wide',
+      submission_desk: 'wide',
       av_placeholder: 'band',
       help_nudge: 'third',
       wayfinding: 'third',
@@ -237,6 +244,7 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     spans: {
       host_controls: 'wide',
       av_placeholder: 'wide',
+      submission_desk: 'wide',
       occupants: 'third',
       objectives: 'half',
       resources: 'half',
@@ -285,6 +293,8 @@ const HERO_ELIGIBLE: RoomSectionId[] = [
   'challenge_brief',
   'occupants',
   'resources',
+  'submission_desk',
+  'judging_console',
 ]
 
 export function heroChoices(kind: VenueRoomKind, visible: RoomSectionId[]): RoomSectionId[] {
