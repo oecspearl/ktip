@@ -250,9 +250,10 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     hero: 'chat',
     rail: 'occupants',
     camera: 'huddle',
-    order: ['host_controls', 'av_placeholder', 'chat', 'occupants'],
+    order: ['host_controls', 'quest_board', 'av_placeholder', 'chat', 'occupants'],
     spans: {
       host_controls: 'wide',
+      quest_board: 'wide',
       av_placeholder: 'band',
       objectives: 'half',
       rules: 'half',

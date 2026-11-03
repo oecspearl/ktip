@@ -38,6 +38,7 @@ export type RoomSectionId =
   | 'chat'
   | 'team_workspace'
   | 'team_finder'
+  | 'quest_board'
   | 'announcement_feed'
   | 'faq'
   | 'rules'
@@ -205,6 +206,14 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: ['team'],
     order: 45,
+  },
+  {
+    id: 'quest_board',
+    label: msg`Quest Board`,
+    blurb: msg`Team leaderboard and the side quests organisers set. Judging scores never count here.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 59,
   },
   {
     id: 'team_finder',

@@ -52,6 +52,7 @@ import type {
 import { useLingui } from '@lingui/react/macro'
 import { prefersReducedMotionNow } from '../../../a11y/store'
 import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
+import { QuestBoardPanel } from './QuestBoardPanel'
 import { TeamFinderPanel } from './TeamFinderPanel'
 
 /**
@@ -360,6 +361,9 @@ function RoomSection({
 
     case 'team_workspace':
       return <TeamWorkspacePanel eventId={event.id} room={room} isHost={isHost} />
+
+    case 'quest_board':
+      return <QuestBoardPanel eventId={event.id} isHost={isHost} />
 
     case 'team_finder':
       return (
