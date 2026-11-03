@@ -31,6 +31,8 @@ export const USAGE_KINDS = [
   'file_bytes',
   'tts_chars',
   'speech_seconds',
+  'caption_speech_seconds',
+  'read_aloud_chars',
 ] as const
 
 export type UsageKind = (typeof USAGE_KINDS)[number]
@@ -179,6 +181,7 @@ export function unitOf(kind: UsageKind): UsageUnit {
     case 'call_seconds':
     case 'screen_share_seconds':
     case 'speech_seconds':
+    case 'caption_speech_seconds':
       return 'minutes'
     case 'help_request':
       return 'count'

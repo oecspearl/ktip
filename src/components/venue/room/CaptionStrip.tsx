@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Captions, CaptionsOff, Languages, Volume2, VolumeX } from 'lucide-react'
+import { useSpeechUsage } from '../../../hooks/useSpeechUsage'
 import { useRoomContext } from '@livekit/components-react'
 import { RoomEvent, type RemoteParticipant } from 'livekit-client'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -87,6 +88,8 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
   const room = useRoomContext()
   const voiceOn = !!prefs.voice && speechSupported()
   const spoken = useRef(new Set<string>())
+  // Characters read aloud, for the organiser's usage panel (199).
+  const meterRead = useSpeechUsage(room?.name || undefined, 'read_aloud_chars')
 
   useEffect(() => {
     if (!voiceOn || !room) return
@@ -113,8 +116,9 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
       if (v) u.voice = v
       u.rate = 1.05
       window.speechSynthesis.speak(u)
+      meterRead(c.display.length)
     }
-  }, [captions, voiceOn, readLang])
+  }, [captions, voiceOn, readLang, meterRead])
 
   const hasLines = captions.length > 0 || interim.length > 0
 

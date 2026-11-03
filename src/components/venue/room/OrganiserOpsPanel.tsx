@@ -56,6 +56,8 @@ const KIND_LABEL: Record<UsageKind, MessageDescriptor> = {
   file_bytes: msg`Files`,
   tts_chars: msg`Neural voice`,
   speech_seconds: msg`Speech translation`,
+  caption_speech_seconds: msg`Captioned speech`,
+  read_aloud_chars: msg`Read aloud`,
 }
 
 const UNIT_LABEL: Record<UsageUnit, MessageDescriptor> = {

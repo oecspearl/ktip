@@ -3,6 +3,8 @@ import { acquireMic } from '@a11y-kit'
 import { useDataChannel, useLocalParticipant, useRoomContext } from '@livekit/components-react'
 import { useContentLanguage } from '../i18n/useContentLanguage'
 import { request } from '../lib/i18n/batcher'
+import { segmentSeconds } from '../lib/speech-usage'
+import { useSpeechUsage } from './useSpeechUsage'
 import { shouldTranslate } from '../lib/i18n/should-translate'
 import { UI_LANGS, isUiLang, type UiLang } from '../lib/i18n/protocol'
 import {
@@ -159,6 +161,9 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   const room = useRoomContext()
   const roomIdRef = useRef('')
   roomIdRef.current = room?.name || ''
+  // Seconds of speech captioned, for the organiser's usage panel (199).
+  const meterSpeech = useSpeechUsage(room?.name || undefined, 'caption_speech_seconds')
+  const segmentStart = useRef<number | null>(null)
 
   const onFinal = useCallback((text: string) => {
     const spoken = langRef.current
@@ -209,9 +214,12 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
       lang: langRef.current,
       onSegment: ({ text, final }) => {
         if (!final) {
+          if (segmentStart.current === null) segmentStart.current = Date.now()
           setInterim(text)
           return
         }
+        meterSpeech(segmentSeconds(segmentStart.current, Date.now()))
+        segmentStart.current = null
         setInterim('')
         if (text.length >= MIN_CAPTION_CHARS) onFinal(text)
       },
@@ -234,7 +242,7 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
     // `contentLang` is a dependency on purpose: switching your own language
     // mid-call has to restart the recogniser, or you carry on being transcribed
     // as the language you are no longer speaking.
-  }, [captioning, enabled, onFinal, contentLang])
+  }, [captioning, enabled, onFinal, contentLang, meterSpeech])
 
   // Sweep expired lines even when nobody is talking, so the strip empties
   // instead of freezing on the last thing anyone said.
